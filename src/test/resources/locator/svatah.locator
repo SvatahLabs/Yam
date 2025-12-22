@@ -1,0 +1,9 @@
+username = id:username & xpath://input[@id='username'] & css selector:#username
+password = id:password & xpath://input[@id='password'] & css selector:#password
+login button = xpath://input[@value='Sign In'] & link text : Sign In & css selector : input.btn.btn-lg.btn-blue.btn-block
+docs link = xpath : //a[contains(@href, '/docs')] & link text : Docs
+dashboard link = xpath : //a[contains(@href, '/login')] & xpath : //a[contains(@href, '/user')] & link text : Dashboard
+Schedule Build Tab = xpath://li[4]/a/p & cssSelector:li.build > a > p
+Schedule Build Title = link text : Schedule A Build & css selector : a.navbar-brand & xpath : //nav/div/div/a
+logout  = css selector : li.logout > a > p & xpath : //li[9]/a/p
+toggle sidebar = css selector : #navbar > div > div.navbar-wrapper > div > button

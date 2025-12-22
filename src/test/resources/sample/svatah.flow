@@ -1,0 +1,23 @@
+story : Validate Text
+user +clicks+ on ~css : body > nav > div > div.navbar-translate > button~
+//user +clicks+ on ~docs link~
+//user +switches to new tab+
+//user +clicks+ on ~css : #navbar > div.navbar-brand > a.navbar-item~
+//user +switches to main tab+
+user +moves to element and click+ ~dashboard link~
+user +clicks on back button+
+user +waits for the presence+ of ~dashboard link~
+user +clicks on forward button+
+user +waits for the presence+ of ~username~
+user +types+ the ~username~ as *connected2atul@gmail.com*
+then she +types+ the ~password~ as *aabc581321!*
+then she +clicks+ the ~login button~
+then she +clicks+ the ~toggle sidebar~
+she then +clicks+ the ~Schedule Build Tab~
++call+ api ~active count~ and save response as var : val
+then she +clicks+ the ~toggle sidebar~
++click+ on ~logout~
+user +types+ the ~username~ as *#val*
++wait+ for *5* seconds
+
+test : Validate Text

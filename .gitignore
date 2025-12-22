@@ -1,0 +1,40 @@
+### Gradle template
+.gradle
+/build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+### Java template
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+*.iml
+
+tmp/
+target/
+lib/
+.*.swp
+.idea/
+.COOKIE_*
+.bash_profile
+out/
+*.iml
+.vscode
+.vscode/settings.json

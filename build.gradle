@@ -1,0 +1,62 @@
+group 'svatah.core'
+version '1.1.0'
+
+description = "This project's purpose is to automate the process required to validate any UI using Selenium so anyone can focus more on development rather than on regression."
+
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            url "https://repo.maven.apache.org/maven2/"
+        }
+    }
+    dependencies {
+        classpath 'com.gradleup.shadow:shadow-gradle-plugin:8.3.0'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'com.gradleup.shadow'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation group: 'junit', name: 'junit', version: '4.13.1'
+    testImplementation 'org.mockito:mockito-core:4.11.0'
+    implementation 'commons-io:commons-io:2.7'
+    // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
+    implementation 'org.seleniumhq.selenium:selenium-java:4.5.3'
+    // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-firefox-driver
+    implementation 'org.seleniumhq.selenium:selenium-firefox-driver:4.5.3'
+    // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-remote-driver
+    implementation 'org.seleniumhq.selenium:selenium-remote-driver:4.5.3'
+    // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-chrome-driver
+    implementation 'org.seleniumhq.selenium:selenium-chrome-driver:4.5.3'
+    // https://mvnrepository.com/artifact/org.assertj/assertj-core
+    implementation 'org.assertj:assertj-core:3.26.3'
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j
+    implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
+    implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
+    // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.14'
+    // https://mvnrepository.com/artifact/io.appium/java-client
+    implementation 'io.appium:java-client:8.6.0'
+    // https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path
+    implementation 'com.jayway.jsonpath:json-path:2.9.0'
+    //web driver manager
+    // https://mvnrepository.com/artifact/io.github.bonigarcia/webdrivermanager
+    implementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
+
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+test {
+    useJUnit()
+}

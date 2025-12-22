@@ -1,0 +1,45 @@
+scenario : start zoomcar booking
++click+ on the search tab on the home Page using ~linkText:Start your wonderful journey~
+
+scenario : perform search
++click+ on the search bar  defined by ~xpath://input[@type='text']~ 
++clear+ the search bar defined by ~xpath://input[@type='text']~ 
++type+ the partial starting point as *indra* in the search bar defined by ~xpath://input[@type='text']~ 
++click+ on the suggested location as Indranagar defined by ~xpath://body~ 
++click+ on the next button defined by ~xpath://button~ to go to date page
+
+scenario: select date and time
++click+ on the element defined by ~xpath://div[3]/div[2]/div[3]~ to select starting date
++click+ on the slider time defined by ~xpath://li[43]~ to choose time
++click+ on the next button defined by ~xpath://button~ to go to choose end time page
++click+ on the element defined by ~xpath://div[3]/div[2]/div[3]~ to select end date
++click+ on the slider time defined by ~xpath://li[19]~  to choose time
++click+ on the next button defined by ~xpath://button~ to go to select car page
+user then +waits+ for *8* seconds
+
+scenario : select car and login
++click+ on the element defined by ~link:book-now~
+//it will open login modal where you need to pass login details
++click+ on the user email field defined by ~xpath://input[@type='text']~
++type+ the user email *atul.sharma@zoomcar.com* in the locator identified by ~xpath://input[@type='text']~
++click+ on the next button defined by ~cssSelector:img.zc-auth-next-icon~
++type+ password *aabc581321* in the element identified by the locator ~xpath://input[@type='password']~
+
+scenario: checkout the selected car
++click+ on the element identified by the locator ~xpath://form/div[3]/img~
++click+ on the element identified by the locator ~id:checkoutButton~ to checkout the car
+
+scenario:initiate payment
++click+ on the element defined by identifier ~id:card~
++click+ on the element defined by identifier ~id:expiry-month~
++type+ on the element defined by identifier ~id:expiry-month~ and enter month as *08*
++click+ on the element defined by identifier ~id:expiry-year~
++type+ on the element defined by identifier ~id:expiry-year~ and enter year as *2019*
++click+ on the element defined by identifier ~id:cvv~
++type+  the cvv as  *123* in the text box defined by identifier ~id:cvv~
++click+ on the element defined by identifier ~xpath://input[@type='text']~
++type+ in text box identifier ~xpath://input[@type='text']~ and enter card number *5123  4567  8901  2346*
+
+scenario: logout
++click+ on the menu icon identified by the locator ~id:user_name_header~ to open user menu
++click+ on the logout button identified by the locator ~linkText:LOGOUT~ to log out of the application

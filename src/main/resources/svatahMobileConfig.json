@@ -1,0 +1,16 @@
+{
+  "buildType" : "Android",
+  "browser" : "chrome",
+  "capabilities" : {
+    "platformName" : "Android",
+    "automationName" : "UiAutomator2",
+    "platformVersion" : "10.0",
+    "deviceName" : "emulator-5554",
+    "browserName" : "Chrome",
+    "newCommandTimeout" : "0",
+    "nativeWebScreenshot" : "true"
+  },
+  "browserOptions" : {
+    "args" :["--disable-features=VizDisplayCompositor"]
+  }
+}

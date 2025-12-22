@@ -1,0 +1,25 @@
+story : I want to validate login
+user +clicks+ the ~sign in button~ on the home page
+user +types+ the ~username~ as *connected2atul@gmail.com*
+user +types+ the ~password~ as *qwerty123*
+user +clicks+ on the login button using ~xpath://input[@value='Sign In']~
+user +clicks+ on the Schedule Build using ~xpath://li[4]/a/p~
+user +saves text+ as var : enterprise  for ~xpath://h1~ on the Schedule Build Page
+user +validates text+ on the Schedule Build Page using ~xpath://h1~ with *#enterprise#*
+
+story : I want to validate logout
+user +clicks+ on logout button using ~xpath://li[9]/a/p~
+
+story : I want to validate text
+user +types+ the username *connected2atul@gmail.com* in field ~id:username~
+user +types+ the password *qwerty123* in ~id:password~
+user +clicks+ on the login button using ~xpath://input[@value='Sign In']~
+user +clicks+ on the Schedule Build using ~xpath://li[4]/a/p~
+user +validates text+ on the Schedule Build Page using ~xpath://h1~ with *#I want to validate login.enterprise#*
+
+compose : I want to validate stories
+I want to validate login
+I want to validate logout
+I want to validate text
+
+test : I want to validate stories
