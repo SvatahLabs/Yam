@@ -1,0 +1,141 @@
+/**
+ * The audit log (REQ-AUTO-6, LLD §3.4, §8.6).
+ *
+ * "`audit.jsonl` records invoker identity, inputs (secrets redacted), every
+ * surface call with reference and outcome, and outputs."
+ *
+ * Every surface call, without the executor having to remember to write a line at
+ * each call site — because that is exactly the kind of thing that is complete on
+ * the day it is written and has three gaps a year later. `auditing()` wraps a
+ * surface in a proxy, so a call that is added later is audited by existing.
+ *
+ * `seq` is monotonic within a run, so lines can be ordered after the fact even
+ * though flows run in parallel and their timestamps interleave.
+ */
+import type { AgentSurface } from "@svatah/surface";
+import type { AuditKind, AuditLine, Invoker } from "@svatah/schema";
+import type { Scope } from "./scope.js";
+
+export interface AuditSink {
+  write(line: AuditLine): void;
+}
+
+/** Collects lines in memory. The runner writes them to `audit.jsonl`. */
+export class MemoryAuditSink implements AuditSink {
+  readonly lines: AuditLine[] = [];
+  write(line: AuditLine): void {
+    this.lines.push(line);
+  }
+}
+
+export interface AuditContext {
+  readonly runId: string;
+  readonly sink: AuditSink;
+  /** Redacts secrets out of anything written (REQ-NFR-6). */
+  readonly scope: Scope;
+  /** Off when `config.run.audit` is false. */
+  readonly enabled: boolean;
+}
+
+export class Auditor {
+  private seq = 0;
+
+  constructor(private readonly context: AuditContext) {}
+
+  /** One line. Everything in `detail` and `call.args` is redacted first. */
+  record(
+    kind: AuditKind,
+    parts: Omit<AuditLine, "runId" | "at" | "seq" | "kind"> = {},
+  ): void {
+    if (!this.context.enabled) return;
+    const redacted = this.context.scope.redact({
+      ...(parts.call === undefined ? {} : { call: parts.call }),
+      ...(parts.detail === undefined ? {} : { detail: parts.detail }),
+      ...(parts.error === undefined ? {} : { error: parts.error }),
+    });
+
+    this.context.sink.write({
+      runId: this.context.runId,
+      at: new Date().toISOString(),
+      seq: this.seq++,
+      kind,
+      ...parts,
+      ...redacted,
+    } as AuditLine);
+  }
+
+  run(invoker: Invoker, inputs: Readonly<Record<string, unknown>>): void {
+    this.record("run", { detail: { invoker, inputs } });
+  }
+
+  story(story: string, detail?: unknown): void {
+    this.record("story", { story, ...(detail === undefined ? {} : { detail }) });
+  }
+
+  outputs(story: string, outputs: Readonly<Record<string, unknown>>): void {
+    this.record("output", { story, detail: outputs });
+  }
+
+  policy(story: string, stepId: string, detail: unknown): void {
+    this.record("policy", { story, stepId, detail });
+  }
+
+  /**
+   * Wrap a surface so every call writes a line.
+   *
+   * A `Proxy` rather than a hand-written wrapper: `AgentSurface` has fourteen
+   * methods and two optional ones, and a wrapper would need updating each time
+   * one is added — which is precisely when nobody remembers the audit log.
+   */
+  auditing(surface: AgentSurface, at: () => { story?: string; stepId?: string }): AgentSurface {
+    if (!this.context.enabled) return surface;
+    // The proxy's traps are not arrow functions — a `get` trap has its own
+    // `this` — so the auditor is captured explicitly.
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const auditor: Auditor = this;
+
+    return new Proxy(surface, {
+      get(target, property, receiver) {
+        const value = Reflect.get(target, property, receiver) as unknown;
+        if (typeof value !== "function" || typeof property !== "string") return value;
+        if (property === "capabilities") return value.bind(target);
+
+        return async function audited(...args: unknown[]): Promise<unknown> {
+          const started = performance.now();
+          const where = at();
+          const call = {
+            method: property,
+            ...(property === "act" && typeof args[0] === "string" ? { action: args[0] } : {}),
+            ...(typeof args[1] === "string" ? { ref: args[1] } : {}),
+            ...(property === "act" || property === "read" || property === "check"
+              ? { args: args.slice(2) }
+              : {}),
+          };
+
+          try {
+            const result: unknown = await (value as (...a: unknown[]) => Promise<unknown>).apply(
+              target,
+              args,
+            );
+            auditor.record("surface", {
+              ...where,
+              call,
+              outcome: "ok",
+              durationMs: Math.round(performance.now() - started),
+            });
+            return result;
+          } catch (error) {
+            auditor.record("surface", {
+              ...where,
+              call,
+              outcome: "error",
+              error: error instanceof Error ? error.message : String(error),
+              durationMs: Math.round(performance.now() - started),
+            });
+            throw error;
+          }
+        };
+      },
+    });
+  }
+}

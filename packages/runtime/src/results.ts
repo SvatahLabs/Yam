@@ -1,0 +1,106 @@
+/**
+ * The run directory (REQ-RUN-9, LLD §8.6).
+ *
+ * "A run directory holds `results.jsonl`, `summary.json`, `audit.jsonl`,
+ * screenshots, and adapter traces; exit code is non-zero on failure, healed, or
+ * aborted."
+ *
+ * Files, in a directory, in the project — not a database and not a service.
+ * `runs/<id>/` can be attached to a CI job, committed to a bug report, diffed
+ * against another run, and read by a foreign runtime's conformance harness
+ * (REQ-STD-2). That is worth more than any query interface.
+ *
+ * Results are appended as they happen rather than written at the end, so a run
+ * that is killed still leaves everything it got through.
+ */
+import { appendFileSync, mkdirSync, renameSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import {
+  canonicalJson,
+  SCHEMA_VERSION,
+  type AuditLine,
+  type Checkpoint,
+  type StepResult,
+  type Summary,
+} from "@svatah/schema";
+
+/** Non-zero on failed, healed or aborted (REQ-RUN-9, LLD §15). */
+export const EXIT = {
+  ok: 0,
+  failed: 1,
+  healed: 6,
+  someUnrepaired: 7,
+  aborted: 11,
+} as const;
+
+export interface RunDirectory {
+  readonly path: string;
+  result(result: StepResult): void;
+  audit(line: AuditLine): void;
+  checkpoint(checkpoint: Checkpoint): void;
+  /** Where a screenshot for a step goes, relative to the run directory. */
+  screenshot(name: string): string;
+  summary(summary: Summary): void;
+}
+
+/** Open (creating) a run directory. */
+export function openRunDirectory(outputDir: string, runId: string): RunDirectory {
+  const path = join(outputDir, runId);
+  mkdirSync(join(path, "screenshots"), { recursive: true });
+
+  const append = (file: string, value: unknown): void => {
+    appendFileSync(join(path, file), `${JSON.stringify(value)}\n`, "utf8");
+  };
+
+  return {
+    path,
+    result: (result) => append("results.jsonl", result),
+    audit: (line) => append("audit.jsonl", line),
+    checkpoint: (checkpoint) => {
+      const file = join(path, "checkpoints", `${safe(checkpoint.stepId)}.json`);
+      mkdirSync(dirname(file), { recursive: true });
+      // Written whole, so a run killed mid-write leaves no half a checkpoint
+      // for `--resume` to trust (LLD §8.6: "written atomically").
+      writeFileSync(`${file}.tmp`, `${canonicalJson(checkpoint)}\n`, "utf8");
+      renameSync(`${file}.tmp`, file);
+    },
+    screenshot: (name) => join(path, "screenshots", `${safe(name)}.png`),
+    summary: (summary) => {
+      writeFileSync(join(path, "summary.json"), `${canonicalJson(summary)}\n`, "utf8");
+    },
+  };
+}
+
+/** A step id is a story name and a number; neither is safe as a file name. */
+function safe(name: string): string {
+  return name.replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+/** The totals and the exit code a summary carries (REQ-RUN-9). */
+export function summarise(
+  results: readonly StepResult[],
+): { totals: Summary["totals"]; exitCode: number } {
+  const totals = {
+    passed: results.filter((r) => r.status === "passed").length,
+    failed: results.filter((r) => r.status === "failed").length,
+    skipped: results.filter((r) => r.status === "skipped").length,
+    healed: results.filter((r) => r.status === "healed").length,
+    aborted: results.filter((r) => r.status === "aborted").length,
+  };
+
+  const exitCode =
+    totals.aborted > 0
+      ? EXIT.aborted
+      : totals.failed > 0
+        ? EXIT.failed
+        : totals.healed > 0
+          ? EXIT.healed
+          : EXIT.ok;
+
+  return { totals, exitCode };
+}
+
+/** A checkpoint for a step (REQ-AUTO-2). */
+export function checkpointFor(parts: Omit<Checkpoint, "schemaVersion">): Checkpoint {
+  return { schemaVersion: SCHEMA_VERSION, ...parts } as Checkpoint;
+}
