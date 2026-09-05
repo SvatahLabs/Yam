@@ -190,8 +190,32 @@ describe("docs/flow-language.md (REQ-LANG-12)", () => {
   });
 });
 
+/**
+ * Every block header in a legacy v1/v2 flow: `story : Name`, `scenario:Name`,
+ * `compose : Name`, `test : Name`. The legacy files are inconsistent about the
+ * spaces around the colon, so the pattern tolerates any.
+ *
+ * P0-F2: the migration check derives its expectations from this, not from a list
+ * a person maintains, so a renamed scenario cannot be made to pass by editing the
+ * test alongside the fixture.
+ */
+function legacyBlockNames(flowText: string): string[] {
+  const names: string[] = [];
+  for (const line of flowText.split("\n")) {
+    const match = /^\s*(story|scenario|compose|test|run)\s*:\s*(\S.*?)\s*$/i.exec(line);
+    if (match !== null) names.push(match[2]!);
+  }
+  return names;
+}
+
 describe("evals/fixtures/flows (REQ-NFR-8)", () => {
-  const fixtures = ["simple.flow", "svatah.flow", "execution.flow", "natural_language_login.flow"];
+  const fixtures = [
+    "simple.flow",
+    "svatah.flow",
+    "execution.flow",
+    "natural_language_login.flow",
+    "booking-compensation.flow",
+  ];
 
   it.each(fixtures)("%s is hand-migrated to v3", (name) => {
     const path = fromRoot("evals", "fixtures", "flows", name);
@@ -213,19 +237,105 @@ describe("evals/fixtures/flows (REQ-NFR-8)", () => {
     expect(flow, `${name} has no block header`).toMatch(/^(story|scenario|compose|test|run)[ (:]/m);
   });
 
-  it("preserves the story and scenario names of the originals", () => {
-    const cases: Array<[string, string[]]> = [
-      ["simple.flow", ["I want to validate login", "I want to validate logout", "I want to validate text", "I want to validate stories"]],
-      ["svatah.flow", ["Validate Text"]],
-      ["natural_language_login.flow", ["Login with natural language format", "Logout with natural language format", "Validate text with natural language format", "Login stories", "Run all login stories"]],
-      ["execution.flow", ["start booking", "perform search", "select date and time", "select slot and login", "checkout the selected slot", "initiate payment", "logout"]],
-    ];
-    for (const [file, names] of cases) {
-      const flow = readFileSync(fromRoot("evals", "fixtures", "flows", file), "utf8");
-      for (const name of names) {
-        expect(flow, `${file} lost the name "${name}"`).toContain(name);
+  /**
+   * The four migrations, each paired with the legacy original the names are
+   * derived from. `booking-compensation.flow` has no original and is absent here
+   * deliberately — it is a new fixture for REQ-AUTO-4, not a migration (P0-F2).
+   */
+  const MIGRATIONS: Array<[string, string]> = [
+    ["simple.flow", "simple.flow"],
+    ["svatah.flow", "svatah.flow"],
+    ["execution.flow", "execution.flow"],
+    ["natural_language_login.flow", "natural_language_login.flow"],
+  ];
+
+  it.each(MIGRATIONS)(
+    "%s preserves every story and scenario name of the original",
+    (fixture, original) => {
+      const legacy = readFileSync(
+        fromRoot("legacy", "src", "test", "resources", "sample", original),
+        "utf8",
+      );
+      const expected = legacyBlockNames(legacy);
+      expect(
+        expected.length,
+        `no block headers were parsed out of legacy/.../${original}`,
+      ).toBeGreaterThan(0);
+
+      const flow = readFileSync(fromRoot("evals", "fixtures", "flows", fixture), "utf8");
+      for (const name of expected) {
+        expect(flow, `${fixture} lost the name "${name}" from the original`).toContain(name);
       }
+    },
+  );
+
+  it("execution.flow has one step per original step, in order", () => {
+    // The original is v2: every step line carries an +action+ sigil, and the
+    // `//` lines are comments. The migration must be one v3 sentence per such
+    // line, in the same order and under the same scenario (P0-F2).
+    const legacy = readFileSync(
+      fromRoot("legacy", "src", "test", "resources", "sample", "execution.flow"),
+      "utf8",
+    );
+    const v3 = readFileSync(fromRoot("evals", "fixtures", "flows", "execution.flow"), "utf8");
+
+    /** Scenario name → number of step lines, for a legacy file. */
+    const legacyCounts = new Map<string, number>();
+    let current: string | null = null;
+    for (const line of legacy.split("\n")) {
+      const header = /^\s*(story|scenario|compose|test|run)\s*:\s*(\S.*?)\s*$/i.exec(line);
+      if (header !== null) {
+        current = header[2]!;
+        legacyCounts.set(current, 0);
+        continue;
+      }
+      if (current === null) continue;
+      if (line.trim() === "" || /^\s*\/\//.test(line)) continue;
+      legacyCounts.set(current, legacyCounts.get(current)! + 1);
     }
+
+    /** Scenario name → number of step lines, for the v3 migration. */
+    const v3Counts = new Map<string, number>();
+    current = null;
+    for (const line of v3.split("\n")) {
+      const header = /^(story|scenario|compose|test|run)\s*(\([^)]*\))?\s*:\s*(\S.*?)\s*$/i.exec(line);
+      if (header !== null) {
+        current = header[3]!;
+        v3Counts.set(current, 0);
+        continue;
+      }
+      if (current === null) continue;
+      if (line.trim() === "" || /^\s*(\/\/|#)/.test(line)) continue;
+      v3Counts.set(current, v3Counts.get(current)! + 1);
+    }
+
+    expect([...v3Counts.keys()]).toEqual([...legacyCounts.keys()]);
+    for (const [name, count] of legacyCounts) {
+      expect(v3Counts.get(name), `scenario "${name}" changed step count`).toBe(count);
+    }
+  });
+
+  it("booking-compensation.flow carries the abort policy execution.flow no longer does", () => {
+    const compensation = readFileSync(
+      fromRoot("evals", "fixtures", "flows", "booking-compensation.flow"),
+      "utf8",
+    );
+    expect(compensation).toContain("onFailure=compensate:cancel booking");
+    expect(compensation).toMatch(/^scenario[^\n]*:\s*cancel booking\s*$/m);
+    expect(compensation).toMatch(/^compose:/m);
+    expect(compensation).toMatch(/^test:/m);
+
+    // …and execution.flow is a plain migration again: no policy metadata, no
+    // compose or run block, no scenario the original did not have. Comment lines
+    // are stripped first — the file's header explains what moved out of it.
+    const execution = readFileSync(fromRoot("evals", "fixtures", "flows", "execution.flow"), "utf8")
+      .split("\n")
+      .filter((line) => !/^\s*(\/\/|#)/.test(line))
+      .join("\n");
+    expect(execution).not.toContain("onFailure");
+    expect(execution).not.toContain("cancel booking");
+    expect(execution).not.toMatch(/^compose:/m);
+    expect(execution).not.toMatch(/^test:/m);
   });
 
   it("ships the run data and the named API request the flows reference", () => {

@@ -1,0 +1,42 @@
+// The compensation showcase for REQ-AUTO-4.
+//
+// This flow is not a migration of anything: it is the fixture that exercises the
+// abort policy `onFailure=compensate:<story>`, which no legacy flow could express.
+// It reuses execution.flow's scenario names and steps so the two read together,
+// and adds the one scenario the original never had — "cancel booking" — as the
+// compensating story.
+//
+// The first migration of execution.flow folded this into that file, which cost it
+// three of its original scenario names and added a scenario the original did not
+// contain. Keeping the showcase here leaves execution.flow a faithful migration
+// (P0-F2).
+
+scenario (onFailure=compensate:cancel booking): book a slot
+  Click the Book a slot link
+  Click the location field
+  Type "indra" into the location field
+  Click the Indiranagar suggestion
+  Click the next button
+  Click the Book now button
+
+scenario (onFailure=compensate:cancel booking): pay for the slot
+  Click the booking result
+  Click the Checkout link
+  Type {data.card.number} into the card number field
+  Select "08" in the expiry month select
+  Select "2027" in the expiry year select
+  Type {data.card.cvv} into the CVV field
+  Click the pay button
+
+// The compensating story. It runs with the failing flow's scope and then the
+// flow stops (LLD §8.3), so a booking created before the failure is not left
+// behind.
+scenario (idempotent): cancel booking
+  Click the Bookings link
+  Click the cancel booking button
+
+compose: book and pay
+  book a slot
+  pay for the slot
+
+test: book and pay

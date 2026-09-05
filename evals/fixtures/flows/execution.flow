@@ -1,15 +1,17 @@
 // Hand-migrated from legacy/src/test/resources/sample/execution.flow (v2) to v3.
 //
-// The original drove a third-party booking site through inline XPaths. The
-// migration keeps every scenario name and every step, in order, and rewrites the
-// targets as the phrases the same controls carry on apps/sample-web, which is
-// what the flow can actually be recorded and replayed against (REQ-NFR-8).
+// Every scenario name is the original's, verbatim, and there is exactly one step
+// per original step, in the original order (REQ-LANG-11). The original drove a
+// third-party booking site through inline XPaths; v3 forbids locators in flows,
+// so each target is rewritten as the phrase the equivalent control carries on
+// apps/sample-web, which is what makes the flow recordable and replayable at all
+// (D7, and the step mapping in docs/spec/progress/phase-1.md).
 //
-// The flow books and pays, so it declares a compensating story: a failure after
-// the booking is created runs "cancel booking" before the flow stops
-// (REQ-AUTO-4).
+// The compensation showcase that stood here in the first migration — a "cancel
+// booking" scenario, onFailure=compensate metadata, and a compose/test block —
+// was not in the original. It moved to booking-compensation.flow.
 
-scenario: start booking
+scenario: start zoomcar booking
   Click the Book a slot link
 
 scenario: perform search
@@ -21,25 +23,25 @@ scenario: perform search
 
 scenario: select date and time
   Click the slot date field
-  Type "2026-09-03" into the slot date field
-  Select "09:00" in the slot times select
+  Click the 09:00 slot time
   Click the next button
-  Select "18:00" in the slot times select
+  Click the slot date field
+  Click the 18:00 slot time
   Click the next button
   Wait 8 seconds
 
-scenario (onFailure=compensate:cancel booking): select slot and login
+scenario: select car and login
   Click the Book now button
   Click the username field
   Type {data.user.email} into the username field
   Click the login button
   Type {data.user.password} into the password field
 
-scenario (onFailure=compensate:cancel booking): checkout the selected slot
+scenario: checkout the selected car
   Click the booking result
   Click the Checkout link
 
-scenario (onFailure=compensate:cancel booking): initiate payment
+scenario: initiate payment
   Click the card number field
   Click the expiry month select
   Select "08" in the expiry month select
@@ -50,21 +52,6 @@ scenario (onFailure=compensate:cancel booking): initiate payment
   Click the card number field
   Type {data.card.number} into the card number field
 
-scenario: cancel booking
-  Click the Bookings link
-  Click the cancel booking button
-
 scenario: logout
   Click the sidebar toggle
   Click the logout link
-
-compose: book and pay
-  start booking
-  perform search
-  select date and time
-  select slot and login
-  checkout the selected slot
-  initiate payment
-  logout
-
-test: book and pay
