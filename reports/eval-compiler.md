@@ -1,10 +1,12 @@
 # Compiler eval
 
-Run at 2026-09-03T19:31:12.184Z.
+Run at 2026-09-03T19:58:25.173Z.
 
 Model-tier answers came from `ollama:qwen2.5:3b`.
 
 **Overall exact match: 97.9%** (188 of 192).
+
+Tiers covered: `tier0`, `tier1`, `tier2`. Tier 3 needs a credential.
 
 ## Per tier (REQ-COMP-9)
 

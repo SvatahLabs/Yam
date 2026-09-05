@@ -346,9 +346,17 @@ export function renderCompilerReport(report: EvalReport): string {
     lines.push(`Model-tier answers came from \`${report.gateway}\`.`, "");
   }
 
+  const covered = Object.keys(report.byTier).sort();
   lines.push(
     `**Overall exact match: ${(report.totals.rate * 100).toFixed(1)}%** ` +
       `(${report.totals.matched} of ${report.totals.total}).`,
+    "",
+    // Which tiers ran, always. A run with `--only tier0,tier1` is a real result
+    // and a partial one, and a report that did not say which would read as the
+    // whole set.
+    `Tiers covered: ${covered.map((t) => `\`${t}\``).join(", ") || "(none)"}.` +
+      (covered.includes("tier2") ? "" : " Tier 2 needs a local model server (docs/local-model.md).") +
+      (covered.includes("tier3") ? "" : " Tier 3 needs a credential."),
     "",
     "## Per tier (REQ-COMP-9)",
     "",

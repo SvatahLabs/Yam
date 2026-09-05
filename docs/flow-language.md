@@ -1786,8 +1786,8 @@ outputs: enterprise: string
 | Code | Meaning |
 |---|---|
 | `W_AMBIGUOUS_TARGET` | A phrase matches more than one element. |
-| `W_TIER2` | The step was compiled by the local model. |
-| `W_TIER3` | The step was compiled by the frontier model. |
+| `W_TIER2` | The step was compiled by the local model (`--tier2`, [`docs/local-model.md`](local-model.md)). |
+| `W_TIER3` | The step was compiled by the frontier model (`--tier3`). |
 | `W_LOW_CONFIDENCE` | `origin.confidence` is below `compile.confidenceThreshold`. |
 | `W_UNUSED_CAPTURE` | A captured name is never read. |
 | `W_LONG_SLEEP` | A `sleep` of more than 5 seconds. |

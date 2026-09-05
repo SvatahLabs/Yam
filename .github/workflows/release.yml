@@ -3,17 +3,25 @@ name: Release
 # REQ-PKG-4: compiler, grounding, healing and adapter-conformance eval results are
 # generated per release and published with the release notes.
 #
-# Phase 0 wires the workflow and the attach step. Each `svatah eval <suite>` command
-# is added by the task that first makes that suite runnable (T1.8 healing, T3.4
-# grounding and healing-with-model, T4.4 compiler); until then the step reports the
-# suite as not yet runnable rather than failing the release.
+# Every suite is runnable as of T4.4: healing (T1.8), grounding (T3.4), compiler
+# (T4.3, T4.4) and adapter conformance (T4.1).
 #
-# The grounding and healing suites need a model to measure the numbers REQ-REC-10
-# and REQ-HEAL-5 name. `ANTHROPIC_API_KEY` is passed when the repository has one;
-# without it the grounding report runs against the fake gateway and says, at the
-# top and in bold, that it measures the harness rather than grounding, and the
-# healing report says its 85% number was not measured. A release that ships those
-# ships an honest "not measured", never a number nobody took.
+# Three of them need something a runner may not have, and each says so rather
+# than guessing:
+#
+#   * grounding and healing-with-model need a credential. `ANTHROPIC_API_KEY` is
+#     passed when the repository has one; without it the grounding report runs
+#     against the fake gateway and says, at the top and in bold, that it measures
+#     the harness rather than grounding, and the healing report says its 85%
+#     number was not measured.
+#   * the compiler's Tier 2 needs a local model server. `SVATAH_TIER2=1` turns it
+#     on for a runner that has one; without it the report covers tiers 0 and 1,
+#     which need no model at all, and names the tiers it covered.
+#   * adapter conformance drives BiDi when a Gecko browser is installed —
+#     `pnpm browsers` installs one — and records the adapter as skipped when not.
+#
+# A release that ships those ships an honest "not measured", never a number
+# nobody took.
 
 on:
   push:
