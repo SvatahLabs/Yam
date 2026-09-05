@@ -164,7 +164,27 @@ describe("entries and contexts (REQ-REC-6)", () => {
     expect(store.entries("login.username-field")[0]!.candidates[0]!.by).toBe("id");
   });
 
-  it("keeps a different context as a separate entry", () => {
+  it("replaces the entry a repair supersedes, even though its context moved", () => {
+    // A heal changes the context hash — the page's shape changed, which is why
+    // the binding broke — so without saying what it replaces the store would keep
+    // the broken entry *and* the repaired one, with the broken one first
+    // (LLD §6.3 selects by hash, then pattern, then position). The next run would
+    // resolve the broken entry and fail exactly as before.
+    const store = BindingsStore.empty(dir);
+    const broken = entry({ candidates: [candidate({ by: "xpath", value: "//form/div[1]/input" })] });
+    store.put("login.username-field", broken);
+
+    const repaired = entry({
+      context: { ...broken.context, hash: "b".repeat(64) },
+      candidates: [candidate({ by: "testid", value: "username" })],
+    });
+    store.put("login.username-field", repaired, undefined, { replaces: broken.context });
+
+    expect(store.entries("login.username-field")).toHaveLength(1);
+    expect(store.entryFor("login.username-field", {})!.candidates[0]!.by).toBe("testid");
+  });
+
+  it("keeps a different context as a separate entry when nothing was superseded", () => {
     const store = BindingsStore.empty(dir);
     store.put("login.username-field", entry());
     store.put(

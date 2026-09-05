@@ -37,6 +37,9 @@ Phase 1 (module a — bindings and model-free healing for Playwright users):
   svatah bindings show <id> [--dir <bindings>] [--json]
   svatah bindings verify [--adapter <name>] [--base-url <url>] [--id <id>] [--json]
   svatah bindings prune [--used-in <dirs>] [--apply] [--json]
+  svatah heal --from-bind-failures | --run <id>
+              [--dir <bindings>] [--out <.svatah>] [--base-url <url>]
+              [--apply] [--no-model] [--headed] [--json]
 
 Exit codes are the table in LLD §15.
 `;
@@ -55,6 +58,8 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
       return await surfaceCommand(args, io);
     case "bindings":
       return await (await import("./commands/bindings.js")).bindingsCommand(args, io);
+    case "heal":
+      return await (await import("./commands/heal.js")).healCommand(args, io);
     default: {
       const task = LATER[command];
       io.err(

@@ -136,16 +136,39 @@ export class BindingsStore {
    * An entry replaces one with the same context hash and pattern rather than
    * accumulating: re-recording an element in the same place should produce a
    * diff of that entry, not a second copy of it.
+   *
+   * `replaces` names an entry this one supersedes even though its context has
+   * moved. A repair is exactly that case — the page's shape changed, which is
+   * why the binding broke — and without it a heal would leave the broken entry
+   * in place *and* add the repaired one beside it, with the broken one first
+   * (LLD §6.3 selects by hash, then pattern, then position). The next run would
+   * resolve the broken entry and fail again.
    */
-  put(id: string, entry: BindingEntry, phrase?: string): void {
+  put(
+    id: string,
+    entry: BindingEntry,
+    phrase?: string,
+    options: { replaces?: BindingEntry["context"] } = {},
+  ): void {
     assertElementId(id);
     const existing = this.files.get(id);
     const phrases = new Set(existing?.phrases ?? []);
     if (phrase !== undefined && phrase.trim() !== "") phrases.add(phrase.trim());
 
-    const entries = (existing?.entries ?? []).filter(
-      (e) => !(e.context.hash === entry.context.hash && e.context.pattern === entry.context.pattern),
-    );
+    const supersedes = options.replaces;
+    const entries = (existing?.entries ?? []).filter((e) => {
+      if (e.context.hash === entry.context.hash && e.context.pattern === entry.context.pattern) {
+        return false;
+      }
+      if (
+        supersedes !== undefined &&
+        e.context.hash === supersedes.hash &&
+        e.context.pattern === supersedes.pattern
+      ) {
+        return false;
+      }
+      return true;
+    });
     entries.push(entry);
 
     this.files.set(id, {
