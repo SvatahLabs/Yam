@@ -67,6 +67,20 @@ const die = (code, message) => {
   process.exit(code);
 };
 
+/*
+ * `--print-report-path` resolves the report path and stops (F6).
+ *
+ * The defect was that a relative `--report` landed somewhere nobody asked for,
+ * and the only way it could be *seen* was by completing a run — which needs a
+ * packaged ADE, a granted permission and a window, none of which a CI runner
+ * on Linux has. One flag makes the resolution testable anywhere, in one line,
+ * and it is the line `tools/repo-checks` runs.
+ */
+if (args.includes("--print-report-path")) {
+  process.stdout.write(`${report}\n`);
+  process.exit(0);
+}
+
 if (!existsSync(cli)) die(2, "Run `pnpm -r build` first.");
 
 /* ── 1. the host ──────────────────────────────────────────────────────────── */
@@ -96,7 +110,8 @@ if (!existsSync(app)) {
   die(
     2,
     `The ADE is not packaged (${app}).\n` +
-      "Run: pnpm --filter @svatah/ade exec electron-forge package",
+      "Run: pnpm --filter @svatah/ade exec electron-forge package\n" +
+      `Nothing was written to ${report}.`,
   );
 }
 
