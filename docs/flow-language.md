@@ -1064,6 +1064,29 @@ Remember the page title as pageTitle
 }
 ```
 
+The attribute name is carried by `capture.attribute` and by nothing else. A read
+step has no `args`: `capture.from` says what is read and `capture.attribute` says
+which attribute, so there is one place to look and one place a rename has to
+happen. `surface.read("attribute", ref, name)` takes the name from there.
+
+`Remember the "href" attribute of the docs link as docsHref` compiles to:
+
+```json
+{
+  "action": "read",
+  "target": {
+    "ref": "docs-link",
+    "phrase": "the docs link",
+    "status": "unbound"
+  },
+  "capture": {
+    "name": "docsHref",
+    "from": "attribute",
+    "attribute": "href"
+  }
+}
+```
+
 ### Pattern 23 — Expect an element state
 
 **IR:** expect

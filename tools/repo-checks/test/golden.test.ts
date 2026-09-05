@@ -98,6 +98,26 @@ describe("evals/compiler/golden.jsonl (REQ-COMP-9)", () => {
     }
   });
 
+  /**
+   * P0-F4 — `capture.attribute` is the only encoding of the attribute name on a
+   * read step. `args.attribute` was a second, redundant one.
+   */
+  it("carries no args.attribute on a read step (P0-F4)", () => {
+    for (const entry of entries) {
+      if (entry.step.action !== "read") continue;
+      expect(
+        entry.step.args?.attribute,
+        `${entry.id} encodes the attribute name in args as well as in capture.attribute`,
+      ).toBeUndefined();
+      if (entry.step.capture?.from === "attribute") {
+        expect(
+          entry.step.capture.attribute,
+          `${entry.id} captures an attribute without naming it in capture.attribute`,
+        ).toBeDefined();
+      }
+    }
+  });
+
   it("covers every pattern in docs/flow-language.md", () => {
     const covered = new Set(entries.map((e) => e.pattern));
     for (let pattern = 1; pattern <= 30; pattern += 1) {
