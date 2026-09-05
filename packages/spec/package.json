@@ -11,19 +11,22 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./actions.yaml": "./actions.yaml"
   },
   "files": [
     "dist",
+    "actions.yaml",
     "README.md"
   ],
   "engines": {
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "tsup --config ../../tsup.config.ts",
+    "build": "tsup --config ../../tsup.config.ts && pnpm run generate",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate": "node scripts/write-actions-yaml.mjs"
   },
   "dependencies": {
     "@svatah/schema": "workspace:*",

@@ -25,6 +25,18 @@ export {
 } from "./diagnostics.js";
 
 export { readFlow } from "./reader.js";
+
+export { VOCABULARY, type Verb } from "./vocabulary.js";
+export { VerbTrie, VERBS, type VerbMatch } from "./verbs.js";
+export { elementId, normaliseWords, phraseKey } from "./normalise.js";
+export {
+  parseTargets,
+  TargetDictionary,
+  type DictionaryEntry,
+  type TargetResolution,
+  type TargetStatus,
+} from "./dictionary.js";
+export { generateActionsYaml } from "./generate.js";
 export { DEFAULT_META, META_KEYS, parseMeta, parseOnFailure } from "./meta.js";
 export { isEmpty as isEmptySignature, readSignatureLine } from "./signature.js";
 

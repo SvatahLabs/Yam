@@ -208,6 +208,34 @@ describe("data (REQ-LANG-9)", () => {
   });
 });
 
+describe("the target dictionary comes with the project (REQ-COMP-5)", () => {
+  it("is seeded from targets.yaml and from the bindings the caller passed", () => {
+    const { project, diagnostics } = readProject({
+      flows: [],
+      targets: { file: "targets.yaml", text: 'sign-in-button:\n  - "the sign in button"\n' },
+      bindings: [{ id: "login.username-field", phrases: ["the username field"] }],
+      env: {},
+    });
+    expect(diagnostics).toEqual([]);
+    expect(project.targets.resolve("the sign in button").id).toBe("sign-in-button");
+    expect(project.targets.resolve("the username field").id).toBe("login.username-field");
+  });
+
+  it("is empty but present when the project has neither", () => {
+    const { project } = readProject({ flows: [], env: {} });
+    expect(project.targets.list()).toEqual([]);
+  });
+
+  it("reports targets.yaml that does not parse", () => {
+    const { diagnostics } = readProject({
+      flows: [],
+      targets: { file: "targets.yaml", text: "a: [1,\n" },
+      env: {},
+    });
+    expect(diagnostics.map((d) => d.code)).toEqual(["E_SYNTAX"]);
+  });
+});
+
 describe("named API requests (REQ-LANG-8, REQ-ADP-2)", () => {
   const apis = (...files: Array<{ file: string; text: string }>) =>
     readProject({ flows: [], apis: files, env: {} });

@@ -16,7 +16,9 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, extname, join, relative, sep } from "node:path";
 import { isStoryBlock, isRunBlock, type FlowFile, type StoryBlock } from "./ast.js";
 import { diagnostic, type Diagnostic } from "./diagnostics.js";
+import { parse as parseYaml } from "yaml";
 import { buildApiCatalogue, EMPTY_APIS, type ApiCatalogue } from "./api.js";
+import { parseTargets, TargetDictionary } from "./dictionary.js";
 import { EMPTY_DATA, readData, type ProjectData } from "./data.js";
 import { readFlow } from "./reader.js";
 
@@ -30,6 +32,12 @@ export interface Project {
   readonly runs: ReadonlyMap<string, readonly string[]>;
   readonly data: ProjectData;
   readonly apis: ApiCatalogue;
+  /**
+   * Phrases to element ids (REQ-COMP-5). Seeded from `targets.yaml` and from any
+   * bindings the caller passed; the compiler adds the phrases it meets, so the
+   * same phrase in two steps produces one id and therefore one binding.
+   */
+  readonly targets: TargetDictionary;
 }
 
 export interface ProjectSource {
@@ -37,6 +45,15 @@ export interface ProjectSource {
   readonly flows: ReadonlyArray<{ file: string; text: string }>;
   readonly data?: { file: string; text: string };
   readonly apis?: ReadonlyArray<{ file: string; text: string }>;
+  /** `targets.yaml`: element id → the phrases that name it. */
+  readonly targets?: { file: string; text: string };
+  /**
+   * The bindings store's ids and phrases, if the caller has one.
+   *
+   * Passed as data rather than read here: `@svatah/spec` is module (b) and the
+   * store is module (a), and LLD §1 draws `spec ─► schema` and nothing else.
+   */
+  readonly bindings?: ReadonlyArray<{ id: string; phrases: readonly string[] }>;
   readonly env?: NodeJS.ProcessEnv;
 }
 
@@ -199,7 +216,28 @@ export function readProject(source: ProjectSource): {
     diagnostics.push(...read.diagnostics);
   }
 
-  return { project: { flows, stories, compositions, runs, data, apis }, diagnostics };
+  const targets = new TargetDictionary();
+  if (source.bindings !== undefined) targets.addBindings(source.bindings);
+  if (source.targets !== undefined) {
+    let parsed: unknown;
+    try {
+      parsed = parseYaml(source.targets.text) as unknown;
+    } catch (error) {
+      diagnostics.push(
+        diagnostic(
+          "E_SYNTAX",
+          `${source.targets.file} is not valid YAML: ${(error as Error).message}`,
+          { file: source.targets.file, line: 0 },
+        ),
+      );
+      parsed = null;
+    }
+    const read = parseTargets(parsed, source.targets.file);
+    diagnostics.push(...read.diagnostics);
+    targets.addTargets(read.targets);
+  }
+
+  return { project: { flows, stories, compositions, runs, data, apis, targets }, diagnostics };
 }
 
 /** The path back to `start`, if expanding it reaches itself. */
@@ -233,6 +271,9 @@ export interface ProjectPaths {
   dataFile?: string;
   /** `config.api.dir`. Default `api`. */
   apiDir?: string;
+  /** Where `targets.yaml` lives. Default `targets.yaml` at the root. */
+  targetsFile?: string;
+  bindings?: ReadonlyArray<{ id: string; phrases: readonly string[] }>;
   env?: NodeJS.ProcessEnv;
 }
 
@@ -264,20 +305,25 @@ export function readProjectFrom(paths: ProjectPaths): {
   const flowFiles = filesUnder(join(root, paths.flowsDir ?? "flows"), [".flow"]);
   const apiFiles = filesUnder(join(root, paths.apiDir ?? "api"), [".yaml", ".yml"]);
 
-  const dataPath = join(root, paths.dataFile ?? "data.yaml");
-  let data: { file: string; text: string } | undefined;
-  try {
-    if (statSync(dataPath).isFile()) {
-      data = { file: rel(dataPath), text: readFileSync(dataPath, "utf8") };
+  /** An optional file: absent is the normal case for both of these. */
+  const optional = (path: string): { file: string; text: string } | undefined => {
+    try {
+      if (!statSync(path).isFile()) return undefined;
+      return { file: rel(path), text: readFileSync(path, "utf8") };
+    } catch {
+      return undefined;
     }
-  } catch {
-    // No data file is normal: a project may have no run-level data at all.
-  }
+  };
+
+  const data = optional(join(root, paths.dataFile ?? "data.yaml"));
+  const targets = optional(join(root, paths.targetsFile ?? "targets.yaml"));
 
   return readProject({
     flows: flowFiles.map((file) => ({ file: rel(file), text: readFileSync(file, "utf8") })),
     ...(data === undefined ? {} : { data }),
+    ...(targets === undefined ? {} : { targets }),
     apis: apiFiles.map((file) => ({ file: rel(file), text: readFileSync(file, "utf8") })),
+    ...(paths.bindings === undefined ? {} : { bindings: paths.bindings }),
     ...(paths.env === undefined ? {} : { env: paths.env }),
   });
 }
