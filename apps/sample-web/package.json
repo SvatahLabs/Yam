@@ -17,14 +17,16 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "start": "node --experimental-strip-types src/cli.ts",
-    "build": "tsup --config ../../tsup.config.ts",
+    "start": "node dist/cli.js",
+    "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "node-html-parser": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "node-html-parser": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
