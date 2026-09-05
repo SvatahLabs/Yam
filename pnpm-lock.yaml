@@ -404,6 +404,12 @@ importers:
       '@svatah/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@svatah/schema':
+        specifier: workspace:*
+        version: link:../schema
+      '@svatah/surface':
+        specifier: workspace:*
+        version: link:../surface
     devDependencies:
       tsup:
         specifier: 'catalog:'

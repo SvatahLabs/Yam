@@ -47,3 +47,23 @@ export {
   looksGenerated,
   type SynthesisOptions,
 } from "./synthesis.js";
+
+export {
+  relocalize,
+  rank,
+  decide,
+  scoreAgainst,
+  attrSimilarity,
+  textSimilarity,
+  neighbourSimilarity,
+  rolePathSimilarity,
+  boxProximity,
+  WEIGHTS,
+  DEFAULT_THRESHOLD,
+  DEFAULT_MARGIN,
+  DEFAULT_MAX_CANDIDATES,
+  type Match,
+  type Score,
+  type RelocalizeOptions,
+  type RelocalizeResult,
+} from "./relocalize.js";
