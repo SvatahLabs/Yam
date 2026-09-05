@@ -23,13 +23,17 @@
   "scripts": {
     "build": "tsup --config ../../tsup.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "playwright test",
+    "test:browsers": "playwright test --project=chromium --project=firefox --project=webkit"
   },
   "dependencies": {
     "@svatah/surface": "workspace:*",
-    "@svatah/schema": "workspace:*"
+    "@svatah/schema": "workspace:*",
+    "playwright": "catalog:"
   },
   "devDependencies": {
+    "@playwright/test": "catalog:",
+    "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

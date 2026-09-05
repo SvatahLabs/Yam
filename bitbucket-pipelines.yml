@@ -32,6 +32,8 @@ definitions:
           - pnpm lint
           # REQ-PKG-3.
           - pnpm check:licenses
+          # Phase 1 adapter and host tests drive a real browser (LLD §1).
+          - pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
           - pnpm -r test
 
     - step: &legacy-java

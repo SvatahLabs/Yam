@@ -1,8 +1,38 @@
 /**
  * @svatah/adapter-playwright
  *
- * Default web adapter: AgentSurface on Playwright.
- *
- * Phase 0 leaves this package a skeleton (T0.2); it is filled in by a later phase.
+ * The default web adapter (REQ-ADP-1, LLD §7.1): `AgentSurface` implemented on
+ * Playwright. It is consumed as an adapter, not as the core — nothing above the
+ * surface imports this package except the CLI, which registers it, and
+ * `@svatah/playwright-test`, which hosts it (LLD §1).
  */
-export {};
+export {
+  PlaywrightSurface,
+  PLAYWRIGHT_CAPABILITIES,
+  createPlaywrightSurface,
+  translate,
+  type BrowserName,
+  type PlaywrightAdapterOptions,
+} from "./surface.js";
+
+export { registerPlaywrightAdapter, PLAYWRIGHT_ADAPTER_NAME } from "./register.js";
+
+export {
+  takeSnapshot,
+  parseAiSnapshot,
+  chooseMechanism,
+  playwrightMechanismAvailable,
+  ariaSnapshotText,
+  RefSpace,
+  DEFAULT_MAX_NODES,
+  REGISTRY,
+  type SnapshotMechanism,
+  type SnapshotOptions,
+} from "./snapshot.js";
+
+export { structuralHash, renderForHash, lengthBucket } from "./structural-hash.js";
+
+export { locatorFor, coordsOf } from "./locate.js";
+export { evaluatePredicate, type CheckContext } from "./predicates.js";
+export { literalValue } from "./values.js";
+export { walkDocument, describeElement, type RawNode, type RawDescription } from "./page-script.js";

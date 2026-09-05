@@ -47,6 +47,12 @@ jobs:
       - name: Licence check (REQ-PKG-3)
         run: pnpm check:licenses
 
+      # Phase 1 adapter and host tests drive a real browser (LLD §1). Only
+      # chromium is required; `--with-deps` installs the system libraries the
+      # Linux runner needs.
+      - name: Install Playwright browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+
       - name: Test
         run: pnpm -r test
 

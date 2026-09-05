@@ -2,7 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": "dist"
+    "outDir": "dist",
+    // The adapter injects code into the page (`page-script.ts`, and the
+    // `evaluate` callbacks in `surface.ts` and `predicates.ts`), so it needs the
+    // DOM lib. Nothing here runs in a browser at module scope: these types
+    // describe the functions Playwright serialises and evaluates there.
+    "lib": ["ES2023", "DOM", "DOM.Iterable"]
   },
   "include": [
     "src/**/*.ts",
