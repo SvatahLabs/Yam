@@ -135,7 +135,8 @@ interface Step {
   action: Action;
   target?: TargetRef; target2?: TargetRef;
   args?: Record<string, ValueRef | number | string | boolean>;
-  guard?: { subject: "target" | "page" | "dialog" | "scope"; predicate: Predicate; mode: "onlyIf" | "unless" };
+  guard?: { subject: "target" | "page" | "dialog" | "scope"; predicate: Predicate; mode: "onlyIf" | "unless";
+            target?: TargetRef };          // Draft 2.7: a `target` guard about another element; the recorder grounds it and the resolver resolves it before evaluation. A `target` guard with no element anywhere is E_GUARD_NO_TARGET.
   expect?: { subject: "target" | "page" | "dialog" | "scope"; predicate: Predicate };
   capture?: { name: string; from: "text" | "value" | "attribute" | "title" | "result" | "response" | "output"; attribute?: string; jsonPath?: string };
   custom?: { id: string; params: Record<string, ValueRef>; targets?: Record<string, TargetRef> };   // action === "custom"; `target` placeholders land in `targets`, never in `params`
@@ -407,7 +408,7 @@ runStep(step):
 
 ### 8.3 Policies
 
-`applyPolicy(onFailure)`: `stop` → flow stopped, remaining `skipped`; `continue` → story stopped, next story runs; `{compensate}` → run the named story with the current scope, record its steps with `behavior` unchanged, then stop the flow. Every applied policy writes an audit line `kind:"policy"` and sets `failure.policyApplied` on the failing step. Status of steps skipped due to a guard is `skipped` with `failure.class: "guard"` only when the guard itself errored (for example an unresolved reference); a clean guard skip has no failure.
+`applyPolicy(onFailure)`: `stop` → flow stopped, remaining `skipped`; `continue` → story stopped, next story runs; `{compensate}` → run the named story with the current scope, then stop the flow. The compensating story's steps are recorded with their own statuses (`passed`, `failed`, `skipped`), never `aborted`; the failing step carries `policyApplied`; the flow's and the run's status is `aborted` (Draft 2.7). Every applied policy writes an audit line `kind:"policy"` and sets `failure.policyApplied` on the failing step. Status of steps skipped due to a guard is `skipped` with `failure.class: "guard"` only when the guard itself errored (for example an unresolved reference); a clean guard skip has no failure.
 
 ### 8.4 Failure classification
 
@@ -493,7 +494,7 @@ Plan run with expectations; web through the Playwright Test host (§9), other ad
 
 ### 13.4 Trajectory compile (package `trajectory`, P2)
 
-- Capture: the MCP raw-surface tools (`surface.snapshot|act|read|check`) require an `intent` string per call; the CLI writes `trajectory.jsonl` lines `{ seq, intent, call, snapshotHash, ref, describe }`.
+- Capture: the MCP raw-surface tools (`surface.snapshot|act|read|check`) require an `intent` string per call; the CLI writes `trajectory.jsonl` lines `{ seq, at, intent, call, args?, ref?, describe?, result?, error?, snapshotHash?, url? }` (Draft 2.7; `describe` is read at the moment of the call, `url` is what a proposal's binding context is addressed to). A proposal's binding context carries the hash of the whole page as it was, which is broader than a recorded binding's landmark hash and is expected to drift sooner.
 - Compile: group calls into steps by intent; map `act` kinds to IR actions; the intent becomes the sentence after normalisation through the synonym vocabulary; targets get element ids from `describe`; candidates and fingerprints are synthesised at capture time (no model); a story draft, plan fragment, and `verified: false` bindings go to `proposals/<date>/`. A Tier 1 compile of the draft must succeed or the step is emitted as a comment with `// review:`.
 
 ---
@@ -508,7 +509,7 @@ Plan run with expectations; web through the Playwright Test host (§9), other ad
 | `GET /flows/:file` · `PUT /flows/:file` | Read and write a flow file | text |
 | `POST /compile` | Compile and lint | `{ plan: PlanRef, errors, warnings }` |
 | `GET /plan` | The compiled plan exactly as `svatah compile` writes it (steps, tiers, confidence, unbound targets), for the ADE's Plan screen | `Plan` |
-| `POST /record` | Start a recording session | `{ stories?, rebind?, headed? }` → `{ sessionId }`; events on the stream |
+| `POST /record` | Start a recording session | `{ stories?, rebind?, headed?, gateway?: "anthropic" \| "fake" }` → `{ sessionId }`; events on the stream. 409 while a session is open. A pending `record.decision` expires after `record.decisionDeadlineMs` (default 10 minutes), after which the session stops with a report (Draft 2.7) |
 | `POST /run` | Start a run | `{ behavior, flows?, stories?, inputs?, host?, workers? }` → `{ runId }`; events on the stream |
 | `POST /runs/:id/stop` | Stop a run or session | |
 | `GET /runs` · `GET /runs/:id` · `GET /runs/:id/results` · `GET /runs/:id/audit` | Summaries, results, audit | schema objects |
@@ -529,7 +530,7 @@ Prototype database import (`svatah migrate --from-ade <path>`, P2) maps the prot
 
 - Electron current LTS, Electron Forge with the Vite plus TypeScript template; `main/` (window, service process lifecycle, project chooser, accessibility flag), `preload/` (typed bridge exposing only `openProject`, `serviceInfo`, `pickFile`, `preferences`), `renderer/` (React; a generated service client; screens listed below). The renderer never has Node access; every capability comes from the service or the bridge. The built main and preload bundles are CommonJS because a sandboxed preload has no ES module loader; sources stay ESM-syntax TypeScript and the renderer is a browser ES module. Electron Forge under pnpm requires `public-hoist-pattern[]=*electron*` in `.npmrc`; no wider hoisting is permitted, and the ADE pins `vite` to a major whose dependency tree is permissively licensed (REQ-PKG-3).
 - Service lifecycle: on project open, locate the bundled CLI (or a configured one), spawn `svatah serve --project <dir> --port 0`, read port and token from stdout, health-check `GET /project`, and stop it on project close or app quit. If a service is already running for the directory (lock file with port and token), connect instead.
-- Screens and the endpoints and events they render: Project (`GET /project`, `init`); Flow editor (`GET/PUT /flows/:file`, `POST /compile` for inline lint, custom step list from `GET /project`); Plan (`POST /compile` result per story: step, tier, confidence, target status); Run (`POST /run`, `step.result` and `run.summary` events, screenshots by URL, `GET /runs/:id/audit`); Results (`GET /runs`); API client (`POST /api/request`, `GET/PUT /api/:name`); Data (`GET/PUT /data`); Record review (`POST /record`, `record.decision` and `record.candidates` events, `POST /surface/:session/snapshot` for re-pick); Bindings (`GET /bindings`, `POST /bindings/verify`); Heal review (`POST /heal`, `heal.proposal` event, apply through `PUT` of the diff); Surface explorer (`POST /surface/:session/*` with `intent`); Tool panel (`tool serve` control and audit lines).
+- Screens and the endpoints and events they render: Project (`GET /project`, `init`); Flow editor (`GET/PUT /flows/:file`, `POST /compile` for inline lint, custom step list from `GET /project`); Plan (`POST /compile` result per story: step, tier, confidence, target status); Run (`POST /run`, `step.result` and `run.summary` events, screenshots by URL, `GET /runs/:id/audit`); Results (`GET /runs`); API client (`POST /api/request`, `GET/PUT /api/:name`); Data (`GET/PUT /data`); Record review (`POST /record`, `record.decision` and `record.candidates` events, `POST /surface/:session/snapshot` for re-pick; the screen offers the gateway, `anthropic` when the service reports a credential and `fake` for the committed answers, sends it in `POST /record`, labels a fake-gateway session as such, and renders `record.failed` as an alert whose advice is written for the screen, never a CLI flag (Draft 2.7)); Bindings (`GET /bindings`, `POST /bindings/verify`); Heal review (`POST /heal`, `heal.proposal` event, apply through `PUT` of the diff); Surface explorer (`POST /surface/:session/*` with `intent`); Tool panel (`tool serve` control and audit lines).
 - Accessibility for the desktop adapters: `app.setAccessibilitySupportEnabled(true)` when launched with `SVATAH_A11Y=1` or in development builds; every interactive control has a role and an accessible name; screen containers carry landmark roles so `controlPath` candidates are short and stable.
 - Storage: preferences (theme, recent projects, window state) in the app's user-data directory; nothing else.
 
@@ -555,6 +556,7 @@ Base URL and storage state precedence (Draft 2.5), applied identically by every 
 | `tool serve` | `--expose`, `--stdio|--http` | daemon |
 | `surface` | `snapshot`, `act`, `read`, `check`, `conform --adapter` | 0 / 1 |
 | `host generate` | `--out` | 0 |
+| `trajectory compile <trajectory.jsonl> [dir]` | `--name`, `--out`, `--app` | 0; writes only under `proposals/` (Draft 2.7) |
 | `migrate <src> <dest>` | `--keep-original` | 0 / 8 unmapped |
 | `repl`, `eval`, `init`, `doctor` | | |
 
@@ -578,6 +580,7 @@ MCP server (`svatah mcp`): operation tools (`compile`, `lint`, `record`, `run`, 
 
 ## 17. Changes from Draft 1
 
+- Draft 2.7 (after Phase 5 verification): `Step.guard.target` (§3.2); compensating-story steps keep their own statuses (§8.3); `svatah trajectory compile` in the command table (§15); the trajectory line shape and the proposal context hash (§13.4); `POST /record` gateway, 409, and decision deadline (§13.5); the ADE Record screen chooses the gateway and renders failures (§13.6).
 - Draft 2.6 (after Phase 4 verification): assertion aliases for the `Expect … to …` and `Verify / Check that / Assert that` forms (§4.2); story inputs for heal replay (§10); the compiler eval reads a committed golden-project config and reports unconfigured tiers as not measured (§16); BiDi attach must not create a second session on a driver-hosted endpoint (§7.3).
 - Draft 2.5 (after Phase 3 verification): the target dictionary is built from parsed binding files and `W_BINDING_NO_PHRASES` (§4.3); base URL and storage state precedence for every session-opening command (§15); `bind()` model grounding registered by the CLI (§9.2); `GET /plan` (§13.5); CommonJS ADE bundles, the Electron hoist pattern, and the Vite pin (§13.6); grounding-case exclusions and the run-artifact hygiene rule (§16).
 - Draft 2.4 (after Phase 2 verification): run-block semantics (§4.1); `failure.session` on step results (§3.4); executor collaborators injected and flow-start navigation stated (§8); host context from the worker-scoped browser (§9.1); both replayers perform the flow-start navigation and verify the page (§10); service `ServiceApi` injection, input validation on `/run`, signatures on `/project` (§13.5); `unverified` eval outcome and the timing-test rule (§16).
