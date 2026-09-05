@@ -9,7 +9,14 @@
  * `@svatah/schema` and nothing else — so the ADE and the CLI cannot end up
  * disagreeing about what a run is.
  */
-export { createService, type RunningService, type ServeOptions } from "./server.js";
+export {
+  createService,
+  missingInputs,
+  storiesInvokedDirectly,
+  type MissingInput,
+  type RunningService,
+  type ServeOptions,
+} from "./server.js";
 export type { CompileOutcome, ProjectHandle, RunOutcome, ServiceApi } from "./api.js";
 export { EventBus, SERVICE_EVENT_KINDS, type ServiceEvent } from "./events.js";
 export { openApiDocument, OPENAPI_VERSION } from "./openapi.js";

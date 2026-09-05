@@ -16,7 +16,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createService, openApiDocument, type RunningService } from "../src/index.js";
-import { fakeApi } from "./fake-api.js";
+import { fakeApi, fakeProject } from "./fake-api.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const PROJECT = join(ROOT, "evals", "fixtures");
@@ -255,5 +255,97 @@ describe("POST /run (REQ-ADE-1, REQ-ADE-3)", () => {
   it("404s a run that does not exist", async () => {
     expect((await get("/runs/nope")).status).toBe(404);
     expect((await get("/runs/nope/results")).status).toBe(404);
+  });
+});
+
+/*
+ * Inputs, before anything starts (P2-F4, Draft 2.4, LLD §13.5).
+ *
+ * The fake project's "Sign in" declares `email: string` with no default, and its
+ * run block invokes it. Calling a function without its arguments is a mistake in
+ * the call; answering 202 and letting the executor fail would give the ADE a red
+ * run to display when what happened is that nobody typed an address.
+ */
+describe("POST /run validates inputs (REQ-AUTO-5, LLD §13.5)", () => {
+  const post = async (body: unknown): Promise<Response> =>
+    await get("/run", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+  it("400s with the missing names, and starts nothing", async () => {
+    const started: string[] = [];
+    const stop = service.events.subscribe((event) => started.push(event.kind));
+
+    const response = await post({});
+    expect(response.status).toBe(400);
+
+    const body = await json(response);
+    expect(body.error).toBe("missing-inputs");
+    expect(body.missing).toEqual([{ story: "Sign in", name: "email", type: "string" }]);
+    expect(body.message).toContain('"Sign in".email');
+
+    expect(started).toEqual([]);
+    stop();
+  });
+
+  it("starts the run once the input is supplied", async () => {
+    const response = await post({ inputs: { email: "a@b.c" } });
+    expect(response.status).toBe(202);
+  });
+
+  it("names the story that is missing one, not every story", async () => {
+    const body = await json(await post({ stories: ["Sign in"] }));
+    expect(body.missing.map((m: { story: string }) => m.story)).toEqual(["Sign in"]);
+  });
+
+  it("asks for nothing from a story with no signature", async () => {
+    const noSignature = await createService({
+      project: PROJECT,
+      port: 0,
+      token: TOKEN,
+      api: fakeApi({
+        loadProject: async (root) => {
+          const handle = fakeProject(root);
+          return {
+            ...handle,
+            project: {
+              ...handle.project,
+              stories: new Map([
+                ["Sign in", { story: { kind: "story", steps: [{}] }, file: "flows/a.flow" }],
+              ]),
+            },
+          };
+        },
+      }),
+    });
+    try {
+      const response = await fetch(`${noSignature.url}/run`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      expect(response.status).toBe(202);
+    } finally {
+      await noSignature.close();
+    }
+  });
+
+  it("expands a composition to the stories it names", async () => {
+    const body = await json(await post({ flows: ["flows/a.flow"] }));
+    expect(body.missing).toEqual([{ story: "Sign in", name: "email", type: "string" }]);
+  });
+});
+
+/*
+ * `GET /project` carries the signatures, which is the half of LLD §13.5 that
+ * makes the 400 above actionable: a client prompts from them.
+ */
+describe("GET /project carries each story's signature (LLD §13.5)", () => {
+  it("so a client can prompt for inputs before it runs", async () => {
+    const body = await json(await get("/project"));
+    const story = body.stories.find((s: { name: string }) => s.name === "Sign in");
+    expect(story.signature.inputs.email.type).toBe("string");
   });
 });

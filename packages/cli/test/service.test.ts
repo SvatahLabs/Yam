@@ -11,7 +11,7 @@
  * showing something the CLI does not agree with.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync, cpSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync, cpSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -221,4 +221,76 @@ describe("the service and the CLI run the same thing (LLD §13.5)", () => {
 
     expect(read(viaCli.runId)).toEqual(read(viaService));
   }, 180_000);
+});
+
+/*
+ * The 400 against a real project (P2-F4, Draft 2.4, LLD §13.5).
+ *
+ * `@svatah/service`'s own contract tests cover the rule with a fake project.
+ * This is the rule meeting a real one: a real flow file, read by the real
+ * `loadProject`, whose signature really came out of the spec reader — which is
+ * where "the stories the run invokes directly" stops being a phrase and starts
+ * being a run block with a composition in it.
+ */
+describe("POST /run refuses a run whose inputs are missing (LLD §13.5)", () => {
+  let signed: string;
+  let withSignature: RunningService;
+
+  beforeAll(async () => {
+    signed = scaffold("runs");
+    writeFileSync(
+      join(signed, "flows", "smoke.flow"),
+      `story: Sign in
+inputs: email: string, password: secret
+  Click the sign in button
+  Type {input.email} into the username field
+  Type {input.password} into the password field
+  Click the login button
+
+test: Sign in
+`,
+      "utf8",
+    );
+    withSignature = await createService({ project: signed, token: TOKEN, port: 0, api });
+  }, 120_000);
+
+  afterAll(async () => {
+    await withSignature.close();
+    rmSync(signed, { recursive: true, force: true });
+  });
+
+  const post = async (body: unknown): Promise<Response> =>
+    await fetch(`${withSignature.url}/run`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+  it("400s with every missing name, before a browser starts", async () => {
+    const response = await post({});
+    expect(response.status).toBe(400);
+
+    const body = (await response.json()) as {
+      error: string;
+      missing: Array<{ story: string; name: string; type: string }>;
+    };
+    expect(body.error).toBe("missing-inputs");
+    expect(body.missing).toEqual([
+      { story: "Sign in", name: "email", type: "string" },
+      { story: "Sign in", name: "password", type: "secret" },
+    ]);
+
+    // Refused, not started: no run directory appeared.
+    expect(existsSync(join(signed, "runs"))).toBe(false);
+  });
+
+  it("names the signature in GET /project, so a client can ask first", async () => {
+    const body = (await (
+      await fetch(`${withSignature.url}/project`, {
+        headers: { authorization: `Bearer ${TOKEN}` },
+      })
+    ).json()) as { stories: Array<{ name: string; signature?: { inputs: Record<string, unknown> } }> };
+
+    expect(Object.keys(body.stories[0]!.signature!.inputs)).toEqual(["email", "password"]);
+  });
 });

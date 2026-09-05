@@ -157,6 +157,32 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     "/run",
     async (request, reply) => {
       const body = request.body ?? {};
+
+      /*
+       * Missing inputs are a 400, before anything starts (Draft 2.4, LLD §13.5).
+       *
+       * A story with a signature is a function (REQ-AUTO-5), and calling one
+       * without its arguments is a mistake in the call, not a run that failed.
+       * Answering 202 and letting the executor fail on the first step would give
+       * the ADE a red run to display and a person a screenshot of a login page
+       * to puzzle over — when what happened is that nobody typed a password.
+       *
+       * `GET /project` carries each story's signature so a client can ask for
+       * them first; this is what happens when it did not.
+       */
+      const loadedForCheck = await load();
+      const missing = missingInputs(loadedForCheck, body);
+      if (missing.length > 0) {
+        return reply.code(400).send({
+          error: "missing-inputs",
+          missing,
+          message:
+            `This run needs ${missing.length === 1 ? "an input" : "inputs"} nothing supplied: ` +
+            `${missing.map((m) => `"${m.story}".${m.name}`).join(", ")}. ` +
+            "Every story's signature is in GET /project.",
+        });
+      }
+
       const runId = api.newRunId();
 
       /*
@@ -190,6 +216,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
   );
 
   const runsDir = async (): Promise<string> => join(root, (await load()).config.run.outputDir);
+
 
   fastify.get("/runs", async () => {
     const dir = await runsDir();
@@ -345,4 +372,74 @@ export async function createService(options: ServeOptions): Promise<RunningServi
       await fastify.close();
     },
   };
+}
+
+/* ── run inputs ───────────────────────────────────────────────────────────── */
+
+/** One input a story declared and the run did not supply. */
+export interface MissingInput {
+  readonly story: string;
+  readonly name: string;
+  readonly type: string;
+}
+
+/**
+ * The stories a run invokes directly (Draft 2.4, LLD §13.5).
+ *
+ * `--story` names them outright. Otherwise it is the run blocks of the flows in
+ * scope, with compositions expanded — the same order the executor derives, and
+ * the same set, because a run block naming a composition runs its stories.
+ *
+ * "Directly" is the word that matters: a story reached through an `invoke` step
+ * gets its inputs from the calling step, not from the run, so requiring them
+ * here would refuse a run that was always going to work.
+ */
+export function storiesInvokedDirectly(
+  loaded: ProjectHandle,
+  body: { flows?: readonly string[]; stories?: readonly string[] },
+): string[] {
+  if (body.stories !== undefined && body.stories.length > 0) return [...body.stories];
+
+  const flows =
+    body.flows === undefined || body.flows.length === 0
+      ? loaded.project.flows.map((flow) => flow.file)
+      : [...body.flows];
+
+  const names: string[] = [];
+  for (const flow of flows) {
+    for (const entry of loaded.project.runs.get(flow) ?? []) {
+      const composition = loaded.project.compositions.get(entry);
+      for (const name of composition?.names ?? [entry]) {
+        if (!names.includes(name)) names.push(name);
+      }
+    }
+  }
+  return names;
+}
+
+/**
+ * The declared inputs with no default that the run did not supply.
+ *
+ * Empty is the answer for a story with no signature, which is most of them: a
+ * story that never declared an input cannot be missing one.
+ */
+export function missingInputs(
+  loaded: ProjectHandle,
+  body: { flows?: readonly string[]; stories?: readonly string[]; inputs?: Record<string, unknown> },
+): MissingInput[] {
+  const supplied = body.inputs ?? {};
+  const missing: MissingInput[] = [];
+
+  for (const name of storiesInvokedDirectly(loaded, body)) {
+    const signature = loaded.project.stories.get(name)?.story.signature as
+      | { inputs?: Record<string, { type: string; default?: unknown }> }
+      | undefined;
+
+    for (const [input, declared] of Object.entries(signature?.inputs ?? {})) {
+      if (declared.default !== undefined) continue;
+      if (Object.prototype.hasOwnProperty.call(supplied, input)) continue;
+      missing.push({ story: name, name: input, type: declared.type });
+    }
+  }
+  return missing;
 }

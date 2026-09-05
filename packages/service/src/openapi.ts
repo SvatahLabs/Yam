@@ -45,8 +45,41 @@ export function openApiDocument(version: string): Record<string, unknown> {
       "/project": {
         get: {
           summary: "Config, flows, stories, compositions, run blocks and API names",
+          description:
+            "Each story carries its `signature` when it declares one, so a client can " +
+            "prompt for inputs before starting a run (LLD §13.5).",
           security: bearer,
-          responses: { 200: { description: "ProjectSummary", ...json({ type: "object" }) } },
+          responses: {
+            200: {
+              description: "ProjectSummary",
+              ...json({
+                type: "object",
+                properties: {
+                  root: { type: "string" },
+                  flows: { type: "array", items: { type: "string" } },
+                  stories: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        file: { type: "string" },
+                        kind: { type: "string" },
+                        steps: { type: "integer" },
+                        signature: ref("signature"),
+                      },
+                      required: ["name", "file", "kind", "steps"],
+                    },
+                  },
+                  compositions: { type: "object" },
+                  runs: { type: "object" },
+                  apis: { type: "array", items: { type: "string" } },
+                  customSteps: { type: "array", items: { type: "string" } },
+                  diagnostics: { type: "array" },
+                },
+              }),
+            },
+          },
         },
       },
       "/flows/{file}": {
@@ -74,9 +107,37 @@ export function openApiDocument(version: string): Record<string, unknown> {
       "/run": {
         post: {
           summary: "Start a run; step events arrive on the stream",
+          description:
+            "The inputs are validated against the signatures of the stories the run " +
+            "invokes directly, before anything starts (LLD §13.5).",
           security: bearer,
           requestBody: json({ type: "object", properties: { flows: { type: "array", items: { type: "string" } }, stories: { type: "array", items: { type: "string" } }, host: { type: "string" }, inputs: { type: "object" } } }),
-          responses: { 202: { description: "The run id", ...json({ type: "object", properties: { runId: { type: "string" } } }) } },
+          responses: {
+            202: { description: "The run id", ...json({ type: "object", properties: { runId: { type: "string" } } }) },
+            400: {
+              description: "A story the run invokes declares an input nothing supplied",
+              ...json({
+                type: "object",
+                properties: {
+                  error: { const: "missing-inputs" },
+                  missing: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        story: { type: "string" },
+                        name: { type: "string" },
+                        type: { type: "string" },
+                      },
+                      required: ["story", "name", "type"],
+                    },
+                  },
+                  message: { type: "string" },
+                },
+                required: ["error", "missing", "message"],
+              }),
+            },
+          },
         },
       },
       "/runs": {
