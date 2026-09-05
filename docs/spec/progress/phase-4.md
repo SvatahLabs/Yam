@@ -481,6 +481,18 @@ What *is* tested holds whichever model answers
 **Validate item — overall 0.95 met.** 97.9 % (188/192): tier 0 3/3, tier 1
 148/148, tier 2 37/41.
 
+> **Corrected after verification (P4-F5).** That number did not reproduce from
+> this repository. `svatah eval compiler` read `compile.tier2` from the config at
+> `--project` (default `.`); the repository root has none and
+> `evals/compiler/project/` had none either, so a clean checkout registered no
+> model, compiled all 41 tier 2 sentences with the grammar alone, scored every
+> one as wrong, and printed **"tier2 0/41 — Below REQ-COMP-9's thresholds"**. The
+> 90.2 % was produced with a config on the implementer's machine. This report
+> described that as a documentation matter; it was a missing repository file.
+> Fixed under P4-F2 on branch `phase-5`: the config is committed with the pinned
+> digest, the eval reads it, and an unconfigured tier is reported as `not
+> measured` rather than as zero.
+
 `reports/eval-compiler.md` is published and **states which tiers it covered**, so
 a run without a local model or a credential reads as the partial result it is
 rather than as the whole set. `scripts/eval-reports.mjs` now has a runner for
@@ -725,11 +737,24 @@ Their remote agent speaks CDP, so they need chromedriver or msedgedriver, which
 this machine does not have. The attach route is implemented and unit-tested;
 the end-to-end run against those browsers is not.
 
+> **Corrected after verification (P4-F5).** "Implemented and unit-tested" was too
+> generous. The verifier installed chromedriver 152 and took the route the
+> adapter's own README documents, and it **failed on the first message**:
+> `session not created: session already exists`. The adapter sent `session.new`
+> at a session the driver had already created. What was unit-tested was the URL
+> being read out of the environment, not the protocol exchange that follows it.
+> A route nothing exercises is a route that is broken and does not know it.
+> Fixed under P4-F3 on branch `phase-5`.
+
 ### K4 — The golden set holds 192 pairs, not 300
 
 REQ-COMP-9 asks for at least 300 before release: 148 tier 1 (T0.6 required 120),
 3 tier 0, and the 41 tier 2 this phase adds. Growing it is release work and is
 recorded in `evals/compiler/README.md`.
+
+> **Updated after verification (P4-F5).** P4-F4 brought it to 222 — 181 tier 1,
+> 3 tier 0, 38 tier 2 — by adding an entry per assertion alias and moving three
+> entries the grammar now claims out of the tier 2 subset. Still short of 300.
 
 ### K5 — The Tier 2 number was tuned against the set it is measured on
 
@@ -771,3 +796,97 @@ not be caught.
 `adapter-uia` and `adapter-ax` are Phase 6 (T6.1, T6.2) and remain skeletons.
 `svatah workflow` and `svatah tool` are Phase 5 and say which task builds them.
 The MCP server offers neither rather than stubbing them.
+
+---
+
+## Post-verification corrections (P4-F5)
+
+Phase 4 was verified by a separate session in a clean detached worktree of
+`phase-4` at `cc6d4e5` and **scored 8.2 / 10 — accepted with corrections**. The
+full record is `docs/spec/progress/phase-4-verification.md`. This section is the
+part of that record this file owes: what the verifier found, and where each
+defect was fixed. Every fix is on branch `phase-5`, committed before any Phase 5
+task began, because the workflow runner and the tool server build on story
+inputs and would have built on the broken half of them.
+
+### What the verifier confirmed
+
+| Probe | Result |
+|---|---|
+| `pnpm install && pnpm browsers && pnpm -r build && pnpm -r test`, no credential | 30 packages, **2,532 tests passed, 0 failed** |
+| The same on Node v22.23.2 with `CI=true` | identical |
+| `pnpm lint`, `pnpm check:licenses` | clean; the one named exception (`css-value@0.0.1`) stands |
+| `git diff master..phase-4 -- docs/spec/*.md` | empty |
+| Tier 2 with a config supplied by hand, twice | 37/41 (90.2 %) **identical on both runs** — the rate is deterministic |
+| The Tier 2 digest pin | mismatch exits 3 with no plan; `--allow-model-drift` records the served digest |
+| MCP over real stdio with a client the implementer did not write | 10 tools, six surface calls, six trajectory lines with intents |
+| `node scripts/bidi-independence.mjs` | Firefox 153, 16/16 conformance, two runs agree, 40/40 identical to the Playwright baseline |
+| `node scripts/privacy-check.mjs` | compile, lint and run reached nothing beyond the machine |
+| The Phase 3 dictionary corrections | every phrase spelling tried binds; an empty `phrases` list lints `W_BINDING_NO_PHRASES` |
+
+The per-parameter scores were: contract reproducibility 9, spec fidelity 7, test
+integrity 8, boundaries and hygiene 9, Phase 3 corrections 8, model-path honesty
+8, independence proof 8, REPL/MCP/privacy 8, report accuracy 8, deviation
+discipline 9.
+
+### The four defects, and where each is fixed
+
+**F1 — Replay for healing had no story inputs** (REQ-HEAL-1, LLD §10).
+A failure at step 5 of `I want to validate login`, behind `Type {input.email}`
+and `Type {input.password}`, could not be healed: the runtime replayer ran the
+four-step prefix with an empty scope, the typed steps failed, and the healer
+reported `unreachable` — blaming the page for a missing argument. `heal --run`
+had no `--input`, and a run recorded nothing about the inputs it was given. The
+heal-cycle test passed only because its own flow hard-codes the credentials,
+which no shipped flow does.
+
+Fixed by **P4-F1**: `heal --run` takes `--input k=v` and `SVATAH_INPUT_<NAME>`
+through the same parser `run` uses; `summary.json` records input *names* and
+never values; an `unreachable` for want of an input names it and the environment
+variable that would supply it. Four cases added to
+`packages/cli/test/heal-cycle.test.ts`.
+
+**F2 — The Tier 2 number was not reproducible from the repository**
+(REQ-COMP-9, REQ-PKG-4). See the correction under T4.4 above. Fixed by
+**P4-F2**: `evals/compiler/project/svatah.config.yaml` is committed with the
+pinned digest, the eval reads the golden project's config rather than the working
+directory, and a requested-but-unconfigured tier is `not measured` rather than
+`0/N`. `reports/eval-compiler.md` regenerated from a clean checkout.
+
+**F3 — BiDi attach to a driver-hosted session failed** (REQ-ADP-4, LLD §7.3).
+See the correction under K3 above. Fixed by **P4-F3**: the adapter tells a
+`…/session/<id>` session from a `…/session` server, does not send `session.new`
+at the first, learns the browser from `session.status`, and does not end a
+session it did not create. Both shapes are tested against exchanges recorded from
+chromedriver 152 and Firefox 153, and `scripts/bidi-independence.mjs` runs the
+stock-Chrome attach whenever a driver is present.
+
+**F4 — The assertion grammar was narrower than the LLD** (REQ-COMP-2, LLD §4.2).
+`Expect the sign in button to be visible`, `Expect the page title to contain "…"`,
+`Expect the URL to contain "…"` and `Verify the sign in button is visible` all
+failed with `E_NO_MATCH`, although the synonym vocabulary had listed those verbs
+for `expect` since Draft 1 — the verifier hit it at the REPL, where two of three
+sentences typed by hand were refused. Fixed by **P4-F4**: the grammar accepts the
+`Expect <subject> to …` and `Verify / Check that / Assert that / Ensure / Make
+sure / Confirm` families for target, page-title and URL subjects, lowering to the
+same IR; 30 golden entries added, one per alias, and three entries moved from
+tier 2 to tier 1 because a `tier: 2` entry the grammar answers is not a Tier 2
+measurement.
+
+**F5 — Report corrections.** This section, plus the inline corrections at K3,
+K4 and T4.4.
+
+### What this changes about the published numbers
+
+| Number | Phase 4 said | After the corrections |
+|---|---|---|
+| Compiler eval, overall | 97.9 % (188/192) | **98.2 % (218/222)** |
+| Tier 1 | 148/148 (100 %) | **181/181 (100 %)** |
+| Tier 2 | 37/41 (90.2 %) — not reproducible from the tree | **34/38 (89.5 %)** — reproducible from the tree with `ollama serve` |
+| BiDi | conformant on Firefox 153 | conformant on Firefox 153 **and on stock Chrome 152 through chromedriver**, 16/16 and 72 checks each |
+| Heal cycle | 4 cases, no story inputs | **8 cases**, including a story with a signature behind its login through both command lines |
+
+The Tier 2 rate moved because three of its 41 sentences are now Tier 1
+sentences, not because the model got worse: the same weights answer the same 38
+remaining sentences the same way.
+
