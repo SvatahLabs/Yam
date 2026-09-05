@@ -618,3 +618,90 @@ repository's only remote is Bitbucket (Phase 0's K1), so no GitHub workflow in
 this repository has ever run. The macOS leg is `continue-on-error` because a
 hosted runner cannot grant the Accessibility permission; the Windows leg should
 pass on a runner and has not been observed to.
+
+---
+
+## Post-verification corrections
+
+Added under Phase 7 (T7.1–T7.4), after the adversarial verification of this
+phase scored it 8.4/10 and accepted it with corrections. The findings are
+recorded here rather than only in `phase-7.md`, because three of them say that
+what this file claimed was not what a live machine did — and a progress file
+that only ever gains good news is not evidence.
+
+The verifier's report is `docs/spec/progress/phase-6-verification.md`; the work
+is `docs/spec/progress/phase-7.md`.
+
+### The AX bridge could not read the ADE's smallest window (F1)
+
+This file recorded the macOS live gate as unrun because the Accessibility
+permission could not be granted in the session it was written in, and treated
+the bridge's cost as *unmeasured*. The permission was subsequently granted on
+the verifier's machine and the gate was run for the first time. It failed **0
+of 7**, every case at "the surface opens", each with
+`The accessibility call did not answer within 10000 ms`.
+
+The cause was the bridge, not the permission. Measured by the verifier against
+the ADE's **35-node welcome window**:
+
+| Read | Cost |
+|---|---|
+| `WINDOW_SCRIPT`'s per-attribute walk | **650 ms per element**; 9.1–10.2 s for one `window()` |
+| `entireContents()` on the same window | 121 ms, one Apple event |
+| `properties()` per element | 19 ms |
+
+Seventeen attributes per node, one Apple event each. The ADE's smallest window
+therefore took ten seconds and its project screen — 488 nodes, measured in
+Phase 7 — would have taken minutes. The timeout message compounded it by
+naming the Accessibility permission that `svatah surface doctor` had just
+reported `granted`, which sends the reader to System Settings for a defect in
+this repository.
+
+Draft 2.8 §7.5 states the bulk-read requirement and the 400-node, 10 s budget;
+T7.1 rewrote the bridge to meet it. The deviation this file recorded under
+"the cost of `osascript`" was accurate about the mechanism and wrong about the
+conclusion: the design could meet the budget, and the per-attribute walk was
+the reason it did not.
+
+### The Java runtime's artifacts were not in the published schemas (F2)
+
+`T6.4` above says the runtime "writes results and summary in the published
+schemas". It did not. Every one of the forty lines of its `results.jsonl` fails
+`stepResultSchema` on `startedAt`, `endedAt` and `durationMs`, and its
+`summary.json` fails `summarySchema` on `startedAt` and `endedAt`.
+
+It was reported conformant because `scripts/runtime-conformance.mjs` compared
+the runtime's output with `evals/conformance/runtime/results.jsonl`, which is a
+**projection** of a run with the run-specific fields stripped — and the runtime
+had copied the projection. The zero-mismatch result stands for status and
+matched candidate. The sentence about the schemas did not.
+
+Draft 2.8 §14 now requires the suite to validate a foreign runtime's artifacts
+before it compares them, and the fixture to say it is a projection; T7.4 did
+both, and the runtime writes full records.
+
+### T6.1's healing-variant Validate item was dropped without a deviation (F3)
+
+T6.1's Validate list included "a healing variant subset (renamed control, moved
+panel) passes relocalization". Nothing in either desktop adapter's tests, in the
+desktop suite, or in this file implements it, mentions it, or records it as a
+deviation. **It was missed**, and the omission is the one finding in the
+verification that is about this file rather than about the code: six deviations
+were recorded with their section and their reason, and this seventh was simply
+absent.
+
+Draft 2.8 §16 restates it concretely as the ADE's `SVATAH_A11Y_VARIANT=1|2` and
+a pair of desktop healing cases; T7.1 implements them, and measured all three
+bindings relocalizing through both desktop adapters.
+
+### The smaller ones (F4–F6)
+
+- **F4**, the dialog: `Dismiss the dialog` accepted it, end to end, on the
+  sample `/widgets` page. Listed here as K7 and correctly attributed to a
+  pre-existing defect; Draft 2.8 §3.2 fixed the IR agreement and T7.3 the
+  adapters.
+- **F5**, `pnpm -r typecheck`: K9 above, confirmed on `master`. Draft 2.8 §16
+  puts `typecheck` in the verification contract; T7.3 made it green.
+- **F6**, the desktop gate script: `--report` resolved against the project
+  directory rather than the current one, and the ADE wait was a fixed eight
+  seconds against a machine that took fifteen. Both fixed in T7.1.
