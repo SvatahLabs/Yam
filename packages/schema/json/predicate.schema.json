@@ -1,0 +1,256 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/predicate.schema.json",
+  "$ref": "#/definitions/predicate",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "predicate": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "visible",
+                "hidden",
+                "enabled",
+                "disabled",
+                "checked",
+                "unchecked",
+                "selected",
+                "present",
+                "absent",
+                "multiSelect"
+              ],
+              "type": "string"
+            },
+            "negate": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "text",
+                "textContains",
+                "value",
+                "title",
+                "titleContains",
+                "url",
+                "urlContains",
+                "tag"
+              ],
+              "type": "string"
+            },
+            "negate": {
+              "type": "boolean"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "literal",
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "var",
+                      "type": "string"
+                    },
+                    "name": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "story": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "name"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "data",
+                      "type": "string"
+                    },
+                    "path": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "secret": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "path"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "input",
+                      "type": "string"
+                    },
+                    "name": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "name"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "template",
+                      "type": "string"
+                    },
+                    "parts": {
+                      "items": {
+                        "$ref": "#/definitions/predicate/anyOf/1/properties/value"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "parts"
+                  ],
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "attribute",
+                "css"
+              ],
+              "type": "string"
+            },
+            "name": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "negate": {
+              "type": "boolean"
+            },
+            "value": {
+              "$ref": "#/definitions/predicate/anyOf/1/properties/value"
+            }
+          },
+          "required": [
+            "kind",
+            "name",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "location",
+                "size",
+                "box"
+              ],
+              "type": "string"
+            },
+            "numbers": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "kind",
+            "numbers"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "expr",
+              "type": "string"
+            },
+            "left": {
+              "$ref": "#/definitions/predicate/anyOf/1/properties/value"
+            },
+            "negate": {
+              "type": "boolean"
+            },
+            "op": {
+              "enum": [
+                "eq",
+                "ne",
+                "gt",
+                "lt",
+                "matches"
+              ],
+              "type": "string"
+            },
+            "right": {
+              "$ref": "#/definitions/predicate/anyOf/1/properties/value"
+            }
+          },
+          "required": [
+            "kind",
+            "left",
+            "op",
+            "right"
+          ],
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "description": "Expectation and guard predicates (LLD §3.2). Svatah schemaVersion 1.0.0.",
+  "title": "predicate",
+  "x-svatah-schema-version": "1.0.0"
+}

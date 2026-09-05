@@ -1,0 +1,55 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/surface.api-response.schema.json",
+  "$ref": "#/definitions/surface.api-response",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "surface.api-response": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "type": "string"
+        },
+        "cookies": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "durationMs": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "json": {},
+        "status": {
+          "type": "integer"
+        },
+        "statusText": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "statusText",
+        "headers",
+        "body",
+        "durationMs"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "HTTP adapter: a response (REQ-ADP-2). Svatah schemaVersion 1.0.0.",
+  "title": "surface.api-response",
+  "x-svatah-schema-version": "1.0.0"
+}

@@ -1,0 +1,115 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/surface.locate.schema.json",
+  "$ref": "#/definitions/surface.locate",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "surface.locate": {
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "additionalProperties": false,
+          "properties": {
+            "candidate": {
+              "additionalProperties": false,
+              "properties": {
+                "attribute": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "by": {
+                  "enum": [
+                    "role",
+                    "label",
+                    "placeholder",
+                    "testid",
+                    "text",
+                    "altText",
+                    "title",
+                    "css",
+                    "xpath",
+                    "id",
+                    "name",
+                    "accessibilityId",
+                    "resourceId",
+                    "automationId",
+                    "controlPath",
+                    "webmcp",
+                    "coords"
+                  ],
+                  "type": "string"
+                },
+                "exact": {
+                  "type": "boolean"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "nth": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "paramMap": {
+                  "additionalProperties": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "propertyNames": {
+                    "minLength": 1
+                  },
+                  "type": "object"
+                },
+                "role": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "score": {
+                  "type": "number"
+                },
+                "tool": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "by",
+                "score"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "candidate"
+          ],
+          "type": "object"
+        },
+        "response": {
+          "additionalProperties": false,
+          "properties": {
+            "refs": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "refs"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "request",
+        "response"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Agent surface: locate() request and response (LLD §2.1). Svatah schemaVersion 1.0.0.",
+  "title": "surface.locate",
+  "x-svatah-schema-version": "1.0.0"
+}

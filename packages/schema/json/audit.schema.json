@@ -1,0 +1,90 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/audit.schema.json",
+  "$ref": "#/definitions/audit",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "audit": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "call": {
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "args": {},
+            "method": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "ref": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "type": "object"
+        },
+        "detail": {},
+        "durationMs": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "error": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "run",
+            "story",
+            "surface",
+            "input",
+            "output",
+            "policy"
+          ],
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "ok",
+            "error"
+          ],
+          "type": "string"
+        },
+        "runId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "seq": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "stepId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "story": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "runId",
+        "at",
+        "seq",
+        "kind"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "One line of audit.jsonl (LLD §3.4). Svatah schemaVersion 1.0.0.",
+  "title": "audit",
+  "x-svatah-schema-version": "1.0.0"
+}

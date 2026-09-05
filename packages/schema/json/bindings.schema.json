@@ -1,0 +1,322 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/bindings.schema.json",
+  "$ref": "#/definitions/bindings",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "bindings": {
+      "additionalProperties": false,
+      "properties": {
+        "entries": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "candidates": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "attribute": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "by": {
+                      "enum": [
+                        "role",
+                        "label",
+                        "placeholder",
+                        "testid",
+                        "text",
+                        "altText",
+                        "title",
+                        "css",
+                        "xpath",
+                        "id",
+                        "name",
+                        "accessibilityId",
+                        "resourceId",
+                        "automationId",
+                        "controlPath",
+                        "webmcp",
+                        "coords"
+                      ],
+                      "type": "string"
+                    },
+                    "exact": {
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "nth": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "paramMap": {
+                      "additionalProperties": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "propertyNames": {
+                        "minLength": 1
+                      },
+                      "type": "object"
+                    },
+                    "role": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "score": {
+                      "type": "number"
+                    },
+                    "tool": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "by",
+                    "score"
+                  ],
+                  "type": "object"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "context": {
+                "additionalProperties": false,
+                "properties": {
+                  "hash": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "pattern": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "platform": {
+                    "enum": [
+                      "web",
+                      "mobile",
+                      "desktop"
+                    ],
+                    "type": "string"
+                  },
+                  "viewport": {
+                    "items": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "pattern",
+                  "hash",
+                  "platform"
+                ],
+                "type": "object"
+              },
+              "fingerprint": {
+                "additionalProperties": false,
+                "properties": {
+                  "attrs": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "propertyNames": {
+                      "minLength": 1
+                    },
+                    "type": "object"
+                  },
+                  "box": {
+                    "items": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "maxItems": 4,
+                    "minItems": 4,
+                    "type": "array"
+                  },
+                  "index": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "neighbours": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "after": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "before": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "before",
+                      "after"
+                    ],
+                    "type": "object"
+                  },
+                  "rolePath": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "tag": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "tag",
+                  "attrs",
+                  "text",
+                  "neighbours",
+                  "rolePath",
+                  "box",
+                  "index"
+                ],
+                "type": "object"
+              },
+              "previous": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "fingerprint": {
+                      "$ref": "#/definitions/bindings/properties/entries/items/properties/fingerprint"
+                    },
+                    "provenance": {
+                      "$ref": "#/definitions/bindings/properties/entries/items/properties/provenance"
+                    }
+                  },
+                  "required": [
+                    "fingerprint",
+                    "provenance"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "provenance": {
+                "additionalProperties": false,
+                "properties": {
+                  "at": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "cacheRead": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "costUsd": {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "digest": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "model": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "promptVersion": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "tokensIn": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "tokensOut": {
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "model",
+                  "promptVersion",
+                  "at",
+                  "tokensIn",
+                  "tokensOut"
+                ],
+                "type": "object"
+              },
+              "recordedAt": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "verified": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "context",
+              "candidates",
+              "fingerprint",
+              "recordedAt",
+              "provenance",
+              "verified"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "phrases": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "schemaVersion": {
+          "const": "1.0.0",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "id",
+        "phrases",
+        "entries"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "A bindings store file (LLD §3.3). Svatah schemaVersion 1.0.0.",
+  "title": "bindings",
+  "x-svatah-schema-version": "1.0.0"
+}

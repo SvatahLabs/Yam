@@ -1,0 +1,41 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/invoker.schema.json",
+  "$ref": "#/definitions/invoker",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "invoker": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "user",
+            "ci",
+            "agent"
+          ],
+          "type": "string"
+        },
+        "via": {
+          "enum": [
+            "cli",
+            "mcp",
+            "host"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "via"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Who invoked a run (LLD §3.4). Svatah schemaVersion 1.0.0.",
+  "title": "invoker",
+  "x-svatah-schema-version": "1.0.0"
+}

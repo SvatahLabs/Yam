@@ -1,0 +1,442 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/config.schema.json",
+  "$ref": "#/definitions/config",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "config": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "enum": [
+            "playwright",
+            "bidi",
+            "appium",
+            "uia",
+            "ax",
+            "http"
+          ],
+          "type": "string"
+        },
+        "allowSideEffects": {
+          "type": "boolean"
+        },
+        "api": {
+          "additionalProperties": false,
+          "properties": {
+            "dir": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "dir"
+          ],
+          "type": "object"
+        },
+        "app": {
+          "additionalProperties": false,
+          "properties": {
+            "appPath": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "baseUrl": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "processName": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "storageState": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "bindings": {
+          "additionalProperties": false,
+          "properties": {
+            "dir": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "testIdAttributes": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "dir",
+            "testIdAttributes"
+          ],
+          "type": "object"
+        },
+        "compile": {
+          "additionalProperties": false,
+          "properties": {
+            "confidenceThreshold": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            "tier2": {
+              "additionalProperties": false,
+              "properties": {
+                "digest": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "endpoint": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "model": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "provider": {
+                  "enum": [
+                    "ollama",
+                    "llamacpp"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "provider",
+                "endpoint",
+                "model"
+              ],
+              "type": "object"
+            },
+            "tier3": {
+              "additionalProperties": false,
+              "properties": {
+                "model": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "promptVersion": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "provider": {
+                  "const": "anthropic",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "provider",
+                "model",
+                "promptVersion"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "confidenceThreshold"
+          ],
+          "type": "object"
+        },
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "file"
+          ],
+          "type": "object"
+        },
+        "environment": {
+          "enum": [
+            "test",
+            "staging",
+            "production"
+          ],
+          "type": "string"
+        },
+        "flows": {
+          "additionalProperties": false,
+          "properties": {
+            "dir": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "exclude": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "include": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "dir"
+          ],
+          "type": "object"
+        },
+        "heal": {
+          "additionalProperties": false,
+          "properties": {
+            "margin": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            "onFail": {
+              "type": "boolean"
+            },
+            "relocalizeThreshold": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            "useModel": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "onFail",
+            "relocalizeThreshold",
+            "margin",
+            "useModel"
+          ],
+          "type": "object"
+        },
+        "macros": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "mobile": {
+          "additionalProperties": false,
+          "properties": {
+            "appium": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "capabilities": {
+              "additionalProperties": {},
+              "propertyNames": {
+                "minLength": 1
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "appium",
+            "capabilities"
+          ],
+          "type": "object"
+        },
+        "prices": {
+          "additionalProperties": {
+            "additionalProperties": false,
+            "properties": {
+              "cacheRead": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "in": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "out": {
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "required": [
+              "in",
+              "out"
+            ],
+            "type": "object"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "project": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "record": {
+          "additionalProperties": false,
+          "properties": {
+            "maxSnapshotTokens": {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            "model": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "visionFallback": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "model",
+            "maxSnapshotTokens",
+            "visionFallback"
+          ],
+          "type": "object"
+        },
+        "run": {
+          "additionalProperties": false,
+          "properties": {
+            "audit": {
+              "type": "boolean"
+            },
+            "browser": {
+              "enum": [
+                "chromium",
+                "firefox",
+                "webkit"
+              ],
+              "type": "string"
+            },
+            "candidateTimeoutMs": {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            "checkpoints": {
+              "type": "boolean"
+            },
+            "headless": {
+              "type": "boolean"
+            },
+            "outputDir": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "screenshots": {
+              "enum": [
+                "onFailure",
+                "always",
+                "never"
+              ],
+              "type": "string"
+            },
+            "stepTimeoutMs": {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            "trace": {
+              "type": "boolean"
+            },
+            "viewport": {
+              "items": [
+                {
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            "workers": {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "workers",
+            "headless",
+            "stepTimeoutMs",
+            "candidateTimeoutMs",
+            "screenshots",
+            "trace",
+            "outputDir",
+            "checkpoints",
+            "audit"
+          ],
+          "type": "object"
+        },
+        "schemaVersion": {
+          "const": "1.0.0",
+          "type": "string"
+        },
+        "steps": {
+          "additionalProperties": false,
+          "properties": {
+            "dir": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "dir"
+          ],
+          "type": "object"
+        },
+        "tool": {
+          "additionalProperties": false,
+          "properties": {
+            "expose": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "requireIdempotent": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "expose",
+            "requireIdempotent"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "project",
+        "environment",
+        "adapter",
+        "app",
+        "flows",
+        "steps",
+        "bindings",
+        "data",
+        "api",
+        "run",
+        "compile",
+        "record",
+        "heal"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "svatah.config.yaml (LLD §3.5). Svatah schemaVersion 1.0.0.",
+  "title": "config",
+  "x-svatah-schema-version": "1.0.0"
+}

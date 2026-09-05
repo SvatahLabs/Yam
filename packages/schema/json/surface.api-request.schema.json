@@ -1,0 +1,149 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/surface.api-request.schema.json",
+  "$ref": "#/definitions/surface.api-request",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "surface.api-request": {
+      "additionalProperties": false,
+      "properties": {
+        "auth": {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "basic",
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "username",
+            "password"
+          ],
+          "type": "object"
+        },
+        "body": {
+          "type": "string"
+        },
+        "cookies": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "files": {
+          "additionalProperties": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "followRedirects": {
+          "type": "boolean"
+        },
+        "form": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "json": {},
+        "method": {
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+            "HEAD",
+            "OPTIONS"
+          ],
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "pathParams": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "query": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "timeoutMs": {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "tls": {
+          "additionalProperties": false,
+          "properties": {
+            "caFile": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "certFile": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "insecure": {
+              "type": "boolean"
+            },
+            "keyFile": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "url": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "method",
+        "url"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "HTTP adapter: a named request (REQ-ADP-2). Svatah schemaVersion 1.0.0.",
+  "title": "surface.api-request",
+  "x-svatah-schema-version": "1.0.0"
+}

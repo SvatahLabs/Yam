@@ -1,0 +1,585 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/ir.schema.json",
+  "$ref": "#/definitions/ir",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ir": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "navigate",
+            "back",
+            "forward",
+            "refresh",
+            "click",
+            "doubleClick",
+            "rightClick",
+            "hover",
+            "hoverAndClick",
+            "pressAndHold",
+            "release",
+            "dragTo",
+            "type",
+            "clear",
+            "press",
+            "keyDown",
+            "keyUp",
+            "submit",
+            "upload",
+            "selectOption",
+            "deselectOption",
+            "deselectAll",
+            "setChecked",
+            "scrollIntoView",
+            "scrollToTop",
+            "scrollToBottom",
+            "sleep",
+            "waitFor",
+            "switchWindow",
+            "closeOtherWindows",
+            "switchFrame",
+            "dialog",
+            "read",
+            "expect",
+            "evaluate",
+            "screenshot",
+            "api",
+            "custom",
+            "invoke"
+          ],
+          "type": "string"
+        },
+        "args": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "literal",
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "var",
+                        "type": "string"
+                      },
+                      "name": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "story": {
+                        "minLength": 1,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "name"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "data",
+                        "type": "string"
+                      },
+                      "path": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "secret": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "path"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "input",
+                        "type": "string"
+                      },
+                      "name": {
+                        "minLength": 1,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "name"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "template",
+                        "type": "string"
+                      },
+                      "parts": {
+                        "items": {
+                          "$ref": "#/definitions/ir/properties/args/additionalProperties/anyOf/0"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "parts"
+                    ],
+                    "type": "object"
+                  }
+                ]
+              },
+              {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean"
+                ]
+              }
+            ]
+          },
+          "type": "object"
+        },
+        "capture": {
+          "additionalProperties": false,
+          "properties": {
+            "attribute": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "from": {
+              "enum": [
+                "text",
+                "value",
+                "attribute",
+                "title",
+                "result",
+                "response",
+                "output"
+              ],
+              "type": "string"
+            },
+            "jsonPath": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "name": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "from"
+          ],
+          "type": "object"
+        },
+        "custom": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "params": {
+              "additionalProperties": {
+                "$ref": "#/definitions/ir/properties/args/additionalProperties/anyOf/0"
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "id",
+            "params"
+          ],
+          "type": "object"
+        },
+        "expect": {
+          "additionalProperties": false,
+          "properties": {
+            "predicate": {
+              "$ref": "#/definitions/ir/properties/guard/properties/predicate"
+            },
+            "subject": {
+              "$ref": "#/definitions/ir/properties/guard/properties/subject"
+            }
+          },
+          "required": [
+            "subject",
+            "predicate"
+          ],
+          "type": "object"
+        },
+        "guard": {
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "onlyIf",
+                "unless"
+              ],
+              "type": "string"
+            },
+            "predicate": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "visible",
+                        "hidden",
+                        "enabled",
+                        "disabled",
+                        "checked",
+                        "unchecked",
+                        "selected",
+                        "present",
+                        "absent",
+                        "multiSelect"
+                      ],
+                      "type": "string"
+                    },
+                    "negate": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "kind"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "text",
+                        "textContains",
+                        "value",
+                        "title",
+                        "titleContains",
+                        "url",
+                        "urlContains",
+                        "tag"
+                      ],
+                      "type": "string"
+                    },
+                    "negate": {
+                      "type": "boolean"
+                    },
+                    "value": {
+                      "$ref": "#/definitions/ir/properties/args/additionalProperties/anyOf/0"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "attribute",
+                        "css"
+                      ],
+                      "type": "string"
+                    },
+                    "name": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "negate": {
+                      "type": "boolean"
+                    },
+                    "value": {
+                      "$ref": "#/definitions/ir/properties/args/additionalProperties/anyOf/0"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "name",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "location",
+                        "size",
+                        "box"
+                      ],
+                      "type": "string"
+                    },
+                    "numbers": {
+                      "items": {
+                        "type": "number"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "numbers"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "expr",
+                      "type": "string"
+                    },
+                    "left": {
+                      "$ref": "#/definitions/ir/properties/args/additionalProperties/anyOf/0"
+                    },
+                    "negate": {
+                      "type": "boolean"
+                    },
+                    "op": {
+                      "enum": [
+                        "eq",
+                        "ne",
+                        "gt",
+                        "lt",
+                        "matches"
+                      ],
+                      "type": "string"
+                    },
+                    "right": {
+                      "$ref": "#/definitions/ir/properties/args/additionalProperties/anyOf/0"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "left",
+                    "op",
+                    "right"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "subject": {
+              "enum": [
+                "target",
+                "page",
+                "dialog",
+                "scope"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "subject",
+            "predicate",
+            "mode"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "invoke": {
+          "additionalProperties": false,
+          "properties": {
+            "inputs": {
+              "additionalProperties": {
+                "$ref": "#/definitions/ir/properties/args/additionalProperties/anyOf/0"
+              },
+              "type": "object"
+            },
+            "story": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "story",
+            "inputs"
+          ],
+          "type": "object"
+        },
+        "line": {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "origin": {
+          "additionalProperties": false,
+          "properties": {
+            "confidence": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            "provenance": {
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "cacheRead": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "costUsd": {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "digest": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "model": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "promptVersion": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "tokensIn": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "tokensOut": {
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "model",
+                "promptVersion",
+                "at",
+                "tokensIn",
+                "tokensOut"
+              ],
+              "type": "object"
+            },
+            "rule": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "tier": {
+              "enum": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "type": "number"
+            }
+          },
+          "required": [
+            "tier",
+            "confidence"
+          ],
+          "type": "object"
+        },
+        "sideEffect": {
+          "type": "boolean"
+        },
+        "storyName": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "target": {
+          "additionalProperties": false,
+          "properties": {
+            "phrase": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "ref": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "scope": {
+              "enum": [
+                "page",
+                "dialog",
+                "frame",
+                "desktop",
+                "window"
+              ],
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "bound",
+                "unbound",
+                "ambiguous"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "ref",
+            "phrase",
+            "status"
+          ],
+          "type": "object"
+        },
+        "target2": {
+          "$ref": "#/definitions/ir/properties/target"
+        },
+        "text": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "timeoutMs": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "storyName",
+        "line",
+        "text",
+        "action",
+        "timeoutMs",
+        "origin"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "One compiled step (LLD §3.2). Svatah schemaVersion 1.0.0.",
+  "title": "ir",
+  "x-svatah-schema-version": "1.0.0"
+}

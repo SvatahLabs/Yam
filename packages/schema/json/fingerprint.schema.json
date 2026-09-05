@@ -1,0 +1,92 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/fingerprint.schema.json",
+  "$ref": "#/definitions/fingerprint",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "fingerprint": {
+      "additionalProperties": false,
+      "properties": {
+        "attrs": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "box": {
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "maxItems": 4,
+          "minItems": 4,
+          "type": "array"
+        },
+        "index": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "neighbours": {
+          "additionalProperties": false,
+          "properties": {
+            "after": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "before": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "before",
+            "after"
+          ],
+          "type": "object"
+        },
+        "rolePath": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tag": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tag",
+        "attrs",
+        "text",
+        "neighbours",
+        "rolePath",
+        "box",
+        "index"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "A structural fingerprint of an element (LLD §3.3). Svatah schemaVersion 1.0.0.",
+  "title": "fingerprint",
+  "x-svatah-schema-version": "1.0.0"
+}

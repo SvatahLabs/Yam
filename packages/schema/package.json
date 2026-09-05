@@ -11,19 +11,22 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./json/*": "./json/*"
   },
   "files": [
     "dist",
+    "json",
     "README.md"
   ],
   "engines": {
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "tsup --config ../../tsup.config.ts",
+    "generate": "node scripts/write-json-schemas.mjs",
+    "build": "tsup --config ../../tsup.config.ts && pnpm run generate",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "devDependencies": {
     "tsup": "catalog:",
@@ -32,5 +35,10 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "yaml": "catalog:",
+    "zod": "catalog:",
+    "zod-to-json-schema": "catalog:"
   }
 }

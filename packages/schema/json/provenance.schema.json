@@ -1,0 +1,55 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/provenance.schema.json",
+  "$ref": "#/definitions/provenance",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "cacheRead": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "costUsd": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "digest": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "model": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "promptVersion": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "tokensIn": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "tokensOut": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "model",
+        "promptVersion",
+        "at",
+        "tokensIn",
+        "tokensOut"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Provenance of a model-produced artifact (LLD §3.5). Svatah schemaVersion 1.0.0.",
+  "title": "provenance",
+  "x-svatah-schema-version": "1.0.0"
+}

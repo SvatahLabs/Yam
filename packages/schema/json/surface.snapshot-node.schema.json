@@ -1,0 +1,92 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/surface.snapshot-node.schema.json",
+  "$ref": "#/definitions/surface.snapshot-node",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "surface.snapshot-node": {
+      "additionalProperties": false,
+      "properties": {
+        "box": {
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "maxItems": 4,
+          "minItems": 4,
+          "type": "array"
+        },
+        "depth": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "native": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "parent": {
+          "$ref": "#/definitions/surface.snapshot-node/properties/ref"
+        },
+        "ref": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "states": {
+          "items": {
+            "enum": [
+              "disabled",
+              "checked",
+              "unchecked",
+              "selected",
+              "expanded",
+              "collapsed",
+              "focused",
+              "required",
+              "hidden",
+              "readonly"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "role",
+        "states",
+        "depth"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Agent surface: one normalised snapshot node (LLD §2.2). Svatah schemaVersion 1.0.0.",
+  "title": "surface.snapshot-node",
+  "x-svatah-schema-version": "1.0.0"
+}

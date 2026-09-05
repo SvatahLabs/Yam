@@ -1,0 +1,184 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/summary.schema.json",
+  "$ref": "#/definitions/summary",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "summary": {
+      "additionalProperties": false,
+      "properties": {
+        "behavior": {
+          "enum": [
+            "test",
+            "workflow",
+            "tool"
+          ],
+          "type": "string"
+        },
+        "bindingsHash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "configHash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "endedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "exitCode": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "flows": {
+          "additionalProperties": {
+            "additionalProperties": false,
+            "properties": {
+              "failed": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "passed": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "skipped": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "status": {
+                "enum": [
+                  "passed",
+                  "failed",
+                  "healed",
+                  "aborted"
+                ],
+                "type": "string"
+              },
+              "trace": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "status",
+              "passed",
+              "failed",
+              "skipped"
+            ],
+            "type": "object"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "invoker": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "kind": {
+              "enum": [
+                "user",
+                "ci",
+                "agent"
+              ],
+              "type": "string"
+            },
+            "via": {
+              "enum": [
+                "cli",
+                "mcp",
+                "host"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "id",
+            "via"
+          ],
+          "type": "object"
+        },
+        "outputs": {
+          "additionalProperties": {},
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "planHash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "runId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0.0",
+          "type": "string"
+        },
+        "startedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "totals": {
+          "additionalProperties": false,
+          "properties": {
+            "aborted": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "failed": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "healed": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "passed": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "skipped": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "passed",
+            "failed",
+            "skipped",
+            "healed",
+            "aborted"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "runId",
+        "behavior",
+        "planHash",
+        "bindingsHash",
+        "configHash",
+        "invoker",
+        "startedAt",
+        "endedAt",
+        "flows",
+        "totals",
+        "exitCode"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "summary.json for a run (LLD §3.4). Svatah schemaVersion 1.0.0.",
+  "title": "summary",
+  "x-svatah-schema-version": "1.0.0"
+}

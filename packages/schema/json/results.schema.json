@@ -1,0 +1,244 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/results.schema.json",
+  "$ref": "#/definitions/results",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "results": {
+      "additionalProperties": false,
+      "properties": {
+        "behavior": {
+          "enum": [
+            "test",
+            "workflow",
+            "tool"
+          ],
+          "type": "string"
+        },
+        "captured": {
+          "additionalProperties": {},
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "durationMs": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "endedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "failure": {
+          "additionalProperties": false,
+          "properties": {
+            "candidatesTried": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "attribute": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "by": {
+                    "$ref": "#/definitions/results/properties/matched/properties/by"
+                  },
+                  "exact": {
+                    "type": "boolean"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "nth": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "paramMap": {
+                    "additionalProperties": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "propertyNames": {
+                      "minLength": 1
+                    },
+                    "type": "object"
+                  },
+                  "role": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "score": {
+                    "type": "number"
+                  },
+                  "tool": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "by",
+                  "score"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "class": {
+              "enum": [
+                "locator",
+                "timeout",
+                "assertion",
+                "guard",
+                "data",
+                "navigation",
+                "dialog",
+                "script",
+                "infrastructure",
+                "unknown"
+              ],
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "policyApplied": {
+              "anyOf": [
+                {
+                  "const": "stop",
+                  "type": "string"
+                },
+                {
+                  "const": "continue",
+                  "type": "string"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "compensate": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "compensate"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "screenshot": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "stack": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "class",
+            "message"
+          ],
+          "type": "object"
+        },
+        "flow": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "line": {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "matched": {
+          "additionalProperties": false,
+          "properties": {
+            "by": {
+              "enum": [
+                "role",
+                "label",
+                "placeholder",
+                "testid",
+                "text",
+                "altText",
+                "title",
+                "css",
+                "xpath",
+                "id",
+                "name",
+                "accessibilityId",
+                "resourceId",
+                "automationId",
+                "controlPath",
+                "webmcp",
+                "coords"
+              ],
+              "type": "string"
+            },
+            "candidateIndex": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "ref": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "ref",
+            "candidateIndex",
+            "by"
+          ],
+          "type": "object"
+        },
+        "runId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "startedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "failed",
+            "skipped",
+            "healed",
+            "aborted"
+          ],
+          "type": "string"
+        },
+        "stepId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "story": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "runId",
+        "behavior",
+        "flow",
+        "story",
+        "stepId",
+        "line",
+        "text",
+        "status",
+        "startedAt",
+        "endedAt",
+        "durationMs"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "One line of results.jsonl (LLD §3.4). Svatah schemaVersion 1.0.0.",
+  "title": "results",
+  "x-svatah-schema-version": "1.0.0"
+}

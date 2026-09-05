@@ -1,0 +1,136 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/surface.element-description.schema.json",
+  "$ref": "#/definitions/surface.element-description",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "surface.element-description": {
+      "additionalProperties": false,
+      "properties": {
+        "attrs": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "box": {
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "maxItems": 4,
+          "minItems": 4,
+          "type": "array"
+        },
+        "index": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "native": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
+        "neighbours": {
+          "additionalProperties": false,
+          "properties": {
+            "after": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "before": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "before",
+            "after"
+          ],
+          "type": "object"
+        },
+        "ref": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "rolePath": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "states": {
+          "items": {
+            "enum": [
+              "disabled",
+              "checked",
+              "unchecked",
+              "selected",
+              "expanded",
+              "collapsed",
+              "focused",
+              "required",
+              "hidden",
+              "readonly"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tag": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "role",
+        "tag",
+        "attrs",
+        "text",
+        "neighbours",
+        "rolePath",
+        "box",
+        "index",
+        "states"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Agent surface: describe() output (LLD §2.1). Svatah schemaVersion 1.0.0.",
+  "title": "surface.element-description",
+  "x-svatah-schema-version": "1.0.0"
+}

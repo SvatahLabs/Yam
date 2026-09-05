@@ -1,0 +1,32 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/surface.session-init.schema.json",
+  "$ref": "#/definitions/surface.session-init",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "surface.session-init": {
+      "additionalProperties": false,
+      "properties": {
+        "appPath": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "baseUrl": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "processName": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "storageState": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "description": "Agent surface: how a session is opened (LLD §2.1). Svatah schemaVersion 1.0.0.",
+  "title": "surface.session-init",
+  "x-svatah-schema-version": "1.0.0"
+}

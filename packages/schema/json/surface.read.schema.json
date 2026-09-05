@@ -1,0 +1,58 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/surface.read.schema.json",
+  "$ref": "#/definitions/surface.read",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "surface.read": {
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "additionalProperties": false,
+          "properties": {
+            "intent": {
+              "type": "string"
+            },
+            "kind": {
+              "enum": [
+                "text",
+                "value",
+                "attribute",
+                "title",
+                "url",
+                "result"
+              ],
+              "type": "string"
+            },
+            "name": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "ref": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        "response": {
+          "additionalProperties": false,
+          "properties": {
+            "value": {}
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "request",
+        "response"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Agent surface: read() request and response (LLD §2.5). Svatah schemaVersion 1.0.0.",
+  "title": "surface.read",
+  "x-svatah-schema-version": "1.0.0"
+}

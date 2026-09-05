@@ -1,0 +1,69 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/surface.session-state.schema.json",
+  "$ref": "#/definitions/surface.session-state",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "surface.session-state": {
+      "additionalProperties": false,
+      "properties": {
+        "dialog": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "type": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "message"
+              ],
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "frame": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "web",
+            "mobile",
+            "desktop",
+            "http"
+          ],
+          "type": "string"
+        },
+        "storageState": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "windowIndex": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "windowTitle": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Agent surface: restorable session state (LLD §2.1). Svatah schemaVersion 1.0.0.",
+  "title": "surface.session-state",
+  "x-svatah-schema-version": "1.0.0"
+}

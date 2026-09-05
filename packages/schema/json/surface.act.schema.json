@@ -1,0 +1,124 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/surface.act.schema.json",
+  "$ref": "#/definitions/surface.act",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "surface.act": {
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "enum": [
+                "navigate",
+                "back",
+                "forward",
+                "refresh",
+                "click",
+                "doubleClick",
+                "rightClick",
+                "hover",
+                "hoverAndClick",
+                "pressAndHold",
+                "release",
+                "dragTo",
+                "type",
+                "clear",
+                "press",
+                "keyDown",
+                "keyUp",
+                "submit",
+                "upload",
+                "selectOption",
+                "deselectOption",
+                "deselectAll",
+                "setChecked",
+                "scrollIntoView",
+                "scrollToTop",
+                "scrollToBottom",
+                "sleep",
+                "waitFor",
+                "switchWindow",
+                "closeOtherWindows",
+                "switchFrame",
+                "dialog",
+                "read",
+                "evaluate",
+                "screenshot",
+                "invoke"
+              ],
+              "type": "string"
+            },
+            "args": {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                ]
+              },
+              "propertyNames": {
+                "minLength": 1
+              },
+              "type": "object"
+            },
+            "intent": {
+              "type": "string"
+            },
+            "ref": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "ref2": {
+              "$ref": "#/definitions/surface.act/properties/request/properties/ref"
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "type": "object"
+        },
+        "response": {
+          "additionalProperties": false,
+          "properties": {
+            "navigated": {
+              "type": "boolean"
+            },
+            "ok": {
+              "type": "boolean"
+            },
+            "ref": {
+              "$ref": "#/definitions/surface.act/properties/request/properties/ref"
+            },
+            "value": {}
+          },
+          "required": [
+            "ok"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "request",
+        "response"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Agent surface: act() request and response (LLD §2.5). Svatah schemaVersion 1.0.0.",
+  "title": "surface.act",
+  "x-svatah-schema-version": "1.0.0"
+}

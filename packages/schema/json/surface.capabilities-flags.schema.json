@@ -1,0 +1,54 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/surface.capabilities-flags.schema.json",
+  "$ref": "#/definitions/surface.capabilities-flags",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "surface.capabilities-flags": {
+      "additionalProperties": false,
+      "properties": {
+        "dialogs": {
+          "type": "boolean"
+        },
+        "drag": {
+          "type": "boolean"
+        },
+        "frames": {
+          "type": "boolean"
+        },
+        "restore": {
+          "type": "boolean"
+        },
+        "screenshot": {
+          "type": "boolean"
+        },
+        "trace": {
+          "type": "boolean"
+        },
+        "upload": {
+          "type": "boolean"
+        },
+        "webmcp": {
+          "type": "boolean"
+        },
+        "windows": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dialogs",
+        "frames",
+        "windows",
+        "upload",
+        "drag",
+        "trace",
+        "webmcp",
+        "screenshot",
+        "restore"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Agent surface: the capability flags (LLD §2.4). Svatah schemaVersion 1.0.0.",
+  "title": "surface.capabilities-flags",
+  "x-svatah-schema-version": "1.0.0"
+}

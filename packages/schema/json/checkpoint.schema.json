@@ -1,0 +1,149 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/checkpoint.schema.json",
+  "$ref": "#/definitions/checkpoint",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "checkpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "bindingsHash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "flow": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "planHash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "runId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "1.0.0",
+          "type": "string"
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "captures": {
+              "additionalProperties": {
+                "additionalProperties": {},
+                "propertyNames": {
+                  "minLength": 1
+                },
+                "type": "object"
+              },
+              "propertyNames": {
+                "minLength": 1
+              },
+              "type": "object"
+            },
+            "inputs": {
+              "additionalProperties": {},
+              "propertyNames": {
+                "minLength": 1
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "inputs",
+            "captures"
+          ],
+          "type": "object"
+        },
+        "session": {
+          "additionalProperties": false,
+          "properties": {
+            "dialog": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "message"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "frame": {
+              "type": "string"
+            },
+            "kind": {
+              "enum": [
+                "web",
+                "mobile",
+                "desktop",
+                "http"
+              ],
+              "type": "string"
+            },
+            "storageState": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            },
+            "windowIndex": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "windowTitle": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        "stepId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "story": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "runId",
+        "flow",
+        "story",
+        "stepId",
+        "at",
+        "planHash",
+        "bindingsHash",
+        "scope",
+        "session"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "State sufficient to resume a flow (LLD §3.4). Svatah schemaVersion 1.0.0.",
+  "title": "checkpoint",
+  "x-svatah-schema-version": "1.0.0"
+}

@@ -1,0 +1,151 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/surface.snapshot.schema.json",
+  "$ref": "#/definitions/surface.snapshot",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "surface.snapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "additionalProperties": false,
+          "properties": {
+            "intent": {
+              "type": "string"
+            },
+            "interactiveOnly": {
+              "type": "boolean"
+            },
+            "maxNodes": {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            "root": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "response": {
+          "additionalProperties": false,
+          "properties": {
+            "hash": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "nodes": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "box": {
+                    "items": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "maxItems": 4,
+                    "minItems": 4,
+                    "type": "array"
+                  },
+                  "depth": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "native": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "propertyNames": {
+                      "minLength": 1
+                    },
+                    "type": "object"
+                  },
+                  "parent": {
+                    "$ref": "#/definitions/surface.snapshot/properties/request/properties/root"
+                  },
+                  "ref": {
+                    "$ref": "#/definitions/surface.snapshot/properties/request/properties/root"
+                  },
+                  "role": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "states": {
+                    "items": {
+                      "enum": [
+                        "disabled",
+                        "checked",
+                        "unchecked",
+                        "selected",
+                        "expanded",
+                        "collapsed",
+                        "focused",
+                        "required",
+                        "hidden",
+                        "readonly"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "ref",
+                  "role",
+                  "states",
+                  "depth"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "ref": {
+              "$ref": "#/definitions/surface.snapshot/properties/request/properties/root"
+            },
+            "text": {
+              "type": "string"
+            },
+            "tokensEstimate": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "ref",
+            "nodes",
+            "text",
+            "tokensEstimate",
+            "hash"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "request",
+        "response"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "Agent surface: snapshot() request and response (LLD §2.5). Svatah schemaVersion 1.0.0.",
+  "title": "surface.snapshot",
+  "x-svatah-schema-version": "1.0.0"
+}

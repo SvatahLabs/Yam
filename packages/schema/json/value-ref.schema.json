@@ -1,0 +1,112 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/value-ref.schema.json",
+  "$ref": "#/definitions/value-ref",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "value-ref": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "literal",
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "var",
+              "type": "string"
+            },
+            "name": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "story": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "data",
+              "type": "string"
+            },
+            "path": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "secret": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "path"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "input",
+              "type": "string"
+            },
+            "name": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "template",
+              "type": "string"
+            },
+            "parts": {
+              "items": {
+                "$ref": "#/definitions/value-ref"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "kind",
+            "parts"
+          ],
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "description": "How a step refers to a value (LLD §3.1). Svatah schemaVersion 1.0.0.",
+  "title": "value-ref",
+  "x-svatah-schema-version": "1.0.0"
+}

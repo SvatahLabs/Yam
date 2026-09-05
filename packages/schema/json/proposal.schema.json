@@ -1,0 +1,1054 @@
+{
+  "$id": "https://svatah.dev/schema/1.0.0/proposal.schema.json",
+  "$ref": "#/definitions/proposal",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "proposal": {
+      "additionalProperties": false,
+      "properties": {
+        "bindings": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "entries": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "candidates": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "attribute": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "by": {
+                            "enum": [
+                              "role",
+                              "label",
+                              "placeholder",
+                              "testid",
+                              "text",
+                              "altText",
+                              "title",
+                              "css",
+                              "xpath",
+                              "id",
+                              "name",
+                              "accessibilityId",
+                              "resourceId",
+                              "automationId",
+                              "controlPath",
+                              "webmcp",
+                              "coords"
+                            ],
+                            "type": "string"
+                          },
+                          "exact": {
+                            "type": "boolean"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "nth": {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          "paramMap": {
+                            "additionalProperties": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "propertyNames": {
+                              "minLength": 1
+                            },
+                            "type": "object"
+                          },
+                          "role": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "score": {
+                            "type": "number"
+                          },
+                          "tool": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "by",
+                          "score"
+                        ],
+                        "type": "object"
+                      },
+                      "minItems": 1,
+                      "type": "array"
+                    },
+                    "context": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "hash": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "pattern": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "platform": {
+                          "enum": [
+                            "web",
+                            "mobile",
+                            "desktop"
+                          ],
+                          "type": "string"
+                        },
+                        "viewport": {
+                          "items": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "maxItems": 2,
+                          "minItems": 2,
+                          "type": "array"
+                        }
+                      },
+                      "required": [
+                        "pattern",
+                        "hash",
+                        "platform"
+                      ],
+                      "type": "object"
+                    },
+                    "fingerprint": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "attrs": {
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "propertyNames": {
+                            "minLength": 1
+                          },
+                          "type": "object"
+                        },
+                        "box": {
+                          "items": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "maxItems": 4,
+                          "minItems": 4,
+                          "type": "array"
+                        },
+                        "index": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "neighbours": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "after": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "before": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "before",
+                            "after"
+                          ],
+                          "type": "object"
+                        },
+                        "rolePath": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "tag": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "tag",
+                        "attrs",
+                        "text",
+                        "neighbours",
+                        "rolePath",
+                        "box",
+                        "index"
+                      ],
+                      "type": "object"
+                    },
+                    "previous": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "fingerprint": {
+                            "$ref": "#/definitions/proposal/properties/bindings/items/properties/entries/items/properties/fingerprint"
+                          },
+                          "provenance": {
+                            "$ref": "#/definitions/proposal/properties/provenance"
+                          }
+                        },
+                        "required": [
+                          "fingerprint",
+                          "provenance"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "provenance": {
+                      "$ref": "#/definitions/proposal/properties/provenance"
+                    },
+                    "recordedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "verified": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "context",
+                    "candidates",
+                    "fingerprint",
+                    "recordedAt",
+                    "provenance",
+                    "verified"
+                  ],
+                  "type": "object"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "phrases": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "schemaVersion": {
+                "const": "1.0.0",
+                "type": "string"
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "id",
+              "phrases",
+              "entries"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "flow": {
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "provenance": {
+          "additionalProperties": false,
+          "properties": {
+            "at": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "cacheRead": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "costUsd": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "digest": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "model": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "promptVersion": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "tokensIn": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "tokensOut": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "model",
+            "promptVersion",
+            "at",
+            "tokensIn",
+            "tokensOut"
+          ],
+          "type": "object"
+        },
+        "schemaVersion": {
+          "const": "1.0.0",
+          "type": "string"
+        },
+        "sourceTrajectory": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "story": {
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "kind": {
+              "enum": [
+                "story",
+                "scenario"
+              ],
+              "type": "string"
+            },
+            "meta": {
+              "additionalProperties": false,
+              "properties": {
+                "dataProvider": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "filePath": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "idempotent": {
+                  "type": "boolean"
+                },
+                "onFailure": {
+                  "anyOf": [
+                    {
+                      "const": "stop",
+                      "type": "string"
+                    },
+                    {
+                      "const": "continue",
+                      "type": "string"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "compensate": {
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "compensate"
+                      ],
+                      "type": "object"
+                    }
+                  ]
+                },
+                "tags": {
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "enabled",
+                "onFailure",
+                "tags"
+              ],
+              "type": "object"
+            },
+            "name": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "signature": {
+              "additionalProperties": false,
+              "properties": {
+                "inputs": {
+                  "additionalProperties": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "default": {},
+                      "description": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "enum": [
+                          "string",
+                          "number",
+                          "boolean",
+                          "json",
+                          "secret"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "type": "object"
+                  },
+                  "propertyNames": {
+                    "minLength": 1
+                  },
+                  "type": "object"
+                },
+                "outputs": {
+                  "additionalProperties": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "enum": [
+                          "string",
+                          "number",
+                          "boolean",
+                          "json"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "type": "object"
+                  },
+                  "propertyNames": {
+                    "minLength": 1
+                  },
+                  "type": "object"
+                }
+              },
+              "required": [
+                "inputs",
+                "outputs"
+              ],
+              "type": "object"
+            },
+            "steps": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "action": {
+                    "enum": [
+                      "navigate",
+                      "back",
+                      "forward",
+                      "refresh",
+                      "click",
+                      "doubleClick",
+                      "rightClick",
+                      "hover",
+                      "hoverAndClick",
+                      "pressAndHold",
+                      "release",
+                      "dragTo",
+                      "type",
+                      "clear",
+                      "press",
+                      "keyDown",
+                      "keyUp",
+                      "submit",
+                      "upload",
+                      "selectOption",
+                      "deselectOption",
+                      "deselectAll",
+                      "setChecked",
+                      "scrollIntoView",
+                      "scrollToTop",
+                      "scrollToBottom",
+                      "sleep",
+                      "waitFor",
+                      "switchWindow",
+                      "closeOtherWindows",
+                      "switchFrame",
+                      "dialog",
+                      "read",
+                      "expect",
+                      "evaluate",
+                      "screenshot",
+                      "api",
+                      "custom",
+                      "invoke"
+                    ],
+                    "type": "string"
+                  },
+                  "args": {
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "kind": {
+                                  "const": "literal",
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "value"
+                              ],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "kind": {
+                                  "const": "var",
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "story": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "name"
+                              ],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "kind": {
+                                  "const": "data",
+                                  "type": "string"
+                                },
+                                "path": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "secret": {
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "path"
+                              ],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "kind": {
+                                  "const": "input",
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "name"
+                              ],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "kind": {
+                                  "const": "template",
+                                  "type": "string"
+                                },
+                                "parts": {
+                                  "items": {
+                                    "$ref": "#/definitions/proposal/properties/story/properties/steps/items/properties/args/additionalProperties/anyOf/0"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "parts"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        {
+                          "type": [
+                            "string",
+                            "number",
+                            "boolean"
+                          ]
+                        }
+                      ]
+                    },
+                    "type": "object"
+                  },
+                  "capture": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "attribute": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "from": {
+                        "enum": [
+                          "text",
+                          "value",
+                          "attribute",
+                          "title",
+                          "result",
+                          "response",
+                          "output"
+                        ],
+                        "type": "string"
+                      },
+                      "jsonPath": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "name": {
+                        "minLength": 1,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "from"
+                    ],
+                    "type": "object"
+                  },
+                  "custom": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "params": {
+                        "additionalProperties": {
+                          "$ref": "#/definitions/proposal/properties/story/properties/steps/items/properties/args/additionalProperties/anyOf/0"
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "params"
+                    ],
+                    "type": "object"
+                  },
+                  "expect": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "predicate": {
+                        "$ref": "#/definitions/proposal/properties/story/properties/steps/items/properties/guard/properties/predicate"
+                      },
+                      "subject": {
+                        "$ref": "#/definitions/proposal/properties/story/properties/steps/items/properties/guard/properties/subject"
+                      }
+                    },
+                    "required": [
+                      "subject",
+                      "predicate"
+                    ],
+                    "type": "object"
+                  },
+                  "guard": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "mode": {
+                        "enum": [
+                          "onlyIf",
+                          "unless"
+                        ],
+                        "type": "string"
+                      },
+                      "predicate": {
+                        "anyOf": [
+                          {
+                            "additionalProperties": false,
+                            "properties": {
+                              "kind": {
+                                "enum": [
+                                  "visible",
+                                  "hidden",
+                                  "enabled",
+                                  "disabled",
+                                  "checked",
+                                  "unchecked",
+                                  "selected",
+                                  "present",
+                                  "absent",
+                                  "multiSelect"
+                                ],
+                                "type": "string"
+                              },
+                              "negate": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "kind"
+                            ],
+                            "type": "object"
+                          },
+                          {
+                            "additionalProperties": false,
+                            "properties": {
+                              "kind": {
+                                "enum": [
+                                  "text",
+                                  "textContains",
+                                  "value",
+                                  "title",
+                                  "titleContains",
+                                  "url",
+                                  "urlContains",
+                                  "tag"
+                                ],
+                                "type": "string"
+                              },
+                              "negate": {
+                                "type": "boolean"
+                              },
+                              "value": {
+                                "$ref": "#/definitions/proposal/properties/story/properties/steps/items/properties/args/additionalProperties/anyOf/0"
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "value"
+                            ],
+                            "type": "object"
+                          },
+                          {
+                            "additionalProperties": false,
+                            "properties": {
+                              "kind": {
+                                "enum": [
+                                  "attribute",
+                                  "css"
+                                ],
+                                "type": "string"
+                              },
+                              "name": {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "negate": {
+                                "type": "boolean"
+                              },
+                              "value": {
+                                "$ref": "#/definitions/proposal/properties/story/properties/steps/items/properties/args/additionalProperties/anyOf/0"
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "name",
+                              "value"
+                            ],
+                            "type": "object"
+                          },
+                          {
+                            "additionalProperties": false,
+                            "properties": {
+                              "kind": {
+                                "enum": [
+                                  "location",
+                                  "size",
+                                  "box"
+                                ],
+                                "type": "string"
+                              },
+                              "numbers": {
+                                "items": {
+                                  "type": "number"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "numbers"
+                            ],
+                            "type": "object"
+                          },
+                          {
+                            "additionalProperties": false,
+                            "properties": {
+                              "kind": {
+                                "const": "expr",
+                                "type": "string"
+                              },
+                              "left": {
+                                "$ref": "#/definitions/proposal/properties/story/properties/steps/items/properties/args/additionalProperties/anyOf/0"
+                              },
+                              "negate": {
+                                "type": "boolean"
+                              },
+                              "op": {
+                                "enum": [
+                                  "eq",
+                                  "ne",
+                                  "gt",
+                                  "lt",
+                                  "matches"
+                                ],
+                                "type": "string"
+                              },
+                              "right": {
+                                "$ref": "#/definitions/proposal/properties/story/properties/steps/items/properties/args/additionalProperties/anyOf/0"
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "left",
+                              "op",
+                              "right"
+                            ],
+                            "type": "object"
+                          }
+                        ]
+                      },
+                      "subject": {
+                        "enum": [
+                          "target",
+                          "page",
+                          "dialog",
+                          "scope"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "subject",
+                      "predicate",
+                      "mode"
+                    ],
+                    "type": "object"
+                  },
+                  "id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "invoke": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "inputs": {
+                        "additionalProperties": {
+                          "$ref": "#/definitions/proposal/properties/story/properties/steps/items/properties/args/additionalProperties/anyOf/0"
+                        },
+                        "type": "object"
+                      },
+                      "story": {
+                        "minLength": 1,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "story",
+                      "inputs"
+                    ],
+                    "type": "object"
+                  },
+                  "line": {
+                    "exclusiveMinimum": 0,
+                    "type": "integer"
+                  },
+                  "origin": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "confidence": {
+                        "maximum": 1,
+                        "minimum": 0,
+                        "type": "number"
+                      },
+                      "provenance": {
+                        "$ref": "#/definitions/proposal/properties/provenance"
+                      },
+                      "rule": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "tier": {
+                        "enum": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ],
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "tier",
+                      "confidence"
+                    ],
+                    "type": "object"
+                  },
+                  "sideEffect": {
+                    "type": "boolean"
+                  },
+                  "storyName": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "target": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "phrase": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "ref": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "scope": {
+                        "enum": [
+                          "page",
+                          "dialog",
+                          "frame",
+                          "desktop",
+                          "window"
+                        ],
+                        "type": "string"
+                      },
+                      "status": {
+                        "enum": [
+                          "bound",
+                          "unbound",
+                          "ambiguous"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "ref",
+                      "phrase",
+                      "status"
+                    ],
+                    "type": "object"
+                  },
+                  "target2": {
+                    "$ref": "#/definitions/proposal/properties/story/properties/steps/items/properties/target"
+                  },
+                  "text": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "timeoutMs": {
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id",
+                  "storyName",
+                  "line",
+                  "text",
+                  "action",
+                  "timeoutMs",
+                  "origin"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "name",
+            "kind",
+            "file",
+            "meta",
+            "steps"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "name",
+        "createdAt",
+        "provenance",
+        "flow",
+        "bindings"
+      ],
+      "type": "object"
+    }
+  },
+  "description": "A trajectory-compiled proposal (HLD §6.6). Svatah schemaVersion 1.0.0.",
+  "title": "proposal",
+  "x-svatah-schema-version": "1.0.0"
+}
