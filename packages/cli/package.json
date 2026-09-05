@@ -21,40 +21,44 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "tsup --config ../../tsup.config.ts",
+    "build": "tsup --config ./tsup.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/schema": "workspace:*",
-    "@svatah/surface": "workspace:*",
-    "@svatah/adapter-playwright": "workspace:*",
-    "@svatah/adapter-http": "workspace:*",
-    "@svatah/adapter-bidi": "workspace:*",
     "@svatah/adapter-appium": "workspace:*",
-    "@svatah/adapter-uia": "workspace:*",
     "@svatah/adapter-ax": "workspace:*",
+    "@svatah/adapter-bidi": "workspace:*",
+    "@svatah/adapter-http": "workspace:*",
+    "@svatah/adapter-playwright": "workspace:*",
+    "@svatah/adapter-uia": "workspace:*",
     "@svatah/bindings": "workspace:*",
+    "@svatah/compiler": "workspace:*",
+    "@svatah/conformance": "workspace:*",
+    "@svatah/gateway": "workspace:*",
     "@svatah/healer": "workspace:*",
-    "@svatah/runtime": "workspace:*",
+    "@svatah/migrate": "workspace:*",
     "@svatah/playwright-test": "workspace:*",
+    "@svatah/recorder": "workspace:*",
+    "@svatah/runtime": "workspace:*",
+    "@svatah/schema": "workspace:*",
     "@svatah/spec": "workspace:*",
     "@svatah/steps": "workspace:*",
-    "@svatah/compiler": "workspace:*",
-    "@svatah/gateway": "workspace:*",
-    "@svatah/recorder": "workspace:*",
-    "@svatah/workflow": "workspace:*",
+    "@svatah/surface": "workspace:*",
     "@svatah/tool": "workspace:*",
     "@svatah/trajectory": "workspace:*",
-    "@svatah/migrate": "workspace:*",
-    "@svatah/conformance": "workspace:*"
+    "@svatah/workflow": "workspace:*"
   },
   "devDependencies": {
+    "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "bin": {
+    "svatah": "./dist/bin.js"
   }
 }

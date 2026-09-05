@@ -71,6 +71,9 @@ importers:
       eslint-plugin-import:
         specifier: 'catalog:'
         version: 2.32.0(@typescript-eslint/parser@8.69.0(eslint@9.39.5)(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.5)(eslint@9.39.5)
+      sample-web:
+        specifier: workspace:*
+        version: link:apps/sample-web
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)
@@ -194,6 +197,9 @@ importers:
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
+      '@svatah/conformance':
+        specifier: workspace:*
+        version: link:../conformance
       sample-web:
         specifier: workspace:*
         version: link:../../apps/sample-web
@@ -314,6 +320,9 @@ importers:
         specifier: workspace:*
         version: link:../workflow
     devDependencies:
+      sample-web:
+        specifier: workspace:*
+        version: link:../../apps/sample-web
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)

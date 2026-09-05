@@ -15,7 +15,9 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint .",
     "check:licenses": "node scripts/check-licenses.mjs",
-    "sample-web": "pnpm --filter sample-web start"
+    "sample-web": "pnpm --filter sample-web start",
+    "svatah": "node packages/cli/dist/bin.js",
+    "conform:playwright": "node scripts/conform.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
@@ -23,6 +25,7 @@
     "eslint": "catalog:",
     "eslint-import-resolver-typescript": "catalog:",
     "eslint-plugin-import": "catalog:",
+    "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",

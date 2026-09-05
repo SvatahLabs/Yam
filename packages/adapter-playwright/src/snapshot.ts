@@ -48,6 +48,28 @@ export const DEFAULT_MAX_NODES = 2000;
 /** How long a reference is given to resolve before it is called stale. */
 const STALE_REF_TIMEOUT_MS = 1000;
 
+/** Roles that are either checked or unchecked, never neither. */
+const CHECKABLE_ROLES = new Set(["checkbox", "radio", "switch", "menuitemcheckbox", "menuitemradio"]);
+
+/**
+ * Roles that can carry a state Playwright's snapshot text does not render:
+ * `required` and `readonly`. Only these nodes are resolved for enrichment, so a
+ * page of a thousand nodes costs a handful of round trips, not a thousand.
+ */
+const ENRICHABLE_ROLES = new Set([
+  "textbox",
+  "searchbox",
+  "spinbutton",
+  "combobox",
+  "listbox",
+  "checkbox",
+  "radio",
+  "slider",
+]);
+
+/** Cap on how many nodes are enriched, so a pathological page cannot stall. */
+const MAX_ENRICHED = 200;
+
 const INTERACTIVE_ROLES = new Set([
   "button",
   "link",
@@ -179,6 +201,18 @@ export function parseAiSnapshot(text: string): SnapshotNode[] {
       if (value === "") value = undefined;
     }
 
+    // Playwright renders `[checked]` only when a control is checked. REQ-SURF-4
+    // asks for normalised states across adapters, and "unchecked" is a state a
+    // caller has to be able to see, so it is derived here rather than left to
+    // every consumer to infer from an absence.
+    if (
+      CHECKABLE_ROLES.has(groups.role) &&
+      !states.includes("checked") &&
+      !states.includes("unchecked")
+    ) {
+      states.push("unchecked");
+    }
+
     const node: SnapshotNode = { ref: refMatch[1]!, role: groups.role, states, depth };
     if (groups.name !== undefined) node.name = groups.name.replace(/\\(.)/g, "$1");
     if (value !== undefined) node.value = value;
@@ -297,7 +331,48 @@ async function viaPlaywright(
   const { snapshot } = await channel.ariaSnapshot({ selector, mode: "ai" });
   let nodes = parseAiSnapshot(snapshot);
   if (options.interactiveOnly === true) nodes = nodes.filter((n) => INTERACTIVE_ROLES.has(n.role));
-  return nodes.slice(0, options.maxNodes ?? DEFAULT_MAX_NODES);
+  nodes = nodes.slice(0, options.maxNodes ?? DEFAULT_MAX_NODES);
+  await enrichStates(space, nodes);
+  return nodes;
+}
+
+/**
+ * Add the states Playwright's snapshot text cannot express.
+ *
+ * `required` and `readonly` are in the normalised state vocabulary of LLD §2.2
+ * and REQ-SURF-4 asks for them across adapters, but Playwright's AI snapshot
+ * renders neither. They are read from the elements themselves, for the handful of
+ * nodes whose role can carry them, in parallel.
+ *
+ * This is the cost of using someone else's snapshot rather than our own: the
+ * own-refs walker computes the whole state set in the one evaluate that builds
+ * the tree.
+ */
+async function enrichStates(space: RefSpace, nodes: SnapshotNode[]): Promise<void> {
+  const candidates = nodes.filter((n) => ENRICHABLE_ROLES.has(n.role)).slice(0, MAX_ENRICHED);
+  if (candidates.length === 0) return;
+
+  await Promise.all(
+    candidates.map(async (node) => {
+      const extra = await space.frame
+        .locator(`aria-ref=${node.ref}`)
+        .evaluate((el) => {
+          const states: string[] = [];
+          if (el.hasAttribute("required") || el.getAttribute("aria-required") === "true")
+            states.push("required");
+          if (el.hasAttribute("readonly") || el.getAttribute("aria-readonly") === "true")
+            states.push("readonly");
+          if (el.ownerDocument.activeElement === el) states.push("focused");
+          return states;
+        })
+        .catch(() => [] as string[]);
+      for (const state of extra) {
+        if (!node.states.includes(state as SnapshotNode["states"][number])) {
+          node.states.push(state as SnapshotNode["states"][number]);
+        }
+      }
+    }),
+  );
 }
 
 async function viaOwnRefs(space: RefSpace, options: SnapshotOptions): Promise<SnapshotNode[]> {

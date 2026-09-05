@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@playwright/test": "catalog:",
+    "@svatah/conformance": "workspace:*",
     "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
