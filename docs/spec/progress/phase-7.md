@@ -8,7 +8,7 @@ answered on this host. Where a command could not be run, the section says so,
 gives the exact command a verifier should run instead, and says what *was*
 measured in its place. Nothing here reports a number nobody took.
 
-## The three results, stated up front
+## The results, stated up front
 
 - **The AX bridge is 62× cheaper per node, and the live gate is still unrun.**
   The rewrite is measured against a real macOS accessibility tree — 10.4 ms per
@@ -22,13 +22,36 @@ measured in its place. Nothing here reports a number nobody took.
   module (a) quick start runs from them in an empty project outside this
   workspace, on both Node LTS versions, with no credential.
 
+And one result nobody wanted, which is the point of measuring:
+
+- **The fine-tune was trained and it makes Tier 2 much worse.** 86.8 % → 13.2 %,
+  against a target of +5 points. Running it also found that its own evaluation
+  harness had never worked — it set two environment variables nothing reads, so
+  it would have compared the base model with itself. T7.5.
+
 ## The contract
 
-`pnpm install --frozen-lockfile && pnpm browsers && pnpm -r build && pnpm -r typecheck && pnpm -r test && pnpm lint`
+`pnpm install --frozen-lockfile && pnpm browsers && pnpm -r build && pnpm -r typecheck && pnpm -r test && pnpm lint`,
+from a clean checkout, with **no model credential**, on the current and the
+previous Node LTS.
 
 | Command | Result |
 |---|---|
-| CONTRACT_ROW_PLACEHOLDER | |
+| `pnpm install --frozen-lockfile` | clean |
+| `pnpm browsers` | chromium and firefox installed |
+| `pnpm -r build` | 33 packages built |
+| `pnpm -r typecheck` | **exit 0** — red on `master` in three packages (P6-F5) |
+| `pnpm -r test`, Node v25.6.1, no credential | **2,750 vitest + 241 Playwright Test passed, 0 failed** |
+| `pnpm -r test`, Node v22.20.0, `CI=true`, no credential | **2,750 vitest + 241 Playwright Test passed, 0 failed** |
+| `pnpm lint` | 0 errors |
+| `git diff master..phase-7 -- docs/spec/{requirements,hld,lld,tasks}.md` | **empty** — 0 lines |
+| `pnpm release:dry-run` | 26 tarballs, every claim held |
+| `pnpm quick-start:packed` | passed on both Node LTS versions |
+| `node scripts/runtime-conformance.mjs`, twice | `artifacts valid`, 40 step results, zero mismatches, identical reports |
+| `node scripts/bidi-independence.mjs` | conformant, and replays identically to Playwright over 40 steps |
+| `SVATAH_TIER2=1 node scripts/eval-reports.mjs --out reports` | compiler 97.7 % (tier 2 33/38), grounding, healing 92.6 %, conformance — all above threshold |
+| `node scripts/desktop-conformance.mjs --adapter ax` | **exit 2** — the host has no reachable display (T7.1) |
+| `node scripts/desktop-conformance.mjs --adapter uia` | **blocked** — not Windows (T7.2) |
 
 ## Which environment fallback applied
 
@@ -323,6 +346,27 @@ carrying the verifier's live AX numbers (650 ms per node, `entireContents()` at
 invalid, and *why* the suite reported conformant anyway), and F3 stated as what
 it is: a Validate item that was missed, in a file that recorded six deviations
 and not this one.
+
+---
+
+## What running things found, beyond the seven corrections
+
+Five defects that no correction asked for, each found by executing something
+this repository had only ever tested against a stand-in.
+
+| Found by | Defect | Where |
+|---|---|---|
+| Running the PowerShell scripts through a real PowerShell | `-Command <script> -Request <json>` **never bound the request**; every UIA call would have died with a `ParserError` | T7.2 |
+| The same | A redirected `powershell.exe` writes the console code page, so every ADE button name with a `…` in it would have arrived mangled | T7.2 |
+| The same | A one-pattern element answered `"Invoke"` rather than `["Invoke"]`, making the adapter's `patterns.includes()` a substring test | T7.2 |
+| Asserting the *accept* direction of the dialog case, not only dismiss | The **BiDi adapter could never accept a dialog**: WebDriver's default unhandled-prompt behaviour answers and then notifies, so `handleUserPrompt` always arrived too late | T7.3 |
+| Running `scripts/finetune-eval.mjs` | It set `SVATAH_TIER2_MODEL` and `SVATAH_ALLOW_MODEL_DRIFT`, **which nothing reads**, and looked up a JSON shape the eval has never written | T7.5 |
+
+The pattern is the same one the Phase 6 verification found in the AX bridge and
+the Java artifacts, and it is worth naming: every one of these lived behind an
+injected test double or an unrun script. A recorded tree, an injected runner and
+a harness nobody has executed all pass for the same reason — nothing on the
+other side of the boundary was ever asked.
 
 ---
 
