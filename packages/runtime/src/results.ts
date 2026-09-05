@@ -13,10 +13,11 @@
  * Results are appended as they happen rather than written at the end, so a run
  * that is killed still leaves everything it got through.
  */
-import { appendFileSync, mkdirSync, renameSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import {
   canonicalJson,
+  checkpointSchema,
   SCHEMA_VERSION,
   type AuditLine,
   type Checkpoint,
@@ -31,6 +32,8 @@ export const EXIT = {
   healed: 6,
   someUnrepaired: 7,
   aborted: 11,
+  /** `run --resume`: the plan or bindings hash does not match the checkpoint. */
+  hashMismatch: 12,
 } as const;
 
 export interface RunDirectory {
@@ -98,6 +101,23 @@ export function summarise(
           : EXIT.ok;
 
   return { totals, exitCode };
+}
+
+/**
+ * Read one step's checkpoint out of a run directory (REQ-AUTO-3, T5.1).
+ *
+ * `undefined` rather than an exception when it is not there: `--resume` walks
+ * backwards looking for the most recent checkpoint before the step it was asked
+ * to start at, and "no checkpoint for this step" is the normal answer for most
+ * of the steps it looks at. A file that exists and will not parse *is* an
+ * exception — a half-written checkpoint is exactly what resume must not trust,
+ * and they are written atomically so a half-written one means something else
+ * went wrong.
+ */
+export function readCheckpoint(runDir: string, stepId: string): Checkpoint | undefined {
+  const file = join(runDir, "checkpoints", `${safe(stepId)}.json`);
+  if (!existsSync(file)) return undefined;
+  return checkpointSchema.parse(JSON.parse(readFileSync(file, "utf8"))) as Checkpoint;
 }
 
 /** A checkpoint for a step (REQ-AUTO-2). */

@@ -35,6 +35,7 @@ import {
   type Story,
   type Summary,
 } from "@svatah/schema";
+import { verifyResumeHashes, type Resume } from "./resume.js";
 import type { AgentSurface } from "@svatah/surface";
 import { Auditor, MemoryAuditSink, type AuditSink } from "./audit.js";
 import { checkpointFor, summarise, type RunDirectory } from "./results.js";
@@ -69,6 +70,15 @@ export interface RunOptions {
   readonly logger?: Logger;
   readonly onResult?: (result: StepResult) => void;
   readonly runId?: string;
+  /**
+   * Pick up where an interrupted run stopped (REQ-AUTO-3, LLD §8.1, T5.1).
+   *
+   * The checkpoint is loaded by the caller — it lives in a run directory, and
+   * `runtime` has no opinion about where those are — and this verifies its
+   * hashes, restores the scope and the session, runs only the flow it belongs
+   * to, and starts at `resume.from`.
+   */
+  readonly resume?: Resume;
 }
 
 export interface RunOutcome {
@@ -99,6 +109,23 @@ export async function run(options: RunOptions): Promise<RunOutcome> {
   const auditSink = options.auditSink ?? new MemoryAuditSink();
   const byName = new Map(plan.stories.map((story) => [story.name, story]));
 
+  /*
+   * The hashes, before anything opens a browser (REQ-AUTO-3, LLD §15).
+   *
+   * A checkpoint is a claim about a plan and a store. If either has moved, the
+   * remaining steps mean something the checkpoint never saw, and the run would
+   * be wrong in a way nothing downstream could detect. Throwing here rather than
+   * recording a failed step is deliberate: `--resume` with a stale checkpoint is
+   * a mistake at the command line, not a failure of the application under test,
+   * and it exits 12 rather than 1.
+   */
+  if (options.resume !== undefined) {
+    verifyResumeHashes(options.resume.checkpoint, {
+      planHash: plan.hash,
+      bindingsHash: options.bindingsHash ?? "none",
+    });
+  }
+
   const order = expandRuns(plan, options);
   const results: StepResult[] = [];
   const outputs: Record<string, unknown> = {};
@@ -112,8 +139,16 @@ export async function run(options: RunOptions): Promise<RunOutcome> {
     detail: { flows: [...order.keys()], behavior },
   });
 
-  /* Flows in parallel up to `workers`; stories inside a flow sequential. */
-  const flows = [...order.entries()];
+  /*
+   * A resumed run runs one flow: the one the checkpoint belongs to.
+   *
+   * The others were not interrupted. Running them again would be running them
+   * twice, and leaving them out is what makes "results equal a full run from
+   * step 5 onward" a comparison of like with like.
+   */
+  const flows = [...order.entries()].filter(
+    ([flow]) => options.resume === undefined || flow === options.resume.flow,
+  );
   const workers = Math.max(1, config.run.workers);
 
   let next = 0;
@@ -286,8 +321,77 @@ async function runFlow(
   let at: { story?: string; stepId?: string } = {};
   const surface = auditor.auditing(raw, () => at);
 
+  /*
+   * Restore the interrupted run's state (REQ-AUTO-3, LLD §8.1).
+   *
+   * The scope first, then the session. The scope is what the remaining steps
+   * read `{bookingId}` out of; the session is where they read it *from*, and
+   * `restore` is adapter-specific — the Playwright and BiDi adapters navigate
+   * to the recorded URL and re-apply the storage state, a desktop adapter
+   * activates the window.
+   *
+   * A session that will not restore stops the resume rather than continuing on
+   * whatever page happens to be open, for the same reason a hash mismatch does:
+   * the remaining steps would run somewhere the checkpoint never was.
+   */
+  const resume = options.resume;
+  if (resume !== undefined) {
+    scope.restore(resume.checkpoint.scope, resume.checkpoint.story);
+    /*
+     * Whatever `--input` supplied wins over the checkpoint (REQ-NFR-6).
+     *
+     * A checkpoint's inputs are redacted, so a `secret` input comes back as
+     * `«redacted»` and has to be given again — the same bargain `heal --run`
+     * makes. Merging rather than replacing means a run resumed with no `--input`
+     * at all still has its non-secret inputs.
+     */
+    const supplied = Object.entries(options.inputs ?? {});
+    if (supplied.length > 0) {
+      scope.restore(
+        {
+          inputs: { ...resume.checkpoint.scope.inputs, ...Object.fromEntries(supplied) },
+          captures: resume.checkpoint.scope.captures,
+        },
+        resume.checkpoint.story,
+      );
+    }
+    try {
+      await surface.restore(resume.checkpoint.session);
+    } catch (error) {
+      const failedAt = new Date().toISOString();
+      const result: StepResult = {
+        runId: context.runId,
+        behavior: context.behavior,
+        flow,
+        story: resume.story,
+        stepId: `${resume.story}#resume`,
+        line: 1,
+        text: `restore the session of run "${resume.checkpoint.runId}"`,
+        status: "failed",
+        startedAt: failedAt,
+        endedAt: failedAt,
+        durationMs: 0,
+        failure: { class: "infrastructure", message: messageOf(error) },
+      };
+      record(result);
+      await (options.closeSurface?.(raw, flow) ?? raw.close()).catch(() => undefined);
+      return {
+        results: [result],
+        outputs: {},
+        status: { status: "failed", passed: 0, failed: 1, skipped: 0 },
+      };
+    }
+  }
+
+  /*
+   * A resumed flow starts at the checkpoint's story, not at the flow's first.
+   * The stories before it ran in the run being resumed.
+   */
+  const fromStory = resume === undefined ? 0 : storyNames.indexOf(resume.story);
+  const remaining = fromStory < 0 ? storyNames : storyNames.slice(fromStory);
+
   try {
-    for (const name of storyNames) {
+    for (const name of remaining) {
       const story = context.byName.get(name);
       if (story === undefined) {
         // A run block naming a story that does not exist is a compile error
@@ -314,6 +418,9 @@ async function runFlow(
 
       const outcome = await runStory(story, inputs, {
         ...storyContext(flow, story, scope, surface, auditor, context, () => at, record),
+        // Only the story the resume starts in skips steps; the ones after it
+        // run whole.
+        ...(resume !== undefined && name === resume.story ? { startAt: resume.from } : {}),
         onResult: (result) => {
           at = { story: name, stepId: result.stepId };
           record(result);
@@ -402,9 +509,28 @@ function storyContext(
                 at: new Date().toISOString(),
                 planHash: options.plan.hash,
                 bindingsHash: options.bindingsHash ?? "none",
+                /*
+                 * Redacted, like every other thing a run writes down
+                 * (REQ-NFR-6, LLD §3.4).
+                 *
+                 * A checkpoint holds a story's inputs, and a story's inputs
+                 * include its `secret`-typed ones — `password` is the whole
+                 * point of the type. `runs/<id>/checkpoints/*.json` is a file
+                 * people attach to bug reports, so the password cannot be in
+                 * it, and the note under `Checkpoint.scope` ("run data is
+                 * deliberately absent … which also keeps secrets out of the
+                 * run directory") is only true if the inputs are treated the
+                 * same way.
+                 *
+                 * What resume does about it is what `heal --run` does: the
+                 * caller supplies the value again with `--input` or
+                 * `SVATAH_INPUT_<NAME>`, and it is merged over the restored
+                 * scope. A secret is never recorded, so it is always
+                 * re-supplied.
+                 */
                 scope: {
-                  inputs: scope.inputsOf(story.name),
-                  captures: scope.allCaptures(),
+                  inputs: scope.redact(scope.inputsOf(story.name)),
+                  captures: scope.redact(scope.allCaptures()),
                 },
                 session: await surface.state(),
               }),
@@ -466,7 +592,10 @@ function readPath(tree: Readonly<Record<string, unknown>>, path: string): unknow
  * A run block names stories and compositions; a composition expands in place.
  * `--story` overrides both, which is how a person re-runs one thing.
  */
-export function expandRuns(plan: Plan, options: RunOptions): Map<string, string[]> {
+export function expandRuns(
+  plan: Plan,
+  options: Pick<RunOptions, "flows" | "stories"> = {},
+): Map<string, string[]> {
   if (options.stories !== undefined && options.stories.length > 0) {
     return new Map([["(selected)", [...options.stories]]]);
   }

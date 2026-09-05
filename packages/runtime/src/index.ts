@@ -38,10 +38,18 @@ export {
 export {
   checkpointFor,
   openRunDirectory,
+  readCheckpoint,
   summarise,
   EXIT,
   type RunDirectory,
 } from "./results.js";
+export {
+  planResume,
+  verifyResumeHashes,
+  ResumeMismatchError,
+  ResumeUnavailableError,
+  type Resume,
+} from "./resume.js";
 export {
   JsonLinesLogger,
   SILENT,

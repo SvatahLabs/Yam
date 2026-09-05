@@ -115,19 +115,36 @@ export class Scope {
     return { ...(this.frames.get(story)?.inputs ?? {}) };
   }
 
-  /** Restore from a checkpoint (REQ-AUTO-3). Run data is re-read, never stored. */
-  restore(state: {
-    inputs: Readonly<Record<string, unknown>>;
-    captures: Readonly<Record<string, Record<string, unknown>>>;
-  }): void {
+  /**
+   * Restore from a checkpoint (REQ-AUTO-3, T5.1). Run data is re-read, never stored.
+   *
+   * `state.captures` is every story's captures, keyed by story name;
+   * `state.inputs` is *one* story's inputs — the story the checkpoint was
+   * written in — because that is the shape LLD §3.4 gives `Checkpoint.scope`
+   * and the only story whose inputs are in play when the run stops. So the
+   * story has to be named: without it there is nothing to say which frame the
+   * inputs belong to, and an earlier version read them as a map of stories and
+   * silently restored nothing.
+   *
+   * Run data is deliberately not in a checkpoint (LLD §3.4): it is read-only and
+   * global, so it is re-read from `data.yaml` on resume — which also keeps
+   * secrets out of the run directory (REQ-NFR-6).
+   */
+  restore(
+    state: {
+      inputs: Readonly<Record<string, unknown>>;
+      captures: Readonly<Record<string, Record<string, unknown>>>;
+    },
+    story?: string,
+  ): void {
     this.frames.clear();
     for (const [name, captures] of Object.entries(state.captures)) {
       this.frames.set(name, { inputs: {}, captures: { ...captures } });
     }
-    for (const [name, value] of Object.entries(state.inputs)) {
-      const frame = this.frames.get(name);
-      if (frame !== undefined) Object.assign(frame.inputs, value as Record<string, unknown>);
-    }
+    if (story === undefined) return;
+    const frame = this.frames.get(story) ?? { inputs: {}, captures: {} };
+    Object.assign(frame.inputs, state.inputs);
+    this.frames.set(story, frame);
   }
 
   /** Resolve a `ValueRef` (LLD §3.1). */

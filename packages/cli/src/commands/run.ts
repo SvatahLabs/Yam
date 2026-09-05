@@ -27,9 +27,13 @@ import { BindingsStore, resolve as resolveBinding } from "@svatah/bindings";
 import { HttpSurface } from "@svatah/adapter-http";
 import { generateSpecs } from "@svatah/host-playwright";
 import {
+  expandRuns,
   newRunId,
   openRunDirectory,
+  planResume,
   run as runPlan,
+  ResumeMismatchError,
+  ResumeUnavailableError,
   type ApiRunner,
   type CustomStepRunner,
   type Resolver,
@@ -118,6 +122,19 @@ interface RunContext {
 
 async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCode> {
   const { args } = context;
+  const resumeId = stringOption(args, "resume");
+  const from = stringOption(args, "from");
+
+  if (resumeId !== undefined && from === undefined) {
+    io.err("--resume <runId> needs --from <stepId>: the step to pick up at.");
+    return EXIT.usage;
+  }
+  if (from !== undefined && resumeId === undefined) {
+    io.err("--from <stepId> only means something with --resume <runId>.");
+    return EXIT.usage;
+  }
+
+  try {
   const outcome = await runProject(context.loaded, {
     plan: context.plan,
     runId: context.runId,
@@ -128,6 +145,7 @@ async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCo
     session: sessionTarget(args, { config: context.loaded.config.app }),
     ...(numberOption(args, "workers") === undefined ? {} : { workers: numberOption(args, "workers")! }),
     ...(inputsFrom(args) === undefined ? {} : { inputs: inputsFrom(args)! }),
+    ...(resumeId === undefined ? {} : { resume: { runId: resumeId, from: from! } }),
     ...(stringOptions(args, "flow").length === 0 ? {} : { flows: stringOptions(args, "flow") }),
     ...(stringOptions(args, "story").length === 0 ? {} : { stories: stringOptions(args, "story") }),
     onResult: (result) => {
@@ -154,6 +172,24 @@ async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCo
     );
   }
   return outcome.summary.exitCode as ExitCode;
+  } catch (error) {
+    /*
+     * A refused resume is a mistake at the command line, not a failure of the
+     * application under test, and LLD §15 gives it its own exit code: 12 for a
+     * hash that moved, 64 for a checkpoint that is not there. Neither is 1 —
+     * a CI job that treated "your plan changed" as "your test failed" would
+     * send someone to look at the wrong thing.
+     */
+    if (error instanceof ResumeMismatchError) {
+      io.err(error.message);
+      return EXIT.hashMismatch;
+    }
+    if (error instanceof ResumeUnavailableError) {
+      io.err(error.message);
+      return EXIT.usage;
+    }
+    throw error;
+  }
 }
 
 /**
@@ -204,6 +240,8 @@ export interface RunProjectOptions {
    * no flags — one place decides where a session opens (Draft 2.5).
    */
   readonly session?: SessionTarget;
+  /** `--resume <runId> --from <stepId>` (REQ-AUTO-3, T5.1). */
+  readonly resume?: { readonly runId: string; readonly from: string };
 }
 
 /**
@@ -237,6 +275,28 @@ export async function runProject(
    * a real one.
    */
   const store = loadBindings(loaded);
+
+  /*
+   * `--resume <runId> --from <stepId>` (REQ-AUTO-3, LLD §8.1, T5.1).
+   *
+   * Resolved here, before a run directory is opened: picking the checkpoint may
+   * fail — no such step, no checkpoint before it — and a refused resume must not
+   * leave a half-written `runs/<id>` for a reader to mistake for a real one.
+   * The hashes are checked inside `run()`, which is the only place that knows
+   * the plan's.
+   */
+  const resume =
+    options.resume === undefined
+      ? undefined
+      : planResume({
+          runDir: join(context.outputDir, options.resume.runId),
+          plan,
+          order: expandRuns(plan, {
+            ...(options.flows === undefined ? {} : { flows: options.flows }),
+            ...(options.stories === undefined ? {} : { stories: options.stories }),
+          }),
+          from: options.resume.from,
+        });
 
   const directory = openRunDirectory(context.outputDir, context.runId);
 
@@ -302,12 +362,21 @@ export async function runProject(
     custom,
     directory,
     runId: context.runId,
+    /*
+     * The store's hash, so `summary.json` and every checkpoint say which
+     * bindings a run used (REQ-AUTO-3). `--resume` refuses a checkpoint whose
+     * hash does not match, and a hash of `"none"` would make that check pass
+     * for every store — a resume against re-recorded bindings would continue
+     * clicking whatever the new candidates find.
+     */
+    bindingsHash: store.hash(),
     data: loaded.project.data.values,
     secrets: loaded.project.data.secrets,
     ...(options.inputs === undefined ? {} : { inputs: options.inputs }),
     ...(options.flows === undefined ? {} : { flows: options.flows }),
     ...(options.stories === undefined ? {} : { stories: options.stories }),
     ...(options.onResult === undefined ? {} : { onResult: options.onResult }),
+    ...(resume === undefined ? {} : { resume }),
   };
 
   const outcome = await runPlan(runOptions);
