@@ -21,7 +21,22 @@ const story = (parts: Partial<Story["meta"]> = {}): Story => ({
   steps: [],
 });
 
-const config = (parts: Partial<Config> = {}): Config => ({ ...DEFAULT_CONFIG, ...parts });
+/**
+ * A config for one case (P6-F5).
+ *
+ * `DEFAULT_CONFIG` is `Omit<Config, "project">` on purpose: every other field
+ * has a defensible default and the project's *name* does not, so a caller has
+ * to say it. Spreading the defaults and calling the result a `Config` therefore
+ * did not type-check — which is why `pnpm -r typecheck` was red in this package
+ * on `master` and stayed red for two phases (K9; Phase 6 verification, F5).
+ * Draft 2.8 §16 puts `typecheck` in the verification contract, so it is fixed
+ * where it was wrong rather than asserted away.
+ */
+const config = (parts: Partial<Config> = {}): Config => ({
+  ...DEFAULT_CONFIG,
+  project: "workflow-policy-test",
+  ...parts,
+});
 
 describe("production refuses a story that might do something (REQ-AUTO-7)", () => {
   it("refuses a non-idempotent story with nothing said", () => {

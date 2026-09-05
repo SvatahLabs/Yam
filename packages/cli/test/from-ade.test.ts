@@ -168,7 +168,11 @@ describe("svatah migrate --from-ade (T6.6, REQ-ADE-9)", () => {
 
     let checked = 0;
     for (const name of ["simple", "svatah", "natural_language_login", "execution"]) {
-      const legacy = readLegacyFlow(readFileSync(join(LEGACY, `${name}.flow`), "utf8"));
+      // `readLegacyFlow(text, file)`: the file name is what its diagnostics cite.
+      const legacy = readLegacyFlow(
+        readFileSync(join(LEGACY, `${name}.flow`), "utf8"),
+        `${name}.flow`,
+      );
       for (const block of legacy.blocks) {
         // A `compose:` or `test:` block names stories; it is not one.
         if (block.kind === "compose" || block.kind === "test") continue;

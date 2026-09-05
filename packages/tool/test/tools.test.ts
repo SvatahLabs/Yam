@@ -48,7 +48,20 @@ const plan = (stories: Story[]): Plan => ({
   hash: "h",
 });
 
-const config = (parts: Partial<Config> = {}): Config => ({ ...DEFAULT_CONFIG, ...parts });
+/**
+ * A config for one case (P6-F5).
+ *
+ * `DEFAULT_CONFIG` is `Omit<Config, "project">` — the project's name is the one
+ * field with no defensible default — so the name has to be supplied here. The
+ * same construction was wrong in `@svatah/workflow` and is what kept
+ * `pnpm -r typecheck` red, which Draft 2.8 §16 now makes part of the
+ * verification contract.
+ */
+const config = (parts: Partial<Config> = {}): Config => ({
+  ...DEFAULT_CONFIG,
+  project: "tool-test",
+  ...parts,
+});
 
 describe("a story's signature is the tool's schema (LLD §13.3)", () => {
   it("makes an input without a default required, and one with a default not", () => {

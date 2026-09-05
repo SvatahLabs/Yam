@@ -163,26 +163,32 @@ legacy/       the frozen Java project, kept until the Java conformance runtime e
 Requires **Node 22 LTS** and pnpm.
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 pnpm browsers      # the adapter and host tests drive a real browser
 pnpm -r build
+pnpm -r typecheck
 pnpm -r test
+pnpm lint
 ```
 
-Those four are the whole contract: a clean checkout that runs them has run
-everything. `pnpm browsers` is `playwright install chromium` in the adapter's
-workspace. Playwright is also a root dev dependency, so
+Those six are the whole contract (LLD §16, Draft 2.8): a clean checkout that
+runs them, with no model credential, on the current and the previous Node LTS,
+has run everything. `pnpm browsers` is `playwright install chromium` in the
+adapter's workspace. Playwright is also a root dev dependency, so
 `pnpm exec playwright install chromium` works from the repository root too.
+
+`typecheck` and `lint` joined the contract in Draft 2.8 because they were
+outside it and red: `pnpm -r typecheck` failed in `@svatah/workflow` for two
+phases while every other gate was green, which is what a check nobody has to
+run looks like (K9; Phase 6 verification, F5).
 
 Other checks:
 
 ```bash
-pnpm lint                 # includes the LLD §1 import boundaries
 pnpm check:licenses       # REQ-PKG-3: every dependency must be permissively licensed
 pnpm conform:playwright   # REQ-SURF-3: the surface conformance suite
 pnpm eval:healing         # REQ-HEAL-5: the healing numbers above
 pnpm quick-start          # REQ-PKG-2: the ten-minute quick start, timed
-pnpm -r typecheck         # strict TypeScript across every package
 
 node scripts/compatibility.mjs         # REQ-RUN-2, REQ-BEH-5, REQ-COMP-7
 node scripts/compile-fixtures.mjs --check   # the committed fixture plan is current
