@@ -1,10 +1,10 @@
 # Compiler eval
 
-Run at 2026-09-04T03:08:15.419Z.
+Run at 2026-09-04T22:17:53.750Z.
 
 Model-tier answers came from `ollama:qwen2.5:3b`.
 
-**Overall exact match: 98.2%** (218 of 222).
+**Overall exact match: 97.7%** (217 of 222).
 
 Tiers covered: `tier0`, `tier1`, `tier2`. Tier 3 needs a credential.
 
@@ -14,7 +14,7 @@ Tiers covered: `tier0`, `tier1`, `tier2`. Tier 3 needs a credential.
 |---|---|---|---|
 | `tier0` | 3 | 3 (100.0%) | — |
 | `tier1` | 181 | 181 (100.0%) | 100% |
-| `tier2` | 38 | 34 (89.5%) | 80% |
+| `tier2` | 38 | 33 (86.8%) | 80% |
 
 ## Method
 
@@ -113,6 +113,48 @@ different on every run by construction.
       "kind": "literal",
       "value": "main"
     }
+  },
+  "tier": 2
+}
+
+```
+
+### `g-190` (tier 2)
+
+> The address bar should end up at "/dashboard"
+
+```diff
+- {
+  "action": "expect",
+  "expect": {
+    "predicate": {
+      "kind": "urlContains",
+      "value": {
+        "kind": "literal",
+        "value": "/dashboard"
+      }
+    },
+    "subject": "page"
+  },
+  "tier": 2
+}
+
++ {
+  "action": "expect",
+  "expect": {
+    "predicate": {
+      "kind": "urlContains",
+      "value": {
+        "kind": "literal",
+        "value": "/dashboard"
+      }
+    },
+    "subject": "page"
+  },
+  "target": {
+    "phrase": "the address bar",
+    "ref": "address-bar",
+    "status": "unbound"
   },
   "tier": 2
 }

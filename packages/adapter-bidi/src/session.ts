@@ -174,6 +174,20 @@ export class BidiSession {
   /** How the next dialog is answered; set by `act("dialog", …)`. */
   dialogPolicy: { accept: boolean; promptText?: string } | undefined;
   /**
+   * The chain of `browsingContext.handleUserPrompt` calls, so an action can
+   * wait for a dialog it opened to have been *answered* (T7.3).
+   *
+   * The prompt handler cannot `await` — it runs on the event stream — so it used
+   * to fire the answer off with `void` and return. That is fine until something
+   * reads the page straight afterwards: the conformance case clicks a confirm
+   * and reads what the page recorded, and read the value from *before* the
+   * confirm was answered. The same shape as the navigation problem below, and
+   * it gets the same treatment.
+   *
+   * Chained rather than replaced, so two prompts in a row both complete.
+   */
+  private promptHandling: Promise<void> = Promise.resolve();
+  /**
    * Navigations started, per top-level context.
    *
    * BiDi actions return as soon as the browser has *dispatched* them, so a click
@@ -231,7 +245,28 @@ export class BidiSession {
      */
     const created = options.hosted === true
       ? { capabilities: await describeHostedSession(client) }
-      : ((await client.call("session.new", { capabilities: {} })) as {
+      : ((await client.call("session.new", {
+          capabilities: {
+            /*
+             * `unhandledPromptBehavior: "ignore"` — without it this adapter
+             * cannot accept a dialog at all (T7.3).
+             *
+             * WebDriver's default is *dismiss and notify*: the browser answers
+             * the prompt itself the moment it opens and then tells us about it,
+             * so `browsingContext.handleUserPrompt` arrives after the dialog is
+             * already gone. Measured against the sample `/widgets` page, every
+             * confirm reported `dismissed` — including the ones the flow said to
+             * accept — which is the same *symptom* as P6-F4 from a completely
+             * different cause, and would have been invisible until someone
+             * wrote a flow that depended on accepting one.
+             *
+             * `ignore` leaves the prompt open and makes answering it this
+             * adapter's job, which is what the surface contract already says it
+             * is (LLD §7.3, §3.2).
+             */
+            alwaysMatch: { unhandledPromptBehavior: "ignore" },
+          },
+        })) as {
           capabilities?: { browserName?: string; browserVersion?: string };
         });
     const session = new BidiSession(
@@ -325,13 +360,15 @@ export class BidiSession {
       const message = String(params["message"] ?? "");
       this.dialogs.push({ type, message });
       const policy = this.dialogPolicy ?? { accept: true };
-      void this.client
-        .send("browsingContext.handleUserPrompt", {
-          context,
-          accept: policy.accept,
-          ...(policy.promptText === undefined ? {} : { userText: policy.promptText }),
-        })
-        .catch(() => undefined);
+      this.promptHandling = this.promptHandling.then(async () => {
+        await this.client
+          .send("browsingContext.handleUserPrompt", {
+            context,
+            accept: policy.accept,
+            ...(policy.promptText === undefined ? {} : { userText: policy.promptText }),
+          })
+          .catch(() => undefined);
+      });
       return;
     }
     if (method === "browsingContext.contextCreated") {
@@ -396,6 +433,19 @@ export class BidiSession {
    * navigates does not do so in the same task, so checking once immediately
    * afterwards would always see zero.
    */
+  /**
+   * Wait for any dialog this action opened to have been answered (T7.3).
+   *
+   * Free where it is used: every caller has just been through
+   * `settleIfNavigated`, whose grace period is far longer than the round trip
+   * of a `userPromptOpened` event, so by the time this is reached the answer is
+   * either already sent or already queued. Awaiting the chain is what makes the
+   * next `read` see a page that has been told.
+   */
+  async settlePrompts(): Promise<void> {
+    await this.promptHandling;
+  }
+
   async settleIfNavigated(before: number, timeoutMs: number, graceMs = 400): Promise<boolean> {
     const deadline = Date.now() + graceMs;
     while (this.navigationCount() === before && Date.now() < deadline) await sleep(20);

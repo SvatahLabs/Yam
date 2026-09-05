@@ -1,6 +1,6 @@
 # Adapter conformance
 
-Run at 2026-09-03T19:45:27.959Z.
+Run at 2026-09-04T22:26:54.288Z.
 
 An adapter is **conformant** only when every case in the published surface suite
 passes (REQ-SURF-3, LLD §14). A case whose capability the adapter declares `false`
@@ -9,8 +9,8 @@ one would be reporting on the wrong thing.
 
 | Adapter | Result | Detail |
 |---|---|---|
-| `playwright` | conformant | 16 passed, 0 failed, 0 skipped (72 checks) |
-| `bidi` | conformant | 16 passed, 0 failed, 0 skipped (72 checks) — driving `firefox 153.0 (launched)` |
+| `playwright` | conformant | 16 passed, 0 failed, 0 skipped (73 checks) |
+| `bidi` | conformant | 16 passed, 0 failed, 0 skipped (73 checks) — driving `firefox 153.0 (launched)` |
 
 ## Regenerate
 

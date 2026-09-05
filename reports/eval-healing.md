@@ -1,6 +1,6 @@
 # Svatah eval report — healing
 
-Generated: 2026-09-04T03:03:51.322Z
+Generated: 2026-09-04T22:18:32.861Z
 
 **Relocalize-only recovery: 92.6%**, against REQ-HEAL-5's 60.0% threshold. Met.
 

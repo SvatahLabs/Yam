@@ -299,6 +299,7 @@ export class BidiSurface implements AgentSurface {
          * is what the fixtures' `Go back` did before this.
          */
         await session.settleIfNavigated(before, timeout);
+        await session.settlePrompts();
         session.activeFrame = undefined;
         return { ok: true, navigated: true };
       }
@@ -309,6 +310,7 @@ export class BidiSurface implements AgentSurface {
           wait: "complete",
         });
         await session.settleIfNavigated(before, timeout, 0);
+        await session.settlePrompts();
         session.activeFrame = undefined;
         return { ok: true, navigated: true };
       }
@@ -329,6 +331,8 @@ export class BidiSurface implements AgentSurface {
         // A click on a link comes back before the new document exists; this is
         // where the surface's caller stops having to know that (LLD §7.3).
         const navigated = await session.settleIfNavigated(before, timeout);
+        await session.settlePrompts();
+        await session.settlePrompts();
         return { ok: true, ref: target, ...(navigated ? { navigated: true } : {}) };
       }
       case "dragTo": {
@@ -365,6 +369,8 @@ export class BidiSurface implements AgentSurface {
         await keyActions(session, str("key"), action);
         // `Press "Enter"` in a form is a submission as much as a click is.
         const navigated = await session.settleIfNavigated(before, timeout);
+        await session.settlePrompts();
+        await session.settlePrompts();
         return { ok: true, ...(ref === undefined ? {} : { ref }), ...(navigated ? { navigated: true } : {}) };
       }
       case "submit": {
@@ -378,6 +384,7 @@ export class BidiSurface implements AgentSurface {
           return true;
         });
         await session.settleIfNavigated(before, timeout);
+        await session.settlePrompts();
         return { ok: true, ref: target, navigated: true };
       }
       case "upload": {

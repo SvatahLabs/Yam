@@ -1,6 +1,6 @@
 # Svatah eval report — grounding
 
-Generated: 2026-09-03T05:55:38.844Z
+Generated: 2026-09-04T22:18:08.948Z
 
 > **This run used `fake:grounding-cases`, which is not a model.** The answers came from the committed cases themselves, so the accuracy below measures the eval harness — that it opens every page, grounds every phrase and checks every answer against the ground-truth key — and measures nothing about grounding. It is not REQ-REC-10's number and must not be quoted as one.
 
