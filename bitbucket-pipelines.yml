@@ -41,6 +41,9 @@ definitions:
           # T4.7: privacy mode. A failure here says "a command reached the
           # network" (REQ-NFR-3, REQ-RUN-1, REQ-NFR-1).
           - node scripts/privacy-check.mjs
+          # T5.6: the examples run. An example nobody runs is documentation that
+          # drifts (REQ-AGT-4).
+          - pnpm examples
 
     - step: &quick-start
         name: quick start from a fresh checkout (REQ-PKG-2)

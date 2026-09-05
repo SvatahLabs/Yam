@@ -150,7 +150,8 @@ or the model gateway — and a dependency-tree test holds that.
 ```
 packages/     the TypeScript workspace, one package per component (HLD §12)
 apps/         sample-web, the application the suites run against
-examples/     plain-playwright, the ten-minute quick start as a runnable project
+examples/     plain-playwright (the ten-minute quick start), plus ci, cron and
+              mcp-agent: the same plan run three ways (REQ-AGT-4)
 evals/        compiler, grounding, healing and conformance suites
 reports/      the published eval results (REQ-PKG-4)
 docs/         the specification, the agent surface contract, the flow language
@@ -196,8 +197,13 @@ cd legacy && ./gradlew compileJava
 
 ## Documentation
 
+- [Behaviors](docs/behaviors.md) — one plan run as a test, a workflow or an agent tool,
+  and why orchestration is external.
 - [Agent surface contract](docs/agent-surface.md) — what an adapter must implement.
 - [Flow language reference](docs/flow-language.md) — every sentence pattern and IR action.
+- [Examples](examples/) — the same plan from CI, from cron, and from an MCP client.
+- [The local model (Tier 2)](docs/local-model.md) · [Privacy mode](docs/privacy.md) ·
+  [MCP](docs/mcp.md) · [REPL](docs/repl.md).
 
 ## Licence
 

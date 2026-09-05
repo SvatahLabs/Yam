@@ -1,0 +1,20 @@
+{
+  "name": "example-mcp-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An MCP client calling a Svatah story as a tool (T5.6, REQ-BEH-3, REQ-AGT-4)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "start": "node call-a-tool.mjs",
+    "typecheck": "echo \"example-mcp-agent is one .mjs file\"",
+    "build": "echo \"example-mcp-agent has nothing to build\"",
+    "test": "node --test test.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "catalog:"
+  },
+  "devDependencies": {
+    "sample-web": "workspace:*"
+  }
+}

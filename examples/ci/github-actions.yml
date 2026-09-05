@@ -1,0 +1,69 @@
+# Replaying a Svatah flow in GitHub Actions (REQ-BEH-1, REQ-AGT-4).
+#
+# Orchestration is external: this is an ordinary job that runs a command and
+# keeps the files it wrote. Svatah has no scheduler and no dashboard, and the
+# whole account of a run is `runs/<id>/`.
+name: Svatah
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+
+      # The plan is committed, and `--stable` is byte-stable (REQ-COMP-7), so a
+      # difference here is a flow somebody edited without recompiling — not
+      # noise. Model decisions live in files under review (HLD ADR-1); a plan
+      # regenerated on every run would make them invisible.
+      - name: The committed plan is the plan this flow compiles to
+        run: |
+          pnpm svatah compile --stable
+          git diff --exit-code .svatah/plan.json
+
+      # Replay. No credential: the runtime cannot import the model gateway and
+      # the import boundary is linted (REQ-RUN-1).
+      - name: Replay
+        env:
+          SVATAH_BASE_URL: ${{ vars.APP_URL }}
+          SVATAH_INPUT_PASSWORD: ${{ secrets.APP_PASSWORD }}
+        run: pnpm svatah run --host playwright
+
+      # Whatever happened, keep the record: results, summary, audit,
+      # checkpoints, screenshots and traces. A failure is then readable without
+      # re-running anything.
+      - name: Keep the run directory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: svatah-runs
+          path: runs/
+
+      # A heal *proposes*; it never applies (REQ-HEAL-2). The diff belongs in a
+      # pull request, where a person decides whether the element the healer found
+      # is the element the flow meant.
+      - name: Propose repairs for the locator failures
+        if: failure()
+        env:
+          SVATAH_BASE_URL: ${{ vars.APP_URL }}
+          SVATAH_INPUT_PASSWORD: ${{ secrets.APP_PASSWORD }}
+        run: pnpm svatah heal --run "$(ls -1 runs | tail -1)" || true
+
+      - name: Keep the proposed diff
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: svatah-heal
+          path: .svatah/heal/

@@ -258,10 +258,42 @@ export async function toolCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
 
   io.err(`serving ${built.tools.length} tool(s) over stdio: ${built.tools.map((t) => t.name).join(", ")}`);
 
-  await built.server.connect(new StdioServerTransport());
-  // The server owns the process from here; MCP over stdio ends when the client
-  // closes the pipe, which closes the transport and resolves nothing here.
-  await new Promise<void>(() => undefined);
+  /*
+   * The server owns the process until the client disconnects.
+   *
+   * MCP over stdio ends when the client closes the pipe. Waiting on the
+   * transport's close rather than on a promise that never settles is what lets
+   * the process exit cleanly instead of leaving Node to complain about an
+   * unsettled top-level await — which is what an agent sees on stderr every
+   * time it finishes with a tool server.
+   */
+  const transport = new StdioServerTransport();
+  await built.server.connect(transport);
+
+  /*
+   * Wait on stdin ending, not on the transport's `onclose`.
+   *
+   * `server.connect()` installs its own `onclose` handler, and assigning over it
+   * either loses the server's cleanup or is lost to it, depending on the order.
+   * What is unambiguous is the pipe: MCP over stdio ends when the client closes
+   * it, and stdin's `close` is that. Without this the process sat on a promise
+   * that never settled and Node printed "unsettled top-level await" at every
+   * agent that finished with a tool server.
+   */
+  await new Promise<void>((done) => {
+    let settled = false;
+    const finish = (): void => {
+      if (settled) return;
+      settled = true;
+      done();
+    };
+    process.stdin.once("close", finish);
+    process.stdin.once("end", finish);
+    process.once("SIGINT", finish);
+    process.once("SIGTERM", finish);
+  });
+
+  await built.close();
   return EXIT.ok;
 }
 

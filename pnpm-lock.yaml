@@ -137,6 +137,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 2.1.9(@types/node@22.20.1)(terser@5.51.2)
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.0
 
   apps/ade:
     dependencies:
@@ -235,6 +238,16 @@ importers:
       '@svatah/host-playwright':
         specifier: workspace:*
         version: link:../../packages/host-playwright
+
+  examples/mcp-agent:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 'catalog:'
+        version: 1.30.0(zod@3.25.76)
+    devDependencies:
+      sample-web:
+        specifier: workspace:*
+        version: link:../../apps/sample-web
 
   examples/plain-playwright:
     dependencies:

@@ -83,6 +83,18 @@ jobs:
       - name: Privacy mode (REQ-NFR-3)
         run: node scripts/privacy-check.mjs
 
+      # T5.6: the examples run. An example nobody runs is documentation that
+      # drifts, and `examples/cron/book.sh` and `examples/mcp-agent/` are the
+      # two that *can* run — the CI ones are workflow files for other people's
+      # runners and are checked by being valid YAML.
+      #
+      # Ubuntu only: they drive the sample application and a browser, which the
+      # matrix above has already exercised on all three platforms, and running
+      # them everywhere would buy nothing but minutes.
+      - name: The examples run (REQ-AGT-4)
+        if: matrix.os == 'ubuntu-latest'
+        run: pnpm examples
+
   quick-start:
     name: quick start from a fresh checkout (REQ-PKG-2)
     runs-on: ubuntu-latest

@@ -1,0 +1,24 @@
+# The same job for GitLab CI (REQ-BEH-1, REQ-AGT-4).
+#
+# Included so the shape is visible rather than implied: nothing about Svatah is
+# GitHub-shaped. It is a command, an exit code, and a directory of files.
+svatah:
+  image: mcr.microsoft.com/playwright:v1.50.0-noble
+  variables:
+    SVATAH_BASE_URL: $APP_URL
+  script:
+    - corepack enable && pnpm install --frozen-lockfile
+    # A difference here is a flow edited without recompiling (REQ-COMP-7).
+    - pnpm svatah compile --stable
+    - git diff --exit-code .svatah/plan.json
+    # `SVATAH_INPUT_PASSWORD` rather than `--input password=…`: a password on a
+    # command line is a password in the process list.
+    - export SVATAH_INPUT_PASSWORD="$APP_PASSWORD"
+    - pnpm svatah run --host playwright
+  artifacts:
+    # `always`, because the interesting run is the one that failed.
+    when: always
+    paths:
+      - runs/
+    reports:
+      junit: []
