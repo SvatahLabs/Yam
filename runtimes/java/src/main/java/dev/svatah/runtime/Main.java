@@ -1,15 +1,18 @@
 package dev.svatah.runtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * `svatah-runtime-java <project> [--plan p] [--run-id r] [--base-url u] [--flow f]`
@@ -104,6 +107,8 @@ public final class Main {
 
         List<ObjectNode> results = new ArrayList<>();
         Map<String, ObjectNode> flows = new LinkedHashMap<>();
+        /* `Summary.startedAt` (T7.4, LLD §3.4): when the run began, not when it wrote. */
+        Instant runStartedAt = Instant.now();
 
         for (java.util.Iterator<String> names = plan.path("runs").fieldNames(); names.hasNext(); ) {
             String flow = names.next();
@@ -139,6 +144,13 @@ public final class Main {
                 }
                 results.addAll(executor.results());
             } catch (RuntimeException broken) {
+                /*
+                 * The synthetic step for a session that would not open. It is a
+                 * line of `results.jsonl` like any other and so carries the
+                 * same required fields (T7.4): a result the schema rejects is
+                 * not a result, whatever it says about the run.
+                 */
+                Instant sessionStartedAt = Instant.now();
                 ObjectNode result = Artifacts.json().createObjectNode();
                 result.put("behavior", behavior);
                 result.put("flow", flow);
@@ -147,6 +159,9 @@ public final class Main {
                 result.put("line", 1);
                 result.put("text", "open a session for " + flow);
                 result.put("status", "failed");
+                result.put("startedAt", Executor.timestamp(sessionStartedAt));
+                result.put("endedAt", Executor.timestamp(Instant.now()));
+                result.put("durationMs", 0);
                 result.putObject("failure")
                         .put("class", "infrastructure")
                         .put("message", String.valueOf(broken.getMessage()));
@@ -166,7 +181,7 @@ public final class Main {
 
         Path directory = root.resolve(Artifacts.text(config.path("run").path("outputDir"), "runs"))
                 .resolve(runId);
-        write(directory, results, flows, plan, runId, behavior);
+        write(directory, results, flows, plan, runId, behavior, runStartedAt, inputs.keySet());
 
         long failures = results.stream().filter(r -> r.path("status").asText().equals("failed")).count();
         System.out.printf(
@@ -217,7 +232,9 @@ public final class Main {
             Map<String, ObjectNode> flows,
             JsonNode plan,
             String runId,
-            String behavior) {
+            String behavior,
+            Instant startedAt,
+            Set<String> inputNames) {
         try {
             Files.createDirectories(directory);
             StringBuilder lines = new StringBuilder();
@@ -239,6 +256,18 @@ public final class Main {
                     .put("kind", "ci")
                     .put("id", "svatah-runtime-java")
                     .put("via", "cli");
+            summary.put("startedAt", Executor.timestamp(startedAt));
+            summary.put("endedAt", Executor.timestamp(Instant.now()));
+            /*
+             * The *names* of the inputs, never the values (LLD §3.4): an input
+             * may be a secret and a run directory is a thing people attach to
+             * bug reports (REQ-NFR-6). The names are what lets a later heal say
+             * which input it is missing instead of reporting `unreachable`.
+             */
+            if (!inputNames.isEmpty()) {
+                ArrayNode names = summary.putArray("inputs");
+                for (String name : inputNames) names.add(name);
+            }
             ObjectNode flowNode = summary.putObject("flows");
             flows.forEach(flowNode::set);
             ObjectNode totals = summary.putObject("totals");

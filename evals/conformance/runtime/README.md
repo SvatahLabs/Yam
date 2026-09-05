@@ -3,10 +3,33 @@
 `results.jsonl`, `summary.json` and `plan.sha256` from one run of the four
 migrated fixture flows against `apps/sample-web` (T2.10, REQ-NFR-8, REQ-STD-2).
 
+## These files are a projection, not an artifact (Draft 2.8 §14)
+
 They are written **canonically**: the run id, the timestamps, the durations and
 the config hash are removed. Those change on every run, so a verbatim copy could
 never be diffed — CI would report a change every time and nobody would read the
 diff. What is left is exactly what a foreign runtime is compared on.
+
+Which means these files are a **projection** of a run and are *not themselves
+valid* against `stepResultSchema` and `summarySchema`. That distinction cost a
+false result once and is stated here because of it: Phase 6's Java runtime
+copied this projection instead of the schema — it wrote no `startedAt`,
+`endedAt` or `durationMs` on any of its forty lines — and the conformance suite
+reported it conformant, because the suite compared the projection and never
+looked at the file (Phase 6 verification, F2).
+
+So a foreign runtime must write **full** `results.jsonl` and `summary.json` in
+the published schemas, and `scripts/runtime-conformance.mjs` validates both
+against `stepResultSchema` and `summarySchema` *before* it compares anything.
+"A runtime whose artifacts do not validate is not conformant whatever the
+comparison says" (§14). To see that gate work:
+
+```bash
+node scripts/runtime-conformance.mjs --strip startedAt
+```
+
+which deletes one required field from the first line the runtime wrote and
+fails with the file, the line and the schema path.
 
 Regenerate with:
 

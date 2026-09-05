@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.microsoft.playwright.ElementHandle;
 import com.microsoft.playwright.options.SelectOption;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -85,8 +89,20 @@ public final class Executor {
         boolean stopped = false;
 
         for (JsonNode step : story.path("steps")) {
+            /*
+             * Every step is timed, including a skipped one (T7.4, LLD §3.4).
+             *
+             * `StepResult` requires `startedAt`, `endedAt` and `durationMs` and
+             * does not make them conditional on the status, so a skipped step
+             * records the instant it was skipped and a zero duration rather
+             * than being written without them. Phase 6's runtime wrote none of
+             * the three on any line and was still reported conformant, because
+             * the suite compared a projection and never validated the file
+             * (Phase 6 verification, F2).
+             */
+            Instant startedAt = Instant.now();
             if (stopped) {
-                record(flow, behavior, story, step, "skipped", null, null);
+                record(flow, behavior, story, step, "skipped", null, null, startedAt);
                 continue;
             }
             /*
@@ -101,9 +117,9 @@ public final class Executor {
             Resolver.Resolution[] matched = new Resolver.Resolution[1];
             try {
                 runStep(step, matched);
-                record(flow, behavior, story, step, "passed", matched[0], null);
+                record(flow, behavior, story, step, "passed", matched[0], null, startedAt);
             } catch (RuntimeException failure) {
-                record(flow, behavior, story, step, "failed", matched[0], failure);
+                record(flow, behavior, story, step, "failed", matched[0], failure, startedAt);
                 stopped = true;
             }
         }
@@ -345,7 +361,9 @@ public final class Executor {
             JsonNode step,
             String status,
             Resolver.Resolution matched,
-            RuntimeException failure) {
+            RuntimeException failure,
+            Instant startedAt) {
+        Instant endedAt = Instant.now();
         ObjectNode result = Artifacts.json().createObjectNode();
         result.put("behavior", behavior);
         result.put("flow", flow);
@@ -354,6 +372,9 @@ public final class Executor {
         result.put("line", step.path("line").asInt());
         result.put("text", step.path("text").asText(""));
         result.put("status", status);
+        result.put("startedAt", timestamp(startedAt));
+        result.put("endedAt", timestamp(endedAt));
+        result.put("durationMs", Duration.between(startedAt, endedAt).toMillis());
         if (matched != null) {
             ObjectNode node = result.putObject("matched");
             node.put("ref", matched.ref());
@@ -366,6 +387,20 @@ public final class Executor {
             node.put("message", scope.redact(String.valueOf(failure.getMessage())));
         }
         results.add(result);
+    }
+
+    /**
+     * An instant as the schemas write one: RFC 3339 with an offset, in UTC.
+     *
+     * `z.string().datetime({ offset: true })` accepts `Z` as well as `+05:30`,
+     * and `Instant.toString()` is the `Z` form with a variable number of
+     * fractional digits — `2026-09-04T10:00:00Z` when the instant lands on a
+     * whole second, which is a shape the validator takes. Truncating to
+     * milliseconds keeps the artifact comparable with the TypeScript runtime's,
+     * whose `toISOString()` always writes three.
+     */
+    static String timestamp(Instant at) {
+        return DateTimeFormatter.ISO_INSTANT.format(at.truncatedTo(ChronoUnit.MILLIS));
     }
 
     /** LLD §8.4's failure classes, from the exception's type. */

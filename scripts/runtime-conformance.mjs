@@ -27,6 +27,21 @@
  * `scripts/compatibility.mjs`, and is what REQ-STD-2 publishes for third
  * parties. Comparing against it is comparing against the published artifact
  * rather than against whatever this checkout happens to do today.
+ *
+ * ## The validation that has to come first (Draft 2.8 §14, T7.4)
+ *
+ * The fixture is a **projection**: `scripts/compatibility.mjs` strips the
+ * run-specific fields, so a line in it carries status and matched candidate and
+ * nothing else. Phase 6's runtime copied the projection instead of the schema,
+ * wrote no `startedAt`, `endedAt` or `durationMs` on any of its forty lines,
+ * and was reported conformant — because this script compared the projection and
+ * never looked at the file (Phase 6 verification, F2).
+ *
+ * So before anything is compared, the foreign runtime's own `results.jsonl` and
+ * `summary.json` are validated against `stepResultSchema` and `summarySchema`,
+ * and the first line that fails stops the run with its path and its schema
+ * path. "A runtime whose artifacts do not validate is not conformant whatever
+ * the comparison says" (§14).
  */
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -34,6 +49,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp } from "sample-web";
+import { stepResultSchema, summarySchema } from "@svatah/schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PROJECT = join(ROOT, "evals", "fixtures");
@@ -47,6 +63,17 @@ const option = (name, fallback) => {
 };
 const runtime = option("runtime", "java");
 const report = option("report", join(ROOT, "reports", `runtime-${runtime}.md`));
+/**
+ * The gate's own proof, and the Validate item of T7.4: "a deliberately stripped
+ * line makes it fail with the schema path".
+ *
+ * `--strip startedAt` deletes that field from the first line the foreign runtime
+ * wrote, *after* the runtime wrote it and before the validation reads it. A
+ * check that cannot be shown to fail is not a check, and this is the one command
+ * that shows it without hand-editing a file in a temporary directory that the
+ * script deletes on its way out.
+ */
+const strip = option("strip", undefined);
 
 /** The four flows the fixture holds; the fifth is the policy showcase (T2.10). */
 const FLOWS = [
@@ -177,6 +204,53 @@ try {
   }
   const produced = readResults(producedPath);
 
+  /* ── the artifacts, against the published schemas (§14, T7.4) ───────────── */
+
+  /**
+   * The first thing that fails, as one line a reader can act on: which file,
+   * which line of it, which field of the schema, and what the schema wanted.
+   */
+  const firstIssue = (error) => {
+    const issue = error.issues[0];
+    const path = issue.path.length === 0 ? "<root>" : issue.path.join(".");
+    return `${path}: ${issue.message}`;
+  };
+
+  const invalid = [];
+  if (strip !== undefined && produced.length > 0) {
+    delete produced[0][strip];
+    process.stderr.write(`--strip ${strip}: removed from results.jsonl line 1\n`);
+  }
+  for (const [at, line] of produced.entries()) {
+    const parsed = stepResultSchema.safeParse(line);
+    if (!parsed.success) {
+      invalid.push({
+        file: producedPath,
+        line: at + 1,
+        issue: firstIssue(parsed.error),
+        issues: parsed.error.issues.length,
+      });
+      break;
+    }
+  }
+
+  const summaryPath = join(project, "runs", "conformance", "summary.json");
+  let summaryIssue;
+  if (!existsSync(summaryPath)) {
+    summaryIssue = "the file was not written at all";
+  } else {
+    const parsed = summarySchema.safeParse(JSON.parse(readFileSync(summaryPath, "utf8")));
+    if (!parsed.success) summaryIssue = firstIssue(parsed.error);
+  }
+
+  const artifactsValid = invalid.length === 0 && summaryIssue === undefined;
+  if (artifactsValid) {
+    process.stderr.write(
+      `artifacts valid — ${produced.length} results.jsonl lines against stepResultSchema, ` +
+        "summary.json against summarySchema\n",
+    );
+  }
+
   /* ── the comparison ─────────────────────────────────────────────────────── */
 
   const mismatches = [];
@@ -197,10 +271,33 @@ try {
     "",
     `Fixture: \`evals/conformance/runtime\` (plan \`${sha.slice(0, 12)}…\`)`,
     "",
-    mismatches.length === 0
-      ? `**Conformant.** ${expected.length} step results, **zero mismatches** in status and ` +
-        "matched candidate (REQ-STD-3, LLD §14)."
-      : `**Not conformant.** ${mismatches.length} of ${width} step results differ.`,
+    mismatches.length === 0 && artifactsValid
+      ? `**Conformant.** Artifacts valid, and ${expected.length} step results with ` +
+        "**zero mismatches** in status and matched candidate (REQ-STD-3, LLD §14)."
+      : !artifactsValid
+        ? "**Not conformant.** The artifacts are not in the published schemas, so nothing " +
+          "the comparison says counts (LLD §14)."
+        : `**Not conformant.** ${mismatches.length} of ${width} step results differ.`,
+    "",
+    "## Artifacts",
+    "",
+    artifactsValid
+      ? `\`results.jsonl\` — all ${produced.length} lines validate against \`stepResultSchema\`; ` +
+        "`summary.json` validates against `summarySchema`. Both are checked before anything is " +
+        "compared: the committed fixture is a *projection* of a run (status and matched " +
+        "candidate only), so a runtime that copied the projection would pass the comparison " +
+        "while writing an artifact nothing else can read (LLD §14)."
+      : [
+          "**Invalid.** " +
+            (invalid.length > 0
+              ? `\`results.jsonl\` line ${invalid[0].line} — \`${invalid[0].issue}\`` +
+                ` (${invalid[0].issues} issue(s) on that line)`
+              : "`results.jsonl` validates") +
+            "; " +
+            (summaryIssue === undefined
+              ? "`summary.json` validates."
+              : `\`summary.json\` — \`${summaryIssue}\`.`),
+        ].join(""),
     "",
     "| # | flow | story | step | status | matched |",
     "|---|---|---|---|---|---|",
@@ -213,6 +310,20 @@ try {
         `${differs ? "**≠** " : ""}${one.status} | ` +
         `${one.matched === null ? "—" : `${one.matched.by} #${one.matched.candidateIndex}`} |`,
     );
+  }
+
+  if (!artifactsValid) {
+    /*
+     * §14: "a runtime whose artifacts do not validate is not conformant
+     * whatever the comparison says". Reported before the mismatches, because it
+     * is the finding that decides the answer.
+     */
+    lines.push("", "## Schema failures", "");
+    for (const one of invalid) {
+      lines.push(`- \`${one.file}\` line ${one.line}: \`${one.issue}\``);
+    }
+    if (summaryIssue !== undefined) lines.push(`- \`${summaryPath}\`: \`${summaryIssue}\``);
+    exitCode = 1;
   }
 
   if (mismatches.length > 0) {
@@ -231,9 +342,12 @@ try {
   writeFileSync(resolve(report), `${lines.join("\n")}\n`, "utf8");
 
   process.stdout.write(
-    mismatches.length === 0
-      ? `${runtime}: conformant — ${expected.length} step results, zero mismatches → ${report}\n`
-      : `${runtime}: NOT conformant — ${mismatches.length} of ${width} differ → ${report}\n`,
+    !artifactsValid
+      ? `${runtime}: NOT conformant — the artifacts are not in the published schemas ` +
+        `(${invalid.length > 0 ? `results.jsonl line ${invalid[0].line}: ${invalid[0].issue}` : `summary.json: ${summaryIssue}`}) → ${report}\n`
+      : mismatches.length === 0
+        ? `${runtime}: conformant — artifacts valid, ${expected.length} step results, zero mismatches → ${report}\n`
+        : `${runtime}: NOT conformant — ${mismatches.length} of ${width} differ → ${report}\n`,
   );
   for (const one of mismatches.slice(0, 10)) {
     process.stdout.write(

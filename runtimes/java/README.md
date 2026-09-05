@@ -23,8 +23,19 @@ node scripts/runtime-conformance.mjs --runtime java --report reports/runtime-jav
 
 The harness compiles the fixture project's plan, checks its hash against
 `evals/conformance/runtime/plan.sha256`, runs the jar against the sample
-application, and compares every step with the committed
-`evals/conformance/runtime/results.jsonl`.
+application, **validates the `results.jsonl` and `summary.json` this runtime
+wrote against `stepResultSchema` and `summarySchema`**, and only then compares
+every step with the committed `evals/conformance/runtime/results.jsonl`.
+
+The validation is not a formality (Draft 2.8 §14, T7.4). The committed fixture
+is a *projection* — status and matched candidate, with the run-specific fields
+stripped — and Phase 6's runtime copied the projection rather than the schema:
+it wrote no `startedAt`, `endedAt` or `durationMs` on any line, and was reported
+conformant anyway. Since T7.4 it writes full `StepResult` and `Summary` records
+and the suite refuses to call a runtime conformant whose artifacts do not
+validate, whatever the comparison says. `--strip <field>` deletes a required
+field from the first produced line and shows the gate failing with the file, the
+line and the schema path.
 
 Directly:
 

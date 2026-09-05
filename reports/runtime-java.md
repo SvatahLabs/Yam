@@ -1,10 +1,14 @@
 # Runtime conformance — `java`
 
-Run at 2026-09-04T08:54:30.987Z · 14797 ms
+Run at 2026-09-04T19:49:22.286Z · 13981 ms
 
 Fixture: `evals/conformance/runtime` (plan `95ec8910a81b…`)
 
-**Conformant.** 40 step results, **zero mismatches** in status and matched candidate (REQ-STD-3, LLD §14).
+**Conformant.** Artifacts valid, and 40 step results with **zero mismatches** in status and matched candidate (REQ-STD-3, LLD §14).
+
+## Artifacts
+
+`results.jsonl` — all 40 lines validate against `stepResultSchema`; `summary.json` validates against `summarySchema`. Both are checked before anything is compared: the committed fixture is a *projection* of a run (status and matched candidate only), so a runtime that copied the projection would pass the comparison while writing an artifact nothing else can read (LLD §14).
 
 | # | flow | story | step | status | matched |
 |---|---|---|---|---|---|
