@@ -45,6 +45,16 @@ export interface WorkflowOptions extends PolicyOptions {
    */
   readonly runner: Omit<RunOptions, "behavior" | "stories" | "inputs">;
   readonly inputs?: Readonly<Record<string, unknown>>;
+  /**
+   * `workflow` by default; `tool` when the caller is the MCP tool server.
+   *
+   * The two are the same run — one story, checkpoints and audit on, the
+   * environment policy applied (LLD §13.3 defines the tool behavior *as*
+   * `runWorkflow`). What differs is who is asking, and `summary.behavior` is
+   * where that is written down: "a person ran this" and "an agent ran this" are
+   * different facts about the same steps.
+   */
+  readonly behavior?: "workflow" | "tool";
 }
 
 export interface WorkflowOutcome {
@@ -76,7 +86,7 @@ export async function runWorkflow(
 
   const outcome = await run({
     ...options.runner,
-    behavior: "workflow",
+    behavior: options.behavior ?? "workflow",
     stories: [storyName],
     ...(options.inputs === undefined ? {} : { inputs: options.inputs }),
     /*

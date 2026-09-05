@@ -22,9 +22,7 @@ import {
 import { ConfigError } from "./config-error.js";
 
 /** Commands LLD §15 lists that are not built yet, and what builds them. */
-const LATER: Record<string, string> = {
-  tool: "T5.3",
-};
+const LATER: Record<string, string> = {};
 
 const USAGE = `svatah — a deterministic automation runtime with a standard agent surface
 
@@ -52,6 +50,9 @@ Flows (module b):
                               [--base-url <url>] [--storage-state <path.json>]
                               [--headed] [--resume <runId> --from <stepId>]
                               [--out runs] [--run-id <id>] [--json]
+  svatah tool serve [dir] [--expose "Story one,Story two"] [--stdio]
+                    [--base-url <url>] [--storage-state <path.json>]
+                    [--headed] [--allow-side-effects] [--out runs] [--json]
   svatah mcp [dir] [--trajectory <path.jsonl>] [--session <id>]
 
 Bindings and healing (module a):
@@ -334,6 +335,8 @@ async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Pro
       return await (await import("./commands/mcp.js")).mcpCommand(args, io);
     case "workflow":
       return await (await import("./commands/workflow.js")).workflowCommand(args, io);
+    case "tool":
+      return await (await import("./commands/tool.js")).toolCommand(args, io);
     default: {
       const task = LATER[command];
       io.err(

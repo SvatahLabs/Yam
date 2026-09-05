@@ -425,6 +425,7 @@ export async function runProject(
 
     const outcome = await runWorkflow(storyName, {
       runner,
+      behavior: options.behavior,
       ...(options.inputs === undefined ? {} : { inputs: options.inputs }),
       ...(options.allowSideEffects === undefined
         ? {}

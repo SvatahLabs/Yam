@@ -275,6 +275,30 @@ async function runFlow(
     scope.noteSecret(readPath(options.data ?? {}, path));
   }
 
+  /*
+   * And every `secret`-typed *input* this run was given, for the same reason.
+   *
+   * The run-level audit line records the inputs (REQ-AUTO-6) and is written
+   * before the first story starts — before `validateInputs` has had a chance to
+   * note the secret ones. A workflow called with `card=5123…` therefore wrote
+   * the card number into `audit.jsonl` on the first line, whatever the signature
+   * said about it.
+   *
+   * Which inputs are secret is a property of the *stories about to run*, and
+   * they are known here: the signature says `card: secret`, and the value was
+   * handed in. Noting it before anything is written is what makes REQ-NFR-6's
+   * "secrets never appear in … audit" true of the first line rather than the
+   * tenth.
+   */
+  for (const name of storyNames) {
+    const story = context.byName.get(name);
+    for (const [input, declared] of Object.entries(story?.signature?.inputs ?? {})) {
+      if (declared.type !== "secret") continue;
+      const value = options.inputs?.[input];
+      if (value !== undefined) scope.noteSecret(value);
+    }
+  }
+
   const auditor = new Auditor({
     runId: context.runId,
     sink: context.auditSink,
