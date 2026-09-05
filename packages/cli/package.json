@@ -54,7 +54,6 @@
   },
   "devDependencies": {
     "@playwright/test": "catalog:",
-    "@svatah/service": "workspace:*",
     "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",

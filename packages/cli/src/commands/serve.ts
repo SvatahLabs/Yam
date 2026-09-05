@@ -19,11 +19,25 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
 
   /*
    * Imported dynamically, and this is the one place it happens for a reason
-   * other than start-up cost: `@svatah/service` depends on `@svatah/cli`, so a
-   * static import here would be a cycle. The CLI mounts the service; the service
-   * calls the CLI's functions.
+   * other than start-up cost.
+   *
+   * `@svatah/service` depends on `@svatah/cli` — LLD §13.5 says every handler
+   * calls the CLI's functions — so the dependency only points one way, and this
+   * package must not declare the service even as a dev dependency: that would
+   * make the workspace graph cyclic and the build order arbitrary. It is an
+   * *optional peer*, resolved at run time, so `svatah serve` works when the
+   * service is installed and says what to install when it is not.
    */
-  const { createService } = await import("@svatah/service");
+  let createService: typeof import("@svatah/service").createService;
+  try {
+    ({ createService } = (await import("@svatah/service")) as typeof import("@svatah/service"));
+  } catch {
+    io.err(
+      "`svatah serve` needs @svatah/service, which is an optional peer of this package.\n" +
+        "  npm install @svatah/service",
+    );
+    return EXIT.usage;
+  }
 
   const service = await createService({
     project,
