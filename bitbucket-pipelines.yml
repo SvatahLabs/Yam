@@ -38,6 +38,9 @@ definitions:
           - pnpm -r test
           - node scripts/compatibility.mjs
           - git diff --exit-code evals/conformance/runtime
+          # T4.7: privacy mode. A failure here says "a command reached the
+          # network" (REQ-NFR-3, REQ-RUN-1, REQ-NFR-1).
+          - node scripts/privacy-check.mjs
 
     - step: &quick-start
         name: quick start from a fresh checkout (REQ-PKG-2)

@@ -30,7 +30,8 @@
     "ade:client": "node scripts/generate-ade-client.mjs",
     "bidi:independence": "node scripts/bidi-independence.mjs --report reports/adapter-bidi.md",
     "eval:compiler": "node scripts/eval-compiler.mjs --report reports/eval-compiler.md",
-    "eval:conformance": "node scripts/adapter-conformance.mjs --report reports/eval-conformance.md"
+    "eval:conformance": "node scripts/adapter-conformance.mjs --report reports/eval-conformance.md",
+    "privacy:check": "node scripts/privacy-check.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
