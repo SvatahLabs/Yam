@@ -40,6 +40,10 @@ jobs:
       - name: Build
         run: pnpm -r build
 
+      # The healing suite drives a real browser against `apps/sample-web` (T1.8).
+      - name: Install Playwright browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+
       - name: Generate eval reports
         run: node scripts/eval-reports.mjs --out reports
 

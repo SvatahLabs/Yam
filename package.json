@@ -18,7 +18,8 @@
     "sample-web": "pnpm --filter sample-web start",
     "svatah": "node packages/cli/dist/bin.js",
     "conform:playwright": "node scripts/conform.mjs",
-    "quick-start": "node scripts/quick-start.mjs"
+    "quick-start": "node scripts/quick-start.mjs",
+    "eval:healing": "node scripts/eval-healing.mjs --report reports/eval-healing.md"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

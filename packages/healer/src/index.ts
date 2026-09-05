@@ -36,6 +36,7 @@ export {
 
 export { unifiedDiff, unifiedDiffFor, type FileChange } from "./diff.js";
 export { renderHealReport, renderHealMarkdown } from "./report.js";
+export { renderHealingEvalMarkdown, renderHealingEvalSummary } from "./eval-report.js";
 
 export {
   runHealingEval,

@@ -40,6 +40,7 @@ Phase 1 (module a — bindings and model-free healing for Playwright users):
   svatah heal --from-bind-failures | --run <id>
               [--dir <bindings>] [--out <.svatah>] [--base-url <url>]
               [--apply] [--no-model] [--headed] [--json]
+  svatah eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
 
 Exit codes are the table in LLD §15.
 `;
@@ -60,6 +61,8 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
       return await (await import("./commands/bindings.js")).bindingsCommand(args, io);
     case "heal":
       return await (await import("./commands/heal.js")).healCommand(args, io);
+    case "eval":
+      return await (await import("./commands/eval.js")).evalCommand(args, io);
     default: {
       const task = LATER[command];
       io.err(

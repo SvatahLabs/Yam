@@ -17,7 +17,14 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SUITES = [
   { name: "compiler", threshold: "Tier 1 exact match 100%, end to end ≥ 95% (REQ-COMP-9)", task: "T4.4", runner: null },
   { name: "grounding", threshold: "accuracy ≥ 95% on the sample application (REQ-REC-10)", task: "T3.4", runner: null },
-  { name: "healing", threshold: "relocalize-only ≥ 60%, with one model call ≥ 85% (REQ-HEAL-5)", task: "T1.8", runner: null },
+  {
+    name: "healing",
+    threshold: "relocalize-only ≥ 60%, with one model call ≥ 85% (REQ-HEAL-5)",
+    task: "T1.8",
+    // Runnable since T1.8. The relocalize-only half is what Phase 1 measures; the
+    // model half arrives with the gateway in Phase 3.
+    runner: ["node", "scripts/eval-healing.mjs", "--report"],
+  },
   { name: "conformance", threshold: "every adapter passes the surface suite (REQ-SURF-3)", task: "T1.2", runner: null },
 ];
 
@@ -28,12 +35,25 @@ mkdirSync(outDir, { recursive: true });
 const version = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).version;
 const at = new Date().toISOString();
 
+/** Suites that ran and missed their threshold. Reported at the end, not swallowed. */
+const failed = [];
+
 for (const suite of SUITES) {
   const target = join(outDir, `eval-${suite.name}.md`);
   if (suite.runner) {
-    // Delegated to the CLI once the suite exists.
-    const { execFileSync } = await import("node:child_process");
-    execFileSync(suite.runner[0], suite.runner.slice(1), { cwd: ROOT, stdio: "inherit" });
+    // Delegated to the CLI once the suite exists. A suite that misses its
+    // threshold exits non-zero, and that has to reach the release: REQ-PKG-4
+    // publishes the numbers, and a number nobody was told about is not published.
+    const { spawnSync } = await import("node:child_process");
+    const result = spawnSync(suite.runner[0], [...suite.runner.slice(1), target], {
+      cwd: ROOT,
+      stdio: "inherit",
+    });
+    if (result.status !== 0) {
+      console.error(`eval ${suite.name} is below its threshold (exit ${result.status}).`);
+      failed.push(suite.name);
+    }
+    console.log(`wrote ${target}`);
     continue;
   }
   const dataDir = join(ROOT, "evals", suite.name);
@@ -56,4 +76,10 @@ for (const suite of SUITES) {
     ].join("\n"),
   );
   console.log(`wrote ${target}`);
+}
+
+if (failed.length > 0) {
+  console.error(`\n${failed.length} eval suite(s) below threshold: ${failed.join(", ")}.`);
+  console.error("The reports were written; the release should not ship on these numbers.");
+  process.exit(1);
 }
