@@ -1,0 +1,30 @@
+// Hand-migrated from legacy/src/test/resources/sample/natural_language_login.flow
+// to v3. The original was already prose; the migration removes the trailing
+// `with xpath:…` / `with id:…` locator suffixes (REQ-LANG-4) and turns the
+// "Verify … appears" sentences into expectations.
+
+story: Login with natural language format
+inputs: email: string = "connected2atul@gmail.com", password: secret
+  Click the sign in button
+  Type {input.email} into the username field
+  Type {input.password} into the password field
+  Click the login button
+  The schedule heading should be visible
+
+story: Logout with natural language format
+  Click the logout link
+  The home heading should be visible
+
+story: Validate text with natural language format
+  Type {data.user.email} into the username field
+  Type {data.user.password} into the password field
+  Click the login button
+  Click the Schedule Build link
+  The schedule heading should contain "Enterprise"
+
+compose: Login stories
+  Login with natural language format
+  Logout with natural language format
+  Validate text with natural language format
+
+test: Run all login stories

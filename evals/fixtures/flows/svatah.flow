@@ -1,0 +1,27 @@
+// Hand-migrated from legacy/src/test/resources/sample/svatah.flow (v2) to v3.
+// The two commented-out steps in the original are kept commented here so the
+// migration is reviewable line for line.
+
+story: Validate Text
+  Click the nav toggle
+  // Click the docs link
+  // Switch to the new tab
+  // Click the brand link
+  // Switch back to the main tab
+  Move to the dashboard link and click it
+  Go back
+  Wait for the dashboard link to be visible
+  Go forward
+  Wait for the username field to be present
+  Type {data.user.email} into the username field
+  Type {data.user.password} into the password field
+  Click the login button
+  Click the sidebar toggle
+  Click the Schedule Build link
+  Call the "active count" API and remember the response as val
+  Click the sidebar toggle
+  Click the logout link
+  Type {val} into the username field
+  Wait 5 seconds
+
+test: Validate Text

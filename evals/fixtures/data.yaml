@@ -1,0 +1,23 @@
+# Run-level data for the migrated fixture flows (REQ-LANG-9).
+#
+# Nothing here is a secret in plain text: values under `secrets:` are read from
+# the named environment variable at run time and are redacted everywhere —
+# prompts, audit, results, traces and screenshots (REQ-NFR-6).
+
+user:
+  email: "connected2atul@gmail.com"
+  password: "${SVATAH_SAMPLE_PASSWORD}"
+
+card:
+  number: "${SVATAH_SAMPLE_CARD_NUMBER}"
+  cvv: "${SVATAH_SAMPLE_CARD_CVV}"
+
+env: "test"
+baseUrl: "http://localhost:4173"
+date: "2026-09-03"
+reportPath: "reports/summary.pdf"
+
+secrets:
+  - user.password
+  - card.number
+  - card.cvv

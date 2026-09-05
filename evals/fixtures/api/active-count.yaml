@@ -1,0 +1,8 @@
+# The "active count" request the sample flows call (REQ-LANG-8, REQ-ADP-2).
+name: "active count"
+method: GET
+url: "{data.baseUrl}/api/active-count"
+headers:
+  accept: "application/json"
+followRedirects: true
+timeoutMs: 5000

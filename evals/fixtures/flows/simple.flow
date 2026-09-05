@@ -1,0 +1,32 @@
+// Hand-migrated from legacy/src/test/resources/sample/simple.flow (v1) to v3.
+// Story names and step order are preserved exactly (REQ-LANG-11); the sigils
+// (+action+, ~locator~, *data*) and the inline locators are gone, and the
+// literals moved to data.yaml.
+
+story (tags=smoke): I want to validate login
+inputs: email: string, password: secret
+outputs: enterprise: string
+  Click the sign in button
+  Type {input.email} into the username field
+  Type {input.password} into the password field
+  Click the login button
+  Click the Schedule Build link
+  Remember the text of the schedule heading as enterprise
+  The schedule heading should say {enterprise}
+
+story: I want to validate logout
+  Click the logout link
+
+story: I want to validate text
+  Type {data.user.email} into the username field
+  Type {data.user.password} into the password field
+  Click the login button
+  Click the Schedule Build link
+  The schedule heading should say {I want to validate login.enterprise}
+
+compose: I want to validate stories
+  I want to validate login
+  I want to validate logout
+  I want to validate text
+
+test: I want to validate stories

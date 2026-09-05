@@ -627,6 +627,9 @@ importers:
       '@svatah/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

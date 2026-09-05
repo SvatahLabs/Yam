@@ -1,0 +1,70 @@
+// Hand-migrated from legacy/src/test/resources/sample/execution.flow (v2) to v3.
+//
+// The original drove a third-party booking site through inline XPaths. The
+// migration keeps every scenario name and every step, in order, and rewrites the
+// targets as the phrases the same controls carry on apps/sample-web, which is
+// what the flow can actually be recorded and replayed against (REQ-NFR-8).
+//
+// The flow books and pays, so it declares a compensating story: a failure after
+// the booking is created runs "cancel booking" before the flow stops
+// (REQ-AUTO-4).
+
+scenario: start booking
+  Click the Book a slot link
+
+scenario: perform search
+  Click the location field
+  Clear the location field
+  Type "indra" into the location field
+  Click the Indiranagar suggestion
+  Click the next button
+
+scenario: select date and time
+  Click the slot date field
+  Type "2026-09-03" into the slot date field
+  Select "09:00" in the slot times select
+  Click the next button
+  Select "18:00" in the slot times select
+  Click the next button
+  Wait 8 seconds
+
+scenario (onFailure=compensate:cancel booking): select slot and login
+  Click the Book now button
+  Click the username field
+  Type {data.user.email} into the username field
+  Click the login button
+  Type {data.user.password} into the password field
+
+scenario (onFailure=compensate:cancel booking): checkout the selected slot
+  Click the booking result
+  Click the Checkout link
+
+scenario (onFailure=compensate:cancel booking): initiate payment
+  Click the card number field
+  Click the expiry month select
+  Select "08" in the expiry month select
+  Click the expiry year select
+  Select "2027" in the expiry year select
+  Click the CVV field
+  Type {data.card.cvv} into the CVV field
+  Click the card number field
+  Type {data.card.number} into the card number field
+
+scenario: cancel booking
+  Click the Bookings link
+  Click the cancel booking button
+
+scenario: logout
+  Click the sidebar toggle
+  Click the logout link
+
+compose: book and pay
+  start booking
+  perform search
+  select date and time
+  select slot and login
+  checkout the selected slot
+  initiate payment
+  logout
+
+test: book and pay
