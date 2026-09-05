@@ -19,7 +19,10 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fromRoot } from "../src/repo.js";
 
-/** The seven packages T1.9 publishes as module (a). */
+/**
+ * The packages HLD §12 publishes as module (a). Draft 2.3 added `bindings-cli`,
+ * so that someone who installed module (a) alone still has a command line.
+ */
 const MODULE_A = [
   "schema",
   "surface",
@@ -27,13 +30,14 @@ const MODULE_A = [
   "bindings",
   "healer",
   "playwright-test",
+  "bindings-cli",
   "conformance",
 ] as const;
 
 /**
- * Module (b), as HLD §12 publishes it: "`@svatah/flow` (spec, steps, compiler,
- * gateway, recorder, runtime, workflow, tool, cli)", plus the service and the
- * migration tool that only exist above it.
+ * Module (b), as HLD §12 lists it from Draft 2.3 on. `runtime` and the flow
+ * host are on it; module (a) reaches replay through the healer's `Replayer`
+ * plugin (LLD §10) rather than by importing either.
  */
 const MODULE_B = [
   "spec",
@@ -42,6 +46,7 @@ const MODULE_B = [
   "gateway",
   "recorder",
   "runtime",
+  "host-playwright",
   "trajectory",
   "workflow",
   "tool",
@@ -184,7 +189,7 @@ describe("the README carries the quick start and the numbers (T1.9)", () => {
     expect(readme).toContain("pnpm eval:healing");
   });
 
-  it("lists the seven packages module (a) publishes", () => {
+  it("lists the packages module (a) publishes", () => {
     for (const pkg of MODULE_A) {
       expect(readme, `the README does not list @svatah/${pkg}`).toContain(`@svatah/${pkg}`);
     }

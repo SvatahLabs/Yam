@@ -76,9 +76,9 @@ built and how each item was verified, and
 
 ### The packages
 
-Module (a) is these seven, published together at 0.1.0. None of them resolves a
-module (b) package — the flow language, the compiler, the recorder or the model
-gateway — and a dependency-tree test holds that.
+Module (a) is these eight, published together at 0.1.0. None of them resolves a
+module (b) package — the flow language, the compiler, the executor, the recorder
+or the model gateway — and a dependency-tree test holds that.
 
 | Package | What it is |
 |---|---|
@@ -89,6 +89,7 @@ gateway — and a dependency-tree test holds that.
 | [`@svatah/surface`](packages/surface) | The published `AgentSurface` interface and adapter registry |
 | [`@svatah/schema`](packages/schema) | The artifact contract, as Zod and as JSON Schema |
 | [`@svatah/conformance`](packages/conformance) | The suite an adapter must pass to be conformant |
+| [`@svatah/bindings-cli`](packages/bindings-cli) | `svatah-bindings`: inspect, verify and heal the store from a terminal |
 
 ## Repository layout
 

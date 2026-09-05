@@ -47,6 +47,8 @@ const ALL_PACKAGES = [
   "healer",
   "runtime",
   "playwright-test",
+  "bindings-cli",
+  "host-playwright",
   "spec",
   "steps",
   "compiler",
@@ -72,17 +74,30 @@ const MODEL_FREE_CONSUMERS = [
   ...ADAPTERS,
   "surface",
   "playwright-test",
+  // Draft 2.3 split `playwright-test` in two. LLD §1's bullet still names only
+  // the old package, but both halves replay rather than author, so both carry
+  // the rule the old one carried.
+  "bindings-cli",
+  "host-playwright",
   "workflow",
   "tool",
 ];
 const MODEL_AND_AUTHORING = ["gateway", "recorder", "compiler", "trajectory"];
 
-/** Module (a) — bindings, healer, playwright-test — must not need the flow language. */
-const MODULE_A = ["bindings", "healer", "playwright-test"];
-const FLOW_LANGUAGE = ["spec", "steps", "compiler"];
+/**
+ * Module (a) must not need module (b). Draft 2.3 added `bindings-cli` to the
+ * list and `runtime` to what the list may not reach: the healer gets to the
+ * executor through the `Replayer` plugin (LLD §10) and never by importing it,
+ * which is what keeps `runtime` publishable in module (b).
+ */
+const MODULE_A = ["bindings", "healer", "playwright-test", "bindings-cli"];
+const MODULE_B_CORE = ["spec", "steps", "compiler", "runtime"];
 
-/** Only `cli` (adapter registration) and `playwright-test` (Playwright only) may reach an adapter. */
-const MAY_IMPORT_ADAPTERS = ["cli", "playwright-test"];
+/**
+ * Only `cli` and `bindings-cli` (adapter registration) and the two Playwright
+ * packages (the Playwright adapter only) may reach an adapter.
+ */
+const MAY_IMPORT_ADAPTERS = ["cli", "bindings-cli", "playwright-test", "host-playwright"];
 
 export const BOUNDARIES = [
   ...MODEL_FREE_CONSUMERS.flatMap((from) =>
@@ -93,10 +108,10 @@ export const BOUNDARIES = [
     })),
   ),
   ...MODULE_A.flatMap((from) =>
-    FLOW_LANGUAGE.filter((to) => to !== from).map((to) => ({
+    MODULE_B_CORE.filter((to) => to !== from).map((to) => ({
       from,
       to,
-      why: "LLD §1: module (a) must not depend on module (b)'s flow language (REQ-PKG-1).",
+      why: "LLD §1: module (a) must not depend on module (b) (REQ-PKG-1). Replay reaches the executor through the Replayer plugin, LLD §10.",
     })),
   ),
   ...ALL_PACKAGES.filter(
@@ -108,12 +123,14 @@ export const BOUNDARIES = [
       why: "LLD §1: nothing above the surface may import an adapter directly (REQ-SURF-2).",
     })),
   ),
-  // playwright-test may reach the Playwright adapter, and only that one.
-  ...ADAPTERS.filter((a) => a !== "adapter-playwright").map((to) => ({
-    from: "playwright-test",
-    to,
-    why: "LLD §1: playwright-test may import adapter-playwright only (REQ-SURF-2).",
-  })),
+  // The Playwright packages may reach the Playwright adapter, and only that one.
+  ...["playwright-test", "host-playwright"].flatMap((from) =>
+    ADAPTERS.filter((a) => a !== "adapter-playwright").map((to) => ({
+      from,
+      to,
+      why: `LLD §1: ${from} may import adapter-playwright only (REQ-SURF-2).`,
+    })),
+  ),
 ];
 
 /** `import/no-restricted-paths` zones, keyed on resolved file paths. */

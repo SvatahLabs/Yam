@@ -44,7 +44,9 @@ describe("repository layout (HLD §12)", () => {
   const expected = hldPackages();
 
   it("HLD §12 lists the expected number of packages", () => {
-    expect(expected.length).toBe(24);
+    // 24 through Draft 2.2; Draft 2.3 splits `playwright-test` into the module
+    // (a) `bind()` package, `bindings-cli`, and the module (b) `host-playwright`.
+    expect(expected.length).toBe(26);
   });
 
   it.each(expected)("packages/%s exists and is a buildable workspace package", (name) => {

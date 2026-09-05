@@ -276,18 +276,17 @@ describe("package.json dependency graph (LLD §1, Draft 2.2)", () => {
 
   it("module (a) resolves no module (b) package, transitively (REQ-PKG-1)", () => {
     /*
-     * Module (b) is what HLD §12 publishes as `@svatah/flow`: "spec, steps,
-     * compiler, gateway, recorder, runtime, workflow, tool, cli", plus the
-     * service and the migration tool that only exist above it.
+     * Module (b) as HLD §12 lists it from Draft 2.3 on. `runtime` is on it, and
+     * stays on it: the tension Phase 1 recorded — LLD §1 drawing
+     * `healer ─► runtime(replay)` while REQ-PKG-1 forbids module (a) depending
+     * on (b) — is resolved by the `Replayer` plugin (LLD §10). The healer
+     * declares the interface; module (b) registers a runtime-backed
+     * implementation from the CLI. So the healer replays without importing the
+     * executor, and this list needs no exception.
      *
-     * `runtime` is on that list, which is why it is here even though LLD §1's
-     * dependency graph draws `healer ─► runtime(replay)` and
-     * `playwright-test ─► runtime`. The two cannot both hold alongside
-     * REQ-PKG-1's "module (a) has no dependency on (b)". Phase 1 resolves it the
-     * only way that is true today — nothing in module (a) uses the executor,
-     * because the executor is T2.7 — and Phase 2 has to decide where `runtime`
-     * is published before the healer's replay needs it. See the Phase 1 progress
-     * record.
+     * `host-playwright` is here for the same reason: it *is* the executor's
+     * Playwright host, which is why Draft 2.3 split it out of the module (a)
+     * `playwright-test` package.
      */
     const MODULE_B = [
       "spec",
@@ -296,6 +295,7 @@ describe("package.json dependency graph (LLD §1, Draft 2.2)", () => {
       "gateway",
       "recorder",
       "runtime",
+      "host-playwright",
       "trajectory",
       "workflow",
       "tool",
@@ -303,11 +303,12 @@ describe("package.json dependency graph (LLD §1, Draft 2.2)", () => {
       "migrate",
       "cli",
     ];
-    /** The seven packages T1.9 publishes as module (a). */
+    /** The eight packages HLD §12 publishes as module (a) (Draft 2.3). */
     const MODULE_A = [
       "bindings",
       "healer",
       "playwright-test",
+      "bindings-cli",
       "adapter-playwright",
       "surface",
       "schema",
