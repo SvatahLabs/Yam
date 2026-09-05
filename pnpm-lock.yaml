@@ -414,9 +414,6 @@ importers:
       '@svatah/schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/service':
-        specifier: workspace:*
-        version: link:../service
       '@svatah/spec':
         specifier: workspace:*
         version: link:../spec

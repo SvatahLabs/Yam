@@ -66,14 +66,10 @@
     "svatah": "./dist/bin.js"
   },
   "peerDependencies": {
-    "@playwright/test": "catalog:",
-    "@svatah/service": "workspace:*"
+    "@playwright/test": "catalog:"
   },
   "peerDependenciesMeta": {
     "@playwright/test": {
-      "optional": true
-    },
-    "@svatah/service": {
       "optional": true
     }
   }

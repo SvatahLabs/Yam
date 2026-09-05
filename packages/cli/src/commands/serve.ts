@@ -26,11 +26,15 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
    * other than start-up cost.
    *
    * `@svatah/service` depends on `@svatah/cli` — LLD §13.5 says every handler
-   * calls the CLI's functions — so the dependency only points one way, and this
-   * package must not declare the service even as a dev dependency: that would
-   * make the workspace graph cyclic and the build order arbitrary. It is an
-   * *optional peer*, resolved at run time, so `svatah serve` works when the
-   * service is installed and says what to install when it is not.
+   * calls the CLI's functions — so the dependency points one way and this
+   * package declares the service **nowhere**: not as a dependency, not as a dev
+   * dependency, not even as an optional peer. Any of those makes the workspace
+   * graph cyclic, and a cyclic graph gives pnpm an arbitrary build order — which
+   * showed up as the service's type build running before the CLI had any types.
+   *
+   * So the import is resolved at run time and its absence is a message rather
+   * than a stack trace. A project that wants `svatah serve` installs
+   * `@svatah/service`; everything else in the CLI works without it.
    */
   let service: RunningService;
   try {
