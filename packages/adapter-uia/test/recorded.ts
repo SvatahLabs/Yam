@@ -42,7 +42,15 @@ export const ADE_SCREENS: readonly AdeScreen[] = [
 
 export function recordedWindow(screen: AdeScreen): UiaWindow {
   const text = readFileSync(join(FIXTURES, `ade-${screen}.json`), "utf8");
-  return JSON.parse(text) as UiaWindow;
+  const window = JSON.parse(text) as Omit<UiaWindow, "cost">;
+  /*
+   * A recorded tree has a node count and no wall time, and says so:
+   * `invocations: 0` is the flag the conformance report reads to write
+   * "recorded tree" instead of publishing a bridge cost that nothing paid
+   * (Draft 2.8 §7.5). Filling in a plausible number here is exactly the thing
+   * the Phase 6 verification caught the desktop suite doing.
+   */
+  return { ...window, cost: { nodes: window.nodes.length, wallMs: 0, msPerNode: 0, invocations: 0 } };
 }
 
 export interface RecordedBridgeOptions {

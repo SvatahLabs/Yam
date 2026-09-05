@@ -80,6 +80,29 @@ export interface UiaNode {
   readonly patterns?: readonly string[];
 }
 
+/**
+ * What one `snapshot()` cost (Draft 2.8 §7.5).
+ *
+ * The same record the AX bridge publishes, and for the same reason: "The
+ * desktop conformance report records nodes read, wall time, and milliseconds
+ * per node." Both desktop reports then carry the same three numbers, so the two
+ * bridges can be compared without reading either one's source.
+ *
+ * UI Automation is in-process COM inside one PowerShell invocation, so a
+ * property read is a method call rather than an Apple event; there is no
+ * per-attribute count to publish and `appleEvents` has no Windows equivalent.
+ * The wall time and the cost per node are still what the ten-second surface
+ * deadline is spent against, and are still measured on this side of the process
+ * boundary, spawning PowerShell included.
+ */
+export interface UiaSnapshotCost {
+  readonly nodes: number;
+  readonly wallMs: number;
+  readonly msPerNode: number;
+  /** How many PowerShell processes the read took. One, by design. */
+  readonly invocations: number;
+}
+
 export interface UiaWindow {
   readonly process: string;
   /** The window's `Name`, which is what `state()` reports. */
@@ -87,6 +110,7 @@ export interface UiaWindow {
   readonly nodes: readonly UiaNode[];
   /** True when the walk stopped at `maxNodes` rather than at the leaves. */
   readonly truncated: boolean;
+  readonly cost: UiaSnapshotCost;
 }
 
 /** Why UI Automation could not be reached. */
@@ -497,6 +521,7 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
     },
 
     async window(request): Promise<UiaWindow> {
+      const startedAt = Date.now();
       const answer = (await call(WINDOW_SCRIPT, request, timeoutMs)) as {
         ok: boolean;
         error?: string;
@@ -514,11 +539,19 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
             : `The UI Automation call failed: ${answer.error ?? "unknown"}.`,
         );
       }
+      const wallMs = Date.now() - startedAt;
+      const nodes = answer.nodes ?? [];
       return {
         process: answer.process ?? request.process,
         title: answer.title ?? "",
-        nodes: answer.nodes ?? [],
+        nodes,
         truncated: answer.truncated === true,
+        cost: {
+          nodes: nodes.length,
+          wallMs,
+          msPerNode: nodes.length === 0 ? wallMs : Math.round((wallMs / nodes.length) * 100) / 100,
+          invocations: 1,
+        },
       };
     },
 

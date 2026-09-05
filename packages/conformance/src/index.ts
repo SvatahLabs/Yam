@@ -15,6 +15,7 @@ export { DESKTOP_CASES } from "./surface/desktop.js";
 export { runSurfaceConformance, type RunOptions } from "./surface/run.js";
 export { renderReport, renderMarkdown } from "./surface/report.js";
 export type {
+  BridgeCost,
   CaseContext,
   CaseReport,
   CheckResult,

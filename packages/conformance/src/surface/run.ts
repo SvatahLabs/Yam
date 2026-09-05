@@ -8,6 +8,7 @@
 import type { AgentSurface } from "@svatah/surface";
 import { SURFACE_CASES } from "./cases.js";
 import type {
+  BridgeCost,
   CaseContext,
   CaseReport,
   CheckResult,
@@ -40,6 +41,23 @@ function detailOf(surface: AgentSurface): string | undefined {
   }
 }
 
+/**
+ * What one case's session cost the bridge, when the adapter measures it
+ * (Draft 2.8 §7.5).
+ *
+ * Read in `runCase`'s `finally`, because the surface is closed there and a
+ * closed adapter has nothing left to report.
+ */
+function costOf(surface: AgentSurface): BridgeCost | undefined {
+  const measured = (surface as unknown as { bridgeCost?: () => BridgeCost | undefined }).bridgeCost;
+  if (typeof measured !== "function") return undefined;
+  try {
+    return measured.call(surface);
+  } catch {
+    return undefined;
+  }
+}
+
 /** The name of a thrown value's constructor, for the `throws` check. */
 function errorName(value: unknown): string {
   if (value instanceof Error) return value.constructor.name;
@@ -49,6 +67,7 @@ function errorName(value: unknown): string {
 async function runCase(
   testCase: ConformanceCase,
   options: RunOptions,
+  collect: (cost: BridgeCost) => void,
 ): Promise<CaseReport> {
   const started = Date.now();
   const checks: CheckResult[] = [];
@@ -162,6 +181,8 @@ async function runCase(
       error: error instanceof Error ? `${error.constructor.name}: ${error.message}` : String(error),
     };
   } finally {
+    const cost = costOf(surface);
+    if (cost !== undefined) collect(cost);
     await (options.closeSurface?.(surface) ?? surface.close()).catch?.(() => undefined);
   }
 }
@@ -190,8 +211,24 @@ export async function runSurfaceConformance(options: RunOptions): Promise<Confor
     // case, with the error each one saw. Not here.
   }
 
+  /*
+   * The costliest read across every case, not the last and not a mean: §7.5's
+   * budget is about the biggest window the suite touched, and the ADE's project
+   * screen is that window.
+   */
+  let bridge: BridgeCost | undefined;
+  const collect = (cost: BridgeCost): void => {
+    if (
+      bridge === undefined ||
+      cost.nodes > bridge.nodes ||
+      (cost.nodes === bridge.nodes && cost.wallMs > bridge.wallMs)
+    ) {
+      bridge = cost;
+    }
+  };
+
   const cases: CaseReport[] = [];
-  for (const testCase of selected) cases.push(await runCase(testCase, options));
+  for (const testCase of selected) cases.push(await runCase(testCase, options, collect));
 
   const totals = {
     passed: cases.filter((c) => c.status === "passed").length,
@@ -204,6 +241,7 @@ export async function runSurfaceConformance(options: RunOptions): Promise<Confor
   return {
     adapter: options.adapter,
     ...(adapterDetail === undefined ? {} : { adapterDetail }),
+    ...(bridge === undefined ? {} : { bridge }),
     startedAt,
     durationMs: Date.now() - started,
     cases,

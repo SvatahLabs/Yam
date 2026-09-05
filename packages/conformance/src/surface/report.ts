@@ -5,7 +5,32 @@
  * to be told what went wrong without reading the suite's source: every failed
  * check names the case, the expectation and the observation.
  */
-import type { ConformanceReport } from "./types.js";
+import type { BridgeCost, ConformanceReport } from "./types.js";
+
+/**
+ * The bridge cost as one sentence (Draft 2.8 §7.5).
+ *
+ * The three numbers the section names — nodes read, wall time, milliseconds per
+ * node — plus the two that say how they were paid for: the process invocations
+ * one snapshot took, and on macOS the Apple events it sent, which is the number
+ * the bulk-read design is about. A recorded tree has no wall time and says so
+ * rather than publishing a zero as if it were a measurement.
+ */
+function bridgeLine(cost: BridgeCost): string {
+  if (cost.invocations === 0) {
+    return (
+      `Bridge: not measured — the ${cost.nodes}-node tree came from a recording, ` +
+      "so there is no live read to charge for."
+    );
+  }
+  const events =
+    cost.appleEvents === undefined ? "" : `, ${cost.appleEvents} Apple events`;
+  return (
+    `Bridge: the largest window read was ${cost.nodes} nodes in ${cost.wallMs} ms ` +
+    `(${cost.msPerNode} ms per node${events}, ${cost.invocations} process ` +
+    `invocation${cost.invocations === 1 ? "" : "s"}).`
+  );
+}
 
 function truncate(value: unknown, max = 160): string {
   const text = typeof value === "string" ? value : JSON.stringify(value);
@@ -18,6 +43,7 @@ export function renderReport(report: ConformanceReport): string {
   const lines: string[] = [];
   lines.push(`Surface conformance — adapter "${report.adapter}"`);
   if (report.adapterDetail !== undefined) lines.push(`  driving ${report.adapterDetail}`);
+  if (report.bridge !== undefined) lines.push(`  ${bridgeLine(report.bridge)}`);
   lines.push("");
 
   let page = "";
@@ -71,6 +97,11 @@ export function renderMarkdown(report: ConformanceReport): string {
     // Which browser answered. "BiDi passes" is not a result without it (LLD §7.3).
     lines.push("");
     lines.push(`Driving \`${report.adapterDetail}\`.`);
+  }
+  lines.push("");
+  if (report.bridge !== undefined) {
+    lines.push("");
+    lines.push(bridgeLine(report.bridge));
   }
   lines.push("");
   lines.push(

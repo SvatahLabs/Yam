@@ -17,11 +17,42 @@
  * `osascript -l JavaScript` needs nothing installed, needs the same
  * Accessibility permission a native module would, and reads the same tree.
  *
- * The cost is real and is stated rather than hidden: every attribute is an
- * Apple event, so a large tree is measured in seconds where a native module
- * would be measured in milliseconds. `entire contents` is used to fetch a
- * window's elements in one event, and each element's attributes are then read
- * in a bounded set. See the deviation in `docs/spec/progress/phase-6.md`.
+ * ## The cost, and what Phase 6 got wrong about it (Draft 2.8 §7.5)
+ *
+ * Every Apple event costs about the same fixed ~16-25 ms whatever it carries,
+ * so the only number that matters is **how many events a snapshot sends**. The
+ * first version of this bridge walked the tree element by element and read
+ * about seventeen attributes per element, one event each: measured against the
+ * ADE's 35-node welcome window that is 650 ms *per node*, so the smallest
+ * window the ADE has took ten seconds and the project screen would have taken
+ * minutes. Every case of the live macOS gate failed on the surface's ten-second
+ * deadline (Phase 6 verification, F1).
+ *
+ * The fix is not a native module — Draft 2.8 §7.5 permits this bridge and
+ * requires **bulk reads**: one event must answer for a whole set of elements,
+ * never one element's one attribute. Three System Events forms do that, and
+ * they are why this script is AppleScript rather than JXA (JXA cannot ask a
+ * plural specifier for `properties`; it answers `Can't get object.`):
+ *
+ * - `properties of every UI element of C` — one event, every attribute of
+ *   every child of `C`: role, subrole, title, description, value, name, help,
+ *   enabled, focused, selected, position, size.
+ * - `value of attribute "X" of every UI element of C` — one event, one
+ *   attribute across every child, for the attributes `properties` leaves out
+ *   (`AXIdentifier`, `AXDOMIdentifier`, `AXPlaceholderValue`, `AXExpanded`).
+ * - `name of every action of every UI element of C` — one event, the action
+ *   names of every child.
+ *
+ * `AXChildren` read the same way says which children are containers, so the
+ * walk spends no event on a leaf. The cost is therefore *per container*, not
+ * per node or per attribute. Measured on this machine against the ADE's own
+ * 199-node menu-bar tree: 103 events, 2.06 s, **10.4 ms per node** — against
+ * 650 ms per node before. The 400-node budget of §7.5 is met with room.
+ *
+ * Every snapshot is one `osascript` invocation. The script carries its own
+ * deadline so that a window it cannot finish comes back as a *measured* bridge
+ * timeout — nodes, milliseconds, events — rather than as a killed process with
+ * nothing to say.
  *
  * ## Why the bridge is an interface
  *
@@ -88,6 +119,25 @@ export interface AxNode {
   readonly actions?: readonly string[];
 }
 
+/**
+ * What one `snapshot()` cost, which Draft 2.8 §7.5 requires the desktop
+ * conformance report to publish: "The desktop conformance report records nodes
+ * read, wall time, and milliseconds per node."
+ *
+ * It is measured on this side of the process boundary, so `wallMs` includes
+ * spawning `osascript`. That is the number a caller waits for, and the number
+ * the ten-second surface deadline is spent against.
+ */
+export interface AxSnapshotCost {
+  readonly nodes: number;
+  readonly wallMs: number;
+  readonly msPerNode: number;
+  /** How many `osascript` processes the read took. One, by design. */
+  readonly invocations: number;
+  /** How many Apple events the script sent. The number the design is about. */
+  readonly appleEvents: number;
+}
+
 /** What the bridge was asked to do, and what came back. */
 export interface AxWindow {
   /** The application process the tree was read from. */
@@ -97,6 +147,7 @@ export interface AxWindow {
   readonly nodes: readonly AxNode[];
   /** True when the walk stopped at `maxNodes` rather than at the leaves. */
   readonly truncated: boolean;
+  readonly cost: AxSnapshotCost;
 }
 
 /** Why an accessibility call could not be made. */
@@ -155,6 +206,9 @@ export class AxBridgeError extends Error {
  * The osascript runner.
  * ──────────────────────────────────────────────────────────────────────────── */
 
+/** Which `osascript` dialect a script is written in. */
+export type OsascriptLanguage = "JavaScript" | "AppleScript";
+
 /**
  * Run one JXA script, with a hard deadline.
  *
@@ -170,9 +224,24 @@ export async function runOsascript(
   script: string,
   argument: unknown,
   timeoutMs: number,
+  language: OsascriptLanguage = "JavaScript",
 ): Promise<{ code: number | null; stdout: string; stderr: string; timedOut: boolean }> {
+  /*
+   * Two languages, one runner (Draft 2.8 §7.5).
+   *
+   * The permission check and the action script stay in JXA, where JSON in and
+   * JSON out costs nothing. The window read is AppleScript because only
+   * AppleScript can ask a *plural* specifier for `properties` — JXA answers
+   * `Can't get object.` — and that one form is the whole bulk-read design.
+   * AppleScript has no JSON, so its arguments are plain `argv` strings and its
+   * answer is delimiter-separated text that `parseWindow` reads back.
+   */
+  const args =
+    language === "AppleScript"
+      ? ["-e", script, ...(argument as readonly string[])]
+      : ["-l", "JavaScript", "-e", script, JSON.stringify(argument)];
   return await new Promise((resolve) => {
-    const child = spawn("osascript", ["-l", "JavaScript", "-e", script, JSON.stringify(argument)], {
+    const child = spawn("osascript", args, {
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
@@ -229,94 +298,454 @@ const PERMISSION_SCRIPT = `function run(argv) {
 }`;
 
 /**
- * One window's accessibility tree.
+ * One window's accessibility tree, in one `osascript` invocation (Draft 2.8 §7.5).
  *
- * The walk is breadth-first with a node budget, so a truncated tree is the top
- * of the window rather than one deep branch of it — a snapshot that stopped
- * after the first sidebar would be worse than useless for grounding.
+ * ## The shape of the walk
  *
- * Every attribute read is wrapped, because asking a macOS element for an
- * attribute it does not have throws rather than answering null, and one missing
- * `AXIdentifier` must not lose the whole tree.
+ * Breadth-first over **containers**, not over nodes. For each container the
+ * script sends at most six Apple events, each of which answers for *every*
+ * child at once:
+ *
+ * | event | what it answers |
+ * |---|---|
+ * | `properties of every UI element of C` | role, subrole, title, description, value, name, help, enabled, focused, selected, position, size |
+ * | `value of attribute "AXChildren" of every UI element of C` | which children are containers, so no event is spent on a leaf |
+ * | `value of attribute "AXIdentifier" …` | `automationId`, first source |
+ * | `value of attribute "AXDOMIdentifier" …` | `automationId`, second source; what Chromium publishes a DOM `id` as |
+ * | `value of attribute "AXPlaceholderValue" …` | the placeholder a name falls back to |
+ * | `name of every action of every UI element of C` | `AXPress` and friends, so `act` uses an accessibility action rather than a click |
+ *
+ * The last four run only for a container that has at least one interactive
+ * child, because those attributes only matter on controls; a Chromium tree is
+ * mostly nested `AXGroup`s and those cost two events, not six.
+ *
+ * ## Asking for an attribute a set does not all have
+ *
+ * A bulk read is all-or-nothing: `value of attribute "AXDOMIdentifier" of every
+ * UI element of C` fails outright if one child lacks the attribute, and a
+ * failed event still costs its ~20 ms. So each optional attribute keeps a
+ * success and a failure count and is abandoned once it has failed eight times
+ * without earning its place (`wanted`). On an Electron window
+ * `AXDOMIdentifier` succeeds everywhere in the web content and `AXIdentifier`
+ * gives up after eight containers; on a native window it is the other way
+ * round. Nothing is read attribute-by-attribute in either case.
+ *
+ * ## Why it carries its own deadline
+ *
+ * §7.5: "A deadline exceeded after `doctor` reported `granted` is reported as a
+ * bridge timeout with those numbers, never as a permission prompt." A killed
+ * `osascript` has no numbers to report, so the script stops itself a second
+ * before the caller would and answers with what it has: the `D` flag, the node
+ * count and the event count. AppleScript's clock has one-second resolution,
+ * which is why the deadline crosses the boundary in seconds.
+ *
+ * ## Why it is not JXA
+ *
+ * `Application("System Events").…uiElements.properties()` — the plural read the
+ * whole design rests on — answers `Error: Can't get object.` in JXA. The
+ * AppleScript form works. That is the entire reason.
  */
-const WINDOW_SCRIPT = `function run(argv) {
-  const request = JSON.parse(argv[0]);
-  const se = Application("System Events");
-  const proc = se.applicationProcesses.byName(request.process);
+const WINDOW_SCRIPT = `global evCount
+global idOk, idFail, domOk, domFail, phOk, phFail, expOk, expFail, actOk, actFail
 
-  function attr(element, name) {
-    try { const v = element.attributes.byName(name).value(); return v === null ? undefined : v; }
-    catch (e) { return undefined; }
-  }
-  function str(v) {
-    if (v === undefined || v === null) return undefined;
-    if (typeof v === "string") return v;
-    if (typeof v === "number" || typeof v === "boolean") return String(v);
-    return undefined;
-  }
-  function bool(v) { return typeof v === "boolean" ? v : undefined; }
+on toText(v)
+	try
+		if v is missing value then return ""
+		if class of v is boolean then
+			if v then return "1"
+			return "0"
+		end if
+		if class of v is list then
+			set acc to {}
+			repeat with one in v
+				set end of acc to my toText(one)
+			end repeat
+			return my joinList(acc, ",")
+		end if
+		return v as text
+	on error
+		return ""
+	end try
+end toText
 
-  const windows = proc.windows();
-  if (windows.length === 0) {
-    return JSON.stringify({ ok: false, error: "no-window", process: request.process });
-  }
-  const win = windows[0];
+on joinList(lst, sep)
+	set old to AppleScript's text item delimiters
+	set AppleScript's text item delimiters to sep
+	set s to lst as text
+	set AppleScript's text item delimiters to old
+	return s
+end joinList
 
-  const nodes = [];
-  const queue = [{ element: win, parent: -1 }];
-  let truncated = false;
+on clean(s)
+	if s is "" then return ""
+	set old to AppleScript's text item delimiters
+	set AppleScript's text item delimiters to (character id 31)
+	set parts to text items of s
+	set AppleScript's text item delimiters to " "
+	set s to parts as text
+	set AppleScript's text item delimiters to (character id 30)
+	set parts to text items of s
+	set AppleScript's text item delimiters to " "
+	set s to parts as text
+	set AppleScript's text item delimiters to old
+	return s
+end clean
 
-  while (queue.length > 0) {
-    if (nodes.length >= request.maxNodes) { truncated = true; break; }
-    const { element, parent } = queue.shift();
-    const index = nodes.length;
+on wanted(okCount, failCount)
+	if failCount < 8 then return true
+	return okCount > failCount
+end wanted
 
-    let actions = [];
-    try { actions = element.actions.name(); } catch (e) { actions = []; }
+on bulkAttr(parentEl, attrName, n)
+	set evCount to evCount + 1
+	tell application "System Events"
+		try
+			set vals to value of attribute attrName of every UI element of parentEl
+			if (count of vals) is n then return vals
+		end try
+	end tell
+	return missing value
+end bulkAttr
 
-    let box = undefined;
-    const position = attr(element, "AXPosition");
-    const size = attr(element, "AXSize");
-    if (Array.isArray(position) && Array.isArray(size)) {
-      box = [position[0], position[1], size[0], size[1]];
-    }
+on bulkActions(parentEl, n)
+	set evCount to evCount + 1
+	tell application "System Events"
+		try
+			set vals to name of every action of every UI element of parentEl
+			if (count of vals) is n then return vals
+		end try
+	end tell
+	return missing value
+end bulkActions
 
-    const value = attr(element, "AXValue");
-    const node = {
-      parent: parent,
-      role: str(attr(element, "AXRole")) || "AXUnknown",
-      subrole: str(attr(element, "AXSubrole")),
-      title: str(attr(element, "AXTitle")),
-      description: str(attr(element, "AXDescription")),
-      value: str(value),
-      identifier: str(attr(element, "AXIdentifier")),
-      domIdentifier: str(attr(element, "AXDOMIdentifier")),
-      help: str(attr(element, "AXHelp")),
-      placeholder: str(attr(element, "AXPlaceholderValue")),
-      enabled: bool(attr(element, "AXEnabled")),
-      focused: bool(attr(element, "AXFocused")),
-      selected: bool(attr(element, "AXSelected")),
-      expanded: bool(attr(element, "AXExpanded")),
-      checked: typeof value === "boolean" ? value : (value === 1 ? true : (value === 0 ? false : undefined)),
-      box: box,
-      actions: actions
+on interactive(r)
+	return r is in {"AXButton", "AXRadioButton", "AXCheckBox", "AXPopUpButton", "AXMenuButton", "AXTextField", "AXTextArea", "AXComboBox", "AXSearchField", "AXLink", "AXTab", "AXTabGroup", "AXRadioGroup", "AXSlider", "AXIncrementor", "AXStepper", "AXDisclosureTriangle", "AXCell", "AXRow", "AXMenuItem", "AXMenuBarItem", "AXCheckBoxGroup", "AXColorWell", "AXScrollBar"}
+end interactive
+
+on pick(lst, i)
+	if lst is missing value then return ""
+	try
+		return my toText(item i of lst)
+	on error
+		return ""
+	end try
+end pick
+
+on emit(parentIndex, p, extra)
+	set fields to {parentIndex as text}
+	tell application "System Events"
+		set end of fields to my clean(my toText(role of p))
+		set end of fields to my clean(my toText(subrole of p))
+		set end of fields to my clean(my toText(title of p))
+		set end of fields to my clean(my toText(description of p))
+		set end of fields to my clean(my toText(value of p))
+		set end of fields to my clean(my toText(name of p))
+		set end of fields to my clean(my toText(help of p))
+		set end of fields to my toText(enabled of p)
+		set end of fields to my toText(focused of p)
+		set end of fields to my toText(selected of p)
+		set end of fields to my toText(position of p)
+		set end of fields to my toText(size of p)
+	end tell
+	repeat with one in extra
+		set end of fields to my clean(one as text)
+	end repeat
+	return my joinList(fields, (character id 31))
+end emit
+
+on run argv
+	set procName to item 1 of argv
+	set maxNodes to (item 2 of argv) as integer
+	set deadlineSeconds to (item 3 of argv) as integer
+	set us to (character id 31)
+	set rs to (character id 30)
+	set evCount to 0
+	set idOk to 0
+	set idFail to 0
+	set domOk to 0
+	set domFail to 0
+	set phOk to 0
+	set phFail to 0
+	set expOk to 0
+	set expFail to 0
+	set actOk to 0
+	set actFail to 0
+	set startedAt to (current date)
+	set deadlineHit to false
+	set truncated to false
+
+	tell application "System Events"
+		set procs to (every application process whose name is procName)
+		if (count of procs) is 0 then return "ERR" & us & "no-process"
+		set proc to item 1 of procs
+		set wins to (every window of proc)
+		if (count of wins) is 0 then return "ERR" & us & "no-window"
+		set win to item 1 of wins
+		set winTitle to ""
+		try
+			set winTitle to (value of attribute "AXTitle" of win) as text
+		end try
+		set evCount to evCount + 1
+		set rootProps to properties of win
+	end tell
+
+	set out to {my emit(-1, rootProps, {"", "", "", "", ""})}
+	set total to 1
+	set queue to {{win, 0}}
+
+	repeat while (count of queue) > 0
+		if ((current date) - startedAt) ≥ deadlineSeconds then
+			set deadlineHit to true
+			exit repeat
+		end if
+		set job to item 1 of queue
+		if (count of queue) is 1 then
+			set queue to {}
+		else
+			set queue to items 2 thru -1 of queue
+		end if
+		set parentEl to item 1 of job
+		set parentIndex to item 2 of job
+
+		set kidProps to {}
+		set evCount to evCount + 1
+		tell application "System Events"
+			try
+				set kidProps to properties of every UI element of parentEl
+			end try
+		end tell
+		set n to (count of kidProps)
+		if n > 0 then
+			set kidKids to my bulkAttr(parentEl, "AXChildren", n)
+
+			set anyInteractive to false
+			set roles to {}
+			tell application "System Events"
+				repeat with i from 1 to n
+					set end of roles to my toText(role of (item i of kidProps))
+				end repeat
+			end tell
+			repeat with i from 1 to n
+				if my interactive(item i of roles) then set anyInteractive to true
+			end repeat
+
+			set ids to missing value
+			set domIds to missing value
+			set phs to missing value
+			set exps to missing value
+			set acts to missing value
+			if anyInteractive then
+				if my wanted(idOk, idFail) then
+					set ids to my bulkAttr(parentEl, "AXIdentifier", n)
+					if ids is missing value then
+						set idFail to idFail + 1
+					else
+						set idOk to idOk + 1
+					end if
+				end if
+				if my wanted(domOk, domFail) then
+					set domIds to my bulkAttr(parentEl, "AXDOMIdentifier", n)
+					if domIds is missing value then
+						set domFail to domFail + 1
+					else
+						set domOk to domOk + 1
+					end if
+				end if
+				if my wanted(phOk, phFail) then
+					set phs to my bulkAttr(parentEl, "AXPlaceholderValue", n)
+					if phs is missing value then
+						set phFail to phFail + 1
+					else
+						set phOk to phOk + 1
+					end if
+				end if
+				if my wanted(expOk, expFail) then
+					set exps to my bulkAttr(parentEl, "AXExpanded", n)
+					if exps is missing value then
+						set expFail to expFail + 1
+					else
+						set expOk to expOk + 1
+					end if
+				end if
+				if my wanted(actOk, actFail) then
+					set acts to my bulkActions(parentEl, n)
+					if acts is missing value then
+						set actFail to actFail + 1
+					else
+						set actOk to actOk + 1
+					end if
+				end if
+			end if
+
+			repeat with i from 1 to n
+				if total ≥ maxNodes then
+					set truncated to true
+					exit repeat
+				end if
+				set extra to {my pick(ids, i), my pick(domIds, i), my pick(phs, i), my pick(exps, i), my pick(acts, i)}
+				set end of out to my emit(parentIndex, item i of kidProps, extra)
+				set total to total + 1
+				set hasKids to true
+				if kidKids is not missing value then
+					set hasKids to false
+					try
+						if (count of (item i of kidKids)) > 0 then set hasKids to true
+					end try
+				end if
+				if hasKids then
+					tell application "System Events"
+						set childRef to a reference to UI element i of parentEl
+					end tell
+					set end of queue to {childRef, total - 1}
+				end if
+			end repeat
+		end if
+		if truncated then exit repeat
+	end repeat
+
+	set flags to ""
+	if truncated then set flags to flags & "T"
+	if deadlineHit then set flags to flags & "D"
+	set header to my joinList({"OK", my clean(winTitle), flags, evCount as text, (count of out) as text}, us)
+	return header & rs & my joinList(out, rs)
+end run
+`;
+
+/** Field order of one node record, as `WINDOW_SCRIPT` writes it. */
+const enum Field {
+  Parent = 0,
+  Role = 1,
+  Subrole = 2,
+  Title = 3,
+  Description = 4,
+  Value = 5,
+  Name = 6,
+  Help = 7,
+  Enabled = 8,
+  Focused = 9,
+  Selected = 10,
+  Position = 11,
+  Size = 12,
+  Identifier = 13,
+  DomIdentifier = 14,
+  Placeholder = 15,
+  Expanded = 16,
+  Actions = 17,
+}
+
+/** Record and field separators: ASCII 30 and 31, which no AX string carries. */
+const RECORD_SEPARATOR = "\u001e";
+const UNIT_SEPARATOR = "\u001f";
+
+const text = (value: string | undefined): string | undefined =>
+  value === undefined || value === "" ? undefined : value;
+
+const flag = (value: string | undefined): boolean | undefined =>
+  value === "1" ? true : value === "0" ? false : undefined;
+
+const pair = (value: string | undefined): [number, number] | undefined => {
+  if (value === undefined || value === "") return undefined;
+  const parts = value.split(",").map((one) => Number(one));
+  if (parts.length !== 2 || parts.some((one) => !Number.isFinite(one))) return undefined;
+  return [parts[0]!, parts[1]!];
+};
+
+/** Roles whose `AXValue` is a tick rather than a string (LLD §3.2 `checked`). */
+const CHECKABLE = new Set(["AXCheckBox", "AXRadioButton", "AXMenuItem", "AXToggle"]);
+
+/**
+ * Read `WINDOW_SCRIPT`'s answer.
+ *
+ * Delimiter-separated rather than JSON because AppleScript has no JSON writer
+ * and hand-rolling string escaping in it is how a tree gets lost to one quote
+ * mark. ASCII 30 and 31 are the separators the format was invented for, an AX
+ * string never contains one, and the script replaces them with spaces if one
+ * ever does.
+ */
+export function parseWindow(stdout: string): {
+  ok: boolean;
+  error?: string;
+  title: string;
+  truncated: boolean;
+  deadlineHit: boolean;
+  appleEvents: number;
+  nodes: AxNode[];
+} {
+  const records = stdout.split(RECORD_SEPARATOR);
+  const header = (records[0] ?? "").split(UNIT_SEPARATOR);
+  if (header[0] !== "OK") {
+    return {
+      ok: false,
+      ...(header[1] === undefined ? {} : { error: header[1] }),
+      title: "",
+      truncated: false,
+      deadlineHit: false,
+      appleEvents: 0,
+      nodes: [],
     };
-    for (const key of Object.keys(node)) if (node[key] === undefined) delete node[key];
-    nodes.push(node);
-
-    let children = [];
-    try { children = element.uiElements(); } catch (e) { children = []; }
-    for (const child of children) queue.push({ element: child, parent: index });
   }
-
-  return JSON.stringify({
+  const flags = header[2] ?? "";
+  const nodes: AxNode[] = [];
+  for (const record of records.slice(1)) {
+    if (record === "") continue;
+    const fields = record.split(UNIT_SEPARATOR);
+    const role = fields[Field.Role] ?? "AXUnknown";
+    const value = text(fields[Field.Value]);
+    const box = ((): readonly [number, number, number, number] | undefined => {
+      const position = pair(fields[Field.Position]);
+      const size = pair(fields[Field.Size]);
+      if (position === undefined || size === undefined) return undefined;
+      return [position[0], position[1], size[0], size[1]];
+    })();
+    const actions = text(fields[Field.Actions])?.split(",").filter((one) => one !== "");
+    const checked = CHECKABLE.has(role)
+      ? value === "1" || value === "true"
+        ? true
+        : value === "0" || value === "false"
+          ? false
+          : undefined
+      : undefined;
+    nodes.push({
+      parent: Number(fields[Field.Parent] ?? "-1"),
+      role: role === "" ? "AXUnknown" : role,
+      ...(text(fields[Field.Subrole]) === undefined ? {} : { subrole: fields[Field.Subrole]! }),
+      ...(text(fields[Field.Title]) === undefined ? {} : { title: fields[Field.Title]! }),
+      ...(text(fields[Field.Description]) === undefined
+        ? {}
+        : { description: fields[Field.Description]! }),
+      ...(value === undefined ? {} : { value }),
+      ...(text(fields[Field.Identifier]) === undefined
+        ? {}
+        : { identifier: fields[Field.Identifier]! }),
+      ...(text(fields[Field.DomIdentifier]) === undefined
+        ? {}
+        : { domIdentifier: fields[Field.DomIdentifier]! }),
+      ...(text(fields[Field.Help]) === undefined ? {} : { help: fields[Field.Help]! }),
+      ...(text(fields[Field.Placeholder]) === undefined
+        ? {}
+        : { placeholder: fields[Field.Placeholder]! }),
+      ...(flag(fields[Field.Enabled]) === undefined ? {} : { enabled: flag(fields[Field.Enabled])! }),
+      ...(flag(fields[Field.Focused]) === undefined ? {} : { focused: flag(fields[Field.Focused])! }),
+      ...(flag(fields[Field.Selected]) === undefined
+        ? {}
+        : { selected: flag(fields[Field.Selected])! }),
+      ...(flag(fields[Field.Expanded]) === undefined
+        ? {}
+        : { expanded: flag(fields[Field.Expanded])! }),
+      ...(checked === undefined ? {} : { checked }),
+      ...(box === undefined ? {} : { box }),
+      ...(actions === undefined || actions.length === 0 ? {} : { actions }),
+    });
+  }
+  return {
     ok: true,
-    process: request.process,
-    title: str(attr(win, "AXTitle")) || "",
-    nodes: nodes,
-    truncated: truncated
-  });
-}`;
+    title: header[1] ?? "",
+    truncated: flags.includes("T"),
+    deadlineHit: flags.includes("D"),
+    appleEvents: Number(header[3] ?? "0"),
+    nodes,
+  };
+}
 
 /**
  * One command.
@@ -371,17 +800,58 @@ export interface OsascriptBridgeOptions {
   readonly process: string;
   /** How long one Apple event may take. Default 20 s; `permission()` uses 5 s. */
   readonly timeoutMs?: number;
+  /**
+   * The budget for one `window()` read, which §7.5 sets at the surface's
+   * default deadline of 10 s for a 400-node window. The script stops itself a
+   * second inside it so the answer carries numbers rather than being a killed
+   * process.
+   */
+  readonly windowDeadlineMs?: number;
   /** For tests: run a script without spawning anything. */
   readonly run?: typeof runOsascript;
 }
 
 const DEFAULT_TIMEOUT_MS = 20_000;
 const PERMISSION_TIMEOUT_MS = 5_000;
+/** LLD §7.5: "the surface's default deadline of 10 s". */
+const WINDOW_DEADLINE_MS = 10_000;
 
 /** The real bridge: `osascript`, System Events, and this machine. */
 export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
   const run = options.run ?? runOsascript;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+
+  /*
+   * What the last `permission()` answered, so a slow window read can say which
+   * of the two things it is. `AxSurface.open` checks the permission before it
+   * takes a snapshot, so by the time a `window()` is slow this is known.
+   */
+  let lastPermission: AxPermissionState | undefined;
+
+  const bridgeTimeout = (
+    processName: string,
+    wallMs: number,
+    deadlineMs: number,
+    cost: AxSnapshotCost | undefined,
+  ): AxBridgeError => {
+    const measured =
+      cost === undefined
+        ? "no nodes came back"
+        : `${cost.nodes} nodes in ${cost.wallMs} ms (${cost.msPerNode} ms per node, ` +
+          `${cost.appleEvents} Apple events, ${cost.invocations} osascript invocation)`;
+    if (lastPermission === "granted") {
+      return new AxBridgeError(
+        `The accessibility bridge did not finish reading the window of "${processName}" within ` +
+          `${deadlineMs} ms: ${measured}. The Accessibility permission is granted, so this is ` +
+          "the bridge's own budget (LLD §7.5), not a permission prompt.",
+      );
+    }
+    return new AxBridgeError(
+      `The accessibility call did not answer within ${deadlineMs} ms (${measured}). The ` +
+        "Accessibility permission has not been confirmed for this program, and an unanswered " +
+        "prompt looks exactly like this: run `svatah surface doctor`.",
+    );
+  };
 
   const call = async (script: string, argument: unknown, ms: number): Promise<unknown> => {
     const result = await run(script, argument, ms);
@@ -407,6 +877,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
   return {
     async permission(): Promise<AxPermission> {
       if (process.platform !== "darwin") {
+        lastPermission = "unsupported";
         return {
           state: "unsupported",
           advice:
@@ -415,8 +886,12 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
         };
       }
       const result = await run(PERMISSION_SCRIPT, {}, PERMISSION_TIMEOUT_MS);
-      if (result.timedOut) return { state: "prompt-pending", advice: PROMPT_ADVICE };
+      if (result.timedOut) {
+        lastPermission = "prompt-pending";
+        return { state: "prompt-pending", advice: PROMPT_ADVICE };
+      }
       if (result.code === 0 && result.stdout.includes('"ok":true')) {
+        lastPermission = "granted";
         return { state: "granted", advice: "The Accessibility permission is granted." };
       }
       const detail = (result.stderr || result.stdout).trim();
@@ -433,34 +908,77 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
         detail.includes("-1743") ||
         detail.includes("-25211") ||
         detail.includes("assistive access");
+      lastPermission = denied ? "denied" : "prompt-pending";
       return {
-        state: denied ? "denied" : "prompt-pending",
+        state: lastPermission,
         advice: denied ? DENIED_ADVICE : PROMPT_ADVICE,
         ...(detail === "" ? {} : { detail }),
       };
     },
 
     async window(request): Promise<AxWindow> {
-      const answer = (await call(WINDOW_SCRIPT, request, timeoutMs)) as {
-        ok: boolean;
-        error?: string;
-        process?: string;
-        title?: string;
-        nodes?: AxNode[];
-        truncated?: boolean;
-      };
+      const deadlineMs = options.windowDeadlineMs ?? WINDOW_DEADLINE_MS;
+      const startedAt = Date.now();
+      /*
+       * The script's own budget is a second inside the caller's, so the normal
+       * way to exceed it is the script answering with the `D` flag and its
+       * numbers — not the runner killing a process that has nothing to say.
+       * The hard kill stays as the backstop for an `osascript` that blocks
+       * before it starts (an unanswered permission prompt does exactly that).
+       */
+      const softSeconds = Math.max(1, Math.floor((deadlineMs - 1_000) / 1_000));
+      const result = await run(
+        WINDOW_SCRIPT,
+        [request.process, String(request.maxNodes), String(softSeconds)],
+        deadlineMs,
+        "AppleScript",
+      );
+      const wallMs = Date.now() - startedAt;
+
+      if (result.timedOut) throw bridgeTimeout(request.process, wallMs, deadlineMs, undefined);
+      if (result.code !== 0) {
+        throw new AxBridgeError(
+          "osascript refused the accessibility call.",
+          result.stderr.trim() || result.stdout.trim(),
+        );
+      }
+
+      const answer = parseWindow(result.stdout);
       if (!answer.ok) {
         throw new AxBridgeError(
           answer.error === "no-window"
             ? `The process "${request.process}" has no window. Is it running, and not minimised?`
-            : `The accessibility call failed: ${answer.error ?? "unknown"}.`,
+            : answer.error === "no-process"
+              ? `No application process is named "${request.process}". Is it running?`
+              : `The accessibility call failed: ${answer.error ?? "unknown"}.`,
         );
       }
+
+      const cost: AxSnapshotCost = {
+        nodes: answer.nodes.length,
+        wallMs,
+        msPerNode:
+          answer.nodes.length === 0
+            ? wallMs
+            : Math.round((wallMs / answer.nodes.length) * 100) / 100,
+        invocations: 1,
+        appleEvents: answer.appleEvents,
+      };
+
+      /*
+       * §7.5, the sentence this exists for: a deadline exceeded after `doctor`
+       * said `granted` is a *bridge* timeout, with the numbers, and never the
+       * permission prompt. Phase 6's message said the opposite and sent the
+       * verifier to System Settings for a defect that was in this file.
+       */
+      if (answer.deadlineHit) throw bridgeTimeout(request.process, wallMs, deadlineMs, cost);
+
       return {
-        process: answer.process ?? request.process,
-        title: answer.title ?? "",
-        nodes: answer.nodes ?? [],
-        truncated: answer.truncated === true,
+        process: request.process,
+        title: answer.title,
+        nodes: answer.nodes,
+        truncated: answer.truncated,
+        cost,
       };
     },
 

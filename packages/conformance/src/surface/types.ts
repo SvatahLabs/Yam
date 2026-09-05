@@ -63,6 +63,26 @@ export interface CaseReport {
   readonly error?: string;
 }
 
+/**
+ * What the adapter's bridge cost, when it has one (Draft 2.8 §7.5).
+ *
+ * "The desktop conformance report records nodes read, wall time, and
+ * milliseconds per node." An adapter publishes it by exposing `bridgeCost()`,
+ * the same duck-typing `adapterDetail` uses; a browser adapter has no process
+ * boundary to charge for and simply has none.
+ *
+ * `invocations: 0` means the numbers came from a *recorded* tree rather than a
+ * live read, and the report says so instead of publishing a cost nothing paid.
+ */
+export interface BridgeCost {
+  readonly nodes: number;
+  readonly wallMs: number;
+  readonly msPerNode: number;
+  readonly invocations: number;
+  /** macOS only: the Apple events one snapshot sent. The number §7.5 is about. */
+  readonly appleEvents?: number;
+}
+
 export interface ConformanceReport {
   readonly adapter: string;
   /**
@@ -74,6 +94,8 @@ export interface ConformanceReport {
    * `browser(): string`; one that does not simply has no detail to publish.
    */
   readonly adapterDetail?: string;
+  /** The costliest window read the suite made, when the adapter measures one. */
+  readonly bridge?: BridgeCost;
   readonly startedAt: string;
   readonly durationMs: number;
   readonly cases: readonly CaseReport[];

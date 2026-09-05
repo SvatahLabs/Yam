@@ -62,6 +62,7 @@ import {
   osascriptBridge,
   AxBridgeError,
   type AxBridge,
+  type AxSnapshotCost,
   type AxWindow,
 } from "./bridge.js";
 import { matchNodes, synthesise } from "./locate.js";
@@ -119,6 +120,17 @@ export class AxSurface implements AgentSurface {
   /** The nodes of the most recent snapshot; `rN` indexes this. */
   private nodes: AxSnapshotNode[] = [];
   private windowTitle = "";
+  /**
+   * The costliest window read of this session (Draft 2.8 §7.5).
+   *
+   * The *costliest*, not the last: the claim §7.5 asks the conformance report
+   * to publish is about the largest window the suite touched — "the ADE's
+   * project screen with every tab present, at least 400 nodes, snapshots
+   * within the surface's default deadline of 10 s". A mean over a session that
+   * spent most of its reads on the welcome window would hide exactly the read
+   * the budget is about.
+   */
+  private worstCost: AxSnapshotCost | undefined;
 
   constructor(private readonly options: AxAdapterOptions = {}) {}
 
@@ -174,6 +186,18 @@ export class AxSurface implements AgentSurface {
     this.nodes = [];
   }
 
+  /**
+   * What the biggest snapshot of this session cost.
+   *
+   * Duck-typed rather than part of `AgentSurface`: the conformance runner asks
+   * every adapter for it and publishes it when there is one, the same way it
+   * asks the BiDi adapter which browser answered (LLD §7.3). A surface with no
+   * process boundary has no such number and does not pretend to.
+   */
+  bridgeCost(): AxSnapshotCost | undefined {
+    return this.worstCost;
+  }
+
   private live(): AxBridge {
     if (this.bridge === undefined || this.processName === undefined) {
       throw new SessionError("The AX session is not open.", { adapter: "ax" });
@@ -200,6 +224,13 @@ export class AxSurface implements AgentSurface {
   /** Re-read the window and rebuild every reference. */
   private async refresh(options: { interactiveOnly?: boolean; maxNodes?: number } = {}): Promise<void> {
     const window = await this.readWindow(options.maxNodes ?? this.options.maxNodes ?? DEFAULT_MAX_NODES);
+    if (
+      this.worstCost === undefined ||
+      window.cost.nodes > this.worstCost.nodes ||
+      (window.cost.nodes === this.worstCost.nodes && window.cost.wallMs > this.worstCost.wallMs)
+    ) {
+      this.worstCost = window.cost;
+    }
     this.windowTitle = window.title;
     this.nodes = convertTree(window.nodes, {
       maxNodes: options.maxNodes ?? this.options.maxNodes ?? DEFAULT_MAX_NODES,

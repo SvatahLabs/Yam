@@ -53,7 +53,13 @@ import {
   structuralHash,
   type SnapshotNode,
 } from "@svatah/surface";
-import { powershellBridge, UiaBridgeError, type UiaBridge, type UiaWindow } from "./bridge.js";
+import {
+  powershellBridge,
+  UiaBridgeError,
+  type UiaBridge,
+  type UiaSnapshotCost,
+  type UiaWindow,
+} from "./bridge.js";
 import { matchNodes, synthesise } from "./locate.js";
 import { evaluateUiaPredicate } from "./predicates.js";
 import { convertTree, nameOf, type UiaSnapshotNode } from "./tree.js";
@@ -97,6 +103,12 @@ export class UiaSurface implements AgentSurface {
   private processName: string | undefined;
   private nodes: UiaSnapshotNode[] = [];
   private windowTitle = "";
+  /**
+   * The costliest window read of this session (Draft 2.8 §7.5), as the AX
+   * adapter keeps it: the biggest window the suite touched is the read the
+   * ten-second budget is about, and a mean over small reads would hide it.
+   */
+  private worstCost: UiaSnapshotCost | undefined;
 
   constructor(private readonly options: UiaAdapterOptions = {}) {}
 
@@ -150,6 +162,11 @@ export class UiaSurface implements AgentSurface {
     this.nodes = [];
   }
 
+  /** What the biggest snapshot of this session cost; see `AxSurface`. */
+  bridgeCost(): UiaSnapshotCost | undefined {
+    return this.worstCost;
+  }
+
   private live(): UiaBridge {
     if (this.bridge === undefined || this.processName === undefined) {
       throw new SessionError("The UIA session is not open.", { adapter: "uia" });
@@ -178,6 +195,13 @@ export class UiaSurface implements AgentSurface {
   ): Promise<void> {
     const budget = options.maxNodes ?? this.options.maxNodes ?? DEFAULT_MAX_NODES;
     const window = await this.readWindow(budget);
+    if (
+      this.worstCost === undefined ||
+      window.cost.nodes > this.worstCost.nodes ||
+      (window.cost.nodes === this.worstCost.nodes && window.cost.wallMs > this.worstCost.wallMs)
+    ) {
+      this.worstCost = window.cost;
+    }
     this.windowTitle = window.title;
     this.nodes = convertTree(window.nodes, {
       maxNodes: budget,

@@ -61,12 +61,46 @@ installs this package. macOS already ships a client of that same API — System
 Events, whose `UI elements` and `attributes` *are* `AXUIElement` under a
 scripting name — and driving it needs nothing installed and the same permission.
 
-The cost is stated rather than hidden: every attribute read is an Apple event,
-so a large window is measured in seconds where a native module would be
-measured in milliseconds. The walk fetches a window breadth-first with a node
-budget for that reason. If this becomes the bottleneck, the bridge is one
-interface (`AxBridge`) and a native implementation drops in behind it without
-anything above changing.
+### The cost, and the bulk reads that pay it (Draft 2.8 §7.5)
+
+Every Apple event costs about the same fixed 16–25 ms whatever it carries, so
+the only number that matters is **how many events one snapshot sends**. The
+first version of this bridge asked each element for each attribute — about
+seventeen events per node — which measured 650 ms *per node* against the ADE's
+35-node welcome window, and failed every case of the live macOS gate on the
+surface's ten-second deadline (Phase 6 verification, F1).
+
+The window read is therefore breadth-first over **containers**, and every read
+answers for a whole set of children at once:
+
+| event | what it answers |
+|---|---|
+| `properties of every UI element of C` | role, subrole, title, description, value, name, help, enabled, focused, selected, position, size |
+| `value of attribute "AXChildren" of every UI element of C` | which children are containers, so no event is spent on a leaf |
+| `value of attribute "AXIdentifier" \| "AXDOMIdentifier" \| "AXPlaceholderValue" \| "AXExpanded" …` | what `properties` leaves out, for containers that hold a control |
+| `name of every action of every UI element of C` | `AXPress` and friends, so `act` uses an accessibility action rather than a click |
+
+Measured against the ADE's own 199-node menu-bar tree on an M-series Mac:
+**103 Apple events, 2.07 s, 10.4 ms per node**, in one `osascript` invocation.
+§7.5's budget — the ADE's project screen, at least 400 nodes, inside 10 s — is
+met with room.
+
+Two consequences worth knowing. The window script is **AppleScript**, not JXA,
+because only AppleScript can ask a plural specifier for `properties` (JXA
+answers `Can't get object.`), and that one form is the whole design. And a bulk
+read is all-or-nothing — one child without `AXDOMIdentifier` fails the read for
+the set — so each optional attribute keeps a success and a failure count and is
+abandoned once it has failed eight times without earning its place.
+
+The script carries its own deadline, a second inside the caller's, so a window
+it cannot finish comes back as a *measured* bridge timeout — nodes,
+milliseconds, events — rather than as a killed process with nothing to say. A
+deadline exceeded after `doctor` has said `granted` is reported as exactly that,
+never as a permission prompt.
+
+If this ever becomes the bottleneck again, the bridge is one interface
+(`AxBridge`) and a native implementation drops in behind it without anything
+above changing.
 
 ## What it can and cannot do
 

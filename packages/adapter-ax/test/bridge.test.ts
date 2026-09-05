@@ -17,13 +17,15 @@ import { AxBridgeError, osascriptBridge, type runOsascript } from "../src/index.
 
 type Run = typeof runOsascript;
 
+type Call = { script: string; argument: unknown; timeoutMs: number; language?: string };
+
 const answering = (
   stdout: string,
   extra: Partial<Awaited<ReturnType<Run>>> = {},
-): { run: Run; calls: Array<{ script: string; argument: unknown; timeoutMs: number }> } => {
-  const calls: Array<{ script: string; argument: unknown; timeoutMs: number }> = [];
-  const run: Run = async (script, argument, timeoutMs) => {
-    calls.push({ script, argument, timeoutMs });
+): { run: Run; calls: Call[] } => {
+  const calls: Call[] = [];
+  const run: Run = async (script, argument, timeoutMs, language) => {
+    calls.push({ script, argument, timeoutMs, ...(language === undefined ? {} : { language }) });
     return { code: 0, stdout, stderr: "", timedOut: false, ...extra };
   };
   return { run, calls };
@@ -107,39 +109,153 @@ describe("the permission check (REQ-ADP-7, `svatah surface doctor`)", () => {
   });
 });
 
+/**
+ * The delimited answer `WINDOW_SCRIPT` writes: ASCII 30 between records, ASCII
+ * 31 between fields, a header record first. Built here rather than pasted so a
+ * test reads as the tree it means.
+ */
+const RS = "\u001e";
+const US = "\u001f";
+const node = (fields: Partial<Record<number, string>>): string => {
+  const row = new Array<string>(18).fill("");
+  for (const [at, value] of Object.entries(fields)) row[Number(at)] = value;
+  return row.join(US);
+};
+const answer = (
+  header: { title?: string; flags?: string; events?: number },
+  nodes: readonly string[],
+): string =>
+  [
+    ["OK", header.title ?? "", header.flags ?? "", String(header.events ?? 0), String(nodes.length)].join(US),
+    ...nodes,
+  ].join(RS);
+
 describe("reading a window", () => {
-  it("sends the process and the node budget, and parses the tree", async () => {
+  it("sends the process, the node budget and its own deadline, as AppleScript", async () => {
     const { run, calls } = answering(
-      JSON.stringify({
-        ok: true,
-        process: "Svatah ADE",
-        title: "Svatah ADE",
-        truncated: false,
-        nodes: [{ parent: -1, role: "AXWindow", title: "Svatah ADE" }],
-      }),
+      answer({ title: "Svatah ADE", events: 40 }, [
+        node({ 0: "-1", 1: "AXWindow", 3: "Svatah ADE" }),
+        node({ 0: "0", 1: "AXButton", 3: "Run", 8: "1", 11: "10,20", 12: "80,24", 17: "AXPress" }),
+      ]),
     );
     const window = await osascriptBridge({ process: "Svatah ADE", run }).window({
       process: "Svatah ADE",
       maxNodes: 500,
     });
-    expect(window.nodes).toHaveLength(1);
-    expect(calls[0]!.argument).toEqual({ process: "Svatah ADE", maxNodes: 500 });
-    // Breadth-first with a budget, so a truncated tree is the top of the window
-    // rather than one deep branch of it.
-    expect(calls[0]!.script).toContain("queue.shift()");
+
+    expect(window.title).toBe("Svatah ADE");
+    expect(window.nodes).toHaveLength(2);
+    expect(window.nodes[1]).toMatchObject({
+      parent: 0,
+      role: "AXButton",
+      title: "Run",
+      enabled: true,
+      box: [10, 20, 80, 24],
+      actions: ["AXPress"],
+    });
+
+    /*
+     * The script's own deadline is a second inside the caller's, so a window it
+     * cannot finish answers with numbers rather than being killed with none
+     * (Draft 2.8 §7.5). AppleScript's clock has one-second resolution, which is
+     * why it crosses the boundary in seconds.
+     */
+    expect(calls[0]!.argument).toEqual(["Svatah ADE", "500", "9"]);
+    expect(calls[0]!.timeoutMs).toBe(10_000);
+    expect(calls[0]!.language).toBe("AppleScript");
   });
 
-  it("says which application had no window", async () => {
-    const { run } = answering(JSON.stringify({ ok: false, error: "no-window" }));
+  it("publishes what the read cost, which is what the report has to say", async () => {
+    const { run } = answering(
+      answer({ events: 103 }, [node({ 0: "-1", 1: "AXWindow" }), node({ 0: "0", 1: "AXGroup" })]),
+    );
+    const window = await osascriptBridge({ process: "Svatah ADE", run }).window({
+      process: "Svatah ADE",
+      maxNodes: 500,
+    });
+    // §7.5: "The desktop conformance report records nodes read, wall time, and
+    // milliseconds per node."
+    expect(window.cost.nodes).toBe(2);
+    expect(window.cost.appleEvents).toBe(103);
+    // And one process per snapshot, which is the "bounded number of process
+    // invocations" the section asks for.
+    expect(window.cost.invocations).toBe(1);
+    expect(window.cost.msPerNode).toBeCloseTo(window.cost.wallMs / 2, 1);
+  });
+
+  it("reads every attribute in bulk, and never one call per attribute", async () => {
+    const { run, calls } = answering(answer({}, [node({ 0: "-1", 1: "AXWindow" })]));
+    await osascriptBridge({ process: "x", run }).window({ process: "x", maxNodes: 1 });
+    const script = calls[0]!.script;
+
+    /*
+     * The defect Phase 6 shipped, stated as a test. The old script asked each
+     * element for each attribute — seventeen Apple events per node, 650 ms per
+     * node — and could not read the ADE's smallest window inside the surface's
+     * ten-second deadline. §7.5 requires bulk reads; these three forms are them.
+     */
+    expect(script).toContain("properties of every UI element of parentEl");
+    expect(script).toContain('value of attribute attrName of every UI element of parentEl');
+    expect(script).toContain("name of every action of every UI element of parentEl");
+    // `AXChildren` in bulk says which children are containers, so the walk
+    // spends no event on a leaf.
+    expect(script).toContain('"AXChildren"');
+    // Nothing addresses one element's one attribute.
+    expect(script).not.toMatch(/attribute "AX\w+" of element/);
+  });
+
+  it("says which application had no window, and which had no process", async () => {
+    const noWindow = answering(["ERR", "no-window"].join(US));
     await expect(
-      osascriptBridge({ process: "Svatah ADE", run }).window({
+      osascriptBridge({ process: "Svatah ADE", run: noWindow.run }).window({
         process: "Svatah ADE",
         maxNodes: 10,
       }),
     ).rejects.toThrow(/"Svatah ADE" has no window/);
+
+    const noProcess = answering(["ERR", "no-process"].join(US));
+    await expect(
+      osascriptBridge({ process: "Svatah ADE", run: noProcess.run }).window({
+        process: "Svatah ADE",
+        maxNodes: 10,
+      }),
+    ).rejects.toThrow(/No application process is named "Svatah ADE"/);
   });
 
-  it("reads a timeout as the permission prompt, and names the way to check", async () => {
+  it("reports a blown budget as a bridge timeout with the numbers, once granted", async () => {
+    /*
+     * F1, and the sentence Draft 2.8 §7.5 added for it: "A deadline exceeded
+     * after `doctor` reported `granted` is reported as a bridge timeout with
+     * those numbers, never as a permission prompt." Phase 6's message said the
+     * opposite and sent the verifier to System Settings for a defect that was
+     * in the bridge.
+     */
+    const run: Run = async (script) => {
+      if (script.includes("uiElements()")) {
+        return { code: 0, stdout: '{"ok":true}', stderr: "", timedOut: false };
+      }
+      return {
+        code: 0,
+        stdout: answer({ flags: "D", events: 260 }, [
+          node({ 0: "-1", 1: "AXWindow" }),
+          node({ 0: "0", 1: "AXGroup" }),
+        ]),
+        stderr: "",
+        timedOut: false,
+      };
+    };
+    const bridge = osascriptBridge({ process: "Svatah ADE", run });
+    expect((await bridge.permission()).state).toBe("granted");
+
+    await expect(
+      bridge.window({ process: "Svatah ADE", maxNodes: 500 }),
+    ).rejects.toThrow(/did not finish reading the window of "Svatah ADE" within 10000 ms: 2 nodes/);
+    await expect(bridge.window({ process: "Svatah ADE", maxNodes: 500 })).rejects.toThrow(
+      /not a permission prompt/,
+    );
+  });
+
+  it("still reads a killed process as the prompt when the permission is unknown", async () => {
     const run: Run = async () => ({ code: null, stdout: "", stderr: "", timedOut: true });
     await expect(
       osascriptBridge({ process: "Svatah ADE", run }).window({
@@ -151,14 +267,17 @@ describe("reading a window", () => {
 
   it("does not lose a whole tree over one missing attribute", async () => {
     // Asking a macOS element for an attribute it does not have *throws* rather
-    // than answering null, so every read in the script is wrapped.
-    const { run, calls } = answering(JSON.stringify({ ok: true, nodes: [] }));
+    // than answering null, and a bulk read is all-or-nothing: one child without
+    // `AXDOMIdentifier` fails the read for the whole set. So each optional
+    // attribute is tried, counted, and abandoned once it has failed enough.
+    const { run, calls } = answering(answer({}, []));
     await osascriptBridge({ process: "x", run }).window({ process: "x", maxNodes: 1 });
-    expect(calls[0]!.script).toMatch(/function attr\(element, name\) \{\s*try \{/);
+    expect(calls[0]!.script).toContain("on wanted(okCount, failCount)");
+    expect(calls[0]!.script).toMatch(/on bulkAttr\(parentEl, attrName, n\)\s+set evCount/);
   });
 
-  it("reports something that is not JSON as such", async () => {
-    const { run } = answering("not json at all");
+  it("reports an answer in no known shape as such", async () => {
+    const { run } = answering("not the format at all");
     await expect(
       osascriptBridge({ process: "x", run }).window({ process: "x", maxNodes: 1 }),
     ).rejects.toThrow(AxBridgeError);

@@ -14,6 +14,7 @@ export {
   type UiaBridge,
   type UiaCommand,
   type UiaNode,
+  type UiaSnapshotCost,
   type UiaWindow,
   type PowershellBridgeOptions,
 } from "./bridge.js";

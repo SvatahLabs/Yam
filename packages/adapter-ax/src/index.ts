@@ -7,6 +7,7 @@
  */
 export {
   osascriptBridge,
+  parseWindow,
   runOsascript,
   AxBridgeError,
   type AxBridge,
@@ -14,7 +15,9 @@ export {
   type AxNode,
   type AxPermission,
   type AxPermissionState,
+  type AxSnapshotCost,
   type AxWindow,
+  type OsascriptLanguage,
   type OsascriptBridgeOptions,
 } from "./bridge.js";
 export {
