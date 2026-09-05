@@ -42,6 +42,11 @@ export const WARNING_CODES = [
   "W_CUSTOM",
   "W_SIDE_EFFECT_TOOL",
   "W_SECRET_UNSET",
+  // Draft 2.5, LLD §4.3: a binding file that declares no phrases. The element
+  // is still addressable by id — that is what `bind("login.username-field")`
+  // does — but no sentence can name it, so a flow project almost always meant
+  // to record one.
+  "W_BINDING_NO_PHRASES",
 ] as const;
 export type WarningCode = (typeof WARNING_CODES)[number];
 

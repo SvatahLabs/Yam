@@ -25,7 +25,12 @@ export {
   LANDMARK_ROLES,
 } from "./context.js";
 
-export { BindingsStore, type EntrySelector } from "./store.js";
+export {
+  BindingsStore,
+  readBindingIndex,
+  type BindingIndexEntry,
+  type EntrySelector,
+} from "./store.js";
 
 export { Dictionary, type Lookup } from "./dictionary.js";
 

@@ -289,3 +289,46 @@ function walk(dir: string): string[] {
   }
   return out;
 }
+
+/**
+ * The dictionary's view of the store: every element id with the phrases its file
+ * declares (LLD §4.3, Draft 2.5).
+ *
+ * The compiler needs "id → phrases" and nothing else, and until Draft 2.5 the
+ * CLI got it by scanning the YAML text for lines of the form two spaces, dash,
+ * double-quoted string. That reads one of the several ways YAML can write a list
+ * of strings, so a phrase written unquoted, in single quotes, in flow style, or
+ * at a different indentation vanished from the dictionary while `bindings show`
+ * still listed it — every step naming it compiled `unbound` and failed at replay
+ * with no candidates (Phase 3 verification, F1).
+ *
+ * This is the fix and the reason it lives here rather than in the CLI: the
+ * dictionary's entries come from the *same loader the store uses*, so a file the
+ * store accepts contributes exactly the phrases it declares, whatever its
+ * quoting, style or indentation. `@svatah/spec` still takes them as data
+ * (LLD §1: `spec ─► schema` and nothing else), so this does not move the
+ * boundary — it moves the parsing to the side of it that owns binding files.
+ */
+export interface BindingIndexEntry {
+  readonly id: string;
+  readonly phrases: readonly string[];
+  /** The file the entry came from, relative to the store directory. */
+  readonly file: string;
+}
+
+/**
+ * Read a bindings directory as ids and phrases.
+ *
+ * Throws whatever `BindingsStore.load` throws — a `DataError` naming the file
+ * and the problem. A binding file that will not parse is a project error and the
+ * compiler should say so, rather than silently compiling every step that names
+ * the element as `unbound`.
+ */
+export function readBindingIndex(dir: string): BindingIndexEntry[] {
+  const store = BindingsStore.load(dir);
+  return store.ids().map((id) => ({
+    id,
+    phrases: [...store.phrases(id)],
+    file: idToSegments(id).join("/"),
+  }));
+}

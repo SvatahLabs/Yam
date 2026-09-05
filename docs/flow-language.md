@@ -1794,6 +1794,7 @@ outputs: enterprise: string
 | `W_CUSTOM` | The step is a Tier 0 custom step. |
 | `W_SIDE_EFFECT_TOOL` | A story with side effects is exposed as a tool but is not marked `idempotent`. |
 | `W_SECRET_UNSET` | A `${ENV}` indirection names a variable that is not set. Compiling does not need the value; running does. |
+| `W_BINDING_NO_PHRASES` | A binding file declares no phrases, so no sentence can name the element. It is still addressable by id from `bind()`. |
 
 Errors, which fail the compile:
 

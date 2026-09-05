@@ -14,7 +14,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { canonicalYaml } from "@svatah/schema";
 import { DataError } from "@svatah/surface";
-import { BindingsStore, elementIdFromPhrase, idToSegments, isElementId, pathToId } from "../src/index.js";
+import {
+  BindingsStore,
+  elementIdFromPhrase,
+  idToSegments,
+  isElementId,
+  pathToId,
+  readBindingIndex,
+} from "../src/index.js";
 import { candidate, entry, file } from "./fixtures.js";
 
 let dir: string;
@@ -254,5 +261,63 @@ describe("saving (REQ-REC-9)", () => {
 
   it("refuses to render bindings that are not there", () => {
     expect(() => BindingsStore.empty(dir).render("login.absent")).toThrow(/No bindings for/);
+  });
+});
+
+describe("readBindingIndex (P3-F1, LLD §4.3, Draft 2.5)", () => {
+  /*
+   * The dictionary's entries come through the store's loader, so the reader has
+   * no opinion about how a phrase list is written — YAML does. Phase 3 read the
+   * text with a regular expression and only the first of these six spellings
+   * survived it.
+   */
+  const spellings: ReadonlyArray<[string, string]> = [
+    ["double-quoted", 'phrases:\n  - "the sign in button"\n'],
+    ["unquoted", "phrases:\n  - the sign in button\n"],
+    ["single-quoted", "phrases:\n  - 'the sign in button'\n"],
+    ["flow style", 'phrases: ["the sign in button"]\n'],
+    ["indented four spaces", 'phrases:\n    - "the sign in button"\n'],
+    ["a block scalar", 'phrases:\n  - >-\n      the sign in\n      button\n'],
+  ];
+
+  const write = (phrases: string): void => {
+    const store = BindingsStore.empty(dir);
+    store.put("login.sign-in-button", entry(), "placeholder");
+    store.save();
+    const path = join(dir, "login", "sign-in-button.yaml");
+    const body = readFileSync(path, "utf8").replace(/^phrases:\n {2}- .*\n/m, phrases);
+    writeFileSync(path, body, "utf8");
+  };
+
+  for (const [how, phrases] of spellings) {
+    it(`reads a phrase list written ${how}`, () => {
+      write(phrases);
+      expect(readBindingIndex(dir)).toEqual([
+        {
+          id: "login.sign-in-button",
+          phrases: ["the sign in button"],
+          file: "login/sign-in-button.yaml",
+        },
+      ]);
+    });
+  }
+
+  it("reports an empty phrase list as empty rather than as absent", () => {
+    // What `W_BINDING_NO_PHRASES` is raised from: the entry exists and is
+    // addressable by id; it just cannot be named by a sentence (LLD §6.5).
+    write("phrases: []\n");
+    expect(readBindingIndex(dir)).toEqual([
+      { id: "login.sign-in-button", phrases: [], file: "login/sign-in-button.yaml" },
+    ]);
+  });
+
+  it("is an empty list for a directory that is not there", () => {
+    expect(readBindingIndex(join(dir, "absent"))).toEqual([]);
+  });
+
+  it("throws the loader's error for a file the store would refuse", () => {
+    write('phrases:\n  - "the sign in button"\n');
+    writeFileSync(join(dir, "login", "broken.yaml"), "entries: [\n", "utf8");
+    expect(() => readBindingIndex(dir)).toThrow(DataError);
   });
 });
