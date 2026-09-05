@@ -25,8 +25,28 @@ describe("reports/eval-healing.md (REQ-HEAL-5, REQ-PKG-4)", () => {
   it("states the method, because a percentage without one is not a number", () => {
     expect(report).toContain("## Method");
     expect(report).toContain("test-id attributes disabled");
-    expect(report).toContain("the score alone is never taken as proof");
-    expect(report).toContain("Population: `no-test-ids`");
+    expect(report).toContain("Headline population: `no-test-ids`");
+  });
+
+  /*
+   * Draft 2.3. Phase 1 verified only that a proposal was findable, which a
+   * confidently wrong repair also is. These three assertions are what stop the
+   * published number sliding back to that: the report has to say it compared
+   * against a ground truth, has to show the count of wrong elements even when it
+   * is zero, and has to show both populations rather than only the flattering
+   * one.
+   */
+  it("says recovery was verified against the ground-truth element", () => {
+    expect(report).toContain("ground-truth key");
+    expect(report).toContain("data-svatah-eval");
+    expect(report).toContain("bindings.ignoreAttributes");
+    expect(report).toContain("Relocalized onto the wrong element");
+  });
+
+  it("reports both populations (REQ-HEAL-5, Draft 2.3)", () => {
+    expect(report).toContain("## Both populations");
+    expect(report).toMatch(/^\| `no-test-ids` \*\*\(headline\)\*\* \|/m);
+    expect(report).toMatch(/^\| `with-test-ids` \|/m);
   });
 
   it("says it used no model", () => {

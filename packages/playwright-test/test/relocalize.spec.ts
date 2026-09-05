@@ -11,7 +11,7 @@
  *
  * Refs: REQ-HEAL-1 (relocalize), REQ-HEAL-5 (relocalize), LLD §6.4.
  */
-import { VARIANTS } from "sample-web";
+import { GROUND_TRUTH_ATTRIBUTE, VARIANTS } from "sample-web";
 import { relocalize, synthesise, fingerprintOf } from "@svatah/bindings";
 import { RELOCALIZE_THRESHOLD, runHealingEval, type HealingEvalReport } from "@svatah/healer";
 import { PlaywrightSurface } from "@svatah/adapter-playwright";
@@ -40,6 +40,14 @@ test.describe("relocalization over the sample variants (REQ-HEAL-5)", () => {
     const report = await runHealingEval({
       pages: [...PAGES],
       variants: VARIANTS.map((v) => ({ id: v.id, title: v.title, pages: v.pages })),
+      /*
+       * The ground truth (LLD §16, Draft 2.3). Read with a page script, not
+       * through `describe()`: `ignoreAttributes` makes the surface blind to this
+       * attribute precisely so that relocalization cannot use it, and reading it
+       * through the surface would put it back.
+       */
+      groundTruth: async (surface, ref) =>
+        await (surface as PlaywrightSurface).readRawAttribute(ref, GROUND_TRUTH_ATTRIBUTE),
       open: async (page, variant) => {
         const surface = new PlaywrightSurface({
           browser: testInfo.project.name as "chromium" | "firefox" | "webkit",
@@ -51,6 +59,7 @@ test.describe("relocalization over the sample variants (REQ-HEAL-5)", () => {
           // paths on a `data-testid`, and those paths would survive structural
           // changes for a reason the population is supposed to exclude.
           testIdAttributes: [],
+          ignoreAttributes: [GROUND_TRUTH_ATTRIBUTE],
         });
         await surface.open({ baseUrl: app.origin });
         await surface.act("navigate", undefined, {
@@ -96,11 +105,22 @@ test.describe("relocalization over the sample variants (REQ-HEAL-5)", () => {
     ).toBeGreaterThanOrEqual(RELOCALIZE_THRESHOLD);
 
     // A repair that binds to the wrong element is worse than no repair: it turns
-    // a red run green while doing something else entirely (REQ-HEAL-3).
+    // a red run green while doing something else entirely (REQ-HEAL-3). Draft 2.3
+    // makes this checkable rather than inferred: the proposal's ground-truth key
+    // is compared with the recorded one.
     expect(
       report.totals.wrongElement,
-      "relocalization proposed an element whose re-synthesised candidate did not resolve back to it",
+      "relocalization proposed a different element from the one the binding was recorded on",
     ).toBe(0);
+
+    // And the ground truth was actually read. Without it every case would be
+    // `unverified` and the number above would be zero — but a future change that
+    // silently stopped reading the key while loosening the rule would not show,
+    // so assert that the comparison was made at all.
+    expect(
+      report.cases.filter((c) => c.outcome === "recovered" && c.proposedTruth !== undefined).length,
+      "no case was verified against a ground-truth key",
+    ).toBeGreaterThan(0);
   });
 
   test("no false accept on the duplicate-buttons variant (variant 9)", async ({ app }, testInfo) => {

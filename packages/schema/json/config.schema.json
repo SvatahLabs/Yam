@@ -62,6 +62,13 @@
               "minLength": 1,
               "type": "string"
             },
+            "ignoreAttributes": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": "array"
+            },
             "testIdAttributes": {
               "items": {
                 "minLength": 1,

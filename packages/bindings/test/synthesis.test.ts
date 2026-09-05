@@ -284,3 +284,67 @@ describe("fingerprintOf (REQ-REC-4, LLD §3.3)", () => {
     expect(source.neighbours.before).toEqual(["Username"]);
   });
 });
+
+/**
+ * P1-F1 — `config.bindings.ignoreAttributes` (LLD §3.5, §16, Draft 2.3).
+ *
+ * The healing eval labels every element with its identity so it can check its
+ * own answers. That label would be the single best locator on the page: unique,
+ * stable across every variant, and never touched by a front-end change. If it
+ * could reach a candidate or a fingerprint, the eval would score its own
+ * bookkeeping and the published number would be meaningless.
+ *
+ * The adapter strips these names before `describe()` returns, so in a real run
+ * they are gone before this code sees them. The filter is here as well because
+ * synthesis is adapter-neutral: an adapter that has not implemented the option
+ * must not be able to leak one through.
+ */
+describe("ignoreAttributes (LLD §3.5)", () => {
+  const labelled: ElementDescription = {
+    ref: "r0",
+    role: "button",
+    tag: "button",
+    attrs: { "data-svatah-eval": "login/10-sign-in", id: "sign-in" },
+    text: "Sign in",
+    neighbours: { before: [], after: [] },
+    rolePath: ["main"],
+    box: [0, 0, 80, 30],
+    index: 0,
+    states: [],
+    native: { tag: "button", "data-svatah-eval": "login/10-sign-in" },
+  };
+
+  it("keeps an ignored attribute out of every candidate", () => {
+    const candidates = candidatesFor(labelled, {
+      // Named as a test id *and* ignored: the ignore list wins, or the option
+      // would be one misconfiguration away from doing nothing.
+      testIdAttributes: ["data-svatah-eval", "data-testid"],
+      ignoreAttributes: ["data-svatah-eval"],
+    });
+
+    expect(candidates.length).toBeGreaterThan(0);
+    for (const candidate of candidates) {
+      expect(candidate.attribute).not.toBe("data-svatah-eval");
+      expect(candidate.value ?? "").not.toContain("login/10-sign-in");
+    }
+  });
+
+  it("keeps it out of the fingerprint, so it cannot influence a score", () => {
+    const printed = fingerprintOf(labelled, { ignoreAttributes: ["data-svatah-eval"] });
+    expect(Object.keys(printed.attrs)).not.toContain("data-svatah-eval");
+    expect(printed.attrs["id"]).toBe("sign-in");
+  });
+
+  it("defaults to the schema's list, so the label is blocked without configuration", () => {
+    // A caller that passes no options at all still cannot bind to it. The eval's
+    // correctness must not depend on every call site remembering the option.
+    const candidates = candidatesFor(labelled, { testIdAttributes: ["data-svatah-eval"] });
+    expect(candidates.some((c) => c.attribute === "data-svatah-eval")).toBe(false);
+    expect(Object.keys(fingerprintOf(labelled).attrs)).not.toContain("data-svatah-eval");
+  });
+
+  it("is case-insensitive, since HTML attribute names are", () => {
+    const shouty = { ...labelled, attrs: { "DATA-SVATAH-EVAL": "login/10-sign-in" } };
+    expect(Object.keys(fingerprintOf(shouty).attrs)).not.toContain("DATA-SVATAH-EVAL");
+  });
+});

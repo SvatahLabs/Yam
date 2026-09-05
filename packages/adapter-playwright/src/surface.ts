@@ -37,6 +37,7 @@ import type {
   SurfaceAction,
   SurfaceKind,
 } from "@svatah/schema";
+import { DEFAULT_IGNORE_ATTRIBUTES } from "@svatah/schema";
 import type { AgentSurface } from "@svatah/surface";
 import {
   ActionabilityError,
@@ -71,6 +72,12 @@ export interface PlaywrightAdapterOptions {
   /** Per-action timeout; `Config.run.stepTimeoutMs`. */
   timeoutMs?: number;
   testIdAttributes?: readonly string[];
+  /**
+   * `config.bindings.ignoreAttributes` (LLD §3.5): attribute names the surface
+   * never reports. Stripped from `describe()`'s `attrs` and from `native`, so
+   * nothing above the surface can bind to one, score on one, or fingerprint one.
+   */
+  ignoreAttributes?: readonly string[];
   /** Where `trace(true, path)` writes when no path is given. */
   outputDir?: string;
   /** Force a snapshot mechanism; otherwise `SVATAH_PW_SNAPSHOT`, otherwise auto. */
@@ -179,7 +186,12 @@ export class PlaywrightSurface implements AgentSurface {
       this.activeFrame,
       this.options.snapshotMechanism ?? process.env["SVATAH_PW_SNAPSHOT"],
     );
-    this.space = new RefSpace(this.activeFrame, this.mechanism, this.testIdAttributes());
+    this.space = new RefSpace(
+      this.activeFrame,
+      this.mechanism,
+      this.testIdAttributes(),
+      this.ignoreAttributes(),
+    );
   }
 
   async close(): Promise<void> {
@@ -212,8 +224,42 @@ export class PlaywrightSurface implements AgentSurface {
     return this.page();
   }
 
+  /**
+   * Read one attribute of a referenced element with a page script, deliberately
+   * going *around* the surface contract (LLD §16, Draft 2.3).
+   *
+   * This exists for the healing eval and nothing else. The eval needs each
+   * element's ground-truth label, and the label is precisely what
+   * `bindings.ignoreAttributes` makes the surface unable to see: `describe()`
+   * strips it, `native` never carries it, synthesis and fingerprinting filter it
+   * again. Reading it through the surface would defeat the point, so the eval
+   * reads it here, from the page, by a path no binding can take.
+   *
+   * It is not on `AgentSurface`, it is not part of the conformance suite, and
+   * nothing in the runtime or the healer may call it. An adapter that does not
+   * implement it makes the eval report every case as `unverified`, which is the
+   * correct outcome for a run that could not check its answers.
+   */
+  async readRawAttribute(ref: Ref, attribute: string): Promise<string | undefined> {
+    const space = this.refs();
+    const handle = await space.handleFor(ref);
+    try {
+      const value = await handle.evaluate(
+        (el: Element, name: string) => el.getAttribute(name),
+        attribute,
+      );
+      return value ?? undefined;
+    } finally {
+      if (!space.ownsHandle(ref)) await handle.dispose();
+    }
+  }
+
   private testIdAttributes(): readonly string[] {
     return this.options.testIdAttributes ?? ["data-testid", "data-test-id", "data-test"];
+  }
+
+  private ignoreAttributes(): readonly string[] {
+    return this.options.ignoreAttributes ?? DEFAULT_IGNORE_ATTRIBUTES;
   }
 
   private trackPage(page: Page): void {
@@ -350,6 +396,7 @@ export class PlaywrightSurface implements AgentSurface {
     try {
       const raw = await handle.evaluate(describeElement, {
         testIdAttributes: [...this.testIdAttributes()],
+        ignoreAttributes: [...this.ignoreAttributes()],
         neighbourCount: NEIGHBOUR_COUNT,
       });
       return { ref, ...raw } as ElementDescription;
@@ -976,6 +1023,7 @@ export function createPlaywrightSurface(
     ...(config.run.viewport === undefined ? {} : { viewport: config.run.viewport }),
     timeoutMs: config.run.stepTimeoutMs,
     testIdAttributes: config.bindings.testIdAttributes,
+    ignoreAttributes: config.bindings.ignoreAttributes ?? DEFAULT_IGNORE_ATTRIBUTES,
     outputDir: config.run.outputDir,
     ...overrides,
   });

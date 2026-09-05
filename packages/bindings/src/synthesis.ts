@@ -12,12 +12,22 @@
  * stops being true, and a candidate that matches more than one element is dropped
  * outright (REQ-REC-3) rather than guessed at.
  */
-import type { Candidate, ElementDescription, Fingerprint, Ref } from "@svatah/schema";
+import { DEFAULT_IGNORE_ATTRIBUTES, type Candidate, type ElementDescription, type Fingerprint, type Ref } from "@svatah/schema";
 import type { AgentSurface } from "@svatah/surface";
 
 export interface SynthesisOptions {
   /** Attributes treated as test ids, most preferred first. */
   testIdAttributes?: readonly string[];
+  /**
+   * Attributes nothing may bind to (`config.bindings.ignoreAttributes`, LLD
+   * §3.5). Removed from candidates and from fingerprints alike.
+   *
+   * The adapter strips these before `describe()` returns, so in the normal case
+   * they are gone before this code runs. It is enforced here as well because
+   * synthesis is adapter-neutral: an adapter that has not implemented the option
+   * must not be able to leak one of these into a candidate.
+   */
+  ignoreAttributes?: readonly string[];
   /**
    * Verify each candidate against the live surface and drop the ones that match
    * more than one element (REQ-REC-3). On by default: an unverified bundle is a
@@ -29,6 +39,28 @@ export interface SynthesisOptions {
 }
 
 const DEFAULT_TEST_ID_ATTRIBUTES = ["data-testid", "data-test-id", "data-test", "data-qa"];
+
+/** Lower-cased, so a caller's casing cannot get a value past the filter. */
+function ignoreSet(ignore: readonly string[] | undefined): Set<string> {
+  return new Set((ignore ?? DEFAULT_IGNORE_ATTRIBUTES).map((a) => a.toLowerCase()));
+}
+
+/** `attrs` and `native` with the ignored names removed. */
+function withoutIgnored(
+  description: ElementDescription,
+  ignore: readonly string[] | undefined,
+): ElementDescription {
+  const drop = ignoreSet(ignore);
+  const strip = (record: Record<string, string> | undefined): Record<string, string> | undefined => {
+    if (record === undefined) return undefined;
+    const kept = Object.entries(record).filter(([key]) => !drop.has(key.toLowerCase()));
+    return kept.length === Object.keys(record).length ? record : Object.fromEntries(kept);
+  };
+  const attrs = strip(description.attrs)!;
+  const native = strip(description.native);
+  if (attrs === description.attrs && native === description.native) return description;
+  return { ...description, attrs, ...(native === undefined ? {} : { native }) };
+}
 
 /** Roles whose text is their label, so a `text` candidate means something. */
 const TEXT_BEARING_ROLES = new Set([
@@ -103,10 +135,14 @@ export function looksGenerated(value: string): boolean {
  * the healer re-synthesises and has to merge two bundles (LLD §6.4).
  */
 export function candidatesFor(
-  description: ElementDescription,
+  raw: ElementDescription,
   options: SynthesisOptions = {},
 ): Candidate[] {
-  const testIdAttributes = options.testIdAttributes ?? DEFAULT_TEST_ID_ATTRIBUTES;
+  const description = withoutIgnored(raw, options.ignoreAttributes);
+  const drop = ignoreSet(options.ignoreAttributes);
+  const testIdAttributes = (options.testIdAttributes ?? DEFAULT_TEST_ID_ATTRIBUTES).filter(
+    (a) => !drop.has(a.toLowerCase()),
+  );
   const attrs = description.attrs;
   const native = description.native ?? {};
   const out: Candidate[] = [];
@@ -301,9 +337,15 @@ async function sameElement(
  * the page around it does. That is why the attributes are a selected list rather
  * than everything, and why generated ids and hashed classes are left out.
  */
-export function fingerprintOf(description: ElementDescription): Fingerprint {
+export function fingerprintOf(
+  raw: ElementDescription,
+  options: Pick<SynthesisOptions, "ignoreAttributes"> = {},
+): Fingerprint {
+  const description = withoutIgnored(raw, options.ignoreAttributes);
+  const drop = ignoreSet(options.ignoreAttributes);
   const attrs: Record<string, string> = {};
   for (const key of FINGERPRINT_ATTRIBUTES) {
+    if (drop.has(key.toLowerCase())) continue;
     const value = description.attrs[key] ?? description.native?.[key];
     if (value === undefined || value === "") continue;
     if (looksGenerated(value)) continue;
@@ -328,8 +370,12 @@ export function fingerprintOf(description: ElementDescription): Fingerprint {
 }
 
 /** The fingerprint of a live element. */
-export async function fingerprint(surface: AgentSurface, ref: Ref): Promise<Fingerprint> {
-  return fingerprintOf(await surface.describe(ref));
+export async function fingerprint(
+  surface: AgentSurface,
+  ref: Ref,
+  options: Pick<SynthesisOptions, "ignoreAttributes"> = {},
+): Promise<Fingerprint> {
+  return fingerprintOf(await surface.describe(ref), options);
 }
 
 /** Candidates and fingerprint in one pass, which is what the recorder wants. */
@@ -340,5 +386,5 @@ export async function synthesiseBundle(
 ): Promise<{ candidates: Candidate[]; fingerprint: Fingerprint; description: ElementDescription }> {
   const description = await surface.describe(ref);
   const candidates = await synthesise(surface, ref, options);
-  return { candidates, fingerprint: fingerprintOf(description), description };
+  return { candidates, fingerprint: fingerprintOf(description, options), description };
 }

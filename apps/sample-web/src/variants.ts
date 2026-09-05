@@ -1,4 +1,5 @@
 import { parse, type HTMLElement } from "node-html-parser";
+import { stampInto } from "./ground-truth.js";
 
 /**
  * The twenty deliberate UI changes (`?variant=1..20`, T0.5, LLD §16).
@@ -358,11 +359,19 @@ export function variantById(id: number): Variant | undefined {
  * not affect all return the HTML unchanged.
  */
 export function applyVariant(html: string, path: string, variant: number): string {
-  if (variant === 0) return html;
-  const spec = variantById(variant);
-  if (spec === undefined || !spec.pages.includes(path)) return html;
-
   const root = parse(html, { comment: true, blockTextElements: { script: true, style: true } });
-  spec.apply(root, path);
+
+  /*
+   * Ground-truth keys are stamped on the baseline, before the variant runs, and
+   * every variant transform then carries them along with the element it moves,
+   * retags or restyles (LLD §16, Draft 2.3). Stamping after the transform would
+   * renumber whatever the variant added or removed and the key would mean
+   * nothing across variants, which is the one property the eval needs from it.
+   */
+  stampInto(root, path);
+
+  const spec = variantById(variant);
+  if (variant !== 0 && spec !== undefined && spec.pages.includes(path)) spec.apply(root, path);
+
   return root.toString();
 }

@@ -197,6 +197,7 @@ export {
   environmentSchema,
   configSchema,
   DEFAULT_CONFIG,
+  DEFAULT_IGNORE_ATTRIBUTES,
   type AdapterName,
   type Environment,
   type Config,

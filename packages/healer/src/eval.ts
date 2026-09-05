@@ -33,11 +33,34 @@
  *   about healing.
  * * **Degraded bindings — the cases this eval's number is about.** A binding at
  *   least one of whose candidates has broken. It still resolves, but it has lost
- *   redundancy and the healer's job is to re-synthesise it. **Recovered** means
- *   relocalization proposed an element *and* a candidate re-synthesised from that
- *   element resolves back to it. The score alone is never taken as proof: a
- *   repair that is not verified is how a healer quietly binds to the wrong thing
- *   (REQ-HEAL-3).
+ *   redundancy and the healer's job is to re-synthesise it.
+ *
+ * ## What counts as recovered (Draft 2.3)
+ *
+ * **Recovered** means two things together: the element relocalization proposed
+ * carries the *same ground-truth key* as the element the binding was recorded
+ * on, and a candidate re-synthesised from it resolves back to exactly one
+ * element.
+ *
+ * The first half is the one Draft 2.3 added, and it is the half that makes the
+ * number mean anything. Phase 1 required only the second, which proves a
+ * proposal is *findable* — not that it is *right*. A healer that confidently
+ * relocalized "Sign in" onto "Sign up" would have scored a recovery. So the
+ * sample application labels every interactive element with a key that is
+ * identical on every variant (LLD §16), the eval records the key at variant 0,
+ * and afterwards it compares. Different key, `wrong-element`, whatever the
+ * score was.
+ *
+ * The label is read with a page script, around the surface rather than through
+ * it, and `bindings.ignoreAttributes` strips it from `describe()`, from
+ * `native`, from synthesis and from fingerprints. Otherwise it would be the
+ * strongest locator on the page and the eval would be measuring its own answer
+ * key.
+ *
+ * The second half is still required, and still separately reported: a proposal
+ * whose key matches but which nothing can re-synthesise a unique candidate for
+ * is `unverified`, not recovered. It is not a wrong element, and calling it one
+ * would be as misleading in the other direction (REQ-HEAL-3).
  *
  * No model is involved anywhere. `usedModel` is always false in Phase 1; the
  * model half of REQ-HEAL-5 arrives with the `Regrounder` plugin in Phase 3.
@@ -55,6 +78,12 @@ export interface EvalBinding {
   readonly name?: string;
   readonly candidates: readonly Candidate[];
   readonly fingerprint: Fingerprint;
+  /**
+   * The element's ground-truth key at variant 0 (LLD §16). `undefined` when the
+   * application does not label the element — those cases are counted separately
+   * rather than assumed correct.
+   */
+  readonly truth?: string;
 }
 
 /** One binding on one variant. */
@@ -64,10 +93,24 @@ export interface EvalCase {
   readonly variant: number;
   /**
    * `intact` — every candidate still identifies the element.
-   * `recovered` / `not-found` / `ambiguous` / `wrong-element` — the binding
-   * degraded and relocalization was asked to find it again.
+   *
+   * The rest are the outcomes of asking relocalization to find a degraded
+   * binding again:
+   *
+   * * `recovered` — the proposal's ground-truth key matches, and a
+   *   re-synthesised candidate resolves uniquely to it.
+   * * `wrong-element` — relocalization proposed a *different* element.
+   * * `unverified` — the key matches but nothing re-synthesised from the
+   *   proposal resolves uniquely, or the element carries no key to compare.
+   * * `not-found` / `ambiguous` — relocalization declined to propose.
    */
-  readonly outcome: "intact" | "recovered" | "not-found" | "ambiguous" | "wrong-element";
+  readonly outcome:
+    | "intact"
+    | "recovered"
+    | "not-found"
+    | "ambiguous"
+    | "wrong-element"
+    | "unverified";
   /** Candidate kinds that stopped identifying the element. */
   readonly brokenCandidates: readonly Candidate["by"][];
   /** True when no candidate resolved at all — the step could not have run. */
@@ -76,6 +119,10 @@ export interface EvalCase {
   readonly runnerUpScore?: number;
   /** The kind of candidate a verified repair re-synthesised. */
   readonly repairedBy?: Candidate["by"];
+  /** The ground-truth key of the element relocalization proposed. */
+  readonly proposedTruth?: string;
+  /** The key the binding was recorded on, when they differ. */
+  readonly expectedTruth?: string;
 }
 
 export interface VariantResult {
@@ -90,6 +137,7 @@ export interface VariantResult {
   readonly notFound: number;
   readonly ambiguous: number;
   readonly wrongElement: number;
+  readonly unverified: number;
   /** Bindings that stopped resolving entirely. */
   readonly unresolvable: number;
   /** `recovered / degraded`, or `null` when the variant degraded nothing. */
@@ -111,6 +159,7 @@ export interface HealingEvalReport {
     readonly notFound: number;
     readonly ambiguous: number;
     readonly wrongElement: number;
+    readonly unverified: number;
     readonly unresolvable: number;
   };
   /** Which candidate kinds broke, and how often. */
@@ -126,14 +175,22 @@ export interface HealingEvalReport {
 export const RELOCALIZE_THRESHOLD = 0.6;
 
 export const METHOD = [
-  "Bindings are recorded for every interactive element on every sample page at variant 0,",
-  "with test-id attributes disabled: an application that carries a data-testid on every",
-  "control barely needs healing, and measuring on it would flatter the result. Each variant",
-  "is then loaded on the pages it changes. A candidate has broken when it no longer",
-  "identifies exactly one element. A binding is degraded when at least one of its candidates",
-  "has broken, and those are the cases this number is about. Recovered means relocalization",
-  "proposed an element AND a candidate re-synthesised from that element resolves back to it —",
-  "the score alone is never taken as proof. No model is involved.",
+  "Bindings are recorded for every interactive element on every sample page at variant 0.",
+  "The headline number is taken with test-id attributes disabled: an application that carries",
+  "a data-testid on every control barely needs healing, and measuring on it would flatter the",
+  "result. The same run with test ids enabled is reported alongside it. Each variant is then",
+  "loaded on the pages it changes. A candidate has broken when it no longer identifies exactly",
+  "one element. A binding is degraded when at least one of its candidates has broken, and those",
+  "are the cases this number is about.",
+  "Recovered means two things together: the element relocalization proposed carries the same",
+  "ground-truth key as the element the binding was recorded on, AND a candidate re-synthesised",
+  "from that element resolves back to exactly one element. The key is a data-svatah-eval",
+  "attribute the sample application stamps on every interactive element, identical across all",
+  "variants; the eval reads it with a page script outside the surface, and",
+  "bindings.ignoreAttributes strips it from describe(), from native, from synthesis and from",
+  "fingerprints, so it can never help relocalization find anything. A proposal with a different",
+  "key is wrong-element however high it scored; one whose key matches but which cannot be",
+  "re-synthesised into a unique candidate is unverified, not recovered. No model is involved.",
 ].join(" ");
 
 export interface HealingEvalOptions {
@@ -147,6 +204,16 @@ export interface HealingEvalOptions {
    * Record with test-id attributes. Default false — see the method above.
    */
   withTestIds?: boolean;
+  /**
+   * Read an element's ground-truth key (LLD §16, Draft 2.3).
+   *
+   * Supplied by the caller rather than taken through the surface, because the
+   * whole point is that the surface cannot see the label: the CLI reads it with
+   * a page script. Without it the eval still runs, but every proposal is
+   * `unverified` rather than `recovered` — the number is not published from a
+   * run that could not check its answers.
+   */
+  groundTruth?: (surface: AgentSurface, ref: string) => Promise<string | undefined>;
   threshold?: number;
   margin?: number;
   onProgress?: (message: string) => void;
@@ -154,7 +221,10 @@ export interface HealingEvalOptions {
 
 /** Record bindings for every interactive element on every page, at variant 0. */
 export async function recordBaseline(
-  options: Pick<HealingEvalOptions, "open" | "close" | "pages" | "withTestIds" | "onProgress">,
+  options: Pick<
+    HealingEvalOptions,
+    "open" | "close" | "pages" | "withTestIds" | "onProgress" | "groundTruth"
+  >,
 ): Promise<EvalBinding[]> {
   const synthesisOptions = options.withTestIds === true ? {} : { testIdAttributes: [] };
   const bindings: EvalBinding[] = [];
@@ -170,6 +240,8 @@ export async function recordBaseline(
         const candidates = await synthesise(surface, node.ref, synthesisOptions);
         if (candidates.length === 0) continue;
 
+        const truth = await options.groundTruth?.(surface, node.ref).catch(() => undefined);
+
         bindings.push({
           id: `${page}::${identity(description)}`,
           page,
@@ -177,6 +249,7 @@ export async function recordBaseline(
           ...(description.name === undefined ? {} : { name: description.name }),
           candidates,
           fingerprint: fingerprintOf(description),
+          ...(truth === undefined ? {} : { truth }),
         });
       }
       options.onProgress?.(`recorded ${bindings.filter((b) => b.page === page).length} on ${page}`);
@@ -277,17 +350,44 @@ async function runCase(
     };
   }
 
+  /*
+   * The ground-truth check comes first, because it is the one that can say the
+   * repair is *wrong*. Verification can only say it is unusable.
+   */
+  const proposedTruth = await options.groundTruth?.(surface, result.match.ref).catch(() => undefined);
+  const scores = {
+    score: round(result.match.score.total),
+    ...(runnerUp === undefined ? {} : { runnerUpScore: round(runnerUp.score.total) }),
+  };
+
+  if (binding.truth !== undefined && proposedTruth !== undefined && proposedTruth !== binding.truth) {
+    return {
+      case: {
+        ...base,
+        outcome: "wrong-element",
+        ...scores,
+        proposedTruth,
+        expectedTruth: binding.truth,
+      },
+    };
+  }
+
   const synthesisOptions = options.withTestIds === true ? {} : { testIdAttributes: [] };
   const repaired = await synthesise(surface, result.match.ref, synthesisOptions).catch(() => []);
   const verified =
     repaired.length > 0 && (await surface.locate(repaired[0]!).catch(() => [])).length === 1;
 
+  // A key that could not be read on both sides leaves the comparison unmade, so
+  // the case is `unverified` even when re-synthesis worked. Counting it as a
+  // recovery would be assuming the answer.
+  const compared = binding.truth !== undefined && proposedTruth !== undefined;
+
   return {
     case: {
       ...base,
-      outcome: verified ? "recovered" : "wrong-element",
-      score: round(result.match.score.total),
-      ...(runnerUp === undefined ? {} : { runnerUpScore: round(runnerUp.score.total) }),
+      outcome: verified && compared ? "recovered" : "unverified",
+      ...scores,
+      ...(proposedTruth === undefined ? {} : { proposedTruth }),
       ...(verified && repaired[0] !== undefined ? { repairedBy: repaired[0].by } : {}),
     },
   };
@@ -315,6 +415,7 @@ function summarise(
       notFound: degradedCases.filter((c) => c.outcome === "not-found").length,
       ambiguous: degradedCases.filter((c) => c.outcome === "ambiguous").length,
       wrongElement: degradedCases.filter((c) => c.outcome === "wrong-element").length,
+      unverified: degradedCases.filter((c) => c.outcome === "unverified").length,
       unresolvable: mine.filter((c) => c.unresolvable).length,
       rate: degradedCases.length === 0 ? null : recovered / degradedCases.length,
     };
@@ -343,6 +444,7 @@ function summarise(
       notFound: degraded.filter((c) => c.outcome === "not-found").length,
       ambiguous: degraded.filter((c) => c.outcome === "ambiguous").length,
       wrongElement: degraded.filter((c) => c.outcome === "wrong-element").length,
+      unverified: degraded.filter((c) => c.outcome === "unverified").length,
       unresolvable: cases.filter((c) => c.unresolvable).length,
     },
     brokenByKind: Object.fromEntries(

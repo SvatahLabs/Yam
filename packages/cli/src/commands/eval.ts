@@ -20,8 +20,9 @@ import {
   runHealingEval,
   clearRegrounder,
 } from "@svatah/healer";
+import type { AgentSurface } from "@svatah/surface";
 import { createSurface, listAdapters } from "@svatah/surface";
-import { DEFAULT_CONFIG, type Config } from "@svatah/schema";
+import { DEFAULT_CONFIG, DEFAULT_IGNORE_ATTRIBUTES, type Config } from "@svatah/schema";
 import { registerAllAdapters } from "../adapters.js";
 import { boolOption, stringOption, type ParsedArgs } from "../args.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
@@ -64,12 +65,40 @@ export async function evalCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
   return await healing(args, io);
 }
 
+/**
+ * Read an element's ground-truth key without going through the surface
+ * (LLD §16, Draft 2.3).
+ *
+ * `bindings.ignoreAttributes` makes the surface blind to this attribute on
+ * purpose, so the eval asks the adapter for a page script instead. An adapter
+ * that has no such affordance returns nothing and every case is reported as
+ * `unverified` — the eval never assumes an answer it could not check.
+ */
+function groundTruthReader(
+  attribute: string,
+): (surface: AgentSurface, ref: string) => Promise<string | undefined> {
+  return async (surface, ref) => {
+    const raw = surface as unknown as {
+      readRawAttribute?: (ref: string, attribute: string) => Promise<string | undefined>;
+    };
+    if (typeof raw.readRawAttribute !== "function") return undefined;
+    return await raw.readRawAttribute(ref, attribute);
+  };
+}
+
 async function healing(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const baseUrl = (stringOption(args, "base-url") ?? "http://127.0.0.1:4173").replace(/\/+$/, "");
   const adapter = stringOption(args, "adapter") ?? "playwright";
   const reportPath = stringOption(args, "report");
   const json = boolOption(args, "json");
-  const withTestIds = boolOption(args, "with-test-ids");
+  /**
+   * REQ-HEAL-5 as amended asks for both populations. `--population` runs one on
+   * its own, which is what a verifier reproducing a single number wants; the
+   * default runs both and publishes them side by side.
+   */
+  const only = stringOption(args, "population");
+  const groundTruthAttribute =
+    stringOption(args, "ground-truth-attribute") ?? DEFAULT_IGNORE_ATTRIBUTES[0]!;
 
   // `--no-model` is the only mode Phase 1 has, and passing it is how a caller
   // says so out loud. Module (a) ships the no-op `Regrounder`; clearing it makes
@@ -85,49 +114,71 @@ async function healing(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const variants = await loadVariants(baseUrl, io);
   if (variants === null) return EXIT.failed;
 
-  const config: Config = {
-    ...DEFAULT_CONFIG,
-    project: "healing-eval",
-    adapter: adapter as Config["adapter"],
-    app: { baseUrl },
-    bindings: {
-      ...DEFAULT_CONFIG.bindings,
-      // The population is "an application with no test ids" — see the method in
-      // `@svatah/healer`. The adapter has none either, so its CSS and XPath paths
-      // are not anchored on one.
-      testIdAttributes: withTestIds ? DEFAULT_CONFIG.bindings.testIdAttributes : [],
-    },
-    run: { ...DEFAULT_CONFIG.run, headless: !boolOption(args, "headed"), stepTimeoutMs: 5_000 },
+  const headless = !boolOption(args, "headed");
+  const groundTruth = groundTruthReader(groundTruthAttribute);
+
+  const runPopulation = async (withTestIds: boolean) => {
+    const config: Config = {
+      ...DEFAULT_CONFIG,
+      project: "healing-eval",
+      adapter: adapter as Config["adapter"],
+      app: { baseUrl },
+      bindings: {
+        ...DEFAULT_CONFIG.bindings,
+        // The headline population is "an application with no test ids" — see the
+        // method in `@svatah/healer`. The adapter has none either, so its CSS and
+        // XPath paths are not anchored on one.
+        testIdAttributes: withTestIds ? DEFAULT_CONFIG.bindings.testIdAttributes : [],
+        // Never negotiable, in either population: the ground-truth label must
+        // stay invisible to everything that could bind to it (LLD §16).
+        ignoreAttributes: [groundTruthAttribute],
+      },
+      run: { ...DEFAULT_CONFIG.run, headless, stepTimeoutMs: 5_000 },
+    };
+
+    io.err(`population ${withTestIds ? "with-test-ids" : "no-test-ids"}`);
+    return await runHealingEval({
+      pages: PAGES,
+      variants,
+      withTestIds,
+      groundTruth,
+      open: async (page, variant) => {
+        const surface = await createSurface(config);
+        await surface.open({ baseUrl });
+        await surface.act("navigate", undefined, {
+          url: variant === 0 ? `${baseUrl}${page}` : `${baseUrl}${page}?variant=${variant}`,
+        });
+        return surface;
+      },
+      onProgress: (message) => io.err(`  ${message}`),
+    });
   };
 
-  const report = await runHealingEval({
-    pages: PAGES,
-    variants,
-    withTestIds,
-    open: async (page, variant) => {
-      const surface = await createSurface(config);
-      await surface.open({ baseUrl });
-      await surface.act("navigate", undefined, {
-        url: variant === 0 ? `${baseUrl}${page}` : `${baseUrl}${page}?variant=${variant}`,
-      });
-      return surface;
-    },
-    onProgress: (message) => io.err(`  ${message}`),
-  });
+  /*
+   * The headline number is always the no-test-ids population (REQ-HEAL-5 as
+   * amended: "both populations are reported"). `--population with-test-ids`
+   * makes that one the headline instead, which is how a verifier reproduces the
+   * second row on its own; `--population no-test-ids` skips the comparison run.
+   */
+  const headlineWithTestIds = only === "with-test-ids";
+  const report = await runPopulation(headlineWithTestIds);
+  const comparison = only === undefined ? await runPopulation(!headlineWithTestIds) : undefined;
 
-  const markdown = renderHealingEvalMarkdown(report);
+  const markdown = renderHealingEvalMarkdown(report, comparison);
   if (reportPath !== undefined) {
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, markdown, "utf8");
     io.err(`wrote ${reportPath}`);
   }
 
-  io.out(json ? JSON.stringify(report, null, 2) : markdown);
+  io.out(json ? JSON.stringify({ report, comparison }, null, 2) : markdown);
   io.err(`\n${renderHealingEvalSummary(report)}`);
+  if (comparison !== undefined) io.err(renderHealingEvalSummary(comparison));
 
   // The gate. The report has already been written and printed, so a number below
   // the threshold is published and *then* fails (REQ-HEAL-5, HLD §14: "publish
-  // anyway; relocalization thresholds are the honest signal").
+  // anyway; relocalization thresholds are the honest signal"). Only the headline
+  // population gates: the easier one is context, not a second bar to clear.
   return report.meetsThreshold ? EXIT.ok : EXIT.failed;
 }
 

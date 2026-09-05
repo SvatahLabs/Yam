@@ -64,6 +64,8 @@ export function walkDocument(options: {
   maxNodes: number;
   interactiveOnly: boolean;
   testIdAttributes: string[];
+  /** `config.bindings.ignoreAttributes` — never reported in `native` (LLD §3.5). */
+  ignoreAttributes: string[];
   /** Index into the registry of a previous walk, to snapshot one subtree. */
   rootIndex: number | null;
 }): RawNode[] {
@@ -323,12 +325,20 @@ export function walkDocument(options: {
   }
 
   function nativeOf(el: Element, testIdAttributes: string[]): Record<string, string> | undefined {
+    const ignored = new Set(options.ignoreAttributes.map((a) => a.toLowerCase()));
     const native: Record<string, string> = {};
-    for (const attribute of testIdAttributes) {
-      const value = el.getAttribute(attribute);
-      if (value !== null && value !== "") native[attribute] = value;
-    }
-    for (const attribute of ["id", "name", "type", "placeholder", "alt", "title", "href", "value"]) {
+    for (const attribute of [
+      ...testIdAttributes,
+      "id",
+      "name",
+      "type",
+      "placeholder",
+      "alt",
+      "title",
+      "href",
+      "value",
+    ]) {
+      if (ignored.has(attribute.toLowerCase())) continue;
       const value = el.getAttribute(attribute);
       if (value !== null && value !== "") native[attribute] = value;
     }
@@ -426,8 +436,17 @@ export function walkDocument(options: {
 
 export function describeElement(
   el: Element,
-  options: { testIdAttributes: string[]; neighbourCount: number },
+  options: { testIdAttributes: string[]; neighbourCount: number; ignoreAttributes: string[] },
 ): RawDescription {
+  /*
+   * `config.bindings.ignoreAttributes` (LLD §3.5, Draft 2.3) is enforced here,
+   * at the point the surface first sees the DOM, rather than above it: an
+   * attribute stripped before `describe()` returns cannot reach a candidate, a
+   * fingerprint, a score, or a `native` extra, whatever any caller does next.
+   * The healing eval's ground-truth label is the reason the option exists, and a
+   * label that leaked into synthesis would be the best candidate on the page.
+   */
+  const ignored = new Set(options.ignoreAttributes.map((a) => a.toLowerCase()));
   function roleOf(node: Element): string {
     const explicit = node.getAttribute("role");
     if (explicit !== null && explicit.trim() !== "") return explicit.trim().split(/\s+/)[0]!;
@@ -554,7 +573,10 @@ export function describeElement(
   const tag = el.tagName.toLowerCase();
 
   const attrs: Record<string, string> = {};
-  for (const attribute of Array.from(el.attributes)) attrs[attribute.name] = attribute.value;
+  for (const attribute of Array.from(el.attributes)) {
+    if (ignored.has(attribute.name.toLowerCase())) continue;
+    attrs[attribute.name] = attribute.value;
+  }
 
   let own = "";
   for (const child of Array.from(el.childNodes)) {
@@ -630,6 +652,7 @@ export function describeElement(
 
   const native: Record<string, string> = { tag };
   for (const attribute of options.testIdAttributes) {
+    if (ignored.has(attribute.toLowerCase())) continue;
     const value = el.getAttribute(attribute);
     if (value !== null && value !== "") native[attribute] = value;
   }
@@ -665,6 +688,7 @@ export function describeElement(
   /** A selector for one element that does not depend on where it sits. */
   const ownSelector = (node: Element): string | null => {
     for (const attribute of options.testIdAttributes) {
+      if (ignored.has(attribute.toLowerCase())) continue;
       const value = node.getAttribute(attribute);
       if (value !== null && value !== "" && !generated(value)) {
         return `[${attribute}="${cssEscape(value)}"]`;

@@ -55,13 +55,26 @@ The ten-minute quick start, with the record and heal passes explained, is
 Published, because a healing claim without a number is a slogan (REQ-HEAL-5,
 REQ-PKG-4). Over the twenty deliberate UI changes in `apps/sample-web`:
 
-| | |
-|---|---|
-| **Relocalize-only recovery** | **92.3 %** (48 of 52 degraded bindings) |
-| Threshold (REQ-HEAL-5) | 60 % |
-| Bindings that stopped resolving entirely | 0 of 106, on any variant |
-| Repairs that could not be verified | 0 |
-| Model calls | none |
+| | `no-test-ids` (headline) | `with-test-ids` |
+|---|---|---|
+| **Relocalize-only recovery** | **92.3 %** (48 of 52 degraded) | 78.9 % (15 of 19) |
+| Repairs onto the **wrong element** | 0 | 0 |
+| Repairs that could not be verified | 0 | 0 |
+| Bindings recorded at variant 0 | 106 | 106 |
+| Bindings that stopped resolving entirely | 0, on any variant | 0, on any variant |
+| Model calls | none | none |
+
+Threshold (REQ-HEAL-5): 60 %. The headline is the population *without* test-id
+attributes, because an application that carries a `data-testid` on every control
+barely needs healing and a number taken on it measures the application rather
+than the healer. Both are published so the gap is visible.
+
+A repair counts as recovered only when the element relocalization proposed
+carries the same ground-truth key as the element the binding was recorded on —
+not merely when the proposal is findable. The sample application stamps that key
+on every interactive element, identical across all variants, and
+`bindings.ignoreAttributes` keeps it out of `describe()`, `native`, synthesis and
+fingerprints so it can never help relocalization find anything.
 
 The method, the per-variant table, and the one change relocalization does *not*
 survive are in [`reports/eval-healing.md`](reports/eval-healing.md). Regenerate it

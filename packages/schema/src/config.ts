@@ -1,6 +1,18 @@
 import { z } from "zod";
 import { SCHEMA_VERSION } from "./version.js";
 
+/**
+ * The default of `bindings.ignoreAttributes` (LLD §3.5, §16, Draft 2.3).
+ *
+ * `data-svatah-eval` is the healing eval's ground-truth label. It is on this
+ * list by default rather than only in the eval's own configuration so that no
+ * arrangement of options can accidentally let a binding be built on it: an
+ * application that carried the attribute into production would otherwise get a
+ * flatteringly unbreakable candidate, and the eval would be scoring its own
+ * bookkeeping.
+ */
+export const DEFAULT_IGNORE_ATTRIBUTES = ["data-svatah-eval"];
+
 /** Project configuration, `svatah.config.yaml` (LLD §3.5). */
 
 export const adapterNameSchema = z.enum(["playwright", "bidi", "appium", "uia", "ax", "http"]);
@@ -41,6 +53,17 @@ export const configSchema = z
         dir: z.string().min(1),
         /** Attributes candidate synthesis may use as a test id, in preference order. */
         testIdAttributes: z.array(z.string().min(1)),
+        /**
+         * Attributes nothing may ever bind to (LLD §3.5, Draft 2.3).
+         *
+         * Removed from synthesis, from fingerprints, and from the adapter's
+         * `native` — so a value under one of these names cannot reach a
+         * candidate, a score, or a relocalization, whatever an adapter happens
+         * to expose. It exists because the healing eval labels every element
+         * with its ground-truth identity, and a label that helps relocalization
+         * find the element would make the eval measure itself.
+         */
+        ignoreAttributes: z.array(z.string().min(1)).optional(),
       })
       .strict(),
     data: z.object({ file: z.string().min(1) }).strict(),
@@ -155,7 +178,11 @@ export const DEFAULT_CONFIG: Omit<Config, "project"> = {
   app: {},
   flows: { dir: "flows" },
   steps: { dir: "steps" },
-  bindings: { dir: "bindings", testIdAttributes: ["data-testid", "data-test", "data-qa"] },
+  bindings: {
+    dir: "bindings",
+    testIdAttributes: ["data-testid", "data-test", "data-qa"],
+    ignoreAttributes: DEFAULT_IGNORE_ATTRIBUTES,
+  },
   data: { file: "data.yaml" },
   api: { dir: "api" },
   run: {

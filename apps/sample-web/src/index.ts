@@ -5,6 +5,7 @@
  * `pnpm --filter sample-web start` serves it on port 4173.
  */
 export { PAGES, pageFor, APP_CSS, CANVAS_JS, type Page } from "./pages.js";
+export { GROUND_TRUTH_ATTRIBUTE, stampGroundTruth, stampInto } from "./ground-truth.js";
 export {
   VARIANTS,
   VARIANT_IDS,

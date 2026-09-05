@@ -6,10 +6,24 @@
  * was measured on decides almost everything about it. So the report leads with
  * the method, gives the per-variant table before the total, and names the
  * variants relocalization does *not* survive rather than averaging them away.
+ *
+ * Draft 2.3 adds two obligations to that: recovery is verified against a
+ * ground-truth key rather than assumed from a score, and *both* populations —
+ * with and without test-id attributes — are reported, so the reader can see how
+ * much of the number is the healer and how much is the application being easy.
  */
 import type { HealingEvalReport } from "./eval.js";
 
-export function renderHealingEvalMarkdown(report: HealingEvalReport): string {
+/**
+ * @param report      the headline population (no test ids).
+ * @param comparison  the same run on the other population, reported alongside
+ *                    it (LLD §16, Draft 2.3). Omitted only when a caller ran one
+ *                    population deliberately; the published report has both.
+ */
+export function renderHealingEvalMarkdown(
+  report: HealingEvalReport,
+  comparison?: HealingEvalReport,
+): string {
   const percent = (value: number): string => `${(value * 100).toFixed(1)}%`;
   const lines: string[] = [];
 
@@ -37,8 +51,31 @@ export function renderHealingEvalMarkdown(report: HealingEvalReport): string {
   lines.push("");
   lines.push(report.method);
   lines.push("");
-  lines.push(`Population: \`${report.population}\`.`);
+  lines.push(`Headline population: \`${report.population}\`.`);
   lines.push("");
+
+  if (comparison !== undefined) {
+    lines.push("## Both populations");
+    lines.push("");
+    lines.push("| Population | Bindings | Degraded | Recovered | Wrong element | Rate |");
+    lines.push("|---|---|---|---|---|---|");
+    for (const one of [report, comparison]) {
+      lines.push(
+        `| \`${one.population}\`${one === report ? " **(headline)**" : ""} | ${one.bindings} | ` +
+          `${one.totals.degraded} | ${one.totals.recovered} | ${one.totals.wrongElement} | ` +
+          `${one.totals.degraded === 0 ? "—" : percent(one.relocalizeOnly)} |`,
+      );
+    }
+    lines.push("");
+    lines.push(
+      "`no-test-ids` is the headline because it is the harder and more representative " +
+        "population: an application with a `data-testid` on every control barely needs healing " +
+        "at all, so a number taken on it measures the application rather than the healer. " +
+        "Both are published so the gap between them is visible rather than a choice made " +
+        "quietly in the eval's own configuration.",
+    );
+    lines.push("");
+  }
 
   lines.push("## What was measured");
   lines.push("");
@@ -52,7 +89,19 @@ export function renderHealingEvalMarkdown(report: HealingEvalReport): string {
   lines.push(`| Recovered by relocalization | ${report.totals.recovered} |`);
   lines.push(`| Not found | ${report.totals.notFound} |`);
   lines.push(`| Refused as ambiguous | ${report.totals.ambiguous} |`);
-  lines.push(`| Proposed but unverifiable | ${report.totals.wrongElement} |`);
+  lines.push(`| **Relocalized onto the wrong element** | **${report.totals.wrongElement}** |`);
+  lines.push(`| Proposed but unverifiable | ${report.totals.unverified} |`);
+  lines.push("");
+  lines.push(
+    report.totals.wrongElement === 0
+      ? "Relocalization proposed the wrong element in no case: every proposal it made carried " +
+          "the ground-truth key of the element the binding was recorded on. That is the claim " +
+          "Phase 1's number could not make, because it verified only that a proposal was " +
+          "findable."
+      : `Relocalization proposed a **different element** in ${report.totals.wrongElement} ` +
+          "case(s). Those are counted as failures, not recoveries, however confident the score " +
+          "was — see the list at the end.",
+  );
   lines.push("");
 
   if (report.totals.unresolvable === 0 && report.totals.brokenLocators > 0) {
@@ -103,7 +152,29 @@ export function renderHealingEvalMarkdown(report: HealingEvalReport): string {
         `- **Variant ${variant.variant} — ${variant.title}**: ${variant.recovered} of ` +
           `${variant.degraded} recovered` +
           `${variant.notFound > 0 ? `, ${variant.notFound} not found` : ""}` +
-          `${variant.ambiguous > 0 ? `, ${variant.ambiguous} refused as ambiguous` : ""}.`,
+          `${variant.ambiguous > 0 ? `, ${variant.ambiguous} refused as ambiguous` : ""}` +
+          `${variant.wrongElement > 0 ? `, ${variant.wrongElement} onto the wrong element` : ""}` +
+          `${variant.unverified > 0 ? `, ${variant.unverified} unverifiable` : ""}.`,
+      );
+    }
+    lines.push("");
+  }
+
+  /*
+   * Every wrong element, individually. A rate hides these and they are the most
+   * interesting cases in the report: each one is a change that made a different
+   * element look more like the recorded fingerprint than the real one did.
+   */
+  const wrong = report.cases.filter((c) => c.outcome === "wrong-element");
+  if (wrong.length > 0) {
+    lines.push("## Where relocalization went to the wrong element");
+    lines.push("");
+    lines.push("| Variant | Binding | Expected | Proposed | Score |");
+    lines.push("|---|---|---|---|---|");
+    for (const one of wrong) {
+      lines.push(
+        `| ${one.variant} | \`${one.bindingId}\` | \`${one.expectedTruth ?? "?"}\` | ` +
+          `\`${one.proposedTruth ?? "?"}\` | ${one.score ?? "—"} |`,
       );
     }
     lines.push("");
@@ -114,7 +185,7 @@ export function renderHealingEvalMarkdown(report: HealingEvalReport): string {
 /** The same numbers as one line, for a terminal. */
 export function renderHealingEvalSummary(report: HealingEvalReport): string {
   return (
-    `healing eval — relocalize-only ${(report.relocalizeOnly * 100).toFixed(1)}% ` +
+    `healing eval [${report.population}] — relocalize-only ${(report.relocalizeOnly * 100).toFixed(1)}% ` +
     `(${report.totals.recovered}/${report.totals.degraded} degraded bindings recovered), ` +
     `threshold ${(report.threshold * 100).toFixed(0)}%: ${report.meetsThreshold ? "met" : "NOT met"}`
   );

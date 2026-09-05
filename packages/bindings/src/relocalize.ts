@@ -63,6 +63,13 @@ export interface RelocalizeOptions {
   maxCandidates?: number;
   /** Consider only elements with this role first; widen if nothing clears. */
   preferRole?: string;
+  /**
+   * Attributes that must not influence the score
+   * (`config.bindings.ignoreAttributes`, LLD §3.5). Defaults to the schema's
+   * default, which is the healing eval's ground-truth label: scoring on it
+   * would let the eval find the answer in the answer key.
+   */
+  ignoreAttributes?: readonly string[];
 }
 
 export type RelocalizeResult =
@@ -190,8 +197,12 @@ export function boxProximity(
 }
 
 /** Score one live element against a recorded fingerprint (LLD §6.4). */
-export function scoreAgainst(fingerprint: Fingerprint, description: ElementDescription): Score {
-  const live = fingerprintOf(description);
+export function scoreAgainst(
+  fingerprint: Fingerprint,
+  description: ElementDescription,
+  options: Pick<RelocalizeOptions, "ignoreAttributes"> = {},
+): Score {
+  const live = fingerprintOf(description, options);
   const attrs = attrSimilarity(fingerprint.attrs, live.attrs);
   const text = textSimilarity(fingerprint.text, live.text);
   const neighbours = neighbourSimilarity(fingerprint.neighbours, live.neighbours);
@@ -217,12 +228,13 @@ export function scoreAgainst(fingerprint: Fingerprint, description: ElementDescr
 export function rank(
   fingerprint: Fingerprint,
   descriptions: readonly ElementDescription[],
+  options: Pick<RelocalizeOptions, "ignoreAttributes"> = {},
 ): Match[] {
   return descriptions
     .map((description) => ({
       ref: description.ref,
       description,
-      score: scoreAgainst(fingerprint, description),
+      score: scoreAgainst(fingerprint, description, options),
     }))
     .sort((a, b) => b.score.total - a.score.total);
 }
@@ -290,11 +302,11 @@ export async function relocalize(
   };
 
   if (sameRole.length > 0) {
-    const ranked = rank(fingerprint, await describeAll(sameRole.map((n) => n.ref)));
+    const ranked = rank(fingerprint, await describeAll(sameRole.map((n) => n.ref)), options);
     const decision = decide(ranked, options);
     if (decision.outcome !== "not-found") return decision;
   }
 
   const everything = snapshot.nodes.filter((n) => !n.states.includes("hidden")).map((n) => n.ref);
-  return decide(rank(fingerprint, await describeAll(everything)), options);
+  return decide(rank(fingerprint, await describeAll(everything), options), options);
 }

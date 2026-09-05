@@ -1,6 +1,6 @@
 # Svatah eval report — healing
 
-Generated: 2026-09-02T19:25:05.625Z
+Generated: 2026-09-02T21:05:52.594Z
 
 **Relocalize-only recovery: 92.3%**, against REQ-HEAL-5's 60.0% threshold. Met.
 
@@ -8,9 +8,18 @@ No model was involved at any point: relocalization only, with the no-op `Regroun
 
 ## Method
 
-Bindings are recorded for every interactive element on every sample page at variant 0, with test-id attributes disabled: an application that carries a data-testid on every control barely needs healing, and measuring on it would flatter the result. Each variant is then loaded on the pages it changes. A candidate has broken when it no longer identifies exactly one element. A binding is degraded when at least one of its candidates has broken, and those are the cases this number is about. Recovered means relocalization proposed an element AND a candidate re-synthesised from that element resolves back to it — the score alone is never taken as proof. No model is involved.
+Bindings are recorded for every interactive element on every sample page at variant 0. The headline number is taken with test-id attributes disabled: an application that carries a data-testid on every control barely needs healing, and measuring on it would flatter the result. The same run with test ids enabled is reported alongside it. Each variant is then loaded on the pages it changes. A candidate has broken when it no longer identifies exactly one element. A binding is degraded when at least one of its candidates has broken, and those are the cases this number is about. Recovered means two things together: the element relocalization proposed carries the same ground-truth key as the element the binding was recorded on, AND a candidate re-synthesised from that element resolves back to exactly one element. The key is a data-svatah-eval attribute the sample application stamps on every interactive element, identical across all variants; the eval reads it with a page script outside the surface, and bindings.ignoreAttributes strips it from describe(), from native, from synthesis and from fingerprints, so it can never help relocalization find anything. A proposal with a different key is wrong-element however high it scored; one whose key matches but which cannot be re-synthesised into a unique candidate is unverified, not recovered. No model is involved.
 
-Population: `no-test-ids`.
+Headline population: `no-test-ids`.
+
+## Both populations
+
+| Population | Bindings | Degraded | Recovered | Wrong element | Rate |
+|---|---|---|---|---|---|
+| `no-test-ids` **(headline)** | 106 | 52 | 48 | 0 | 92.3% |
+| `with-test-ids` | 106 | 19 | 15 | 0 | 78.9% |
+
+`no-test-ids` is the headline because it is the harder and more representative population: an application with a `data-testid` on every control barely needs healing at all, so a number taken on it measures the application rather than the healer. Both are published so the gap between them is visible rather than a choice made quietly in the eval's own configuration.
 
 ## What was measured
 
@@ -24,7 +33,10 @@ Population: `no-test-ids`.
 | Recovered by relocalization | 48 |
 | Not found | 4 |
 | Refused as ambiguous | 0 |
+| **Relocalized onto the wrong element** | **0** |
 | Proposed but unverifiable | 0 |
+
+Relocalization proposed the wrong element in no case: every proposal it made carried the ground-truth key of the element the binding was recorded on. That is the claim Phase 1's number could not make, because it verified only that a proposal was findable.
 
 > No binding stopped resolving on any variant. A synthesised bundle carries five to eight independent candidates and a single-property change rarely takes them all, so the recovery rate above is measured over bindings that *degraded* — lost a candidate and with it their redundancy — rather than over bindings that failed outright. That distinction is the honest one; see the method.
 

@@ -242,6 +242,8 @@ export class RefSpace {
     public frame: Frame,
     public mechanism: SnapshotMechanism,
     public readonly testIdAttributes: readonly string[],
+    /** `config.bindings.ignoreAttributes` — never reported in `native`. */
+    public readonly ignoreAttributes: readonly string[] = [],
   ) {}
 
   /** Mint a ref for a handle found from a stored candidate. */
@@ -380,6 +382,7 @@ async function viaOwnRefs(space: RefSpace, options: SnapshotOptions): Promise<Sn
     maxNodes: options.maxNodes ?? DEFAULT_MAX_NODES,
     interactiveOnly: options.interactiveOnly === true,
     testIdAttributes: [...space.testIdAttributes],
+    ignoreAttributes: [...space.ignoreAttributes],
     rootIndex: options.root === undefined ? null : refIndex(options.root),
   })) as RawNode[];
   return raw as SnapshotNode[];
