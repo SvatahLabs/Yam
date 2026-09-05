@@ -27,7 +27,6 @@
   },
   "dependencies": {
     "@svatah/bindings": "workspace:*",
-    "@svatah/runtime": "workspace:*",
     "@svatah/schema": "workspace:*",
     "@svatah/surface": "workspace:*"
   },

@@ -275,14 +275,27 @@ describe("package.json dependency graph (LLD §1, Draft 2.2)", () => {
   });
 
   it("module (a) resolves no module (b) package, transitively (REQ-PKG-1)", () => {
-    // Module (b): the flow language, the compiler, the model gateway, the
-    // recorder, the trajectory compiler, and everything only they need.
+    /*
+     * Module (b) is what HLD §12 publishes as `@svatah/flow`: "spec, steps,
+     * compiler, gateway, recorder, runtime, workflow, tool, cli", plus the
+     * service and the migration tool that only exist above it.
+     *
+     * `runtime` is on that list, which is why it is here even though LLD §1's
+     * dependency graph draws `healer ─► runtime(replay)` and
+     * `playwright-test ─► runtime`. The two cannot both hold alongside
+     * REQ-PKG-1's "module (a) has no dependency on (b)". Phase 1 resolves it the
+     * only way that is true today — nothing in module (a) uses the executor,
+     * because the executor is T2.7 — and Phase 2 has to decide where `runtime`
+     * is published before the healer's replay needs it. See the Phase 1 progress
+     * record.
+     */
     const MODULE_B = [
       "spec",
       "steps",
       "compiler",
       "gateway",
       "recorder",
+      "runtime",
       "trajectory",
       "workflow",
       "tool",
@@ -290,6 +303,7 @@ describe("package.json dependency graph (LLD §1, Draft 2.2)", () => {
       "migrate",
       "cli",
     ];
+    /** The seven packages T1.9 publishes as module (a). */
     const MODULE_A = [
       "bindings",
       "healer",

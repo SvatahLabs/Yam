@@ -1,0 +1,204 @@
+/**
+ * T1.9 — module (a) is publishable, and it is module (a).
+ *
+ * "Publish `@svatah/bindings`, `@svatah/schema`, `@svatah/conformance`,
+ * `@svatah/adapter-playwright` 0.1; README with the ten-minute quick start and
+ * the published healing numbers."
+ *
+ * Validate: "`npm install` in a clean Playwright project works; module (a) has no
+ * dependency on module (b) packages (test inspects the dependency tree)."
+ *
+ * The clean-install half needs a network and a browser and is recorded in the
+ * Phase 1 progress file with the commands a verifier re-runs. What is here is
+ * everything that can be checked from the repository: that each package is
+ * publishable at all, that what it would publish is complete, and that the
+ * dependency tree contains no module (b) package.
+ */
+import { describe, expect, it } from "vitest";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { fromRoot } from "../src/repo.js";
+
+/** The seven packages T1.9 publishes as module (a). */
+const MODULE_A = [
+  "schema",
+  "surface",
+  "adapter-playwright",
+  "bindings",
+  "healer",
+  "playwright-test",
+  "conformance",
+] as const;
+
+/**
+ * Module (b), as HLD §12 publishes it: "`@svatah/flow` (spec, steps, compiler,
+ * gateway, recorder, runtime, workflow, tool, cli)", plus the service and the
+ * migration tool that only exist above it.
+ */
+const MODULE_B = [
+  "spec",
+  "steps",
+  "compiler",
+  "gateway",
+  "recorder",
+  "runtime",
+  "trajectory",
+  "workflow",
+  "tool",
+  "service",
+  "migrate",
+  "cli",
+];
+
+interface Manifest {
+  name: string;
+  version: string;
+  license: string;
+  type: string;
+  main?: string;
+  types?: string;
+  exports?: Record<string, unknown>;
+  files?: string[];
+  engines?: Record<string, string>;
+  publishConfig?: Record<string, unknown>;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
+}
+
+const manifest = (pkg: string): Manifest =>
+  JSON.parse(readFileSync(fromRoot("packages", pkg, "package.json"), "utf8")) as Manifest;
+
+describe("module (a) is publishable at 0.1.0 (T1.9)", () => {
+  it.each(MODULE_A)("@svatah/%s declares what npm needs to publish it", (pkg) => {
+    const m = manifest(pkg);
+    expect(m.name).toBe(`@svatah/${pkg}`);
+    expect(m.version).toBe("0.1.0");
+    expect(m.license, "REQ-PKG-3: the project itself is Apache-2.0").toBe("Apache-2.0");
+    expect(m.type, "the workspace is ESM (LLD §1)").toBe("module");
+    expect(m.publishConfig?.["access"], "a scoped package needs public access").toBe("public");
+    expect(m.engines?.["node"], "REQ-NFR-7: Node 22 LTS").toContain("22");
+
+    // `files` is what a consumer receives. Missing `dist` would publish an empty
+    // package that installs and then fails to import.
+    expect(m.files ?? [], `@svatah/${pkg} publishes no dist`).toContain("dist");
+    expect(m.exports?.["."], `@svatah/${pkg} has no entry point`).toBeDefined();
+  });
+
+  it("@svatah/schema publishes the JSON Schemas as well as the types (REQ-STD-1)", () => {
+    const m = manifest("schema");
+    expect(m.files).toContain("json");
+    expect(m.exports?.["./json/*"]).toBe("./json/*");
+    expect(existsSync(fromRoot("packages", "schema", "json", "ir.schema.json"))).toBe(true);
+  });
+
+  it("@svatah/playwright-test peers on the runner rather than depending on it", () => {
+    const m = manifest("playwright-test");
+    // A consumer's tests run under *their* @playwright/test. Depending on it
+    // would install a second copy, and two runners in one project is a bug that
+    // presents as fixtures mysteriously not existing.
+    expect(m.dependencies?.["@playwright/test"]).toBeUndefined();
+    expect(m.peerDependencies?.["@playwright/test"]).toBeDefined();
+    expect(m.devDependencies?.["@playwright/test"]).toBeDefined();
+  });
+
+  it("every module (a) package is built before it could be packed", () => {
+    for (const pkg of MODULE_A) {
+      expect(
+        existsSync(fromRoot("packages", pkg, "dist", "index.js")),
+        `packages/${pkg}/dist is missing — run \`pnpm -r build\``,
+      ).toBe(true);
+    }
+  });
+});
+
+describe("module (a) resolves no module (b) package (REQ-PKG-1)", () => {
+  /** Every `@svatah/*` package reachable from `pkg` through any dependency field. */
+  function closure(pkg: string): string[] {
+    const seen = new Set<string>();
+    const queue = [pkg];
+    while (queue.length > 0) {
+      const current = queue.pop()!;
+      const m = manifest(current);
+      for (const field of [
+        "dependencies",
+        "devDependencies",
+        "peerDependencies",
+        "optionalDependencies",
+      ] as const) {
+        for (const specifier of Object.keys(m[field] ?? {})) {
+          const match = /^@svatah\/([^/]+)$/.exec(specifier);
+          if (match === null) continue;
+          const next = match[1]!;
+          if (seen.has(next) || !existsSync(fromRoot("packages", next, "package.json"))) continue;
+          seen.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    return [...seen].sort();
+  }
+
+  it.each(MODULE_A)("@svatah/%s reaches no module (b) package", (pkg) => {
+    const reached = closure(pkg).filter((p) => MODULE_B.includes(p));
+    expect(reached, `@svatah/${pkg} reaches ${reached.join(", ")}`).toEqual([]);
+  });
+
+  it("the whole of module (a) is closed under its own dependencies", () => {
+    // Anything module (a) reaches must itself be module (a), or the seven
+    // packages T1.9 publishes would not be installable on their own.
+    const reached = new Set(MODULE_A.flatMap((pkg) => closure(pkg)));
+    for (const dependency of reached) {
+      expect(
+        MODULE_A as readonly string[],
+        `module (a) reaches @svatah/${dependency}, which is not published with it`,
+      ).toContain(dependency);
+    }
+  });
+
+  it("no module (a) package brings a browser runner as a hard dependency", () => {
+    // `playwright` is the adapter's business; `@playwright/test` is the
+    // consumer's. Neither may be forced on someone who wanted only the schemas.
+    for (const pkg of ["schema", "surface", "bindings", "healer", "conformance"] as const) {
+      const deps = Object.keys(manifest(pkg).dependencies ?? {});
+      expect(deps, `@svatah/${pkg} depends on a browser runner`).not.toContain("playwright");
+      expect(deps).not.toContain("@playwright/test");
+    }
+  });
+});
+
+describe("the README carries the quick start and the numbers (T1.9)", () => {
+  const readme = readFileSync(fromRoot("README.md"), "utf8");
+
+  it("shows the one dependency and the one import", () => {
+    expect(readme).toContain("npm install --save-dev @svatah/playwright-test");
+    expect(readme).toContain('import { test, expect } from "@svatah/playwright-test";');
+    expect(readme).toContain("examples/plain-playwright/README.md");
+  });
+
+  it("publishes the healing numbers, and links the method", () => {
+    expect(readme).toContain("Relocalize-only recovery");
+    expect(readme).toMatch(/\d+\.\d\s?%/);
+    expect(readme).toContain("reports/eval-healing.md");
+    expect(readme).toContain("pnpm eval:healing");
+  });
+
+  it("lists the seven packages module (a) publishes", () => {
+    for (const pkg of MODULE_A) {
+      expect(readme, `the README does not list @svatah/${pkg}`).toContain(`@svatah/${pkg}`);
+    }
+  });
+
+  it("says a browser has to be installed before the tests run", () => {
+    expect(readme).toContain("pnpm exec playwright install chromium");
+  });
+});
+
+describe("every published package explains itself", () => {
+  it.each(MODULE_A)("packages/%s has a README", (pkg) => {
+    const path = join(fromRoot("packages", pkg), "README.md");
+    expect(existsSync(path)).toBe(true);
+    expect(readFileSync(path, "utf8").length, `packages/${pkg}/README.md is a stub`).toBeGreaterThan(400);
+  });
+});

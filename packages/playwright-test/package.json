@@ -26,16 +26,15 @@
     "test": "playwright test"
   },
   "dependencies": {
-    "@playwright/test": "catalog:",
     "@svatah/adapter-playwright": "workspace:*",
     "@svatah/bindings": "workspace:*",
     "@svatah/healer": "workspace:*",
-    "@svatah/runtime": "workspace:*",
     "@svatah/schema": "workspace:*",
     "@svatah/surface": "workspace:*",
     "playwright": "catalog:"
   },
   "devDependencies": {
+    "@playwright/test": "catalog:",
     "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",

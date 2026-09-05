@@ -385,9 +385,6 @@ importers:
 
   packages/conformance:
     dependencies:
-      '@svatah/runtime':
-        specifier: workspace:*
-        version: link:../runtime
       '@svatah/schema':
         specifier: workspace:*
         version: link:../schema
@@ -426,9 +423,6 @@ importers:
       '@svatah/bindings':
         specifier: workspace:*
         version: link:../bindings
-      '@svatah/runtime':
-        specifier: workspace:*
-        version: link:../runtime
       '@svatah/schema':
         specifier: workspace:*
         version: link:../schema
@@ -467,9 +461,6 @@ importers:
 
   packages/playwright-test:
     dependencies:
-      '@playwright/test':
-        specifier: 'catalog:'
-        version: 1.62.1
       '@svatah/adapter-playwright':
         specifier: workspace:*
         version: link:../adapter-playwright
@@ -479,9 +470,6 @@ importers:
       '@svatah/healer':
         specifier: workspace:*
         version: link:../healer
-      '@svatah/runtime':
-        specifier: workspace:*
-        version: link:../runtime
       '@svatah/schema':
         specifier: workspace:*
         version: link:../schema
@@ -492,6 +480,9 @@ importers:
         specifier: 'catalog:'
         version: 1.62.1
     devDependencies:
+      '@playwright/test':
+        specifier: 'catalog:'
+        version: 1.62.1
       sample-web:
         specifier: workspace:*
         version: link:../../apps/sample-web
