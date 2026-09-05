@@ -136,7 +136,11 @@ export class BidiSurface implements AgentSurface {
 
     const endpoint = await openEndpoint(this.options);
     this.endpoint = endpoint;
-    this.servedBy = endpoint.launched ? "launched" : "attached";
+    this.servedBy = endpoint.launched
+      ? "launched"
+      : endpoint.hosted
+        ? "attached to a driver-hosted session"
+        : "attached";
 
     const trace = process.env["SVATAH_BIDI_TRACE"] === "1";
     this.client = await BidiClient.connect(endpoint.url, {
@@ -155,6 +159,7 @@ export class BidiSurface implements AgentSurface {
       testIdAttributes: this.options.testIdAttributes ?? ["data-testid"],
       ignoreAttributes: this.options.ignoreAttributes ?? DEFAULT_IGNORE_ATTRIBUTES,
       timeoutMs: this.options.timeoutMs ?? 10_000,
+      hosted: endpoint.hosted,
     });
 
     if (session.storageState !== undefined) {
@@ -174,7 +179,18 @@ export class BidiSurface implements AgentSurface {
      * wandered off must not make closing a session take the full command
      * timeout, thirty seconds at a time, once per flow.
      */
-    await this.client?.send("session.end", {}, { timeoutMs: 2_000 }).catch(() => undefined);
+    /*
+     * A session we did not create is not ours to end (Draft 2.6, LLD §7.3).
+     *
+     * When the URL is `…/session/<id>`, the classic session belongs to whoever
+     * created it through the driver, and they will `DELETE /session/<id>` when
+     * they are done. Ending it here would take the browser away from a caller
+     * that meant to keep driving it, and would make a second `open()` against
+     * the same URL fail on an endpoint that no longer has a session.
+     */
+    if (this.endpoint?.hosted !== true) {
+      await this.client?.send("session.end", {}, { timeoutMs: 2_000 }).catch(() => undefined);
+    }
     await this.client?.close();
     await this.endpoint?.close();
     this.session = undefined;

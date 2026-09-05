@@ -21,8 +21,18 @@ A browser exposes BiDi in one of two ways, and the adapter covers both.
 
 | Route | How | For |
 |---|---|---|
-| Attach | `SVATAH_BIDI_URL=ws://…/session` | Stock Chrome and Edge through chromedriver / msedgedriver started with the `webSocketUrl` capability; geckodriver; a remote grid; a browser launched by hand |
+| Attach to a **server** | `SVATAH_BIDI_URL=ws://…/session` | geckodriver, Firefox's remote agent, a remote grid — an endpoint where no session exists yet |
+| Attach to a **session** | `SVATAH_BIDI_URL=ws://…/session/<id>` | Stock Chrome and Edge through chromedriver / msedgedriver started with the `webSocketUrl` capability |
 | Launch | A Gecko binary, found in Playwright's browser cache, in `SVATAH_BIDI_BROWSER`, or installed on the machine | CI and the default developer loop |
+
+The two attach shapes differ by one path segment and behave completely
+differently (LLD §7.3, Draft 2.6). A bare `/session` is a server: the adapter
+creates a session with `session.new`. A `/session/<id>` is a session someone
+already created through a driver, and `session.new` there is answered with
+`session not created: session already exists` — so the adapter does not send it,
+and learns the browser from `session.status` instead. It also leaves that session
+alone on close: it did not create it, and whoever did will `DELETE /session/<id>`
+when they are finished.
 
 Firefox's remote agent *is* a BiDi server: `firefox --remote-debugging-port=0`
 prints `WebDriver BiDi listening on ws://127.0.0.1:<port>` and serves the
@@ -37,6 +47,10 @@ chromedriver --port=9515 &
 # `capabilities.webSocketUrl` from the response
 SVATAH_BIDI_URL=ws://127.0.0.1:9515/session/<id> svatah surface conform --adapter bidi
 ```
+
+`node scripts/bidi-independence.mjs` runs exactly those commands for you whenever
+a chromedriver or msedgedriver is on `PATH` or named by `SVATAH_CHROMEDRIVER`,
+and records the browser it reached in `reports/adapter-bidi.md`.
 
 `svatah surface conform` prints which binary or URL answered, and
 `reports/adapter-bidi.md` records it, because "BiDi passes" is not a result

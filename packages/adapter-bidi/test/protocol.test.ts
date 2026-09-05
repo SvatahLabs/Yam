@@ -6,9 +6,10 @@
  * is a command table, and everything below is a WebSocket.
  */
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   DialogError,
   LocateError,
@@ -18,8 +19,15 @@ import {
   TimeoutError,
 } from "@svatah/surface";
 import { BidiError } from "../src/client.js";
-import { bidiAvailable, findGecko, openEndpoint, BIDI_BROWSER_ENV, BIDI_URL_ENV } from "../src/launch.js";
-import { fromRemoteValue, RefSpace, toLocalValue } from "../src/session.js";
+import {
+  bidiAvailable,
+  findGecko,
+  isDriverHostedSession,
+  openEndpoint,
+  BIDI_BROWSER_ENV,
+  BIDI_URL_ENV,
+} from "../src/launch.js";
+import { BidiSession, fromRemoteValue, RefSpace, toLocalValue } from "../src/session.js";
 import { keyValue } from "../src/input.js";
 import { BIDI_CAPABILITIES } from "../src/surface.js";
 
@@ -173,8 +181,134 @@ describe("finding an endpoint (LLD §7.3)", () => {
     });
     expect(endpoint.url).toBe("ws://127.0.0.1:4444/session");
     expect(endpoint.describedAs).toContain("ws://127.0.0.1:4444/session");
+    // A bare `/session` is a *server*: no session exists there yet.
+    expect(endpoint.hosted).toBe(false);
     // Nothing was launched, so nothing is closed.
     await expect(endpoint.close()).resolves.toBeUndefined();
+  });
+
+  it("knows a driver-hosted session from a BiDi server (P4-F3, LLD §7.3)", async () => {
+    const endpoint = await openEndpoint({
+      env: { [BIDI_URL_ENV]: "ws://127.0.0.1:9515/session/a1b2c3" },
+    });
+    expect(endpoint.hosted).toBe(true);
+    expect(endpoint.describedAs).toContain("driver-hosted");
+  });
+
+  it("decides on the path, since that is all the two shapes differ by", () => {
+    // A session, created through a driver with `webSocketUrl: true`.
+    expect(isDriverHostedSession("ws://127.0.0.1:9515/session/a1b2c3")).toBe(true);
+    expect(isDriverHostedSession("ws://127.0.0.1:9515/session/a1b2c3/")).toBe(true);
+    expect(isDriverHostedSession("wss://grid.example.com/wd/hub/session/xyz")).toBe(true);
+    // A server, waiting to be asked for one.
+    expect(isDriverHostedSession("ws://127.0.0.1:4444/session")).toBe(false);
+    expect(isDriverHostedSession("ws://127.0.0.1:4444/session/")).toBe(false);
+    expect(isDriverHostedSession("ws://127.0.0.1:9222/")).toBe(false);
+    // Not a URL at all: not a session, and not a crash either.
+    expect(isDriverHostedSession("not a url")).toBe(false);
+  });
+});
+
+/**
+ * Both attach shapes, against exchanges recorded from real drivers (P4-F3).
+ *
+ * "Both attach shapes are tested against recorded exchanges" (Draft 2.6,
+ * LLD §7.3). The two JSON files under `test/exchanges/` are what chromedriver
+ * 152 and Firefox 153's remote agent actually answered, captured by
+ * `BidiClient`'s traffic hook — including chromedriver's refusal of
+ * `session.new`, which is the defect this pins down:
+ *
+ *     session.new → session not created: session already exists
+ *
+ * The adapter used to send that as its first message on the route its own README
+ * documents, so attaching to stock Chrome failed on contact (Phase 4
+ * verification, F3). The test is not "does the adapter cope with the error" — it
+ * is that the message is never sent.
+ */
+describe("attaching to the two endpoint shapes (P4-F3, LLD §7.3)", () => {
+  const HERE = dirname(fileURLToPath(import.meta.url));
+
+  type Recorded = Record<string, { result?: unknown; error?: string }>;
+
+  function exchange(name: string): Recorded {
+    return JSON.parse(readFileSync(join(HERE, "exchanges", `${name}.json`), "utf8")) as Recorded;
+  }
+
+  /**
+   * A `BidiClient` that answers from a recording and remembers what it was asked.
+   *
+   * `BidiSession.open` takes the client, so replaying at this level tests the
+   * whole opening sequence — which message goes first, what the browser is
+   * learned from, what the session ends up knowing — without a browser.
+   */
+  function replay(recorded: Recorded): {
+    client: Parameters<typeof BidiSession.open>[0];
+    sent: string[];
+  } {
+    const sent: string[] = [];
+    const client = {
+      async call(method: string, params: Record<string, unknown> = {}): Promise<unknown> {
+        const key =
+          method === "session.subscribe"
+            ? `session.subscribe:${(params["events"] as string[] | undefined)?.[0] ?? ""}`
+            : method;
+        sent.push(key);
+        const answer = recorded[key];
+        if (answer === undefined) throw new Error(`nothing recorded for ${key}`);
+        if (answer.error !== undefined) throw new Error(answer.error);
+        return answer.result;
+      },
+      on(): void {},
+    };
+    return { client: client as unknown as Parameters<typeof BidiSession.open>[0], sent };
+  }
+
+  const options = { testIdAttributes: ["data-testid"], ignoreAttributes: [], timeoutMs: 5_000 };
+
+  it("attaches to chromedriver's session without creating a second one", async () => {
+    const { client, sent } = replay(exchange("chromedriver-attach"));
+    const session = await BidiSession.open(client, { ...options, hosted: true });
+
+    // The whole of the defect, in one assertion.
+    expect(sent).not.toContain("session.new");
+    // And the recording *does* hold chromedriver's refusal, so this would fail
+    // rather than pass vacuously if the message came back.
+    expect(exchange("chromedriver-attach")["session.new"]?.error).toContain(
+      "session already exists",
+    );
+
+    // `session.status` is what it asks instead, and what it learns from.
+    expect(sent[0]).toBe("session.status");
+    expect(session.describedBrowser).toContain("152.0.7977.82");
+
+    // And it is a working session: the context tree was read.
+    expect(session.windows).toEqual(["1A3B20C181A78EF8DC8CDBD12DAB5F13"]);
+  });
+
+  it("still creates a session on a bare BiDi server", async () => {
+    const { client, sent } = replay(exchange("firefox-server"));
+    const session = await BidiSession.open(client, { ...options, hosted: false });
+
+    expect(sent).toContain("session.new");
+    expect(sent).not.toContain("session.status");
+    // Firefox names itself in `session.new`'s capabilities, so the report gets
+    // the browser and the version rather than a build string.
+    expect(session.describedBrowser).toBe("firefox 153.0");
+    expect(session.windows).toEqual(["ea02a15e-b4d5-42fd-a38d-167ad444c9e5"]);
+  });
+
+  it("loses only the event a browser does not have", async () => {
+    // Gecko refuses `browsingContext.navigationAborted`, and the recording holds
+    // that refusal. One subscription per call is what keeps the refusal from
+    // taking the dialog subscription down with it.
+    expect(
+      exchange("firefox-server")["session.subscribe:browsingContext.navigationAborted"]?.error,
+    ).toContain("not a valid event name");
+
+    const { client, sent } = replay(exchange("firefox-server"));
+    await BidiSession.open(client, { ...options, hosted: false });
+    expect(sent).toContain("session.subscribe:browsingContext.userPromptOpened");
+    expect(sent).toContain("session.subscribe:browsingContext.navigationAborted");
   });
 
   it("says what to do when there is neither an endpoint nor a browser", async () => {

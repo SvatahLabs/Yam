@@ -1,0 +1,75 @@
+{
+  "session.status": {
+    "result": {
+      "ready": true,
+      "message": ""
+    }
+  },
+  "session.new": {
+    "result": {
+      "sessionId": "b8412c21-ddc9-4991-b590-f9894500a431",
+      "capabilities": {
+        "acceptInsecureCerts": false,
+        "browserName": "firefox",
+        "browserVersion": "153.0",
+        "platformName": "mac",
+        "setWindowRect": true,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:153.0) Gecko/20100101 Firefox/153.0",
+        "moz:buildID": "20260722112722",
+        "moz:headless": true,
+        "moz:platformVersion": "25.3.0",
+        "moz:processID": 97289,
+        "moz:profile": "/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-bidi-IcWLDh",
+        "moz:shutdownTimeout": 60000
+      }
+    }
+  },
+  "session.subscribe:browsingContext.userPromptOpened": {
+    "result": {
+      "subscription": "f7d02bc9-92f0-489a-b946-817d2ce2acac"
+    }
+  },
+  "session.subscribe:browsingContext.contextCreated": {
+    "result": {
+      "subscription": "d4822230-1a62-4fce-adb1-4f5a6fae57b3"
+    }
+  },
+  "session.subscribe:browsingContext.contextDestroyed": {
+    "result": {
+      "subscription": "8f97ca8a-2b00-44d3-9860-7ac86f0f5d20"
+    }
+  },
+  "session.subscribe:browsingContext.navigationStarted": {
+    "result": {
+      "subscription": "ba265566-a70e-4652-ad23-cbb7bc44be3b"
+    }
+  },
+  "session.subscribe:browsingContext.load": {
+    "result": {
+      "subscription": "3639c642-de08-4237-875c-46f22c49f008"
+    }
+  },
+  "session.subscribe:browsingContext.navigationFailed": {
+    "result": {
+      "subscription": "eec6c393-28ec-4312-9f46-30302ca9bed7"
+    }
+  },
+  "session.subscribe:browsingContext.navigationAborted": {
+    "error": "invalid argument: browsingContext.navigationAborted is not a valid event name"
+  },
+  "browsingContext.getTree": {
+    "result": {
+      "contexts": [
+        {
+          "children": [],
+          "context": "ea02a15e-b4d5-42fd-a38d-167ad444c9e5",
+          "originalOpener": null,
+          "url": "about:blank",
+          "userContext": "default",
+          "clientWindow": "57c7afce-6081-4181-9dea-67abe886c48d",
+          "parent": null
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "session.status": {
+    "result": {
+      "build": {
+        "version": "152.0.7977.82 (d04cdb24d67b081f6cf80200ffc5233f44b61109-refs/branch-heads/7977@{#2322})"
+      },
+      "message": "already connected",
+      "os": {
+        "arch": "arm64",
+        "name": "Mac OS X",
+        "version": "26.3.0"
+      },
+      "ready": false
+    }
+  },
+  "session.new": {
+    "error": "session not created: session not created: session already exists"
+  },
+  "session.subscribe:browsingContext.userPromptOpened": {
+    "result": {
+      "subscription": "d9edac3b-340e-4d86-a5b7-da8c477a96de"
+    }
+  },
+  "session.subscribe:browsingContext.contextCreated": {
+    "result": {
+      "subscription": "688a82f9-0ac1-4780-8770-7448d20d2214"
+    }
+  },
+  "session.subscribe:browsingContext.contextDestroyed": {
+    "result": {
+      "subscription": "8488350c-f346-4956-9530-febb3c0bbdb2"
+    }
+  },
+  "session.subscribe:browsingContext.navigationStarted": {
+    "result": {
+      "subscription": "ec102460-7742-4712-99a2-ef5a1053d0f8"
+    }
+  },
+  "session.subscribe:browsingContext.load": {
+    "result": {
+      "subscription": "db3d143a-7010-4937-acc6-865ba17e8b59"
+    }
+  },
+  "session.subscribe:browsingContext.navigationFailed": {
+    "result": {
+      "subscription": "1619a70e-1491-4bdf-aa3a-9ffb0e3684e0"
+    }
+  },
+  "session.subscribe:browsingContext.navigationAborted": {
+    "result": {
+      "subscription": "e5d9ae50-9bf0-4111-b833-c0eb945876d3"
+    }
+  },
+  "browsingContext.getTree": {
+    "result": {
+      "contexts": [
+        {
+          "children": [],
+          "clientWindow": "668927530",
+          "context": "1A3B20C181A78EF8DC8CDBD12DAB5F13",
+          "originalOpener": null,
+          "parent": null,
+          "url": "about:blank",
+          "userContext": "default"
+        }
+      ]
+    }
+  }
+}

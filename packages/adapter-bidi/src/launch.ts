@@ -31,14 +31,51 @@ import { SessionError } from "@svatah/surface";
 
 /** Where a session is talking, and to what. */
 export interface BidiEndpoint {
-  /** The BiDi WebSocket URL, ready for `session.new`. */
+  /** The BiDi WebSocket URL. */
   readonly url: string;
   /** The binary, or the URL, this came from. Diagnostics only, never a report. */
   readonly describedAs: string;
   /** True when this adapter started the browser; false when it attached. */
   readonly launched: boolean;
+  /**
+   * True when the URL is a driver-hosted *session* (Draft 2.6, LLD §7.3).
+   *
+   * A session that already exists must not be created again — see
+   * `isDriverHostedSession`.
+   */
+  readonly hosted: boolean;
   /** Stop the browser this launched, if it launched one. */
   close(): Promise<void>;
+}
+
+/**
+ * Is this URL a session someone already created? (Draft 2.6, LLD §7.3)
+ *
+ * The two attach shapes look almost the same and behave completely differently:
+ *
+ * - `ws://127.0.0.1:9222/session` — a *server*. Firefox's remote agent, and
+ *   geckodriver's BiDi port. No session exists yet; `session.new` creates one.
+ * - `ws://127.0.0.1:9515/session/<id>` — a *session*. chromedriver and
+ *   msedgedriver expose this after a classic session is created with
+ *   `webSocketUrl: true`, which is the documented route to stock Chrome and
+ *   Edge. The session is already there, and `session.new` is answered with
+ *   `session not created: session already exists` — which is what the adapter
+ *   did on its first message, making the README's own commands fail (Phase 4
+ *   verification, F3).
+ *
+ * The distinction is one path segment, so it is decided here, once, rather than
+ * guessed from an error message after the fact.
+ */
+export function isDriverHostedSession(url: string): boolean {
+  let path: string;
+  try {
+    path = new URL(url).pathname;
+  } catch {
+    return false;
+  }
+  // `/session/<id>`, with an id that is not empty. A trailing slash on
+  // `/session/` is a server with a sloppy URL, not a session.
+  return /\/session\/[^/]+\/?$/.test(path);
 }
 
 export interface LaunchOptions {
@@ -137,10 +174,14 @@ export async function openEndpoint(options: LaunchOptions = {}): Promise<BidiEnd
 
   const attach = options.url ?? env[BIDI_URL_ENV];
   if (attach !== undefined && attach !== "") {
+    const hosted = isDriverHostedSession(attach);
     return {
       url: attach,
-      describedAs: `an endpoint at ${attach}`,
+      describedAs: hosted
+        ? `a driver-hosted session at ${attach}`
+        : `an endpoint at ${attach}`,
       launched: false,
+      hosted,
       close: async () => undefined,
     };
   }
@@ -252,6 +293,8 @@ async function launchGecko(binary: string, options: LaunchOptions): Promise<Bidi
     url: `${url}/session`,
     describedAs: binary,
     launched: true,
+    // A launched Gecko is a BiDi *server*: no session exists until we make one.
+    hosted: false,
     close: async () => {
       process.removeListener("exit", reap);
       reap();

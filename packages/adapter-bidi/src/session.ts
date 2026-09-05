@@ -130,6 +130,38 @@ export interface EvaluateOptions {
  * One open BiDi session: the client, the contexts it knows about, and the
  * in-page helpers.
  */
+/**
+ * What an already-created session says it is (Draft 2.6, LLD §7.3).
+ *
+ * "It learns the browser from `session.status`." That command is answerable
+ * whether or not a session exists, which is exactly why the spec names it: it
+ * is the one question the adapter can ask an endpoint it did not create.
+ *
+ * What it gets back is less than `session.new` would have given. chromedriver
+ * answers `{ ready: false, message: "already connected", build: { version },
+ * os: {…} }` — a build string and no browser name, because there is no field
+ * for one. So the name is reported when a driver offers it and the version
+ * always, rather than a name being invented: a conformance report that said
+ * "chrome" because the URL had a port number in the nine thousands would be a
+ * report making things up.
+ */
+async function describeHostedSession(
+  client: BidiClient,
+): Promise<{ browserName?: string; browserVersion?: string }> {
+  const status = (await client.call("session.status", {})) as {
+    build?: { version?: string; browserName?: string };
+    browserName?: string;
+    os?: { name?: string };
+  };
+
+  const browserName = status.build?.browserName ?? status.browserName;
+  const browserVersion = status.build?.version;
+  return {
+    ...(browserName === undefined ? {} : { browserName }),
+    ...(browserVersion === undefined ? {} : { browserVersion }),
+  };
+}
+
 export class BidiSession {
   /** Top-level contexts, in the order the browser reported or created them. */
   windows: ContextId[] = [];
@@ -173,11 +205,35 @@ export class BidiSession {
 
   static async open(
     client: BidiClient,
-    options: { testIdAttributes: readonly string[]; ignoreAttributes: readonly string[]; timeoutMs: number },
+    options: {
+      testIdAttributes: readonly string[];
+      ignoreAttributes: readonly string[];
+      timeoutMs: number;
+      /**
+       * The endpoint is a session someone already created (Draft 2.6, LLD §7.3).
+       *
+       * chromedriver and msedgedriver expose `…/session/<id>` after a classic
+       * session is created with `webSocketUrl: true` — the documented route to
+       * stock Chrome and Edge. Sending `session.new` there is answered with
+       * `session not created: session already exists`, and it was the adapter's
+       * first message, so the README's own commands failed on contact.
+       */
+      readonly hosted?: boolean;
+    },
   ): Promise<BidiSession> {
-    const created = (await client.call("session.new", { capabilities: {} })) as {
-      capabilities?: { browserName?: string; browserVersion?: string };
-    };
+    /*
+     * Create a session, or attach to one (Draft 2.6, LLD §7.3).
+     *
+     * Both shapes end up in the same place: a client that can subscribe, walk
+     * the context tree and drive the browser. What differs is the first message
+     * and where the browser's name comes from — `session.new`'s capabilities
+     * when we made it, `session.status`'s build when we did not.
+     */
+    const created = options.hosted === true
+      ? { capabilities: await describeHostedSession(client) }
+      : ((await client.call("session.new", { capabilities: {} })) as {
+          capabilities?: { browserName?: string; browserVersion?: string };
+        });
     const session = new BidiSession(
       client,
       new RefSpace(options.testIdAttributes, options.ignoreAttributes),
@@ -225,6 +281,10 @@ export class BidiSession {
     const version = created.capabilities?.browserVersion;
     if (name !== undefined) {
       session.describedBrowser = version === undefined ? name : `${name} ${version}`;
+    } else if (version !== undefined) {
+      // An attached driver session: `session.status` gave a build and no name.
+      // The build is what the report can honestly record.
+      session.describedBrowser = `a WebDriver BiDi browser, build ${version}`;
     }
 
     const tree = (await client.call("browsingContext.getTree", {})) as {

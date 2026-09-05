@@ -245,6 +245,10 @@ export default tseslint.config(
       // not source and linting it says nothing about this repository.
       "**/.vite/**",
       "apps/ade/out/**",
+      // `.svatah/` is a project's scratch directory — a compiled plan, a heal
+      // diff, a model cache — and is git-ignored everywhere. It is generated
+      // output, not source, and linting it says nothing about this repository.
+      "**/.svatah/**",
     ],
   },
   js.configs.recommended,
