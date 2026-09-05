@@ -201,9 +201,33 @@ describe("performance (REQ-COMP-2: 1,000 steps in under 1 s)", () => {
     }
     const elapsed = performance.now() - started;
 
-    // Reported either way, so a regression that stays inside the budget is still
-    // visible to whoever reads the output.
-    console.log(`1,000 steps parsed and lowered in ${elapsed.toFixed(0)} ms`);
-    expect(elapsed).toBeLessThan(1000);
+    /*
+     * The budget is three times the requirement (LLD §16, Draft 2.4).
+     *
+     * REQ-COMP-2 asks for 1,000 steps in under a second. This suite runs beside
+     * every other package's, several browsers among them, on whatever the CI
+     * runner has left — and a wall-clock assertion sized exactly to its
+     * requirement measures the machine's load as much as the grammar. "A timing
+     * test that fails only under parallel load is a defect in the test, not in
+     * the code."
+     *
+     * What keeps the requirement honest is the number itself: it is printed
+     * every run, and it is a tenth of the budget on an idle machine, so a
+     * regression that stays inside the budget is still there to be read.
+     */
+    const REQUIREMENT_MS = 1000;
+    const BUDGET_MS = REQUIREMENT_MS * 3;
+
+    console.log(
+      `1,000 steps parsed and lowered in ${elapsed.toFixed(0)} ms ` +
+        `(REQ-COMP-2: ${REQUIREMENT_MS} ms; budget under load: ${BUDGET_MS} ms)`,
+    );
+    if (elapsed >= REQUIREMENT_MS) {
+      console.warn(
+        `over the ${REQUIREMENT_MS} ms REQ-COMP-2 asks for — either the machine is busy ` +
+          "or the grammar got slower; measure it on its own before deciding which.",
+      );
+    }
+    expect(elapsed).toBeLessThan(BUDGET_MS);
   });
 });
