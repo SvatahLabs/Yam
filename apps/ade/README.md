@@ -7,7 +7,14 @@ and the service's reference client (REQ-ADE-1, 2).
 pnpm -r build                      # the CLI the ADE spawns
 pnpm --filter @svatah/ade start    # run it
 pnpm --filter @svatah/ade make     # installers for this platform
+pnpm --filter @svatah/ade smoke    # open the fixture project and quit
 ```
+
+Each of those fetches Electron's runtime binary first if it is not there.
+`electron`'s own postinstall does not reliably run under pnpm — a store hit
+installs the package without its binary — and the failure it causes is
+confusing, so the scripts run one idempotent downloader rather than leaving a
+person to discover it.
 
 Developed in this repository until its first tagged release, then split to the
 `svatahADE` repository (HLD ADR-17, Draft 2.4). It is also the desktop
