@@ -6,39 +6,22 @@
  * them in the same order matters, because a `--stable` compile has to be a
  * function of the files and nothing else.
  */
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { parse as parseYaml } from "yaml";
 import { readBindingIndex, type BindingIndexEntry } from "@svatah/bindings";
 import { compile, type CompileResult } from "@svatah/compiler";
 import { diagnostic, readProjectFrom, type Diagnostic, type Project } from "@svatah/spec";
 import { loadSteps, type StepRegistry } from "@svatah/steps";
-import { DEFAULT_CONFIG, configSchema, type Config } from "@svatah/schema";
+import type { Config } from "@svatah/schema";
+import { loadConfig as readConfig } from "@svatah/bindings-cli";
 import { ConfigError } from "./config-error.js";
 
-export const CONFIG_FILES = ["svatah.config.yaml", "svatah.config.yml", "svatah.config.json"];
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-/**
- * The defaults, with the file's sections merged over them one level deep.
- *
- * A shallow spread would be wrong: `bindings: { dir: fixtures }` in a config
- * would replace the whole `bindings` section and silently drop
- * `testIdAttributes` and `ignoreAttributes`, which is not what anyone writing
- * two lines of YAML means. Arrays are replaced whole — a project that lists its
- * test-id attributes is naming the set, not adding to ours.
+/*
+ * Config loading lives in `@svatah/bindings-cli` since Draft 2.5, so that both
+ * command lines read one file with one set of defaults (LLD §15). Re-exported
+ * here because this is where module (b) has always reached for it.
  */
-function withDefaults(parsed: Record<string, unknown>, project: string): Record<string, unknown> {
-  const merged: Record<string, unknown> = { ...DEFAULT_CONFIG, project, ...parsed };
-  for (const [key, fallback] of Object.entries(DEFAULT_CONFIG)) {
-    const given = parsed[key];
-    if (isPlainObject(fallback) && isPlainObject(given)) merged[key] = { ...fallback, ...given };
-  }
-  return merged;
-}
+export { CONFIG_FILES, loadConfig } from "@svatah/bindings-cli";
 
 export interface LoadedProject {
   readonly root: string;
@@ -47,38 +30,6 @@ export interface LoadedProject {
   readonly steps: StepRegistry;
   /** Everything reading the project said, including the step loader's. */
   readonly diagnostics: readonly Diagnostic[];
-}
-
-/** The config a project declares, or the defaults. */
-export function loadConfig(root: string): { config: Config; file?: string } {
-  for (const name of CONFIG_FILES) {
-    const path = join(root, name);
-    if (!existsSync(path)) continue;
-    const text = readFileSync(path, "utf8");
-    const parsed = (name.endsWith(".json") ? JSON.parse(text) : parseYaml(text)) as
-      | Record<string, unknown>
-      | null;
-    const merged = withDefaults(parsed ?? {}, root.split(/[\\/]/).pop() ?? "project");
-    const result = configSchema.safeParse(merged);
-    /*
-     * A typo in a config file is the user's mistake, not a crash. Zod's issues
-     * become one line each, pointing at the path, and the caller turns that into
-     * exit 64 (LLD §15).
-     */
-    if (!result.success) {
-      const issues = result.error.issues
-        .map((issue) => `  ${issue.path.join(".") || "(root)"}: ${issue.message}`)
-        .join("\n");
-      throw new ConfigError(`${name} is not a valid Svatah config:\n${issues}`, name);
-    }
-    return { config: result.data, file: name };
-  }
-  return {
-    config: configSchema.parse({
-      ...DEFAULT_CONFIG,
-      project: root.split(/[\\/]/).pop() ?? "project",
-    }),
-  };
 }
 
 /**
@@ -137,7 +88,7 @@ function bindingsOf(
 
 export async function loadProject(root: string): Promise<LoadedProject> {
   const absolute = resolve(root);
-  const { config } = loadConfig(absolute);
+  const { config } = readConfig(absolute);
 
   const bindings = bindingsOf(absolute, config.bindings.dir);
 

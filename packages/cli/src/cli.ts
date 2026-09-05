@@ -36,8 +36,10 @@ Flows (module b):
   svatah lint [dir] [--json]
   svatah compile [dir] [--stable] [--out .svatah/plan.json] [--json]
   svatah record [dir] [--flow <file>] [--story <name>] [--rebind] [--headed]
+                [--base-url <url>] [--storage-state <path.json>]
                 [--gateway anthropic|fake] [--input k=v] [--force-production] [--json]
   svatah run [dir] [--host playwright|none] [--flow <file>] [--story <name>]
+             [--base-url <url>] [--storage-state <path.json>]
              [--workers <n>] [--headed] [--out runs] [--run-id <id>] [--json]
   svatah host generate [dir] [--out .svatah/specs]
   svatah migrate <src> <dest> [--keep-original] [--json]
@@ -59,6 +61,10 @@ Bindings and healing (module a):
   svatah eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
   svatah eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
                         [--limit <n>] [--report <path.md>] [--json]
+
+Every command that opens a session takes its base URL and storage state from
+the --base-url / --storage-state flag, then SVATAH_BASE_URL /
+SVATAH_STORAGE_STATE, then config.app, in that order (LLD §15).
 
 Exit codes are the table in LLD §15.
 `;
@@ -127,12 +133,10 @@ async function registerModelRegrounder(args: ParsedArgs, io: CommandIo): Promise
  * is registered as a plugin (LLD §10, Draft 2.3).
  *
  * **The flow's start.** Draft 2.4 (LLD §10) says both replayers begin from a
- * session opened at the flow's base URL with the configured storage state. The
- * heal command takes those as `--base-url` and `--storage-state`; when they were
- * not given, the project's config is where they come from, so
- * `svatah heal --run <id>` works from a project directory with no flags at all.
- * An explicit flag always wins — someone healing against a second environment
- * said so deliberately.
+ * session opened at the flow's base URL with the configured storage state.
+ * Where those come from is LLD §15's precedence — flag, then environment, then
+ * `config.app` — and since Draft 2.5 the heal command applies it itself from
+ * `--project`, so nothing has to be injected here.
  *
  * Best effort by design: a project that will not load is not a reason to refuse
  * to heal — the session-state default still works — so a failure here leaves the
@@ -167,13 +171,13 @@ async function prepareRunHeal(args: ParsedArgs, io: CommandIo): Promise<ParsedAr
       onProgress: (message) => io.err(`  ${message}`),
     });
 
-    const from = {
-      ...(loaded.config.app.baseUrl === undefined ? {} : { "base-url": loaded.config.app.baseUrl }),
-      ...(loaded.config.app.storageState === undefined
-        ? {}
-        : { "storage-state": loaded.config.app.storageState }),
-    };
-    return { ...args, options: { ...from, ...args.options } };
+    /*
+     * The project root, so `sessionTarget` can read `config.app` as the last of
+     * LLD §15's three sources. Injecting the *values* here — what Phase 3 did —
+     * would make them look like flags and beat `SVATAH_BASE_URL`, which is the
+     * defect F2 names.
+     */
+    return { ...args, options: { project: loaded.root, ...args.options } };
   } catch (error) {
     io.err(
       "Could not load the project, so healing will restore the recorded page rather than " +

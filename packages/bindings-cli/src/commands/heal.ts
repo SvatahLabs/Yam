@@ -22,6 +22,7 @@ import { DEFAULT_CONFIG, type Config } from "@svatah/schema";
 import { registerAllAdapters } from "../adapters.js";
 import { boolOption, stringOption, type ParsedArgs } from "../args.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
+import { sessionTarget } from "../session.js";
 import type { CommandIo } from "./surface.js";
 
 export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
@@ -37,8 +38,21 @@ export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
   const outputDir = stringOption(args, "out") ?? process.env["SVATAH_OUT"] ?? ".svatah";
   const runsDir = stringOption(args, "runs") ?? "runs";
   const adapter = stringOption(args, "adapter") ?? "playwright";
-  const baseUrl = stringOption(args, "base-url");
-  const storageState = stringOption(args, "storage-state");
+  /*
+   * Flag, then `SVATAH_BASE_URL` / `SVATAH_STORAGE_STATE`, then `config.app`
+   * (LLD §15, Draft 2.5). Phase 3 read the flag and the config but not the
+   * environment, so a run started against an ephemeral port — the normal shape
+   * of a CI job — could not be healed without repeating the flag by hand
+   * (Phase 3 verification, F2).
+   *
+   * `@svatah/cli` merges the *project's* `config.app` in before delegating here
+   * (`prepareRunHeal`), which is the same value `root` would find; reading it
+   * here as well is what makes `svatah-bindings heal` behave identically when
+   * no project loads.
+   */
+  const { baseUrl, storageState } = sessionTarget(args, {
+    root: stringOption(args, "project") ?? ".",
+  });
   const json = boolOption(args, "json");
   const apply = boolOption(args, "apply");
 

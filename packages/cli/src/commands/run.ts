@@ -36,7 +36,16 @@ import {
   type RunOptions,
 } from "@svatah/runtime";
 import { createSurface } from "@svatah/surface";
-import { boolOption, numberOption, stringOption, stringOptions, type ParsedArgs } from "@svatah/bindings-cli";
+import {
+  boolOption,
+  numberOption,
+  resolveSessionTarget,
+  sessionTarget,
+  stringOption,
+  stringOptions,
+  type ParsedArgs,
+  type SessionTarget,
+} from "@svatah/bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
 import { EXIT, type ExitCode } from "@svatah/bindings-cli";
 import { ConfigError } from "../config-error.js";
@@ -113,6 +122,9 @@ async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCo
     runId: context.runId,
     outputDir: context.outputDir,
     headed: boolOption(args, "headed"),
+    // The flag layer of LLD §15's precedence; `runProject` adds the
+    // environment and `config.app` beneath it.
+    session: sessionTarget(args, { config: context.loaded.config.app }),
     ...(numberOption(args, "workers") === undefined ? {} : { workers: numberOption(args, "workers")! }),
     ...(inputsFrom(args) === undefined ? {} : { inputs: inputsFrom(args)! }),
     ...(stringOptions(args, "flow").length === 0 ? {} : { flows: stringOptions(args, "flow") }),
@@ -183,6 +195,14 @@ export interface RunProjectOptions {
   readonly stories?: readonly string[];
   readonly onResult?: (result: StepResult) => void;
   readonly log?: (message: string) => void;
+  /**
+   * The `--base-url` / `--storage-state` flags, when the caller had any.
+   *
+   * The flag layer of LLD §15's precedence. The environment and `config.app`
+   * are applied here, so `POST /run` gets the same answer as `svatah run` with
+   * no flags — one place decides where a session opens (Draft 2.5).
+   */
+  readonly session?: SessionTarget;
 }
 
 /**
@@ -220,15 +240,17 @@ export async function runProject(
   const directory = openRunDirectory(context.outputDir, context.runId);
 
   /*
-   * `SVATAH_BASE_URL` overrides the configured one. A project's config names the
-   * deployment it usually runs against; a CI job, or a test that starts the
-   * application on an ephemeral port, needs to say otherwise without editing it.
+   * Where the session opens: flag, then environment, then `config.app`
+   * (LLD §15, Draft 2.5). A project's config names the deployment it usually
+   * runs against; a CI job, or a test that starts the application on an
+   * ephemeral port, needs to say otherwise without editing it, and a person at
+   * a terminal needs to say so once without exporting anything.
    */
-  const baseUrl = process.env["SVATAH_BASE_URL"] ?? loaded.config.app.baseUrl;
+  const target = resolveSessionTarget(options.session ?? {}, { config: loaded.config.app });
 
   const config = {
     ...loaded.config,
-    app: { ...loaded.config.app, ...(baseUrl === undefined ? {} : { baseUrl }) },
+    app: { ...loaded.config.app, ...target },
     run: {
       ...loaded.config.run,
       headless: options.headed !== true,
@@ -386,6 +408,8 @@ async function runUnderPlaywright(context: RunContext, io: CommandIo): Promise<E
   const args = ["test", "--config", "playwright.config.ts"];
   if (boolOption(context.args, "headed")) args.push("--headed");
 
+  const hostSession = sessionTarget(context.args, { config: context.loaded.config.app });
+
   // `done`, not `resolve`: `resolve` here is `node:path`'s, used just below.
   const status = await new Promise<number>((done) => {
     const child = spawn(process.execPath, [cli, ...args], {
@@ -402,6 +426,18 @@ async function runUnderPlaywright(context: RunContext, io: CommandIo): Promise<E
           : { SVATAH_INPUTS: JSON.stringify(inputsFrom(context.args)) }),
         SVATAH_DATA: JSON.stringify(context.loaded.project.data.values),
         SVATAH_SECRETS: JSON.stringify([...context.loaded.project.data.secrets]),
+        /*
+         * The resolved session target, passed down as the environment layer of
+         * LLD §15's precedence. The host reads its base URL from the config and
+         * the environment, and it is a separate process, so a `--base-url` given
+         * to `svatah run --host playwright` reaches it only this way. Resolving
+         * first means the flag beats an inherited `SVATAH_BASE_URL`, which is
+         * the order the spec gives.
+         */
+        ...(hostSession.baseUrl === undefined ? {} : { SVATAH_BASE_URL: hostSession.baseUrl }),
+        ...(hostSession.storageState === undefined
+          ? {}
+          : { SVATAH_STORAGE_STATE: hostSession.storageState }),
       },
     });
     child.on("close", (code) => done(code ?? 1));

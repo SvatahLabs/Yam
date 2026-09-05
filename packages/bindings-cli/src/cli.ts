@@ -28,6 +28,10 @@ const USAGE = `svatah-bindings — the bindings store and model-free healing (mo
                                   [--only <ids>] [--report <path.md>] [--json]
   svatah-bindings eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
 
+Every command that opens a session takes its base URL and storage state from
+the --base-url / --storage-state flag, then SVATAH_BASE_URL /
+SVATAH_STORAGE_STATE, then config.app, in that order (LLD §15).
+
 Every one of these is also a \`svatah\` subcommand, if the whole project is
 installed. Exit codes are the table in LLD §15.
 `;

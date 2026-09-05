@@ -78,7 +78,8 @@ describe("@svatah/bindings-cli (T2.12)", () => {
     // `bindings-cli ─► bindings, healer, conformance, adapter-playwright,
     // surface, schema`. Written out, so widening it is a decision someone makes
     // in front of this comment.
-    expect(Object.keys(manifest("bindings-cli").dependencies ?? {}).sort()).toEqual([
+    const dependencies = Object.keys(manifest("bindings-cli").dependencies ?? {}).sort();
+    expect(dependencies.filter((name) => name.startsWith("@svatah/"))).toEqual([
       "@svatah/adapter-playwright",
       "@svatah/bindings",
       "@svatah/conformance",
@@ -86,6 +87,16 @@ describe("@svatah/bindings-cli (T2.12)", () => {
       "@svatah/schema",
       "@svatah/surface",
     ]);
+
+    /*
+     * `yaml` is the third-party half, and there is exactly one of it: Draft 2.5
+     * moves `svatah.config.yaml` loading here, because LLD §15's base-URL
+     * precedence is "applied identically by every command that opens a session"
+     * and three of those commands — `bindings verify`, `surface conform`,
+     * `eval` — are module (a)'s. A second config reader beside it is how the two
+     * halves would come to disagree about what `config.app` says.
+     */
+    expect(dependencies.filter((name) => !name.startsWith("@svatah/"))).toEqual(["yaml"]);
   });
 
   it("is what @svatah/cli mounts, rather than a second implementation", () => {

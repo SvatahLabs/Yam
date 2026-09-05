@@ -18,6 +18,7 @@ import { DEFAULT_CONFIG, type Config } from "@svatah/schema";
 import { registerAllAdapters } from "../adapters.js";
 import { boolOption, stringOption, type ParsedArgs } from "../args.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
+import { sessionTarget } from "../session.js";
 import type { CommandIo } from "./surface.js";
 
 export async function bindingsCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
@@ -135,8 +136,15 @@ async function verify(
   json: boolean,
 ): Promise<ExitCode> {
   const adapter = stringOption(args, "adapter") ?? "playwright";
-  const baseUrl = stringOption(args, "base-url") ?? "http://127.0.0.1:4173";
   const only = stringOption(args, "id");
+
+  // Flag, then environment, then `config.app`, then the sample app's port
+  // (LLD §15, Draft 2.5). `verify` is a session-opening command like any other.
+  const target = sessionTarget(args, {
+    root: stringOption(args, "project") ?? ".",
+    fallbackBaseUrl: "http://127.0.0.1:4173",
+  });
+  const baseUrl = target.baseUrl!;
 
   registerAllAdapters();
   if (!listAdapters().includes(adapter)) {
@@ -154,13 +162,13 @@ async function verify(
     ...DEFAULT_CONFIG,
     project: "bindings-verify",
     adapter: adapter as Config["adapter"],
-    app: { baseUrl },
+    app: { ...target },
     run: { ...DEFAULT_CONFIG.run, headless: !boolOption(args, "headed") },
   };
 
   const results: Array<{ id: string; ok: boolean; by?: string; detail?: string }> = [];
   const surface = await createSurface(config);
-  await surface.open({ baseUrl });
+  await surface.open({ ...target });
 
   try {
     for (const id of ids) {

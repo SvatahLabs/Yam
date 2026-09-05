@@ -38,6 +38,7 @@ import { EnvironmentRefused, record, renderReport, reportJson } from "@svatah/re
 import { createSurface } from "@svatah/surface";
 import {
   boolOption,
+  sessionTarget,
   stringOption,
   stringOptions,
   EXIT,
@@ -91,10 +92,11 @@ export async function recordCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
 
   registerAllAdapters();
 
-  const baseUrl = process.env["SVATAH_BASE_URL"] ?? loaded.config.app.baseUrl;
+  // Flag, then environment, then `config.app` (LLD §15, Draft 2.5).
+  const target = sessionTarget(args, { config: loaded.config.app });
   const config = {
     ...loaded.config,
-    app: { ...loaded.config.app, ...(baseUrl === undefined ? {} : { baseUrl }) },
+    app: { ...loaded.config.app, ...target },
     run: { ...loaded.config.run, headless: !boolOption(args, "headed") },
   };
 

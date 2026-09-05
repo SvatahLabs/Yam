@@ -1,17 +1,10 @@
 /**
  * A project config that will not load (LLD §3.5, §15).
  *
- * Its own module, and importing nothing, so `cli.ts` can catch it by type
- * without eagerly loading the compiler — the reason every command is imported
- * lazily in the first place.
+ * Defined in `@svatah/bindings-cli` since Draft 2.5, because both command lines
+ * read `svatah.config.yaml` — module (a)'s `bindings verify`, `surface conform`
+ * and `eval` need `config.app` for the base-URL precedence of LLD §15. Kept as
+ * its own module here so `cli.ts` can catch it by type without pulling in the
+ * compiler.
  */
-export class ConfigError extends Error {
-  constructor(
-    message: string,
-    /** The config file this came from, relative to the project root. */
-    readonly file: string,
-  ) {
-    super(message);
-    this.name = "ConfigError";
-  }
-}
+export { ConfigError } from "@svatah/bindings-cli";

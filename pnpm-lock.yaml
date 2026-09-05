@@ -423,6 +423,9 @@ importers:
       '@svatah/surface':
         specifier: workspace:*
         version: link:../surface
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.0
     devDependencies:
       sample-web:
         specifier: workspace:*

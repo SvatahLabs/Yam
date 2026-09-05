@@ -18,6 +18,7 @@ import { DEFAULT_CONFIG, type Config } from "@svatah/schema";
 import { registerAllAdapters } from "../adapters.js";
 import { boolOption, stringOption, type ParsedArgs } from "../args.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
+import { sessionTarget } from "../session.js";
 
 export interface CommandIo {
   out(text: string): void;
@@ -54,7 +55,16 @@ async function conform(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
     return EXIT.usage;
   }
 
-  const baseUrl = (stringOption(args, "base-url") ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
+  /*
+   * Flag, then `SVATAH_BASE_URL`, then `config.app`, then the sample app's port
+   * (LLD §15, Draft 2.5). A conformance run against an application on an
+   * ephemeral port should not have to repeat the flag every time.
+   */
+  const target = sessionTarget(args, {
+    root: stringOption(args, "project") ?? ".",
+    fallbackBaseUrl: DEFAULT_BASE_URL,
+  });
+  const baseUrl = target.baseUrl!;
   const headless = !boolOption(args, "headed");
   const only = stringOption(args, "only");
   const json = boolOption(args, "json");
@@ -63,7 +73,7 @@ async function conform(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
     ...DEFAULT_CONFIG,
     project: "surface-conformance",
     adapter: adapter as Config["adapter"],
-    app: { baseUrl },
+    app: { ...target },
     run: { ...DEFAULT_CONFIG.run, headless },
   };
 
@@ -73,7 +83,7 @@ async function conform(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
     ...(only === undefined ? {} : { only: only.split(",").map((s) => s.trim()) }),
     openSurface: async () => {
       const surface = await createSurface(config);
-      await surface.open({ baseUrl });
+      await surface.open({ ...target });
       return surface;
     },
   });

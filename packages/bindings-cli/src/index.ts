@@ -16,6 +16,15 @@
 export { main, runBindingsCommand } from "./cli.js";
 export { parseArgs, stringOption, stringOptions, boolOption, numberOption, type ParsedArgs } from "./args.js";
 export { EXIT, type ExitCode } from "./exit-codes.js";
+export { ConfigError, CONFIG_FILES, appConfig, loadConfig } from "./config.js";
+export {
+  BASE_URL_ENV,
+  STORAGE_STATE_ENV,
+  resolveSessionTarget,
+  sessionTarget,
+  type SessionTarget,
+  type SessionTargetSources,
+} from "./session.js";
 export { registerAllAdapters } from "./adapters.js";
 export { surfaceCommand, type CommandIo } from "./commands/surface.js";
 export { bindingsCommand } from "./commands/bindings.js";

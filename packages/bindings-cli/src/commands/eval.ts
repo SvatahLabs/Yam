@@ -26,6 +26,7 @@ import { DEFAULT_CONFIG, DEFAULT_IGNORE_ATTRIBUTES, type Config } from "@svatah/
 import { registerAllAdapters } from "../adapters.js";
 import { boolOption, stringOption, type ParsedArgs } from "../args.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
+import { sessionTarget } from "../session.js";
 import type { CommandIo } from "./surface.js";
 
 /** Suites LLD §16 names, and the task that makes each runnable. */
@@ -87,7 +88,13 @@ function groundTruthReader(
 }
 
 async function healing(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
-  const baseUrl = (stringOption(args, "base-url") ?? "http://127.0.0.1:4173").replace(/\/+$/, "");
+  // Flag, then `SVATAH_BASE_URL`, then `config.app`, then the sample app's
+  // port (LLD §15, Draft 2.5).
+  const target = sessionTarget(args, {
+    root: stringOption(args, "project") ?? ".",
+    fallbackBaseUrl: "http://127.0.0.1:4173",
+  });
+  const baseUrl = target.baseUrl!;
   const adapter = stringOption(args, "adapter") ?? "playwright";
   const reportPath = stringOption(args, "report");
   const json = boolOption(args, "json");
@@ -122,7 +129,7 @@ async function healing(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
       ...DEFAULT_CONFIG,
       project: "healing-eval",
       adapter: adapter as Config["adapter"],
-      app: { baseUrl },
+      app: { ...target },
       bindings: {
         ...DEFAULT_CONFIG.bindings,
         // The headline population is "an application with no test ids" — see the
@@ -144,7 +151,7 @@ async function healing(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
       groundTruth,
       open: async (page, variant) => {
         const surface = await createSurface(config);
-        await surface.open({ baseUrl });
+        await surface.open({ ...target });
         await surface.act("navigate", undefined, {
           url: variant === 0 ? `${baseUrl}${page}` : `${baseUrl}${page}?variant=${variant}`,
         });

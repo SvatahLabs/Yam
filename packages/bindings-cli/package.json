@@ -40,7 +40,8 @@
     "@svatah/conformance": "workspace:*",
     "@svatah/healer": "workspace:*",
     "@svatah/schema": "workspace:*",
-    "@svatah/surface": "workspace:*"
+    "@svatah/surface": "workspace:*",
+    "yaml": "catalog:"
   },
   "bin": {
     "svatah-bindings": "./dist/bin.js"

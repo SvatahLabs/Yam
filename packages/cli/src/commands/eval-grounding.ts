@@ -52,6 +52,7 @@ import {
   EXIT,
   type CommandIo,
   type ExitCode,
+  sessionTarget,
   type ParsedArgs,
 } from "@svatah/bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
@@ -61,7 +62,13 @@ export async function groundingEvalCommand(
   args: ParsedArgs,
   io: CommandIo,
 ): Promise<ExitCode> {
-  const baseUrl = (stringOption(args, "base-url") ?? "http://127.0.0.1:4173").replace(/\/+$/, "");
+  // Flag, then `SVATAH_BASE_URL`, then `config.app`, then the sample app's
+  // port (LLD §15, Draft 2.5).
+  const target = sessionTarget(args, {
+    root: stringOption(args, "project") ?? ".",
+    fallbackBaseUrl: "http://127.0.0.1:4173",
+  });
+  const baseUrl = target.baseUrl!;
   const casesPath = stringOption(args, "cases");
   const limit = numberOption(args, "limit");
   const json = boolOption(args, "json");
@@ -89,7 +96,7 @@ export async function groundingEvalCommand(
     ...DEFAULT_CONFIG,
     project: "grounding-eval",
     adapter: "playwright",
-    app: { baseUrl },
+    app: { ...target },
     bindings: { ...DEFAULT_CONFIG.bindings, ignoreAttributes },
     run: { ...DEFAULT_CONFIG.run, headless: !boolOption(args, "headed") },
   };
@@ -99,7 +106,7 @@ export async function groundingEvalCommand(
     gateway,
     open: async (page, variant) => {
       const surface = await createSurface(config);
-      await surface.open({ baseUrl });
+      await surface.open({ ...target });
       await surface.act("navigate", undefined, {
         url: `${baseUrl}${page}${variant === 0 ? "" : `?variant=${variant}`}`,
       });
