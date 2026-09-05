@@ -1,0 +1,3697 @@
+{
+  "/": [
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "brand"
+        },
+        {
+          "by": "role",
+          "name": "Svatah Sample",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Svatah Sample"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"brand\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='brand']"
+        }
+      ],
+      "element": "a#brand[link] \"Svatah Sample\"@0",
+      "name": "Svatah Sample",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle navigation",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Menu"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-toggle']"
+        }
+      ],
+      "element": "button#nav-toggle[button] \"Toggle navigation\"@0",
+      "name": "Toggle navigation",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "dashboard-link"
+        },
+        {
+          "by": "role",
+          "name": "Dashboard",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Dashboard"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"dashboard-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='dashboard-link']"
+        }
+      ],
+      "element": "a#dashboard-link[link] \"Dashboard\"@0",
+      "name": "Dashboard",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "booking-link"
+        },
+        {
+          "by": "role",
+          "name": "Book a slot",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Book a slot"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"booking-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='booking-link']"
+        }
+      ],
+      "element": "a#booking-link[link] \"Book a slot\"@1",
+      "name": "Book a slot",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "widgets-link"
+        },
+        {
+          "by": "role",
+          "name": "Widgets",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Widgets"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"widgets-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='widgets-link']"
+        }
+      ],
+      "element": "a#widgets-link[link] \"Widgets\"@2",
+      "name": "Widgets",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "docs-link"
+        },
+        {
+          "by": "role",
+          "name": "Docs",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Docs"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"docs-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='docs-link']"
+        }
+      ],
+      "element": "a#docs-link[link] \"Docs\"@3",
+      "name": "Docs",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "sign-in"
+        },
+        {
+          "by": "role",
+          "name": "Sign in",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Sign in"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"sign-in\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='sign-in']"
+        }
+      ],
+      "element": "a#sign-in[link] \"Sign in\"@0",
+      "name": "Sign in",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "by": "role",
+          "name": "Read the docs",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Read the docs"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "body > main.hero > a.btn.btn-link"
+        },
+        {
+          "by": "xpath",
+          "score": 0.45,
+          "value": "//body/main[1]/a[2]"
+        }
+      ],
+      "element": "a[link] \"Read the docs\"@1",
+      "name": "Read the docs",
+      "role": "link"
+    }
+  ],
+  "/booking": [
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "brand"
+        },
+        {
+          "by": "role",
+          "name": "Svatah Sample",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Svatah Sample"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"brand\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='brand']"
+        }
+      ],
+      "element": "a#brand[link] \"Svatah Sample\"@0",
+      "name": "Svatah Sample",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle navigation",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Menu"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-toggle']"
+        }
+      ],
+      "element": "button#nav-toggle[button] \"Toggle navigation\"@0",
+      "name": "Toggle navigation",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "dashboard-link"
+        },
+        {
+          "by": "role",
+          "name": "Dashboard",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Dashboard"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"dashboard-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='dashboard-link']"
+        }
+      ],
+      "element": "a#dashboard-link[link] \"Dashboard\"@0",
+      "name": "Dashboard",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "booking-link"
+        },
+        {
+          "by": "role",
+          "name": "Book a slot",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"booking-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='booking-link']"
+        }
+      ],
+      "element": "a#booking-link[link] \"Book a slot\"@1",
+      "name": "Book a slot",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "widgets-link"
+        },
+        {
+          "by": "role",
+          "name": "Widgets",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Widgets"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"widgets-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='widgets-link']"
+        }
+      ],
+      "element": "a#widgets-link[link] \"Widgets\"@2",
+      "name": "Widgets",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "docs-link"
+        },
+        {
+          "by": "role",
+          "name": "Docs",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Docs"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"docs-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='docs-link']"
+        }
+      ],
+      "element": "a#docs-link[link] \"Docs\"@3",
+      "name": "Docs",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "sidebar-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle sidebar",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "☰"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"sidebar-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='sidebar-toggle']"
+        }
+      ],
+      "element": "button#sidebar-toggle[button] \"Toggle sidebar\"@0",
+      "name": "Toggle sidebar",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-overview"
+        },
+        {
+          "by": "role",
+          "name": "Overview",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Overview"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-overview\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-overview']"
+        }
+      ],
+      "element": "a#nav-overview[link] \"Overview\"@0",
+      "name": "Overview",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-schedule-build"
+        },
+        {
+          "by": "role",
+          "name": "Schedule Build",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Schedule Build"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-schedule-build\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-schedule-build']"
+        }
+      ],
+      "element": "a#nav-schedule-build[link] \"Schedule Build\"@0",
+      "name": "Schedule Build",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-bookings"
+        },
+        {
+          "by": "role",
+          "name": "Bookings",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Bookings"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-bookings\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-bookings']"
+        }
+      ],
+      "element": "a#nav-bookings[link] \"Bookings\"@0",
+      "name": "Bookings",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-checkout"
+        },
+        {
+          "by": "role",
+          "name": "Checkout",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Checkout"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-checkout\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-checkout']"
+        }
+      ],
+      "element": "a#nav-checkout[link] \"Checkout\"@0",
+      "name": "Checkout",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-logout"
+        },
+        {
+          "by": "role",
+          "name": "Logout",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Logout"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-logout\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-logout']"
+        }
+      ],
+      "element": "a#nav-logout[link] \"Logout\"@0",
+      "name": "Logout",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "location"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "location"
+        },
+        {
+          "by": "role",
+          "name": "Starting point",
+          "role": "combobox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "Starting point"
+        },
+        {
+          "by": "placeholder",
+          "score": 0.85,
+          "value": "Where from?"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "location"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"location\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='location']"
+        }
+      ],
+      "element": "input#location[combobox] \"Starting point\"@0",
+      "name": "Starting point",
+      "role": "combobox"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "slot-date"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "slot-date"
+        },
+        {
+          "by": "role",
+          "name": "Date",
+          "role": "textbox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "Date"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "date"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"slot-date\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='slot-date']"
+        }
+      ],
+      "element": "input#slot-date[textbox] \"Date\"@0",
+      "name": "Date",
+      "role": "textbox"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "slot-times"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "slot-times"
+        },
+        {
+          "by": "role",
+          "name": "Times",
+          "role": "listbox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "Times"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "times"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"slot-times\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='slot-times']"
+        }
+      ],
+      "element": "select#slot-times[listbox] \"Times\"@0",
+      "name": "Times",
+      "role": "listbox"
+    },
+    {
+      "candidates": [
+        {
+          "by": "role",
+          "name": "09:00",
+          "role": "option",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "09:00"
+        },
+        {
+          "by": "css",
+          "score": 0.55,
+          "value": "[data-testid=\"slot-times\"] > option:nth-of-type(1)"
+        },
+        {
+          "by": "xpath",
+          "score": 0.45,
+          "value": "//*[@data-testid='slot-times']/option[1]"
+        }
+      ],
+      "element": "option[option] \"09:00\"@0",
+      "name": "09:00",
+      "role": "option"
+    },
+    {
+      "candidates": [
+        {
+          "by": "role",
+          "name": "12:00",
+          "role": "option",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "12:00"
+        },
+        {
+          "by": "css",
+          "score": 0.55,
+          "value": "[data-testid=\"slot-times\"] > option:nth-of-type(2)"
+        },
+        {
+          "by": "xpath",
+          "score": 0.45,
+          "value": "//*[@data-testid='slot-times']/option[2]"
+        }
+      ],
+      "element": "option[option] \"12:00\"@1",
+      "name": "12:00",
+      "role": "option"
+    },
+    {
+      "candidates": [
+        {
+          "by": "role",
+          "name": "15:00",
+          "role": "option",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "15:00"
+        },
+        {
+          "by": "css",
+          "score": 0.55,
+          "value": "[data-testid=\"slot-times\"] > option:nth-of-type(3)"
+        },
+        {
+          "by": "xpath",
+          "score": 0.45,
+          "value": "//*[@data-testid='slot-times']/option[3]"
+        }
+      ],
+      "element": "option[option] \"15:00\"@2",
+      "name": "15:00",
+      "role": "option"
+    },
+    {
+      "candidates": [
+        {
+          "by": "role",
+          "name": "18:00",
+          "role": "option",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "18:00"
+        },
+        {
+          "by": "css",
+          "score": 0.55,
+          "value": "[data-testid=\"slot-times\"] > option:nth-of-type(4)"
+        },
+        {
+          "by": "xpath",
+          "score": 0.45,
+          "value": "//*[@data-testid='slot-times']/option[4]"
+        }
+      ],
+      "element": "option[option] \"18:00\"@3",
+      "name": "18:00",
+      "role": "option"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "booking-next"
+        },
+        {
+          "by": "role",
+          "name": "Next",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Next"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"booking-next\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='booking-next']"
+        }
+      ],
+      "element": "button#booking-next[button] \"Next\"@0",
+      "name": "Next",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "book-now"
+        },
+        {
+          "by": "role",
+          "name": "Book now",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Book now"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"book-now\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='book-now']"
+        }
+      ],
+      "element": "button#book-now[button] \"Book now\"@1",
+      "name": "Book now",
+      "role": "button"
+    }
+  ],
+  "/checkout": [
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "brand"
+        },
+        {
+          "by": "role",
+          "name": "Svatah Sample",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Svatah Sample"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"brand\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='brand']"
+        }
+      ],
+      "element": "a#brand[link] \"Svatah Sample\"@0",
+      "name": "Svatah Sample",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle navigation",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Menu"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-toggle']"
+        }
+      ],
+      "element": "button#nav-toggle[button] \"Toggle navigation\"@0",
+      "name": "Toggle navigation",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "dashboard-link"
+        },
+        {
+          "by": "role",
+          "name": "Dashboard",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Dashboard"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"dashboard-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='dashboard-link']"
+        }
+      ],
+      "element": "a#dashboard-link[link] \"Dashboard\"@0",
+      "name": "Dashboard",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "booking-link"
+        },
+        {
+          "by": "role",
+          "name": "Book a slot",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Book a slot"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"booking-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='booking-link']"
+        }
+      ],
+      "element": "a#booking-link[link] \"Book a slot\"@1",
+      "name": "Book a slot",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "widgets-link"
+        },
+        {
+          "by": "role",
+          "name": "Widgets",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Widgets"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"widgets-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='widgets-link']"
+        }
+      ],
+      "element": "a#widgets-link[link] \"Widgets\"@2",
+      "name": "Widgets",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "docs-link"
+        },
+        {
+          "by": "role",
+          "name": "Docs",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Docs"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"docs-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='docs-link']"
+        }
+      ],
+      "element": "a#docs-link[link] \"Docs\"@3",
+      "name": "Docs",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "sidebar-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle sidebar",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "☰"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"sidebar-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='sidebar-toggle']"
+        }
+      ],
+      "element": "button#sidebar-toggle[button] \"Toggle sidebar\"@0",
+      "name": "Toggle sidebar",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-overview"
+        },
+        {
+          "by": "role",
+          "name": "Overview",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Overview"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-overview\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-overview']"
+        }
+      ],
+      "element": "a#nav-overview[link] \"Overview\"@0",
+      "name": "Overview",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-schedule-build"
+        },
+        {
+          "by": "role",
+          "name": "Schedule Build",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Schedule Build"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-schedule-build\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-schedule-build']"
+        }
+      ],
+      "element": "a#nav-schedule-build[link] \"Schedule Build\"@0",
+      "name": "Schedule Build",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-bookings"
+        },
+        {
+          "by": "role",
+          "name": "Bookings",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Bookings"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-bookings\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-bookings']"
+        }
+      ],
+      "element": "a#nav-bookings[link] \"Bookings\"@0",
+      "name": "Bookings",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-checkout"
+        },
+        {
+          "by": "role",
+          "name": "Checkout",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-checkout\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-checkout']"
+        }
+      ],
+      "element": "a#nav-checkout[link] \"Checkout\"@0",
+      "name": "Checkout",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-logout"
+        },
+        {
+          "by": "role",
+          "name": "Logout",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Logout"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-logout\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-logout']"
+        }
+      ],
+      "element": "a#nav-logout[link] \"Logout\"@0",
+      "name": "Logout",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "card"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "card"
+        },
+        {
+          "by": "role",
+          "name": "Card number",
+          "role": "textbox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "Card number"
+        },
+        {
+          "by": "placeholder",
+          "score": 0.85,
+          "value": "0000 0000 0000 0000"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "card"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"card\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='card']"
+        }
+      ],
+      "element": "input#card[textbox] \"Card number\"@0",
+      "name": "Card number",
+      "role": "textbox"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "expiry-month"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "expiry-month"
+        },
+        {
+          "by": "role",
+          "name": "Expiry",
+          "role": "combobox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "Expiry"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "expiryMonth"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"expiry-month\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='expiry-month']"
+        }
+      ],
+      "element": "select#expiry-month[combobox] \"Expiry\"@0",
+      "name": "Expiry",
+      "role": "combobox"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "expiry-year"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "expiry-year"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "expiryYear"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"expiry-year\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='expiry-year']"
+        }
+      ],
+      "element": "select#expiry-year[combobox]@1",
+      "role": "combobox"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "cvv"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "cvv"
+        },
+        {
+          "by": "role",
+          "name": "CVV",
+          "role": "textbox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "CVV"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "cvv"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"cvv\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='cvv']"
+        }
+      ],
+      "element": "input#cvv[textbox] \"CVV\"@0",
+      "name": "CVV",
+      "role": "textbox"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "pay"
+        },
+        {
+          "by": "role",
+          "name": "Pay",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Pay"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"pay\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='pay']"
+        }
+      ],
+      "element": "button#pay[button] \"Pay\"@0",
+      "name": "Pay",
+      "role": "button"
+    }
+  ],
+  "/dashboard": [
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "brand"
+        },
+        {
+          "by": "role",
+          "name": "Svatah Sample",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Svatah Sample"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"brand\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='brand']"
+        }
+      ],
+      "element": "a#brand[link] \"Svatah Sample\"@0",
+      "name": "Svatah Sample",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle navigation",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Menu"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-toggle']"
+        }
+      ],
+      "element": "button#nav-toggle[button] \"Toggle navigation\"@0",
+      "name": "Toggle navigation",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "dashboard-link"
+        },
+        {
+          "by": "role",
+          "name": "Dashboard",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Dashboard"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"dashboard-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='dashboard-link']"
+        }
+      ],
+      "element": "a#dashboard-link[link] \"Dashboard\"@0",
+      "name": "Dashboard",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "booking-link"
+        },
+        {
+          "by": "role",
+          "name": "Book a slot",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Book a slot"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"booking-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='booking-link']"
+        }
+      ],
+      "element": "a#booking-link[link] \"Book a slot\"@1",
+      "name": "Book a slot",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "widgets-link"
+        },
+        {
+          "by": "role",
+          "name": "Widgets",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Widgets"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"widgets-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='widgets-link']"
+        }
+      ],
+      "element": "a#widgets-link[link] \"Widgets\"@2",
+      "name": "Widgets",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "docs-link"
+        },
+        {
+          "by": "role",
+          "name": "Docs",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Docs"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"docs-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='docs-link']"
+        }
+      ],
+      "element": "a#docs-link[link] \"Docs\"@3",
+      "name": "Docs",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "sidebar-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle sidebar",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "☰"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"sidebar-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='sidebar-toggle']"
+        }
+      ],
+      "element": "button#sidebar-toggle[button] \"Toggle sidebar\"@0",
+      "name": "Toggle sidebar",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-overview"
+        },
+        {
+          "by": "role",
+          "name": "Overview",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Overview"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-overview\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-overview']"
+        }
+      ],
+      "element": "a#nav-overview[link] \"Overview\"@0",
+      "name": "Overview",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-schedule-build"
+        },
+        {
+          "by": "role",
+          "name": "Schedule Build",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Schedule Build"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-schedule-build\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-schedule-build']"
+        }
+      ],
+      "element": "a#nav-schedule-build[link] \"Schedule Build\"@0",
+      "name": "Schedule Build",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-bookings"
+        },
+        {
+          "by": "role",
+          "name": "Bookings",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Bookings"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-bookings\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-bookings']"
+        }
+      ],
+      "element": "a#nav-bookings[link] \"Bookings\"@0",
+      "name": "Bookings",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-checkout"
+        },
+        {
+          "by": "role",
+          "name": "Checkout",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Checkout"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-checkout\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-checkout']"
+        }
+      ],
+      "element": "a#nav-checkout[link] \"Checkout\"@0",
+      "name": "Checkout",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-logout"
+        },
+        {
+          "by": "role",
+          "name": "Logout",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Logout"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-logout\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-logout']"
+        }
+      ],
+      "element": "a#nav-logout[link] \"Logout\"@0",
+      "name": "Logout",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "refresh-count"
+        },
+        {
+          "by": "role",
+          "name": "Refresh count",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Refresh count"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"refresh-count\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='refresh-count']"
+        }
+      ],
+      "element": "button#refresh-count[button] \"Refresh count\"@0",
+      "name": "Refresh count",
+      "role": "button"
+    }
+  ],
+  "/login": [
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "brand"
+        },
+        {
+          "by": "role",
+          "name": "Svatah Sample",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Svatah Sample"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"brand\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='brand']"
+        }
+      ],
+      "element": "a#brand[link] \"Svatah Sample\"@0",
+      "name": "Svatah Sample",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle navigation",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Menu"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-toggle']"
+        }
+      ],
+      "element": "button#nav-toggle[button] \"Toggle navigation\"@0",
+      "name": "Toggle navigation",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "dashboard-link"
+        },
+        {
+          "by": "role",
+          "name": "Dashboard",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Dashboard"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"dashboard-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='dashboard-link']"
+        }
+      ],
+      "element": "a#dashboard-link[link] \"Dashboard\"@0",
+      "name": "Dashboard",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "booking-link"
+        },
+        {
+          "by": "role",
+          "name": "Book a slot",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Book a slot"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"booking-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='booking-link']"
+        }
+      ],
+      "element": "a#booking-link[link] \"Book a slot\"@1",
+      "name": "Book a slot",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "widgets-link"
+        },
+        {
+          "by": "role",
+          "name": "Widgets",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Widgets"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"widgets-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='widgets-link']"
+        }
+      ],
+      "element": "a#widgets-link[link] \"Widgets\"@2",
+      "name": "Widgets",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "docs-link"
+        },
+        {
+          "by": "role",
+          "name": "Docs",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Docs"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"docs-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='docs-link']"
+        }
+      ],
+      "element": "a#docs-link[link] \"Docs\"@3",
+      "name": "Docs",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "username"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "username"
+        },
+        {
+          "by": "role",
+          "name": "Username",
+          "role": "textbox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "Username"
+        },
+        {
+          "by": "placeholder",
+          "score": 0.85,
+          "value": "you@example.com"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "username"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"username\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='username']"
+        }
+      ],
+      "element": "input#username[textbox] \"Username\"@0",
+      "name": "Username",
+      "role": "textbox"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "password"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "password"
+        },
+        {
+          "by": "role",
+          "name": "Password",
+          "role": "textbox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "Password"
+        },
+        {
+          "by": "placeholder",
+          "score": 0.85,
+          "value": "Your password"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "password"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"password\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='password']"
+        }
+      ],
+      "element": "input#password[textbox] \"Password\"@0",
+      "name": "Password",
+      "role": "textbox"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "remember"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "remember"
+        },
+        {
+          "by": "role",
+          "name": "Remember me",
+          "role": "checkbox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "Remember me"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "remember"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"remember\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='remember']"
+        }
+      ],
+      "element": "input#remember[checkbox] \"Remember me\"@0",
+      "name": "Remember me",
+      "role": "checkbox"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "login-submit"
+        },
+        {
+          "by": "role",
+          "name": "Sign In",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"login-submit\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='login-submit']"
+        }
+      ],
+      "element": "input#login-submit[button] \"Sign In\"@0",
+      "name": "Sign In",
+      "role": "button"
+    }
+  ],
+  "/logout": [
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "brand"
+        },
+        {
+          "by": "role",
+          "name": "Svatah Sample",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Svatah Sample"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"brand\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='brand']"
+        }
+      ],
+      "element": "a#brand[link] \"Svatah Sample\"@0",
+      "name": "Svatah Sample",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle navigation",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Menu"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-toggle']"
+        }
+      ],
+      "element": "button#nav-toggle[button] \"Toggle navigation\"@0",
+      "name": "Toggle navigation",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "dashboard-link"
+        },
+        {
+          "by": "role",
+          "name": "Dashboard",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Dashboard"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"dashboard-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='dashboard-link']"
+        }
+      ],
+      "element": "a#dashboard-link[link] \"Dashboard\"@0",
+      "name": "Dashboard",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "booking-link"
+        },
+        {
+          "by": "role",
+          "name": "Book a slot",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Book a slot"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"booking-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='booking-link']"
+        }
+      ],
+      "element": "a#booking-link[link] \"Book a slot\"@1",
+      "name": "Book a slot",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "widgets-link"
+        },
+        {
+          "by": "role",
+          "name": "Widgets",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Widgets"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"widgets-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='widgets-link']"
+        }
+      ],
+      "element": "a#widgets-link[link] \"Widgets\"@2",
+      "name": "Widgets",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "docs-link"
+        },
+        {
+          "by": "role",
+          "name": "Docs",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Docs"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"docs-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='docs-link']"
+        }
+      ],
+      "element": "a#docs-link[link] \"Docs\"@3",
+      "name": "Docs",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "sign-in-again"
+        },
+        {
+          "by": "role",
+          "name": "Sign in again",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Sign in again"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"sign-in-again\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='sign-in-again']"
+        }
+      ],
+      "element": "a#sign-in-again[link] \"Sign in again\"@0",
+      "name": "Sign in again",
+      "role": "link"
+    }
+  ],
+  "/schedule-build": [
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "brand"
+        },
+        {
+          "by": "role",
+          "name": "Svatah Sample",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Svatah Sample"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"brand\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='brand']"
+        }
+      ],
+      "element": "a#brand[link] \"Svatah Sample\"@0",
+      "name": "Svatah Sample",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle navigation",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Menu"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-toggle']"
+        }
+      ],
+      "element": "button#nav-toggle[button] \"Toggle navigation\"@0",
+      "name": "Toggle navigation",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "dashboard-link"
+        },
+        {
+          "by": "role",
+          "name": "Dashboard",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Dashboard"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"dashboard-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='dashboard-link']"
+        }
+      ],
+      "element": "a#dashboard-link[link] \"Dashboard\"@0",
+      "name": "Dashboard",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "booking-link"
+        },
+        {
+          "by": "role",
+          "name": "Book a slot",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Book a slot"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"booking-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='booking-link']"
+        }
+      ],
+      "element": "a#booking-link[link] \"Book a slot\"@1",
+      "name": "Book a slot",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "widgets-link"
+        },
+        {
+          "by": "role",
+          "name": "Widgets",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Widgets"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"widgets-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='widgets-link']"
+        }
+      ],
+      "element": "a#widgets-link[link] \"Widgets\"@2",
+      "name": "Widgets",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "docs-link"
+        },
+        {
+          "by": "role",
+          "name": "Docs",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Docs"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"docs-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='docs-link']"
+        }
+      ],
+      "element": "a#docs-link[link] \"Docs\"@3",
+      "name": "Docs",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "sidebar-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle sidebar",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "☰"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"sidebar-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='sidebar-toggle']"
+        }
+      ],
+      "element": "button#sidebar-toggle[button] \"Toggle sidebar\"@0",
+      "name": "Toggle sidebar",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-overview"
+        },
+        {
+          "by": "role",
+          "name": "Overview",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Overview"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-overview\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-overview']"
+        }
+      ],
+      "element": "a#nav-overview[link] \"Overview\"@0",
+      "name": "Overview",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-schedule-build"
+        },
+        {
+          "by": "role",
+          "name": "Schedule Build",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Schedule Build"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-schedule-build\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-schedule-build']"
+        }
+      ],
+      "element": "a#nav-schedule-build[link] \"Schedule Build\"@0",
+      "name": "Schedule Build",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-bookings"
+        },
+        {
+          "by": "role",
+          "name": "Bookings",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Bookings"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-bookings\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-bookings']"
+        }
+      ],
+      "element": "a#nav-bookings[link] \"Bookings\"@0",
+      "name": "Bookings",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-checkout"
+        },
+        {
+          "by": "role",
+          "name": "Checkout",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Checkout"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-checkout\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-checkout']"
+        }
+      ],
+      "element": "a#nav-checkout[link] \"Checkout\"@0",
+      "name": "Checkout",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-logout"
+        },
+        {
+          "by": "role",
+          "name": "Logout",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Logout"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-logout\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-logout']"
+        }
+      ],
+      "element": "a#nav-logout[link] \"Logout\"@0",
+      "name": "Logout",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "project"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "project"
+        },
+        {
+          "by": "role",
+          "name": "Project",
+          "role": "combobox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "Project"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "project"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"project\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='project']"
+        }
+      ],
+      "element": "select#project[combobox] \"Project\"@0",
+      "name": "Project",
+      "role": "combobox"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "run-build"
+        },
+        {
+          "by": "role",
+          "name": "Run build",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Run build"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"run-build\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='run-build']"
+        }
+      ],
+      "element": "button#run-build[button] \"Run build\"@0",
+      "name": "Run build",
+      "role": "button"
+    }
+  ],
+  "/widgets": [
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "brand"
+        },
+        {
+          "by": "role",
+          "name": "Svatah Sample",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Svatah Sample"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"brand\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='brand']"
+        }
+      ],
+      "element": "a#brand[link] \"Svatah Sample\"@0",
+      "name": "Svatah Sample",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "nav-toggle"
+        },
+        {
+          "by": "role",
+          "name": "Toggle navigation",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Menu"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"nav-toggle\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='nav-toggle']"
+        }
+      ],
+      "element": "button#nav-toggle[button] \"Toggle navigation\"@0",
+      "name": "Toggle navigation",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "dashboard-link"
+        },
+        {
+          "by": "role",
+          "name": "Dashboard",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Dashboard"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"dashboard-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='dashboard-link']"
+        }
+      ],
+      "element": "a#dashboard-link[link] \"Dashboard\"@0",
+      "name": "Dashboard",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "booking-link"
+        },
+        {
+          "by": "role",
+          "name": "Book a slot",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Book a slot"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"booking-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='booking-link']"
+        }
+      ],
+      "element": "a#booking-link[link] \"Book a slot\"@1",
+      "name": "Book a slot",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "widgets-link"
+        },
+        {
+          "by": "role",
+          "name": "Widgets",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"widgets-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='widgets-link']"
+        }
+      ],
+      "element": "a#widgets-link[link] \"Widgets\"@2",
+      "name": "Widgets",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "docs-link"
+        },
+        {
+          "by": "role",
+          "name": "Docs",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Docs"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"docs-link\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='docs-link']"
+        }
+      ],
+      "element": "a#docs-link[link] \"Docs\"@3",
+      "name": "Docs",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "show-alert"
+        },
+        {
+          "by": "role",
+          "name": "Show alert",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Show alert"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"show-alert\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='show-alert']"
+        }
+      ],
+      "element": "button#show-alert[button] \"Show alert\"@0",
+      "name": "Show alert",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "show-confirm"
+        },
+        {
+          "by": "role",
+          "name": "Show confirm",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Show confirm"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"show-confirm\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='show-confirm']"
+        }
+      ],
+      "element": "button#show-confirm[button] \"Show confirm\"@1",
+      "name": "Show confirm",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "show-prompt"
+        },
+        {
+          "by": "role",
+          "name": "Show prompt",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Show prompt"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"show-prompt\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='show-prompt']"
+        }
+      ],
+      "element": "button#show-prompt[button] \"Show prompt\"@2",
+      "name": "Show prompt",
+      "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "single-select"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "single-select"
+        },
+        {
+          "by": "role",
+          "name": "Environment",
+          "role": "combobox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "Environment"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "environment"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"single-select\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='single-select']"
+        }
+      ],
+      "element": "select#single-select[combobox] \"Environment\"@0",
+      "name": "Environment",
+      "role": "combobox"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "multi-select"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "multi-select"
+        },
+        {
+          "by": "role",
+          "name": "Browsers",
+          "role": "listbox",
+          "score": 0.92
+        },
+        {
+          "by": "label",
+          "score": 0.9,
+          "value": "Browsers"
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "browsers"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"multi-select\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='multi-select']"
+        }
+      ],
+      "element": "select#multi-select[listbox] \"Browsers\"@0",
+      "name": "Browsers",
+      "role": "listbox"
+    },
+    {
+      "candidates": [
+        {
+          "by": "role",
+          "name": "Chromium",
+          "role": "option",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Chromium"
+        },
+        {
+          "by": "css",
+          "score": 0.55,
+          "value": "[data-testid=\"multi-select\"] > option:nth-of-type(1)"
+        },
+        {
+          "by": "xpath",
+          "score": 0.45,
+          "value": "//*[@data-testid='multi-select']/option[1]"
+        }
+      ],
+      "element": "option[option] \"Chromium\"@0",
+      "name": "Chromium",
+      "role": "option"
+    },
+    {
+      "candidates": [
+        {
+          "by": "role",
+          "name": "Firefox",
+          "role": "option",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Firefox"
+        },
+        {
+          "by": "css",
+          "score": 0.55,
+          "value": "[data-testid=\"multi-select\"] > option:nth-of-type(2)"
+        },
+        {
+          "by": "xpath",
+          "score": 0.45,
+          "value": "//*[@data-testid='multi-select']/option[2]"
+        }
+      ],
+      "element": "option[option] \"Firefox\"@1",
+      "name": "Firefox",
+      "role": "option"
+    },
+    {
+      "candidates": [
+        {
+          "by": "role",
+          "name": "WebKit",
+          "role": "option",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "WebKit"
+        },
+        {
+          "by": "css",
+          "score": 0.55,
+          "value": "[data-testid=\"multi-select\"] > option:nth-of-type(3)"
+        },
+        {
+          "by": "xpath",
+          "score": 0.45,
+          "value": "//*[@data-testid='multi-select']/option[3]"
+        }
+      ],
+      "element": "option[option] \"WebKit\"@2",
+      "name": "WebKit",
+      "role": "option"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "open-new-tab"
+        },
+        {
+          "by": "role",
+          "name": "Open the docs in a new tab",
+          "role": "link",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Open the docs in a new tab"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"open-new-tab\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='open-new-tab']"
+        }
+      ],
+      "element": "a#open-new-tab[link] \"Open the docs in a new tab\"@0",
+      "name": "Open the docs in a new tab",
+      "role": "link"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "upload"
+        },
+        {
+          "by": "id",
+          "score": 0.95,
+          "value": "upload"
+        },
+        {
+          "by": "role",
+          "name": "Attach a report",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "name",
+          "score": 0.82,
+          "value": "report"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"upload\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='upload']"
+        }
+      ],
+      "element": "input#upload[button] \"Attach a report\"@0",
+      "name": "Attach a report",
+      "role": "button"
+    }
+  ]
+}

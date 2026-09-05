@@ -40,6 +40,10 @@ export interface StubOptions {
   url?: string;
   kind?: SurfaceKind;
   snapshot?: Snapshot;
+  /** What `describe` reports, by reference. Synthesis reads this. */
+  descriptions?: Record<Ref, ElementDescription>;
+  /** What `describe` reports for a reference with no entry. */
+  defaultDescription?: (ref: Ref) => ElementDescription;
 }
 
 /** The key a candidate is looked up by, so a test can write a readable table. */
@@ -95,6 +99,11 @@ export class StubSurface implements AgentSurface {
   }
 
   async describe(ref: Ref): Promise<ElementDescription> {
+    const configured = this.options.descriptions?.[ref];
+    if (configured !== undefined) return { ...configured, ref };
+    if (this.options.defaultDescription !== undefined) {
+      return { ...this.options.defaultDescription(ref), ref };
+    }
     return {
       ref,
       role: "textbox",

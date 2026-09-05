@@ -23,20 +23,28 @@
   "scripts": {
     "build": "tsup --config ../../tsup.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "playwright test"
   },
   "dependencies": {
-    "@svatah/runtime": "workspace:*",
-    "@svatah/bindings": "workspace:*",
     "@svatah/adapter-playwright": "workspace:*",
-    "@svatah/healer": "workspace:*"
+    "@svatah/bindings": "workspace:*",
+    "@svatah/healer": "workspace:*",
+    "@svatah/runtime": "workspace:*",
+    "@svatah/schema": "workspace:*",
+    "@svatah/surface": "workspace:*",
+    "playwright": "catalog:"
   },
   "devDependencies": {
+    "@playwright/test": "catalog:",
+    "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.50.0"
   }
 }

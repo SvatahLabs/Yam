@@ -634,6 +634,128 @@ export function describeElement(
     if (value !== null && value !== "") native[attribute] = value;
   }
 
+  /* ── stable paths for candidate synthesis ──────────────────────────────────
+   *
+   * `native` is documented as "adapter-specific extras … never used above the
+   * surface except by synthesis" (LLD §2.2), and this is that use. A CSS path
+   * and a relative XPath need the ancestor chain, which only the adapter can
+   * see; synthesis above the surface then ranks and filters them like any other
+   * candidate without knowing what a DOM is.
+   *
+   * Both are anchored at the nearest ancestor that has a stable identity, so
+   * they say "the second row of the bookings table" rather than
+   * "body > div:nth-child(3) > div > div > table > tbody > tr:nth-child(2)":
+   * the second is longer and breaks the moment anything above it moves.
+   */
+  const generated = (value: string): boolean =>
+    // React's useId (`:r3:`), Ember (`ember42`), MUI (`mui-1234`), Radix
+    // (`radix-:r1:`), styled-components (`sc-hAxLzW`), CSS-modules hashes
+    // (`css-1x2y3z`, `_3fF4aQ`), and anything that is mostly hex.
+    /^:r[0-9a-z]+:$/i.test(value) ||
+    /^ember\d+$/i.test(value) ||
+    /^(mui|radix|headlessui|reach|aria)[-_][:a-z0-9]+$/i.test(value) ||
+    /^sc-[a-zA-Z]{6,}$/.test(value) ||
+    /^(css|jsx|emotion)-[a-z0-9]{5,}$/i.test(value) ||
+    /^_[a-zA-Z0-9]{5,}$/.test(value) ||
+    /^[0-9a-f]{8,}$/i.test(value) ||
+    /\d{5,}$/.test(value);
+
+  const cssEscape = (value: string): string => value.replace(/(["\\])/g, "\\$1");
+
+  /** A selector for one element that does not depend on where it sits. */
+  const ownSelector = (node: Element): string | null => {
+    for (const attribute of options.testIdAttributes) {
+      const value = node.getAttribute(attribute);
+      if (value !== null && value !== "" && !generated(value)) {
+        return `[${attribute}="${cssEscape(value)}"]`;
+      }
+    }
+    const id = node.getAttribute("id");
+    if (id !== null && id !== "" && !generated(id)) return `[id="${cssEscape(id)}"]`;
+    const name = node.getAttribute("name");
+    if (name !== null && name !== "") {
+      return `${node.tagName.toLowerCase()}[name="${cssEscape(name)}"]`;
+    }
+    return null;
+  };
+
+  /** The element's position among siblings of the same tag, 1-based. */
+  const nthOfType = (node: Element): number => {
+    let n = 1;
+    let sibling = node.previousElementSibling;
+    while (sibling !== null) {
+      if (sibling.tagName === node.tagName) n += 1;
+      sibling = sibling.previousElementSibling;
+    }
+    return n;
+  };
+
+  const stableClasses = (node: Element): string[] =>
+    Array.from(node.classList).filter((c) => !generated(c) && c.length > 1);
+
+  /** Walk up until something has a stable identity, then come back down. */
+  const buildPaths = (node: Element): { css: string; xpath: string } => {
+    const cssParts: string[] = [];
+    const xpathParts: string[] = [];
+    let cursor: Element | null = node;
+    let depth = 0;
+
+    while (cursor !== null && depth < 8) {
+      const anchor = ownSelector(cursor);
+      const tag = cursor.tagName.toLowerCase();
+
+      if (anchor !== null) {
+        cssParts.unshift(anchor);
+        const attributeMatch = /^\[?([a-z-]+)?\[?([a-zA-Z-]+)="(.*)"\]$/.exec(anchor);
+        void attributeMatch;
+        const id = cursor.getAttribute("id");
+        const testId = options.testIdAttributes
+          .map((a) => [a, cursor!.getAttribute(a)] as const)
+          .find(([, v]) => v !== null && v !== "" && !generated(v));
+        if (testId !== undefined) {
+          xpathParts.unshift(`//*[@${testId[0]}='${testId[1]}']`);
+        } else if (id !== null && id !== "" && !generated(id)) {
+          xpathParts.unshift(`//*[@id='${id}']`);
+        } else {
+          xpathParts.unshift(`//${tag}[@name='${cursor.getAttribute("name") ?? ""}']`);
+        }
+        break;
+      }
+
+      const classes = stableClasses(cursor);
+      const own =
+        classes.length > 0
+          ? `${tag}.${classes.slice(0, 2).join(".")}`
+          : `${tag}:nth-of-type(${nthOfType(cursor)})`;
+      cssParts.unshift(own);
+      xpathParts.unshift(`${tag}[${nthOfType(cursor)}]`);
+
+      cursor = cursor.parentElement;
+      depth += 1;
+      if (cursor !== null && cursor.tagName.toLowerCase() === "body") {
+        cssParts.unshift("body");
+        xpathParts.unshift("//body");
+        break;
+      }
+    }
+
+    const css = cssParts.join(" > ");
+    const first = xpathParts[0] ?? "";
+    const xpath = first.startsWith("//")
+      ? [first, ...xpathParts.slice(1)].join("/")
+      : `//${xpathParts.join("/")}`;
+    return { css, xpath };
+  };
+
+  const paths = buildPaths(el);
+  if (paths.css !== "") native["cssPath"] = paths.css;
+  if (paths.xpath !== "") native["xpath"] = paths.xpath;
+  if (attrs["id"] !== undefined && generated(attrs["id"])) native["idIsGenerated"] = "true";
+  const generatedClasses = Array.from(el.classList).filter((c) => generated(c));
+  if (generatedClasses.length > 0) native["generatedClasses"] = generatedClasses.join(" ");
+  const stable = stableClasses(el);
+  if (stable.length > 0) native["stableClasses"] = stable.join(" ");
+
   let value: string | undefined;
   const inputType = (el.getAttribute("type") ?? "").toLowerCase();
   const buttonLike = ["submit", "button", "reset", "image", "file"].includes(inputType);

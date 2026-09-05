@@ -37,3 +37,13 @@ export {
 } from "./resolver.js";
 
 export { LocatorError, type CandidateAttempt, type LocatorErrorDetail } from "./errors.js";
+
+export {
+  synthesise,
+  synthesiseBundle,
+  candidatesFor,
+  fingerprint,
+  fingerprintOf,
+  looksGenerated,
+  type SynthesisOptions,
+} from "./synthesis.js";
