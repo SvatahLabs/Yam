@@ -28,7 +28,7 @@ import {
   type EvalReport,
   type GoldenEntry,
 } from "@svatah/compiler";
-import { fakeGateway, type Gateway } from "@svatah/gateway";
+import { credentialInEnvironment, fakeGateway, type Gateway } from "@svatah/gateway";
 import { parseTargets, readData, TargetDictionary } from "@svatah/spec";
 import {
   boolOption,
@@ -171,9 +171,13 @@ async function compileEntry(
 }
 
 export async function compilerEvalCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
-  const root = stringOption(args, "project") ?? ".";
+  const overrideProject = stringOption(args, "project");
+  const root = overrideProject ?? ".";
   const goldenPath = resolve(
     stringOption(args, "golden") ?? join(root, "evals", "compiler", "golden.jsonl"),
+  );
+  const goldenProjectDir = resolve(
+    stringOption(args, "golden-project") ?? join(dirname(goldenPath), "project"),
   );
 
   let entries: GoldenEntry[];
@@ -191,7 +195,29 @@ export async function compilerEvalCommand(args: ParsedArgs, io: CommandIo): Prom
 
   const wantTier2 = boolOption(args, "tier2") || selected.some((e) => e.tier === 2);
   const wantTier3 = boolOption(args, "tier3") || selected.some((e) => e.tier === 3);
-  const { config } = loadConfig(resolve(root));
+
+  /*
+   * The model tiers come from the golden set's *own* project (Draft 2.6, LLD §16).
+   *
+   * "`svatah eval compiler` reads `compile.tier2` and `compile.tier3` from the
+   * golden project's own committed `svatah.config.yaml` (`evals/compiler/project/`),
+   * which pins the local model and its digest; `--project` may override it."
+   *
+   * Phase 4 read the config at `--project` (default `.`), and the repository
+   * root has none — so a clean checkout ran the whole Tier 2 subset with no
+   * model registered, scored 41 sentences as wrong, and printed "Below
+   * thresholds". The published 90.2 percent came from a config on the
+   * implementer's machine. Reading it from the golden project puts the pinned
+   * digest in the tree, where a verifier can find it.
+   */
+  const configDir = overrideProject === undefined ? goldenProjectDir : resolve(overrideProject);
+  const { config, file: configFile } = loadConfig(configDir);
+  if (configFile === undefined && !boolOption(args, "json")) {
+    io.err(
+      `  no svatah.config.yaml in ${configDir}; the model tiers have nothing to be ` +
+        "configured from and will be reported as not measured",
+    );
+  }
 
   /*
    * `--gateway fake` answers every model-tier question with the golden answer,
@@ -228,14 +254,46 @@ export async function compilerEvalCommand(args: ParsedArgs, io: CommandIo): Prom
           ? `${config.compile.tier2?.provider ?? "local"}:${config.compile.tier2?.model ?? "?"}`
           : "(none)";
 
-  const project = await loadGoldenProject(
-    resolve(stringOption(args, "golden-project") ?? join(dirname(goldenPath), "project")),
-  );
+  const project = await loadGoldenProject(goldenProjectDir);
 
   for (const one of project.loaderDiagnostics) io.err(`  steps/: ${one}`);
 
+  /*
+   * A tier asked for and not configured is `not measured` (Draft 2.6, LLD §16).
+   *
+   * Its entries are not compiled at all, rather than compiled with no tier
+   * registered and scored as failures. "The local model got 0 of 41 right" and
+   * "there was no local model" are different facts, and only the second is true
+   * of a clean checkout.
+   *
+   * Note what this is *not*: a configured tier whose server is refusing
+   * connections still runs, still fails, and still drags the number down. That
+   * is a measurement that went wrong, and hiding it would be the opposite of
+   * the fix.
+   */
+  const notMeasured: Record<string, string> = {};
+  if (wantTier2 && !registered.tier2) {
+    notMeasured["tier2"] =
+      `\`compile.tier2\` is not configured in ${short(configDir)}, so no local model was ` +
+      "registered and the tier 2 entries were not compiled";
+  }
+  if (wantTier3 && !registered.tier3) {
+    notMeasured["tier3"] = credentialInEnvironment()
+      ? `\`compile.tier3\` is not configured in ${short(configDir)}, so the tier 3 entries ` +
+        "were not compiled"
+      : "tier 3 needs a credential (ANTHROPIC_API_KEY), and there is none, so the tier 3 " +
+        "entries were not compiled";
+  }
+
+  const measurable = selected.filter(
+    (entry) => notMeasured[`tier${entry.tier}`] === undefined,
+  );
+  for (const [tier, why] of Object.entries(notMeasured).sort()) {
+    io.err(`  ${tier}: not measured — ${why}`);
+  }
+
   const cases: CaseResult[] = [];
-  for (const entry of selected) {
+  for (const entry of measurable) {
     const result = await compileEntry(entry, { stepTimeoutMs: 10_000, project });
     cases.push(result);
     if (!boolOption(args, "json")) {
@@ -246,6 +304,7 @@ export async function compilerEvalCommand(args: ParsedArgs, io: CommandIo): Prom
   const report = summarise(cases, {
     gateway: gatewayName,
     real: gatewayChoice !== "fake" && (registered.tier2 || registered.tier3),
+    notMeasured,
   });
 
   const reportPath = stringOption(args, "report");
@@ -261,13 +320,35 @@ export async function compilerEvalCommand(args: ParsedArgs, io: CommandIo): Prom
   return meetsThresholds(report) ? EXIT.ok : EXIT.failed;
 }
 
-/** Whether a report clears the thresholds REQ-COMP-9 names for the tiers it ran. */
+/**
+ * Whether a report clears the thresholds REQ-COMP-9 names for the tiers it ran.
+ *
+ * A tier reported as `not measured` has no bucket in `byTier` at all and its
+ * entries are absent from `totals`, so it is excluded from every threshold by
+ * construction rather than by a special case here (Draft 2.6, LLD §16).
+ */
 export function meetsThresholds(report: EvalReport): boolean {
+  /*
+   * Nothing measured is not a failure (Draft 2.6, LLD §16).
+   *
+   * A run whose every tier was `not measured` has an empty `totals`, and
+   * `0/0 = 0` is below 95 percent by arithmetic and about nothing at all. That
+   * arithmetic is how a clean checkout came to exit non-zero with "Below
+   * REQ-COMP-9's thresholds" while measuring no sentences.
+   */
+  if (report.totals.total === 0) return true;
+
   const tier1 = report.byTier["tier1"];
   const tier2 = report.byTier["tier2"];
   if (tier1 !== undefined && tier1.rate < TIER1_THRESHOLD) return false;
   if (tier2 !== undefined && tier2.rate < TIER2_THRESHOLD) return false;
   return report.totals.rate >= OVERALL_THRESHOLD;
+}
+
+/** A directory as it reads in a message: relative to here when it is under here. */
+function short(dir: string): string {
+  const from = process.cwd();
+  return dir.startsWith(`${from}/`) ? dir.slice(from.length + 1) : dir;
 }
 
 /** A golden entry, in the shape a model tier would have answered with. */
@@ -315,14 +396,20 @@ export function renderCompilerSummary(report: EvalReport): string {
       `  ${tier}: ${bucket.matched}/${bucket.total} exact match (${(bucket.rate * 100).toFixed(1)}%)`,
     );
   }
+  // Never `0/41`. A tier with nothing to measure it against says so (LLD §16).
+  for (const tier of Object.keys(report.notMeasured ?? {}).sort()) {
+    lines.push(`  ${tier}: not measured`);
+  }
   lines.push(
     "",
     `  overall: ${report.totals.matched}/${report.totals.total} ` +
       `(${(report.totals.rate * 100).toFixed(1)}%)`,
     "",
-    meetsThresholds(report)
-      ? "  Meets REQ-COMP-9."
-      : "  Below REQ-COMP-9's thresholds (tier 1 100%, tier 2 80%, overall 95%).",
+    report.totals.total === 0
+      ? "  Nothing was measured."
+      : meetsThresholds(report)
+        ? "  Meets REQ-COMP-9."
+        : "  Below REQ-COMP-9's thresholds (tier 1 100%, tier 2 80%, overall 95%).",
   );
   return lines.join("\n");
 }
@@ -347,6 +434,7 @@ export function renderCompilerReport(report: EvalReport): string {
   }
 
   const covered = Object.keys(report.byTier).sort();
+  const notMeasured = report.notMeasured ?? {};
   lines.push(
     `**Overall exact match: ${(report.totals.rate * 100).toFixed(1)}%** ` +
       `(${report.totals.matched} of ${report.totals.total}).`,
@@ -369,6 +457,22 @@ export function renderCompilerReport(report: EvalReport): string {
       `| \`${tier}\` | ${bucket.total} | ${bucket.matched} (${(bucket.rate * 100).toFixed(1)}%) | ` +
         `${thresholds[tier] ?? "—"} |`,
     );
+  }
+  /*
+   * A tier with no configuration is `not measured`, in the table and in words
+   * (Draft 2.6, LLD §16). It is not `0 (0.0%)`: a reader who saw that would
+   * conclude the model answered every sentence wrongly, which is the reading
+   * the Phase 4 report invited.
+   */
+  for (const tier of Object.keys(notMeasured).sort()) {
+    lines.push(`| \`${tier}\` | — | *not measured* | ${thresholds[tier] ?? "—"} |`);
+  }
+
+  if (Object.keys(notMeasured).length > 0) {
+    lines.push("", "### Not measured", "");
+    for (const [tier, why] of Object.entries(notMeasured).sort()) {
+      lines.push(`- \`${tier}\`: ${why}. Excluded from the thresholds and from the overall rate.`);
+    }
   }
 
   lines.push(

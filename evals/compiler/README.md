@@ -35,12 +35,26 @@ look like* rather than one a model produced.
 
 ## The project the set compiles against
 
-`project/` holds the three things a sentence does **not** determine and a project
+`project/` holds the four things a sentence does **not** determine and a project
 does: `data.yaml`'s `secrets:` list, which is why `{data.card.number}` compiles
 to a secret value; `targets.yaml`, which is why "the frame button" carries
-`scope: frame`; and `steps/`, the Tier 0 custom steps the `tier: 0` entries
-compile against. An eval that compiled against an empty project would score the
-compiler as wrong for being right.
+`scope: frame`; `steps/`, the Tier 0 custom steps the `tier: 0` entries compile
+against; and `svatah.config.yaml`, whose `compile.tier2` names the local model
+and pins its digest. An eval that compiled against an empty project would score
+the compiler as wrong for being right.
+
+`svatah eval compiler` reads `compile.tier2` and `compile.tier3` from **this**
+config, not from the directory it was invoked in (LLD §16, Draft 2.6); `--project
+<dir>` overrides it. That is what makes the published Tier 2 number reproducible
+from a checkout: before Draft 2.6 the eval read the repository root, which has no
+config, so a clean checkout registered no model, scored all 41 tier 2 sentences
+as wrong, and printed "Below thresholds" (Phase 4 verification, F2).
+
+A tier that is asked for and has no configuration is reported as **not measured**
+and excluded from the thresholds and from the overall rate. Its entries are not
+compiled at all. A configured tier whose server is unreachable is a different
+thing and still fails, because that is a measurement that went wrong rather than
+one that was never attempted.
 
 ## Thresholds
 
@@ -50,9 +64,13 @@ enforced by `svatah eval compiler`'s exit code.
 
 ```bash
 svatah eval compiler --report reports/eval-compiler.md      # every tier
+svatah eval compiler --tier2                                # the published number
 svatah eval compiler --only tier1                           # no model needed
 svatah eval compiler --only tier2 --gateway fake            # the harness alone
 ```
+
+Reproducing the published Tier 2 rate needs only `ollama serve` with
+`qwen2.5:3b` pulled; the model name and digest come from the committed config.
 
 The published result is [`reports/eval-compiler.md`](../../reports/eval-compiler.md),
 which names the gateway that produced the model-tier numbers — a percentage

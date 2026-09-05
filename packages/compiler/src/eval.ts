@@ -159,6 +159,21 @@ export interface EvalReport {
   readonly cases: readonly CaseResult[];
   readonly byTier: Readonly<Record<string, { total: number; matched: number; rate: number }>>;
   readonly totals: { total: number; matched: number; rate: number };
+  /**
+   * Tiers that were asked for and could not be measured (Draft 2.6, LLD §16).
+   *
+   * "A tier that is requested but not configured is reported as `not measured`
+   * and excluded from the threshold, never scored 0/N."
+   *
+   * The distinction is configuration, not availability. A tier with no
+   * `compile.tier2` in the project has nothing to measure and its entries are
+   * not scored at all; a tier that *is* configured and whose server is down
+   * fails, loudly, because that is a measurement that went wrong rather than
+   * one that was never attempted. Phase 4 published a Tier 2 rate of 0/41 and
+   * "Below thresholds" from a clean checkout for want of a committed config —
+   * a number that read as "the model got everything wrong".
+   */
+  readonly notMeasured?: Readonly<Record<string, string>>;
 }
 
 /** Score one measured step against the golden entry it was measured for. */
@@ -183,7 +198,13 @@ export function scoreCase(entry: GoldenEntry, actual: Step | undefined, error?: 
 /** Roll a list of case results into per-tier and overall rates. */
 export function summarise(
   cases: readonly CaseResult[],
-  meta: { gateway: string; real: boolean; at?: string },
+  meta: {
+    gateway: string;
+    real: boolean;
+    at?: string;
+    /** Tier name → why it could not be measured (Draft 2.6, LLD §16). */
+    notMeasured?: Readonly<Record<string, string>>;
+  },
 ): EvalReport {
   const byTier: Record<string, { total: number; matched: number; rate: number }> = {};
   for (const one of cases) {
@@ -208,5 +229,8 @@ export function summarise(
       matched,
       rate: cases.length === 0 ? 0 : matched / cases.length,
     },
+    ...(meta.notMeasured === undefined || Object.keys(meta.notMeasured).length === 0
+      ? {}
+      : { notMeasured: meta.notMeasured }),
   };
 }

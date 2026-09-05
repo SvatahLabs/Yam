@@ -14,7 +14,8 @@
  *   and `real` is false whenever a fake produced it (Phase 3's D1).
  */
 import { describe, expect, it } from "vitest";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readGolden } from "@svatah/compiler";
@@ -38,6 +39,7 @@ interface Report {
   byTier: Record<string, { total: number; matched: number; rate: number }>;
   totals: { total: number; matched: number; rate: number };
   cases: Array<{ id: string; tier: number; ok: boolean; text: string }>;
+  notMeasured?: Record<string, string>;
 }
 
 async function evaluate(...argv: string[]): Promise<{ code: number; report: Report; err: string }> {
@@ -138,6 +140,97 @@ describe("the golden set (REQ-COMP-9)", () => {
     for (const entry of entries.filter((e) => e.tier === 2)) {
       expect(entry.rule, entry.id).toBe(entry.step.action);
     }
+  });
+});
+
+/**
+ * The configuration the number is reproducible from (P4-F2, Draft 2.6, LLD §16).
+ *
+ * Phase 4's verifier ran `svatah eval compiler --tier2` on a clean checkout and
+ * got 0 of 41 and "Below REQ-COMP-9's thresholds". The eval read `compile.tier2`
+ * from the config at `--project` (default `.`), the repository root has none, so
+ * no model was registered and every tier 2 sentence was scored as a wrong
+ * answer. The published 90.2 percent had come from a config on a machine.
+ *
+ * Two things fix it and both are checked here: the golden project has its own
+ * committed config with the pinned digest, and a tier that could not be
+ * configured is `not measured` rather than zero.
+ */
+describe("the golden project's own config (P4-F2, LLD §16)", () => {
+  const configPath = join(PROJECT, "svatah.config.yaml");
+
+  it("is committed, with the model and the digest the report names", () => {
+    expect(existsSync(configPath), "evals/compiler/project/svatah.config.yaml").toBe(true);
+    const config = readFileSync(configPath, "utf8");
+    expect(config).toContain("qwen2.5:3b");
+    expect(config).toContain(
+      "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+    );
+  });
+
+  it("is what the eval reads, not the directory it was invoked from", async () => {
+    /*
+     * `--golden-project` points at the committed project; nothing points at a
+     * config, and the tier 2 subset is still measured — which can only be
+     * because the eval found `compile.tier2` beside the golden project. With
+     * Phase 4's resolution it would have looked in the working directory, found
+     * nothing, and reported tier 2 as not measured.
+     *
+     * `--gateway fake` so this needs no model server: what is under test is
+     * where the configuration is read from, and the fake is registered only for
+     * the tiers the eval asked for.
+     */
+    const { report } = await evaluate("--only", "tier2", "--gateway", "fake");
+    expect(report.notMeasured).toBeUndefined();
+    expect(report.byTier["tier2"]!.total).toBeGreaterThan(0);
+  }, 180_000);
+
+  it("reports a tier it cannot configure as not measured, never as 0/N", async () => {
+    /*
+     * Phase 4's defect, reproduced and then required to answer differently:
+     * `--project` at a directory with no config is exactly the clean checkout
+     * the verifier ran in. The 41 tier 2 sentences must vanish from the scoring
+     * — not be compiled with no model registered and counted as 41 wrong
+     * answers, which is what produced "tier2 0/41, Below thresholds".
+     */
+    const empty = mkdtempSync(join(tmpdir(), "svatah-eval-noconfig-"));
+    try {
+      const { report, code, err } = await evaluate("--only", "tier2", "--project", empty);
+      expect(report.notMeasured?.["tier2"]).toBeTypeOf("string");
+      expect(report.byTier["tier2"]).toBeUndefined();
+      expect(report.totals.total).toBe(0);
+      expect(err).toContain("not measured");
+      // And it is not a failure: nothing was measured, so nothing fell short.
+      expect(code).toBe(EXIT.ok);
+    } finally {
+      rmSync(empty, { recursive: true, force: true });
+    }
+  }, 180_000);
+
+  it("leaves the tiers it can measure alone", async () => {
+    // Tier 3 is unconfigured everywhere — no credential ever reaches a golden
+    // project — and asking for it must not disturb tier 1's 100 percent.
+    const { report, code } = await evaluate("--only", "tier1", "--tier3");
+    expect(report.notMeasured?.["tier3"]).toBeTypeOf("string");
+    expect(report.byTier["tier1"]!.rate).toBe(TIER1_THRESHOLD);
+    expect(code).toBe(EXIT.ok);
+  }, 180_000);
+
+  it("says so in the report a release publishes", () => {
+    const markdown = renderCompilerReport({
+      at: "1970-01-01T00:00:00.000Z",
+      gateway: "(none)",
+      real: false,
+      cases: [],
+      byTier: { tier1: { total: 10, matched: 10, rate: 1 } },
+      totals: { total: 10, matched: 10, rate: 1 },
+      notMeasured: { tier2: "`compile.tier2` is not configured in evals/compiler/project" },
+    });
+    expect(markdown).toContain("*not measured*");
+    expect(markdown).toContain("### Not measured");
+    expect(markdown).toContain("Excluded from the thresholds");
+    // The reading the Phase 4 report invited, and the one this must never allow.
+    expect(markdown).not.toMatch(/\| `tier2` \| \d+ \| 0 \(0\.0%\)/);
   });
 });
 

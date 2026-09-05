@@ -1,0 +1,68 @@
+# The golden set's own project (LLD §16, Draft 2.6).
+#
+# `svatah eval compiler` reads `compile.tier2` and `compile.tier3` from here
+# rather than from the repository root, which has no config at all. Without this
+# file a clean checkout scored tier 2 at 0/41 and printed "Below REQ-COMP-9's
+# thresholds": the published 90.2 percent had been produced with a config that
+# was never committed (Phase 4 verification, F2).
+#
+# `project/` is not a runnable project — the golden set is 300 sentences, not a
+# flow — so only the sections the eval reads are meaningful: `compile`, and the
+# `data.yaml` / `targets.yaml` / `steps/` beside this file. Everything else is
+# the schema's defaults, written out so the file validates on its own.
+schemaVersion: "1.0.0"
+project: "svatah-compiler-golden"
+environment: test
+adapter: playwright
+
+app: {}
+
+flows: { dir: flows }
+steps: { dir: steps }
+bindings:
+  dir: bindings
+  testIdAttributes: ["data-testid", "data-test", "data-qa"]
+data: { file: data.yaml }
+api: { dir: api }
+
+run:
+  workers: 1
+  headless: true
+  stepTimeoutMs: 10000
+  candidateTimeoutMs: 2000
+  screenshots: never
+  trace: false
+  outputDir: runs
+  checkpoints: false
+  audit: false
+
+compile:
+  confidenceThreshold: 0.8
+  # The weights the published Tier 2 number was measured against, pinned by
+  # digest (REQ-COMP-3): provenance has to be able to say *which* build of
+  # `qwen2.5:3b` produced a step, and a tag is re-pointed at a new build without
+  # changing its name. A server offering a different digest is refused with
+  # exit 3 unless `--allow-model-drift` is passed, and then the served digest is
+  # what the report records.
+  #
+  # Reproducing the number: `ollama pull qwen2.5:3b && ollama serve`, then
+  # `svatah eval compiler --tier2` from the repository root (docs/local-model.md).
+  tier2:
+    provider: ollama
+    endpoint: "http://127.0.0.1:11434"
+    model: "qwen2.5:3b"
+    digest: "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b"
+  # Tier 3 is deliberately absent. It needs a credential, so it can never be
+  # part of a number a clean checkout reproduces; asking for it here reports it
+  # as `not measured` rather than scoring it zero (LLD §16).
+
+record:
+  model: "none"
+  maxSnapshotTokens: 4000
+  visionFallback: false
+
+heal:
+  onFail: false
+  relocalizeThreshold: 0.72
+  margin: 0.1
+  useModel: false
