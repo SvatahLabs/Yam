@@ -10,8 +10,20 @@
 //     patterns. This is what actually catches the normal case, a workspace
 //     package importing `@svatah/<other>` by name, without depending on the
 //     module resolver being able to follow pnpm's symlinks.
+//   * `no-restricted-syntax` — the same boundaries expressed as selectors over
+//     `import()` expressions and `require()` calls. `no-restricted-imports` only
+//     sees static `import` and `export … from`; a dynamic import would otherwise
+//     walk straight through the boundary (LLD §1, Draft 2.2).
 //
-// A violation of either rule fails `pnpm lint`.
+// `import/no-restricted-paths` works on *resolved* paths, so it is only as good
+// as the resolver: without one that understands TypeScript, a relative specifier
+// like `../../gateway/src/index.js` resolves to nothing and the rule silently
+// skips it. `eslint-import-resolver-typescript` is configured below so the `.js`
+// specifier ESM requires maps back onto the `.ts` file on disk.
+//
+// A violation of any of the three rules fails `pnpm lint`. The fourth guard —
+// that no package.json *declares* a forbidden package — is a test, not a lint
+// rule: see `tools/repo-checks/test/import-boundaries.test.ts`.
 
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
@@ -72,7 +84,7 @@ const FLOW_LANGUAGE = ["spec", "steps", "compiler"];
 /** Only `cli` (adapter registration) and `playwright-test` (Playwright only) may reach an adapter. */
 const MAY_IMPORT_ADAPTERS = ["cli", "playwright-test"];
 
-const BOUNDARIES = [
+export const BOUNDARIES = [
   ...MODEL_FREE_CONSUMERS.flatMap((from) =>
     MODEL_AND_AUTHORING.filter((to) => to !== from).map((to) => ({
       from,
@@ -130,6 +142,24 @@ const specifierBlocks = ALL_PACKAGES.map((from) => {
           })),
         },
       ],
+      // `no-restricted-imports` does not see `import("…")` or `require("…")`.
+      // These selectors do, for the package-name form; the relative form is
+      // caught by `import/no-restricted-paths`, which visits import expressions
+      // too now that the TypeScript resolver can resolve them (LLD §1).
+      "no-restricted-syntax": [
+        "error",
+        ...forbidden.flatMap(({ to, why }) => {
+          const message = `@svatah/${from} must not import @svatah/${to}. ${why}`;
+          const pattern = `/^@svatah\\u002F${to}(\\u002F|$)/`;
+          return [
+            { selector: `ImportExpression > Literal[value=${pattern}]`, message },
+            {
+              selector: `CallExpression[callee.name="require"] > Literal[value=${pattern}]`,
+              message,
+            },
+          ];
+        }),
+      ],
     },
   };
 }).filter((b) => b !== null);
@@ -149,6 +179,24 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     plugins: { import: importPlugin },
+    settings: {
+      // Without this, `import/no-restricted-paths` cannot resolve a relative
+      // specifier such as `../../gateway/src/index.js` (ESM writes `.js`, the
+      // file on disk is `.ts`) and skips it silently — the bypass Draft 2.2 §1
+      // closes.
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+          noWarnOnMultipleProjects: true,
+          project: [
+            "packages/*/tsconfig.json",
+            "tools/*/tsconfig.json",
+            "apps/*/tsconfig.json",
+          ],
+        },
+      },
+      "import/parsers": { "@typescript-eslint/parser": [".ts", ".tsx"] },
+    },
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: "module",
@@ -167,6 +215,10 @@ export default tseslint.config(
   {
     // Repo tooling and tests are outside the package graph.
     files: ["scripts/**/*.mjs", "tools/**/*.ts", "**/test/**/*.ts", "**/*.config.ts"],
-    rules: { "import/no-restricted-paths": "off", "no-restricted-imports": "off" },
+    rules: {
+      "import/no-restricted-paths": "off",
+      "no-restricted-imports": "off",
+      "no-restricted-syntax": "off",
+    },
   },
 );
