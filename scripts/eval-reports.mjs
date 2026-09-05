@@ -16,13 +16,34 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 const SUITES = [
   { name: "compiler", threshold: "Tier 1 exact match 100%, end to end ≥ 95% (REQ-COMP-9)", task: "T4.4", runner: null },
-  { name: "grounding", threshold: "accuracy ≥ 95% on the sample application (REQ-REC-10)", task: "T3.4", runner: null },
+  {
+    name: "grounding",
+    threshold: "accuracy ≥ 95% on the sample application (REQ-REC-10)",
+    task: "T3.4",
+    /*
+     * Runnable since T3.4, and it needs a model.
+     *
+     * With `ANTHROPIC_API_KEY` set this measures grounding. Without one it runs
+     * against the fake gateway, which measures the *harness* — the report says
+     * so at the top, in bold, and that sentence is the only reason running it
+     * unattended is acceptable at all.
+     */
+    runner: process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN
+      ? ["node", "scripts/eval-grounding.mjs", "--report"]
+      : ["node", "scripts/eval-grounding.mjs", "--gateway", "fake", "--report"],
+  },
   {
     name: "healing",
     threshold: "relocalize-only ≥ 60%, with one model call ≥ 85% (REQ-HEAL-5)",
     task: "T1.8",
-    // Runnable since T1.8. The relocalize-only half is what Phase 1 measures; the
-    // model half arrives with the gateway in Phase 3.
+    /*
+     * Runnable since T1.8; the model half since T3.4.
+     *
+     * `svatah eval healing` registers the recorder's `Regrounder` when there is
+     * a credential and `heal.useModel` allows it, so the same command measures
+     * both numbers when a model is available and says the second is unmeasured
+     * when one is not.
+     */
     runner: ["node", "scripts/eval-healing.mjs", "--report"],
   },
   { name: "conformance", threshold: "every adapter passes the surface suite (REQ-SURF-3)", task: "T1.2", runner: null },

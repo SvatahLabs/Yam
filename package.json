@@ -25,7 +25,8 @@
     "quick-start": "node scripts/quick-start.mjs",
     "eval:healing": "node scripts/eval-healing.mjs --report reports/eval-healing.md",
     "record:snapshots": "node scripts/record-snapshots.mjs",
-    "grounding:cases": "node scripts/grounding-cases.mjs"
+    "grounding:cases": "node scripts/grounding-cases.mjs",
+    "eval:grounding": "node scripts/eval-grounding.mjs --report reports/eval-grounding.md"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

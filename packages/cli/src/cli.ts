@@ -57,6 +57,8 @@ Bindings and healing (module a):
               [--base-url <url>] [--storage-state <path.json>]
               [--apply] [--no-model] [--headed] [--json]
   svatah eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
+  svatah eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
+                        [--limit <n>] [--report <path.md>] [--json]
 
 Exit codes are the table in LLD §15.
 `;
@@ -204,7 +206,19 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
    * `svatah-bindings heal --from-bind-failures` has no runtime and keeps module
    * (a)'s session-state default, which is the right answer for a bind failure.
    */
-  if (command === "heal") await registerModelRegrounder(args, io);
+  /*
+   * `eval grounding` is module (b)'s: it needs a gateway and the recorder, so it
+   * is intercepted before the module (a) command table, which correctly does not
+   * have it (LLD §16).
+   */
+  if (command === "eval" && args.command[1] === "grounding") {
+    return await (await import("./commands/eval-grounding.js")).groundingEvalCommand(args, io);
+  }
+
+  // `heal` and `eval healing` both take the model half of REQ-HEAL-1.
+  if (command === "heal" || (command === "eval" && args.command[1] === "healing")) {
+    await registerModelRegrounder(args, io);
+  }
 
   const prepared =
     command === "heal" && typeof args.options["run"] === "string"

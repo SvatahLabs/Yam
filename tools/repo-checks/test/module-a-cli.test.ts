@@ -97,6 +97,15 @@ describe("@svatah/bindings-cli (T2.12)", () => {
     expect(cliSource).toContain("runBindingsCommand");
 
     const commands = fromRoot("packages", "cli", "src", "commands");
+
+    /*
+     * Module (b) has an eval command of its own (T3.4) — `eval-grounding.ts`,
+     * which needs the gateway and the recorder and therefore cannot live in
+     * module (a). It is deliberately not named `eval.ts`: that name belongs to
+     * the file that moved out, and reusing it would read like it moved back.
+     */
+    expect(existsSync(join(commands, "eval-grounding.ts"))).toBe(true);
+
     for (const moved of ["bindings.ts", "heal.ts", "surface.ts", "eval.ts"]) {
       expect(existsSync(join(commands, moved)), `${moved} is still in @svatah/cli`).toBe(false);
     }

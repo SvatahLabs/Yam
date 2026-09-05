@@ -39,12 +39,28 @@ export function renderHealingEvalMarkdown(
           `${percent(report.threshold)} threshold. **Not met.**`,
   );
   lines.push("");
-  lines.push(
-    report.usedModel
-      ? "A model was used for the residue relocalization could not place."
-      : "No model was involved at any point: relocalization only, with the no-op `Regrounder` " +
-          "(LLD §10). The model half of REQ-HEAL-5 arrives in Phase 3.",
-  );
+  if (report.usedModel) {
+    lines.push(
+      `**With one model call: ${percent(report.withModel)}**, against REQ-HEAL-5's ` +
+        `${percent(report.modelThreshold)} threshold. ` +
+        (report.meetsModelThreshold ? "Met." : "**Not met.**"),
+    );
+    lines.push("");
+    lines.push(
+      "The residue relocalization declined — `not-found` and `ambiguous` — was re-grounded " +
+        `by \`${report.regrounder}\`, one call per binding and never on one relocalization ` +
+        "placed (REQ-HEAL-1). A re-grounded proposal is judged by the same two tests as a " +
+        "relocalized one: the ground-truth key has to match, and a candidate re-synthesised " +
+        "from it has to resolve uniquely. A model's confidence buys it nothing.",
+    );
+  } else {
+    lines.push(
+      "**No model was involved at any point**: relocalization only, with the no-op " +
+        "`Regrounder` (LLD §10). REQ-HEAL-5's second number — 85% with one model call — is " +
+        "therefore *not measured here*, and the figure below is the relocalize-only one. " +
+        "Register a `Regrounder` (a credential, and `heal.useModel`) to measure it.",
+    );
+  }
   lines.push("");
 
   lines.push("## Method");
@@ -87,6 +103,9 @@ export function renderHealingEvalMarkdown(
   lines.push(`| Bindings that stopped resolving entirely | ${report.totals.unresolvable} |`);
   lines.push(`| **Bindings degraded — the cases below** | **${report.totals.degraded}** |`);
   lines.push(`| Recovered by relocalization | ${report.totals.recovered} |`);
+  if (report.usedModel) {
+    lines.push(`| Recovered by one model call | ${report.totals.regrounded} |`);
+  }
   lines.push(`| Not found | ${report.totals.notFound} |`);
   lines.push(`| Refused as ambiguous | ${report.totals.ambiguous} |`);
   lines.push(`| **Relocalized onto the wrong element** | **${report.totals.wrongElement}** |`);
@@ -117,12 +136,18 @@ export function renderHealingEvalMarkdown(
 
   lines.push("## By variant");
   lines.push("");
-  lines.push("| # | Change | Locators broken | Degraded | Recovered | Rate |");
-  lines.push("|---|---|---|---|---|---|");
+  lines.push(
+    report.usedModel
+      ? "| # | Change | Locators broken | Degraded | Recovered | Re-grounded | Rate |"
+      : "| # | Change | Locators broken | Degraded | Recovered | Rate |",
+  );
+  lines.push(report.usedModel ? "|---|---|---|---|---|---|---|" : "|---|---|---|---|---|---|");
   for (const variant of report.variants) {
     lines.push(
       `| ${variant.variant} | ${variant.title} | ${variant.brokenLocators}/${variant.locatorCases} | ` +
-        `${variant.degraded} | ${variant.recovered} | ${variant.rate === null ? "—" : percent(variant.rate)} |`,
+        `${variant.degraded} | ${variant.recovered} | ` +
+        (report.usedModel ? `${variant.regrounded} | ` : "") +
+        `${variant.rate === null ? "—" : percent(variant.rate)} |`,
     );
   }
   lines.push("");
@@ -184,9 +209,15 @@ export function renderHealingEvalMarkdown(
 
 /** The same numbers as one line, for a terminal. */
 export function renderHealingEvalSummary(report: HealingEvalReport): string {
-  return (
+  const relocalize =
     `healing eval [${report.population}] — relocalize-only ${(report.relocalizeOnly * 100).toFixed(1)}% ` +
     `(${report.totals.recovered}/${report.totals.degraded} degraded bindings recovered), ` +
-    `threshold ${(report.threshold * 100).toFixed(0)}%: ${report.meetsThreshold ? "met" : "NOT met"}`
-  );
+    `threshold ${(report.threshold * 100).toFixed(0)}%: ${report.meetsThreshold ? "met" : "NOT met"}`;
+
+  return report.usedModel
+    ? `${relocalize}\n` +
+      `  with one model call (${report.regrounder}) ${(report.withModel * 100).toFixed(1)}% ` +
+      `(+${report.totals.regrounded} re-grounded), threshold ` +
+      `${(report.modelThreshold * 100).toFixed(0)}%: ${report.meetsModelThreshold ? "met" : "NOT met"}`
+    : `${relocalize}\n  no model: REQ-HEAL-5's 85% number is not measured by this run`;
 }

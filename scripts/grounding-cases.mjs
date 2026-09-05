@@ -228,8 +228,45 @@ try {
           process.stderr.write(`${id} on ${path}: could not locate; skipped\n`);
           continue;
         }
+        if (node.states.includes("hidden")) {
+          /*
+           * Not in the snapshot the model is given, so not a grounding case.
+           *
+           * `booking.indiranagar-suggestion` is an `<option>` inside a
+           * `<datalist>`: the accessibility tree does not expose it, which is the
+           * same limitation the conformance fixture documents for clicking it.
+           * REQ-REC-2 measures grounding *from the snapshot*; an element the
+           * snapshot does not contain is a case for the vision fallback, not for
+           * this suite.
+           */
+          process.stderr.write(`${id} on ${path}: hidden from the snapshot; skipped\n`);
+          continue;
+        }
 
         const truth = await surface.readRawAttribute(node.ref, GROUND_TRUTH_ATTRIBUTE);
+        if (truth === undefined) {
+          /*
+           * No ground-truth key, so no case.
+           *
+           * `apps/sample-web` stamps interactive elements; a heading is not one,
+           * and the fixtures bind two of them. A case the eval cannot check
+           * could never be scored `correct`, so including it would put a
+           * permanently unreachable case in REQ-REC-10's denominator — which is
+           * a rigged threshold, not a hard case. The phrases stay covered by the
+           * recorder's own tests.
+           */
+          process.stderr.write(`${id} on ${path}: no ground-truth key; skipped\n`);
+          continue;
+        }
+
+        // Where the element sits among the same role, so a case for a control
+        // with no accessible name — a nameless select — can still say which one
+        // it means. Counted over what the renderer emits, not over every node:
+        // hidden nodes are dropped from the text, and an index over a different
+        // list would point at a different element.
+        const visible = snapshot.nodes.filter((one) => !one.states.includes("hidden"));
+        const nth = visible.filter((one) => one.role === node.role).indexOf(node);
+
         for (const phrase of file.phrases) {
           if (cases.some((c) => c.page === path && c.phrase === phrase)) continue;
           cases.push({
@@ -237,9 +274,10 @@ try {
             page: path,
             phrase,
             expect: "present",
-            ...(truth === undefined ? {} : { element: truth }),
+            element: truth,
             role: node.role,
             ...(node.name === undefined ? {} : { name: node.name }),
+            nth,
             source: "fixtures",
           });
         }

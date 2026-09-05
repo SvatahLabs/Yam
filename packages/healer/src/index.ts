@@ -55,6 +55,7 @@ export {
   recordBaseline,
   entryFrom,
   METHOD,
+  MODEL_THRESHOLD,
   RELOCALIZE_THRESHOLD,
   type EvalBinding,
   type EvalCase,

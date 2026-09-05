@@ -5,6 +5,11 @@ on:
     branches: ["**"]
   pull_request:
   workflow_dispatch:
+  # T3.4: the scheduled run is the one that spends. It measures grounding and the
+  # model half of healing against the real gateway, and commits the answer cache
+  # the pull-request job replays.
+  schedule:
+    - cron: "0 3 * * *"
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -99,6 +104,107 @@ jobs:
 
       - name: The recorded bindings match the committed ones
         run: git diff --exit-code examples/plain-playwright/bindings
+
+  # T3.4: the grounding eval, twice over.
+  #
+  # On a pull request it replays answers a scheduled run committed under
+  # `evals/grounding/cache` — a real measurement, re-checked at no cost, which is
+  # what catches a change to the prompt, the pruning or the sample pages moving
+  # the number. With no cache committed yet it falls back to the fake gateway,
+  # which checks the harness and says so in its own report.
+  grounding-eval:
+    name: grounding eval (cached answers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm -r build
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+
+      - name: Eval (REQ-REC-10)
+        run: |
+          if [ -d evals/grounding/cache ]; then
+            node scripts/eval-grounding.mjs --cache evals/grounding/cache --report reports/eval-grounding.md
+          else
+            echo "No committed answer cache yet: checking the harness with the fake gateway."
+            node scripts/eval-grounding.mjs --gateway fake --report reports/eval-grounding.md
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-grounding
+          path: reports/eval-grounding.md
+
+  # T3.4: the run that costs money, once a night, never on a pull request.
+  #
+  # It measures what REQ-REC-10 and REQ-HEAL-5 actually ask for — grounding
+  # accuracy and healing with one model call — and writes the answer cache the
+  # pull-request job replays for free. Skipped entirely when the repository has no
+  # credential, rather than falling back to a fixture and calling it a measurement.
+  model-evals:
+    name: model evals (real gateway)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm -r build
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+
+      - name: Skip without a credential
+        id: credential
+        run: |
+          if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "No ANTHROPIC_API_KEY: the model evals measure nothing without one."
+            echo "have=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "have=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Grounding eval (REQ-REC-10)
+        if: steps.credential.outputs.have == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/eval-grounding.mjs --cache evals/grounding/cache --report reports/eval-grounding.md
+
+      - name: Healing eval with one model call (REQ-HEAL-5)
+        if: steps.credential.outputs.have == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/eval-healing.mjs --report reports/eval-healing.md
+
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.credential.outputs.have == 'true'
+        with:
+          name: model-eval-reports
+          path: reports/
 
   legacy-java:
     name: legacy Java project compiles

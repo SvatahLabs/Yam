@@ -24,7 +24,11 @@ interface GithubStep {
 }
 interface GithubWorkflow {
   env?: Record<string, string>;
-  jobs: Record<string, { strategy?: { matrix?: { os?: string[] } }; steps: GithubStep[] }>;
+  on?: { schedule?: Array<{ cron: string }> };
+  jobs: Record<
+    string,
+    { strategy?: { matrix?: { os?: string[] } }; if?: string; steps: GithubStep[] }
+  >;
 }
 interface BitbucketStep {
   name?: string;
@@ -55,10 +59,40 @@ const quickStartStep = bitbucketSteps.find((s) => s.name?.startsWith("quick star
 
 describe("CI mirrors (P0-F5)", () => {
   it("both workflows exist", () => {
-    expect(Object.keys(github.jobs).sort()).toEqual(["legacy-java", "quick-start", "workspace"]);
+    expect(Object.keys(github.jobs).sort()).toEqual([
+      "grounding-eval",
+      "legacy-java",
+      "model-evals",
+      "quick-start",
+      "workspace",
+    ]);
     expect(workspaceStep).toBeDefined();
     expect(javaStep).toBeDefined();
     expect(quickStartStep).toBeDefined();
+  });
+
+  /*
+   * The eval jobs are GitHub-only, deliberately (T3.4).
+   *
+   * `model-evals` spends money and needs a repository secret, and
+   * `grounding-eval` replays a cache that job commits. Mirroring either onto
+   * Bitbucket would mean a second place to hold a credential for no gain, so the
+   * mirror test below compares the *workspace* job and this one records why the
+   * other two are not in it.
+   */
+  it("the model evals run on a schedule and never on a pull request", () => {
+    expect(github.on?.schedule).toBeDefined();
+    const job = github.jobs["model-evals"]!;
+    expect(job.if).toContain("schedule");
+    expect(job.if).not.toContain("pull_request");
+  });
+
+  it("the pull-request eval job replays a cache rather than spending", () => {
+    const script = githubCommands("grounding-eval").join("\n");
+    expect(script).toContain("--cache evals/grounding/cache");
+    // And it degrades to the harness check rather than failing when no
+    // scheduled run has committed a cache yet.
+    expect(script).toContain("--gateway fake");
   });
 
   it("the quick-start job runs the quick start and checks the recorded bindings (T1.6)", () => {

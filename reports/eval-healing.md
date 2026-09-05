@@ -1,10 +1,10 @@
 # Svatah eval report — healing
 
-Generated: 2026-09-02T21:05:52.594Z
+Generated: 2026-09-03T05:56:14.728Z
 
 **Relocalize-only recovery: 92.3%**, against REQ-HEAL-5's 60.0% threshold. Met.
 
-No model was involved at any point: relocalization only, with the no-op `Regrounder` (LLD §10). The model half of REQ-HEAL-5 arrives in Phase 3.
+**No model was involved at any point**: relocalization only, with the no-op `Regrounder` (LLD §10). REQ-HEAL-5's second number — 85% with one model call — is therefore *not measured here*, and the figure below is the relocalize-only one. Register a `Regrounder` (a credential, and `heal.useModel`) to measure it.
 
 ## Method
 

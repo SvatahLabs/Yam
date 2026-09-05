@@ -62,12 +62,25 @@
  * is `unverified`, not recovered. It is not a wrong element, and calling it one
  * would be as misleading in the other direction (REQ-HEAL-3).
  *
- * No model is involved anywhere. `usedModel` is always false in Phase 1; the
- * model half of REQ-HEAL-5 arrives with the `Regrounder` plugin in Phase 3.
+ * ## The model half (Phase 3, REQ-HEAL-5)
+ *
+ * "Relocalization alone at least 60 percent, with one model call at least 85
+ * percent." The second number is what the registered `Regrounder` adds: exactly
+ * one call per binding relocalization declined — `not-found` or `ambiguous` —
+ * and never on one it placed, which is the ordering REQ-HEAL-1 asks for.
+ *
+ * A regrounded proposal is judged by the same two tests as a relocalized one:
+ * the ground-truth key has to match, and a candidate re-synthesised from it has
+ * to resolve uniquely. A model's confidence buys it nothing here.
+ *
+ * With no `Regrounder` registered — module (a) alone, or no credential — nothing
+ * changes: `usedModel` is false, `withModel` equals `relocalizeOnly`, and the
+ * report says so rather than reporting a model number nobody measured.
  */
 import type { AgentSurface } from "@svatah/surface";
 import type { BindingEntry, Candidate, Fingerprint } from "@svatah/schema";
 import { fingerprintOf, relocalize, synthesise, type RelocalizeResult } from "@svatah/bindings";
+import { currentRegrounder, hasRegrounder } from "./regrounder.js";
 
 /** A binding recorded at variant 0. */
 export interface EvalBinding {
@@ -84,6 +97,8 @@ export interface EvalBinding {
    * rather than assumed correct.
    */
   readonly truth?: string;
+  /** What a person would call it, for the `Regrounder`'s prompt. */
+  readonly phrase?: string;
 }
 
 /** One binding on one variant. */
@@ -107,6 +122,8 @@ export interface EvalCase {
   readonly outcome:
     | "intact"
     | "recovered"
+    /** Relocalization declined and the registered `Regrounder` placed it. */
+    | "regrounded"
     | "not-found"
     | "ambiguous"
     | "wrong-element"
@@ -134,6 +151,7 @@ export interface VariantResult {
   /** Bindings that lost at least one candidate. */
   readonly degraded: number;
   readonly recovered: number;
+  readonly regrounded: number;
   readonly notFound: number;
   readonly ambiguous: number;
   readonly wrongElement: number;
@@ -156,6 +174,7 @@ export interface HealingEvalReport {
     readonly brokenLocators: number;
     readonly degraded: number;
     readonly recovered: number;
+    readonly regrounded: number;
     readonly notFound: number;
     readonly ambiguous: number;
     readonly wrongElement: number;
@@ -164,15 +183,25 @@ export interface HealingEvalReport {
   };
   /** Which candidate kinds broke, and how often. */
   readonly brokenByKind: Readonly<Record<string, number>>;
-  /** The relocalize-only recovery rate — the number REQ-HEAL-5 asks for. */
+  /** The relocalize-only recovery rate — the first number REQ-HEAL-5 asks for. */
   readonly relocalizeOnly: number;
+  /** `(recovered + regrounded) / degraded` — the second (REQ-HEAL-5). */
+  readonly withModel: number;
   readonly threshold: number;
+  readonly modelThreshold: number;
   readonly meetsThreshold: boolean;
+  /** Only meaningful when `usedModel`; false otherwise, and the report says why. */
+  readonly meetsModelThreshold: boolean;
   readonly usedModel: boolean;
+  /** Which `Regrounder` answered, for the report. */
+  readonly regrounder: string;
 }
 
 /** REQ-HEAL-5: "relocalization alone at least 60 percent". */
 export const RELOCALIZE_THRESHOLD = 0.6;
+
+/** REQ-HEAL-5: "with one model call at least 85 percent". */
+export const MODEL_THRESHOLD = 0.85;
 
 export const METHOD = [
   "Bindings are recorded for every interactive element on every sample page at variant 0.",
@@ -250,6 +279,9 @@ export async function recordBaseline(
           candidates,
           fingerprint: fingerprintOf(description),
           ...(truth === undefined ? {} : { truth }),
+          ...(description.name === undefined || description.name === ""
+            ? {}
+            : { phrase: `the ${description.name} ${description.role}` }),
         });
       }
       options.onProgress?.(`recorded ${bindings.filter((b) => b.page === page).length} on ${page}`);
@@ -329,17 +361,27 @@ async function runCase(
 
   const runnerUp = result.ranked[1];
 
-  if (result.outcome === "not-found") {
-    const best = result.ranked[0];
-    return {
-      case: {
-        ...base,
-        outcome: "not-found",
-        ...(best === undefined ? {} : { score: round(best.score.total) }),
-      },
-    };
-  }
-  if (result.outcome === "ambiguous") {
+  if (result.outcome === "not-found" || result.outcome === "ambiguous") {
+    /*
+     * One model call, and only here (REQ-HEAL-1, REQ-HEAL-5).
+     *
+     * Relocalization declined, which is the only point at which REQ-HEAL-1
+     * allows a model. With no `Regrounder` registered this returns null and the
+     * case stays what relocalization made it.
+     */
+    const regrounded = await regroundCase(surface, binding, options);
+    if (regrounded !== undefined) return { case: { ...base, ...regrounded } };
+
+    if (result.outcome === "not-found") {
+      const best = result.ranked[0];
+      return {
+        case: {
+          ...base,
+          outcome: "not-found",
+          ...(best === undefined ? {} : { score: round(best.score.total) }),
+        },
+      };
+    }
     return {
       case: {
         ...base,
@@ -393,6 +435,58 @@ async function runCase(
   };
 }
 
+/**
+ * The model half of one case (REQ-HEAL-5).
+ *
+ * Returns `undefined` when there is no `Regrounder`, or when it declined — both
+ * of which leave the case exactly what relocalization made it. A proposal is
+ * judged by the same two tests a relocalized one is: the ground-truth key has to
+ * match, and a candidate re-synthesised from it has to resolve uniquely. Nothing
+ * about a model's confidence substitutes for either.
+ */
+async function regroundCase(
+  surface: AgentSurface,
+  binding: EvalBinding,
+  options: HealingEvalOptions,
+): Promise<(Pick<EvalCase, "outcome"> & Partial<EvalCase>) | undefined> {
+  if (!hasRegrounder()) return undefined;
+
+  const entry: BindingEntry = {
+    context: { pattern: binding.page, hash: "eval", platform: "web" },
+    candidates: [...binding.candidates],
+    fingerprint: binding.fingerprint,
+    recordedAt: new Date().toISOString(),
+    provenance: {
+      model: "human",
+      promptVersion: "eval:baseline",
+      at: new Date().toISOString(),
+      tokensIn: 0,
+      tokensOut: 0,
+    },
+    verified: false,
+  };
+
+  const proposal = await currentRegrounder()
+    .ground(
+      { id: binding.id, ...(binding.phrase === undefined ? {} : { phrase: binding.phrase }), entry },
+      surface,
+    )
+    .catch(() => null);
+  if (proposal === null || proposal.candidates.length === 0) return undefined;
+
+  const refs = await surface.locate(proposal.candidates[0]!).catch(() => []);
+  if (refs.length !== 1) return { outcome: "unverified" };
+
+  const proposedTruth = await options.groundTruth?.(surface, refs[0]!).catch(() => undefined);
+  if (binding.truth === undefined || proposedTruth === undefined) {
+    return { outcome: "unverified", ...(proposedTruth === undefined ? {} : { proposedTruth }) };
+  }
+  if (proposedTruth !== binding.truth) {
+    return { outcome: "wrong-element", proposedTruth, expectedTruth: binding.truth };
+  }
+  return { outcome: "regrounded", proposedTruth, repairedBy: proposal.candidates[0]!.by };
+}
+
 function summarise(
   baseline: readonly EvalBinding[],
   cases: readonly EvalCase[],
@@ -404,6 +498,7 @@ function summarise(
     const mine = cases.filter((c) => c.variant === variant.id);
     const degradedCases = mine.filter((c) => c.outcome !== "intact");
     const recovered = degradedCases.filter((c) => c.outcome === "recovered").length;
+    const regrounded = degradedCases.filter((c) => c.outcome === "regrounded").length;
     const counter = locatorCases.get(variant.id) ?? { examined: 0, broken: 0 };
     return {
       variant: variant.id,
@@ -412,6 +507,7 @@ function summarise(
       brokenLocators: counter.broken,
       degraded: degradedCases.length,
       recovered,
+      regrounded,
       notFound: degradedCases.filter((c) => c.outcome === "not-found").length,
       ambiguous: degradedCases.filter((c) => c.outcome === "ambiguous").length,
       wrongElement: degradedCases.filter((c) => c.outcome === "wrong-element").length,
@@ -423,6 +519,7 @@ function summarise(
 
   const degraded = cases.filter((c) => c.outcome !== "intact");
   const recovered = degraded.filter((c) => c.outcome === "recovered").length;
+  const regrounded = degraded.filter((c) => c.outcome === "regrounded").length;
 
   const brokenByKind: Record<string, number> = {};
   for (const one of cases) {
@@ -441,6 +538,7 @@ function summarise(
       brokenLocators: results.reduce((n, v) => n + v.brokenLocators, 0),
       degraded: degraded.length,
       recovered,
+      regrounded,
       notFound: degraded.filter((c) => c.outcome === "not-found").length,
       ambiguous: degraded.filter((c) => c.outcome === "ambiguous").length,
       wrongElement: degraded.filter((c) => c.outcome === "wrong-element").length,
@@ -451,9 +549,16 @@ function summarise(
       Object.entries(brokenByKind).sort(([, a], [, b]) => b - a),
     ),
     relocalizeOnly: degraded.length === 0 ? 0 : recovered / degraded.length,
+    withModel: degraded.length === 0 ? 0 : (recovered + regrounded) / degraded.length,
     threshold: RELOCALIZE_THRESHOLD,
+    modelThreshold: MODEL_THRESHOLD,
     meetsThreshold: degraded.length > 0 && recovered / degraded.length >= RELOCALIZE_THRESHOLD,
-    usedModel: false,
+    meetsModelThreshold:
+      hasRegrounder() &&
+      degraded.length > 0 &&
+      (recovered + regrounded) / degraded.length >= MODEL_THRESHOLD,
+    usedModel: hasRegrounder(),
+    regrounder: currentRegrounder().name,
   };
 }
 

@@ -36,6 +36,8 @@ export interface GroundingCase {
   readonly element?: string;
   readonly role?: string;
   readonly name?: string;
+  /** Position among same-role nodes, for an element with no accessible name. */
+  readonly nth?: number;
 }
 
 export interface GroundingAnswer {
@@ -91,7 +93,7 @@ export function groundingAnswers(path?: string): GroundingAnswers {
        * remembered: references are per-snapshot, and a case that hard-coded one
        * would answer with a handle from a page that no longer exists.
        */
-      const ref = refFor(question, found.role, found.name);
+      const ref = refFor(question, found);
       return ref === undefined
         ? undefined
         : { ref, why: `${found.id}: the ${found.role} named "${found.name}"`, confidence: 1 };
@@ -109,18 +111,29 @@ function pagePathOf(url: string | undefined): string | undefined {
   }
 }
 
-/** The `[ref=…]` of the snapshot line naming that role and accessible name. */
-function refFor(
-  question: string,
-  role: string | undefined,
-  name: string | undefined,
-): string | undefined {
-  if (role === undefined || name === undefined) return undefined;
-  const wanted = `- ${role} ${JSON.stringify(name)}`;
-  for (const line of question.split("\n")) {
-    if (!line.trimStart().startsWith(wanted)) continue;
-    const ref = /\[ref=([^\]]+)\]/.exec(line)?.[1];
-    if (ref !== undefined) return ref;
+/**
+ * The `[ref=…]` of the snapshot line the case names.
+ *
+ * By role and accessible name, which is how a rendered snapshot line reads. An
+ * element with no name — a nameless select, an option inside a `datalist` — is
+ * found by its position among the same role instead, which is the only thing
+ * that distinguishes it and is what a person means by "the expiry year select".
+ */
+function refFor(question: string, found: GroundingCase): string | undefined {
+  if (found.role === undefined) return undefined;
+
+  const lines = question.split("\n");
+  if (found.name !== undefined) {
+    const wanted = `- ${found.role} ${JSON.stringify(found.name)}`;
+    for (const line of lines) {
+      if (!line.trimStart().startsWith(wanted)) continue;
+      const ref = /\[ref=([^\]]+)\]/.exec(line)?.[1];
+      if (ref !== undefined) return ref;
+    }
+    return undefined;
   }
-  return undefined;
+
+  if (found.nth === undefined) return undefined;
+  const sameRole = lines.filter((line) => line.trimStart().startsWith(`- ${found.role}`));
+  return /\[ref=([^\]]+)\]/.exec(sameRole[found.nth] ?? "")?.[1];
 }

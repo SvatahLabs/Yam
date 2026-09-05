@@ -53,3 +53,15 @@ export {
   recorderRegrounder,
   type PluginOptions,
 } from "./plugins.js";
+
+export {
+  GROUNDING_THRESHOLD,
+  runGroundingEval,
+  type GroundingCase,
+  type GroundingEvalOptions,
+  type GroundingEvalOutcome,
+  type GroundingEvalReport,
+  type GroundingEvalResult,
+} from "./eval.js";
+
+export { renderGroundingEvalMarkdown, renderGroundingEvalSummary } from "./eval-report.js";

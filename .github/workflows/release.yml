@@ -7,6 +7,13 @@ name: Release
 # is added by the task that first makes that suite runnable (T1.8 healing, T3.4
 # grounding and healing-with-model, T4.4 compiler); until then the step reports the
 # suite as not yet runnable rather than failing the release.
+#
+# The grounding and healing suites need a model to measure the numbers REQ-REC-10
+# and REQ-HEAL-5 name. `ANTHROPIC_API_KEY` is passed when the repository has one;
+# without it the grounding report runs against the fake gateway and says, at the
+# top and in bold, that it measures the harness rather than grounding, and the
+# healing report says its 85% number was not measured. A release that ships those
+# ships an honest "not measured", never a number nobody took.
 
 on:
   push:
@@ -46,6 +53,8 @@ jobs:
 
       - name: Generate eval reports
         run: node scripts/eval-reports.mjs --out reports
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Upload eval reports as build artifacts
         uses: actions/upload-artifact@v4

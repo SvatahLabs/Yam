@@ -179,23 +179,20 @@
 {"id":"g-357","page":"/booking","variant":19,"phrase":"the Toggle navigation button","expect":"present","element":"booking/02-nav-toggle","role":"button","name":"Toggle navigation"}
 {"id":"g-377","page":"/login","variant":20,"phrase":"the Svatah Sample link","expect":"present","element":"login/01-brand","role":"link","name":"Svatah Sample"}
 {"id":"g-378","page":"/login","variant":20,"phrase":"the Toggle navigation button","expect":"present","element":"login/02-nav-toggle","role":"button","name":"Toggle navigation"}
-{"id":"g-387","page":"/dashboard","phrase":"the logout link","expect":"present","element":"dashboard/12-nav-logout","role":"link","name":"Logout","source":"fixtures"}
-{"id":"g-388","page":"/dashboard","phrase":"the sidebar toggle","expect":"present","element":"dashboard/07-sidebar-toggle","role":"button","name":"Toggle sidebar","source":"fixtures"}
-{"id":"g-389","page":"/booking","phrase":"the 09:00 slot time","expect":"present","element":"booking/19-09-00","role":"option","name":"09:00","source":"fixtures"}
-{"id":"g-390","page":"/booking","phrase":"the 18:00 slot time","expect":"present","element":"booking/22-18-00","role":"option","name":"18:00","source":"fixtures"}
-{"id":"g-391","page":"/booking","phrase":"the Indiranagar suggestion","expect":"present","element":"booking/14-option","role":"option","source":"fixtures"}
-{"id":"g-392","page":"/booking","phrase":"the location field","expect":"present","element":"booking/13-location","role":"combobox","name":"Starting point","source":"fixtures"}
-{"id":"g-393","page":"/booking","phrase":"the next button","expect":"present","element":"booking/23-booking-next","role":"button","name":"Next","source":"fixtures"}
-{"id":"g-394","page":"/booking","phrase":"the slot date field","expect":"present","element":"booking/17-slot-date","role":"textbox","name":"Date","source":"fixtures"}
-{"id":"g-395","page":"/checkout","phrase":"the card number field","expect":"present","element":"checkout/13-card","role":"textbox","name":"Card number","source":"fixtures"}
-{"id":"g-396","page":"/checkout","phrase":"the expiry month select","expect":"present","element":"checkout/14-expiry-month","role":"combobox","name":"Expiry","source":"fixtures"}
-{"id":"g-397","page":"/checkout","phrase":"the expiry year select","expect":"present","element":"checkout/18-expiry-year","role":"combobox","source":"fixtures"}
-{"id":"g-398","page":"/checkout","phrase":"the pay button","expect":"present","element":"checkout/22-pay","role":"button","name":"Pay","source":"fixtures"}
-{"id":"g-399","page":"/","phrase":"the home heading","expect":"present","role":"heading","name":"Deterministic automation, once described","source":"fixtures"}
-{"id":"g-400","page":"/","phrase":"the sign in button","expect":"present","element":"home/07-sign-in","role":"link","name":"Sign in","source":"fixtures"}
-{"id":"g-401","page":"/login","phrase":"the login button","expect":"present","element":"login/10-login-submit","role":"button","name":"Sign In","source":"fixtures"}
-{"id":"g-402","page":"/login","phrase":"the password field","expect":"present","element":"login/08-password","role":"textbox","name":"Password","source":"fixtures"}
-{"id":"g-403","page":"/login","phrase":"the username field","expect":"present","element":"login/07-username","role":"textbox","name":"Username","source":"fixtures"}
-{"id":"g-404","page":"/","phrase":"the dashboard link","expect":"present","element":"home/03-dashboard-link","role":"link","name":"Dashboard","source":"fixtures"}
-{"id":"g-405","page":"/","phrase":"the nav toggle","expect":"present","element":"home/02-nav-toggle","role":"button","name":"Toggle navigation","source":"fixtures"}
-{"id":"g-406","page":"/schedule-build","phrase":"the schedule heading","expect":"present","role":"heading","name":"Enterprise","source":"fixtures"}
+{"id":"g-387","page":"/dashboard","phrase":"the logout link","expect":"present","element":"dashboard/12-nav-logout","role":"link","name":"Logout","nth":9,"source":"fixtures"}
+{"id":"g-388","page":"/dashboard","phrase":"the sidebar toggle","expect":"present","element":"dashboard/07-sidebar-toggle","role":"button","name":"Toggle sidebar","nth":1,"source":"fixtures"}
+{"id":"g-389","page":"/booking","phrase":"the 09:00 slot time","expect":"present","element":"booking/19-09-00","role":"option","name":"09:00","nth":0,"source":"fixtures"}
+{"id":"g-390","page":"/booking","phrase":"the 18:00 slot time","expect":"present","element":"booking/22-18-00","role":"option","name":"18:00","nth":3,"source":"fixtures"}
+{"id":"g-391","page":"/booking","phrase":"the location field","expect":"present","element":"booking/13-location","role":"combobox","name":"Starting point","nth":0,"source":"fixtures"}
+{"id":"g-392","page":"/booking","phrase":"the next button","expect":"present","element":"booking/23-booking-next","role":"button","name":"Next","nth":2,"source":"fixtures"}
+{"id":"g-393","page":"/booking","phrase":"the slot date field","expect":"present","element":"booking/17-slot-date","role":"textbox","name":"Date","nth":0,"source":"fixtures"}
+{"id":"g-394","page":"/checkout","phrase":"the card number field","expect":"present","element":"checkout/13-card","role":"textbox","name":"Card number","nth":0,"source":"fixtures"}
+{"id":"g-395","page":"/checkout","phrase":"the expiry month select","expect":"present","element":"checkout/14-expiry-month","role":"combobox","name":"Expiry","nth":0,"source":"fixtures"}
+{"id":"g-396","page":"/checkout","phrase":"the expiry year select","expect":"present","element":"checkout/18-expiry-year","role":"combobox","nth":1,"source":"fixtures"}
+{"id":"g-397","page":"/checkout","phrase":"the pay button","expect":"present","element":"checkout/22-pay","role":"button","name":"Pay","nth":2,"source":"fixtures"}
+{"id":"g-398","page":"/","phrase":"the sign in button","expect":"present","element":"home/07-sign-in","role":"link","name":"Sign in","nth":5,"source":"fixtures"}
+{"id":"g-399","page":"/login","phrase":"the login button","expect":"present","element":"login/10-login-submit","role":"button","name":"Sign In","nth":1,"source":"fixtures"}
+{"id":"g-400","page":"/login","phrase":"the password field","expect":"present","element":"login/08-password","role":"textbox","name":"Password","nth":1,"source":"fixtures"}
+{"id":"g-401","page":"/login","phrase":"the username field","expect":"present","element":"login/07-username","role":"textbox","name":"Username","nth":0,"source":"fixtures"}
+{"id":"g-402","page":"/","phrase":"the dashboard link","expect":"present","element":"home/03-dashboard-link","role":"link","name":"Dashboard","nth":1,"source":"fixtures"}
+{"id":"g-403","page":"/","phrase":"the nav toggle","expect":"present","element":"home/02-nav-toggle","role":"button","name":"Toggle navigation","nth":0,"source":"fixtures"}

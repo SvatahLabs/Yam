@@ -83,3 +83,6 @@ export {
   hasModelGrounding,
   type ModelGroundingOptions,
 } from "./bind-grounding.js";
+
+/** `svatah eval grounding` — module (b)'s eval suite (T3.4). */
+export { groundingEvalCommand } from "./commands/eval-grounding.js";
