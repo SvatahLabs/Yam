@@ -10,7 +10,11 @@
  * not written anywhere: a token in a file is a token that outlives the process
  * that needed it.
  */
+import type * as ServiceExports from "@svatah/service";
 import { numberOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
+
+type ServiceModule = typeof ServiceExports;
+type RunningService = ServiceExports.RunningService;
 import { EXIT, type ExitCode } from "@svatah/bindings-cli";
 import type { CommandIo } from "@svatah/bindings-cli";
 
@@ -28,22 +32,22 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
    * *optional peer*, resolved at run time, so `svatah serve` works when the
    * service is installed and says what to install when it is not.
    */
-  let createService: typeof import("@svatah/service").createService;
+  let service: RunningService;
   try {
-    ({ createService } = (await import("@svatah/service")) as typeof import("@svatah/service"));
-  } catch {
+    const { createService } = (await import("@svatah/service")) as ServiceModule;
+    service = await createService({
+      project,
+      ...(numberOption(args, "port") === undefined ? {} : { port: numberOption(args, "port")! }),
+      ...(stringOption(args, "token") === undefined ? {} : { token: stringOption(args, "token")! }),
+    });
+  } catch (error) {
+    if (!(error instanceof Error) || !/Cannot find (package|module)/.test(error.message)) throw error;
     io.err(
       "`svatah serve` needs @svatah/service, which is an optional peer of this package.\n" +
         "  npm install @svatah/service",
     );
     return EXIT.usage;
   }
-
-  const service = await createService({
-    project,
-    ...(numberOption(args, "port") === undefined ? {} : { port: numberOption(args, "port")! }),
-    ...(stringOption(args, "token") === undefined ? {} : { token: stringOption(args, "token")! }),
-  });
 
   // One line, parsed by the ADE's spawn handshake (LLD §13.6).
   io.out(`svatah serve listening url=${service.url} token=${service.token}`);
