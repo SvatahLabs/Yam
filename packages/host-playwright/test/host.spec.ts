@@ -103,9 +103,22 @@ async function runPlaywright(
   args: string[] = [],
   env: Record<string, string> = {},
 ): Promise<{ status: number; output: string }> {
+  /*
+   * `CI` is cleared for the child (P3 note).
+   *
+   * Playwright picks its default reporter from the environment: `list` normally,
+   * `dot` when `CI` is set. `dot` prints `··` instead of test titles, so an
+   * assertion on the child's output passed locally and failed on a CI runner —
+   * a test measuring its own environment, which LLD §16 (Draft 2.4) says is a
+   * defect in the test. What is under test here is the *host*, and the host does
+   * not change with `CI`.
+   */
+  const { CI, ...environment } = process.env;
+  void CI;
+
   const child = spawn(process.execPath, [PLAYWRIGHT_CLI, "test", ...args], {
     cwd: dir,
-    env: { ...process.env, SVATAH_BINDINGS: join(PROJECT, "bindings"), ...env },
+    env: { ...environment, SVATAH_BINDINGS: join(PROJECT, "bindings"), ...env },
   });
 
   let output = "";
@@ -126,8 +139,8 @@ test("a generated spec runs under Playwright Test and writes Svatah results", as
   await writePlan(dir);
 
   const { status, output } = await runPlaywright(dir);
-  expect(output).toContain("Sign in");
   expect(status, output).toBe(0);
+  expect(output, "the runner named the story it ran").toContain("Sign in");
 
   /* The runner's own report is produced, unchanged. */
   expect(existsSync(join(dir, "html", "index.html"))).toBe(true);
@@ -193,7 +206,10 @@ test("runs under two shards, and the two halves together are the whole run", asy
   expect(second.status, second.output).toBe(0);
 
   const ran = [first.output, second.output].filter((out) => out.includes("Sign in")).length;
-  expect(ran, "exactly one shard should have run the flow").toBe(1);
+  expect(
+    ran,
+    `exactly one shard should have run the flow\n--- shard 1\n${first.output}\n--- shard 2\n${second.output}`,
+  ).toBe(1);
 });
 
 test("a failing step fails the Playwright test, with the failure class in the message", async () => {
