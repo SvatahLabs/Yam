@@ -10,6 +10,7 @@ import { SURFACE_CASES } from "./cases.js";
 import type {
   BridgeCost,
   CaseContext,
+  DesktopHealing,
   CaseReport,
   CheckResult,
   ConformanceCase,
@@ -25,6 +26,14 @@ export interface RunOptions {
   only?: readonly string[];
   /** The suite to run; the web suite by default. */
   cases?: readonly ConformanceCase[];
+  /**
+   * Which ADE accessibility variant the application under test is showing
+   * (LLD §16). Cases that do not declare this variant are skipped, so one
+   * variant's report can be read against another's.
+   */
+  variant?: number;
+  /** The healer the desktop healing cases need; injected, never imported. */
+  healing?: DesktopHealing;
   /** Opened and closed per case, so one case cannot leak state into the next. */
   openSurface: () => Promise<AgentSurface>;
   closeSurface?: (surface: AgentSurface) => Promise<void>;
@@ -106,6 +115,26 @@ async function runCase(
   }
 
   try {
+    /*
+     * A case that belongs to another ADE variant is skipped rather than
+     * dropped (LLD §16): three passes over the same suite produce three reports
+     * that line up case for case, and a case that quietly vanished from one of
+     * them would be invisible.
+     */
+    const variant = options.variant ?? 0;
+    const variants = testCase.variants ?? [0];
+    if (!variants.includes(variant)) {
+      return {
+        id: testCase.id,
+        page: testCase.page,
+        description: testCase.description,
+        status: "skipped",
+        skipReason: `the case runs at ADE variant ${variants.join(" and ")}, and this is ${variant}`,
+        checks: [],
+        durationMs: Date.now() - started,
+      };
+    }
+
     const missing = (testCase.requires ?? []).filter(
       (flag) => (surface.capabilities() as unknown as Record<string, boolean>)[flag] !== true,
     );
@@ -124,6 +153,7 @@ async function runCase(
     const context: CaseContext = {
       surface,
       baseUrl: options.baseUrl,
+      ...(options.healing === undefined ? {} : { healing: options.healing }),
       check(description, ok, detail) {
         checks.push({ description, ok, ...(detail ?? {}) });
       },

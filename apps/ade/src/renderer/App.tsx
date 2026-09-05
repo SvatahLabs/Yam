@@ -12,6 +12,7 @@
  * what makes it usable with a screen reader.
  */
 import { useCallback, useEffect, useState } from "react";
+import { a11yVariant } from "./a11y-variant.js";
 import { bridge, type ServiceInfo } from "./bridge.js";
 import { ServiceClient } from "./client.js";
 import { ProjectScreen } from "./screens/Project.js";
@@ -43,6 +44,18 @@ const SCREENS = [
 ] as const;
 
 type ScreenId = (typeof SCREENS)[number]["id"];
+
+/**
+ * The tab this window shows for a screen (LLD §16's variant 1).
+ *
+ * One tab, renamed and nothing else: a binding that matched `tab "Flow editor"`
+ * stops matching, while the tab keeps its id, its position and its neighbours,
+ * so relocalization has everything except the thing it matched on. Renaming two
+ * would make it a different test.
+ */
+function tabLabel(id: ScreenId, label: string): string {
+  return a11yVariant() === 1 && id === "flows" ? "Editor" : label;
+}
 
 export function App(): React.JSX.Element {
   const [info, setInfo] = useState<ServiceInfo | null>(null);
@@ -91,13 +104,14 @@ export function App(): React.JSX.Element {
           {SCREENS.map((one) => (
             <button
               key={one.id}
+              id={`screen-${one.id}`}
               type="button"
               role="tab"
               aria-selected={screen === one.id}
               className={screen === one.id ? "tab tab-current" : "tab"}
               onClick={() => setScreen(one.id)}
             >
-              {one.label}
+              {tabLabel(one.id, one.label)}
             </button>
           ))}
         </nav>

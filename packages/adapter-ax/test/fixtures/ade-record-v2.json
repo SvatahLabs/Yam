@@ -148,26 +148,26 @@
       "box": [
         678,
         34,
-        121,
+        120,
         14
       ]
     },
     {
       "parent": 13,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:58100",
+      "title": "http://127.0.0.1:57481",
       "enabled": true,
       "box": [
         678,
         34,
-        121,
+        120,
         14
       ]
     },
     {
       "parent": 14,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:58100",
+      "title": "http://127.0.0.1:57481",
       "enabled": true
     },
     {
@@ -600,28 +600,28 @@
         16,
         97,
         1248,
-        82
+        108
       ]
     },
     {
       "parent": 51,
-      "role": "AXUnknown",
+      "role": "AXGroup",
+      "description": "Session settings",
       "enabled": true,
       "box": [
         16,
-        108,
-        63,
-        19
+        97,
+        1248,
+        33
       ]
     },
     {
       "parent": 52,
-      "role": "AXStaticText",
-      "title": "Gateway",
+      "role": "AXUnknown",
       "enabled": true,
       "box": [
         16,
-        108,
+        104,
         63,
         19
       ]
@@ -630,10 +630,22 @@
       "parent": 53,
       "role": "AXStaticText",
       "title": "Gateway",
+      "enabled": true,
+      "box": [
+        16,
+        104,
+        63,
+        19
+      ]
+    },
+    {
+      "parent": 54,
+      "role": "AXStaticText",
+      "title": "Gateway",
       "enabled": true
     },
     {
-      "parent": 51,
+      "parent": 52,
       "role": "AXPopUpButton",
       "description": "Gateway",
       "value": "fake — committed answers from evals/grounding/cases",
@@ -646,19 +658,19 @@
       ],
       "box": [
         87,
-        101,
-        1013,
+        97,
+        1111,
         33
       ],
       "domIdentifier": "record-gateway"
     },
     {
-      "parent": 55,
+      "parent": 56,
       "role": "AXUnknown",
       "enabled": true
     },
     {
-      "parent": 56,
+      "parent": 57,
       "role": "AXMenuItem",
       "title": "anthropic — no credential on this service",
       "enabled": false,
@@ -667,7 +679,7 @@
       ]
     },
     {
-      "parent": 56,
+      "parent": 57,
       "role": "AXMenuItem",
       "title": "fake — committed answers from evals/grounding/cases",
       "enabled": true,
@@ -675,6 +687,30 @@
       "actions": [
         "AXPress"
       ]
+    },
+    {
+      "parent": 52,
+      "role": "AXStaticText",
+      "title": "No session.",
+      "enabled": true,
+      "box": [
+        1206,
+        101,
+        46,
+        28
+      ]
+    },
+    {
+      "parent": 60,
+      "role": "AXStaticText",
+      "title": "No",
+      "enabled": true
+    },
+    {
+      "parent": 60,
+      "role": "AXStaticText",
+      "title": "session.",
+      "enabled": true
     },
     {
       "parent": 51,
@@ -685,58 +721,28 @@
         "AXPress"
       ],
       "box": [
-        1107,
-        97,
-        96,
-        42
+        16,
+        138,
+        113,
+        27
       ]
     },
     {
-      "parent": 59,
+      "parent": 63,
       "role": "AXStaticText",
       "title": "Start recording",
       "enabled": true,
       "box": [
-        1126,
-        103,
-        58,
-        30
+        27,
+        144,
+        91,
+        15
       ]
     },
     {
-      "parent": 60,
+      "parent": 64,
       "role": "AXStaticText",
-      "title": "Start",
-      "enabled": true
-    },
-    {
-      "parent": 60,
-      "role": "AXStaticText",
-      "title": "recording",
-      "enabled": true
-    },
-    {
-      "parent": 51,
-      "role": "AXStaticText",
-      "title": "No session.",
-      "enabled": true,
-      "box": [
-        1211,
-        106,
-        46,
-        28
-      ]
-    },
-    {
-      "parent": 63,
-      "role": "AXStaticText",
-      "title": "No",
-      "enabled": true
-    },
-    {
-      "parent": 63,
-      "role": "AXStaticText",
-      "title": "session.",
+      "title": "Start recording",
       "enabled": true
     },
     {
@@ -746,7 +752,7 @@
       "enabled": true,
       "box": [
         16,
-        147,
+        173,
         1248,
         15
       ]
@@ -758,7 +764,7 @@
       "enabled": true,
       "box": [
         16,
-        147,
+        173,
         182,
         14
       ]
@@ -775,7 +781,7 @@
       "enabled": true,
       "box": [
         198,
-        147,
+        173,
         152,
         14
       ]
@@ -787,7 +793,7 @@
       "enabled": true,
       "box": [
         198,
-        147,
+        173,
         152,
         14
       ]
@@ -805,7 +811,7 @@
       "enabled": true,
       "box": [
         350,
-        147,
+        173,
         459,
         14
       ]
@@ -822,7 +828,7 @@
       "enabled": true,
       "box": [
         16,
-        165,
+        191,
         1248,
         13
       ]
@@ -834,7 +840,7 @@
       "enabled": true,
       "box": [
         16,
-        165,
+        191,
         81,
         13
       ]
@@ -852,7 +858,7 @@
       "enabled": true,
       "box": [
         97,
-        165,
+        191,
         51,
         13
       ]
@@ -870,7 +876,7 @@
       "enabled": true,
       "box": [
         148,
-        165,
+        191,
         6,
         13
       ]
@@ -888,7 +894,7 @@
       "enabled": true,
       "box": [
         155,
-        165,
+        191,
         54,
         13
       ]
@@ -906,7 +912,7 @@
       "enabled": true,
       "box": [
         209,
-        165,
+        191,
         310,
         13
       ]

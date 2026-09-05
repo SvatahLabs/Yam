@@ -24,7 +24,7 @@
         0,
         0,
         1280,
-        828
+        819
       ]
     },
     {
@@ -35,7 +35,7 @@
         0,
         0,
         1280,
-        828
+        819
       ],
       "domIdentifier": "root"
     },
@@ -100,26 +100,26 @@
       "box": [
         16,
         34,
-        667,
+        652,
         14
       ]
     },
     {
       "parent": 8,
       "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01Q1tN6MR8PDeTwRA2rgU3wK/evals/fixtures",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
       "enabled": true,
       "box": [
         16,
         34,
-        667,
+        652,
         14
       ]
     },
     {
       "parent": 9,
       "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01Q1tN6MR8PDeTwRA2rgU3wK/evals/fixtures",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
       "enabled": true
     },
     {
@@ -128,7 +128,7 @@
       "title": "·",
       "enabled": true,
       "box": [
-        683,
+        668,
         34,
         10,
         14
@@ -146,28 +146,28 @@
       "description": "Service URL",
       "enabled": true,
       "box": [
-        693,
+        678,
         34,
-        121,
+        120,
         14
       ]
     },
     {
       "parent": 13,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:54129",
+      "title": "http://127.0.0.1:57801",
       "enabled": true,
       "box": [
-        693,
+        678,
         34,
-        121,
+        120,
         14
       ]
     },
     {
       "parent": 14,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:54129",
+      "title": "http://127.0.0.1:57801",
       "enabled": true
     },
     {
@@ -197,7 +197,8 @@
         56,
         65,
         28
-      ]
+      ],
+      "domIdentifier": "screen-project"
     },
     {
       "parent": 17,
@@ -232,7 +233,8 @@
         56,
         89,
         28
-      ]
+      ],
+      "domIdentifier": "screen-flows"
     },
     {
       "parent": 20,
@@ -267,7 +269,8 @@
         56,
         48,
         28
-      ]
+      ],
+      "domIdentifier": "screen-plan"
     },
     {
       "parent": 23,
@@ -302,7 +305,8 @@
         56,
         45,
         28
-      ]
+      ],
+      "domIdentifier": "screen-run"
     },
     {
       "parent": 26,
@@ -337,7 +341,8 @@
         56,
         66,
         28
-      ]
+      ],
+      "domIdentifier": "screen-results"
     },
     {
       "parent": 29,
@@ -372,7 +377,8 @@
         56,
         79,
         28
-      ]
+      ],
+      "domIdentifier": "screen-api"
     },
     {
       "parent": 32,
@@ -407,7 +413,8 @@
         56,
         50,
         28
-      ]
+      ],
+      "domIdentifier": "screen-data"
     },
     {
       "parent": 35,
@@ -442,7 +449,8 @@
         56,
         108,
         28
-      ]
+      ],
+      "domIdentifier": "screen-record"
     },
     {
       "parent": 38,
@@ -477,7 +485,8 @@
         56,
         74,
         28
-      ]
+      ],
+      "domIdentifier": "screen-bindings"
     },
     {
       "parent": 41,
@@ -512,7 +521,8 @@
         56,
         122,
         28
-      ]
+      ],
+      "domIdentifier": "screen-explorer"
     },
     {
       "parent": 44,
@@ -547,7 +557,8 @@
         56,
         84,
         28
-      ]
+      ],
+      "domIdentifier": "screen-tools"
     },
     {
       "parent": 47,
@@ -576,7 +587,7 @@
         0,
         85,
         1280,
-        744
+        735
       ]
     },
     {

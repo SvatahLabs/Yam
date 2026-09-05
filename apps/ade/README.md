@@ -43,6 +43,37 @@ Three things make that structural rather than aspirational:
 compile from the CLI give the same plan hash, a run started through the ADE
 writes the same `runs/<id>` files, and the editor's lint is `svatah lint --json`.
 
+## The accessibility variants (`SVATAH_A11Y_VARIANT`)
+
+The ADE is the desktop conformance target (REQ-ADE-6), and Draft 2.8 LLD §16
+makes it the desktop *healing* target too. `SVATAH_A11Y=1` publishes the
+renderer's accessibility tree; `SVATAH_A11Y_VARIANT` then changes one thing
+about the interface, so that a binding recorded against the real one can be
+measured against a changed one — the desktop half of what
+`apps/sample-web/VARIANTS.md` is for the web.
+
+| Variant | What changes | What it breaks |
+|---|---|---|
+| `0` (unset) | nothing — the real interface | — |
+| `1` | the **Flow editor** tab becomes **Editor**; the Project screen's **Open a project…** button becomes **Choose a project…** | the *name* a binding matched on; the structure is untouched |
+| `2` | the Record screen's gateway control moves into a `Session settings` panel beside the session status | the control's *place* in the tree and its neighbours; the name and the role are untouched |
+
+Both keep every control's `id`, which is what the desktop adapters publish as
+`automationId` and what the healing cases use as ground truth — the equivalent
+of `apps/sample-web`'s `data-svatah-eval`, and excluded from scoring for the
+same reason.
+
+The variant reaches the renderer as a query parameter on the window's URL rather
+than through the preload bridge, because LLD §13.6 says that bridge exposes four
+functions and only those four.
+
+```bash
+SVATAH_A11Y=1 SVATAH_A11Y_VARIANT=1 open -a "…/Svatah ADE.app"
+
+# and the gate that drives all three, launching the ADE once per variant:
+node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md
+```
+
 ## Security
 
 `contextIsolation`, no `nodeIntegration`, `sandbox`, a loopback-only

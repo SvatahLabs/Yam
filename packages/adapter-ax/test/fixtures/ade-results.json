@@ -24,7 +24,7 @@
         0,
         0,
         1280,
-        828
+        819
       ]
     },
     {
@@ -35,7 +35,7 @@
         0,
         0,
         1280,
-        828
+        819
       ],
       "domIdentifier": "root"
     },
@@ -100,26 +100,26 @@
       "box": [
         16,
         34,
-        667,
+        652,
         14
       ]
     },
     {
       "parent": 8,
       "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01Q1tN6MR8PDeTwRA2rgU3wK/evals/fixtures",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
       "enabled": true,
       "box": [
         16,
         34,
-        667,
+        652,
         14
       ]
     },
     {
       "parent": 9,
       "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01Q1tN6MR8PDeTwRA2rgU3wK/evals/fixtures",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
       "enabled": true
     },
     {
@@ -128,7 +128,7 @@
       "title": "·",
       "enabled": true,
       "box": [
-        683,
+        668,
         34,
         10,
         14
@@ -146,28 +146,28 @@
       "description": "Service URL",
       "enabled": true,
       "box": [
-        693,
+        678,
         34,
-        122,
+        123,
         14
       ]
     },
     {
       "parent": 13,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:54270",
+      "title": "http://127.0.0.1:58026",
       "enabled": true,
       "box": [
-        693,
+        678,
         34,
-        122,
+        123,
         14
       ]
     },
     {
       "parent": 14,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:54270",
+      "title": "http://127.0.0.1:58026",
       "enabled": true
     },
     {
@@ -197,7 +197,8 @@
         56,
         65,
         28
-      ]
+      ],
+      "domIdentifier": "screen-project"
     },
     {
       "parent": 17,
@@ -232,7 +233,8 @@
         56,
         89,
         28
-      ]
+      ],
+      "domIdentifier": "screen-flows"
     },
     {
       "parent": 20,
@@ -267,7 +269,8 @@
         56,
         48,
         28
-      ]
+      ],
+      "domIdentifier": "screen-plan"
     },
     {
       "parent": 23,
@@ -302,7 +305,8 @@
         56,
         45,
         28
-      ]
+      ],
+      "domIdentifier": "screen-run"
     },
     {
       "parent": 26,
@@ -337,7 +341,8 @@
         56,
         66,
         28
-      ]
+      ],
+      "domIdentifier": "screen-results"
     },
     {
       "parent": 29,
@@ -372,7 +377,8 @@
         56,
         79,
         28
-      ]
+      ],
+      "domIdentifier": "screen-api"
     },
     {
       "parent": 32,
@@ -407,7 +413,8 @@
         56,
         50,
         28
-      ]
+      ],
+      "domIdentifier": "screen-data"
     },
     {
       "parent": 35,
@@ -442,7 +449,8 @@
         56,
         108,
         28
-      ]
+      ],
+      "domIdentifier": "screen-record"
     },
     {
       "parent": 38,
@@ -477,7 +485,8 @@
         56,
         74,
         28
-      ]
+      ],
+      "domIdentifier": "screen-bindings"
     },
     {
       "parent": 41,
@@ -512,7 +521,8 @@
         56,
         122,
         28
-      ]
+      ],
+      "domIdentifier": "screen-explorer"
     },
     {
       "parent": 44,
@@ -547,7 +557,8 @@
         56,
         84,
         28
-      ]
+      ],
+      "domIdentifier": "screen-tools"
     },
     {
       "parent": 47,
@@ -576,7 +587,7 @@
         0,
         85,
         1280,
-        744
+        735
       ]
     },
     {
@@ -589,13 +600,13 @@
         16,
         97,
         1248,
-        245
+        137
       ]
     },
     {
       "parent": 51,
       "role": "AXHeading",
-      "title": "Runs (5)",
+      "title": "Runs (2)",
       "enabled": true,
       "box": [
         16,
@@ -625,7 +636,7 @@
     {
       "parent": 52,
       "role": "AXStaticText",
-      "title": "5",
+      "title": "2",
       "enabled": true,
       "box": [
         60,
@@ -637,7 +648,7 @@
     {
       "parent": 55,
       "role": "AXStaticText",
-      "title": "5",
+      "title": "2",
       "enabled": true
     },
     {
@@ -666,7 +677,7 @@
         16,
         121,
         1248,
-        203
+        95
       ]
     },
     {
@@ -699,7 +710,7 @@
       "box": [
         16,
         121,
-        276,
+        251,
         23
       ]
     },
@@ -727,9 +738,9 @@
       "title": "Started",
       "enabled": true,
       "box": [
-        292,
+        267,
         121,
-        357,
+        382,
         23
       ]
     },
@@ -739,7 +750,7 @@
       "title": "Started",
       "enabled": true,
       "box": [
-        300,
+        275,
         125,
         43,
         14
@@ -759,7 +770,7 @@
       "box": [
         649,
         121,
-        132,
+        143,
         23
       ]
     },
@@ -787,9 +798,9 @@
       "title": "Exit",
       "enabled": true,
       "box": [
-        781,
+        793,
         121,
-        74,
+        80,
         23
       ]
     },
@@ -799,7 +810,7 @@
       "title": "Exit",
       "enabled": true,
       "box": [
-        789,
+        801,
         125,
         21,
         14
@@ -816,9 +827,9 @@
       "role": "AXCell",
       "enabled": true,
       "box": [
-        855,
+        873,
         121,
-        409,
+        391,
         23
       ]
     },
@@ -836,61 +847,61 @@
     {
       "parent": 75,
       "role": "AXCell",
-      "title": "00mtmmmcvvzd18wo",
+      "title": "00mtndsizqls1efx",
       "enabled": true,
       "box": [
         16,
         144,
-        276,
+        251,
         36
       ]
     },
     {
       "parent": 76,
       "role": "AXStaticText",
-      "title": "00mtmmmcvvzd18wo",
+      "title": "00mtndsizqls1efx",
       "enabled": true,
       "box": [
         24,
         148,
-        124,
+        99,
         14
       ]
     },
     {
       "parent": 77,
       "role": "AXStaticText",
-      "title": "00mtmmmcvvzd18wo",
+      "title": "00mtndsizqls1efx",
       "enabled": true
     },
     {
       "parent": 75,
       "role": "AXCell",
-      "title": "2026-09-04T07:22:28.454Z",
+      "title": "2026-09-04T20:03:05.913Z",
       "enabled": true,
       "box": [
-        292,
+        267,
         144,
-        357,
+        382,
         36
       ]
     },
     {
       "parent": 79,
       "role": "AXStaticText",
-      "title": "2026-09-04T07:22:28.454Z",
+      "title": "2026-09-04T20:03:05.913Z",
       "enabled": true,
       "box": [
-        300,
+        275,
         148,
-        163,
+        162,
         14
       ]
     },
     {
       "parent": 80,
       "role": "AXStaticText",
-      "title": "2026-09-04T07:22:28.454Z",
+      "title": "2026-09-04T20:03:05.913Z",
       "enabled": true
     },
     {
@@ -901,7 +912,7 @@
       "box": [
         649,
         144,
-        132,
+        143,
         36
       ]
     },
@@ -929,9 +940,9 @@
       "title": "0",
       "enabled": true,
       "box": [
-        781,
+        793,
         144,
-        74,
+        80,
         36
       ]
     },
@@ -941,7 +952,7 @@
       "title": "0",
       "enabled": true,
       "box": [
-        789,
+        801,
         148,
         8,
         14
@@ -956,27 +967,27 @@
     {
       "parent": 75,
       "role": "AXCell",
-      "title": "Open 00mtmmmcvvzd18wo",
+      "title": "Open 00mtndsizqls1efx",
       "enabled": true,
       "box": [
-        855,
+        873,
         144,
-        409,
+        391,
         36
       ]
     },
     {
       "parent": 88,
       "role": "AXButton",
-      "title": "Open 00mtmmmcvvzd18wo",
+      "title": "Open 00mtndsizqls1efx",
       "enabled": true,
       "actions": [
         "AXPress"
       ],
       "box": [
-        863,
+        881,
         148,
-        191,
+        165,
         27
       ]
     },
@@ -986,7 +997,7 @@
       "title": "Open",
       "enabled": true,
       "box": [
-        874,
+        892,
         154,
         36,
         15
@@ -1001,19 +1012,19 @@
     {
       "parent": 89,
       "role": "AXStaticText",
-      "title": "00mtmmmcvvzd18wo",
+      "title": "00mtndsizqls1efx",
       "enabled": true,
       "box": [
-        910,
+        928,
         154,
-        133,
+        106,
         15
       ]
     },
     {
       "parent": 92,
       "role": "AXStaticText",
-      "title": "00mtmmmcvvzd18wo",
+      "title": "00mtndsizqls1efx",
       "enabled": true
     },
     {
@@ -1030,61 +1041,61 @@
     {
       "parent": 94,
       "role": "AXCell",
-      "title": "00mtml5yjs746irq",
+      "title": "00mtndo3fnrolise",
       "enabled": true,
       "box": [
         16,
         180,
-        276,
+        251,
         36
       ]
     },
     {
       "parent": 95,
       "role": "AXStaticText",
-      "title": "00mtml5yjs746irq",
+      "title": "00mtndo3fnrolise",
       "enabled": true,
       "box": [
         24,
         184,
-        103,
+        101,
         14
       ]
     },
     {
       "parent": 96,
       "role": "AXStaticText",
-      "title": "00mtml5yjs746irq",
+      "title": "00mtndo3fnrolise",
       "enabled": true
     },
     {
       "parent": 94,
       "role": "AXCell",
-      "title": "2026-09-04T06:41:43.759Z",
+      "title": "2026-09-04T19:59:39.124Z",
       "enabled": true,
       "box": [
-        292,
+        267,
         180,
-        357,
+        382,
         36
       ]
     },
     {
       "parent": 98,
       "role": "AXStaticText",
-      "title": "2026-09-04T06:41:43.759Z",
+      "title": "2026-09-04T19:59:39.124Z",
       "enabled": true,
       "box": [
-        300,
+        275,
         184,
-        162,
+        161,
         14
       ]
     },
     {
       "parent": 99,
       "role": "AXStaticText",
-      "title": "2026-09-04T06:41:43.759Z",
+      "title": "2026-09-04T19:59:39.124Z",
       "enabled": true
     },
     {
@@ -1095,7 +1106,7 @@
       "box": [
         649,
         180,
-        132,
+        143,
         36
       ]
     },
@@ -1123,9 +1134,9 @@
       "title": "0",
       "enabled": true,
       "box": [
-        781,
+        793,
         180,
-        74,
+        80,
         36
       ]
     },
@@ -1135,7 +1146,7 @@
       "title": "0",
       "enabled": true,
       "box": [
-        789,
+        801,
         184,
         8,
         14
@@ -1150,27 +1161,27 @@
     {
       "parent": 94,
       "role": "AXCell",
-      "title": "Open 00mtml5yjs746irq",
+      "title": "Open 00mtndo3fnrolise",
       "enabled": true,
       "box": [
-        855,
+        873,
         180,
-        409,
+        391,
         36
       ]
     },
     {
       "parent": 107,
       "role": "AXButton",
-      "title": "Open 00mtml5yjs746irq",
+      "title": "Open 00mtndo3fnrolise",
       "enabled": true,
       "actions": [
         "AXPress"
       ],
       "box": [
-        863,
+        881,
         184,
-        168,
+        166,
         27
       ]
     },
@@ -1180,7 +1191,7 @@
       "title": "Open",
       "enabled": true,
       "box": [
-        874,
+        892,
         190,
         36,
         15
@@ -1195,601 +1206,19 @@
     {
       "parent": 108,
       "role": "AXStaticText",
-      "title": "00mtml5yjs746irq",
+      "title": "00mtndo3fnrolise",
       "enabled": true,
       "box": [
-        910,
+        928,
         190,
-        110,
+        108,
         15
       ]
     },
     {
       "parent": 111,
       "role": "AXStaticText",
-      "title": "00mtml5yjs746irq",
-      "enabled": true
-    },
-    {
-      "parent": 59,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        216,
-        1248,
-        36
-      ]
-    },
-    {
-      "parent": 113,
-      "role": "AXCell",
-      "title": "00mtml3i7z97tjjd",
-      "enabled": true,
-      "box": [
-        16,
-        216,
-        276,
-        36
-      ]
-    },
-    {
-      "parent": 114,
-      "role": "AXStaticText",
-      "title": "00mtml3i7z97tjjd",
-      "enabled": true,
-      "box": [
-        24,
-        220,
-        99,
-        14
-      ]
-    },
-    {
-      "parent": 115,
-      "role": "AXStaticText",
-      "title": "00mtml3i7z97tjjd",
-      "enabled": true
-    },
-    {
-      "parent": 113,
-      "role": "AXCell",
-      "title": "2026-09-04T06:39:49.273Z",
-      "enabled": true,
-      "box": [
-        292,
-        216,
-        357,
-        36
-      ]
-    },
-    {
-      "parent": 117,
-      "role": "AXStaticText",
-      "title": "2026-09-04T06:39:49.273Z",
-      "enabled": true,
-      "box": [
-        300,
-        220,
-        164,
-        14
-      ]
-    },
-    {
-      "parent": 118,
-      "role": "AXStaticText",
-      "title": "2026-09-04T06:39:49.273Z",
-      "enabled": true
-    },
-    {
-      "parent": 113,
-      "role": "AXCell",
-      "title": "7 passed",
-      "enabled": true,
-      "box": [
-        649,
-        216,
-        132,
-        36
-      ]
-    },
-    {
-      "parent": 120,
-      "role": "AXStaticText",
-      "title": "7 passed",
-      "enabled": true,
-      "box": [
-        657,
-        220,
-        51,
-        14
-      ]
-    },
-    {
-      "parent": 121,
-      "role": "AXStaticText",
-      "title": "7 passed",
-      "enabled": true
-    },
-    {
-      "parent": 113,
-      "role": "AXCell",
-      "title": "0",
-      "enabled": true,
-      "box": [
-        781,
-        216,
-        74,
-        36
-      ]
-    },
-    {
-      "parent": 123,
-      "role": "AXStaticText",
-      "title": "0",
-      "enabled": true,
-      "box": [
-        789,
-        220,
-        8,
-        14
-      ]
-    },
-    {
-      "parent": 124,
-      "role": "AXStaticText",
-      "title": "0",
-      "enabled": true
-    },
-    {
-      "parent": 113,
-      "role": "AXCell",
-      "title": "Open 00mtml3i7z97tjjd",
-      "enabled": true,
-      "box": [
-        855,
-        216,
-        409,
-        36
-      ]
-    },
-    {
-      "parent": 126,
-      "role": "AXButton",
-      "title": "Open 00mtml3i7z97tjjd",
-      "enabled": true,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        863,
-        220,
-        164,
-        27
-      ]
-    },
-    {
-      "parent": 127,
-      "role": "AXStaticText",
-      "title": "Open",
-      "enabled": true,
-      "box": [
-        874,
-        226,
-        36,
-        15
-      ]
-    },
-    {
-      "parent": 128,
-      "role": "AXStaticText",
-      "title": "Open",
-      "enabled": true
-    },
-    {
-      "parent": 127,
-      "role": "AXStaticText",
-      "title": "00mtml3i7z97tjjd",
-      "enabled": true,
-      "box": [
-        910,
-        226,
-        106,
-        15
-      ]
-    },
-    {
-      "parent": 130,
-      "role": "AXStaticText",
-      "title": "00mtml3i7z97tjjd",
-      "enabled": true
-    },
-    {
-      "parent": 59,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        252,
-        1248,
-        36
-      ]
-    },
-    {
-      "parent": 132,
-      "role": "AXCell",
-      "title": "00mtmjiob78woblj",
-      "enabled": true,
-      "box": [
-        16,
-        252,
-        276,
-        36
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXStaticText",
-      "title": "00mtmjiob78woblj",
-      "enabled": true,
-      "box": [
-        24,
-        256,
-        104,
-        14
-      ]
-    },
-    {
-      "parent": 134,
-      "role": "AXStaticText",
-      "title": "00mtmjiob78woblj",
-      "enabled": true
-    },
-    {
-      "parent": 132,
-      "role": "AXCell",
-      "title": "2026-09-04T05:55:37.977Z",
-      "enabled": true,
-      "box": [
-        292,
-        252,
-        357,
-        36
-      ]
-    },
-    {
-      "parent": 136,
-      "role": "AXStaticText",
-      "title": "2026-09-04T05:55:37.977Z",
-      "enabled": true,
-      "box": [
-        300,
-        256,
-        161,
-        14
-      ]
-    },
-    {
-      "parent": 137,
-      "role": "AXStaticText",
-      "title": "2026-09-04T05:55:37.977Z",
-      "enabled": true
-    },
-    {
-      "parent": 132,
-      "role": "AXCell",
-      "title": "7 passed",
-      "enabled": true,
-      "box": [
-        649,
-        252,
-        132,
-        36
-      ]
-    },
-    {
-      "parent": 139,
-      "role": "AXStaticText",
-      "title": "7 passed",
-      "enabled": true,
-      "box": [
-        657,
-        256,
-        51,
-        14
-      ]
-    },
-    {
-      "parent": 140,
-      "role": "AXStaticText",
-      "title": "7 passed",
-      "enabled": true
-    },
-    {
-      "parent": 132,
-      "role": "AXCell",
-      "title": "0",
-      "enabled": true,
-      "box": [
-        781,
-        252,
-        74,
-        36
-      ]
-    },
-    {
-      "parent": 142,
-      "role": "AXStaticText",
-      "title": "0",
-      "enabled": true,
-      "box": [
-        789,
-        256,
-        8,
-        14
-      ]
-    },
-    {
-      "parent": 143,
-      "role": "AXStaticText",
-      "title": "0",
-      "enabled": true
-    },
-    {
-      "parent": 132,
-      "role": "AXCell",
-      "title": "Open 00mtmjiob78woblj",
-      "enabled": true,
-      "box": [
-        855,
-        252,
-        409,
-        36
-      ]
-    },
-    {
-      "parent": 145,
-      "role": "AXButton",
-      "title": "Open 00mtmjiob78woblj",
-      "enabled": true,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        863,
-        256,
-        170,
-        27
-      ]
-    },
-    {
-      "parent": 146,
-      "role": "AXStaticText",
-      "title": "Open",
-      "enabled": true,
-      "box": [
-        874,
-        262,
-        36,
-        15
-      ]
-    },
-    {
-      "parent": 147,
-      "role": "AXStaticText",
-      "title": "Open",
-      "enabled": true
-    },
-    {
-      "parent": 146,
-      "role": "AXStaticText",
-      "title": "00mtmjiob78woblj",
-      "enabled": true,
-      "box": [
-        910,
-        262,
-        112,
-        15
-      ]
-    },
-    {
-      "parent": 149,
-      "role": "AXStaticText",
-      "title": "00mtmjiob78woblj",
-      "enabled": true
-    },
-    {
-      "parent": 59,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        288,
-        1248,
-        36
-      ]
-    },
-    {
-      "parent": 151,
-      "role": "AXCell",
-      "title": "00mtmjbecjrk7fzk",
-      "enabled": true,
-      "box": [
-        16,
-        288,
-        276,
-        36
-      ]
-    },
-    {
-      "parent": 152,
-      "role": "AXStaticText",
-      "title": "00mtmjbecjrk7fzk",
-      "enabled": true,
-      "box": [
-        24,
-        292,
-        102,
-        14
-      ]
-    },
-    {
-      "parent": 153,
-      "role": "AXStaticText",
-      "title": "00mtmjbecjrk7fzk",
-      "enabled": true
-    },
-    {
-      "parent": 151,
-      "role": "AXCell",
-      "title": "2026-09-04T05:49:58.266Z",
-      "enabled": true,
-      "box": [
-        292,
-        288,
-        357,
-        36
-      ]
-    },
-    {
-      "parent": 155,
-      "role": "AXStaticText",
-      "title": "2026-09-04T05:49:58.266Z",
-      "enabled": true,
-      "box": [
-        300,
-        292,
-        165,
-        14
-      ]
-    },
-    {
-      "parent": 156,
-      "role": "AXStaticText",
-      "title": "2026-09-04T05:49:58.266Z",
-      "enabled": true
-    },
-    {
-      "parent": 151,
-      "role": "AXCell",
-      "title": "7 passed",
-      "enabled": true,
-      "box": [
-        649,
-        288,
-        132,
-        36
-      ]
-    },
-    {
-      "parent": 158,
-      "role": "AXStaticText",
-      "title": "7 passed",
-      "enabled": true,
-      "box": [
-        657,
-        292,
-        51,
-        14
-      ]
-    },
-    {
-      "parent": 159,
-      "role": "AXStaticText",
-      "title": "7 passed",
-      "enabled": true
-    },
-    {
-      "parent": 151,
-      "role": "AXCell",
-      "title": "0",
-      "enabled": true,
-      "box": [
-        781,
-        288,
-        74,
-        36
-      ]
-    },
-    {
-      "parent": 161,
-      "role": "AXStaticText",
-      "title": "0",
-      "enabled": true,
-      "box": [
-        789,
-        292,
-        8,
-        14
-      ]
-    },
-    {
-      "parent": 162,
-      "role": "AXStaticText",
-      "title": "0",
-      "enabled": true
-    },
-    {
-      "parent": 151,
-      "role": "AXCell",
-      "title": "Open 00mtmjbecjrk7fzk",
-      "enabled": true,
-      "box": [
-        855,
-        288,
-        409,
-        36
-      ]
-    },
-    {
-      "parent": 164,
-      "role": "AXButton",
-      "title": "Open 00mtmjbecjrk7fzk",
-      "enabled": true,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        863,
-        292,
-        168,
-        27
-      ]
-    },
-    {
-      "parent": 165,
-      "role": "AXStaticText",
-      "title": "Open",
-      "enabled": true,
-      "box": [
-        874,
-        298,
-        36,
-        15
-      ]
-    },
-    {
-      "parent": 166,
-      "role": "AXStaticText",
-      "title": "Open",
-      "enabled": true
-    },
-    {
-      "parent": 165,
-      "role": "AXStaticText",
-      "title": "00mtmjbecjrk7fzk",
-      "enabled": true,
-      "box": [
-        910,
-        298,
-        110,
-        15
-      ]
-    },
-    {
-      "parent": 168,
-      "role": "AXStaticText",
-      "title": "00mtmjbecjrk7fzk",
+      "title": "00mtndo3fnrolise",
       "enabled": true
     },
     {
@@ -1798,61 +1227,61 @@
       "enabled": true,
       "box": [
         16,
-        328,
+        220,
         1248,
         13
       ]
     },
     {
-      "parent": 170,
+      "parent": 113,
       "role": "AXStaticText",
       "title": "Rendered from",
       "enabled": true,
       "box": [
         16,
-        328,
+        220,
         81,
         13
       ]
     },
     {
-      "parent": 171,
+      "parent": 114,
       "role": "AXStaticText",
       "title": "Rendered from",
       "enabled": true
     },
     {
-      "parent": 170,
+      "parent": 113,
       "role": "AXStaticText",
       "title": "getRuns",
       "enabled": true,
       "box": [
         97,
-        328,
+        220,
         43,
         13
       ]
     },
     {
-      "parent": 173,
+      "parent": 116,
       "role": "AXStaticText",
       "title": "getRuns",
       "enabled": true
     },
     {
-      "parent": 170,
+      "parent": 113,
       "role": "AXStaticText",
       "title": "and getRunsByIdResults.",
       "enabled": true,
       "box": [
         140,
-        328,
+        220,
         134,
         13
       ]
     },
     {
-      "parent": 175,
+      "parent": 118,
       "role": "AXStaticText",
       "title": "and getRunsByIdResults.",
       "enabled": true

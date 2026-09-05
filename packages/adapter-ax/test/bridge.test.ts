@@ -116,7 +116,7 @@ describe("the permission check (REQ-ADP-7, `svatah surface doctor`)", () => {
  */
 const RS = "\u001e";
 const US = "\u001f";
-const node = (fields: Partial<Record<number, string>>): string => {
+const node = (fields: Record<number, string>): string => {
   const row = new Array<string>(18).fill("");
   for (const [at, value] of Object.entries(fields)) row[Number(at)] = value;
   return row.join(US);

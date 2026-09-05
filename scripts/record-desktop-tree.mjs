@@ -58,6 +58,20 @@ if (!["ax", "uia", "both"].includes(shapeOption)) {
  */
 const shapes = shapeOption === "both" ? ["ax", "uia"] : [shapeOption];
 const outOption = option("out", undefined);
+/**
+ * Which ADE accessibility variant to record (Draft 2.8 LLD §16, T7.1).
+ *
+ * `0` is the real interface. `1` renames a screen tab and a Project button; `2`
+ * moves the Record screen's gateway control into another panel. The desktop
+ * healing cases need a *pair* of trees — before and after — and this is how the
+ * "after" gets recorded without a granted Accessibility permission, exactly as
+ * the variant-0 trees were.
+ */
+const variant = option("variant", "0");
+if (!["0", "1", "2"].includes(variant)) {
+  process.stderr.write(`--variant must be 0, 1 or 2, not "${variant}"\n`);
+  process.exit(1);
+}
 
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 const entry = join(ADE, ".vite", "build", "main.js");
@@ -81,6 +95,7 @@ const child = spawn(
       ...process.env,
       SVATAH_CLI: cli,
       SVATAH_A11Y: "1",
+      ...(variant === "0" ? {} : { SVATAH_A11Y_VARIANT: variant }),
       SVATAH_ADE_RECORD_PROJECT: project,
     },
   },
@@ -393,11 +408,18 @@ async function main() {
     throw new Error(`unknown --screen ${screen}; one of ${Object.keys(SCREEN_LABELS).join(", ")}`);
   }
   if (screen !== "project") {
+    /*
+     * By id first, then by label. Variant 1 renames a tab (LLD §16), and a
+     * recorder that could only find a tab by its text would be unable to record
+     * the very variant it exists to record.
+     */
     const clicked = await evaluate(
       `(() => {
-         const tab = [...document.querySelectorAll('[role="tab"]')]
-           .find((one) => one.textContent.trim() === ${JSON.stringify(label)});
-         if (tab === undefined) return false;
+         const tabs = [...document.querySelectorAll('[role="tab"]')];
+         const tab =
+           document.getElementById(${JSON.stringify(`screen-${screen}`)}) ??
+           tabs.find((one) => one.textContent.trim() === ${JSON.stringify(label)});
+         if (tab === undefined || tab === null) return false;
          tab.click();
          return true;
        })()`,
@@ -586,7 +608,7 @@ function writeShape(shape, { nodes, byId, geometry, title, screen }) {
 
   const out = resolve(ROOT, outOption ?? `packages/adapter-${shape}/test/fixtures`);
   mkdirSync(out, { recursive: true });
-  const file = join(out, `ade-${screen}.json`);
+  const file = join(out, `ade-${screen}${variant === "0" ? "" : `-v${variant}`}.json`);
   writeFileSync(
     file,
     `${JSON.stringify({ process: "Svatah ADE", title, truncated: false, nodes: window }, null, 2)}\n`,

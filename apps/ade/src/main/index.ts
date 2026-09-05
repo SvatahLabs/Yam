@@ -131,10 +131,30 @@ function createWindow(): void {
     preferences = { ...preferences, window: { width, height } };
   });
 
+  /*
+   * `SVATAH_A11Y_VARIANT=1|2` (Draft 2.8 LLD §16, T7.1).
+   *
+   * The desktop healing cases need the same window with one thing changed —
+   * variant 1 renames a tab and a button, variant 2 moves the Record screen's
+   * gateway control into another panel — so a binding recorded at variant 0 can
+   * be *measured* against them through the desktop adapter.
+   *
+   * It reaches the renderer on the URL rather than through the preload bridge,
+   * because LLD §13.6 says that bridge exposes four functions and only those
+   * four; widening the ADE's narrowest surface for a test fixture would be the
+   * wrong trade.
+   */
+  const variant = process.env["SVATAH_A11Y_VARIANT"];
+  const query = variant === "1" || variant === "2" ? { a11yVariant: variant } : undefined;
+
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL !== undefined) {
-    void window_.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+    const url = new URL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+    if (query !== undefined) url.searchParams.set("a11yVariant", query.a11yVariant);
+    void window_.loadURL(url.toString());
   } else {
-    void window_.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+    void window_.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`), {
+      ...(query === undefined ? {} : { query }),
+    });
   }
 }
 

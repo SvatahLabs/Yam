@@ -12,6 +12,7 @@
  * has, and `svatah lint --json` could not be compared with it.
  */
 import { useEffect, useState } from "react";
+import { a11yVariant } from "../a11y-variant.js";
 import { bridge } from "../bridge.js";
 import { fromEndpoint, ServiceError, type ScreenData, type ServiceClient } from "../client.js";
 
@@ -113,8 +114,14 @@ export function ProjectScreen({
   return (
     <section aria-label="Project">
       <div className="row">
-        <button type="button" onClick={() => void choose()}>
-          Open a project…
+        {/*
+          LLD §16's variant 1 renames this button and nothing else about it. The
+          `id` is what survives — it is the `automationId` the desktop adapters
+          read, and the healing case's ground-truth key, the desktop equivalent
+          of `apps/sample-web`'s `data-svatah-eval`.
+        */}
+        <button id="project-open" type="button" onClick={() => void choose()}>
+          {a11yVariant() === 1 ? "Choose a project…" : "Open a project…"}
         </button>
         <button
           type="button"

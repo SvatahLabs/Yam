@@ -11,12 +11,15 @@
  */
 export { SURFACE_CASES } from "./surface/cases.js";
 /** The desktop suite: the Svatah ADE, for the UIA and AX adapters (LLD §16). */
-export { DESKTOP_CASES } from "./surface/desktop.js";
+export { DESKTOP_CASES, DESKTOP_HEALING_CASES } from "./surface/desktop.js";
 export { runSurfaceConformance, type RunOptions } from "./surface/run.js";
 export { renderReport, renderMarkdown } from "./surface/report.js";
 export type {
   BridgeCost,
   CaseContext,
+  DesktopHealing,
+  HealOutcome,
+  RecordedElement,
   CaseReport,
   CheckResult,
   ConformanceCase,

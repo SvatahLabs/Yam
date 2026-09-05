@@ -5,14 +5,18 @@
  * place that can hand the conformance suite a live surface. The suite itself
  * knows nothing but `AgentSurface`.
  */
-import { writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import { fingerprint, relocalize } from "@svatah/bindings";
 import {
   DESKTOP_CASES,
+  DESKTOP_HEALING_CASES,
   renderMarkdown,
   renderReport,
   runSurfaceConformance,
   type ConformanceReport,
+  type DesktopHealing,
+  type RecordedElement,
 } from "@svatah/conformance";
 import { createSurface, listAdapters } from "@svatah/surface";
 import { DEFAULT_CONFIG, type Config } from "@svatah/schema";
@@ -28,6 +32,64 @@ export interface CommandIo {
 
 /** Where the sample application runs by default (LLD §16, T0.5). */
 const DEFAULT_BASE_URL = "http://127.0.0.1:4173";
+
+/**
+ * The desktop healing cases' ground-truth key (Draft 2.8 LLD §16).
+ *
+ * The desktop equivalent of `apps/sample-web`'s `data-svatah-eval`: the control
+ * keeps its `automationId` across every variant, so it is what says whether a
+ * proposal is the *right* element. Which is exactly why the relocalizer is told
+ * to ignore it — §16's rule for the web eval, applied here: "removes the
+ * attribute from synthesis, fingerprints, and `native` so it can never help
+ * relocalization".
+ */
+const GROUND_TRUTH_ATTRIBUTE = "automationId";
+
+/**
+ * The healer the desktop healing cases are handed, and the file that carries
+ * their state between the three passes over three ADE variants.
+ *
+ * The suite knows nothing about `@svatah/bindings`; the CLI does, and is the
+ * only place that can hand it over (the same rule that makes this the only
+ * place that registers adapters). The state is a file because each pass is a
+ * separate `svatah surface conform` against a separately launched ADE.
+ */
+function desktopHealing(variant: number, statePath: string): DesktopHealing {
+  const state: Record<string, RecordedElement> =
+    existsSync(statePath) && variant !== 0
+      ? (JSON.parse(readFileSync(statePath, "utf8")) as Record<string, RecordedElement>)
+      : {};
+  return {
+    variant,
+    async fingerprint(surface, ref) {
+      return await fingerprint(surface, ref, { ignoreAttributes: [GROUND_TRUTH_ATTRIBUTE] });
+    },
+    async relocalize(surface, print, preferRole) {
+      /*
+       * "with the same weights and threshold as the web healing eval" (§16):
+       * `relocalize`'s own defaults, which is exactly what `svatah eval healing`
+       * passes — it names neither a threshold nor a margin. Naming one here
+       * would make the two numbers different the first time one moved.
+       */
+      const result = await relocalize(surface, print, {
+        preferRole,
+        ignoreAttributes: [GROUND_TRUTH_ATTRIBUTE],
+      });
+      return {
+        outcome: result.outcome,
+        ...(result.outcome === "relocalized" ? { ref: result.match.ref, score: result.match.score.total } : {}),
+      };
+    },
+    recall(id) {
+      return state[id];
+    },
+    remember(id, value) {
+      state[id] = value;
+      mkdirSync(dirname(statePath), { recursive: true });
+      writeFileSync(statePath, JSON.stringify(state, null, 2), "utf8");
+    },
+  };
+}
 
 export async function surfaceCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const sub = args.command[1];
@@ -108,10 +170,22 @@ async function conform(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const probe = await createSurface(config);
   const desktop = probe.kind === "desktop";
 
+  /*
+   * The ADE variant this pass is looking at, and where the healing cases keep
+   * what they recorded (Draft 2.8 LLD §16, T7.1). Without `--heal-state` the
+   * healing cases have no healer and say so rather than passing.
+   */
+  const variant = Number(stringOption(args, "variant") ?? "0");
+  const healState = stringOption(args, "heal-state");
+
   const report = await runSurfaceConformance({
     adapter,
     baseUrl,
-    ...(desktop ? { cases: DESKTOP_CASES } : {}),
+    ...(desktop ? { cases: [...DESKTOP_CASES, ...DESKTOP_HEALING_CASES] } : {}),
+    ...(desktop ? { variant } : {}),
+    ...(desktop && healState !== undefined
+      ? { healing: desktopHealing(variant, healState) }
+      : {}),
     ...(only === undefined ? {} : { only: only.split(",").map((s) => s.trim()) }),
     openSurface: async () => {
       const surface = await createSurface(config);

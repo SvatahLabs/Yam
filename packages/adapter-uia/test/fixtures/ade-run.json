@@ -26,7 +26,7 @@
         0,
         0,
         1280,
-        828
+        819
       ]
     },
     {
@@ -38,7 +38,7 @@
         0,
         0,
         1280,
-        828
+        819
       ],
       "automationId": "root"
     },
@@ -110,7 +110,7 @@
       "box": [
         16,
         34,
-        667,
+        652,
         14
       ]
     },
@@ -118,12 +118,12 @@
       "parent": 8,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01Q1tN6MR8PDeTwRA2rgU3wK/evals/fixtures",
+      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
       "isEnabled": true,
       "box": [
         16,
         34,
-        667,
+        652,
         14
       ]
     },
@@ -131,7 +131,7 @@
       "parent": 9,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01Q1tN6MR8PDeTwRA2rgU3wK/evals/fixtures",
+      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
       "isEnabled": true
     },
     {
@@ -141,7 +141,7 @@
       "name": "·",
       "isEnabled": true,
       "box": [
-        683,
+        668,
         34,
         10,
         14
@@ -161,9 +161,9 @@
       "name": "Service URL",
       "isEnabled": true,
       "box": [
-        693,
+        678,
         34,
-        121,
+        122,
         14
       ]
     },
@@ -171,12 +171,12 @@
       "parent": 13,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "http://127.0.0.1:54192",
+      "name": "http://127.0.0.1:57904",
       "isEnabled": true,
       "box": [
-        693,
+        678,
         34,
-        121,
+        122,
         14
       ]
     },
@@ -184,7 +184,7 @@
       "parent": 14,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "http://127.0.0.1:54192",
+      "name": "http://127.0.0.1:57904",
       "isEnabled": true
     },
     {
@@ -216,7 +216,8 @@
         56,
         65,
         28
-      ]
+      ],
+      "automationId": "screen-project"
     },
     {
       "parent": 17,
@@ -254,7 +255,8 @@
         56,
         89,
         28
-      ]
+      ],
+      "automationId": "screen-flows"
     },
     {
       "parent": 20,
@@ -292,7 +294,8 @@
         56,
         48,
         28
-      ]
+      ],
+      "automationId": "screen-plan"
     },
     {
       "parent": 23,
@@ -330,7 +333,8 @@
         56,
         45,
         28
-      ]
+      ],
+      "automationId": "screen-run"
     },
     {
       "parent": 26,
@@ -368,7 +372,8 @@
         56,
         66,
         28
-      ]
+      ],
+      "automationId": "screen-results"
     },
     {
       "parent": 29,
@@ -406,7 +411,8 @@
         56,
         79,
         28
-      ]
+      ],
+      "automationId": "screen-api"
     },
     {
       "parent": 32,
@@ -444,7 +450,8 @@
         56,
         50,
         28
-      ]
+      ],
+      "automationId": "screen-data"
     },
     {
       "parent": 35,
@@ -482,7 +489,8 @@
         56,
         108,
         28
-      ]
+      ],
+      "automationId": "screen-record"
     },
     {
       "parent": 38,
@@ -520,7 +528,8 @@
         56,
         74,
         28
-      ]
+      ],
+      "automationId": "screen-bindings"
     },
     {
       "parent": 41,
@@ -558,7 +567,8 @@
         56,
         122,
         28
-      ]
+      ],
+      "automationId": "screen-explorer"
     },
     {
       "parent": 44,
@@ -596,7 +606,8 @@
         56,
         84,
         28
-      ]
+      ],
+      "automationId": "screen-tools"
     },
     {
       "parent": 47,
@@ -628,7 +639,7 @@
         0,
         85,
         1280,
-        744
+        735
       ]
     },
     {

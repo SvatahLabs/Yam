@@ -31,7 +31,7 @@
  * both is the evidence for that requirement; a case that had to ask about
  * `AXButton` would be evidence against it.
  */
-import type { ConformanceCase } from "./types.js";
+import type { CaseContext, ConformanceCase, DesktopHealing } from "./types.js";
 
 interface Node {
   readonly ref: string;
@@ -270,6 +270,193 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
         "read('url') throws NavigationError",
         () => surface.read("url"),
         "NavigationError",
+      );
+    },
+  },
+];
+
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * The desktop healing cases (Draft 2.8 LLD §16, T7.1)
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * > the ADE gains `SVATAH_A11Y_VARIANT=1|2`, where variant 1 renames one screen
+ * > tab and one button on the Project screen and variant 2 moves the Record
+ * > screen's gateway control into a different panel; a binding recorded at
+ * > variant 0 must relocalize on both through the desktop adapter with the same
+ * > weights and threshold as the web healing eval, and the desktop conformance
+ * > report records the outcome per case.
+ *
+ * This is T6.1's "healing variant subset (renamed control, moved panel)", which
+ * Phase 6 shipped without and without a deviation (Phase 6 verification, F3).
+ *
+ * ## Each case runs twice, at two variants
+ *
+ * A healing case cannot be one pass: the binding has to exist *before* the
+ * interface changes. So each case declares `variants: [0, N]` and does one of
+ * two things depending on which window it is looking at.
+ *
+ * - At **variant 0** it finds the control by its `automationId`, fingerprints
+ *   it, and remembers the fingerprint and the ground-truth key.
+ * - At **variant N** it recalls that fingerprint, relocalizes against the
+ *   changed window, and checks that what came back is the same element — by the
+ *   key, never by the name or the position, either of which is the thing the
+ *   variant broke.
+ *
+ * `scripts/desktop-conformance.mjs` is what launches the ADE three times and
+ * carries the recorded state between the passes.
+ *
+ * ## Why the key cannot help
+ *
+ * The ground truth is the control's `automationId`, which is the desktop
+ * equivalent of `apps/sample-web`'s `data-svatah-eval` (LLD §16). The web
+ * healing eval keeps its key out of synthesis and fingerprints through
+ * `bindings.ignoreAttributes` so that the eval cannot find the answer in the
+ * answer key, and the injected healer does the same here. The case reads the
+ * key through `describe()`, which does not apply that exclusion; the scorer
+ * never sees it.
+ */
+
+/** The one control each case tracks, by the `automationId` that survives both variants. */
+interface Subject {
+  readonly key: string;
+  readonly role: string;
+  /** The tab to open before looking, by the name it has at *every* variant. */
+  readonly screen: string;
+  /** What the control was called at variant 0, so a rename can be shown to bite. */
+  readonly nameAtZero: string;
+}
+
+const byKey = (nodes: readonly Node[], key: string): Node | undefined =>
+  nodes.find((node) => node.native?.["automationId"] === key);
+
+/**
+ * Record at variant 0, relocalize at the variant under test.
+ *
+ * One body for both cases, because the difference between them is *what
+ * changed*, not what the case does about it — and a second copy of this would
+ * be a second place for the check to drift.
+ */
+async function healingCase(
+  context: CaseContext,
+  id: string,
+  subjects: readonly Subject[],
+  variant: number,
+): Promise<void> {
+  const { check, equals } = context;
+  const healing: DesktopHealing | undefined = context.healing;
+  if (healing === undefined) {
+    check(
+      "a relocalizer was injected, so the healing case can run at all",
+      false,
+      {
+        expected: "`svatah surface conform --heal-state <path>`, which supplies the healer",
+        actual: "no healer was injected",
+      },
+    );
+    return;
+  }
+
+  for (const subject of subjects) {
+    const nodes = await openScreen(context, subject.screen);
+    const live = byKey(nodes, subject.key);
+
+    if (healing.variant === 0) {
+      check(`"${subject.key}" is on the ${subject.screen} screen at variant 0`, live !== undefined, {
+        expected: `a ${subject.role} whose automationId is "${subject.key}"`,
+        actual: nodes.filter((n) => n.role === subject.role).map((n) => n.name),
+      });
+      if (live === undefined) continue;
+      equals(`"${subject.key}" is named "${subject.nameAtZero}" at variant 0`, live.name, subject.nameAtZero);
+      const fingerprint = await healing.fingerprint(context.surface, live.ref);
+      const described = await context.surface.describe(live.ref);
+      healing.remember(`${id}:${subject.key}`, {
+        fingerprint,
+        key: subject.key,
+        rolePath: described.rolePath,
+      });
+      check(`the binding for "${subject.key}" is recorded for the healing pass`, true);
+      continue;
+    }
+
+    const recorded = healing.recall(`${id}:${subject.key}`);
+    if (recorded === undefined) {
+      check(`a binding for "${subject.key}" was recorded at variant 0`, false, {
+        expected: "a fingerprint carried over from the variant-0 pass",
+        actual: "nothing was recorded — run the variant-0 pass first",
+      });
+      continue;
+    }
+
+    /*
+     * The variant has to actually break something, or the case proves nothing.
+     * A rename breaks the name; a move breaks the ancestry. Both are asserted
+     * before the relocalization is, so a variant that silently stopped changing
+     * the interface fails here rather than passing everywhere.
+     */
+    const renamed = live !== undefined && live.name !== subject.nameAtZero;
+    const moved =
+      live !== undefined &&
+      JSON.stringify((await context.surface.describe(live.ref)).rolePath) !==
+        JSON.stringify(recorded.rolePath);
+    check(`variant ${variant} changed "${subject.key}"`, renamed || moved, {
+      expected: "a different name, or a different place in the tree",
+      actual: { name: live?.name, renamed, moved },
+    });
+
+    const healed = await healing.relocalize(context.surface, recorded.fingerprint, subject.role);
+    equals(`"${subject.key}" relocalizes at variant ${variant}`, healed.outcome, "relocalized");
+    if (healed.outcome !== "relocalized" || healed.ref === undefined) continue;
+
+    /*
+     * The recovery is verified against the ground-truth key, never against the
+     * proposal's own confidence — LLD §16's rule for the web healing eval, and
+     * the difference between "something scored highly" and "it is the right
+     * element".
+     */
+    const proposed = await context.surface.describe(healed.ref);
+    equals(
+      `the element it proposed is the one that was recorded ("${subject.key}")`,
+      proposed.native?.["automationId"],
+      recorded.key,
+    );
+  }
+}
+
+export const DESKTOP_HEALING_CASES: readonly ConformanceCase[] = [
+  {
+    id: "ade.heal.renamed-control",
+    page: "Svatah ADE",
+    description:
+      "LLD §16 variant 1: a screen tab and a Project button are renamed, and bindings recorded " +
+      "at variant 0 relocalize onto them.",
+    variants: [0, 1],
+    async run(context) {
+      await healingCase(
+        context,
+        "ade.heal.renamed-control",
+        [
+          { key: "screen-flows", role: "tab", screen: "Project", nameAtZero: "Flow editor" },
+          { key: "project-open", role: "button", screen: "Project", nameAtZero: "Open a project…" },
+        ],
+        1,
+      );
+    },
+  },
+  {
+    id: "ade.heal.moved-panel",
+    page: "Svatah ADE",
+    description:
+      "LLD §16 variant 2: the Record screen's gateway control moves into another panel, and a " +
+      "binding recorded at variant 0 relocalizes onto it.",
+    variants: [0, 2],
+    async run(context) {
+      await healingCase(
+        context,
+        "ade.heal.moved-panel",
+        [{ key: "record-gateway", role: "combobox", screen: "Record review", nameAtZero: "Gateway" }],
+        2,
       );
     },
   },

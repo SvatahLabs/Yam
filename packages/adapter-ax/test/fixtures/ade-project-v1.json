@@ -155,7 +155,7 @@
     {
       "parent": 13,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:57767",
+      "title": "http://127.0.0.1:58156",
       "enabled": true,
       "box": [
         678,
@@ -167,7 +167,7 @@
     {
       "parent": 14,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:57767",
+      "title": "http://127.0.0.1:58156",
       "enabled": true
     },
     {
@@ -222,7 +222,7 @@
       "parent": 16,
       "role": "AXRadioButton",
       "subrole": "AXTabButton",
-      "title": "Flow editor",
+      "title": "Editor",
       "enabled": true,
       "selected": false,
       "actions": [
@@ -231,7 +231,7 @@
       "box": [
         85,
         56,
-        89,
+        58,
         28
       ],
       "domIdentifier": "screen-flows"
@@ -239,19 +239,19 @@
     {
       "parent": 20,
       "role": "AXStaticText",
-      "title": "Flow editor",
+      "title": "Editor",
       "enabled": true,
       "box": [
         96,
         63,
-        67,
+        36,
         15
       ]
     },
     {
       "parent": 21,
       "role": "AXStaticText",
-      "title": "Flow editor",
+      "title": "Editor",
       "enabled": true
     },
     {
@@ -265,7 +265,7 @@
         "AXPress"
       ],
       "box": [
-        178,
+        147,
         56,
         48,
         28
@@ -278,7 +278,7 @@
       "title": "Plan",
       "enabled": true,
       "box": [
-        189,
+        158,
         63,
         26,
         15
@@ -301,7 +301,7 @@
         "AXPress"
       ],
       "box": [
-        230,
+        199,
         56,
         45,
         28
@@ -314,7 +314,7 @@
       "title": "Run",
       "enabled": true,
       "box": [
-        241,
+        210,
         63,
         23,
         15
@@ -337,7 +337,7 @@
         "AXPress"
       ],
       "box": [
-        279,
+        248,
         56,
         66,
         28
@@ -350,7 +350,7 @@
       "title": "Results",
       "enabled": true,
       "box": [
-        290,
+        259,
         63,
         44,
         15
@@ -373,7 +373,7 @@
         "AXPress"
       ],
       "box": [
-        350,
+        318,
         56,
         79,
         28
@@ -386,7 +386,7 @@
       "title": "API client",
       "enabled": true,
       "box": [
-        361,
+        329,
         63,
         57,
         15
@@ -409,7 +409,7 @@
         "AXPress"
       ],
       "box": [
-        432,
+        401,
         56,
         50,
         28
@@ -422,7 +422,7 @@
       "title": "Data",
       "enabled": true,
       "box": [
-        443,
+        412,
         63,
         28,
         15
@@ -445,7 +445,7 @@
         "AXPress"
       ],
       "box": [
-        487,
+        456,
         56,
         108,
         28
@@ -458,7 +458,7 @@
       "title": "Record review",
       "enabled": true,
       "box": [
-        498,
+        467,
         63,
         86,
         15
@@ -481,7 +481,7 @@
         "AXPress"
       ],
       "box": [
-        599,
+        567,
         56,
         74,
         28
@@ -494,7 +494,7 @@
       "title": "Bindings",
       "enabled": true,
       "box": [
-        610,
+        578,
         63,
         52,
         15
@@ -517,7 +517,7 @@
         "AXPress"
       ],
       "box": [
-        677,
+        646,
         56,
         122,
         28
@@ -530,7 +530,7 @@
       "title": "Surface explorer",
       "enabled": true,
       "box": [
-        688,
+        657,
         63,
         100,
         15
@@ -553,7 +553,7 @@
         "AXPress"
       ],
       "box": [
-        803,
+        772,
         56,
         84,
         28
@@ -566,7 +566,7 @@
       "title": "Tool panel",
       "enabled": true,
       "box": [
-        814,
+        783,
         63,
         62,
         15
@@ -606,7 +606,7 @@
     {
       "parent": 51,
       "role": "AXButton",
-      "title": "Open a project…",
+      "title": "Choose a project…",
       "enabled": true,
       "actions": [
         "AXPress"
@@ -614,7 +614,7 @@
       "box": [
         16,
         97,
-        122,
+        135,
         27
       ],
       "domIdentifier": "project-open"
@@ -622,19 +622,19 @@
     {
       "parent": 52,
       "role": "AXStaticText",
-      "title": "Open a project…",
+      "title": "Choose a project…",
       "enabled": true,
       "box": [
         27,
         103,
-        100,
+        113,
         15
       ]
     },
     {
       "parent": 53,
       "role": "AXStaticText",
-      "title": "Open a project…",
+      "title": "Choose a project…",
       "enabled": true
     },
     {
@@ -647,7 +647,7 @@
         "AXPress"
       ],
       "box": [
-        146,
+        159,
         97,
         194,
         27
@@ -659,7 +659,7 @@
       "title": "Import prototype database…",
       "enabled": true,
       "box": [
-        157,
+        170,
         103,
         172,
         15
@@ -677,7 +677,7 @@
       "title": "Recent:",
       "enabled": true,
       "box": [
-        348,
+        362,
         105,
         43,
         14
@@ -698,7 +698,7 @@
         "AXPress"
       ],
       "box": [
-        399,
+        413,
         97,
         67,
         27
@@ -710,7 +710,7 @@
       "title": "fixtures",
       "enabled": true,
       "box": [
-        410,
+        424,
         103,
         45,
         15

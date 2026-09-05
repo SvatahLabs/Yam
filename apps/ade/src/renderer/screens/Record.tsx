@@ -40,6 +40,7 @@
  * gateway was asked for, and what to do about it here.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { a11yVariant } from "../a11y-variant.js";
 import { fromEndpoint, type ScreenData, type ServiceClient } from "../client.js";
 
 interface Candidate {
@@ -231,34 +232,67 @@ export function RecordScreen({ client }: { client: ServiceClient }): React.JSX.E
     }
   }, [client]);
 
+  /*
+   * The gateway control, which LLD §16's variant 2 moves.
+   *
+   * Identical markup in both variants — same role, same accessible name, same
+   * id — placed in a different container. That is the whole point of the
+   * variant: a binding that matched on where the control *was* breaks, and one
+   * that matched on what it *is* does not, so the desktop healing case measures
+   * the structural half of relocalization on its own.
+   */
+  const gatewayControl = (
+    <>
+      <label htmlFor="record-gateway">Gateway</label>
+      <select
+        id="record-gateway"
+        aria-label="Gateway"
+        value={gateway ?? "fake"}
+        onChange={(event) => setGateway(event.target.value as GatewayChoice)}
+        disabled={busy || proposal !== undefined}
+      >
+        {/*
+          Both labelled for what they are (REQ-ADE-4). A reviewer accepting a
+          grounding decision is entitled to know whether a model made it or a
+          committed fixture did, and the label is the only place on this
+          screen that can say so before the decision arrives.
+        */}
+        <option value="anthropic" disabled={credential?.value !== true}>
+          {credential?.value === true
+            ? "anthropic — a model, through the service's credential"
+            : "anthropic — no credential on this service"}
+        </option>
+        <option value="fake">fake — committed answers from evals/grounding/cases</option>
+      </select>
+    </>
+  );
+  const movedGateway = a11yVariant() === 2;
+
   return (
     <section aria-label="Record review">
+      {movedGateway ? (
+        /*
+         * A *panel*, and one the accessibility tree can see: a plain `<div>` is
+         * not published as a node, so moving the control into one would change
+         * nothing a desktop adapter could read and the healing case would be
+         * measuring nothing. `role="group"` with a name is the smallest
+         * container that actually moves the control in the tree.
+         */
+        <div className="panel row" role="group" aria-label="Session settings">
+          {gatewayControl}
+          {session === undefined ? (
+            <span className="muted">No session.</span>
+          ) : (
+            <span className="muted">session {session.value}</span>
+          )}
+        </div>
+      ) : null}
       <div className="row">
-        <label htmlFor="record-gateway">Gateway</label>
-        <select
-          id="record-gateway"
-          aria-label="Gateway"
-          value={gateway ?? "fake"}
-          onChange={(event) => setGateway(event.target.value as GatewayChoice)}
-          disabled={busy || proposal !== undefined}
-        >
-          {/*
-            Both labelled for what they are (REQ-ADE-4). A reviewer accepting a
-            grounding decision is entitled to know whether a model made it or a
-            committed fixture did, and the label is the only place on this
-            screen that can say so before the decision arrives.
-          */}
-          <option value="anthropic" disabled={credential?.value !== true}>
-            {credential?.value === true
-              ? "anthropic — a model, through the service's credential"
-              : "anthropic — no credential on this service"}
-          </option>
-          <option value="fake">fake — committed answers from evals/grounding/cases</option>
-        </select>
+        {movedGateway ? null : gatewayControl}
         <button type="button" onClick={() => void start()} disabled={busy || proposal !== undefined}>
           Start recording
         </button>
-        {session === undefined ? (
+        {movedGateway ? null : session === undefined ? (
           <span className="muted">No session.</span>
         ) : (
           <span className="muted">session {session.value}</span>

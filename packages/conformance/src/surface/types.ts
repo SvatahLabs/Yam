@@ -12,7 +12,61 @@
  * reading the suite's source (REQ-STD-2 — the suite is published and runnable by
  * third parties).
  */
+import type { Fingerprint, Ref } from "@svatah/schema";
 import type { AgentSurface } from "@svatah/surface";
+
+/**
+ * What the desktop healing cases need, and this package will not import
+ * (Draft 2.8 LLD §16, T7.1).
+ *
+ * > a binding recorded at variant 0 must relocalize on both through the desktop
+ * > adapter with the same weights and threshold as the web healing eval
+ *
+ * The relocalizer lives in `@svatah/bindings`, which this package does not
+ * depend on and should not: the suite is published for third parties to run
+ * against *their* adapter, and a conformance suite that dragged the healer in
+ * with it would make that a bigger ask than it is. So it arrives the way the
+ * executor's collaborators arrive (LLD §8) — injected by the CLI, which owns
+ * the healer already. A run with no healer skips the healing cases rather than
+ * passing them.
+ */
+export interface RecordedElement {
+  /** The fingerprint taken at variant 0 (LLD §3.3). */
+  readonly fingerprint: Fingerprint;
+  /**
+   * The ground truth: the element's `automationId`.
+   *
+   * The desktop equivalent of `apps/sample-web`'s `data-svatah-eval`
+   * (LLD §16). It is read through `describe()` — which does not apply
+   * `ignoreAttributes` — while the relocalizer is told to ignore it, so the
+   * answer key cannot help the answer.
+   */
+  readonly key: string;
+  /** The roles from the root down, so a moved control can be shown to have moved. */
+  readonly rolePath: readonly string[];
+}
+
+/** What model-free relocalization answered (LLD §6.4). */
+export interface HealOutcome {
+  readonly outcome: "relocalized" | "not-found" | "ambiguous";
+  readonly ref?: Ref;
+  readonly score?: number;
+}
+
+export interface DesktopHealing {
+  /** Which ADE variant this window is showing: 0 records, 1 and 2 relocalize. */
+  readonly variant: number;
+  /** Fingerprint one element, with the ground-truth attribute excluded. */
+  fingerprint(surface: AgentSurface, ref: Ref): Promise<Fingerprint>;
+  /** Model-free, with the web healing eval's weights and threshold (LLD §16). */
+  relocalize(
+    surface: AgentSurface,
+    fingerprint: Fingerprint,
+    preferRole: string,
+  ): Promise<HealOutcome>;
+  recall(id: string): RecordedElement | undefined;
+  remember(id: string, value: RecordedElement): void;
+}
 
 /** One observation the suite made. */
 export interface CheckResult {
@@ -30,6 +84,8 @@ export interface CaseContext {
   readonly surface: AgentSurface;
   /** Where the sample application is served. */
   readonly baseUrl: string;
+  /** The healer, for the desktop healing cases; absent when none was injected. */
+  readonly healing?: DesktopHealing;
   /** Record one observation. */
   check(description: string, ok: boolean, detail?: { expected?: unknown; actual?: unknown }): void;
   /** Record an equality observation, filling in expected and actual. */
@@ -47,6 +103,13 @@ export interface ConformanceCase {
   readonly description: string;
   /** Capability flags the case needs; skipped, not failed, when the adapter lacks one. */
   readonly requires?: readonly string[];
+  /**
+   * Which ADE accessibility variants this case runs at (LLD §16); `[0]` by
+   * default, which is every case that is not a healing case. A case is
+   * *skipped* at the other variants rather than dropped, so one report can be
+   * read against another and a missing case is visible.
+   */
+  readonly variants?: readonly number[];
   run(context: CaseContext): Promise<void>;
 }
 
