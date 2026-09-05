@@ -1,0 +1,413 @@
+# The Svatah agent surface
+
+The contract an adapter implements.
+
+Everything above this line — the compiler, the recorder, the executor, the healer,
+the behaviors — knows nothing about locators, protocols or platforms. It calls
+`snapshot`, `act`, `read`, `check`, `locate`, `describe`, `state` and `restore`,
+and addresses elements by reference or by a stored candidate. That is the whole
+boundary (REQ-SURF-2, REQ-SURF-5).
+
+The TypeScript interface lives in
+[`@svatah/surface`](../packages/surface/src/surface.ts). The wire shapes are
+generated from Zod and published as JSON Schema under
+[`packages/schema/json/`](../packages/schema/json/), so an adapter written in
+another language has the same contract without reading TypeScript.
+
+- Design: [LLD §2](spec/lld.md), [HLD §5.1](spec/hld.md)
+- Requirements: REQ-SURF-1, REQ-SURF-2, REQ-SURF-3, REQ-SURF-4, REQ-SURF-5
+
+---
+
+## 1. The interface
+
+```ts
+interface AgentSurface {
+  readonly kind: "web" | "mobile" | "desktop" | "http";
+
+  capabilities(): Capabilities;
+  open(session: SessionInit): Promise<void>;
+  close(): Promise<void>;
+
+  snapshot(opts?: { root?: Ref; maxNodes?: number; interactiveOnly?: boolean }): Promise<Snapshot>;
+  act(action: SurfaceAction, ref?: Ref, args?: ActArgs, ref2?: Ref): Promise<ActResult>;
+  read(kind: "text" | "value" | "attribute" | "title" | "url" | "result", ref?: Ref, name?: string): Promise<unknown>;
+  check(predicate: Predicate, subject: "ref" | "page" | "dialog", ref?: Ref): Promise<CheckResult>;
+
+  locate(candidate: Candidate): Promise<Ref[]>;
+  describe(ref: Ref): Promise<ElementDescription>;
+  screenshot(path: string, mask?: Ref[]): Promise<void>;
+  state(): Promise<SessionState>;
+  restore(state: SessionState): Promise<void>;
+
+  trace?(start: boolean, path?: string): Promise<void>;
+  request?(req: ApiRequest, opts: { withSessionCookies: boolean }): Promise<ApiResponse>;
+}
+```
+
+### Every method
+
+| Method | Required | What it must do | Wire schema |
+|---|---|---|---|
+| `capabilities` | yes | Return which optional features this adapter has. Must be cheap and callable before `open`. | `surface.capabilities.schema.json` |
+| `open` | yes | Start a session: launch or attach, apply `storageState` / `appPath` / `processName` / `baseUrl`. Throw `SessionError` on failure. | `surface.session-init.schema.json` |
+| `close` | yes | End the session and release the driver. Must be safe to call twice. | — |
+| `snapshot` | yes | Return the normalised semantic tree with stable references. See §2. | `surface.snapshot.schema.json` |
+| `act` | yes | Perform one action, by reference. See §4. | `surface.act.schema.json` |
+| `read` | yes | Read one value: element text or value, an attribute, the page title or URL, or the last action's result. | `surface.read.schema.json` |
+| `check` | yes | Evaluate one predicate against an element, the page or a dialog. Return `{ ok }` — do not throw when the predicate is simply false. | `surface.check.schema.json` |
+| `locate` | yes | Turn one stored `Candidate` into 0, 1 or many references. The resolver requires exactly one. See §5. | `surface.locate.schema.json` |
+| `describe` | yes | Return everything candidate synthesis and fingerprinting need for one element. | `surface.element-description.schema.json` |
+| `screenshot` | yes | Write a screenshot to `path`, blanking the boxes in `mask`. Masking is how secret-injecting steps stay out of artifacts (REQ-NFR-6). | — |
+| `state` | yes | Return the restorable subset of session state. This is what a checkpoint stores. | `surface.session-state.schema.json` |
+| `restore` | yes | Put the session back into a previously returned state. | `surface.session-state.schema.json` |
+| `trace` | optional | Start or stop adapter tracing. Present only when `capabilities().trace`. | — |
+| `request` | optional | Execute a named HTTP request, optionally sharing the web session's cookies (REQ-ADP-3). | `surface.api-request.schema.json`, `surface.api-response.schema.json` |
+
+An adapter that does not implement `trace` or `request` must omit them, not
+implement them as throwing stubs — callers check for presence.
+
+### Every capability flag
+
+`capabilities()` returns exactly these nine booleans. Default every one to `false`
+and opt in to what you actually support: the executor checks a plan against them
+**before the run starts**, so a missing feature is a refusal to begin rather than a
+failure halfway through a flow (LLD §2.4).
+
+| Flag | Meaning | Actions it gates |
+|---|---|---|
+| `dialogs` | Native dialogs can be observed and answered. | `dialog` |
+| `frames` | The session has addressable frames. | `switchFrame` |
+| `windows` | The session can have more than one window or page. | `switchWindow`, `closeOtherWindows` |
+| `upload` | Files can be attached to a file control. | `upload` |
+| `drag` | One element can be dragged onto another. | `dragTo` |
+| `trace` | `trace()` is implemented. | — |
+| `webmcp` | The platform can declare tools the adapter can call (REQ-ADP-9). | — |
+| `screenshot` | `screenshot()` produces an image. | `screenshot` |
+| `restore` | `restore()` can put the session back into a stored state. | — |
+
+Everything not listed above — clicking, typing, navigating, scrolling, reading,
+waiting — every adapter must support.
+
+---
+
+## 2. The snapshot
+
+`snapshot()` is the primary input to grounding (REQ-REC-2) and the source of the
+context hash (LLD §6.2). Its shape is identical whether the tree came from ARIA,
+UIA, AX, AT-SPI or an Appium page source (REQ-SURF-4).
+
+```ts
+interface Snapshot { ref: Ref; nodes: SnapshotNode[]; text: string; tokensEstimate: number; hash: string; }
+
+interface SnapshotNode {
+  ref: Ref;                     // "r12" style; opaque above the surface
+  role: string;                 // always an ARIA role — see §3
+  name?: string; value?: string; description?: string;
+  states: Array<"disabled" | "checked" | "unchecked" | "selected" | "expanded"
+               | "collapsed" | "focused" | "required" | "hidden" | "readonly">;
+  box?: [number, number, number, number];
+  depth: number; parent?: Ref;
+  native?: Record<string, string>;
+}
+```
+
+Rules an adapter must honour:
+
+1. **References are stable within a snapshot** and map back to the same element for
+   as long as the snapshot is current. They are opaque above the surface: never
+   encode a locator in one.
+2. **Nodes are in document order**, parents before children, so the rendering is
+   deterministic.
+3. **`role` is always an ARIA role.** Map your platform's vocabulary with the tables
+   in §3. An unmapped control becomes `generic` and still appears — never drop it.
+4. **`native` carries adapter-specific extras** (`data-testid`, `AutomationId`,
+   `resource-id`). Nothing above the surface reads it except candidate synthesis.
+5. **`text` is the rendering below**, produced by `renderSnapshot` from
+   `@svatah/surface` so every adapter's prompt input reads the same.
+6. **`hash` is the structural hash** of LLD §6.2, computed from this tree rather
+   than from the DOM, which is what makes it adapter-neutral.
+
+The rendering is one node per line, indented by depth, with the reference last:
+
+```
+- form "Sign in" [ref=r1]
+  - textbox "Username": atul [required] [ref=r2]
+  - button "Sign in" [disabled, focused] [ref=r3]
+```
+
+Use `buildSnapshot(root, nodes, hash)` rather than assembling `text` and
+`tokensEstimate` yourself.
+
+---
+
+## 3. Role mapping
+
+`SnapshotNode.role` is an ARIA role whatever the source tree was. These tables are
+generated from [`packages/surface/src/roles.ts`](../packages/surface/src/roles.ts),
+which is the source of truth; a test regenerates them and fails if this document
+drifts. Anything absent from a table maps to `generic`.
+
+Webview contexts already expose ARIA roles and need no mapping.
+
+### 3.1 Windows UI Automation (REQ-ADP-6)
+
+<!-- generated:uia -->
+| UIA `ControlType` | Surface role |
+|---|---|
+| `AppBar` | `toolbar` |
+| `Button` | `button` |
+| `Calendar` | `grid` |
+| `CheckBox` | `checkbox` |
+| `ComboBox` | `combobox` |
+| `Custom` | `generic` |
+| `DataGrid` | `grid` |
+| `DataItem` | `row` |
+| `Document` | `document` |
+| `Edit` | `textbox` |
+| `Group` | `group` |
+| `Header` | `rowgroup` |
+| `HeaderItem` | `columnheader` |
+| `Hyperlink` | `link` |
+| `Image` | `img` |
+| `List` | `listbox` |
+| `ListItem` | `option` |
+| `Menu` | `menu` |
+| `MenuBar` | `menubar` |
+| `MenuItem` | `menuitem` |
+| `Pane` | `group` |
+| `ProgressBar` | `progressbar` |
+| `RadioButton` | `radio` |
+| `ScrollBar` | `scrollbar` |
+| `Separator` | `separator` |
+| `Slider` | `slider` |
+| `Spinner` | `spinbutton` |
+| `SplitButton` | `button` |
+| `StatusBar` | `status` |
+| `Tab` | `tablist` |
+| `TabItem` | `tab` |
+| `Table` | `table` |
+| `Text` | `text` |
+| `Thumb` | `generic` |
+| `TitleBar` | `banner` |
+| `ToolBar` | `toolbar` |
+| `ToolTip` | `tooltip` |
+| `Tree` | `tree` |
+| `TreeItem` | `treeitem` |
+| `Window` | `window` |
+<!-- /generated:uia -->
+
+Candidate kinds on this platform: `automationId` (from `AutomationId`),
+`controlPath` (`Window[name]/Pane[2]/Button[name]`), then `coords`.
+
+### 3.2 macOS Accessibility (REQ-ADP-7)
+
+<!-- generated:ax -->
+| macOS `AXRole` | Surface role |
+|---|---|
+| `AXApplication` | `application` |
+| `AXBrowser` | `group` |
+| `AXBusyIndicator` | `progressbar` |
+| `AXButton` | `button` |
+| `AXCell` | `cell` |
+| `AXCheckBox` | `checkbox` |
+| `AXColorWell` | `button` |
+| `AXColumn` | `group` |
+| `AXComboBox` | `combobox` |
+| `AXDisclosureTriangle` | `button` |
+| `AXDrawer` | `group` |
+| `AXGroup` | `group` |
+| `AXGrowArea` | `generic` |
+| `AXHeading` | `heading` |
+| `AXHelpTag` | `tooltip` |
+| `AXImage` | `img` |
+| `AXIncrementor` | `spinbutton` |
+| `AXLink` | `link` |
+| `AXList` | `listbox` |
+| `AXMenu` | `menu` |
+| `AXMenuBar` | `menubar` |
+| `AXMenuButton` | `button` |
+| `AXMenuItem` | `menuitem` |
+| `AXOutline` | `tree` |
+| `AXOutlineRow` | `treeitem` |
+| `AXPopUpButton` | `combobox` |
+| `AXProgressIndicator` | `progressbar` |
+| `AXRadioButton` | `radio` |
+| `AXRadioGroup` | `radiogroup` |
+| `AXRow` | `row` |
+| `AXScrollArea` | `group` |
+| `AXScrollBar` | `scrollbar` |
+| `AXSecureTextField` | `textbox` |
+| `AXSheet` | `dialog` |
+| `AXSlider` | `slider` |
+| `AXSplitGroup` | `group` |
+| `AXSplitter` | `separator` |
+| `AXStaticText` | `text` |
+| `AXTabGroup` | `tablist` |
+| `AXTable` | `table` |
+| `AXTextArea` | `textbox` |
+| `AXTextField` | `textbox` |
+| `AXToolbar` | `toolbar` |
+| `AXUnknown` | `generic` |
+| `AXValueIndicator` | `generic` |
+| `AXWebArea` | `document` |
+| `AXWindow` | `window` |
+<!-- /generated:ax -->
+
+Candidate kinds: `automationId` (from `AXIdentifier`, falling back to
+`aria-label`), `controlPath`, then `coords`. The adapter must document the
+accessibility permission grant and offer `svatah surface doctor` to check it.
+
+### 3.3 Appium, native Android (REQ-ADP-5)
+
+<!-- generated:appium -->
+| Android class | Surface role |
+|---|---|
+| `android.app.Dialog` | `dialog` |
+| `android.view.View` | `generic` |
+| `android.view.ViewGroup` | `group` |
+| `android.webkit.WebView` | `document` |
+| `android.widget.Button` | `button` |
+| `android.widget.CheckBox` | `checkbox` |
+| `android.widget.CheckedTextView` | `option` |
+| `android.widget.EditText` | `textbox` |
+| `android.widget.FrameLayout` | `group` |
+| `android.widget.HorizontalScrollView` | `group` |
+| `android.widget.ImageButton` | `button` |
+| `android.widget.ImageView` | `img` |
+| `android.widget.LinearLayout` | `group` |
+| `android.widget.ListView` | `list` |
+| `android.widget.NumberPicker` | `spinbutton` |
+| `android.widget.ProgressBar` | `progressbar` |
+| `android.widget.RadioButton` | `radio` |
+| `android.widget.RadioGroup` | `radiogroup` |
+| `android.widget.RatingBar` | `slider` |
+| `android.widget.RelativeLayout` | `group` |
+| `android.widget.ScrollView` | `group` |
+| `android.widget.SearchView` | `searchbox` |
+| `android.widget.SeekBar` | `slider` |
+| `android.widget.Spinner` | `combobox` |
+| `android.widget.Switch` | `switch` |
+| `android.widget.TabWidget` | `tablist` |
+| `android.widget.TextView` | `text` |
+| `android.widget.ToggleButton` | `switch` |
+| `android.widget.Toolbar` | `toolbar` |
+| `androidx.recyclerview.widget.RecyclerView` | `list` |
+<!-- /generated:appium -->
+
+Names come from `content-desc`, falling back to `text`; boxes come from `bounds`.
+Candidate kinds: `accessibilityId`, `resourceId`, `xpath`. iOS is not scheduled and
+has no table yet.
+
+---
+
+## 4. Actions
+
+`act(action, ref, args, ref2)` takes the IR action set minus `api`, `custom` and
+`expect`, which the executor handles itself. `ref2` is only used by two-element
+actions such as `dragTo`.
+
+| Group | Actions |
+|---|---|
+| Navigation | `navigate`, `back`, `forward`, `refresh` |
+| Pointer | `click`, `doubleClick`, `rightClick`, `hover`, `hoverAndClick`, `pressAndHold`, `release`, `dragTo` |
+| Keyboard and input | `type`, `clear`, `press`, `keyDown`, `keyUp`, `submit`, `upload` |
+| Selection | `selectOption`, `deselectOption`, `deselectAll`, `setChecked` |
+| Scrolling | `scrollIntoView`, `scrollToTop`, `scrollToBottom` |
+| Waiting | `sleep`, `waitFor` |
+| Windows and frames | `switchWindow`, `closeOtherWindows`, `switchFrame` |
+| Dialogs | `dialog` |
+| Reading and diagnostics | `read`, `evaluate`, `screenshot` |
+| Story composition | `invoke` |
+
+An adapter must implement every action its capabilities claim. Actions that need a
+capability it does not have are never sent, because the executor refuses the plan
+at start.
+
+---
+
+## 5. `locate` and candidates
+
+`locate(candidate)` is how the resolver replays a stored binding. It returns every
+reference the candidate matches — 0, 1 or many — and does **not** throw when there
+is no match; the resolver decides what a zero or a multiple means (LLD §6.3).
+
+| Group | Kinds |
+|---|---|
+| Web | `role`, `label`, `placeholder`, `testid`, `text`, `altText`, `title`, `css`, `xpath`, `id`, `name` |
+| Mobile | `accessibilityId`, `resourceId` |
+| Desktop | `automationId`, `controlPath` |
+| Declared tools | `webmcp` |
+| Last resort | `coords` |
+
+An adapter implements the kinds its platform has and returns an empty array for a
+kind it cannot express. It must never fall back to a different kind silently: the
+matched `by` is recorded in the results and compared across runtimes (REQ-STD-3).
+
+---
+
+## 6. Errors
+
+Adapters throw typed errors. Each carries the failure class the executor records,
+so LLD §8.4's mapping is data on the error rather than a switch above the surface.
+
+| Error | Failure class | Throw it when |
+|---|---|---|
+| `LocateError` | `locator` | A reference is unknown, or a candidate matched the wrong number of elements. |
+| `ActionabilityError` | `timeout` | The element exists but is not in a state that permits the action. |
+| `TimeoutError` | `timeout` | An operation exceeded its timeout. |
+| `CheckError` | `assertion` | A predicate could not be evaluated. A predicate that is simply false returns `{ ok: false }` instead. |
+| `DialogError` | `dialog` | A dialog was expected and absent, unexpected and present, or unanswerable. |
+| `NavigationError` | `navigation` | Navigation failed, timed out, or landed somewhere unexpected. |
+| `ScriptError` | `script` | An injected or evaluated script threw. |
+| `SessionError` | `infrastructure` | The session could not be opened, was lost, or the driven process crashed. |
+| `DataError` | `data` | A value was missing or of the wrong type. |
+
+Anything that is not a `SurfaceError` is classified `unknown`, so a leaked native
+error shows up in the results rather than being silently miscategorised.
+
+---
+
+## 7. Registration
+
+```ts
+import { registerAdapter } from "@svatah/surface";
+
+registerAdapter("playwright", (config) => new PlaywrightSurface(config));
+```
+
+Only the CLI registers adapters; the import-boundary lint forbids every other
+package from importing an `adapter-*` package (REQ-SURF-2). Registering the same
+name twice is an error rather than a silent replacement, because which
+implementation ran must not depend on import order.
+
+`createSurface(config)` builds the adapter named by `config.adapter`.
+
+---
+
+## 8. Conformance
+
+An adapter is **conformant** only when the surface conformance suite passes against
+it (REQ-SURF-3, LLD §14):
+
+```bash
+svatah surface conform --adapter <name>
+```
+
+The suite is a fixed script of surface calls per sample page with expected snapshot
+invariants, expected effects, and expected error types. It ships in
+`@svatah/conformance` and is runnable by third parties (REQ-STD-2). The suite and
+the `svatah surface conform` command are built in T1.2; Phase 0 publishes the
+contract they check.
+
+## 9. Checklist for a new adapter
+
+1. Implement every required method in §1; omit `trace` and `request` if you do not
+   have them.
+2. Return honest `capabilities()`.
+3. Normalise roles with the tables in §3; map unknowns to `generic`, never drop.
+4. Build snapshots with `buildSnapshot` so the rendering matches every other adapter.
+5. Implement the candidate kinds your platform has; return `[]` for the rest.
+6. Throw the typed errors in §6 — never a bare `Error`.
+7. Register the adapter from the CLI only.
+8. Pass `svatah surface conform --adapter <name>`.
