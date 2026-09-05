@@ -287,7 +287,9 @@ svatah/
     adapter-ax/           macOS Accessibility (P2)
     bindings/             store, resolver, synthesis, fingerprint, relocalization   ← module (a) core
     healer/               failure selection, repair, verify, diff                    ← module (a)
-    playwright-test/      host: bind() fixture, generated spec per flow, dual results ← module (a) + (b)
+    playwright-test/      bind() fixture for plain Playwright tests                   ← module (a)
+    bindings-cli/         svatah-bindings bin: bindings, heal, conform, eval healing  ← module (a)
+    host-playwright/      flow host: svatah fixture, generated spec per flow, reporter ← module (b)
     runtime/              executor core: scope, guards, checkpoints, policies, results, audit
     spec/                 flow reader, grammar, target dictionary, signatures
     steps/                defineStep API and Tier 0 matcher
@@ -310,7 +312,7 @@ svatah/
   legacy/                 frozen Java project until the Java conformance runtime exists
 ```
 
-Published npm modules: `@svatah/bindings` (bindings + healer + playwright-test host) = module (a); `@svatah/flow` (spec, steps, compiler, gateway, recorder, runtime, workflow, tool, cli) = module (b); `@svatah/schema` and `@svatah/conformance` = module (c). Adapters are separate packages.
+Published npm modules (Draft 2.3; no aggregate packages, each package publishes individually): module (a) = `@svatah/schema`, `@svatah/surface`, `@svatah/adapter-playwright`, `@svatah/bindings`, `@svatah/healer`, `@svatah/playwright-test`, `@svatah/bindings-cli`, `@svatah/conformance`; module (b) = `@svatah/spec`, `@svatah/steps`, `@svatah/compiler`, `@svatah/gateway`, `@svatah/recorder`, `@svatah/runtime`, `@svatah/host-playwright`, `@svatah/workflow`, `@svatah/tool`, `@svatah/trajectory`, `@svatah/service`, `@svatah/migrate`, `@svatah/cli`; module (c) = the schema and conformance packages consumed by foreign runtimes. `runtime` stays in module (b); module (a) reaches replay only through the healer's `Replayer` plugin (LLD §10). Other adapters are separate packages.
 
 ## 13. Delivery phases
 

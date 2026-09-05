@@ -183,7 +183,7 @@ Constraints stated by the owner:
 | REQ-HEAL-2 | Repairs are a diff to the bindings store plus a report; plan and flows are never modified. | P0 | T, R |
 | REQ-HEAL-3 | A repaired binding is verified by re-running the failed story before inclusion. | P0 | T |
 | REQ-HEAL-4 | Heal-on-fail during a run is behind a policy flag, off by default, and marks the run `healed`, never `passed`. | P1 | T |
-| REQ-HEAL-5 | Healing eval over at least 20 deliberate UI changes; relocalization alone at least 60 percent, with one model call at least 85 percent; results published per release with the method. | P0 relocalize, P1 model | E |
+| REQ-HEAL-5 | Healing eval over at least 20 deliberate UI changes; relocalization alone at least 60 percent, with one model call at least 85 percent; results published per release with the method. A repair counts as recovered only when the repaired binding resolves to the ground-truth element; the denominator is bindings that lost at least one candidate, with bindings that stopped resolving entirely reported alongside. | P0 relocalize, P1 model | E |
 | REQ-HEAL-6 | Healing works for bindings used from plain host tests (REQ-REC-11) without a flow file. | P0 | T |
 
 ### 3.9 Agentic surface (`REQ-AGT`)
@@ -269,4 +269,5 @@ Each requirement is referenced by at least one HLD section, one LLD section, and
 - `REQ-AGT-3` (explorer) replaced by `REQ-BEH-4` (trajectory compiler); `REQ-AGT-4` now states external orchestration.
 - Healing evals and all evals must be published per release (`REQ-PKG-4`, `REQ-HEAL-5`).
 - Priorities reordered so the bindings module (module a) is P0 and ships first.
+- Draft 2.3 (after Phase 1 verification): `REQ-HEAL-5` defines recovery against the ground-truth element and the denominator.
 - Draft 2.1: `REQ-ADE-1..9` added for the local service and a new Svatah ADE Electron client designed to the vision, with the prototype as the blueprint of jobs only; the ADE is the desktop conformance target for `REQ-ADP-6/7`; constraint 7 added.

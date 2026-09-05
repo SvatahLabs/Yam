@@ -12,7 +12,7 @@ Section numbers are referenced from tasks as `LLD §n`. Types are TypeScript wit
 - pnpm workspace, TypeScript 5.x, ESM, Node 22 LTS, strict mode, `tsup` builds, `vitest` unit tests, Playwright Test for adapter and host tests.
 - Import boundaries enforced by eslint `import/no-restricted-paths`:
   - `runtime`, `bindings`, `healer` (relocalize path), `adapter-*`, `surface`, `playwright-test`, `workflow`, `tool` must not import `gateway`, `recorder`, `compiler`, or `trajectory`.
-  - `bindings`, `healer`, `playwright-test` must not import `spec`, `steps`, `compiler` (module (a) independence, REQ-PKG-1).
+  - `bindings`, `healer`, `playwright-test`, `bindings-cli` must not import `spec`, `steps`, `compiler`, or `runtime` (module (a) independence, REQ-PKG-1); `cli` may depend on `bindings-cli` and mounts its commands under `svatah`.
   - Nothing above `surface` may import an `adapter-*` package directly except `cli` (registration) and `playwright-test` (Playwright adapter only).
   - The lint must resolve TypeScript sources for relative imports (an `eslint-import-resolver-typescript` or equivalent) and must also cover dynamic `import()` expressions; and a repository test must assert that no package's `package.json` declares a forbidden package under `dependencies`, `devDependencies`, `peerDependencies`, or `optionalDependencies`. With pnpm's strict isolation, the dependency-graph test is the guard that holds at run time; the lint is the guard that names the rule.
 - Every package exports from `src/index.ts`. One version for all packages; `schemaVersion` is separate and bumped on any contract change.
@@ -22,9 +22,11 @@ Dependency graph (arrows = depends on):
 ```
 schema ◄── surface ◄── adapter-playwright | adapter-http | adapter-bidi | adapter-appium | adapter-uia | adapter-ax
 bindings ─► surface, schema
-healer ─► bindings, runtime(replay), [gateway via optional plugin interface, see §10]
+healer ─► bindings, surface, schema, [runtime via the Replayer plugin, gateway via the Regrounder plugin, see §10]
 runtime ─► bindings, surface, schema
-playwright-test ─► runtime, bindings, adapter-playwright, healer
+playwright-test ─► bindings, adapter-playwright, healer, surface, schema        (module (a); never runtime)
+bindings-cli ─► bindings, healer, conformance, adapter-playwright, surface, schema   (module (a))
+host-playwright ─► runtime, playwright-test, adapter-playwright, schema           (module (b))
 spec ─► schema ; steps ─► schema, surface ; compiler ─► spec, steps, schema, [gateway]
 gateway ─► schema ; recorder ─► gateway, bindings, runtime, surface, schema
 workflow ─► runtime ; tool ─► workflow, schema ; trajectory ─► compiler, recorder
@@ -203,7 +205,8 @@ interface Config {
   adapter: "playwright" | "bidi" | "appium" | "uia" | "ax" | "http";
   app: { baseUrl?: string; storageState?: string; appPath?: string; processName?: string };
   flows: { dir: string; include?: string[]; exclude?: string[] }; steps: { dir: string };
-  bindings: { dir: string; testIdAttributes: string[] }; data: { file: string }; api: { dir: string };
+  bindings: { dir: string; testIdAttributes: string[]; ignoreAttributes?: string[]; matchHost?: boolean };   // ignoreAttributes default ["data-svatah-eval"]; matchHost false → urlPattern is path-only
+  data: { file: string }; api: { dir: string };
   run: { workers: number; browser?: "chromium" | "firefox" | "webkit"; headless: boolean; viewport?: [number,number]; stepTimeoutMs: number; candidateTimeoutMs: number;
          screenshots: "onFailure" | "always" | "never"; trace: boolean; outputDir: string; checkpoints: boolean; audit: boolean };
   compile: { tier2?: { provider: "ollama" | "llamacpp"; endpoint: string; model: string; digest?: string }; tier3?: { provider: "anthropic"; model: string; promptVersion: string }; confidenceThreshold: number };
@@ -303,7 +306,7 @@ Unchanged scoring from Draft 1 (`0.30·attrJaccard + 0.25·textSim + 0.20·neigh
 
 ```ts
 // in a Playwright test
-import { test } from "@svatah/bindings/playwright";
+import { test } from "@svatah/playwright-test";
 test("login", async ({ page, bind }) => {
   await page.goto("/login");
   await (await bind("login.username-field", "the username field")).fill("user");   // phrase optional after first record
@@ -411,14 +414,14 @@ runStep(step):
 
 ---
 
-## 9. Playwright Test host (package `playwright-test`)
+## 9. Playwright Test host (package `host-playwright`, module (b))
 
 ### 9.1 Generated specs
 
 `svatah host generate` (also run implicitly by `svatah run --host playwright`) writes `.svatah/specs/<flow>.spec.ts`:
 
 ```ts
-import { test } from "@svatah/playwright-test";
+import { test } from "@svatah/host-playwright";
 test.describe("simple.flow", () => {
   test("Validate login", async ({ svatah }) => { await svatah.runStory("Validate login"); });
   test("Validate logout", async ({ svatah }) => { await svatah.runStory("Validate logout"); });
@@ -431,7 +434,7 @@ test.describe("simple.flow", () => {
 
 ### 9.2 `bind()` fixture
 
-Provided by the same package for plain tests (§6.5). The two fixtures share the adapter and store.
+Provided by `@svatah/playwright-test` (module (a), §6.5); the host re-exports it so a flow project imports one package. The two fixtures share the adapter and store.
 
 ---
 
@@ -440,6 +443,8 @@ Provided by the same package for plain tests (§6.5). The two fixtures share the
 Gateway unchanged from Draft 1 §5 (Anthropic and local backends, schema-constrained output, caching, redaction, provenance, cost).
 
 Because `healer` is part of module (a) and must not depend on `gateway`, the model re-grounding step is a plugin: `healer` defines `interface Regrounder { ground(step, surface): Promise<BindingEntry | null> }`; module (b) registers the recorder's implementation at CLI start; module (a) alone runs relocalization only and reports the rest as unrepaired.
+
+The same pattern covers replay. `healer` defines `interface Replayer { toFailure(input: { runDir?: string; bindFailure?: BindFailure }, surface: AgentSurface): Promise<"reached" | "unreachable"> }`. Module (a)'s default restores the session state recorded with the failure (URL, storage state) and returns `unreachable` when the page needs a login that state does not carry. Module (b) registers a runtime-backed implementation that replays the story to the failing step. `healer` therefore never imports `runtime`.
 
 ---
 
@@ -455,7 +460,7 @@ Session loop and report unchanged from Draft 1 §9. Grounding (§9.2 there) now 
 
 ## 12. Healer (package `healer`)
 
-Algorithm unchanged from Draft 1 §10 with two changes: the model step goes through the `Regrounder` plugin (§10), and input comes either from a Svatah run directory or from the `bind()` failure lines written by host tests (`.svatah/bind-failures.jsonl`), so module (a) users heal without flows.
+Algorithm unchanged from Draft 1 §10 with three changes: the model step goes through the `Regrounder` plugin (§10); the replay to the failing point goes through the `Replayer` plugin (§10), which in module (a) restores the recorded session state and in module (b) replays the story through the runtime; and input comes either from a Svatah run directory or from the `bind()` failure lines written by host tests (`.svatah/bind-failures.jsonl`), so module (a) users heal without flows.
 
 ---
 
@@ -546,12 +551,14 @@ MCP server (`svatah mcp`): operation tools (`compile`, `lint`, `record`, `run`, 
 - `apps/sample-web`: as Draft 1 §13 with variants 1..20, plus a WebMCP-declaring page (P2) and a page with a canvas-only control for the vision fallback.
 - Desktop conformance target (P2): the Svatah ADE itself, built from its repository in CI on Windows and macOS runners and launched with `SVATAH_A11Y=1`. The desktop conformance flows are: create a project, open a flow, run it, open the result, use the API client. No separate sample desktop app is built.
 - Evals: `compiler/golden.jsonl` (≥300), `grounding/cases` (≥150), `healing/variants.json` (≥20), `conformance/` (surface and runtime). `svatah eval <suite> --report <path>` writes a Markdown report that the release workflow attaches to release notes (REQ-PKG-4).
+- Healing eval ground truth (Draft 2.3). `apps/sample-web` stamps every interactive element with `data-svatah-eval="<stable key>"`, identical across all variants. The eval reads that key outside the surface (a page script, never `describe()`), records it per binding at variant 0, and after relocalization compares the key of the proposed element with the recorded one. Outcomes: `recovered` only when the keys match and a re-synthesised candidate resolves uniquely; `wrong-element` when the keys differ; `not-found`, `ambiguous` as before. `bindings.ignoreAttributes` (config, default `["data-svatah-eval"]`) removes the attribute from synthesis, fingerprints, and `native` so it can never help relocalization. The published percentage is over bindings that lost at least one candidate; the count that stopped resolving entirely is reported alongside, and both populations (with and without test-id attributes) are reported.
 - Unit and integration tests per package as Draft 1 §14, plus: surface conformance for every adapter; `bind()` record, run, and heal modes; host-generated specs run under Playwright Test with sharding; policy matrix (`stop`, `continue`, `compensate`); checkpoint and resume with hash mismatch; audit redaction; tool server end to end over MCP; trajectory compile of a captured session.
 
 ---
 
 ## 17. Changes from Draft 1
 
+- Draft 2.3 (after Phase 1 verification): `runtime` stays in module (b); `Replayer` plugin in the healer (§10, §12); `playwright-test` is module (a) `bind()` only, the flow host moves to `host-playwright` (§1, §9); `bindings-cli` package for module (a) commands (§1); `bind()` import path corrected (§6.5); healing eval must verify recovery against a ground-truth key and report both populations (§16); `bindings.ignoreAttributes` config.
 - Draft 2.2 (after Phase 0 verification): `Step.custom.targets` for Tier 0 `target` placeholders (§3.2, §5); import boundaries must resolve TypeScript sources, cover dynamic imports, and be backed by a package.json dependency-graph test (§1).
 - `Driver` replaced by the published `AgentSurface` (§2) with normalised snapshots, `locate`, `describe`, `state`/`restore`, capabilities, and wire schemas.
 - Packages regrouped by layer and by module (a)/(b)/(c); import boundaries extended for module (a) independence.

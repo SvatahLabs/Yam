@@ -134,7 +134,7 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T2.8 Playwright Test host
 **Refs:** REQ-RUN-12, REQ-BEH-1, LLD §9 · **Est:** 3
-**Do:** `svatah` fixture, `host generate`, reporter writing Svatah results, retry policy gating, annotations with failure class.
+**Do:** In the module (b) package `host-playwright`: `svatah` fixture, `host generate`, reporter writing Svatah results, retry policy gating, annotations with failure class; re-export `bind()` from `@svatah/playwright-test`. `@svatah/playwright-test` itself gains nothing and keeps no runtime dependency.
 **Validate:** Generated specs for the fixtures run under Playwright Test with two shards and the HTML reporter; Svatah `results.jsonl` produced alongside; retries disabled unless permitted (test).
 
 ### T2.9 Migration tool
@@ -151,6 +151,11 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 **Refs:** REQ-ADE-1, REQ-ADE-7, LLD §13.5 · **Est:** 3
 **Do:** `packages/service`: Fastify on `127.0.0.1` with a bearer token, every endpoint in LLD §13.5 delegating to the CLI's functions, WebSocket event stream (SSE fallback), `svatah serve`. No business logic in handlers (lint rule: `service` may import only `cli`'s command functions and `schema`).
 **Validate:** Contract tests per endpoint against the fixtures project; an unauthenticated request is refused; a `run` streams one `step.result` per step and a final `run.summary`; the same run started via CLI and via service produces identical `results.jsonl`.
+
+### T2.12 Module (a) command line and healer replay plugin
+**Refs:** REQ-PKG-1, 2, REQ-HEAL-1, LLD §1, §10, HLD §12 · **Est:** 2
+**Do:** Create `@svatah/bindings-cli` (bin `svatah-bindings`) holding `bindings list|show|verify|prune`, `heal --from-bind-failures`, `surface conform`, and `eval healing`, moved out of `@svatah/cli`; `@svatah/cli` depends on it and mounts the same commands under `svatah`. Add the `Replayer` plugin interface to `@svatah/healer` with the session-state default; register a runtime-backed `Replayer` from `@svatah/cli` for flow runs.
+**Validate:** The dependency-tree test covers `bindings-cli` as module (a); a clean install of the module (a) tarballs exposes `svatah-bindings`; `svatah heal --run <id>` on a Phase 2 run directory replays to the failing step through the runtime, while `svatah-bindings heal --from-bind-failures` still works with no module (b) package installed.
 
 ---
 
@@ -380,7 +385,7 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 | REQ-AGT-2 | §5.3 B9 | §15 | T4.6 |
 | REQ-AGT-3 | §11 | §3.5, §10 | T0.3, T3.1 |
 | REQ-AGT-4 | ADR-13 | — | T5.6 |
-| REQ-PKG-1 | ADR-11, §12 | §1 | T0.2, T1.6, T1.9 |
+| REQ-PKG-1 | ADR-11, §12 | §1 | T0.2, T1.6, T1.9, T2.12 |
 | REQ-PKG-2 | §14 | §6.5 | T1.6, T1.9 |
 | REQ-PKG-3 | §8 | §1 | T0.2, T1.9 |
 | REQ-PKG-4 | §5.3 B11 | §16 | T1.8, T3.4, T4.4 |
@@ -403,16 +408,17 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 |---|---|---|
 | 0 | 11.5 | Foundation |
 | 1 | 25 | `@svatah/bindings` 0.1 for Playwright users, with published healing numbers |
-| 2 | 30.5 | `@svatah/flow` 0.1: prose flows, test behavior in Playwright Test; local service |
+| 2 | 32.5 | Module (b) 0.1: prose flows, test behavior in Playwright Test; local service; module (a) CLI and replay plugin |
 | 3 | 21.5 | Recorder with model grounding; full healing; published evals; new ADE shell and core screens |
 | 4 | 22.5 | BiDi and Appium adapters; local and frontier tiers; REPL; MCP |
 | 5 | 22 | Workflow and tool behaviors; trajectory compile; ADE record, bindings and heal review, surface explorer, tool panel |
 | 6 | 33.5 | Desktop adapters validated against the ADE; prototype import; WebMCP; Java runtime; fine-tune |
-| **Total** | **168.5** | |
+| **Total** | **170.5** | |
 
 ## Changes from Draft 1
 
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.3 (after Phase 1 verification): T2.8 targets the new `host-playwright` package; T2.12 added for `bindings-cli` and the healer `Replayer` plugin. Total 170.5 ideal days.
 - Draft 2.1: local service (T2.11); new ADE built to the vision with the prototype as blueprint: shell (T3.6), core screens (T3.7), record and heal review (T5.7), surface explorer and tool panel (T5.8), prototype data import (T6.6); T6.1 and T6.2 validate against the new ADE instead of a separate sample desktop app. Total 168.5 ideal days; module (a) release date unchanged.
