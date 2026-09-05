@@ -23,11 +23,12 @@
   "scripts": {
     "build": "tsup --config ../../tsup.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "dependencies": {
+    "@svatah/schema": "workspace:*",
     "@svatah/surface": "workspace:*",
-    "@svatah/schema": "workspace:*"
+    "undici": "catalog:"
   },
   "devDependencies": {
     "tsup": "catalog:",

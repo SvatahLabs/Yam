@@ -1,8 +1,12 @@
 /**
  * @svatah/adapter-http
  *
- * HTTP/API adapter.
- *
- * Phase 0 leaves this package a skeleton (T0.2); it is filled in by a later phase.
+ * The HTTP adapter (REQ-ADP-2, REQ-ADP-3, LLD §7.2): named requests with the
+ * field set the legacy Java builder had, templating from the run's scope,
+ * JSON-path capture, and per-call cookie sharing with a paired web session.
  */
-export {};
+export { HttpSurface, createHttpSurface, type HttpAdapterOptions } from "./surface.js";
+export { executeRequest, ApiRequestError, type RequestOptions } from "./request.js";
+export { readJsonPath, parseJsonPath, JsonPathError } from "./jsonpath.js";
+export { expand, expandRecord, fillPathParams, type TemplateScope } from "./template.js";
+export { registerHttpAdapter } from "./register.js";

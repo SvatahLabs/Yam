@@ -42,6 +42,9 @@ catalogs:
     typescript-eslint:
       specifier: ^8.19.0
       version: 8.69.0
+    undici:
+      specifier: ^7.16.0
+      version: 7.29.0
     vitest:
       specifier: ^2.1.8
       version: 2.1.9
@@ -202,6 +205,9 @@ importers:
       '@svatah/surface':
         specifier: workspace:*
         version: link:../surface
+      undici:
+        specifier: 'catalog:'
+        version: 7.29.0
     devDependencies:
       tsup:
         specifier: 'catalog:'
@@ -2656,6 +2662,10 @@ packages:
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
+  undici@7.29.0:
+    resolution: {integrity: sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==}
+    engines: {node: '>=20.18.1'}
+
   unrs-resolver@1.12.2:
     resolution: {integrity: sha512-dmlRxBJJayXjqTwC+JtF1HhJmgf3ftQ3YejFcZrf4+KKtJv0qDsK1pjqaaVjG7wJ5NJ6UVP1OqRMQ71Z4C3rxQ==}
 
@@ -4681,6 +4691,8 @@ snapshots:
       which-boxed-primitive: 1.1.1
 
   undici-types@6.21.0: {}
+
+  undici@7.29.0: {}
 
   unrs-resolver@1.12.2:
     dependencies:
