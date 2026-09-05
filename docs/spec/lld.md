@@ -254,6 +254,8 @@ Patterns 1–26 are unchanged from Draft 1 and listed in `docs/flow-language.md`
 
 Unchanged from Draft 1 (§2.3, §2.4 there): normalisation rules, element id generation, ambiguity as `W_AMBIGUOUS_TARGET`, `actions.yaml` ported from `ActionSynonyms.java`.
 
+The dictionary's binding entries come from parsed binding files, through the same loader `BindingsStore` uses, never from scanning YAML text (Draft 2.5). A file the store accepts contributes exactly the phrases it declares, whatever their quoting, style, or indentation; a binding file that declares no phrases is a lint warning `W_BINDING_NO_PHRASES`.
+
 ---
 
 ## 5. Custom typed steps (package `steps`, Tier 0)
@@ -438,7 +440,7 @@ test.describe("simple.flow", () => {
 
 ### 9.2 `bind()` fixture
 
-Provided by `@svatah/playwright-test` (module (a), §6.5); the host re-exports it so a flow project imports one package. The two fixtures share the adapter and store.
+Provided by `@svatah/playwright-test` (module (a), §6.5); the host re-exports it so a flow project imports one package. The two fixtures share the adapter and store. Model grounding for `bind()` record mode is registered by `@svatah/cli` (`installModelGrounding()`), never by the host, which stays model-free (§1, REQ-RUN-1); a flow project's Playwright config imports it from the CLI package.
 
 ---
 
@@ -500,6 +502,7 @@ Plan run with expectations; web through the Playwright Test host (§9), other ad
 | `GET /project` | Config, flows list, stories, compositions, run blocks, API names | `ProjectSummary` |
 | `GET /flows/:file` · `PUT /flows/:file` | Read and write a flow file | text |
 | `POST /compile` | Compile and lint | `{ plan: PlanRef, errors, warnings }` |
+| `GET /plan` | The compiled plan exactly as `svatah compile` writes it (steps, tiers, confidence, unbound targets), for the ADE's Plan screen | `Plan` |
 | `POST /record` | Start a recording session | `{ stories?, rebind?, headed? }` → `{ sessionId }`; events on the stream |
 | `POST /run` | Start a run | `{ behavior, flows?, stories?, inputs?, host?, workers? }` → `{ runId }`; events on the stream |
 | `POST /runs/:id/stop` | Stop a run or session | |
@@ -519,7 +522,7 @@ Prototype database import (`svatah migrate --from-ade <path>`, P2) maps the prot
 
 ### 13.6 ADE client structure (separate repository)
 
-- Electron current LTS, Electron Forge with the Vite plus TypeScript template; `main/` (window, service process lifecycle, project chooser, accessibility flag), `preload/` (typed bridge exposing only `openProject`, `serviceInfo`, `pickFile`, `preferences`), `renderer/` (React; a generated service client; screens listed below). The renderer never has Node access; every capability comes from the service or the bridge.
+- Electron current LTS, Electron Forge with the Vite plus TypeScript template; `main/` (window, service process lifecycle, project chooser, accessibility flag), `preload/` (typed bridge exposing only `openProject`, `serviceInfo`, `pickFile`, `preferences`), `renderer/` (React; a generated service client; screens listed below). The renderer never has Node access; every capability comes from the service or the bridge. The built main and preload bundles are CommonJS because a sandboxed preload has no ES module loader; sources stay ESM-syntax TypeScript and the renderer is a browser ES module. Electron Forge under pnpm requires `public-hoist-pattern[]=*electron*` in `.npmrc`; no wider hoisting is permitted, and the ADE pins `vite` to a major whose dependency tree is permissively licensed (REQ-PKG-3).
 - Service lifecycle: on project open, locate the bundled CLI (or a configured one), spawn `svatah serve --project <dir> --port 0`, read port and token from stdout, health-check `GET /project`, and stop it on project close or app quit. If a service is already running for the directory (lock file with port and token), connect instead.
 - Screens and the endpoints and events they render: Project (`GET /project`, `init`); Flow editor (`GET/PUT /flows/:file`, `POST /compile` for inline lint, custom step list from `GET /project`); Plan (`POST /compile` result per story: step, tier, confidence, target status); Run (`POST /run`, `step.result` and `run.summary` events, screenshots by URL, `GET /runs/:id/audit`); Results (`GET /runs`); API client (`POST /api/request`, `GET/PUT /api/:name`); Data (`GET/PUT /data`); Record review (`POST /record`, `record.decision` and `record.candidates` events, `POST /surface/:session/snapshot` for re-pick); Bindings (`GET /bindings`, `POST /bindings/verify`); Heal review (`POST /heal`, `heal.proposal` event, apply through `PUT` of the diff); Surface explorer (`POST /surface/:session/*` with `intent`); Tool panel (`tool serve` control and audit lines).
 - Accessibility for the desktop adapters: `app.setAccessibilitySupportEnabled(true)` when launched with `SVATAH_A11Y=1` or in development builds; every interactive control has a role and an accessible name; screen containers carry landmark roles so `controlPath` candidates are short and stable.
@@ -533,6 +536,8 @@ Prototype database import (`svatah migrate --from-ade <path>`, P2) maps the prot
 ---
 
 ## 15. CLI and MCP (package `cli`)
+
+Base URL and storage state precedence (Draft 2.5), applied identically by every command that opens a session (`run`, `record`, `heal`, `bindings verify`, `surface conform`, `eval`, `repl`): the `--base-url` / `--storage-state` flag, then the `SVATAH_BASE_URL` / `SVATAH_STORAGE_STATE` environment variable, then `config.app`. A command that opens a session and ignores any of the three is a defect.
 
 | Command | Options | Exit |
 |---|---|---|
@@ -559,12 +564,15 @@ MCP server (`svatah mcp`): operation tools (`compile`, `lint`, `record`, `run`, 
 - Evals: `compiler/golden.jsonl` (≥300), `grounding/cases` (≥150), `healing/variants.json` (≥20), `conformance/` (surface and runtime). `svatah eval <suite> --report <path>` writes a Markdown report that the release workflow attaches to release notes (REQ-PKG-4).
 - Healing eval ground truth (Draft 2.3). `apps/sample-web` stamps every interactive element with `data-svatah-eval="<stable key>"`, identical across all variants. The eval reads that key outside the surface (a page script, never `describe()`), records it per binding at variant 0, and after relocalization compares the key of the proposed element with the recorded one. Outcomes: `recovered` only when the keys match and a re-synthesised candidate resolves uniquely; `wrong-element` when the keys differ; `not-found`, `ambiguous` as before. `bindings.ignoreAttributes` (config, default `["data-svatah-eval"]`) removes the attribute from synthesis, fingerprints, and `native` so it can never help relocalization. The published percentage is over bindings that lost at least one candidate; the count that stopped resolving entirely is reported alongside, and both populations (with and without test-id attributes) are reported. A proposal whose key matches but which cannot be re-synthesised into a unique candidate is `unverified`, counted separately and never as a recovery.
 - Timing assertions (REQ-COMP-2, REQ-NFR-4) run isolated from the browser suites or use a budget of at least three times the requirement; a timing test that fails only under parallel load is a defect in the test, not in the code.
+- Grounding eval cases (Draft 2.5): only elements that carry a ground-truth key and appear in the surface snapshot are cases. Elements without a key, or outside the snapshot (for example `<datalist>` options, which belong to the vision fallback), are listed in `evals/grounding/fixture-answers.jsonl` for the fake gateway and excluded from the accuracy denominator; the report publishes the exclusion count and reason.
+- Run artifacts (`results.jsonl`, `summary.json`, `audit.jsonl`, screenshots, traces) are committed only under `evals/conformance/` and `reports/`. Every project directory ignores `runs/`, `.svatah/`, and any absolute-path echo such as `var/`; a repository check enforces it.
 - Unit and integration tests per package as Draft 1 §14, plus: surface conformance for every adapter; `bind()` record, run, and heal modes; host-generated specs run under Playwright Test with sharding; policy matrix (`stop`, `continue`, `compensate`); checkpoint and resume with hash mismatch; audit redaction; tool server end to end over MCP; trajectory compile of a captured session.
 
 ---
 
 ## 17. Changes from Draft 1
 
+- Draft 2.5 (after Phase 3 verification): the target dictionary is built from parsed binding files and `W_BINDING_NO_PHRASES` (§4.3); base URL and storage state precedence for every session-opening command (§15); `bind()` model grounding registered by the CLI (§9.2); `GET /plan` (§13.5); CommonJS ADE bundles, the Electron hoist pattern, and the Vite pin (§13.6); grounding-case exclusions and the run-artifact hygiene rule (§16).
 - Draft 2.4 (after Phase 2 verification): run-block semantics (§4.1); `failure.session` on step results (§3.4); executor collaborators injected and flow-start navigation stated (§8); host context from the worker-scoped browser (§9.1); both replayers perform the flow-start navigation and verify the page (§10); service `ServiceApi` injection, input validation on `/run`, signatures on `/project` (§13.5); `unverified` eval outcome and the timing-test rule (§16).
 - Draft 2.3 (after Phase 1 verification): `runtime` stays in module (b); `Replayer` plugin in the healer (§10, §12); `playwright-test` is module (a) `bind()` only, the flow host moves to `host-playwright` (§1, §9); `bindings-cli` package for module (a) commands (§1); `bind()` import path corrected (§6.5); healing eval must verify recovery against a ground-truth key and report both populations (§16); `bindings.ignoreAttributes` config.
 - Draft 2.2 (after Phase 0 verification): `Step.custom.targets` for Tier 0 `target` placeholders (§3.2, §5); import boundaries must resolve TypeScript sources, cover dynamic imports, and be backed by a package.json dependency-graph test (§1).
