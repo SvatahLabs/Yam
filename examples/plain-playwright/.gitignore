@@ -1,0 +1,15 @@
+# What a run writes (LLD §16). Results, screenshots and traces are artifacts of
+# a run, not of the project: they are reproduced by re-running and never
+# reviewed as a diff.
+runs/
+.svatah/
+
+# The shape an absolute --out leaves behind when it is joined onto the project
+# root rather than resolved.
+var/
+private/
+
+# Playwright's own output.
+test-results/
+playwright-report/
+node_modules/

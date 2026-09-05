@@ -64,7 +64,7 @@ describe("svatah init (REQ-AGT-1)", () => {
     const dir = mkdtempSync(join(tmpdir(), "svatah-init-"));
     expect((await cli("init", dir)).code).toBe(EXIT.ok);
 
-    for (const file of ["svatah.config.yaml", "flows/sign-in.flow", "data.yaml"]) {
+    for (const file of ["svatah.config.yaml", "flows/sign-in.flow", "data.yaml", ".gitignore"]) {
       expect(existsSync(join(dir, file)), file).toBe(true);
     }
     // The example flow it writes has to be a flow that compiles, or `init`

@@ -4,3 +4,9 @@ runs/
 test-results/
 playwright-report/
 node_modules/
+
+# The shape an absolute `--out` leaves behind when it is joined onto the project
+# root rather than resolved. Fourteen run artifacts were committed under
+# `var/folders/…` in Phase 2 and found by the Phase 3 verification (LLD §16).
+var/
+private/

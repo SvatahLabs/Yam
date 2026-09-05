@@ -71,6 +71,35 @@ story: Sign in
 test: Sign in
 `;
 
+/**
+ * What a project must not commit (LLD §16, Draft 2.5).
+ *
+ * "Run artifacts are committed only under `evals/conformance/` and `reports/`.
+ * Every project directory ignores `runs/`, `.svatah/`, and any absolute-path
+ * echo such as `var/`."
+ *
+ * `var/` is not a directory Svatah writes on purpose. It is what an absolute
+ * `--out` leaves behind when something joins it onto the project root instead
+ * of resolving it — which is exactly how fourteen run artifacts came to be
+ * committed under `evals/fixtures/var/folders/…` in Phase 2 and stayed there
+ * until the Phase 3 verification found them. A bug like that should show up as
+ * an untracked directory nobody commits, not as a diff nobody reads.
+ */
+const GITIGNORE = `# Run output. Results, screenshots and traces are artifacts of a run, not of
+# the project: they are reproduced by re-running and never reviewed as a diff.
+runs/
+.svatah/
+
+# The shape an absolute --out leaves behind when it is joined onto the project
+# root rather than resolved (LLD §16).
+var/
+private/
+
+# Playwright's own output, when a flow runs under the Playwright Test host.
+test-results/
+playwright-report/
+`;
+
 const DATA = `# Run-level data (REQ-LANG-9).
 #
 # A value under \`secrets:\` is read from the named environment variable at run
@@ -92,9 +121,17 @@ export async function initCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
     ["svatah.config.yaml", CONFIG.replace("PROJECT", root === "." ? "my-project" : root)],
     [join("flows", "sign-in.flow"), EXAMPLE_FLOW],
     ["data.yaml", DATA],
+    [".gitignore", GITIGNORE],
   ];
 
-  const existing = files.map(([name]) => name).filter((name) => existsSync(join(root, name)));
+  /*
+   * A `.gitignore` that is already there is not a reason to refuse: `svatah
+   * init` inside an existing repository is a normal thing to do, and the file
+   * is the repository's, not ours. It is written only when absent.
+   */
+  const existing = files
+    .map(([name]) => name)
+    .filter((name) => name !== ".gitignore" && existsSync(join(root, name)));
   if (existing.length > 0 && !force) {
     io.err(
       `${existing.join(", ")} already exist(s). \`svatah init\` in a project that has one is ` +
@@ -107,6 +144,7 @@ export async function initCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
     mkdirSync(join(root, dir), { recursive: true });
   }
   for (const [name, contents] of files) {
+    if (name === ".gitignore" && existsSync(join(root, name))) continue;
     mkdirSync(join(root, name, ".."), { recursive: true });
     writeFileSync(join(root, name), contents, "utf8");
   }
