@@ -17,6 +17,7 @@ function truncate(value: unknown, max = 160): string {
 export function renderReport(report: ConformanceReport): string {
   const lines: string[] = [];
   lines.push(`Surface conformance — adapter "${report.adapter}"`);
+  if (report.adapterDetail !== undefined) lines.push(`  driving ${report.adapterDetail}`);
   lines.push("");
 
   let page = "";
@@ -66,6 +67,11 @@ export function renderMarkdown(report: ConformanceReport): string {
   lines.push(`# Surface conformance — \`${report.adapter}\``);
   lines.push("");
   lines.push(`Run at ${report.startedAt} · ${report.durationMs} ms`);
+  if (report.adapterDetail !== undefined) {
+    // Which browser answered. "BiDi passes" is not a result without it (LLD §7.3).
+    lines.push("");
+    lines.push(`Driving \`${report.adapterDetail}\`.`);
+  }
   lines.push("");
   lines.push(
     report.conformant

@@ -11,7 +11,7 @@
   "packageManager": "pnpm@10.30.2",
   "scripts": {
     "build": "pnpm -r build",
-    "browsers": "pnpm --filter @svatah/adapter-playwright exec playwright install chromium",
+    "browsers": "pnpm --filter @svatah/adapter-playwright exec playwright install chromium firefox",
     "fixtures": "node scripts/compile-fixtures.mjs",
     "migrate:legacy": "node scripts/migrate-legacy.mjs",
     "seed:bindings": "node scripts/seed-fixture-bindings.mjs",
@@ -27,7 +27,8 @@
     "record:snapshots": "node scripts/record-snapshots.mjs",
     "grounding:cases": "node scripts/grounding-cases.mjs",
     "eval:grounding": "node scripts/eval-grounding.mjs --report reports/eval-grounding.md",
-    "ade:client": "node scripts/generate-ade-client.mjs"
+    "ade:client": "node scripts/generate-ade-client.mjs",
+    "bidi:independence": "node scripts/bidi-independence.mjs --report reports/adapter-bidi.md"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

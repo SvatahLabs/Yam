@@ -299,6 +299,9 @@ importers:
         specifier: workspace:*
         version: link:../surface
     devDependencies:
+      sample-web:
+        specifier: workspace:*
+        version: link:../../apps/sample-web
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)

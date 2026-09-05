@@ -48,8 +48,11 @@ jobs:
         run: pnpm -r build
 
       # The healing suite drives a real browser against `apps/sample-web` (T1.8).
-      - name: Install Playwright browsers
-        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+      # chromium for the Playwright adapter, firefox for the BiDi one: Gecko's
+      # remote agent *is* a WebDriver BiDi server, so the independence proof
+      # (T4.1) needs a browser that speaks the protocol natively (LLD §7.3).
+      - name: Install browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium firefox
 
       - name: Generate eval reports
         run: node scripts/eval-reports.mjs --out reports

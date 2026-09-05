@@ -187,6 +187,24 @@ async function prepareRunHeal(args: ParsedArgs, io: CommandIo): Promise<ParsedAr
   }
 }
 
+/**
+ * Register every adapter this build ships (LLD §1).
+ *
+ * Lazily and best-effort: `svatah lint` should not pay for loading a browser
+ * protocol client, and an adapter that fails to load is a reason for
+ * `--adapter <that one>` to fail, not for `svatah bindings list` to.
+ */
+async function registerEveryAdapter(io: CommandIo): Promise<void> {
+  try {
+    const { registerAllAdapters } = await import("./adapters.js");
+    registerAllAdapters();
+  } catch (error) {
+    io.err(
+      `Could not register every adapter: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
 export async function main(argv: readonly string[], io: CommandIo): Promise<ExitCode> {
   const args: ParsedArgs = parseArgs(argv);
   const command = args.command[0];
@@ -228,6 +246,18 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
     command === "heal" && typeof args.options["run"] === "string"
       ? await prepareRunHeal(args, io)
       : args;
+
+  /*
+   * Every adapter, before module (a)'s commands run (LLD §1, REQ-SURF-2).
+   *
+   * `svatah surface conform --adapter bidi` and `svatah bindings verify
+   * --adapter bidi` are module (a) commands mounted here, and module (a)'s own
+   * registration knows only Playwright — it is what a plain Playwright user
+   * installs, and the other adapters are not in its dependency tree. Registering
+   * from here is what makes the whole adapter set reachable under `svatah` while
+   * `svatah-bindings` stays module (a).
+   */
+  await registerEveryAdapter(io);
 
   const moduleA = await runBindingsCommand(command, prepared, io);
   if (moduleA !== undefined) return moduleA;

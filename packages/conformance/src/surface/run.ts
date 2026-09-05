@@ -29,6 +29,17 @@ export interface RunOptions {
   closeSurface?: (surface: AgentSurface) => Promise<void>;
 }
 
+/** What the adapter says it is driving, when it says anything (LLD §7.3). */
+function detailOf(surface: AgentSurface): string | undefined {
+  const described = (surface as unknown as { browser?: () => string }).browser;
+  if (typeof described !== "function") return undefined;
+  try {
+    return described.call(surface);
+  } catch {
+    return undefined;
+  }
+}
+
 /** The name of a thrown value's constructor, for the `throws` check. */
 function errorName(value: unknown): string {
   if (value instanceof Error) return value.constructor.name;
@@ -131,6 +142,22 @@ export async function runSurfaceConformance(options: RunOptions): Promise<Confor
   const selected =
     options.only === undefined ? all : all.filter((c) => options.only!.includes(c.id));
 
+  /*
+   * Ask the adapter what it is driving before the suite runs, in a session of
+   * its own. It cannot be read from a case's session — each case opens and
+   * closes one so that no case can leak state into the next — and a report that
+   * says "bidi passed" without saying *against what* is not a result (LLD §7.3).
+   */
+  let adapterDetail: string | undefined;
+  try {
+    const probe = await options.openSurface();
+    adapterDetail = detailOf(probe);
+    await (options.closeSurface?.(probe) ?? probe.close()).catch?.(() => undefined);
+  } catch {
+    // A surface that will not open is the suite's problem to report, case by
+    // case, with the error each one saw. Not here.
+  }
+
   const cases: CaseReport[] = [];
   for (const testCase of selected) cases.push(await runCase(testCase, options));
 
@@ -144,6 +171,7 @@ export async function runSurfaceConformance(options: RunOptions): Promise<Confor
 
   return {
     adapter: options.adapter,
+    ...(adapterDetail === undefined ? {} : { adapterDetail }),
     startedAt,
     durationMs: Date.now() - started,
     cases,

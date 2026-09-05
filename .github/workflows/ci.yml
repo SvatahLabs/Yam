@@ -55,8 +55,11 @@ jobs:
       # Phase 1 adapter and host tests drive a real browser (LLD §1). Only
       # chromium is required; `--with-deps` installs the system libraries the
       # Linux runner needs.
-      - name: Install Playwright browsers
-        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+      # chromium for the Playwright adapter, firefox for the BiDi one: Gecko's
+      # remote agent *is* a WebDriver BiDi server, so the independence proof
+      # (T4.1) needs a browser that speaks the protocol natively (LLD §7.3).
+      - name: Install browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium firefox
 
       - name: Test
         run: pnpm -r test
@@ -93,8 +96,11 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
-        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+      # chromium for the Playwright adapter, firefox for the BiDi one: Gecko's
+      # remote agent *is* a WebDriver BiDi server, so the independence proof
+      # (T4.1) needs a browser that speaks the protocol natively (LLD §7.3).
+      - name: Install browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium firefox
 
       - name: Build
         run: pnpm -r build
@@ -131,8 +137,11 @@ jobs:
       - name: Build
         run: pnpm -r build
 
-      - name: Install Playwright browsers
-        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+      # chromium for the Playwright adapter, firefox for the BiDi one: Gecko's
+      # remote agent *is* a WebDriver BiDi server, so the independence proof
+      # (T4.1) needs a browser that speaks the protocol natively (LLD §7.3).
+      - name: Install browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium firefox
 
       - name: Eval (REQ-REC-10)
         run: |
@@ -175,8 +184,11 @@ jobs:
       - name: Build
         run: pnpm -r build
 
-      - name: Install Playwright browsers
-        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+      # chromium for the Playwright adapter, firefox for the BiDi one: Gecko's
+      # remote agent *is* a WebDriver BiDi server, so the independence proof
+      # (T4.1) needs a browser that speaks the protocol natively (LLD §7.3).
+      - name: Install browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium firefox
 
       - name: Skip without a credential
         id: credential

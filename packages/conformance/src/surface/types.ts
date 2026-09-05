@@ -65,6 +65,15 @@ export interface CaseReport {
 
 export interface ConformanceReport {
   readonly adapter: string;
+  /**
+   * What the adapter is actually driving, when it can say.
+   *
+   * "The BiDi suite passes" is not a result on its own: it matters whether that
+   * was stock Firefox, a Playwright-downloaded build, or an endpoint someone
+   * else was hosting (LLD §7.3, T4.1). An adapter reports it by exposing a
+   * `browser(): string`; one that does not simply has no detail to publish.
+   */
+  readonly adapterDetail?: string;
   readonly startedAt: string;
   readonly durationMs: number;
   readonly cases: readonly CaseReport[];

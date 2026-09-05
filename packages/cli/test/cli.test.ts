@@ -75,9 +75,27 @@ describe("the command table (LLD §15)", () => {
   });
 
   it("names what is registered when the adapter is not", async () => {
+    // `uia` is HLD §12's Windows adapter and is Phase 6 (T6.1); a command line
+    // that just said "unknown" would leave the reader guessing whether they had
+    // a typo or a missing phase.
     const io = capture();
-    expect(await main(["surface", "conform", "--adapter", "bidi"], io)).toBe(EXIT.usage);
+    expect(await main(["surface", "conform", "--adapter", "uia"], io)).toBe(EXIT.usage);
     expect(io.stderr.join("\n")).toContain("playwright");
+  });
+
+  it("registers every adapter this build ships, under `svatah` (T4.1, LLD §1)", async () => {
+    /*
+     * `surface conform` and `bindings verify` are module (a) commands mounted
+     * under `svatah`, and module (a)'s own registration knows only Playwright —
+     * it is what a plain Playwright user installs. Registering the rest from
+     * `@svatah/cli` is what makes `--adapter bidi` reachable here while
+     * `svatah-bindings` stays module (a).
+     */
+    const io = capture();
+    await main(["surface", "conform", "--adapter", "uia"], io);
+    const { listAdapters } = await import("@svatah/surface");
+    expect(listAdapters()).toContain("playwright");
+    expect(listAdapters()).toContain("bidi");
   });
 });
 
