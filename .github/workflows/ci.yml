@@ -295,6 +295,69 @@ jobs:
           path: apps/ade/out/make/**
           if-no-files-found: error
 
+  # T6.1, T6.2: the desktop adapters against the ADE (REQ-ADP-6, 7, REQ-ADE-6).
+  #
+  # The only place either adapter can be *run*: the AX one needs macOS with the
+  # Accessibility permission granted, the UIA one needs Windows. Everything below
+  # the bridge is a pure function of a recorded tree and is covered by the
+  # `workspace` job on every platform; this is the part that is not.
+  #
+  # `continue-on-error` on the macOS leg is deliberate and is not a way of
+  # ignoring a failure. GitHub's hosted macOS runners cannot grant the
+  # Accessibility permission to a process — there is no one to answer the prompt
+  # and no supported way to write the TCC database — so the conformance step
+  # reports `prompt-pending` and stops. `scripts/desktop-conformance.mjs` exits 2
+  # for that, and 1 for an adapter that is genuinely not conformant, so the log
+  # says which happened. A self-hosted macOS runner with the permission granted
+  # to its agent turns this green; nothing else does.
+  desktop-conformance:
+    name: desktop conformance (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.os == 'macos-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            adapter: uia
+          - os: macos-latest
+            adapter: ax
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the workspace
+        run: pnpm -r build
+
+      # The host requirement, first and on its own, so a failure here is
+      # legible as "the runner cannot do this" rather than as a failed suite.
+      - name: Host check
+        run: node packages/cli/dist/bin.js surface doctor --adapter ${{ matrix.adapter }}
+
+      # The conformance target is the ADE itself, packaged and launched with
+      # `SVATAH_A11Y=1` (LLD §16, REQ-ADE-6).
+      - name: Package the ADE
+        run: pnpm --filter @svatah/ade exec electron-forge package
+
+      - name: Conformance
+        run: node scripts/desktop-conformance.mjs --adapter ${{ matrix.adapter }} --report reports/adapter-${{ matrix.adapter }}.md
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-conformance-${{ matrix.adapter }}
+          path: reports/adapter-${{ matrix.adapter }}.md
+          if-no-files-found: ignore
+
   legacy-java:
     name: legacy Java project compiles
     runs-on: ubuntu-latest

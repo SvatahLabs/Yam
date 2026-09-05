@@ -148,26 +148,26 @@
       "box": [
         693,
         34,
-        121,
+        123,
         14
       ]
     },
     {
       "parent": 13,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:63619",
+      "title": "http://127.0.0.1:54308",
       "enabled": true,
       "box": [
         693,
         34,
-        121,
+        123,
         14
       ]
     },
     {
       "parent": 14,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:63619",
+      "title": "http://127.0.0.1:54308",
       "enabled": true
     },
     {
@@ -648,7 +648,7 @@
     },
     {
       "parent": 56,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "choose…",
       "enabled": true,
       "selected": true,
@@ -658,7 +658,7 @@
     },
     {
       "parent": 56,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "active count",
       "enabled": true,
       "selected": false,
@@ -722,7 +722,7 @@
     },
     {
       "parent": 63,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "GET",
       "enabled": true,
       "selected": true,
@@ -732,7 +732,7 @@
     },
     {
       "parent": 63,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "POST",
       "enabled": true,
       "selected": false,
@@ -742,7 +742,7 @@
     },
     {
       "parent": 63,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "PUT",
       "enabled": true,
       "selected": false,
@@ -752,7 +752,7 @@
     },
     {
       "parent": 63,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "PATCH",
       "enabled": true,
       "selected": false,
@@ -762,7 +762,7 @@
     },
     {
       "parent": 63,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "DELETE",
       "enabled": true,
       "selected": false,
@@ -772,7 +772,7 @@
     },
     {
       "parent": 63,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "HEAD",
       "enabled": true,
       "selected": false,

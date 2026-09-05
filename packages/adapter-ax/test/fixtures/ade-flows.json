@@ -148,26 +148,26 @@
       "box": [
         693,
         34,
-        123,
+        121,
         14
       ]
     },
     {
       "parent": 13,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:63430",
+      "title": "http://127.0.0.1:54129",
       "enabled": true,
       "box": [
         693,
         34,
-        123,
+        121,
         14
       ]
     },
     {
       "parent": 14,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:63430",
+      "title": "http://127.0.0.1:54129",
       "enabled": true
     },
     {
@@ -648,7 +648,7 @@
     },
     {
       "parent": 56,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "flows/booking-compensation.flow",
       "enabled": true,
       "selected": true,
@@ -658,7 +658,7 @@
     },
     {
       "parent": 56,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "flows/booking-workflow.flow",
       "enabled": true,
       "selected": false,
@@ -668,7 +668,7 @@
     },
     {
       "parent": 56,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "flows/execution.flow",
       "enabled": true,
       "selected": false,
@@ -678,7 +678,7 @@
     },
     {
       "parent": 56,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "flows/guards-and-compensation.flow",
       "enabled": true,
       "selected": false,
@@ -688,7 +688,7 @@
     },
     {
       "parent": 56,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "flows/natural_language_login.flow",
       "enabled": true,
       "selected": false,
@@ -698,7 +698,7 @@
     },
     {
       "parent": 56,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "flows/simple.flow",
       "enabled": true,
       "selected": false,
@@ -708,7 +708,7 @@
     },
     {
       "parent": 56,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "flows/svatah.flow",
       "enabled": true,
       "selected": false,

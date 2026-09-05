@@ -34,7 +34,7 @@
     "privacy:check": "node scripts/privacy-check.mjs",
     "examples": "node scripts/examples-check.mjs",
     "conform:desktop": "node scripts/desktop-conformance.mjs",
-    "record:ax-trees": "node scripts/record-ax-tree.mjs"
+    "record:desktop-trees": "node scripts/record-desktop-tree.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

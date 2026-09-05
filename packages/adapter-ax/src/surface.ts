@@ -128,29 +128,22 @@ export class AxSurface implements AgentSurface {
 
   async open(session: SessionInit): Promise<void> {
     const name = session.processName ?? this.options.processName;
-    if (name === undefined || name.trim() === "") {
-      throw new SessionError(
-        "The AX adapter needs the name of the application process to drive. Set " +
-          "`app.processName` in `svatah.config.yaml` (the ADE is \"Svatah ADE\"). Driving " +
-          "whatever happens to be frontmost would make a run depend on what was last clicked.",
-        { adapter: "ax" },
-      );
-    }
-    this.processName = name;
     this.bridge =
       this.options.bridge ??
       osascriptBridge({
-        process: name,
+        process: name ?? "System Events",
         ...(this.options.timeoutMs === undefined ? {} : { timeoutMs: this.options.timeoutMs }),
       });
 
     /*
-     * The permission, before anything else (REQ-ADP-7).
+     * The permission first — before the configuration, and before the first
+     * snapshot (REQ-ADP-7).
      *
-     * A session that opened and then failed on its first snapshot would report
-     * a `locator` failure for a step whose element was there all along. This is
-     * the one check that turns that into a `SessionError` naming the setting to
-     * change — the same text `svatah surface doctor` prints.
+     * Before the snapshot, because a session that opened and then failed on its
+     * first `locate` would report a `locator` failure for an element that was
+     * there all along. Before the *configuration*, because telling someone on
+     * Windows to set `app.processName` is the wrong advice: the host is the
+     * problem, and the process name would not fix it.
      */
     const permission = await this.bridge.permission();
     if (permission.state !== "granted") {
@@ -160,6 +153,16 @@ export class AxSurface implements AgentSurface {
         { adapter: "ax" },
       );
     }
+
+    if (name === undefined || name.trim() === "") {
+      throw new SessionError(
+        "The AX adapter needs the name of the application process to drive. Set " +
+          "`app.processName` in `svatah.config.yaml` (the ADE is \"Svatah ADE\"). Driving " +
+          "whatever happens to be frontmost would make a run depend on what was last clicked.",
+        { adapter: "ax" },
+      );
+    }
+    this.processName = name;
 
     // Bring the window forward, so the tree is the one a person would see.
     await this.bridge.perform({ kind: "activate" }).catch(() => undefined);

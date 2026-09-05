@@ -1,27 +1,32 @@
 #!/usr/bin/env node
 /**
- * Record the ADE's accessibility tree as `AxNode[]` (T6.2, LLD §7.5).
+ * Record the ADE's accessibility tree for the desktop adapters (T6.1, T6.2,
+ * LLD §7.5).
  *
- *   node scripts/record-ax-tree.mjs [--project evals/fixtures] [--screen record]
+ *   node scripts/record-desktop-tree.mjs --shape ax  [--screen record]
+ *   node scripts/record-desktop-tree.mjs --shape uia [--screen record]
  *
  * ## What this records, and what it does not
  *
  * It records **Chromium's own accessibility tree** for the ADE's window,
  * through `Accessibility.getFullAXTree` over the DevTools protocol, and maps it
- * into the `AxNode` shape `packages/adapter-ax` consumes — the AX attribute
- * names Chromium publishes on macOS, with the same roles, names, identifiers and
- * boxes.
+ * into the shape one of the desktop adapters consumes: the `AXRole` /
+ * `AXTitle` / `AXDOMIdentifier` names Chromium publishes on macOS, or the
+ * `ControlType` / `Name` / `AutomationId` names it publishes to UI Automation
+ * on Windows. Same tree, two vocabularies — which is what REQ-SURF-4 asks the
+ * adapters to normalise back to one.
  *
- * It does **not** read `AXUIElement`. That needs the macOS Accessibility
- * permission, which cannot be granted in a non-interactive session (the prompt
- * blocks and the Apple event times out at `-1712`). A tree recorded here is
- * therefore one step removed from what `osascriptBridge` would return: it is the
- * tree Chromium's macOS AX bridge serialises *from*, which is why the roles and
- * names are real, and it is not proof that the bridge itself works.
+ * It does **not** read `AXUIElement`, and it does not read a UIA tree. Reading
+ * the first needs the macOS Accessibility permission, which cannot be granted
+ * in a non-interactive session (the prompt blocks and the Apple event times out
+ * at `-1712`); reading the second needs Windows. A tree recorded here is
+ * therefore one step removed from what a bridge would return: it is the tree
+ * Chromium's platform bridges serialise *from*, which is why the roles and the
+ * names are real, and it is not proof that either bridge works.
  *
  * That distinction is the whole reason this script exists rather than a
- * hand-written fixture. `docs/spec/progress/phase-6.md` states the live gate
- * that remains, and the command that closes it.
+ * hand-written fixture. `docs/spec/progress/phase-6.md` states the live gates
+ * that remain, and the commands that close them.
  */
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
@@ -37,7 +42,22 @@ const option = (name, fallback) => {
   return at < 0 ? fallback : args[at + 1];
 };
 const project = resolve(ROOT, option("project", "evals/fixtures"));
-const out = resolve(ROOT, option("out", "packages/adapter-ax/test/fixtures"));
+const shapeOption = option("shape", "both");
+if (!["ax", "uia", "both"].includes(shapeOption)) {
+  process.stderr.write(`--shape must be "ax", "uia" or "both", not "${shapeOption}"\n`);
+  process.exit(1);
+}
+/*
+ * `both` by default, and both from *one* read of *one* window.
+ *
+ * `packages/adapter-uia/test/parity.test.ts` compares the two adapters'
+ * normalisation of the same window, and two separate launches are not the same
+ * window: the ADE's service takes an ephemeral port, so the URL in its header
+ * differs, and the Results screen lists the runs that exist at the time. Both
+ * showed up as parity failures that were really recording noise.
+ */
+const shapes = shapeOption === "both" ? ["ax", "uia"] : [shapeOption];
+const outOption = option("out", undefined);
 
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 const entry = join(ADE, ".vite", "build", "main.js");
@@ -164,7 +184,10 @@ const AX_ROLE_FOR = {
   menu: "AXMenu",
   menuitem: "AXMenuItem",
   navigation: "AXGroup",
-  option: "AXStaticText",
+  // Chromium's macOS bridge publishes a `<select>`'s option as a menu item
+  // (`kMenuListOption` → `NSAccessibilityMenuItemRole`), inside the pop-up
+  // button's menu. The adapter turns it back into an `option` from that parent.
+  option: "AXMenuItem",
   paragraph: "AXGroup",
   radio: "AXRadioButton",
   region: "AXGroup",
@@ -189,6 +212,106 @@ const AX_ROLE_FOR = {
   presentation: "AXGroup",
   pre: "AXGroup",
 };
+/**
+ * Chromium AX role → the UIA `ControlType` it publishes on Windows.
+ *
+ * The other half of REQ-SURF-4's claim. A `<button>` is `AXButton` on macOS and
+ * `ControlType.Button` on Windows; an `<input type=text>` is `AXTextField` and
+ * `ControlType.Edit`; an ARIA `tab` is `AXRadioButton` (with the `AXTabButton`
+ * subrole) and `ControlType.TabItem`. The adapters map both back to `button`,
+ * `textbox` and `tab`, which is what makes one flow drive the ADE on both.
+ */
+const UIA_CONTROL_TYPE_FOR = {
+  RootWebArea: "Document",
+  alert: "Group",
+  banner: "Group",
+  button: "Button",
+  cell: "DataItem",
+  checkbox: "CheckBox",
+  code: "Group",
+  columnheader: "HeaderItem",
+  combobox: "ComboBox",
+  ComboBox: "ComboBox",
+  complementary: "Group",
+  contentinfo: "Group",
+  document: "Document",
+  generic: "Group",
+  group: "Group",
+  heading: "Text",
+  image: "Image",
+  InlineTextBox: "Text",
+  LineBreak: "Text",
+  link: "Hyperlink",
+  list: "List",
+  listbox: "List",
+  listitem: "ListItem",
+  main: "Group",
+  menu: "Menu",
+  menuitem: "MenuItem",
+  navigation: "Group",
+  none: "Group",
+  option: "ListItem",
+  paragraph: "Group",
+  pre: "Group",
+  presentation: "Group",
+  radio: "RadioButton",
+  region: "Group",
+  row: "DataItem",
+  rowheader: "HeaderItem",
+  StaticText: "Text",
+  status: "Group",
+  tab: "TabItem",
+  table: "Table",
+  tablist: "Tab",
+  textbox: "Edit",
+};
+
+/**
+ * The roles Chromium names in `LocalizedControlType` on Windows.
+ *
+ * UIA has no landmark control types and no subrole: a `<header>` is
+ * `ControlType.Group` and a `<h1>` is `ControlType.Text`, and the refinement is
+ * this string. Without it every landmark in the ADE reads as a plain group and
+ * every heading as text — which is exactly what the cross-adapter parity check
+ * found (`packages/adapter-uia/test/parity.test.ts`).
+ */
+const UIA_LOCALIZED_FOR = new Set([
+  "heading",
+  "tab",
+  "banner",
+  "navigation",
+  "main",
+  "complementary",
+  "contentinfo",
+  "region",
+  "search",
+  "form",
+  "status",
+  "alert",
+]);
+
+/** The UIA `ClassName` Chromium reports for a web element. */
+const UIA_CLASS_NAME = "Chrome_RenderWidgetHostHWND";
+
+/**
+ * The UIA control patterns a Chromium element supports.
+ *
+ * A pattern is UIA's equivalent of an AX action: `Invoke` presses, `Value` sets
+ * text, `SelectionItem` selects, `Toggle` checks, `ExpandCollapse` opens a
+ * dropdown. LLD §7.5's "act via UIA patterns (Invoke, Value, Toggle, Selection,
+ * Scroll) with a mouse/keyboard fallback" is a list of these.
+ */
+function uiaPatternsFor(role) {
+  const patterns = [];
+  if (["button", "link", "menuitem"].includes(role)) patterns.push("Invoke");
+  if (["textbox", "combobox"].includes(role)) patterns.push("Value");
+  if (["tab", "option", "radio"].includes(role)) patterns.push("SelectionItem");
+  if (role === "checkbox") patterns.push("Toggle");
+  if (role === "combobox") patterns.push("ExpandCollapse");
+  if (["list", "listbox", "table", "document"].includes(role)) patterns.push("Scroll");
+  return patterns;
+}
+
 const AX_SUBROLE_FOR = {
   tab: "AXTabButton",
   main: "AXLandmarkMain",
@@ -292,7 +415,47 @@ async function main() {
   const { nodes } = await cdp.send("Accessibility.getFullAXTree");
   const byId = new Map(nodes.map((node) => [node.nodeId, node]));
 
-  /* Flatten depth-first into the parent-index form the adapter reads. */
+  /* Boxes and DOM ids, read once and shared by both shapes. */
+  const geometry = new Map();
+  for (const node of nodes) {
+    if (node.backendDOMNodeId === undefined) continue;
+    const entry = {};
+    try {
+      const { model } = await cdp.send("DOM.getBoxModel", { backendNodeId: node.backendDOMNodeId });
+      const [x1, y1, , , x3, y3] = model.border;
+      entry.box = [Math.round(x1), Math.round(y1), Math.round(x3 - x1), Math.round(y3 - y1)];
+    } catch {
+      // An element with no layout box has none; the adapters read that as hidden.
+    }
+    try {
+      const { node: dom } = await cdp.send("DOM.describeNode", {
+        backendNodeId: node.backendDOMNodeId,
+      });
+      const attributes = dom.attributes ?? [];
+      for (let a = 0; a < attributes.length; a += 2) {
+        if (attributes[a] === "id" && attributes[a + 1] !== "") entry.domId = attributes[a + 1];
+      }
+    } catch {
+      // A pseudo-element or a text node has no attributes.
+    }
+    geometry.set(node.nodeId, entry);
+  }
+
+  const { result } = await cdp.send("Runtime.evaluate", { expression: "document.title" });
+  const title = result.value ?? "Svatah ADE";
+
+  for (const shape of shapes) {
+    writeShape(shape, { nodes, byId, geometry, title, screen });
+  }
+
+  cdp.close();
+  clearTimeout(deadline);
+  child.kill("SIGTERM");
+  process.exit(0);
+}
+
+/** One read of one window, written in one platform's vocabulary. */
+function writeShape(shape, { nodes, byId, geometry, title, screen }) {
   const flat = [];
   const index = new Map();
   const walk = (node, parent) => {
@@ -310,46 +473,86 @@ async function main() {
 
     const at = flat.length;
     index.set(node.nodeId, at);
-    const mapped = {
-      parent,
-      role: AX_ROLE_FOR[role] ?? "AXUnknown",
-    };
+    const mapped =
+      shape === "uia"
+        ? { parent, controlType: UIA_CONTROL_TYPE_FOR[role] ?? "Custom", className: UIA_CLASS_NAME }
+        : { parent, role: AX_ROLE_FOR[role] ?? "AXUnknown" };
     const subrole = AX_SUBROLE_FOR[role];
-    if (subrole !== undefined) mapped.subrole = subrole;
+    if (shape === "ax" && subrole !== undefined) mapped.subrole = subrole;
+    /*
+     * UIA has no subrole, and Chromium says "this Text is a heading" through
+     * `LocalizedControlType` instead. The adapter reads it the same way.
+     */
+    if (shape === "uia" && UIA_LOCALIZED_FOR.has(role)) {
+      mapped.localizedControlType = role;
+    }
     /*
      * Chromium puts a name that came from the element's own contents in
      * `AXTitle`, and one that came from `aria-label` in `AXDescription`. The
      * `from` of the name's source is what says which.
      */
     const from = node.name?.sources?.find((one) => one.value !== undefined)?.type;
-    if (name !== "") {
+    if (shape === "uia") {
+      // UIA has one `Name`, wherever the name came from, and `HelpText` for a
+      // tooltip. The macOS split between `AXTitle` and `AXDescription` has no
+      // counterpart.
+      if (name !== "") mapped.name = name;
+      if (description !== "" && description !== name) mapped.helpText = description;
+    } else if (name !== "") {
       if (from === "attribute" || from === "relatedElement") mapped.description = name;
       else mapped.title = name;
     }
-    if (description !== "" && description !== name) mapped.help = description;
+    if (shape === "ax" && description !== "" && description !== name) mapped.help = description;
     if (typeof value === "string" && value !== "") mapped.value = value;
     if (typeof value === "number") mapped.value = String(value);
 
     const disabled = property(node, "disabled");
-    mapped.enabled = disabled !== true;
     const focused = property(node, "focused");
-    if (focused === true) mapped.focused = true;
     const selected = property(node, "selected");
-    if (typeof selected === "boolean") mapped.selected = selected;
     const expanded = property(node, "expanded");
-    if (typeof expanded === "boolean") mapped.expanded = expanded;
     const checked = property(node, "checked");
-    if (checked === "true") mapped.checked = true;
-    else if (checked === "false") mapped.checked = false;
 
-    // The actions a Chromium AX node offers on macOS: everything focusable and
-    // clickable gets AXPress; a text field also gets AXConfirm and AXSetValue.
-    const actions = [];
-    if (["button", "link", "tab", "checkbox", "radio", "combobox", "menuitem", "option"].includes(role)) {
-      actions.push("AXPress");
+    if (shape === "uia") {
+      mapped.isEnabled = disabled !== true;
+      if (focused === true) mapped.hasKeyboardFocus = true;
+      if (typeof selected === "boolean") mapped.isSelected = selected;
+      if (typeof expanded === "boolean") {
+        mapped.expandCollapseState = expanded ? "Expanded" : "Collapsed";
+      }
+      if (checked === "true") mapped.toggleState = "On";
+      else if (checked === "false") mapped.toggleState = "Off";
+      else if (checked === "mixed") mapped.toggleState = "Indeterminate";
+      const patterns = uiaPatternsFor(role);
+      if (patterns.length > 0) mapped.patterns = patterns;
+    } else {
+      mapped.enabled = disabled !== true;
+      if (focused === true) mapped.focused = true;
+      if (typeof selected === "boolean") mapped.selected = selected;
+      if (typeof expanded === "boolean") mapped.expanded = expanded;
+      if (checked === "true") mapped.checked = true;
+      else if (checked === "false") mapped.checked = false;
+
+      // The actions a Chromium AX node offers on macOS: everything focusable and
+      // clickable gets AXPress; a text field also gets AXConfirm and AXSetValue.
+      const actions = [];
+      if (["button", "link", "tab", "checkbox", "radio", "combobox", "menuitem", "option"].includes(role)) {
+        actions.push("AXPress");
+      }
+      if (role === "textbox" || role === "combobox") actions.push("AXConfirm", "AXSetValue");
+      if (actions.length > 0) mapped.actions = actions;
     }
-    if (role === "textbox" || role === "combobox") actions.push("AXConfirm", "AXSetValue");
-    if (actions.length > 0) mapped.actions = actions;
+
+    const geo = geometry.get(node.nodeId);
+    if (geo?.box !== undefined) mapped.box = geo.box;
+    if (geo?.domId !== undefined) {
+      /*
+       * "`automationId` is populated from `id` attributes on Windows and from
+       * `aria-label` or `AXIdentifier` on macOS" (LLD §7.5). On Windows the
+       * `id` *is* the `AutomationId`, so there is no second field for it.
+       */
+      if (shape === "uia") mapped.automationId = geo.domId;
+      else mapped.domIdentifier = geo.domId;
+    }
 
     flat.push(mapped);
     for (const child of node.childIds ?? []) {
@@ -358,58 +561,30 @@ async function main() {
     }
   };
 
-  const root = nodes.find((node) => node.role?.value === "RootWebArea") ?? nodes[0];
-  walk(root, -1);
+  const webArea = nodes.find((node) => node.role?.value === "RootWebArea") ?? nodes[0];
+  walk(webArea, -1);
 
   /*
-   * The boxes. `DOM.getBoxModel` per node is one round trip each, which is fine
-   * for a fixture and would not be for a snapshot; the adapter reads
-   * `AXPosition` and `AXSize` in the same walk that reads everything else.
+   * The window Chromium's platform bridge puts above the web area: an
+   * `AXWindow` on macOS, a `ControlType.Window` on Windows, whose title is the
+   * document title. It is not in the CDP tree because CDP describes the *page*;
+   * a real AXUIElement or UIA walk starts here.
    */
-  for (const node of nodes) {
-    const at = index.get(node.nodeId);
-    if (at === undefined || node.backendDOMNodeId === undefined) continue;
-    try {
-      const { model } = await cdp.send("DOM.getBoxModel", { backendNodeId: node.backendDOMNodeId });
-      const [x1, y1, , , x3, y3] = model.border;
-      flat[at].box = [Math.round(x1), Math.round(y1), Math.round(x3 - x1), Math.round(y3 - y1)];
-    } catch {
-      // An element with no layout box has none; the adapter reads that as hidden.
-    }
-    /*
-     * The DOM `id`, which Chromium publishes on macOS as `AXDOMIdentifier`.
-     * It is not among the AX node's `properties`, so it is read from the DOM
-     * node the AX node came from — which is where `AXDOMIdentifier` comes from
-     * in Chromium too.
-     */
-    try {
-      const { node: dom } = await cdp.send("DOM.describeNode", {
-        backendNodeId: node.backendDOMNodeId,
-      });
-      const attributes = dom.attributes ?? [];
-      for (let a = 0; a < attributes.length; a += 2) {
-        if (attributes[a] === "id" && attributes[a + 1] !== "") {
-          flat[at].domIdentifier = attributes[a + 1];
+  const root =
+    shape === "uia"
+      ? {
+          parent: -1,
+          controlType: "Window",
+          name: title,
+          className: "Chrome_WidgetWin_1",
+          isEnabled: true,
+          box: [0, 0, 1280, 860],
         }
-      }
-    } catch {
-      // A pseudo-element or a text node has no attributes.
-    }
-  }
-
-  /*
-   * The window Chromium's AX bridge puts above the web area on macOS: an
-   * `AXWindow` whose `AXTitle` is the document title. It is not in the CDP tree
-   * because CDP describes the *page*; a real AXUIElement walk starts here.
-   */
-  const { result } = await cdp.send("Runtime.evaluate", { expression: "document.title" });
-  const title = result.value ?? "Svatah ADE";
-  const window = [
-    { parent: -1, role: "AXWindow", subrole: "AXStandardWindow", title, box: [0, 0, 1280, 860] },
-    ...flat.map((node) => ({ ...node, parent: node.parent + 1 })),
-  ];
+      : { parent: -1, role: "AXWindow", subrole: "AXStandardWindow", title, box: [0, 0, 1280, 860] };
+  const window = [root, ...flat.map((node) => ({ ...node, parent: node.parent + 1 }))];
   window[1].parent = 0;
 
+  const out = resolve(ROOT, outOption ?? `packages/adapter-${shape}/test/fixtures`);
   mkdirSync(out, { recursive: true });
   const file = join(out, `ade-${screen}.json`);
   writeFileSync(
@@ -418,11 +593,6 @@ async function main() {
     "utf8",
   );
   process.stdout.write(`wrote ${window.length} node(s) to ${file}\n`);
-
-  cdp.close();
-  clearTimeout(deadline);
-  child.kill("SIGTERM");
-  process.exit(0);
 }
 
 main().catch((error) => {

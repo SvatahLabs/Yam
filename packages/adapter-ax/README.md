@@ -116,7 +116,7 @@ could not start.
 
 Every rule above the bridge is a pure function of an `AxNode[]`, and the bridge
 is an interface. `test/recorded.ts` replays accessibility trees recorded from the
-real ADE (`node scripts/record-ax-tree.mjs --screen <name>`), so the mapping, the
+real ADE (`node scripts/record-desktop-tree.mjs --shape ax --screen <name>`), so the mapping, the
 candidates, the predicates and the whole surface are exercised on a machine that
 cannot reach the accessibility API at all. What that cannot prove is that
 `osascriptBridge` reads a real `AXUIElement` correctly — which is why the

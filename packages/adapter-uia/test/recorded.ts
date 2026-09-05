@@ -1,21 +1,22 @@
 /**
- * The recorded ADE trees, and a bridge that replays one (T6.2).
+ * The recorded ADE trees, and a bridge that replays one (T6.1).
  *
  * ## Where these came from, exactly
  *
- * `node scripts/record-desktop-tree.mjs --shape ax --screen <name>` launches the real ADE with
+ * `node scripts/record-desktop-tree.mjs --shape uia --screen <name>` launches the real ADE with
  * `SVATAH_A11Y=1`, opens `evals/fixtures` **through the ADE's own Recent-project
  * button**, clicks the screen's tab, and reads Chromium's accessibility tree
  * over the DevTools protocol — roles, names, values, DOM ids, boxes — mapping it
- * into the `AxNode` shape this adapter consumes.
+ * into the `UiaNode` shape this adapter consumes: `ControlType`, `Name`,
+ * `AutomationId`, the control patterns, the bounding rectangles.
  *
  * They are therefore a real application's real accessibility tree, not an
- * invention. What they are *not* is the output of `AXUIElement`: reading that
- * needs the macOS Accessibility permission, which could not be granted in the
- * session these were made in (the prompt blocks and the Apple event times out at
- * `-1712`). The tree recorded here is the one Chromium's macOS AX bridge
- * serialises *from* — which is why the roles and the names are right, and why it
- * is not proof that `osascriptBridge` reads them correctly.
+ * invention — which matters, because the alternative offered was to hand-author
+ * them. What they are *not* is the output of `UIAutomationClient`: reading that
+ * needs Windows, and this was written on macOS. The tree recorded here is the
+ * one Chromium's UIA provider serialises *from* — which is why the control
+ * types, the names and the automation ids are right, and why it is not proof
+ * that `powershellBridge` reads them correctly.
  *
  * `docs/spec/progress/phase-6.md` states the live gate that remains and the
  * command that closes it.
@@ -23,7 +24,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { AxBridge, AxCommand, AxNode, AxPermission, AxWindow } from "../src/index.js";
+import type { UiaAvailability, UiaBridge, UiaCommand, UiaNode, UiaWindow } from "../src/index.js";
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
 
@@ -39,15 +40,15 @@ export const ADE_SCREENS: readonly AdeScreen[] = [
   "record",
 ];
 
-export function recordedWindow(screen: AdeScreen): AxWindow {
+export function recordedWindow(screen: AdeScreen): UiaWindow {
   const text = readFileSync(join(FIXTURES, `ade-${screen}.json`), "utf8");
-  return JSON.parse(text) as AxWindow;
+  return JSON.parse(text) as UiaWindow;
 }
 
 export interface RecordedBridgeOptions {
   /** The screen the window starts on. */
   readonly screen?: AdeScreen;
-  readonly permission?: AxPermission;
+  readonly availability?: UiaAvailability;
   /**
    * What a command does to the window.
    *
@@ -56,12 +57,12 @@ export interface RecordedBridgeOptions {
    * test says "pressing the Run tab shows the Run screen" without needing the
    * application.
    */
-  readonly onCommand?: (command: AxCommand, current: AdeScreen) => AdeScreen | void;
+  readonly onCommand?: (command: UiaCommand, current: AdeScreen) => AdeScreen | void;
 }
 
-export interface RecordedBridge extends AxBridge {
+export interface RecordedBridge extends UiaBridge {
   /** Every command the adapter sent, in order. */
-  readonly commands: AxCommand[];
+  readonly commands: UiaCommand[];
   /** Which screen the window is showing now. */
   screen(): AdeScreen;
   /** Files `screenshot()` was asked to write. */
@@ -72,11 +73,11 @@ export interface RecordedBridge extends AxBridge {
  * The child index of every node, so a command's path can be resolved back.
  *
  * A command addresses an element by the child index at each level from the
- * window down (`AxCommand.path`), because an AppleScript specifier does not
+ * window down (`UiaCommand.path`), because an AppleScript specifier does not
  * survive between `osascript` processes. Replaying one means walking the same
  * way.
  */
-function indexOfPath(nodes: readonly AxNode[], path: readonly number[]): number | undefined {
+function indexOfPath(nodes: readonly UiaNode[], path: readonly number[]): number | undefined {
   const children = new Map<number, number[]>();
   nodes.forEach((node, index) => {
     if (node.parent < 0) return;
@@ -98,14 +99,14 @@ function indexOfPath(nodes: readonly AxNode[], path: readonly number[]): number 
  * A bridge that replays a recorded tree, and records what was asked of it.
  *
  * It replays, and it also **remembers a value that was set**. A window that
- * never changed could not test `type` at all: the adapter sets `AXValue`, takes
- * a new snapshot and reads it back, and a bridge that served the same tree
- * either way would make that round trip untestable. macOS does change the value;
- * so does this.
+ * never changed could not test `type` at all: the adapter calls
+ * `ValuePattern.SetValue`, takes a new snapshot and reads it back, and a bridge
+ * that served the same tree either way would make that round trip untestable.
+ * Windows does change the value; so does this.
  */
 export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBridge {
   let screen: AdeScreen = options.screen ?? "record";
-  const commands: AxCommand[] = [];
+  const commands: UiaCommand[] = [];
   const screenshots: string[] = [];
   /** `screen:pathIndex` → the value set on it. */
   const values = new Map<string, string>();
@@ -114,12 +115,12 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
     commands,
     screenshots,
     screen: () => screen,
-    async permission(): Promise<AxPermission> {
-      return options.permission ?? { state: "granted", advice: "granted (recorded)" };
+    async availability(): Promise<UiaAvailability> {
+      return options.availability ?? { state: "available", advice: "available (recorded)" };
     },
-    async window({ maxNodes }): Promise<AxWindow> {
+    async window({ maxNodes }): Promise<UiaWindow> {
       const window = recordedWindow(screen);
-      const nodes: AxNode[] = window.nodes.slice(0, maxNodes).map((node, index) => {
+      const nodes: UiaNode[] = window.nodes.slice(0, maxNodes).map((node, index) => {
         const set = values.get(`${screen}:${index}`);
         return set === undefined ? node : { ...node, value: set };
       });
@@ -127,9 +128,9 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
     },
     async perform(command): Promise<void> {
       commands.push(command);
-      if (command.kind === "setValue") {
+      if (command.kind === "pattern" && command.pattern === "Value" && command.method === "SetValue") {
         const at = indexOfPath(recordedWindow(screen).nodes, command.path);
-        if (at !== undefined) values.set(`${screen}:${at}`, command.value);
+        if (at !== undefined) values.set(`${screen}:${at}`, command.argument ?? "");
       }
       const next = options.onCommand?.(command, screen);
       if (next !== undefined) screen = next;

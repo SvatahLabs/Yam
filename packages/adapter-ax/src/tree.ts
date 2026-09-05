@@ -42,10 +42,42 @@ export interface AxSnapshotNode extends SnapshotNode {
  * `AXGroup` + `AXTabGroup` is a `tablist`. Where there is no subrole mapping,
  * the role's own answer stands.
  */
-export function roleOf(node: Pick<AxNode, "role" | "subrole">): string {
+export function roleOf(
+  node: Pick<AxNode, "role" | "subrole">,
+  context: { readonly insidePopUp?: boolean } = {},
+): string {
   const bySubrole = node.subrole === undefined ? undefined : AX_SUBROLE_MAP[node.subrole];
   if (bySubrole !== undefined) return bySubrole;
+  /*
+   * A pop-up button's item is an `option`, not a menu bar command (REQ-SURF-4).
+   *
+   * Chromium publishes a `<select>`'s `<option>` on macOS as `AXMenuItem` — the
+   * same role a menu bar's "Save As…" has — and on Windows as
+   * `ControlType.ListItem`, which the UIA map sends to `option`. One element,
+   * two roles, and `selectOption` looking for two different things depending on
+   * the platform.
+   *
+   * The flat role map cannot tell them apart, because the difference is not in
+   * the element: it is in the parent. This is the one place the AX adapter reads
+   * an ancestor to decide a role, and it is why `roleOf` takes a context rather
+   * than only a node. `packages/adapter-uia/test/parity.test.ts` is what found
+   * it.
+   */
+  if (context.insidePopUp === true && (node.role === "AXMenuItem" || node.role === "AXStaticText")) {
+    return "option";
+  }
   return AX_ROLE_MAP[node.role] ?? FALLBACK_ROLE;
+}
+
+/** The AX roles whose descendants are a chooser's items rather than a menu's. */
+const POP_UP_ROLES = new Set(["AXPopUpButton", "AXComboBox"]);
+
+/** Whether this node is inside a pop-up button's menu (see `roleOf`). */
+export function insidePopUp(nodes: readonly AxNode[], index: number): boolean {
+  for (let at = nodes[index]?.parent ?? -1; at >= 0; at = nodes[at]!.parent) {
+    if (POP_UP_ROLES.has(nodes[at]!.role)) return true;
+  }
+  return false;
 }
 
 /** The subroles that mean something different from their role (LLD §7.5). */
@@ -216,7 +248,9 @@ export function convertTree(nodes: readonly AxNode[], options: ConvertOptions): 
   const keep = new Set<number>();
   if (options.interactiveOnly) {
     for (let index = 0; index < nodes.length; index += 1) {
-      if (!isInteractiveRole(roleOf(nodes[index]!))) continue;
+      if (!isInteractiveRole(roleOf(nodes[index]!, { insidePopUp: insidePopUp(nodes, index) }))) {
+        continue;
+      }
       // Keep the element and every ancestor, so the structure survives.
       for (let at = index; at >= 0; at = nodes[at]!.parent) keep.add(at);
     }
@@ -241,7 +275,7 @@ export function convertTree(nodes: readonly AxNode[], options: ConvertOptions): 
 
     return {
       ref: refOf.get(index)!,
-      role: roleOf(node),
+      role: roleOf(node, { insidePopUp: insidePopUp(nodes, index) }),
       ...(name === "" ? {} : { name }),
       ...(value === undefined ? {} : { value }),
       ...(description === "" || description === name ? {} : { description }),

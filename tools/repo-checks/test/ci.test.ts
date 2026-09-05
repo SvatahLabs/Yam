@@ -27,7 +27,14 @@ interface GithubWorkflow {
   on?: { schedule?: Array<{ cron: string }> };
   jobs: Record<
     string,
-    { strategy?: { matrix?: { os?: string[] } }; if?: string; steps: GithubStep[] }
+    {
+      strategy?: {
+        matrix?: { os?: string[]; include?: Array<Record<string, string>> };
+      };
+      if?: string;
+      "continue-on-error"?: string;
+      steps: GithubStep[];
+    }
   >;
 }
 interface BitbucketStep {
@@ -61,6 +68,7 @@ describe("CI mirrors (P0-F5)", () => {
   it("both workflows exist", () => {
     expect(Object.keys(github.jobs).sort()).toEqual([
       "ade-installers",
+      "desktop-conformance",
       "grounding-eval",
       "legacy-java",
       "model-evals",
@@ -100,6 +108,37 @@ describe("CI mirrors (P0-F5)", () => {
     // broken app is an installer nobody wants (T3.6's Validate item).
     expect(script).toContain("pnpm --filter @svatah/ade smoke");
     expect(script).toContain("xvfb-run");
+  });
+
+  it("runs each desktop adapter on the only host it can run on (T6.1, T6.2)", () => {
+    /*
+     * The AX adapter needs macOS with the Accessibility permission; the UIA one
+     * needs Windows. Everything below their bridges is a pure function of a
+     * recorded tree and runs in `workspace` on all three platforms — this job
+     * is the part that is not, and there is no point running either leg on a
+     * host that cannot host it.
+     */
+    const job = github.jobs["desktop-conformance"]!;
+    expect(job.strategy?.matrix?.include).toEqual([
+      { os: "windows-latest", adapter: "uia" },
+      { os: "macos-latest", adapter: "ax" },
+    ]);
+
+    const script = githubCommands("desktop-conformance").join("\n");
+    // The host requirement first and on its own, so a failure reads as "the
+    // runner cannot do this" rather than as a failed suite.
+    expect(script).toContain("surface doctor --adapter");
+    // The conformance target is the ADE itself, packaged (LLD §16, REQ-ADE-6).
+    expect(script).toContain("electron-forge package");
+    expect(script).toContain("scripts/desktop-conformance.mjs");
+
+    /*
+     * The macOS leg is `continue-on-error`, and that is a statement rather than
+     * a shrug: GitHub's hosted macOS runners have no way to grant the
+     * Accessibility permission, so the step reports `prompt-pending` and stops.
+     * A self-hosted runner with the permission granted turns it green.
+     */
+    expect(job["continue-on-error"]).toContain("macos-latest");
   });
 
   it("the pull-request eval job replays a cache rather than spending", () => {

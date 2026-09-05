@@ -23,6 +23,7 @@ export {
   childIndex,
   controlPathOf,
   convertTree,
+  insidePopUp,
   isTextual,
   nameOf,
   roleOf,

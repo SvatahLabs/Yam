@@ -148,26 +148,26 @@
       "box": [
         693,
         34,
-        123,
+        122,
         14
       ]
     },
     {
       "parent": 13,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:63699",
+      "title": "http://127.0.0.1:53754",
       "enabled": true,
       "box": [
         693,
         34,
-        123,
+        122,
         14
       ]
     },
     {
       "parent": 14,
       "role": "AXStaticText",
-      "title": "http://127.0.0.1:63699",
+      "title": "http://127.0.0.1:53754",
       "enabled": true
     },
     {
@@ -648,7 +648,7 @@
     },
     {
       "parent": 56,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "anthropic — no credential on this service",
       "enabled": false,
       "actions": [
@@ -657,7 +657,7 @@
     },
     {
       "parent": 56,
-      "role": "AXStaticText",
+      "role": "AXMenuItem",
       "title": "fake — committed answers from evals/grounding/cases",
       "enabled": true,
       "selected": true,

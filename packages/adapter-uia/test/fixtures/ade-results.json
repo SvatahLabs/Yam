@@ -1,0 +1,2043 @@
+{
+  "process": "Svatah ADE",
+  "title": "Svatah ADE",
+  "truncated": false,
+  "nodes": [
+    {
+      "parent": -1,
+      "controlType": "Window",
+      "name": "Svatah ADE",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "box": [
+        0,
+        0,
+        1280,
+        860
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Document",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Svatah ADE",
+      "isEnabled": true,
+      "box": [
+        0,
+        0,
+        1280,
+        828
+      ]
+    },
+    {
+      "parent": 1,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        0,
+        0,
+        1280,
+        828
+      ],
+      "automationId": "root"
+    },
+    {
+      "parent": 2,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "banner",
+      "isEnabled": true,
+      "box": [
+        0,
+        0,
+        1280,
+        48
+      ]
+    },
+    {
+      "parent": 3,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "heading",
+      "name": "Svatah ADE",
+      "isEnabled": true,
+      "box": [
+        16,
+        12,
+        1248,
+        18
+      ]
+    },
+    {
+      "parent": 4,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Svatah ADE",
+      "isEnabled": true,
+      "box": [
+        16,
+        12,
+        85,
+        18
+      ]
+    },
+    {
+      "parent": 5,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Svatah ADE",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        34,
+        1248,
+        14
+      ]
+    },
+    {
+      "parent": 7,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open project",
+      "isEnabled": true,
+      "box": [
+        16,
+        34,
+        667,
+        14
+      ]
+    },
+    {
+      "parent": 8,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01Q1tN6MR8PDeTwRA2rgU3wK/evals/fixtures",
+      "isEnabled": true,
+      "box": [
+        16,
+        34,
+        667,
+        14
+      ]
+    },
+    {
+      "parent": 9,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01Q1tN6MR8PDeTwRA2rgU3wK/evals/fixtures",
+      "isEnabled": true
+    },
+    {
+      "parent": 7,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "·",
+      "isEnabled": true,
+      "box": [
+        683,
+        34,
+        10,
+        14
+      ]
+    },
+    {
+      "parent": 11,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "·",
+      "isEnabled": true
+    },
+    {
+      "parent": 7,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Service URL",
+      "isEnabled": true,
+      "box": [
+        693,
+        34,
+        122,
+        14
+      ]
+    },
+    {
+      "parent": 13,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "http://127.0.0.1:54270",
+      "isEnabled": true,
+      "box": [
+        693,
+        34,
+        122,
+        14
+      ]
+    },
+    {
+      "parent": 14,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "http://127.0.0.1:54270",
+      "isEnabled": true
+    },
+    {
+      "parent": 2,
+      "controlType": "Tab",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Screens",
+      "isEnabled": true,
+      "box": [
+        0,
+        48,
+        1280,
+        37
+      ]
+    },
+    {
+      "parent": 16,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "Project",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        16,
+        56,
+        65,
+        28
+      ]
+    },
+    {
+      "parent": 17,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Project",
+      "isEnabled": true,
+      "box": [
+        27,
+        63,
+        43,
+        15
+      ]
+    },
+    {
+      "parent": 18,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Project",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "Flow editor",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        85,
+        56,
+        89,
+        28
+      ]
+    },
+    {
+      "parent": 20,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Flow editor",
+      "isEnabled": true,
+      "box": [
+        96,
+        63,
+        67,
+        15
+      ]
+    },
+    {
+      "parent": 21,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Flow editor",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "Plan",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        178,
+        56,
+        48,
+        28
+      ]
+    },
+    {
+      "parent": 23,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Plan",
+      "isEnabled": true,
+      "box": [
+        189,
+        63,
+        26,
+        15
+      ]
+    },
+    {
+      "parent": 24,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Plan",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "Run",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        230,
+        56,
+        45,
+        28
+      ]
+    },
+    {
+      "parent": 26,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run",
+      "isEnabled": true,
+      "box": [
+        241,
+        63,
+        23,
+        15
+      ]
+    },
+    {
+      "parent": 27,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "Results",
+      "isEnabled": true,
+      "isSelected": true,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        279,
+        56,
+        66,
+        28
+      ]
+    },
+    {
+      "parent": 29,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Results",
+      "isEnabled": true,
+      "box": [
+        290,
+        63,
+        44,
+        15
+      ]
+    },
+    {
+      "parent": 30,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Results",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "API client",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        350,
+        56,
+        79,
+        28
+      ]
+    },
+    {
+      "parent": 32,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "API client",
+      "isEnabled": true,
+      "box": [
+        361,
+        63,
+        57,
+        15
+      ]
+    },
+    {
+      "parent": 33,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "API client",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "Data",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        432,
+        56,
+        50,
+        28
+      ]
+    },
+    {
+      "parent": 35,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Data",
+      "isEnabled": true,
+      "box": [
+        443,
+        63,
+        28,
+        15
+      ]
+    },
+    {
+      "parent": 36,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Data",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "Record review",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        487,
+        56,
+        108,
+        28
+      ]
+    },
+    {
+      "parent": 38,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Record review",
+      "isEnabled": true,
+      "box": [
+        498,
+        63,
+        86,
+        15
+      ]
+    },
+    {
+      "parent": 39,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Record review",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "Bindings",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        599,
+        56,
+        74,
+        28
+      ]
+    },
+    {
+      "parent": 41,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Bindings",
+      "isEnabled": true,
+      "box": [
+        610,
+        63,
+        52,
+        15
+      ]
+    },
+    {
+      "parent": 42,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Bindings",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "Surface explorer",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        677,
+        56,
+        122,
+        28
+      ]
+    },
+    {
+      "parent": 44,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Surface explorer",
+      "isEnabled": true,
+      "box": [
+        688,
+        63,
+        100,
+        15
+      ]
+    },
+    {
+      "parent": 45,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Surface explorer",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "Tool panel",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        803,
+        56,
+        84,
+        28
+      ]
+    },
+    {
+      "parent": 47,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Tool panel",
+      "isEnabled": true,
+      "box": [
+        814,
+        63,
+        62,
+        15
+      ]
+    },
+    {
+      "parent": 48,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Tool panel",
+      "isEnabled": true
+    },
+    {
+      "parent": 2,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "main",
+      "isEnabled": true,
+      "box": [
+        0,
+        85,
+        1280,
+        744
+      ]
+    },
+    {
+      "parent": 50,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "region",
+      "name": "Results",
+      "isEnabled": true,
+      "box": [
+        16,
+        97,
+        1248,
+        245
+      ]
+    },
+    {
+      "parent": 51,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "heading",
+      "name": "Runs (5)",
+      "isEnabled": true,
+      "box": [
+        16,
+        97,
+        1248,
+        17
+      ]
+    },
+    {
+      "parent": 52,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Runs (",
+      "isEnabled": true,
+      "box": [
+        16,
+        97,
+        44,
+        17
+      ]
+    },
+    {
+      "parent": 53,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Runs (",
+      "isEnabled": true
+    },
+    {
+      "parent": 52,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "5",
+      "isEnabled": true,
+      "box": [
+        60,
+        97,
+        9,
+        17
+      ]
+    },
+    {
+      "parent": 55,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "5",
+      "isEnabled": true
+    },
+    {
+      "parent": 52,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": ")",
+      "isEnabled": true,
+      "box": [
+        69,
+        97,
+        6,
+        17
+      ]
+    },
+    {
+      "parent": 57,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": ")",
+      "isEnabled": true
+    },
+    {
+      "parent": 51,
+      "controlType": "Table",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "patterns": [
+        "Scroll"
+      ],
+      "box": [
+        16,
+        121,
+        1248,
+        203
+      ]
+    },
+    {
+      "parent": 59,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        121,
+        1248,
+        23
+      ]
+    },
+    {
+      "parent": 60,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        121,
+        1248,
+        23
+      ]
+    },
+    {
+      "parent": 61,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run",
+      "isEnabled": true,
+      "box": [
+        16,
+        121,
+        276,
+        23
+      ]
+    },
+    {
+      "parent": 62,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run",
+      "isEnabled": true,
+      "box": [
+        24,
+        125,
+        22,
+        14
+      ]
+    },
+    {
+      "parent": 63,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run",
+      "isEnabled": true
+    },
+    {
+      "parent": 61,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Started",
+      "isEnabled": true,
+      "box": [
+        292,
+        121,
+        357,
+        23
+      ]
+    },
+    {
+      "parent": 65,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Started",
+      "isEnabled": true,
+      "box": [
+        300,
+        125,
+        43,
+        14
+      ]
+    },
+    {
+      "parent": 66,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Started",
+      "isEnabled": true
+    },
+    {
+      "parent": 61,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Totals",
+      "isEnabled": true,
+      "box": [
+        649,
+        121,
+        132,
+        23
+      ]
+    },
+    {
+      "parent": 68,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Totals",
+      "isEnabled": true,
+      "box": [
+        657,
+        125,
+        35,
+        14
+      ]
+    },
+    {
+      "parent": 69,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Totals",
+      "isEnabled": true
+    },
+    {
+      "parent": 61,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Exit",
+      "isEnabled": true,
+      "box": [
+        781,
+        121,
+        74,
+        23
+      ]
+    },
+    {
+      "parent": 71,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Exit",
+      "isEnabled": true,
+      "box": [
+        789,
+        125,
+        21,
+        14
+      ]
+    },
+    {
+      "parent": 72,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Exit",
+      "isEnabled": true
+    },
+    {
+      "parent": 61,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        855,
+        121,
+        409,
+        23
+      ]
+    },
+    {
+      "parent": 59,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        144,
+        1248,
+        36
+      ]
+    },
+    {
+      "parent": 75,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmmmcvvzd18wo",
+      "isEnabled": true,
+      "box": [
+        16,
+        144,
+        276,
+        36
+      ]
+    },
+    {
+      "parent": 76,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmmmcvvzd18wo",
+      "isEnabled": true,
+      "box": [
+        24,
+        148,
+        124,
+        14
+      ]
+    },
+    {
+      "parent": 77,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmmmcvvzd18wo",
+      "isEnabled": true
+    },
+    {
+      "parent": 75,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T07:22:28.454Z",
+      "isEnabled": true,
+      "box": [
+        292,
+        144,
+        357,
+        36
+      ]
+    },
+    {
+      "parent": 79,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T07:22:28.454Z",
+      "isEnabled": true,
+      "box": [
+        300,
+        148,
+        163,
+        14
+      ]
+    },
+    {
+      "parent": 80,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T07:22:28.454Z",
+      "isEnabled": true
+    },
+    {
+      "parent": 75,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true,
+      "box": [
+        649,
+        144,
+        132,
+        36
+      ]
+    },
+    {
+      "parent": 82,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true,
+      "box": [
+        657,
+        148,
+        51,
+        14
+      ]
+    },
+    {
+      "parent": 83,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true
+    },
+    {
+      "parent": 75,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        781,
+        144,
+        74,
+        36
+      ]
+    },
+    {
+      "parent": 85,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        789,
+        148,
+        8,
+        14
+      ]
+    },
+    {
+      "parent": 86,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true
+    },
+    {
+      "parent": 75,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open 00mtmmmcvvzd18wo",
+      "isEnabled": true,
+      "box": [
+        855,
+        144,
+        409,
+        36
+      ]
+    },
+    {
+      "parent": 88,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open 00mtmmmcvvzd18wo",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        863,
+        148,
+        191,
+        27
+      ]
+    },
+    {
+      "parent": 89,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open",
+      "isEnabled": true,
+      "box": [
+        874,
+        154,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 90,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open",
+      "isEnabled": true
+    },
+    {
+      "parent": 89,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmmmcvvzd18wo",
+      "isEnabled": true,
+      "box": [
+        910,
+        154,
+        133,
+        15
+      ]
+    },
+    {
+      "parent": 92,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmmmcvvzd18wo",
+      "isEnabled": true
+    },
+    {
+      "parent": 59,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        180,
+        1248,
+        36
+      ]
+    },
+    {
+      "parent": 94,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtml5yjs746irq",
+      "isEnabled": true,
+      "box": [
+        16,
+        180,
+        276,
+        36
+      ]
+    },
+    {
+      "parent": 95,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtml5yjs746irq",
+      "isEnabled": true,
+      "box": [
+        24,
+        184,
+        103,
+        14
+      ]
+    },
+    {
+      "parent": 96,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtml5yjs746irq",
+      "isEnabled": true
+    },
+    {
+      "parent": 94,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T06:41:43.759Z",
+      "isEnabled": true,
+      "box": [
+        292,
+        180,
+        357,
+        36
+      ]
+    },
+    {
+      "parent": 98,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T06:41:43.759Z",
+      "isEnabled": true,
+      "box": [
+        300,
+        184,
+        162,
+        14
+      ]
+    },
+    {
+      "parent": 99,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T06:41:43.759Z",
+      "isEnabled": true
+    },
+    {
+      "parent": 94,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true,
+      "box": [
+        649,
+        180,
+        132,
+        36
+      ]
+    },
+    {
+      "parent": 101,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true,
+      "box": [
+        657,
+        184,
+        51,
+        14
+      ]
+    },
+    {
+      "parent": 102,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true
+    },
+    {
+      "parent": 94,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        781,
+        180,
+        74,
+        36
+      ]
+    },
+    {
+      "parent": 104,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        789,
+        184,
+        8,
+        14
+      ]
+    },
+    {
+      "parent": 105,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true
+    },
+    {
+      "parent": 94,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open 00mtml5yjs746irq",
+      "isEnabled": true,
+      "box": [
+        855,
+        180,
+        409,
+        36
+      ]
+    },
+    {
+      "parent": 107,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open 00mtml5yjs746irq",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        863,
+        184,
+        168,
+        27
+      ]
+    },
+    {
+      "parent": 108,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open",
+      "isEnabled": true,
+      "box": [
+        874,
+        190,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 109,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open",
+      "isEnabled": true
+    },
+    {
+      "parent": 108,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtml5yjs746irq",
+      "isEnabled": true,
+      "box": [
+        910,
+        190,
+        110,
+        15
+      ]
+    },
+    {
+      "parent": 111,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtml5yjs746irq",
+      "isEnabled": true
+    },
+    {
+      "parent": 59,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        216,
+        1248,
+        36
+      ]
+    },
+    {
+      "parent": 113,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtml3i7z97tjjd",
+      "isEnabled": true,
+      "box": [
+        16,
+        216,
+        276,
+        36
+      ]
+    },
+    {
+      "parent": 114,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtml3i7z97tjjd",
+      "isEnabled": true,
+      "box": [
+        24,
+        220,
+        99,
+        14
+      ]
+    },
+    {
+      "parent": 115,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtml3i7z97tjjd",
+      "isEnabled": true
+    },
+    {
+      "parent": 113,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T06:39:49.273Z",
+      "isEnabled": true,
+      "box": [
+        292,
+        216,
+        357,
+        36
+      ]
+    },
+    {
+      "parent": 117,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T06:39:49.273Z",
+      "isEnabled": true,
+      "box": [
+        300,
+        220,
+        164,
+        14
+      ]
+    },
+    {
+      "parent": 118,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T06:39:49.273Z",
+      "isEnabled": true
+    },
+    {
+      "parent": 113,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true,
+      "box": [
+        649,
+        216,
+        132,
+        36
+      ]
+    },
+    {
+      "parent": 120,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true,
+      "box": [
+        657,
+        220,
+        51,
+        14
+      ]
+    },
+    {
+      "parent": 121,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true
+    },
+    {
+      "parent": 113,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        781,
+        216,
+        74,
+        36
+      ]
+    },
+    {
+      "parent": 123,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        789,
+        220,
+        8,
+        14
+      ]
+    },
+    {
+      "parent": 124,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true
+    },
+    {
+      "parent": 113,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open 00mtml3i7z97tjjd",
+      "isEnabled": true,
+      "box": [
+        855,
+        216,
+        409,
+        36
+      ]
+    },
+    {
+      "parent": 126,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open 00mtml3i7z97tjjd",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        863,
+        220,
+        164,
+        27
+      ]
+    },
+    {
+      "parent": 127,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open",
+      "isEnabled": true,
+      "box": [
+        874,
+        226,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 128,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open",
+      "isEnabled": true
+    },
+    {
+      "parent": 127,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtml3i7z97tjjd",
+      "isEnabled": true,
+      "box": [
+        910,
+        226,
+        106,
+        15
+      ]
+    },
+    {
+      "parent": 130,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtml3i7z97tjjd",
+      "isEnabled": true
+    },
+    {
+      "parent": 59,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        252,
+        1248,
+        36
+      ]
+    },
+    {
+      "parent": 132,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmjiob78woblj",
+      "isEnabled": true,
+      "box": [
+        16,
+        252,
+        276,
+        36
+      ]
+    },
+    {
+      "parent": 133,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmjiob78woblj",
+      "isEnabled": true,
+      "box": [
+        24,
+        256,
+        104,
+        14
+      ]
+    },
+    {
+      "parent": 134,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmjiob78woblj",
+      "isEnabled": true
+    },
+    {
+      "parent": 132,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T05:55:37.977Z",
+      "isEnabled": true,
+      "box": [
+        292,
+        252,
+        357,
+        36
+      ]
+    },
+    {
+      "parent": 136,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T05:55:37.977Z",
+      "isEnabled": true,
+      "box": [
+        300,
+        256,
+        161,
+        14
+      ]
+    },
+    {
+      "parent": 137,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T05:55:37.977Z",
+      "isEnabled": true
+    },
+    {
+      "parent": 132,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true,
+      "box": [
+        649,
+        252,
+        132,
+        36
+      ]
+    },
+    {
+      "parent": 139,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true,
+      "box": [
+        657,
+        256,
+        51,
+        14
+      ]
+    },
+    {
+      "parent": 140,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true
+    },
+    {
+      "parent": 132,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        781,
+        252,
+        74,
+        36
+      ]
+    },
+    {
+      "parent": 142,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        789,
+        256,
+        8,
+        14
+      ]
+    },
+    {
+      "parent": 143,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true
+    },
+    {
+      "parent": 132,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open 00mtmjiob78woblj",
+      "isEnabled": true,
+      "box": [
+        855,
+        252,
+        409,
+        36
+      ]
+    },
+    {
+      "parent": 145,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open 00mtmjiob78woblj",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        863,
+        256,
+        170,
+        27
+      ]
+    },
+    {
+      "parent": 146,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open",
+      "isEnabled": true,
+      "box": [
+        874,
+        262,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 147,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open",
+      "isEnabled": true
+    },
+    {
+      "parent": 146,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmjiob78woblj",
+      "isEnabled": true,
+      "box": [
+        910,
+        262,
+        112,
+        15
+      ]
+    },
+    {
+      "parent": 149,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmjiob78woblj",
+      "isEnabled": true
+    },
+    {
+      "parent": 59,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        288,
+        1248,
+        36
+      ]
+    },
+    {
+      "parent": 151,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmjbecjrk7fzk",
+      "isEnabled": true,
+      "box": [
+        16,
+        288,
+        276,
+        36
+      ]
+    },
+    {
+      "parent": 152,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmjbecjrk7fzk",
+      "isEnabled": true,
+      "box": [
+        24,
+        292,
+        102,
+        14
+      ]
+    },
+    {
+      "parent": 153,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmjbecjrk7fzk",
+      "isEnabled": true
+    },
+    {
+      "parent": 151,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T05:49:58.266Z",
+      "isEnabled": true,
+      "box": [
+        292,
+        288,
+        357,
+        36
+      ]
+    },
+    {
+      "parent": 155,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T05:49:58.266Z",
+      "isEnabled": true,
+      "box": [
+        300,
+        292,
+        165,
+        14
+      ]
+    },
+    {
+      "parent": 156,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2026-09-04T05:49:58.266Z",
+      "isEnabled": true
+    },
+    {
+      "parent": 151,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true,
+      "box": [
+        649,
+        288,
+        132,
+        36
+      ]
+    },
+    {
+      "parent": 158,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true,
+      "box": [
+        657,
+        292,
+        51,
+        14
+      ]
+    },
+    {
+      "parent": 159,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 passed",
+      "isEnabled": true
+    },
+    {
+      "parent": 151,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        781,
+        288,
+        74,
+        36
+      ]
+    },
+    {
+      "parent": 161,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        789,
+        292,
+        8,
+        14
+      ]
+    },
+    {
+      "parent": 162,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true
+    },
+    {
+      "parent": 151,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open 00mtmjbecjrk7fzk",
+      "isEnabled": true,
+      "box": [
+        855,
+        288,
+        409,
+        36
+      ]
+    },
+    {
+      "parent": 164,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open 00mtmjbecjrk7fzk",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        863,
+        292,
+        168,
+        27
+      ]
+    },
+    {
+      "parent": 165,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open",
+      "isEnabled": true,
+      "box": [
+        874,
+        298,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 166,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open",
+      "isEnabled": true
+    },
+    {
+      "parent": 165,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmjbecjrk7fzk",
+      "isEnabled": true,
+      "box": [
+        910,
+        298,
+        110,
+        15
+      ]
+    },
+    {
+      "parent": 168,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "00mtmjbecjrk7fzk",
+      "isEnabled": true
+    },
+    {
+      "parent": 51,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        328,
+        1248,
+        13
+      ]
+    },
+    {
+      "parent": 170,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Rendered from",
+      "isEnabled": true,
+      "box": [
+        16,
+        328,
+        81,
+        13
+      ]
+    },
+    {
+      "parent": 171,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Rendered from",
+      "isEnabled": true
+    },
+    {
+      "parent": 170,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "getRuns",
+      "isEnabled": true,
+      "box": [
+        97,
+        328,
+        43,
+        13
+      ]
+    },
+    {
+      "parent": 173,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "getRuns",
+      "isEnabled": true
+    },
+    {
+      "parent": 170,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "and getRunsByIdResults.",
+      "isEnabled": true,
+      "box": [
+        140,
+        328,
+        134,
+        13
+      ]
+    },
+    {
+      "parent": 175,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "and getRunsByIdResults.",
+      "isEnabled": true
+    }
+  ]
+}

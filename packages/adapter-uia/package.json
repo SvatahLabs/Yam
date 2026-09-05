@@ -1,7 +1,7 @@
 {
   "name": "@svatah/adapter-uia",
   "version": "0.1.0",
-  "description": "Windows UI Automation adapter",
+  "description": "Windows UI Automation adapter: the Svatah agent surface over UIAutomationClient",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -30,11 +30,20 @@
     "@svatah/schema": "workspace:*"
   },
   "devDependencies": {
+    "@svatah/adapter-ax": "workspace:*",
+    "@svatah/conformance": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "keywords": [
+    "svatah",
+    "ui-automation",
+    "windows",
+    "automation",
+    "agent-surface"
+  ]
 }

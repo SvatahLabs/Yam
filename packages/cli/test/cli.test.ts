@@ -96,15 +96,15 @@ describe("the command table (LLD §15)", () => {
   });
 
   it("names what is registered when the adapter is not", async () => {
-    // `uia` is HLD §12's Windows adapter and is Phase 6 (T6.1); a command line
-    // that just said "unknown" would leave the reader guessing whether they had
-    // a typo or a missing phase.
+    // `atspi` is HLD §12's Linux adapter, which is P3 and unscheduled; a command
+    // line that just said "unknown" would leave the reader guessing whether they
+    // had a typo or a missing phase.
     const io = capture();
-    expect(await main(["surface", "conform", "--adapter", "uia"], io)).toBe(EXIT.usage);
+    expect(await main(["surface", "conform", "--adapter", "atspi"], io)).toBe(EXIT.usage);
     expect(io.stderr.join("\n")).toContain("playwright");
   });
 
-  it("registers every adapter this build ships, under `svatah` (T4.1, LLD §1)", async () => {
+  it("registers every adapter this build ships, under `svatah` (T4.1, T6.1, T6.2, LLD §1)", async () => {
     /*
      * `surface conform` and `bindings verify` are module (a) commands mounted
      * under `svatah`, and module (a)'s own registration knows only Playwright —
@@ -113,11 +113,31 @@ describe("the command table (LLD §15)", () => {
      * `svatah-bindings` stays module (a).
      */
     const io = capture();
-    await main(["surface", "conform", "--adapter", "uia"], io);
+    await main(["surface", "conform", "--adapter", "atspi"], io);
     const { listAdapters } = await import("@svatah/surface");
-    expect(listAdapters()).toContain("playwright");
-    expect(listAdapters()).toContain("bidi");
+    /*
+     * The HTTP adapter is deliberately absent: it is reached through the
+     * executor's injected API runner rather than by name (LLD §8), so it has
+     * no registration and `--adapter http` is not a thing to type.
+     */
+    expect(listAdapters().sort()).toEqual(["appium", "ax", "bidi", "playwright", "uia"]);
   });
+
+  it("fails a desktop adapter on the wrong host with the host's reason, not `no such adapter`", async () => {
+    /*
+     * The desktop adapters are registered on every platform, not only on their
+     * own (T6.1, T6.2). The difference matters: "no such adapter" sends someone
+     * looking for a missing install, and the truth is that this machine cannot
+     * host it. Which of the two applies here depends on where the tests run, so
+     * both are checked by their message rather than by the platform.
+     */
+    const io = capture();
+    const wrongHost = process.platform === "darwin" ? "uia" : "ax";
+    expect(await main(["surface", "conform", "--adapter", wrongHost], io)).toBe(EXIT.failed);
+    const said = [...io.stdout, ...io.stderr].join("\n");
+    expect(said).not.toContain("No adapter registered");
+    expect(said).toMatch(/runs on (Windows|macOS) only/);
+  }, 120_000);
 });
 
 describe("exit codes", () => {

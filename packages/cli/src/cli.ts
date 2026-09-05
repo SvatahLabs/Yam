@@ -70,7 +70,7 @@ Bindings and healing (module a):
               [--base-url <url>] [--storage-state <path.json>]
               [--input k=v] [--apply] [--no-model] [--headed] [--json]
   svatah eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
-  svatah surface doctor [--adapter ax] [--json]
+  svatah surface doctor [--adapter ax|uia] [--json]
   svatah eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
                         [--limit <n>] [--report <path.md>] [--json]
   svatah eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]

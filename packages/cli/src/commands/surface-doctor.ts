@@ -47,6 +47,7 @@ export async function surfaceDoctorCommand(
   });
 
   if (only === undefined || only === "ax") checks.push(...(await axChecks()));
+  if (only === undefined || only === "uia") checks.push(...(await uiaChecks()));
 
   if (boolOption(args, "json")) {
     io.out(JSON.stringify({ checks }, null, 2));
@@ -86,6 +87,26 @@ async function axChecks(): Promise<SurfaceCheck[]> {
       ok: permission.state === "granted",
       detail: permission.state + (permission.detail === undefined ? "" : ` — ${permission.detail}`),
       fix: permission.advice,
+    },
+  ];
+}
+
+/** Windows UI Automation (REQ-ADP-6). */
+async function uiaChecks(): Promise<SurfaceCheck[]> {
+  if (process.platform !== "win32") {
+    return [{ adapter: "uia", name: "platform", ok: false, skipped: true, detail: "not Windows" }];
+  }
+
+  const { powershellBridge } = await import("@svatah/adapter-uia");
+  const availability = await powershellBridge({ process: "" }).availability();
+  return [
+    {
+      adapter: "uia",
+      name: "ui-automation",
+      ok: availability.state === "available",
+      detail:
+        availability.state + (availability.detail === undefined ? "" : ` — ${availability.detail}`),
+      fix: availability.advice,
     },
   ];
 }
