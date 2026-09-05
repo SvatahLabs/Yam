@@ -24,7 +24,7 @@ Draft 2.3 spec amendments, the six Phase 1 corrections, and T2.1 … T2.12 of
 | T2.7 | Executor core with policies, checkpoints, audit | done | `05bada9` |
 | T2.8 | Playwright Test host | done | `bb5b147` |
 | T2.9 | Migration tool | done | `742140d` |
-| T2.10 | CLI for module (b) and compatibility run | done | `fda684a`, `24b4869`, `84ac7ea`, `1bf80ca` |
+| T2.10 | CLI for module (b) and compatibility run | done | `fda684a`, `24b4869`, `84ac7ea`, `723fe6f` |
 | T2.11 | Local service | done | `eb99dde`, `347ea54` |
 | T2.12 | Module (a) command line and healer replay plugin | done | `0410918` |
 
@@ -385,7 +385,7 @@ stands and flagged for the reviewer.
 
 ## T2.10 — CLI for module (b) and compatibility run (milestone)
 
-**Status: done.** Commits `fda684a`, `24b4869`, `84ac7ea`, `1bf80ca`.
+**Status: done.** Commits `fda684a`, `24b4869`, `84ac7ea`, `723fe6f`.
 
 ```bash
 node scripts/compatibility.mjs
