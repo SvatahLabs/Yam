@@ -1,0 +1,30 @@
+// Migrated from sample/svatah.flow by `svatah migrate`.
+//
+// Story names and step order are preserved exactly (REQ-LANG-11). Read the
+// review report beside this file before trusting it: a legacy locator says
+// where an element was, never what it is, so some target phrases were derived
+// and need a better name.
+
+story: Validate Text
+  Click the body nav div div navbar translate button
+  // user +clicks+ on ~docs link~
+  // user +switches to new tab+
+  // user +clicks+ on ~css : #navbar > div.navbar-brand > a.navbar-item~
+  // user +switches to main tab+
+  Move to the dashboard link and click it
+  Go back
+  Wait for the dashboard link to be present
+  Go forward
+  Wait for the username to be present
+  Type "connected2atul@gmail.com" into the username
+  Type "aabc581321!" into the she the
+  Click the she the
+  Click the she the
+  Click the then the
+  Call the "active count" API and remember the response as val
+  Click the she the
+  Click the logout
+  Type {val} into the username
+  Wait 5 seconds
+
+test: Validate Text

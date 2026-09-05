@@ -1,0 +1,52 @@
+// Migrated from sample/execution.flow by `svatah migrate`.
+//
+// Story names and step order are preserved exactly (REQ-LANG-11). Read the
+// review report beside this file before trusting it: a legacy locator says
+// where an element was, never what it is, so some target phrases were derived
+// and need a better name.
+
+scenario: start zoomcar booking
+  Click the Start your wonderful journey
+
+scenario: perform search
+  Click the search bar
+  Clear the search bar
+  Type "indra" into the search bar
+  Click the suggested location as Indranagar
+  Click the next button
+
+scenario: select date and time
+  Click the div 3 div 2 div 3
+  Click the slider time
+  Click the next button
+  Click the div 3 div 2 div 3
+  Click the slider time
+  Click the next button
+  Wait 8 seconds
+
+scenario: select car and login
+  Click the book now
+  // it will open login modal where you need to pass login details
+  Click the user email field
+  Type "atul.sharma@zoomcar.com" into the user email
+  Click the next button
+  Type "aabc581321" into the password
+
+scenario: checkout the selected car
+  Click the form div 3 img
+  Click the checkoutButton
+
+scenario: initiate payment
+  Click the card
+  Click the expiry month
+  Type "08" into the expiry month
+  Click the expiry year
+  Type "2019" into the expiry year
+  Click the cvv
+  Type "123" into the text box
+  Click the input type text
+  Type "5123  4567  8901  2346" into the text box identifier and enter card number
+
+scenario: logout
+  Click the menu icon
+  Click the logout button

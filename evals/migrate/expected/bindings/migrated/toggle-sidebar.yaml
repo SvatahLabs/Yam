@@ -1,0 +1,35 @@
+entries:
+  - candidates:
+      - by: "css"
+        score: 0.5
+        value: "#navbar > div > div.navbar-wrapper > div > button"
+    context:
+      hash: "0000000000000000000000000000000000000000000000000000000000000000"
+      pattern: "/"
+      platform: "web"
+    fingerprint:
+      attrs: {}
+      box:
+        - 0
+        - 0
+        - 0
+        - 0
+      index: 0
+      neighbours:
+        after: []
+        before: []
+      rolePath: []
+      tag: ""
+      text: ""
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "migrate"
+      promptVersion: "v2-locator-file"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: false
+id: "migrated.toggle-sidebar"
+phrases:
+  - "the toggle sidebar"
+schemaVersion: "1.0.0"

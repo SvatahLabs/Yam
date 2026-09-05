@@ -1,0 +1,44 @@
+entries:
+  - candidates:
+      - by: "xpath"
+        score: 0.5
+        value: "//li[5]/div/a"
+      - by: "xpath"
+        score: 0.45
+        value: "//a[contains(@href, '/login')]"
+      - by: "xpath"
+        score: 0.4
+        value: "//a[contains(@href, '/user')]"
+      - by: "text"
+        score: 0.35
+        value: "Dashboard"
+    context:
+      hash: "0000000000000000000000000000000000000000000000000000000000000000"
+      pattern: "/"
+      platform: "web"
+    fingerprint:
+      attrs: {}
+      box:
+        - 0
+        - 0
+        - 0
+        - 0
+      index: 0
+      neighbours:
+        after: []
+        before: []
+      rolePath: []
+      tag: ""
+      text: ""
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "migrate"
+      promptVersion: "v2-locator-file"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: false
+id: "migrated.dashboard-link"
+phrases:
+  - "the dashboard link"
+schemaVersion: "1.0.0"

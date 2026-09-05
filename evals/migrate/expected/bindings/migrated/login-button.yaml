@@ -1,0 +1,44 @@
+entries:
+  - candidates:
+      - by: "xpath"
+        score: 0.5
+        value: "//a[contains(@href, '/login')]"
+      - by: "xpath"
+        score: 0.45
+        value: "//input[@value='Sign In']"
+      - by: "text"
+        score: 0.4
+        value: "Sign In"
+      - by: "css"
+        score: 0.35
+        value: "input.btn.btn-lg.btn-blue.btn-block"
+    context:
+      hash: "0000000000000000000000000000000000000000000000000000000000000000"
+      pattern: "/"
+      platform: "web"
+    fingerprint:
+      attrs: {}
+      box:
+        - 0
+        - 0
+        - 0
+        - 0
+      index: 0
+      neighbours:
+        after: []
+        before: []
+      rolePath: []
+      tag: ""
+      text: ""
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "migrate"
+      promptVersion: "v2-locator-file"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: false
+id: "migrated.login-button"
+phrases:
+  - "the login button"
+schemaVersion: "1.0.0"

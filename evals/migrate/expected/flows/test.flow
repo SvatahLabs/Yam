@@ -1,0 +1,6 @@
+// Migrated from flows/test.flow by `svatah migrate`.
+//
+// Story names and step order are preserved exactly (REQ-LANG-11). Read the
+// review report beside this file before trusting it: a legacy locator says
+// where an element was, never what it is, so some target phrases were derived
+// and need a better name.

@@ -7,6 +7,7 @@
     "src/**/*.ts",
     "test/**/*.ts",
     "../../eslint.config.d.ts",
-    "../../scripts/compile-fixtures.d.mts"
+    "../../scripts/compile-fixtures.d.mts",
+    "../../scripts/migrate-legacy.d.mts"
   ]
 }

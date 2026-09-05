@@ -16,6 +16,9 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@svatah/compiler": "workspace:*",
+    "@svatah/migrate": "workspace:*",
+    "@svatah/spec": "workspace:*",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",

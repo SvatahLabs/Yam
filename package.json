@@ -13,6 +13,7 @@
     "build": "pnpm -r build",
     "browsers": "pnpm --filter @svatah/adapter-playwright exec playwright install chromium",
     "fixtures": "node scripts/compile-fixtures.mjs",
+    "migrate:legacy": "node scripts/migrate-legacy.mjs",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint .",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@eslint/js": "catalog:",
     "@svatah/compiler": "workspace:*",
+    "@svatah/migrate": "workspace:*",
     "@svatah/schema": "workspace:*",
     "@svatah/spec": "workspace:*",
     "@types/node": "catalog:",
