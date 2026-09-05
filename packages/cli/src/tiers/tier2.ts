@@ -77,7 +77,7 @@ export interface Tier2Options {
  * to do. The vocabulary itself is not listed here — the schema carries it, and
  * repeating it in prose is how a prompt and a schema come to disagree.
  */
-const SYSTEM = `You translate one sentence from a browser automation script into a JSON step.
+export const TIER2_SYSTEM_PROMPT = `You translate one sentence from a browser automation script into a JSON step.
 
 The sentence describes a single action a person performs on a web page. Answer
 with the step it means, and nothing else.
@@ -221,7 +221,7 @@ export function tier2(options: Tier2Options): ModelTier {
       try {
         answer = await gateway.ask({
           promptVersion: TIER2_PROMPT_VERSION,
-          system: `${SYSTEM}\n\n${shots.map(renderExample).join("\n\n")}`,
+          system: `${TIER2_SYSTEM_PROMPT}\n\n${shots.map(renderExample).join("\n\n")}`,
           user: text,
           answer: modelStepSchema,
         });

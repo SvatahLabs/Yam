@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-09-04T09:51:14.963Z",
+  "ref": "master",
+  "commit": "bd184e0b90ec73b7ef8d2624f64e560475c20d53",
+  "projects": [
+    "evals/fixtures",
+    "evals/migrate/expected",
+    "packages/host-playwright/test/project"
+  ],
+  "pairs": 83,
+  "shape": "modelStepSchema (@svatah/compiler raw-schema.ts) — the shape a Tier 2 answer has",
+  "promptVersion": "c2-1",
+  "excluded": {
+    "golden": 60,
+    "duplicate": 49,
+    "unparsed": 0
+  },
+  "note": "Exported from merged flows only (ADR-4). Every sentence in evals/compiler/golden.jsonl is excluded: it is the test set, and a tuned model measured on sentences it was trained on would report an improvement that means nothing."
+}

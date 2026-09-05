@@ -74,6 +74,7 @@ Bindings and healing (module a):
   svatah surface doctor [--adapter ax|uia] [--json]
   svatah eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
                         [--limit <n>] [--report <path.md>] [--json]
+  svatah eval finetune export [--project <dir>]… [--ref master] [--out <path.jsonl>]
   svatah eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
                        [--only tier1,tier2] [--report <path.md>] [--json]
 
@@ -271,6 +272,14 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
    */
   if (command === "eval" && args.command[1] === "compiler") {
     return await (await import("./commands/eval-compiler.js")).compilerEvalCommand(args, io);
+  }
+
+  /*
+   * `eval finetune` is module (b)'s: it compiles merged flows to export the
+   * pairs a Tier 2 fine-tune trains on (T6.5, ADR-4).
+   */
+  if (command === "eval" && args.command[1] === "finetune") {
+    return await (await import("./commands/finetune.js")).finetuneCommand(args, io);
   }
 
   // `heal` and `eval healing` both take the model half of REQ-HEAL-1.

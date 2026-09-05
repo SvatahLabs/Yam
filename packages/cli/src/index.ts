@@ -104,3 +104,13 @@ export {
   serviceToolsFor,
   serviceVerifyBindings,
 } from "./service-api.js";
+
+/**
+ * The Tier 2 instruction block and its version (T6.5, ADR-4).
+ *
+ * Exported so `scripts/finetune-tier2.mjs` trains against the *same* system
+ * prompt the tier sends at compile time. A model tuned against a different one
+ * would be tuned for a job it never sees, and the two drifting apart is exactly
+ * the kind of thing nobody notices for a month.
+ */
+export { TIER2_PROMPT_VERSION, TIER2_SYSTEM_PROMPT } from "./tiers/tier2.js";

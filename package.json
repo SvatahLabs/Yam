@@ -36,7 +36,10 @@
     "conform:desktop": "node scripts/desktop-conformance.mjs",
     "record:desktop-trees": "node scripts/record-desktop-tree.mjs",
     "conform:runtime": "node scripts/runtime-conformance.mjs",
-    "fixture:ade-db": "node scripts/build-ade-fixture.mjs"
+    "fixture:ade-db": "node scripts/build-ade-fixture.mjs",
+    "finetune:export": "node packages/cli/dist/bin.js eval finetune export",
+    "finetune:train": "node scripts/finetune-tier2.mjs",
+    "finetune:eval": "node scripts/finetune-eval.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

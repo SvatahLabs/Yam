@@ -108,12 +108,35 @@ const modelArgsSchema = z
     script: z.string().optional(),
     /** `api`. */
     request: z.string().optional(),
+    /**
+     * Whether an `api` step shares the web session's cookies (REQ-ADP-3).
+     *
+     * The grammar emits it — `Call the "x" API with the session cookies` — and
+     * the HTTP adapter reads it, so a Tier 2 answer that could not carry it
+     * would compile the sentence into a request that quietly sends no cookies.
+     * Found by the fine-tune export, which requires every pair to parse.
+     */
+    withSessionCookies: z.boolean().optional(),
     /** `switchWindow`: 0-based, so "the second tab" is 1. */
     index: z.number().optional(),
     /** `switchWindow`: "new" or "main". */
     which: z.enum(["new", "main"]).optional(),
     /** `dialog`. */
     action: z.enum(["accept", "dismiss"]).optional(),
+    /**
+     * The text to type into a `prompt` dialog.
+     *
+     * `text` is what the grammar emits and what the adapter reads
+     * (`Answer the dialog with "Atul"` → `args.text`). `promptText` was the only
+     * spelling allowed here, so a Tier 2 answer for that sentence could never
+     * carry the text the adapter uses — and `g-079` could not even be *shown* to
+     * the model as an example, because the schema rejects it.
+     *
+     * Both are accepted: `text` because it is the one that works, `promptText`
+     * because a model that has learned the other name should not be refused over
+     * a synonym the lowering can resolve.
+     */
+    text: z.string().optional(),
     promptText: z.string().optional(),
   })
   .strict();

@@ -97,10 +97,59 @@ export function asExample(step: Record<string, unknown>): Record<string, unknown
   if (Object.keys(args).length > 0) out["args"] = args;
   if (Object.keys(argRefs).length > 0) out["argRefs"] = argRefs;
 
-  for (const field of ["expect", "capture"]) {
-    if (step[field] !== undefined) out[field] = step[field];
+  /*
+   * A predicate's `value` is a `ValueRef` too, and it needs the same conversion
+   * (T6.5).
+   *
+   * This was missed. `{"kind":"var","name":"enterprise"}` is the IR's shape; the
+   * model's is `{"kind":"var","value":"enterprise"}` — a different *field*, not
+   * a different spelling — so `g-098` ("The schedule heading should say
+   * {enterprise}") was shown to the model in a shape `modelStepSchema` rejects.
+   * One example in the prompt teaching a shape the parser refuses is a quiet way
+   * to lose accuracy on exactly the sentences it was meant to help with, and the
+   * fine-tune export is what surfaced it: every pair has to parse.
+   */
+  if (step["expect"] !== undefined) {
+    const expect = step["expect"] as { subject?: unknown; predicate?: Record<string, unknown> };
+    out["expect"] =
+      expect.predicate === undefined
+        ? expect
+        : { ...expect, predicate: asModelPredicate(expect.predicate) };
   }
+  if (step["capture"] !== undefined) out["capture"] = step["capture"];
   return out;
+}
+
+/** A predicate with its `value` in the shape `rawValueSchema` describes. */
+function asModelPredicate(predicate: Record<string, unknown>): Record<string, unknown> {
+  const value = predicate["value"] as
+    | { kind?: string; value?: string; path?: string; name?: string; story?: string }
+    | undefined;
+  if (value === undefined || typeof value !== "object") return predicate;
+
+  switch (value.kind) {
+    case "literal":
+      return { ...predicate, value: { kind: "literal", value: value.value ?? "" } };
+    case "data":
+      return { ...predicate, value: { kind: "data", value: value.path ?? "" } };
+    case "input":
+      return { ...predicate, value: { kind: "input", value: value.name ?? "" } };
+    case "var":
+      return {
+        ...predicate,
+        value: {
+          kind: "var",
+          value: value.name ?? "",
+          ...(value.story === undefined ? {} : { story: value.story }),
+        },
+      };
+    default: {
+      // A template, which the model's schema has no form for. The predicate is
+      // kept without its value rather than shown in a shape it cannot answer.
+      const { value: _dropped, ...rest } = predicate;
+      return rest;
+    }
+  }
 }
 
 let cached: readonly GoldenExample[] | undefined;

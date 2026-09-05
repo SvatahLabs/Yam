@@ -48,3 +48,9 @@ out/
 # --- Electron / the ADE (T3.6) ---
 # `out/` above already covers the installers; `.vite/` is Forge's build output.
 .vite/
+
+# The fine-tune's model artifacts (T6.5). The exported *pairs* and their
+# manifest are committed — they are the training set and a reviewer reads them —
+# but adapter weights and a fused GGUF are hundreds of megabytes and are
+# reproducible from the pairs and the digest.
+evals/compiler/finetune/tuned/
