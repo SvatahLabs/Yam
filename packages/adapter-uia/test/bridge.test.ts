@@ -6,7 +6,13 @@
  * what `svatah surface doctor` is told.
  */
 import { describe, expect, it, vi } from "vitest";
-import { powershellBridge, UiaBridgeError, type runPowershell } from "../src/index.js";
+import {
+  encodePowershell,
+  powershellBridge,
+  readablePowershellError,
+  UiaBridgeError,
+  type runPowershell,
+} from "../src/index.js";
 
 type Run = typeof runPowershell;
 
@@ -166,5 +172,115 @@ describe("performing a command", () => {
     );
     expect(source).toContain('"-NoProfile"');
     expect(source).toContain('"-NonInteractive"');
+  });
+});
+
+/*
+ * ────────────────────────────────────────────────────────────────────────────
+ * What running these scripts against a real PowerShell found (T7.2)
+ * ────────────────────────────────────────────────────────────────────────────
+ *
+ * Every test above injects its own runner, so nothing here had ever spawned
+ * PowerShell, and the live Windows gate has never run (Phase 6 verification,
+ * F8/K10). Driving the scripts through PowerShell 7.4.6 — which cannot do UI
+ * Automation, but is the same language — found three defects that would have
+ * failed every call on every Windows machine.
+ */
+describe("how the request reaches the script (T7.2)", () => {
+  it("assigns the request instead of passing it as an argument", () => {
+    /*
+     * The first defect. `powershell.exe -Command <script> -Request <json>`
+     * binds nothing: PowerShell's own documentation says that when `-Command`
+     * is a string it "must be the last parameter in the command, because any
+     * characters typed after the command are interpreted as the command
+     * arguments". The JSON was appended to the script as *text* and parsed:
+     *
+     *   ParserError:
+     *      6 |  -Request {"process":"Svatah ADE","maxNodes":1500}
+     *        | Unexpected token ':"Svatah ADE"' in expression or statement.
+     */
+    const decoded = Buffer.from(
+      encodePowershell("$req = $Request | ConvertFrom-Json", { process: "Svatah ADE" }),
+      "base64",
+    ).toString("utf16le");
+    expect(decoded).toContain(`$Request = '{"process":"Svatah ADE"}'`);
+    expect(decoded).toContain("$req = $Request | ConvertFrom-Json");
+  });
+
+  it("escapes a quote the way a PowerShell literal string does", () => {
+    const decoded = Buffer.from(
+      encodePowershell("", { name: "it's" }),
+      "base64",
+    ).toString("utf16le");
+    // Doubling is the escape inside '…', and it is the only one that matters.
+    expect(decoded).toContain(`$Request = '{"name":"it''s"}'`);
+  });
+
+  it("sets the console to UTF-8 before anything writes", () => {
+    /*
+     * The second defect. A redirected `powershell.exe` writes stdout in the
+     * console code page, and Node reads UTF-8 — so every name in the ADE
+     * containing "…" or "—" would have arrived mangled, and the conformance
+     * target's buttons are called "Open a project…" and "Import prototype
+     * database…".
+     */
+    const decoded = Buffer.from(encodePowershell("x", {}), "base64").toString("utf16le");
+    expect(decoded.split("\n")[0]).toBe(
+      "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8",
+    );
+  });
+
+  it("keeps a one-element pattern list a list", async () => {
+    /*
+     * The third defect, and the one that would have been hardest to see.
+     * PowerShell unrolls a single-element array on return, so an element
+     * supporting exactly one control pattern answered `"Invoke"` rather than
+     * `["Invoke"]` and `ConvertTo-Json` wrote a string. The adapter then calls
+     * `patterns.includes("Value")` on it — which on a string is a *substring*
+     * test.
+     */
+    const source = (await import("node:fs")).readFileSync(
+      new URL("../src/bridge.ts", import.meta.url),
+      "utf8",
+    );
+    expect(source).toContain("return ,@($names)");
+    expect(source).toContain("$patterns = @(Get-PatternNames $element)");
+  });
+
+  it("answers rather than dying on a host with no UI Automation", async () => {
+    /*
+     * The fourth. `Add-Type -AssemblyName UIAutomationClient` under
+     * `$ErrorActionPreference = "Stop"` killed the script before it wrote
+     * anything, and the bridge reported "PowerShell answered something that is
+     * not JSON" — a diagnostic that sends the reader to look at the adapter
+     * rather than at the host.
+     */
+    const source = (await import("node:fs")).readFileSync(
+      new URL("../src/bridge.ts", import.meta.url),
+      "utf8",
+    );
+    expect([...source.matchAll(/no-uiautomation/g)]).toHaveLength(2);
+    expect(source).toContain("no-drawing");
+  });
+});
+
+describe("PowerShell's stderr, made readable (T7.2)", () => {
+  it("decodes the CLIXML a redirected powershell.exe writes", () => {
+    const clixml =
+      '#< CLIXML\n<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">' +
+      '<S S="Error">_x001B_[31;1mAdd-Type: _x001B_[0m_x000A_</S>' +
+      '<S S="Error">Cannot find path &lt;UIAutomationClient.dll&gt;</S></Objs>';
+    const readable = readablePowershellError(clixml);
+    expect(readable).toContain("Add-Type:");
+    expect(readable).toContain("Cannot find path <UIAutomationClient.dll>");
+    // No escapes, no colour codes, no XML.
+    expect(readable).not.toContain("_x001B_");
+    expect(readable).not.toContain("<S S=");
+    expect(readable).not.toContain("\u001b");
+  });
+
+  it("leaves plain text alone but strips its colours", () => {
+    expect(readablePowershellError("\u001b[31;1mplain\u001b[0m")).toBe("plain");
+    expect(readablePowershellError("  plain  ")).toBe("plain");
   });
 });

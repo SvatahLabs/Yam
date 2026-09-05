@@ -1,14 +1,36 @@
-# Bitbucket Pipelines — the Linux job of .github/workflows/ci.yml.
+# Bitbucket Pipelines — the workflow this repository actually runs.
 #
 # The repository's only remote is Bitbucket, so GitHub Actions has nowhere to
-# run (Phase 0, K1). This file runs exactly the same seven steps on the same
-# Node 22 LTS the GitHub matrix pins, in the same order, so the workflow is
-# observable on the branch. macOS and Windows are not offered by Bitbucket's
-# hosted runners; they stay covered by .github/workflows/ci.yml and remain
-# unverified until a GitHub remote exists (REQ-NFR-7).
+# run (Phase 0, K1). This file runs exactly the same steps as the Linux job of
+# .github/workflows/ci.yml, on the same Node 22 LTS the GitHub matrix pins, in
+# the same order, so the workflow is observable on the branch.
 #
 # Keep the two files in step: a step added here must be added there and the
-# other way round.
+# other way round. `tools/repo-checks/test/ci.test.ts` is what enforces it.
+#
+# ## The gates T7.2 added, and where each of them can run
+#
+# Phase 6's verification found that the GitHub workflow carried the desktop and
+# Java conformance jobs and this file — the only one with a runner — carried
+# neither, so both had never run (F8, K10). Three legs were added:
+#
+# | Gate | Runner | Status |
+# |---|---|---|
+# | Java runtime conformance | Bitbucket's hosted Linux | runs on every branch and pull request |
+# | Windows UIA gate | self-hosted Windows | needs a runner attached |
+# | macOS AX gate | self-hosted macOS with Accessibility granted | needs a runner attached |
+#
+# The two desktop legs live in a `custom:` pipeline rather than the default one
+# on purpose. Bitbucket's hosted runners are Linux only; a step whose `runs-on`
+# labels match no attached runner *queues* rather than failing, so putting them
+# in the default pipeline would stall every branch build behind a runner that
+# does not exist. `docs/spec/progress/phase-7.md` records which legs are blocked
+# and why.
+#
+# The macOS leg tolerates exit 2 and nothing else. The gate script exits 2 for
+# "this host cannot run me" and 1 for "this adapter is not conformant", and only
+# the first is a runner's fault. A blanket `continue-on-error` would have made
+# Phase 6's 0-of-7 macOS failure green.
 
 image: node:22
 
@@ -61,6 +83,79 @@ definitions:
           - pnpm quick-start
           - git diff --exit-code examples/plain-playwright/bindings
 
+    - step: &runtime-conformance
+        name: Java runtime conformance (REQ-STD-3, LLD §14)
+        caches:
+          - pnpm
+        script:
+          - corepack enable
+          - corepack prepare --activate
+          # The one gate here that must work with a JDK, Maven Central and the
+          # artifacts this repository publishes — Node appears only to compile
+          # the plan and serve the sample application, which is what any third
+          # party would do.
+          - apt-get update && apt-get install -y --no-install-recommends openjdk-17-jdk-headless
+          - java -version
+          - pnpm install --frozen-lockfile
+          - pnpm -r build
+          - pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+          - cd runtimes/java && ./gradlew --no-daemon fatJar test && cd ../..
+          # T7.4: this validates the runtime's own results.jsonl and summary.json
+          # against the published schemas before it compares anything, and is a
+          # gate — a mismatch or an invalid artifact exits non-zero.
+          - node scripts/runtime-conformance.mjs --runtime java --report reports/runtime-java.md
+        artifacts:
+          - reports/runtime-java.md
+
+    - step: &uia-gate
+        name: desktop conformance (windows, uia)
+        runs-on:
+          - self.hosted
+          - windows
+        script:
+          - corepack enable
+          - corepack prepare --activate
+          - pnpm install --frozen-lockfile
+          - pnpm -r build
+          # The host requirement first and on its own, so a failure reads as
+          # "the runner cannot do this" rather than as a failed suite.
+          - node packages/cli/dist/bin.js surface doctor --adapter uia
+          - pnpm --filter @svatah/ade exec electron-forge package
+          # No tolerance: UI Automation needs no permission grant, so there is
+          # no "the runner could not" for this leg to hide behind.
+          - node scripts/desktop-conformance.mjs --adapter uia --report reports/adapter-uia.md
+        artifacts:
+          - reports/adapter-uia.md
+
+    - step: &ax-gate
+        name: desktop conformance (macos, ax)
+        runs-on:
+          - self.hosted
+          - macos
+        script:
+          - corepack enable
+          - corepack prepare --activate
+          - pnpm install --frozen-lockfile
+          - pnpm -r build
+          - node packages/cli/dist/bin.js surface doctor --adapter ax
+          - pnpm --filter @svatah/ade exec electron-forge package
+          # Exit 2 is "this host cannot grant the Accessibility permission" and
+          # is tolerated with a message; exit 1 is "the adapter is not
+          # conformant" and fails the leg. Never the other way round (T7.2).
+          - |
+            set +e
+            node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md
+            code=$?
+            set -e
+            if [ "$code" = "2" ]; then
+              echo "This runner cannot host the ax gate (exit 2): the suite did not run."
+              echo "Grant Accessibility to the runner's agent and it will."
+              exit 0
+            fi
+            exit "$code"
+        artifacts:
+          - reports/adapter-ax.md
+
     - step: &legacy-java
         name: legacy Java project compiles
         image: eclipse-temurin:17-jdk
@@ -73,16 +168,28 @@ pipelines:
     - parallel:
         - step: *workspace
         - step: *quick-start
+        - step: *runtime-conformance
         - step: *legacy-java
   branches:
     '**':
       - parallel:
           - step: *workspace
           - step: *quick-start
+          - step: *runtime-conformance
           - step: *legacy-java
   pull-requests:
     '**':
       - parallel:
           - step: *workspace
           - step: *quick-start
+          - step: *runtime-conformance
           - step: *legacy-java
+  custom:
+    # The two legs that need a runner this account does not have yet (T7.2).
+    # Run from the Bitbucket UI once a self-hosted macOS or Windows runner is
+    # attached with the labels above; they are here, definition and all, so that
+    # attaching a runner is the only thing left to do.
+    desktop-gates:
+      - parallel:
+          - step: *uia-gate
+          - step: *ax-gate

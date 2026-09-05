@@ -159,12 +159,97 @@ export class UiaBridgeError extends Error {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 /**
+ * PowerShell's stderr, made readable (T7.2).
+ *
+ * When `powershell.exe` has its stderr redirected it does not write text: it
+ * writes **CLIXML**, a serialised object stream that begins `#< CLIXML` and
+ * carries the message inside `<S S="Error">` elements with control characters
+ * escaped as `_x001B_`. The bridge put that straight into
+ * `UiaBridgeError.detail`, so a real failure surfaced as a wall of XML with the
+ * one useful sentence buried in it.
+ *
+ * Found by running these scripts against a real PowerShell, which is the first
+ * time anything in this repository had (Phase 6 verification, F8/K10).
+ */
+export function readablePowershellError(stderr: string): string {
+  const text = stderr.trim();
+  if (!text.startsWith("#< CLIXML")) return stripAnsi(text);
+  const parts = [...text.matchAll(/<S S="Error">([\s\S]*?)<\/S>/g)].map((m) => m[1] ?? "");
+  const decoded = parts
+    .join("")
+    .replaceAll(/_x([0-9A-Fa-f]{4})_/g, (_, hex: string) => String.fromCharCode(parseInt(hex, 16)))
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&");
+  return stripAnsi(decoded).trim();
+}
+
+/** Colour codes belong to a terminal, not to an error message. */
+function stripAnsi(text: string): string {
+  // eslint-disable-next-line no-control-regex
+  return text.replaceAll(/\u001b\[[0-9;]*m/g, "");
+}
+
+/**
+ * The request, and the console, put where the script can reach them (T7.2).
+ *
+ * ## Why `-EncodedCommand` and not `-Command`
+ *
+ * The Phase 6 bridge spawned `powershell.exe -Command <script> -Request <json>`
+ * and every script began with `param([string]$Request)`. That does not bind
+ * anything. PowerShell's own documentation says it: when the value of
+ * `-Command` is a *string*, "Command must be the last parameter in the command,
+ * because any characters typed after the command are interpreted as the command
+ * arguments" — so `-Request {"process":"Svatah ADE",…}` was appended to the
+ * script as **text** and parsed as PowerShell.
+ *
+ * Run against a real PowerShell it fails before it reaches UI Automation at all:
+ *
+ * ```
+ * ParserError:
+ * Line |
+ *    6 |  -Request {"process":"Svatah ADE","maxNodes":1500}
+ *      |                     ~~~~~~~~~~~~~
+ *      | Unexpected token ':"Svatah ADE"' in expression or statement.
+ * ```
+ *
+ * Every UIA test injects its own runner, so nothing in this repository had ever
+ * spawned the real thing, and the live Windows gate has never run (Phase 6
+ * verification, F8/K10). This is the first defect T7.2's "fix what it finds"
+ * found.
+ *
+ * `-EncodedCommand` takes base64 of UTF-16LE and has no argument list to get
+ * wrong: the request is *assigned* in a preamble the encoder writes, with
+ * single quotes doubled, which is PowerShell's own literal-string escape and
+ * cannot be broken by anything JSON can contain.
+ *
+ * ## Why the preamble sets the console encoding
+ *
+ * A redirected `powershell.exe` writes stdout in the console code page, not
+ * UTF-8, and Node reads UTF-8. The conformance target is an application whose
+ * buttons are called "Open a project…" and "Import prototype database…" — every
+ * one of those names would have arrived mangled. One line fixes it, and it has
+ * to be the first line, before anything writes.
+ */
+export function encodePowershell(script: string, argument: unknown): string {
+  const request = JSON.stringify(argument).replaceAll("'", "''");
+  const preamble =
+    "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n" +
+    `$Request = '${request}'\n`;
+  return Buffer.from(preamble + script, "utf16le").toString("base64");
+}
+
+/**
  * Run one PowerShell script, with a hard deadline.
  *
  * `-NoProfile` because a profile can print, and printed output would land in
  * the JSON. `-NonInteractive` because nobody is there to answer a prompt.
  * `-ExecutionPolicy Bypass` because the script arrives on the command line
  * rather than as a file, and a machine's policy is about files.
+ *
+ * `powershell.exe` rather than `pwsh`: `Add-Type -AssemblyName
+ * UIAutomationClient` needs the .NET Framework assemblies, which PowerShell 7
+ * does not carry. Windows PowerShell 5.1 is present on every Windows install.
  */
 export async function runPowershell(
   script: string,
@@ -179,10 +264,8 @@ export async function runPowershell(
         "-NonInteractive",
         "-ExecutionPolicy",
         "Bypass",
-        "-Command",
-        script,
-        "-Request",
-        JSON.stringify(argument),
+        "-EncodedCommand",
+        encodePowershell(script, argument),
       ],
       { stdio: ["ignore", "pipe", "pipe"] },
     );
@@ -212,7 +295,6 @@ export async function runPowershell(
 
 /** The smallest call that needs `UIAutomationClient` and nothing else. */
 const AVAILABILITY_SCRIPT = `
-param([string]$Request)
 try {
   Add-Type -AssemblyName UIAutomationClient -ErrorAction Stop
   Add-Type -AssemblyName UIAutomationTypes -ErrorAction Stop
@@ -233,10 +315,19 @@ try {
  * in a live application, and not a reason to lose the whole tree.
  */
 const WINDOW_SCRIPT = `
-param([string]$Request)
 $ErrorActionPreference = "Stop"
-Add-Type -AssemblyName UIAutomationClient
-Add-Type -AssemblyName UIAutomationTypes
+try {
+  Add-Type -AssemblyName UIAutomationClient -ErrorAction Stop
+  Add-Type -AssemblyName UIAutomationTypes -ErrorAction Stop
+} catch {
+  # A host without UI Automation is a *host* answer, not a crash: without this
+  # the script died with an unhandled Add-Type error, wrote nothing to stdout,
+  # and the bridge reported "PowerShell answered something that is not JSON" —
+  # a diagnostic that sends the reader to the wrong place. Found by running
+  # these scripts against a real PowerShell (T7.2).
+  ConvertTo-Json -Compress @{ ok = $false; error = "no-uiautomation: " + $_.Exception.Message }
+  exit 0
+}
 
 $req = $Request | ConvertFrom-Json
 $procs = Get-Process -Name $req.process -ErrorAction SilentlyContinue |
@@ -262,7 +353,12 @@ function Get-PatternNames($element) {
       $names += ($p.ProgrammaticName -replace "PatternIdentifiers.Pattern", "")
     }
   } catch { }
-  return $names
+  # \`,\` keeps a one-element list a list. PowerShell unrolls a single-element
+  # array on return, so an element supporting exactly one pattern answered
+  # \`"Invoke"\` rather than \`["Invoke"]\` and \`ConvertTo-Json\` wrote a string —
+  # which the adapter then called \`.includes()\` on, where it is a *substring*
+  # test. The second defect T7.2 found (see \`encodePowershell\`).
+  return ,@($names)
 }
 
 $AE = [System.Windows.Automation.AutomationElement]
@@ -307,7 +403,7 @@ while ($queue.Count -gt 0) {
   if ($focus) { $node.hasKeyboardFocus = $true }
   if ($box) { $node.box = $box }
 
-  $patterns = Get-PatternNames $element
+  $patterns = @(Get-PatternNames $element)
   if ($patterns.Count -gt 0) { $node.patterns = $patterns }
 
   try {
@@ -357,10 +453,19 @@ ConvertTo-Json -Compress -Depth 6 @{
  * walk already produced.
  */
 const PERFORM_SCRIPT = `
-param([string]$Request)
 $ErrorActionPreference = "Stop"
-Add-Type -AssemblyName UIAutomationClient
-Add-Type -AssemblyName UIAutomationTypes
+try {
+  Add-Type -AssemblyName UIAutomationClient -ErrorAction Stop
+  Add-Type -AssemblyName UIAutomationTypes -ErrorAction Stop
+} catch {
+  # A host without UI Automation is a *host* answer, not a crash: without this
+  # the script died with an unhandled Add-Type error, wrote nothing to stdout,
+  # and the bridge reported "PowerShell answered something that is not JSON" —
+  # a diagnostic that sends the reader to the wrong place. Found by running
+  # these scripts against a real PowerShell (T7.2).
+  ConvertTo-Json -Compress @{ ok = $false; error = "no-uiautomation: " + $_.Exception.Message }
+  exit 0
+}
 Add-Type -AssemblyName System.Windows.Forms
 
 $cmd = $Request | ConvertFrom-Json
@@ -436,10 +541,16 @@ ConvertTo-Json -Compress @{ ok = $true }
 `;
 
 const SCREENSHOT_SCRIPT = `
-param([string]$Request)
 $ErrorActionPreference = "Stop"
-Add-Type -AssemblyName System.Drawing
-Add-Type -AssemblyName System.Windows.Forms
+try {
+  Add-Type -AssemblyName System.Drawing -ErrorAction Stop
+  Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop
+} catch {
+  # Same rule as the other three (T7.2): a host that cannot do this answers,
+  # rather than dying with a pipeline exception and no stdout.
+  ConvertTo-Json -Compress @{ ok = $false; error = "no-drawing: " + $_.Exception.Message }
+  exit 0
+}
 $req = $Request | ConvertFrom-Json
 $bounds = if ($req.box) {
   New-Object System.Drawing.Rectangle($req.box[0], $req.box[1], $req.box[2], $req.box[3])
@@ -482,13 +593,16 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
     if (result.code !== 0) {
       throw new UiaBridgeError(
         "PowerShell refused the UI Automation call.",
-        result.stderr.trim() || result.stdout.trim(),
+        readablePowershellError(result.stderr) || result.stdout.trim(),
       );
     }
     try {
       return JSON.parse(result.stdout) as unknown;
     } catch {
-      throw new UiaBridgeError("PowerShell answered something that is not JSON.", result.stdout);
+      throw new UiaBridgeError(
+        "PowerShell answered something that is not JSON.",
+        result.stdout.trim() || readablePowershellError(result.stderr),
+      );
     }
   };
 
@@ -506,7 +620,7 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
       if (!result.timedOut && result.code === 0 && result.stdout.includes('"ok":true')) {
         return { state: "available", advice: "UI Automation is reachable." };
       }
-      const detail = (result.stderr || result.stdout).trim();
+      const detail = readablePowershellError(result.stderr) || result.stdout.trim();
       return {
         state: "unavailable",
         advice:

@@ -7,6 +7,8 @@
  */
 export {
   powershellBridge,
+  encodePowershell,
+  readablePowershellError,
   runPowershell,
   UiaBridgeError,
   type UiaAvailability,

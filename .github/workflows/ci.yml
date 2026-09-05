@@ -302,18 +302,23 @@ jobs:
   # the bridge is a pure function of a recorded tree and is covered by the
   # `workspace` job on every platform; this is the part that is not.
   #
-  # `continue-on-error` on the macOS leg is deliberate and is not a way of
-  # ignoring a failure. GitHub's hosted macOS runners cannot grant the
-  # Accessibility permission to a process — there is no one to answer the prompt
-  # and no supported way to write the TCC database — so the conformance step
-  # reports `prompt-pending` and stops. `scripts/desktop-conformance.mjs` exits 2
-  # for that, and 1 for an adapter that is genuinely not conformant, so the log
-  # says which happened. A self-hosted macOS runner with the permission granted
-  # to its agent turns this green; nothing else does.
+  # What the macOS leg is allowed to do, and what it is not (T7.2).
+  #
+  # GitHub's hosted macOS runners cannot grant the Accessibility permission to a
+  # process — there is nobody to answer the prompt and no supported way to write
+  # the TCC database — so on one the gate stops before it runs anything.
+  # `scripts/desktop-conformance.mjs` says which of the two happened in its exit
+  # code: **2** is "the host is not ready", **1** is "this adapter is not
+  # conformant". Only the first is tolerated.
+  #
+  # It used to be `continue-on-error: macos-latest`, which tolerated both — so a
+  # macOS run that genuinely failed 0 of 7 would have been green, which is
+  # exactly what Phase 6's live gate did (F1). The distinction is now in the
+  # step, and a self-hosted macOS runner with the permission granted turns the
+  # leg green for real.
   desktop-conformance:
     name: desktop conformance (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.os == 'macos-latest' }}
     strategy:
       fail-fast: false
       matrix:
@@ -348,8 +353,23 @@ jobs:
       - name: Package the ADE
         run: pnpm --filter @svatah/ade exec electron-forge package
 
+      # Exit 2 (host not ready) is tolerated and says so; exit 1 (not
+      # conformant) fails the leg. Never the other way round.
       - name: Conformance
-        run: node scripts/desktop-conformance.mjs --adapter ${{ matrix.adapter }} --report reports/adapter-${{ matrix.adapter }}.md
+        shell: bash
+        run: |
+          set +e
+          node scripts/desktop-conformance.mjs \
+            --adapter ${{ matrix.adapter }} \
+            --report reports/adapter-${{ matrix.adapter }}.md
+          code=$?
+          set -e
+          if [ "$code" = "2" ]; then
+            echo "::warning::This runner cannot host the ${{ matrix.adapter }} gate (exit 2)."
+            echo "The suite did not run. A self-hosted runner with the permission granted does."
+            exit 0
+          fi
+          exit "$code"
 
       - uses: actions/upload-artifact@v4
         if: always()

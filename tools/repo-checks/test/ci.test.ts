@@ -44,7 +44,12 @@ interface BitbucketStep {
 }
 interface BitbucketPipelines {
   image?: string;
-  pipelines: Record<string, Array<{ parallel?: Array<{ step: BitbucketStep }> }>>;
+  pipelines: {
+    default: Array<{ parallel?: Array<{ step: BitbucketStep }> }>;
+    branches: Record<string, Array<{ parallel?: Array<{ step: BitbucketStep }> }>>;
+    "pull-requests": Record<string, Array<{ parallel?: Array<{ step: BitbucketStep }> }>>;
+    custom?: Record<string, Array<{ parallel?: Array<{ step: BitbucketStep }> }>>;
+  };
 }
 
 const github = parse(
@@ -59,10 +64,14 @@ function githubCommands(job: string): string[] {
   return github.jobs[job]!.steps.filter((s) => typeof s.run === "string").map((s) => s.run!.trim());
 }
 
-const bitbucketSteps = bitbucket.pipelines.default![0]!.parallel!.map((p) => p.step);
+const bitbucketSteps = bitbucket.pipelines.default[0]!.parallel!.map((p) => p.step);
 const workspaceStep = bitbucketSteps.find((s) => s.name?.startsWith("workspace"))!;
-const javaStep = bitbucketSteps.find((s) => s.name?.includes("Java"))!;
+const javaStep = bitbucketSteps.find((s) => s.name === "legacy Java project compiles")!;
 const quickStartStep = bitbucketSteps.find((s) => s.name?.startsWith("quick start"))!;
+const runtimeStep = bitbucketSteps.find((s) => s.name?.startsWith("Java runtime conformance"))!;
+const desktopSteps = (bitbucket.pipelines.custom?.["desktop-gates"]?.[0]?.parallel ?? []).map(
+  (p) => p.step,
+);
 
 describe("CI mirrors (P0-F5)", () => {
   it("both workflows exist", () => {
@@ -139,7 +148,18 @@ describe("CI mirrors (P0-F5)", () => {
      * Accessibility permission, so the step reports `prompt-pending` and stops.
      * A self-hosted runner with the permission granted turns it green.
      */
-    expect(job["continue-on-error"]).toContain("macos-latest");
+    /*
+     * The macOS leg tolerates exit 2 and nothing else (T7.2).
+     *
+     * It used to be `continue-on-error: macos-latest`, which tolerated *any*
+     * failure — so the 0-of-7 the live gate actually produced would have been
+     * green (Phase 6 verification, F1). The gate script exits 2 for "this host
+     * cannot run me" and 1 for "this adapter is not conformant"; only the first
+     * is a runner's fault.
+     */
+    expect(job["continue-on-error"]).toBeUndefined();
+    expect(script).toContain('if [ "$code" = "2" ]');
+    expect(script).toContain('exit "$code"');
   });
 
   it("runs the Java runtime against the published fixture (T6.4, REQ-STD-3)", () => {
@@ -156,6 +176,60 @@ describe("CI mirrors (P0-F5)", () => {
     // job cannot go green with a runtime that disagrees.
     expect(script).not.toContain("continue-on-error");
     expect(github.jobs["runtime-conformance"]!["continue-on-error"]).toBeUndefined();
+  });
+
+  /*
+   * T7.2, and the finding it exists for (Phase 6 verification, F8, K10).
+   *
+   * The GitHub workflow carried the desktop and Java conformance jobs, and this
+   * repository's only remote is Bitbucket — so neither had ever run, anywhere.
+   * The Java gate now runs on Bitbucket's hosted Linux on every branch; the two
+   * desktop gates are defined against self-hosted runner labels and live in a
+   * `custom:` pipeline, because a step whose labels match no attached runner
+   * queues rather than fails and would stall every branch build.
+   */
+  describe("the pipeline that exists carries every gate (T7.2)", () => {
+    it("runs the Java runtime conformance on every branch and pull request", () => {
+      for (const [where, steps] of [
+        ["default", bitbucket.pipelines.default[0]!.parallel!],
+        ["branches", bitbucket.pipelines.branches["**"]![0]!.parallel!],
+        ["pull-requests", bitbucket.pipelines["pull-requests"]["**"]![0]!.parallel!],
+      ] as const) {
+        expect(
+          steps.some((p) => p.step.name?.startsWith("Java runtime conformance")),
+          `the ${where} pipeline does not run the Java conformance`,
+        ).toBe(true);
+      }
+      const script = runtimeStep.script.join("\n");
+      expect(script).toContain("./gradlew --no-daemon fatJar test");
+      expect(script).toContain("scripts/runtime-conformance.mjs");
+      // A JDK, because the image is Node's.
+      expect(script).toContain("openjdk-17-jdk-headless");
+    });
+
+    it("defines both desktop gates against the runners that can host them", () => {
+      expect(desktopSteps.map((s) => s.name)).toEqual([
+        "desktop conformance (windows, uia)",
+        "desktop conformance (macos, ax)",
+      ]);
+      for (const step of desktopSteps) {
+        const script = step.script.join("\n");
+        // The host requirement first and on its own.
+        expect(script).toContain("surface doctor --adapter");
+        expect(script).toContain("electron-forge package");
+        expect(script).toContain("scripts/desktop-conformance.mjs");
+      }
+    });
+
+    it("lets only the macOS leg off, and only for exit 2", () => {
+      const [uia, ax] = desktopSteps as [BitbucketStep, BitbucketStep];
+      // UI Automation needs no permission grant, so that leg has nothing to
+      // hide behind and is a hard gate.
+      expect(uia.script.join("\n")).not.toContain('code" = "2"');
+      const script = ax.script.join("\n");
+      expect(script).toContain('if [ "$code" = "2" ]');
+      expect(script).toContain('exit "$code"');
+    });
   });
 
   it("the pull-request eval job replays a cache rather than spending", () => {
@@ -213,10 +287,19 @@ describe("CI mirrors (P0-F5)", () => {
   });
 
   it("runs on every branch and on pull requests, as the GitHub workflow does", () => {
+    /*
+     * Plus `custom`, which T7.2 added for the two desktop gates. They are not
+     * in the automatic pipelines because Bitbucket's hosted runners are Linux
+     * only and a step whose `runs-on` labels match nothing *queues* — putting
+     * them in `branches` would stall every build behind a runner that does not
+     * exist.
+     */
     expect(Object.keys(bitbucket.pipelines).sort()).toEqual([
       "branches",
+      "custom",
       "default",
       "pull-requests",
     ]);
+    expect(Object.keys(bitbucket.pipelines.custom!)).toEqual(["desktop-gates"]);
   });
 });
