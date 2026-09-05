@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<hierarchy index="0" class="hierarchy" rotation="0" width="1080" height="2400">
+  <android.widget.FrameLayout index="0" class="android.widget.FrameLayout" bounds="[0,0][1080,2400]" enabled="true" displayed="true">
+    <androidx.recyclerview.widget.RecyclerView index="0" class="androidx.recyclerview.widget.RecyclerView" resource-id="com.svatah.sample:id/bookings" scrollable="true" enabled="true" displayed="true" bounds="[0,300][1080,2100]">
+      <android.widget.LinearLayout index="0" class="android.widget.LinearLayout" enabled="true" displayed="true" bounds="[0,300][1080,600]">
+        <android.widget.TextView index="0" class="android.widget.TextView" text="Indiranagar" enabled="true" displayed="true" bounds="[24,330][600,420]" />
+        <android.widget.Button index="1" class="android.widget.Button" text="Book now" content-desc="Book Indiranagar" enabled="true" clickable="true" displayed="true" bounds="[700,330][1050,420]" />
+      </android.widget.LinearLayout>
+      <android.widget.LinearLayout index="1" class="android.widget.LinearLayout" enabled="true" displayed="true" bounds="[0,600][1080,900]">
+        <android.widget.TextView index="0" class="android.widget.TextView" text="Koramangala" enabled="true" displayed="true" bounds="[24,630][600,720]" />
+        <android.widget.Button index="1" class="android.widget.Button" text="Book now" content-desc="Book Koramangala" enabled="true" clickable="true" displayed="true" bounds="[700,630][1050,720]" />
+      </android.widget.LinearLayout>
+    </androidx.recyclerview.widget.RecyclerView>
+    <com.svatah.sample.widget.FancyButton index="1" class="com.svatah.sample.widget.FancyButton" text="Continue" enabled="true" clickable="true" displayed="true" bounds="[42,2160][1038,2304]" />
+  </android.widget.FrameLayout>
+</hierarchy>

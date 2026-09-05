@@ -13,6 +13,7 @@
  */
 import { registerPlaywrightAdapter } from "@svatah/adapter-playwright";
 import { registerBidiAdapter } from "@svatah/adapter-bidi";
+import { registerAppiumAdapter } from "@svatah/adapter-appium";
 
 let registered = false;
 
@@ -20,5 +21,6 @@ export function registerAllAdapters(): void {
   if (registered) return;
   registerPlaywrightAdapter();
   registerBidiAdapter();
+  registerAppiumAdapter();
   registered = true;
 }

@@ -38,6 +38,38 @@ const ALLOWED = new Set([
   "Zlib",
 ]);
 
+/**
+ * Packages whose licence is permissive but whose `package.json` does not say so,
+ * with the evidence and the reason each is accepted.
+ *
+ * Not a way to wave something through. A package earns a row only when its
+ * licence text is *in the published tarball* and is one of the licences REQ-PKG-3
+ * names — the metadata is missing, not the licence — and the row records where
+ * to read it, so the next person can check rather than trust.
+ *
+ * The version is pinned deliberately: a later release that changed its licence
+ * would fail this check again rather than inherit the exception.
+ */
+const METADATA_GAPS = [
+  {
+    name: "css-value",
+    version: "0.0.1",
+    licence: "MIT",
+    // A transitive dependency of `webdriverio` (T4.2). Published in 2012 with no
+    // `license` field; the MIT text is in `Readme.md` under "## License",
+    // copyright TJ Holowaychuk.
+    evidence: "node_modules/.pnpm/css-value@0.0.1/node_modules/css-value/Readme.md",
+  },
+];
+
+/** Whether a package is one of the documented metadata gaps above. */
+function isDocumentedGap(name, versions) {
+  const gap = METADATA_GAPS.find((g) => g.name === name);
+  if (gap === undefined) return false;
+  const found = (versions ?? "").split(", ").filter((v) => v !== "");
+  return found.length > 0 && found.every((v) => v === gap.version);
+}
+
 /** Split an SPDX expression and accept it when every alternative branch is allowed. */
 function isAllowed(expression) {
   if (!expression) return false;
@@ -67,14 +99,19 @@ function pnpmLicenses() {
 
 const report = pnpmLicenses();
 const offenders = [];
+const gaps = [];
 let inspected = 0;
 
 for (const [license, entries] of Object.entries(report)) {
   for (const entry of entries) {
     inspected += 1;
-    if (!isAllowed(license)) {
-      offenders.push({ name: entry.name, versions: entry.versions?.join(", ") ?? "", license });
+    if (isAllowed(license)) continue;
+    const versions = entry.versions?.join(", ") ?? "";
+    if (isDocumentedGap(entry.name, versions)) {
+      gaps.push({ name: entry.name, versions });
+      continue;
     }
+    offenders.push({ name: entry.name, versions, license });
   }
 }
 
@@ -96,3 +133,11 @@ if (offenders.length > 0) {
 const seen = Object.keys(report).sort();
 console.log(`Licence check OK — ${inspected} package(s), ${seen.length} distinct licence(s):`);
 for (const l of seen) console.log(`  ${l}`);
+
+if (gaps.length > 0) {
+  console.log(`\n${gaps.length} package(s) declare no licence but ship a permissive one:`);
+  for (const gap of gaps) {
+    const known = METADATA_GAPS.find((g) => g.name === gap.name);
+    console.log(`  ${gap.name}@${gap.versions}  ${known.licence} — see ${known.evidence}`);
+  }
+}
