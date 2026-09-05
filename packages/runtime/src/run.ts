@@ -129,6 +129,17 @@ export async function run(options: RunOptions): Promise<RunOutcome> {
   const order = expandRuns(plan, options);
   const results: StepResult[] = [];
   const outputs: Record<string, unknown> = {};
+  /*
+   * The same outputs with secret values replaced (REQ-NFR-6).
+   *
+   * `summary.json` is a file in the run directory; the returned `outputs` are a
+   * value handed to whoever asked for the run. A story may legitimately declare
+   * an output whose value came from a `secret` input — `Pay for a slot` reading
+   * the card number back off the form is the shape of it — and the caller who
+   * supplied the secret may have it back. The file may not: it is committed to
+   * bug reports and read by CI.
+   */
+  const redactedOutputs: Record<string, unknown> = {};
   const flowStatuses: Summary["flows"] = {};
 
   logger.log({
@@ -168,6 +179,7 @@ export async function run(options: RunOptions): Promise<RunOutcome> {
       });
       results.push(...outcome.results);
       Object.assign(outputs, outcome.outputs);
+      Object.assign(redactedOutputs, outcome.redactedOutputs);
       flowStatuses[flow] = outcome.status;
     }
   };
@@ -188,7 +200,7 @@ export async function run(options: RunOptions): Promise<RunOutcome> {
     startedAt: startedAt.toISOString(),
     endedAt: endedAt.toISOString(),
     flows: flowStatuses,
-    ...(Object.keys(outputs).length === 0 ? {} : { outputs }),
+    ...(Object.keys(redactedOutputs).length === 0 ? {} : { outputs: redactedOutputs }),
     /*
      * The names of the inputs this run received (Draft 2.6, LLD §10).
      *
@@ -241,6 +253,8 @@ async function runFlow(
 ): Promise<{
   results: StepResult[];
   outputs: Record<string, unknown>;
+  /** The same, safe to write down (REQ-NFR-6). */
+  redactedOutputs: Record<string, unknown>;
   status: Summary["flows"][string];
 }> {
   const { options } = context;
@@ -271,6 +285,7 @@ async function runFlow(
 
   const results: StepResult[] = [];
   const outputs: Record<string, unknown> = {};
+  const redactedOutputs: Record<string, unknown> = {};
 
   /*
    * Every step that ran, including the steps of stories reached through
@@ -314,6 +329,7 @@ async function runFlow(
     return {
       results: [result],
       outputs: {},
+      redactedOutputs: {},
       status: { status: "failed", passed: 0, failed: 1, skipped: 0 },
     };
   }
@@ -378,6 +394,7 @@ async function runFlow(
       return {
         results: [result],
         outputs: {},
+        redactedOutputs: {},
         status: { status: "failed", passed: 0, failed: 1, skipped: 0 },
       };
     }
@@ -427,7 +444,10 @@ async function runFlow(
         },
       });
 
-      for (const [key, value] of Object.entries(outcome.outputs)) outputs[`${name}.${key}`] = value;
+      for (const [key, value] of Object.entries(outcome.outputs)) {
+        outputs[`${name}.${key}`] = value;
+        redactedOutputs[`${name}.${key}`] = scope.redact(value);
+      }
 
       if (outcome.flowStopped) break;
     }
@@ -444,6 +464,7 @@ async function runFlow(
   return {
     results,
     outputs,
+    redactedOutputs,
     status: {
       status: aborted > 0 ? "aborted" : failed > 0 ? "failed" : healed > 0 ? "healed" : "passed",
       passed,

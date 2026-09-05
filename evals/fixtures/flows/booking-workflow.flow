@@ -1,0 +1,37 @@
+// A story with a typed signature, run as a function (T5.2, REQ-BEH-2, REQ-AUTO-5).
+//
+// This flow has no run block, so `svatah run` runs nothing from it: a `story`
+// block outside a run block is a function waiting to be called, not a test
+// (REQ-LANG-10). It is invoked by name —
+//
+//   svatah workflow run "Book a slot" --input location=Indiranagar
+//
+// — and by the tool server over MCP (T5.3), which derives the tool's schema from
+// the signature below.
+//
+// `idempotent` because booking the same slot twice on the sample application
+// leaves it in the same state: the page is static. A story that made a real
+// booking would not carry it, and the environment policy would refuse to run it
+// against production without `--allow-side-effects` (REQ-AUTO-7).
+
+story (idempotent=true, tags=workflow): Book a slot
+inputs: location: string, date: string = "2026-09-03"
+outputs: booking: string, place: string
+  Click the Book a slot link
+  Type {input.location} into the location field
+  Type {input.date} into the slot date field
+  Click the next button
+  Click the Book now button
+  Remember the text of the booking result as booking
+  Remember the value of the location field as place
+
+// The same shape without `idempotent`, for the environment policy: booking a
+// slot is safe to repeat on a static page, but paying for one is not, and a
+// production config must refuse this one without an explicit override.
+story (tags=workflow): Pay for a slot
+inputs: card: secret
+outputs: paid: string
+  Click the Book a slot link
+  Click the Checkout link
+  Type {input.card} into the card number field
+  Remember the value of the card number field as paid

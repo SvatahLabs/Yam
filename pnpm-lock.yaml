@@ -960,6 +960,9 @@ importers:
       '@svatah/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@svatah/schema':
+        specifier: workspace:*
+        version: link:../schema
     devDependencies:
       tsup:
         specifier: 'catalog:'

@@ -21,7 +21,7 @@ import { spawn } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
-import type { Plan, StepResult, Summary } from "@svatah/schema";
+import type { Invoker, Plan, StepResult, Summary } from "@svatah/schema";
 import { canonicalJson } from "@svatah/schema";
 import { BindingsStore, resolve as resolveBinding } from "@svatah/bindings";
 import { HttpSurface } from "@svatah/adapter-http";
@@ -40,6 +40,7 @@ import {
   type RunOptions,
 } from "@svatah/runtime";
 import { createSurface } from "@svatah/surface";
+import { runWorkflow } from "@svatah/workflow";
 import {
   boolOption,
   inputOptions,
@@ -242,6 +243,20 @@ export interface RunProjectOptions {
   readonly session?: SessionTarget;
   /** `--resume <runId> --from <stepId>` (REQ-AUTO-3, T5.1). */
   readonly resume?: { readonly runId: string; readonly from: string };
+  /**
+   * Which behavior this run is (REQ-BEH-5, LLD §13, T5.2).
+   *
+   * `test` by default. `workflow` runs the one story named in `stories` through
+   * `runWorkflow`, which forces checkpoints and audit on and applies the
+   * environment policy; `tool` is the same, invoked over MCP. One function for
+   * all three, because "behaviors share one plan" is only true if they share the
+   * code that runs it.
+   */
+  readonly behavior?: "test" | "workflow" | "tool";
+  /** `--allow-side-effects`, for the environment policy (REQ-AUTO-7). */
+  readonly allowSideEffects?: boolean;
+  /** Who is running this, for the audit log (REQ-AUTO-6). */
+  readonly invoker?: Invoker;
 }
 
 /**
@@ -255,7 +270,14 @@ export interface RunProjectOptions {
 export async function runProject(
   loaded: Awaited<ReturnType<typeof loadProject>>,
   options: RunProjectOptions = {},
-): Promise<{ runId: string; summary: Summary; results: readonly StepResult[]; directory: string }> {
+): Promise<{
+  runId: string;
+  summary: Summary;
+  results: readonly StepResult[];
+  directory: string;
+  /** A workflow's or a tool's declared outputs, un-namespaced (LLD §13.2). */
+  outputs?: Record<string, unknown>;
+}> {
   const plan = options.plan ?? compileProject(loaded, { stable: true }).plan;
   const runId = options.runId ?? newRunId();
   const outputDir = resolve(loaded.root, options.outputDir ?? loaded.config.run.outputDir);
@@ -377,7 +399,45 @@ export async function runProject(
     ...(options.stories === undefined ? {} : { stories: options.stories }),
     ...(options.onResult === undefined ? {} : { onResult: options.onResult }),
     ...(resume === undefined ? {} : { resume }),
+    ...(options.behavior === undefined ? {} : { behavior: options.behavior }),
+    ...(options.invoker === undefined ? {} : { invoker: options.invoker }),
   };
+
+  /*
+   * The workflow behavior is `runWorkflow`, not a branch here (LLD §13.2).
+   *
+   * It applies the environment policy, forces checkpoints and audit on, and
+   * un-namespaces the outputs — and it does that by *configuring* `run()`, so a
+   * step means exactly what it means under `svatah run` (REQ-BEH-5).
+   */
+  if (options.behavior === "workflow" || options.behavior === "tool") {
+    const storyName = options.stories?.[0];
+    if (storyName === undefined) {
+      throw new ConfigError("A workflow run names one story.", "stories");
+    }
+
+    // `behavior`, `stories` and `inputs` are the behavior's to set, so they are
+    // taken back off the shared options rather than passed twice.
+    const { behavior: _b, stories: _s, inputs: _i, ...runner } = runOptions;
+    void _b;
+    void _s;
+    void _i;
+
+    const outcome = await runWorkflow(storyName, {
+      runner,
+      ...(options.inputs === undefined ? {} : { inputs: options.inputs }),
+      ...(options.allowSideEffects === undefined
+        ? {}
+        : { allowSideEffects: options.allowSideEffects }),
+    });
+    return {
+      runId: outcome.runId,
+      summary: outcome.summary,
+      results: outcome.results,
+      directory: directory.path,
+      outputs: outcome.outputs,
+    };
+  }
 
   const outcome = await runPlan(runOptions);
   return {
