@@ -3,6 +3,9 @@ packages:
   - 'apps/*'
   - 'tools/*'
   - 'examples/*'
+  # The fixture project is a real project: it runs under Playwright Test, so it
+  # needs its own node_modules like any other consumer would (T2.10).
+  - 'evals/fixtures'
 
 onlyBuiltDependencies:
   - esbuild

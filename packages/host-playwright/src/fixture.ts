@@ -100,6 +100,8 @@ class FlowSession {
     bindingsDir: string,
     data: Record<string, unknown>,
     secrets: ReadonlySet<string>,
+    /** Run-level inputs, reaching only the stories that declare them. */
+    readonly inputs: Record<string, unknown> = {},
   ) {
     this.scope = new Scope({ data, secrets });
     for (const path of secrets) this.scope.noteSecret(readPath(data, path));
@@ -136,6 +138,16 @@ class FlowSession {
 
   story(name: string): Story | undefined {
     return this.plan.stories.find((s) => s.name === name);
+  }
+}
+
+/** A JSON environment variable, or nothing. */
+function readJson(text: string | undefined): Record<string, unknown> | undefined {
+  if (text === undefined || text === "") return undefined;
+  try {
+    return JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    return undefined;
   }
 }
 
@@ -197,14 +209,38 @@ export const test = base.extend<
       const surface = createPlaywrightSurface(config, { page });
       await surface.open({ ...(use_.baseURL === undefined ? {} : { baseUrl: use_.baseURL }) });
 
+      /*
+       * Start at the base URL, exactly as `svatah run --host none` does.
+       *
+       * A new context starts at `about:blank`, and a migrated flow begins by
+       * clicking something on the home page because the old runner opened the
+       * configured URL first. The two hosts have to agree about this or
+       * REQ-BEH-5 — the same plan, either host, the same statuses — would be
+       * false for every flow that does not navigate explicitly.
+       */
+      if (use_.baseURL !== undefined) {
+        await surface.act("navigate", undefined, { url: use_.baseURL });
+      }
+
+      /*
+       * The run's data and secrets travel by environment when the CLI spawned
+       * this process (`svatah run --host playwright`), and by fixture option
+       * when a project wired the host itself. Both, so neither audience has to
+       * do the other's setup.
+       */
+      const data = svatahData ?? readJson(process.env["SVATAH_DATA"]) ?? {};
+      const secrets = svatahSecrets ?? (readJson(process.env["SVATAH_SECRETS"]) as string[] | undefined) ?? [];
+      const inputs = readJson(process.env["SVATAH_INPUTS"]) ?? {};
+
       const session = new FlowSession(
         plan,
         svatahFlow ?? "(flow)",
         config,
         surface,
         svatahBindings ?? process.env["SVATAH_BINDINGS"] ?? "bindings",
-        svatahData ?? {},
-        new Set(svatahSecrets ?? []),
+        data,
+        new Set(secrets),
+        inputs,
       );
 
       await use(session);
@@ -251,7 +287,14 @@ async function runOne(
   }
 
   const before = session.results.length;
-  await runStory(story, {}, {
+  // Only the inputs this story declares — the same rule the standalone runner
+  // uses, so the two hosts agree about what a run-level input means (T2.7).
+  const declared = story.signature?.inputs ?? {};
+  const inputs = Object.fromEntries(
+    Object.entries(session.inputs).filter(([key]) => declared[key] !== undefined),
+  );
+
+  await runStory(story, inputs, {
     runId: session.runId,
     behavior: "test",
     flow: session.flow,

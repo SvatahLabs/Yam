@@ -1,0 +1,61 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "booking-link"
+      - by: "role"
+        exact: true
+        name: "Book a slot"
+        role: "link"
+        score: 0.92
+      - by: "text"
+        exact: true
+        score: 0.75
+        value: "Book a slot"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"booking-link\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='booking-link']"
+    context:
+      hash: "26f8d89fbf51c5544cac8aee328d2979e2127a910c495c7a7f3eec4c1ecd2fb2"
+      pattern: "/"
+      platform: "web"
+    fingerprint:
+      attrs:
+        class: "navbar-item"
+        data-testid: "booking-link"
+        href: "/booking"
+      box:
+        - 1064.42
+        - 12.88
+        - 75.83
+        - 23.25
+      index: 1
+      neighbours:
+        after:
+          - "Widgets"
+          - "Docs"
+          - "Deterministic automation, once described Describe a behaviour, record the bindings, replay it forever. Sign in Read the docs"
+        before:
+          - "Svatah Sample"
+          - "Menu"
+          - "Dashboard"
+      rolePath:
+        - "navigation"
+      tag: "a"
+      text: "Book a slot"
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "nav.book-a-slot-link"
+phrases:
+  - "the Book a slot link"
+schemaVersion: "1.0.0"

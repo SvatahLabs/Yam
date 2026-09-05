@@ -1,0 +1,72 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "username"
+      - by: "id"
+        score: 0.95
+        value: "username"
+      - by: "role"
+        exact: true
+        name: "Username"
+        role: "textbox"
+        score: 0.92
+      - by: "label"
+        exact: true
+        score: 0.9
+        value: "Username"
+      - by: "placeholder"
+        exact: true
+        score: 0.85
+        value: "you@example.com"
+      - by: "name"
+        score: 0.82
+        value: "username"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"username\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='username']"
+    context:
+      hash: "e3b76582ec5ee1693bf023b032849e765972348bbc3ca66582071d2b6c07d2a1"
+      pattern: "/login"
+      platform: "web"
+    fingerprint:
+      attrs:
+        data-testid: "username"
+        id: "username"
+        name: "username"
+        placeholder: "you@example.com"
+        type: "text"
+      box:
+        - 20
+        - 149.55
+        - 380
+        - 39.25
+      index: 0
+      neighbours:
+        after:
+          - "Password"
+          - "Remember me"
+        before:
+          - "Sign in to your account"
+          - "Invalid credentials"
+          - "Username"
+      rolePath:
+        - "main"
+      tag: "input"
+      text: ""
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "login.username-field"
+phrases:
+  - "the username field"
+schemaVersion: "1.0.0"

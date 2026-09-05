@@ -1,0 +1,67 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "expiry-month"
+      - by: "id"
+        score: 0.95
+        value: "expiry-month"
+      - by: "role"
+        exact: true
+        name: "Expiry"
+        role: "combobox"
+        score: 0.92
+      - by: "label"
+        exact: true
+        score: 0.9
+        value: "Expiry"
+      - by: "name"
+        score: 0.82
+        value: "expiryMonth"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"expiry-month\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='expiry-month']"
+    context:
+      hash: "c32f876970fe76369c0d0836cd9a9d2d85e50833ad706b8edeb0a1bcc29f7649"
+      pattern: "/checkout"
+      platform: "web"
+    fingerprint:
+      attrs:
+        data-testid: "expiry-month"
+        id: "expiry-month"
+        name: "expiryMonth"
+      box:
+        - 294.19
+        - 202.8
+        - 59
+        - 36
+      index: 0
+      neighbours:
+        after:
+          - "20262027"
+          - "CVV"
+          - "Pay"
+        before:
+          - "Checkout"
+          - "Card number"
+          - "Expiry"
+      rolePath:
+        - "main"
+      tag: "select"
+      text: "010812"
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "checkout.expiry-month-select"
+phrases:
+  - "the expiry month select"
+schemaVersion: "1.0.0"

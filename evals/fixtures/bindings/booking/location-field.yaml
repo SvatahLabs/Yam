@@ -1,0 +1,73 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "location"
+      - by: "id"
+        score: 0.95
+        value: "location"
+      - by: "role"
+        exact: true
+        name: "Starting point"
+        role: "combobox"
+        score: 0.92
+      - by: "label"
+        exact: true
+        score: 0.9
+        value: "Starting point"
+      - by: "placeholder"
+        exact: true
+        score: 0.85
+        value: "Where from?"
+      - by: "name"
+        score: 0.82
+        value: "location"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"location\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='location']"
+    context:
+      hash: "5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9"
+      pattern: "/booking"
+      platform: "web"
+    fingerprint:
+      attrs:
+        data-testid: "location"
+        id: "location"
+        name: "location"
+        placeholder: "Where from?"
+        type: "text"
+      box:
+        - 244
+        - 149.55
+        - 187
+        - 39.25
+      index: 0
+      neighbours:
+        after:
+          - "Date"
+          - "Times 09:00 12:00 15:00 18:00"
+          - "Next"
+        before:
+          - "☰ Overview Schedule Build Bookings Checkout Logout"
+          - "Book a slot"
+          - "Starting point"
+      rolePath:
+        - "main"
+      tag: "input"
+      text: ""
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "booking.location-field"
+phrases:
+  - "the location field"
+schemaVersion: "1.0.0"

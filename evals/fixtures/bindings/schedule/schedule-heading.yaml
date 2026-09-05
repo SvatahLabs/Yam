@@ -1,0 +1,58 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "schedule-heading"
+      - by: "role"
+        exact: true
+        name: "Enterprise"
+        role: "heading"
+        score: 0.92
+      - by: "text"
+        exact: true
+        score: 0.75
+        value: "Enterprise"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"schedule-heading\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='schedule-heading']"
+    context:
+      hash: "ae92e58ae42e3e29bd77f775e8e2d1a0a59d546a5943ce927450cbf60f8a6a66"
+      pattern: "/schedule-build"
+      platform: "web"
+    fingerprint:
+      attrs:
+        data-testid: "schedule-heading"
+      box:
+        - 244
+        - 74
+        - 226.84
+        - 40.3
+      index: 0
+      neighbours:
+        after:
+          - "Schedule a build for your project."
+          - "Project Core Adapters ADE Run build"
+          - "Build scheduled."
+        before:
+          - "Svatah Sample Menu Dashboard Book a slot Widgets Docs"
+          - "☰ Overview Schedule Build Bookings Checkout Logout"
+      rolePath:
+        - "main"
+      tag: "h1"
+      text: "Enterprise"
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "schedule.schedule-heading"
+phrases:
+  - "the schedule heading"
+schemaVersion: "1.0.0"

@@ -37,6 +37,7 @@
     "@svatah/conformance": "workspace:*",
     "@svatah/gateway": "workspace:*",
     "@svatah/healer": "workspace:*",
+    "@svatah/host-playwright": "workspace:*",
     "@svatah/migrate": "workspace:*",
     "@svatah/playwright-test": "workspace:*",
     "@svatah/recorder": "workspace:*",
@@ -47,9 +48,11 @@
     "@svatah/surface": "workspace:*",
     "@svatah/tool": "workspace:*",
     "@svatah/trajectory": "workspace:*",
-    "@svatah/workflow": "workspace:*"
+    "@svatah/workflow": "workspace:*",
+    "yaml": "catalog:"
   },
   "devDependencies": {
+    "@playwright/test": "catalog:",
     "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
@@ -60,5 +63,13 @@
   },
   "bin": {
     "svatah": "./dist/bin.js"
+  },
+  "peerDependencies": {
+    "@playwright/test": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "@playwright/test": {
+      "optional": true
+    }
   }
 }

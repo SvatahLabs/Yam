@@ -1,0 +1,57 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "expiry-year"
+      - by: "id"
+        score: 0.95
+        value: "expiry-year"
+      - by: "name"
+        score: 0.82
+        value: "expiryYear"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"expiry-year\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='expiry-year']"
+    context:
+      hash: "c32f876970fe76369c0d0836cd9a9d2d85e50833ad706b8edeb0a1bcc29f7649"
+      pattern: "/checkout"
+      platform: "web"
+    fingerprint:
+      attrs:
+        data-testid: "expiry-year"
+        id: "expiry-year"
+        name: "expiryYear"
+      box:
+        - 361.19
+        - 202.8
+        - 77
+        - 36
+      index: 1
+      neighbours:
+        after:
+          - "CVV"
+          - "Pay"
+        before:
+          - "Card number"
+          - "Expiry"
+          - "010812"
+      rolePath:
+        - "main"
+      tag: "select"
+      text: "20262027"
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "checkout.expiry-year-select"
+phrases:
+  - "the expiry year select"
+schemaVersion: "1.0.0"

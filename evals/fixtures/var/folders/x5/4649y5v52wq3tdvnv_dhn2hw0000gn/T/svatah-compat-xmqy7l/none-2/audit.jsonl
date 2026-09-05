@@ -1,0 +1,45 @@
+{"runId":"none-2","at":"2026-09-02T23:02:08.388Z","seq":0,"kind":"run","detail":{"invoker":{"kind":"user","id":"local","via":"cli"},"inputs":{}}}
+{"runId":"none-2","at":"2026-09-02T23:02:08.497Z","seq":1,"kind":"story","story":"book a slot","detail":{"inputs":{}}}
+{"runId":"none-2","at":"2026-09-02T23:02:08.498Z","seq":2,"kind":"surface","story":"book a slot","call":{"method":"state"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:08.499Z","seq":3,"kind":"surface","story":"book a slot","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:08.500Z","seq":4,"kind":"surface","story":"book a slot","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:08.500Z","seq":5,"kind":"surface","story":"book a slot","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:08.501Z","seq":6,"kind":"surface","story":"book a slot","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:08.502Z","seq":7,"kind":"surface","story":"book a slot","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:08.502Z","seq":8,"kind":"surface","story":"book a slot","call":{"method":"state"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:08.537Z","seq":9,"kind":"surface","story":"book a slot","call":{"method":"screenshot"},"outcome":"ok","durationMs":34}
+{"runId":"none-2","at":"2026-09-02T23:02:08.537Z","seq":10,"kind":"policy","story":"book a slot","stepId":"book a slot#1","detail":{"policy":{"compensate":"cancel booking"}}}
+{"runId":"none-2","at":"2026-09-02T23:02:08.537Z","seq":11,"kind":"story","story":"cancel booking","detail":{"inputs":{}}}
+{"runId":"none-2","at":"2026-09-02T23:02:08.538Z","seq":12,"kind":"surface","story":"book a slot","stepId":"book a slot#6","call":{"method":"state"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:08.538Z","seq":13,"kind":"surface","story":"book a slot","stepId":"book a slot#6","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:08.539Z","seq":14,"kind":"surface","story":"book a slot","stepId":"book a slot#6","call":{"method":"locate"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:08.539Z","seq":15,"kind":"surface","story":"book a slot","stepId":"book a slot#6","call":{"method":"locate"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:08.540Z","seq":16,"kind":"surface","story":"book a slot","stepId":"book a slot#6","call":{"method":"locate"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:08.540Z","seq":17,"kind":"surface","story":"book a slot","stepId":"book a slot#6","call":{"method":"locate"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:08.540Z","seq":18,"kind":"surface","story":"book a slot","stepId":"book a slot#6","call":{"method":"state"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:08.552Z","seq":19,"kind":"surface","story":"book a slot","stepId":"book a slot#6","call":{"method":"screenshot"},"outcome":"ok","durationMs":12}
+{"runId":"none-2","at":"2026-09-02T23:02:08.552Z","seq":20,"kind":"policy","story":"cancel booking","stepId":"cancel booking#1","detail":{"policy":"stop"}}
+{"runId":"none-2","at":"2026-09-02T23:02:08.566Z","seq":0,"kind":"run","detail":{"invoker":{"kind":"user","id":"local","via":"cli"},"inputs":{}}}
+{"runId":"none-2","at":"2026-09-02T23:02:08.662Z","seq":1,"kind":"story","story":"start zoomcar booking","detail":{"inputs":{}}}
+{"runId":"none-2","at":"2026-09-02T23:02:08.662Z","seq":2,"kind":"surface","story":"start zoomcar booking","call":{"method":"state"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:08.663Z","seq":3,"kind":"surface","story":"start zoomcar booking","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:08.663Z","seq":4,"kind":"surface","story":"start zoomcar booking","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:08.664Z","seq":5,"kind":"surface","story":"start zoomcar booking","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:08.665Z","seq":6,"kind":"surface","story":"start zoomcar booking","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:08.665Z","seq":7,"kind":"surface","story":"start zoomcar booking","call":{"method":"locate"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:08.665Z","seq":8,"kind":"surface","story":"start zoomcar booking","call":{"method":"state"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:08.703Z","seq":9,"kind":"surface","story":"start zoomcar booking","call":{"method":"screenshot"},"outcome":"ok","durationMs":38}
+{"runId":"none-2","at":"2026-09-02T23:02:08.703Z","seq":10,"kind":"policy","story":"start zoomcar booking","stepId":"start zoomcar booking#1","detail":{"policy":"stop"}}
+{"runId":"none-2","at":"2026-09-02T23:02:08.713Z","seq":0,"kind":"run","detail":{"invoker":{"kind":"user","id":"local","via":"cli"},"inputs":{}}}
+{"runId":"none-2","at":"2026-09-02T23:02:08.821Z","seq":0,"kind":"run","detail":{"invoker":{"kind":"user","id":"local","via":"cli"},"inputs":{}}}
+{"runId":"none-2","at":"2026-09-02T23:02:08.930Z","seq":0,"kind":"run","detail":{"invoker":{"kind":"user","id":"local","via":"cli"},"inputs":{}}}
+{"runId":"none-2","at":"2026-09-02T23:02:09.027Z","seq":1,"kind":"story","story":"Validate Text","detail":{"inputs":{}}}
+{"runId":"none-2","at":"2026-09-02T23:02:09.027Z","seq":2,"kind":"surface","story":"Validate Text","call":{"method":"state"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:09.028Z","seq":3,"kind":"surface","story":"Validate Text","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:09.028Z","seq":4,"kind":"surface","story":"Validate Text","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:09.029Z","seq":5,"kind":"surface","story":"Validate Text","call":{"method":"locate"},"outcome":"ok","durationMs":1}
+{"runId":"none-2","at":"2026-09-02T23:02:09.029Z","seq":6,"kind":"surface","story":"Validate Text","call":{"method":"locate"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:09.030Z","seq":7,"kind":"surface","story":"Validate Text","call":{"method":"locate"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:09.030Z","seq":8,"kind":"surface","story":"Validate Text","call":{"method":"state"},"outcome":"ok","durationMs":0}
+{"runId":"none-2","at":"2026-09-02T23:02:09.069Z","seq":9,"kind":"surface","story":"Validate Text","call":{"method":"screenshot"},"outcome":"ok","durationMs":39}
+{"runId":"none-2","at":"2026-09-02T23:02:09.069Z","seq":10,"kind":"policy","story":"Validate Text","stepId":"Validate Text#1","detail":{"policy":"stop"}}

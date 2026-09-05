@@ -1,0 +1,56 @@
+entries:
+  - candidates:
+      - by: "role"
+        exact: true
+        name: "18:00"
+        role: "option"
+        score: 0.92
+      - by: "text"
+        exact: true
+        score: 0.75
+        value: "18:00"
+      - by: "css"
+        score: 0.55
+        value: "[data-testid=\"slot-times\"] > option:nth-of-type(4)"
+      - by: "xpath"
+        score: 0.45
+        value: "//*[@data-testid='slot-times']/option[4]"
+    context:
+      hash: "5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9"
+      pattern: "/booking"
+      platform: "web"
+    fingerprint:
+      attrs:
+        value: "18:00"
+      box:
+        - 254
+        - 377.55
+        - 167
+        - 19
+      index: 3
+      neighbours:
+        after:
+          - "Next"
+          - "Book now"
+          - "Slot booked."
+        before:
+          - "09:00"
+          - "12:00"
+          - "15:00"
+      rolePath:
+        - "main"
+        - "listbox"
+      tag: "option"
+      text: "18:00"
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "booking.18-00-slot-time"
+phrases:
+  - "the 18:00 slot time"
+schemaVersion: "1.0.0"

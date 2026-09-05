@@ -1,0 +1,46 @@
+# The fixture project: the four migrated flows plus the compensation showcase,
+# run against `apps/sample-web` (REQ-NFR-8, T2.10).
+#
+# `app.baseUrl` is overridden at run time — the sample application takes an
+# ephemeral port so two runs can overlap — and is written here so the project
+# reads sensibly on its own.
+schemaVersion: "1.0.0"
+project: "svatah-fixtures"
+environment: test
+adapter: playwright
+
+app:
+  baseUrl: "http://127.0.0.1:4173"
+
+flows: { dir: flows }
+steps: { dir: steps }
+bindings:
+  dir: bindings
+  testIdAttributes: ["data-testid", "data-test", "data-qa"]
+data: { file: data.yaml }
+api: { dir: api }
+
+run:
+  workers: 1
+  headless: true
+  stepTimeoutMs: 10000
+  candidateTimeoutMs: 2000
+  screenshots: onFailure
+  trace: false
+  outputDir: runs
+  checkpoints: false
+  audit: true
+
+compile:
+  confidenceThreshold: 0.8
+
+record:
+  model: "none"
+  maxSnapshotTokens: 4000
+  visionFallback: false
+
+heal:
+  onFail: false
+  relocalizeThreshold: 0.72
+  margin: 0.1
+  useModel: false

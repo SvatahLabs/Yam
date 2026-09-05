@@ -1,0 +1,53 @@
+{
+  "behavior": "test",
+  "bindingsHash": "none",
+  "configHash": "9d50827a4e999c743f87cfb66683f2b020f93bf34b70f9f63a8c3672701711a5",
+  "endedAt": "2026-09-02T23:17:43.348Z",
+  "exitCode": 1,
+  "flows": {
+    "flows/execution.flow": {
+      "failed": 1,
+      "passed": 4,
+      "skipped": 1,
+      "status": "failed"
+    },
+    "flows/natural_language_login.flow": {
+      "failed": 1,
+      "passed": 4,
+      "skipped": 0,
+      "status": "failed"
+    },
+    "flows/simple.flow": {
+      "failed": 1,
+      "passed": 8,
+      "skipped": 4,
+      "status": "failed"
+    },
+    "flows/svatah.flow": {
+      "failed": 1,
+      "passed": 5,
+      "skipped": 10,
+      "status": "failed"
+    }
+  },
+  "invoker": {
+    "id": "local",
+    "kind": "user",
+    "via": "cli"
+  },
+  "outputs": {
+    "I want to validate login.enterprise": "Enterprise"
+  },
+  "planHash": "c689d0cc3eb82dd726884b22888f68d4c24b23f2528d2798e8396256459e1ab9",
+  "runId": "none-1",
+  "schemaVersion": "1.0.0",
+  "startedAt": "2026-09-02T23:17:31.707Z",
+  "totals": {
+    "aborted": 0,
+    "failed": 4,
+    "healed": 0,
+    "passed": 21,
+    "skipped": 15
+  }
+}
+

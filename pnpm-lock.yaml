@@ -65,6 +65,12 @@ importers:
       '@eslint/js':
         specifier: 'catalog:'
         version: 9.39.5
+      '@svatah/adapter-playwright':
+        specifier: workspace:*
+        version: link:packages/adapter-playwright
+      '@svatah/bindings':
+        specifier: workspace:*
+        version: link:packages/bindings
       '@svatah/compiler':
         specifier: workspace:*
         version: link:packages/compiler
@@ -126,6 +132,15 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 2.1.9(@types/node@22.20.1)
+
+  evals/fixtures:
+    devDependencies:
+      '@playwright/test':
+        specifier: 'catalog:'
+        version: 1.62.1
+      '@svatah/host-playwright':
+        specifier: workspace:*
+        version: link:../../packages/host-playwright
 
   examples/plain-playwright:
     dependencies:
@@ -350,6 +365,9 @@ importers:
       '@svatah/healer':
         specifier: workspace:*
         version: link:../healer
+      '@svatah/host-playwright':
+        specifier: workspace:*
+        version: link:../host-playwright
       '@svatah/migrate':
         specifier: workspace:*
         version: link:../migrate
@@ -383,7 +401,13 @@ importers:
       '@svatah/workflow':
         specifier: workspace:*
         version: link:../workflow
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.0
     devDependencies:
+      '@playwright/test':
+        specifier: 'catalog:'
+        version: 1.62.1
       sample-web:
         specifier: workspace:*
         version: link:../../apps/sample-web

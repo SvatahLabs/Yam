@@ -1,0 +1,69 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "slot-date"
+      - by: "id"
+        score: 0.95
+        value: "slot-date"
+      - by: "role"
+        exact: true
+        name: "Date"
+        role: "textbox"
+        score: 0.92
+      - by: "label"
+        exact: true
+        score: 0.9
+        value: "Date"
+      - by: "name"
+        score: 0.82
+        value: "date"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"slot-date\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='slot-date']"
+    context:
+      hash: "5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9"
+      pattern: "/booking"
+      platform: "web"
+    fingerprint:
+      attrs:
+        data-testid: "slot-date"
+        id: "slot-date"
+        name: "date"
+        type: "date"
+        value: "2026-09-03"
+      box:
+        - 244
+        - 230.05
+        - 187
+        - 41.25
+      index: 0
+      neighbours:
+        after:
+          - "Times 09:00 12:00 15:00 18:00"
+          - "Next"
+          - "Book now"
+        before:
+          - "Book a slot"
+          - "Starting point"
+          - "Date"
+      rolePath:
+        - "main"
+      tag: "input"
+      text: ""
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "booking.slot-date-field"
+phrases:
+  - "the slot date field"
+schemaVersion: "1.0.0"

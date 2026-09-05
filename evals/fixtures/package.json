@@ -1,0 +1,15 @@
+{
+  "name": "svatah-fixtures",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The migrated sample flows, run against apps/sample-web as the compatibility milestone (T2.10, REQ-NFR-8)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"the fixtures run through scripts/compatibility.mjs\" && exit 0"
+  },
+  "devDependencies": {
+    "@playwright/test": "catalog:",
+    "@svatah/host-playwright": "workspace:*"
+  }
+}

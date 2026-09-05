@@ -1,0 +1,60 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "booking-next"
+      - by: "role"
+        exact: true
+        name: "Next"
+        role: "button"
+        score: 0.92
+      - by: "text"
+        exact: true
+        score: 0.75
+        value: "Next"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"booking-next\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='booking-next']"
+    context:
+      hash: "5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9"
+      pattern: "/booking"
+      platform: "web"
+    fingerprint:
+      attrs:
+        class: "btn"
+        data-testid: "booking-next"
+        type: "button"
+      box:
+        - 244
+        - 399.55
+        - 187
+        - 41.25
+      index: 0
+      neighbours:
+        after:
+          - "Book now"
+          - "Slot booked."
+        before:
+          - "Starting point"
+          - "Date"
+          - "Times 09:00 12:00 15:00 18:00"
+      rolePath:
+        - "main"
+      tag: "button"
+      text: "Next"
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "booking.next-button"
+phrases:
+  - "the next button"
+schemaVersion: "1.0.0"

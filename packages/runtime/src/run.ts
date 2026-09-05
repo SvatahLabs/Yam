@@ -39,6 +39,7 @@ import type { AgentSurface } from "@svatah/surface";
 import { Auditor, MemoryAuditSink, type AuditSink } from "./audit.js";
 import { checkpointFor, summarise, type RunDirectory } from "./results.js";
 import { Scope } from "./scope.js";
+import { messageOf } from "./failure.js";
 import { runStory, type StoryContext } from "./story.js";
 import type { ApiRunner, CustomStepRunner, Resolver } from "./step.js";
 import { SILENT, type Logger } from "./log.js";
@@ -234,7 +235,40 @@ async function runFlow(
     options.onResult?.(result);
   };
 
-  const raw = await options.openSurface(flow);
+  /*
+   * A session that will not open is `infrastructure`, reported as a result
+   * rather than thrown (REQ-RUN-8). A browser that could not launch, or an
+   * application that is not up, is a normal CI failure — and a run that crashed
+   * leaves no `results.jsonl` for anything downstream to read.
+   */
+  let raw: AgentSurface;
+  try {
+    raw = await options.openSurface(flow);
+  } catch (error) {
+    const at = new Date().toISOString();
+    const result: StepResult = {
+      runId: context.runId,
+      behavior: context.behavior,
+      flow,
+      story: storyNames[0] ?? flow,
+      stepId: `${flow}#session`,
+      line: 1,
+      text: `open a session for ${flow}`,
+      status: "failed",
+      startedAt: at,
+      endedAt: at,
+      durationMs: 0,
+      failure: { class: "infrastructure", message: messageOf(error) },
+    };
+    options.directory?.result(result);
+    options.onResult?.(result);
+    return {
+      results: [result],
+      outputs: {},
+      status: { status: "failed", passed: 0, failed: 1, skipped: 0 },
+    };
+  }
+
   let at: { story?: string; stepId?: string } = {};
   const surface = auditor.auditing(raw, () => at);
 
@@ -250,7 +284,21 @@ async function runFlow(
       if (!story.meta.enabled) continue;
 
       at = { story: name };
-      const outcome = await runStory(story, options.inputs ?? {}, {
+      /*
+       * Run-level inputs reach only the stories that declare them.
+       *
+       * `--input email=…` is about the run, and a run holds stories with
+       * different signatures — most with none at all. Passing every input to
+       * every story would make an unrelated story fail for having been given
+       * something it never asked for. An `invoke` is the other case, and stays
+       * strict: there the caller named one story deliberately.
+       */
+      const declared = story.signature?.inputs ?? {};
+      const inputs = Object.fromEntries(
+        Object.entries(options.inputs ?? {}).filter(([key]) => declared[key] !== undefined),
+      );
+
+      const outcome = await runStory(story, inputs, {
         ...storyContext(flow, story, scope, surface, auditor, context, () => at, record),
         onResult: (result) => {
           at = { story: name, stepId: result.stepId };

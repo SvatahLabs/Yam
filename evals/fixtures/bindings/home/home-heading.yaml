@@ -1,0 +1,57 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "home-heading"
+      - by: "role"
+        exact: true
+        name: "Deterministic automation, once described"
+        role: "heading"
+        score: 0.92
+      - by: "text"
+        exact: true
+        score: 0.75
+        value: "Deterministic automation, once described"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"home-heading\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='home-heading']"
+    context:
+      hash: "26f8d89fbf51c5544cac8aee328d2979e2127a910c495c7a7f3eec4c1ecd2fb2"
+      pattern: "/"
+      platform: "web"
+    fingerprint:
+      attrs:
+        data-testid: "home-heading"
+      box:
+        - 20
+        - 74
+        - 720
+        - 40.3
+      index: 0
+      neighbours:
+        after:
+          - "Describe a behaviour, record the bindings, replay it forever."
+          - "Sign in"
+          - "Read the docs"
+        before:
+          - "Svatah Sample Menu Dashboard Book a slot Widgets Docs"
+      rolePath:
+        - "main"
+      tag: "h1"
+      text: "Deterministic automation, once described"
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "home.home-heading"
+phrases:
+  - "the home heading"
+schemaVersion: "1.0.0"

@@ -1,0 +1,46 @@
+entries:
+  - candidates:
+      - by: "css"
+        score: 0.55
+        value: "[id=\"locations\"] > option:nth-of-type(1)"
+      - by: "xpath"
+        score: 0.45
+        value: "//*[@id='locations']/option[1]"
+    context:
+      hash: "5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9"
+      pattern: "/booking"
+      platform: "web"
+    fingerprint:
+      attrs:
+        value: "Indiranagar"
+      box:
+        - 0
+        - 0
+        - 0
+        - 0
+      index: 0
+      neighbours:
+        after:
+          - "Date"
+          - "Times 09:00 12:00 15:00 18:00"
+          - "Next"
+        before:
+          - "☰ Overview Schedule Build Bookings Checkout Logout"
+          - "Book a slot"
+          - "Starting point"
+      rolePath:
+        - "main"
+      tag: "option"
+      text: ""
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "booking.indiranagar-suggestion"
+phrases:
+  - "the Indiranagar suggestion"
+schemaVersion: "1.0.0"

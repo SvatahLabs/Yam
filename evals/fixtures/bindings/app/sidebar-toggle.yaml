@@ -1,0 +1,58 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "sidebar-toggle"
+      - by: "role"
+        exact: true
+        name: "Toggle sidebar"
+        role: "button"
+        score: 0.92
+      - by: "text"
+        exact: true
+        score: 0.75
+        value: "☰"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"sidebar-toggle\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='sidebar-toggle']"
+    context:
+      hash: "691ed4838691ef73b9105f6a60fcca52d9c149cd446ad1d9ea4ffb4d102ccfca"
+      pattern: "/dashboard"
+      platform: "web"
+    fingerprint:
+      attrs:
+        aria-label: "Toggle sidebar"
+        class: "sidebar-toggle"
+        data-testid: "sidebar-toggle"
+      box:
+        - 20
+        - 70
+        - 33.73
+        - 26
+      index: 0
+      neighbours:
+        after:
+          - "Overview Schedule Build Bookings Checkout Logout"
+          - "Welcome back, Enterprise You have 3 active builds. Refresh count BuildStatus nightly-1042passed nightly-1043running nightly-1044queued"
+        before:
+          - "Svatah Sample Menu Dashboard Book a slot Widgets Docs"
+      rolePath:
+        - "complementary"
+      tag: "button"
+      text: "☰"
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "app.sidebar-toggle"
+phrases:
+  - "the sidebar toggle"
+schemaVersion: "1.0.0"

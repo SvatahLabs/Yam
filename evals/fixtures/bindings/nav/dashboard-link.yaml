@@ -1,0 +1,60 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "dashboard-link"
+      - by: "role"
+        exact: true
+        name: "Dashboard"
+        role: "link"
+        score: 0.92
+      - by: "text"
+        exact: true
+        score: 0.75
+        value: "Dashboard"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"dashboard-link\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='dashboard-link']"
+    context:
+      hash: "26f8d89fbf51c5544cac8aee328d2979e2127a910c495c7a7f3eec4c1ecd2fb2"
+      pattern: "/"
+      platform: "web"
+    fingerprint:
+      attrs:
+        class: "navbar-item"
+        data-testid: "dashboard-link"
+        href: "/dashboard"
+      box:
+        - 975.61
+        - 12.88
+        - 74.81
+        - 23.25
+      index: 0
+      neighbours:
+        after:
+          - "Book a slot"
+          - "Widgets"
+          - "Docs"
+        before:
+          - "Svatah Sample"
+          - "Menu"
+      rolePath:
+        - "navigation"
+      tag: "a"
+      text: "Dashboard"
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "nav.dashboard-link"
+phrases:
+  - "the dashboard link"
+schemaVersion: "1.0.0"

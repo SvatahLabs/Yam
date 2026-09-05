@@ -6,7 +6,14 @@
  * Playwright Test host — import an `adapter-*` package (LLD §1).
  */
 export { main } from "./cli.js";
-export { parseArgs, stringOption, boolOption, type ParsedArgs } from "./args.js";
+export {
+  parseArgs,
+  stringOption,
+  stringOptions,
+  boolOption,
+  numberOption,
+  type ParsedArgs,
+} from "./args.js";
 export { EXIT, type ExitCode } from "./exit-codes.js";
 export { registerAllAdapters } from "./adapters.js";
 export type { CommandIo } from "./commands/surface.js";

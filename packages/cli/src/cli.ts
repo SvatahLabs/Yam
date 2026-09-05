@@ -1,35 +1,43 @@
 /**
  * The `svatah` command line (LLD §15).
  *
- * Phase 1 implements the commands module (a) needs: `surface conform`,
- * `bindings`, `heal` and `eval healing`. The rest of the table in LLD §15 arrives
- * with the components behind it, and an unimplemented command says which task
- * builds it rather than printing a bare "unknown command".
+ * Phase 1 built the commands module (a) needs — `surface conform`, `bindings`,
+ * `heal`, `eval healing`. Phase 2 adds module (b)'s: `compile`, `lint`, `run`
+ * under both hosts, `migrate`, `init` and `doctor`. What is still missing says
+ * which task builds it rather than printing a bare "unknown command", because
+ * "not yet" and "never" are different answers.
+ *
+ * Commands are imported lazily. `svatah bindings list` should not pay for
+ * loading the compiler, and `svatah --help` should not load anything at all.
  */
 import { parseArgs, type ParsedArgs } from "./args.js";
 import { EXIT, type ExitCode } from "./exit-codes.js";
 import { surfaceCommand, type CommandIo } from "./commands/surface.js";
 
-/** Commands LLD §15 lists that Phase 1 does not build, and what does. */
+/** Commands LLD §15 lists that are not built yet, and what builds them. */
 const LATER: Record<string, string> = {
-  compile: "T2.5",
-  lint: "T2.5",
   record: "T3.3",
-  run: "T2.7",
-  migrate: "T2.9",
   repl: "T4.5",
   workflow: "T5.4",
   tool: "T5.5",
-  host: "T2.8",
-  init: "T2.10",
-  doctor: "T4.1",
   mcp: "T4.6",
   serve: "T2.11",
 };
 
 const USAGE = `svatah — a deterministic automation runtime with a standard agent surface
 
-Phase 1 (module a — bindings and model-free healing for Playwright users):
+Flows (module b):
+
+  svatah init [dir] [--force]
+  svatah lint [dir] [--json]
+  svatah compile [dir] [--stable] [--out .svatah/plan.json] [--json]
+  svatah run [dir] [--host playwright|none] [--flow <file>] [--story <name>]
+             [--workers <n>] [--headed] [--out runs] [--run-id <id>] [--json]
+  svatah host generate [dir] [--out .svatah/specs]
+  svatah migrate <src> <dest> [--keep-original] [--json]
+  svatah doctor [dir] [--json]
+
+Bindings and healing (module a):
 
   svatah surface conform --adapter <name> [--base-url <url>] [--headed] [--only <ids>]
                          [--report <path.md>] [--json]
@@ -63,6 +71,20 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
       return await (await import("./commands/heal.js")).healCommand(args, io);
     case "eval":
       return await (await import("./commands/eval.js")).evalCommand(args, io);
+    case "compile":
+      return await (await import("./commands/compile.js")).compileCommand(args, io);
+    case "lint":
+      return await (await import("./commands/compile.js")).lintCommand(args, io);
+    case "run":
+      return await (await import("./commands/run.js")).runCommand(args, io);
+    case "migrate":
+      return await (await import("./commands/migrate.js")).migrateCommand(args, io);
+    case "init":
+      return await (await import("./commands/init.js")).initCommand(args, io);
+    case "doctor":
+      return await (await import("./commands/doctor.js")).doctorCommand(args, io);
+    case "host":
+      return await (await import("./commands/host.js")).hostCommand(args, io);
     default: {
       const task = LATER[command];
       io.err(

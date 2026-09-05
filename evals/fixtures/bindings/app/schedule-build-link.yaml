@@ -1,0 +1,62 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "nav-schedule-build"
+      - by: "role"
+        exact: true
+        name: "Schedule Build"
+        role: "link"
+        score: 0.92
+      - by: "text"
+        exact: true
+        score: 0.75
+        value: "Schedule Build"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"nav-schedule-build\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='nav-schedule-build']"
+    context:
+      hash: "691ed4838691ef73b9105f6a60fcca52d9c149cd446ad1d9ea4ffb4d102ccfca"
+      pattern: "/dashboard"
+      platform: "web"
+    fingerprint:
+      attrs:
+        data-testid: "nav-schedule-build"
+        href: "/schedule-build"
+      box:
+        - 20
+        - 141.25
+        - 101.95
+        - 18
+      index: 0
+      neighbours:
+        after:
+          - "Bookings"
+          - "Checkout"
+          - "Logout"
+        before:
+          - "Svatah Sample Menu Dashboard Book a slot Widgets Docs"
+          - "☰"
+          - "Overview"
+      rolePath:
+        - "complementary"
+        - "list"
+        - "listitem"
+      tag: "a"
+      text: "Schedule Build"
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "app.schedule-build-link"
+phrases:
+  - "the Schedule Build link"
+schemaVersion: "1.0.0"

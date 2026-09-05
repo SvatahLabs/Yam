@@ -1,0 +1,55 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "login-submit"
+      - by: "role"
+        exact: true
+        name: "Sign In"
+        role: "button"
+        score: 0.92
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"login-submit\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='login-submit']"
+    context:
+      hash: "e3b76582ec5ee1693bf023b032849e765972348bbc3ca66582071d2b6c07d2a1"
+      pattern: "/login"
+      platform: "web"
+    fingerprint:
+      attrs:
+        class: "btn btn-primary"
+        data-testid: "login-submit"
+        type: "submit"
+        value: "Sign In"
+      box:
+        - 20
+        - 320.55
+        - 380
+        - 41.25
+      index: 0
+      neighbours:
+        after: []
+        before:
+          - "Username"
+          - "Password"
+          - "Remember me"
+      rolePath:
+        - "main"
+      tag: "input"
+      text: ""
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: true
+id: "login.login-button"
+phrases:
+  - "the login button"
+schemaVersion: "1.0.0"
