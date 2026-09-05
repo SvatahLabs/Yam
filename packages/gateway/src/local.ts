@@ -37,6 +37,16 @@ export interface LocalGatewayOptions {
   readonly model: string;
   /** Pinned digest; a mismatch fails rather than proceeds (REQ-COMP-3). */
   readonly digest?: string;
+  /**
+   * `--allow-model-drift`: compile against weights that are not the pinned ones.
+   *
+   * The check is suppressed, not the *recording*: the digest the server actually
+   * serves still goes into provenance, so a plan compiled this way says which
+   * weights produced it and a reader can see that they were not the pinned ones.
+   * A flag that made provenance stop saying so would be a flag that hid the
+   * thing it exists to permit.
+   */
+  readonly allowDigestDrift?: boolean;
   readonly cache?: GatewayCache;
   readonly secrets?: ReadonlySet<string>;
   /** Injected in tests, so the request shape is checkable without a server. */
@@ -73,11 +83,48 @@ export function renderLocal<T>(
   };
 }
 
+/**
+ * The digest of the weights a server is actually serving (REQ-COMP-3).
+ *
+ * Ollama's `/api/generate` does **not** report one — only `/api/tags` does — so a
+ * pin checked against the generation response would be a pin that never fired.
+ * That is the whole point of the check, so it is resolved separately, once per
+ * session, and compared before the first call.
+ *
+ * llama.cpp has no equivalent: it serves a GGUF file and reports the path, not a
+ * content digest. A project on llama.cpp therefore cannot pin, and saying so is
+ * better than pretending to.
+ */
+export async function resolveDigest(
+  provider: LocalProvider,
+  endpoint: string,
+  model: string,
+  doFetch: typeof globalThis.fetch = globalThis.fetch,
+): Promise<string | undefined> {
+  const base = endpoint.replace(/\/+$/, "");
+  if (provider !== "ollama") return undefined;
+  try {
+    const response = await doFetch(`${base}/api/tags`);
+    if (!response.ok) return undefined;
+    const payload = (await response.json()) as { models?: Array<{ name?: string; digest?: string }> };
+    const found = (payload.models ?? []).find(
+      (one) => one.name === model || one.name === `${model}:latest`,
+    );
+    return found?.digest;
+  } catch {
+    // A server that will not answer `/api/tags` is a server the next call will
+    // fail against anyway, with a message about the thing the caller asked for.
+    return undefined;
+  }
+}
+
 export function localGateway(options: LocalGatewayOptions): Gateway {
   const cache = options.cache ?? NO_CACHE;
   const totals: GatewayUsage = emptyUsage();
   const doFetch = options.fetch ?? globalThis.fetch;
   const base = options.endpoint.replace(/\/+$/, "");
+  /** Resolved once and reused: the weights do not change mid-compile. */
+  let served: string | undefined | null = null;
 
   return {
     name: `local:${options.provider}`,
@@ -94,6 +141,25 @@ export function localGateway(options: LocalGatewayOptions): Gateway {
         schema: schemaOf(request),
         ...(request.cacheScope === undefined ? {} : { scope: request.cacheScope }),
       });
+
+      /*
+       * The pin, before anything else (REQ-COMP-3).
+       *
+       * Checked ahead of the cache deliberately: a cached answer carries the
+       * digest it was produced under, and returning it from a server that has
+       * since pulled different weights would make the provenance true of the
+       * cache and false of the machine.
+       */
+      if (served === null) {
+        served = await resolveDigest(options.provider, base, options.model, doFetch);
+      }
+      if (options.digest !== undefined && served !== undefined && served !== options.digest) {
+        const drift =
+          `${options.model} on ${base} reports digest ${served}, and the project pins ` +
+          `${options.digest}. Update the pin deliberately, or pull the pinned build.`;
+        if (options.allowDigestDrift !== true) throw new GatewayUnavailable(drift);
+        options.onCall?.(`compiling against unpinned weights: ${drift}`);
+      }
 
       const hit = cache.get(key);
       if (hit !== undefined) {
@@ -144,6 +210,7 @@ export function localGateway(options: LocalGatewayOptions): Gateway {
        */
       if (
         options.digest !== undefined &&
+        options.allowDigestDrift !== true &&
         payload.digest !== undefined &&
         payload.digest !== options.digest
       ) {
@@ -159,9 +226,18 @@ export function localGateway(options: LocalGatewayOptions): Gateway {
       totals.tokensIn += tokensIn;
       totals.tokensOut += tokensOut;
 
+      /*
+       * The digest goes in provenance whether or not the project pinned one
+       * (REQ-AGT-3): provenance says *which weights produced this*, and a
+       * project that has not pinned yet still deserves an answer it can pin to.
+       */
+      // What the *server* serves wins over what the project pinned: under
+      // `--allow-model-drift` those differ, and provenance must say which
+      // weights actually produced the step.
+      const digest = payload.digest ?? served ?? options.digest ?? undefined;
       const provenance: Provenance = provenanceSchema.parse({
         model: options.model,
-        ...(options.digest === undefined ? {} : { digest: options.digest }),
+        ...(digest === undefined ? {} : { digest }),
         promptVersion: request.promptVersion,
         at: new Date().toISOString(),
         tokensIn,

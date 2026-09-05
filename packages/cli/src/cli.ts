@@ -35,6 +35,7 @@ Flows (module b):
   svatah init [dir] [--force]
   svatah lint [dir] [--json]
   svatah compile [dir] [--stable] [--out .svatah/plan.json] [--json]
+                 [--tier2] [--tier3] [--allow-model-drift]
   svatah record [dir] [--flow <file>] [--story <name>] [--rebind] [--headed]
                 [--base-url <url>] [--storage-state <path.json>]
                 [--gateway anthropic|fake] [--input k=v] [--force-production] [--json]
@@ -61,6 +62,8 @@ Bindings and healing (module a):
   svatah eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
   svatah eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
                         [--limit <n>] [--report <path.md>] [--json]
+  svatah eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
+                       [--only tier1,tier2] [--report <path.md>] [--json]
 
 Every command that opens a session takes its base URL and storage state from
 the --base-url / --storage-state flag, then SVATAH_BASE_URL /
@@ -235,6 +238,14 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
    */
   if (command === "eval" && args.command[1] === "grounding") {
     return await (await import("./commands/eval-grounding.js")).groundingEvalCommand(args, io);
+  }
+
+  /*
+   * `eval compiler` is module (b)'s too: it needs the compiler and, for the
+   * model tiers, the gateway (T4.3, T4.4, REQ-COMP-9).
+   */
+  if (command === "eval" && args.command[1] === "compiler") {
+    return await (await import("./commands/eval-compiler.js")).compilerEvalCommand(args, io);
   }
 
   // `heal` and `eval healing` both take the model half of REQ-HEAL-1.

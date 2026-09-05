@@ -40,6 +40,7 @@ import {
 import { emitCustom, type StepRegistry } from "@svatah/steps";
 import { lowerStep, lowerValue, type LowerContext } from "./lower.js";
 import { parseGuard, parseSentence } from "./tier1.js";
+import { tierFor, type ModelTierAnswer } from "./tiers.js";
 import { validateStory, type ValidateContext } from "./validate.js";
 import type { RawStep, RawValue } from "./raw.js";
 
@@ -58,6 +59,29 @@ export interface CompileOptions {
   readonly stable?: boolean;
   /** Words that make a step side-effecting; defaults to `SIDE_EFFECT_WORDS`. */
   readonly sideEffectWords?: readonly string[];
+  /**
+   * Answers a model-backed tier already gave, keyed by `sentenceKey` (T4.3).
+   *
+   * `compile` stays synchronous and stays a pure function of its inputs, which
+   * is what REQ-COMP-7's byte-stability rests on. `compileWithModelTiers` is the
+   * asynchronous shell: it compiles once, asks the registered tiers about the
+   * sentences the grammar refused, and compiles again with their answers in
+   * hand. Two passes rather than an async compiler, because a compiler that
+   * awaited in the middle of assembling a plan would be one whose output
+   * depended on when a model answered.
+   */
+  readonly modelAnswers?: ReadonlyMap<string, ModelTierAnswer & { readonly tier: 2 | 3 }>;
+}
+
+/**
+ * How a sentence is keyed in `modelAnswers`.
+ *
+ * File, line and text together: the same sentence written twice in one story is
+ * two steps, and two identical sentences in different files must not share one
+ * answer's provenance.
+ */
+export function sentenceKey(file: string, line: number, text: string): string {
+  return `${file}:${line}:${text}`;
 }
 
 export interface CompileResult {
@@ -87,6 +111,7 @@ export function compile(options: CompileOptions): CompileResult {
       if (!isStoryBlock(block)) continue;
       const { story, diagnostics: stepDiagnostics } = compileStory(block, flow.file, {
         registry: options.steps,
+        ...(options.modelAnswers === undefined ? {} : { modelAnswers: options.modelAnswers }),
         lower: {
           targets: project.targets,
           secrets: project.data.secrets,
@@ -141,7 +166,11 @@ export function compile(options: CompileOptions): CompileResult {
     }
   }
 
-  const plan = assemble(compiled.map((c) => c.story), project, options);
+  const plan = assemble(
+    compiled.map((c) => (options.stable === true ? stabilise(c.story) : c.story)),
+    project,
+    options,
+  );
   return { plan, diagnostics, ok: !diagnostics.some((d) => d.severity === "error") };
 }
 
@@ -150,6 +179,7 @@ export function compile(options: CompileOptions): CompileResult {
 interface StoryContext {
   readonly registry?: StepRegistry;
   readonly lower: LowerContext;
+  readonly modelAnswers?: CompileOptions["modelAnswers"];
 }
 
 function compileStory(
@@ -167,7 +197,14 @@ function compileStory(
     const where = { file, line: raw.line };
     const lower: LowerContext = { ...context.lower, file, line: raw.line };
 
-    const result = compileSentence(raw, { id, storyName: block.name, file, lower, registry: context.registry });
+    const result = compileSentence(raw, {
+      id,
+      storyName: block.name,
+      file,
+      lower,
+      ...(context.registry === undefined ? {} : { registry: context.registry }),
+      ...(context.modelAnswers === undefined ? {} : { modelAnswers: context.modelAnswers }),
+    });
     diagnostics.push(...result.diagnostics);
     if (result.step !== undefined) steps.push(result.step);
     void where;
@@ -190,6 +227,7 @@ interface SentenceContext {
   readonly file: string;
   readonly lower: LowerContext;
   readonly registry?: StepRegistry;
+  readonly modelAnswers?: CompileOptions["modelAnswers"];
 }
 
 /**
@@ -239,14 +277,22 @@ export function compileSentence(
     return { step: customStep(raw, tier0.match, context), diagnostics };
   }
 
-  if (tier1.raw === undefined) {
-    // Tiers 2 and 3 would take the sentence here when registered (Phase 4). The
-    // sentence is reported rather than dropped so nothing runs a plan that is
-    // quietly missing a step.
+  /*
+   * The grammar refused. A model-backed tier may already have answered for this
+   * sentence (T4.3, T4.4); if none did, the sentence is reported rather than
+   * dropped, so nothing runs a plan that is quietly missing a step.
+   */
+  const model =
+    tier1.raw === undefined
+      ? context.modelAnswers?.get(sentenceKey(context.file, raw.line, raw.text))
+      : undefined;
+
+  if (tier1.raw === undefined && model === undefined) {
     return { diagnostics: [...tier1.diagnostics] };
   }
 
-  const withGuard = attachGuard(tier1.raw, raw, where, diagnostics);
+  const parsed = tier1.raw ?? model!.raw;
+  const withGuard = attachGuard(parsed, raw, where, diagnostics);
   const lowered = lowerStep(
     withGuard,
     {
@@ -255,11 +301,98 @@ export function compileSentence(
       line: raw.line,
       text: raw.text,
       rule: withGuard.action,
+      ...(model === undefined
+        ? {}
+        : {
+            tier: model.tier,
+            confidence: model.confidence,
+            provenance: model.provenance,
+          }),
     },
     context.lower,
   );
-  diagnostics.push(...lowered.diagnostics);
+  diagnostics.push(...lowered.diagnostics, ...(model?.diagnostics ?? []));
   return { step: lowered.step, diagnostics };
+}
+
+/* ── the asynchronous shell (T4.3, T4.4) ─────────────────────────────────── */
+
+export interface ModelTierOptions {
+  /** Ask Tier 2. Off by default, so `compile` is offline unless told otherwise. */
+  readonly tier2?: boolean;
+  /** Ask Tier 3 for what Tier 2 could not place (REQ-COMP-4). */
+  readonly tier3?: boolean;
+  /** Report progress; one line per sentence a tier was asked about. */
+  readonly onProgress?: (message: string) => void;
+}
+
+/**
+ * Compile, asking the registered model tiers about the residue (REQ-COMP-1, 3, 4).
+ *
+ * Three passes and no more: compile, ask, compile again. The first pass finds
+ * the sentences the grammar refused — which is the *only* thing a model tier is
+ * for, because "the first claimant wins" and Tier 1 always claims first. The
+ * second asks Tier 2, then Tier 3 for whatever Tier 2 declined ("Tier 3 is used
+ * only for Tier 2's residue", REQ-COMP-4). The third produces the plan.
+ *
+ * Recompiling rather than patching is what keeps the plan byte-stable: a step
+ * assembled by a different path from its neighbours would differ from one
+ * assembled by the same path, and `--stable` would stop meaning anything.
+ */
+export async function compileWithModelTiers(
+  options: CompileOptions,
+  tiers: ModelTierOptions = {},
+): Promise<CompileResult> {
+  const first = compile(options);
+  if (tiers.tier2 !== true && tiers.tier3 !== true) return first;
+
+  const residue = unmatchedSentences(options.project);
+  if (residue.length === 0) return first;
+
+  const answers = new Map<string, ModelTierAnswer & { tier: 2 | 3 }>();
+  for (const sentence of residue) {
+    for (const level of [2, 3] as const) {
+      if (tiers[level === 2 ? "tier2" : "tier3"] !== true) continue;
+      const tier = tierFor(level);
+      if (tier === undefined) continue;
+
+      const answer = await tier.compile(sentence.text, {
+        file: sentence.file,
+        line: sentence.line,
+        storyName: sentence.storyName,
+      });
+      if (answer === undefined) continue;
+
+      answers.set(sentenceKey(sentence.file, sentence.line, sentence.text), {
+        ...answer,
+        tier: level,
+      });
+      tiers.onProgress?.(
+        `tier ${level}: "${sentence.text}" → ${answer.raw.action} ` +
+          `(confidence ${answer.confidence.toFixed(2)})`,
+      );
+      break;
+    }
+  }
+
+  return answers.size === 0 ? first : compile({ ...options, modelAnswers: answers });
+}
+
+/** Every sentence in the project the grammar and the custom steps both refused. */
+function unmatchedSentences(
+  project: Project,
+): Array<{ file: string; line: number; text: string; storyName: string }> {
+  const out: Array<{ file: string; line: number; text: string; storyName: string }> = [];
+  for (const flow of project.flows) {
+    for (const block of flow.blocks) {
+      if (!isStoryBlock(block)) continue;
+      for (const raw of block.steps) {
+        if (parseSentence(raw.text, { file: flow.file, line: raw.line }).raw !== undefined) continue;
+        out.push({ file: flow.file, line: raw.line, text: raw.text, storyName: block.name });
+      }
+    }
+  }
+  return out;
 }
 
 /**
@@ -336,6 +469,37 @@ function parseRawValue(text: string): RawValue {
 }
 
 /* ── the plan ─────────────────────────────────────────────────────────────── */
+
+/**
+ * `--stable`: fix everything that would differ between two compiles of one input.
+ *
+ * `generatedAt` is one such field and was the only one until a model tier could
+ * produce a step. A Tier 2 or Tier 3 step carries provenance, and provenance
+ * carries the *time of the call* — so a plan with one model step in it could
+ * never be byte-stable, and REQ-COMP-7 would hold for the grammar alone.
+ *
+ * The timestamp is the only field fixed. Everything provenance exists to say —
+ * which model, which digest, which prompt version, how many tokens, what it cost
+ * — is a fact about the answer rather than about when it was asked for, and
+ * stays exactly as the gateway reported it (REQ-AGT-3).
+ */
+function stabilise(story: Story): Story {
+  if (!story.steps.some((step) => step.origin.provenance !== undefined)) return story;
+  return {
+    ...story,
+    steps: story.steps.map((step) =>
+      step.origin.provenance === undefined
+        ? step
+        : {
+            ...step,
+            origin: {
+              ...step.origin,
+              provenance: { ...step.origin.provenance, at: STABLE_TIMESTAMP },
+            },
+          },
+    ),
+  };
+}
 
 function assemble(stories: readonly Story[], project: Project, options: CompileOptions): Plan {
   const compositions: Record<string, string[]> = {};

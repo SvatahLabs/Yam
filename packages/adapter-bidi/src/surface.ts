@@ -101,7 +101,7 @@ export class BidiSurface implements AgentSurface {
   private session: BidiSession | undefined;
   private baseUrl: string | undefined;
   private storageStatePath: string | undefined;
-  /** The binary or URL that answered, for the conformance report. */
+  /** How the endpoint was obtained: a launched binary, or an attached URL. */
   private servedBy = "(not open)";
 
   constructor(private readonly options: BidiAdapterOptions = {}) {}
@@ -112,9 +112,16 @@ export class BidiSurface implements AgentSurface {
     return { ...BIDI_CAPABILITIES };
   }
 
-  /** Which browser is actually answering. Named in the progress record. */
+  /**
+   * Which browser is actually answering, as it names itself.
+   *
+   * `firefox 153.0 (launched)`, not the path to a binary in somebody's home
+   * directory: a conformance report is committed, and one that recorded a path
+   * would record whose machine ran it (LLD §16).
+   */
   browser(): string {
-    return this.servedBy;
+    if (this.session === undefined) return this.servedBy;
+    return `${this.session.describedBrowser} (${this.servedBy})`;
   }
 
   async open(session: SessionInit): Promise<void> {
@@ -129,7 +136,7 @@ export class BidiSurface implements AgentSurface {
 
     const endpoint = await openEndpoint(this.options);
     this.endpoint = endpoint;
-    this.servedBy = endpoint.describedAs;
+    this.servedBy = endpoint.launched ? "launched" : "attached";
 
     const trace = process.env["SVATAH_BIDI_TRACE"] === "1";
     this.client = await BidiClient.connect(endpoint.url, {

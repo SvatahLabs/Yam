@@ -168,11 +168,16 @@ export class BidiSession {
     readonly timeoutMs: number,
   ) {}
 
+  /** What `session.new` said it is: `firefox 153.0`, `chrome 152.0.…`. */
+  describedBrowser = "an unidentified browser";
+
   static async open(
     client: BidiClient,
     options: { testIdAttributes: readonly string[]; ignoreAttributes: readonly string[]; timeoutMs: number },
   ): Promise<BidiSession> {
-    await client.call("session.new", { capabilities: {} });
+    const created = (await client.call("session.new", { capabilities: {} })) as {
+      capabilities?: { browserName?: string; browserVersion?: string };
+    };
     const session = new BidiSession(
       client,
       new RefSpace(options.testIdAttributes, options.ignoreAttributes),
@@ -210,6 +215,17 @@ export class BidiSession {
     }
 
     client.on((event) => session.onEvent(event.method, event.params));
+
+    /*
+     * What the browser calls itself, rather than where its binary is. A
+     * conformance report is committed, and a report that recorded an absolute
+     * path would record whose machine ran it (LLD §16's hygiene rule).
+     */
+    const name = created.capabilities?.browserName;
+    const version = created.capabilities?.browserVersion;
+    if (name !== undefined) {
+      session.describedBrowser = version === undefined ? name : `${name} ${version}`;
+    }
 
     const tree = (await client.call("browsingContext.getTree", {})) as {
       contexts?: Array<{ context: string }>;

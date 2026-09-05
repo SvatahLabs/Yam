@@ -42,6 +42,7 @@ export {
 export {
   localGateway,
   renderLocal,
+  resolveDigest,
   SEED,
   type LocalGatewayOptions,
   type LocalProvider,

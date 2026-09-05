@@ -33,8 +33,10 @@ import { SessionError } from "@svatah/surface";
 export interface BidiEndpoint {
   /** The BiDi WebSocket URL, ready for `session.new`. */
   readonly url: string;
-  /** The binary, or the URL, this came from — for the report. */
+  /** The binary, or the URL, this came from. Diagnostics only, never a report. */
   readonly describedAs: string;
+  /** True when this adapter started the browser; false when it attached. */
+  readonly launched: boolean;
   /** Stop the browser this launched, if it launched one. */
   close(): Promise<void>;
 }
@@ -138,6 +140,7 @@ export async function openEndpoint(options: LaunchOptions = {}): Promise<BidiEnd
     return {
       url: attach,
       describedAs: `an endpoint at ${attach}`,
+      launched: false,
       close: async () => undefined,
     };
   }
@@ -248,6 +251,7 @@ async function launchGecko(binary: string, options: LaunchOptions): Promise<Bidi
     // 400 with an unhelpful message, which is a confusing first experience.
     url: `${url}/session`,
     describedAs: binary,
+    launched: true,
     close: async () => {
       process.removeListener("exit", reap);
       reap();

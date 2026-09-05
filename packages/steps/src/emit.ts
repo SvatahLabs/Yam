@@ -53,9 +53,18 @@ export function emitCustom(
       params[placeholder.name] = options.parseValue(raw.trim());
       continue;
     }
-    // `string`, `number` and `boolean` are literals by construction: the
-    // template's pattern would not have matched anything else.
-    params[placeholder.name] = { kind: "literal", value: raw };
+    /*
+     * `string`, `number` and `boolean` are a literal *or* a `{…}` reference —
+     * the two forms their patterns accept (LLD §5, `template.ts`). A reference
+     * goes through the same parser a `value` placeholder uses, so
+     * `{input.amount}` in a `number` slot produces the same `ValueRef` it would
+     * anywhere else and the executor resolves it against the same scope.
+     */
+    const trimmed = raw.trim();
+    params[placeholder.name] =
+      trimmed.startsWith("{") && trimmed.endsWith("}")
+        ? options.parseValue(trimmed)
+        : { kind: "literal", value: raw };
   }
 
   return { params, targets };

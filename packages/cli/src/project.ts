@@ -9,7 +9,12 @@
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { readBindingIndex, type BindingIndexEntry } from "@svatah/bindings";
-import { compile, type CompileResult } from "@svatah/compiler";
+import {
+  compile,
+  compileWithModelTiers,
+  type CompileOptions,
+  type CompileResult,
+} from "@svatah/compiler";
 import { diagnostic, readProjectFrom, type Diagnostic, type Project } from "@svatah/spec";
 import { loadSteps, type StepRegistry } from "@svatah/steps";
 import type { Config } from "@svatah/schema";
@@ -117,16 +122,41 @@ export async function loadProject(root: string): Promise<LoadedProject> {
   };
 }
 
-/** Compile a loaded project. */
-export function compileProject(
-  loaded: LoadedProject,
-  options: { stable?: boolean } = {},
-): CompileResult {
-  return compile({
+/** What `compile()` is called with for a loaded project. */
+function compileOptions(loaded: LoadedProject, options: { stable?: boolean }): CompileOptions {
+  return {
     project: loaded.project,
     steps: loaded.steps,
     projectName: loaded.config.project,
     stepTimeoutMs: loaded.config.run.stepTimeoutMs,
     ...(options.stable === undefined ? {} : { stable: options.stable }),
+  };
+}
+
+/** Compile a loaded project with the grammar alone. Offline, always. */
+export function compileProject(
+  loaded: LoadedProject,
+  options: { stable?: boolean } = {},
+): CompileResult {
+  return compile(compileOptions(loaded, options));
+}
+
+/**
+ * Compile, asking the registered model tiers about what the grammar refused
+ * (T4.3, T4.4).
+ *
+ * Identical to `compileProject` when no tier was asked for, which is why `run`,
+ * the service and the host can go on calling the synchronous one: a plan is a
+ * plan whichever produced it, and `--tier2` is a decision made at `compile`
+ * time and recorded in the plan's `origin.tier` (REQ-COMP-1).
+ */
+export async function compileProjectWithTiers(
+  loaded: LoadedProject,
+  options: { stable?: boolean; tier2?: boolean; tier3?: boolean; onProgress?: (line: string) => void } = {},
+): Promise<CompileResult> {
+  return await compileWithModelTiers(compileOptions(loaded, options), {
+    ...(options.tier2 === undefined ? {} : { tier2: options.tier2 }),
+    ...(options.tier3 === undefined ? {} : { tier3: options.tier3 }),
+    ...(options.onProgress === undefined ? {} : { onProgress: options.onProgress }),
   });
 }

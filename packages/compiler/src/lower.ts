@@ -19,6 +19,7 @@
 import type {
   Action,
   Predicate,
+  Provenance,
   Step,
   TargetRef,
   ValueRef,
@@ -133,6 +134,20 @@ export interface StepIdentity {
   readonly line: number;
   readonly text: string;
   readonly rule: string;
+  /**
+   * Which tier produced the parse. `1` — the grammar — unless a model tier did
+   * (T4.3, T4.4).
+   *
+   * A step from a model is lowered by exactly this function, from exactly the
+   * same raw shape, so `origin` is the *only* thing in the finished step that
+   * differs. That is what makes REQ-COMP-1's "every step records tier of origin"
+   * a property of the plan rather than of a report beside it.
+   */
+  readonly tier?: 1 | 2 | 3;
+  /** The tier's confidence; lint compares it to the threshold (REQ-COMP-8). */
+  readonly confidence?: number;
+  /** Mandatory on a Tier 2 or Tier 3 step, and schema-enforced (REQ-STD-4). */
+  readonly provenance?: Provenance;
 }
 
 /** The IR step for one parsed sentence. */
@@ -211,7 +226,12 @@ export function lowerStep(
         }),
     ...(sideEffect ? { sideEffect: true } : {}),
     timeoutMs: context.stepTimeoutMs,
-    origin: { tier: 1, rule: identity.rule, confidence: 1 },
+    origin: {
+      tier: identity.tier ?? 1,
+      rule: identity.rule,
+      confidence: identity.confidence ?? 1,
+      ...(identity.provenance === undefined ? {} : { provenance: identity.provenance }),
+    },
   };
 
   return { step, diagnostics };

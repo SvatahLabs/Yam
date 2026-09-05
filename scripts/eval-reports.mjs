@@ -15,7 +15,23 @@ import { fileURLToPath } from "node:url";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 const SUITES = [
-  { name: "compiler", threshold: "Tier 1 exact match 100%, end to end ≥ 95% (REQ-COMP-9)", task: "T4.4", runner: null },
+  {
+    name: "compiler",
+    threshold: "Tier 1 100%, Tier 2 ≥ 80%, end to end ≥ 95% (REQ-COMP-9, REQ-COMP-3)",
+    task: "T4.4",
+    /*
+     * Runnable since T4.4, and Tier 2 needs a local model server.
+     *
+     * When one is configured and reachable, this measures the compiler. When one
+     * is not, `--only tier1,tier0` measures the half that needs no model at all
+     * and the report says which tiers it covered — a partial measurement that
+     * says so beats a missing one, and beats a fake standing in for a model
+     * whose accuracy is the entire point of the number.
+     */
+    runner: process.env.SVATAH_TIER2 === "1"
+      ? ["node", "scripts/eval-compiler.mjs", "--report"]
+      : ["node", "scripts/eval-compiler.mjs", "--only", "tier0,tier1", "--report"],
+  },
   {
     name: "grounding",
     threshold: "accuracy ≥ 95% on the sample application (REQ-REC-10)",
@@ -46,7 +62,17 @@ const SUITES = [
      */
     runner: ["node", "scripts/eval-healing.mjs", "--report"],
   },
-  { name: "conformance", threshold: "every adapter passes the surface suite (REQ-SURF-3)", task: "T1.2", runner: null },
+  {
+    name: "conformance",
+    threshold: "every adapter passes the surface suite (REQ-SURF-3)",
+    task: "T1.2",
+    /*
+     * Runnable since T4.1, which is the first phase with a second adapter to
+     * compare against. It starts the sample application and drives BiDi through
+     * both the surface suite and a fixture replay (`scripts/bidi-independence.mjs`).
+     */
+    runner: ["node", "scripts/adapter-conformance.mjs", "--report"],
+  },
 ];
 
 const outIndex = process.argv.indexOf("--out");

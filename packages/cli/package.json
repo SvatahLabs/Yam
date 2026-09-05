@@ -58,7 +58,8 @@
     "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "zod": "catalog:"
   },
   "publishConfig": {
     "access": "public"

@@ -11,9 +11,10 @@ so a change to them is a diff someone sees.
 | Report | Suite | Threshold | Regenerate with |
 |---|---|---|---|
 | [`eval-healing.md`](eval-healing.md) | Healing, relocalize-only (REQ-HEAL-5) | ≥ 60 % | `pnpm eval:healing` |
-| — | Surface conformance (REQ-SURF-3) | every adapter passes | `pnpm conform:playwright` |
-| — | Grounding (REQ-REC-10) | ≥ 95 % | T3.4 |
-| — | Compiler (REQ-COMP-9) | Tier 1 100 %, end to end ≥ 95 % | T4.4 |
+| [`eval-grounding.md`](eval-grounding.md) | Grounding (REQ-REC-10) | ≥ 95 % | `pnpm eval:grounding` |
+| [`eval-compiler.md`](eval-compiler.md) | Compiler (REQ-COMP-9, REQ-COMP-3) | Tier 1 100 %, Tier 2 ≥ 80 %, end to end ≥ 95 % | `pnpm eval:compiler` |
+| [`eval-conformance.md`](eval-conformance.md) | Surface conformance (REQ-SURF-3) | every adapter passes | `pnpm eval:conformance` |
+| [`adapter-bidi.md`](adapter-bidi.md) | BiDi independence (REQ-ADP-4, REQ-STD-2) | conformant, and identical to Playwright | `pnpm bidi:independence` |
 
 `node scripts/eval-reports.mjs --out reports` regenerates all four; the suites
 that are not runnable yet write a placeholder naming the task that builds them,

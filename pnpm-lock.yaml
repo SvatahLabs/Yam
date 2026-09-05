@@ -98,6 +98,9 @@ importers:
       '@svatah/spec':
         specifier: workspace:*
         version: link:packages/spec
+      '@svatah/steps':
+        specifier: workspace:*
+        version: link:packages/steps
       '@svatah/surface':
         specifier: workspace:*
         version: link:packages/surface
@@ -545,6 +548,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 2.1.9(@types/node@26.4.1)(terser@5.51.2)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
 
   packages/compiler:
     dependencies:
@@ -560,6 +566,9 @@ importers:
       yaml:
         specifier: 'catalog:'
         version: 2.9.0
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       peggy:
         specifier: 'catalog:'

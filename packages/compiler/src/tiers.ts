@@ -24,17 +24,40 @@
  * even after Tier 0 has claimed a sentence: it has to know whether there was a
  * second claimant.
  */
-import type { Step } from "@svatah/schema";
+import type { Provenance } from "@svatah/schema";
 import type { Diagnostic } from "@svatah/spec";
+import type { RawStep } from "./raw.js";
+
+/** Where a sentence the grammar refused was written. */
+export interface SentenceContext {
+  readonly file: string;
+  readonly line: number;
+  readonly storyName: string;
+}
+
+/**
+ * What a model-backed tier answers with.
+ *
+ * The *raw* step, not the finished one: element ids, secret marking, timeouts
+ * and step ids are project facts a model has no basis for, and `lower.ts`
+ * supplies them exactly as it does for Tier 1 (see `raw-schema.ts`).
+ *
+ * `provenance` is mandatory, and the schema enforces it on any step whose tier
+ * is 2 or 3 (REQ-AGT-3, REQ-STD-4). `confidence` is the tier's own estimate,
+ * which lint compares against `compile.confidenceThreshold` (REQ-COMP-8).
+ */
+export interface ModelTierAnswer {
+  readonly raw: RawStep;
+  readonly provenance: Provenance;
+  readonly confidence: number;
+  readonly diagnostics?: readonly Diagnostic[];
+}
 
 /** A tier that a model backs. Registered by the CLI; absent by default. */
 export interface ModelTier {
   readonly tier: 2 | 3;
   /** Compile one sentence, or return nothing to pass it on. */
-  compile(
-    text: string,
-    context: { file: string; line: number; storyName: string },
-  ): Promise<{ step: Partial<Step>; diagnostics?: readonly Diagnostic[] } | undefined>;
+  compile(text: string, context: SentenceContext): Promise<ModelTierAnswer | undefined>;
 }
 
 const registered = new Map<2 | 3, ModelTier>();

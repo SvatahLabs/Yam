@@ -19,7 +19,8 @@ import { lintPlan, renderPlan } from "@svatah/compiler";
 import { formatDiagnostic, type Diagnostic } from "@svatah/spec";
 import { boolOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
 import { EXIT, type ExitCode } from "@svatah/bindings-cli";
-import { compileProject, loadProject } from "../project.js";
+import { compileProjectWithTiers, loadProject, type LoadedProject } from "../project.js";
+import { isDigestMismatch, registerModelTiers } from "../tiers/register.js";
 import type { CommandIo } from "@svatah/bindings-cli";
 
 /** Print diagnostics, worst first, in the shape editors parse. */
@@ -30,10 +31,86 @@ export function report(diagnostics: readonly Diagnostic[], io: CommandIo): void 
   if (diagnostics.length > 0) io.err("");
 }
 
+/**
+ * Compile, with whichever model tiers the flags asked for (T4.3, T4.4).
+ *
+ * `--tier2` and `--tier3` are opt-in, so a compile with neither reaches no
+ * network at all — which is the compile half of privacy mode (REQ-NFR-3, T4.7).
+ * A tier that was asked for and could not be built says so on stderr rather than
+ * being silently absent: "compiled with the grammar alone because you asked for
+ * nothing else" and "…because the config names no server" are different facts.
+ *
+ * A **digest mismatch** is the one model failure that stops the compile
+ * (REQ-COMP-3). The pin is what lets provenance say which weights produced a
+ * step, and a server that has pulled a new build of the same tag is a different
+ * model wearing the same name. `--allow-model-drift` says so deliberately.
+ */
+/**
+ * Compile, with whichever model tiers the flags asked for (T4.3, T4.4).
+ *
+ * `--tier2` and `--tier3` are opt-in, so a compile with neither reaches no
+ * network at all — which is the compile half of privacy mode (REQ-NFR-3, T4.7).
+ * A tier that was asked for and could not be built says so on stderr rather than
+ * being silently absent: "compiled with the grammar alone because you asked for
+ * nothing else" and "…because the config names no server" are different facts.
+ *
+ * A **digest mismatch** is the one model failure that stops the compile
+ * (REQ-COMP-3). The pin is what lets provenance say which weights produced a
+ * step, and a server that has pulled a new build of the same tag is a different
+ * model wearing the same name. `--allow-model-drift` suppresses the *check* and
+ * not the *record*: the digest the server actually served still goes into
+ * provenance, so a plan compiled that way says so.
+ */
+async function compileWithTiers(
+  loaded: LoadedProject,
+  args: ParsedArgs,
+  io: CommandIo,
+): Promise<{ result: Awaited<ReturnType<typeof compileProjectWithTiers>> } | { refused: string }> {
+  const wantTier2 = boolOption(args, "tier2");
+  const wantTier3 = boolOption(args, "tier3");
+  const allowDrift = boolOption(args, "allow-model-drift");
+
+  if (wantTier2 || wantTier3) {
+    const registered = registerModelTiers({
+      config: loaded.config,
+      wantTier2,
+      wantTier3,
+      allowDigestDrift: allowDrift,
+      onCall: (line) => io.err(`  ${line}`),
+    });
+    for (const refusal of registered.refusals) io.err(refusal);
+  }
+
+  try {
+    return {
+      result: await compileProjectWithTiers(loaded, {
+        stable: boolOption(args, "stable"),
+        tier2: wantTier2,
+        tier3: wantTier3,
+        onProgress: (line) => io.err(`  ${line}`),
+      }),
+    };
+  } catch (error) {
+    if (!isDigestMismatch(error)) throw error;
+    return {
+      refused:
+        `${(error as Error).message}` +
+        "\n\n  Nothing was compiled. A pinned digest is what lets a plan's provenance say" +
+        "\n  which weights produced a step (REQ-COMP-3); pass --allow-model-drift to" +
+        "\n  compile anyway.",
+    };
+  }
+}
+
 export async function compileCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const root = args.command[1] ?? ".";
   const loaded = await loadProject(root);
-  const compiled = compileProject(loaded, { stable: boolOption(args, "stable") });
+  const attempt = await compileWithTiers(loaded, args, io);
+  if ("refused" in attempt) {
+    io.err(attempt.refused);
+    return EXIT.modelUnavailable;
+  }
+  const compiled = attempt.result;
   const diagnostics = [...loaded.diagnostics, ...compiled.diagnostics];
 
   const out = stringOption(args, "out") ?? join(loaded.config.run.outputDir, "..", ".svatah", "plan.json");
@@ -70,7 +147,12 @@ export async function compileCommand(args: ParsedArgs, io: CommandIo): Promise<E
 export async function lintCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const root = args.command[1] ?? ".";
   const loaded = await loadProject(root);
-  const compiled = compileProject(loaded, { stable: true });
+  const attempt = await compileWithTiers(loaded, { ...args, options: { ...args.options, stable: true } }, io);
+  if ("refused" in attempt) {
+    io.err(attempt.refused);
+    return EXIT.modelUnavailable;
+  }
+  const compiled = attempt.result;
 
   const diagnostics = [
     ...loaded.diagnostics,

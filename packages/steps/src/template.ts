@@ -19,6 +19,21 @@
  * anything can be one. It is bounded by the literal text around it, which is why
  * a template with two adjacent `target` placeholders and nothing between them is
  * rejected at definition time rather than silently matching greedily.
+ *
+ * ## Why every typed placeholder also accepts a `{…}` reference
+ *
+ * `Transfer {input.amount} from the current account to the savings account` is
+ * the obvious thing to write against LLD §5's own example template, which
+ * declares `{amount:number}`. A `number` pattern that took only digits would
+ * refuse it, the sentence would fall through to the grammar, and the grammar has
+ * no rule for it — so a project would have to declare `{amount:value}` and give
+ * up the type entirely to pass a variable.
+ *
+ * A reference is syntactically distinct from a bare word, so accepting one costs
+ * nothing the type discipline was protecting: `Transfer everything from A to B`
+ * still does not match, because `everything` is neither a number nor a
+ * reference. What the reference *holds* is checked where it must be, at run
+ * time, against the scope it comes from.
  */
 import { PLACEHOLDER_TYPES, type Placeholder, type PlaceholderType } from "./types.js";
 
@@ -32,11 +47,14 @@ const PLACEHOLDER = /\{([A-Za-z_][A-Za-z0-9_]*)\s*:\s*([a-z]+)\}/g;
  * greedy target would swallow " to the savings account" and leave the second
  * placeholder nothing.
  */
+/** `{name}`, `{data.a.b}`, `{input.n}`, `{Story name.var}`: a value reference. */
+const REFERENCE = "\\{[^}]+\\}";
+
 const PATTERNS: Record<PlaceholderType, string> = {
-  // A quoted literal, or a bare word run with no quotes.
-  string: '(?:"((?:[^"\\\\]|\\\\.)*)"|(\\S+))',
-  number: "(-?\\d+(?:\\.\\d+)?)",
-  boolean: "(true|false)",
+  // A quoted literal, a reference, or a bare word run with no quotes.
+  string: `(?:"((?:[^"\\\\]|\\\\.)*)"|(${REFERENCE}|\\S+))`,
+  number: `(-?\\d+(?:\\.\\d+)?|${REFERENCE})`,
+  boolean: `(true|false|${REFERENCE})`,
   // A noun phrase, bounded by the literal text around it.
   target: "(.+?)",
   // A quoted literal or a `{…}` reference (LLD §5).

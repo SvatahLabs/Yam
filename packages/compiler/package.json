@@ -30,7 +30,8 @@
     "@svatah/schema": "workspace:*",
     "@svatah/spec": "workspace:*",
     "@svatah/steps": "workspace:*",
-    "yaml": "catalog:"
+    "yaml": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "peggy": "catalog:",
