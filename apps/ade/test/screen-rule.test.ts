@@ -43,15 +43,24 @@ const CALLABLE = new Set([
 ]);
 
 describe("every screen calls only what the service publishes (T3.7)", () => {
-  it("has a screen for each of the seven REQ-ADE-3 names", () => {
+  it("has a screen for each name LLD §13.6 lists", () => {
+    // Seven from T3.7 (REQ-ADE-3), plus record review and bindings from T5.7
+    // (REQ-ADE-4, 5) and the surface explorer and tool panel from T5.8
+    // (REQ-ADE-8). `Bindings.tsx` carries the heal review, because a heal is a
+    // proposal *about* the store and reviewing it beside the store is what makes
+    // a before-and-after readable.
     expect(screens.map((one) => one.name).sort()).toEqual([
       "ApiClient.tsx",
+      "Bindings.tsx",
       "Data.tsx",
+      "Explorer.tsx",
       "FlowEditor.tsx",
       "Plan.tsx",
       "Project.tsx",
+      "Record.tsx",
       "Results.tsx",
       "Run.tsx",
+      "Tools.tsx",
     ]);
   });
 
@@ -112,6 +121,20 @@ describe("the endpoints the screens exercise (REQ-ADE-3)", () => {
     "putApiByName",
     "getData",
     "putData",
+    /* T5.7 — record review, the bindings browser and the heal review. */
+    "postRecord",
+    "postRecordByIdDecision",
+    "postSurfaceBySessionSnapshot",
+    "getBindings",
+    "postBindingsVerify",
+    "postHeal",
+    /* T5.8 — the surface explorer and the tool panel. */
+    "postSurfaceBySessionOpen",
+    "postSurfaceBySessionAct",
+    "postSurfaceBySessionRead",
+    "postSurfaceBySessionClose",
+    "postTrajectoryCompile",
+    "getTools",
   ];
 
   for (const endpoint of REQUIRED) {

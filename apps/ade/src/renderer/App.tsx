@@ -1,5 +1,6 @@
 /**
- * The ADE's shell: pick a project, then one of seven screens (T3.6, T3.7).
+ * The ADE's shell: pick a project, then one of eleven screens (T3.6, T3.7, T5.7,
+ * T5.8).
  *
  * ## Every interactive control has a role and an accessible name
  *
@@ -20,6 +21,10 @@ import { RunScreen } from "./screens/Run.js";
 import { ResultsScreen } from "./screens/Results.js";
 import { ApiClientScreen } from "./screens/ApiClient.js";
 import { DataScreen } from "./screens/Data.js";
+import { RecordScreen } from "./screens/Record.js";
+import { BindingsScreen } from "./screens/Bindings.js";
+import { ExplorerScreen } from "./screens/Explorer.js";
+import { ToolsScreen } from "./screens/Tools.js";
 
 const SCREENS = [
   { id: "project", label: "Project" },
@@ -29,6 +34,12 @@ const SCREENS = [
   { id: "results", label: "Results" },
   { id: "api", label: "API client" },
   { id: "data", label: "Data" },
+  // T5.7: review what the model decided, before it is written.
+  { id: "record", label: "Record review" },
+  { id: "bindings", label: "Bindings" },
+  // T5.8: the agent workbench (REQ-ADE-8).
+  { id: "explorer", label: "Surface explorer" },
+  { id: "tools", label: "Tool panel" },
 ] as const;
 
 type ScreenId = (typeof SCREENS)[number]["id"];
@@ -113,8 +124,16 @@ export function App(): React.JSX.Element {
           <ResultsScreen client={client} />
         ) : screen === "api" ? (
           <ApiClientScreen client={client} />
-        ) : (
+        ) : screen === "data" ? (
           <DataScreen client={client} />
+        ) : screen === "record" ? (
+          <RecordScreen client={client} />
+        ) : screen === "bindings" ? (
+          <BindingsScreen client={client} />
+        ) : screen === "explorer" ? (
+          <ExplorerScreen client={client} />
+        ) : (
+          <ToolsScreen client={client} />
         )}
       </main>
     </div>
