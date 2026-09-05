@@ -35,6 +35,8 @@ definitions:
           # Phase 1 adapter and host tests drive a real browser (LLD §1).
           - pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
           - pnpm -r test
+          - node scripts/compatibility.mjs
+          - git diff --exit-code evals/conformance/runtime
 
     - step: &quick-start
         name: quick start from a fresh checkout (REQ-PKG-2)

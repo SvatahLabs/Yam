@@ -56,6 +56,17 @@ jobs:
       - name: Test
         run: pnpm -r test
 
+      # T2.10's milestone: the four migrated fixtures against apps/sample-web,
+      # four times, checking determinism (REQ-RUN-2), that both hosts agree
+      # (REQ-BEH-5) and that two compiles are byte-identical (REQ-COMP-7). It
+      # rewrites evals/conformance/runtime, and the diff check is what says the
+      # committed fixture is still what a run produces.
+      - name: Compatibility milestone (REQ-NFR-8)
+        run: node scripts/compatibility.mjs
+
+      - name: The conformance fixture is unchanged
+        run: git diff --exit-code evals/conformance/runtime
+
   quick-start:
     name: quick start from a fresh checkout (REQ-PKG-2)
     runs-on: ubuntu-latest
