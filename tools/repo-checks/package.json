@@ -1,0 +1,22 @@
+{
+  "name": "@svatah/repo-checks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Workspace-level checks that span package directories: import boundaries, licences, eval and documentation coverage",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "echo \"@svatah/repo-checks has nothing to build\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@svatah/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
