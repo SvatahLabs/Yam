@@ -25,6 +25,10 @@ was not started.
 | T1.8 | Healing eval (relocalize-only) and publish | partial — see K2 | `2209f32` |
 | T1.9 | Module (a) release | done | `1c533e4` |
 
+Phase 1 was verified after this file was written; **[Post-verification
+corrections](#post-verification-corrections)** at the end is the later record and
+is what holds where the two disagree.
+
 The four spec documents were not modified beyond the Draft 2.2 amendments the
 verifier authorised, which are `d436177` and touch `lld.md` only:
 
@@ -851,3 +855,124 @@ icon-only button). It removes the visible text, which the text, neighbour and
 role-path measures were all reading. This is in the published report by name
 rather than averaged away. It is the case the model half of REQ-HEAL-5 exists for,
 and it arrives in Phase 3.
+
+---
+
+# Post-verification corrections
+
+Phase 1 was verified after the record above was written, and scored 8.1/10 with
+corrections required. This section is the later one: where it disagrees with
+anything above, this is what holds. Nothing above was rewritten, so the original
+claim and its correction are both visible.
+
+The corrections are commits on `phase-2`, because Phase 1's branch was already
+verified; each carries the `P1-F<n>` prefix.
+
+| # | What was wrong | Commit |
+|---|---|---|
+| F1 | The healing number verified only that a repair was *findable*, not that it was *right* | `bd986c4` |
+| F2 | The documented contract did not stand up from a clean checkout | `b582652` |
+| F3 | `pnpm quick-start` dirtied the working tree, and committed bindings named an ephemeral port | `7460e9a` |
+| F4 | HLD §12's layout gained two packages that did not exist | `c793a11` |
+| F5 | The import-boundary lint's limits were not stated anywhere | `758d061` |
+| F6 | This section | — |
+
+## The Node 22 result
+
+**K3 is closed by the verification session, not by this one.** K3 above records
+that Phase 1's contract had been run only on Node v25.6.1. The verifying session
+ran it on Node 22 LTS, which is what the requirement asks for (REQ-NFR-7).
+
+This session could not repeat that. The only Node on the machine is v25.6.1;
+`/opt/homebrew/opt/node@22` is an alias that resolves to the same binary, and
+installing another runtime is outside what Phase 2 was asked to do. So the Node 22
+evidence is the verifier's, and this record relays it rather than claiming to
+have observed it. Everything in Part 2 of this file, and everything in
+[`phase-2.md`](phase-2.md), was observed on Node v25.6.1.
+
+## The root install failure
+
+The contract in **The contract** above reads:
+
+```bash
+pnpm install && pnpm exec playwright install chromium && pnpm -r build && pnpm -r test
+```
+
+The second command **did not work**. `playwright` was a dependency of
+`@svatah/adapter-playwright` and of nothing else, so `pnpm exec playwright` at
+the repository root resolved no binary. The command as published would have
+failed for anyone following it, and the adapter's own launch-failure message
+named the same command.
+
+Phase 1's own runs did not catch it because they were made from the adapter's
+workspace, where the binary does resolve. That is the shape of the mistake worth
+recording: the contract was verified from the one directory in which it happened
+to hold.
+
+Corrected in F2 (`b582652`). The contract is now four commands:
+
+```bash
+pnpm install && pnpm browsers && pnpm -r build && pnpm -r test
+```
+
+`pnpm browsers` runs `playwright install chromium` in the adapter's workspace,
+and `playwright` is a root dev dependency as well, so the longer form works from
+the root too. `tools/repo-checks/test/packaging.test.ts` asserts the README
+documents all four in order — the earlier test only checked that a browser was
+mentioned, which the broken instruction also satisfied.
+
+## The eval verification sentence, reworded
+
+T1.8 above, and the report it published, said:
+
+> **Recovered** means relocalization proposed an element *and* a candidate
+> re-synthesised from that element resolves back to it. The score alone is never
+> taken as proof.
+
+That is true and it is not enough, and the difference matters. Re-synthesising a
+candidate that resolves proves the proposed element is **findable**. It says
+nothing about whether it is the **right** element. A healer that relocalized
+"Sign in" onto "Sign up" would have produced a candidate that resolved uniquely,
+and Phase 1 would have counted it as a recovery. The published 92.3 % rested on a
+check that a confidently wrong repair passes.
+
+It now reads:
+
+> **Recovered** means two things together: the element relocalization proposed
+> carries the same ground-truth key as the element the binding was recorded on,
+> and a candidate re-synthesised from it resolves back to exactly one element. A
+> proposal with a different key is `wrong-element` however high it scored; one
+> whose key matches but which cannot be re-synthesised into a unique candidate is
+> `unverified`, not recovered.
+
+The key is a `data-svatah-eval` attribute `apps/sample-web` stamps on every
+interactive element, identical across all variants, read by a page script outside
+the surface and kept out of `describe()`, `native`, synthesis, fingerprints and
+scoring by `bindings.ignoreAttributes` (LLD §16, §3.5).
+
+**The number did not move.** Under the stricter rule the headline is still
+**92.3 % (48/52), with zero wrong elements**, and `with-test-ids` is 78.9 %
+(15/19). So Phase 1's figure was not inflated — but until F1 there was no way to
+show that, which is the whole objection. D13 and D14 above still describe the
+population correctly; what changed is what counts as a recovery within it.
+
+`packages/healer/test/eval-ground-truth.test.ts` runs the same eval twice over
+one stub, altering only the key of the proposed element, and requires `recovered`
+then `wrong-element`. A comparison that cannot fail cannot pass it.
+
+## What the corrections did not close
+
+- **K1** (no GitHub remote, so no three-OS matrix run) and **K2** (no tagged
+  release, so no attached report) are unchanged. Both need a remote.
+- **K3** is closed by the verifier, as above, not here.
+- **K4**, **K5**, **K7** are unchanged and belong to later phases.
+- **K6** (`heal --run <id>` has no producer in this repository) is closed by
+  Phase 2: T2.7 writes `runs/<id>/results.jsonl` and T2.12 gives the healer a
+  runtime-backed `Replayer`. See [`phase-2.md`](phase-2.md).
+- **D15** (`runtime` in module (a) or (b)) is **resolved by Draft 2.3**, which
+  this Phase 2 session applied: `runtime` stays in module (b), and module (a)
+  reaches replay through the healer's `Replayer` plugin rather than by importing
+  it (LLD §10, HLD §12). The dependency-tree tests were updated to say so.
+- **D16** (`bind()` imported from `@svatah/playwright-test` rather than LLD
+  §6.5's `@svatah/bindings/playwright`) is **resolved by Draft 2.3**, which
+  corrects the import path in the spec to what was implemented.
