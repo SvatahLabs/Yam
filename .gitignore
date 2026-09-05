@@ -53,10 +53,12 @@ out/
 # manifest are committed — they are the training set and a reviewer reads them —
 # but adapter weights and a fused GGUF are hundreds of megabytes and are
 # reproducible from the pairs and the digest.
-evals/compiler/finetune/tuned/
-# The digest is the exception, and T7.5 asks for it by name: "publish the tuned
-# digest". It is a few hundred bytes and it is the only thing that says which
-# weights and which schedule produced a published number.
+# The contents, not the directory: git cannot re-include a file inside an
+# excluded directory, and the digest is the one thing in here that is published.
+evals/compiler/finetune/tuned/*
+# T7.5 asks for it by name — "publish the tuned digest". A few hundred bytes,
+# and the only thing that says which weights and which schedule produced a
+# published number.
 !evals/compiler/finetune/tuned/digest.json
 
 # The Phase 7 fine-tune virtual environment (T7.5). Multi-gigabyte, and a

@@ -1,0 +1,18 @@
+{
+  "base": "qwen2.5:3b",
+  "huggingFace": "mlx-community/Qwen2.5-3B-Instruct-4bit",
+  "tunedModel": "qwen2-5-3b-svatah",
+  "stack": "mlx",
+  "epochs": 4,
+  "iterations": 332,
+  "batchSize": 1,
+  "maxSeqLength": 1536,
+  "loraLayers": 8,
+  "host": "darwin arm64",
+  "pairs": 83,
+  "promptVersion": "c2-1",
+  "digest": "f90d4e432be6bdc9afe7ec6af3b436107d2e3603806629b10fd880fb8539b98b",
+  "trainedAt": "2026-09-04T21:44:22.416Z",
+  "durationMs": 3464871,
+  "note": "The digest is over the adapter weights and the training set together, so a run can be reproduced and provenance can say which one produced a step (REQ-COMP-3)."
+}

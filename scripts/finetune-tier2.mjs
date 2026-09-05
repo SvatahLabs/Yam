@@ -222,12 +222,27 @@ if (training.status !== 0) die(1, `Training failed (${stack}, exit ${training.st
 
 /*
  * Ollama serves the Tier 2 model, and it cannot load a LoRA adapter directly:
- * the adapter has to be fused into the base weights and converted to GGUF.
- * Doing it here rather than leaving it to a README is what makes the pipeline
- * one command — and the Modelfile is what makes the served model reproducible
- * from the digest.
+ * the adapter has to be fused into the base weights first.
+ *
+ * ## Why the fuse dequantizes, and does not export GGUF (T7.5)
+ *
+ * `--export-gguf` was the obvious route and it does not work here:
+ *
+ *     ValueError: Model type qwen2 not supported for GGUF conversion.
+ *
+ * `mlx_lm`'s GGUF writer covers a short list of architectures and Qwen 2 is not
+ * on it. What *does* work is `--dequantize`, which fuses the adapter into
+ * fp16 weights in the ordinary Hugging Face layout — and Ollama imports that
+ * layout directly, converting on the way in. So the Modelfile's `FROM` is the
+ * fused *directory* rather than a `.gguf` file.
+ *
+ * The base is a 4-bit build and the fused copy is fp16, which is about 5.8 GB
+ * on disk and is why `evals/compiler/finetune/tuned/` is git-ignored apart from
+ * the digest. Dequantizing does not un-do the quantization the model was
+ * trained under: the LoRA was trained against the 4-bit weights and is fused
+ * into their dequantized values, which is the same model.
  */
-const fused = join(out, "fused");
+const fused = join(out, "fused-fp16");
 if (stack === "mlx") {
   const fuse = spawnSync(
     python,
@@ -236,9 +251,7 @@ if (stack === "mlx") {
       "--model", hf,
       "--adapter-path", join(out, "adapters"),
       "--save-path", fused,
-      // GGUF, because that is what Ollama loads. `--export-gguf` writes it
-      // beside the fused weights.
-      "--export-gguf",
+      "--dequantize",
     ],
     { stdio: "inherit" },
   );
@@ -247,7 +260,10 @@ if (stack === "mlx") {
       `\nFusing failed (exit ${fuse.status}). The adapter is at ${join(out, "adapters")} and can ` +
         "be fused by hand:\n" +
         `  ${python} -m mlx_lm fuse --model ${hf} --adapter-path ${join(out, "adapters")} ` +
-        `--save-path ${fused} --export-gguf\n`,
+        `--save-path ${fused} --dequantize\n` +
+        "If the model's cached snapshot is reported as *incomplete*, complete it first — the " +
+        "trainer runs offline once the weights are cached, and a partial cache fails only here:\n" +
+        `  ${python} -c "from huggingface_hub import snapshot_download; snapshot_download('${hf}')"\n`,
     );
   }
 }
@@ -266,7 +282,11 @@ writeFileSync(
     `# The temperature and seed match what the tier sends at compile time\n` +
     `# (REQ-COMP-3: temperature 0, fixed seed), because a model tuned under one\n` +
     `# sampling regime and served under another is not the model that was measured.\n` +
-    `FROM ${join(fused, "ggml-model-f16.gguf")}\n` +
+    `#\n` +
+    `# \`FROM\` is a *directory* of fp16 safetensors, not a .gguf: mlx_lm cannot\n` +
+    `# export GGUF for this architecture ("Model type qwen2 not supported for GGUF\n` +
+    `# conversion"), and Ollama imports the Hugging Face layout directly.\n` +
+    `FROM ${fused}\n` +
     `PARAMETER temperature 0\n` +
     `PARAMETER seed 1\n`,
   "utf8",

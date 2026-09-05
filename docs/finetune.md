@@ -24,8 +24,8 @@ python3 -m venv .venv && .venv/bin/pip install mlx-lm     # or peft on Linux
 SVATAH_FINETUNE_PYTHON=.venv/bin/python node scripts/finetune-tier2.mjs
 
 # 3. Serve it, and measure it against the base.
-ollama create qwen2.5-3b-svatah -f evals/compiler/finetune/tuned/Modelfile
-node scripts/finetune-eval.mjs --tuned qwen2.5-3b-svatah
+ollama create qwen2-5-3b-svatah -f evals/compiler/finetune/tuned/Modelfile
+node scripts/finetune-eval.mjs --tuned qwen2-5-3b-svatah
 ```
 
 ## The schedule, and the machine it has to fit in (T7.5)
@@ -109,6 +109,42 @@ real defects that had nothing to do with training:
 | `asExample` left a predicate's `value` in the IR's shape | So `g-098` — one of the few-shot examples in **every Tier 2 prompt** — was demonstrating a shape the parser rejects |
 | `modelStepSchema` had `promptText` and not `text` for a dialog | The grammar emits `text` and the adapter reads it, so a Tier 2 answer could never carry a prompt's reply |
 | `modelStepSchema` had no `withSessionCookies` | So `Call the "x" API with the session cookies` would compile to a request that quietly sent none |
+
+## Serving it: why the Modelfile points at a directory (T7.5)
+
+`mlx_lm fuse --export-gguf` was the obvious way to get from a LoRA to something
+Ollama loads, and it does not work for this model:
+
+```
+ValueError: Model type qwen2 not supported for GGUF conversion.
+```
+
+`mlx_lm`'s GGUF writer covers a short list of architectures and Qwen 2 is not on
+it. `--dequantize` fuses the adapter into fp16 weights in the ordinary Hugging
+Face layout instead, and Ollama imports that layout directly — so the
+`Modelfile`'s `FROM` is the fused **directory**, not a `.gguf` file. The fused
+copy is about 5.8 GB, which is why everything under
+`evals/compiler/finetune/tuned/` is git-ignored apart from `digest.json`.
+
+Dequantizing does not undo the quantization the model was trained under: the
+LoRA was trained against the 4-bit weights and is fused into their dequantized
+values, which is the same model.
+
+One more failure worth knowing, because it happens *after* an hour of training:
+
+```
+huggingface_hub.errors.IncompleteSnapshotError: The cached snapshot for
+'mlx-community/Qwen2.5-3B-Instruct-4bit' is incomplete: 2 file(s) are missing
+```
+
+The trainer runs offline once the weights are cached, and a partially cached
+snapshot fails only at the fuse. Complete it and re-run the fuse by hand — the
+adapter is already on disk:
+
+```bash
+.venv/bin/python -c "from huggingface_hub import snapshot_download; \
+  snapshot_download('mlx-community/Qwen2.5-3B-Instruct-4bit')"
+```
 
 ## The digest
 
