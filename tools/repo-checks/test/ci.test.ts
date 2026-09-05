@@ -73,6 +73,7 @@ describe("CI mirrors (P0-F5)", () => {
       "legacy-java",
       "model-evals",
       "quick-start",
+      "runtime-conformance",
       "workspace",
     ]);
     expect(workspaceStep).toBeDefined();
@@ -139,6 +140,22 @@ describe("CI mirrors (P0-F5)", () => {
      * A self-hosted runner with the permission granted turns it green.
      */
     expect(job["continue-on-error"]).toContain("macos-latest");
+  });
+
+  it("runs the Java runtime against the published fixture (T6.4, REQ-STD-3)", () => {
+    /*
+     * The one job in this workflow that must work with no Node in the loop:
+     * a JDK, Maven Central, and the artifacts this repository publishes. Node
+     * appears only to compile the plan and serve the sample application, which
+     * is what any third party would do.
+     */
+    const script = githubCommands("runtime-conformance").join("\n");
+    expect(script).toContain("./gradlew --no-daemon fatJar test");
+    expect(script).toContain("scripts/runtime-conformance.mjs");
+    // And it is a *gate*: the script exits non-zero on any mismatch, so the
+    // job cannot go green with a runtime that disagrees.
+    expect(script).not.toContain("continue-on-error");
+    expect(github.jobs["runtime-conformance"]!["continue-on-error"]).toBeUndefined();
   });
 
   it("the pull-request eval job replays a cache rather than spending", () => {

@@ -1,6 +1,6 @@
 {
   "behavior": "test",
-  "bindingsHash": "none",
+  "bindingsHash": "aa7c8799b30e377aaf967b3ea1203ed265e95506d6376d98e1464fc7aba13693",
   "exitCode": 1,
   "flows": {
     "flows/execution.flow": {
@@ -28,6 +28,10 @@
       "status": "failed"
     }
   },
+  "inputs": [
+    "email",
+    "password"
+  ],
   "invoker": {
     "id": "local",
     "kind": "user",
@@ -36,7 +40,7 @@
   "outputs": {
     "I want to validate login.enterprise": "Enterprise"
   },
-  "planHash": "c689d0cc3eb82dd726884b22888f68d4c24b23f2528d2798e8396256459e1ab9",
+  "planHash": "a60918dcfd0027d0d8b072f09dde78d39de2dbba7b854ca3fe9f05002f5d85cf",
   "schemaVersion": "1.0.0",
   "totals": {
     "aborted": 0,

@@ -19,9 +19,12 @@ gradle-app.setting
 *.war
 *.ear
 
-# Jars are ignored except the committed Gradle wrapper
+# Jars are ignored except the committed Gradle wrappers. A wrapper jar is how
+# `./gradlew` bootstraps without a Gradle install, so a checkout without it
+# cannot build either Java project (T6.4).
 *.jar
 !legacy/gradle/wrapper/gradle-wrapper.jar
+!runtimes/java/gradle/wrapper/gradle-wrapper.jar
 
 # --- Archives / logs / editors ---
 *.zip

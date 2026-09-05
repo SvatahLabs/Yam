@@ -83,6 +83,29 @@ describe("repository layout (HLD §12)", () => {
     }
   });
 
+  it("the Java conformance runtime lives under runtimes/java (T6.4, REQ-STD-3)", () => {
+    /*
+     * Not under `packages/`, which is the pnpm workspace, and not under
+     * `legacy/`, which is the *frozen* Selenium project. It is a live
+     * deliverable that must build with `./gradlew` and depend on nothing in the
+     * workspace — which is the whole claim of REQ-STD-3, and would stop being
+     * checkable the moment it could reach a `@svatah/*` package.
+     */
+    expect(isDir(fromRoot("runtimes", "java"))).toBe(true);
+    expect(existsSync(fromRoot("runtimes", "java", "build.gradle"))).toBe(true);
+    expect(existsSync(fromRoot("runtimes", "java", "gradlew"))).toBe(true);
+    expect(
+      existsSync(fromRoot("runtimes", "java", "src", "main", "java", "dev", "svatah", "runtime")),
+    ).toBe(true);
+
+    const gradle = readFileSync(fromRoot("runtimes", "java", "build.gradle"), "utf8");
+    // Playwright for Java and Jackson, which LLD §14 names.
+    expect(gradle).toMatch(/com\.microsoft\.playwright:playwright/);
+    expect(gradle).toMatch(/jackson-databind/);
+    // JDK 17, which the phase requires (REQ-PKG-3, REQ-NFR-7).
+    expect(gradle).toMatch(/JavaLanguageVersion\.of\(17\)/);
+  });
+
   it("the frozen Java project lives under legacy/ and nowhere else", () => {
     expect(existsSync(fromRoot("legacy", "build.gradle"))).toBe(true);
     expect(existsSync(fromRoot("legacy", "src", "main", "java"))).toBe(true);

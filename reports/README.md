@@ -15,6 +15,7 @@ so a change to them is a diff someone sees.
 | [`eval-compiler.md`](eval-compiler.md) | Compiler (REQ-COMP-9, REQ-COMP-3) | Tier 1 100 %, Tier 2 ≥ 80 %, end to end ≥ 95 % | `pnpm eval:compiler` |
 | [`eval-conformance.md`](eval-conformance.md) | Surface conformance (REQ-SURF-3) | every adapter passes | `pnpm eval:conformance` |
 | [`adapter-bidi.md`](adapter-bidi.md) | BiDi independence (REQ-ADP-4, REQ-STD-2) | conformant, and identical to Playwright | `pnpm bidi:independence` |
+| [`runtime-java.md`](runtime-java.md) | Java runtime conformance (REQ-STD-3, LLD §14) | zero mismatches in status and matched candidate | `pnpm conform:runtime` (after `cd runtimes/java && ./gradlew fatJar`) |
 
 `node scripts/eval-reports.mjs --out reports` regenerates all four; the suites
 that are not runnable yet write a placeholder naming the task that builds them,

@@ -358,6 +358,56 @@ jobs:
           path: reports/adapter-${{ matrix.adapter }}.md
           if-no-files-found: ignore
 
+  # T6.4: the foreign runtime against the published fixture (REQ-STD-3, LLD §14).
+  #
+  # Its own job because it is the one thing in this repository that must build
+  # and run with *no* Node in the loop: a JDK, Maven Central, and the artifacts
+  # this repository publishes. Node appears only to compile the plan and to serve
+  # the sample application, which is what any third party would do.
+  runtime-conformance:
+    name: Java runtime conformance (REQ-STD-3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the workspace
+        run: pnpm -r build
+
+      # The sample application is served by the harness; Playwright for Java
+      # brings its own driver but needs the browser's system libraries.
+      - name: Install browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+
+      - name: Build the Java runtime
+        working-directory: runtimes/java
+        run: ./gradlew --no-daemon fatJar test
+
+      - name: Conformance (zero mismatches, or fail)
+        run: node scripts/runtime-conformance.mjs --runtime java --report reports/runtime-java.md
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime-conformance-java
+          path: reports/runtime-java.md
+          if-no-files-found: ignore
+
   legacy-java:
     name: legacy Java project compiles
     runs-on: ubuntu-latest

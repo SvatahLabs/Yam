@@ -1,0 +1,66 @@
+/*
+ * The Java conformance runtime (T6.4, REQ-STD-3, LLD §14).
+ *
+ * "A foreign runtime (first: Java on Playwright for Java) executes `plan.json`
+ * and bindings without the TypeScript compiler and passes the runtime
+ * conformance suite."
+ *
+ * It is a *conformance target*, not a second product (HLD §13 Phase 6): what it
+ * proves is that the published artifacts — plan, bindings, data, config — are
+ * enough to execute a flow, and that the schemas say enough for someone who
+ * never read the TypeScript to get identical results.
+ *
+ * Deliberately outside the pnpm workspace and with its own wrapper, so it builds
+ * with `./gradlew` from this directory and nothing about it depends on Node.
+ */
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'dev.svatah'
+version = '0.1.0'
+description = 'Svatah runtime for Java: executes plan.json and bindings (REQ-STD-3)'
+
+java {
+    // REQ-PKG-3 and the phase's constraint: JDK 17.
+    toolchain { languageVersion = JavaLanguageVersion.of(17) }
+}
+
+repositories { mavenCentral() }
+
+dependencies {
+    // Playwright for Java, which LLD §14 names. Apache-2.0.
+    implementation 'com.microsoft.playwright:playwright:1.49.0'
+    // Jackson for the schemas, which LLD §14 names. Apache-2.0.
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.2'
+
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+application { mainClass = 'dev.svatah.runtime.Main' }
+
+test { useJUnitPlatform() }
+
+/** `./gradlew run --args="<project> --run-id conformance"`. */
+run {
+    // The runtime writes into the project directory it is given, so it must not
+    // inherit Gradle's own working directory.
+    if (project.hasProperty('projectDir')) {
+        args = [project.property('projectDir')] + (project.findProperty('runArgs') ?: '').toString().split(' ').findAll { it }
+    }
+}
+
+/** A fat jar, so the conformance harness runs one file with no classpath. */
+tasks.register('fatJar', Jar) {
+    archiveClassifier = 'all'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest { attributes 'Main-Class': 'dev.svatah.runtime.Main' }
+    from sourceSets.main.output
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    // Signature files from signed dependencies break a shaded jar's verification.
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.MF'
+}
