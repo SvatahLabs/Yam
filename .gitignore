@@ -54,3 +54,15 @@ out/
 # but adapter weights and a fused GGUF are hundreds of megabytes and are
 # reproducible from the pairs and the digest.
 evals/compiler/finetune/tuned/
+
+# The Phase 7 fine-tune virtual environment (T7.5). Multi-gigabyte, and a
+# machine-local install of `mlx-lm`; `docs/finetune.md` says how to make one.
+.venv-finetune/
+.venv/
+
+# Built into `@svatah/schema` from `evals/conformance/` at build time (T7.6).
+# One source, one copy, and the copy is never committed.
+packages/schema/conformance/
+
+# `pnpm release:dry-run` output (T7.6): real tarballs, never published.
+release/

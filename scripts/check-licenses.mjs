@@ -7,11 +7,28 @@
 // the allowlist appears.
 
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+
+/**
+ * `--tree <dir>` checks an installed `node_modules` instead of this workspace
+ * (T7.6, REQ-PKG-3).
+ *
+ * REQ-PKG-3 is a promise about what someone *installs*, and this workspace is
+ * not that: it carries every dev dependency the repository needs and resolves
+ * `@svatah/*` through links. What a Playwright user ends up with is the tree
+ * `scripts/quick-start-packed.mjs` builds from the tarballs, so that is the tree
+ * the claim has to be checked against. It is walked directly rather than through
+ * `pnpm licenses`, because the project it belongs to was installed with npm and
+ * has no pnpm lockfile to read.
+ */
+const treeAt = (() => {
+  const at = process.argv.indexOf("--tree");
+  return at < 0 ? undefined : process.argv[at + 1];
+})();
 
 /**
  * Permissive licences accepted under REQ-PKG-3. The requirement names MIT,
@@ -97,7 +114,53 @@ function pnpmLicenses() {
   return JSON.parse(raw);
 }
 
-const report = pnpmLicenses();
+/**
+ * Every installed package's declared licence, from an npm-installed tree.
+ *
+ * Same shape as `pnpm licenses list --json`, so everything below reads one
+ * report and does not care which produced it.
+ */
+function treeLicenses(root) {
+  const modules = join(root, "node_modules");
+  if (!existsSync(modules)) {
+    console.error(`No node_modules under ${root}. Install it before checking its licences.`);
+    process.exit(2);
+  }
+  const byLicense = {};
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
+      if (entry.name === ".bin" || entry.name === ".package-lock.json") continue;
+      const full = join(dir, entry.name);
+      if (entry.name.startsWith("@")) {
+        walk(full);
+        continue;
+      }
+      const manifestPath = join(full, "package.json");
+      if (!existsSync(manifestPath)) continue;
+      let manifest;
+      try {
+        manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+      } catch {
+        continue;
+      }
+      const license =
+        typeof manifest.license === "string"
+          ? manifest.license
+          : (manifest.license?.type ?? manifest.licenses?.[0]?.type ?? "UNKNOWN");
+      (byLicense[license] ??= []).push({
+        name: manifest.name ?? entry.name,
+        versions: [manifest.version ?? "0.0.0"],
+      });
+      const nested = join(full, "node_modules");
+      if (existsSync(nested)) walk(nested);
+    }
+  };
+  walk(modules);
+  return byLicense;
+}
+
+const report = treeAt === undefined ? pnpmLicenses() : treeLicenses(treeAt);
 const offenders = [];
 const gaps = [];
 let inspected = 0;
@@ -115,10 +178,17 @@ for (const [license, entries] of Object.entries(report)) {
   }
 }
 
-// The project's own licence.
-const rootPkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
-if (rootPkg.license !== "Apache-2.0") {
-  offenders.push({ name: "svatah (this project)", versions: rootPkg.version, license: rootPkg.license });
+// The project's own licence. A packed tree has no such project — it *is* the
+// dependencies — so this is asked only of the workspace.
+if (treeAt === undefined) {
+  const rootPkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+  if (rootPkg.license !== "Apache-2.0") {
+    offenders.push({
+      name: "svatah (this project)",
+      versions: rootPkg.version,
+      license: rootPkg.license,
+    });
+  }
 }
 
 if (offenders.length > 0) {
@@ -131,7 +201,10 @@ if (offenders.length > 0) {
 }
 
 const seen = Object.keys(report).sort();
-console.log(`Licence check OK — ${inspected} package(s), ${seen.length} distinct licence(s):`);
+console.log(
+  `Licence check OK — ${inspected} package(s) in ${treeAt === undefined ? "the workspace" : treeAt}, ` +
+    `${seen.length} distinct licence(s):`,
+);
 for (const l of seen) console.log(`  ${l}`);
 
 if (gaps.length > 0) {

@@ -79,3 +79,112 @@ jobs:
         with:
           files: reports/*.md
           fail_on_unmatched_files: false
+
+  # T7.6: the 0.1.0 release candidate's tarballs, and the promise they carry.
+  #
+  # It packs and it publishes nothing — "release candidate means packed
+  # tarballs, a release workflow that stops at the artifact step, and a scripted
+  # quick start; no registry publish". The quick start is the point: it installs
+  # the module (a) tarballs into an empty Playwright project outside the
+  # workspace and runs record, run and heal from them, which is the only way to
+  # check what REQ-PKG-1 promises. A workspace hides every failure that matters
+  # to it — a missing `files` entry, a `dist` nobody built, a `workspace:*` that
+  # escaped into a tarball.
+  #
+  # Both Node LTS versions, because the contract names both (LLD §16), and with
+  # no credential, because module (a) needs none.
+  tarballs:
+    name: pack and run the quick start from the tarballs (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22", "24"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm -r build
+
+      - name: Install browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+
+      # Lists every tarball's contents and fails on a package that would ship
+      # its tests, its build state, or a `workspace:` range.
+      - name: Pack (no publish)
+        run: pnpm release:dry-run
+
+      # Installs them into an empty project, runs the quick start, and checks
+      # the licences of what was installed (REQ-PKG-2, REQ-PKG-3).
+      - name: The quick start, from the tarballs
+        run: pnpm quick-start:packed --reuse
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tarballs-node-${{ matrix.node }}
+          path: release/*.tgz
+          if-no-files-found: error
+
+      - name: Attach the tarballs to the release
+        if: startsWith(github.ref, 'refs/tags/') && matrix.node == '22'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.tgz
+          fail_on_unmatched_files: false
+
+  # T7.6: "a release workflow that builds the ADE installers on the three-OS
+  # matrix". `ci.yml` builds them on every push to prove they *can* be built;
+  # this one builds the ones a release ships and attaches them.
+  ade-installers:
+    name: ADE installers (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # The ADE spawns `svatah serve`, so the CLI has to exist before it runs.
+      - name: Build the workspace
+        run: pnpm -r build
+
+      - name: Linux packaging tools
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y fakeroot dpkg xvfb
+
+      - name: Make
+        run: pnpm --filter @svatah/ade make
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ade-installers-${{ matrix.os }}
+          path: apps/ade/out/make/**
+          if-no-files-found: error
+
+      - name: Attach the installers to the release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/ade/out/make/**/*
+          fail_on_unmatched_files: false

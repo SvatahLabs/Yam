@@ -15,7 +15,7 @@
  * dependency tree contains no module (b) package.
  */
 import { describe, expect, it } from "vitest";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fromRoot } from "../src/repo.js";
 
@@ -237,5 +237,91 @@ describe("every published package explains itself", () => {
     const path = join(fromRoot("packages", pkg), "README.md");
     expect(existsSync(path)).toBe(true);
     expect(readFileSync(path, "utf8").length, `packages/${pkg}/README.md is a stub`).toBeGreaterThan(400);
+  });
+});
+
+/*
+ * ────────────────────────────────────────────────────────────────────────────
+ * T7.6 — the 0.1.0 release candidate
+ * ────────────────────────────────────────────────────────────────────────────
+ *
+ * "Release candidate means packed tarballs, a release workflow that stops at the
+ * artifact step, and a scripted quick start; no registry publish." What can be
+ * checked here is the *shape* of that promise: one version everywhere, a
+ * changelog that names it, the two scripts, and a release definition with no
+ * publish in it. `pnpm release:dry-run` and `pnpm quick-start:packed` check the
+ * rest by doing it.
+ */
+describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
+  const rootManifest = JSON.parse(readFileSync(fromRoot("package.json"), "utf8")) as {
+    version: string;
+    scripts: Record<string, string>;
+  };
+
+  it("versions every publishable package at 0.1.0", () => {
+    const wrong: string[] = [];
+    for (const dir of readdirSync(fromRoot("packages"))) {
+      const manifestPath = fromRoot("packages", dir, "package.json");
+      if (!existsSync(manifestPath)) continue;
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as {
+        name: string;
+        version: string;
+        private?: boolean;
+        license?: string;
+      };
+      if (manifest.private === true) continue;
+      if (manifest.version !== "0.1.0") wrong.push(`${manifest.name}@${manifest.version}`);
+      if (manifest.license !== "Apache-2.0") wrong.push(`${manifest.name}: ${manifest.license}`);
+    }
+    expect(wrong, "every published package is 0.1.0 and Apache-2.0").toEqual([]);
+    expect(rootManifest.version).toBe("0.1.0");
+  });
+
+  it("has a changelog that names the version and what it does not do", () => {
+    const changelog = readFileSync(fromRoot("CHANGELOG.md"), "utf8");
+    expect(changelog).toContain("## [0.1.0]");
+    // The decision, written down where a reader of the release finds it.
+    expect(changelog).toContain("Nothing is published to a registry");
+  });
+
+  it("offers the two scripts the release candidate is made of", () => {
+    expect(rootManifest.scripts["release:dry-run"]).toBe("node scripts/release-dry-run.mjs");
+    expect(rootManifest.scripts["quick-start:packed"]).toBe("node scripts/quick-start-packed.mjs");
+    expect(existsSync(fromRoot("scripts/release-dry-run.mjs"))).toBe(true);
+    expect(existsSync(fromRoot("scripts/quick-start-packed.mjs"))).toBe(true);
+  });
+
+  it("ships the published contract with the schemas and the fixture", () => {
+    /*
+     * REQ-STD-1 and REQ-STD-2 together: a third party writing a runtime
+     * downloads `@svatah/schema` for the schemas their artifacts must satisfy
+     * *and* the fixture their results are compared against. Shipping one
+     * without the other leaves them able to validate and unable to check.
+     */
+    const manifest = JSON.parse(
+      readFileSync(fromRoot("packages/schema/package.json"), "utf8"),
+    ) as { files: string[]; scripts: Record<string, string> };
+    expect(manifest.files).toContain("json");
+    expect(manifest.files).toContain("conformance");
+    expect(manifest.scripts["generate"]).toContain("copy-conformance-fixture.mjs");
+  });
+
+  it("stops at the artifact step in both release definitions", () => {
+    for (const file of [".github/workflows/release.yml", "bitbucket-pipelines.yml"]) {
+      const text = readFileSync(fromRoot(file), "utf8");
+      // Not one publish, anywhere. Adding one is a decision somebody makes on
+      // purpose, not something that arrives with a copied step.
+      expect(text, `${file} publishes to a registry`).not.toMatch(/^\s*-?\s*(run:\s*)?(pnpm|npm) publish/m);
+    }
+    const release = readFileSync(fromRoot(".github/workflows/release.yml"), "utf8");
+    expect(release).toContain("pnpm release:dry-run");
+    expect(release).toContain("pnpm quick-start:packed");
+    // The three-OS installer matrix, and the reports on the release notes.
+    expect(release).toContain("pnpm --filter @svatah/ade make");
+    expect(release).toContain("files: reports/*.md");
+
+    const bitbucket = readFileSync(fromRoot("bitbucket-pipelines.yml"), "utf8");
+    expect(bitbucket).toContain("pnpm release:dry-run");
+    expect(bitbucket).toContain("pnpm quick-start:packed");
   });
 });

@@ -39,7 +39,9 @@
     "fixture:ade-db": "node scripts/build-ade-fixture.mjs",
     "finetune:export": "node packages/cli/dist/bin.js eval finetune export",
     "finetune:train": "node scripts/finetune-tier2.mjs",
-    "finetune:eval": "node scripts/finetune-eval.mjs"
+    "finetune:eval": "node scripts/finetune-eval.mjs",
+    "release:dry-run": "node scripts/release-dry-run.mjs",
+    "quick-start:packed": "node scripts/quick-start-packed.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

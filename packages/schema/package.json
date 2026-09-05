@@ -12,18 +12,20 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./json/*": "./json/*"
+    "./json/*": "./json/*",
+    "./conformance/*": "./conformance/*"
   },
   "files": [
     "dist",
     "json",
+    "conformance",
     "README.md"
   ],
   "engines": {
     "node": ">=22.0.0"
   },
   "scripts": {
-    "generate": "node scripts/write-json-schemas.mjs",
+    "generate": "node scripts/write-json-schemas.mjs && node scripts/copy-conformance-fixture.mjs",
     "build": "tsup --config ../../tsup.config.ts && pnpm run generate",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

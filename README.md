@@ -195,6 +195,28 @@ node scripts/compile-fixtures.mjs --check   # the committed fixture plan is curr
 node scripts/migrate-legacy.mjs --check     # migration output is unchanged
 ```
 
+## The 0.1.0 release candidate
+
+Packed tarballs, and nothing published (T7.6):
+
+```bash
+pnpm release:dry-run      # packs every publishable package and lists its contents
+pnpm quick-start:packed   # installs the module (a) tarballs into an empty
+                          # Playwright project outside this workspace, runs
+                          # record/run/heal there, and checks the licences of
+                          # what was installed
+```
+
+`pnpm quick-start` runs the same three steps *inside* the workspace, where every
+`@svatah/*` import resolves through pnpm's links. `pnpm quick-start:packed` is
+the one that checks what REQ-PKG-1 actually promises: that a Playwright user who
+has never seen this repository can install four packages and be running. A
+workspace hides exactly the failures that matter to that — a missing `files`
+entry, a `dist` nobody built, a `workspace:*` that escaped into a tarball.
+
+Neither `.github/workflows/release.yml` nor `bitbucket-pipelines.yml` contains a
+publish. See [CHANGELOG.md](CHANGELOG.md).
+
 The frozen Java project builds on its own:
 
 ```bash

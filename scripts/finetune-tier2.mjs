@@ -45,6 +45,20 @@ const option = (name, fallback) => {
 const pairsPath = resolve(ROOT, option("pairs", "evals/compiler/finetune/pairs.jsonl"));
 const out = resolve(ROOT, option("out", "evals/compiler/finetune/tuned"));
 const epochs = Number(option("epochs", "4"));
+/*
+ * The knobs that decide whether this fits in the machine's memory (T7.5).
+ *
+ * `mlx_lm.lora` defaults to a batch of 4, sequences of 2048 tokens and LoRA on
+ * 16 layers, which is more than a 16 GB Apple-silicon machine has to give while
+ * anything else is running: the full schedule on this host died at iteration 1
+ * with `[METAL] Command buffer execution failed: Insufficient Memory`. They are
+ * options rather than smaller defaults because the numbers a run was trained
+ * with belong in its digest, and a run that quietly shrank itself would publish
+ * a number nobody could reproduce.
+ */
+const batchSize = Number(option("batch-size", "1"));
+const maxSeqLength = Number(option("max-seq-length", "1024"));
+const numLayers = Number(option("layers", "8"));
 const stack = option("stack", process.platform === "darwin" ? "mlx" : "peft");
 /*
  * The interpreter, so a virtual environment works without activating one.
@@ -189,6 +203,9 @@ const training =
           "--train",
           "--data", out,
           "--iters", String(epochs * pairs.length),
+          "--batch-size", String(batchSize),
+          "--max-seq-length", String(maxSeqLength),
+          "--num-layers", String(numLayers),
           "--adapter-path", join(out, "adapters"),
         ],
         { stdio: "inherit" },
@@ -284,6 +301,16 @@ writeFileSync(
       tunedModel,
       stack,
       epochs,
+      /*
+       * The schedule, in the digest, because T7.5 allows "a documented shorter
+       * schedule if the full one exceeds the host" and a number reported
+       * without the schedule that produced it is not reproducible.
+       */
+      iterations: epochs * pairs.length,
+      batchSize,
+      maxSeqLength,
+      loraLayers: numLayers,
+      host: `${process.platform} ${process.arch}`,
       pairs: pairs.length,
       promptVersion: TIER2_PROMPT_VERSION,
       digest: hex,

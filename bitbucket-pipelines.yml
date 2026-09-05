@@ -156,6 +156,33 @@ definitions:
         artifacts:
           - reports/adapter-ax.md
 
+    - step: &release-candidate
+        name: release candidate 0.1.0 — pack, quick start, reports (T7.6)
+        caches:
+          - pnpm
+        script:
+          - corepack enable
+          - corepack prepare --activate
+          - pnpm install --frozen-lockfile
+          - pnpm -r build
+          - pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium firefox
+          # Packs, lists every tarball's contents, and fails on a package that
+          # would ship its tests, its build state, or a `workspace:` range.
+          - pnpm release:dry-run
+          # Installs the module (a) tarballs into an empty Playwright project
+          # outside the workspace and runs record, run and heal from them, then
+          # checks the licences of what was installed (REQ-PKG-1, 2, 3).
+          - pnpm quick-start:packed --reuse
+          # REQ-PKG-4: the reports a release attaches.
+          - node scripts/eval-reports.mjs --out reports
+        # And it stops here. "Release candidate means packed tarballs, a release
+        # workflow that stops at the artifact step, and a scripted quick start;
+        # no registry publish." There is no `npm publish` in this file, and
+        # adding one is a decision somebody makes on purpose.
+        artifacts:
+          - release/*.tgz
+          - reports/*.md
+
     - step: &legacy-java
         name: legacy Java project compiles
         image: eclipse-temurin:17-jdk
@@ -193,3 +220,10 @@ pipelines:
       - parallel:
           - step: *uia-gate
           - step: *ax-gate
+    # T7.6, and the half of `.github/workflows/release.yml` that can run on the
+    # remote this repository has. It packs, runs the quick start from what it
+    # packed, writes the reports, and stops at the artifact step. The ADE
+    # installers are the other half and need macOS and Windows runners, which is
+    # the same blocked leg as `desktop-gates`.
+    release:
+      - step: *release-candidate
