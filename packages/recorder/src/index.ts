@@ -21,6 +21,7 @@ export {
   entryFor,
   EnvironmentRefused,
   ground,
+  groundSiteTool,
   type GroundingDecision,
   type GroundingResult,
   type GroundingTarget,

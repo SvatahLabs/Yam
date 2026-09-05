@@ -43,6 +43,7 @@
  */
 import {
   resolve as resolveBinding,
+  synthesiseSiteTool,
   type BindingsStore,
   type Resolution,
 } from "@svatah/bindings";
@@ -70,6 +71,7 @@ import {
   assertRecordable,
   entryFor,
   ground,
+  groundSiteTool,
   type GroundingDecision,
   type GroundOptions,
   type GroundingTarget,
@@ -265,7 +267,31 @@ export async function record(options: RecordSessionOptions): Promise<RecordRepor
         record_.binding = needs ? (store.has(target.ref) ? "rebound" : "grounded") : "existing";
         if (!needs) continue;
 
-        const result = await ground(
+        /*
+         * A declared site tool needs no grounding at all (T6.3, REQ-ADP-9,
+         * LLD §6.3).
+         *
+         * `Use the "book-slot" site tool` names a *tool*, not an element, and
+         * the page publishes the tool by that name. There is nothing for a
+         * model to look for and nothing for it to be wrong about: the page
+         * either declares `book-slot` or it does not, and `locate` answers.
+         *
+         * So the binding is written from the declaration, with the tool as its
+         * only candidate, and no model is called. A page that does not declare
+         * it falls through to grounding below, which is right — the sentence
+         * may name a control the site describes some other way.
+         */
+        const declared = await groundSiteTool(
+          surface,
+          { id: target.ref, phrase: target.phrase, sentence: step.text },
+          {
+            ...(options.grounding?.matchHost === undefined
+              ? {}
+              : { matchHost: options.grounding.matchHost }),
+          },
+        );
+
+        const result = declared ?? (await ground(
           {
             id: target.ref,
             phrase: target.phrase,
@@ -273,7 +299,7 @@ export async function record(options: RecordSessionOptions): Promise<RecordRepor
           } satisfies GroundingTarget,
           surface,
           { gateway, ...(options.grounding ?? {}) },
-        );
+        ));
         record_.decision = result.decision;
         options.log?.(`${target.ref}: ${result.decision.outcome}`);
 
@@ -365,6 +391,32 @@ export async function record(options: RecordSessionOptions): Promise<RecordRepor
             }
             entry = replacement;
             options.log?.(`${target.ref}: re-picked ${repick} by the reviewer`);
+          }
+        }
+
+        /*
+         * The declared tool goes *in front of* the locators, not instead of
+         * them (LLD §6.3, T6.3).
+         *
+         * That order is the whole feature. The resolver prefers the tool while
+         * the page declares it and falls through to the locators when the
+         * declaration is gone — in the same run, from the same binding, without
+         * anything being re-recorded. A binding that carried only the tool
+         * could not fall through to anything, and one that carried only the
+         * locators would never use the tool the site published.
+         *
+         * When the target *is* the tool (pattern 30, `Use the "book-slot" site
+         * tool`), there is no element and no locator to put behind it, which
+         * `groundSiteTool` above has already handled.
+         */
+        if (declared === undefined) {
+          const alsoDeclared = await synthesiseSiteTool(surface, target.phrase, target.ref);
+          if (alsoDeclared !== undefined) {
+            entry = { ...entry, candidates: [alsoDeclared, ...entry.candidates] };
+            options.log?.(
+              `${target.ref}: the page also declares it as the "${alsoDeclared.tool ?? ""}" ` +
+                "site tool, which the resolver will prefer",
+            );
           }
         }
 

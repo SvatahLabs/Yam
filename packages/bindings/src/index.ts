@@ -45,8 +45,11 @@ export {
 export { LocatorError, type CandidateAttempt, type LocatorErrorDetail } from "./errors.js";
 
 export {
+  siteToolCandidatesFor,
+  siteToolOf,
   synthesise,
   synthesiseBundle,
+  synthesiseSiteTool,
   candidatesFor,
   fingerprint,
   fingerprintOf,

@@ -1,5 +1,5 @@
 import { createServer, type Server, type ServerResponse } from "node:http";
-import { APP_CSS, CANVAS_JS, PAGES, pageFor } from "./pages.js";
+import { APP_CSS, CANVAS_JS, PAGES, WEBMCP_JS, pageFor } from "./pages.js";
 import { applyVariant, VARIANTS } from "./variants.js";
 
 /** The port LLD §16 and T0.5 fix for the sample application. */
@@ -46,6 +46,9 @@ export function createSampleApp(): Server {
 
     if (path === "/app.css") return send(res, 200, APP_CSS, "text/css; charset=utf-8");
     if (path === "/canvas.js") return send(res, 200, CANVAS_JS, "text/javascript; charset=utf-8");
+    // The WebMCP declaration (T6.3). A file rather than an inline script so a
+    // page with a strict CSP could still serve it.
+    if (path === "/webmcp.js") return send(res, 200, WEBMCP_JS, "text/javascript; charset=utf-8");
 
     if (path === "/api/active-count") {
       return send(

@@ -148,10 +148,34 @@ for (const mechanism of MECHANISMS) {
       expect(await surface.read("text", result)).toBe("approved");
     });
 
-    test("[webmcp] webmcp locates nothing until REQ-ADP-9 lands", async ({ openSurface }) => {
+    test("[webmcp] a tool the page does not declare locates nothing", async ({ openSurface }) => {
+      /*
+       * The fall-through, at its smallest (T6.3, REQ-ADP-9, LLD §6.3). The home
+       * page declares no tools, so a `webmcp` candidate resolves to nothing and
+       * the resolver moves on to the locators recorded behind it. The capability
+       * says this adapter *can* read a declaration, not that this page has one.
+       */
       const surface = await openSurface(mechanism, "/");
       expect(await surface.locate(candidate({ by: "webmcp", tool: "book-a-slot" }))).toHaveLength(0);
-      expect(surface.capabilities().webmcp).toBe(false);
+      expect(surface.capabilities().webmcp).toBe(true);
+    });
+
+    test("[webmcp] a declared tool locates to a reference that is not an element", async ({
+      openSurface,
+    }) => {
+      const surface = await openSurface(mechanism, "/site-tools");
+      const refs = await surface.locate(candidate({ by: "webmcp", tool: "book-the-slot" }));
+      expect(refs).toHaveLength(1);
+      // `wN`, and it names a tool: `describe` refuses it, because there is no
+      // element to describe.
+      expect(refs[0]).toMatch(/^w\d+$/);
+      await expect(surface.describe(refs[0]!)).rejects.toThrow(/site tool/);
+
+      // And the same page with the declaration removed answers with nothing.
+      await surface.act("navigate", undefined, { url: "/site-tools?webmcp=off" });
+      expect(await surface.locate(candidate({ by: "webmcp", tool: "book-the-slot" }))).toHaveLength(
+        0,
+      );
     });
 
     test("[accessibilityId][resourceId][automationId][controlPath] the foreign kinds are refused by name", async ({

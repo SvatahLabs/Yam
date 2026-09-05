@@ -36,7 +36,9 @@ import {
   contextHash,
   contextPattern,
   fingerprintOf,
+  siteToolOf,
   synthesise,
+  synthesiseSiteTool,
 } from "@svatah/bindings";
 import type { BindingEntry, Candidate, Provenance, Ref, Snapshot } from "@svatah/schema";
 import type { AgentSurface } from "@svatah/surface";
@@ -86,7 +88,20 @@ export interface GroundOptions {
 export interface GroundingDecision {
   readonly id: string;
   readonly phrase: string;
-  readonly outcome: "grounded" | "not-found" | "unverified" | "low-confidence" | "refused";
+  readonly outcome:
+    | "grounded"
+    | "not-found"
+    | "unverified"
+    | "low-confidence"
+    | "refused"
+    /**
+     * The page declared the target as a WebMCP tool, so no model was asked
+     * (T6.3, REQ-ADP-9). Distinct from `grounded` on purpose: a record report
+     * that called it grounding would be claiming a model decision that never
+     * happened, and REQ-REC-8's per-step tokens and cost would be zero with no
+     * explanation.
+     */
+    | "declared";
   /** The reference the model chose, when it chose one. */
   readonly ref?: Ref;
   readonly why?: string;
@@ -488,4 +503,118 @@ async function isSameElement(
     other.index === description.index &&
     other.box.every((value, at) => value === description.box[at])
   );
+}
+
+/* ── WebMCP (T6.3, REQ-ADP-9, LLD §6.3) ───────────────────────────────────── */
+
+/**
+ * The binding for a target the page declares as a site tool.
+ *
+ * `Use the "book-slot" site tool` names a *tool*, not an element. There is
+ * nothing for a model to look for and nothing for it to be wrong about: the
+ * page either declares `book-slot` or it does not, and `locate` answers. So no
+ * model is called, and the provenance says `webmcp:declaration` rather than
+ * naming one.
+ *
+ * `undefined` when the page declares no such tool, which leaves the caller to
+ * ground the phrase in the ordinary way — the sentence may name a control the
+ * site describes some other way.
+ *
+ * ## The fingerprint of a thing with no element
+ *
+ * Empty, and deliberately so. A fingerprint exists for relocalization (LLD
+ * §6.4): it describes where an element sat so a moved one can be found again. A
+ * tool does not sit anywhere. Inventing a fingerprint from the page would make
+ * relocalization score a binding it can never repair, and the honest answer to
+ * "this tool is gone" is the fall-through to the locators, not a repair.
+ */
+export async function groundSiteTool(
+  surface: AgentSurface,
+  target: GroundingTarget,
+  options: Pick<GroundOptions, "matchHost"> = {},
+): Promise<GroundingResult | undefined> {
+  /*
+   * Only when the *phrase* names the tool — pattern 30's
+   * `Use the "book-slot" site tool`, and nothing looser.
+   *
+   * An ordinary sentence like "Click the Book the slot button" names a control
+   * that the page may *also* declare as a tool, and that case must go through
+   * ordinary grounding so the locators end up in the binding behind the tool.
+   * Taking this path for it produced a binding with a `webmcp` candidate and
+   * nothing else — which resolved perfectly while the declaration was there and
+   * had nothing to fall through to when it went, quietly removing the property
+   * LLD §6.3 is about. `session.ts` prepends the tool in that case instead.
+   */
+  if (siteToolOf(target.phrase) === undefined) return undefined;
+
+  const candidate = await synthesiseSiteTool(surface, target.phrase, target.id);
+  if (candidate === undefined) return undefined;
+
+  const url = (await surface.state().catch(() => undefined))?.url;
+  const snapshot = await surface.snapshot();
+  const at = new Date().toISOString();
+  const tool = candidate.tool ?? "";
+
+  const provenance: Provenance = {
+    model: "webmcp:declaration",
+    promptVersion: "webmcp-1",
+    at,
+    tokensIn: 0,
+    tokensOut: 0,
+  };
+
+  const entry: BindingEntry = {
+    context: {
+      /*
+       * The whole page's hash, not a landmark's: a tool belongs to the document
+       * that declared it, and there is no element to take the nearest landmark
+       * of. It is broader than a recorded element's context and will drift
+       * sooner — which matters less here, because the resolver re-asks the page
+       * whether the tool is declared on every resolution anyway.
+       */
+      pattern: contextPattern(url ?? "/", {
+        ...(options.matchHost === undefined ? {} : { matchHost: options.matchHost }),
+      }),
+      hash: contextHash(snapshot).hash,
+      platform: surface.kind === "http" ? "web" : surface.kind,
+    },
+    candidates: [candidate],
+    fingerprint: {
+      tag: "webmcp",
+      attrs: { tool: candidate.tool ?? "" },
+      text: "",
+      neighbours: { before: [], after: [] },
+      rolePath: [],
+      box: [0, 0, 0, 0],
+      index: 0,
+    },
+    recordedAt: at,
+    provenance,
+    /*
+     * Verified at synthesis, unlike a grounded binding: `synthesiseSiteTool`
+     * only answers when `locate` resolved the tool, which is the whole of what
+     * "this binding can be re-found" means for a declaration.
+     */
+    verified: true,
+  };
+
+  return {
+    entry,
+    decision: {
+      id: target.id,
+      phrase: target.phrase,
+      outcome: "declared",
+      ref: tool,
+      confidence: 1,
+      why: `the page declares a "${tool}" site tool, so no model was asked`,
+      // Nothing was sent and nothing was spent, which is the point.
+      snapshotTokens: 0,
+      pruned: false,
+      usedVision: false,
+      cached: false,
+      provenance,
+      candidates: [candidate],
+    },
+    snapshot: snapshot.text,
+  };
 }

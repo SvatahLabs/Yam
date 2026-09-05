@@ -388,3 +388,98 @@ export async function synthesiseBundle(
   const candidates = await synthesise(surface, ref, options);
   return { candidates, fingerprint: fingerprintOf(description, options), description };
 }
+
+/* ── WebMCP (T6.3, REQ-ADP-9, LLD §6.3) ───────────────────────────────────── */
+
+/**
+ * The site tool a target phrase names, if it names one.
+ *
+ * `docs/flow-language.md` pattern 30 is `Use the "<tool>" site tool`, and the
+ * compiler turns it into a target whose phrase is `the <tool> site tool`. That
+ * phrase is the *only* deterministic link between a flow and a declared tool:
+ * for an ordinary target — "the Book now button" — nothing but a model could say
+ * which tool corresponds, and REQ-REC-3 requires synthesis to be model-free.
+ *
+ * So a `webmcp` candidate is synthesised exactly when the author asked for one
+ * by name. That is narrower than "whenever the page declares something useful",
+ * and it is the part that can be got right without guessing.
+ */
+export function siteToolOf(phrase: string): string | undefined {
+  const match = /^\s*(?:the\s+)?["']?(.+?)["']?\s+site\s+tool\s*$/i.exec(phrase);
+  const name = match?.[1]?.trim();
+  return name === undefined || name === "" ? undefined : name;
+}
+
+/** Control nouns an element id ends with, which a tool name will not. */
+const CONTROL_NOUNS = [
+  "button",
+  "link",
+  "field",
+  "input",
+  "box",
+  "checkbox",
+  "select",
+  "control",
+  "tab",
+];
+
+/**
+ * The tool names a target might be, best first.
+ *
+ * Two ways a flow can reach a declared tool, and both are deterministic:
+ *
+ * 1. **The author named it** — `Use the "book-slot" site tool`, pattern 30,
+ *    whose target phrase is `the book-slot site tool`. This is exact.
+ * 2. **The element id is the tool name**, with or without the control noun the
+ *    dictionary appended: "Click the Book the slot button" becomes
+ *    `book-the-slot-button`, and a page declaring `book-the-slot` is declaring
+ *    that control.
+ *
+ * The second is a guess in the sense that a page *could* name a tool after an
+ * unrelated control — which is why every candidate is confirmed against the
+ * live declaration before it is written, and why nothing looser is tried. A
+ * fuzzy match would put a tool in a binding on the strength of a shared word.
+ */
+export function siteToolCandidatesFor(phrase: string, elementId?: string): string[] {
+  const named = siteToolOf(phrase);
+  if (named !== undefined) return [named];
+  if (elementId === undefined || elementId === "") return [];
+
+  // The dictionary namespaces ids as `page.element`; the tool is the element.
+  const local = elementId.split(".").pop()!;
+  const out = [local];
+  for (const noun of CONTROL_NOUNS) {
+    if (local.endsWith(`-${noun}`)) out.push(local.slice(0, -(noun.length + 1)));
+  }
+  return out;
+}
+
+/**
+ * The `webmcp` candidate for a target, when the page declares the tool.
+ *
+ * Score 1.0, above every locator, because the resolver's preference is not a
+ * ranking — it is a separate branch (LLD §6.3) — and a bundle whose first entry
+ * were a locator would read as though the tool came second.
+ *
+ * `paramMap` is deliberately absent. It exists for a tool whose parameter names
+ * differ from the step's argument names, and nothing model-free can discover
+ * that mapping; identity is what the sentence says and what the page's
+ * `inputSchema` will confirm or reject.
+ */
+export async function synthesiseSiteTool(
+  surface: AgentSurface,
+  phrase: string,
+  elementId?: string,
+): Promise<Candidate | undefined> {
+  if (surface.capabilities().webmcp !== true) return undefined;
+
+  for (const tool of siteToolCandidatesFor(phrase, elementId)) {
+    const candidate: Candidate = { by: "webmcp", tool, score: 1 };
+    const refs = await surface.locate(candidate).catch(() => [] as Ref[]);
+    // Exactly as for a locator: a candidate that does not resolve is not
+    // written. A page that does not declare the tool leaves the binding to its
+    // locators, which is the fall-through of LLD §6.3 seen from record time.
+    if (refs.length === 1) return candidate;
+  }
+  return undefined;
+}

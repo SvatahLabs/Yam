@@ -343,6 +343,66 @@ ${SIDEBAR}
     ),
   },
   {
+    /**
+     * The WebMCP-declaring page (LLD §16, REQ-ADP-9, T6.3).
+     *
+     * > `apps/sample-web`: […] plus a WebMCP-declaring page (P2)
+     *
+     * A page that tells an agent what its controls *do*, rather than leaving it
+     * to work that out from what they look like. The booking form here is
+     * ordinary and fully locator-addressable; on top of it the page registers
+     * two `navigator.modelContext` tools that perform the same two jobs.
+     *
+     * That overlap is the point of the whole feature. A binding recorded here
+     * carries both a declared tool and the locators behind it, and the resolver
+     * prefers the tool when it is declared and falls through to the locators
+     * when it is not (LLD §6.3). `?webmcp=off` removes the declaration and
+     * leaves everything else exactly as it was, which is how the fall-through
+     * is demonstrated rather than asserted.
+     *
+     * The tool names match the controls they operate — `book-the-slot` for the
+     * "Book the slot" button — because that is the only link between a sentence
+     * and a tool that can be made without a model (REQ-REC-3). A page whose
+     * tools were named unrelatedly would still be drivable through
+     * `Use the "…" site tool`, which names the tool outright (pattern 30).
+     *
+     * No browser ships `navigator.modelContext` yet — the Web MCP proposal is a
+     * draft — so `webmcp.js` defines it. That is what a site would do today
+     * behind a feature detect, and it means this page exercises the adapter's
+     * *reading* of the API rather than any particular browser's implementation.
+     */
+    path: "/site-tools",
+    title: "Site tools",
+    html: shell(
+      "Site tools",
+      `    <main class="page">
+      <h1 data-testid="site-tools-heading">Site tools</h1>
+      <p class="lead">
+        This page declares its controls to an agent through
+        <code>navigator.modelContext</code>. Add <code>?webmcp=off</code> to take the
+        declaration away and leave the form behind it.
+      </p>
+
+      <form id="site-tools-form" class="form">
+        <div class="field">
+          <label for="tool-location">Starting point</label>
+          <input id="tool-location" name="location" type="text" data-testid="tool-location">
+        </div>
+        <div class="field">
+          <label for="tool-date">Date</label>
+          <input id="tool-date" name="date" type="date" value="2026-09-03" data-testid="tool-date">
+        </div>
+        <button type="button" class="btn btn-primary" data-testid="tool-book">Book the slot</button>
+        <button type="button" class="btn btn-link" data-testid="tool-cancel">Cancel the booking</button>
+      </form>
+
+      <output id="site-tools-result" role="status" aria-label="Site tools result" data-testid="site-tools-result">No booking.</output>
+      <output id="site-tools-declared" role="status" aria-label="Declared tools" data-testid="site-tools-declared">tools: none</output>
+    </main>`,
+      '\n  <script src="/webmcp.js" defer></script>',
+    ),
+  },
+  {
     path: "/logout",
     title: "Logged out",
     html: shell(
@@ -386,6 +446,94 @@ input, select { padding: 7px 9px; border: 1px solid var(--line); border-radius: 
 #drag-source, #drag-target { display: inline-block; padding: 18px 24px; border: 1px dashed var(--line); border-radius: 8px; margin-right: 12px; }
 canvas { border: 1px solid var(--line); border-radius: 8px; display: block; }
 .frame-body { padding: 12px; }
+`;
+
+/**
+ * The page's WebMCP declaration (T6.3, REQ-ADP-9, LLD §6.3, §16).
+ *
+ * `navigator.modelContext` is the Web MCP proposal's entry point and no browser
+ * ships it, so this defines it — which is what a site would do today behind a
+ * feature detect. Both the reading shapes the adapter tries are provided, so the
+ * page exercises the adapter rather than one guess about the final API:
+ *
+ * * `navigator.modelContext.tools` — an array of `{ name, description,
+ *   inputSchema }`, which is what the proposal's `provideContext` accumulates;
+ * * `navigator.modelContext.callTool(name, args)` — the invocation.
+ *
+ * `?webmcp=off` skips the whole thing. The form underneath is untouched, so the
+ * page with and without a declaration is *the same page*: that is what makes
+ * "the resolver falls through to the locators" a demonstration rather than an
+ * assertion about two different documents.
+ */
+export const WEBMCP_JS = `(() => {
+  const result = () => document.getElementById("site-tools-result");
+  const field = (id) => document.getElementById(id);
+
+  /*
+   * The form's own behaviour, always. This is the fall-through path: with
+   * ?webmcp=off the page declares nothing and the two buttons still work, so
+   * "the resolver falls through to the locators" is a claim about the same
+   * page rather than about a page that stopped working.
+   */
+  document.querySelector('[data-testid="tool-book"]').addEventListener("click", () => {
+    result().textContent =
+      "Booked " + field("tool-location").value + " on " + field("tool-date").value + ".";
+  });
+  document.querySelector('[data-testid="tool-cancel"]').addEventListener("click", () => {
+    result().textContent = "No booking.";
+  });
+
+  const off = new URLSearchParams(location.search).get("webmcp") === "off";
+  const declared = document.getElementById("site-tools-declared");
+  if (off) {
+    if (declared) declared.textContent = "tools: none";
+    return;
+  }
+
+  const tools = [
+    {
+      name: "book-the-slot",
+      description: "Book a slot at a starting point on a date.",
+      inputSchema: {
+        type: "object",
+        properties: { location: { type: "string" }, date: { type: "string" } },
+        required: ["location"],
+      },
+      async execute(args) {
+        const where = (args && args.location) || field("tool-location").value;
+        const when = (args && args.date) || field("tool-date").value;
+        field("tool-location").value = where;
+        field("tool-date").value = when;
+        result().textContent = "Booked " + where + " on " + when + ".";
+        return { ok: true, reference: "BK-77001" };
+      },
+    },
+    {
+      name: "cancel-the-booking",
+      description: "Cancel the booking this page shows.",
+      inputSchema: { type: "object", properties: {} },
+      async execute() {
+        result().textContent = "No booking.";
+        return { ok: true };
+      },
+    },
+  ];
+
+  navigator.modelContext = {
+    tools: tools.map((t) => ({
+      name: t.name,
+      description: t.description,
+      inputSchema: t.inputSchema,
+    })),
+    async callTool(name, args) {
+      const tool = tools.find((t) => t.name === name);
+      if (!tool) throw new Error('No tool named "' + name + '".');
+      return await tool.execute(args || {});
+    },
+  };
+
+  if (declared) declared.textContent = "tools: " + tools.map((t) => t.name).join(", ");
+})();
 `;
 
 /**

@@ -43,6 +43,7 @@ which is what the tests use.
 | `/checkout` | Checkout |
 | `/widgets` | Widgets |
 | `/widgets/frame` | Embedded frame |
+| `/site-tools` | Site tools — declares `navigator.modelContext` tools (T6.3, REQ-ADP-9); `?webmcp=off` removes the declaration and leaves the form |
 | `/docs` | Docs |
 | `/logout` | Logged out |
 

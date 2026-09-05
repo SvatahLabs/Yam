@@ -71,10 +71,11 @@ export function groundingAnswers(path?: string): GroundingAnswers {
    * The cases, plus the phrases the eval cannot score.
    *
    * `fixture-answers.jsonl` holds the fixture phrases whose element carries no
-   * ground-truth key — the two headings the flows bind. The eval never reads it,
-   * because a case it cannot check would sit in REQ-REC-10's denominator for
-   * ever; recording does, because the fixtures cannot be recorded without a
-   * credential otherwise.
+   * ground-truth key — two headings the flows bind, and the WebMCP page's
+   * controls (T6.3), which exist to test a *declaration* rather than grounding.
+   * The eval never reads it, because a case it cannot check would sit in
+   * REQ-REC-10's denominator for ever; recording does, because the fixtures
+   * cannot be recorded without a credential otherwise.
    */
   const cases = [...readCases(path), ...readCases(unscoredPath(path))];
 

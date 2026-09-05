@@ -1,2 +1,5 @@
 {"id":"g-398","page":"/","phrase":"the home heading","expect":"present","role":"heading","name":"Deterministic automation, once described","nth":0,"source":"fixtures"}
 {"id":"g-405","page":"/schedule-build","phrase":"the schedule heading","expect":"present","role":"heading","name":"Enterprise","nth":0,"source":"fixtures"}
+{"id":"g-410","page":"/site-tools","phrase":"the tool location field","expect":"present","role":"textbox","name":"Starting point","nth":0,"source":"fixtures"}
+{"id":"g-411","page":"/site-tools","phrase":"the Book the slot button","expect":"present","role":"button","name":"Book the slot","nth":0,"source":"fixtures"}
+{"id":"g-412","page":"/site-tools","phrase":"the site tools result","expect":"present","role":"status","name":"Site tools result","nth":0,"source":"fixtures"}

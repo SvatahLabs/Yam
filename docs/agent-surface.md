@@ -82,7 +82,7 @@ failure halfway through a flow (LLD §2.4).
 | `upload` | Files can be attached to a file control. | `upload` |
 | `drag` | One element can be dragged onto another. | `dragTo` |
 | `trace` | `trace()` is implemented. | — |
-| `webmcp` | The platform can declare tools the adapter can call (REQ-ADP-9). | — |
+| `webmcp` | The adapter can read a page's declared tools and call one (REQ-ADP-9). Says nothing about whether the *current* page declares any — that is `locate({ by: "webmcp" })`, asked per resolution. | — |
 | `screenshot` | `screenshot()` produces an image. | `screenshot` |
 | `restore` | `restore()` can put the session back into a stored state. | — |
 
@@ -343,6 +343,23 @@ is no match; the resolver decides what a zero or a multiple means (LLD §6.3).
 An adapter implements the kinds its platform has and returns an empty array for a
 kind it cannot express. It must never fall back to a different kind silently: the
 matched `by` is recorded in the results and compared across runtimes (REQ-STD-3).
+
+### `webmcp` is the one kind that does not name an element
+
+A `webmcp` candidate names a **tool the page declared**, so `locate` answers with
+a reference no `describe` will accept and no element backs — the Playwright
+adapter mints `wN` for it, and `act` on that reference calls the tool rather than
+clicking anything.
+
+Two properties follow, and both are LLD §6.3:
+
+* **The resolver prefers it**, ahead of every locator, in a branch of its own
+  rather than by score. The site is telling you what the control does; a locator
+  is telling you where it was.
+* **It is asked per resolution.** A page that has stopped declaring the tool
+  answers `locate` with nothing, and the locators recorded behind it in the same
+  binding are tried instead — in the same run, with nothing re-recorded. That is
+  what makes preferring a draft web API safe.
 
 ---
 

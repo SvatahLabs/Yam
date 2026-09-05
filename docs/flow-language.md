@@ -1629,6 +1629,36 @@ Use the "book-slot" site tool
 Use the "book-slot" site tool with date={data.date}
 ```
 
+A **site tool** is a thing the page says it will do, published through
+`navigator.modelContext` (WebMCP). Every other kind of binding says *where* an
+element is; a declared tool says what the page will *do*, which is information
+the site maintains rather than a shape Svatah inferred from a rendering. So the
+resolver prefers it: a tool survives the redesign that breaks every locator, and
+it cannot be ambiguous.
+
+**You usually do not write this sentence.** An ordinary sentence naming a
+control is enough:
+
+```
+Click the Book the slot button
+```
+
+When the page declares a tool for that control, `record` puts the tool in front
+of the locators it found, in the same binding — so replay uses the tool while
+the page declares it and **falls through to the locators when the declaration
+goes away**, with nothing re-recorded. That fall-through is the point, and it is
+why the binding carries both.
+
+Pattern 30 is for a tool with *no* control — something the page can do that
+nothing on screen offers. Such a binding has only the tool in it, and cannot
+fall through to anything: if the page stops declaring it, the step fails, which
+is the honest answer to a sentence that asked for that tool by name.
+
+A tool is matched to an ordinary target by name, and only by name: the tool
+`book-the-slot` matches the element id `book-the-slot` or `book-the-slot-button`.
+Nothing fuzzier, because a fuzzy match would put a tool in a binding on the
+strength of a shared word, and candidate synthesis is model-free (REQ-REC-3).
+
 `Use the "book-slot" site tool` compiles to:
 
 ```json

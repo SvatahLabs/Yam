@@ -50,6 +50,7 @@ import {
 } from "@svatah/surface";
 import { describeElement } from "./page-script.js";
 import { coordsOf, locatorFor } from "./locate.js";
+import { callTool, declaredTools, declaresTool, type DeclaredTool } from "./webmcp.js";
 import { evaluatePredicate } from "./predicates.js";
 import {
   ariaSnapshotText,
@@ -103,9 +104,15 @@ export const PLAYWRIGHT_CAPABILITIES: Capabilities = {
   upload: true,
   drag: true,
   trace: true,
-  // WebMCP tool declarations are REQ-ADP-9 (P2); until then the resolver falls
-  // through to the locator candidates behind a `webmcp` candidate.
-  webmcp: false,
+  /*
+   * WebMCP (T6.3, REQ-ADP-9). The capability says this adapter *can* read a
+   * page's `navigator.modelContext` declaration — not that the page in front of
+   * it declares anything. That distinction is what makes the fall-through work:
+   * the resolver asks `locate({ by: "webmcp" })` per resolution, and a page that
+   * has stopped declaring the tool answers with nothing, so the locators
+   * recorded behind it are tried in the same run (LLD §6.3).
+   */
+  webmcp: true,
   screenshot: true,
   restore: true,
 };
@@ -355,6 +362,19 @@ export class PlaywrightSurface implements AgentSurface {
     return this.frame();
   }
 
+  /**
+   * Every WebMCP tool the current page declares (T6.3, REQ-ADP-9).
+   *
+   * Not part of `AgentSurface`: nothing above the surface addresses a tool by
+   * anything but a `webmcp` candidate, and a method for listing them would be a
+   * browser idea in a platform-neutral interface. It is here because a record
+   * report can usefully say what the page offered — including the tools nothing
+   * bound to.
+   */
+  async declaredSiteTools(): Promise<DeclaredTool[]> {
+    return await declaredTools(this.frame());
+  }
+
   /** Register an element handle and return a reference for it. */
   refForHandle(handle: ElementHandle<Element>): Ref {
     return this.refs().mint(handle);
@@ -362,6 +382,22 @@ export class PlaywrightSurface implements AgentSurface {
 
   async locate(candidate: Candidate): Promise<Ref[]> {
     const space = this.refs();
+    if (candidate.by === "webmcp") {
+      /*
+       * A `webmcp` candidate names a *tool*, not an element, so what comes back
+       * is a synthetic reference — `wN` — that `act` recognises and calls. It
+       * resolves to exactly one when the page declares the tool right now, and
+       * to nothing when it does not, which is the whole of the fall-through
+       * (LLD §6.3).
+       */
+      const tool = candidate.tool;
+      if (tool === undefined || tool === "") {
+        throw new LocateError('A "webmcp" candidate must carry a tool name.', {
+          adapter: "playwright",
+        });
+      }
+      return (await declaresTool(this.frame(), tool)) ? [space.mintTool(tool)] : [];
+    }
     if (candidate.by === "coords") {
       // Coordinates name a point, not an element; a `coords` candidate resolves
       // to whatever is at that point, so exactly one reference or none.
@@ -439,6 +475,26 @@ export class PlaywrightSurface implements AgentSurface {
       }
       return Array.isArray(value) ? value.join(",") : String(value);
     };
+
+    /*
+     * A tool reference is answered by calling the tool, whatever the action was
+     * (T6.3). `Use the "book-slot" site tool` compiles to a `click` on a target
+     * whose binding carries a `webmcp` candidate (pattern 30), so the action
+     * that arrives here is `click` — and clicking a tool is calling it. Every
+     * argument the step carried is passed through, renamed by the binding's
+     * `paramMap` where it has one.
+     */
+    if (ref !== undefined && space.isToolRef(ref)) {
+      const tool = space.toolFor(ref);
+      const called = await callTool(this.frame(), tool, args as Record<string, unknown>);
+      if (!called.ok) {
+        throw new ActionabilityError(
+          `The site tool "${tool}" did not run: ${called.error ?? "unknown"}.`,
+          { adapter: "playwright" },
+        );
+      }
+      return { ok: true, ref, ...(called.value === undefined ? {} : { value: called.value }) };
+    }
 
     try {
       switch (action) {

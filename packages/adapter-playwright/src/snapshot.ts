@@ -219,6 +219,8 @@ export function parseAiSnapshot(text: string): SnapshotNode[] {
 export class RefSpace {
   /** Handles minted by `locate()`, keyed `h0`, `h1`, … */
   private readonly handles = new Map<Ref, ElementHandle<Element>>();
+  /** Declared WebMCP tools minted by `locate()`, keyed `w0`, `w1`, … (T6.3). */
+  private readonly tools = new Map<Ref, string>();
   private next = 0;
 
   constructor(
@@ -236,10 +238,35 @@ export class RefSpace {
     return ref;
   }
 
+  /**
+   * Mint a reference for a declared WebMCP tool (T6.3, REQ-ADP-9).
+   *
+   * `wN`, and it names no element: a site tool is a thing the page will *do*,
+   * so there is no handle to hold and `handleFor` refuses it. `act` recognises
+   * the prefix and calls the tool instead.
+   */
+  mintTool(tool: string): Ref {
+    const ref = `w${this.next++}`;
+    this.tools.set(ref, tool);
+    return ref;
+  }
+
+  isToolRef(ref: Ref): boolean {
+    return this.tools.has(ref);
+  }
+
+  /** The tool a `wN` reference names. */
+  toolFor(ref: Ref): string {
+    const tool = this.tools.get(ref);
+    if (tool === undefined) throw new Error(staleRef(ref));
+    return tool;
+  }
+
   /** Drop every minted handle. Called on navigation and on close. */
   async reset(): Promise<void> {
     const held = [...this.handles.values()];
     this.handles.clear();
+    this.tools.clear();
     this.next = 0;
     await Promise.all(held.map((h) => h.dispose().catch(() => undefined)));
   }
@@ -252,6 +279,12 @@ export class RefSpace {
    * registry the own-refs walker filled.
    */
   async handleFor(ref: Ref): Promise<ElementHandle<Element>> {
+    if (this.tools.has(ref)) {
+      throw new Error(
+        `Reference "${ref}" names the site tool "${this.tools.get(ref)!}", not an element. ` +
+          "A WebMCP tool is called, not located (LLD §6.3).",
+      );
+    }
     if (ref.startsWith("h")) {
       const held = this.handles.get(ref);
       if (held === undefined) throw new Error(staleRef(ref));

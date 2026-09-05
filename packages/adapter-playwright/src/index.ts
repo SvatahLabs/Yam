@@ -39,3 +39,10 @@ export { locatorFor, coordsOf } from "./locate.js";
 export { evaluatePredicate, type CheckContext } from "./predicates.js";
 export { literalValue } from "./values.js";
 export { walkDocument, describeElement, type RawNode, type RawDescription } from "./page-script.js";
+export {
+  callTool,
+  declaredTools,
+  declaresTool,
+  type DeclaredTool,
+  type ToolCall,
+} from "./webmcp.js";

@@ -88,10 +88,20 @@ test.describe("capabilities (LLD §2.4)", () => {
         await surface.restore(await surface.state());
         return true;
       },
-      // WebMCP is REQ-ADP-9 (P2) and is claimed as false; the proof is that a
-      // `webmcp` candidate locates nothing rather than pretending to.
-      webmcp: async () =>
-        (await surface.locate({ by: "webmcp", tool: "book", score: 1 })).length === 0,
+      /*
+       * WebMCP (T6.3, REQ-ADP-9). The claim is that this adapter can read a
+       * page's `navigator.modelContext` declaration — so the proof is that it
+       * finds a tool on the page that declares one, and finds nothing on the
+       * same page with `?webmcp=off`. Either half alone would pass for an
+       * adapter that always answered the same way.
+       */
+      webmcp: async () => {
+        await surface.act("navigate", undefined, { url: "/site-tools" });
+        const declared = await surface.locate({ by: "webmcp", tool: "book-the-slot", score: 1 });
+        await surface.act("navigate", undefined, { url: "/site-tools?webmcp=off" });
+        const gone = await surface.locate({ by: "webmcp", tool: "book-the-slot", score: 1 });
+        return declared.length === 1 && gone.length === 0;
+      },
     };
 
     for (const flag of CAPABILITY_FLAGS) {
@@ -102,7 +112,9 @@ test.describe("capabilities (LLD §2.4)", () => {
         expect(held, `the adapter claims "${flag}" but the proof failed`).toBeTruthy();
       }
     }
-    expect(capabilities.webmcp, "webmcp is P2 and must not be claimed yet").toBe(false);
+    // T6.3 lands it: the adapter reads a declaration, so it claims the capability
+    // and the proof above is what backs the claim.
+    expect(capabilities.webmcp).toBe(true);
   });
 
   test("capabilities() returns a copy, so a caller cannot mutate the adapter", async ({
