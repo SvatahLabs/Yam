@@ -351,6 +351,42 @@ Phase 7 total: 16.5 ideal days.
 
 ---
 
+## Phase 8 — Ship (Draft 2.9)
+
+### T8.1 The packaged ADE opens a project
+**Refs:** REQ-ADE-2, REQ-ADE-6, LLD §13.6 · **Est:** 2.5
+**Do:** Resolve the service's runtime as §13.6 states (`SVATAH_NODE`, then `node` on `PATH` of the supported major or newer, then a Node beside the CLI under `resources/` when packaged with one); never `process.execPath` in a packaged build; the Project screen's alert names the three places when none is found; `doctor` and the smoke check report the chosen runtime. `SVATAH_ADE_PROJECT=<dir>` opens a project on ready. `scripts/ade-smoke.mjs` and the ADE smoke test run against the packaged application when `apps/ade/out/` exists and say so. The desktop gate passes the fixtures project through `SVATAH_ADE_PROJECT`.
+**Validate:** The packaged ADE, launched by hand with no environment, opens a project from its Recent list within 30 s and shows the eleven tabs; with `PATH` emptied it shows the alert and opens nothing; `pnpm ade:smoke` runs against the packaged app in CI on the three-OS matrix; the gate's variant 0 log shows the project screen open before the first case.
+
+### T8.2 The AX bridge within budget, and the macOS gate green
+**Refs:** REQ-ADP-7, REQ-SURF-3, REQ-ADE-6, LLD §7.5, §14, §16 · **Est:** 4
+**Do:** Read the whole window in a fixed number of Apple events (`properties of every UI element of entire contents`, plus one event per optional attribute over the same set), or a native helper reading `AXUIElement` when that cannot reach the budget on the project screen; honour the caller's deadline in the script; report skipped for a case with no checks; run each healing case only at its variant.
+**Validate:** `node scripts/desktop-conformance.mjs --adapter ax` passes 7 of 7 plus both healing cases on a macOS host with the permission granted and an unlocked display; the report's bridge line is a snapshot of the project screen (≥400 nodes) within 10 s; a `window()` call with a 60 s deadline is allowed to run 60 s.
+
+### T8.3 Dialog arming: documented, linted, audited
+**Refs:** REQ-LANG-*, REQ-RUN-8, LLD §3.2, §4.2 · **Est:** 1
+**Do:** Rewrite pattern 21 in `docs/flow-language.md` with the arming order and a worked example; implement `W_DIALOG_UNARMED` and `W_DIALOG_NEVER_OPENED` in lint with golden entries; write the `kind:"dialog", armed:false` audit line in the executor.
+**Validate:** A flow with the click before the dialog step lints with `W_DIALOG_UNARMED` and its run's audit shows the unarmed default; the reference's own examples lint clean and run as documented, in the suite.
+
+### T8.4 The fine-tune withdrawn from 0.1.0, and the corpus that would bring it back
+**Refs:** ADR-4, REQ-COMP-3 · **Est:** 2
+**Do:** Record in `reports/eval-finetune.md` and the release notes that the Tier 2 fine-tune target is not met and the tuned digest is not used; add `svatah eval finetune corpus`, which collects sentences the grammar refuses from the golden set's `tier: 2` entries, the migration fixtures' review notes, and a new `evals/compiler/refused.jsonl` seeded with at least 150 reviewed (sentence, Step) pairs; export pairs from that corpus only, with the golden `tier: 2` subset still excluded.
+**Validate:** The corpus export reports its sources and counts and shares no sentence with the golden set; no training run is required, and none is reported unless measured with early stopping on a held-out split that is not the training set.
+
+### T8.5 Publish 0.1.0
+**Refs:** REQ-PKG-1, 2, 3, 4, REQ-STD-1, 2, LLD §16 · **Est:** 2
+**Do:** A `custom: publish` Bitbucket pipeline and a manually dispatched GitHub workflow that run the release dry run, the packed quick start, the reports, then `npm publish` for the 26 packages under the owner's scope using a token supplied as a pipeline secret, and attach the ADE installers and `reports/*.md` to the release. The implementer prepares and dry-runs it; the owner triggers it.
+**Validate:** The pipeline's dry-run mode runs end to end from a clean checkout and prints the exact publish commands it would run, with the token absent; the publish step refuses to run without the manual trigger and the token; a `CHANGELOG.md` entry for 0.1.0 lists what is in, what is measured, and what is withdrawn.
+
+### T8.6 The Windows UIA gate (carried)
+**Refs:** REQ-ADP-6, LLD §7.5 · **Est:** 2 (needs a Windows host)
+**Do:** Run the gate on a Windows machine or an attached runner; fix what a real UI Automation tree finds.
+**Validate:** `reports/adapter-uia.md` from a live run, 7 of 7 plus the healing cases; or the exact blocked command and the host's `doctor` output, unchanged from Phase 7.
+
+Phase 8 total: 13.5 ideal days.
+
+---
+
 ## Traceability matrix
 
 | Requirement | HLD | LLD | Tasks |
@@ -456,6 +492,7 @@ Phase 7 total: 16.5 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.9 (after Phase 7 verification): Phase 8 added — T8.1 the packaged ADE opens a project, T8.2 the AX bridge within budget and the macOS gate green, T8.3 dialog arming documented, linted, audited, T8.4 the fine-tune withdrawn and its corpus, T8.5 publish 0.1.0 by a manual token-gated step, T8.6 the Windows gate carried. Total 200.5 ideal days.
 - Draft 2.8 (after Phase 6 verification): Phase 7 added — T7.1 AX live gate and desktop healing cases, T7.2 UIA live gate and the pipeline, T7.3 dialog IR and type check, T7.4 Java artifacts in the published schemas, T7.5 the fine-tune measured, T7.6 release candidate 0.1.0. Total 187 ideal days.
 - Draft 2.4 (after Phase 2 verification): T3.6 builds the ADE under `apps/ade` in this repository.
 - Draft 2.3 (after Phase 1 verification): T2.8 targets the new `host-playwright` package; T2.12 added for `bindings-cli` and the healer `Replayer` plugin. Total 170.5 ideal days.
