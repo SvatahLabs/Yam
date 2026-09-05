@@ -79,6 +79,27 @@ function safe(name: string): string {
   return name.replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
+/**
+ * Did a policy abort the flow these results belong to (LLD §8.3, Draft 2.7)?
+ *
+ * `compensate:<story>` is the only policy that aborts: `stop` and `continue`
+ * leave the run `failed`. Since Draft 2.7 the compensating story's steps keep
+ * their own statuses, so no step is labelled `aborted` any more and the abort
+ * has to be read off the failing step's `policyApplied` — which is an object
+ * (`{ compensate: "…" }`) exactly when the policy was a compensation.
+ *
+ * Stated as a function on `results.jsonl` rather than as internal executor
+ * state on purpose: the Playwright Test host's reporter, the runtime
+ * conformance suite, and a foreign runtime all have the results file and
+ * nothing else, and all three have to agree on when a run is `aborted`.
+ */
+export function abortedByPolicy(results: readonly StepResult[]): boolean {
+  return results.some((result) => {
+    const policy = result.failure?.policyApplied;
+    return typeof policy === "object" && policy !== null;
+  });
+}
+
 /** The totals and the exit code a summary carries (REQ-RUN-9). */
 export function summarise(
   results: readonly StepResult[],
@@ -92,7 +113,7 @@ export function summarise(
   };
 
   const exitCode =
-    totals.aborted > 0
+    totals.aborted > 0 || abortedByPolicy(results)
       ? EXIT.aborted
       : totals.failed > 0
         ? EXIT.failed

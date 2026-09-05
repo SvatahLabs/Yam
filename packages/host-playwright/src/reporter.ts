@@ -37,7 +37,7 @@ import {
   type StepResult,
   type Summary,
 } from "@svatah/schema";
-import { newRunId, summarise } from "@svatah/runtime";
+import { abortedByPolicy, newRunId, summarise } from "@svatah/runtime";
 
 /** The attachment name the fixture uses and the reporter reads. */
 export const RESULTS_ATTACHMENT = "svatah-results";
@@ -99,6 +99,18 @@ export default class SvatahReporter implements Reporter {
       if (one.status === "skipped") flow.skipped += 1;
       if (one.status === "failed") flow.status = "failed";
       if (one.status === "aborted") flow.status = "aborted";
+    }
+    /*
+     * A compensation aborts its flow (LLD §8.3, Draft 2.7), and since the
+     * compensating story's steps keep their own statuses the abort is on the
+     * failing step's `policyApplied`, not on any step's status. The standalone
+     * executor reads it the same way; the two must not disagree about a flow
+     * that ran under both.
+     */
+    for (const one of this.results) {
+      if (abortedByPolicy([one]) && flows[one.flow] !== undefined) {
+        flows[one.flow]!.status = "aborted";
+      }
     }
 
     const summary: Summary = {

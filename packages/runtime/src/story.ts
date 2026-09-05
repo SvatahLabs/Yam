@@ -26,6 +26,15 @@
  * the flow. The compensating story sees what the failing one captured, which is
  * how it can cancel the booking whose id the failing story remembered
  * (REQ-AUTO-4).
+ *
+ * ## What `aborted` is a status of
+ *
+ * The flow and the run, not the steps (LLD §8.3, Draft 2.7). A compensating
+ * story's steps are recorded with their own statuses — `passed`, `failed`,
+ * `skipped` — because the question a reader has about a compensation is
+ * whether it worked, and re-labelling every one of them `aborted` erased the
+ * answer. The failing step carries `failure.policyApplied`, which is what says
+ * a compensation happened and is what `abortedByPolicy` reads.
  */
 import type { Signature, Step, StepResult, Story } from "@svatah/schema";
 import type { Scope } from "./scope.js";

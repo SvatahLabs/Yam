@@ -39,6 +39,7 @@ export {
   checkpointFor,
   openRunDirectory,
   readCheckpoint,
+  abortedByPolicy,
   summarise,
   EXIT,
   type RunDirectory,

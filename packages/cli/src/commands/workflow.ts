@@ -117,9 +117,15 @@ export async function workflowCommand(args: ParsedArgs, io: CommandIo): Promise<
 
     if (!json) {
       const { totals } = outcome.summary;
+      // Flows, not steps — see the note in `run.ts` (LLD §8.3, Draft 2.7).
+      const abortedFlows = Object.values(outcome.summary.flows).filter(
+        (flow) => flow.status === "aborted",
+      ).length;
       io.err(
         `\n${outcome.runId}: ${totals.passed} passed, ${totals.failed} failed, ` +
-          `${totals.skipped} skipped, ${totals.aborted} aborted → ${outcome.directory}`,
+          `${totals.skipped} skipped` +
+          (abortedFlows === 0 ? "" : `, ${abortedFlows} flow(s) aborted`) +
+          ` → ${outcome.directory}`,
       );
     }
     return outcome.summary.exitCode as ExitCode;

@@ -38,7 +38,7 @@ import {
 import { verifyResumeHashes, type Resume } from "./resume.js";
 import type { AgentSurface } from "@svatah/surface";
 import { Auditor, MemoryAuditSink, type AuditSink } from "./audit.js";
-import { checkpointFor, summarise, type RunDirectory } from "./results.js";
+import { abortedByPolicy as aborts, checkpointFor, summarise, type RunDirectory } from "./results.js";
 import { Scope } from "./scope.js";
 import { messageOf } from "./failure.js";
 import { runStory, type StoryContext } from "./story.js";
@@ -488,7 +488,6 @@ async function runFlow(
   const passed = results.filter((r) => r.status === "passed").length;
   const failed = results.filter((r) => r.status === "failed").length;
   const skipped = results.filter((r) => r.status === "skipped").length;
-  const aborted = results.filter((r) => r.status === "aborted").length;
   const healed = results.filter((r) => r.status === "healed").length;
 
   return {
@@ -496,7 +495,24 @@ async function runFlow(
     outputs,
     redactedOutputs,
     status: {
-      status: aborted > 0 ? "aborted" : failed > 0 ? "failed" : healed > 0 ? "healed" : "passed",
+      /*
+       * `aborted` beats `failed` (LLD §8.3): a flow that compensated is not
+       * simply a flow that failed, and the two have different exit codes.
+       *
+       * Read from the results rather than from the story outcome, because
+       * `results.jsonl` is the only account a foreign runtime, the Playwright
+       * Test reporter, and the conformance suite all share — and since Draft
+       * 2.7 the compensating story's steps keep their own statuses, so a step
+       * *status* no longer says an abort happened. The failing step's
+       * `policyApplied` does.
+       */
+      status: aborts(results)
+        ? "aborted"
+        : failed > 0
+          ? "failed"
+          : healed > 0
+            ? "healed"
+            : "passed",
       passed,
       failed,
       skipped,
@@ -604,18 +620,27 @@ function storyContext(
     compensate: async (name: string) => {
       const target = context.byName.get(name);
       if (target === undefined) return [];
-      // Collected by the caller, which re-labels them; recording them here as
+      // Collected by the caller, which records them; recording them here as
       // well would put each one in the results twice.
       const outcome = await runStory(target, {}, {
         ...storyContext(flow, target, scope, surface, auditor, context, at, () => undefined),
         onStep: (step) => at.set({ story: name, stepId: step.id }),
       });
-      // The compensating story's own steps are recorded as `aborted`: they ran,
-      // but as part of an abort rather than as part of the flow's intent
-      // (REQ-AUTO-4, REQ-RUN-7).
-      return outcome.results.map((result) =>
-        result.status === "passed" ? { ...result, status: "aborted" as const } : result,
-      );
+      /*
+       * The compensating story's steps keep their own statuses (LLD §8.3,
+       * Draft 2.7).
+       *
+       * They used to be re-labelled `aborted`, which made the results unable
+       * to answer the only question a reader has about a compensation: did the
+       * booking actually get cancelled? A passed step and a failed step both
+       * came out `aborted` with no failure attached, so the audit log was the
+       * only place the difference survived.
+       *
+       * What is `aborted` is the *flow* and the *run* — the intent was not
+       * carried out — and the failing step carries `policyApplied`, which is
+       * how a reader (and `summarise`) knows the compensation happened at all.
+       */
+      return outcome.results;
     },
   };
 }

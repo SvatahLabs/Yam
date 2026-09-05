@@ -167,7 +167,7 @@ describe("the policy matrix (REQ-AUTO-4, LLD §8.3)", () => {
   });
 
   it("`compensate` runs the named story and then stops the flow", async () => {
-    const { results } = await execute(
+    const { results, outcome } = await execute(
       [
         failing("A", { compensate: "Cancel" }),
         story("Cancel", [step({ id: "c1", action: "click", target: target("cancel") })]),
@@ -176,10 +176,40 @@ describe("the policy matrix (REQ-AUTO-4, LLD §8.3)", () => {
       {},
       { unresolvable: ["gone"] },
     );
-    // The compensating story's steps are `aborted`: they ran, but as part of an
-    // abort rather than as part of what the flow set out to do.
-    expect(statuses(results)).toEqual(["a1:failed", "c1:aborted"]);
+    /*
+     * The compensating story's steps keep their own statuses (LLD §8.3, Draft
+     * 2.7). `c1` clicked the cancel button and it worked, so it is `passed` —
+     * a reader of `results.jsonl` has to be able to tell a compensation that
+     * cancelled the booking from one that failed to, and re-labelling both
+     * `aborted` with no failure attached made them identical.
+     */
+    expect(statuses(results)).toEqual(["a1:failed", "c1:passed"]);
     expect(results[0]!.failure?.policyApplied).toEqual({ compensate: "Cancel" });
+    // What is `aborted` is the flow.
+    expect(Object.values(outcome.summary.flows)[0]?.status).toBe("aborted");
+    // And no step is: the run has an aborted flow and zero aborted steps.
+    expect(outcome.summary.totals.aborted).toBe(0);
+  });
+
+  it("a compensating story that itself fails says so, rather than reading `aborted`", async () => {
+    /*
+     * The reason F1 mattered. Before Draft 2.7 this run and the one above wrote
+     * exactly the same statuses: `c1:aborted`, no failure. Now the difference
+     * between "the booking was cancelled" and "the cancellation did not work
+     * either" is in the file.
+     */
+    const { results, outcome } = await execute(
+      [
+        failing("A", { compensate: "Cancel" }),
+        story("Cancel", [step({ id: "c1", action: "click", target: target("also-gone") })]),
+      ],
+      {},
+      { unresolvable: ["gone", "also-gone"] },
+    );
+    expect(statuses(results)).toEqual(["a1:failed", "c1:failed"]);
+    expect(results[1]!.failure?.class).toBe("locator");
+    expect(Object.values(outcome.summary.flows)[0]?.status).toBe("aborted");
+    expect(outcome.summary.exitCode).toBe(EXIT.aborted);
   });
 
   it("the compensating story sees what the failing one captured", async () => {
@@ -207,7 +237,9 @@ describe("the policy matrix (REQ-AUTO-4, LLD §8.3)", () => {
       {},
       { unresolvable: ["gone"], reads: { "ref:ref": "BK-42" } },
     );
-    expect(statuses(results)).toEqual(["b1:passed", "b2:failed", "c1:aborted"]);
+    // `c1` typed the id it read out of the failing story's scope and passed;
+    // that it passed is the proof the scope crossed (LLD §8.3, Draft 2.7).
+    expect(statuses(results)).toEqual(["b1:passed", "b2:failed", "c1:passed"]);
   });
 
   it("exits 11 on an abort, 1 on a failure, 0 when everything passed", async () => {

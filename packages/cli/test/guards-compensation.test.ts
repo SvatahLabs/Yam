@@ -198,16 +198,75 @@ describe("a failing story compensates and aborts (REQ-AUTO-4, T5.4)", () => {
     expect(failed?.failure?.policyApplied).toEqual({ compensate: "cancel a booking" });
 
     const compensating = steps.filter((r) => r.story === "cancel a booking");
-    expect(compensating.length).toBeGreaterThan(0);
-    // Its steps ran, and are recorded as `aborted`: they happened, but as part
-    // of an abort rather than as part of the flow's intent (REQ-RUN-7).
-    expect(compensating.every((r) => r.status === "aborted")).toBe(true);
+    expect(compensating.length).toBe(2);
+    /*
+     * Its steps ran and they worked, so they are recorded `passed` — their own
+     * statuses, not the flow's (LLD §8.3, Draft 2.7).
+     *
+     * They used to be re-labelled `aborted` with no failure attached, which
+     * meant `results.jsonl` could not answer the one question a reader has
+     * about a compensation: did the booking get cancelled? The audit log showed
+     * the click and the check happening, and the results contradicted it.
+     */
+    expect(compensating.every((r) => r.status === "passed")).toBe(true);
+    expect(compensating.every((r) => r.failure === undefined)).toBe(true);
 
     const summary = JSON.parse(
       readFileSync(join(project, "runs", "c", "summary.json"), "utf8"),
     ) as Summary;
+    // What is `aborted` is the flow and the run: the flow's intent was not
+    // carried out, whatever the compensation managed.
     expect(Object.values(summary.flows)[0]?.status).toBe("aborted");
     expect(summary.exitCode).toBe(11);
+    // And no *step* is aborted any more.
+    expect(summary.totals.aborted).toBe(0);
+    expect(steps.every((r) => r.status !== "aborted")).toBe(true);
+  }, 240_000);
+
+  it("says in the results whether the compensation itself worked", async () => {
+    /*
+     * The point of F1, stated as the difference between two runs.
+     *
+     * Here the compensating story is one whose expectation cannot hold — it
+     * asserts a reference the page does not show — so its check fails. Before
+     * Draft 2.7 this run and the one above wrote the same two lines for
+     * "cancel a booking": `aborted`, no failure. Now one says `passed` and this
+     * one says `failed` with an `assertion` class, and the run is `aborted`
+     * either way because the flow's intent was not carried out.
+     */
+    const project = scaffold();
+    writeFileSync(
+      join(project, "flows", "compensation-fails.flow"),
+      `scenario (onFailure=compensate:cancel into nothing): I want to book and then fail twice
+  Click the Book a slot link
+  Type "Indiranagar" into the location field
+  Click the Book now button
+  Click the pay button
+
+scenario: cancel into nothing
+  Click the cancel booking button
+  The booking reference should say "BK-00000"
+
+test: I want to book and then fail twice
+`,
+      "utf8",
+    );
+
+    const run = await cli(
+      ["run", ".", "--host", "none", "--run-id", "cf", "--flow", "flows/compensation-fails.flow"],
+      project,
+    );
+    expect(run.code, run.output).toBe(11);
+
+    const steps = results(project, "cf");
+    const compensating = steps.filter((r) => r.story === "cancel into nothing");
+    expect(compensating.map((r) => r.status)).toEqual(["passed", "failed"]);
+    expect(compensating[1]?.failure?.class).toBe("assertion");
+
+    const summary = JSON.parse(
+      readFileSync(join(project, "runs", "cf", "summary.json"), "utf8"),
+    ) as Summary;
+    expect(Object.values(summary.flows)[0]?.status).toBe("aborted");
   }, 240_000);
 
   it("gives the compensating story the failing story's scope", async () => {
@@ -216,8 +275,8 @@ describe("a failing story compensates and aborts (REQ-AUTO-4, T5.4)", () => {
      * cannot see what the failing one captured has nothing to cancel. The
      * compensating story's last step asserts against
      * `{I want to book and then fail.reference}`, so it passing at all is the
-     * proof — and it is recorded as `aborted` because that is what the status of
-     * a compensating step is.
+     * proof — and since Draft 2.7 the result says `passed`, so the proof is
+     * legible in the file rather than only in the audit.
      */
     const project = scaffold();
     await cli(
@@ -230,8 +289,8 @@ describe("a failing story compensates and aborts (REQ-AUTO-4, T5.4)", () => {
     expect(captured?.captured?.["reference"]).toBe("BK-10428");
 
     const check = steps.find((r) => r.story === "cancel a booking" && r.text.includes("reference"));
-    // `aborted` rather than `failed`: the expectation held.
-    expect(check?.status).toBe("aborted");
+    // `passed`: the expectation held, and the result now says so (LLD §8.3).
+    expect(check?.status).toBe("passed");
     expect(check?.failure).toBeUndefined();
   }, 240_000);
 

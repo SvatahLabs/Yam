@@ -88,6 +88,31 @@ an error rather than a precedence rule nobody would remember.
 `continueOnFailure=false` sets nothing: it is the absence of the alias, not a
 third policy.
 
+#### What the three policies do when a step fails
+
+| Policy | The flow | The rest of this story | The failing step |
+|---|---|---|---|
+| `stop` (default) | stops; everything after it is `skipped` | `skipped` | `failed`, with `policyApplied: "stop"` |
+| `continue` | carries on with the next story | `skipped` | `failed`, with `policyApplied: "continue"` |
+| `compensate:<story>` | runs `<story>` with this story's scope, then stops | `skipped` | `failed`, with `policyApplied: { compensate: "<story>" }` |
+
+A compensating story runs with the failing story's scope, so it can read what
+the failing story captured — `{Book a slot.reference}` is how "cancel booking"
+knows which booking to cancel.
+
+**Its own steps keep their own statuses.** A compensating step that worked is
+`passed` and one that did not is `failed` with a failure class, exactly like any
+other step. What is `aborted` is the *flow* and the *run*: the flow's intent was
+not carried out, whatever the compensation managed. The run exits 11.
+
+That distinction is the point. The only question a reader has about a
+compensation is whether it worked, and until Draft 2.7 every compensating step
+was re-labelled `aborted` with no failure attached — so a cancellation that
+succeeded and one that failed produced identical lines in `results.jsonl`, and
+the audit log was the only place the difference survived. A run that
+compensated therefore has an `aborted` flow in `summary.json`, exit code 11, and
+zero steps with status `aborted`.
+
 ### Comments
 
 `//` and `#` both start a comment line (REQ-LANG-3).

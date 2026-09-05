@@ -167,9 +167,22 @@ async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCo
   if (boolOption(args, "json")) io.out(JSON.stringify(outcome.summary, null, 2));
   else {
     const { totals } = outcome.summary;
+    /*
+     * Which flows aborted, not how many steps did (LLD §8.3, Draft 2.7).
+     *
+     * A compensating story's steps keep their own statuses now, so
+     * `totals.aborted` is 0 for a run that compensated and stopped — and a
+     * line reading "0 aborted" above exit code 11 would be a contradiction.
+     * What aborted is the flow.
+     */
+    const abortedFlows = Object.values(outcome.summary.flows).filter(
+      (flow) => flow.status === "aborted",
+    ).length;
     io.err(
       `\n${outcome.runId}: ${totals.passed} passed, ${totals.failed} failed, ` +
-        `${totals.skipped} skipped, ${totals.aborted} aborted → ${outcome.directory}`,
+        `${totals.skipped} skipped` +
+        (abortedFlows === 0 ? "" : `, ${abortedFlows} flow(s) aborted`) +
+        ` → ${outcome.directory}`,
     );
   }
   return outcome.summary.exitCode as ExitCode;
