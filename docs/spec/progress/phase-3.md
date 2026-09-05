@@ -403,6 +403,62 @@ takes the file's own `${ENV}` indirection, whatever the editor sent
 
 ---
 
+## Post-verification corrections
+
+Added on branch `phase-4`, after the adversarial verification of `phase-3` at
+`1a6d4a7` scored it **8.1 / 10** and accepted it with corrections
+([`phase-3-verification.md`](phase-3-verification.md)). This section is P3-F5 of
+the Phase 4 prompt: what the verifier found that this record did not say.
+
+### The verifier's Node 22 result — K7 is closed
+
+K7 below says this phase was verified on Node v25.6.1 and never on Node 22 LTS,
+because that is the runtime this session had. The verifier ran the contract on
+**Node v22.23.2 with `CI=true`** in a clean detached worktree, with
+`ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN` unset: 30 packages built,
+**2,197 tests passed, 0 failed** — the same result as their Node 25 run. K7 is
+answered; the gap was in this session's environment, not in the code.
+
+### Two defects this record did not name
+
+**P3-F1 — the target dictionary was read by text scanning, not by parsing
+(REQ-COMP-5, LLD §4.3).** `packages/cli/src/project.ts` collected binding
+phrases with `/^ {2}- "(.+)"$/gm` over the raw YAML. That reads one of the
+several ways YAML writes a list of strings: a phrase written unquoted,
+single-quoted, in flow style, or at a different indentation vanished from the
+dictionary while `svatah bindings show` still listed it, and every step naming it
+compiled `unbound` and failed at replay with zero candidates. Any reformatting
+tool, hand edit, or future writer emitting plain scalars would have unbound a
+project silently. Scored parameter 7 (compiler and recorder robustness) at 5/10.
+
+**P3-F2 — base-URL precedence differed between commands (LLD §15).** `svatah
+run` honoured `SVATAH_BASE_URL`; `svatah heal --run` read only `--base-url` and
+`config.app`, so a run started against an ephemeral port — the normal shape of a
+CI job — could not be healed unless the flag was repeated by hand. `surface
+conform`, `bindings verify` and `eval` read a flag and a hard-coded default and
+neither of the other two sources. The heal-cycle table above records the symptom
+("`unreachable` when it comes only from `SVATAH_BASE_URL`") without naming it as
+a defect; it was one.
+
+**P3-F3 — fourteen run artifacts were committed.** `evals/fixtures/var/folders/
+x5/…/svatah-compat-xmqy7l/none-{1,2}/` held `results.jsonl`, `summary.json`,
+`audit.jsonl` and eight screenshots, 91 KB, added in `fda684a` during Phase 2's
+T2.10 when an absolute `--out` was joined onto the project root rather than
+resolved. Neither the Phase 2 nor the Phase 3 record mentions them. Scored
+parameter 4 (boundaries, packaging, hygiene) at 7/10.
+
+All three are fixed on `phase-4` as P3-F1, P3-F2 and P3-F3; see
+[`phase-4.md`](phase-4.md) for the commands that demonstrate each.
+
+### D2 through D6 are no longer deviations
+
+Draft 2.5 writes them into the LLD, so what was a departure is now the design:
+grounding-case exclusions and the run-artifact hygiene rule (§16), model
+grounding registered by the CLI (§9.2), CommonJS ADE bundles with the Electron
+hoist pattern and the Vite pin (§13.6), and `GET /plan` (§13.5). They are left
+below as written, because they explain *why* the spec says what it now says. D1
+stands: no credential was available then, and none is available now.
+
 ## Deviations
 
 Each is the closest faithful option, with the section it departs from and why.
@@ -562,12 +618,16 @@ this session has no access to, and ADR-17 as amended places the archiving at the
 split — "the prototype's code is archived there on a `prototype` branch" — which
 happens at the ADE's first tagged release, not now.
 
-### K7 — Verified on Node 25, not Node 22 LTS
+### K7 — Verified on Node 25, not Node 22 LTS ~~(closed)~~
 
 Carried from Phase 2's K2. The available runtime is Node v25.6.1; everything
 targets and declares Node 22 (`.nvmrc`, `engines`, `tsup` `target: node22`, both
 CI files). The Phase 2 verifier ran that phase's contract on Node v22.23.2; this
 session could not.
+
+**Closed by the Phase 3 verifier**, who ran this phase's contract on Node
+v22.23.2 with `CI=true`: 2,197 tests passed, the same as on Node 25. See
+"Post-verification corrections" above.
 
 ### K8 — Firefox and WebKit are not exercised
 
