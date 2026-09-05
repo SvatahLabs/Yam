@@ -31,12 +31,10 @@
   },
   "dependencies": {
     "@fastify/websocket": "catalog:",
-    "@svatah/cli": "workspace:*",
     "@svatah/schema": "workspace:*",
     "fastify": "catalog:"
   },
   "devDependencies": {
-    "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

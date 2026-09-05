@@ -414,6 +414,9 @@ importers:
       '@svatah/schema':
         specifier: workspace:*
         version: link:../schema
+      '@svatah/service':
+        specifier: workspace:*
+        version: link:../service
       '@svatah/spec':
         specifier: workspace:*
         version: link:../spec
@@ -716,9 +719,6 @@ importers:
       '@fastify/websocket':
         specifier: 'catalog:'
         version: 11.3.0
-      '@svatah/cli':
-        specifier: workspace:*
-        version: link:../cli
       '@svatah/schema':
         specifier: workspace:*
         version: link:../schema
@@ -726,9 +726,6 @@ importers:
         specifier: 'catalog:'
         version: 5.12.1
     devDependencies:
-      sample-web:
-        specifier: workspace:*
-        version: link:../../apps/sample-web
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)

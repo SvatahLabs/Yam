@@ -15,9 +15,17 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync, cpSync } f
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadProject, runProject } from "@svatah/cli";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { createService, type RunningService, type ServiceEvent } from "../src/index.js";
+import { createService, type RunningService, type ServiceEvent } from "@svatah/service";
+import { compileProject, loadProject, newRunId, runProject } from "../src/index.js";
+
+/**
+ * The CLI's own functions, handed to the service (LLD §13.5).
+ *
+ * This is the wiring `svatah serve` does, written out: the service is given four
+ * functions and imports nothing that could implement them itself.
+ */
+const api = { loadProject, compileProject, runProject, newRunId } as never;
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
@@ -85,7 +93,7 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
 beforeAll(async () => {
   app = await startSampleApp(0);
   project = scaffold("runs");
-  service = await createService({ project, token: TOKEN, port: 0 });
+  service = await createService({ project, token: TOKEN, port: 0, api });
 }, 120_000);
 
 afterAll(async () => {
@@ -94,11 +102,52 @@ afterAll(async () => {
   rmSync(project, { recursive: true, force: true });
 });
 
+describe("the service answers with the project the CLI loaded (LLD §13.5)", () => {
+  it("reports the real project's flows, stories, compositions and APIs", async () => {
+    const body = (await (
+      await fetch(`${service.url}/project`, { headers: { authorization: `Bearer ${TOKEN}` } })
+    ).json()) as {
+      flows: string[];
+      stories: Array<{ name: string; steps: number }>;
+      runs: Record<string, string[]>;
+    };
+    expect(body.flows).toEqual(["flows/smoke.flow"]);
+    expect(body.stories.map((s) => s.name)).toEqual(["Sign in"]);
+    expect(body.stories[0]!.steps).toBe(4);
+    expect(body.runs["flows/smoke.flow"]).toEqual(["Sign in"]);
+  });
+
+  it("compiles it, with the plan hash the CLI would produce", async () => {
+    const body = (await (
+      await fetch(`${service.url}/compile`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${TOKEN}` },
+      })
+    ).json()) as { ok: boolean; plan: { hash: string } };
+
+    const loaded = await loadProject(project);
+    expect(body.ok).toBe(true);
+    expect(body.plan.hash).toBe(compileProject(loaded, { stable: true }).plan.hash);
+  });
+
+  it("reads a flow file and the bindings store", async () => {
+    const flow = await (
+      await fetch(`${service.url}/flows/smoke.flow`, { headers: { authorization: `Bearer ${TOKEN}` } })
+    ).text();
+    expect(flow).toContain("story: Sign in");
+
+    const bindings = (await (
+      await fetch(`${service.url}/bindings`, { headers: { authorization: `Bearer ${TOKEN}` } })
+    ).json()) as Array<{ id: string }>;
+    expect(bindings.map((b) => b.id)).toContain("login.username-field");
+  });
+});
+
 describe("POST /run streams what happens (REQ-ADE-1, REQ-ADE-3)", () => {
   it("emits one step.result per step, then a run.summary", async () => {
     const events: ServiceEvent[] = [];
     const finished = new Promise<void>((resolve) => {
-      service.events.subscribe((event) => {
+      service.events.subscribe((event: ServiceEvent) => {
         events.push(event);
         if (event.kind === "run.summary" || event.kind === "run.failed") resolve();
       });
@@ -140,7 +189,7 @@ describe("the service and the CLI run the same thing (LLD §13.5)", () => {
   it("produces identical results.jsonl either way", async () => {
     /* Through the service. */
     const viaService = await new Promise<string>((resolve) => {
-      const stop = service.events.subscribe((event) => {
+      const stop = service.events.subscribe((event: ServiceEvent) => {
         if (event.kind === "run.summary") {
           stop();
           resolve(event.runId);

@@ -131,13 +131,18 @@ const PLAYWRIGHT_ONLY = ["playwright-test", "host-playwright", "bindings-cli"];
  * service (lint rule: `service` may import only `cli`'s command functions and
  * `schema`)."
  *
- * Expressed as what it may *not* reach: everything the CLI already composes. If
- * the service could call the compiler or the executor directly it would grow a
- * second implementation of `run`, and the ADE and the CLI would start disagreeing
- * about what a run is — which is the failure this rule exists to prevent.
+ * Stricter than the spec's parenthetical, and for a reason. The first draft had
+ * the service import `@svatah/cli`, which satisfied the rule and made the
+ * workspace graph cyclic — the CLI mounts `svatah serve` — so a clean clone
+ * failed to build with the service's type build running before the CLI had any
+ * types. The CLI now *injects* those functions (`ServiceApi`), and the service
+ * imports `schema` alone.
+ *
+ * The rule is stronger as a result: the service does not merely refrain from
+ * calling the compiler or the executor, it has no way to reach them.
  */
 const SERVICE_MAY_NOT_IMPORT = ALL_PACKAGES.filter(
-  (name) => name !== "cli" && name !== "schema" && name !== "service",
+  (name) => name !== "schema" && name !== "service",
 );
 
 export const BOUNDARIES = [

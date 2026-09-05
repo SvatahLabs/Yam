@@ -28,19 +28,20 @@ import { readFileSync, readdirSync, writeFileSync, existsSync } from "node:fs";
 import { join, normalize, relative, resolve, sep } from "node:path";
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
 import websocket from "@fastify/websocket";
-import {
-  compileProject,
-  loadProject,
-  newRunId,
-  runProject,
-  type LoadedProject,
-} from "@svatah/cli";
+import type { ProjectHandle, ServiceApi } from "./api.js";
 import { EventBus, type ServiceEvent } from "./events.js";
 import { openApiDocument } from "./openapi.js";
 
 export interface ServeOptions {
   /** The project directory. Everything the service reads and writes is under it. */
   readonly project: string;
+  /**
+   * The CLI's own functions (LLD §13.5).
+   *
+   * Injected rather than imported: see `api.ts`. The dependency points one way,
+   * and a handler literally cannot reach the compiler or the executor.
+   */
+  readonly api: ServiceApi;
   /** 0 asks the OS for a free port, which is what the ADE wants. */
   readonly port?: number;
   /** Supplied only by a test; otherwise generated per process. */
@@ -96,7 +97,8 @@ export async function createService(options: ServeOptions): Promise<RunningServi
 
   /* ── project ────────────────────────────────────────────────────────────── */
 
-  const load = async (): Promise<LoadedProject> => await loadProject(root);
+  const { api } = options;
+  const load = async (): Promise<ProjectHandle> => await api.loadProject(root);
 
   fastify.get("/health", async () => ({ ok: true, project: root }));
   fastify.get("/openapi.json", async () => openApiDocument(options.version ?? "0.1.0"));
@@ -139,7 +141,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
 
   fastify.post("/compile", async () => {
     const loaded = await load();
-    const compiled = compileProject(loaded, { stable: true });
+    const compiled = api.compileProject(loaded, { stable: true });
     const diagnostics = [...loaded.diagnostics, ...compiled.diagnostics];
     return {
       ok: !diagnostics.some((d) => d.severity === "error"),
@@ -155,7 +157,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     "/run",
     async (request, reply) => {
       const body = request.body ?? {};
-      const runId = newRunId();
+      const runId = api.newRunId();
 
       /*
        * Started, then answered. A client gets the run id immediately and
@@ -166,7 +168,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
         try {
           const loaded = await load();
           events.emit({ kind: "run.started", runId, flows: body.flows ?? loaded.project.flows.map((f) => f.file) });
-          const outcome = await runProject(loaded, {
+          const outcome = await api.runProject(loaded, {
             runId,
             ...(body.flows === undefined ? {} : { flows: body.flows }),
             ...(body.stories === undefined ? {} : { stories: body.stories }),

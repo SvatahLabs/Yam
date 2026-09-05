@@ -44,6 +44,7 @@
     "@svatah/recorder": "workspace:*",
     "@svatah/runtime": "workspace:*",
     "@svatah/schema": "workspace:*",
+    "@svatah/service": "workspace:*",
     "@svatah/spec": "workspace:*",
     "@svatah/steps": "workspace:*",
     "@svatah/surface": "workspace:*",

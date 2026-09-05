@@ -16,6 +16,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createService, openApiDocument, type RunningService } from "../src/index.js";
+import { fakeApi } from "./fake-api.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const PROJECT = join(ROOT, "evals", "fixtures");
@@ -24,7 +25,7 @@ const TOKEN = "test-token";
 let service: RunningService;
 
 beforeAll(async () => {
-  service = await createService({ project: PROJECT, token: TOKEN, port: 0 });
+  service = await createService({ project: PROJECT, token: TOKEN, port: 0, api: fakeApi() });
 });
 afterAll(async () => {
   await service.close();
@@ -70,8 +71,8 @@ describe("the token (REQ-ADE-7)", () => {
   });
 
   it("generates a different token per process", async () => {
-    const a = await createService({ project: PROJECT, port: 0 });
-    const b = await createService({ project: PROJECT, port: 0 });
+    const a = await createService({ project: PROJECT, port: 0, api: fakeApi() });
+    const b = await createService({ project: PROJECT, port: 0, api: fakeApi() });
     expect(a.token).not.toBe(b.token);
     expect(a.token.length).toBeGreaterThan(20);
     await a.close();
@@ -84,29 +85,22 @@ describe("the token (REQ-ADE-7)", () => {
 });
 
 describe("GET /project (LLD §13.5)", () => {
-  it("answers with the project the CLI would load", async () => {
+  it("answers with what the CLI's loadProject returned, shaped for a client", async () => {
     const body = await json(await get("/project"));
-    expect(body.flows).toContain("flows/simple.flow");
-    expect(body.stories.map((s: { name: string }) => s.name)).toContain("I want to validate login");
-    expect(body.compositions["I want to validate stories"]).toHaveLength(3);
-    expect(body.apis).toContain("active count");
-    expect(body.config.project).toBe("svatah-fixtures");
+    expect(body.flows).toEqual(["flows/a.flow"]);
+    expect(body.stories.map((s: { name: string }) => s.name)).toEqual(["Sign in"]);
+    expect(body.compositions["Everything"]).toEqual(["Sign in"]);
+    expect(body.apis).toEqual(["active count"]);
+    expect(body.customSteps).toEqual(["steps/seed.ts#default"]);
   });
 
   it("carries a story's signature, which is what makes it invocable", async () => {
     const body = await json(await get("/project"));
-    const login = body.stories.find((s: { name: string }) => s.name === "I want to validate login");
-    expect(login.signature.inputs.email.type).toBe("string");
-    expect(login.signature.outputs.enterprise.type).toBe("string");
+    expect(body.stories[0].signature.inputs.email.type).toBe("string");
   });
 });
 
 describe("flows (LLD §13.5)", () => {
-  it("reads a flow file", async () => {
-    const text = await (await get("/flows/simple.flow")).text();
-    expect(text).toContain("story (tags=smoke): I want to validate login");
-  });
-
   it("404s a flow that is not there", async () => {
     expect((await get("/flows/nope.flow")).status).toBe(404);
   });
@@ -119,44 +113,53 @@ describe("flows (LLD §13.5)", () => {
 });
 
 describe("POST /compile (REQ-COMP-7)", () => {
-  it("compiles the fixtures clean and reports the plan's hash", async () => {
+  it("reports the plan's hash and splits errors from warnings", async () => {
     const body = await json(await get("/compile", { method: "POST" }));
     expect(body.ok).toBe(true);
     expect(body.errors).toEqual([]);
     expect(body.plan.hash).toMatch(/^[0-9a-f]{64}$/);
-    expect(body.plan.stories).toBeGreaterThan(10);
   });
 
-  it("reports warnings without failing", async () => {
-    const body = await json(await get("/compile", { method: "POST" }));
-    expect(body.warnings.length).toBeGreaterThan(0);
+  it("is not ok when the compile had an error", async () => {
+    const failing = await createService({
+      project: PROJECT,
+      port: 0,
+      token: TOKEN,
+      api: fakeApi({
+        compileProject: () => ({
+          plan: { hash: "b".repeat(64), stories: [] },
+          diagnostics: [{ severity: "error", code: "E_SIGIL", message: "v2 syntax" }],
+        }),
+      }),
+    });
+    try {
+      const body = (await (
+        await fetch(`${failing.url}/compile`, {
+          method: "POST",
+          headers: { authorization: `Bearer ${TOKEN}` },
+        })
+      ).json()) as { ok: boolean; errors: unknown[] };
+      expect(body.ok).toBe(false);
+      expect(body.errors).toHaveLength(1);
+    } finally {
+      await failing.close();
+    }
   });
 });
 
-describe("bindings and data (LLD §13.5)", () => {
-  it("lists the store", async () => {
-    const body = await json(await get("/bindings"));
-    expect(body.length).toBeGreaterThan(20);
-    expect(body.map((b: { id: string }) => b.id)).toContain("login.username-field");
-  });
-
-  it("reads one binding", async () => {
-    const text = await (await get("/bindings/login.username-field")).text();
-    expect(text).toContain('id: "login.username-field"');
-  });
-
+describe("data and api (LLD §13.5)", () => {
   it("redacts secrets on read (REQ-NFR-6)", async () => {
     // The ADE shows a data editor in a renderer process. A resolved secret must
     // not travel there.
     const body = await json(await get("/data"));
     expect(body.values.user.password).toBe("«redacted»");
-    expect(body.values.user.email).toBe("connected2atul@gmail.com");
+    expect(body.values.user.email).toBe("a@b.c");
     expect(body.secrets).toContain("user.password");
   });
 
   it("lists the named API requests", async () => {
     const body = await json(await get("/api"));
-    expect(body.map((r: { name: string }) => r.name)).toContain("active count");
+    expect(body.map((r: { name: string }) => r.name)).toEqual(["active count"]);
   });
 });
 
