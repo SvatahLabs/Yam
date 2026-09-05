@@ -47,6 +47,7 @@ Flows (module b):
   svatah repl [dir] [--adapter <name>] [--base-url <url>] [--headless]
               [--gateway anthropic|fake|none] [--tier2] [--tier3]
               [--out <flows>] [--name <flow name>] [--json]
+  svatah mcp [dir] [--trajectory <path.jsonl>] [--session <id>]
 
 Bindings and healing (module a):
 
@@ -311,6 +312,8 @@ async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Pro
       return await (await import("./commands/serve.js")).serveCommand(args, io);
     case "repl":
       return await (await import("./commands/repl.js")).replCommand(args, io);
+    case "mcp":
+      return await (await import("./commands/mcp.js")).mcpCommand(args, io);
     default: {
       const task = LATER[command];
       io.err(

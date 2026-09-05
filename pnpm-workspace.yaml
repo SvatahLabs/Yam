@@ -19,6 +19,7 @@ onlyBuiltDependencies:
 # One version of every shared tool across the workspace (LLD §1).
 catalog:
   '@anthropic-ai/sdk': ^0.123.0
+  '@modelcontextprotocol/sdk': ^1.30.0
   '@eslint/js': ^9.17.0
   '@types/node': ^22.10.2
   '@typescript-eslint/utils': ^8.19.0

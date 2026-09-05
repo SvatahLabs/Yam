@@ -26,6 +26,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "catalog:",
     "@svatah/adapter-appium": "workspace:*",
     "@svatah/adapter-ax": "workspace:*",
     "@svatah/adapter-bidi": "workspace:*",
