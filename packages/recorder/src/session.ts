@@ -255,7 +255,25 @@ export async function record(options: RecordSessionOptions): Promise<RecordRepor
         }
 
         if (!staged.has(target.ref)) staged.set(target.ref, store.get(target.ref));
-        store.put(target.ref, result.entry, target.phrase, { replaces: result.entry.context });
+
+        /*
+         * A re-record supersedes the entry that applied here, rather than
+         * sitting beside it (`--rebind`, REQ-REC-1).
+         *
+         * The context hash moves whenever the page's shape has changed at all —
+         * which is most of the time, since it is why anyone re-records — so
+         * without naming what this replaces the store would keep both, with the
+         * older one first (LLD §6.3), and the next run would resolve the entry
+         * the re-record was meant to retire. An element genuinely seen on a new
+         * page has no entry here, and is added.
+         */
+        const superseded = store.entryFor(target.ref, {
+          ...(url === undefined ? {} : { url }),
+          platform,
+        });
+        store.put(target.ref, result.entry, target.phrase, {
+          ...(superseded === undefined ? {} : { replaces: superseded.context }),
+        });
       }
 
       /* ── the step, through the executor's own runStep (REQ-REC-5) ────────── */

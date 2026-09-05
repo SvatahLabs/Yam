@@ -20,7 +20,7 @@ entries:
         score: 0.6
         value: "//*[@data-testid='nav-toggle']"
     context:
-      hash: "26f8d89fbf51c5544cac8aee328d2979e2127a910c495c7a7f3eec4c1ecd2fb2"
+      hash: "87208ba43c34ae6e87bd6801fad58d49627e44cfa4ea17c51a8d2a1746e95751"
       pattern: "/"
       platform: "web"
     fingerprint:
@@ -45,12 +45,13 @@ entries:
       tag: "button"
       text: "Menu"
     provenance:
-      at: "2026-09-02T00:00:00.000Z"
-      model: "human"
-      promptVersion: "seed:hand-completed"
+      at: "2026-09-03T06:05:42.194Z"
+      costUsd: 0
+      model: "fake:grounding-cases"
+      promptVersion: "g-1"
       tokensIn: 0
       tokensOut: 0
-    recordedAt: "2026-09-02T00:00:00.000Z"
+    recordedAt: "2026-09-03T06:05:42.226Z"
     verified: true
 id: "nav.nav-toggle"
 phrases:

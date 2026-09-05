@@ -322,3 +322,64 @@ test: Sign in
     expect(replayed.code, replayed.output).toBe(EXIT.ok);
   }, 300_000);
 });
+
+/*
+ * T3.5's Validate — "replay passes with the model endpoint blocked".
+ *
+ * REQ-RUN-1 and REQ-NFR-1 are structural: `runtime` cannot import `gateway`, and
+ * the lint and the dependency-graph test say so. A structural argument is a thing
+ * a reader has to follow; this is the thing a reader can run.
+ *
+ * `scripts/block-external-network.mjs` refuses every connection that is not to
+ * loopback — `fetch`, `http`, `https`, `net` and `tls`, because Node has four
+ * doors and patching only the top would leave a socket open. `apps/sample-web` is
+ * on loopback and stays reachable; `api.anthropic.com` does not.
+ */
+describe("replay with the model endpoint blocked (T3.5, REQ-RUN-1, REQ-NFR-1)", () => {
+  it("runs the recorded fixtures with nothing but the application reachable", async () => {
+    const project = scaffold({
+      flows: {
+        "one.flow": `story: Sign in
+  Click the sign in button
+  Type "connected2atul@gmail.com" into the username field
+  Type "qwerty123" into the password field
+  Click the login button
+  Click the Schedule Build link
+
+test: Sign in
+`,
+      },
+    });
+
+    const blocker = join(ROOT, "scripts", "block-external-network.mjs");
+    const result = await cli(["run", ".", "--host", "none", "--run-id", "blocked"], project, {
+      NODE_OPTIONS: `--import=${blocker}`,
+      // A credential *is* present, and unusable: a run that reached for the model
+      // would fail on the blocked connection rather than on a missing key, which
+      // is the stronger demonstration.
+      ANTHROPIC_API_KEY: "sk-ant-not-a-real-key",
+    });
+
+    expect(result.code, result.output).toBe(EXIT.ok);
+    expect(result.output).not.toContain("Blocked a");
+  }, 300_000);
+
+  it("the blocker would have caught a call, so the test above means something", async () => {
+    const project = scaffold({
+      flows: { "one.flow": "story: One\n  Click the sign in button\n\ntest: One\n" },
+    });
+    const blocker = join(ROOT, "scripts", "block-external-network.mjs");
+
+    // The negative control: `record --gateway anthropic` does reach for a model,
+    // and with the blocker loaded it cannot. Without this, "the run passed with
+    // the network blocked" could mean the blocker does nothing.
+    const result = await cli(["record", ".", "--gateway", "anthropic", "--rebind"], project, {
+      NODE_OPTIONS: `--import=${blocker}`,
+      ANTHROPIC_API_KEY: "sk-ant-not-a-real-key",
+    });
+
+    expect(result.code).not.toBe(EXIT.ok);
+    expect(result.output).toContain("Blocked a");
+    expect(result.output).toContain("api.anthropic.com");
+  }, 300_000);
+});

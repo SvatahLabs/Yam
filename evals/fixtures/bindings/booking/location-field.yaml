@@ -30,7 +30,7 @@ entries:
         score: 0.6
         value: "//*[@data-testid='location']"
     context:
-      hash: "5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9"
+      hash: "f771bfc3c29b361824720c6bffef2948a50440e5bf279edfd529ba6037fddf33"
       pattern: "/booking"
       platform: "web"
     fingerprint:
@@ -60,12 +60,13 @@ entries:
       tag: "input"
       text: ""
     provenance:
-      at: "2026-09-02T00:00:00.000Z"
-      model: "human"
-      promptVersion: "seed:hand-completed"
+      at: "2026-09-03T06:05:44.024Z"
+      costUsd: 0
+      model: "fake:grounding-cases"
+      promptVersion: "g-1"
       tokensIn: 0
       tokensOut: 0
-    recordedAt: "2026-09-02T00:00:00.000Z"
+    recordedAt: "2026-09-03T06:05:44.043Z"
     verified: true
 id: "booking.location-field"
 phrases:

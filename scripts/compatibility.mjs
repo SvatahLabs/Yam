@@ -62,12 +62,30 @@ const SECRETS = {
   SVATAH_SAMPLE_CARD_CVV: "123",
 };
 
+/*
+ * Every command here runs with external network access disabled (T3.5).
+ *
+ * REQ-RUN-1 says the executor makes no model calls and REQ-NFR-1 says replay has
+ * no network dependency beyond the target platform. Both are structural — the
+ * lint and the dependency-graph test keep `runtime` from reaching `gateway` — and
+ * this is the part a reader can run: with `block-external-network.mjs` loaded, a
+ * replay that reached for a model would fail loudly, and the milestone below
+ * passes, so it reached for nothing. Loopback stays open, because that is where
+ * `apps/sample-web` is.
+ */
+const BLOCK_NETWORK = `--import=${join(ROOT, "scripts", "block-external-network.mjs")}`;
+
 function runCli(args, env = {}) {
   return new Promise((resolve) => {
     let output = "";
     const child = spawn(process.execPath, [CLI, ...args], {
       cwd: ROOT,
-      env: { ...process.env, ...SECRETS, ...env },
+      env: {
+        ...process.env,
+        ...SECRETS,
+        NODE_OPTIONS: [process.env.NODE_OPTIONS, BLOCK_NETWORK].filter(Boolean).join(" "),
+        ...env,
+      },
     });
     child.stdout.on("data", (c) => (output += c.toString("utf8")));
     child.stderr.on("data", (c) => (output += c.toString("utf8")));

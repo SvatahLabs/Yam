@@ -86,6 +86,14 @@ function phraseFor(role, name) {
 
 const app = await startSampleApp(0);
 const cases = [];
+/**
+ * Phrases the fake gateway can answer but the eval cannot score.
+ *
+ * Written beside the cases as `fixture-answers.jsonl`. `svatah record --gateway
+ * fake` reads both; `svatah eval grounding` reads only the cases, so a phrase
+ * that cannot be checked can never flatter or drag a published number.
+ */
+const answers = [];
 let n = 0;
 const id_ = () => `g-${String((n += 1)).padStart(3, "0")}`;
 
@@ -244,22 +252,8 @@ try {
         }
 
         const truth = await surface.readRawAttribute(node.ref, GROUND_TRUTH_ATTRIBUTE);
-        if (truth === undefined) {
-          /*
-           * No ground-truth key, so no case.
-           *
-           * `apps/sample-web` stamps interactive elements; a heading is not one,
-           * and the fixtures bind two of them. A case the eval cannot check
-           * could never be scored `correct`, so including it would put a
-           * permanently unreachable case in REQ-REC-10's denominator — which is
-           * a rigged threshold, not a hard case. The phrases stay covered by the
-           * recorder's own tests.
-           */
-          process.stderr.write(`${id} on ${path}: no ground-truth key; skipped\n`);
-          continue;
-        }
 
-        // Where the element sits among the same role, so a case for a control
+        // Where the element sits among the same role, so an answer for a control
         // with no accessible name — a nameless select — can still say which one
         // it means. Counted over what the renderer emits, not over every node:
         // hidden nodes are dropped from the text, and an index over a different
@@ -267,14 +261,26 @@ try {
         const visible = snapshot.nodes.filter((one) => !one.states.includes("hidden"));
         const nth = visible.filter((one) => one.role === node.role).indexOf(node);
 
+        /*
+         * A phrase with no ground-truth key is an *answer*, not a *case*.
+         *
+         * `apps/sample-web` stamps interactive elements; a heading is not one,
+         * and the fixtures bind two of them. The eval cannot check such an
+         * answer, so scoring it would put a permanently unreachable case in
+         * REQ-REC-10's denominator — a rigged threshold, not a hard case. But
+         * `svatah record --gateway fake` still has to be able to answer the
+         * phrase, or the fixtures cannot be recorded without a credential. So it
+         * goes in the answer book and not in the case set.
+         */
+        const target = truth === undefined ? answers : cases;
         for (const phrase of file.phrases) {
-          if (cases.some((c) => c.page === path && c.phrase === phrase)) continue;
-          cases.push({
+          if ([...cases, ...answers].some((c) => c.page === path && c.phrase === phrase)) continue;
+          target.push({
             id: id_(),
             page: path,
             phrase,
             expect: "present",
-            element: truth,
+            ...(truth === undefined ? {} : { element: truth }),
             role: node.role,
             ...(node.name === undefined ? {} : { name: node.name }),
             nth,
@@ -297,6 +303,10 @@ try {
       `(${cases.filter((c) => c.expect === "present").length} present, ` +
       `${cases.filter((c) => c.expect === "absent").length} absent)\n`,
   );
+
+  const answersPath = join(dirname(OUT), "fixture-answers.jsonl");
+  writeFileSync(answersPath, `${answers.map((c) => JSON.stringify(c)).join("\n")}\n`, "utf8");
+  process.stderr.write(`wrote ${answers.length} unscored answer(s) to ${answersPath}\n`);
 } finally {
   await app.close();
 }

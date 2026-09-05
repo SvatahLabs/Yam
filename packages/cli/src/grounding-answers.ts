@@ -67,7 +67,16 @@ export function readCases(path = defaultCasesPath()): GroundingCase[] {
 }
 
 export function groundingAnswers(path?: string): GroundingAnswers {
-  const cases = readCases(path);
+  /*
+   * The cases, plus the phrases the eval cannot score.
+   *
+   * `fixture-answers.jsonl` holds the fixture phrases whose element carries no
+   * ground-truth key — the two headings the flows bind. The eval never reads it,
+   * because a case it cannot check would sit in REQ-REC-10's denominator for
+   * ever; recording does, because the fixtures cannot be recorded without a
+   * credential otherwise.
+   */
+  const cases = [...readCases(path), ...readCases(unscoredPath(path))];
 
   /** page + phrase → the case. Variant cases are keyed on the page too. */
   const byKey = new Map<string, GroundingCase>();
@@ -99,6 +108,12 @@ export function groundingAnswers(path?: string): GroundingAnswers {
         : { ref, why: `${found.id}: the ${found.role} named "${found.name}"`, confidence: 1 };
     },
   };
+}
+
+/** `…/cases.jsonl` → `…/fixture-answers.jsonl`. */
+function unscoredPath(casesPath: string | undefined): string {
+  const base = casesPath ?? defaultCasesPath();
+  return join(dirname(base), "fixture-answers.jsonl");
 }
 
 /** `http://127.0.0.1:53321/login?x=1` → `/login`. Ports and queries move. */

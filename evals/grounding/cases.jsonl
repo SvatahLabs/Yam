@@ -190,9 +190,9 @@
 {"id":"g-395","page":"/checkout","phrase":"the expiry month select","expect":"present","element":"checkout/14-expiry-month","role":"combobox","name":"Expiry","nth":0,"source":"fixtures"}
 {"id":"g-396","page":"/checkout","phrase":"the expiry year select","expect":"present","element":"checkout/18-expiry-year","role":"combobox","nth":1,"source":"fixtures"}
 {"id":"g-397","page":"/checkout","phrase":"the pay button","expect":"present","element":"checkout/22-pay","role":"button","name":"Pay","nth":2,"source":"fixtures"}
-{"id":"g-398","page":"/","phrase":"the sign in button","expect":"present","element":"home/07-sign-in","role":"link","name":"Sign in","nth":5,"source":"fixtures"}
-{"id":"g-399","page":"/login","phrase":"the login button","expect":"present","element":"login/10-login-submit","role":"button","name":"Sign In","nth":1,"source":"fixtures"}
-{"id":"g-400","page":"/login","phrase":"the password field","expect":"present","element":"login/08-password","role":"textbox","name":"Password","nth":1,"source":"fixtures"}
-{"id":"g-401","page":"/login","phrase":"the username field","expect":"present","element":"login/07-username","role":"textbox","name":"Username","nth":0,"source":"fixtures"}
-{"id":"g-402","page":"/","phrase":"the dashboard link","expect":"present","element":"home/03-dashboard-link","role":"link","name":"Dashboard","nth":1,"source":"fixtures"}
-{"id":"g-403","page":"/","phrase":"the nav toggle","expect":"present","element":"home/02-nav-toggle","role":"button","name":"Toggle navigation","nth":0,"source":"fixtures"}
+{"id":"g-399","page":"/","phrase":"the sign in button","expect":"present","element":"home/07-sign-in","role":"link","name":"Sign in","nth":5,"source":"fixtures"}
+{"id":"g-400","page":"/login","phrase":"the login button","expect":"present","element":"login/10-login-submit","role":"button","name":"Sign In","nth":1,"source":"fixtures"}
+{"id":"g-401","page":"/login","phrase":"the password field","expect":"present","element":"login/08-password","role":"textbox","name":"Password","nth":1,"source":"fixtures"}
+{"id":"g-402","page":"/login","phrase":"the username field","expect":"present","element":"login/07-username","role":"textbox","name":"Username","nth":0,"source":"fixtures"}
+{"id":"g-403","page":"/","phrase":"the dashboard link","expect":"present","element":"home/03-dashboard-link","role":"link","name":"Dashboard","nth":1,"source":"fixtures"}
+{"id":"g-404","page":"/","phrase":"the nav toggle","expect":"present","element":"home/02-nav-toggle","role":"button","name":"Toggle navigation","nth":0,"source":"fixtures"}

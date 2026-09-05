@@ -45,12 +45,13 @@ entries:
       tag: "h1"
       text: "Enterprise"
     provenance:
-      at: "2026-09-02T00:00:00.000Z"
-      model: "human"
-      promptVersion: "seed:hand-completed"
+      at: "2026-09-03T06:05:41.517Z"
+      costUsd: 0
+      model: "fake:grounding-cases"
+      promptVersion: "g-1"
       tokensIn: 0
       tokensOut: 0
-    recordedAt: "2026-09-02T00:00:00.000Z"
+    recordedAt: "2026-09-03T06:05:41.538Z"
     verified: true
 id: "schedule.schedule-heading"
 phrases:

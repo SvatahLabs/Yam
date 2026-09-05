@@ -20,8 +20,8 @@ entries:
         score: 0.6
         value: "//*[@data-testid='nav-logout']"
     context:
-      hash: "691ed4838691ef73b9105f6a60fcca52d9c149cd446ad1d9ea4ffb4d102ccfca"
-      pattern: "/dashboard"
+      hash: "93257260a0a5ddc37decbbc3e6e08b9e6dabfa73d8d48933e82d085ff6c0d59f"
+      pattern: "/schedule-build"
       platform: "web"
     fingerprint:
       attrs:
@@ -35,7 +35,7 @@ entries:
       index: 0
       neighbours:
         after:
-          - "Welcome back, Enterprise You have 3 active builds. Refresh count BuildStatus nightly-1042passed nightly-1043running nightly-1044queued"
+          - "Enterprise Schedule a build for your project. Project Core Adapters ADE Run build Build scheduled."
         before:
           - "Schedule Build"
           - "Bookings"
@@ -47,12 +47,13 @@ entries:
       tag: "a"
       text: "Logout"
     provenance:
-      at: "2026-09-02T00:00:00.000Z"
-      model: "human"
-      promptVersion: "seed:hand-completed"
+      at: "2026-09-03T06:05:41.545Z"
+      costUsd: 0
+      model: "fake:grounding-cases"
+      promptVersion: "g-1"
       tokensIn: 0
       tokensOut: 0
-    recordedAt: "2026-09-02T00:00:00.000Z"
+    recordedAt: "2026-09-03T06:05:41.558Z"
     verified: true
 id: "app.logout-link"
 phrases:

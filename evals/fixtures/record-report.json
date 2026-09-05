@@ -1,0 +1,1609 @@
+{
+  "at": "2026-09-03T06:05:44.080Z",
+  "milestone": "T3.5 — the four migrated fixtures, recorded",
+  "gateway": {
+    "name": "fake:grounding-cases",
+    "model": "fake:grounding-cases",
+    "real": false
+  },
+  "flows": [
+    {
+      "flow": "flows/simple.flow",
+      "exit": 4,
+      "complete": false,
+      "stoppedBecause": "Grounding \"the username field\" (login.username-field) not-found: Nothing on http://127.0.0.1:64980/logout is \"the username field\".",
+      "written": [
+        "home.sign-in-button",
+        "login.username-field",
+        "login.password-field",
+        "login.login-button",
+        "app.schedule-build-link",
+        "schedule.schedule-heading",
+        "app.logout-link"
+      ],
+      "totals": {
+        "steps": 9,
+        "grounded": 9,
+        "reused": 0,
+        "failed": 1,
+        "modelCalls": 9,
+        "cacheHits": 0,
+        "tokensIn": 0,
+        "tokensOut": 0,
+        "costUsd": 0
+      },
+      "steps": [
+        {
+          "story": "I want to validate login",
+          "stepId": "I want to validate login#1",
+          "line": 9,
+          "text": "Click the sign in button",
+          "status": "passed",
+          "durationMs": 190,
+          "elementId": "home.sign-in-button",
+          "binding": "rebound",
+          "decision": {
+            "id": "home.sign-in-button",
+            "phrase": "the sign in button",
+            "snapshotTokens": 93,
+            "pruned": false,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:40.990Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-399: the link named \"Sign in\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r9",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "sign-in",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "link",
+                "name": "Sign in",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "text",
+                "value": "Sign in",
+                "exact": true,
+                "score": 0.75
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"sign-in\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='sign-in']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "I want to validate login",
+          "stepId": "I want to validate login#2",
+          "line": 10,
+          "text": "Type {input.email} into the username field",
+          "status": "passed",
+          "durationMs": 79,
+          "elementId": "login.username-field",
+          "binding": "rebound",
+          "decision": {
+            "id": "login.username-field",
+            "phrase": "the username field",
+            "snapshotTokens": 115,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:41.150Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-402: the textbox named \"Username\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r10",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "username",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "id",
+                "value": "username",
+                "score": 0.95
+              },
+              {
+                "by": "role",
+                "role": "textbox",
+                "name": "Username",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "label",
+                "value": "Username",
+                "exact": true,
+                "score": 0.9
+              },
+              {
+                "by": "placeholder",
+                "value": "you@example.com",
+                "exact": true,
+                "score": 0.85
+              },
+              {
+                "by": "name",
+                "value": "username",
+                "score": 0.82
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"username\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='username']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "I want to validate login",
+          "stepId": "I want to validate login#3",
+          "line": 11,
+          "text": "Type {input.password} into the password field",
+          "status": "passed",
+          "durationMs": 62,
+          "elementId": "login.password-field",
+          "binding": "rebound",
+          "decision": {
+            "id": "login.password-field",
+            "phrase": "the password field",
+            "snapshotTokens": 124,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:41.227Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-401: the textbox named \"Password\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r11",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "password",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "id",
+                "value": "password",
+                "score": 0.95
+              },
+              {
+                "by": "role",
+                "role": "textbox",
+                "name": "Password",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "label",
+                "value": "Password",
+                "exact": true,
+                "score": 0.9
+              },
+              {
+                "by": "placeholder",
+                "value": "Your password",
+                "exact": true,
+                "score": 0.85
+              },
+              {
+                "by": "name",
+                "value": "password",
+                "score": 0.82
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"password\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='password']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "I want to validate login",
+          "stepId": "I want to validate login#4",
+          "line": 12,
+          "text": "Click the login button",
+          "status": "passed",
+          "durationMs": 68,
+          "elementId": "login.login-button",
+          "binding": "rebound",
+          "decision": {
+            "id": "login.login-button",
+            "phrase": "the login button",
+            "snapshotTokens": 127,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:41.289Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-400: the button named \"Sign In\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r13",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "login-submit",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "button",
+                "name": "Sign In",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"login-submit\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='login-submit']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "I want to validate login",
+          "stepId": "I want to validate login#5",
+          "line": 13,
+          "text": "Click the Schedule Build link",
+          "status": "passed",
+          "durationMs": 103,
+          "elementId": "app.schedule-build-link",
+          "binding": "rebound",
+          "decision": {
+            "id": "app.schedule-build-link",
+            "phrase": "the Schedule Build link",
+            "snapshotTokens": 303,
+            "pruned": false,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:41.365Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-027: the link named \"Schedule Build\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r13",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "nav-schedule-build",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "link",
+                "name": "Schedule Build",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "text",
+                "value": "Schedule Build",
+                "exact": true,
+                "score": 0.75
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"nav-schedule-build\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='nav-schedule-build']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "I want to validate login",
+          "stepId": "I want to validate login#6",
+          "line": 14,
+          "text": "Remember the text of the schedule heading as enterprise",
+          "status": "passed",
+          "durationMs": 56,
+          "elementId": "schedule.schedule-heading",
+          "binding": "rebound",
+          "decision": {
+            "id": "schedule.schedule-heading",
+            "phrase": "the schedule heading",
+            "snapshotTokens": 204,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:41.466Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-405: the heading named \"Enterprise\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r21",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "schedule-heading",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "heading",
+                "name": "Enterprise",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "text",
+                "value": "Enterprise",
+                "exact": true,
+                "score": 0.75
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"schedule-heading\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='schedule-heading']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "I want to validate login",
+          "stepId": "I want to validate login#7",
+          "line": 15,
+          "text": "The schedule heading should say {enterprise}",
+          "status": "passed",
+          "durationMs": 30,
+          "elementId": "schedule.schedule-heading",
+          "binding": "rebound",
+          "decision": {
+            "id": "schedule.schedule-heading",
+            "phrase": "the schedule heading",
+            "snapshotTokens": 204,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:41.517Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-405: the heading named \"Enterprise\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r21",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "schedule-heading",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "heading",
+                "name": "Enterprise",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "text",
+                "value": "Enterprise",
+                "exact": true,
+                "score": 0.75
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"schedule-heading\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='schedule-heading']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "I want to validate logout",
+          "stepId": "I want to validate logout#1",
+          "line": 18,
+          "text": "Click the logout link",
+          "status": "passed",
+          "durationMs": 39,
+          "elementId": "app.logout-link",
+          "binding": "rebound",
+          "decision": {
+            "id": "app.logout-link",
+            "phrase": "the logout link",
+            "snapshotTokens": 204,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:41.545Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-043: the link named \"Logout\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r19",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "nav-logout",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "link",
+                "name": "Logout",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "text",
+                "value": "Logout",
+                "exact": true,
+                "score": 0.75
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"nav-logout\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='nav-logout']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "I want to validate text",
+          "stepId": "I want to validate text#1",
+          "line": 21,
+          "text": "Type {data.user.email} into the username field",
+          "status": "failed",
+          "durationMs": 3,
+          "elementId": "login.username-field",
+          "binding": "rebound",
+          "decision": {
+            "id": "login.username-field",
+            "phrase": "the username field",
+            "snapshotTokens": 81,
+            "pruned": false,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:41.585Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "no committed case covers this phrase on this page",
+            "confidence": 1,
+            "outcome": "not-found",
+            "message": "Nothing on http://127.0.0.1:64980/logout is \"the username field\"."
+          },
+          "failure": {
+            "class": "locator",
+            "message": "Nothing on http://127.0.0.1:64980/logout is \"the username field\"."
+          }
+        }
+      ]
+    },
+    {
+      "flow": "flows/svatah.flow",
+      "exit": 4,
+      "complete": false,
+      "stoppedBecause": "Grounding \"the username field\" (login.username-field) not-found: Nothing on http://127.0.0.1:64980/dashboard is \"the username field\".",
+      "written": [
+        "nav.nav-toggle",
+        "nav.dashboard-link"
+      ],
+      "totals": {
+        "steps": 6,
+        "grounded": 4,
+        "reused": 0,
+        "failed": 1,
+        "modelCalls": 4,
+        "cacheHits": 0,
+        "tokensIn": 0,
+        "tokensOut": 0,
+        "costUsd": 0
+      },
+      "steps": [
+        {
+          "story": "Validate Text",
+          "stepId": "Validate Text#1",
+          "line": 6,
+          "text": "Click the nav toggle",
+          "status": "passed",
+          "durationMs": 61,
+          "elementId": "nav.nav-toggle",
+          "binding": "rebound",
+          "decision": {
+            "id": "nav.nav-toggle",
+            "phrase": "the nav toggle",
+            "snapshotTokens": 93,
+            "pruned": false,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:42.194Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-404: the button named \"Toggle navigation\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r2",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "nav-toggle",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "button",
+                "name": "Toggle navigation",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "text",
+                "value": "Menu",
+                "exact": true,
+                "score": 0.75
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"nav-toggle\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='nav-toggle']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "Validate Text",
+          "stepId": "Validate Text#2",
+          "line": 11,
+          "text": "Move to the dashboard link and click it",
+          "status": "passed",
+          "durationMs": 101,
+          "elementId": "nav.dashboard-link",
+          "binding": "rebound",
+          "decision": {
+            "id": "nav.dashboard-link",
+            "phrase": "the dashboard link",
+            "snapshotTokens": 96,
+            "pruned": false,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:42.251Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-403: the link named \"Dashboard\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r3",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "dashboard-link",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "link",
+                "name": "Dashboard",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "text",
+                "value": "Dashboard",
+                "exact": true,
+                "score": 0.75
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"dashboard-link\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='dashboard-link']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "Validate Text",
+          "stepId": "Validate Text#3",
+          "line": 12,
+          "text": "Go back",
+          "status": "passed",
+          "durationMs": 11
+        },
+        {
+          "story": "Validate Text",
+          "stepId": "Validate Text#4",
+          "line": 13,
+          "text": "Wait for the dashboard link to be visible",
+          "status": "passed",
+          "durationMs": 33,
+          "elementId": "nav.dashboard-link",
+          "binding": "rebound",
+          "decision": {
+            "id": "nav.dashboard-link",
+            "phrase": "the dashboard link",
+            "snapshotTokens": 93,
+            "pruned": false,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:42.363Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-403: the link named \"Dashboard\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r3",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "dashboard-link",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "link",
+                "name": "Dashboard",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "text",
+                "value": "Dashboard",
+                "exact": true,
+                "score": 0.75
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"dashboard-link\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='dashboard-link']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "Validate Text",
+          "stepId": "Validate Text#5",
+          "line": 14,
+          "text": "Go forward",
+          "status": "passed",
+          "durationMs": 6
+        },
+        {
+          "story": "Validate Text",
+          "stepId": "Validate Text#6",
+          "line": 15,
+          "text": "Wait for the username field to be present",
+          "status": "failed",
+          "durationMs": 5,
+          "elementId": "login.username-field",
+          "binding": "rebound",
+          "decision": {
+            "id": "login.username-field",
+            "phrase": "the username field",
+            "snapshotTokens": 303,
+            "pruned": false,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:42.403Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "no committed case covers this phrase on this page",
+            "confidence": 1,
+            "outcome": "not-found",
+            "message": "Nothing on http://127.0.0.1:64980/dashboard is \"the username field\"."
+          },
+          "failure": {
+            "class": "locator",
+            "message": "Nothing on http://127.0.0.1:64980/dashboard is \"the username field\"."
+          }
+        }
+      ]
+    },
+    {
+      "flow": "flows/natural_language_login.flow",
+      "exit": 4,
+      "complete": false,
+      "stoppedBecause": "Grounding \"the schedule heading\" (schedule.schedule-heading) not-found: Nothing on http://127.0.0.1:64980/dashboard is \"the schedule heading\".",
+      "written": [
+        "home.sign-in-button",
+        "login.username-field",
+        "login.password-field",
+        "login.login-button"
+      ],
+      "totals": {
+        "steps": 5,
+        "grounded": 5,
+        "reused": 0,
+        "failed": 1,
+        "modelCalls": 5,
+        "cacheHits": 0,
+        "tokensIn": 0,
+        "tokensOut": 0,
+        "costUsd": 0
+      },
+      "steps": [
+        {
+          "story": "Login with natural language format",
+          "stepId": "Login with natural language format#1",
+          "line": 8,
+          "text": "Click the sign in button",
+          "status": "passed",
+          "durationMs": 81,
+          "elementId": "home.sign-in-button",
+          "binding": "rebound",
+          "decision": {
+            "id": "home.sign-in-button",
+            "phrase": "the sign in button",
+            "snapshotTokens": 93,
+            "pruned": false,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:42.976Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-399: the link named \"Sign in\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r9",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "sign-in",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "link",
+                "name": "Sign in",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "text",
+                "value": "Sign in",
+                "exact": true,
+                "score": 0.75
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"sign-in\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='sign-in']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "Login with natural language format",
+          "stepId": "Login with natural language format#2",
+          "line": 9,
+          "text": "Type {input.email} into the username field",
+          "status": "passed",
+          "durationMs": 45,
+          "elementId": "login.username-field",
+          "binding": "rebound",
+          "decision": {
+            "id": "login.username-field",
+            "phrase": "the username field",
+            "snapshotTokens": 115,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:43.055Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-402: the textbox named \"Username\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r10",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "username",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "id",
+                "value": "username",
+                "score": 0.95
+              },
+              {
+                "by": "role",
+                "role": "textbox",
+                "name": "Username",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "label",
+                "value": "Username",
+                "exact": true,
+                "score": 0.9
+              },
+              {
+                "by": "placeholder",
+                "value": "you@example.com",
+                "exact": true,
+                "score": 0.85
+              },
+              {
+                "by": "name",
+                "value": "username",
+                "score": 0.82
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"username\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='username']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "Login with natural language format",
+          "stepId": "Login with natural language format#3",
+          "line": 10,
+          "text": "Type {input.password} into the password field",
+          "status": "passed",
+          "durationMs": 47,
+          "elementId": "login.password-field",
+          "binding": "rebound",
+          "decision": {
+            "id": "login.password-field",
+            "phrase": "the password field",
+            "snapshotTokens": 124,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:43.099Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-401: the textbox named \"Password\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r11",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "password",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "id",
+                "value": "password",
+                "score": 0.95
+              },
+              {
+                "by": "role",
+                "role": "textbox",
+                "name": "Password",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "label",
+                "value": "Password",
+                "exact": true,
+                "score": 0.9
+              },
+              {
+                "by": "placeholder",
+                "value": "Your password",
+                "exact": true,
+                "score": 0.85
+              },
+              {
+                "by": "name",
+                "value": "password",
+                "score": 0.82
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"password\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='password']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "Login with natural language format",
+          "stepId": "Login with natural language format#4",
+          "line": 11,
+          "text": "Click the login button",
+          "status": "passed",
+          "durationMs": 73,
+          "elementId": "login.login-button",
+          "binding": "rebound",
+          "decision": {
+            "id": "login.login-button",
+            "phrase": "the login button",
+            "snapshotTokens": 127,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:43.145Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-400: the button named \"Sign In\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r13",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "login-submit",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "button",
+                "name": "Sign In",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"login-submit\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='login-submit']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "Login with natural language format",
+          "stepId": "Login with natural language format#5",
+          "line": 12,
+          "text": "The schedule heading should be visible",
+          "status": "failed",
+          "durationMs": 11,
+          "elementId": "schedule.schedule-heading",
+          "binding": "rebound",
+          "decision": {
+            "id": "schedule.schedule-heading",
+            "phrase": "the schedule heading",
+            "snapshotTokens": 303,
+            "pruned": false,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:43.227Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "no committed case covers this phrase on this page",
+            "confidence": 1,
+            "outcome": "not-found",
+            "message": "Nothing on http://127.0.0.1:64980/dashboard is \"the schedule heading\"."
+          },
+          "failure": {
+            "class": "locator",
+            "message": "Nothing on http://127.0.0.1:64980/dashboard is \"the schedule heading\"."
+          }
+        }
+      ]
+    },
+    {
+      "flow": "flows/execution.flow",
+      "exit": 4,
+      "complete": false,
+      "stoppedBecause": "Grounding \"the Indiranagar suggestion\" (booking.indiranagar-suggestion) not-found: Nothing on http://127.0.0.1:64980/booking is \"the Indiranagar suggestion\".",
+      "written": [
+        "nav.book-a-slot-link",
+        "booking.location-field"
+      ],
+      "totals": {
+        "steps": 5,
+        "grounded": 5,
+        "reused": 0,
+        "failed": 1,
+        "modelCalls": 5,
+        "cacheHits": 0,
+        "tokensIn": 0,
+        "tokensOut": 0,
+        "costUsd": 0
+      },
+      "steps": [
+        {
+          "story": "start zoomcar booking",
+          "stepId": "start zoomcar booking#1",
+          "line": 15,
+          "text": "Click the Book a slot link",
+          "status": "passed",
+          "durationMs": 87,
+          "elementId": "nav.book-a-slot-link",
+          "binding": "rebound",
+          "decision": {
+            "id": "nav.book-a-slot-link",
+            "phrase": "the Book a slot link",
+            "snapshotTokens": 93,
+            "pruned": false,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:43.842Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-004: the link named \"Book a slot\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r4",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "booking-link",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "link",
+                "name": "Book a slot",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "text",
+                "value": "Book a slot",
+                "exact": true,
+                "score": 0.75
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"booking-link\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='booking-link']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "perform search",
+          "stepId": "perform search#1",
+          "line": 18,
+          "text": "Click the location field",
+          "status": "passed",
+          "durationMs": 55,
+          "elementId": "booking.location-field",
+          "binding": "rebound",
+          "decision": {
+            "id": "booking.location-field",
+            "phrase": "the location field",
+            "snapshotTokens": 260,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:43.933Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-391: the combobox named \"Starting point\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r22",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "location",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "id",
+                "value": "location",
+                "score": 0.95
+              },
+              {
+                "by": "role",
+                "role": "combobox",
+                "name": "Starting point",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "label",
+                "value": "Starting point",
+                "exact": true,
+                "score": 0.9
+              },
+              {
+                "by": "placeholder",
+                "value": "Where from?",
+                "exact": true,
+                "score": 0.85
+              },
+              {
+                "by": "name",
+                "value": "location",
+                "score": 0.82
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"location\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='location']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "perform search",
+          "stepId": "perform search#2",
+          "line": 19,
+          "text": "Clear the location field",
+          "status": "passed",
+          "durationMs": 47,
+          "elementId": "booking.location-field",
+          "binding": "rebound",
+          "decision": {
+            "id": "booking.location-field",
+            "phrase": "the location field",
+            "snapshotTokens": 262,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:43.978Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-391: the combobox named \"Starting point\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r22",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "location",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "id",
+                "value": "location",
+                "score": 0.95
+              },
+              {
+                "by": "role",
+                "role": "combobox",
+                "name": "Starting point",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "label",
+                "value": "Starting point",
+                "exact": true,
+                "score": 0.9
+              },
+              {
+                "by": "placeholder",
+                "value": "Where from?",
+                "exact": true,
+                "score": 0.85
+              },
+              {
+                "by": "name",
+                "value": "location",
+                "score": 0.82
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"location\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='location']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "perform search",
+          "stepId": "perform search#3",
+          "line": 20,
+          "text": "Type \"indra\" into the location field",
+          "status": "passed",
+          "durationMs": 25,
+          "elementId": "booking.location-field",
+          "binding": "rebound",
+          "decision": {
+            "id": "booking.location-field",
+            "phrase": "the location field",
+            "snapshotTokens": 262,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:44.024Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "g-391: the combobox named \"Starting point\"",
+            "confidence": 1,
+            "outcome": "grounded",
+            "ref": "r22",
+            "candidates": [
+              {
+                "by": "testid",
+                "value": "location",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "id",
+                "value": "location",
+                "score": 0.95
+              },
+              {
+                "by": "role",
+                "role": "combobox",
+                "name": "Starting point",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "label",
+                "value": "Starting point",
+                "exact": true,
+                "score": 0.9
+              },
+              {
+                "by": "placeholder",
+                "value": "Where from?",
+                "exact": true,
+                "score": 0.85
+              },
+              {
+                "by": "name",
+                "value": "location",
+                "score": 0.82
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"location\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='location']",
+                "score": 0.6
+              }
+            ]
+          },
+          "matched": {
+            "by": "testid",
+            "index": 0
+          }
+        },
+        {
+          "story": "perform search",
+          "stepId": "perform search#4",
+          "line": 21,
+          "text": "Click the Indiranagar suggestion",
+          "status": "failed",
+          "durationMs": 3,
+          "elementId": "booking.indiranagar-suggestion",
+          "binding": "rebound",
+          "decision": {
+            "id": "booking.indiranagar-suggestion",
+            "phrase": "the Indiranagar suggestion",
+            "snapshotTokens": 264,
+            "pruned": true,
+            "usedVision": false,
+            "cached": false,
+            "provenance": {
+              "model": "fake:grounding-cases",
+              "promptVersion": "g-1",
+              "at": "2026-09-03T06:05:44.049Z",
+              "tokensIn": 0,
+              "tokensOut": 0,
+              "costUsd": 0
+            },
+            "why": "no committed case covers this phrase on this page",
+            "confidence": 1,
+            "outcome": "not-found",
+            "message": "Nothing on http://127.0.0.1:64980/booking is \"the Indiranagar suggestion\"."
+          },
+          "failure": {
+            "class": "locator",
+            "message": "Nothing on http://127.0.0.1:64980/booking is \"the Indiranagar suggestion\"."
+          }
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "steps": 25,
+    "grounded": 23,
+    "reused": 0,
+    "failed": 4,
+    "modelCalls": 23,
+    "cacheHits": 0,
+    "tokensIn": 0,
+    "tokensOut": 0,
+    "costUsd": 0,
+    "written": 15
+  }
+}

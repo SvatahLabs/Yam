@@ -46,3 +46,38 @@ expectation.
 
 `data.yaml` holds the run data; the three secrets are `${ENV}` indirections, so
 nothing sensitive is committed.
+
+## The bindings, and how they got there (T3.5)
+
+`bindings/` is the recorder's output, not a hand-seeded store. Phase 2 wrote it by
+pointing at elements by hand and synthesising candidates against the live page —
+the recorder's output *shape* without the recorder — and recorded that as a known
+gap. T3.5 closes it:
+
+```bash
+node scripts/record-fixtures.mjs                 # with a model
+node scripts/record-fixtures.mjs --gateway fake  # from the eval's committed answers
+```
+
+Every entry here was grounded, performed by a step through the executor's own
+`runStep`, and confirmed by that step passing (REQ-REC-5). `provenance.model`
+says which gateway decided it, so a store recorded from the grounding eval's
+answers can never be read as one a model produced.
+
+`record-report.json` is the merged report for the four sessions: every step, its
+grounding decision, the snapshot size, the tokens, the cost, and the candidate the
+step resolved through (REQ-REC-8).
+
+### None of the four sessions finished, by design
+
+Each fixture carries exactly one documented step `apps/sample-web` cannot satisfy
+— see the table in [`../conformance/runtime/README.md`](../conformance/runtime/README.md).
+A recording stops there and writes what the steps before it proved, so the store
+is exactly the set of bindings a passing step verified, and the four documented
+failures stay visible rather than being recorded around.
+
+Two phrases the fixtures use name elements the eval cannot score — the two
+headings, which are not interactive and so carry no ground-truth key. They live in
+`evals/grounding/fixture-answers.jsonl` rather than in the case set, so recording
+without a credential can answer them and a published accuracy figure is never
+dragged by a case nobody could check.
