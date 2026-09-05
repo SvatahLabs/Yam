@@ -18,6 +18,7 @@ import {
   type ExitCode,
   type ParsedArgs,
 } from "@svatah/bindings-cli";
+import { ConfigError } from "./config-error.js";
 
 /** Commands LLD §15 lists that are not built yet, and what builds them. */
 const LATER: Record<string, string> = {
@@ -131,6 +132,22 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
   const moduleA = await runBindingsCommand(command, args, io);
   if (moduleA !== undefined) return moduleA;
 
+  /*
+   * A config that will not load is a usage error with a message, not a stack
+   * trace: every module (b) command starts by reading one, and Zod's raw
+   * `ZodError` reaching the top level would print a page of JSON for a
+   * misspelled key.
+   */
+  try {
+    return await runModuleB(command, args, io);
+  } catch (error) {
+    if (!(error instanceof ConfigError)) throw error;
+    io.err(error.message);
+    return EXIT.usage;
+  }
+}
+
+async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   switch (command) {
     case "compile":
       return await (await import("./commands/compile.js")).compileCommand(args, io);

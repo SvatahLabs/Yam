@@ -1,7 +1,7 @@
 {
   "name": "@svatah/playwright-test",
   "version": "0.1.0",
-  "description": "Playwright Test host: bind() fixture, generated specs, dual results",
+  "description": "The bind() fixture for an existing Playwright Test project",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",

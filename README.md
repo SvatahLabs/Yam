@@ -80,12 +80,53 @@ The method, the per-variant table, and the one change relocalization does *not*
 survive are in [`reports/eval-healing.md`](reports/eval-healing.md). Regenerate it
 with `pnpm eval:healing`.
 
+## Writing a flow
+
+Module (b) is the rest of the runtime: the flow language, the compiler that turns
+it into a typed plan, and the executor that replays that plan. A flow is plain
+sentences with a signature, and it compiles to an artifact you can read.
+
+```
+story (tags=smoke): Sign in
+inputs: username: string, password: secret
+  Go to "/login"
+  Type {input.username} into the username field
+  Type {input.password} into the password field
+  Click the sign in button
+  The dashboard heading should be visible
+
+test: Sign in
+```
+
+```bash
+svatah compile                    # flows -> plan.json, byte-stable
+svatah lint                       # long sleeps, unused captures, side effects in tools
+svatah run --host playwright      # or --host none for the runner-agnostic executor
+svatah migrate ./legacy ./flows   # v1/v2 flows and prototype databases
+svatah serve                      # the local HTTP and event-stream service
+```
+
+The same plan runs under both hosts and produces identical results — statuses and
+matched candidates alike. `node scripts/compatibility.mjs` demonstrates that over
+the four migrated fixtures, twice under each host, and is what
+[`evals/conformance/runtime/`](evals/conformance/runtime) is a recording of.
+
+Every sentence pattern and IR action is in
+[`docs/flow-language.md`](docs/flow-language.md).
+
 ## Status
 
-Phase 1 (module (a): bindings and model-free healing for Playwright users).
-See [`docs/spec/progress/phase-1.md`](docs/spec/progress/phase-1.md) for what is
+Phase 2 (module (b): the flow reader, the Tier 0 and Tier 1 compilers, the
+executor, both hosts, migration, the CLI and the local service). See
+[`docs/spec/progress/phase-2.md`](docs/spec/progress/phase-2.md) for what is
 built and how each item was verified, and
-[`phase-0.md`](docs/spec/progress/phase-0.md) for the foundation.
+[`phase-1.md`](docs/spec/progress/phase-1.md) and
+[`phase-0.md`](docs/spec/progress/phase-0.md) for what came before.
+
+Not built yet, and honest about it: `svatah record`, the model gateway and the
+Tier 2 and Tier 3 compilers, the workflow and tool runners, and every adapter
+except Playwright and HTTP. Those packages exist as skeletons so the layout and
+the import boundaries are enforced from the start; they are Phases 3 and 4.
 
 ### The packages
 
@@ -95,7 +136,7 @@ or the model gateway — and a dependency-tree test holds that.
 
 | Package | What it is |
 |---|---|
-| [`@svatah/playwright-test`](packages/playwright-test) | The `bind()` fixture. **The one dependency you add.** |
+| [`@svatah/playwright-test`](packages/playwright-test) | The `bind()` fixture, and nothing else. **The one dependency you add.** |
 | [`@svatah/bindings`](packages/bindings) | Store, context hash, resolver, synthesis, fingerprints, relocalization |
 | [`@svatah/healer`](packages/healer) | Failure selection, repair, verification, diff |
 | [`@svatah/adapter-playwright`](packages/adapter-playwright) | The default web adapter |
@@ -140,6 +181,11 @@ pnpm check:licenses       # REQ-PKG-3: every dependency must be permissively lic
 pnpm conform:playwright   # REQ-SURF-3: the surface conformance suite
 pnpm eval:healing         # REQ-HEAL-5: the healing numbers above
 pnpm quick-start          # REQ-PKG-2: the ten-minute quick start, timed
+pnpm -r typecheck         # strict TypeScript across every package
+
+node scripts/compatibility.mjs         # REQ-RUN-2, REQ-BEH-5, REQ-COMP-7
+node scripts/compile-fixtures.mjs --check   # the committed fixture plan is current
+node scripts/migrate-legacy.mjs --check     # migration output is unchanged
 ```
 
 The frozen Java project builds on its own:

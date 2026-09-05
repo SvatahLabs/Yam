@@ -13,8 +13,31 @@ import { compile, type CompileResult } from "@svatah/compiler";
 import { readProjectFrom, type Diagnostic, type Project } from "@svatah/spec";
 import { loadSteps, type StepRegistry } from "@svatah/steps";
 import { DEFAULT_CONFIG, configSchema, type Config } from "@svatah/schema";
+import { ConfigError } from "./config-error.js";
 
 export const CONFIG_FILES = ["svatah.config.yaml", "svatah.config.yml", "svatah.config.json"];
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * The defaults, with the file's sections merged over them one level deep.
+ *
+ * A shallow spread would be wrong: `bindings: { dir: fixtures }` in a config
+ * would replace the whole `bindings` section and silently drop
+ * `testIdAttributes` and `ignoreAttributes`, which is not what anyone writing
+ * two lines of YAML means. Arrays are replaced whole — a project that lists its
+ * test-id attributes is naming the set, not adding to ours.
+ */
+function withDefaults(parsed: Record<string, unknown>, project: string): Record<string, unknown> {
+  const merged: Record<string, unknown> = { ...DEFAULT_CONFIG, project, ...parsed };
+  for (const [key, fallback] of Object.entries(DEFAULT_CONFIG)) {
+    const given = parsed[key];
+    if (isPlainObject(fallback) && isPlainObject(given)) merged[key] = { ...fallback, ...given };
+  }
+  return merged;
+}
 
 export interface LoadedProject {
   readonly root: string;
@@ -34,8 +57,20 @@ export function loadConfig(root: string): { config: Config; file?: string } {
     const parsed = (name.endsWith(".json") ? JSON.parse(text) : parseYaml(text)) as
       | Record<string, unknown>
       | null;
-    const merged = { ...DEFAULT_CONFIG, project: root.split(/[\\/]/).pop() ?? "project", ...(parsed ?? {}) };
-    return { config: configSchema.parse(merged), file: name };
+    const merged = withDefaults(parsed ?? {}, root.split(/[\\/]/).pop() ?? "project");
+    const result = configSchema.safeParse(merged);
+    /*
+     * A typo in a config file is the user's mistake, not a crash. Zod's issues
+     * become one line each, pointing at the path, and the caller turns that into
+     * exit 64 (LLD §15).
+     */
+    if (!result.success) {
+      const issues = result.error.issues
+        .map((issue) => `  ${issue.path.join(".") || "(root)"}: ${issue.message}`)
+        .join("\n");
+      throw new ConfigError(`${name} is not a valid Svatah config:\n${issues}`, name);
+    }
+    return { config: result.data, file: name };
   }
   return {
     config: configSchema.parse({

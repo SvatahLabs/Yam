@@ -203,3 +203,73 @@ describe("svatah run (LLD §15)", () => {
     expect(err).toContain("nothing to run");
   });
 });
+
+/*
+ * Found by compiling the flow in the README, which is a partial config like
+ * anyone's first one: two sections, a handful of keys, everything else left to
+ * the defaults. That crashed with a raw `ZodError` stack, for two reasons worth
+ * separating.
+ */
+describe("the project config (LLD §3.5, §15)", () => {
+  const flow = 'story : Sign in\n  Go to "/login"\n\ntest : Sign in\n';
+
+  it("merges a section over the defaults rather than replacing it", async () => {
+    // `bindings: { dir: ... }` must not silently drop `testIdAttributes` and
+    // `ignoreAttributes`; nobody writing one key means to unset the other two.
+    const dir = project({
+      "svatah.config.yaml": 'schemaVersion: "1.0.0"\nbindings: { dir: fixtures }\n',
+      "flows/signin.flow": flow,
+    });
+    const { loadConfig } = await import("../src/project.js");
+    const { config } = loadConfig(dir);
+    expect(config.bindings.dir).toBe("fixtures");
+    expect(config.bindings.testIdAttributes).toEqual(["data-testid", "data-test", "data-qa"]);
+    expect(config.bindings.ignoreAttributes?.length ?? 0).toBeGreaterThan(0);
+    // The sections the file never mentioned are untouched.
+    expect(config.run.workers).toBe(4);
+    expect(config.compile.confidenceThreshold).toBe(0.8);
+  });
+
+  it("compiles a project whose config names only what it changes", async () => {
+    const dir = project({
+      "svatah.config.yaml":
+        'schemaVersion: "1.0.0"\napp: { baseUrl: "http://127.0.0.1:4173" }\nbindings: { dir: bindings }\n',
+      "flows/signin.flow": flow,
+    });
+    const { code } = await cli("compile", dir, "--stable");
+    expect(code).toBe(EXIT.ok);
+  });
+
+  it("reports a bad config as a usage error, not a stack trace", async () => {
+    const dir = project({
+      "svatah.config.yaml": 'schemaVersion: "1.0.0"\nrun: { workers: "four" }\n',
+      "flows/signin.flow": flow,
+    });
+    const { code, err } = await cli("compile", dir);
+    expect(code).toBe(EXIT.usage);
+    expect(err).toContain("svatah.config.yaml is not a valid Svatah config");
+    expect(err).toContain("run.workers");
+    expect(err).not.toContain("ZodError");
+  });
+});
+
+/*
+ * The flow in the README is the first Svatah anyone reads. An example that does
+ * not compile is worse than no example, and there is no way to notice by eye —
+ * the first draft of this one used three patterns the grammar does not have.
+ */
+describe("the README's flow example", () => {
+  it("compiles", async () => {
+    const readme = readFileSync(join(ROOT, "README.md"), "utf8");
+    const block = /```\n(story \(tags=smoke\): Sign in\n[\s\S]*?)```/.exec(readme);
+    expect(block, "the README no longer contains the flow example").not.toBeNull();
+
+    const dir = project({
+      "svatah.config.yaml": 'schemaVersion: "1.0.0"\napp: { baseUrl: "http://127.0.0.1:4173" }\n',
+      "flows/signin.flow": block![1]!,
+    });
+    const { code, err } = await cli("compile", dir, "--stable");
+    expect(err).not.toContain("error");
+    expect(code).toBe(EXIT.ok);
+  });
+});
