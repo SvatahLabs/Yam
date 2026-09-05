@@ -57,11 +57,20 @@ export function canonicalHash(value: unknown): string {
 }
 
 /**
- * Hash of a plan, computed over everything except the `hash` field itself, so a
- * plan can carry its own hash without the hash depending on itself (REQ-COMP-7).
+ * Hash of a plan's *content* (REQ-COMP-7, REQ-AUTO-3).
+ *
+ * Excludes two fields, for two different reasons:
+ *
+ * * `hash` itself, so a plan can carry its own hash without the hash depending
+ *   on itself;
+ * * `generatedAt`, because it is when the compile ran and not what it produced.
+ *   `--resume` refuses a run whose plan hash has changed (REQ-AUTO-3); if the
+ *   timestamp counted, recompiling the very same flows would make every
+ *   in-flight run unresumable, and the check would be worse than useless — it
+ *   would fire on the one case it exists to permit.
  */
 export function planHash(plan: Record<string, unknown>): string {
-  const { hash: _ignored, ...rest } = plan;
+  const { hash: _ignored, generatedAt: _when, ...rest } = plan;
   return canonicalHash(rest);
 }
 

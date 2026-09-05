@@ -17,3 +17,20 @@ export {
   type StepIdentity,
 } from "./lower.js";
 export type { RawPredicate, RawStep, RawTarget, RawValue } from "./raw.js";
+export {
+  compile,
+  compileSentence,
+  renderPlan,
+  STABLE_TIMESTAMP,
+  type CompileOptions,
+  type CompileResult,
+} from "./compile.js";
+export { validateStory, referencesOf, type ValidateContext } from "./validate.js";
+export { lintPlan, DEFAULT_LONG_SLEEP_SECONDS, type LintOptions } from "./lint.js";
+export {
+  clearTiers,
+  hasModelTiers,
+  registerTier,
+  tierFor,
+  type ModelTier,
+} from "./tiers.js";
