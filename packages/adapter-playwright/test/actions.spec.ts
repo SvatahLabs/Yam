@@ -249,18 +249,18 @@ for (const mechanism of MECHANISMS) {
       const surface = await openSurface(mechanism, "/widgets");
       const result = await refByTestId(surface, "dialog-result");
 
-      await surface.act("dialog", undefined, { accept: true });
+      await surface.act("dialog", undefined, { action: "accept" });
       await surface.act("click", await refByTestId(surface, "show-confirm"));
       expect(await surface.read("text", result)).toBe("confirmed");
 
-      await surface.act("dialog", undefined, { accept: false });
+      await surface.act("dialog", undefined, { action: "dismiss" });
       await surface.act("click", await refByTestId(surface, "show-confirm"));
       expect(await surface.read("text", result)).toBe("dismissed");
     });
 
     test("dialog supplies prompt text", async ({ openSurface }) => {
       const surface = await openSurface(mechanism, "/widgets");
-      await surface.act("dialog", undefined, { accept: true, text: "Atul" });
+      await surface.act("dialog", undefined, { action: "accept", text: "Atul" });
       await surface.act("click", await refByTestId(surface, "show-prompt"));
       expect(await surface.read("text", await refByTestId(surface, "dialog-result"))).toBe("Atul");
     });

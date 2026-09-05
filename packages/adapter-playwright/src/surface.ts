@@ -777,10 +777,37 @@ export class PlaywrightSurface implements AgentSurface {
 
         /* ── dialogs ────────────────────────────────────────────────────── */
         case "dialog": {
-          const accept = args["accept"] === undefined ? true : Boolean(args["accept"]);
+          /*
+           * `args.action`, and nothing else (Draft 2.8 LLD §3.2).
+           *
+           * The grammar has always emitted `{ action: "accept" | "dismiss" }`
+           * and this adapter read `args.accept`, which no step ever carried —
+           * so `args.accept === undefined` and the default `true` accepted
+           * every dialog, including the ones a flow said to dismiss. `Dismiss
+           * the dialog` left the sample page saying `confirmed` end to end
+           * (K7, confirmed by the Phase 6 verification as F4).
+           *
+           * §3.2 now fixes the key on both sides and adds the sentence that
+           * makes this a defect rather than a preference: "an adapter that
+           * defaults a missing `action` to accept is a defect". A missing
+           * `action` is a caller error and is refused, because the two ways of
+           * being wrong are not symmetric — a dialog wrongly dismissed shows up
+           * as a failing assertion, and one wrongly accepted silently confirms
+           * whatever it was asking about.
+           */
+          const answer = args["action"];
+          if (answer !== "accept" && answer !== "dismiss") {
+            throw new ActionabilityError(
+              'The "dialog" action needs args.action of "accept" or "dismiss" ' +
+                `(LLD §3.2), and was given ${answer === undefined ? "nothing" : JSON.stringify(answer)}. ` +
+                "A missing action is never treated as accept: a dialog wrongly accepted confirms " +
+                "whatever it asked about and says nothing about it.",
+              { adapter: "playwright" },
+            );
+          }
           const text = args["text"];
           this.dialogPolicy = {
-            accept,
+            accept: answer === "accept",
             ...(text === undefined ? {} : { promptText: String(text) }),
           };
           return { ok: true };

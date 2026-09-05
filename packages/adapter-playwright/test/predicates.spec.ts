@@ -178,7 +178,7 @@ for (const mechanism of MECHANISMS) {
       const surface = await openSurface(mechanism, "/widgets");
       expect((await surface.check({ kind: "absent" }, "dialog")).ok).toBe(true);
 
-      await surface.act("dialog", undefined, { accept: true });
+      await surface.act("dialog", undefined, { action: "accept" });
       await surface.act("click", await refByTestId(surface, "show-alert"));
 
       expect((await surface.check({ kind: "present" }, "dialog")).ok).toBe(true);

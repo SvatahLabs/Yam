@@ -46,7 +46,7 @@ test.describe("capabilities (LLD §2.4)", () => {
     // makes on the adapter's behalf and the adapter cannot keep.
     const proofs: Record<string, () => Promise<unknown>> = {
       dialogs: async () => {
-        await surface.act("dialog", undefined, { accept: true });
+        await surface.act("dialog", undefined, { action: "accept" });
         await surface.act("click", await refByTestId(surface, "show-alert"));
         return (await surface.check({ kind: "present" }, "dialog")).ok;
       },
@@ -208,7 +208,7 @@ test.describe("state and restore (REQ-AUTO-2)", () => {
 
   test("state records the active frame and the last dialog", async ({ openSurface }) => {
     const surface = await openSurface("own", "/widgets");
-    await surface.act("dialog", undefined, { accept: true });
+    await surface.act("dialog", undefined, { action: "accept" });
     await surface.act("click", await refByTestId(surface, "show-alert"));
     await surface.act("switchFrame", undefined, { url: "/widgets/frame" });
 

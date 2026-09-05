@@ -297,7 +297,7 @@ export const SURFACE_CASES: readonly ConformanceCase[] = [
         expected: true,
       });
 
-      await surface.act("dialog", undefined, { accept: true });
+      await surface.act("dialog", undefined, { action: "accept" });
       const alert = (await surface.locate({ by: "css", value: "[data-testid=show-alert]", score: 1 }))[0]!;
       await surface.act("click", alert);
 
@@ -308,9 +308,20 @@ export const SURFACE_CASES: readonly ConformanceCase[] = [
       const confirmRef = (await surface.locate({ by: "css", value: "[data-testid=show-confirm]", score: 1 }))[0]!;
       const result = (await surface.locate({ by: "css", value: "[data-testid=dialog-result]", score: 1 }))[0]!;
 
-      await surface.act("dialog", undefined, { accept: false });
+      /*
+       * Both directions, because a suite that only dismissed would pass against
+       * an adapter that dismissed everything — and the mirror of that is exactly
+       * the defect Draft 2.8 §3.2 was written for: an adapter that read a key no
+       * step carried, defaulted to accept, and confirmed every dialog a flow
+       * asked it to dismiss (Phase 6 verification, F4).
+       */
+      await surface.act("dialog", undefined, { action: "dismiss" });
       await surface.act("click", confirmRef);
       equals("a dismissed confirm reports dismissed", await surface.read("text", result), "dismissed");
+
+      await surface.act("dialog", undefined, { action: "accept" });
+      await surface.act("click", confirmRef);
+      equals("an accepted confirm reports confirmed", await surface.read("text", result), "confirmed");
     },
   },
   {

@@ -79,8 +79,12 @@ export const ACTION_CONVENTIONS: readonly ActionConvention[] = [
   { action: "switchFrame", args: [], when: "an iframe is entered or left" },
   {
     action: "dialog",
-    args: ["action", "promptText"],
-    when: 'a native alert, confirm or prompt: "action" is "accept" for accept/confirm/ok, "dismiss" for dismiss/cancel',
+    // Draft 2.8 §3.2: the args are `{ action, text? }`, and `text` is the one
+    // the adapters read. `promptText` is still *accepted* by the raw schema as a
+    // synonym, but a convention that taught the model the synonym would keep
+    // producing steps that need lowering to rescue them.
+    args: ["action", "text"],
+    when: 'a native alert, confirm or prompt: "action" is "accept" for accept/confirm/ok, "dismiss" for dismiss/cancel; "text" is what a prompt is answered with',
   },
   {
     action: "read",
