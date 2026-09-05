@@ -443,3 +443,166 @@ describe("GET /plan (T3.7)", () => {
     expect(Array.isArray(plan.stories)).toBe(true);
   });
 });
+
+describe("POST /record: one session, and a decision that expires (P5-F4, LLD §13.5)", () => {
+  /**
+   * A service whose `record` blocks on the reviewer, exactly as the real one
+   * does, with the project's `record.decisionDeadlineMs` set to something a
+   * test can wait for.
+   */
+  async function recordingService(
+    deadlineMs: number,
+  ): Promise<{ service: RunningService; decisions: unknown[] }> {
+    const decisions: unknown[] = [];
+    const base = fakeProject();
+    const api = fakeApi({
+      loadProject: async () => ({
+        ...base,
+        config: {
+          ...base.config,
+          record: { model: "none", maxSnapshotTokens: 4000, visionFallback: false, decisionDeadlineMs: deadlineMs },
+        },
+      }),
+      record: async (_loaded, options) => {
+        const decision = await options.review?.({
+          elementId: "login.username-field",
+          entry: { candidates: [{ by: "role", score: 1 }], fingerprint: { tag: "input" } },
+        });
+        decisions.push(decision);
+        return { grounded: 0 };
+      },
+    });
+    const service = await createService({ project: PROJECT, token: TOKEN, port: 0, api });
+    return { service, decisions };
+  }
+
+  const post = async (service: RunningService, path: string, body?: unknown): Promise<Response> =>
+    await fetch(`${service.url}${path}`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${TOKEN}`,
+        ...(body === undefined ? {} : { "content-type": "application/json" }),
+      },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+
+  it("answers 409 while a session is open, and starts nothing", async () => {
+    /*
+     * One session at a time (LLD §13.5). The second request must not start a
+     * recorder — two sessions would drive one project's browser and write one
+     * store, and the reviewer would have no way to tell which decision belonged
+     * to which.
+     */
+    const { service } = await recordingService(60_000);
+    try {
+      const first = await post(service, "/record", { gateway: "fake" });
+      expect(first.status).toBe(202);
+      const { sessionId } = (await first.json()) as { sessionId: string };
+
+      // Wait for the recorder to reach its first review, which is when the
+      // session is properly "open".
+      await new Promise((done) => setTimeout(done, 50));
+
+      const second = await post(service, "/record", { gateway: "fake" });
+      expect(second.status).toBe(409);
+      const body = (await second.json()) as { error: string; message: string };
+      expect(body.error).toBe("already-recording");
+      expect(body.message).toMatch(/already open/i);
+
+      // And it really started nothing: the first session is still the one
+      // holding the pending decision, and stopping it releases the service.
+      expect((await post(service, `/record/${sessionId}/stop`)).status).toBe(202);
+      await new Promise((done) => setTimeout(done, 50));
+      const third = await post(service, "/record", { gateway: "fake" });
+      expect(third.status).toBe(202);
+      const { sessionId: next } = (await third.json()) as { sessionId: string };
+      await post(service, `/record/${next}/stop`);
+    } finally {
+      await service.close();
+    }
+  }, 30_000);
+
+  it("expires a pending decision after record.decisionDeadlineMs", async () => {
+    /*
+     * The reason the deadline exists (Draft 2.7). A blocked session holds the
+     * browser open *and* answers 409 to everyone else, so a reviewer who closed
+     * the ADE window without deciding used to leave the service unusable until
+     * it was restarted.
+     */
+    const { service, decisions } = await recordingService(150);
+    try {
+      const events: Array<Record<string, unknown>> = [];
+      const unsubscribe = service.events.subscribe((event) =>
+        events.push(event as unknown as Record<string, unknown>),
+      );
+
+      const started = await post(service, "/record", { gateway: "fake" });
+      expect(started.status).toBe(202);
+
+      await new Promise((done) => setTimeout(done, 600));
+      unsubscribe();
+
+      const expired = events.find((one) => one["kind"] === "record.decision.expired");
+      expect(expired, events.map((one) => one["kind"]).join(", ")).toBeDefined();
+      expect(expired!["elementId"]).toBe("login.username-field");
+      expect(expired!["afterMs"]).toBe(150);
+
+      // The grounding was rejected, not accepted by default: nothing a reviewer
+      // did not approve reaches the store.
+      expect(decisions).toHaveLength(1);
+      expect(decisions[0]).toMatchObject({ accept: false });
+      expect(String((decisions[0] as { why: string }).why)).toMatch(/decisionDeadlineMs/);
+
+      // And the session is gone, so the next one starts.
+      const next = await post(service, "/record", { gateway: "fake" });
+      expect(next.status).toBe(202);
+      const { sessionId } = (await next.json()) as { sessionId: string };
+      await post(service, `/record/${sessionId}/stop`);
+    } finally {
+      await service.close();
+    }
+  }, 30_000);
+
+  it("a decision that arrives in time cancels the deadline", async () => {
+    // The timer must not fire after the answer: a session that was reviewed and
+    // moved on would otherwise be aborted mid-recording.
+    const { service, decisions } = await recordingService(300);
+    try {
+      const started = await post(service, "/record", { gateway: "fake" });
+      const { sessionId } = (await started.json()) as { sessionId: string };
+      await new Promise((done) => setTimeout(done, 50));
+
+      const answered = await post(service, `/record/${sessionId}/decision`, { accept: true });
+      expect(answered.status).toBe(202);
+
+      await new Promise((done) => setTimeout(done, 500));
+      expect(decisions).toEqual([{ accept: true }]);
+    } finally {
+      await service.close();
+    }
+  }, 30_000);
+});
+
+describe("the config's decision deadline (P5-F4, LLD §13.5)", () => {
+  it("defaults to ten minutes", async () => {
+    const { configSchema, DEFAULT_CONFIG } = await import("@svatah/schema");
+    expect(DEFAULT_CONFIG.record.decisionDeadlineMs).toBe(600_000);
+    // And a config that does not mention it gets the default rather than an error.
+    const parsed = configSchema.parse({
+      ...DEFAULT_CONFIG,
+      project: "x",
+      record: { model: "m", maxSnapshotTokens: 100, visionFallback: false },
+    });
+    expect(parsed.record.decisionDeadlineMs).toBe(600_000);
+  });
+
+  it("is documented on POST /record, along with the 409", () => {
+    const document = openApiDocument("0.1.0") as unknown as {
+      paths: Record<string, { post?: { description?: string; responses: Record<string, { description: string }> } }>;
+    };
+    const record = document.paths["/record"]!.post!;
+    expect(record.description).toMatch(/decisionDeadlineMs/);
+    expect(record.description).toMatch(/409/);
+    expect(record.responses["409"]!.description).toMatch(/already open/i);
+  });
+});

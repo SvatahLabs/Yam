@@ -470,10 +470,29 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     {
       readonly abort: AbortController;
       /** Set while a grounding is waiting for `POST /record/:id/decision`. */
-      pending?: { readonly elementId: string; resolve(decision: unknown): void };
+      pending?: {
+        readonly elementId: string;
+        resolve(decision: unknown): void;
+        /** Cleared when the decision arrives (LLD §13.5, Draft 2.7). */
+        readonly deadline: ReturnType<typeof setTimeout>;
+      };
       surface?: { snapshot(options?: unknown): Promise<unknown> };
     }
   >();
+
+  /**
+   * How long a pending decision may wait (LLD §13.5, Draft 2.7).
+   *
+   * `record.decisionDeadlineMs`, default ten minutes. Read from the project's
+   * own config rather than a constant here, because how long a review takes is
+   * a property of the project being reviewed — a fixture project in CI wants
+   * seconds, a person reading candidate tables wants minutes.
+   */
+  const decisionDeadlineMs = (loaded: ProjectHandle): number => {
+    const record = (loaded.config as { record?: { decisionDeadlineMs?: unknown } }).record;
+    const configured = record?.decisionDeadlineMs;
+    return typeof configured === "number" && configured > 0 ? configured : 600_000;
+  };
 
   fastify.post<{
     Body?: {
@@ -504,7 +523,9 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     void (async () => {
       try {
         events.emit({ kind: "record.started", sessionId });
-        const report = await api.record!(await load(), {
+        const project = await load();
+        const deadlineMs = decisionDeadlineMs(project);
+        const report = await api.record!(project, {
           ...(body.stories === undefined ? {} : { stories: body.stories }),
           ...(body.flows === undefined ? {} : { flows: body.flows }),
           ...(body.rebind === undefined ? {} : { rebind: body.rebind }),
@@ -527,7 +548,37 @@ export async function createService(options: ServeOptions): Promise<RunningServi
                 elementId: string;
                 entry: { candidates: unknown[]; fingerprint: unknown };
               };
-              session.pending = { elementId: one.elementId, resolve: resolveDecision };
+              /*
+               * The deadline (LLD §13.5, Draft 2.7).
+               *
+               * A session blocked here holds a browser open and, because only
+               * one session may be open at a time, answers 409 to everyone
+               * else — so a reviewer who closes the ADE window without
+               * deciding used to leave the service unusable until it was
+               * restarted. On expiry the pending grounding is rejected and the
+               * session is aborted, which stops it with a report: the same
+               * path `POST /record/{id}/stop` takes, so nothing half-decided
+               * reaches the store either way.
+               */
+              const deadline = setTimeout(() => {
+                if (session.pending?.elementId !== one.elementId) return;
+                session.pending = undefined;
+                events.emit({
+                  kind: "record.decision.expired",
+                  sessionId,
+                  elementId: one.elementId,
+                  afterMs: deadlineMs,
+                });
+                resolveDecision({
+                  accept: false,
+                  why: `no decision within ${deadlineMs} ms (record.decisionDeadlineMs)`,
+                });
+                session.abort.abort();
+              }, deadlineMs);
+              // The timer must not keep the process alive on its own; a
+              // service with an idle session is still a service that can exit.
+              deadline.unref?.();
+              session.pending = { elementId: one.elementId, resolve: resolveDecision, deadline };
               events.emit({ kind: "record.decision", sessionId, proposal });
               events.emit({
                 kind: "record.candidates",
@@ -566,6 +617,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     }
     const body = request.body ?? {};
     const pending = session.pending;
+    clearTimeout(pending.deadline);
     session.pending = undefined;
     pending.resolve(
       body.accept === true
@@ -599,7 +651,9 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     if (session === undefined) {
       return reply.code(404).send({ error: "no-session" });
     }
+    if (session.pending !== undefined) clearTimeout(session.pending.deadline);
     session.pending?.resolve({ accept: false, why: "the session was stopped" });
+    session.pending = undefined;
     session.abort.abort();
     return reply.code(202).send({ ok: true });
   });

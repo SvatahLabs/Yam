@@ -125,6 +125,22 @@ export const configSchema = z
         maxSnapshotTokens: z.number().int().positive(),
         /** Screenshots are a configured fallback only, never the primary input (REQ-REC-2). */
         visionFallback: z.boolean(),
+        /**
+         * How long a grounding waits for a review before the session gives up
+         * (LLD §13.5, Draft 2.7). Default ten minutes.
+         *
+         * A recording session blocks on `POST /record/{id}/decision`, which is
+         * what makes "reviewed before anything is written" true (REQ-ADE-4).
+         * The cost of that is a session holding a browser open forever when the
+         * reviewer walks away or the client window is closed — and, because the
+         * service allows one session at a time, holding the *next* one out with
+         * a 409 nobody can clear.
+         *
+         * So a pending decision expires. The session stops and writes its
+         * report, exactly as a stop would: nothing half-decided reaches the
+         * store either way.
+         */
+        decisionDeadlineMs: z.number().int().positive().default(600_000),
       })
       .strict(),
 
@@ -207,7 +223,14 @@ export const DEFAULT_CONFIG: Omit<Config, "project"> = {
     audit: true,
   },
   compile: { confidenceThreshold: 0.8 },
-  record: { model: "claude-opus-5", maxSnapshotTokens: 8_000, visionFallback: false },
+  record: {
+    model: "claude-opus-5",
+    maxSnapshotTokens: 8_000,
+    visionFallback: false,
+    // Ten minutes (LLD §13.5): long enough to read a snapshot excerpt and a
+    // candidate table, short enough that a forgotten window frees the service.
+    decisionDeadlineMs: 600_000,
+  },
   // Defaults from LLD §6.4.
   heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false },
 };

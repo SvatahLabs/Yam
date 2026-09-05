@@ -248,7 +248,18 @@ export function openApiDocument(version: string): Record<string, unknown> {
           description:
             "Each grounding is emitted as `record.decision` with its candidate bundle and " +
             "fingerprint, and the session blocks until POST /record/{id}/decision answers — " +
-            "before the binding is written (REQ-ADE-4).",
+            "before the binding is written (REQ-ADE-4).\n\n" +
+            "One session at a time: while one is open this answers **409** and starts " +
+            "nothing, so a second client cannot drive the same project's browser " +
+            "(LLD §13.5). Stop the open session first.\n\n" +
+            "A pending decision expires after `record.decisionDeadlineMs` (config, " +
+            "default 600000 — ten minutes). On expiry the grounding is rejected, " +
+            "`record.decision.expired` goes to the stream and the session stops with a " +
+            "report, so a reviewer who walked away does not hold the service's one " +
+            "session open forever (LLD §13.5, Draft 2.7).\n\n" +
+            "`gateway` chooses the model: `anthropic` needs a credential — " +
+            "`GET /project` reports whether there is one — and `fake` answers from " +
+            "`evals/grounding/cases`, which is a fixture and says so in its provenance.",
           security: bearer,
           requestBody: json({
             type: "object",
@@ -257,13 +268,23 @@ export function openApiDocument(version: string): Record<string, unknown> {
               flows: { type: "array", items: { type: "string" } },
               rebind: { type: "boolean" },
               headed: { type: "boolean" },
-              gateway: { type: "string" },
+              gateway: {
+                type: "string",
+                enum: ["anthropic", "fake"],
+                description:
+                  "`anthropic` is a model and needs a credential; `fake` reads the " +
+                  "committed grounding answers (REQ-ADE-4).",
+              },
               inputs: { type: "object" },
             },
           }),
           responses: {
             202: { description: "The session id", ...json({ type: "object", properties: { sessionId: { type: "string" } } }) },
-            409: { description: "A session is already open", ...json({ type: "object" }) },
+            409: {
+              description:
+                "A recording session is already open. Stop it before starting another.",
+              ...json({ type: "object" }),
+            },
             501: { description: "This build has no recorder", ...json({ type: "object" }) },
           },
         },

@@ -44,6 +44,20 @@ export type ServiceEvent =
       readonly candidates: readonly unknown[];
       readonly fingerprint: unknown;
     }
+  /**
+   * A grounding nobody decided in time (LLD §13.5, Draft 2.7).
+   *
+   * `record.decisionDeadlineMs` passed, so the pending grounding was rejected
+   * and the session stopped. A client shows this rather than a session that
+   * simply never says anything again, and a reviewer who came back to a closed
+   * window learns why it closed.
+   */
+  | {
+      readonly kind: "record.decision.expired";
+      readonly sessionId: string;
+      readonly elementId: string;
+      readonly afterMs: number;
+    }
   | { readonly kind: "record.finished"; readonly sessionId: string; readonly report: unknown }
   | { readonly kind: "record.failed"; readonly sessionId: string; readonly message: string }
   /* ── heal review (T5.7, REQ-ADE-5) ─────────────────────────────────────── */
@@ -63,6 +77,7 @@ export const SERVICE_EVENT_KINDS = [
   "record.step",
   "record.decision",
   "record.candidates",
+  "record.decision.expired",
   "record.finished",
   "record.failed",
   "heal.proposal",

@@ -294,6 +294,11 @@
         "record": {
           "additionalProperties": false,
           "properties": {
+            "decisionDeadlineMs": {
+              "default": 600000,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
             "maxSnapshotTokens": {
               "exclusiveMinimum": 0,
               "type": "integer"

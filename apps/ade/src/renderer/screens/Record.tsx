@@ -166,6 +166,18 @@ export function RecordScreen({ client }: { client: ServiceClient }): React.JSX.E
       } else if (event.kind === "record.finished") {
         setProposal(undefined);
         setReport(event["report"]);
+      } else if (event.kind === "record.decision.expired") {
+        /*
+         * Nobody decided in time (LLD §13.5, Draft 2.7). The session has
+         * stopped, so the screen says why rather than leaving a decision panel
+         * that will never be answered on the screen.
+         */
+        setProposal(undefined);
+        setError(
+          `No decision within ${Math.round(Number(event["afterMs"]) / 1000)} s, so the ` +
+            "recording session stopped and wrote its report. Nothing was written to the " +
+            "bindings store. Start recording again to review the same grounding.",
+        );
       } else if (event.kind === "record.failed") {
         setProposal(undefined);
         setError(adviseOnFailure(String(event["message"]), startedWith.current));
