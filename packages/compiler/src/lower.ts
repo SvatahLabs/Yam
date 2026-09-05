@@ -190,7 +190,20 @@ export function lowerStep(
 
   const args: Record<string, ValueRef | number | string | boolean> = {};
   for (const [key, value] of Object.entries(raw.args ?? {})) {
-    args[key] =
+    /*
+     * `promptText` becomes `text` here, and nowhere else (Draft 2.8 §3.2).
+     *
+     * §3.2 fixes `dialog`'s args as `{ action, text? }`, and the raw schema
+     * accepts `promptText` as a synonym because a Tier 2 model may have learned
+     * the other name and refusing a step over it would lose a correct answer.
+     * Resolving it *at the boundary* is what keeps that tolerance from reaching
+     * the adapters: an adapter that had to know both spellings is an adapter
+     * that can disagree with another one about which it reads, which is the
+     * shape of the defect §3.2 was written for (P6-F4).
+     */
+    const name = raw.action === "dialog" && key === "promptText" ? "text" : key;
+    if (name === "text" && args["text"] !== undefined) continue;
+    args[name] =
       typeof value === "number" || typeof value === "boolean"
         ? value
         : lowerValue(value, secrets);

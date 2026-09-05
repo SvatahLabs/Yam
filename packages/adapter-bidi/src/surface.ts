@@ -603,15 +603,12 @@ export class BidiSurface implements AgentSurface {
         session.dialogPolicy = {
           accept: answer === "accept",
           /*
-           * `text`, which is what the grammar emits; `promptText` is still read
-           * because the raw schema accepts it as a synonym a model may have
-           * learned, and dropping it would silently type nothing into a prompt.
+           * `text`, and only `text` (§3.2). A model that answered `promptText`
+           * has already had it renamed by the lowering, which is the one place
+           * that tolerance lives; an adapter that also knew the synonym could
+           * disagree with another adapter about which it reads.
            */
-          ...(text === undefined
-            ? args["promptText"] === undefined
-              ? {}
-              : { promptText: String(args["promptText"]) }
-            : { promptText: String(text) }),
+          ...(text === undefined ? {} : { promptText: String(text) }),
         };
         return { ok: true };
       }
