@@ -23,10 +23,13 @@
   "scripts": {
     "build": "tsup --config ../../tsup.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/schema": "workspace:*"
+    "@anthropic-ai/sdk": "catalog:",
+    "@svatah/schema": "workspace:*",
+    "zod": "catalog:",
+    "zod-to-json-schema": "catalog:"
   },
   "devDependencies": {
     "tsup": "catalog:",
