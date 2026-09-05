@@ -2,6 +2,12 @@
 #
 # Not committed, unlike the JSON Schemas and actions.yaml. Those are small and are
 # read by people and by foreign runtimes; this is 300 kB of generated parser that
-# nobody reads and that would swamp every diff that touches the grammar. `build`
-# and `test` both regenerate it first, so no command needs it to be present.
-src/generated/
+# nobody reads and that would swamp every diff that touches the grammar. `build`,
+# `typecheck` and `test` all regenerate it first, so no command needs it present.
+src/generated/*
+
+# …except the hand-written declaration file beside it. The generated module is
+# JavaScript with `@ts-nocheck` on it, and this is what gives `tier1.ts` types.
+# It is not generated, and a clean checkout that lacked it could not build —
+# which is exactly how this line came to be here.
+!src/generated/step-parser.d.ts
