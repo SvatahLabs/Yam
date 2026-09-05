@@ -300,6 +300,11 @@ describe("CI mirrors (P0-F5)", () => {
       "default",
       "pull-requests",
     ]);
-    expect(Object.keys(bitbucket.pipelines.custom!)).toEqual(["desktop-gates"]);
+    /*
+     * `desktop-gates` needs a self-hosted runner (D1); `release` is the half of
+     * `.github/workflows/release.yml` that can run on the remote this
+     * repository has, and stops at the artifact step (T7.6).
+     */
+    expect(Object.keys(bitbucket.pipelines.custom!).sort()).toEqual(["desktop-gates", "release"]);
   });
 });
