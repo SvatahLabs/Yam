@@ -11,12 +11,42 @@
  * that needed it.
  */
 import { createService } from "@svatah/service";
+import { HttpSurface } from "@svatah/adapter-http";
+import { apiRequestSchema } from "@svatah/schema";
 import { numberOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
 import { compileProject, loadProject } from "../project.js";
 import { runProject } from "./run.js";
 import { newRunId } from "@svatah/runtime";
 import { EXIT, type ExitCode } from "@svatah/bindings-cli";
 import type { CommandIo } from "@svatah/bindings-cli";
+
+/**
+ * The ADE's API client, through the adapter a run uses (LLD §13.5).
+ *
+ * The service cannot import `adapter-http` — it imports only `@svatah/schema` —
+ * so this arrives the same way its other functions do. Sharing the adapter is
+ * the point: an ADE with its own HTTP client would have its own idea of a
+ * header, a redirect and a cookie, and "the API client agrees with the run"
+ * would be a coincidence rather than a fact.
+ *
+ * The request is parsed against the published schema before anything is sent, so
+ * a renderer cannot talk the service into an arbitrary fetch.
+ */
+async function apiRequest(
+  loaded: Awaited<ReturnType<typeof loadProject>>,
+  request: unknown,
+  options: { withSessionCookies?: boolean } = {},
+): Promise<unknown> {
+  const parsed = apiRequestSchema.parse(request);
+  const http = new HttpSurface({
+    ...(loaded.config.app.baseUrl === undefined ? {} : { baseUrl: loaded.config.app.baseUrl }),
+    cwd: loaded.root,
+  });
+  return await http.request(parsed, {
+    withSessionCookies: options.withSessionCookies === true,
+    scope: { read: () => undefined },
+  });
+}
 
 export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const project = args.command[1] ?? ".";
@@ -34,7 +64,7 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
    */
   const service = await createService({
     project,
-    api: { loadProject, compileProject, runProject, newRunId } as never,
+    api: { loadProject, compileProject, runProject, newRunId, apiRequest } as never,
     ...(numberOption(args, "port") === undefined ? {} : { port: numberOption(args, "port")! }),
     ...(stringOption(args, "token") === undefined ? {} : { token: stringOption(args, "token")! }),
   });

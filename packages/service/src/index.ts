@@ -11,7 +11,9 @@
  */
 export {
   createService,
+  keepRedacted,
   missingInputs,
+  REDACTED,
   storiesInvokedDirectly,
   type MissingInput,
   type RunningService,

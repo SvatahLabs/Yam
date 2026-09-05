@@ -41,3 +41,7 @@ out/
 
 # --- Playwright ---
 .last-run.json
+
+# --- Electron / the ADE (T3.6) ---
+# `out/` above already covers the installers; `.vite/` is Forge's build output.
+.vite/

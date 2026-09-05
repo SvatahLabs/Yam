@@ -60,6 +60,7 @@ const quickStartStep = bitbucketSteps.find((s) => s.name?.startsWith("quick star
 describe("CI mirrors (P0-F5)", () => {
   it("both workflows exist", () => {
     expect(Object.keys(github.jobs).sort()).toEqual([
+      "ade-installers",
       "grounding-eval",
       "legacy-java",
       "model-evals",
@@ -85,6 +86,20 @@ describe("CI mirrors (P0-F5)", () => {
     const job = github.jobs["model-evals"]!;
     expect(job.if).toContain("schedule");
     expect(job.if).not.toContain("pull_request");
+  });
+
+  it("builds the ADE's installers on all three operating systems (T3.6)", () => {
+    expect(github.jobs["ade-installers"]!.strategy?.matrix?.os).toEqual([
+      "ubuntu-latest",
+      "macos-latest",
+      "windows-latest",
+    ]);
+    const script = githubCommands("ade-installers").join("\n");
+    expect(script).toContain("pnpm --filter @svatah/ade make");
+    // And it launches the thing it just built: an installer that packages a
+    // broken app is an installer nobody wants (T3.6's Validate item).
+    expect(script).toContain("pnpm --filter @svatah/ade smoke");
+    expect(script).toContain("xvfb-run");
   });
 
   it("the pull-request eval job replays a cache rather than spending", () => {

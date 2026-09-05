@@ -24,10 +24,11 @@
  * users, and REQ-ADE-7 says it never becomes one.
  */
 import { randomBytes } from "node:crypto";
-import { readFileSync, readdirSync, writeFileSync, existsSync } from "node:fs";
-import { join, normalize, relative, resolve, sep } from "node:path";
+import { mkdirSync, readFileSync, readdirSync, writeFileSync, existsSync } from "node:fs";
+import { dirname, join, normalize, relative, resolve, sep } from "node:path";
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
 import websocket from "@fastify/websocket";
+import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 import type { ProjectHandle, ServiceApi } from "./api.js";
 import { EventBus, type ServiceEvent } from "./events.js";
 import { openApiDocument } from "./openapi.js";
@@ -149,6 +150,22 @@ export async function createService(options: ServeOptions): Promise<RunningServi
       errors: diagnostics.filter((d) => d.severity === "error"),
       warnings: diagnostics.filter((d) => d.severity === "warning"),
     };
+  });
+
+  /**
+   * The compiled plan itself (T3.7).
+   *
+   * `POST /compile` answers with a reference — the hash and a count — because
+   * that is what a caller checking whether a project compiles wants. The ADE's
+   * Plan screen wants the steps: their tier, their confidence, and which targets
+   * are still `unbound`. That is exactly the object `svatah compile` writes to
+   * `.svatah/plan.json`, so serving it keeps the screen rule (T3.7: "every screen
+   * renders a service response or a project file and nothing the CLI cannot
+   * produce") rather than bending it.
+   */
+  fastify.get("/plan", async () => {
+    const loaded = await load();
+    return api.compileProject(loaded, { stable: true }).plan;
   });
 
   /* ── runs ───────────────────────────────────────────────────────────────── */
@@ -308,7 +325,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
           if (typeof value === "object" && value !== null && !Array.isArray(value)) {
             return [key, redact(value as Record<string, unknown>, path)];
           }
-          return [key, loaded.project.data.secrets.has(path) ? "«redacted»" : value];
+          return [key, loaded.project.data.secrets.has(path) ? REDACTED : value];
         }),
       );
 
@@ -322,6 +339,109 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     const loaded = await load();
     return [...loaded.project.apis.requests.values()];
   });
+
+  /**
+   * Write `data.yaml`, keeping the secrets the read redacted (LLD §13.5).
+   *
+   * `GET /data` replaces every resolved secret with `«redacted»` so it never
+   * reaches a renderer (REQ-NFR-6). A naive write-back would then store that
+   * marker over the real value and quietly destroy it, so a value that comes
+   * back still redacted means "unchanged" and the file keeps what it had. The
+   * only way to change a secret is to change the environment it indirects to,
+   * which is where a secret belongs.
+   */
+  fastify.put<{ Body: { values?: Record<string, unknown> } }>("/data", async (request, reply) => {
+    const loaded = await load();
+    const file = join(root, String((loaded.config as { data?: { file?: string } }).data?.file ?? "data.yaml"));
+
+    const supplied = request.body?.values;
+    if (supplied === undefined || typeof supplied !== "object") {
+      return reply.code(400).send({ error: "no-values", message: "Send { values: { … } }." });
+    }
+
+    /*
+     * Merged over the file as it is on disk, not over the project as loaded.
+     *
+     * The loaded project has every `${ENV}` indirection *resolved*, so merging
+     * over it and writing the result would put the plaintext secret into
+     * `data.yaml` — the opposite of what the redaction is for. The raw file has
+     * `${SVATAH_SAMPLE_PASSWORD}`, which is exactly what has to stay.
+     *
+     * `secrets:` is a key of the same file, and it is not a value the editor
+     * shows; it is carried across untouched, because a save that dropped it
+     * would un-declare every secret in the project.
+     */
+    const raw = (existsSync(file) ? (parseYaml(readFileSync(file, "utf8")) as unknown) : {}) ?? {};
+    const onDisk = (typeof raw === "object" && raw !== null ? raw : {}) as Record<string, unknown>;
+    const { secrets, ...values } = onDisk;
+
+    const merged = keepRedacted(supplied, values, loaded.project.data.secrets);
+
+    writeFileSync(
+      file,
+      stringifyYaml(secrets === undefined ? merged : { ...merged, secrets }),
+      "utf8",
+    );
+    return { ok: true, file: relative(root, file).split(sep).join("/") };
+  });
+
+  /** Save a named request under `api/<name>.yaml` (LLD §13.5). */
+  fastify.put<{ Params: { name: string }; Body: unknown }>(
+    "/api/:name",
+    async (request, reply) => {
+      const loaded = await load();
+      const dir = String((loaded.config as { api?: { dir?: string } }).api?.dir ?? "api");
+      const path = insideProject(root, join(dir, `${request.params.name}.yaml`));
+      if (path === undefined) return reply.code(400).send({ error: "outside-project" });
+
+      mkdirSync(dirname(path), { recursive: true });
+      writeFileSync(path, stringifyYaml(request.body), "utf8");
+      return { ok: true, file: relative(root, path).split(sep).join("/") };
+    },
+  );
+
+  /**
+   * Execute one request ad hoc, for the ADE's API client (LLD §13.5).
+   *
+   * Through the same function `svatah run` uses for an `api` step, injected like
+   * every other. An ADE that had its own HTTP client would have its own idea of
+   * a header, a redirect and a cookie, and "the API client agrees with the run"
+   * would be a coincidence.
+   */
+  fastify.post<{ Body: { request?: unknown; withSessionCookies?: boolean } }>(
+    "/api/request",
+    async (request, reply) => {
+      if (api.apiRequest === undefined) {
+        return reply
+          .code(501)
+          .send({ error: "no-http-adapter", message: "This service was started without one." });
+      }
+      const body = request.body ?? {};
+      if (body.request === undefined) {
+        return reply.code(400).send({ error: "no-request", message: "Send { request: { … } }." });
+      }
+      try {
+        return await api.apiRequest(await load(), body.request, {
+          withSessionCookies: body.withSessionCookies === true,
+        });
+      } catch (error) {
+        return reply.code(400).send({
+          error: "request-failed",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+  );
+
+  /** A screenshot a run wrote (LLD §13.5). Bounded to the run's own directory. */
+  fastify.get<{ Params: { id: string; name: string } }>(
+    "/runs/:id/screenshots/:name",
+    async (request, reply) => {
+      const path = await runFile(request.params.id, join("screenshots", request.params.name));
+      if (path === undefined) return reply.code(404).send({ error: "not-found" });
+      return reply.type("image/png").send(readFileSync(path));
+    },
+  );
 
   /* ── the event stream ───────────────────────────────────────────────────── */
 
@@ -373,6 +493,52 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     },
   };
 }
+
+/**
+ * Merge an edited data tree over the file's own, keeping every secret as it was.
+ *
+ * A path the project declared secret always takes the file's value, whatever the
+ * editor sent. That is stronger than checking for the `«redacted»` marker and it
+ * is the rule stated plainly: the editor never saw the secret, so it has nothing
+ * to say about it, and the only way to change one is to change the environment it
+ * indirects to.
+ *
+ * `onDisk` must be the *raw* tree — `${SVATAH_SAMPLE_PASSWORD}`, not what that
+ * resolves to — or this would write the plaintext into a committed file.
+ *
+ * Recursive, because a secret can be nested (`user.password`).
+ */
+export function keepRedacted(
+  supplied: Record<string, unknown>,
+  onDisk: Record<string, unknown>,
+  secrets: ReadonlySet<string>,
+  prefix = "",
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(supplied)) {
+    const path = prefix === "" ? key : `${prefix}.${key}`;
+    const existing = onDisk[key];
+
+    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+      out[key] = keepRedacted(
+        value as Record<string, unknown>,
+        (typeof existing === "object" && existing !== null ? existing : {}) as Record<
+          string,
+          unknown
+        >,
+        secrets,
+        path,
+      );
+      continue;
+    }
+
+    out[key] = secrets.has(path) || value === REDACTED ? existing : value;
+  }
+  return out;
+}
+
+/** What `GET /data` puts where a resolved secret was. */
+export const REDACTED = "«redacted»";
 
 /* ── run inputs ───────────────────────────────────────────────────────────── */
 

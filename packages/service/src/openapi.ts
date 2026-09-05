@@ -104,6 +104,16 @@ export function openApiDocument(version: string): Record<string, unknown> {
           responses: { 200: { description: "Plan reference, errors and warnings", ...json({ type: "object" }) } },
         },
       },
+      "/plan": {
+        get: {
+          summary: "The compiled plan, story by story",
+          description:
+            "The object `svatah compile` writes to `.svatah/plan.json`. `POST /compile` " +
+            "answers with a reference; this is the plan the ADE's Plan screen renders.",
+          security: bearer,
+          responses: { 200: { description: "Plan", ...json(ref("plan")) } },
+        },
+      },
       "/run": {
         post: {
           summary: "Start a run; step events arrive on the stream",
@@ -159,7 +169,63 @@ export function openApiDocument(version: string): Record<string, unknown> {
         get: { summary: "One binding", security: bearer, parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "BindingFile", ...json(ref("bindings.file")) } } },
       },
       "/data": {
+        put: {
+          summary: "Write data.yaml",
+          description:
+            "A value that comes back still `«redacted»` means unchanged: the file keeps the " +
+            "secret it had, because the editor never saw it (REQ-NFR-6).",
+          security: bearer,
+          requestBody: json({ type: "object", properties: { values: { type: "object" } }, required: ["values"] }),
+          responses: {
+            200: { description: "The file written", ...json({ type: "object" }) },
+            400: { description: "No values were sent", ...json({ type: "object" }) },
+          },
+        },
         get: { summary: "Run data, with secrets redacted", security: bearer, responses: { 200: { description: "The data", ...json({ type: "object" }) } } },
+      },
+      "/runs/{id}/screenshots/{name}": {
+        get: {
+          summary: "A screenshot a run wrote",
+          security: bearer,
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string" } },
+            { name: "name", in: "path", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            200: {
+              description: "The image",
+              content: { "image/png": { schema: { type: "string", format: "binary" } } },
+            },
+          },
+        },
+      },
+      "/api/request": {
+        post: {
+          summary: "Execute one API request ad hoc",
+          description:
+            "Through the same function `svatah run` uses for an `api` step, so the ADE's " +
+            "API client is not a second HTTP client (LLD §13.5).",
+          security: bearer,
+          requestBody: json({
+            type: "object",
+            properties: { request: ref("surface.api-request"), withSessionCookies: { type: "boolean" } },
+            required: ["request"],
+          }),
+          responses: {
+            200: { description: "ApiResponse", ...json(ref("surface.api-response")) },
+            400: { description: "The request could not be executed", ...json({ type: "object" }) },
+            501: { description: "No HTTP adapter was wired in", ...json({ type: "object" }) },
+          },
+        },
+      },
+      "/api/{name}": {
+        put: {
+          summary: "Save a named request under api/<name>.yaml",
+          security: bearer,
+          parameters: [{ name: "name", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json(ref("surface.api-request")),
+          responses: { 200: { description: "The file written", ...json({ type: "object" }) } },
+        },
       },
       "/api": {
         get: { summary: "Named API requests", security: bearer, responses: { 200: { description: "ApiRequest[]", ...json({ type: "array" }) } } },

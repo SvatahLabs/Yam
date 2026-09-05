@@ -9,6 +9,12 @@ packages:
 
 onlyBuiltDependencies:
   - esbuild
+  # The ADE is an Electron application developed in this repository until its
+  # first release (HLD ADR-17, T3.6). Electron's postinstall fetches the runtime
+  # binary; without it `pnpm --filter @svatah/ade start` and the installers have
+  # nothing to run.
+  - electron
+  - electron-winstaller
 
 # One version of every shared tool across the workspace (LLD §1).
 catalog:

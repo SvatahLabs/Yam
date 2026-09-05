@@ -207,6 +207,29 @@
         }
       }
     },
+    "/plan": {
+      "get": {
+        "summary": "The compiled plan, story by story",
+        "description": "The object `svatah compile` writes to `.svatah/plan.json`. `POST /compile` answers with a reference; this is the plan the ADE's Plan screen renders.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://svatah.dev/schema/plan.schema.json"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/run": {
       "post": {
         "summary": "Start a run; step events arrive on the stream",
@@ -485,6 +508,54 @@
       }
     },
     "/data": {
+      "put": {
+        "summary": "Write data.yaml",
+        "description": "A value that comes back still `«redacted»` means unchanged: the file keeps the secret it had, because the editor never saw it (REQ-NFR-6).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "values": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "values"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The file written",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No values were sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "summary": "Run data, with secrets redacted",
         "security": [
@@ -495,6 +566,151 @@
         "responses": {
           "200": {
             "description": "The data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{id}/screenshots/{name}": {
+      "get": {
+        "summary": "A screenshot a run wrote",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The image",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/request": {
+      "post": {
+        "summary": "Execute one API request ad hoc",
+        "description": "Through the same function `svatah run` uses for an `api` step, so the ADE's API client is not a second HTTP client (LLD §13.5).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "$ref": "https://svatah.dev/schema/surface.api-request.schema.json"
+                  },
+                  "withSessionCookies": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "request"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://svatah.dev/schema/surface.api-response.schema.json"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request could not be executed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "No HTTP adapter was wired in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{name}": {
+      "put": {
+        "summary": "Save a named request under api/<name>.yaml",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "https://svatah.dev/schema/surface.api-request.schema.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The file written",
             "content": {
               "application/json": {
                 "schema": {

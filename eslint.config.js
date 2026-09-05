@@ -241,6 +241,10 @@ export default tseslint.config(
       "**/*.d.ts",
       "apps/sample-web/public/**",
       "docs/**",
+      // Electron Forge's Vite output and its installers (T3.6). Bundled code is
+      // not source and linting it says nothing about this repository.
+      "**/.vite/**",
+      "apps/ade/out/**",
     ],
   },
   js.configs.recommended,
@@ -268,7 +272,21 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: "module",
-      globals: { console: "readonly", process: "readonly", URL: "readonly", fetch: "readonly" },
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        URL: "readonly",
+        fetch: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        // The renderer is a browser (T3.6); these are its, not Node's.
+        document: "readonly",
+        window: "readonly",
+        Response: "readonly",
+        Blob: "readonly",
+        AbortController: "readonly",
+        TextDecoderStream: "readonly",
+      },
     },
     rules: {
       "@typescript-eslint/no-unused-vars": [

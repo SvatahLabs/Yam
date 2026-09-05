@@ -26,7 +26,8 @@
     "eval:healing": "node scripts/eval-healing.mjs --report reports/eval-healing.md",
     "record:snapshots": "node scripts/record-snapshots.mjs",
     "grounding:cases": "node scripts/grounding-cases.mjs",
-    "eval:grounding": "node scripts/eval-grounding.mjs --report reports/eval-grounding.md"
+    "eval:grounding": "node scripts/eval-grounding.mjs --report reports/eval-grounding.md",
+    "ade:client": "node scripts/generate-ade-client.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
@@ -35,6 +36,7 @@
     "@svatah/compiler": "workspace:*",
     "@svatah/migrate": "workspace:*",
     "@svatah/schema": "workspace:*",
+    "@svatah/service": "workspace:*",
     "@svatah/spec": "workspace:*",
     "@svatah/surface": "workspace:*",
     "@types/node": "catalog:",

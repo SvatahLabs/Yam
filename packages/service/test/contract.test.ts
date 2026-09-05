@@ -15,7 +15,13 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createService, openApiDocument, type RunningService } from "../src/index.js";
+import {
+  createService,
+  keepRedacted,
+  openApiDocument,
+  REDACTED,
+  type RunningService,
+} from "../src/index.js";
 import { fakeApi, fakeProject } from "./fake-api.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -347,5 +353,93 @@ describe("GET /project carries each story's signature (LLD §13.5)", () => {
     const body = await json(await get("/project"));
     const story = body.stories.find((s: { name: string }) => s.name === "Sign in");
     expect(story.signature.inputs.email.type).toBe("string");
+  });
+});
+
+/*
+ * The routes T3.7's screens need (LLD §13.5).
+ *
+ * `PUT /data`, `PUT /api/:name`, `POST /api/request` and `GET /plan` were in
+ * LLD §13.5's table from Draft 2.1 and arrived with the screens that use them.
+ * The interesting one is `PUT /data`: `GET /data` redacts, so a naive write-back
+ * would store the redaction marker over the secret and destroy it.
+ */
+describe("the data editor's write keeps what it could not see (REQ-NFR-6)", () => {
+  it("never writes a secret the editor was never shown", () => {
+    const supplied = { user: { email: "changed@example.com", password: "«redacted»" } };
+    const onDisk = { user: { email: "a@b.c", password: "${SVATAH_SAMPLE_PASSWORD}" } };
+
+    const merged = keepRedacted(supplied, onDisk, new Set(["user.password"]));
+
+    expect(merged).toEqual({
+      user: { email: "changed@example.com", password: "${SVATAH_SAMPLE_PASSWORD}" },
+    });
+  });
+
+  it("keeps a secret even when the editor sent something that is not the marker", () => {
+    // Stronger than checking for `«redacted»`: a path the project declared secret
+    // always takes the file's value, whatever arrived. The editor never saw the
+    // secret, so it has nothing to say about it.
+    const merged = keepRedacted(
+      { user: { password: "hunter2" } },
+      { user: { password: "${SVATAH_SAMPLE_PASSWORD}" } },
+      new Set(["user.password"]),
+    );
+    expect(merged).toEqual({ user: { password: "${SVATAH_SAMPLE_PASSWORD}" } });
+  });
+
+  it("writes an ordinary value exactly as it arrived", () => {
+    expect(keepRedacted({ env: "staging" }, { env: "test" }, new Set())).toEqual({
+      env: "staging",
+    });
+  });
+
+  it("goes as deep as the tree does", () => {
+    expect(
+      keepRedacted(
+        { a: { b: { c: REDACTED, d: "new" } } },
+        { a: { b: { c: "${X}", d: "old" } } },
+        new Set(["a.b.c"]),
+      ),
+    ).toEqual({ a: { b: { c: "${X}", d: "new" } } });
+  });
+
+  it("400s when no values were sent", async () => {
+    const response = await get("/data", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    expect(response.status).toBe(400);
+  });
+});
+
+describe("the API client's endpoints (LLD §13.5)", () => {
+  it("501s POST /api/request when no HTTP adapter was wired in", async () => {
+    // The fake `ServiceApi` has no `apiRequest`, which is the honest answer for a
+    // service started without one — not a 500, and not a second HTTP client.
+    const response = await get("/api/request", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ request: { name: "x", method: "GET", url: "/" } }),
+    });
+    expect(response.status).toBe(501);
+  });
+
+  it("400s a POST /api/request with no request in it", async () => {
+    const response = await get("/api/request", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    expect([400, 501]).toContain(response.status);
+  });
+});
+
+describe("GET /plan (T3.7)", () => {
+  it("answers with the compiled plan, not a reference to it", async () => {
+    const plan = await json(await get("/plan"));
+    expect(plan.hash).toMatch(/^[0-9a-f]{64}$/);
+    expect(Array.isArray(plan.stories)).toBe(true);
   });
 });

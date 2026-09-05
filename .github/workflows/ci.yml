@@ -206,6 +206,63 @@ jobs:
           name: model-eval-reports
           path: reports/
 
+  # T3.6: "installers build on three OSes."
+  #
+  # The ADE is an Electron application developed in this repository until its
+  # first release (ADR-17), and `electron-forge make` is the only check that says
+  # it can actually be shipped — a build that passes on a developer's machine and
+  # cannot be packaged is a build nobody can install.
+  ade-installers:
+    name: ADE installers (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # The ADE spawns `svatah serve`, so the CLI has to exist before it runs —
+      # and the generated service client is written from the service's build.
+      - name: Build the workspace
+        run: pnpm -r build
+
+      # The Debian maker needs dpkg and fakeroot; the smoke check needs a
+      # display, which `xvfb` provides.
+      - name: Linux packaging tools
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y fakeroot dpkg xvfb
+
+      - name: Make
+        run: pnpm --filter @svatah/ade make
+
+      # T3.6's Validate item: the app opens a fixture project and shows
+      # `GET /project` data, and quitting stops the service. Linux runners have
+      # no display, so Electron gets a virtual one.
+      - name: Smoke (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum pnpm --filter @svatah/ade smoke
+
+      - name: Smoke
+        if: runner.os != 'Linux'
+        run: pnpm --filter @svatah/ade smoke
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ade-${{ matrix.os }}
+          path: apps/ade/out/make/**
+          if-no-files-found: error
+
   legacy-java:
     name: legacy Java project compiles
     runs-on: ubuntu-latest

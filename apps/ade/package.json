@@ -1,0 +1,47 @@
+{
+  "name": "@svatah/ade",
+  "productName": "Svatah ADE",
+  "version": "0.1.0",
+  "description": "The Svatah Automation Development Environment: the reference client for the local service",
+  "license": "Apache-2.0",
+  "private": true,
+  "main": ".vite/build/main.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "start": "electron-forge start",
+    "build": "node ../../scripts/generate-ade-client.mjs && tsc --noEmit -p tsconfig.json",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "smoke": "node ../../scripts/ade-smoke.mjs"
+  },
+  "dependencies": {
+    "@svatah/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.11.2",
+    "@electron-forge/maker-deb": "^7.11.2",
+    "@electron-forge/maker-squirrel": "^7.11.2",
+    "@electron-forge/maker-zip": "^7.11.2",
+    "@electron-forge/plugin-fuses": "^7.11.2",
+    "@electron-forge/plugin-vite": "^7.11.2",
+    "@electron-forge/shared-types": "^7.11.2",
+    "@electron/fuses": "^1.8.0",
+    "@svatah/cli": "workspace:*",
+    "@svatah/service": "workspace:*",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^44.1.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "sample-web": "workspace:*",
+    "scheduler": "^0.27.0",
+    "typescript": "catalog:",
+    "vite": "^7.3.6",
+    "vitest": "catalog:"
+  }
+}

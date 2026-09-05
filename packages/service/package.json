@@ -32,7 +32,8 @@
   "dependencies": {
     "@fastify/websocket": "catalog:",
     "@svatah/schema": "workspace:*",
-    "fastify": "catalog:"
+    "fastify": "catalog:",
+    "yaml": "catalog:"
   },
   "devDependencies": {
     "tsup": "catalog:",

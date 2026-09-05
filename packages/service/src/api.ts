@@ -57,7 +57,12 @@ export interface RunOutcome {
 }
 
 /**
- * The four functions a handler may call. Every one of them is the CLI's own.
+ * The functions a handler may call. Every one of them is the CLI's own.
+ *
+ * The list grows only when a screen needs something the CLI can already do —
+ * that is the ADE's screen rule read from this side (LLD §13.6): a handler that
+ * needed a fifth capability nobody could reach from a command line would be the
+ * service growing logic of its own.
  */
 export interface ServiceApi {
   loadProject(root: string): Promise<ProjectHandle>;
@@ -73,4 +78,17 @@ export interface ServiceApi {
     },
   ): Promise<RunOutcome>;
   newRunId(): string;
+  /**
+   * Execute one `ApiRequest` ad hoc, for the ADE's API client (LLD §13.5).
+   *
+   * The HTTP adapter is module (b)'s and the service imports only
+   * `@svatah/schema`, so this arrives the same way the others do. `svatah run`
+   * calls the same function for an `api` step, which is what keeps the ADE's API
+   * client from being a second HTTP client with its own idea of a header.
+   */
+  apiRequest?(
+    loaded: ProjectHandle,
+    request: unknown,
+    options?: { withSessionCookies?: boolean },
+  ): Promise<unknown>;
 }
