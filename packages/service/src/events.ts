@@ -20,6 +20,38 @@ export type ServiceEvent =
   | { readonly kind: "run.summary"; readonly runId: string; readonly summary: Summary }
   | { readonly kind: "run.started"; readonly runId: string; readonly flows: readonly string[] }
   | { readonly kind: "run.failed"; readonly runId: string; readonly message: string }
+  /* ── record with review (T5.7, REQ-ADE-4) ──────────────────────────────── */
+  | { readonly kind: "record.started"; readonly sessionId: string }
+  | { readonly kind: "record.step"; readonly sessionId: string; readonly step: unknown }
+  /**
+   * One grounding, waiting on a reviewer.
+   *
+   * Emitted *before* the binding is written, and the session is blocked until
+   * `POST /record/:sessionId/decision` answers. That is what makes "accept,
+   * re-pick, or reject, before bindings are written" true rather than a label on
+   * an undo.
+   */
+  | {
+      readonly kind: "record.decision";
+      readonly sessionId: string;
+      readonly proposal: unknown;
+    }
+  /** The candidate bundle for that grounding, so a reviewer can read it. */
+  | {
+      readonly kind: "record.candidates";
+      readonly sessionId: string;
+      readonly elementId: string;
+      readonly candidates: readonly unknown[];
+      readonly fingerprint: unknown;
+    }
+  | { readonly kind: "record.finished"; readonly sessionId: string; readonly report: unknown }
+  | { readonly kind: "record.failed"; readonly sessionId: string; readonly message: string }
+  /* ── heal review (T5.7, REQ-ADE-5) ─────────────────────────────────────── */
+  | { readonly kind: "heal.proposal"; readonly healId: string; readonly proposal: unknown }
+  | { readonly kind: "heal.finished"; readonly healId: string; readonly report: unknown }
+  | { readonly kind: "heal.failed"; readonly healId: string; readonly message: string }
+  /* ── the tool panel (T5.8, REQ-ADE-8) ──────────────────────────────────── */
+  | { readonly kind: "tool.invocation"; readonly invocation: unknown }
   | { readonly kind: "log"; readonly at: string; readonly level: string; readonly message: string };
 
 export const SERVICE_EVENT_KINDS = [
@@ -27,6 +59,16 @@ export const SERVICE_EVENT_KINDS = [
   "run.summary",
   "run.started",
   "run.failed",
+  "record.started",
+  "record.step",
+  "record.decision",
+  "record.candidates",
+  "record.finished",
+  "record.failed",
+  "heal.proposal",
+  "heal.finished",
+  "heal.failed",
+  "tool.invocation",
   "log",
 ] as const;
 

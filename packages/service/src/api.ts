@@ -91,4 +91,76 @@ export interface ServiceApi {
     request: unknown,
     options?: { withSessionCookies?: boolean },
   ): Promise<unknown>;
+
+  /* ── T5.7: record with review, bindings, heal (REQ-ADE-4, 5) ───────────── */
+
+  /**
+   * Start a recording session (LLD §13.5's `POST /record`).
+   *
+   * `review` is called once per target, *before* the binding is written
+   * (REQ-ADE-4), and the service turns each call into a `record.decision` event
+   * and waits for the client's answer. `svatah record` passes no reviewer and
+   * behaves exactly as it did.
+   */
+  record?(
+    loaded: ProjectHandle,
+    options: {
+      stories?: readonly string[];
+      flows?: readonly string[];
+      rebind?: boolean;
+      headed?: boolean;
+      gateway?: string;
+      inputs?: Record<string, unknown>;
+      onStep?: (step: unknown) => void;
+      review?: (proposal: unknown) => Promise<unknown>;
+      /** Handed the live surface, so the picker can snapshot the driven session. */
+      onSurface?: (surface: unknown) => void;
+      signal?: AbortSignal;
+    },
+  ): Promise<unknown>;
+
+  /** Dry-resolve every binding, or one (LLD §13.5's `POST /bindings/verify`). */
+  verifyBindings?(
+    loaded: ProjectHandle,
+    options?: { id?: string; headed?: boolean },
+  ): Promise<unknown>;
+
+  /** Heal a run, and apply the repairs when asked (LLD §13.5's `POST /heal`). */
+  heal?(
+    loaded: ProjectHandle,
+    options: {
+      runId: string;
+      useModel?: boolean;
+      apply?: boolean;
+      inputs?: Record<string, unknown>;
+      onProposal?: (proposal: unknown) => void;
+    },
+  ): Promise<unknown>;
+
+  /* ── T5.8: the surface explorer and the tool panel (REQ-ADE-8) ─────────── */
+
+  /**
+   * Open a surface session an agent — or the ADE's explorer — drives call by
+   * call, writing `trajectory.jsonl` (LLD §13.5's `POST /surface/:sessionId/*`).
+   */
+  openSurfaceSession?(
+    loaded: ProjectHandle,
+    options: { sessionId: string; headed?: boolean },
+  ): Promise<{
+    call(
+      call: "snapshot" | "act" | "read" | "check",
+      args: Record<string, unknown>,
+    ): Promise<unknown>;
+    trajectoryPath: string;
+    close(): Promise<void>;
+  }>;
+
+  /** Compile a captured trajectory into `proposals/<date>/` (T5.5). */
+  compileTrajectory?(
+    loaded: ProjectHandle,
+    options: { path: string; name?: string },
+  ): Promise<unknown>;
+
+  /** The tools a project would expose, and the invocations one has served. */
+  toolsFor?(loaded: ProjectHandle, options?: { expose?: string }): Promise<unknown>;
 }

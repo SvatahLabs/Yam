@@ -18,6 +18,7 @@ export {
   assertRecordable,
   DEFAULT_MAX_SNAPSHOT_TOKENS,
   DEFAULT_MIN_CONFIDENCE,
+  entryFor,
   EnvironmentRefused,
   ground,
   type GroundingDecision,
@@ -40,9 +41,11 @@ export { prune, STRUCTURAL_ROLES, type PrunedSnapshot, type PruneOptions } from 
 export {
   record,
   storyOrder,
+  type GroundingProposal,
   type RecordedStep,
   type RecordReport,
   type RecordSessionOptions,
+  type ReviewDecision,
 } from "./session.js";
 
 export { renderReport, reportJson } from "./report.js";

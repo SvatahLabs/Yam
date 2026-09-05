@@ -15,6 +15,14 @@ import { HttpSurface } from "@svatah/adapter-http";
 import { apiRequestSchema } from "@svatah/schema";
 import { numberOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
 import { compileProject, loadProject } from "../project.js";
+import {
+  serviceCompileTrajectory,
+  serviceHeal,
+  serviceOpenSurfaceSession,
+  serviceRecord,
+  serviceToolsFor,
+  serviceVerifyBindings,
+} from "../service-api.js";
 import { runProject } from "./run.js";
 import { newRunId } from "@svatah/runtime";
 import { EXIT, type ExitCode } from "@svatah/bindings-cli";
@@ -64,7 +72,27 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
    */
   const service = await createService({
     project,
-    api: { loadProject, compileProject, runProject, newRunId, apiRequest } as never,
+    /*
+     * Nine functions since T5.7 and T5.8, and every one of them the CLI's own.
+     *
+     * The ADE's record review, bindings browser, heal review, surface explorer
+     * and tool panel need capabilities a command line already has; injecting
+     * them here rather than letting the service reach for them is what keeps
+     * "an agent and a person get the same artifact" true (LLD §13.5).
+     */
+    api: {
+      loadProject,
+      compileProject,
+      runProject,
+      newRunId,
+      apiRequest,
+      record: serviceRecord,
+      verifyBindings: serviceVerifyBindings,
+      heal: serviceHeal,
+      openSurfaceSession: serviceOpenSurfaceSession,
+      compileTrajectory: serviceCompileTrajectory,
+      toolsFor: serviceToolsFor,
+    } as never,
     ...(numberOption(args, "port") === undefined ? {} : { port: numberOption(args, "port")! }),
     ...(stringOption(args, "token") === undefined ? {} : { token: stringOption(args, "token")! }),
   });

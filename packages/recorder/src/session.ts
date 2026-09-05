@@ -47,9 +47,11 @@ import {
   type Resolution,
 } from "@svatah/bindings";
 import type {
+  BindingEntry,
   BindingFile,
   Candidate,
   Plan,
+  Ref,
   Step,
   StepResult,
   Story,
@@ -66,6 +68,7 @@ import {
 } from "@svatah/runtime";
 import {
   assertRecordable,
+  entryFor,
   ground,
   type GroundingDecision,
   type GroundOptions,
@@ -144,8 +147,52 @@ export interface RecordSessionOptions {
 
   /** Called as each step finishes, for a live stream (REQ-ADE-4). */
   readonly onStep?: (step: RecordedStep) => void;
+  /**
+   * Review each grounding **before the binding is written** (REQ-ADE-4, T5.7).
+   *
+   * "A record session streams grounding decisions; the ADE shows the snapshot
+   * excerpt, chosen reference, candidate bundle, and fingerprint per target,
+   * with accept, re-pick by clicking in the driven session, or reject, before
+   * bindings are written."
+   *
+   * Before, and that is the whole of it. A hook that ran after the store was
+   * written would be showing a person a decision already made, and "reject"
+   * would mean "undo", which is a different and much weaker promise.
+   *
+   * Absent — which is what `svatah record` passes — every grounding is accepted,
+   * so the command line behaves exactly as it did.
+   */
+  readonly review?: (proposal: GroundingProposal) => Promise<ReviewDecision>;
   readonly log?: (message: string) => void;
 }
+
+/** What a reviewer is shown for one target (REQ-ADE-4). */
+export interface GroundingProposal {
+  readonly story: string;
+  readonly stepId: string;
+  readonly text: string;
+  readonly elementId: string;
+  readonly phrase: string;
+  readonly decision: GroundingDecision;
+  /** The entry as it would be written: candidates, fingerprint and context. */
+  readonly entry: BindingEntry;
+  /** The page as the model saw it, so a reviewer can see what it chose from. */
+  readonly snapshot: string;
+  readonly url?: string;
+}
+
+/** What the reviewer said (REQ-ADE-4). */
+export type ReviewDecision =
+  | { readonly accept: true }
+  | { readonly accept: false; readonly why?: string }
+  /**
+   * "Re-pick by clicking in the driven session": the reviewer names a different
+   * reference from the *same* snapshot, and the entry is re-synthesised from
+   * that element. Not a different phrase and not a hand-written candidate — the
+   * bundle a reviewer accepts has to be one this project's synthesis produced,
+   * or the store would hold a locator nothing else knows how to make.
+   */
+  | { readonly accept: false; readonly repick: Ref };
 
 export async function record(options: RecordSessionOptions): Promise<RecordReport> {
   assertRecordable({
@@ -254,6 +301,73 @@ export async function record(options: RecordSessionOptions): Promise<RecordRepor
           break outer;
         }
 
+        /*
+         * The reviewer, before the store is touched (REQ-ADE-4, T5.7).
+         *
+         * `entry` is what would be written; the snapshot is what the model saw.
+         * A rejection stops the session — a flow whose element nobody would
+         * accept is not a flow to keep recording — and a re-pick re-synthesises
+         * the entry from the element the reviewer named, in the same snapshot,
+         * so the bundle in the store is one this project's synthesis produced.
+         */
+        let entry = result.entry;
+        if (options.review !== undefined) {
+          const reviewed = await options.review({
+            story: story.name,
+            stepId: step.id,
+            text: step.text,
+            elementId: target.ref,
+            phrase: target.phrase,
+            decision: result.decision,
+            entry,
+            snapshot: result.snapshot ?? "",
+            ...(url === undefined ? {} : { url }),
+          });
+
+          if (!reviewed.accept) {
+            const repick = (reviewed as { repick?: Ref }).repick;
+            if (repick === undefined) {
+              const rejected: RecordedStep = {
+                story: story.name,
+                stepId: step.id,
+                line: step.line,
+                text: step.text,
+                status: "failed",
+                durationMs: Date.now() - started,
+                elementId: target.ref,
+                ...(record_.binding === undefined ? {} : { binding: record_.binding }),
+                decision: result.decision,
+                failure: {
+                  class: "locator",
+                  message:
+                    (reviewed as { why?: string }).why ??
+                    `The reviewer rejected the grounding of "${target.phrase}".`,
+                },
+              };
+              steps.push(rejected);
+              options.onStep?.(rejected);
+              stoppedBecause =
+                `The reviewer rejected "${target.phrase}" (${target.ref})` +
+                ((reviewed as { why?: string }).why === undefined
+                  ? "."
+                  : `: ${(reviewed as { why?: string }).why!}`);
+              break outer;
+            }
+
+            const replacement = await entryFor(surface, repick, {
+              ...(options.grounding ?? {}),
+            }).catch(() => undefined);
+            if (replacement === undefined) {
+              stoppedBecause =
+                `The reviewer re-picked ${repick} for "${target.phrase}", and nothing could be ` +
+                "synthesised from it — the reference may belong to an older snapshot.";
+              break outer;
+            }
+            entry = replacement;
+            options.log?.(`${target.ref}: re-picked ${repick} by the reviewer`);
+          }
+        }
+
         if (!staged.has(target.ref)) staged.set(target.ref, store.get(target.ref));
 
         /*
@@ -271,7 +385,7 @@ export async function record(options: RecordSessionOptions): Promise<RecordRepor
           ...(url === undefined ? {} : { url }),
           platform,
         });
-        store.put(target.ref, result.entry, target.phrase, {
+        store.put(target.ref, entry, target.phrase, {
           ...(superseded === undefined ? {} : { replaces: superseded.context }),
         });
       }

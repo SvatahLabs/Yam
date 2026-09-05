@@ -59,6 +59,17 @@ export interface HealReport {
   };
   /** The unified diff of the store; empty when nothing was repaired. */
   readonly diff: string;
+  /**
+   * The binding files the job changed, as they would be written (T5.7).
+   *
+   * REQ-ADE-5 asks a heal review to show "a proposed diff with before and after
+   * candidates". A unified diff is the right artifact for `git apply` and the
+   * wrong one for a table: a reviewer comparing candidate kinds wants the two
+   * objects, not text about them. The *before* is the store on disk, which the
+   * caller already has; this is the after, and it exists whether or not `apply`
+   * wrote it — a proposal is a proposal precisely because nothing was written.
+   */
+  readonly changed: Readonly<Record<string, BindingFile>>;
   /** Whether the repaired store was written to disk (`--apply`). */
   readonly applied: boolean;
   /** Whether anything but the no-op `Regrounder` was registered (LLD §10). */
@@ -120,10 +131,17 @@ export async function heal(options: HealOptions): Promise<HealReport> {
 
   const after = snapshotOfStore(store, prefix);
   const changes: FileChange[] = [];
+  const changed: Record<string, BindingFile> = {};
   for (const path of new Set([...Object.keys(before), ...Object.keys(after)])) {
     const from = before[path] ?? "";
     const to = after[path] ?? "";
-    if (from !== to) changes.push({ path, before: from, after: to });
+    if (from === to) continue;
+    changes.push({ path, before: from, after: to });
+    // Keyed by element id rather than by path, because that is what a result
+    // names and what a reviewer is looking at.
+    const id = path.slice(prefix.length + 1).replace(/\.yaml$/, "").split("/").join(".");
+    const file = store.get(id);
+    if (file !== undefined) changed[id] = file;
   }
 
   const repaired = results.filter((r) => r.outcome === "repaired").length;
@@ -143,6 +161,7 @@ export async function heal(options: HealOptions): Promise<HealReport> {
       unrepaired: results.length - repaired - regrounded,
     },
     diff: unifiedDiffFor(changes),
+    changed,
     applied,
     usedModel: hasRegrounder(),
     regrounder: currentRegrounder().name,

@@ -43,6 +43,16 @@ export interface RuntimeReplayerOptions {
   readonly root: string;
   /** Resolves a target, the same resolver the run used. */
   readonly resolve: Resolver;
+  /**
+   * The plan, when the caller already has it (T5.7).
+   *
+   * `svatah heal --run` reads `.svatah/plan.json`, because a command line heals
+   * a project it has not just compiled. The local service *has* just compiled
+   * it — `POST /heal` loads the project the same way `POST /compile` does — and
+   * making it write a file as a side effect of healing would put a compile
+   * artifact on disk for a reason nobody could see from the command.
+   */
+  readonly plan?: Plan;
   /** Run data, so a replayed step reads the same values the run did. */
   readonly data?: Readonly<Record<string, unknown>>;
   readonly secrets?: ReadonlySet<string>;
@@ -78,19 +88,22 @@ export function runtimeReplayer(options: RuntimeReplayerOptions): Replayer {
         return "unreachable";
       }
 
-      const planPath = join(options.root, ".svatah", "plan.json");
-      if (!existsSync(planPath)) {
-        options.onProgress?.(
-          `no plan at ${planPath}; run \`svatah compile\` before healing a run directory`,
-        );
-        return "unreachable";
-      }
-
       let plan: Plan;
-      try {
-        plan = planSchema.parse(JSON.parse(readFileSync(planPath, "utf8"))) as Plan;
-      } catch {
-        return "unreachable";
+      if (options.plan !== undefined) {
+        plan = options.plan;
+      } else {
+        const planPath = join(options.root, ".svatah", "plan.json");
+        if (!existsSync(planPath)) {
+          options.onProgress?.(
+            `no plan at ${planPath}; run \`svatah compile\` before healing a run directory`,
+          );
+          return "unreachable";
+        }
+        try {
+          plan = planSchema.parse(JSON.parse(readFileSync(planPath, "utf8"))) as Plan;
+        } catch {
+          return "unreachable";
+        }
       }
 
       const story = plan.stories.find((one) => one.name === input.story);

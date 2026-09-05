@@ -106,6 +106,16 @@ export interface GroundingResult {
   readonly decision: GroundingDecision;
   /** Present only when the outcome is `grounded`. */
   readonly entry?: BindingEntry;
+  /**
+   * The snapshot text the model was shown (T5.7, REQ-ADE-4).
+   *
+   * "The ADE shows the snapshot excerpt … per target": a reviewer deciding
+   * whether the model picked the right element needs to see what it was choosing
+   * *from*. It is the same string the prompt carried, so what the reviewer reads
+   * is what the model read, rather than a fresh snapshot taken afterwards of a
+   * page that has since moved on.
+   */
+  readonly snapshot?: string;
 }
 
 /**
@@ -353,6 +363,74 @@ export async function ground(
   return {
     decision: { ...shared, outcome: "grounded", ref, candidates },
     entry,
+    snapshot: snapshot.text,
+  };
+}
+
+/**
+ * A binding entry for an element a *person* chose (T5.7, REQ-ADE-4).
+ *
+ * The re-pick half of "accept, re-pick by clicking in the driven session, or
+ * reject": the reviewer names a reference in the snapshot the model was shown,
+ * and the entry is synthesised from that element by the same path a grounded one
+ * takes — the same candidate ranking, the same fingerprint, the same context
+ * hash. A hand-written locator would put something in the store that nothing
+ * else in this project knows how to produce, and that no future re-record could
+ * reproduce.
+ *
+ * The provenance says `human`, because that is what happened. A store entry that
+ * claimed a model chose an element a person did is the one lie a review must not
+ * be able to tell.
+ */
+export async function entryFor(
+  surface: AgentSurface,
+  ref: Ref,
+  options: Omit<GroundOptions, "gateway" | "snapshot"> = {},
+): Promise<BindingEntry> {
+  const candidates = await synthesise(surface, ref, {
+    ...(options.testIdAttributes === undefined
+      ? {}
+      : { testIdAttributes: options.testIdAttributes }),
+    ...(options.ignoreAttributes === undefined
+      ? {}
+      : { ignoreAttributes: options.ignoreAttributes }),
+  });
+  if (candidates.length === 0) {
+    throw new Error(
+      `Nothing synthesised from ${ref} resolves to exactly one element. ` +
+        "A binding that cannot be re-found is not a binding.",
+    );
+  }
+
+  const description = await surface.describe(ref);
+  const snapshot = await surface.snapshot();
+  const { hash } = contextHash(snapshot, ref);
+  const url = (await surface.state().catch(() => undefined))?.url;
+
+  return {
+    context: {
+      pattern: contextPattern(url ?? "/", {
+        ...(options.matchHost === undefined ? {} : { matchHost: options.matchHost }),
+      }),
+      hash,
+      platform: surface.kind === "http" ? "web" : surface.kind,
+    },
+    candidates,
+    fingerprint: fingerprintOf(description, {
+      ...(options.ignoreAttributes === undefined
+        ? {}
+        : { ignoreAttributes: options.ignoreAttributes }),
+    }),
+    recordedAt: new Date().toISOString(),
+    provenance: {
+      model: "human",
+      promptVersion: "review:re-pick",
+      at: new Date().toISOString(),
+      tokensIn: 0,
+      tokensOut: 0,
+      costUsd: 0,
+    },
+    verified: false,
   };
 }
 

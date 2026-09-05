@@ -230,6 +230,170 @@ export function openApiDocument(version: string): Record<string, unknown> {
       "/api": {
         get: { summary: "Named API requests", security: bearer, responses: { 200: { description: "ApiRequest[]", ...json({ type: "array" }) } } },
       },
+      /* ── T5.7: record with review, bindings verify, heal (REQ-ADE-4, 5) ─── */
+      "/record": {
+        post: {
+          summary: "Start a recording session; decisions arrive on the stream",
+          description:
+            "Each grounding is emitted as `record.decision` with its candidate bundle and " +
+            "fingerprint, and the session blocks until POST /record/{id}/decision answers — " +
+            "before the binding is written (REQ-ADE-4).",
+          security: bearer,
+          requestBody: json({
+            type: "object",
+            properties: {
+              stories: { type: "array", items: { type: "string" } },
+              flows: { type: "array", items: { type: "string" } },
+              rebind: { type: "boolean" },
+              headed: { type: "boolean" },
+              gateway: { type: "string" },
+              inputs: { type: "object" },
+            },
+          }),
+          responses: {
+            202: { description: "The session id", ...json({ type: "object", properties: { sessionId: { type: "string" } } }) },
+            409: { description: "A session is already open", ...json({ type: "object" }) },
+            501: { description: "This build has no recorder", ...json({ type: "object" }) },
+          },
+        },
+      },
+      "/record/{id}/decision": {
+        post: {
+          summary: "Accept, re-pick or reject the grounding a session is waiting on",
+          security: bearer,
+          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({
+            type: "object",
+            properties: {
+              accept: { type: "boolean" },
+              repick: { type: "string", description: "A reference in the snapshot the model saw" },
+              why: { type: "string" },
+            },
+          }),
+          responses: {
+            202: { description: "Recorded", ...json({ type: "object" }) },
+            404: { description: "Nothing is waiting for a decision", ...json({ type: "object" }) },
+          },
+        },
+      },
+      "/record/{id}/stop": {
+        post: {
+          summary: "Stop a recording session",
+          security: bearer,
+          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+          responses: { 202: { description: "Stopping", ...json({ type: "object" }) }, 404: { description: "No such session", ...json({ type: "object" }) } },
+        },
+      },
+      "/bindings/verify": {
+        post: {
+          summary: "Dry-resolve the store, or one binding",
+          security: bearer,
+          requestBody: json({ type: "object", properties: { id: { type: "string" }, headed: { type: "boolean" } } }),
+          responses: {
+            200: { description: "One result per binding", ...json({ type: "object" }) },
+            501: { description: "This build cannot verify", ...json({ type: "object" }) },
+          },
+        },
+      },
+      "/heal": {
+        post: {
+          summary: "Heal a run; proposals arrive on the stream",
+          security: bearer,
+          requestBody: json({
+            type: "object",
+            properties: {
+              runId: { type: "string" },
+              useModel: { type: "boolean" },
+              apply: { type: "boolean" },
+              inputs: { type: "object" },
+            },
+            required: ["runId"],
+          }),
+          responses: {
+            202: { description: "The heal id", ...json({ type: "object", properties: { healId: { type: "string" } } }) },
+            400: { description: "No run was named", ...json({ type: "object" }) },
+            501: { description: "This build cannot heal", ...json({ type: "object" }) },
+          },
+        },
+      },
+
+      /* ── T5.8: the surface explorer and the tool panel (REQ-ADE-8) ──────── */
+      "/surface/{session}/open": {
+        post: {
+          summary: "Open a surface session the explorer drives",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object", properties: { headed: { type: "boolean" } } }),
+          responses: { 200: { description: "The session and its trajectory file", ...json({ type: "object" }) } },
+        },
+      },
+      "/surface/{session}/snapshot": {
+        post: {
+          summary: "The driven session's snapshot, for the picker and the explorer",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object" }),
+          responses: { 200: { description: "Snapshot", ...json(ref("surface.snapshot")) } },
+        },
+      },
+      "/surface/{session}/act": {
+        post: {
+          summary: "Act in the explored session; `intent` is required",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object", properties: { intent: { type: "string" }, action: { type: "string" }, ref: { type: "string" }, args: { type: "object" } }, required: ["intent", "action"] }),
+          responses: {
+            200: { description: "The act result", ...json({ type: "object" }) },
+            400: { description: "No intent was given", ...json({ type: "object" }) },
+          },
+        },
+      },
+      "/surface/{session}/read": {
+        post: {
+          summary: "Read in the explored session; `intent` is required",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object", properties: { intent: { type: "string" }, kind: { type: "string" }, ref: { type: "string" } }, required: ["intent"] }),
+          responses: { 200: { description: "The value read", ...json({ type: "object" }) } },
+        },
+      },
+      "/surface/{session}/check": {
+        post: {
+          summary: "Check in the explored session; `intent` is required",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object", properties: { intent: { type: "string" }, predicate: { type: "object" }, subject: { type: "string" }, ref: { type: "string" } }, required: ["intent"] }),
+          responses: { 200: { description: "The check result", ...json({ type: "object" }) } },
+        },
+      },
+      "/surface/{session}/close": {
+        post: {
+          summary: "Close an explored session",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          responses: { 202: { description: "Closed", ...json({ type: "object" }) } },
+        },
+      },
+      "/trajectory/compile": {
+        post: {
+          summary: "Compile a captured trajectory into proposals/<date>/",
+          security: bearer,
+          requestBody: json({ type: "object", properties: { path: { type: "string" }, name: { type: "string" } }, required: ["path"] }),
+          responses: { 200: { description: "Where the proposal went, and the rate", ...json({ type: "object" }) } },
+        },
+      },
+      "/tools": {
+        get: {
+          summary: "The tools this project exposes, and every invocation served",
+          description:
+            "Invocations are read from the run directories — `behavior: \"tool\"` summaries and " +
+            "their audit lines — so the panel shows what a `svatah tool serve` in another " +
+            "terminal served too (REQ-ADE-2).",
+          security: bearer,
+          parameters: [{ name: "expose", in: "query", required: false, schema: { type: "string" } }],
+          responses: { 200: { description: "Tools and invocations", ...json({ type: "object" }) } },
+        },
+      },
       "/events": {
         get: {
           summary: "The event stream (WebSocket)",

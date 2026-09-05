@@ -36,9 +36,22 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "getRunsByIdAudit", verb: "get", path: "/runs/{id}/audit", summary: "One run's audit log" },
   { id: "getRunsByIdResults", verb: "get", path: "/runs/{id}/results", summary: "One run's step results" },
   { id: "getRunsByIdScreenshotsByName", verb: "get", path: "/runs/{id}/screenshots/{name}", summary: "A screenshot a run wrote" },
+  { id: "getTools", verb: "get", path: "/tools", summary: "The tools this project exposes, and every invocation served" },
   { id: "postApiRequest", verb: "post", path: "/api/request", summary: "Execute one API request ad hoc" },
+  { id: "postBindingsVerify", verb: "post", path: "/bindings/verify", summary: "Dry-resolve the store, or one binding" },
   { id: "postCompile", verb: "post", path: "/compile", summary: "Compile and lint" },
+  { id: "postHeal", verb: "post", path: "/heal", summary: "Heal a run; proposals arrive on the stream" },
+  { id: "postRecord", verb: "post", path: "/record", summary: "Start a recording session; decisions arrive on the stream" },
+  { id: "postRecordByIdDecision", verb: "post", path: "/record/{id}/decision", summary: "Accept, re-pick or reject the grounding a session is waiting on" },
+  { id: "postRecordByIdStop", verb: "post", path: "/record/{id}/stop", summary: "Stop a recording session" },
   { id: "postRun", verb: "post", path: "/run", summary: "Start a run; step events arrive on the stream" },
+  { id: "postSurfaceBySessionAct", verb: "post", path: "/surface/{session}/act", summary: "Act in the explored session; `intent` is required" },
+  { id: "postSurfaceBySessionCheck", verb: "post", path: "/surface/{session}/check", summary: "Check in the explored session; `intent` is required" },
+  { id: "postSurfaceBySessionClose", verb: "post", path: "/surface/{session}/close", summary: "Close an explored session" },
+  { id: "postSurfaceBySessionOpen", verb: "post", path: "/surface/{session}/open", summary: "Open a surface session the explorer drives" },
+  { id: "postSurfaceBySessionRead", verb: "post", path: "/surface/{session}/read", summary: "Read in the explored session; `intent` is required" },
+  { id: "postSurfaceBySessionSnapshot", verb: "post", path: "/surface/{session}/snapshot", summary: "The driven session's snapshot, for the picker and the explorer" },
+  { id: "postTrajectoryCompile", verb: "post", path: "/trajectory/compile", summary: "Compile a captured trajectory into proposals/<date>/" },
   { id: "putApiByName", verb: "put", path: "/api/{name}", summary: "Save a named request under api/<name>.yaml" },
   { id: "putData", verb: "put", path: "/data", summary: "Write data.yaml" },
   { id: "putFlowsByFile", verb: "put", path: "/flows/{file}", summary: "Write a flow file" },
@@ -162,9 +175,19 @@ export class GeneratedServiceClient {
     return await this.call("get", `/runs/${encodeURIComponent(id)}/screenshots/${encodeURIComponent(name)}`, { });
   }
 
+  /** `GET /tools` — The tools this project exposes, and every invocation served */
+  async getTools(): Promise<unknown> {
+    return await this.call("get", `/tools`, { });
+  }
+
   /** `POST /api/request` — Execute one API request ad hoc */
   async postApiRequest(body?: unknown): Promise<unknown> {
     return await this.call("post", `/api/request`, { body, });
+  }
+
+  /** `POST /bindings/verify` — Dry-resolve the store, or one binding */
+  async postBindingsVerify(body?: unknown): Promise<unknown> {
+    return await this.call("post", `/bindings/verify`, { body, });
   }
 
   /** `POST /compile` — Compile and lint */
@@ -172,9 +195,64 @@ export class GeneratedServiceClient {
     return await this.call("post", `/compile`, { });
   }
 
+  /** `POST /heal` — Heal a run; proposals arrive on the stream */
+  async postHeal(body?: unknown): Promise<unknown> {
+    return await this.call("post", `/heal`, { body, });
+  }
+
+  /** `POST /record` — Start a recording session; decisions arrive on the stream */
+  async postRecord(body?: unknown): Promise<unknown> {
+    return await this.call("post", `/record`, { body, });
+  }
+
+  /** `POST /record/{id}/decision` — Accept, re-pick or reject the grounding a session is waiting on */
+  async postRecordByIdDecision(id: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/record/${encodeURIComponent(id)}/decision`, { body, });
+  }
+
+  /** `POST /record/{id}/stop` — Stop a recording session */
+  async postRecordByIdStop(id: string): Promise<unknown> {
+    return await this.call("post", `/record/${encodeURIComponent(id)}/stop`, { });
+  }
+
   /** `POST /run` — Start a run; step events arrive on the stream */
   async postRun(body?: unknown): Promise<unknown> {
     return await this.call("post", `/run`, { body, });
+  }
+
+  /** `POST /surface/{session}/act` — Act in the explored session; `intent` is required */
+  async postSurfaceBySessionAct(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/surface/${encodeURIComponent(session)}/act`, { body, });
+  }
+
+  /** `POST /surface/{session}/check` — Check in the explored session; `intent` is required */
+  async postSurfaceBySessionCheck(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/surface/${encodeURIComponent(session)}/check`, { body, });
+  }
+
+  /** `POST /surface/{session}/close` — Close an explored session */
+  async postSurfaceBySessionClose(session: string): Promise<unknown> {
+    return await this.call("post", `/surface/${encodeURIComponent(session)}/close`, { });
+  }
+
+  /** `POST /surface/{session}/open` — Open a surface session the explorer drives */
+  async postSurfaceBySessionOpen(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/surface/${encodeURIComponent(session)}/open`, { body, });
+  }
+
+  /** `POST /surface/{session}/read` — Read in the explored session; `intent` is required */
+  async postSurfaceBySessionRead(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/surface/${encodeURIComponent(session)}/read`, { body, });
+  }
+
+  /** `POST /surface/{session}/snapshot` — The driven session's snapshot, for the picker and the explorer */
+  async postSurfaceBySessionSnapshot(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/surface/${encodeURIComponent(session)}/snapshot`, { body, });
+  }
+
+  /** `POST /trajectory/compile` — Compile a captured trajectory into proposals/<date>/ */
+  async postTrajectoryCompile(body?: unknown): Promise<unknown> {
+    return await this.call("post", `/trajectory/compile`, { body, });
   }
 
   /** `PUT /api/{name}` — Save a named request under api/<name>.yaml */

@@ -445,6 +445,341 @@ export async function createService(options: ServeOptions): Promise<RunningServi
 
   /* ── the event stream ───────────────────────────────────────────────────── */
 
+  /* ── T5.7: record with review (REQ-ADE-4, LLD §13.5) ────────────────────── */
+
+  /**
+   * One recording session at a time, and the reviewer it is waiting on.
+   *
+   * Held in memory rather than in the project, because it is a *session*: a
+   * browser is open and a step is half-done. REQ-ADE-2's "the project directory
+   * is the only source of truth" is about artifacts, and nothing here becomes
+   * one until the session writes the store.
+   */
+  const recording = new Map<
+    string,
+    {
+      readonly abort: AbortController;
+      /** Set while a grounding is waiting for `POST /record/:id/decision`. */
+      pending?: { readonly elementId: string; resolve(decision: unknown): void };
+      surface?: { snapshot(options?: unknown): Promise<unknown> };
+    }
+  >();
+
+  fastify.post<{
+    Body?: {
+      stories?: string[];
+      flows?: string[];
+      rebind?: boolean;
+      headed?: boolean;
+      gateway?: string;
+      inputs?: Record<string, unknown>;
+    };
+  }>("/record", async (request, reply) => {
+    if (api.record === undefined) {
+      return reply.code(501).send({ error: "not-available", message: "This build has no recorder." });
+    }
+    if (recording.size > 0) {
+      return reply.code(409).send({
+        error: "already-recording",
+        message: "A recording session is already open. Stop it before starting another.",
+      });
+    }
+
+    const body = request.body ?? {};
+    const sessionId = api.newRunId();
+    const abort = new AbortController();
+    const session: NonNullable<ReturnType<(typeof recording)["get"]>> = { abort };
+    recording.set(sessionId, session);
+
+    void (async () => {
+      try {
+        events.emit({ kind: "record.started", sessionId });
+        const report = await api.record!(await load(), {
+          ...(body.stories === undefined ? {} : { stories: body.stories }),
+          ...(body.flows === undefined ? {} : { flows: body.flows }),
+          ...(body.rebind === undefined ? {} : { rebind: body.rebind }),
+          ...(body.headed === undefined ? {} : { headed: body.headed }),
+          ...(body.gateway === undefined ? {} : { gateway: body.gateway }),
+          ...(body.inputs === undefined ? {} : { inputs: body.inputs }),
+          signal: abort.signal,
+          onSurface: (surface) => {
+            session.surface = surface as { snapshot(options?: unknown): Promise<unknown> };
+          },
+          onStep: (step) => events.emit({ kind: "record.step", sessionId, step }),
+          /*
+           * The reviewer (REQ-ADE-4). The session blocks here until the client
+           * answers, which is the whole point: a decision taken after the store
+           * was written would be an undo, not a review.
+           */
+          review: (proposal) =>
+            new Promise((resolveDecision) => {
+              const one = proposal as {
+                elementId: string;
+                entry: { candidates: unknown[]; fingerprint: unknown };
+              };
+              session.pending = { elementId: one.elementId, resolve: resolveDecision };
+              events.emit({ kind: "record.decision", sessionId, proposal });
+              events.emit({
+                kind: "record.candidates",
+                sessionId,
+                elementId: one.elementId,
+                candidates: one.entry.candidates,
+                fingerprint: one.entry.fingerprint,
+              });
+            }),
+        });
+        events.emit({ kind: "record.finished", sessionId, report });
+      } catch (error) {
+        events.emit({
+          kind: "record.failed",
+          sessionId,
+          message: error instanceof Error ? error.message : String(error),
+        });
+      } finally {
+        recording.delete(sessionId);
+      }
+    })();
+
+    return reply.code(202).send({ sessionId });
+  });
+
+  fastify.post<{
+    Params: { id: string };
+    Body?: { accept?: boolean; repick?: string; why?: string };
+  }>("/record/:id/decision", async (request, reply) => {
+    const session = recording.get(request.params.id);
+    if (session?.pending === undefined) {
+      return reply.code(404).send({
+        error: "nothing-pending",
+        message: "No grounding in this session is waiting for a decision.",
+      });
+    }
+    const body = request.body ?? {};
+    const pending = session.pending;
+    session.pending = undefined;
+    pending.resolve(
+      body.accept === true
+        ? { accept: true }
+        : body.repick !== undefined
+          ? { accept: false, repick: body.repick }
+          : { accept: false, ...(body.why === undefined ? {} : { why: body.why }) },
+    );
+    return reply.code(202).send({ ok: true });
+  });
+
+  /**
+   * The driven session's snapshot, so a reviewer can re-pick by clicking
+   * (REQ-ADE-4, LLD §13.6's "`POST /surface/:session/snapshot` for re-pick").
+   */
+  fastify.post<{ Params: { session: string }; Body?: Record<string, unknown> }>(
+    "/surface/:session/snapshot",
+    async (request, reply) => {
+      const recorder = recording.get(request.params.session);
+      if (recorder?.surface !== undefined) {
+        return await recorder.surface.snapshot(request.body ?? {});
+      }
+      const explorer = exploring.get(request.params.session);
+      if (explorer !== undefined) return await explorer.call("snapshot", request.body ?? {});
+      return reply.code(404).send({ error: "no-session", message: "No session by that id." });
+    },
+  );
+
+  fastify.post<{ Params: { id: string } }>("/record/:id/stop", async (request, reply) => {
+    const session = recording.get(request.params.id);
+    if (session === undefined) {
+      return reply.code(404).send({ error: "no-session" });
+    }
+    session.pending?.resolve({ accept: false, why: "the session was stopped" });
+    session.abort.abort();
+    return reply.code(202).send({ ok: true });
+  });
+
+  /* ── T5.7: bindings verify and heal review (REQ-ADE-5) ───────────────────── */
+
+  fastify.post<{ Body?: { id?: string; headed?: boolean } }>(
+    "/bindings/verify",
+    async (request, reply) => {
+      if (api.verifyBindings === undefined) {
+        return reply.code(501).send({ error: "not-available" });
+      }
+      const body = request.body ?? {};
+      return await api.verifyBindings(await load(), {
+        ...(body.id === undefined ? {} : { id: body.id }),
+        ...(body.headed === undefined ? {} : { headed: body.headed }),
+      });
+    },
+  );
+
+  fastify.post<{
+    Body?: { runId?: string; useModel?: boolean; apply?: boolean; inputs?: Record<string, unknown> };
+  }>("/heal", async (request, reply) => {
+    if (api.heal === undefined) return reply.code(501).send({ error: "not-available" });
+    const body = request.body ?? {};
+    if (body.runId === undefined) {
+      return reply.code(400).send({ error: "missing-run", message: "`runId` names the run to heal." });
+    }
+
+    const healId = api.newRunId();
+    void (async () => {
+      try {
+        const report = await api.heal!(await load(), {
+          runId: body.runId!,
+          ...(body.useModel === undefined ? {} : { useModel: body.useModel }),
+          ...(body.apply === undefined ? {} : { apply: body.apply }),
+          ...(body.inputs === undefined ? {} : { inputs: body.inputs }),
+          onProposal: (proposal) => events.emit({ kind: "heal.proposal", healId, proposal }),
+        });
+        events.emit({ kind: "heal.finished", healId, report });
+      } catch (error) {
+        events.emit({
+          kind: "heal.failed",
+          healId,
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    })();
+
+    return reply.code(202).send({ healId });
+  });
+
+  /* ── T5.8: the surface explorer and the tool panel (REQ-ADE-8) ───────────── */
+
+  /** Open surface sessions the explorer drives, keyed by the id it chose. */
+  const exploring = new Map<
+    string,
+    Awaited<ReturnType<NonNullable<ServiceApi["openSurfaceSession"]>>>
+  >();
+
+  fastify.post<{ Params: { session: string }; Body?: { headed?: boolean } }>(
+    "/surface/:session/open",
+    async (request, reply) => {
+      if (api.openSurfaceSession === undefined) {
+        return reply.code(501).send({ error: "not-available" });
+      }
+      const id = request.params.session;
+      const existing = exploring.get(id);
+      if (existing !== undefined) return { sessionId: id, trajectory: existing.trajectoryPath };
+
+      const session = await api.openSurfaceSession(await load(), {
+        sessionId: id,
+        ...(request.body?.headed === undefined ? {} : { headed: request.body.headed }),
+      });
+      exploring.set(id, session);
+      return { sessionId: id, trajectory: session.trajectoryPath };
+    },
+  );
+
+  for (const call of ["act", "read", "check"] as const) {
+    fastify.post<{ Params: { session: string }; Body?: Record<string, unknown> }>(
+      `/surface/:session/${call}`,
+      async (request, reply) => {
+        const session = exploring.get(request.params.session);
+        if (session === undefined) {
+          return reply.code(404).send({ error: "no-session", message: "Open the session first." });
+        }
+        /*
+         * `intent` is required, on every call (LLD §13.4). An exploration whose
+         * calls do not say what they were for is a log rather than something the
+         * trajectory compiler can read, and the explorer is exactly the client
+         * that would be tempted to leave it out.
+         */
+        const body = request.body ?? {};
+        if (typeof body["intent"] !== "string" || body["intent"].trim() === "") {
+          return reply.code(400).send({
+            error: "missing-intent",
+            message:
+              "Every surface call needs an `intent`: what you are trying to do, in the words " +
+              "you would use to describe the step to a person. It is the sentence this call " +
+              "compiles into (LLD §13.4).",
+          });
+        }
+        /*
+         * Wrapped, always. `read` answers with a bare value — a string, a
+         * number — and a bare string is not JSON, so a client that parses every
+         * answer as JSON would choke on the one route that returns text.
+         * `{ value }` costs a key and makes every surface route the same shape.
+         */
+        return { value: await session.call(call, body) };
+      },
+    );
+  }
+
+  fastify.post<{ Params: { session: string } }>("/surface/:session/close", async (request, reply) => {
+    const session = exploring.get(request.params.session);
+    if (session === undefined) return reply.code(404).send({ error: "no-session" });
+    exploring.delete(request.params.session);
+    await session.close();
+    return reply.code(202).send({ ok: true });
+  });
+
+  fastify.post<{ Body?: { path?: string; name?: string } }>(
+    "/trajectory/compile",
+    async (request, reply) => {
+      if (api.compileTrajectory === undefined) {
+        return reply.code(501).send({ error: "not-available" });
+      }
+      const body = request.body ?? {};
+      if (body.path === undefined) {
+        return reply.code(400).send({ error: "missing-path" });
+      }
+      return await api.compileTrajectory(await load(), {
+        path: body.path,
+        ...(body.name === undefined ? {} : { name: body.name }),
+      });
+    },
+  );
+
+  /**
+   * The tools a project would expose, and every invocation served so far.
+   *
+   * Read from each run's `summary.json` and `audit.jsonl` rather than from a
+   * register the service keeps: "an MCP client invocation appears in the tool
+   * panel with its audit record" (T5.8) is a fact about *files*, and reading
+   * them means the panel shows invocations served by a `svatah tool serve`
+   * running in another terminal too (REQ-ADE-2).
+   */
+  fastify.get<{ Querystring: { expose?: string } }>("/tools", async (request) => {
+    const loaded = await load();
+    const tools =
+      api.toolsFor === undefined
+        ? []
+        : await api.toolsFor(loaded, {
+            ...(request.query.expose === undefined ? {} : { expose: request.query.expose }),
+          });
+
+    const dir = join(root, loaded.config.run.outputDir);
+    const invocations = !existsSync(dir)
+      ? []
+      : readdirSync(dir, { withFileTypes: true })
+          .filter((entry) => entry.isDirectory())
+          .flatMap((entry) => {
+            const summaryPath = join(dir, entry.name, "summary.json");
+            if (!existsSync(summaryPath)) return [];
+            const summary = JSON.parse(readFileSync(summaryPath, "utf8")) as {
+              behavior?: string;
+              runId?: string;
+              invoker?: unknown;
+              startedAt?: string;
+              totals?: unknown;
+              exitCode?: number;
+            };
+            if (summary.behavior !== "tool") return [];
+
+            const auditPath = join(dir, entry.name, "audit.jsonl");
+            const audit = existsSync(auditPath)
+              ? readFileSync(auditPath, "utf8")
+                  .trim()
+                  .split("\n")
+                  .filter((line) => line !== "")
+                  .map((line) => JSON.parse(line) as unknown)
+              : [];
+            return [{ ...summary, audit }];
+          })
+          .sort((a, b) => String(b.runId).localeCompare(String(a.runId)));
+
+    return { tools, invocations };
+  });
+
   fastify.get("/events", { websocket: true }, (socket) => {
     const unsubscribe = events.subscribe((event: ServiceEvent) => {
       socket.send(JSON.stringify(event));
