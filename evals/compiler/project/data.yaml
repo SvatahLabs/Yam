@@ -1,0 +1,29 @@
+# The run data the golden set compiles against (REQ-LANG-9, REQ-NFR-6).
+#
+# The `secrets:` list is what makes `{data.card.number}` compile to a ValueRef
+# with `secret: true`, which is what everything downstream redacts on. Without
+# it the golden entries for the card fields would be indistinguishable from any
+# other data reference — and the redaction they exist to exercise would be
+# untested.
+
+baseUrl: "https://sample.test"
+date: "2026-09-03"
+env: "test"
+pw: "${SVATAH_GOLDEN_PW}"
+reportPath: "reports/summary.pdf"
+
+user:
+  email: "connected2atul@gmail.com"
+  password: "${SVATAH_GOLDEN_PASSWORD}"
+
+card:
+  number: "${SVATAH_GOLDEN_CARD_NUMBER}"
+  cvv: "${SVATAH_GOLDEN_CARD_CVV}"
+
+# Only the card fields. `user.password` is deliberately *not* here even though it
+# reads from an environment variable: the golden set needs one data reference
+# that is an indirection and not a secret (g-034) alongside two that are both
+# (g-135, g-136), so that "reads ${ENV}" and "is redacted" cannot be confused.
+secrets:
+  - card.number
+  - card.cvv

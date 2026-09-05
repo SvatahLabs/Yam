@@ -33,7 +33,9 @@ export {
   parseTargets,
   TargetDictionary,
   type DictionaryEntry,
+  type TargetDeclaration,
   type TargetResolution,
+  type TargetScope,
   type TargetStatus,
 } from "./dictionary.js";
 export { generateActionsYaml } from "./generate.js";

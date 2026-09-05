@@ -1,0 +1,7 @@
+# The Tier 1 parser, generated from grammar/step.peggy by scripts/build-grammar.mjs.
+#
+# Not committed, unlike the JSON Schemas and actions.yaml. Those are small and are
+# read by people and by foreign runtimes; this is 300 kB of generated parser that
+# nobody reads and that would swamp every diff that touches the grammar. `build`
+# and `test` both regenerate it first, so no command needs it to be present.
+src/generated/

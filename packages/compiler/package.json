@@ -21,16 +21,19 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "tsup --config ../../tsup.config.ts",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "build": "pnpm run generate && tsup --config ../../tsup.config.ts",
+    "typecheck": "pnpm run generate && tsc --noEmit",
+    "test": "pnpm run generate && vitest run",
+    "generate": "node scripts/build-grammar.mjs"
   },
   "dependencies": {
+    "@svatah/schema": "workspace:*",
     "@svatah/spec": "workspace:*",
     "@svatah/steps": "workspace:*",
-    "@svatah/schema": "workspace:*"
+    "yaml": "catalog:"
   },
   "devDependencies": {
+    "peggy": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

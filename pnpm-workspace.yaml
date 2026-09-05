@@ -16,6 +16,7 @@ catalog:
   'eslint-plugin-import': ^2.31.0
   'eslint-import-resolver-typescript': ^4.4.5
   'node-html-parser': ^6.1.13
+  peggy: ^5.1.0
   playwright: ^1.62.1
   '@playwright/test': ^1.62.1
   tsup: ^8.3.5

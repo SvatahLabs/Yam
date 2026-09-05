@@ -1,0 +1,21 @@
+# The target dictionary the golden set compiles against (REQ-COMP-5, T2.4).
+#
+# Almost every golden entry's element id is what the phrase normalises to, and
+# needs no entry here. This file holds the two things normalisation cannot know:
+#
+#   * an element whose id a project chose rather than derived — `accounts.current`
+#     for "the current account", which is what a real project does once it has a
+#     naming scheme;
+#   * an element that lives somewhere other than the page. Scope is a property of
+#     the element, not of the sentence: "Click the frame button" says nothing
+#     about frames, and it should not have to.
+
+accounts.current:
+  - "the current account"
+accounts.savings:
+  - "the savings account"
+
+frame-button:
+  phrases:
+    - "the frame button"
+  scope: frame
