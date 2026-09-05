@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@svatah/schema": "workspace:*",
+    "yaml": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

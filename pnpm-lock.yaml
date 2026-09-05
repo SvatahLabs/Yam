@@ -633,6 +633,9 @@ importers:
       '@svatah/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.0
       zod:
         specifier: 'catalog:'
         version: 3.25.76

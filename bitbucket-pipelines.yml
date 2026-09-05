@@ -1,0 +1,58 @@
+# Bitbucket Pipelines — the Linux job of .github/workflows/ci.yml.
+#
+# The repository's only remote is Bitbucket, so GitHub Actions has nowhere to
+# run (Phase 0, K1). This file runs exactly the same seven steps on the same
+# Node 22 LTS the GitHub matrix pins, in the same order, so the workflow is
+# observable on the branch. macOS and Windows are not offered by Bitbucket's
+# hosted runners; they stay covered by .github/workflows/ci.yml and remain
+# unverified until a GitHub remote exists (REQ-NFR-7).
+#
+# Keep the two files in step: a step added here must be added there and the
+# other way round.
+
+image: node:22
+
+definitions:
+  caches:
+    pnpm: $HOME/.local/share/pnpm/store
+  steps:
+    - step: &workspace
+        name: workspace (linux, node 22)
+        caches:
+          - pnpm
+        script:
+          - corepack enable
+          - corepack prepare --activate
+          - node --version
+          - pnpm --version
+          - pnpm install --frozen-lockfile
+          - pnpm -r build
+          - pnpm -r typecheck
+          # Includes the LLD §1 import boundaries.
+          - pnpm lint
+          # REQ-PKG-3.
+          - pnpm check:licenses
+          - pnpm -r test
+
+    - step: &legacy-java
+        name: legacy Java project compiles
+        image: eclipse-temurin:17-jdk
+        script:
+          - cd legacy
+          - ./gradlew --no-daemon compileJava
+
+pipelines:
+  default:
+    - parallel:
+        - step: *workspace
+        - step: *legacy-java
+  branches:
+    '**':
+      - parallel:
+          - step: *workspace
+          - step: *legacy-java
+  pull-requests:
+    '**':
+      - parallel:
+          - step: *workspace
+          - step: *legacy-java
