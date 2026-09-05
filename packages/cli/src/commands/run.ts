@@ -245,61 +245,11 @@ export async function runProject(
     return { ref: resolution.ref, candidateIndex: resolution.candidateIndex, by: resolution.by };
   };
 
-  /*
-   * The API and custom-step runners are wired in here rather than imported by
-   * the runtime, which is what keeps LLD §1's `runtime ─► bindings, surface,
-   * schema` true (T2.7).
-   */
-  const http = new HttpSurface({
-    ...(config.app.baseUrl === undefined ? {} : { baseUrl: config.app.baseUrl }),
+  const { api, custom } = projectRunners(loaded, {
+    baseUrl: config.app.baseUrl,
     cwd: context.root,
+    ...(options.log === undefined ? {} : { log: options.log }),
   });
-
-  const api: ApiRunner = async (step, { scope }) => {
-    const name = literalArg(step.args?.["request"]);
-    const request = name === undefined ? undefined : loaded.project.apis.requests.get(name);
-    if (request === undefined) {
-      throw new Error(`No API request named "${name ?? "?"}" in ${loaded.config.api.dir}/.`);
-    }
-    const withSessionCookies = step.args?.["withSessionCookies"] === true;
-    const response = await http.request(request, {
-      withSessionCookies,
-      scope: { read: (reference) => readReference(scope, reference) },
-    });
-    return step.capture?.jsonPath === undefined
-      ? (response.json ?? response.body)
-      : http.captureFromLast(step.capture.jsonPath);
-  };
-
-  const custom: CustomStepRunner = async (step, ctx) => {
-    const definition = loaded.steps.all().find((one) => one.id === step.custom?.id);
-    if (definition === undefined) {
-      throw new Error(`No custom step ${step.custom?.id ?? "?"} in ${loaded.config.steps.dir}/.`);
-    }
-    const resolvedArgs: Record<string, unknown> = {};
-    for (const [name, value] of Object.entries(step.custom?.params ?? {})) {
-      resolvedArgs[name] = ctx.scope.read(value);
-    }
-    for (const [name, target] of Object.entries(step.custom?.targets ?? {})) {
-      resolvedArgs[name] = target;
-    }
-    await definition.handler({
-      surface: ctx.surface,
-      args: resolvedArgs,
-      resolve: async (target) => (await ctx.resolve(target, ctx.surface)).ref,
-      scope: {
-        read: (reference) => ctx.scope.read(reference),
-        capture: (name, value) => ctx.scope.capture(name, value),
-        data: {},
-        inputs: {},
-      },
-      expect: async () => undefined,
-      audit: () => undefined,
-      log: (message) => options.log?.(message),
-      timeoutMs: ctx.timeoutMs,
-      signal: ctx.signal,
-    });
-  };
 
   const runOptions: RunOptions = {
     config,
@@ -458,4 +408,85 @@ async function runUnderPlaywright(context: RunContext, io: CommandIo): Promise<E
   });
 
   return (status === 0 ? EXIT.ok : EXIT.failed) as ExitCode;
+}
+
+/* ── the collaborators the executor is given (LLD §8, Draft 2.4) ───────────── */
+
+export interface ProjectRunnerOptions {
+  readonly baseUrl?: string;
+  /** The project root, for a request body that names a file. */
+  readonly cwd: string;
+  readonly log?: (message: string) => void;
+}
+
+/**
+ * The API and custom-step runners a project's plan needs.
+ *
+ * Built here rather than imported by the runtime, which is what keeps LLD §1's
+ * `runtime ─► bindings, surface, schema` true: "the executor receives the
+ * resolver, the custom-step runner, and the API runner as injected
+ * collaborators; `runtime` imports neither `steps` nor `adapter-http`" (Draft
+ * 2.4, LLD §8).
+ *
+ * Shared by `svatah run` and `svatah record` rather than written twice. The
+ * recorder performs every step it records (REQ-REC-5), so an `api` step or a
+ * Tier 0 step has to do the same thing in both — a second copy would drift, and
+ * the drift would be a binding verified against behaviour a run does not repeat.
+ */
+export function projectRunners(
+  loaded: Awaited<ReturnType<typeof loadProject>>,
+  options: ProjectRunnerOptions,
+): { api: ApiRunner; custom: CustomStepRunner } {
+  const http = new HttpSurface({
+    ...(options.baseUrl === undefined ? {} : { baseUrl: options.baseUrl }),
+    cwd: options.cwd,
+  });
+
+  const api: ApiRunner = async (step, { scope }) => {
+    const name = literalArg(step.args?.["request"]);
+    const request = name === undefined ? undefined : loaded.project.apis.requests.get(name);
+    if (request === undefined) {
+      throw new Error(`No API request named "${name ?? "?"}" in ${loaded.config.api.dir}/.`);
+    }
+    const withSessionCookies = step.args?.["withSessionCookies"] === true;
+    const response = await http.request(request, {
+      withSessionCookies,
+      scope: { read: (reference) => readReference(scope, reference) },
+    });
+    return step.capture?.jsonPath === undefined
+      ? (response.json ?? response.body)
+      : http.captureFromLast(step.capture.jsonPath);
+  };
+
+  const custom: CustomStepRunner = async (step, ctx) => {
+    const definition = loaded.steps.all().find((one) => one.id === step.custom?.id);
+    if (definition === undefined) {
+      throw new Error(`No custom step ${step.custom?.id ?? "?"} in ${loaded.config.steps.dir}/.`);
+    }
+    const resolvedArgs: Record<string, unknown> = {};
+    for (const [name, value] of Object.entries(step.custom?.params ?? {})) {
+      resolvedArgs[name] = ctx.scope.read(value);
+    }
+    for (const [name, target] of Object.entries(step.custom?.targets ?? {})) {
+      resolvedArgs[name] = target;
+    }
+    await definition.handler({
+      surface: ctx.surface,
+      args: resolvedArgs,
+      resolve: async (target) => (await ctx.resolve(target, ctx.surface)).ref,
+      scope: {
+        read: (reference) => ctx.scope.read(reference),
+        capture: (name, value) => ctx.scope.capture(name, value),
+        data: {},
+        inputs: {},
+      },
+      expect: async () => undefined,
+      audit: () => undefined,
+      log: (message) => options.log?.(message),
+      timeoutMs: ctx.timeoutMs,
+      signal: ctx.signal,
+    });
+  };
+
+  return { api, custom };
 }

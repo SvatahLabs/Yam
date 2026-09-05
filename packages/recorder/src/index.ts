@@ -36,3 +36,20 @@ export {
 } from "./prompt.js";
 
 export { prune, STRUCTURAL_ROLES, type PrunedSnapshot, type PruneOptions } from "./prune.js";
+
+export {
+  record,
+  storyOrder,
+  type RecordedStep,
+  type RecordReport,
+  type RecordSessionOptions,
+} from "./session.js";
+
+export { renderReport, reportJson } from "./report.js";
+
+export {
+  phraseFromId,
+  recorderBindGrounder,
+  recorderRegrounder,
+  type PluginOptions,
+} from "./plugins.js";

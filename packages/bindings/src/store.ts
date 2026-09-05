@@ -201,6 +201,20 @@ export class BindingsStore {
   }
 
   /** Remove an element entirely. Returns whether it was there. */
+  /**
+   * Put a whole file back as it was.
+   *
+   * The recorder's rollback (T3.3): it stages a grounded binding into the live
+   * store so the resolver can find it, performs the step, and — if the step did
+   * not pass — restores the id to the bytes it had, because an unverified
+   * binding must never reach disk (REQ-REC-5). Distinct from `put`, which merges
+   * an entry into whatever is there; this replaces.
+   */
+  replaceFile(id: string, file: BindingFile): void {
+    assertElementId(id);
+    this.files.set(id, bindingFileSchema.parse(file));
+  }
+
   remove(id: string): boolean {
     return this.files.delete(id);
   }

@@ -22,7 +22,6 @@ import { ConfigError } from "./config-error.js";
 
 /** Commands LLD §15 lists that are not built yet, and what builds them. */
 const LATER: Record<string, string> = {
-  record: "T3.3",
   repl: "T4.5",
   workflow: "T5.4",
   tool: "T5.5",
@@ -36,6 +35,8 @@ Flows (module b):
   svatah init [dir] [--force]
   svatah lint [dir] [--json]
   svatah compile [dir] [--stable] [--out .svatah/plan.json] [--json]
+  svatah record [dir] [--flow <file>] [--story <name>] [--rebind] [--headed]
+                [--gateway anthropic|fake] [--input k=v] [--force-production] [--json]
   svatah run [dir] [--host playwright|none] [--flow <file>] [--story <name>]
              [--workers <n>] [--headed] [--out runs] [--run-id <id>] [--json]
   svatah host generate [dir] [--out .svatah/specs]
@@ -59,6 +60,60 @@ Bindings and healing (module a):
 
 Exit codes are the table in LLD §15.
 `;
+
+/**
+ * Register the recorder as the healer's `Regrounder` (T3.3, LLD §10).
+ *
+ * REQ-HEAL-1's model half: "relocalization first (no model), then one model
+ * re-grounding call per element if configured". The healer defines the interface
+ * and module (a) ships a no-op; this is where module (b) fills it, with the same
+ * `ground()` the recorder uses for a flow.
+ *
+ * Three ways to end up with no model, all of them fine: `--no-model`,
+ * `heal.useModel: false` in the project's config, or no credential. In each the
+ * heal runs as relocalization and the report says the regrounder was `none`,
+ * which is an honest answer rather than a degraded one.
+ */
+async function registerModelRegrounder(args: ParsedArgs, io: CommandIo): Promise<void> {
+  if (args.options["no-model"] !== undefined) return;
+
+  try {
+    const { credentialInEnvironment, anthropicGateway, DiskCache } = await import(
+      "@svatah/gateway"
+    );
+    if (!credentialInEnvironment()) return;
+
+    const { loadProject } = await import("./project.js");
+    const { registerRegrounder } = await import("@svatah/healer");
+    const { recorderRegrounder } = await import("@svatah/recorder");
+
+    const root = typeof args.options["project"] === "string" ? args.options["project"] : ".";
+    const loaded = await loadProject(root).catch(() => undefined);
+    if (loaded === undefined || !loaded.config.heal.useModel) return;
+
+    registerRegrounder(
+      recorderRegrounder({
+        gateway: anthropicGateway({
+          model: loaded.config.record.model,
+          cache: new DiskCache(`${loaded.root}/.svatah/model-cache`),
+          onCall: (line) => io.err(`      ${line}`),
+        }),
+        maxSnapshotTokens: loaded.config.record.maxSnapshotTokens,
+        visionFallback: loaded.config.record.visionFallback,
+        testIdAttributes: loaded.config.bindings.testIdAttributes,
+        ...(loaded.config.bindings.ignoreAttributes === undefined
+          ? {}
+          : { ignoreAttributes: loaded.config.bindings.ignoreAttributes }),
+        onDecision: (line) => io.err(`  ${line}`),
+      }),
+    );
+  } catch (error) {
+    io.err(
+      "Could not wire the model re-grounder in, so healing is relocalization only: " +
+        `${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
 
 /**
  * Prepare `svatah heal --run <id>`: the replayer, and where the flow starts.
@@ -149,6 +204,8 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
    * `svatah-bindings heal --from-bind-failures` has no runtime and keeps module
    * (a)'s session-state default, which is the right answer for a bind failure.
    */
+  if (command === "heal") await registerModelRegrounder(args, io);
+
   const prepared =
     command === "heal" && typeof args.options["run"] === "string"
       ? await prepareRunHeal(args, io)
@@ -178,6 +235,8 @@ async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Pro
       return await (await import("./commands/compile.js")).compileCommand(args, io);
     case "lint":
       return await (await import("./commands/compile.js")).lintCommand(args, io);
+    case "record":
+      return await (await import("./commands/record.js")).recordCommand(args, io);
     case "run":
       return await (await import("./commands/run.js")).runCommand(args, io);
     case "migrate":

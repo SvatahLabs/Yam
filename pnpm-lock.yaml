@@ -92,6 +92,9 @@ importers:
       '@svatah/spec':
         specifier: workspace:*
         version: link:packages/spec
+      '@svatah/surface':
+        specifier: workspace:*
+        version: link:packages/surface
       '@types/node':
         specifier: 'catalog:'
         version: 22.20.1

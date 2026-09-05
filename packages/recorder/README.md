@@ -34,6 +34,29 @@ The entry is written `verified: false`. Verification is REQ-REC-5's: the session
 performs the step with the top candidate and checks the expectation. Calling a
 binding verified because a model was confident about it would empty the word.
 
+## The session, and what it writes
+
+`record()` is a loop around `runStep` from `@svatah/runtime` — the same function
+`svatah run` and the Playwright host call — with grounding added before each
+step. That is REQ-REC-5 taken literally: recording verifies a binding by
+*performing the step*, and the verification only means something if recording
+performs a step the way replay will.
+
+A binding reaches the store when a step performed through it and its expectation
+held. Grounded-but-unproven entries are staged into the live store while the
+session runs, because the resolver has to find them to perform the step at all,
+and rolled back at the end. So a session that stops at step four writes the three
+it proved and not the fourth, and an impossible expectation writes nothing.
+
+## Two plugins for module (a)
+
+`recorderRegrounder()` is the healer's model half (LLD §10), reached only after
+relocalization could not place a fingerprint. `recorderBindGrounder()` is
+`bind()`'s record mode (LLD §6.5), which module (a) otherwise answers by waiting
+for a person to click. Both return `null` rather than failing, and `@svatah/cli`
+registers them — LLD §10 puts that wiring at CLI start, and the CLI is the one
+package allowed to import everything.
+
 ## Testing it
 
 `scripts/record-snapshots.mjs` records `apps/sample-web` — the snapshot,

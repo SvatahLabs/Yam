@@ -48,9 +48,9 @@ describe("help and unknown commands", () => {
   it("says which task builds a command that is not built yet", async () => {
     // "Not yet" and "never" are different answers, and a bare "unknown command"
     // gives neither.
-    const { code, err } = await cli("record");
+    const { code, err } = await cli("repl");
     expect(code).toBe(EXIT.usage);
-    expect(err).toContain("T3.3");
+    expect(err).toContain("T4.5");
   });
 
   it("says plainly when a command does not exist", async () => {

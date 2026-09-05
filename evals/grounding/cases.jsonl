@@ -1,0 +1,201 @@
+{"id":"g-001","page":"/","phrase":"the Svatah Sample link","expect":"present","element":"home/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-002","page":"/","phrase":"the Toggle navigation button","expect":"present","element":"home/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-003","page":"/","phrase":"the Dashboard link","expect":"present","element":"home/03-dashboard-link","role":"link","name":"Dashboard"}
+{"id":"g-004","page":"/","phrase":"the Book a slot link","expect":"present","element":"home/04-booking-link","role":"link","name":"Book a slot"}
+{"id":"g-005","page":"/","phrase":"the Widgets link","expect":"present","element":"home/05-widgets-link","role":"link","name":"Widgets"}
+{"id":"g-006","page":"/","phrase":"the Docs link","expect":"present","element":"home/06-docs-link","role":"link","name":"Docs"}
+{"id":"g-007","page":"/","phrase":"the Sign in link","expect":"present","element":"home/07-sign-in","role":"link","name":"Sign in"}
+{"id":"g-008","page":"/","phrase":"the Read the docs link","expect":"present","element":"home/08-read-the-docs","role":"link","name":"Read the docs"}
+{"id":"g-009","page":"/login","phrase":"the Svatah Sample link","expect":"present","element":"login/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-010","page":"/login","phrase":"the Toggle navigation button","expect":"present","element":"login/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-011","page":"/login","phrase":"the Dashboard link","expect":"present","element":"login/03-dashboard-link","role":"link","name":"Dashboard"}
+{"id":"g-012","page":"/login","phrase":"the Book a slot link","expect":"present","element":"login/04-booking-link","role":"link","name":"Book a slot"}
+{"id":"g-013","page":"/login","phrase":"the Widgets link","expect":"present","element":"login/05-widgets-link","role":"link","name":"Widgets"}
+{"id":"g-014","page":"/login","phrase":"the Docs link","expect":"present","element":"login/06-docs-link","role":"link","name":"Docs"}
+{"id":"g-015","page":"/login","phrase":"the Username field","expect":"present","element":"login/07-username","role":"textbox","name":"Username"}
+{"id":"g-016","page":"/login","phrase":"the Password field","expect":"present","element":"login/08-password","role":"textbox","name":"Password"}
+{"id":"g-017","page":"/login","phrase":"the Remember me checkbox","expect":"present","element":"login/09-remember","role":"checkbox","name":"Remember me"}
+{"id":"g-018","page":"/login","phrase":"the Sign In button","expect":"present","element":"login/10-login-submit","role":"button","name":"Sign In"}
+{"id":"g-019","page":"/dashboard","phrase":"the Svatah Sample link","expect":"present","element":"dashboard/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-020","page":"/dashboard","phrase":"the Toggle navigation button","expect":"present","element":"dashboard/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-021","page":"/dashboard","phrase":"the Dashboard link","expect":"present","element":"dashboard/03-dashboard-link","role":"link","name":"Dashboard"}
+{"id":"g-022","page":"/dashboard","phrase":"the Book a slot link","expect":"present","element":"dashboard/04-booking-link","role":"link","name":"Book a slot"}
+{"id":"g-023","page":"/dashboard","phrase":"the Widgets link","expect":"present","element":"dashboard/05-widgets-link","role":"link","name":"Widgets"}
+{"id":"g-024","page":"/dashboard","phrase":"the Docs link","expect":"present","element":"dashboard/06-docs-link","role":"link","name":"Docs"}
+{"id":"g-025","page":"/dashboard","phrase":"the Toggle sidebar button","expect":"present","element":"dashboard/07-sidebar-toggle","role":"button","name":"Toggle sidebar"}
+{"id":"g-026","page":"/dashboard","phrase":"the Overview link","expect":"present","element":"dashboard/08-nav-overview","role":"link","name":"Overview"}
+{"id":"g-027","page":"/dashboard","phrase":"the Schedule Build link","expect":"present","element":"dashboard/09-nav-schedule-build","role":"link","name":"Schedule Build"}
+{"id":"g-028","page":"/dashboard","phrase":"the Bookings link","expect":"present","element":"dashboard/10-nav-bookings","role":"link","name":"Bookings"}
+{"id":"g-029","page":"/dashboard","phrase":"the Checkout link","expect":"present","element":"dashboard/11-nav-checkout","role":"link","name":"Checkout"}
+{"id":"g-030","page":"/dashboard","phrase":"the Logout link","expect":"present","element":"dashboard/12-nav-logout","role":"link","name":"Logout"}
+{"id":"g-031","page":"/dashboard","phrase":"the Refresh count button","expect":"present","element":"dashboard/13-refresh-count","role":"button","name":"Refresh count"}
+{"id":"g-032","page":"/schedule-build","phrase":"the Svatah Sample link","expect":"present","element":"schedule-build/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-033","page":"/schedule-build","phrase":"the Toggle navigation button","expect":"present","element":"schedule-build/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-034","page":"/schedule-build","phrase":"the Dashboard link","expect":"present","element":"schedule-build/03-dashboard-link","role":"link","name":"Dashboard"}
+{"id":"g-035","page":"/schedule-build","phrase":"the Book a slot link","expect":"present","element":"schedule-build/04-booking-link","role":"link","name":"Book a slot"}
+{"id":"g-036","page":"/schedule-build","phrase":"the Widgets link","expect":"present","element":"schedule-build/05-widgets-link","role":"link","name":"Widgets"}
+{"id":"g-037","page":"/schedule-build","phrase":"the Docs link","expect":"present","element":"schedule-build/06-docs-link","role":"link","name":"Docs"}
+{"id":"g-038","page":"/schedule-build","phrase":"the Toggle sidebar button","expect":"present","element":"schedule-build/07-sidebar-toggle","role":"button","name":"Toggle sidebar"}
+{"id":"g-039","page":"/schedule-build","phrase":"the Overview link","expect":"present","element":"schedule-build/08-nav-overview","role":"link","name":"Overview"}
+{"id":"g-040","page":"/schedule-build","phrase":"the Schedule Build link","expect":"present","element":"schedule-build/09-nav-schedule-build","role":"link","name":"Schedule Build"}
+{"id":"g-041","page":"/schedule-build","phrase":"the Bookings link","expect":"present","element":"schedule-build/10-nav-bookings","role":"link","name":"Bookings"}
+{"id":"g-042","page":"/schedule-build","phrase":"the Checkout link","expect":"present","element":"schedule-build/11-nav-checkout","role":"link","name":"Checkout"}
+{"id":"g-043","page":"/schedule-build","phrase":"the Logout link","expect":"present","element":"schedule-build/12-nav-logout","role":"link","name":"Logout"}
+{"id":"g-044","page":"/schedule-build","phrase":"the Project select","expect":"present","element":"schedule-build/13-project","role":"combobox","name":"Project"}
+{"id":"g-045","page":"/schedule-build","phrase":"the Run build button","expect":"present","element":"schedule-build/17-run-build","role":"button","name":"Run build"}
+{"id":"g-046","page":"/booking","phrase":"the Svatah Sample link","expect":"present","element":"booking/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-047","page":"/booking","phrase":"the Toggle navigation button","expect":"present","element":"booking/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-048","page":"/booking","phrase":"the Dashboard link","expect":"present","element":"booking/03-dashboard-link","role":"link","name":"Dashboard"}
+{"id":"g-049","page":"/booking","phrase":"the Book a slot link","expect":"present","element":"booking/04-booking-link","role":"link","name":"Book a slot"}
+{"id":"g-050","page":"/booking","phrase":"the Widgets link","expect":"present","element":"booking/05-widgets-link","role":"link","name":"Widgets"}
+{"id":"g-051","page":"/booking","phrase":"the Docs link","expect":"present","element":"booking/06-docs-link","role":"link","name":"Docs"}
+{"id":"g-052","page":"/booking","phrase":"the Toggle sidebar button","expect":"present","element":"booking/07-sidebar-toggle","role":"button","name":"Toggle sidebar"}
+{"id":"g-053","page":"/booking","phrase":"the Overview link","expect":"present","element":"booking/08-nav-overview","role":"link","name":"Overview"}
+{"id":"g-054","page":"/booking","phrase":"the Schedule Build link","expect":"present","element":"booking/09-nav-schedule-build","role":"link","name":"Schedule Build"}
+{"id":"g-055","page":"/booking","phrase":"the Bookings link","expect":"present","element":"booking/10-nav-bookings","role":"link","name":"Bookings"}
+{"id":"g-056","page":"/booking","phrase":"the Checkout link","expect":"present","element":"booking/11-nav-checkout","role":"link","name":"Checkout"}
+{"id":"g-057","page":"/booking","phrase":"the Logout link","expect":"present","element":"booking/12-nav-logout","role":"link","name":"Logout"}
+{"id":"g-058","page":"/booking","phrase":"the Starting point select","expect":"present","element":"booking/13-location","role":"combobox","name":"Starting point"}
+{"id":"g-059","page":"/booking","phrase":"the Date field","expect":"present","element":"booking/17-slot-date","role":"textbox","name":"Date"}
+{"id":"g-060","page":"/booking","phrase":"the Times select","expect":"present","element":"booking/18-slot-times","role":"listbox","name":"Times"}
+{"id":"g-061","page":"/booking","phrase":"the 09:00 option","expect":"present","element":"booking/19-09-00","role":"option","name":"09:00"}
+{"id":"g-062","page":"/booking","phrase":"the 12:00 option","expect":"present","element":"booking/20-12-00","role":"option","name":"12:00"}
+{"id":"g-063","page":"/booking","phrase":"the 15:00 option","expect":"present","element":"booking/21-15-00","role":"option","name":"15:00"}
+{"id":"g-064","page":"/booking","phrase":"the 18:00 option","expect":"present","element":"booking/22-18-00","role":"option","name":"18:00"}
+{"id":"g-065","page":"/booking","phrase":"the Next button","expect":"present","element":"booking/23-booking-next","role":"button","name":"Next"}
+{"id":"g-066","page":"/booking","phrase":"the Book now button","expect":"present","element":"booking/24-book-now","role":"button","name":"Book now"}
+{"id":"g-067","page":"/checkout","phrase":"the Svatah Sample link","expect":"present","element":"checkout/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-068","page":"/checkout","phrase":"the Toggle navigation button","expect":"present","element":"checkout/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-069","page":"/checkout","phrase":"the Dashboard link","expect":"present","element":"checkout/03-dashboard-link","role":"link","name":"Dashboard"}
+{"id":"g-070","page":"/checkout","phrase":"the Book a slot link","expect":"present","element":"checkout/04-booking-link","role":"link","name":"Book a slot"}
+{"id":"g-071","page":"/checkout","phrase":"the Widgets link","expect":"present","element":"checkout/05-widgets-link","role":"link","name":"Widgets"}
+{"id":"g-072","page":"/checkout","phrase":"the Docs link","expect":"present","element":"checkout/06-docs-link","role":"link","name":"Docs"}
+{"id":"g-073","page":"/checkout","phrase":"the Toggle sidebar button","expect":"present","element":"checkout/07-sidebar-toggle","role":"button","name":"Toggle sidebar"}
+{"id":"g-074","page":"/checkout","phrase":"the Overview link","expect":"present","element":"checkout/08-nav-overview","role":"link","name":"Overview"}
+{"id":"g-075","page":"/checkout","phrase":"the Schedule Build link","expect":"present","element":"checkout/09-nav-schedule-build","role":"link","name":"Schedule Build"}
+{"id":"g-076","page":"/checkout","phrase":"the Bookings link","expect":"present","element":"checkout/10-nav-bookings","role":"link","name":"Bookings"}
+{"id":"g-077","page":"/checkout","phrase":"the Checkout link","expect":"present","element":"checkout/11-nav-checkout","role":"link","name":"Checkout"}
+{"id":"g-078","page":"/checkout","phrase":"the Logout link","expect":"present","element":"checkout/12-nav-logout","role":"link","name":"Logout"}
+{"id":"g-079","page":"/checkout","phrase":"the Card number field","expect":"present","element":"checkout/13-card","role":"textbox","name":"Card number"}
+{"id":"g-080","page":"/checkout","phrase":"the Expiry select","expect":"present","element":"checkout/14-expiry-month","role":"combobox","name":"Expiry"}
+{"id":"g-081","page":"/checkout","phrase":"the CVV field","expect":"present","element":"checkout/21-cvv","role":"textbox","name":"CVV"}
+{"id":"g-082","page":"/checkout","phrase":"the Pay button","expect":"present","element":"checkout/22-pay","role":"button","name":"Pay"}
+{"id":"g-083","page":"/widgets","phrase":"the Svatah Sample link","expect":"present","element":"widgets/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-084","page":"/widgets","phrase":"the Toggle navigation button","expect":"present","element":"widgets/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-085","page":"/widgets","phrase":"the Dashboard link","expect":"present","element":"widgets/03-dashboard-link","role":"link","name":"Dashboard"}
+{"id":"g-086","page":"/widgets","phrase":"the Book a slot link","expect":"present","element":"widgets/04-booking-link","role":"link","name":"Book a slot"}
+{"id":"g-087","page":"/widgets","phrase":"the Widgets link","expect":"present","element":"widgets/05-widgets-link","role":"link","name":"Widgets"}
+{"id":"g-088","page":"/widgets","phrase":"the Docs link","expect":"present","element":"widgets/06-docs-link","role":"link","name":"Docs"}
+{"id":"g-089","page":"/widgets","phrase":"the Show alert button","expect":"present","element":"widgets/07-show-alert","role":"button","name":"Show alert"}
+{"id":"g-090","page":"/widgets","phrase":"the Show confirm button","expect":"present","element":"widgets/08-show-confirm","role":"button","name":"Show confirm"}
+{"id":"g-091","page":"/widgets","phrase":"the Show prompt button","expect":"present","element":"widgets/09-show-prompt","role":"button","name":"Show prompt"}
+{"id":"g-092","page":"/widgets","phrase":"the Environment select","expect":"present","element":"widgets/10-single-select","role":"combobox","name":"Environment"}
+{"id":"g-093","page":"/widgets","phrase":"the Browsers select","expect":"present","element":"widgets/14-multi-select","role":"listbox","name":"Browsers"}
+{"id":"g-094","page":"/widgets","phrase":"the Chromium option","expect":"present","element":"widgets/15-chromium","role":"option","name":"Chromium"}
+{"id":"g-095","page":"/widgets","phrase":"the Firefox option","expect":"present","element":"widgets/16-firefox","role":"option","name":"Firefox"}
+{"id":"g-096","page":"/widgets","phrase":"the WebKit option","expect":"present","element":"widgets/17-webkit","role":"option","name":"WebKit"}
+{"id":"g-097","page":"/widgets","phrase":"the Open the docs in a new tab link","expect":"present","element":"widgets/18-open-new-tab","role":"link","name":"Open the docs in a new tab"}
+{"id":"g-098","page":"/widgets","phrase":"the Attach a report button","expect":"present","element":"widgets/19-upload","role":"button","name":"Attach a report"}
+{"id":"g-099","page":"/widgets/frame","phrase":"the Svatah Sample link","expect":"present","element":"widgets-frame/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-100","page":"/widgets/frame","phrase":"the Toggle navigation button","expect":"present","element":"widgets-frame/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-101","page":"/widgets/frame","phrase":"the Dashboard link","expect":"present","element":"widgets-frame/03-dashboard-link","role":"link","name":"Dashboard"}
+{"id":"g-102","page":"/widgets/frame","phrase":"the Book a slot link","expect":"present","element":"widgets-frame/04-booking-link","role":"link","name":"Book a slot"}
+{"id":"g-103","page":"/widgets/frame","phrase":"the Widgets link","expect":"present","element":"widgets-frame/05-widgets-link","role":"link","name":"Widgets"}
+{"id":"g-104","page":"/widgets/frame","phrase":"the Docs link","expect":"present","element":"widgets-frame/06-docs-link","role":"link","name":"Docs"}
+{"id":"g-105","page":"/widgets/frame","phrase":"the Frame field field","expect":"present","element":"widgets-frame/07-frame-input","role":"textbox","name":"Frame field"}
+{"id":"g-106","page":"/widgets/frame","phrase":"the Frame button button","expect":"present","element":"widgets-frame/08-frame-button","role":"button","name":"Frame button"}
+{"id":"g-107","page":"/docs","phrase":"the Svatah Sample link","expect":"present","element":"docs/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-108","page":"/docs","phrase":"the Toggle navigation button","expect":"present","element":"docs/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-109","page":"/docs","phrase":"the Dashboard link","expect":"present","element":"docs/03-dashboard-link","role":"link","name":"Dashboard"}
+{"id":"g-110","page":"/docs","phrase":"the Book a slot link","expect":"present","element":"docs/04-booking-link","role":"link","name":"Book a slot"}
+{"id":"g-111","page":"/docs","phrase":"the Widgets link","expect":"present","element":"docs/05-widgets-link","role":"link","name":"Widgets"}
+{"id":"g-112","page":"/docs","phrase":"the Docs link","expect":"present","element":"docs/06-docs-link","role":"link","name":"Docs"}
+{"id":"g-113","page":"/logout","phrase":"the Svatah Sample link","expect":"present","element":"logout/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-114","page":"/logout","phrase":"the Toggle navigation button","expect":"present","element":"logout/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-115","page":"/logout","phrase":"the Dashboard link","expect":"present","element":"logout/03-dashboard-link","role":"link","name":"Dashboard"}
+{"id":"g-116","page":"/logout","phrase":"the Book a slot link","expect":"present","element":"logout/04-booking-link","role":"link","name":"Book a slot"}
+{"id":"g-117","page":"/logout","phrase":"the Widgets link","expect":"present","element":"logout/05-widgets-link","role":"link","name":"Widgets"}
+{"id":"g-118","page":"/logout","phrase":"the Docs link","expect":"present","element":"logout/06-docs-link","role":"link","name":"Docs"}
+{"id":"g-119","page":"/logout","phrase":"the Sign in again link","expect":"present","element":"logout/07-sign-in-again","role":"link","name":"Sign in again"}
+{"id":"g-120","page":"/","phrase":"the Username field","expect":"absent"}
+{"id":"g-121","page":"/","phrase":"the Password field","expect":"absent"}
+{"id":"g-122","page":"/","phrase":"the Remember me checkbox","expect":"absent"}
+{"id":"g-123","page":"/login","phrase":"the Toggle sidebar button","expect":"absent"}
+{"id":"g-124","page":"/login","phrase":"the Overview link","expect":"absent"}
+{"id":"g-125","page":"/login","phrase":"the Schedule Build link","expect":"absent"}
+{"id":"g-126","page":"/dashboard","phrase":"the Project select","expect":"absent"}
+{"id":"g-127","page":"/dashboard","phrase":"the Run build button","expect":"absent"}
+{"id":"g-128","page":"/schedule-build","phrase":"the Starting point select","expect":"absent"}
+{"id":"g-129","page":"/schedule-build","phrase":"the Date field","expect":"absent"}
+{"id":"g-130","page":"/schedule-build","phrase":"the Times select","expect":"absent"}
+{"id":"g-131","page":"/booking","phrase":"the Card number field","expect":"absent"}
+{"id":"g-132","page":"/booking","phrase":"the Expiry select","expect":"absent"}
+{"id":"g-133","page":"/booking","phrase":"the CVV field","expect":"absent"}
+{"id":"g-134","page":"/checkout","phrase":"the Show alert button","expect":"absent"}
+{"id":"g-135","page":"/checkout","phrase":"the Show confirm button","expect":"absent"}
+{"id":"g-136","page":"/checkout","phrase":"the Show prompt button","expect":"absent"}
+{"id":"g-137","page":"/widgets","phrase":"the Frame field field","expect":"absent"}
+{"id":"g-138","page":"/widgets","phrase":"the Frame button button","expect":"absent"}
+{"id":"g-139","page":"/docs","phrase":"the Sign in again link","expect":"absent"}
+{"id":"g-140","page":"/logout","phrase":"the Sign in link","expect":"absent"}
+{"id":"g-141","page":"/logout","phrase":"the Read the docs link","expect":"absent"}
+{"id":"g-142","page":"/","variant":1,"phrase":"the Svatah Sample link","expect":"present","element":"home/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-143","page":"/","variant":1,"phrase":"the Toggle navigation button","expect":"present","element":"home/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-150","page":"/login","variant":2,"phrase":"the Svatah Sample link","expect":"present","element":"login/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-151","page":"/login","variant":2,"phrase":"the Toggle navigation button","expect":"present","element":"login/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-160","page":"/login","variant":3,"phrase":"the Svatah Sample link","expect":"present","element":"login/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-161","page":"/login","variant":3,"phrase":"the Toggle navigation button","expect":"present","element":"login/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-170","page":"/login","variant":4,"phrase":"the Svatah Sample link","expect":"present","element":"login/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-171","page":"/login","variant":4,"phrase":"the Toggle navigation button","expect":"present","element":"login/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-180","page":"/login","variant":5,"phrase":"the Svatah Sample link","expect":"present","element":"login/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-181","page":"/login","variant":5,"phrase":"the Toggle navigation button","expect":"present","element":"login/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-190","page":"/dashboard","variant":6,"phrase":"the Svatah Sample link","expect":"present","element":"dashboard/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-191","page":"/dashboard","variant":6,"phrase":"the Toggle navigation button","expect":"present","element":"dashboard/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-203","page":"/dashboard","variant":7,"phrase":"the Svatah Sample link","expect":"present","element":"dashboard/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-204","page":"/dashboard","variant":7,"phrase":"the Toggle navigation button","expect":"present","element":"dashboard/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-216","page":"/dashboard","variant":8,"phrase":"the Svatah Sample link","expect":"present","element":"dashboard/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-217","page":"/dashboard","variant":8,"phrase":"the Toggle navigation button","expect":"present","element":"dashboard/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-229","page":"/booking","variant":9,"phrase":"the Svatah Sample link","expect":"present","element":"booking/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-230","page":"/booking","variant":9,"phrase":"the Toggle navigation button","expect":"present","element":"booking/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-249","page":"/","variant":10,"phrase":"the Svatah Sample link","expect":"present","element":"home/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-250","page":"/","variant":10,"phrase":"the Toggle navigation button","expect":"present","element":"home/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-257","page":"/booking","variant":11,"phrase":"the Svatah Sample link","expect":"present","element":"booking/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-258","page":"/booking","variant":11,"phrase":"the Toggle navigation button","expect":"present","element":"booking/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-278","page":"/schedule-build","variant":12,"phrase":"the Svatah Sample link","expect":"present","element":"schedule-build/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-279","page":"/schedule-build","variant":12,"phrase":"the Toggle navigation button","expect":"present","element":"schedule-build/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-292","page":"/","variant":13,"phrase":"the Svatah Sample link","expect":"present","element":"home/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-293","page":"/","variant":13,"phrase":"the Toggle navigation button","expect":"present","element":"home/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-300","page":"/login","variant":14,"phrase":"the Svatah Sample link","expect":"present","element":"login/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-301","page":"/login","variant":14,"phrase":"the Toggle navigation button","expect":"present","element":"login/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-310","page":"/login","variant":15,"phrase":"the Svatah Sample link","expect":"present","element":"login/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-311","page":"/login","variant":15,"phrase":"the Toggle navigation button","expect":"present","element":"login/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-319","page":"/checkout","variant":16,"phrase":"the Svatah Sample link","expect":"present","element":"checkout/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-320","page":"/checkout","variant":16,"phrase":"the Toggle navigation button","expect":"present","element":"checkout/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-334","page":"/","variant":17,"phrase":"the Svatah Sample link","expect":"present","element":"home/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-335","page":"/","variant":17,"phrase":"the Toggle navigation button","expect":"present","element":"home/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-342","page":"/schedule-build","variant":18,"phrase":"the Svatah Sample link","expect":"present","element":"schedule-build/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-343","page":"/schedule-build","variant":18,"phrase":"the Toggle navigation button","expect":"present","element":"schedule-build/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-356","page":"/booking","variant":19,"phrase":"the Svatah Sample link","expect":"present","element":"booking/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-357","page":"/booking","variant":19,"phrase":"the Toggle navigation button","expect":"present","element":"booking/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-377","page":"/login","variant":20,"phrase":"the Svatah Sample link","expect":"present","element":"login/01-brand","role":"link","name":"Svatah Sample"}
+{"id":"g-378","page":"/login","variant":20,"phrase":"the Toggle navigation button","expect":"present","element":"login/02-nav-toggle","role":"button","name":"Toggle navigation"}
+{"id":"g-387","page":"/dashboard","phrase":"the logout link","expect":"present","element":"dashboard/12-nav-logout","role":"link","name":"Logout","source":"fixtures"}
+{"id":"g-388","page":"/dashboard","phrase":"the sidebar toggle","expect":"present","element":"dashboard/07-sidebar-toggle","role":"button","name":"Toggle sidebar","source":"fixtures"}
+{"id":"g-389","page":"/booking","phrase":"the 09:00 slot time","expect":"present","element":"booking/19-09-00","role":"option","name":"09:00","source":"fixtures"}
+{"id":"g-390","page":"/booking","phrase":"the 18:00 slot time","expect":"present","element":"booking/22-18-00","role":"option","name":"18:00","source":"fixtures"}
+{"id":"g-391","page":"/booking","phrase":"the Indiranagar suggestion","expect":"present","element":"booking/14-option","role":"option","source":"fixtures"}
+{"id":"g-392","page":"/booking","phrase":"the location field","expect":"present","element":"booking/13-location","role":"combobox","name":"Starting point","source":"fixtures"}
+{"id":"g-393","page":"/booking","phrase":"the next button","expect":"present","element":"booking/23-booking-next","role":"button","name":"Next","source":"fixtures"}
+{"id":"g-394","page":"/booking","phrase":"the slot date field","expect":"present","element":"booking/17-slot-date","role":"textbox","name":"Date","source":"fixtures"}
+{"id":"g-395","page":"/checkout","phrase":"the card number field","expect":"present","element":"checkout/13-card","role":"textbox","name":"Card number","source":"fixtures"}
+{"id":"g-396","page":"/checkout","phrase":"the expiry month select","expect":"present","element":"checkout/14-expiry-month","role":"combobox","name":"Expiry","source":"fixtures"}
+{"id":"g-397","page":"/checkout","phrase":"the expiry year select","expect":"present","element":"checkout/18-expiry-year","role":"combobox","source":"fixtures"}
+{"id":"g-398","page":"/checkout","phrase":"the pay button","expect":"present","element":"checkout/22-pay","role":"button","name":"Pay","source":"fixtures"}
+{"id":"g-399","page":"/","phrase":"the home heading","expect":"present","role":"heading","name":"Deterministic automation, once described","source":"fixtures"}
+{"id":"g-400","page":"/","phrase":"the sign in button","expect":"present","element":"home/07-sign-in","role":"link","name":"Sign in","source":"fixtures"}
+{"id":"g-401","page":"/login","phrase":"the login button","expect":"present","element":"login/10-login-submit","role":"button","name":"Sign In","source":"fixtures"}
+{"id":"g-402","page":"/login","phrase":"the password field","expect":"present","element":"login/08-password","role":"textbox","name":"Password","source":"fixtures"}
+{"id":"g-403","page":"/login","phrase":"the username field","expect":"present","element":"login/07-username","role":"textbox","name":"Username","source":"fixtures"}
+{"id":"g-404","page":"/","phrase":"the dashboard link","expect":"present","element":"home/03-dashboard-link","role":"link","name":"Dashboard","source":"fixtures"}
+{"id":"g-405","page":"/","phrase":"the nav toggle","expect":"present","element":"home/02-nav-toggle","role":"button","name":"Toggle navigation","source":"fixtures"}
+{"id":"g-406","page":"/schedule-build","phrase":"the schedule heading","expect":"present","role":"heading","name":"Enterprise","source":"fixtures"}

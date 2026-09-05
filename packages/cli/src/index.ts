@@ -57,3 +57,29 @@ export { runProject, type RunProjectOptions } from "./commands/run.js";
  */
 export { registerRuntimeReplayer, runtimeReplayer, type RuntimeReplayerOptions } from "./replayer.js";
 export { newRunId } from "@svatah/runtime";
+
+/** `svatah record` and the fixture answers `--gateway fake` uses (T3.3). */
+export { recordCommand } from "./commands/record.js";
+export { projectRunners, loadBindings, type ProjectRunnerOptions } from "./commands/run.js";
+export {
+  defaultCasesPath,
+  groundingAnswers,
+  readCases,
+  type GroundingAnswer,
+  type GroundingAnswers,
+  type GroundingCase,
+} from "./grounding-answers.js";
+
+/**
+ * Model-backed `bind()` recording, because module (b) is installed (T3.3).
+ *
+ * `bind()` records by asking a registered grounder and falling back to a person
+ * clicking; module (a) registers nothing. This is where module (b) fills that
+ * hole, with the same `ground()` a flow gets (LLD §6.5, §10).
+ */
+export {
+  installModelGrounding,
+  uninstallModelGrounding,
+  hasModelGrounding,
+  type ModelGroundingOptions,
+} from "./bind-grounding.js";

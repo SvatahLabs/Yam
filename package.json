@@ -23,7 +23,9 @@
     "svatah": "node packages/cli/dist/bin.js",
     "conform:playwright": "node scripts/conform.mjs",
     "quick-start": "node scripts/quick-start.mjs",
-    "eval:healing": "node scripts/eval-healing.mjs --report reports/eval-healing.md"
+    "eval:healing": "node scripts/eval-healing.mjs --report reports/eval-healing.md",
+    "record:snapshots": "node scripts/record-snapshots.mjs",
+    "grounding:cases": "node scripts/grounding-cases.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
@@ -33,6 +35,7 @@
     "@svatah/migrate": "workspace:*",
     "@svatah/schema": "workspace:*",
     "@svatah/spec": "workspace:*",
+    "@svatah/surface": "workspace:*",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "eslint-import-resolver-typescript": "catalog:",

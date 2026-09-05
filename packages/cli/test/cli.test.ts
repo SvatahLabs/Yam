@@ -51,8 +51,8 @@ describe("the command table (LLD §15)", () => {
 
   it("says which task builds a command that is not here yet", async () => {
     const io = capture();
-    expect(await main(["record"], io)).toBe(EXIT.usage);
-    expect(io.stderr.join("\n")).toContain("T3.3");
+    expect(await main(["repl"], io)).toBe(EXIT.usage);
+    expect(io.stderr.join("\n")).toContain("T4.5");
     expect(io.stderr.join("\n")).toContain("docs/spec/tasks.md");
   });
 

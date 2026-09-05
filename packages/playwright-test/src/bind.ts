@@ -45,6 +45,7 @@ import {
 import { HUMAN_PROVENANCE_MODEL, type BindingEntry, type Candidate } from "@svatah/schema";
 import { PlaywrightSurface } from "@svatah/adapter-playwright";
 import { clearPickerStamp, parseProgrammaticPicks, pickInteractively, pickSelector } from "./picker.js";
+import { currentBindGrounder, hasBindGrounder } from "./grounder.js";
 
 export type BindMode = "run" | "record" | "heal";
 
@@ -217,6 +218,30 @@ export class Binder {
 
   private async record(id: string, phrase?: string): Promise<Locator> {
     const { surface, store } = await this.open();
+
+    /*
+     * Module (b), if it is installed (LLD §6.5, T3.3).
+     *
+     * With the flow language present, `@svatah/host-playwright` has registered
+     * the recorder's grounder, and `bind("login.username-field", "the username
+     * field")` is grounded by the same `ground()` a flow gets. Module (a) alone
+     * has none registered and goes straight to the picker, which is what keeps
+     * "module (a) has no dependency on (b)" true rather than aspirational.
+     *
+     * A `null` falls back to the picker: a person at a keyboard is a better
+     * answer than an error, and that fallback is what makes this safe to try.
+     */
+    if (hasBindGrounder()) {
+      const grounder = currentBindGrounder();
+      const entry = await grounder
+        .ground({ id, ...(phrase === undefined ? {} : { phrase }) }, surface)
+        .catch(() => null);
+      if (entry !== null) {
+        store.put(id, entry, phrase);
+        this.dirty = true;
+        return surface.locatorForCandidate(entry.candidates[0]!);
+      }
+    }
 
     const picks = this.options.picks ?? parseProgrammaticPicks(process.env["SVATAH_PICK"], this.testIdAttributes[0]);
     const programmatic = picks.get(id);
