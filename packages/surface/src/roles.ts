@@ -171,3 +171,35 @@ export function normalisedRoles(): string[] {
   }
   return [...roles].sort();
 }
+
+/**
+ * The roles that are worth acting on (LLD §2.2, §11).
+ *
+ * Used two ways, and they have to agree. `snapshot({ interactiveOnly: true })`
+ * narrows to these, and the recorder's pruning keeps them when a snapshot is too
+ * large for a grounding prompt — a page whose pruned form dropped its buttons
+ * would be a page the model cannot ground anything in.
+ *
+ * The list is normalised ARIA roles, so it means the same thing whether the
+ * source was ARIA, UIA, AX, AT-SPI or an Appium class name.
+ */
+export const INTERACTIVE_ROLES: ReadonlySet<string> = new Set([
+  "button",
+  "link",
+  "textbox",
+  "searchbox",
+  "spinbutton",
+  "checkbox",
+  "radio",
+  "combobox",
+  "listbox",
+  "option",
+  "slider",
+  "menuitem",
+  "tab",
+  "switch",
+]);
+
+export function isInteractiveRole(role: string): boolean {
+  return INTERACTIVE_ROLES.has(role);
+}

@@ -23,19 +23,21 @@
   "scripts": {
     "build": "tsup --config ../../tsup.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "dependencies": {
     "@svatah/gateway": "workspace:*",
     "@svatah/bindings": "workspace:*",
     "@svatah/runtime": "workspace:*",
     "@svatah/surface": "workspace:*",
-    "@svatah/schema": "workspace:*"
+    "@svatah/schema": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "tsup": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@svatah/schema": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

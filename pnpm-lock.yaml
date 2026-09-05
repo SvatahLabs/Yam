@@ -671,6 +671,9 @@ importers:
       '@svatah/surface':
         specifier: workspace:*
         version: link:../surface
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       tsup:
         specifier: 'catalog:'

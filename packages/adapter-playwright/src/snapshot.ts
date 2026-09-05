@@ -27,7 +27,7 @@
  */
 import type { ElementHandle, Frame } from "playwright";
 import type { Ref, Snapshot, SnapshotNode } from "@svatah/schema";
-import { buildSnapshot, structuralHash } from "@svatah/surface";
+import { buildSnapshot, isInteractiveRole, structuralHash } from "@svatah/surface";
 import { walkDocument, type RawNode } from "./page-script.js";
 
 export type SnapshotMechanism = "playwright" | "own";
@@ -68,23 +68,6 @@ const ENRICHABLE_ROLES = new Set([
 
 /** Cap on how many nodes are enriched, so a pathological page cannot stall. */
 const MAX_ENRICHED = 200;
-
-const INTERACTIVE_ROLES = new Set([
-  "button",
-  "link",
-  "textbox",
-  "searchbox",
-  "spinbutton",
-  "checkbox",
-  "radio",
-  "combobox",
-  "listbox",
-  "option",
-  "slider",
-  "menuitem",
-  "tab",
-  "switch",
-]);
 
 /* ── mechanism selection ──────────────────────────────────────────────────── */
 
@@ -331,7 +314,7 @@ async function viaPlaywright(
   const selector = options.root === undefined ? "body" : `aria-ref=${options.root}`;
   const { snapshot } = await channel.ariaSnapshot({ selector, mode: "ai" });
   let nodes = parseAiSnapshot(snapshot);
-  if (options.interactiveOnly === true) nodes = nodes.filter((n) => INTERACTIVE_ROLES.has(n.role));
+  if (options.interactiveOnly === true) nodes = nodes.filter((n) => isInteractiveRole(n.role));
   nodes = nodes.slice(0, options.maxNodes ?? DEFAULT_MAX_NODES);
   await enrichStates(space, nodes);
   return nodes;

@@ -61,6 +61,8 @@ export {
 
 export {
   FALLBACK_ROLE,
+  INTERACTIVE_ROLES,
+  isInteractiveRole,
   UIA_ROLE_MAP,
   AX_ROLE_MAP,
   APPIUM_ANDROID_ROLE_MAP,
