@@ -202,6 +202,52 @@ describe("svatah run (LLD §15)", () => {
     expect(code).toBe(EXIT.compileErrors);
     expect(err).toContain("nothing to run");
   });
+
+  /*
+   * A binding file nobody can parse (P2-F2).
+   *
+   * Phase 2 let the YAML parser's error reach the top level: a stack trace out
+   * of `BindingsStore.load`, exit 1, and — worse — a `runs/<id>` directory
+   * already opened, which reads afterwards like a run that happened. A file that
+   * will not parse is a project error, like a config that will not load.
+   */
+  for (const [what, text] of [
+    ["will not parse", "this: [is: not: valid\n"],
+    [
+      "does not match the schema",
+      'entries: []\nid: "home.sign-in-button"\nphrases: []\nschemaVersion: "9.9.9"\n',
+    ],
+  ] as const) {
+    it(`reports a binding file that ${what}, and writes no run`, async () => {
+      const dir = project({
+        "svatah.config.yaml": 'schemaVersion: "1.0.0"\nbindings: { dir: bindings }\n',
+        "flows/a.flow": 'story: One\n  Go to "/"\n\ntest: One\n',
+        "bindings/home/sign-in-button.yaml": text,
+      });
+
+      const { code, err } = await cli("run", dir, "--host", "none");
+
+      expect(code).toBe(EXIT.usage);
+      expect(err).toContain("bindings/home/sign-in-button.yaml");
+      expect(err).not.toContain("at BindingsStore");
+      expect(err).not.toContain("ZodError");
+      // Nothing was written: no half-run to mistake for a real one.
+      expect(existsSync(join(dir, "runs"))).toBe(false);
+    });
+  }
+
+  it("reports it under the Playwright host too, before a worker starts", async () => {
+    const dir = project({
+      "svatah.config.yaml": 'schemaVersion: "1.0.0"\nbindings: { dir: bindings }\n',
+      "flows/a.flow": 'story: One\n  Go to "/"\n\ntest: One\n',
+      "bindings/home/sign-in-button.yaml": "this: [is: not: valid\n",
+    });
+
+    const { code, err } = await cli("run", dir, "--host", "playwright");
+    expect(code).toBe(EXIT.usage);
+    expect(err).toContain("bindings/home/sign-in-button.yaml");
+    expect(existsSync(join(dir, "runs"))).toBe(false);
+  });
 });
 
 /*

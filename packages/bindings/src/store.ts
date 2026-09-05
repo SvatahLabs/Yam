@@ -59,13 +59,25 @@ export class BindingsStore {
       try {
         raw = parseYaml(readFileSync(path, "utf8"));
       } catch (cause) {
-        throw new DataError(`${path} is not valid YAML.`, { cause });
+        // The parser's own message says the line and column; without it the
+        // diagnostic names a file and leaves the reader to find the typo.
+        const why = cause instanceof Error ? cause.message.split("\n")[0] : String(cause);
+        throw new DataError(`${path} is not valid YAML: ${why}`, { cause });
       }
       const parsed = bindingFileSchema.safeParse(raw);
       if (!parsed.success) {
-        throw new DataError(
-          `${path} is not a valid bindings file: ${JSON.stringify(parsed.error.issues)}`,
-        );
+        /*
+         * A person, not a JSON dump.
+         *
+         * A hand-edited binding file is a normal thing to get wrong, and the
+         * whole `ZodError` printed raw is a page of nesting that buries which
+         * field it was. One line per issue, deepest field first, is what someone
+         * can act on.
+         */
+        const issues = parsed.error.issues
+          .map((issue) => `  ${issue.path.join(".") || "(root)"}: ${issue.message}`)
+          .join("\n");
+        throw new DataError(`${path} is not a valid bindings file:\n${issues}`);
       }
       if (parsed.data.id !== id) {
         throw new DataError(

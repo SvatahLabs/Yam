@@ -39,6 +39,7 @@ import { createSurface } from "@svatah/surface";
 import { boolOption, numberOption, stringOption, stringOptions, type ParsedArgs } from "@svatah/bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
 import { EXIT, type ExitCode } from "@svatah/bindings-cli";
+import { ConfigError } from "../config-error.js";
 import { compileProject, loadProject } from "../project.js";
 import { report } from "./compile.js";
 import type { CommandIo } from "@svatah/bindings-cli";
@@ -60,6 +61,10 @@ export async function runCommand(args: ParsedArgs, io: CommandIo): Promise<ExitC
     io.err(`--host must be "playwright" or "none", not "${host}".`);
     return EXIT.usage;
   }
+
+  // Before either host, and before anything is written: a store that will not
+  // load is a diagnostic, not a stack trace out of a Playwright worker (F2).
+  loadBindings(loaded);
 
   // `resolve` rather than `join`, so an absolute `--out` is not appended to the
   // project root — a run directory somewhere else is a normal thing to want.
@@ -138,6 +143,33 @@ async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCo
   return outcome.summary.exitCode as ExitCode;
 }
 
+/**
+ * The bindings store, or a `ConfigError` naming the file (P2-F2).
+ *
+ * A binding file that will not parse is a project error in the same family as a
+ * config that will not load: nothing about it is discovered by running, and a
+ * stack trace out of the YAML parser tells a person nothing they can act on. As
+ * a `ConfigError` it is reported as a diagnostic and exits with the config-error
+ * code, the same as a bad `svatah.config.yaml`.
+ *
+ * Called before the run directory is opened, so a refused run leaves no
+ * half-written `runs/<id>` behind for a reader to mistake for a real one.
+ */
+export function loadBindings(
+  loaded: Awaited<ReturnType<typeof loadProject>>,
+): BindingsStore {
+  const dir = resolve(loaded.root, loaded.config.bindings.dir);
+  try {
+    return BindingsStore.load(dir);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const named = message.includes(dir)
+      ? message.split(dir).join(loaded.config.bindings.dir)
+      : `${loaded.config.bindings.dir}: ${message}`;
+    throw new ConfigError(named, loaded.config.bindings.dir);
+  }
+}
+
 /** What `runProject` needs beyond the loaded project. */
 export interface RunProjectOptions {
   /** A plan already compiled from this project; compiled here when absent. */
@@ -172,7 +204,19 @@ export async function runProject(
 
   registerAllAdapters();
 
-  const store = BindingsStore.load(resolve(context.root, loaded.config.bindings.dir));
+  /*
+   * The bindings store, before the run directory exists (P2-F1's sibling, F2).
+   *
+   * A binding file that will not parse is a project error, in the same family as
+   * a config that will not load: nothing about it is discovered by running, and
+   * a stack trace out of the YAML parser tells a person nothing they can fix. So
+   * it becomes a `ConfigError` naming the file, which `svatah run` reports as a
+   * diagnostic and exits with the config-error code — and because this happens
+   * before `openRunDirectory`, no half-written run is left behind to be read as
+   * a real one.
+   */
+  const store = loadBindings(loaded);
+
   const directory = openRunDirectory(context.outputDir, context.runId);
 
   /*
