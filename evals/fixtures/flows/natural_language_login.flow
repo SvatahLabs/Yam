@@ -28,3 +28,4 @@ compose: Login stories
   Validate text with natural language format
 
 test: Run all login stories
+  Login stories

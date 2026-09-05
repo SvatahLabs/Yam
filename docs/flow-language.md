@@ -36,9 +36,29 @@ unique per project (REQ-LANG-1). Indentation is ignored — indent for readabili
 
 | Kind | What it is |
 |---|---|
-| `story:` / `scenario:` | A named, ordered list of steps. Synonyms. |
+| `story:` | A named, ordered list of steps. A library unit: it runs when something names it. |
+| `scenario:` | The same, but it runs where it is written when the flow has no run block. |
 | `compose:` | A named ordered list of story names; expands in place (REQ-LANG-10). |
 | `test:` / `run:` | Which stories or compositions execute, in order. |
+
+### What a flow runs
+
+```
+test: Validate Text                 # runs the story or composition called "Validate Text"
+
+test: nightly                       # runs the two named below, in order
+  Validate login
+  Validate logout
+```
+
+A run block with names under it runs those names, and its own name is a label. A
+run block with nothing under it runs the story or composition of *its own name* —
+which is how every migrated flow is written, and the form the legacy files use.
+
+A flow with **no** run block at all runs its `scenario:` blocks, in file order. A
+`story:` never runs unless something names it. That is the only difference
+between the two header words, and it is why `execution.flow` — seven scenarios
+and no run block — runs.
 
 ### Header metadata (REQ-LANG-2)
 
@@ -55,6 +75,18 @@ story (tags=smoke, onFailure=compensate:cancel booking, idempotent=false): Book 
 | `onFailure` | `stop` \| `continue` \| `compensate:<story>` | The abort policy (REQ-AUTO-4). `stop` is the default. |
 | `idempotent` | `true` \| `false` | Declares the story free of side effects; lint warns when a non-idempotent story is exposed as a tool (REQ-AUTO-8). |
 | `tags` | comma-separated | Selection at run time. |
+
+The boolean keys — `enabled`, `idempotent`, `continueOnFailure` — may be written
+bare, meaning `=true`:
+
+```
+scenario (idempotent): cancel booking
+```
+
+`onFailure` and `continueOnFailure` both set the abort policy, so setting both is
+an error rather than a precedence rule nobody would remember.
+`continueOnFailure=false` sets nothing: it is the absence of the alias, not a
+third policy.
 
 ### Comments
 
@@ -1761,13 +1793,20 @@ outputs: enterprise: string
 | `W_LONG_SLEEP` | A `sleep` of more than 5 seconds. |
 | `W_CUSTOM` | The step is a Tier 0 custom step. |
 | `W_SIDE_EFFECT_TOOL` | A story with side effects is exposed as a tool but is not marked `idempotent`. |
+| `W_SECRET_UNSET` | A `${ENV}` indirection names a variable that is not set. Compiling does not need the value; running does. |
 
 Errors, which fail the compile:
 
 | Code | Meaning |
 |---|---|
+| `E_SYNTAX` | A line is not a header, a signature, a step or a comment where it stands. |
+| `E_META` | Unknown metadata key, or a value the key does not take. |
+| `E_SIGNATURE` | A malformed `inputs:` / `outputs:` line, an unknown type, or a default that does not match its type. |
+| `E_GUARD_ORPHAN` | An `Only if` / `Unless` line that guards no step. |
 | `E_DUP_STORY` | Two stories share a name. |
-| `E_TEST_EMPTY` | A `test:` / `run:` block names nothing. |
+| `E_TEST_EMPTY` | A `test:` / `run:` block runs nothing. |
+| `E_DUP_API` | Two `api/*.yaml` files declare the same request name. |
+| `E_DATA` | `data.yaml` does not parse, or `secrets:` names a path that is not in it. |
 | `E_SIGIL` | A v1 or v2 sigil or an inline locator appears in a step. Points at `migrate`. |
 | `E_VAR_UNDEFINED` | A reference is not defined earlier in order. |
 | `E_VAR_REDEFINED` | A name is captured twice. |

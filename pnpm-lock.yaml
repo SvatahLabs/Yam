@@ -619,6 +619,9 @@ importers:
       '@svatah/schema':
         specifier: workspace:*
         version: link:../schema
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.0
     devDependencies:
       tsup:
         specifier: 'catalog:'
