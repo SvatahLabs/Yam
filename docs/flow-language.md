@@ -1132,6 +1132,33 @@ The login submit should be enabled
 The book now button should be disabled
 ```
 
+The same expectation may be written three ways. All three compile to exactly the
+same step (LLD §4.2, Draft 2.6); the surface a person chose leaves no trace in
+the IR.
+
+```
+The sign in button should be visible        canonical
+Expect the sign in button to be visible     Expect <subject> to <infinitive>
+Verify the sign in button is visible        <verb> <subject> <third person>
+```
+
+The prefix verbs are `Verify`, `Check that`, `Assert that`, `Ensure`,
+`Make sure` and `Confirm`, each optionally followed by `that`:
+
+```
+Verify that the sign in button is enabled
+Check that the login submit is enabled
+Assert that the book now button is disabled
+Ensure the remember me box is checked
+Make sure the terms checkbox is unchecked
+Confirm the builds table is present
+```
+
+`Check` is the one verb that *needs* its `that`, because `Check the remember me
+box` is pattern 17 and ticks a checkbox. `Confirm the alert` is pattern 21 and
+answers a dialog: with no predicate after the target there is no expectation to
+read, so it stays a dialog step.
+
 `The sign in button should be visible` compiles to:
 
 ```json
@@ -1182,6 +1209,31 @@ The schedule heading should say {enterprise}
 The dashboard heading should contain "Welcome"
 The username field should have the value "atul"
 ```
+
+The aliases of pattern 23 apply to every predicate here, and to the page title
+and the URL as well as to elements. The infinitive follows `to`; the third person
+follows the target:
+
+```
+Expect the schedule heading to say "Enterprise"
+Verify the schedule heading says "Enterprise"
+Expect the username field to have the value "atul"
+Check that the username field has the value "atul"
+Ensure the docs link has the "target" attribute "_blank"
+Make sure the sign in button occupies 40, 180, 100, 36
+
+Expect the page title to contain "Svatah"
+Verify the page title contains "Svatah"
+Expect the URL to be "https://sample.test/dashboard"
+Ensure the URL contains "/dashboard"
+```
+
+One limitation, shared with the canonical form: the target phrase ends at the
+first `to` (infinitive form) or at the first `is`, `says`, `reads`, `contains`,
+`has`, `supports`, `occupies` or `does` (third-person form), matched as a whole
+word — exactly as it ends at the first `should`. `Expect the go to dashboard link
+to be visible` therefore does not compile; `The go to dashboard link should be
+visible` does.
 
 `The schedule heading should say "Enterprise"` compiles to:
 
@@ -1653,7 +1705,8 @@ guards, which is why one collapse buys two features.
 | Geometry | `location`, `size`, `box` |
 | Scope expression | `expr` with `eq`, `ne`, `gt`, `lt`, `matches` |
 
-Any predicate may carry `negate: true`, which is what *should not be* compiles to.
+Any predicate may carry `negate: true`, which is what *should not be*, *to not
+be* and *is not* compile to.
 
 ---
 

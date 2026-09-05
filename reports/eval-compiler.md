@@ -1,10 +1,10 @@
 # Compiler eval
 
-Run at 2026-09-04T02:08:15.091Z.
+Run at 2026-09-04T02:28:42.476Z.
 
 Model-tier answers came from `ollama:qwen2.5:3b`.
 
-**Overall exact match: 97.9%** (188 of 192).
+**Overall exact match: 98.2%** (218 of 222).
 
 Tiers covered: `tier0`, `tier1`, `tier2`. Tier 3 needs a credential.
 
@@ -13,8 +13,8 @@ Tiers covered: `tier0`, `tier1`, `tier2`. Tier 3 needs a credential.
 | Tier | Cases | Exact match | Threshold |
 |---|---|---|---|
 | `tier0` | 3 | 3 (100.0%) | — |
-| `tier1` | 148 | 148 (100.0%) | 100% |
-| `tier2` | 41 | 37 (90.2%) | 80% |
+| `tier1` | 181 | 181 (100.0%) | 100% |
+| `tier2` | 38 | 34 (89.5%) | 80% |
 
 ## Method
 
@@ -30,45 +30,6 @@ the first three come from the project rather than the sentence, and the fourth i
 different on every run by construction.
 
 ## Not matched
-
-### `g-153` (tier 2)
-
-> Browse to "https://sample.test/dashboard"
-
-```diff
-- {
-  "action": "navigate",
-  "args": {
-    "url": {
-      "kind": "literal",
-      "value": "https://sample.test/dashboard"
-    }
-  },
-  "tier": 2
-}
-
-+ {
-  "action": "navigate",
-  "args": {
-    "url": {
-      "kind": "literal",
-      "value": "https://sample.test/dashboard"
-    }
-  },
-  "expect": {
-    "predicate": {
-      "kind": "url",
-      "value": {
-        "kind": "literal",
-        "value": "https://sample.test/dashboard"
-      }
-    },
-    "subject": "page"
-  },
-  "tier": 2
-}
-
-```
 
 ### `g-161` (tier 2)
 
@@ -98,43 +59,60 @@ different on every run by construction.
 
 ```
 
-### `g-188` (tier 2)
+### `g-183` (tier 2)
 
-> Ensure the booking result reads "confirmed"
+> Confirm the alert
 
 ```diff
 - {
-  "action": "expect",
-  "expect": {
-    "predicate": {
-      "kind": "text",
-      "value": {
-        "kind": "literal",
-        "value": "confirmed"
-      }
-    },
-    "subject": "target"
-  },
-  "target": {
-    "phrase": "the booking result",
-    "ref": "booking-result",
-    "status": "unbound"
+  "action": "dialog",
+  "args": {
+    "action": {
+      "kind": "literal",
+      "value": "accept"
+    }
   },
   "tier": 2
 }
 
 + {
   "action": "expect",
-  "args": {
-    "value": {
-      "kind": "literal",
-      "value": "confirmed"
-    }
+  "expect": {
+    "predicate": {
+      "kind": "present"
+    },
+    "subject": "target"
   },
   "target": {
-    "phrase": "the booking result",
-    "ref": "booking-result",
+    "phrase": "the alert",
+    "ref": "alert",
     "status": "unbound"
+  },
+  "tier": 2
+}
+
+```
+
+### `g-185` (tier 2)
+
+> Switch to the second tab
+
+```diff
+- {
+  "action": "switchWindow",
+  "args": {
+    "index": 1
+  },
+  "tier": 2
+}
+
++ {
+  "action": "switchWindow",
+  "args": {
+    "which": {
+      "kind": "literal",
+      "value": "main"
+    }
   },
   "tier": 2
 }

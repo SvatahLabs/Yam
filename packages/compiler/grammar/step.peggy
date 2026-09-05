@@ -240,7 +240,15 @@ SetChecked
   = ("uncheck"i / "unchecks"i / "untick"i / "unticks"i) __ t:Rest {
       return step({ action: "setChecked", target: target(t), args: { checked: false } });
     }
-  / ("check"i / "checks"i / "tick"i / "ticks"i) __ t:Rest {
+  /*
+   * `Check that …` is an assertion, not a checkbox (Draft 2.6, LLD §4.2).
+   *
+   * "Check the remember me box" ticks something; "Check that the sign in button
+   * is visible" asserts something, and this rule is tried first. One word tells
+   * them apart, which is why LLD §4.2 writes the alias as `Check that` and why
+   * `AssertVerb` requires the `that` for this verb alone.
+   */
+  / ("check"i / "checks"i / "tick"i / "ticks"i) __ !("that"i !NameChar) t:Rest {
       return step({ action: "setChecked", target: target(t), args: { checked: true } });
     }
 
@@ -344,12 +352,99 @@ Remember = ("remember"i / "remembers"i / "save"i / "saves"i)
 
 /* ── 23, 24. expectations ─────────────────────────────────────────────────── */
 
+/*
+ * Three surfaces, one IR (Draft 2.6, LLD §4.2).
+ *
+ * The `should` forms are canonical. The two families below say the same thing
+ * and lower to the same step, because people writing a test write all three and
+ * a grammar that accepted only one made the other two compile errors — or worse,
+ * silently promoted them to the local model, where they cost a network round
+ * trip to arrive at an answer the grammar already knew (Phase 4 verification,
+ * F4; the synonym vocabulary listed the verbs all along).
+ *
+ *   The sign in button should be visible      canonical
+ *   Expect the sign in button to be visible   infinitive
+ *   Verify the sign in button is visible      third person
+ *
+ * The predicate rules are shared where the shape is shared: `Expect … to …` is
+ * followed by exactly the infinitive `TargetPredicate` the `should` forms take,
+ * so that family is three lines and no duplicated predicate table. The
+ * third-person family needs its own — `says` rather than `say`, `has` rather
+ * than `have` — and is `…Is` throughout.
+ *
+ * Page title and URL come before the target forms so "the page title" is read as
+ * the subject it is rather than as an element phrase.
+ */
 Expectation
   = "the page title should"i __ p:TitlePredicate { return step({ action: "expect", expect: { subject: "page", predicate: p } }); }
   / "the url should"i __ p:UrlPredicate { return step({ action: "expect", expect: { subject: "page", predicate: p } }); }
+  / ExpectVerb __ "the page title to"i __ p:TitlePredicate { return step({ action: "expect", expect: { subject: "page", predicate: p } }); }
+  / ExpectVerb __ "the url to"i __ p:UrlPredicate { return step({ action: "expect", expect: { subject: "page", predicate: p } }); }
+  / AssertVerb __ "the page title"i __ p:TitlePredicateIs { return step({ action: "expect", expect: { subject: "page", predicate: p } }); }
+  / AssertVerb __ "the url"i __ p:UrlPredicateIs { return step({ action: "expect", expect: { subject: "page", predicate: p } }); }
+  / ExpectVerb __ t:UntilTo __ "to"i __ p:TargetPredicate {
+      return step({ action: "expect", target: target(t), expect: { subject: "target", predicate: p } });
+    }
+  / AssertVerb __ t:UntilIsVerb __ p:TargetPredicateIs {
+      return step({ action: "expect", target: target(t), expect: { subject: "target", predicate: p } });
+    }
   / t:UntilShould __ "should"i __ p:TargetPredicate {
       return step({ action: "expect", target: target(t), expect: { subject: "target", predicate: p } });
     }
+
+/** `Expect [that] …`, which is followed by an infinitive. */
+ExpectVerb = ("expect"i / "expects"i) (__ "that"i !NameChar)?
+
+/**
+ * `Verify [that] …` and its synonyms, which are followed by a third person.
+ *
+ * LLD §4.2 names `Verify`, `Check that`, `Assert that`, `Ensure`, `Make sure`
+ * and `Confirm`. `that` is optional after all of them rather than required
+ * after two: "Check the sign in button is visible" is the same sentence.
+ *
+ * `Confirm the alert` is not an expectation and must stay one: it has no
+ * predicate, so `TargetPredicateIs` finds nothing to match and the whole
+ * alternative fails, exactly as it did before this rule existed.
+ */
+AssertVerb
+  = ("verify"i / "verifies"i / "assert"i / "asserts"i / "ensure"i / "ensures"i
+    / "make sure"i / "makes sure"i / "confirm"i / "confirms"i) (__ "that"i !NameChar)?
+  /*
+   * `Check` needs its `that`, because `Check the remember me box` is pattern 17
+   * and has been since Draft 1. LLD §4.2 spells the alias `Check that` for
+   * exactly this reason.
+   */
+  / ("check"i / "checks"i) __ "that"i !NameChar
+
+TitlePredicateIs
+  = ("contains"i / "contain"i) __ v:Value { return { kind: "titleContains", value: v }; }
+  / ("is"i / "says"i / "reads"i / "equals"i) __ v:Value { return { kind: "title", value: v }; }
+
+UrlPredicateIs
+  = ("contains"i / "contain"i) __ v:Value { return { kind: "urlContains", value: v }; }
+  / ("is"i / "says"i / "equals"i) __ v:Value { return { kind: "url", value: v }; }
+
+/**
+ * The third-person mirror of `TargetPredicate`, in the same order.
+ *
+ * The order is not cosmetic: `is 800 by 600` has to be tried before
+ * `is a "<tag>"` and both before the bare state words, or a size is read as a
+ * tag and a tag as a state.
+ */
+TargetPredicateIs
+  = ("says"i / "reads"i) __ v:Value { return { kind: "text", value: v }; }
+  / ("contains"i / "contain"i) __ v:Value { return { kind: "textContains", value: v }; }
+  / "has the value"i __ v:Value { return { kind: "value", value: v }; }
+  / "has the"i __ a:QuotedText __ "attribute"i __ v:Value { return { kind: "attribute", name: a, value: v }; }
+  / "has the"i __ a:QuotedText __ "style"i __ v:Value { return { kind: "css", name: a, value: v }; }
+  / "supports multiple selection"i { return { kind: "multiSelect" }; }
+  / ("does not support"i / "supports no"i) __ "multiple selection"i { return { kind: "multiSelect", negate: true }; }
+  / "is at"i __ ns:NumberList { return { kind: "location", numbers: ns }; }
+  / "occupies"i __ ns:NumberList { return { kind: "box", numbers: ns }; }
+  / "is"i __ w:Number __ "by"i __ h:Number { return { kind: "size", numbers: [w, h] }; }
+  / ("is an"i / "is a"i) __ v:Value { return { kind: "tag", value: v }; }
+  / "is not"i __ p:StateWord { return { ...p, negate: true }; }
+  / "is"i __ p:StateWord { return p; }
 
 TitlePredicate
   = ("contain"i / "contains"i) __ v:Value { return { kind: "titleContains", value: v }; }
@@ -586,6 +681,18 @@ UntilToBe       = chars:$((!(__ "to be"i !NameChar) .)+) { return chars; }
 UntilAs         = chars:$((!(__ "as"i !NameChar) .)+) { return chars; }
 UntilShould     = chars:$((!(__ "should"i !NameChar) .)+) { return chars; }
 UntilIs         = chars:$((!(__ ("is not"i / "is"i) !NameChar) .)+) { return chars; }
+UntilTo         = chars:$((!(__ "to"i !NameChar) .)+) { return chars; }
+/*
+ * Up to the verb a third-person expectation turns on (Draft 2.6, LLD §4.2).
+ *
+ * Third person only — `says`, not `say`. The set is what ends a target phrase,
+ * and every word in it is one a phrase might otherwise contain: "the read more
+ * link is visible" must end at `is`, not at `read`. Restricting the set to the
+ * conjugated forms is what buys that, and costs nothing, because after
+ * `Verify the …` the predicate is third person anyway.
+ */
+UntilIsVerb     = chars:$((!(__ ("is"i / "says"i / "reads"i / "contains"i / "has"i
+                             / "supports"i / "occupies"i / "does"i) !NameChar) .)+) { return chars; }
 
 NameChar = [A-Za-z0-9_-]
 

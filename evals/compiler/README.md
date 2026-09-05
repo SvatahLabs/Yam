@@ -79,13 +79,20 @@ for setting up the local model Tier 2 uses.
 
 ### Corpus size
 
-REQ-COMP-9 asks for at least 300 pairs before release. The set holds 192: 148
-tier 1 (T0.6 required 120), 3 tier 0, and 41 tier 2 added by T4.3. Growing it to
-300 is release work, not phase work, and is recorded as a known gap in
-`docs/spec/progress/phase-4.md`.
+REQ-COMP-9 asks for at least 300 pairs before release. The set holds 222: 181
+tier 1 (T0.6 required 120), 3 tier 0, and 38 tier 2. Growing it to 300 is release
+work, not phase work, and is recorded as a known gap in
+`docs/spec/progress/phase-5.md`.
 
 ## History
 
 Phase 0 seeded the first 148 tier-1 entries (T0.6). T2.4 measured against them.
 T4.3 added the 41-entry `tier: 2` subset and the local model that answers it;
 T4.4 built `svatah eval compiler` and published the report.
+
+P4-F4 added the 30 assertion-alias entries and moved three from tier 2 to tier 1.
+`Make sure the dashboard heading is visible`, `Verify that the sign in button is
+enabled` and `Ensure the booking result reads "confirmed"` were `tier: 2` cases
+only because the grammar refused them; now that it accepts them (LLD §4.2,
+Draft 2.6) they never reach the model, and a `tier: 2` entry the grammar answers
+is not a Tier 2 measurement — it is a Tier 1 one wearing the wrong label.

@@ -231,3 +231,128 @@ describe("performance (REQ-COMP-2: 1,000 steps in under 1 s)", () => {
     expect(elapsed).toBeLessThan(BUDGET_MS);
   });
 });
+
+/**
+ * The assertion aliases (P4-F4, Draft 2.6, LLD §4.2).
+ *
+ * "The grammar accepts `Expect <subject> to …` and the `Verify / Check that /
+ * Assert that / Ensure / Make sure / Confirm` prefixes for target, page-title
+ * and URL predicates, lowering to the same IR as the canonical `should` forms."
+ *
+ * Phase 4's verifier typed `Expect the sign in button to be visible` at the REPL
+ * and got `E_NO_MATCH`, although the synonym vocabulary had listed those verbs
+ * for `expect` since Draft 1. The golden set has an entry per alias; what is
+ * asserted here is the property that makes the aliases safe — that the surface a
+ * person chose leaves no trace in the step.
+ */
+describe("assertion aliases lower to the canonical IR (P4-F4, LLD §4.2)", () => {
+  const same = (canonical: string, ...aliases: string[]): void => {
+    const parse = (text: string): unknown => {
+      const result = parseSentence(text, { file: "aliases", line: 1 });
+      expect(result.raw, `${text}: ${result.diagnostics.map((d) => d.code).join(", ")}`).toBeDefined();
+      return result.raw;
+    };
+    const expected = JSON.stringify(parse(canonical));
+    for (const alias of aliases) expect(JSON.stringify(parse(alias)), alias).toBe(expected);
+  };
+
+  it("says the same thing about an element's state, six ways", () => {
+    same(
+      "The sign in button should be visible",
+      "Expect the sign in button to be visible",
+      "Verify the sign in button is visible",
+      "Verify that the sign in button is visible",
+      "Check that the sign in button is visible",
+      "Assert that the sign in button is visible",
+      "Ensure the sign in button is visible",
+      "Make sure the sign in button is visible",
+      "Confirm the sign in button is visible",
+    );
+  });
+
+  it("negates the same way", () => {
+    same(
+      "The login error should not be visible",
+      "Expect the login error to not be visible",
+      "Verify the login error is not visible",
+      "Ensure that the login error is not visible",
+    );
+  });
+
+  it("carries text, value, attribute, tag and geometry predicates through", () => {
+    same(
+      'The schedule heading should say "Enterprise"',
+      'Expect the schedule heading to say "Enterprise"',
+      'Verify the schedule heading says "Enterprise"',
+      'Confirm the schedule heading reads "Enterprise"',
+    );
+    same(
+      'The username field should have the value "atul"',
+      'Expect the username field to have the value "atul"',
+      'Check that the username field has the value "atul"',
+    );
+    same(
+      'The docs link should have the "target" attribute "_blank"',
+      'Ensure the docs link has the "target" attribute "_blank"',
+    );
+    same(
+      'The schedule heading should be an "h1"',
+      'Confirm the schedule heading is an "h1"',
+    );
+    same(
+      "The sign in button should occupy 40, 180, 100, 36",
+      "Make sure the sign in button occupies 40, 180, 100, 36",
+    );
+    same(
+      "The sign in button should be 100 by 36",
+      "Expect the sign in button to be 100 by 36",
+    );
+  });
+
+  it("covers the page title and the URL, not only elements", () => {
+    same(
+      'The page title should contain "Svatah"',
+      'Expect the page title to contain "Svatah"',
+      'Verify the page title contains "Svatah"',
+    );
+    same(
+      'The page title should be "Dashboard"',
+      'Expect the page title to be "Dashboard"',
+      'Check that the page title is "Dashboard"',
+    );
+    same(
+      'The URL should contain "/dashboard"',
+      'Expect the URL to contain "/dashboard"',
+      'Ensure the URL contains "/dashboard"',
+    );
+    same(
+      'The URL should be "/dashboard"',
+      'Expect the URL to be "/dashboard"',
+      'Make sure the URL is "/dashboard"',
+    );
+  });
+
+  it("leaves `Check the remember me box` a checkbox", () => {
+    /*
+     * The one collision the aliases create: `check` is pattern 17's verb. LLD
+     * §4.2 spells the alias `Check that`, and the `that` is what tells them
+     * apart — so the checkbox sentence has to keep working unchanged.
+     */
+    const checkbox = parseSentence("Check the remember me box", { file: "a", line: 1 }).raw;
+    expect(checkbox?.action).toBe("setChecked");
+    expect(checkbox?.args?.["checked"]).toBe(true);
+
+    const assertion = parseSentence("Check that the remember me box is checked", {
+      file: "a",
+      line: 1,
+    }).raw;
+    expect(assertion?.action).toBe("expect");
+  });
+
+  it("leaves `Confirm the alert` alone, since it has no predicate", () => {
+    // `confirm` is an alias verb and `Confirm the alert` is not an assertion.
+    // With nothing for the predicate rules to match, the alternative fails and
+    // the sentence falls through exactly as it did before (golden g-183).
+    expect(parseSentence("Confirm the alert", { file: "a", line: 1 }).raw).toBeUndefined();
+  });
+});
