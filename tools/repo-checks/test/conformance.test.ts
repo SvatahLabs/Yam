@@ -38,7 +38,7 @@ const DOCUMENTED_FAILURES = [
 
 describe("the runtime conformance fixture (T2.10)", () => {
   it("is complete", () => {
-    for (const file of ["results.jsonl", "summary.json", "audit.jsonl", "plan.sha256", "README.md"]) {
+    for (const file of ["results.jsonl", "summary.json", "plan.sha256", "README.md"]) {
       expect(existsSync(join(DIR, file)), file).toBe(true);
     }
   });
@@ -55,12 +55,47 @@ describe("the runtime conformance fixture (T2.10)", () => {
     );
   });
 
-  it("every result validates against the published schema (REQ-STD-1)", () => {
-    // A foreign runtime is compared against this file; a result that does not
-    // validate is not a comparison anyone can make.
-    for (const result of results) expect(() => stepResultSchema.parse(result)).not.toThrow();
+  it("is canonical, so it can be diffed", () => {
+    /*
+     * A run id, three timestamps and a duration change on every run. A verbatim
+     * copy could never be diffed — CI would report a change every time — so
+     * those are removed, and what is left is what a foreign runtime is compared
+     * on (REQ-STD-3).
+     */
+    for (const result of results) {
+      for (const field of ["runId", "startedAt", "endedAt", "durationMs"]) {
+        expect(result[field], `${field} is still in the fixture`).toBeUndefined();
+      }
+    }
+    const summary = JSON.parse(readFileSync(join(DIR, "summary.json"), "utf8")) as Record<string, unknown>;
+    expect(summary["runId"]).toBeUndefined();
+    expect(summary["totals"]).toBeDefined();
+    expect(summary["planHash"]).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("every result is the shape the published schema describes (REQ-STD-1)", () => {
+    // Minus the run's own fields, which is what `stepResultSchema` also wants
+    // once they are put back — so the check is that the rest is intact.
+    const at = "2026-09-02T00:00:00.000Z";
+    for (const result of results) {
+      expect(() =>
+        stepResultSchema.parse({
+          ...result,
+          runId: "r",
+          startedAt: at,
+          endedAt: at,
+          durationMs: 0,
+        }),
+      ).not.toThrow();
+    }
     expect(() =>
-      summarySchema.parse(JSON.parse(readFileSync(join(DIR, "summary.json"), "utf8"))),
+      summarySchema.parse({
+        ...(JSON.parse(readFileSync(join(DIR, "summary.json"), "utf8")) as object),
+        runId: "r",
+        startedAt: at,
+        endedAt: at,
+        configHash: "c",
+      }),
     ).not.toThrow();
   });
 

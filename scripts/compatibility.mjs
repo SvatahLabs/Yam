@@ -28,7 +28,7 @@
  */
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -75,7 +75,14 @@ function runCli(args, env = {}) {
   });
 }
 
-/** A step result with the fields a second run is supposed to change removed. */
+/**
+ * A step result with the fields a second run is supposed to change removed.
+ *
+ * The run id, the timestamps and the duration are the run's, not the plan's. So
+ * is everything after a failure message's first line: a locator failure lists
+ * each candidate with how long it took, and "2 ms" is not something two runs
+ * agree on. The first line — what failed and why — is.
+ */
 function comparable(result) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { runId, startedAt, endedAt, durationMs, failure, ...rest } = result;
@@ -83,7 +90,13 @@ function comparable(result) {
     ...rest,
     ...(failure === undefined
       ? {}
-      : { failure: { class: failure.class, ...(failure.policyApplied === undefined ? {} : { policyApplied: failure.policyApplied }) } }),
+      : {
+          failure: {
+            class: failure.class,
+            message: (failure.message ?? "").split("\n")[0],
+            ...(failure.policyApplied === undefined ? {} : { policyApplied: failure.policyApplied }),
+          },
+        }),
   };
 }
 
@@ -176,17 +189,37 @@ async function main() {
     }
 
     /*
-     * The conformance fixture (REQ-STD-2).
+     * The conformance fixture (REQ-STD-2), written *canonically*.
      *
-     * Only the run's own files are replaced. `README.md` explains the fixture
-     * and the four documented failures, and is written by hand — wiping the
-     * directory would delete it, which is how the last run deleted it.
+     * A run id, three timestamps and a duration change on every run, so a
+     * verbatim copy could never be diffed — CI would report a change every time
+     * and nobody would read the diff. What a foreign runtime is compared on is
+     * the status and the matched candidate (REQ-STD-3), and those are exactly
+     * what survives here. The raw run stays in `runs/` for whoever wants it.
+     *
+     * Only the run's own files are replaced: `README.md` is written by hand and
+     * wiping the directory would delete it, which is how the last run deleted it.
      */
     mkdirSync(conformance, { recursive: true });
     for (const name of ["results.jsonl", "summary.json", "audit.jsonl", "plan.sha256", "screenshots", "checkpoints"]) {
       rmSync(join(conformance, name), { recursive: true, force: true });
     }
-    cpSync(results.find((r) => r.host === "none").dir, conformance, { recursive: true });
+
+    const canonical = results.find((r) => r.host === "none");
+    writeFileSync(
+      join(conformance, "results.jsonl"),
+      `${canonical.results.map((r) => JSON.stringify(comparable(r))).join("\n")}\n`,
+      "utf8",
+    );
+
+    const summary = JSON.parse(readFileSync(join(canonical.dir, "summary.json"), "utf8"));
+    const { runId, startedAt, endedAt, configHash, ...stable } = summary;
+    void runId;
+    void startedAt;
+    void endedAt;
+    void configHash;
+    writeFileSync(join(conformance, "summary.json"), `${JSON.stringify(stable, null, 2)}\n`, "utf8");
+
     writeFileSync(
       join(conformance, "plan.sha256"),
       `${planSha}  plan.json (svatah compile evals/fixtures --stable)\n`,
@@ -194,10 +227,9 @@ async function main() {
     );
     console.log(`wrote the conformance fixture to ${outArg > 0 ? process.argv[outArg + 1] : CONFORMANCE_DIR}`);
 
-    const summary = JSON.parse(readFileSync(join(conformance, "summary.json"), "utf8"));
     console.log(
-      `\ntotals: ${summary.totals.passed} passed, ${summary.totals.failed} failed, ` +
-        `${summary.totals.skipped} skipped, ${summary.totals.aborted} aborted`,
+      `\ntotals: ${stable.totals.passed} passed, ${stable.totals.failed} failed, ` +
+        `${stable.totals.skipped} skipped, ${stable.totals.aborted} aborted`,
     );
 
     process.exit(failures === 0 ? 0 : 1);

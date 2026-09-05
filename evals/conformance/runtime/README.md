@@ -1,8 +1,12 @@
 # The runtime conformance fixture
 
-`results.jsonl`, `summary.json`, `audit.jsonl` and `plan.sha256` from one run of
-the four migrated fixture flows against `apps/sample-web` (T2.10, REQ-NFR-8,
-REQ-STD-2).
+`results.jsonl`, `summary.json` and `plan.sha256` from one run of the four
+migrated fixture flows against `apps/sample-web` (T2.10, REQ-NFR-8, REQ-STD-2).
+
+They are written **canonically**: the run id, the timestamps, the durations and
+the config hash are removed. Those change on every run, so a verbatim copy could
+never be diffed — CI would report a change every time and nobody would read the
+diff. What is left is exactly what a foreign runtime is compared on.
 
 Regenerate with:
 
