@@ -163,6 +163,14 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       .then((one) => one.hash)
       .catch(() => undefined);
     const describe = ref === undefined ? undefined : await live.describe(ref).catch(() => undefined);
+    /*
+     * And where the call was made (T5.5). A binding entry is keyed by a context,
+     * and a context is a URL pattern plus the structural hash above — so a
+     * trajectory with the hash and not the URL is one the compiler can group but
+     * cannot address. Best effort: a non-web surface has no URL and says so by
+     * having none.
+     */
+    const url = (await live.state().catch(() => undefined))?.url;
 
     try {
       const result = await run(live);
@@ -171,6 +179,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
         call,
         ...(Object.keys(args).length === 0 ? {} : { args }),
         ...(snapshotHash === undefined ? {} : { snapshotHash }),
+        ...(url === undefined ? {} : { url }),
         ...(ref === undefined ? {} : { ref }),
         ...(describe === undefined ? {} : { describe }),
         ...(result === undefined ? {} : { result }),
@@ -182,6 +191,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
         call,
         ...(Object.keys(args).length === 0 ? {} : { args }),
         ...(snapshotHash === undefined ? {} : { snapshotHash }),
+        ...(url === undefined ? {} : { url }),
         ...(ref === undefined ? {} : { ref }),
         ...(describe === undefined ? {} : { describe }),
         error: error instanceof Error ? error.message.split("\n")[0]! : String(error),

@@ -54,6 +54,8 @@ Flows (module b):
                     [--base-url <url>] [--storage-state <path.json>]
                     [--headed] [--allow-side-effects] [--out runs] [--json]
   svatah mcp [dir] [--trajectory <path.jsonl>] [--session <id>]
+  svatah trajectory compile <trajectory.jsonl> [dir] [--name "Story name"]
+                            [--out proposals] [--app proposed] [--json]
 
 Bindings and healing (module a):
 
@@ -337,6 +339,8 @@ async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Pro
       return await (await import("./commands/workflow.js")).workflowCommand(args, io);
     case "tool":
       return await (await import("./commands/tool.js")).toolCommand(args, io);
+    case "trajectory":
+      return await (await import("./commands/trajectory.js")).trajectoryCommand(args, io);
     default: {
       const task = LATER[command];
       io.err(

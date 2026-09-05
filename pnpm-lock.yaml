@@ -941,6 +941,9 @@ importers:
       '@svatah/schema':
         specifier: workspace:*
         version: link:../schema
+      '@svatah/spec':
+        specifier: workspace:*
+        version: link:../spec
       zod:
         specifier: 'catalog:'
         version: 3.25.76

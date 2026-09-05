@@ -29,7 +29,8 @@
     "@svatah/compiler": "workspace:*",
     "@svatah/recorder": "workspace:*",
     "@svatah/schema": "workspace:*",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@svatah/spec": "workspace:*"
   },
   "devDependencies": {
     "tsup": "catalog:",

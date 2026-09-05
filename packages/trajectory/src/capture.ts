@@ -54,6 +54,18 @@ export const trajectoryLineSchema = z
      * tells it a navigation happened between two that it cannot see otherwise.
      */
     snapshotHash: z.string().optional(),
+    /**
+     * The URL the call was made on (T5.5).
+     *
+     * LLD §13.4 lists `{ seq, intent, call, snapshotHash, ref, describe }` and
+     * this is one more, for one reason: a binding entry is keyed by a *context*,
+     * and a context is a URL pattern plus a structural hash (LLD §3.3, §6.2).
+     * The hash is here; without the URL the compiler would have to invent the
+     * pattern, and a proposal's binding would be addressed to a page nobody
+     * could name. Optional, so a trajectory captured before this — or by a
+     * non-web adapter, which has no URL — still reads and still compiles.
+     */
+    url: z.string().optional(),
     /** The reference the call acted on, when it acted on one. */
     ref: refSchema.optional(),
     /**
