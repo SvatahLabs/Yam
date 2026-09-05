@@ -30,14 +30,35 @@ const answering = (
 };
 
 describe("the permission check (REQ-ADP-7, `svatah surface doctor`)", () => {
-  it("is granted when the smallest accessibility call answers", async () => {
-    const { run, calls } = answering('{"ok":true,"processes":42}');
+  it("is granted only when an assistive-access call answers", async () => {
+    const { run, calls } = answering('{"ok":true,"processes":42,"elements":7}');
     const permission = await osascriptBridge({ process: "Svatah ADE", run }).permission();
     expect(permission.state).toBe("granted");
-    // Counting processes touches no application and asks for no attribute, so a
-    // failure is about the permission rather than about the target.
-    expect(calls[0]!.script).toContain("applicationProcesses.length");
+
+    /*
+     * The check has to read **UI elements**, not count processes.
+     *
+     * Counting `applicationProcesses` needs only Automation permission for
+     * System Events and succeeds on a machine where the accessibility API is
+     * refused — so a `doctor` built on it reported `granted` while every
+     * `snapshot` failed with `-25211`. That is the worst kind of diagnostic:
+     * confidently wrong, and it sends the reader to look at the adapter.
+     */
+    expect(calls[0]!.script).toContain("uiElements()");
+    // And it touches no application under test.
     expect(calls[0]!.script).not.toContain("Svatah ADE");
+  });
+
+  it("reads `not allowed assistive access` as denied, which is what it is", async () => {
+    const refused: Run = async () => ({
+      code: 1,
+      stdout: "",
+      stderr: "execution error: Error: Error: osascript is not allowed assistive access. (-25211)",
+      timedOut: false,
+    });
+    const permission = await osascriptBridge({ process: "Svatah ADE", run: refused }).permission();
+    expect(permission.state).toBe("denied");
+    expect(permission.advice).toContain("restart it");
   });
 
   it("reads a timeout as the unanswered prompt, and says where to grant it", async () => {

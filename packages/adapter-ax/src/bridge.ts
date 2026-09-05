@@ -200,14 +200,32 @@ export async function runOsascript(
  * ──────────────────────────────────────────────────────────────────────────── */
 
 /**
- * The smallest call that needs the Accessibility permission and nothing else.
+ * The smallest call that needs **assistive access**, and nothing else.
  *
- * Counting processes touches no application and asks for no attribute, so a
- * failure here is about the permission rather than about the target.
+ * The distinction matters and cost a wrong answer to get right. Counting
+ * `applicationProcesses` needs only Automation permission for System Events —
+ * it succeeds on a machine where the accessibility API is refused — so a
+ * `doctor` built on it reported `granted` while every `snapshot` failed with
+ * `-25211`, which is the worst kind of diagnostic: confidently wrong, and it
+ * sends the reader to look at the adapter.
+ *
+ * Reading a process's `UI elements` is the thing the adapter actually does, so
+ * it is the thing the check does. `System Events` itself is the target: it is
+ * always running, it belongs to the OS, and asking it about its own interface
+ * touches no application under test.
  */
 const PERMISSION_SCRIPT = `function run(argv) {
   const se = Application("System Events");
-  return JSON.stringify({ ok: true, processes: se.applicationProcesses.length });
+  const procs = se.applicationProcesses.length;
+  // The assistive-access call. Any process would do; the one guaranteed to be
+  // running is System Events itself.
+  const self = se.applicationProcesses.byName("System Events");
+  let windows = 0;
+  try { windows = self.windows().length; } catch (e) { windows = 0; }
+  // A window list is not enough on its own — a process with no windows answers
+  // 0 either way — so a UI-element read is what the check turns on.
+  const elements = se.applicationProcesses.byName("Finder").uiElements().length;
+  return JSON.stringify({ ok: true, processes: procs, windows: windows, elements: elements });
 }`;
 
 /**
@@ -403,13 +421,18 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
       }
       const detail = (result.stderr || result.stdout).trim();
       /*
-       * `-1743` is "Not authorised to send Apple events"; `-25211` is the
-       * accessibility API's own refusal. Anything else that fails here is
-       * treated as the prompt, because a first run on a clean machine produces
-       * a timeout rather than either code and telling someone "denied" when
-       * they have simply not been asked yet sends them to the wrong screen.
+       * `-1743` is "Not authorised to send Apple events"; `-25211` is
+       * "not allowed assistive access", which is the accessibility API's own
+       * refusal and the one this adapter runs into. Anything else that fails
+       * here is treated as the prompt, because a first run on a clean machine
+       * produces a timeout rather than either code, and telling someone
+       * "denied" when they have simply not been asked yet sends them to the
+       * wrong screen.
        */
-      const denied = detail.includes("-1743") || detail.includes("-25211");
+      const denied =
+        detail.includes("-1743") ||
+        detail.includes("-25211") ||
+        detail.includes("assistive access");
       return {
         state: denied ? "denied" : "prompt-pending",
         advice: denied ? DENIED_ADVICE : PROMPT_ADVICE,
