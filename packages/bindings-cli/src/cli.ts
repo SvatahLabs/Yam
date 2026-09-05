@@ -21,7 +21,8 @@ const USAGE = `svatah-bindings — the bindings store and model-free healing (mo
   svatah-bindings bindings verify [--adapter <name>] [--base-url <url>] [--id <id>] [--json]
   svatah-bindings bindings prune [--used-in <dirs>] [--apply] [--json]
   svatah-bindings heal --from-bind-failures | --run <id>
-                       [--dir <bindings>] [--out <.svatah>] [--base-url <url>]
+                       [--dir <bindings>] [--out <.svatah>] [--runs <runs>]
+                       [--base-url <url>] [--storage-state <path.json>]
                        [--apply] [--no-model] [--headed] [--json]
   svatah-bindings surface conform --adapter <name> [--base-url <url>] [--headed]
                                   [--only <ids>] [--report <path.md>] [--json]

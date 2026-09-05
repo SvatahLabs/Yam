@@ -51,8 +51,9 @@ Bindings and healing (module a):
   svatah bindings show <id> [--dir <bindings>] [--json]
   svatah bindings verify [--adapter <name>] [--base-url <url>] [--id <id>] [--json]
   svatah bindings prune [--used-in <dirs>] [--apply] [--json]
-  svatah heal --from-bind-failures | --run <id>
-              [--dir <bindings>] [--out <.svatah>] [--base-url <url>]
+  svatah heal --from-bind-failures | --run <id> [--project <dir>]
+              [--dir <bindings>] [--out <.svatah>] [--runs <runs>]
+              [--base-url <url>] [--storage-state <path.json>]
               [--apply] [--no-model] [--headed] [--json]
   svatah eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
 
@@ -60,13 +61,27 @@ Exit codes are the table in LLD §15.
 `;
 
 /**
- * Wire module (b)'s replayer in, if the project this is run from has a plan.
+ * Prepare `svatah heal --run <id>`: the replayer, and where the flow starts.
+ *
+ * Two things the project knows and module (a) does not.
+ *
+ * **The replayer.** `heal --run` replays the story to the failing step, which
+ * needs the executor; the healer cannot import it (module (a), REQ-PKG-1), so it
+ * is registered as a plugin (LLD §10, Draft 2.3).
+ *
+ * **The flow's start.** Draft 2.4 (LLD §10) says both replayers begin from a
+ * session opened at the flow's base URL with the configured storage state. The
+ * heal command takes those as `--base-url` and `--storage-state`; when they were
+ * not given, the project's config is where they come from, so
+ * `svatah heal --run <id>` works from a project directory with no flags at all.
+ * An explicit flag always wins — someone healing against a second environment
+ * said so deliberately.
  *
  * Best effort by design: a project that will not load is not a reason to refuse
  * to heal — the session-state default still works — so a failure here leaves the
  * default in place and says so.
  */
-async function registerReplayerForRun(args: ParsedArgs, io: CommandIo): Promise<void> {
+async function prepareRunHeal(args: ParsedArgs, io: CommandIo): Promise<ParsedArgs> {
   try {
     const { loadProject } = await import("./project.js");
     const { registerRuntimeReplayer } = await import("./replayer.js");
@@ -94,11 +109,20 @@ async function registerReplayerForRun(args: ParsedArgs, io: CommandIo): Promise<
       },
       onProgress: (message) => io.err(`  ${message}`),
     });
+
+    const from = {
+      ...(loaded.config.app.baseUrl === undefined ? {} : { "base-url": loaded.config.app.baseUrl }),
+      ...(loaded.config.app.storageState === undefined
+        ? {}
+        : { "storage-state": loaded.config.app.storageState }),
+    };
+    return { ...args, options: { ...from, ...args.options } };
   } catch (error) {
     io.err(
       "Could not load the project, so healing will restore the recorded page rather than " +
         `replaying the story to it: ${error instanceof Error ? error.message : String(error)}`,
     );
+    return args;
   }
 }
 
@@ -125,11 +149,12 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
    * `svatah-bindings heal --from-bind-failures` has no runtime and keeps module
    * (a)'s session-state default, which is the right answer for a bind failure.
    */
-  if (command === "heal" && typeof args.options["run"] === "string") {
-    await registerReplayerForRun(args, io);
-  }
+  const prepared =
+    command === "heal" && typeof args.options["run"] === "string"
+      ? await prepareRunHeal(args, io)
+      : args;
 
-  const moduleA = await runBindingsCommand(command, args, io);
+  const moduleA = await runBindingsCommand(command, prepared, io);
   if (moduleA !== undefined) return moduleA;
 
   /*

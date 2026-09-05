@@ -38,6 +38,7 @@ export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
   const runsDir = stringOption(args, "runs") ?? "runs";
   const adapter = stringOption(args, "adapter") ?? "playwright";
   const baseUrl = stringOption(args, "base-url");
+  const storageState = stringOption(args, "storage-state");
   const json = boolOption(args, "json");
   const apply = boolOption(args, "apply");
 
@@ -72,7 +73,10 @@ export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
     ...DEFAULT_CONFIG,
     project: "heal",
     adapter: adapter as Config["adapter"],
-    ...(baseUrl === undefined ? {} : { app: { baseUrl } }),
+    app: {
+      ...(baseUrl === undefined ? {} : { baseUrl }),
+      ...(storageState === undefined ? {} : { storageState }),
+    },
     run: { ...DEFAULT_CONFIG.run, headless: !boolOption(args, "headed") },
   };
 
@@ -82,21 +86,32 @@ export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
     apply,
     testIdAttributes: DEFAULT_CONFIG.bindings.testIdAttributes,
     /**
-     * Get back to the page the failure happened on.
+     * Open a session where the flow starts (Draft 2.4, LLD §10).
      *
-     * LLD §12 says the healer replays to the failing point: through the runtime
-     * for a flow, and by re-running the named Playwright test for a bind-failure.
-     * Neither exists in Phase 1 — the executor is T2.7 — so the session is put
-     * back on the URL the failure recorded, which is the page state the repair
-     * needs. Where a page is only reachable through a login, `--base-url` and a
-     * storage state get there; a failure on such a page is reported `unreachable`
-     * rather than silently mis-repaired.
+     * "Both implementations must first put the session where the flow starts,
+     * exactly as the executor does: open at the flow's base URL with the
+     * configured storage state, then replay the prefix of steps before the
+     * failing one."
+     *
+     * The navigation lives here rather than in a replayer because this is the
+     * only party that knows the base URL and the storage state — a replayer is
+     * given a session, not a configuration. Getting from the flow's start to
+     * the failing step is then the replayer's job and only the replayer's:
+     * module (a)'s default restores the state the failure recorded, module (b)'s
+     * replays the story to it, and each checks it arrived. This used to navigate
+     * to the failure's URL itself, which quietly did the session-state
+     * replayer's work for it and did nothing at all for a run whose results
+     * carried no state.
      */
-    open: async (input) => {
+    open: async () => {
       const surface = await createSurface(config);
-      await surface.open(baseUrl === undefined ? {} : { baseUrl });
-      const url = input.url ?? input.state?.url;
-      if (url !== undefined) await surface.act("navigate", undefined, { url });
+      await surface.open({
+        ...(baseUrl === undefined ? {} : { baseUrl }),
+        ...(storageState === undefined ? {} : { storageState }),
+      });
+      if (baseUrl !== undefined && surface.kind === "web") {
+        await surface.act("navigate", undefined, { url: baseUrl });
+      }
       return surface;
     },
   });

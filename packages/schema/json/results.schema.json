@@ -133,6 +133,65 @@
               "minLength": 1,
               "type": "string"
             },
+            "session": {
+              "additionalProperties": false,
+              "properties": {
+                "dialog": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "frame": {
+                  "type": "string"
+                },
+                "kind": {
+                  "enum": [
+                    "web",
+                    "mobile",
+                    "desktop",
+                    "http"
+                  ],
+                  "type": "string"
+                },
+                "storageState": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "windowIndex": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "windowTitle": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "type": "object"
+            },
             "stack": {
               "type": "string"
             }

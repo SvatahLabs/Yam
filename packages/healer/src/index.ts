@@ -28,6 +28,7 @@ export {
   clearReplayer,
   currentReplayer,
   hasReplayer,
+  reachedRecordedPage,
   registerReplayer,
   samePath,
   SESSION_STATE_REPLAYER,

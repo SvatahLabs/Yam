@@ -18,12 +18,23 @@
  * leave the session in whatever state a failed action leaves it. Replaying to
  * *just before* it puts the page in exactly the state the binding was recorded
  * against, which is where relocalization has a chance.
+ *
+ * ## Where the replay starts (Draft 2.4, LLD §10)
+ *
+ * The session it is handed has already been opened at the flow's base URL with
+ * the configured storage state, exactly as the executor opens one — that is
+ * `HealOptions.open`'s job, because it is the only party that knows them. So a
+ * story whose *first* step failed needs no replay at all, and this used to
+ * report `reached` for it unconditionally. That was the bug F1 names: with no
+ * flow-start navigation the page was `about:blank`, relocalization ran against
+ * an empty document and every such failure came back `not-found`. Now the
+ * arrival is checked against the URL the failure recorded, first step or not.
  */
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { planSchema, type Plan, type Story } from "@svatah/schema";
 import type { HealInput, Replayer, ReplayOutcome } from "@svatah/healer";
-import { registerReplayer } from "@svatah/healer";
+import { reachedRecordedPage, registerReplayer } from "@svatah/healer";
 import { runStory, Scope, type Resolver } from "@svatah/runtime";
 import type { AgentSurface } from "@svatah/surface";
 
@@ -77,9 +88,14 @@ export function runtimeReplayer(options: RuntimeReplayerOptions): Replayer {
       const at = story.steps.findIndex((step) => step.id === input.stepId);
       if (at < 0) return "unreachable";
       if (at === 0) {
-        // The first step failed, so there is nothing to replay and the story's
-        // starting page is wherever the session opened.
-        return "reached";
+        /*
+         * The first step failed, so there is nothing to replay: the session was
+         * opened at the flow's base URL and that *is* where the story starts.
+         * Checked rather than asserted (Draft 2.4, LLD §10) — a session that
+         * never navigated is on `about:blank`, and relocalizing there finds
+         * nothing and blames the fingerprint for it.
+         */
+        return await reachedRecordedPage(input, surface);
       }
 
       const prefix: Story = { ...story, steps: story.steps.slice(0, at) };
@@ -104,7 +120,12 @@ export function runtimeReplayer(options: RuntimeReplayerOptions): Replayer {
       // Anything short of every step passing means the page is not where the
       // binding was recorded, and relocalizing there would be relocalizing
       // against the wrong thing.
-      return outcome.results.every((result) => result.status === "passed") ? "reached" : "unreachable";
+      if (!outcome.results.every((result) => result.status === "passed")) return "unreachable";
+
+      // And even a clean replay has to land where the failure was recorded: a
+      // step that "passed" after the application redirected it elsewhere would
+      // otherwise hand relocalization the wrong page (Draft 2.4, LLD §10).
+      return await reachedRecordedPage(input, surface);
     },
   };
 }

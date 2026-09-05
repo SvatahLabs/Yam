@@ -28,11 +28,50 @@
  * the replayer cannot reach the failing point, the healer reports the binding as
  * unrepaired and says why, rather than relocalizing against whatever happens to
  * be on screen.
+ *
+ * ## Where a replayer starts (Draft 2.4, LLD §10)
+ *
+ * "Both implementations must first put the session where the flow starts,
+ * exactly as the executor does: open at the flow's base URL with the configured
+ * storage state, then replay the prefix of steps before the failing one."
+ *
+ * That first move belongs to whoever opens the session — `HealOptions.open`,
+ * which is the only party that knows the base URL and the storage state — so a
+ * replayer is handed a session already at the flow's start and never has to
+ * guess. What both replayers own is the rest: getting from there to the failing
+ * step, and then *checking* they arrived (`reachedRecordedPage`). A failure at a
+ * story's first step is `reached` only after that navigation, never on a blank
+ * page, which is exactly what `svatah heal --run` used to get wrong.
  */
 import type { AgentSurface } from "@svatah/surface";
 import type { HealInput } from "./failures.js";
 
 export type ReplayOutcome = "reached" | "unreachable";
+
+/**
+ * Did the session actually land on the page the failure was recorded on?
+ *
+ * "`reached` must be verified by comparing the live URL path with the recorded
+ * one before relocalization runs" (Draft 2.4, LLD §10). Paths rather than whole
+ * URLs, because a query string may legitimately differ and an origin certainly
+ * does — the sample application takes an ephemeral port.
+ *
+ * A failure that recorded no URL at all cannot be checked, and is taken at its
+ * word: a non-web surface has no URL to compare, and refusing to heal it would
+ * be refusing on a technicality.
+ */
+export async function reachedRecordedPage(
+  input: { readonly url?: string; readonly state?: { readonly url?: string } },
+  surface: AgentSurface,
+): Promise<ReplayOutcome> {
+  const wanted = input.state?.url ?? input.url;
+  if (wanted === undefined) return "reached";
+
+  const live = (await surface.state().catch(() => undefined))?.url;
+  if (live === undefined) return "reached";
+
+  return samePath(wanted, live) ? "reached" : "unreachable";
+}
 
 export interface Replayer {
   /** A name for the report, so it says how the page was reached. */
@@ -64,17 +103,10 @@ export const SESSION_STATE_REPLAYER: Replayer = {
      * Did it actually land there?
      *
      * A URL that redirects to a login page restores "successfully" and leaves
-     * the session somewhere else entirely. Comparing the path — not the whole
-     * URL, since a query string may legitimately differ — is what tells the
-     * difference between "restored" and "reached".
+     * the session somewhere else entirely. Comparing the path is what tells the
+     * difference between "restored" and "reached" (LLD §10, Draft 2.4).
      */
-    const wanted = input.state?.url ?? input.url;
-    if (wanted === undefined) return "reached";
-
-    const live = (await surface.state().catch(() => undefined))?.url;
-    if (live === undefined) return "reached";
-
-    return samePath(wanted, live) ? "reached" : "unreachable";
+    return await reachedRecordedPage(input, surface);
   },
 };
 

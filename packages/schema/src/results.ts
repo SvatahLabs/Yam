@@ -81,6 +81,16 @@ export const stepResultSchema = z
         screenshot: z.string().min(1).optional(),
         stack: z.string().optional(),
         policyApplied: onFailureSchema.optional(),
+        /**
+         * The surface state at failure (Draft 2.4, LLD §3.4).
+         *
+         * "The surface state at failure, so a healer can restore it without a
+         * plan." A run directory that records only *what* failed leaves module
+         * (a)'s session-state replayer with nowhere to go, which is why
+         * `svatah-bindings heal --run` used to answer `unreachable` for every
+         * flow failure.
+         */
+        session: sessionStateSchema.optional(),
       })
       .strict()
       .optional(),

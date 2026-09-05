@@ -101,7 +101,7 @@ export async function runStep(step: Step, context: StepContext): Promise<StepOut
   try {
     args = scope.resolveArgs(step.args);
   } catch (error) {
-    return failed(step, error, context);
+    return await failed(step, error, context);
   }
 
   /* The guard, before anything else touches the application (REQ-AUTO-1). */
@@ -113,7 +113,11 @@ export async function runStep(step: Step, context: StepContext): Promise<StepOut
       // The guard itself broke — an unresolved reference, a surface error. That
       // is `guard`, and it is a failure rather than a skip: a guard that cannot
       // be evaluated has not said the step is unnecessary (LLD §8.3).
-      return failed(step, new GuardError(`The guard could not be evaluated: ${messageOf(error)}`, error), context);
+      return await failed(
+        step,
+        new GuardError(`The guard could not be evaluated: ${messageOf(error)}`, error),
+        context,
+      );
     }
 
     const shouldRun = step.guard.mode === "onlyIf" ? holds : !holds;
@@ -142,7 +146,10 @@ export async function runStep(step: Step, context: StepContext): Promise<StepOut
     };
   } catch (error) {
     if (context.screenshots !== "never") await screenshot(step, context);
-    return { ...failed(step, error, context), ...(matched === undefined ? {} : { matched }) };
+    return {
+      ...(await failed(step, error, context)),
+      ...(matched === undefined ? {} : { matched }),
+    };
   }
 }
 
@@ -333,8 +340,21 @@ function describePredicate(predicate: Predicate): string {
 
 /* ── failure ──────────────────────────────────────────────────────────────── */
 
-function failed(step: Step, error: unknown, context: StepContext): StepOutcome {
+/**
+ * Build the failure record, including the session state (Draft 2.4, LLD §3.4).
+ *
+ * `failure.session` is what lets a healer get back to the page without a plan:
+ * module (a)'s session-state `Replayer` reads it out of `results.jsonl` and
+ * restores it (LLD §10). Without it, every flow failure was `unreachable` to
+ * `svatah-bindings heal --run`, which is the defect F1 names.
+ *
+ * Reading the state is best effort. A session that has already crashed cannot
+ * answer, and a failure record that says less is far better than a failure
+ * record that never gets written.
+ */
+async function failed(step: Step, error: unknown, context: StepContext): Promise<StepOutcome> {
   const tried = candidatesTried(error);
+  const session = await context.surface.state().catch(() => undefined);
   return {
     status: "failed",
     failure: {
@@ -345,6 +365,7 @@ function failed(step: Step, error: unknown, context: StepContext): StepOutcome {
       ...(context.screenshots === "never" || context.screenshotPath === undefined
         ? {}
         : { screenshot: context.screenshotPath(step) }),
+      ...(session === undefined ? {} : { session }),
     },
   };
 }

@@ -26,6 +26,8 @@ export interface HealInput {
   /** The run's step, when the input was a run directory. */
   readonly stepId?: string;
   readonly story?: string;
+  /** The flow the failing story belongs to, for a replayer that needs its base URL. */
+  readonly flow?: string;
 }
 
 interface BindFailureLine {
@@ -105,13 +107,27 @@ export function readRunFailures(runDir: string): HealInput[] {
     const id = elementIdOf(result);
     if (id === undefined) continue;
 
+    /*
+     * The page the step failed on (Draft 2.4, LLD §3.4, §10).
+     *
+     * Until the executor recorded `failure.session`, a run failure reached the
+     * healer with no state at all, so module (a)'s session-state replayer had
+     * nowhere to restore to and answered `unreachable` for every one of them —
+     * the defect F1 names. The state is what makes healing a run possible
+     * without a plan.
+     */
+    const session = result.failure.session;
+
     inputs.push({
       id,
       source: "run",
+      ...(session?.url === undefined ? {} : { url: session.url }),
+      ...(session === undefined ? {} : { state: session }),
       tried: (result.failure.candidatesTried ?? []).map((c) => c.by),
       contextDrift: false,
       stepId: result.stepId,
       story: result.story,
+      flow: result.flow,
     });
   }
   return inputs;
