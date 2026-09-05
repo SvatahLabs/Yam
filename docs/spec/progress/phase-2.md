@@ -28,6 +28,11 @@ Draft 2.3 spec amendments, the six Phase 1 corrections, and T2.1 … T2.12 of
 | T2.11 | Local service | done | `eb99dde`, `347ea54` |
 | T2.12 | Module (a) command line and healer replay plugin | done | `0410918` |
 
+Phase 2 was verified after `3d285f9` and accepted with corrections. Six of them
+were applied on `phase-3`; see **[Post-verification corrections](#post-verification-corrections)**
+at the end of this document, which is the later record where it and the text
+above disagree.
+
 The four spec documents were changed only by the Draft 2.3 amendments the
 verifier authorised:
 
@@ -637,8 +642,13 @@ Phase 1's K6 is half closed: T2.7 writes `runs/<id>/results.jsonl` and T2.12
 gives the healer a runtime-backed `Replayer`. What has not been demonstrated is a
 full cycle — break a binding, run the fixtures, `svatah heal --run <id>`, apply,
 re-run green — because the four documented compatibility failures are not locator
-failures a repair would fix. The `Replayer` itself is unit-tested in both
-implementations.
+failures a repair would fix.
+
+> **Corrected after verification.** This paragraph originally ended "The
+> `Replayer` itself is unit-tested in both implementations." That sentence
+> implied more than the tests showed: neither implementation could reach a page
+> from a run directory at all, and the cycle this gap named did not work. See
+> **[Post-verification corrections](#post-verification-corrections)**.
 
 ### K6 — Firefox and WebKit are not exercised
 
@@ -657,3 +667,75 @@ sample application does not reproduce, plus one HTML limitation.
 does not have. Adding one would shift the healing eval's element counts and the
 committed report, so the flow is excluded from the compatibility run (D12) and
 the behaviour it shows is covered by the executor's own policy matrix.
+
+---
+
+## Post-verification corrections
+
+Phase 2 was verified after `3d285f9` by a separate session and scored **8.1 / 10
+— accepted with corrections**. The corrections were applied on branch `phase-3`,
+ahead of any Phase 3 work, because Phase 3's model-backed healing builds on the
+cycle F1 names.
+
+### The verifier's Node 22 result
+
+The contract was re-run on **Node v22.23.2**, twice, closing most of K2 below:
+the workspace builds and the suites pass on the runtime the project declares, so
+the Node 25 result recorded above is no longer the only evidence. One qualifier,
+which became correction F3: on the *first* Node 22 run,
+`packages/compiler/test/grammar.test.ts`'s 1,000-steps-in-1-s assertion failed
+while the compiler suite ran alongside the Playwright suites; the second run and
+three isolated runs all passed. That is a load-sensitive test, not a slow
+grammar. K1 — the three-OS CI matrix — was not closed; there is still no GitHub
+remote.
+
+### The heal-from-run cycle did not work
+
+This is the correction that matters, and the report above understated it. K5 said
+the *demonstration* was missing. What the verifier found is that the
+demonstration fails: `heal --run <id>` could not repair a real flow failure
+through either command line, for two independent reasons.
+
+**`svatah heal --run` reported `not-found`.** `packages/cli/src/replayer.ts`
+returned `"reached"` whenever the failing step was a story's first, on the
+reasoning that there was nothing to replay. There was nothing to replay and also
+nothing to replay *onto*: the heal session opened a browser context and never
+navigated to the flow's base URL, so relocalization ran against `about:blank`,
+scored nothing above the threshold, and blamed the fingerprint for it.
+
+**`svatah-bindings heal --run` reported `unreachable`.** Module (a)'s
+session-state replayer restores the page a failure recorded. A run's
+`results.jsonl` carried no session state at all — the URL appeared only inside
+the failure *message* — so there was nothing to restore and the honest answer was
+the one it gave.
+
+Neither is visible from a unit test of a replayer, which is why the sentence
+claiming both were "unit-tested" was removed from K5 above: the two
+implementations were tested against inputs that carried a state, and the producer
+of the real inputs did not write one.
+
+### The corrections
+
+| # | Correction | Commit | What it closed |
+|---|---|---|---|
+| — | Draft 2.4 spec amendments | `4f3c69a` | The amendments the verifier authorised: run-block semantics (REQ-LANG-10, LLD §4.1), `failure.session` (§3.4), executor collaborators and flow-start navigation (§8), the host's own browser context (§9.1), replayer navigation and the URL check (§10), `ServiceApi` injection with `/run` input validation and signatures on `/project` (§13.5), the `unverified` outcome and the timing-test rule (§16), and the ADE under `apps/ade` (HLD §12, ADR-17, T3.6). |
+| F1 | Heal from a run directory | `d54ae55` | The two causes above. The executor records `failure.session`; the heal command opens the session at the flow's base URL with the configured storage state, and no longer navigates to the failure's URL itself; both replayers verify they arrived by comparing the live URL path with the recorded one. Five tests in `packages/cli/test/heal-cycle.test.ts` run the whole cycle — break, run, heal, apply, re-run green — through both command lines, for a failure at a story's first step and for one at a later step behind a navigation. |
+| F2 | Malformed binding file | `2f94939` | `BindingsStore.load`'s error reached the top level as a stack trace, after a run directory had already been opened. It is now a `ConfigError` naming the file, reported as a diagnostic with the config-error code, raised before either host starts and before anything is written. The store's own message names the field or the line instead of dumping a `ZodError`. |
+| F3 | Load-sensitive timing test | `705faee` | `grammar.test.ts` (REQ-COMP-2) and the executor overhead benchmark (REQ-NFR-4) each assert three times their requirement and print the measurement beside the requirement, per LLD §16 as amended. |
+| F4 | Service inputs | `9ee5725` | `POST /run` validates the supplied inputs against the signatures of the stories the run invokes directly and answers 400 listing the missing names before anything starts. `GET /project` already carried the signatures; `openapi.json` now describes both, and the contract tests cover the rule against the fake project and against a real one. |
+| F5 | This section | *this commit* | The K5 sentence above, and this record. |
+| F6 | Deviations absorbed | `4f3c69a` | D1, D2, D4, D7, D8 and D9 below are written into the spec by the Draft 2.4 amendments and are no longer deviations. They are left in place as the record of how they arose. |
+
+### What K5 and the deviations mean now
+
+- **K5 is closed.** The cycle it named runs end to end in CI, through both
+  command lines, on two shapes of failure.
+- **D1, D2, D4, D7, D8, D9 are no longer deviations.** Each is now what the spec
+  says (Draft 2.4). The sections stay above so the reasoning that produced them
+  is still readable.
+- **K2 is narrowed, not closed.** Node 22 is verified; the three operating
+  systems are not.
+
+The rest of this document is the record as it stood at verification, apart from
+the one marked correction in K5. Where a statement above contradicts one here,
+this section is the later one.
