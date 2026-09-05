@@ -77,7 +77,7 @@ Constraints stated by the owner:
 | REQ-ADP-4 | WebDriver BiDi adapter drives stock Chrome, Edge, and Firefox with no patched builds; it proves the surface boundary and passes the conformance suite. | P1 | T |
 | REQ-ADP-5 | Appium adapter targets Android Chrome and native Android; native bindings use accessibility id, resource id, and XPath candidates. | P1 | T |
 | REQ-ADP-6 | Windows UI Automation adapter drives desktop applications; candidates are automation id, role plus name, and tree path. The conformance target is the new Svatah ADE Electron application. | P2 | T |
-| REQ-ADP-7 | macOS Accessibility adapter with the same candidate kinds; documents the accessibility permission grant. Conformance target as REQ-ADP-6. | P2 | T |
+| REQ-ADP-7 | macOS Accessibility adapter with the same candidate kinds; documents the accessibility permission grant. Conformance target as REQ-ADP-6. The adapter snapshots the ADE's project screen within the surface's default deadline, and its conformance report records nodes read and milliseconds per node (Draft 2.8). | P2 | T |
 | REQ-ADP-8 | Linux AT-SPI adapter. | P3 | T |
 | REQ-ADP-9 | WebMCP-aware behaviour: when a page declares tools, the recorder may store a `webmcp` candidate and the executor prefers it over locators for that binding. | P2 | T |
 | REQ-ADP-10 | An external frozen-step browser (for example an ABP-style build) can be wrapped as an adapter; no browser is forked or vendored in this project. | P3 | R |
@@ -210,7 +210,7 @@ Constraints stated by the owner:
 |---|---|---|---|
 | REQ-STD-1 | IR, bindings, results, audit, checkpoint, config, and surface message schemas are JSON Schema files versioned with `schemaVersion` and published. | P0 | T |
 | REQ-STD-2 | Adapter conformance suite (REQ-SURF-3) and runtime conformance suite (plans plus bindings plus expected results) are published and runnable by third parties. | P0 | T |
-| REQ-STD-3 | A foreign runtime (first: Java on Playwright for Java) executes `plan.json` and bindings without the TypeScript compiler and passes the runtime conformance suite. | P2 | T |
+| REQ-STD-3 | A foreign runtime (first: Java on Playwright for Java) executes `plan.json` and bindings without the TypeScript compiler and passes the runtime conformance suite; its `results.jsonl` and `summary.json` validate against the published schemas, and the suite checks that before it compares (Draft 2.8). | P2 | T |
 | REQ-STD-4 | Provenance is mandatory on every model-produced artifact; schema validation rejects artifacts without it. | P0 | T |
 
 ### 3.12 Desktop client and local service (`REQ-ADE`)
@@ -270,6 +270,7 @@ Each requirement is referenced by at least one HLD section, one LLD section, and
 - Healing evals and all evals must be published per release (`REQ-PKG-4`, `REQ-HEAL-5`).
 - Priorities reordered so the bindings module (module a) is P0 and ships first.
 - Draft 2.7 (after Phase 5 verification): `REQ-ADE-4` requires a gateway choice and screen-appropriate failure advice.
+- Draft 2.8 (after Phase 6 verification): `REQ-STD-3` requires a foreign runtime's artifacts to validate against the published schemas; `REQ-ADP-7` requires the macOS adapter to snapshot the ADE's project screen within the surface deadline and to publish its read cost. Phase 7 (hardening and release candidate) added to the delivery plan; no new requirement ids.
 - Draft 2.4 (after Phase 2 verification): `REQ-LANG-10` states the run-block semantics inherited from the legacy parser.
 - Draft 2.3 (after Phase 1 verification): `REQ-HEAL-5` defines recovery against the ground-truth element and the denominator.
 - Draft 2.1: `REQ-ADE-1..9` added for the local service and a new Svatah ADE Electron client designed to the vision, with the prototype as the blueprint of jobs only; the ADE is the desktop conformance target for `REQ-ADP-6/7`; constraint 7 added.

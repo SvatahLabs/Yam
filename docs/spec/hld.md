@@ -325,6 +325,7 @@ Published npm modules (Draft 2.3; no aggregate packages, each package publishes 
 | 4 | **Independence and tiers:** BiDi adapter, Appium adapter, Tier 2 and 3, privacy mode, REPL, MCP server with raw surface | REQ-ADP-4, 5, REQ-COMP-3, 4, REQ-NFR-3, REQ-RUN-11, REQ-AGT-2 |
 | 5 | **Automation behaviors:** guards, checkpoints, resume, abort policies, workflow runner, tool server, environment policy, trajectory compiler; ADE record review, bindings and heal review, surface explorer and tool panel | REQ-AUTO-1..4, 7, 8, REQ-BEH-2, 3, 4, REQ-LANG-14, REQ-ADE-4, 5, 8 |
 | 6 | **Reach:** Windows UIA and macOS AX validated against the ADE, prototype data import, WebMCP candidate, Java conformance runtime, Tier 2 fine-tune | REQ-ADP-6, 7, 9, REQ-STD-3, REQ-ADE-6, 9 |
+| 7 | **Hardening and release candidate (Draft 2.8):** the live desktop gates pass on the hosts that can run them and the pipeline carries every gate; the Java runtime's artifacts validate; the dialog IR and the type check join the contract; the fine-tune is measured or stated blocked; module (a), the CLI, the schemas, and the ADE installers are packaged as a 0.1.0 release candidate with the published evals attached | REQ-PKG-1, 2, 4, REQ-STD-2, 3, REQ-ADP-6, 7 (closed live) |
 
 ## 14. Risks and mitigations
 

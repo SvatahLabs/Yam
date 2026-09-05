@@ -315,6 +315,42 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ---
 
+## Phase 7 — Hardening and release candidate (Draft 2.8)
+
+### T7.1 The macOS Accessibility live gate passes, and the desktop healing cases
+**Refs:** REQ-ADP-7, REQ-SURF-3, REQ-ADE-6, LLD §7.5, §14, §16 · **Est:** 4
+**Do:** Rewrite the AX bridge's window read to bulk attribute reads (`entire contents` plus `properties`, one process invocation per snapshot); make the timeout message a bridge timeout with nodes and milliseconds when `doctor` has said `granted`; poll for the ADE window up to 60 s; resolve `--report` against the current directory; record nodes read, wall time, and ms per node in the report. Add `SVATAH_A11Y_VARIANT=1|2` to the ADE (LLD §16) and the desktop healing cases to the desktop suite for both adapters.
+**Validate:** `node scripts/desktop-conformance.mjs --adapter ax` passes 7 of 7 on a macOS host with the permission granted, with the project screen (≥400 nodes) read within 10 s and the cost in the report; the two healing cases relocalize at variant 1 and 2 and the report says so; `svatah surface doctor` still reports `denied` and `prompt-pending` correctly against recorded exchanges.
+
+### T7.2 Windows UIA live gate and the pipeline that carries every gate
+**Refs:** REQ-ADP-6, REQ-STD-2, REQ-STD-3, LLD §7.5, §14 · **Est:** 3
+**Do:** Run the UIA gate on a Windows machine or runner and fix what it finds (the bridge scripts are untested against a real `UIAutomationClient`); add the desktop conformance legs and the Java runtime conformance to `bitbucket-pipelines.yml`, the repository's remote, with the macOS leg allowed to fail only on a hosted runner that cannot grant the permission; keep the GitHub workflow in step.
+**Validate:** `reports/adapter-uia.md` from a live run, 7 of 7 plus the healing cases, or the exact blocked command and the host's `doctor` output; the pipeline definition runs the Java conformance and both desktop gates and is green or blocked per leg with the reason recorded in the progress file.
+
+### T7.3 Dialog IR agreement, type check in the contract, small defects
+**Refs:** REQ-LANG-*, REQ-RUN-8, LLD §3.2, §15, §16 · **Est:** 1.5
+**Do:** `dialog` args become `{ action, text? }` end to end: grammar, `modelStepSchema`, the Playwright and BiDi adapters, the Java runtime (fail by name if unimplemented), pattern 21 golden entries and a run against `/widgets`. Fix `@svatah/workflow`'s `Config` construction so `pnpm -r typecheck` is green, and add `typecheck` to the contract in the README and the CI. Fix the report path and the window poll of the desktop gate script if T7.1 has not.
+**Validate:** `Dismiss the dialog` leaves the sample page saying `dismissed` and `Accept the dialog` saying `confirmed`, in the suite; `pnpm -r typecheck` exits 0 from a clean checkout; the contract line in `README.md` includes it.
+
+### T7.4 The Java runtime writes the published schemas
+**Refs:** REQ-STD-3, LLD §3.4, §14 · **Est:** 2
+**Do:** Emit full `StepResult` and `Summary` records (`startedAt`, `endedAt`, `durationMs`, `inputs` as names, `failure` as today); make `scripts/runtime-conformance.mjs` validate both files against `stepResultSchema` and `summarySchema` before comparing and fail on the first invalid line with its path; document the fixture as a projection in `evals/conformance/runtime/README.md`.
+**Validate:** The suite reports `artifacts valid` and zero mismatches, twice; a deliberately stripped line makes it fail with the schema path; `reports/runtime-java.md` carries both facts.
+
+### T7.5 The fine-tune, measured
+**Refs:** ADR-4, REQ-COMP-3 · **Est:** 2 (plus machine time)
+**Do:** Complete the training run (`scripts/finetune-tier2.mjs`), or a documented shorter schedule if the full one exceeds the host, publish the tuned digest, and run `scripts/finetune-eval.mjs` base versus tuned on the `tier: 2` golden subset with Tier 1 unchanged.
+**Validate:** The measured numbers in `reports/eval-finetune.md` with the digest, iterations, and host; the five-point target met or the shortfall stated; or the exact blocked command and why. No improvement is reported without a measurement.
+
+### T7.6 Release candidate 0.1.0
+**Refs:** REQ-PKG-1, 2, 3, 4, REQ-STD-1, 2, LLD §16 · **Est:** 4
+**Do:** Version every publishable package 0.1.0 with a changelog; `npm pack` dry runs for module (a) (`@svatah/bindings`, `@svatah/healer`, `@svatah/playwright-test`, `@svatah/bindings-cli`), the `svatah` CLI, and `@svatah/schema` with the JSON Schema files and the conformance fixtures included; a release workflow that builds the ADE installers on the three-OS matrix and attaches `reports/*.md` to the release notes; the module (a) ten-minute quick start executed from the packed tarballs in an empty Playwright project by a script, not by hand.
+**Validate:** `pnpm release:dry-run` produces the tarballs and lists their contents; the quick-start script passes against the tarballs on Node 22 and the current LTS with no credential; the licence check passes on the packed dependency trees; the release workflow runs to the artifact step on the pipeline that exists.
+
+Phase 7 total: 16.5 ideal days.
+
+---
+
 ## Traceability matrix
 
 | Requirement | HLD | LLD | Tasks |
@@ -420,6 +456,7 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.8 (after Phase 6 verification): Phase 7 added — T7.1 AX live gate and desktop healing cases, T7.2 UIA live gate and the pipeline, T7.3 dialog IR and type check, T7.4 Java artifacts in the published schemas, T7.5 the fine-tune measured, T7.6 release candidate 0.1.0. Total 187 ideal days.
 - Draft 2.4 (after Phase 2 verification): T3.6 builds the ADE under `apps/ade` in this repository.
 - Draft 2.3 (after Phase 1 verification): T2.8 targets the new `host-playwright` package; T2.12 added for `bindings-cli` and the healer `Replayer` plugin. Total 170.5 ideal days.
 - Draft 2.1: local service (T2.11); new ADE built to the vision with the prototype as blueprint: shell (T3.6), core screens (T3.7), record and heal review (T5.7), surface explorer and tool panel (T5.8), prototype data import (T6.6); T6.1 and T6.2 validate against the new ADE instead of a separate sample desktop app. Total 168.5 ideal days; module (a) release date unchanged.

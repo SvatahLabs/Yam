@@ -135,6 +135,8 @@ interface Step {
   action: Action;
   target?: TargetRef; target2?: TargetRef;
   args?: Record<string, ValueRef | number | string | boolean>;
+                                             // Draft 2.8: `dialog` args are `{ action: "accept" | "dismiss"; text?: ValueRef }` and every adapter reads `action`;
+                                             // an adapter that defaults a missing `action` to accept is a defect. Pattern 21's four forms each have a golden entry and a run against the sample dialogs page.
   guard?: { subject: "target" | "page" | "dialog" | "scope"; predicate: Predicate; mode: "onlyIf" | "unless";
             target?: TargetRef };          // Draft 2.7: a `target` guard about another element; the recorder grounds it and the resolver resolves it before evaluation. A `target` guard with no element anywhere is E_GUARD_NO_TARGET.
   expect?: { subject: "target" | "page" | "dialog" | "scope"; predicate: Predicate };
@@ -355,8 +357,9 @@ WebdriverIO client; webview contexts use web candidate kinds; native contexts us
 ### 7.5 Desktop adapters (`adapter-uia`, `adapter-ax`)
 
 - UIA: Node binding over the UI Automation COM API (or a wrapped driver with the same surface); `ControlType` → role map; `AutomationId` → `automationId` candidate; `controlPath` built from ancestor chain with names and sibling indices; `act` via UIA patterns (Invoke, Value, Toggle, Selection, Scroll) with a mouse/keyboard fallback at the element's box centre.
-- AX: `AXUIElement` via a small native module; `AXRole` → role map; `AXIdentifier` → `automationId`; actions via `AXPress`, `AXSetValue`, keyboard events; documents the accessibility permission prompt and provides a `svatah surface doctor` check.
-- Both: `state()` returns the focused window and title; `restore` activates the window; screenshots via OS APIs; masks by box.
+- AX: `AXUIElement` via a small native module or a bridge over the OS's own client of the same API (Draft 2.8, below); `AXRole` → role map; `AXIdentifier`, then `AXDOMIdentifier`, then `aria-label` → `automationId` (Draft 2.8, the DOM `id` added because the conformance target is an Electron application whose controls carry ids and no `AXIdentifier`); actions via `AXPress`, `AXSetValue`, keyboard events; documents the accessibility permission prompt and provides a `svatah surface doctor` check that performs an assistive-access call, never a process listing.
+- Both: `state()` returns the focused window and title; `restore` activates the window; screenshots via OS APIs; masks by box. Where the OS writes the screenshot in another process and the adapter cannot paint over a box (macOS `screencapture`), the adapter scopes the capture to the window's box and the executor skips the screenshot of any step that injects a secret (Draft 2.8).
+- Bridges and their budget (Draft 2.8). A bridge over `osascript` (System Events) or PowerShell (`UIAutomationClient`) is a permitted implementation of this section; a native module is not required. What is required is that one `snapshot()` reads the window in a bounded number of process invocations with **bulk attribute reads** (`entire contents` plus `properties` per element, or the platform's equivalent), never one call per attribute, and that the ADE's project screen with every tab present, at least 400 nodes, snapshots within the surface's default deadline of 10 s on the CI runner class named in the conformance report. The desktop conformance report records nodes read, wall time, and milliseconds per node. A deadline exceeded after `doctor` reported `granted` is reported as a bridge timeout with those numbers, never as a permission prompt.
 - Electron targets (including the ADE): Chromium exposes the renderer's accessibility tree through UIA and AX only when accessibility support is enabled; the ADE calls `app.setAccessibilitySupportEnabled(true)` when launched with `SVATAH_A11Y=1` (or always in development builds). Web content nodes then appear with ARIA roles, which map one to one onto the surface role vocabulary. `automationId` is populated from `id` attributes on Windows and from `aria-label` or `AXIdentifier` on macOS; `controlPath` starts at the top-level window title.
 
 ---
@@ -516,6 +519,7 @@ Plan run with expectations; web through the Playwright Test host (§9), other ad
 | `GET /runs/:id/screenshots/:name` · `GET /runs/:id/trace/:flow` | Artifacts | binary |
 | `GET /bindings` · `GET /bindings/:id` · `POST /bindings/verify` | Store read and dry-resolve | `BindingFile` |
 | `POST /heal` | Start healing for a run | `{ runId, useModel? }` → `{ healId }`; diff and report on completion |
+| `POST /migrate` | Import a prototype database into the open project | `{ from: <electron-db dir>, project?: <name> }` → `{ stories, files, review }`; writes only under the directory the service was opened on, so the confinement rule holds (Draft 2.8) |
 | `POST /api/request` | API client: execute an `ApiRequest` ad hoc | `ApiResponse` |
 | `GET /api` · `PUT /api/:name` | Named requests | `ApiRequest` |
 | `GET /data` · `PUT /data` | `data.yaml` with secrets redacted on read | |
@@ -537,7 +541,8 @@ Prototype database import (`svatah migrate --from-ade <path>`, P2) maps the prot
 ## 14. Conformance suites (package `conformance`)
 
 - Surface suite: for each sample app page, a script of surface calls with expected snapshot invariants (roles present, names, states), expected `act` effects (URL change, value change, dialog appears), and error types. Runs against any adapter via `svatah surface conform --adapter <name>`.
-- Runtime suite: plans plus bindings plus expected `results.jsonl` (status and matched `by`) generated by the TS runtime on the sample app; a foreign runtime passes when statuses and matched candidates are identical.
+- Runtime suite: plans plus bindings plus expected `results.jsonl` (status and matched `by`) generated by the TS runtime on the sample app; a foreign runtime passes when statuses and matched candidates are identical. Draft 2.8: the committed fixture is a *projection* of the TS runtime's results (run-specific fields stripped) and is documented as such; a foreign runtime writes full `results.jsonl` and `summary.json`, the suite validates both against `stepResultSchema` and `summarySchema` before it compares, and a runtime whose artifacts do not validate is not conformant whatever the comparison says. The features a runtime implements are stated in its README; every action or predicate outside that set fails the step by name.
+- Desktop suite (Draft 2.8): a second case list with the same `ConformanceCase` shape, runner, and report, selected by the surface's `kind`; its cases are the five ADE flows of §16, the snapshot shape, and a refusal of web-only calls. The web suite's cases begin with `navigate`, which a desktop adapter refuses by design, so the two lists do not merge.
 
 ---
 
@@ -554,7 +559,9 @@ Base URL and storage state precedence (Draft 2.5), applied identically by every 
 | `bindings` | `list`, `show <id>`, `verify` (dry-resolve all), `prune` | 0 / 1 |
 | `workflow run <story>` | `--input`, `--resume`, `--from` | as `run` |
 | `tool serve` | `--expose`, `--stdio|--http` | daemon |
-| `surface` | `snapshot`, `act`, `read`, `check`, `conform --adapter` | 0 / 1 |
+| `surface` | `snapshot`, `act`, `read`, `check`, `conform --adapter`, `doctor [--adapter]` | 0 / 1; `doctor` exits 1 when the host is not ready for the adapter (Draft 2.8) |
+| `eval finetune export` | `--out`, `--ref` | 0; exports only from merged flows, excludes the golden set and says how many (Draft 2.8) |
+| `scripts/desktop-conformance.mjs --adapter ax\|uia` | `--report` (resolved against the current directory), `--project` | 0 conformant / 1 not / 2 host not ready; polls for the ADE window up to 60 s (Draft 2.8) |
 | `host generate` | `--out` | 0 |
 | `trajectory compile <trajectory.jsonl> [dir]` | `--name`, `--out`, `--app` | 0; writes only under `proposals/` (Draft 2.7) |
 | `migrate <src> <dest>` | `--keep-original` | 0 / 8 unmapped |
@@ -568,6 +575,7 @@ MCP server (`svatah mcp`): operation tools (`compile`, `lint`, `record`, `run`, 
 
 - `apps/sample-web`: as Draft 1 §13 with variants 1..20, plus a WebMCP-declaring page (P2) and a page with a canvas-only control for the vision fallback.
 - Desktop conformance target (P2): the Svatah ADE itself, built from its repository in CI on Windows and macOS runners and launched with `SVATAH_A11Y=1`. The desktop conformance flows are: create a project, open a flow, run it, open the result, use the API client. No separate sample desktop app is built.
+- Desktop healing cases (Draft 2.8, T6.1's "healing variant subset" made concrete): the ADE gains `SVATAH_A11Y_VARIANT=1|2`, where variant 1 renames one screen tab and one button on the Project screen and variant 2 moves the Record screen's gateway control into a different panel; a binding recorded at variant 0 must relocalize on both through the desktop adapter with the same weights and threshold as the web healing eval, and the desktop conformance report records the outcome per case.
 - Evals: `compiler/golden.jsonl` (≥300), `grounding/cases` (≥150), `healing/variants.json` (≥20), `conformance/` (surface and runtime). `svatah eval <suite> --report <path>` writes a Markdown report that the release workflow attaches to release notes (REQ-PKG-4).
 - Healing eval ground truth (Draft 2.3). `apps/sample-web` stamps every interactive element with `data-svatah-eval="<stable key>"`, identical across all variants. The eval reads that key outside the surface (a page script, never `describe()`), records it per binding at variant 0, and after relocalization compares the key of the proposed element with the recorded one. Outcomes: `recovered` only when the keys match and a re-synthesised candidate resolves uniquely; `wrong-element` when the keys differ; `not-found`, `ambiguous` as before. `bindings.ignoreAttributes` (config, default `["data-svatah-eval"]`) removes the attribute from synthesis, fingerprints, and `native` so it can never help relocalization. The published percentage is over bindings that lost at least one candidate; the count that stopped resolving entirely is reported alongside, and both populations (with and without test-id attributes) are reported. A proposal whose key matches but which cannot be re-synthesised into a unique candidate is `unverified`, counted separately and never as a recovery.
 - Timing assertions (REQ-COMP-2, REQ-NFR-4) run isolated from the browser suites or use a budget of at least three times the requirement; a timing test that fails only under parallel load is a defect in the test, not in the code.
@@ -575,12 +583,14 @@ MCP server (`svatah mcp`): operation tools (`compile`, `lint`, `record`, `run`, 
 - Compiler eval configuration (Draft 2.6): `svatah eval compiler` reads `compile.tier2` and `compile.tier3` from the golden project's own committed `svatah.config.yaml` (`evals/compiler/project/`), which pins the local model and its digest; `--project` may override it. A tier that is requested but not configured is reported as `not measured` and excluded from the threshold, never scored 0/N.
 - Run artifacts (`results.jsonl`, `summary.json`, `audit.jsonl`, screenshots, traces) are committed only under `evals/conformance/` and `reports/`. Every project directory ignores `runs/`, `.svatah/`, and any absolute-path echo such as `var/`; a repository check enforces it.
 - Unit and integration tests per package as Draft 1 §14, plus: surface conformance for every adapter; `bind()` record, run, and heal modes; host-generated specs run under Playwright Test with sharding; policy matrix (`stop`, `continue`, `compensate`); checkpoint and resume with hash mismatch; audit redaction; tool server end to end over MCP; trajectory compile of a captured session.
+- The verification contract (Draft 2.8) is `pnpm install --frozen-lockfile && pnpm browsers && pnpm -r build && pnpm -r typecheck && pnpm -r test && pnpm lint` from a clean checkout with no credential, on the current and the previous Node LTS; a red `typecheck` in any package fails the contract.
 
 ---
 
 ## 17. Changes from Draft 1
 
 - Draft 2.7 (after Phase 5 verification): `Step.guard.target` (§3.2); compensating-story steps keep their own statuses (§8.3); `svatah trajectory compile` in the command table (§15); the trajectory line shape and the proposal context hash (§13.4); `POST /record` gateway, 409, and decision deadline (§13.5); the ADE Record screen chooses the gateway and renders failures (§13.6).
+- Draft 2.8 (after Phase 6 verification): `dialog` args are `{ action, text? }` and adapters read `action` (§3.2); desktop bridges over `osascript`/PowerShell permitted with bulk reads and a 400-node, 10 s budget, `automationId` from `AXDOMIdentifier`, scoped screenshots (§7.5); `POST /migrate` into the open project (§13.5); the runtime suite validates a foreign runtime's artifacts against the schemas, the fixture is a projection, the desktop suite is a second case list (§14); `surface doctor`, `eval finetune export`, and the desktop gate script in the command table (§15); desktop healing cases through ADE variants (§16); `pnpm -r typecheck` joins the verification contract (§16).
 - Draft 2.6 (after Phase 4 verification): assertion aliases for the `Expect … to …` and `Verify / Check that / Assert that` forms (§4.2); story inputs for heal replay (§10); the compiler eval reads a committed golden-project config and reports unconfigured tiers as not measured (§16); BiDi attach must not create a second session on a driver-hosted endpoint (§7.3).
 - Draft 2.5 (after Phase 3 verification): the target dictionary is built from parsed binding files and `W_BINDING_NO_PHRASES` (§4.3); base URL and storage state precedence for every session-opening command (§15); `bind()` model grounding registered by the CLI (§9.2); `GET /plan` (§13.5); CommonJS ADE bundles, the Electron hoist pattern, and the Vite pin (§13.6); grounding-case exclusions and the run-artifact hygiene rule (§16).
 - Draft 2.4 (after Phase 2 verification): run-block semantics (§4.1); `failure.session` on step results (§3.4); executor collaborators injected and flow-start navigation stated (§8); host context from the worker-scoped browser (§9.1); both replayers perform the flow-start navigation and verify the page (§10); service `ServiceApi` injection, input validation on `/run`, signatures on `/project` (§13.5); `unverified` eval outcome and the timing-test rule (§16).
