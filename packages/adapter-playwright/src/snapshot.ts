@@ -27,9 +27,8 @@
  */
 import type { ElementHandle, Frame } from "playwright";
 import type { Ref, Snapshot, SnapshotNode } from "@svatah/schema";
-import { buildSnapshot } from "@svatah/surface";
+import { buildSnapshot, structuralHash } from "@svatah/surface";
 import { walkDocument, type RawNode } from "./page-script.js";
-import { structuralHash } from "./structural-hash.js";
 
 export type SnapshotMechanism = "playwright" | "own";
 
@@ -414,5 +413,3 @@ export async function takeSnapshot(
 export async function ariaSnapshotText(frame: Frame): Promise<string> {
   return await frame.locator("body").ariaSnapshot();
 }
-
-export { structuralHash };

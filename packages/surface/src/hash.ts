@@ -1,18 +1,16 @@
 /**
  * The structural hash of LLD §6.2.
  *
- * "Render its subtree with names replaced by length buckets, sha256." Names are
- * replaced by buckets so the hash tracks the *shape* of a page and not its
- * content: a different user's name in a greeting is not a page-shape change, but
- * a wrapper div, a reordered sidebar or a moved form is.
+ * "Render its subtree with names replaced by length buckets, sha256." Names
+ * become buckets so the hash tracks the *shape* of a page and not its content: a
+ * different user's name in a greeting is not a page-shape change, but a wrapper
+ * element, a reordered sidebar or a moved form is.
  *
- * `Snapshot.hash` is this function over the whole snapshot. `@svatah/bindings`
- * applies the same function to the subtree under the nearest landmark, `form`,
- * `dialog` or `window` ancestor to get `BindingContext.hash`. Both need it, and
- * `surface` is the only package both depend on — but the adapter is where the
- * snapshot is produced, so the primitive lives here and `@svatah/bindings`
- * re-implements the *scoping*, not the hash. Keeping one implementation is what
- * the drift test in `packages/bindings/test` asserts.
+ * Two callers need it and they are in different modules — an adapter, which fills
+ * in `Snapshot.hash`, and `@svatah/bindings`, which hashes the subtree under an
+ * element to get `BindingContext.hash`. `@svatah/surface` is the one package both
+ * depend on (LLD §1), so the primitive lives here and each caller supplies the
+ * nodes. That way there is one implementation and the two hashes cannot drift.
  */
 import { createHash } from "node:crypto";
 import type { SnapshotNode } from "@svatah/schema";

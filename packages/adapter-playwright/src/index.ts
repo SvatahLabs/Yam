@@ -30,7 +30,10 @@ export {
   type SnapshotOptions,
 } from "./snapshot.js";
 
-export { structuralHash, renderForHash, lengthBucket } from "./structural-hash.js";
+// The structural hash of LLD §6.2 lives in `@svatah/surface`, where both an
+// adapter and `@svatah/bindings` can reach it (LLD §1). Re-exported so an adapter
+// implementer needs one import.
+export { structuralHash, renderForHash, lengthBucket } from "@svatah/surface";
 
 export { locatorFor, coordsOf } from "./locate.js";
 export { evaluatePredicate, type CheckContext } from "./predicates.js";

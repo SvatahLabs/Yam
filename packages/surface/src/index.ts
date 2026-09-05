@@ -49,6 +49,8 @@ export {
   failureClassOf,
 } from "./errors.js";
 
+export { structuralHash, renderForHash, lengthBucket } from "./hash.js";
+
 export {
   renderNode,
   renderSnapshot,
