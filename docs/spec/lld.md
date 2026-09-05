@@ -182,7 +182,7 @@ type FailureClass = "locator" | "timeout" | "assertion" | "guard" | "data" | "na
 interface StepResult { runId: string; behavior: "test" | "workflow" | "tool"; flow: string; story: string; stepId: string; line: number; text: string;
                        status: "passed" | "failed" | "skipped" | "healed" | "aborted"; startedAt: string; endedAt: string; durationMs: number;
                        matched?: { ref: string; candidateIndex: number; by: Candidate["by"] }; captured?: Record<string, unknown>;
-                       failure?: { class: FailureClass; message: string; candidatesTried?: Candidate[]; screenshot?: string; stack?: string; policyApplied?: StoryMeta["onFailure"] }; }
+                       failure?: { class: FailureClass; message: string; candidatesTried?: Candidate[]; screenshot?: string; stack?: string; policyApplied?: StoryMeta["onFailure"]; session?: SessionState /* the surface state at failure, so a healer can restore it without a plan */ }; }
 interface Summary { runId: string; behavior: string; planHash: string; bindingsHash: string; configHash: string; invoker: Invoker; startedAt: string; endedAt: string;
                     flows: Record<string, { status: "passed" | "failed" | "healed" | "aborted"; passed: number; failed: number; skipped: number; trace?: string }>;
                     outputs?: Record<string, unknown>; totals: { passed: number; failed: number; skipped: number; healed: number; aborted: number }; exitCode: number; }
@@ -236,6 +236,8 @@ Comment  := ('//' | '#') any
 ```
 
 `onFailure` values: `stop`, `continue`, `compensate:<story name>`. `continueOnFailure=true` is an alias of `onFailure=continue`.
+
+Run-block semantics (Draft 2.4): a `compose:` block's lines are story names; a `test:` or `run:` block's lines are story or composition names. A run block with no lines runs the story or composition of its own name, and when none exists it is `E_TEST_EMPTY`. A flow with no run block runs its `scenario` blocks in file order and its `story` blocks not at all (the legacy `addScenarioEntry` / `addStoryEntry` semantics).
 
 ### 4.2 Sentence patterns (Tier 1)
 
@@ -355,6 +357,8 @@ WebdriverIO client; webview contexts use web candidate kinds; native contexts us
 
 ## 8. Runtime executor (package `runtime`)
 
+The executor receives the resolver, the custom-step runner, and the API runner as injected collaborators; `runtime` imports neither `steps` nor `adapter-http` (LLD §1). The CLI wires them, and a foreign runtime supplies its own or refuses plans that need them with a clear diagnostic. At flow start the executor opens the session at the flow's base URL with the configured storage state before the first story runs.
+
 ### 8.1 Orchestration
 
 ```
@@ -428,7 +432,7 @@ test.describe("simple.flow", () => {
 });
 ```
 
-- The `svatah` fixture (worker-scoped) creates the Playwright adapter over the test's `context`, loads plan and bindings, and owns the scope for the flow so captures cross stories inside the same worker. `test.describe.configure({ mode: "serial" })` keeps story order; flows map to Playwright projects or files for sharding.
+- The `svatah` fixture (worker-scoped) creates its own browser context from the worker-scoped `browser` (Playwright's test-scoped `context` is torn down between stories), creates the Playwright adapter over it, loads plan and bindings, and owns the scope for the flow so captures cross stories inside the same worker. `test.describe.configure({ mode: "serial" })` keeps story order; flows map to Playwright projects or files for sharding.
 - Failures surface as Playwright assertions with the Svatah failure class in the message and `test.info().annotations`; results are additionally written in the Svatah schema by a reporter (`@svatah/playwright-test/reporter`).
 - Retries: disabled by default; enabled only if the flow's policy is `continue` or the story is `idempotent`.
 
@@ -445,6 +449,8 @@ Gateway unchanged from Draft 1 §5 (Anthropic and local backends, schema-constra
 Because `healer` is part of module (a) and must not depend on `gateway`, the model re-grounding step is a plugin: `healer` defines `interface Regrounder { ground(step, surface): Promise<BindingEntry | null> }`; module (b) registers the recorder's implementation at CLI start; module (a) alone runs relocalization only and reports the rest as unrepaired.
 
 The same pattern covers replay. `healer` defines `interface Replayer { toFailure(input: { runDir?: string; bindFailure?: BindFailure }, surface: AgentSurface): Promise<"reached" | "unreachable"> }`. Module (a)'s default restores the session state recorded with the failure (URL, storage state) and returns `unreachable` when the page needs a login that state does not carry. Module (b) registers a runtime-backed implementation that replays the story to the failing step. `healer` therefore never imports `runtime`.
+
+Both implementations must first put the session where the flow starts, exactly as the executor does: open at the flow's base URL with the configured storage state, then replay the prefix of steps before the failing one. A failure at a story's first step is `reached` only after that navigation, never on a blank page. A run's failure record carries the session state at failure (`failure.session`, §3.4), so the session-state default can restore it from a run directory without a plan. `reached` must be verified by comparing the live URL path with the recorded one before relocalization runs.
 
 ---
 
@@ -487,7 +493,7 @@ Plan run with expectations; web through the Playwright Test host (§9), other ad
 
 ### 13.5 Local service (package `service`)
 
-`svatah serve --project <dir> --port <p> [--token <t>]` starts a Fastify server bound to `127.0.0.1` with a bearer token printed on stdout (the ADE reads it from the child process). Every handler calls the same functions the CLI calls; no logic lives in the service.
+`svatah serve --project <dir> --port <p> [--token <t>]` starts a Fastify server bound to `127.0.0.1` with a bearer token printed on stdout (the ADE reads it from the child process). Every handler calls the same functions the CLI calls; no logic lives in the service. The functions are injected through a `ServiceApi` interface so the service imports only `@svatah/schema` (the CLI mounts the service, so an import the other way would be a cycle). `POST /run` validates the supplied inputs against the signatures of the stories the run invokes directly and answers 400 with the missing names before anything starts; `GET /project` includes each story's signature so a client can prompt for inputs.
 
 | Method and path | Purpose | Body / response |
 |---|---|---|
@@ -551,13 +557,15 @@ MCP server (`svatah mcp`): operation tools (`compile`, `lint`, `record`, `run`, 
 - `apps/sample-web`: as Draft 1 §13 with variants 1..20, plus a WebMCP-declaring page (P2) and a page with a canvas-only control for the vision fallback.
 - Desktop conformance target (P2): the Svatah ADE itself, built from its repository in CI on Windows and macOS runners and launched with `SVATAH_A11Y=1`. The desktop conformance flows are: create a project, open a flow, run it, open the result, use the API client. No separate sample desktop app is built.
 - Evals: `compiler/golden.jsonl` (≥300), `grounding/cases` (≥150), `healing/variants.json` (≥20), `conformance/` (surface and runtime). `svatah eval <suite> --report <path>` writes a Markdown report that the release workflow attaches to release notes (REQ-PKG-4).
-- Healing eval ground truth (Draft 2.3). `apps/sample-web` stamps every interactive element with `data-svatah-eval="<stable key>"`, identical across all variants. The eval reads that key outside the surface (a page script, never `describe()`), records it per binding at variant 0, and after relocalization compares the key of the proposed element with the recorded one. Outcomes: `recovered` only when the keys match and a re-synthesised candidate resolves uniquely; `wrong-element` when the keys differ; `not-found`, `ambiguous` as before. `bindings.ignoreAttributes` (config, default `["data-svatah-eval"]`) removes the attribute from synthesis, fingerprints, and `native` so it can never help relocalization. The published percentage is over bindings that lost at least one candidate; the count that stopped resolving entirely is reported alongside, and both populations (with and without test-id attributes) are reported.
+- Healing eval ground truth (Draft 2.3). `apps/sample-web` stamps every interactive element with `data-svatah-eval="<stable key>"`, identical across all variants. The eval reads that key outside the surface (a page script, never `describe()`), records it per binding at variant 0, and after relocalization compares the key of the proposed element with the recorded one. Outcomes: `recovered` only when the keys match and a re-synthesised candidate resolves uniquely; `wrong-element` when the keys differ; `not-found`, `ambiguous` as before. `bindings.ignoreAttributes` (config, default `["data-svatah-eval"]`) removes the attribute from synthesis, fingerprints, and `native` so it can never help relocalization. The published percentage is over bindings that lost at least one candidate; the count that stopped resolving entirely is reported alongside, and both populations (with and without test-id attributes) are reported. A proposal whose key matches but which cannot be re-synthesised into a unique candidate is `unverified`, counted separately and never as a recovery.
+- Timing assertions (REQ-COMP-2, REQ-NFR-4) run isolated from the browser suites or use a budget of at least three times the requirement; a timing test that fails only under parallel load is a defect in the test, not in the code.
 - Unit and integration tests per package as Draft 1 §14, plus: surface conformance for every adapter; `bind()` record, run, and heal modes; host-generated specs run under Playwright Test with sharding; policy matrix (`stop`, `continue`, `compensate`); checkpoint and resume with hash mismatch; audit redaction; tool server end to end over MCP; trajectory compile of a captured session.
 
 ---
 
 ## 17. Changes from Draft 1
 
+- Draft 2.4 (after Phase 2 verification): run-block semantics (§4.1); `failure.session` on step results (§3.4); executor collaborators injected and flow-start navigation stated (§8); host context from the worker-scoped browser (§9.1); both replayers perform the flow-start navigation and verify the page (§10); service `ServiceApi` injection, input validation on `/run`, signatures on `/project` (§13.5); `unverified` eval outcome and the timing-test rule (§16).
 - Draft 2.3 (after Phase 1 verification): `runtime` stays in module (b); `Replayer` plugin in the healer (§10, §12); `playwright-test` is module (a) `bind()` only, the flow host moves to `host-playwright` (§1, §9); `bindings-cli` package for module (a) commands (§1); `bind()` import path corrected (§6.5); healing eval must verify recovery against a ground-truth key and report both populations (§16); `bindings.ignoreAttributes` config.
 - Draft 2.2 (after Phase 0 verification): `Step.custom.targets` for Tier 0 `target` placeholders (§3.2, §5); import boundaries must resolve TypeScript sources, cover dynamic imports, and be backed by a package.json dependency-graph test (§1).
 - `Driver` replaced by the published `AgentSurface` (§2) with normalised snapshots, `locate`, `describe`, `state`/`restore`, capabilities, and wire schemas.

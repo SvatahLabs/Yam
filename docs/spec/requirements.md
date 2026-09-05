@@ -96,7 +96,7 @@ Constraints stated by the owner:
 | REQ-LANG-7 | Capture with `… as <name>` or `Remember <target> as <name>`. Replaces `var : name` and `var(type) : name`. | P0 | T |
 | REQ-LANG-8 | API steps reference named requests in `api/`: `Call the "active count" API and remember the response as activeCount`. | P0 | T |
 | REQ-LANG-9 | Run-level data comes from `data.yaml` (or JSON) and `SVATAH_DATA_*` environment variables; secrets by `${ENV}` indirection under a `secrets:` list. | P0 | T |
-| REQ-LANG-10 | `compose:` expands in place; the run block defines execution order for the flow. | P0 | T |
+| REQ-LANG-10 | `compose:` expands in place; the run block defines execution order for the flow. A run block with no lines runs the story or composition of its own name. A flow with no run block runs its `scenario` blocks in file order and its `story` blocks not at all, matching the legacy parser. | P0 | T |
 | REQ-LANG-11 | `migrate` converts v1/v2 flows, `.locator`, and `.data` files into v3 flows, a seed bindings store, and `data.yaml`, preserving names and step order. | P0 | T, R |
 | REQ-LANG-12 | A grammar reference documents every sentence pattern with at least two examples and every IR action. | P0 | R |
 | REQ-LANG-13 | A story may declare a typed signature: `inputs:` and `outputs:` lines directly under the header, each `name: type [= default]` with types `string|number|boolean|json|secret`. Outputs must be captured names. | P0 | T |
@@ -269,5 +269,6 @@ Each requirement is referenced by at least one HLD section, one LLD section, and
 - `REQ-AGT-3` (explorer) replaced by `REQ-BEH-4` (trajectory compiler); `REQ-AGT-4` now states external orchestration.
 - Healing evals and all evals must be published per release (`REQ-PKG-4`, `REQ-HEAL-5`).
 - Priorities reordered so the bindings module (module a) is P0 and ships first.
+- Draft 2.4 (after Phase 2 verification): `REQ-LANG-10` states the run-block semantics inherited from the legacy parser.
 - Draft 2.3 (after Phase 1 verification): `REQ-HEAL-5` defines recovery against the ground-truth element and the denominator.
 - Draft 2.1: `REQ-ADE-1..9` added for the local service and a new Svatah ADE Electron client designed to the vision, with the prototype as the blueprint of jobs only; the ADE is the desktop conformance target for `REQ-ADP-6/7`; constraint 7 added.

@@ -240,7 +240,7 @@ Step IR (abridged; full in LLD §3):
 
 **ADR-15 Desktop through the same surface.** OS accessibility trees map to the same snapshot shape; UIA first, AX second, AT-SPI third; vision fallback only where trees are absent.
 
-**ADR-17 The ADE is rebuilt to the vision; the prototype is the blueprint of jobs, not code to retain.** The prototype establishes that a desktop client must let a person manage a project, author flows, run them, inspect results and screenshots, and exercise APIs. The new ADE delivers those jobs redesigned around the new artifacts (prose flows with lint, plan view, record with review, bindings and heal review, audit, surface explorer, tool panel), talks to the core only through the local service, and stores nothing but UI preferences. Because it is an Electron app whose Chromium exposes an accessibility tree through UIA and AX, it replaces a separate desktop sample application for validating the OS adapters. Rejected: upgrading the prototype in place (its shell, renderer, and storage all conflict with the new boundaries), keeping electron-db as a second source of truth, letting the renderer import core packages directly, and building a separate desktop sample app.
+**ADR-17 The ADE is rebuilt to the vision; the prototype is the blueprint of jobs, not code to retain.** The prototype establishes that a desktop client must let a person manage a project, author flows, run them, inspect results and screenshots, and exercise APIs. The new ADE delivers those jobs redesigned around the new artifacts (prose flows with lint, plan view, record with review, bindings and heal review, audit, surface explorer, tool panel), talks to the core only through the local service, and stores nothing but UI preferences. Because it is an Electron app whose Chromium exposes an accessibility tree through UIA and AX, it replaces a separate desktop sample application for validating the OS adapters. Rejected: upgrading the prototype in place (its shell, renderer, and storage all conflict with the new boundaries), keeping electron-db as a second source of truth, letting the renderer import core packages directly, and building a separate desktop sample app. Until its first tagged release the new ADE is developed in this repository under `apps/ade`, so Phase 3 and the desktop conformance work verify in one checkout; the split to the `svatahADE` repository happens at that release, and the prototype's code is archived there on a `prototype` branch.
 
 **ADR-16 Trajectory compile replaces a standalone explorer.** Agents explore through Svatah's raw surface so their trajectories are captured and compiled into deterministic tools, rather than Svatah owning an exploration agent.
 
@@ -305,7 +305,7 @@ svatah/
     conformance/          surface and runtime conformance suites
   apps/
     sample-web/           sample web app with variants
-  (svatahADE)             separate repository, new build; Electron client consuming @svatah/service; also the desktop conformance target
+    ade/                  the new Svatah ADE (Electron), developed in-repo until its first release, then split to the svatahADE repository (ADR-17); also the desktop conformance target
   evals/
     compiler/  grounding/  healing/  conformance/
   docs/spec/              this document set
