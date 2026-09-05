@@ -27,7 +27,7 @@
  * 2; it does not print the base twice, and it does not estimate.
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -69,20 +69,53 @@ if (tuned === undefined) {
   );
 }
 
+/**
+ * The golden project, with one line changed: the Tier 2 model (T7.5).
+ *
+ * `--tier2` reads the model from the golden set's *own* committed config
+ * (Draft 2.6, LLD §16), and §16 says "`--project` may override it". So the
+ * override is a copy of that project with `compile.tier2.model` replaced and
+ * the pinned `digest` removed — the tuned model is by definition not the pinned
+ * weights, and leaving the pin in would make every run exit 3.
+ *
+ * It used to be two environment variables, `SVATAH_TIER2_MODEL` and
+ * `SVATAH_ALLOW_MODEL_DRIFT`. **Nothing in the CLI read either of them.** So
+ * both runs used the base model, the "comparison" compared a model with itself,
+ * and the script that says in its own header that it "does not print the base
+ * twice" did exactly that. Found by running it (T7.5); it had never been run.
+ */
+function goldenProjectFor(model) {
+  const source = join(ROOT, "evals", "compiler", "project");
+  const target = join(ROOT, ".svatah", `golden-project-${model.replace(/[^\w.-]/g, "-")}`);
+  rmSync(target, { recursive: true, force: true });
+  cpSync(source, target, { recursive: true });
+
+  const configPath = join(target, "svatah.config.yaml");
+  const config = readFileSync(configPath, "utf8")
+    .replace(/^(\s*)model:\s*".*"$/m, `$1model: "${model}"`)
+    .replace(/^\s*digest:\s*".*"\n/m, "");
+  writeFileSync(configPath, config, "utf8");
+  return target;
+}
+
 /** One run of the published compiler eval, as JSON. */
 function measure(model, label) {
   const out = join(ROOT, ".svatah", `finetune-${label}.md`);
   mkdirSync(dirname(out), { recursive: true });
   const result = spawnSync(
     process.execPath,
-    [CLI, "eval", "compiler", "--tier2", "--report", out, "--json"],
-    {
-      encoding: "utf8",
-      // The only difference between the two runs. `--tier2` reads the golden
-      // project's committed config (LLD §16); this overrides the model it names
-      // and nothing else, so the two runs differ in one variable.
-      env: { ...process.env, SVATAH_TIER2_MODEL: model, SVATAH_ALLOW_MODEL_DRIFT: "1" },
-    },
+    [
+      CLI,
+      "eval",
+      "compiler",
+      "--tier2",
+      "--golden-project",
+      goldenProjectFor(model),
+      "--report",
+      out,
+      "--json",
+    ],
+    { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
   );
   if (result.status !== 0 && result.stdout.trim() === "") {
     die(1, `The eval failed for ${label} (${model}):\n${result.stdout}${result.stderr}`);
@@ -103,9 +136,33 @@ const before = measure(baseModel, "base");
 process.stderr.write(`measuring the tuned model (${tuned})…\n`);
 const after = measure(tuned, "tuned");
 
+/*
+ * The guard that would have caught the defect this script shipped with: each
+ * run reports the gateway it actually used, and if the two are the same then
+ * the override did not take and the "comparison" is a model against itself.
+ */
+if (before.gateway === after.gateway) {
+  die(
+    1,
+    `Both runs used ${before.gateway}. The model override did not take, so there is nothing ` +
+      "to compare — and a delta of zero from two identical runs is the one number this script " +
+      "must never print (ADR-4).",
+  );
+}
+process.stderr.write(`base ran on ${before.gateway}; tuned ran on ${after.gateway}\n`);
+
+/**
+ * One tier's exact-match rate, from `svatah eval compiler --json`.
+ *
+ * The shape is `byTier: { tier2: { total, matched, rate } }`. This used to read
+ * `result.tiers.find(t => t.tier === 2)`, which matches nothing that command has
+ * ever written — so both rates were `null`, and the script reported "Tier 2 was
+ * `not measured`" whatever it had just measured. The second half of the defect
+ * above: a harness nobody had run.
+ */
 const rate = (result, tier) => {
-  const one = (result.tiers ?? []).find((t) => String(t.tier) === String(tier));
-  return one === undefined || one.total === 0 ? null : (one.passed / one.total) * 100;
+  const one = (result.byTier ?? {})[`tier${tier}`];
+  return one === undefined || one.total === 0 ? null : (one.matched / one.total) * 100;
 };
 
 const tier2Before = rate(before, 2);
@@ -135,9 +192,29 @@ const lines = [
     : `| tier 1 | ${tier1Before.toFixed(1)} % | ${tier1After.toFixed(1)} % | ` +
       `${(tier1After - tier1Before).toFixed(1)} |`,
   "",
-  `Base: \`${baseModel}\` · Tuned: \`${tuned}\``,
+  `Base: \`${baseModel}\` (served as \`${before.gateway}\`) · Tuned: \`${tuned}\` ` +
+    `(served as \`${after.gateway}\`)`,
   digest.digest === undefined ? "" : `Adapter digest: \`${digest.digest}\``,
-  digest.pairs === undefined ? "" : `Trained on ${digest.pairs} merged pair(s).`,
+  "",
+  /*
+   * The schedule, in the published report (T7.5's Validate: "the measured
+   * numbers … with the digest, iterations, and host"). A number without the
+   * schedule that produced it is a number nobody can reproduce, and this
+   * project's whole position on fine-tuning is that an unreproducible
+   * improvement is worth less than none (ADR-4).
+   */
+  "| | |",
+  "|---|---|",
+  ...(digest.pairs === undefined ? [] : [`| training pairs | ${digest.pairs}, from merged flows |`]),
+  ...(digest.iterations === undefined ? [] : [`| iterations | ${digest.iterations} (${digest.epochs} epochs) |`]),
+  ...(digest.batchSize === undefined
+    ? []
+    : [`| schedule | batch ${digest.batchSize}, max sequence ${digest.maxSeqLength}, ${digest.loraLayers} LoRA layers |`]),
+  ...(digest.host === undefined ? [] : [`| host | ${digest.host} |`]),
+  ...(digest.durationMs === undefined
+    ? []
+    : [`| training time | ${(digest.durationMs / 60000).toFixed(0)} min |`]),
+  ...(digest.stack === undefined ? [] : [`| stack | ${digest.stack} |`]),
   "",
   met
     ? `**Meets T6.5.** Tier 2 improved by ${delta.toFixed(1)} points (threshold ${THRESHOLD}) ` +

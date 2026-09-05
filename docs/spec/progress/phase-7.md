@@ -36,7 +36,12 @@ measured in its place. Nothing here reports a number nobody took.
 |---|---|
 | "This host is macOS with the Accessibility permission granted… If your session's terminal reports `denied`, say so" | `doctor` reports **`granted`**. A *different* blocker applied: the display is unreachable, so no application has an accessible window. Recorded in T7.1 and in `reports/adapter-ax.md` with the probes that establish it. |
 | "T7.2's Windows gate cannot run here" | Confirmed: the only host is macOS. The pipeline carries the leg and the exact blocked command is recorded. What recorded exchanges could not reach — the PowerShell invocation itself — was reached by installing a real PowerShell, which found four defects. |
-| "T7.5 needs hours of machine time… otherwise run the shortest schedule that produces a tuned digest and report its measured number as what it is" | FINETUNE_FALLBACK_PLACEHOLDER |
+| "T7.5 needs hours of machine time… otherwise run the shortest schedule that produces a tuned digest and report its measured number as what it is" | **Applied, and then some.** The full schedule did not fit the host at all — it
+died at iteration 1 with `[METAL] … Insufficient Memory` — so it ran at batch 1,
+sequence 1536 and 8 LoRA layers: 332 iterations, 58 minutes, validation loss
+2.650 → 0.021. The schedule is in `digest.json` and in the published report. The
+measured number is reported as what it is: **tier 2 86.8 % → 13.2 %**, a 73.7
+point *regression*, against a target of +5. |
 | "T7.6 publishes nothing: dry runs and packed tarballs only" | Held. No `publish` appears in either release definition, and a repository check asserts it. |
 | "Every recording in the suite uses `--gateway fake`" | Held; no model credential was present at any point. |
 
@@ -447,7 +452,137 @@ commands.
 
 ## T7.5 — The fine-tune, measured
 
-FINETUNE_PLACEHOLDER
+**Status: trained, served and measured. It does not meet T6.5 — it is much
+worse than the base — and that is the result.**
+
+T6.5 shipped this pipeline unrun; the Phase 6 verification's third headline
+finding was "the fine-tune was never trained or measured". It has now been run
+end to end, and running it found two defects in the harness before it produced a
+number, and then produced a number nobody wanted.
+
+### The training
+
+| | |
+|---|---|
+| base | `qwen2.5:3b` → `mlx-community/Qwen2.5-3B-Instruct-4bit` |
+| pairs | 83, exported from merged flows; 60 golden sentences excluded because the golden set is the test set |
+| schedule | 332 iterations (4 epochs), batch 1, max sequence 1536, 8 LoRA layers |
+| host | Apple silicon, 16 GB, `mlx-lm` |
+| time | 58 min |
+| validation loss | **2.650 → 0.021** |
+| digest | `f90d4e432be6bdc9afe7ec6af3b436107d2e3603806629b10fd880fb8539b98b` |
+
+The schedule is shorter than `mlx_lm.lora`'s defaults, which the prompt allows
+("a documented shorter schedule if the full one exceeds the host"). The default
+schedule died on this machine at iteration 1:
+
+```
+RuntimeError: [METAL] Command buffer execution failed: Insufficient Memory
+```
+
+The four knobs are now options rather than hidden defaults, and every one is
+written into `digest.json`, because a run that quietly shrank itself would
+publish a number nobody could reproduce.
+
+### The two defects that had to be fixed before any number existed
+
+Both in `scripts/finetune-eval.mjs`, and both invisible until it was run.
+
+1. **The model override did nothing.** The script set `SVATAH_TIER2_MODEL` and
+   `SVATAH_ALLOW_MODEL_DRIFT` in the child's environment. **Nothing in the CLI
+   reads either variable.** So both runs used the base model, the "comparison"
+   compared a model with itself, and the script whose own header says it "does
+   not print the base twice" did exactly that. The override is now a copy of the
+   golden project with `compile.tier2.model` replaced and the pin removed, passed
+   as `--golden-project` — which is what LLD §16 means by "`--project` may
+   override it".
+2. **The tier lookup matched nothing.** It read
+   `result.tiers.find(t => t.tier === 2)`; `svatah eval compiler --json` writes
+   `byTier: { tier2: { total, matched, rate } }`. Both rates came back `null`, so
+   the script reported "Tier 2 was `not measured`" whatever it had just measured.
+
+A guard was added for the first: each run reports the gateway it actually used,
+and two identical gateways stop the script. A delta of zero from two identical
+runs is the one number ADR-4 says must never be printed.
+
+### The measurement
+
+```console
+$ node scripts/finetune-eval.mjs --tuned qwen2-5-3b-svatah-q4 --report reports/eval-finetune.md
+base ran on ollama:qwen2.5:3b; tuned ran on ollama:qwen2-5-3b-svatah-q4
+tier 2: 86.8 % → 13.2 % (-73.7)
+```
+
+| | base | tuned | delta | required |
+|---|---|---|---|---|
+| tier 2 | 86.8 % (33/38) | **13.2 %** (5/38) | **−73.7** | +5 |
+| tier 1 | 100 % | 100 % | 0.0 | no regression |
+
+**The five-point target is not met. The shortfall is 78.7 points, in the wrong
+direction.**
+
+Tier 1 is unchanged at 100 %, which is the check that says the two runs were
+comparable: Tier 1 is the grammar and no model touches it, so a move there would
+have meant the numbers could not be compared at all.
+
+### Quantization is not the cause
+
+The fused model is fp16 and the base is `Q4_K_M`, so the first run confounded
+the LoRA with the precision. It was re-run against a `--quantize q4_K_M` build of
+the same fused weights, which is the published number above. Both:
+
+| tuned build | tier 2 | delta |
+|---|---|---|
+| fp16 (6.2 GB) | 5.3 % | −81.6 |
+| `q4_K_M` (1.9 GB), same quantization as the base | **13.2 %** | **−73.7** |
+
+Worse in both, and worse at fp16 than at Q4. The published report is the
+like-for-like one.
+
+### What the tuned model actually does
+
+Thirty-six of thirty-eight tier 2 cases fail, and they fail the same way: the
+**action** is often right and the **arguments** are gone or invented.
+
+```diff
+  "Go to the \"/login\" page"
+- { "action": "navigate", "args": { "url": { "kind": "literal", "value": "/login" } } }
++ { "action": "navigate" }
+
+  "Browse to \"https://sample.test/dashboard\""
+- { "action": "navigate", "args": { "url": { … "value": "https://sample.test/dashboard" } } }
++ { "action": "navigate", "args": { "url": { … "value": "/dashboards/1234567890" } } }
+
+  "Return to the previous page"
+- { "action": "back" }
++ { "action": "scrollToTop" }
+```
+
+That is what overfitting looks like from the outside. Training loss fell from
+2.09 to **0.005** over 332 iterations on 83 examples: the model memorised the
+training set. Validation loss agrees — 0.021 — but the validation split is ten
+per cent *of those same 83 pairs*, so it measures memorisation of the same
+distribution rather than generalisation.
+
+And the distribution is the deeper problem, which this measurement is the first
+evidence for. `eval finetune export` says what it exports: "every pair is a
+grammar (**tier 1**) compile, in the shape a Tier 2 answer has". Tier 2 exists
+for the sentences the grammar **deliberately refuses**. The pairs are therefore
+drawn from a distribution disjoint from the one the tuned model is asked about,
+and 83 of them are enough to overwrite the base model's general instruction
+following without teaching it anything about the cases that matter.
+
+### What is not claimed
+
+No improvement. The tuned model is published as a digest and a measurement, and
+the Tier 2 model the compiler eval and every published compiler number still use
+is the **base** `qwen2.5:3b` — nothing in the repository points at the tuned one,
+and `evals/compiler/project/svatah.config.yaml` is unchanged.
+
+Fixing it is not in Phase 7's scope: it needs a training set drawn from what
+Tier 2 is actually asked — sentences the grammar refuses, with reviewed answers —
+which is a corpus that does not exist yet, and probably regularisation and far
+fewer epochs besides. It is recorded as K6.
 
 ---
 
@@ -577,7 +712,22 @@ is code rather than a fixture and is published as `@svatah/conformance`, which
 is packed beside it. The copy is git-ignored so there is one source and the
 published copy cannot drift.
 
-DEVIATION_FINETUNE
+### D7 — The fine-tune's schedule is smaller than the trainer's defaults
+
+**T7.5** allows "a documented shorter schedule if the full one exceeds the
+host", and this host could not run the default one at all. Batch 1, max sequence
+1536, 8 LoRA layers, 332 iterations. Every one of those numbers is in
+`digest.json` and in `reports/eval-finetune.md`, because a number without the
+schedule that produced it cannot be reproduced.
+
+### D8 — The tuned model is served from fused fp16 weights, not from GGUF
+
+`scripts/finetune-tier2.mjs` was written to `mlx_lm fuse --export-gguf`, which
+answers `ValueError: Model type qwen2 not supported for GGUF conversion` —
+mlx_lm's GGUF writer covers a short list of architectures and Qwen 2 is not on
+it. The fuse dequantizes to fp16 in the Hugging Face layout instead, which
+Ollama imports directly, and the published measurement re-quantizes that to
+`q4_K_M` so that the base and the tuned model are served at the same precision.
 
 
 ## Known gaps
@@ -633,5 +783,19 @@ self-hosted runner attached to the Bitbucket account.
 By design (T7.6). The tarballs exist and install; no `publish` appears in either
 release definition, and a repository check asserts it.
 
-GAP_FINETUNE
+### K6 — The Tier 2 fine-tune makes the model worse, and is not understood
+
+Trained, served and measured (T7.5): tier 2 **86.8 % → 13.2 %** against a target
+of +5 points. Not a harness artefact — the harness's two defects were fixed
+first, Tier 1 held at 100 %, and quantization was ruled out with a like-for-like
+`q4_K_M` build.
+
+The evidence points at the training set rather than the schedule: 83 pairs, all
+of them **tier 1** grammar compiles, against a tier that exists for the sentences
+the grammar refuses. Fixing it needs a corpus drawn from what Tier 2 is actually
+asked, which does not exist yet.
+
+Nothing points at the tuned model. `evals/compiler/project/svatah.config.yaml`
+still names `qwen2.5:3b`, and every published compiler number is the base
+model's.
 
