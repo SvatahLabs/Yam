@@ -71,6 +71,9 @@ importers:
       eslint-plugin-import:
         specifier: 'catalog:'
         version: 2.32.0(@typescript-eslint/parser@8.69.0(eslint@9.39.5)(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.5)(eslint@9.39.5)
+      playwright:
+        specifier: 'catalog:'
+        version: 1.62.1
       sample-web:
         specifier: workspace:*
         version: link:apps/sample-web
@@ -279,6 +282,18 @@ importers:
         specifier: 'catalog:'
         version: 2.1.9(@types/node@22.20.1)
 
+  packages/bindings-cli:
+    devDependencies:
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 2.1.9(@types/node@22.20.1)
+
   packages/cli:
     dependencies:
       '@svatah/adapter-appium':
@@ -429,6 +444,18 @@ importers:
       '@svatah/surface':
         specifier: workspace:*
         version: link:../surface
+    devDependencies:
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 2.1.9(@types/node@22.20.1)
+
+  packages/host-playwright:
     devDependencies:
       tsup:
         specifier: 'catalog:'

@@ -53,7 +53,7 @@ LLD §2.2 says. Using one afterwards is an error that says to take a new snapsho
 ## Running the tests
 
 ```bash
-pnpm exec playwright install chromium
+pnpm browsers   # or: pnpm exec playwright install chromium
 pnpm --filter @svatah/adapter-playwright test
 ```
 

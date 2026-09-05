@@ -122,10 +122,15 @@ Requires **Node 22 LTS** and pnpm.
 
 ```bash
 pnpm install
-pnpm exec playwright install chromium   # the adapter and host tests drive a real browser
+pnpm browsers      # the adapter and host tests drive a real browser
 pnpm -r build
 pnpm -r test
 ```
+
+Those four are the whole contract: a clean checkout that runs them has run
+everything. `pnpm browsers` is `playwright install chromium` in the adapter's
+workspace. Playwright is also a root dev dependency, so
+`pnpm exec playwright install chromium` works from the repository root too.
 
 Other checks:
 

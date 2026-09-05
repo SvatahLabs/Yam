@@ -105,7 +105,7 @@ again, which is the thing bindings are for not doing.
 From a checkout of this repository:
 
 ```bash
-pnpm install && pnpm exec playwright install chromium && pnpm -r build
+pnpm install && pnpm browsers && pnpm -r build
 pnpm --filter example-plain-playwright test
 ```
 

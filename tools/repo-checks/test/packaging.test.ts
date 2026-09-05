@@ -196,7 +196,39 @@ describe("the README carries the quick start and the numbers (T1.9)", () => {
   });
 
   it("says a browser has to be installed before the tests run", () => {
+    // The contract is four commands, and this is the one a newcomer skips.
+    // `pnpm browsers` exists so it is a step rather than an incantation; the
+    // longer form is documented beside it because that is what fails when the
+    // step is missed.
+    expect(readme).toContain("pnpm browsers");
     expect(readme).toContain("pnpm exec playwright install chromium");
+  });
+
+  it("provides `pnpm browsers` and a root Playwright to run it with", () => {
+    const root = JSON.parse(readFileSync(fromRoot("package.json"), "utf8")) as Manifest & {
+      scripts?: Record<string, string>;
+    };
+    expect(root.scripts?.["browsers"], "there is no `pnpm browsers` script").toContain(
+      "playwright install",
+    );
+    expect(root.scripts?.["browsers"]).toContain("chromium");
+    // Without this, `pnpm exec playwright` at the root resolves nothing and the
+    // command in every error message and README is wrong from the repository
+    // root — which is where a newcomer types it.
+    expect(
+      root.devDependencies?.["playwright"],
+      "playwright is not a root dev dependency, so `pnpm exec playwright` fails at the root",
+    ).toBeDefined();
+  });
+
+  it("documents the four-command contract in order", () => {
+    const contract = ["pnpm install", "pnpm browsers", "pnpm -r build", "pnpm -r test"];
+    let at = -1;
+    for (const command of contract) {
+      const next = readme.indexOf(command, at + 1);
+      expect(next, `the README does not document \`${command}\` after the previous step`).toBeGreaterThan(at);
+      at = next;
+    }
   });
 });
 

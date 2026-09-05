@@ -11,6 +11,7 @@
   "packageManager": "pnpm@10.30.2",
   "scripts": {
     "build": "pnpm -r build",
+    "browsers": "pnpm --filter @svatah/adapter-playwright exec playwright install chromium",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint .",
@@ -27,6 +28,7 @@
     "eslint": "catalog:",
     "eslint-import-resolver-typescript": "catalog:",
     "eslint-plugin-import": "catalog:",
+    "playwright": "catalog:",
     "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
