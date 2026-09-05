@@ -28,6 +28,38 @@ ollama create qwen2.5-3b-svatah -f evals/compiler/finetune/tuned/Modelfile
 node scripts/finetune-eval.mjs --tuned qwen2.5-3b-svatah
 ```
 
+## The schedule, and the machine it has to fit in (T7.5)
+
+`mlx_lm.lora`'s defaults — a batch of 4, sequences of 2048 tokens, LoRA on 16
+layers — are more than a 16 GB Apple-silicon machine has to give while anything
+else is running. The first attempt at the full schedule on such a machine died
+at iteration 1:
+
+```
+RuntimeError: [METAL] Command buffer execution failed: Insufficient Memory
+```
+
+So the four knobs that decide whether a run fits are options, and every one of
+them is written into `digest.json`:
+
+| Option | Default here | Why it is not `mlx_lm`'s default |
+|---|---|---|
+| `--epochs` | 4 | iterations are `epochs × pairs` |
+| `--batch-size` | 1 | the largest single term in peak memory |
+| `--max-seq-length` | 1024 | a truncated sequence loses the *end* of the answer, so raise it until the warnings stop rather than leaving it low |
+| `--layers` | 8 | fewer adapted layers, less optimiser state |
+
+They are options rather than smaller defaults because the numbers a run was
+trained with belong in its digest: a script that quietly shrank itself would
+publish a number nobody could reproduce, which is the one outcome ADR-4 exists
+to prevent.
+
+`mlx_lm` warns when a sequence is longer than `--max-seq-length` and truncates
+it. Those warnings matter more than they look: the assistant's answer is at the
+*end* of a pair, so a truncated pair trains the model on a prompt with no
+answer. Raise `--max-seq-length` until they stop, or accept — and record — that
+the longest pairs were not fully trained on.
+
 ## What "accepted pairs" means, and why it is the whole design
 
 A pair is a sentence and the step it means. The step has to be **right**, and

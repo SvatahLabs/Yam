@@ -503,8 +503,135 @@ runs the packed quick start, writes the reports and stops.
 
 ## Deviations
 
-DEVIATIONS_PLACEHOLDER
+Each names the section it departs from and why. A deviation is a decision;
+where the spec could be followed, it was.
+
+### D1 — The desktop legs sit in a `custom:` Bitbucket pipeline, not the default one
+
+**§14, T7.2:** "the pipeline definition runs the Java conformance and both
+desktop gates".
+
+The Java conformance runs in `default`, `branches` and `pull-requests`, on
+Bitbucket's hosted Linux. The two desktop legs are defined against self-hosted
+runner labels — `self.hosted` plus `macos` or `windows` — and live in
+`custom: desktop-gates`.
+
+**Why:** Bitbucket's hosted runners are Linux only, and a step whose `runs-on`
+labels match no attached runner **queues** rather than failing. Putting the
+desktop legs in `branches` would stall every branch build behind a runner that
+does not exist, which is a worse outcome than a leg someone has to start. The
+definitions are complete; attaching one runner is the only step left.
+
+### D2 — The macOS leg tolerates exit 2 rather than being `continue-on-error`
+
+**T7.2:** "with the macOS leg allowed to fail only on a hosted runner that
+cannot grant the permission".
+
+Read literally that is `continue-on-error`, which is what the GitHub workflow
+had. It tolerates *any* failure — including the 0-of-7 the live gate actually
+produced in Phase 6, which would have been green. Both definitions now
+discriminate on the gate's exit code: **2** is "this host cannot run me" and is
+tolerated with a message; **1** is "this adapter is not conformant" and fails
+the leg. This is stricter than the words and is what the words mean.
+
+### D3 — The AX window script is AppleScript, and JXA is used for everything else
+
+**§7.5** permits "a bridge over `osascript` (System Events)" without naming a
+dialect. The permission check and the action script stay in JXA, where JSON in
+and JSON out costs nothing; the window read is AppleScript because **only**
+AppleScript can ask a plural specifier for `properties` — JXA answers `Error:
+Can't get object.`, measured before the design was chosen — and that one form is
+the whole bulk-read design. The AppleScript answers delimiter-separated text
+rather than JSON, because AppleScript has no JSON writer and hand-rolling string
+escaping in it is how a tree gets lost to one quote mark.
+
+### D4 — Optional AX attributes are read only for containers holding a control
+
+**§7.5** asks for bulk reads and a budget; it does not say which attributes.
+`AXIdentifier`, `AXDOMIdentifier`, `AXPlaceholderValue`, `AXExpanded` and the
+action names are read only for a container that has at least one interactive
+child, and each is abandoned after eight failed bulk reads. A Chromium tree is
+mostly nested `AXGroup`s, and reading five extra attributes for every one of
+them would put the 488-node project screen back over the budget. The cost of the
+choice is that a purely decorative container's children carry no `automationId`;
+the controls a binding names always do.
+
+### D5 — `promptText` is renamed in the lowering rather than accepted by adapters
+
+**§3.2** fixes `dialog`'s args as `{ action, text? }`. The raw model-step schema
+still accepts `promptText`, because a Tier 2 model may have learned the other
+name; the lowering renames it on `dialog` steps and the adapters read `text`
+only. An adapter that knew both spellings is an adapter that can disagree with
+another one about which it reads, which is the shape of the defect §3.2 was
+written for.
+
+### D6 — `@svatah/schema` carries the *runtime* conformance fixture
+
+**T7.6:** "`@svatah/schema` with the JSON Schema files and the conformance
+fixtures included".
+
+"The conformance fixtures" is read as `evals/conformance/runtime` — the plan
+hash, the projected results and the summary a foreign runtime is compared
+against — copied into the package at build time. The *surface* conformance suite
+is code rather than a fixture and is published as `@svatah/conformance`, which
+is packed beside it. The copy is git-ignored so there is one source and the
+published copy cannot drift.
+
+DEVIATION_FINETUNE
+
 
 ## Known gaps
 
-GAPS_PLACEHOLDER
+Recorded rather than closed, each with the command that closes it.
+
+### K1 — The macOS Accessibility gate has never been run against a live window
+
+The permission is granted on this host and the bridge reads a real accessibility
+tree through it; what is missing is a **display**. Every application reports zero
+windows and `screencapture` cannot read the screen, which is what a locked or
+detached session looks like.
+
+```bash
+# On a macOS host with Accessibility granted and an unlocked display:
+node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md
+```
+
+Until it runs: the 10.39 ms per node is measured on a 199-node menu-bar tree, and
+the ~5.1 s for the 488-node project screen is an extrapolation from it. Both are
+labelled as such in `reports/adapter-ax.md` and above.
+
+### K2 — The Windows UI Automation gate has never been run
+
+No Windows host. Four defects that would have failed every call were found by
+running the PowerShell scripts through a real PowerShell on macOS; what a real
+UI Automation *tree* does — the `ControlType` mapping, `AutomationId`, the
+pattern calls, `controlPath` — is exactly as unverified as it was.
+
+```bash
+# On Windows:
+node scripts/desktop-conformance.mjs --adapter uia --report reports/adapter-uia.md
+```
+
+`SCREENSHOT_SCRIPT` is the one of the four scripts this exercise could not even
+parse, because its Windows-only type literals do not resolve on macOS.
+
+### K3 — The desktop healing outcomes are against recorded trees
+
+The three relocalization scores are measured through both adapters' real
+normalisation and the real relocalizer, against trees
+`scripts/record-desktop-tree.mjs` read out of Chromium over the DevTools
+protocol. They are not measured against a tree either *bridge* read. K1 and K2
+close this too.
+
+### K4 — Neither desktop leg of the pipeline has run
+
+D1. The Java conformance leg runs on every branch; the two desktop legs need a
+self-hosted runner attached to the Bitbucket account.
+
+### K5 — Nothing is published to a registry
+
+By design (T7.6). The tarballs exist and install; no `publish` appears in either
+release definition, and a repository check asserts it.
+
+GAP_FINETUNE
+

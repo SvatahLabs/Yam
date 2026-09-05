@@ -132,8 +132,24 @@ for (const mechanism of MECHANISMS) {
       await surface.act("type", await refByTestId(surface, "username"), { value: "a@b.c" });
       await surface.act("type", await refByTestId(surface, "password"), { value: "secret" });
       await surface.act("submit", await refByTestId(surface, "username"));
-      await new Promise((r) => setTimeout(r, 300));
-      expect(await surface.read("url")).toContain("/dashboard");
+      /*
+       * Polled, not slept (LLD §16's timing rule).
+       *
+       * A fixed 300 ms after a form submission is a race with a navigation, and
+       * it lost one on a loaded machine: the assertion read
+       * `http://127.0.0.1:…/login` because the browser had not got there yet.
+       * "A timing test that fails only under parallel load is a defect in the
+       * test, not in the code." What the case is about is that `submit`
+       * submits, so it waits for the navigation and gives up after a budget far
+       * larger than the thing it measures.
+       */
+      const deadline = Date.now() + 15_000;
+      let url = await surface.read("url");
+      while (!String(url).includes("/dashboard") && Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 50));
+        url = await surface.read("url");
+      }
+      expect(url).toContain("/dashboard");
     });
 
     test("[upload] upload sets an input's files", async ({ openSurface }) => {
@@ -213,10 +229,25 @@ for (const mechanism of MECHANISMS) {
     test("[switchWindow][closeOtherWindows] switchWindow and closeOtherWindows", async ({ openSurface }) => {
       const surface = await openSurface(mechanism, "/widgets");
       await surface.act("click", await refByTestId(surface, "open-new-tab"));
-      await new Promise((r) => setTimeout(r, 500));
 
-      await surface.act("switchWindow", undefined, { index: 1 });
-      expect(await surface.read("url")).toContain("/docs");
+      /*
+       * Polled, not slept (LLD §16's timing rule), for the same reason as
+       * `[submit]` above: half a second is a race with a browser opening a tab,
+       * and a race decided by how loaded the machine is is a test that will
+       * fail for a reason that has nothing to do with the adapter.
+       */
+      const deadline = Date.now() + 15_000;
+      let second = "";
+      while (!second.includes("/docs") && Date.now() < deadline) {
+        try {
+          await surface.act("switchWindow", undefined, { index: 1 });
+          second = String(await surface.read("url"));
+        } catch {
+          // The second window is not there yet.
+          await new Promise((r) => setTimeout(r, 50));
+        }
+      }
+      expect(second).toContain("/docs");
 
       await surface.act("switchWindow", undefined, { index: 0 });
       expect(await surface.read("url")).toContain("/widgets");
