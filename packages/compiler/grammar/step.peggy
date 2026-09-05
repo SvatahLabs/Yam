@@ -576,8 +576,19 @@ GuardBody
   / left:Reference __ "is empty"i {
       return { subject: "scope", predicate: { kind: "expr", left, op: "eq", right: { literal: "" } } };
     }
-  / t:UntilIs __ "is not"i __ p:StateWord { return { subject: "target", predicate: { ...p, negate: true } }; }
-  / t:UntilIs __ "is"i __ p:StateWord { return { subject: "target", predicate: p }; }
+  /*
+   * The phrase is carried, not dropped (T5.4).
+   *
+   * The IR's guard has a subject and a predicate and no target of its own
+   * (LLD §3.2): a `target` guard is about the element *the step acts on*. The
+   * grammar accepts a noun phrase here because that is how the sentence reads,
+   * and the compiler compares it with the step's own target — so
+   * `Only if the booking result is visible, Click the pay button` is a compile
+   * error naming both, rather than a guard that silently asks about the pay
+   * button (HLD principle 7: fail at authoring, not at replay).
+   */
+  / t:UntilIs __ "is not"i __ p:StateWord { return { subject: "target", predicate: { ...p, negate: true }, phrase: t }; }
+  / t:UntilIs __ "is"i __ p:StateWord { return { subject: "target", predicate: p, phrase: t }; }
 
 UrlGuard
   = ("contains"i / "contain"i) __ v:Value { return { kind: "urlContains", value: v }; }

@@ -31,6 +31,7 @@ import {
 } from "@svatah/schema";
 import {
   diagnostic,
+  elementId,
   isStoryBlock,
   type Diagnostic,
   type Project,
@@ -41,7 +42,7 @@ import { emitCustom, type StepRegistry } from "@svatah/steps";
 import { lowerStep, lowerValue, type LowerContext } from "./lower.js";
 import { parseGuard, parseSentence } from "./tier1.js";
 import { tierFor, type ModelTierAnswer } from "./tiers.js";
-import { validateStory, type ValidateContext } from "./validate.js";
+import { referencesOf, validateStory, type ValidateContext } from "./validate.js";
 import type { RawStep, RawValue } from "./raw.js";
 
 export interface CompileOptions {
@@ -138,12 +139,36 @@ export function compile(options: CompileOptions): CompileResult {
     compiled.map(({ story }) => [story.name, story.signature]),
   );
 
+  /*
+   * Every `{Story name.capture}` any story reads (T5.4).
+   *
+   * `W_UNUSED_CAPTURE` is decided per story, and a cross-story read is by
+   * definition in a different one, so a capture read only from elsewhere looked
+   * unused. That is the ordinary shape of a compensating story — it exists to
+   * undo what the failing story recorded — and the warning fired on exactly the
+   * pattern REQ-AUTO-4 asks people to write.
+   *
+   * Collected once here, where every story is in hand, rather than by validating
+   * twice.
+   */
+  const crossStoryReads = new Set<string>();
+  for (const { story } of compiled) {
+    for (const step of story.steps) {
+      for (const reference of referencesOf(step)) {
+        if (reference.kind === "var" && reference.story !== undefined) {
+          crossStoryReads.add(`${reference.story}.${reference.name}`);
+        }
+      }
+    }
+  }
+
   for (const { story, file } of compiled) {
     const context: ValidateContext = {
       file,
       storyName: story.name,
       ...(story.signature === undefined ? {} : { signature: story.signature }),
       otherStories: capturesByStory,
+      crossStoryReads,
       dataPaths,
       stories: signatures,
       apis,
@@ -408,10 +433,92 @@ function attachGuard(
   where: { file: string; line: number },
   diagnostics: Diagnostic[],
 ): RawStep {
-  if (raw.guard === undefined) return parsed;
-  const guard = parseGuard(raw.guard.text, raw.guard.mode, { ...where, line: raw.guard.line });
-  diagnostics.push(...guard.diagnostics);
-  return guard.guard === undefined ? parsed : { ...parsed, guard: guard.guard };
+  /*
+   * A guard reaches here two ways and both are checked below (T5.4).
+   *
+   * `Only if <predicate>, <sentence>` is one line and the grammar attaches the
+   * guard as it parses it. A standalone `Only if <predicate>` line before a step
+   * is two lines, and the reader hands them over separately. They are the same
+   * guard and must be answered the same way — a check on one spelling only would
+   * be worse than no check at all.
+   */
+  const attached =
+    raw.guard === undefined
+      ? parsed
+      : (() => {
+          const guard = parseGuard(raw.guard.text, raw.guard.mode, {
+            ...where,
+            line: raw.guard.line,
+          });
+          diagnostics.push(...guard.diagnostics);
+          return guard.guard === undefined ? parsed : { ...parsed, guard: guard.guard };
+        })();
+
+  return checkGuardTarget(attached, raw, where, diagnostics);
+}
+
+/**
+ * A `target` guard is about the element the step acts on (T5.4, LLD §3.2).
+ *
+ * The IR's guard carries a subject, a predicate and a mode — and no target. "The
+ * executor evaluates it before acting and never performs the action if it fails"
+ * (REQ-AUTO-1) is about *this* action's element, and `runStep` resolves
+ * `step.target` to answer it. So
+ *
+ *     Only if the login error is hidden, click the sign in button
+ *
+ * cannot be expressed. It used to compile — to a guard asking whether the *sign
+ * in button* was hidden, with "the login error" thrown away — which is a
+ * different question with the same shape, and nothing anywhere said so.
+ *
+ * It is a compile error naming both phrases instead (HLD principle 7: fail at
+ * authoring, not at replay), with the two spellings that do work suggested. See
+ * the deviation in `docs/spec/progress/phase-5.md`: this narrows a form
+ * `docs/flow-language.md` pattern 28 documented, because the IR the same spec
+ * defines cannot carry it.
+ */
+function checkGuardTarget(
+  parsed: RawStep,
+  raw: ReaderStep,
+  where: { file: string; line: number },
+  diagnostics: Diagnostic[],
+): RawStep {
+  const guard = parsed.guard as (NonNullable<RawStep["guard"]> & { phrase?: string }) | undefined;
+  if (guard === undefined || guard.subject !== "target") return parsed;
+
+  const line = raw.guard?.line ?? raw.line;
+  const source = raw.guard?.text ?? raw.text;
+  const step = parsed.target?.phrase;
+
+  if (step === undefined) {
+    diagnostics.push(
+      diagnostic(
+        "E_GUARD_NO_TARGET",
+        `The guard is about "${guard.phrase ?? "an element"}", but "${raw.text}" acts on no ` +
+          "element, so there is nothing for a target guard to be about. Use a page guard " +
+          '(`Only if the URL contains "…"`) or a scope guard (`Only if {name} is "…"`).',
+        { ...where, line, source },
+      ),
+    );
+    return { ...parsed, guard: undefined };
+  }
+
+  if (guard.phrase !== undefined && elementId(guard.phrase) !== elementId(step)) {
+    diagnostics.push(
+      diagnostic(
+        "E_GUARD_OTHER_TARGET",
+        `The guard asks about "${guard.phrase}" and the step acts on "${step}". A guard is a ` +
+          "precondition on the step's own element — the IR has one target per step (LLD §3.2) " +
+          "and the executor resolves it to answer the guard — so it cannot ask about a " +
+          "different element. Either guard on the same element, or read the other one first " +
+          '(`Remember … as name`) and use a scope guard (`Only if {name} is "…"`).',
+        { ...where, line, source },
+      ),
+    );
+    return { ...parsed, guard: undefined };
+  }
+
+  return parsed;
 }
 
 /** A Tier 0 match, as an IR step (LLD §5, Draft 2.2). */

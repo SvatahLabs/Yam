@@ -1,0 +1,60 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "booking-status"
+      - by: "role"
+        exact: true
+        name: "Confirmed"
+        role: "cell"
+        score: 0.92
+      - by: "text"
+        exact: true
+        score: 0.75
+        value: "Confirmed"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"booking-status\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='booking-status']"
+    context:
+      hash: "782c67c0c203e5c251532fa6cfba11ce7aa2ecfed8ce507973a2e021dabbf0c6"
+      pattern: "/booking"
+      platform: "web"
+    fingerprint:
+      attrs:
+        data-testid: "booking-status"
+      box:
+        - 470
+        - 647.69
+        - 97.08
+        - 36.25
+      index: 2
+      neighbours:
+        after:
+          - "Cancel booking"
+        before:
+          - "ReferenceStarting pointStatus"
+          - "BK-10428"
+          - "Indiranagar"
+      rolePath:
+        - "main"
+        - "region"
+        - "table"
+        - "row"
+      tag: "td"
+      text: "Confirmed"
+    provenance:
+      at: "2026-09-04T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-04T00:00:00.000Z"
+    verified: true
+id: "booking.booking-status"
+phrases:
+  - "the booking status"
+schemaVersion: "1.0.0"

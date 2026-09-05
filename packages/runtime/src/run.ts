@@ -358,8 +358,14 @@ async function runFlow(
     };
   }
 
-  let at: { story?: string; stepId?: string } = {};
-  const surface = auditor.auditing(raw, () => at);
+  let where: { story?: string; stepId?: string } = {};
+  const at = {
+    get: () => where,
+    set: (value: { story?: string; stepId?: string }) => {
+      where = value;
+    },
+  };
+  const surface = auditor.auditing(raw, at.get);
 
   /*
    * Restore the interrupted run's state (REQ-AUTO-3, LLD §8.1).
@@ -442,7 +448,7 @@ async function runFlow(
       }
       if (!story.meta.enabled) continue;
 
-      at = { story: name };
+      at.set({ story: name });
       /*
        * Run-level inputs reach only the stories that declare them.
        *
@@ -458,14 +464,14 @@ async function runFlow(
       );
 
       const outcome = await runStory(story, inputs, {
-        ...storyContext(flow, story, scope, surface, auditor, context, () => at, record),
+        ...storyContext(flow, story, scope, surface, auditor, context, at, record),
         // Only the story the resume starts in skips steps; the ones after it
         // run whole.
         ...(resume !== undefined && name === resume.story ? { startAt: resume.from } : {}),
-        onResult: (result) => {
-          at = { story: name, stepId: result.stepId };
-          record(result);
-        },
+        // Before the step, not after its result: the audit has to say which step
+        // made a surface call, and after the fact it is the *previous* step.
+        onStep: (step) => at.set({ story: name, stepId: step.id }),
+        onResult: record,
       });
 
       for (const [key, value] of Object.entries(outcome.outputs)) {
@@ -505,7 +511,18 @@ function storyContext(
   surface: AgentSurface,
   auditor: Auditor,
   context: FlowContext,
-  at: () => { story?: string; stepId?: string },
+  /**
+   * Where the run is, read by the audit proxy and written before each step.
+   *
+   * A pair rather than a getter because the nested runs — `invoke` and a
+   * compensating story — have to move it too: a surface call made inside an
+   * invoked story is that story's step's call, not the calling step's
+   * (REQ-AUTO-6).
+   */
+  at: {
+    get(): { story?: string; stepId?: string };
+    set(value: { story?: string; stepId?: string }): void;
+  },
   record: (result: StepResult) => void,
 ): StoryContext {
   const { options } = context;
@@ -518,6 +535,7 @@ function storyContext(
     if (target === undefined) return { outputs: {}, ok: false };
     const outcome = await runStory(target, inputs, {
       ...storyContext(flow, target, scope, surface, auditor, context, at, record),
+      onStep: (step) => at.set({ story: name, stepId: step.id }),
       onResult: record,
     });
     // The caller's frame is re-entered: `invoke` is a call, and a call returns
@@ -590,6 +608,7 @@ function storyContext(
       // well would put each one in the results twice.
       const outcome = await runStory(target, {}, {
         ...storyContext(flow, target, scope, surface, auditor, context, at, () => undefined),
+        onStep: (step) => at.set({ story: name, stepId: step.id }),
       });
       // The compensating story's own steps are recorded as `aborted`: they ran,
       // but as part of an abort rather than as part of the flow's intent

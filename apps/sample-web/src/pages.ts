@@ -153,6 +153,20 @@ ${SIDEBAR}
     </div>`,
     ),
   },
+  /*
+   * The booking page, and — since T5.4 — the compensating control.
+   *
+   * `onFailure=compensate:cancel booking` (REQ-AUTO-4) needs something for the
+   * compensating story to do, and `evals/fixtures/flows/booking-compensation.flow`
+   * named a "cancel booking button" the application did not have. The booking is
+   * not real, because the page is static, but the shape is: a booking with a
+   * reference, a status, and one control that undoes it, on the page the
+   * sidebar's Bookings link already pointed at.
+   *
+   * Adding interactive elements moves the healing eval's numbers — every one of
+   * them is a binding the eval records and a candidate it can break — which is
+   * why `reports/eval-healing.md` was regenerated in the same commit.
+   */
   {
     path: "/booking",
     title: "Booking",
@@ -189,6 +203,20 @@ ${SIDEBAR}
           <button type="button" class="btn btn-primary" data-testid="book-now">Book now</button>
         </form>
         <p id="booking-result" data-testid="booking-result" hidden>Slot booked.</p>
+        <section class="bookings" aria-labelledby="bookings-heading">
+          <h2 id="bookings-heading" data-testid="bookings-heading">Your bookings</h2>
+          <table class="table" data-testid="bookings-table">
+            <thead><tr><th>Reference</th><th>Starting point</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr>
+                <td data-testid="booking-reference">BK-10428</td>
+                <td>Indiranagar</td>
+                <td data-testid="booking-status">Confirmed</td>
+              </tr>
+            </tbody>
+          </table>
+          <button type="button" class="btn btn-link" data-testid="cancel-booking">Cancel booking</button>
+        </section>
       </main>
     </div>`,
     ),
@@ -353,6 +381,7 @@ input, select { padding: 7px 9px; border: 1px solid var(--line); border-radius: 
 .alert { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--line); margin-bottom: 14px; }
 .alert-error { border-color: #c0392b; color: #c0392b; }
 .table { border-collapse: collapse; margin-top: 18px; }
+.bookings { margin-top: 28px; border-top: 1px solid var(--line); padding-top: 12px; }
 .table th, .table td { border: 1px solid var(--line); padding: 6px 12px; text-align: left; }
 #drag-source, #drag-target { display: inline-block; padding: 18px 24px; border: 1px dashed var(--line); border-radius: 8px; margin-right: 12px; }
 canvas { border: 1px solid var(--line); border-radius: 8px; display: block; }

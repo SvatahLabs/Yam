@@ -41,7 +41,20 @@ export interface RawStep {
   readonly target2?: RawTarget;
   readonly args?: Readonly<Record<string, RawValue | number | boolean>>;
   readonly expect?: { readonly subject: string; readonly predicate: RawPredicate };
-  readonly guard?: { readonly subject: string; readonly predicate: RawPredicate; readonly mode: string };
+  readonly guard?: {
+    readonly subject: string;
+    readonly predicate: RawPredicate;
+    readonly mode: string;
+    /**
+     * The noun phrase a `target` guard named, before it is checked (T5.4).
+     *
+     * The IR's guard has no target of its own (LLD §3.2): a `target` guard is
+     * about the element the step acts on. The grammar reads the phrase anyway,
+     * because that is how the sentence is written, and the compiler uses it to
+     * refuse a guard that names a *different* element. It never reaches the IR.
+     */
+    readonly phrase?: string;
+  };
   readonly capture?: {
     readonly name: string;
     readonly from: string;

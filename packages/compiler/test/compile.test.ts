@@ -407,3 +407,79 @@ describe("the fixture flows compile clean (REQ-NFR-8, T2.5 Validate)", () => {
     expect(renderPlan(again.plan)).toBe(renderPlan(plan));
   });
 });
+
+/**
+ * A `target` guard is about the step's own element (T5.4, LLD §3.2).
+ *
+ * The IR carries one target per step and the guard carries none, so a guard
+ * naming a different element cannot be expressed. It used to compile — to a
+ * guard about the *step's* element, with the author's phrase discarded — which
+ * is a different question wearing the same shape, and nothing said so.
+ *
+ * Both spellings are checked, because they are the same guard: the one-line
+ * `Only if <predicate>, <sentence>` the grammar attaches as it parses, and the
+ * standalone `Only if <predicate>` line the reader hands over separately. A rule
+ * that held for one and not the other would be worse than no rule.
+ */
+describe("guards name the element their step acts on (T5.4, REQ-AUTO-1)", () => {
+  const compile = (flow: string) =>
+    compileFlow(flow).diagnostics.map((d) => `${d.code}`);
+
+  it("accepts a guard on the step's own element, both ways round", () => {
+    expect(
+      compile(`story: S
+  Only if the sign in button is visible, click the sign in button
+
+test: S
+`),
+    ).toEqual([]);
+    expect(
+      compile(`story: S
+  Only if the sign in button is visible
+  click the sign in button
+
+test: S
+`),
+    ).toEqual([]);
+  });
+
+  it("refuses a guard about a different element, both ways round", () => {
+    for (const flow of [
+      `story: S
+  Only if the login error is hidden, click the sign in button
+
+test: S
+`,
+      `story: S
+  Only if the login error is hidden
+  click the sign in button
+
+test: S
+`,
+    ]) {
+      expect(compile(flow)).toContain("E_GUARD_OTHER_TARGET");
+    }
+  });
+
+  it("refuses a target guard on a step with no element", () => {
+    expect(
+      compile(`story: S
+  Only if the login error is hidden, wait 2 seconds
+
+test: S
+`),
+    ).toContain("E_GUARD_NO_TARGET");
+  });
+
+  it("leaves page and scope guards alone: they name no element", () => {
+    expect(
+      compile(`story: S
+  Remember the text of the login error as error
+  Only if the URL contains "/login", click the sign in button
+  Only if {error} is "", click the sign in button
+
+test: S
+`),
+    ).toEqual([]);
+  });
+});

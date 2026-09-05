@@ -1425,13 +1425,27 @@ Run the "Validate login" story with email={input.email}, password={data.pw}
 **Form:** `Only if <predicate>, <sentence>` · `Unless <predicate>, <sentence>` · a standalone `Only if <predicate>` / `Unless <predicate>` line before a step
 
 ```
-Only if the login error is hidden, click the sign in button
-Unless the announcement banner is visible, click the dashboard link
+Only if the sign in button is visible, click the sign in button
+Unless the dashboard link is hidden, click the dashboard link
 Only if the URL contains "/login", type {input.email} into the username field
 Unless the remember me box is checked, check the remember me box
 ```
 
-`Only if the login error is hidden, click the sign in button` compiles to:
+A guard has one of four subjects: the step's own **element**, the **page**, a
+**dialog**, or the run's **scope** (pattern 29).
+
+> **A `target` guard is about the element the step acts on.** A step has one
+> target and the guard has no target of its own, so
+> `Only if the login error is hidden, click the sign in button` cannot be
+> expressed: it is `E_GUARD_OTHER_TARGET`, naming both phrases. Read the other
+> element first and use a scope guard instead:
+>
+> ```
+> Remember the text of the login error as error
+> Only if {error} is "", click the sign in button
+> ```
+
+`Only if the sign in button is visible, click the sign in button` compiles to:
 
 ```json
 {
@@ -1444,14 +1458,14 @@ Unless the remember me box is checked, check the remember me box
   "guard": {
     "subject": "target",
     "predicate": {
-      "kind": "hidden"
+      "kind": "visible"
     },
     "mode": "onlyIf"
   }
 }
 ```
 
-`Unless the announcement banner is visible, click the dashboard link` compiles to:
+`Unless the dashboard link is hidden, click the dashboard link` compiles to:
 
 ```json
 {
@@ -1464,7 +1478,7 @@ Unless the remember me box is checked, check the remember me box
   "guard": {
     "subject": "target",
     "predicate": {
-      "kind": "visible"
+      "kind": "hidden"
     },
     "mode": "unless"
   }
@@ -1857,6 +1871,8 @@ Errors, which fail the compile:
 | `E_META` | Unknown metadata key, or a value the key does not take. |
 | `E_SIGNATURE` | A malformed `inputs:` / `outputs:` line, an unknown type, or a default that does not match its type. |
 | `E_GUARD_ORPHAN` | An `Only if` / `Unless` line that guards no step. |
+| `E_GUARD_OTHER_TARGET` | A `target` guard naming a different element from the one the step acts on. A step has one target and the guard has no target of its own; read the other element first and use a scope guard. |
+| `E_GUARD_NO_TARGET` | A `target` guard on a step that addresses no element (`Only if the banner is visible, wait 2 seconds`). Use a page or a scope guard. |
 | `E_DUP_STORY` | Two stories share a name. |
 | `E_TEST_EMPTY` | A `test:` / `run:` block runs nothing. |
 | `E_DUP_API` | Two `api/*.yaml` files declare the same request name. |

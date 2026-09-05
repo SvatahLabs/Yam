@@ -15,6 +15,16 @@ export const ERROR_CODES = [
   "E_META",
   "E_SIGNATURE",
   "E_GUARD_ORPHAN",
+  /*
+   * T5.4. The IR's guard has a subject and a predicate and no target of its own
+   * (LLD §3.2): a `target` guard is a precondition on the element *the step acts
+   * on*. A sentence that names a different one cannot be expressed, and used to
+   * compile to a guard about the step's element with the author's phrase thrown
+   * away — silently the wrong question.
+   */
+  "E_GUARD_OTHER_TARGET",
+  /** T5.4. A `target` guard on a step that addresses no element. */
+  "E_GUARD_NO_TARGET",
   "E_DUP_STORY",
   "E_TEST_EMPTY",
   "E_SIGIL",

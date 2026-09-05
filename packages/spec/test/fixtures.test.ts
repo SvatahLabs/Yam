@@ -38,10 +38,15 @@ describe("the fixture flows (REQ-NFR-8)", () => {
     expect(diagnostics.length).toBe(3);
   });
 
-  it("finds all five flow files", () => {
+  it("finds every flow file", () => {
+    // Four migrated fixtures, the compensation showcase, and the two Phase 5
+    // added: the workflow stories T5.2 and T5.3 call by name, and the guard and
+    // compensation showcase T5.4 runs.
     expect(project.flows.map((f) => f.file).sort()).toEqual([
       "flows/booking-compensation.flow",
+      "flows/booking-workflow.flow",
       "flows/execution.flow",
+      "flows/guards-and-compensation.flow",
       "flows/natural_language_login.flow",
       "flows/simple.flow",
       "flows/svatah.flow",
@@ -82,7 +87,17 @@ describe("the fixture flows (REQ-NFR-8)", () => {
     // Covered by "reads with no errors" as well, but named separately: this is
     // the property that makes the compatibility run (T2.10) possible at all.
     expect(diagnostics.filter((d) => d.code === "E_UNKNOWN_STORY")).toEqual([]);
-    expect([...project.runs.values()].every((names) => names.length > 0)).toBe(true);
+    /*
+     * Every flow that has anything to run, runs something. `booking-workflow.flow`
+     * has no run block and only `story` blocks, so it runs nothing (REQ-LANG-10)
+     * — which is exactly right for a file of functions other things call by name
+     * (T5.2, T5.3), and is not the same as a run block that names nothing
+     * (`E_TEST_EMPTY`).
+     */
+    const empty = [...project.runs.entries()]
+      .filter(([, names]) => names.length === 0)
+      .map(([file]) => file);
+    expect(empty).toEqual(["flows/booking-workflow.flow"]);
   });
 
   it("reads the named API request the flows call", () => {

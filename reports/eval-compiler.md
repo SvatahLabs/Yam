@@ -1,6 +1,6 @@
 # Compiler eval
 
-Run at 2026-09-04T02:28:42.476Z.
+Run at 2026-09-04T03:08:15.419Z.
 
 Model-tier answers came from `ollama:qwen2.5:3b`.
 

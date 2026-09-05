@@ -1,8 +1,8 @@
 # Svatah eval report — healing
 
-Generated: 2026-09-03T05:56:14.728Z
+Generated: 2026-09-04T03:03:51.322Z
 
-**Relocalize-only recovery: 92.3%**, against REQ-HEAL-5's 60.0% threshold. Met.
+**Relocalize-only recovery: 92.6%**, against REQ-HEAL-5's 60.0% threshold. Met.
 
 **No model was involved at any point**: relocalization only, with the no-op `Regrounder` (LLD §10). REQ-HEAL-5's second number — 85% with one model call — is therefore *not measured here*, and the figure below is the relocalize-only one. Register a `Regrounder` (a credential, and `heal.useModel`) to measure it.
 
@@ -16,8 +16,8 @@ Headline population: `no-test-ids`.
 
 | Population | Bindings | Degraded | Recovered | Wrong element | Rate |
 |---|---|---|---|---|---|
-| `no-test-ids` **(headline)** | 106 | 52 | 48 | 0 | 92.3% |
-| `with-test-ids` | 106 | 19 | 15 | 0 | 78.9% |
+| `no-test-ids` **(headline)** | 107 | 54 | 50 | 0 | 92.6% |
+| `with-test-ids` | 107 | 19 | 15 | 0 | 78.9% |
 
 `no-test-ids` is the headline because it is the harder and more representative population: an application with a `data-testid` on every control barely needs healing at all, so a number taken on it measures the application rather than the healer. Both are published so the gap between them is visible rather than a choice made quietly in the eval's own configuration.
 
@@ -25,12 +25,12 @@ Headline population: `no-test-ids`.
 
 | | Count |
 |---|---|
-| Bindings recorded at variant 0 | 106 |
-| Locator cases examined (candidate × variant) | 2825 |
-| Locators broken | 66 |
+| Bindings recorded at variant 0 | 107 |
+| Locator cases examined (candidate × variant) | 2861 |
+| Locators broken | 68 |
 | Bindings that stopped resolving entirely | 0 |
-| **Bindings degraded — the cases below** | **52** |
-| Recovered by relocalization | 48 |
+| **Bindings degraded — the cases below** | **54** |
+| Recovered by relocalization | 50 |
 | Not found | 4 |
 | Refused as ambiguous | 0 |
 | **Relocalized onto the wrong element** | **0** |
@@ -49,20 +49,20 @@ Relocalization proposed the wrong element in no case: every proposal it made car
 | 3 | Login fields wrapped in an extra layout div | 0/43 | 0 | 0 | — |
 | 4 | Submit button value changed | 1/43 | 1 | 1 | 100.0% |
 | 5 | Password field id renamed | 3/43 | 1 | 1 | 100.0% |
-| 6 | Sidebar items reordered | 0/257 | 0 | 0 | — |
-| 7 | Logout became an icon-only button | 4/257 | 4 | 0 | 0.0% |
+| 6 | Sidebar items reordered | 0/261 | 0 | 0 | — |
+| 7 | Logout became an icon-only button | 4/261 | 4 | 0 | 0.0% |
 | 8 | Dashboard heading rewritten | 0/48 | 0 | 0 | — |
-| 9 | A second Book button appears | 2/85 | 1 | 1 | 100.0% |
-| 10 | CSS classes hashed by the build | 9/413 | 9 | 9 | 100.0% |
-| 11 | Search field became a search input | 0/85 | 0 | 0 | — |
+| 9 | A second Book button appears | 2/89 | 1 | 1 | 100.0% |
+| 10 | CSS classes hashed by the build | 10/417 | 10 | 10 | 100.0% |
+| 11 | Search field became a search input | 0/89 | 0 | 0 | — |
 | 12 | Schedule Build heading demoted to h2 | 0/54 | 0 | 0 | — |
-| 13 | Nav toggle text moved into a child span | 0/413 | 0 | 0 | — |
+| 13 | Nav toggle text moved into a child span | 0/417 | 0 | 0 | — |
 | 14 | Placeholders removed from the login form | 2/43 | 2 | 2 | 100.0% |
 | 15 | Labels detached from their inputs | 12/113 | 6 | 6 | 100.0% |
 | 16 | CVV field keeps only its name | 5/70 | 1 | 1 | 100.0% |
-| 17 | A banner was added above the main content | 25/389 | 25 | 25 | 100.0% |
-| 18 | An extra first option in every select | 0/270 | 0 | 0 | — |
-| 19 | Next button moved into a toolbar | 1/85 | 1 | 1 | 100.0% |
+| 17 | A banner was added above the main content | 26/393 | 26 | 26 | 100.0% |
+| 18 | An extra first option in every select | 0/274 | 0 | 0 | — |
+| 19 | Next button moved into a toolbar | 1/89 | 1 | 1 | 100.0% |
 | 20 | Login moved into a modal dialog | 0/43 | 0 | 0 | — |
 
 A rate of `—` means the variant degraded no binding: every candidate it could have
@@ -72,8 +72,8 @@ invalidated still identified its element.
 
 | Kind | Times broken |
 |---|---|
-| `xpath` | 28 |
-| `css` | 11 |
+| `xpath` | 29 |
+| `css` | 12 |
 | `role` | 10 |
 | `label` | 7 |
 | `text` | 6 |

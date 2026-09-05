@@ -1,0 +1,62 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "booking-reference"
+      - by: "role"
+        exact: true
+        name: "BK-10428"
+        role: "cell"
+        score: 0.92
+      - by: "text"
+        exact: true
+        score: 0.75
+        value: "BK-10428"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"booking-reference\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='booking-reference']"
+    context:
+      hash: "782c67c0c203e5c251532fa6cfba11ce7aa2ecfed8ce507973a2e021dabbf0c6"
+      pattern: "/booking"
+      platform: "web"
+    fingerprint:
+      attrs:
+        data-testid: "booking-reference"
+      box:
+        - 244.5
+        - 647.69
+        - 99.53
+        - 36.25
+      index: 0
+      neighbours:
+        after:
+          - "Indiranagar"
+          - "Confirmed"
+          - "Cancel booking"
+        before:
+          - "Slot booked."
+          - "Your bookings"
+          - "ReferenceStarting pointStatus"
+      rolePath:
+        - "main"
+        - "region"
+        - "table"
+        - "row"
+      tag: "td"
+      text: "BK-10428"
+    provenance:
+      at: "2026-09-04T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-04T00:00:00.000Z"
+    verified: true
+id: "booking.booking-reference"
+phrases:
+  - "the booking reference"
+schemaVersion: "1.0.0"

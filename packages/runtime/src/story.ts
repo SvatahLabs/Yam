@@ -49,6 +49,17 @@ export interface StoryContext extends Omit<StepContext, "scope"> {
   readonly checkpoint?: (step: Step) => Promise<void>;
   /** Reports each result as it happens, for a live event stream (REQ-ADE-1). */
   readonly onResult?: (result: StepResult) => void;
+  /**
+   * Called with each step *before* it runs (REQ-AUTO-6).
+   *
+   * The audit attributes every surface call to a step, and the only moment at
+   * which the right step is known is before the call happens. Deriving it from
+   * the last *result* instead labelled each step's calls with the previous
+   * step's id — which made "the audit shows no surface call for the guarded
+   * step" (T5.4) unanswerable, because the calls attributed to it were the next
+   * step's.
+   */
+  readonly onStep?: (step: Step) => void;
   /** Runs the compensating story named by a policy. */
   readonly compensate?: (story: string) => Promise<readonly StepResult[]>;
   /**
@@ -154,6 +165,7 @@ export async function runStory(
       continue;
     }
 
+    context.onStep?.(step);
     const startedAt = new Date();
     const outcome = await runStep(step, context);
     const endedAt = new Date();

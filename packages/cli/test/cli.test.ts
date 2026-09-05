@@ -49,21 +49,32 @@ describe("the command table (LLD §15)", () => {
     expect(await main(["help"], io)).toBe(EXIT.ok);
   });
 
-  it("says which task builds a command that is not here yet", async () => {
-    // `workflow` is LLD §15's story-as-a-function command and is Phase 5.
-    // "Not yet" and "never" are different answers.
+  it("names the subcommand a built command wants, rather than a task", async () => {
+    /*
+     * `workflow` and `tool` were the last two entries in the "not built yet"
+     * table, and Phase 5 built them (T5.2, T5.3), so the table is empty. What
+     * `svatah workflow` with no subcommand says now is what it takes — which is
+     * the same rule as before applied to a command that exists: "not yet" and
+     * "never" and "you left something out" are three different answers.
+     */
     const io = capture();
     expect(await main(["workflow"], io)).toBe(EXIT.usage);
-    expect(io.stderr.join("\n")).toContain("T5.4");
-    expect(io.stderr.join("\n")).toContain("docs/spec/tasks.md");
+    expect(io.stderr.join("\n")).toContain("workflow run <story>");
+
+    const tool = capture();
+    expect(await main(["tool"], tool)).toBe(EXIT.usage);
+    expect(tool.stderr.join("\n")).toContain("tool serve");
   });
 
-  it("no longer says that about a command Phase 4 built", async () => {
-    // The stale half of the same rule: `repl` and `mcp` are here now (T4.5,
-    // T4.6), and a command line that still promised them later would be lying.
+  it("no longer promises later a command that is here now", async () => {
+    // The stale half of the same rule: `repl` and `mcp` arrived in Phase 4,
+    // `workflow` and `tool` in Phase 5, and a command line that still promised
+    // any of them later would be lying.
     const io = capture();
     await main(["help"], io);
-    expect(io.stdout.join("\n")).toContain("svatah repl");
+    for (const command of ["svatah repl", "svatah workflow run", "svatah tool serve"]) {
+      expect(io.stdout.join("\n")).toContain(command);
+    }
   });
 
   it("rejects an unknown command with the usage", async () => {

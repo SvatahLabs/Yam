@@ -21,6 +21,16 @@ export interface ValidateContext {
   readonly signature?: Signature;
   /** Captures of other stories in the project: story name → names. */
   readonly otherStories: ReadonlyMap<string, ReadonlySet<string>>;
+  /**
+   * Every `Story name.capture` any story in the project reads (T5.4).
+   *
+   * `W_UNUSED_CAPTURE` is decided one story at a time, and a cross-story read is
+   * in a different story by construction — so without this a capture read only
+   * from elsewhere looked unused. A compensating story reading what the failing
+   * story recorded is the ordinary shape of REQ-AUTO-4, and the warning fired on
+   * exactly that.
+   */
+  readonly crossStoryReads?: ReadonlySet<string>;
   /** Run data paths that exist, so `{data.x}` can be checked. */
   readonly dataPaths: ReadonlySet<string>;
   /** Story names that exist, for `invoke` and its inputs. */
@@ -192,6 +202,7 @@ export function validateStory(
   for (const name of captured) {
     if (read.has(name)) continue;
     if (context.signature?.outputs[name] !== undefined) continue;
+    if (context.crossStoryReads?.has(`${context.storyName}.${name}`) === true) continue;
     const step = steps.find((s) => s.capture?.name === name);
     diagnostics.push(
       diagnostic(

@@ -987,6 +987,40 @@
       "element": "button#book-now[button] \"Book now\"@1",
       "name": "Book now",
       "role": "button"
+    },
+    {
+      "candidates": [
+        {
+          "attribute": "data-testid",
+          "by": "testid",
+          "score": 0.98,
+          "value": "cancel-booking"
+        },
+        {
+          "by": "role",
+          "name": "Cancel booking",
+          "role": "button",
+          "score": 0.92
+        },
+        {
+          "by": "text",
+          "score": 0.75,
+          "value": "Cancel booking"
+        },
+        {
+          "by": "css",
+          "score": 0.68,
+          "value": "[data-testid=\"cancel-booking\"]"
+        },
+        {
+          "by": "xpath",
+          "score": 0.6,
+          "value": "//*[@data-testid='cancel-booking']"
+        }
+      ],
+      "element": "button#cancel-booking[button] \"Cancel booking\"@0",
+      "name": "Cancel booking",
+      "role": "button"
     }
   ],
   "/checkout": [

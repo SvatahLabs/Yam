@@ -45,12 +45,18 @@ describe("help and unknown commands", () => {
     expect(out).toContain("svatah bindings list");
   });
 
-  it("says which task builds a command that is not built yet", async () => {
-    // "Not yet" and "never" are different answers, and a bare "unknown command"
-    // gives neither. `workflow` is Phase 5's (T5.4).
+  it("names the subcommand a built command wants", async () => {
+    /*
+     * The "not built yet" table is empty since Phase 5 built `workflow` and
+     * `tool`, its last two entries. `svatah workflow` with nothing after it is
+     * now a usage error about *this* command rather than a promise about a
+     * later phase — still not a bare "unknown command", which would be a third
+     * and wrong answer.
+     */
     const { code, err } = await cli("workflow");
     expect(code).toBe(EXIT.usage);
-    expect(err).toContain("T5.4");
+    expect(err).toContain("workflow run <story>");
+    expect(err).not.toContain("not built yet");
   });
 
   it("says plainly when a command does not exist", async () => {

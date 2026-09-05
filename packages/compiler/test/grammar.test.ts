@@ -92,10 +92,16 @@ describe("guards written on their own line (REQ-LANG-14)", () => {
       subject: "target",
       predicate: { kind: "hidden" },
       mode: "onlyIf",
+      /*
+       * The phrase is carried out of the grammar (T5.4) so the compiler can
+       * refuse a guard about a different element from the one the step acts on.
+       * It never reaches the IR: `lowerStep` builds the guard field by field.
+       */
+      phrase: "the login error",
     });
 
     const prefixed = parseSentence(
-      "Only if the login error is hidden, click the sign in button",
+      "Only if the login error is hidden, click the login error",
       where,
     );
     expect(prefixed.raw?.guard).toEqual(line.guard);
@@ -110,8 +116,10 @@ describe("guards written on their own line (REQ-LANG-14)", () => {
 describe("the fixture flows parse with zero errors (REQ-NFR-8, T2.4 Validate)", () => {
   const files = readdirSync(FLOWS).filter((name) => name.endsWith(".flow")).sort();
 
-  it("finds all five, so this is not vacuous", () => {
-    expect(files).toHaveLength(5);
+  it("finds them all, so this is not vacuous", () => {
+    // Five migrated fixtures, plus the workflow and the guard-and-compensation
+    // showcases Phase 5 added.
+    expect(files.length).toBeGreaterThanOrEqual(7);
   });
 
   it.each(files)("%s: every step matches a pattern", (name) => {

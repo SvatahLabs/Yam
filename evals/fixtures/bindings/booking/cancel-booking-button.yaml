@@ -1,0 +1,59 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "cancel-booking"
+      - by: "role"
+        exact: true
+        name: "Cancel booking"
+        role: "button"
+        score: 0.92
+      - by: "text"
+        exact: true
+        score: 0.75
+        value: "Cancel booking"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"cancel-booking\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='cancel-booking']"
+    context:
+      hash: "782c67c0c203e5c251532fa6cfba11ce7aa2ecfed8ce507973a2e021dabbf0c6"
+      pattern: "/booking"
+      platform: "web"
+    fingerprint:
+      attrs:
+        class: "btn btn-link"
+        data-testid: "cancel-booking"
+        type: "button"
+      box:
+        - 244
+        - 684.44
+        - 136.16
+        - 41.25
+      index: 0
+      neighbours:
+        after: []
+        before:
+          - "Slot booked."
+          - "Your bookings"
+          - "ReferenceStarting pointStatus BK-10428 Indiranagar Confirmed"
+      rolePath:
+        - "main"
+        - "region"
+      tag: "button"
+      text: "Cancel booking"
+    provenance:
+      at: "2026-09-04T00:00:00.000Z"
+      model: "human"
+      promptVersion: "seed:hand-completed"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-04T00:00:00.000Z"
+    verified: true
+id: "booking.cancel-booking-button"
+phrases:
+  - "the cancel booking button"
+schemaVersion: "1.0.0"
