@@ -66,6 +66,19 @@ export interface RunOutcome {
  */
 export interface ServiceApi {
   loadProject(root: string): Promise<ProjectHandle>;
+  /**
+   * Is a model credential available to this service (REQ-ADE-4, Draft 2.7)?
+   *
+   * `GET /project` reports the answer so the Record screen can offer
+   * `anthropic` when there is one and `fake` when there is not. Deliberately a
+   * boolean and not the key: the ADE never needs the value, and a service that
+   * handed it out over HTTP — even on loopback, even behind the bearer token —
+   * would be a place a credential leaks from (REQ-NFR-6).
+   *
+   * Optional, like the rest: a build with no gateway wired reports `false`,
+   * which is the truth for it.
+   */
+  hasModelCredential?(): boolean;
   compileProject(loaded: ProjectHandle, options?: { stable?: boolean }): CompileOutcome;
   runProject(
     loaded: ProjectHandle,

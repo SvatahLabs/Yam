@@ -143,3 +143,50 @@ describe("the endpoints the screens exercise (REQ-ADE-3)", () => {
     });
   }
 });
+
+describe("the Record screen's gateway choice (P5-F2, REQ-ADE-4, LLD §13.6)", () => {
+  const record = screens.find((one) => one.name === "Record.tsx")!.source;
+
+  it("asks the service whether there is a credential", () => {
+    // `GET /project` reports the boolean (Draft 2.7); the screen reads it and
+    // never reaches for `process.env`, which a renderer does not have anyway.
+    expect(record).toMatch(/client\s*\n?\s*\.\s*getProject\s*\(/);
+    expect(record).toContain("gateway?.credential");
+    expect(record).not.toContain("process.env");
+    expect(record).not.toContain("ANTHROPIC_API_KEY\"");
+  });
+
+  it("offers both gateways, labelled, and sends the choice", () => {
+    expect(record).toMatch(/aria-label="Gateway"/);
+    expect(record).toContain('value="anthropic"');
+    expect(record).toContain('value="fake"');
+    // "labelled as such" (REQ-ADE-4): the fake option says what it reads from.
+    expect(record).toContain("evals/grounding/cases");
+    // And the choice reaches the service, which is the whole finding: the
+    // screen used to post `{ rebind: true }` and let the environment decide.
+    expect(record).toMatch(/postRecord\([^)]*gateway/s);
+  });
+
+  it("renders a failed session as an alert", () => {
+    expect(record).toContain('record.failed');
+    expect(record).toMatch(/role="alert"/);
+  });
+
+  it("gives advice about this window, never a command-line flag", () => {
+    /*
+     * The defect stated mechanically. Whatever `adviseOnFailure` returns is
+     * what a person reads in an Electron window, and a flag they cannot type
+     * is not advice. The screen's *comments* may name the old message — that
+     * is the record of why this exists — so only the returned strings are
+     * checked.
+     */
+    const body = record.slice(record.indexOf("export function adviseOnFailure"));
+    const advice = body.slice(0, body.indexOf("\n}"));
+    const literals = [...advice.matchAll(/"([^"]{12,})"/g)].map((match) => match[1]!);
+    expect(literals.length).toBeGreaterThan(0);
+    for (const literal of literals) {
+      expect(literal, `advice reads: ${literal}`).not.toMatch(/--[a-z]/);
+      expect(literal, `advice reads: ${literal}`).not.toMatch(/\bsvatah [a-z]+/);
+    }
+  });
+});

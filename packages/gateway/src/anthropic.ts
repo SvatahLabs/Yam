@@ -152,6 +152,29 @@ export function anthropicGateway(options: AnthropicGatewayOptions = {}): Gateway
             { cause: error },
           );
         }
+        /*
+         * No credential at all, which the SDK reports before it sends anything
+         * (P5-F2). `new Anthropic()` succeeds with an empty environment — it
+         * only decides how to authenticate when a request is made — so this is
+         * where "there is no key" surfaces, and it surfaced as the SDK's own
+         * sentence about `apiKey, authToken, credentials, config, or profile`.
+         *
+         * That sentence is about the SDK's options, not about anything a
+         * caller of Svatah did or can do, and it is what the ADE's Record
+         * screen ends up showing when a person picks `anthropic` on a machine
+         * with no key. `GatewayUnavailable` is the type every caller already
+         * handles, and the message names the two things that fix it.
+         */
+        if (
+          error instanceof Error &&
+          /could not resolve authentication method/i.test(error.message)
+        ) {
+          throw new GatewayUnavailable(
+            "Recording needs a model, and no Anthropic credential is available. " +
+              "Set ANTHROPIC_API_KEY or run `ant auth login`.",
+            { cause: error },
+          );
+        }
         if (error instanceof Anthropic.APIConnectionError) {
           throw new GatewayUnavailable("Could not reach the Anthropic API.", { cause: error });
         }

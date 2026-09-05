@@ -11,6 +11,7 @@
  * that needed it.
  */
 import { createService } from "@svatah/service";
+import { credentialInEnvironment } from "@svatah/gateway";
 import { HttpSurface } from "@svatah/adapter-http";
 import { apiRequestSchema } from "@svatah/schema";
 import { numberOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
@@ -86,6 +87,13 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
       runProject,
       newRunId,
       apiRequest,
+      /*
+       * The same question `gatewayForRecording` asks before it defaults to
+       * `anthropic` (REQ-ADE-4, Draft 2.7), so the Record screen offers what
+       * the recorder would actually pick. One implementation, or the screen
+       * and the session come to disagree about whether there is a model.
+       */
+      hasModelCredential: credentialInEnvironment,
       record: serviceRecord,
       verifyBindings: serviceVerifyBindings,
       heal: serviceHeal,

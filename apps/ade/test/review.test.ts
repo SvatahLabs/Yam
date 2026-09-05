@@ -49,6 +49,7 @@ import {
   serviceVerifyBindings,
 } from "@svatah/cli";
 import { ServiceClient, type StreamedEvent } from "../src/renderer/client.js";
+import { adviseOnFailure } from "../src/renderer/screens/Record.js";
 
 const ADE = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT = join(ADE, "..", "..");
@@ -112,7 +113,10 @@ tool: { expose: ["Sign in and look"], requireIdempotent: false }
 }
 
 /** A service wired exactly as `svatah serve` wires one (LLD §13.5). */
-async function serve(project: string): Promise<{ service: RunningService; client: ServiceClient }> {
+async function serve(
+  project: string,
+  options: { credential?: boolean } = {},
+): Promise<{ service: RunningService; client: ServiceClient }> {
   const service = await createService({
     project,
     token: TOKEN,
@@ -122,6 +126,14 @@ async function serve(project: string): Promise<{ service: RunningService; client
       compileProject,
       runProject,
       newRunId,
+      /*
+       * What `svatah serve` injects is `credentialInEnvironment` (REQ-ADE-4).
+       * Here it is a constant, so a test can have a service that reports a
+       * credential without one being in this process's environment — and,
+       * more to the point, without the recording session then reaching a real
+       * model.
+       */
+      hasModelCredential: () => options.credential === true,
       record: serviceRecord,
       verifyBindings: serviceVerifyBindings,
       heal: serviceHeal,
@@ -274,6 +286,164 @@ describe("record review: accept, reject and re-pick before anything is written (
       // A re-pick is a person's decision, and the provenance says so rather than
       // claiming a model made it.
       expect(written).toContain('model: "human"');
+    } finally {
+      await service.close();
+    }
+  }, 240_000);
+});
+
+describe("the Record screen chooses the gateway (P5-F2, REQ-ADE-4, LLD §13.5, §13.6)", () => {
+  /*
+   * The finding this closes: the screen posted `{ rebind: true }` and never a
+   * gateway, so on a machine with no `ANTHROPIC_API_KEY` the first press of
+   * "Start recording" produced `record.failed` with a message telling the
+   * person to "pass --gateway fake" — a flag a window cannot pass. Every route
+   * out of the screen led to a terminal.
+   */
+
+  it("GET /project says whether a credential is present, and never what it is", async () => {
+    const project = scaffold();
+
+    const without = await serve(project);
+    try {
+      const summary = (await without.client.getProject()) as {
+        gateway?: { credential?: boolean };
+      };
+      expect(summary.gateway?.credential).toBe(false);
+    } finally {
+      await without.service.close();
+    }
+
+    const with_ = await serve(project, { credential: true });
+    try {
+      const summary = (await with_.client.getProject()) as {
+        gateway?: { credential?: boolean };
+      };
+      expect(summary.gateway?.credential).toBe(true);
+      /*
+       * A boolean, not the key. The service is on loopback behind a bearer
+       * token and it still does not send the credential, because a value that
+       * never crosses the wire cannot be read off it (REQ-NFR-6).
+       */
+      const body = JSON.stringify(summary);
+      expect(body).not.toMatch(/sk-ant/);
+      expect(body).not.toMatch(/ANTHROPIC_API_KEY/);
+      expect(body).not.toMatch(/[Aa]pi[-_]?[Kk]ey/);
+    } finally {
+      await with_.service.close();
+    }
+  }, 240_000);
+
+  it("the default the screen would pick follows the service, both ways", () => {
+    /*
+     * The screen's rule, stated where a test can read it: `anthropic` when the
+     * service reports a credential, `fake` when it does not (REQ-ADE-4). The
+     * screen computes it in one line from `GET /project`; what matters is that
+     * a machine with no key never defaults to the gateway it cannot reach.
+     */
+    const defaultFor = (credential: boolean): string => (credential ? "anthropic" : "fake");
+    expect(defaultFor(false)).toBe("fake");
+    expect(defaultFor(true)).toBe("anthropic");
+
+    const source = readFileSync(
+      join(ADE, "src", "renderer", "screens", "Record.tsx"),
+      "utf8",
+    );
+    // The screen asks the service, and sends what it chose.
+    expect(source).toMatch(/getProject\(\)/);
+    expect(source).toMatch(/gateway\?\.credential === true/);
+    expect(source).toMatch(/postRecord\(\{\s*rebind: true,\s*gateway: chosen\s*\}\)/);
+    // Both options are labelled for what they are.
+    expect(source).toContain('value="anthropic"');
+    expect(source).toContain('value="fake"');
+    expect(source).toContain("evals/grounding/cases");
+  });
+
+  it("a session started the way the screen now starts one records with the fake gateway", async () => {
+    /*
+     * The regression, in the form the verifier drove it: no credential in the
+     * environment, and the request the screen sends. It used to be
+     * `{ rebind: true }` and fail; it is now `{ rebind: true, gateway: "fake" }`
+     * and reaches a decision.
+     */
+    const project = scaffold({
+      bindings: false,
+      flow: "story: Look\n  Click the sign in button\n\ntest: Look\n",
+    });
+    const { service, client } = await serve(project);
+    try {
+      const waiting = collect(
+        client,
+        (event) => event.kind === "record.decision" || event.kind === "record.failed",
+      );
+      const { sessionId } = (await client.postRecord({ rebind: true, gateway: "fake" })) as {
+        sessionId: string;
+      };
+      const events = await waiting.done;
+      expect(events.map((one) => one.kind)).not.toContain("record.failed");
+      expect(events.find((one) => one.kind === "record.decision")).toBeDefined();
+      await client.postRecordByIdStop(sessionId);
+      await sleep(200);
+    } finally {
+      await service.close();
+    }
+  }, 240_000);
+
+  it("asking for anthropic with no credential fails, and the screen turns it into advice it can act on", async () => {
+    const project = scaffold({
+      bindings: false,
+      flow: "story: Look\n  Click the sign in button\n\ntest: Look\n",
+    });
+    const { service, client } = await serve(project);
+    try {
+      const waiting = collect(client, (event) => event.kind === "record.failed");
+      await client.postRecord({ rebind: true, gateway: "anthropic" });
+      const events = await waiting.done;
+      const failed = events.find((one) => one.kind === "record.failed")!;
+      const message = String(failed["message"]);
+      // What the service says, written for whoever called it.
+      expect(message).toMatch(/needs a model/i);
+
+      /*
+       * And what the screen shows: the same failure, with advice about controls
+       * that exist in this window. The old alert named `--gateway fake`; a
+       * person reading it in an Electron window had nowhere to type it.
+       */
+      const advice = adviseOnFailure(message, "anthropic");
+      expect(advice).not.toContain("--gateway");
+      expect(advice).not.toContain("--");
+      expect(advice).toContain("fake gateway");
+      expect(advice).toContain("ANTHROPIC_API_KEY");
+
+      // A message the screen does not recognise is passed through rather than
+      // replaced by a guess.
+      expect(adviseOnFailure("the browser closed", "fake")).toBe("the browser closed");
+    } finally {
+      await service.close();
+    }
+  }, 240_000);
+
+  it("refuses a second session while one is open (LLD §13.5's 409)", async () => {
+    const project = scaffold({
+      bindings: false,
+      flow: "story: Look\n  Click the sign in button\n\ntest: Look\n",
+    });
+    const { service, client } = await serve(project);
+    try {
+      const waiting = collect(client, (event) => event.kind === "record.decision");
+      const { sessionId } = (await client.postRecord({ rebind: true, gateway: "fake" })) as {
+        sessionId: string;
+      };
+      await waiting.done;
+
+      // The screen disables "Start recording" while a session is open; the
+      // service does not rely on that.
+      await expect(client.postRecord({ rebind: true, gateway: "fake" })).rejects.toThrow(
+        /already|409/i,
+      );
+
+      await client.postRecordByIdStop(sessionId);
+      await sleep(200);
     } finally {
       await service.close();
     }

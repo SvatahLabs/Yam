@@ -20,6 +20,24 @@
  * reviewer picks a reference out of it and the recorder re-synthesises the entry
  * from *that* element — the same candidate ranking and fingerprint a grounded
  * one gets, so the store never holds a locator nothing else knows how to make.
+ *
+ * ## The gateway is the screen's to choose (REQ-ADE-4, Draft 2.7)
+ *
+ * This screen used to post `{ rebind: true }` and nothing else, so a person
+ * with no `ANTHROPIC_API_KEY` pressed "Start recording" and got a failure whose
+ * advice was "pass --gateway fake" — a command-line flag the window has no way
+ * to pass. Every path out of that message led back to a terminal, which makes
+ * the screen a worse way to do the thing than not having it.
+ *
+ * So the choice is on the screen. `GET /project` says whether the service has a
+ * credential — the boolean, never the key — and the control defaults to
+ * `anthropic` when it does and `fake` when it does not. Both are labelled for
+ * what they are: one is a model, the other is `evals/grounding/cases` read back,
+ * and a reviewer accepting a decision has a right to know which of the two
+ * produced it. The choice goes to `POST /record` as `gateway`.
+ *
+ * `record.failed` is an alert with advice written for this window: which
+ * gateway was asked for, and what to do about it here.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fromEndpoint, type ScreenData, type ServiceClient } from "../client.js";
@@ -57,6 +75,37 @@ interface SnapshotNode {
   name?: string;
 }
 
+/** The two gateways a record session can run against (LLD §13.5, §13.6). */
+type GatewayChoice = "anthropic" | "fake";
+
+/**
+ * What `GET /project` says about the service's model credential (REQ-ADE-4).
+ *
+ * A boolean, because that is all the service sends and all the screen needs.
+ */
+interface ProjectGateway {
+  gateway?: { credential?: boolean };
+}
+
+/**
+ * Advice a person at this window can act on (REQ-ADE-4, LLD §13.6).
+ *
+ * The service's message is written for whoever called it, and for the missing
+ * credential it names a CLI flag. Everything the flag would do is a control on
+ * this screen, so the advice says so; anything else is passed through, because
+ * an invented explanation of an unfamiliar failure is worse than the real one.
+ */
+export function adviseOnFailure(message: string, gateway: GatewayChoice): string {
+  if (/needs a model|ANTHROPIC_API_KEY|GatewayUnavailable/i.test(message)) {
+    return gateway === "anthropic"
+      ? "Recording needs a model, and this service has no credential. Choose the " +
+          "fake gateway above to record from the committed grounding answers, or " +
+          "restart the service with ANTHROPIC_API_KEY set."
+      : "Recording needs a gateway, and none answered. Choose one above and start again.";
+  }
+  return message;
+}
+
 export function RecordScreen({ client }: { client: ServiceClient }): React.JSX.Element {
   const [session, setSession] = useState<ScreenData<string> | undefined>(undefined);
   const [proposal, setProposal] = useState<ScreenData<Proposal> | undefined>(undefined);
@@ -65,7 +114,41 @@ export function RecordScreen({ client }: { client: ServiceClient }): React.JSX.E
   const [report, setReport] = useState<unknown>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
   const [busy, setBusy] = useState(false);
+  const [credential, setCredential] = useState<ScreenData<boolean> | undefined>(undefined);
+  const [gateway, setGateway] = useState<GatewayChoice | undefined>(undefined);
   const sessionRef = useRef<string | undefined>(undefined);
+  /* Which gateway the *running* session was started with, so the alert can
+     advise about the choice that failed rather than the one now selected. */
+  const startedWith = useRef<GatewayChoice>("fake");
+
+  /*
+   * The default follows the service, not a preference (REQ-ADE-4): `anthropic`
+   * when `GET /project` reports a credential, `fake` when it does not. Choosing
+   * `anthropic` by default on a machine with no key is how the old screen
+   * produced a failure on the first press of the button.
+   */
+  useEffect(() => {
+    let live = true;
+    void client
+      .getProject()
+      .then((value) => {
+        if (!live) return;
+        const present = (value as ProjectGateway).gateway?.credential === true;
+        setCredential(fromEndpoint("getProject", present));
+        setGateway((chosen) => chosen ?? (present ? "anthropic" : "fake"));
+      })
+      .catch(() => {
+        if (!live) return;
+        // A project that will not load is the Project screen's problem to
+        // report. Here it only means the safe default: the gateway that needs
+        // nothing.
+        setCredential(fromEndpoint("getProject", false));
+        setGateway((chosen) => chosen ?? "fake");
+      });
+    return () => {
+      live = false;
+    };
+  }, [client]);
 
   useEffect(() => {
     return client.subscribe((event) => {
@@ -85,7 +168,7 @@ export function RecordScreen({ client }: { client: ServiceClient }): React.JSX.E
         setReport(event["report"]);
       } else if (event.kind === "record.failed") {
         setProposal(undefined);
-        setError(String(event["message"]));
+        setError(adviseOnFailure(String(event["message"]), startedWith.current));
       }
     });
   }, [client]);
@@ -93,14 +176,19 @@ export function RecordScreen({ client }: { client: ServiceClient }): React.JSX.E
   const start = useCallback(async () => {
     setError(undefined);
     setBusy(true);
+    const chosen: GatewayChoice = gateway ?? "fake";
+    startedWith.current = chosen;
     try {
-      await client.postRecord({ rebind: true });
+      // The gateway goes with the request (LLD §13.5's `POST /record`). Without
+      // it the service falls back to whatever the environment happens to hold,
+      // which is exactly the guess this control exists to remove.
+      await client.postRecord({ rebind: true, gateway: chosen });
     } catch (cause) {
-      setError(String(cause));
+      setError(adviseOnFailure(String(cause), chosen));
     } finally {
       setBusy(false);
     }
-  }, [client]);
+  }, [client, gateway]);
 
   const decide = useCallback(
     async (body: { accept?: boolean; repick?: string; why?: string }) => {
@@ -134,6 +222,27 @@ export function RecordScreen({ client }: { client: ServiceClient }): React.JSX.E
   return (
     <section aria-label="Record review">
       <div className="row">
+        <label htmlFor="record-gateway">Gateway</label>
+        <select
+          id="record-gateway"
+          aria-label="Gateway"
+          value={gateway ?? "fake"}
+          onChange={(event) => setGateway(event.target.value as GatewayChoice)}
+          disabled={busy || proposal !== undefined}
+        >
+          {/*
+            Both labelled for what they are (REQ-ADE-4). A reviewer accepting a
+            grounding decision is entitled to know whether a model made it or a
+            committed fixture did, and the label is the only place on this
+            screen that can say so before the decision arrives.
+          */}
+          <option value="anthropic" disabled={credential?.value !== true}>
+            {credential?.value === true
+              ? "anthropic — a model, through the service's credential"
+              : "anthropic — no credential on this service"}
+          </option>
+          <option value="fake">fake — committed answers from evals/grounding/cases</option>
+        </select>
         <button type="button" onClick={() => void start()} disabled={busy || proposal !== undefined}>
           Start recording
         </button>
@@ -143,6 +252,13 @@ export function RecordScreen({ client }: { client: ServiceClient }): React.JSX.E
           <span className="muted">session {session.value}</span>
         )}
       </div>
+
+      {gateway === "fake" ? (
+        <p className="muted" aria-label="Gateway notice">
+          The fake gateway answers from <code>evals/grounding/cases</code>. Nothing recorded in
+          this session measures a model, and its provenance says so.
+        </p>
+      ) : null}
 
       {error !== undefined ? (
         <p role="alert" className="error">
@@ -254,8 +370,8 @@ export function RecordScreen({ client }: { client: ServiceClient }): React.JSX.E
       )}
 
       <p className="source">
-        Rendered from {session?.from ?? "subscribe"} and postRecord. Bindings are written only
-        after a decision.
+        Rendered from {session?.from ?? "subscribe"}, {credential?.from ?? "getProject"} and
+        postRecord. Bindings are written only after a decision.
       </p>
     </section>
   );

@@ -47,7 +47,9 @@ export function openApiDocument(version: string): Record<string, unknown> {
           summary: "Config, flows, stories, compositions, run blocks and API names",
           description:
             "Each story carries its `signature` when it declares one, so a client can " +
-            "prompt for inputs before starting a run (LLD §13.5).",
+            "prompt for inputs before starting a run (LLD §13.5). `gateway.credential` " +
+            "says whether a model credential is present, without revealing it, so the " +
+            "Record screen can offer a gateway it can reach (REQ-ADE-4).",
           security: bearer,
           responses: {
             200: {
@@ -76,6 +78,15 @@ export function openApiDocument(version: string): Record<string, unknown> {
                   apis: { type: "array", items: { type: "string" } },
                   customSteps: { type: "array", items: { type: "string" } },
                   diagnostics: { type: "array" },
+                  gateway: {
+                    type: "object",
+                    description:
+                      "Whether a model credential is available to this service, so a client " +
+                      "can offer a gateway it can reach (REQ-ADE-4). The credential itself " +
+                      "is never sent.",
+                    properties: { credential: { type: "boolean" } },
+                    required: ["credential"],
+                  },
                 },
               }),
             },

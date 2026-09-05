@@ -124,6 +124,16 @@ export async function createService(options: ServeOptions): Promise<RunningServi
       apis: [...loaded.project.apis.requests.keys()],
       customSteps: loaded.steps.ids(),
       diagnostics: loaded.diagnostics,
+      /*
+       * Whether a model credential is present — not what it is (REQ-ADE-4,
+       * Draft 2.7).
+       *
+       * The Record screen needs it to offer a gateway it can actually reach:
+       * `anthropic` when this is true, `fake` when it is not. A boolean is all
+       * that question needs, and it is all the service will say. The key never
+       * crosses the wire.
+       */
+      gateway: { credential: api.hasModelCredential?.() ?? false },
     };
   });
 
