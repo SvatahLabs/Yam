@@ -31,7 +31,6 @@ import {
 } from "@svatah/schema";
 import {
   diagnostic,
-  elementId,
   isStoryBlock,
   type Diagnostic,
   type Project,
@@ -458,24 +457,23 @@ function attachGuard(
 }
 
 /**
- * A `target` guard is about the element the step acts on (T5.4, LLD §3.2).
+ * A `target` guard has to be about *some* element (T5.4, LLD §3.2, Draft 2.7).
  *
- * The IR's guard carries a subject, a predicate and a mode — and no target. "The
- * executor evaluates it before acting and never performs the action if it fails"
- * (REQ-AUTO-1) is about *this* action's element, and `runStep` resolves
- * `step.target` to answer it. So
+ * Since Draft 2.7 `Step.guard` carries an optional `target`, so a guard may ask
+ * about an element other than the one the step acts on:
  *
  *     Only if the login error is hidden, click the sign in button
  *
- * cannot be expressed. It used to compile — to a guard asking whether the *sign
- * in button* was hidden, with "the login error" thrown away — which is a
- * different question with the same shape, and nothing anywhere said so.
+ * compiles to a guard whose own target is the login error, which the recorder
+ * grounds and the resolver resolves before the predicate is evaluated. `lower`
+ * builds it; nothing is checked here.
  *
- * It is a compile error naming both phrases instead (HLD principle 7: fail at
- * authoring, not at replay), with the two spellings that do work suggested. See
- * the deviation in `docs/spec/progress/phase-5.md`: this narrows a form
- * `docs/flow-language.md` pattern 28 documented, because the IR the same spec
- * defines cannot carry it.
+ * What is left to refuse is a `target` guard with no element *anywhere*: no
+ * phrase of its own, and a step that acts on nothing either. The grammar cannot
+ * produce that — its target-guard rules always capture a phrase — but Tier 2
+ * and Tier 3 emit raw steps directly, and a model asked to guard a
+ * `sleep 2 seconds` can produce a subject with nothing behind it. There is no
+ * element to ask the question of, so it is `E_GUARD_NO_TARGET`.
  */
 function checkGuardTarget(
   parsed: RawStep,
@@ -485,40 +483,19 @@ function checkGuardTarget(
 ): RawStep {
   const guard = parsed.guard as (NonNullable<RawStep["guard"]> & { phrase?: string }) | undefined;
   if (guard === undefined || guard.subject !== "target") return parsed;
+  if (guard.phrase !== undefined || parsed.target !== undefined) return parsed;
 
-  const line = raw.guard?.line ?? raw.line;
-  const source = raw.guard?.text ?? raw.text;
-  const step = parsed.target?.phrase;
-
-  if (step === undefined) {
-    diagnostics.push(
-      diagnostic(
-        "E_GUARD_NO_TARGET",
-        `The guard is about "${guard.phrase ?? "an element"}", but "${raw.text}" acts on no ` +
-          "element, so there is nothing for a target guard to be about. Use a page guard " +
-          '(`Only if the URL contains "…"`) or a scope guard (`Only if {name} is "…"`).',
-        { ...where, line, source },
-      ),
-    );
-    return { ...parsed, guard: undefined };
-  }
-
-  if (guard.phrase !== undefined && elementId(guard.phrase) !== elementId(step)) {
-    diagnostics.push(
-      diagnostic(
-        "E_GUARD_OTHER_TARGET",
-        `The guard asks about "${guard.phrase}" and the step acts on "${step}". A guard is a ` +
-          "precondition on the step's own element — the IR has one target per step (LLD §3.2) " +
-          "and the executor resolves it to answer the guard — so it cannot ask about a " +
-          "different element. Either guard on the same element, or read the other one first " +
-          '(`Remember … as name`) and use a scope guard (`Only if {name} is "…"`).',
-        { ...where, line, source },
-      ),
-    );
-    return { ...parsed, guard: undefined };
-  }
-
-  return parsed;
+  diagnostics.push(
+    diagnostic(
+      "E_GUARD_NO_TARGET",
+      `The guard is about an element, but "${raw.text}" acts on no element and the guard ` +
+        "names none either, so there is nothing for it to be about. Name the element " +
+        "(`Only if the banner is visible, …`), or use a page guard " +
+        '(`Only if the URL contains "…"`) or a scope guard (`Only if {name} is "…"`).',
+      { ...where, line: raw.guard?.line ?? raw.line, source: raw.guard?.text ?? raw.text },
+    ),
+  );
+  return { ...parsed, guard: undefined };
 }
 
 /** A Tier 0 match, as an IR step (LLD §5, Draft 2.2). */

@@ -549,6 +549,9 @@
                       "scope"
                     ],
                     "type": "string"
+                  },
+                  "target": {
+                    "$ref": "#/definitions/story/properties/steps/items/properties/target"
                   }
                 },
                 "required": [

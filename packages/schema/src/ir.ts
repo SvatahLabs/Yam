@@ -191,6 +191,22 @@ export const guardSchema = z
     subject: predicateSubjectSchema,
     predicate: predicateSchema,
     mode: z.enum(["onlyIf", "unless"]),
+    /**
+     * The element the guard is about, when it is not the step's own (Draft 2.7).
+     *
+     * "Only if the login error is hidden, click the sign in button" asks about
+     * one element and acts on another, which is the ordinary shape of a
+     * precondition: you check the thing that would stop you, then do the thing.
+     * Until Draft 2.7 the IR had no room for it — a `target` guard was assumed
+     * to be about `step.target` — so the sentence either compiled to the wrong
+     * question or was refused.
+     *
+     * Absent means the step's own target, which is what every guard written so
+     * far means. Present, the recorder grounds it exactly like `step.target`
+     * and the resolver resolves it before the predicate is evaluated (LLD
+     * §3.2, §8.2).
+     */
+    target: targetRefSchema.optional(),
   })
   .strict();
 export type Guard = z.infer<typeof guardSchema>;

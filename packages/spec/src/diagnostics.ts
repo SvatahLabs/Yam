@@ -15,15 +15,16 @@ export const ERROR_CODES = [
   "E_META",
   "E_SIGNATURE",
   "E_GUARD_ORPHAN",
-  /*
-   * T5.4. The IR's guard has a subject and a predicate and no target of its own
-   * (LLD §3.2): a `target` guard is a precondition on the element *the step acts
-   * on*. A sentence that names a different one cannot be expressed, and used to
-   * compile to a guard about the step's element with the author's phrase thrown
-   * away — silently the wrong question.
+  /**
+   * T5.4, Draft 2.7. A `target` guard with no element anywhere.
+   *
+   * Since Draft 2.7 a guard carries its own optional `target` (LLD §3.2), so a
+   * guard about a different element from the step's is the ordinary case and no
+   * longer an error. What remains an error is a `target` guard that names no
+   * element *and* sits on a step that acts on none: there is nothing to ask the
+   * question of. The grammar cannot write one — its target-guard rules always
+   * capture a phrase — but Tier 2 and Tier 3 emit steps directly.
    */
-  "E_GUARD_OTHER_TARGET",
-  /** T5.4. A `target` guard on a step that addresses no element. */
   "E_GUARD_NO_TARGET",
   "E_DUP_STORY",
   "E_TEST_EMPTY",

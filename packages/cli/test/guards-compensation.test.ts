@@ -140,30 +140,133 @@ describe("a guard that is false never acts (REQ-AUTO-1, T5.4)", () => {
     expect(steps[steps.length - 1]?.status).toBe("passed");
   }, 240_000);
 
-  it("refuses at compile time a guard about a different element", async () => {
+  it("asks about the element the guard names, not the one the step acts on", async () => {
     /*
-     * The IR's guard has a subject and a predicate and no target of its own
-     * (LLD §3.2), so a guard is a precondition on the step's own element. A
-     * sentence naming a different one used to compile to a guard about the
-     * step's element with the author's phrase thrown away — silently the wrong
-     * question. It is a compile error naming both phrases (HLD principle 7).
+     * `Step.guard.target` end to end (P5-F3, LLD §3.2, Draft 2.7).
+     *
+     * `docs/flow-language.md` pattern 28 documents
+     * `Only if the login error is hidden, click the sign in button` — one
+     * element asked about, another acted on, which is the ordinary shape of a
+     * precondition. The IR had no room for it, so the sentence first compiled
+     * to the *wrong question* (the predicate applied to the step's own element,
+     * the author's phrase discarded) and was then refused outright. Neither is
+     * what the sentence says.
+     *
+     * Both answers, on the booking page, each about an element the step does
+     * not act on:
+     *
+     *   * the booking result is `hidden`, so `Only if … is hidden` runs its
+     *     step — which types into the *location field*;
+     *   * the booking status is showing, so `Unless … is visible` does not run
+     *     its step — and the audit shows no click on the cancel booking button
+     *     it named.
      */
     const project = scaffold();
     writeFileSync(
-      join(project, "flows", "bad-guard.flow"),
-      `story: Guard about something else
-  Only if the booking result is visible, Click the Book now button
+      join(project, "flows", "other-element-guard.flow"),
+      `story: Guard about another element
+  Click the Book a slot link
+  // True: the booking result is hidden. The step acts on the location field.
+  Only if the booking result is hidden, Type "Indiranagar" into the location field
+  // False: the booking status is showing, so \`Unless\` skips. The step would
+  // have clicked the cancel booking button, and never does.
+  Unless the booking status is visible, Click the cancel booking button
+  The booking status should say "Confirmed"
 
-test: Guard about something else
+test: Guard about another element
 `,
       "utf8",
     );
 
     const compile = await cli(["compile", "."], project);
-    expect(compile.code).toBe(2);
-    expect(compile.output).toContain("E_GUARD_OTHER_TARGET");
-    expect(compile.output).toContain("the booking result");
-    expect(compile.output).toContain("the Book now button");
+    expect(compile.code, compile.output).toBe(0);
+
+    // The guard carries its own target, and the step keeps its own. Read from
+    // the plan the compile wrote, which is what the executor reads.
+    const plan = JSON.parse(readFileSync(join(project, ".svatah", "plan.json"), "utf8")) as {
+      stories: Array<{
+        name: string;
+        steps: Array<{
+          text: string;
+          target?: { ref: string };
+          guard?: { target?: { ref: string }; predicate: { kind: string } };
+        }>;
+      }>;
+    };
+    const story = plan.stories.find((one) => one.name === "Guard about another element")!;
+    const typing = story.steps.find((one) => one.text.includes("Indiranagar"))!;
+    expect(typing.target?.ref).toBe("booking.location-field");
+    expect(typing.guard?.target?.ref).toBe("booking.booking-result");
+    expect(typing.guard?.predicate.kind).toBe("hidden");
+
+    const run = await cli(
+      [
+        "run",
+        ".",
+        "--host",
+        "none",
+        "--run-id",
+        "og",
+        "--flow",
+        "flows/other-element-guard.flow",
+      ],
+      project,
+    );
+    expect(run.code, run.output).toBe(0);
+
+    const steps = results(project, "og");
+    // The true guard ran its step: the location was typed, and the story
+    // reached its expectation.
+    expect(steps.find((r) => r.text.includes("Indiranagar"))?.status).toBe("passed");
+    expect(steps[steps.length - 1]?.status).toBe("passed");
+    // The false one did not, and carries no failure — a clean guard skip.
+    const skipped = steps.filter((r) => r.status === "skipped");
+    expect(skipped).toHaveLength(1);
+    expect(skipped[0]!.text).toContain("cancel booking");
+    expect(skipped[0]!.failure).toBeUndefined();
+
+    /*
+     * The independent record. The guarded step named the cancel booking button
+     * and never acted on it — and the *guard* did resolve the booking result,
+     * twice, which is the thing that would be missing if the guard were still
+     * asking about the step's own element.
+     */
+    const surface = audit(project, "og").filter((line) => line.kind === "surface");
+    expect(
+      surface.filter(
+        (line) => line.stepId === skipped[0]!.stepId && line.call?.method === "act",
+      ),
+    ).toEqual([]);
+    expect(
+      surface.filter(
+        (line) => line.call?.method === "check" && line.stepId === skipped[0]!.stepId,
+      ).length,
+    ).toBeGreaterThan(0);
+  }, 240_000);
+
+  it("refuses a target guard with no element anywhere", async () => {
+    /*
+     * `E_GUARD_NO_TARGET` as Draft 2.7 leaves it: the guard names no element
+     * and the step acts on none either. The grammar always captures a phrase
+     * for a target guard, so from a flow file this is unreachable — which is
+     * the point of checking here that the sentence the old error used to name
+     * (`Only if the banner is visible, wait 2 seconds`) now compiles.
+     */
+    const project = scaffold();
+    writeFileSync(
+      join(project, "flows", "guard-no-step-target.flow"),
+      `story: Guard on a step with no element
+  Click the Book a slot link
+  Only if the booking result is hidden, wait 1 second
+
+test: Guard on a step with no element
+`,
+      "utf8",
+    );
+
+    const compile = await cli(["compile", "."], project);
+    expect(compile.code, compile.output).toBe(0);
+    expect(compile.output).not.toContain("E_GUARD_NO_TARGET");
   }, 240_000);
 });
 

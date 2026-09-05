@@ -287,6 +287,106 @@ describe("guards (REQ-AUTO-1)", () => {
     expect(surface.actions).toEqual([]);
   });
 
+  it("asks about the element the guard names, and only then resolves the step's", async () => {
+    /*
+     * `Step.guard.target` (LLD §3.2, §8.2, Draft 2.7). "Only if the login error
+     * is hidden, click the sign in button" is a question about one element and
+     * an action on another; the guard used to be assumed to be about the step's
+     * own target, which asked the wrong question with the right shape.
+     *
+     * The guard here is false, so the step never runs — and the check must
+     * still have gone to the *guard's* element.
+     */
+    const { results, surface } = await execute(
+      [
+        story("S", [
+          step({
+            id: "a",
+            action: "click",
+            target: target("sign-in"),
+            guard: {
+              subject: "target",
+              predicate: { kind: "hidden" },
+              mode: "onlyIf",
+              target: target("login-error"),
+            },
+          }),
+        ]),
+      ],
+      {},
+      { checks: { hidden: false } },
+    );
+
+    expect(statuses(results)).toEqual(["a:skipped"]);
+    // The question was asked of the login error.
+    const checks = surface.calls.filter((call) => call.method === "check");
+    expect(checks.map((call) => call.ref)).toEqual(["ref:login-error"]);
+    // Nothing acted, and the sign in button was never even resolved: a step
+    // whose guard is false does not touch the element it would have acted on.
+    expect(surface.actions).toEqual([]);
+    expect(
+      surface.calls.filter((call) => call.method === "locate").map((call) => call.args),
+    ).not.toContainEqual(expect.objectContaining({ value: "sign-in" }));
+  });
+
+  it("acts on the step's element when a guard about another element holds", async () => {
+    const { results, surface } = await execute(
+      [
+        story("S", [
+          step({
+            id: "a",
+            action: "click",
+            target: target("sign-in"),
+            guard: {
+              subject: "target",
+              predicate: { kind: "hidden" },
+              mode: "onlyIf",
+              target: target("login-error"),
+            },
+          }),
+        ]),
+      ],
+      {},
+      { checks: { hidden: true } },
+    );
+
+    expect(statuses(results)).toEqual(["a:passed"]);
+    // Asked about the login error; clicked the sign in button.
+    expect(
+      surface.calls.filter((call) => call.method === "check").map((call) => call.ref),
+    ).toEqual(["ref:login-error"]);
+    expect(surface.actions).toEqual(["click:ref:sign-in"]);
+    expect(results[0]!.matched?.ref).toBe("ref:sign-in");
+  });
+
+  it("guards a step that acts on nothing at all", async () => {
+    // `Only if the banner is visible, wait 2 seconds` — no step target, and the
+    // guard supplies the element (Draft 2.7).
+    const { results, surface } = await execute(
+      [
+        story("S", [
+          step({
+            id: "a",
+            action: "sleep",
+            args: { ms: 1 },
+            guard: {
+              subject: "target",
+              predicate: { kind: "visible" },
+              mode: "onlyIf",
+              target: target("banner"),
+            },
+          }),
+        ]),
+      ],
+      {},
+      { checks: { visible: false } },
+    );
+    expect(statuses(results)).toEqual(["a:skipped"]);
+    expect(
+      surface.calls.filter((call) => call.method === "check").map((call) => call.ref),
+    ).toEqual(["ref:banner"]);
+  });
+
   it("runs the step when the guard holds", async () => {
     const { results, surface } = await execute(
       [

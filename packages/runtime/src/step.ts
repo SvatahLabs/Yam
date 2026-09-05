@@ -108,7 +108,19 @@ export async function runStep(step: Step, context: StepContext): Promise<StepOut
   if (step.guard !== undefined) {
     let holds: boolean;
     try {
-      holds = await evaluate(step.guard.subject, step.guard.predicate, step, context);
+      holds = await evaluate(step.guard.subject, step.guard.predicate, step, context, {
+        /*
+         * The guard's own element, when it has one (LLD §3.2, Draft 2.7).
+         *
+         * "Only if the login error is hidden, click the sign in button" asks
+         * about the login error and acts on the sign in button, so the guard
+         * is resolved against its own target and the step's is not touched
+         * until the guard has said to go ahead — which is what REQ-AUTO-1's
+         * "never performs the action if it fails" means when the two elements
+         * are different.
+         */
+        ...(step.guard.target === undefined ? {} : { target: step.guard.target }),
+      });
     } catch (error) {
       // The guard itself broke — an unresolved reference, a surface error. That
       // is `guard`, and it is a failure rather than a skip: a guard that cannot
@@ -275,12 +287,15 @@ async function evaluate(
   predicate: Predicate,
   step: Step,
   context: StepContext,
+  /** A guard's own target, which is not the step's (Draft 2.7). */
+  about: { target?: TargetRef } = {},
 ): Promise<boolean> {
   if (subject === "scope") return evaluateExpression(predicate, context.scope);
 
+  const element = about.target ?? step.target;
   const ref =
-    subject === "target" && step.target !== undefined
-      ? (await context.resolve(step.target, context.surface)).ref
+    subject === "target" && element !== undefined
+      ? (await context.resolve(element, context.surface)).ref
       : undefined;
 
   const resolved = resolvePredicateValue(predicate, context.scope);

@@ -407,6 +407,9 @@
                 "scope"
               ],
               "type": "string"
+            },
+            "target": {
+              "$ref": "#/definitions/ir/properties/target"
             }
           },
           "required": [

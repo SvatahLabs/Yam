@@ -115,6 +115,31 @@ function lowerTarget(
   };
 }
 
+/**
+ * A `target` guard's own element, when it differs from the step's (Draft 2.7).
+ *
+ * Three cases, and the middle one is the whole change:
+ *
+ * * the guard names the element the step acts on — nothing, `step.target` is
+ *   the answer and `guard.target` absent means exactly that;
+ * * the guard names a different element — a `TargetRef` resolved through the
+ *   same dictionary, so the recorder grounds it and the resolver resolves it
+ *   like any other target;
+ * * the guard names nothing at all and the step has no target either — no
+ *   element anywhere, which `compile.ts` reports as `E_GUARD_NO_TARGET`.
+ */
+function guardTarget(
+  guard: NonNullable<RawStep["guard"]>,
+  stepTarget: TargetRef | undefined,
+  context: LowerContext,
+  diagnostics: Diagnostic[],
+): { target?: TargetRef } {
+  if (guard.subject !== "target" || guard.phrase === undefined) return {};
+  const target = lowerTarget({ phrase: guard.phrase }, context, diagnostics);
+  if (stepTarget !== undefined && target.ref === stepTarget.ref) return {};
+  return { target };
+}
+
 function lowerPredicate(raw: RawPredicate, secrets: ReadonlySet<string>): Predicate {
   const out: Record<string, unknown> = { kind: raw.kind };
   if (raw.negate === true) out["negate"] = true;
@@ -191,6 +216,21 @@ export function lowerStep(
             subject: raw.guard.subject as "target" | "page" | "dialog" | "scope",
             predicate: lowerPredicate(raw.guard.predicate, secrets),
             mode: raw.guard.mode as "onlyIf" | "unless",
+            /*
+             * The element the guard is about, when it is not the step's own
+             * (LLD §3.2, Draft 2.7).
+             *
+             * "Only if the login error is hidden, click the sign in button"
+             * asks about one element and acts on another. The guard's own
+             * target is grounded and resolved exactly like `step.target`, so
+             * the question asked at run time is the one the sentence asks.
+             *
+             * Omitted when the phrases name the same element, because
+             * `step.target` already says it and a redundant copy would put two
+             * accounts of one element in the plan. That also keeps every plan
+             * compiled before Draft 2.7 byte-identical (REQ-COMP-7).
+             */
+            ...guardTarget(raw.guard, target, context, diagnostics),
           },
         }),
     ...(raw.expect === undefined

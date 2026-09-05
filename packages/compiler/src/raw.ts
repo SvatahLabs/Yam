@@ -46,12 +46,12 @@ export interface RawStep {
     readonly predicate: RawPredicate;
     readonly mode: string;
     /**
-     * The noun phrase a `target` guard named, before it is checked (T5.4).
+     * The noun phrase a `target` guard named (T5.4, Draft 2.7).
      *
-     * The IR's guard has no target of its own (LLD §3.2): a `target` guard is
-     * about the element the step acts on. The grammar reads the phrase anyway,
-     * because that is how the sentence is written, and the compiler uses it to
-     * refuse a guard that names a *different* element. It never reaches the IR.
+     * The grammar reads it because that is how the sentence is written, and
+     * `lowerStep` turns it into `guard.target` when it names an element other
+     * than the one the step acts on (LLD §3.2). When it names the same element
+     * it is dropped, because the step's own target already says it.
      */
     readonly phrase?: string;
   };

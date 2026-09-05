@@ -19,6 +19,9 @@ import {
 import { defineStep, loadSteps, StepRegistry } from "@svatah/steps";
 import { compile, lintPlan, renderPlan, STABLE_TIMESTAMP } from "../src/index.js";
 
+/** The module-level `compile`, reachable inside describes that shadow the name. */
+const compilePlan = compile;
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
 const GOLDEN_PROJECT = join(ROOT, "evals", "compiler", "project");
@@ -409,21 +412,28 @@ describe("the fixture flows compile clean (REQ-NFR-8, T2.5 Validate)", () => {
 });
 
 /**
- * A `target` guard is about the step's own element (T5.4, LLD §3.2).
+ * A `target` guard carries its own element (T5.4, LLD §3.2, Draft 2.7).
  *
- * The IR carries one target per step and the guard carries none, so a guard
- * naming a different element cannot be expressed. It used to compile — to a
- * guard about the *step's* element, with the author's phrase discarded — which
- * is a different question wearing the same shape, and nothing said so.
+ * "Only if the login error is hidden, click the sign in button" asks about one
+ * element and acts on another, which is the ordinary shape of a precondition:
+ * check the thing that would stop you, then do the thing. Until Draft 2.7 the
+ * IR had no room for it — a `target` guard was assumed to be about
+ * `step.target` — so the sentence first compiled to the *wrong question* with
+ * the author's phrase discarded, and then was refused outright. Neither is what
+ * `docs/flow-language.md` pattern 28 documents.
  *
- * Both spellings are checked, because they are the same guard: the one-line
- * `Only if <predicate>, <sentence>` the grammar attaches as it parses, and the
- * standalone `Only if <predicate>` line the reader hands over separately. A rule
- * that held for one and not the other would be worse than no rule.
+ * Both spellings are checked throughout, because they are the same guard: the
+ * one-line `Only if <predicate>, <sentence>` the grammar attaches as it parses,
+ * and the standalone `Only if <predicate>` line the reader hands over
+ * separately. A rule that held for one and not the other would be worse than no
+ * rule.
  */
-describe("guards name the element their step acts on (T5.4, REQ-AUTO-1)", () => {
+describe("a guard may name an element of its own (T5.4, REQ-AUTO-1, Draft 2.7)", () => {
   const compile = (flow: string) =>
     compileFlow(flow).diagnostics.map((d) => `${d.code}`);
+  const guardOf = (flow: string) =>
+    compileFlow(flow).plan.stories[0]?.steps[compileFlow(flow).plan.stories[0]!.steps.length - 1]
+      ?.guard;
 
   it("accepts a guard on the step's own element, both ways round", () => {
     expect(
@@ -443,7 +453,21 @@ test: S
     ).toEqual([]);
   });
 
-  it("refuses a guard about a different element, both ways round", () => {
+  it("omits guard.target when the guard names the step's own element", () => {
+    /*
+     * `step.target` already says which element it is, and a second copy would
+     * put two accounts of one element in the plan. It also keeps every plan
+     * compiled before Draft 2.7 byte-identical (REQ-COMP-7).
+     */
+    const guard = guardOf(`story: S
+  Only if the sign in button is visible, click the sign in button
+
+test: S
+`);
+    expect(guard).toEqual({ subject: "target", predicate: { kind: "visible" }, mode: "onlyIf" });
+  });
+
+  it("compiles a guard about a different element, both ways round", () => {
     for (const flow of [
       `story: S
   Only if the login error is hidden, click the sign in button
@@ -457,18 +481,93 @@ test: S
 test: S
 `,
     ]) {
-      expect(compile(flow)).toContain("E_GUARD_OTHER_TARGET");
+      expect(compile(flow)).toEqual([]);
+      // The question the sentence asks: hidden, of the login error — and the
+      // step still acts on the sign in button.
+      expect(guardOf(flow)).toEqual({
+        subject: "target",
+        predicate: { kind: "hidden" },
+        mode: "onlyIf",
+        target: { ref: "login-error", phrase: "the login error", status: "unbound" },
+      });
+      const step = compileFlow(flow).plan.stories[0]!.steps.at(-1)!;
+      expect(step.target?.ref).toBe("sign-in-button");
     }
   });
 
-  it("refuses a target guard on a step with no element", () => {
-    expect(
-      compile(`story: S
-  Only if the login error is hidden, wait 2 seconds
+  it("compiles a guard on a step that acts on nothing, when the guard names the element", () => {
+    /*
+     * `Only if the banner is visible, wait 2 seconds` used to be
+     * `E_GUARD_NO_TARGET` because the guard had nowhere to put its element.
+     * Now it has one, and the sentence means what it says.
+     */
+    const flow = `story: S
+  Only if the announcement banner is visible, wait 2 seconds
 
 test: S
-`),
-    ).toContain("E_GUARD_NO_TARGET");
+`;
+    expect(compile(flow)).toEqual([]);
+    expect(guardOf(flow)).toEqual({
+      subject: "target",
+      predicate: { kind: "visible" },
+      mode: "onlyIf",
+      target: {
+        ref: "announcement-banner",
+        phrase: "the announcement banner",
+        status: "unbound",
+      },
+    });
+    expect(compileFlow(flow).plan.stories[0]!.steps.at(-1)!.target).toBeUndefined();
+  });
+
+  it("refuses a target guard with no element anywhere", () => {
+    /*
+     * `E_GUARD_NO_TARGET` as Draft 2.7 leaves it: the guard names no element
+     * and the step acts on none either, so there is nothing to ask the question
+     * of.
+     *
+     * The grammar cannot write one — every target-guard rule captures a phrase
+     * — so it arrives the way a model tier's step does: a raw step handed to
+     * the compiler with a guard already on it. That is not a contrived input;
+     * it is exactly the shape `compileWithModelTiers` feeds back in when Tier 2
+     * answers a sentence the grammar refused, and a model asked to guard a
+     * `wait` can produce a subject with nothing behind it.
+     */
+    const flow = `story: S
+  hold on for a bit
+
+test: S
+`;
+    const { diagnostics } = compilePlan({
+      project: project(flow),
+      projectName: "test",
+      stable: true,
+      modelAnswers: new Map([
+        [
+          "flows/a.flow:2:hold on for a bit",
+          {
+            tier: 2 as const,
+            confidence: 0.9,
+            provenance: {
+              model: "test",
+              promptVersion: "v1",
+              at: STABLE_TIMESTAMP,
+              tokensIn: 1,
+              tokensOut: 1,
+            },
+            raw: {
+              action: "sleep",
+              args: { ms: 2000 },
+              guard: { subject: "target", predicate: { kind: "visible" }, mode: "onlyIf" },
+            },
+          } as never,
+        ],
+      ]),
+    });
+    expect(diagnostics.map((d) => d.code)).toContain("E_GUARD_NO_TARGET");
+    expect(diagnostics.find((d) => d.code === "E_GUARD_NO_TARGET")!.message).toMatch(
+      /names none either/,
+    );
   });
 
   it("leaves page and scope guards alone: they name no element", () => {

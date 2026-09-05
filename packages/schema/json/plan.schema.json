@@ -609,6 +609,9 @@
                             "scope"
                           ],
                           "type": "string"
+                        },
+                        "target": {
+                          "$ref": "#/definitions/plan/properties/stories/items/properties/steps/items/properties/target"
                         }
                       },
                       "required": [

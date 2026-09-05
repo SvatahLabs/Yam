@@ -495,6 +495,15 @@ export async function record(options: RecordSessionOptions): Promise<RecordRepor
 /** The targets one step addresses, in the order it resolves them. */
 function targetsOf(step: Step): TargetRef[] {
   const targets: TargetRef[] = [];
+  /*
+   * The guard's own element first, because the executor resolves it first
+   * (LLD §3.2, §8.2, Draft 2.7). "Only if the login error is hidden, click the
+   * sign in button" asks about the login error *before* it touches the sign in
+   * button — and if the recorder grounded them the other way round, a
+   * recording session would perform the step's resolution for a step the guard
+   * was about to skip.
+   */
+  if (step.guard?.target !== undefined) targets.push(step.guard.target);
   if (step.target !== undefined) targets.push(step.target);
   if (step.target2 !== undefined) targets.push(step.target2);
   // A Tier 0 custom step's `target` placeholders are grounded exactly like a

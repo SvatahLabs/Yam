@@ -119,7 +119,12 @@ function report(project: string): {
   complete: boolean;
   gateway: { name: string; real: boolean };
   written: string[];
-  steps: Array<{ text: string; status: string; decision?: { outcome: string } }>;
+  steps: Array<{
+    text: string;
+    status: string;
+    elementId?: string;
+    decision?: { outcome: string };
+  }>;
   totals: Record<string, number>;
 } {
   return JSON.parse(readFileSync(join(project, "record-report.json"), "utf8")) as never;
@@ -176,6 +181,58 @@ describe("svatah record (REQ-REC-1, 5, 8, 9, LLD §11, §15)", () => {
     const entry = binding(project, "home.sign-in-button").entries.find((e) => e.verified)!;
     expect(entry.provenance.promptVersion).toBe("g-1");
     expect(entry.provenance.model).toBe("fake:grounding-cases");
+  }, 300_000);
+
+  it("grounds the element a guard names, not only the one the step acts on", async () => {
+    /*
+     * `Step.guard.target` through the recorder (P5-F3, LLD §3.2, §11, Draft
+     * 2.7). "Only if the Remember me checkbox is checked, type … into the
+     * username field" addresses *two* elements, and a recorder that grounded
+     * only the step's would leave the guard unresolvable at replay — a flow
+     * that recorded clean and then failed on its first run.
+     *
+     * The guard's element is grounded first, because that is the order the
+     * executor resolves them in: a step whose guard is false never resolves
+     * the element it would have acted on.
+     */
+    const project = scaffold({
+      flows: {
+        "guarded.flow": `story: Guarded
+  Click the sign in button
+  Only if the Remember me checkbox is checked, Type "atul" into the username field
+
+test: Guarded
+`,
+      },
+    });
+    const result = await cli(["record", ".", "--gateway", "fake", "--rebind"], project);
+    expect(result.code, result.output).toBe(EXIT.ok);
+
+    /*
+     * Three bindings from two steps: the sign in button, the guard's checkbox
+     * and the step's username field — and in that order, the guard's before
+     * the step's. (`remember-me-checkbox` is unprefixed because the fixture
+     * store has no entry for it yet, so the dictionary has no page to namespace
+     * it under.)
+     */
+    const written = report(project).written;
+    expect(written).toEqual([
+      "home.sign-in-button",
+      "remember-me-checkbox",
+      "login.username-field",
+    ]);
+
+    // Both are verified: a guard's element is dry-checked like any other.
+    expect(binding(project, "remember-me-checkbox").entries.some((e) => e.verified)).toBe(true);
+    expect(binding(project, "login.username-field").entries.some((e) => e.verified)).toBe(true);
+
+    /*
+     * And the guard was *false* — the checkbox is not checked — so the step was
+     * skipped. The binding for the element it would have acted on exists
+     * anyway, which is the point: a recording session grounds what the plan
+     * addresses, not only what this particular run happened to reach.
+     */
+    expect(report(project).steps.at(-1)?.status).toBe("skipped");
   }, 300_000);
 
   it("says which gateway produced the report, in the report and on the terminal", async () => {
