@@ -10,26 +10,33 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./openapi.json": "./openapi.json"
   },
   "files": [
     "dist",
+    "openapi.json",
     "README.md"
   ],
   "engines": {
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "tsup --config ../../tsup.config.ts",
+    "build": "tsup --config ../../tsup.config.ts && pnpm run generate",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run",
+    "generate": "node scripts/write-openapi.mjs"
   },
   "dependencies": {
+    "@fastify/websocket": "catalog:",
     "@svatah/cli": "workspace:*",
-    "@svatah/schema": "workspace:*"
+    "@svatah/schema": "workspace:*",
+    "fastify": "catalog:"
   },
   "devDependencies": {
+    "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

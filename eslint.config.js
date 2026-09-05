@@ -121,7 +121,28 @@ const MODULE_B_CORE = ["spec", "steps", "compiler", "runtime"];
  */
 const MAY_IMPORT_ADAPTERS = ["cli", "bindings-cli", "playwright-test", "host-playwright"];
 
+/**
+ * The service holds no logic (T2.11, LLD §13.5).
+ *
+ * "Every handler calls the same functions the CLI calls; no logic lives in the
+ * service (lint rule: `service` may import only `cli`'s command functions and
+ * `schema`)."
+ *
+ * Expressed as what it may *not* reach: everything the CLI already composes. If
+ * the service could call the compiler or the executor directly it would grow a
+ * second implementation of `run`, and the ADE and the CLI would start disagreeing
+ * about what a run is — which is the failure this rule exists to prevent.
+ */
+const SERVICE_MAY_NOT_IMPORT = ALL_PACKAGES.filter(
+  (name) => name !== "cli" && name !== "schema" && name !== "service",
+);
+
 export const BOUNDARIES = [
+  ...SERVICE_MAY_NOT_IMPORT.map((to) => ({
+    from: "service",
+    to,
+    why: "LLD §13.5: the service may import @svatah/cli and @svatah/schema only; no logic lives in a handler.",
+  })),
   ...MODEL_FREE_CONSUMERS.flatMap((from) =>
     MODEL_AND_AUTHORING.filter((to) => to !== from).map((to) => ({
       from,

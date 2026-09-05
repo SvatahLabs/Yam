@@ -21,6 +21,7 @@ import { spawn } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
+import type { Plan, StepResult, Summary } from "@svatah/schema";
 import { canonicalJson } from "@svatah/schema";
 import { BindingsStore, resolve as resolveBinding } from "@svatah/bindings";
 import { HttpSurface } from "@svatah/adapter-http";
@@ -101,7 +102,74 @@ interface RunContext {
 }
 
 async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCode> {
-  const { loaded, plan, args } = context;
+  const { args } = context;
+  const outcome = await runProject(context.loaded, {
+    plan: context.plan,
+    runId: context.runId,
+    outputDir: context.outputDir,
+    headed: boolOption(args, "headed"),
+    ...(numberOption(args, "workers") === undefined ? {} : { workers: numberOption(args, "workers")! }),
+    ...(inputsFrom(args) === undefined ? {} : { inputs: inputsFrom(args)! }),
+    ...(stringOptions(args, "flow").length === 0 ? {} : { flows: stringOptions(args, "flow") }),
+    ...(stringOptions(args, "story").length === 0 ? {} : { stories: stringOptions(args, "story") }),
+    onResult: (result) => {
+      if (boolOption(args, "json")) return;
+      const marks: Record<StepResult["status"], string> = {
+        passed: "✓",
+        failed: "✗",
+        skipped: "–",
+        healed: "~",
+        aborted: "!",
+      };
+      const mark = marks[result.status];
+      io.err(`  ${mark} ${result.story} · ${result.text}`);
+    },
+    log: (message) => io.err(`  ${message}`),
+  });
+
+  if (boolOption(args, "json")) io.out(JSON.stringify(outcome.summary, null, 2));
+  else {
+    const { totals } = outcome.summary;
+    io.err(
+      `\n${outcome.runId}: ${totals.passed} passed, ${totals.failed} failed, ` +
+        `${totals.skipped} skipped, ${totals.aborted} aborted → ${outcome.directory}`,
+    );
+  }
+  return outcome.summary.exitCode as ExitCode;
+}
+
+/** What `runProject` needs beyond the loaded project. */
+export interface RunProjectOptions {
+  /** A plan already compiled from this project; compiled here when absent. */
+  readonly plan?: Plan;
+  readonly runId?: string;
+  readonly outputDir?: string;
+  readonly headed?: boolean;
+  readonly workers?: number;
+  readonly inputs?: Record<string, unknown>;
+  readonly flows?: readonly string[];
+  readonly stories?: readonly string[];
+  readonly onResult?: (result: StepResult) => void;
+  readonly log?: (message: string) => void;
+}
+
+/**
+ * Run a project with the standalone executor.
+ *
+ * Exported because the local service (T2.11) calls it: LLD §13.5 says every
+ * service handler calls the same function the CLI calls, and this is that
+ * function. A second implementation behind `POST /run` is how the ADE and the
+ * CLI would start disagreeing about what a run is.
+ */
+export async function runProject(
+  loaded: Awaited<ReturnType<typeof loadProject>>,
+  options: RunProjectOptions = {},
+): Promise<{ runId: string; summary: Summary; results: readonly StepResult[]; directory: string }> {
+  const plan = options.plan ?? compileProject(loaded, { stable: true }).plan;
+  const runId = options.runId ?? newRunId();
+  const outputDir = resolve(loaded.root, options.outputDir ?? loaded.config.run.outputDir);
+  const context = { root: loaded.root, loaded, plan, runId, outputDir };
+
   registerAllAdapters();
 
   const store = BindingsStore.load(resolve(context.root, loaded.config.bindings.dir));
@@ -119,8 +187,8 @@ async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCo
     app: { ...loaded.config.app, ...(baseUrl === undefined ? {} : { baseUrl }) },
     run: {
       ...loaded.config.run,
-      headless: !boolOption(args, "headed"),
-      workers: numberOption(args, "workers") ?? loaded.config.run.workers,
+      headless: options.headed !== true,
+      workers: options.workers ?? loaded.config.run.workers,
       outputDir: context.outputDir,
     },
   };
@@ -183,13 +251,13 @@ async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCo
       },
       expect: async () => undefined,
       audit: () => undefined,
-      log: (message) => io.err(`  ${message}`),
+      log: (message) => options.log?.(message),
       timeoutMs: ctx.timeoutMs,
       signal: ctx.signal,
     });
   };
 
-  const options: RunOptions = {
+  const runOptions: RunOptions = {
     config,
     plan,
     openSurface: async () => {
@@ -219,29 +287,19 @@ async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCo
     runId: context.runId,
     data: loaded.project.data.values,
     secrets: loaded.project.data.secrets,
-    ...(inputsFrom(args) === undefined ? {} : { inputs: inputsFrom(args)! }),
-    // Repeatable: a run is often a subset of the project's flows, and naming
-    // them one at a time is how a person says which.
-    ...(stringOptions(args, "flow").length === 0 ? {} : { flows: stringOptions(args, "flow") }),
-    ...(stringOptions(args, "story").length === 0 ? {} : { stories: stringOptions(args, "story") }),
-    onResult: (result) => {
-      if (boolOption(args, "json")) return;
-      const mark = { passed: "✓", failed: "✗", skipped: "–", healed: "~", aborted: "!" }[result.status];
-      io.err(`  ${mark} ${result.story} · ${result.text}`);
-    },
+    ...(options.inputs === undefined ? {} : { inputs: options.inputs }),
+    ...(options.flows === undefined ? {} : { flows: options.flows }),
+    ...(options.stories === undefined ? {} : { stories: options.stories }),
+    ...(options.onResult === undefined ? {} : { onResult: options.onResult }),
   };
 
-  const outcome = await runPlan(options);
-
-  if (boolOption(args, "json")) io.out(JSON.stringify(outcome.summary, null, 2));
-  else {
-    const { totals } = outcome.summary;
-    io.err(
-      `\n${outcome.runId}: ${totals.passed} passed, ${totals.failed} failed, ` +
-        `${totals.skipped} skipped, ${totals.aborted} aborted → ${directory.path}`,
-    );
-  }
-  return outcome.summary.exitCode as ExitCode;
+  const outcome = await runPlan(runOptions);
+  return {
+    runId: outcome.runId,
+    summary: outcome.summary,
+    results: outcome.results,
+    directory: directory.path,
+  };
 }
 
 /**

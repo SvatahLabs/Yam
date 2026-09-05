@@ -21,7 +21,6 @@ const LATER: Record<string, string> = {
   workflow: "T5.4",
   tool: "T5.5",
   mcp: "T4.6",
-  serve: "T2.11",
 };
 
 const USAGE = `svatah — a deterministic automation runtime with a standard agent surface
@@ -36,6 +35,7 @@ Flows (module b):
   svatah host generate [dir] [--out .svatah/specs]
   svatah migrate <src> <dest> [--keep-original] [--json]
   svatah doctor [dir] [--json]
+  svatah serve [dir] [--port 0] [--token <t>]
 
 Bindings and healing (module a):
 
@@ -85,6 +85,8 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
       return await (await import("./commands/doctor.js")).doctorCommand(args, io);
     case "host":
       return await (await import("./commands/host.js")).hostCommand(args, io);
+    case "serve":
+      return await (await import("./commands/serve.js")).serveCommand(args, io);
     default: {
       const task = LATER[command];
       io.err(

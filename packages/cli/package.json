@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "@playwright/test": "catalog:",
+    "@svatah/service": "workspace:*",
     "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
@@ -65,10 +66,14 @@
     "svatah": "./dist/bin.js"
   },
   "peerDependencies": {
-    "@playwright/test": "catalog:"
+    "@playwright/test": "catalog:",
+    "@svatah/service": "workspace:*"
   },
   "peerDependenciesMeta": {
     "@playwright/test": {
+      "optional": true
+    },
+    "@svatah/service": {
       "optional": true
     }
   }
