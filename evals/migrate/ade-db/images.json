@@ -1,0 +1,12 @@
+{
+  "images": [
+    {
+      "id": 1,
+      "resultId": "r1",
+      "flowName": "simple.flow",
+      "scenarioName": "I want to validate login",
+      "stepNumber": "3",
+      "imgString": "data:image/png;base64,iVBORw0KGgo="
+    }
+  ]
+}

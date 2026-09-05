@@ -15,6 +15,16 @@ import { useEffect, useState } from "react";
 import { bridge } from "../bridge.js";
 import { fromEndpoint, ServiceError, type ScreenData, type ServiceClient } from "../client.js";
 
+/** What `POST /migrate` answers with (T6.6). */
+interface ImportResult {
+  project: string;
+  files: string[];
+  stories: Array<{ file: string; name: string; steps: number }>;
+  unmapped: number;
+  notes: Array<{ kind: string; message: string }>;
+  review: string;
+}
+
 interface ProjectSummary {
   root: string;
   config: { project?: string; environment?: string; adapter?: string; app?: { baseUrl?: string } };
@@ -45,6 +55,8 @@ export function ProjectScreen({
   const [summary, setSummary] = useState<ScreenData<ProjectSummary> | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
   const [recent, setRecent] = useState<readonly string[]>([]);
+  const [imported, setImported] = useState<ScreenData<ImportResult> | undefined>(undefined);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     void bridge()
@@ -69,11 +81,48 @@ export function ProjectScreen({
     if (directory !== null) await onOpen(directory);
   };
 
+  /**
+   * Import a Svatah ADE prototype's database into the open project (T6.6,
+   * REQ-ADE-9).
+   *
+   * Into the *open* project, because that is the only directory the service
+   * writes to (LLD §13.5) — so the flow is "open an empty directory, then
+   * import into it", which is what `svatah migrate <dest> --from-ade <src>`
+   * does from a terminal. The screen says so rather than leaving someone to
+   * discover it by importing over a project they meant to keep.
+   */
+  const importPrototype = async (): Promise<void> => {
+    setError(undefined);
+    setImported(undefined);
+    if (client === undefined) return;
+    const source = await bridge().pickFile("directory");
+    if (source === null) return;
+    setImporting(true);
+    try {
+      const result = (await client.postMigrate({ source })) as ImportResult;
+      setImported(fromEndpoint("postMigrate", result));
+      // The project changed on disk, so what the screen shows must be re-read.
+      setSummary(fromEndpoint("getProject", (await client.getProject()) as ProjectSummary));
+    } catch (cause) {
+      setError(cause instanceof ServiceError ? cause.message : String(cause));
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <section aria-label="Project">
       <div className="row">
         <button type="button" onClick={() => void choose()}>
           Open a project…
+        </button>
+        <button
+          type="button"
+          onClick={() => void importPrototype()}
+          disabled={client === undefined || importing}
+          title="Read a Svatah ADE prototype's electron-db directory into the open project"
+        >
+          {importing ? "Importing…" : "Import prototype database…"}
         </button>
         {recent.length > 0 ? <span className="muted">Recent:</span> : null}
         {recent.slice(0, 3).map((one) => (
@@ -88,6 +137,30 @@ export function ProjectScreen({
           {error}
         </p>
       ) : null}
+
+      {imported === undefined ? null : (
+        <article aria-label="Prototype import" className="panel">
+          <h2>Imported “{imported.value.project}”</h2>
+          <p className="muted">
+            {imported.value.stories.length} stories in {imported.value.files.length} file(s).
+            Results and screenshots were not imported. Read{" "}
+            <code>{imported.value.review}</code> before trusting the output
+            {imported.value.unmapped === 0
+              ? "."
+              : `: ${imported.value.unmapped} step(s) could not be converted and are left as comments.`}
+          </p>
+          {imported.value.notes.length === 0 ? null : (
+            <ul aria-label="Import notes">
+              {imported.value.notes.slice(0, 20).map((note, at) => (
+                <li key={`${note.kind}-${at}`}>
+                  <code>{note.kind}</code> — {note.message}
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="source">Rendered from {imported.from}.</p>
+        </article>
+      )}
 
       {client === undefined ? (
         <>

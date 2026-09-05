@@ -43,6 +43,7 @@ import {
   runProject,
   serviceCompileTrajectory,
   serviceHeal,
+  serviceMigrateFromAde,
   serviceOpenSurfaceSession,
   serviceRecord,
   serviceToolsFor,
@@ -68,7 +69,7 @@ test: Sign in and look
 let app: SampleServer;
 const projects: string[] = [];
 
-function scaffold(options: { flow?: string; bindings?: boolean } = {}): string {
+function scaffold(options: { flow?: string; bindings?: boolean; empty?: boolean } = {}): string {
   const project = mkdtempSync(join(tmpdir(), "svatah-ade-review-"));
   projects.push(project);
   if (options.bindings !== false) {
@@ -78,7 +79,11 @@ function scaffold(options: { flow?: string; bindings?: boolean } = {}): string {
   }
   mkdirSync(join(project, "flows"), { recursive: true });
   mkdirSync(join(project, "api"), { recursive: true });
-  writeFileSync(join(project, "flows", "review.flow"), options.flow ?? FLOW, "utf8");
+  // `empty` is for the prototype import (T6.6), whose whole flow is "open an
+  // empty directory as a project, then import into it".
+  if (options.empty !== true) {
+    writeFileSync(join(project, "flows", "review.flow"), options.flow ?? FLOW, "utf8");
+  }
   writeFileSync(join(project, "data.yaml"), 'user:\n  email: "a@b.c"\n', "utf8");
   writeFileSync(
     join(project, "svatah.config.yaml"),
@@ -134,6 +139,7 @@ async function serve(
        * model.
        */
       hasModelCredential: () => options.credential === true,
+      migrateFromAde: serviceMigrateFromAde,
       record: serviceRecord,
       verifyBindings: serviceVerifyBindings,
       heal: serviceHeal,
@@ -444,6 +450,71 @@ describe("the Record screen chooses the gateway (P5-F2, REQ-ADE-4, LLD §13.5, �
 
       await client.postRecordByIdStop(sessionId);
       await sleep(200);
+    } finally {
+      await service.close();
+    }
+  }, 240_000);
+});
+
+describe("the prototype database import (T6.6, REQ-ADE-9, LLD §13.5)", () => {
+  /*
+   * The ADE's "Import prototype database…" button, driven at the layer the
+   * screen drives. The screen picks a directory through the preload bridge and
+   * posts it; everything after that is this.
+   *
+   * Into the *open* project, deliberately: the service confines every write to
+   * the directory it was opened on, and an import that could write anywhere
+   * would be the one route around that (LLD §13.5).
+   */
+  const DATABASE = join(ROOT, "evals", "migrate", "ade-db");
+
+  it("writes the prototype's project into the directory the service is open on", async () => {
+    const project = scaffold({ bindings: false, empty: true });
+    const { service, client } = await serve(project);
+    try {
+      const result = (await client.postMigrate({ source: DATABASE })) as {
+        project: string;
+        files: string[];
+        stories: Array<{ name: string; steps: number }>;
+        notes: Array<{ kind: string }>;
+      };
+
+      expect(result.project).toBe("Zoomcar regression");
+      expect(result.stories).toHaveLength(14);
+      expect(result.files).toContain("svatah.config.yaml");
+      expect(result.files).toContain("data.yaml");
+      expect(result.files.some((one) => one.startsWith("bindings/"))).toBe(true);
+      expect(result.files).toContain("migration-review.md");
+
+      // On disk, in the open project, and nowhere else.
+      expect(existsSync(join(project, "flows", "simple.flow"))).toBe(true);
+      expect(existsSync(join(project, "runs"))).toBe(false);
+      // The report says what was left behind rather than passing over it.
+      expect(result.notes.some((one) => one.kind === "ade-not-imported")).toBe(true);
+
+      // And the screen re-reads the project afterwards, which now sees it.
+      const summary = (await client.getProject()) as { stories: unknown[] };
+      expect(summary.stories.length).toBeGreaterThan(10);
+    } finally {
+      await service.close();
+    }
+  }, 240_000);
+
+  it("answers 400 with the reason, rather than 500, when the database is wrong", async () => {
+    /*
+     * Every way this fails is about the *input* — no `project` table, a name the
+     * database does not hold, a directory that is not one — and a 500 would send
+     * whoever reads it looking at the service.
+     */
+    const project = scaffold({ bindings: false, empty: true });
+    const { service, client } = await serve(project);
+    try {
+      await expect(client.postMigrate({ source: join(project, "flows") })).rejects.toThrow(
+        /project` table/,
+      );
+      await expect(
+        client.postMigrate({ source: DATABASE, project: "Nope" }),
+      ).rejects.toThrow(/Zoomcar regression/);
     } finally {
       await service.close();
     }

@@ -1,0 +1,16 @@
+{
+  "project": [
+    {
+      "id": 1,
+      "name": "Zoomcar regression",
+      "locatorFile": "[\n  {\n    \"locator identifier\": \"username\",\n    \"locator details\": \"id:username & xpath://input[@id='username'] & css selector:#username\"\n  },\n  {\n    \"locator identifier\": \"password\",\n    \"locator details\": \"id:password & xpath://input[@id='password'] & css selector:#password\"\n  },\n  {\n    \"locator identifier\": \"login button\",\n    \"locator details\": \"xpath://input[@value='Sign In'] & link text : Sign In & css selector : input.btn.btn-lg.btn-blue.btn-block\"\n  },\n  {\n    \"locator identifier\": \"docs link\",\n    \"locator details\": \"xpath : //a[contains(@href, '/docs')] & link text : Docs\"\n  },\n  {\n    \"locator identifier\": \"dashboard link\",\n    \"locator details\": \"xpath : //a[contains(@href, '/login')] & xpath : //a[contains(@href, '/user')] & link text : Dashboard\"\n  },\n  {\n    \"locator identifier\": \"Schedule Build Tab\",\n    \"locator details\": \"xpath://li[4]/a/p & cssSelector:li.build > a > p\"\n  },\n  {\n    \"locator identifier\": \"Schedule Build Title\",\n    \"locator details\": \"link text : Schedule A Build & css selector : a.navbar-brand & xpath : //nav/div/div/a\"\n  },\n  {\n    \"locator identifier\": \"logout\",\n    \"locator details\": \"css selector : li.logout > a > p & xpath : //li[9]/a/p\"\n  },\n  {\n    \"locator identifier\": \"toggle sidebar\",\n    \"locator details\": \"css selector : #navbar > div > div.navbar-wrapper > div > button\"\n  }\n]",
+      "configName": "regression"
+    },
+    {
+      "id": 2,
+      "name": "Smoke",
+      "locatorFile": "",
+      "configName": "smoke"
+    }
+  ]
+}

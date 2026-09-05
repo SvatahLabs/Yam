@@ -41,6 +41,7 @@ Flows (module b):
              [--workers <n>] [--headed] [--out runs] [--run-id <id>] [--json]
   svatah host generate [dir] [--out .svatah/specs]
   svatah migrate <src> <dest> [--keep-original] [--json]
+  svatah migrate <dest> --from-ade <electron-db dir> [--project <name>]
   svatah doctor [dir] [--json]
   svatah serve [dir] [--port 0] [--token <t>]
   svatah repl [dir] [--adapter <name>] [--base-url <url>] [--headless]

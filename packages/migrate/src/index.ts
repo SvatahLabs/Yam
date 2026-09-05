@@ -11,6 +11,15 @@
  * nobody would recognise.
  */
 export { migrate, type MigrateOptions, type MigrateResult } from "./migrate.js";
+export {
+  extractAdeProject,
+  readAdeDatabase,
+  NOT_IMPORTED,
+  type AdeDatabase,
+  type FromAdeOptions,
+  type FromAdeResult,
+  type Table,
+} from "./from-ade.js";
 export { renderReviewReport, type ReportInput, type ReviewNote } from "./report.js";
 export {
   parseLegacyStep,

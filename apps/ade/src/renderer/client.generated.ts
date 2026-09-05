@@ -41,6 +41,7 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "postBindingsVerify", verb: "post", path: "/bindings/verify", summary: "Dry-resolve the store, or one binding" },
   { id: "postCompile", verb: "post", path: "/compile", summary: "Compile and lint" },
   { id: "postHeal", verb: "post", path: "/heal", summary: "Heal a run; proposals arrive on the stream" },
+  { id: "postMigrate", verb: "post", path: "/migrate", summary: "Import a Svatah ADE prototype's electron-db directory into this project" },
   { id: "postRecord", verb: "post", path: "/record", summary: "Start a recording session; decisions arrive on the stream" },
   { id: "postRecordByIdDecision", verb: "post", path: "/record/{id}/decision", summary: "Accept, re-pick or reject the grounding a session is waiting on" },
   { id: "postRecordByIdStop", verb: "post", path: "/record/{id}/stop", summary: "Stop a recording session" },
@@ -198,6 +199,11 @@ export class GeneratedServiceClient {
   /** `POST /heal` — Heal a run; proposals arrive on the stream */
   async postHeal(body?: unknown): Promise<unknown> {
     return await this.call("post", `/heal`, { body, });
+  }
+
+  /** `POST /migrate` — Import a Svatah ADE prototype's electron-db directory into this project */
+  async postMigrate(body?: unknown): Promise<unknown> {
+    return await this.call("post", `/migrate`, { body, });
   }
 
   /** `POST /record` — Start a recording session; decisions arrive on the stream */

@@ -135,6 +135,8 @@ describe("the endpoints the screens exercise (REQ-ADE-3)", () => {
     "postSurfaceBySessionClose",
     "postTrajectoryCompile",
     "getTools",
+    /* T6.6 — the prototype database import (REQ-ADE-9). */
+    "postMigrate",
   ];
 
   for (const endpoint of REQUIRED) {

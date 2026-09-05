@@ -316,6 +316,45 @@ export function openApiDocument(version: string): Record<string, unknown> {
           responses: { 202: { description: "Stopping", ...json({ type: "object" }) }, 404: { description: "No such session", ...json({ type: "object" }) } },
         },
       },
+      "/migrate": {
+        post: {
+          summary: "Import a Svatah ADE prototype's electron-db directory into this project",
+          description:
+            "Reads the prototype's `project`, `config`, `flows` and `api` tables and writes " +
+            "`svatah.config.yaml`, `flows/`, seed `bindings/`, `data.yaml` and `api/*.yaml` " +
+            "into **this** project directory — the one the service was opened on, because " +
+            "every write the service makes is confined to it (REQ-ADE-9, LLD §13.5).\n\n" +
+            "Results and screenshots are not imported: a `runs/` directory reconstructed " +
+            "from another tool's database would look like something you could re-run and " +
+            "diff, and would be neither.",
+          security: bearer,
+          requestBody: json({
+            type: "object",
+            properties: {
+              source: {
+                type: "string",
+                description: "The prototype's electron-db directory.",
+              },
+              project: {
+                type: "string",
+                description: "Which project, when the database holds more than one.",
+              },
+            },
+            required: ["source"],
+          }),
+          responses: {
+            200: {
+              description: "What was written, and what needs review",
+              ...json({ type: "object" }),
+            },
+            400: {
+              description: "The database could not be read, or names no such project",
+              ...json({ type: "object" }),
+            },
+            501: { description: "This build has no migration", ...json({ type: "object" }) },
+          },
+        },
+      },
       "/bindings/verify": {
         post: {
           summary: "Dry-resolve the store, or one binding",

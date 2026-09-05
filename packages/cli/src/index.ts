@@ -98,6 +98,7 @@ export { groundingEvalCommand } from "./commands/eval-grounding.js";
 export {
   serviceCompileTrajectory,
   serviceHeal,
+  serviceMigrateFromAde,
   serviceOpenSurfaceSession,
   serviceRecord,
   serviceToolsFor,

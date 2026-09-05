@@ -176,4 +176,22 @@ export interface ServiceApi {
 
   /** The tools a project would expose, and the invocations one has served. */
   toolsFor?(loaded: ProjectHandle, options?: { expose?: string }): Promise<unknown>;
+
+  /* ── T6.6: the prototype database import (REQ-ADE-9, LLD §13.5) ────────── */
+
+  /**
+   * Import a Svatah ADE prototype's electron-db directory into this project.
+   *
+   * Into *this* project, deliberately: the service confines every write to the
+   * directory it was opened on, and an import that could write anywhere would
+   * be the one route around that. The ADE's flow is therefore "open an empty
+   * directory as a project, then import into it", which is also what
+   * `svatah migrate <dest> --from-ade <src>` does.
+   *
+   * The source is a path outside the project, and reading it is the point.
+   */
+  migrateFromAde?(
+    loaded: ProjectHandle,
+    options: { source: string; project?: string },
+  ): Promise<unknown>;
 }

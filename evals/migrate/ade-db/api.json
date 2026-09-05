@@ -1,0 +1,28 @@
+{
+  "api": [
+    {
+      "id": 1,
+      "name": "active count",
+      "projectName": "Zoomcar regression",
+      "httpMethod": "GET",
+      "uri": "http://localhost:4173/api/active-count",
+      "requestBody": "",
+      "acceptAllSslCert": "false",
+      "headers": "accept: application/json",
+      "contentType": "",
+      "followRedirect": "true"
+    },
+    {
+      "id": 2,
+      "name": "create booking",
+      "projectName": "Zoomcar regression",
+      "httpMethod": "POST",
+      "uri": "http://localhost:4173/api/bookings",
+      "requestBody": "{\"location\":\"Indiranagar\"}",
+      "acceptAllSslCert": "true",
+      "headers": "",
+      "contentType": "application/json",
+      "followRedirect": "false"
+    }
+  ]
+}

@@ -110,7 +110,22 @@ export function seedBinding(locator: MigratedLocator, at: string): BindingFile {
     context: { pattern: "/", hash: "0".repeat(64), platform: "web" },
     candidates: [...locator.candidates],
     fingerprint: {
-      tag: "",
+      /*
+       * `unknown`, not the empty string (T6.6).
+       *
+       * A fingerprint describes an element that was *seen*, so relocalization
+       * can find it after it moves (LLD §6.4, REQ-REC-4). A migrated locator was
+       * never seen: it is what someone wrote in a `.locator` file. There is no
+       * tag to record, and `""` is not an answer — the schema requires a
+       * non-empty `tag`, so every migrated store this ever wrote failed
+       * validation and no migrated project has compiled.
+       *
+       * `unknown` is the honest value and behaves correctly: relocalization
+       * scores tag equality, and `unknown` matches nothing, which is right for a
+       * binding with no evidence behind it. The recorder replaces the whole
+       * entry on the first `svatah record` (REQ-REC-1).
+       */
+      tag: "unknown",
       attrs: {},
       text: "",
       neighbours: { before: [], after: [] },

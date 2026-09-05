@@ -658,6 +658,44 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     return reply.code(202).send({ ok: true });
   });
 
+  /* ── T6.6: the prototype database import (REQ-ADE-9) ────────────────────── */
+
+  fastify.post<{ Body?: { source?: string; project?: string } }>(
+    "/migrate",
+    async (request, reply) => {
+      if (api.migrateFromAde === undefined) {
+        return reply
+          .code(501)
+          .send({ error: "not-available", message: "This build has no migration." });
+      }
+      const source = request.body?.source;
+      if (source === undefined || source.trim() === "") {
+        return reply.code(400).send({
+          error: "no-source",
+          message: "`source` must be the path of the prototype's electron-db directory.",
+        });
+      }
+      try {
+        const result = await api.migrateFromAde(await load(), {
+          source,
+          ...(request.body?.project === undefined ? {} : { project: request.body.project }),
+        });
+        return reply.code(200).send(result);
+      } catch (error) {
+        /*
+         * A 400, not a 500. Every way this fails is something about the
+         * *input* — no `project` table, a project name that is not in the
+         * database, a directory that is not one — and a 500 would send whoever
+         * reads it looking at the service.
+         */
+        return reply.code(400).send({
+          error: "import-failed",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+  );
+
   /* ── T5.7: bindings verify and heal review (REQ-ADE-5) ───────────────────── */
 
   fastify.post<{ Body?: { id?: string; headed?: boolean } }>(

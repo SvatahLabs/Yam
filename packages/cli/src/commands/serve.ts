@@ -19,6 +19,7 @@ import { compileProject, loadProject } from "../project.js";
 import {
   serviceCompileTrajectory,
   serviceHeal,
+  serviceMigrateFromAde,
   serviceOpenSurfaceSession,
   serviceRecord,
   serviceToolsFor,
@@ -100,6 +101,7 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
       openSurfaceSession: serviceOpenSurfaceSession,
       compileTrajectory: serviceCompileTrajectory,
       toolsFor: serviceToolsFor,
+      migrateFromAde: serviceMigrateFromAde,
     } as never,
     ...(numberOption(args, "port") === undefined ? {} : { port: numberOption(args, "port")! }),
     ...(stringOption(args, "token") === undefined ? {} : { token: stringOption(args, "token")! }),

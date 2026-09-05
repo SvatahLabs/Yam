@@ -1,0 +1,18 @@
+{
+  "results": [
+    {
+      "id": 1,
+      "uid": "r1",
+      "projectName": "Zoomcar regression",
+      "configName": "regression",
+      "url": "http://localhost:4173",
+      "browser": "chrome",
+      "startTime": "2023-02-11T09:00:00Z",
+      "endTime": "2023-02-11T09:04:00Z",
+      "timeTaken": "4m",
+      "passed": "18",
+      "failed": "2",
+      "skipped": "0"
+    }
+  ]
+}

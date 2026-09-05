@@ -949,6 +949,71 @@
         }
       }
     },
+    "/migrate": {
+      "post": {
+        "summary": "Import a Svatah ADE prototype's electron-db directory into this project",
+        "description": "Reads the prototype's `project`, `config`, `flows` and `api` tables and writes `svatah.config.yaml`, `flows/`, seed `bindings/`, `data.yaml` and `api/*.yaml` into **this** project directory — the one the service was opened on, because every write the service makes is confined to it (REQ-ADE-9, LLD §13.5).\n\nResults and screenshots are not imported: a `runs/` directory reconstructed from another tool's database would look like something you could re-run and diff, and would be neither.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "description": "The prototype's electron-db directory."
+                  },
+                  "project": {
+                    "type": "string",
+                    "description": "Which project, when the database holds more than one."
+                  }
+                },
+                "required": [
+                  "source"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "What was written, and what needs review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The database could not be read, or names no such project",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "This build has no migration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/bindings/verify": {
       "post": {
         "summary": "Dry-resolve the store, or one binding",

@@ -1,0 +1,26 @@
+{
+  "config": [
+    {
+      "id": 1,
+      "name": "regression",
+      "browser": "chrome",
+      "threadCount": "3",
+      "url": "http://localhost:4173",
+      "projectName": "Zoomcar regression",
+      "takeStepScreenshot": "true",
+      "dataFile": "[\n  {\n    \"variable name\": \"email\",\n    \"variable value\": \"connected2atul@gmail.com\"\n  },\n  {\n    \"variable name\": \"password\",\n    \"variable value\": \"qwerty123\"\n  },\n  {\n    \"variable name\": \"date\",\n    \"variable value\": \"2026-09-03\"\n  }\n]",
+      "screenDimension": "1920x1080"
+    },
+    {
+      "id": 2,
+      "name": "smoke",
+      "browser": "internet explorer",
+      "threadCount": "1",
+      "url": "http://localhost:4173",
+      "projectName": "Smoke",
+      "takeStepScreenshot": "false",
+      "dataFile": "",
+      "screenDimension": "1920x1080"
+    }
+  ]
+}

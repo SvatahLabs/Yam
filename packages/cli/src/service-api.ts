@@ -15,7 +15,7 @@
  * Each function below opens a browser, calls the same package the command does,
  * and shapes the answer. Nothing here decides anything a command line cannot.
  */
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { BindingsStore, resolve as resolveBinding } from "@svatah/bindings";
 import {
@@ -440,4 +440,53 @@ export async function serviceToolsFor(
     ...(options.expose === undefined ? {} : { expose: options.expose }),
   });
   return { tools, refused: exposure.refused };
+}
+
+/* ── T6.6: the prototype database import (REQ-ADE-9, LLD §13.5) ───────────── */
+
+/**
+ * `POST /migrate`, which is `svatah migrate <dest> --from-ade <src>`.
+ *
+ * The same two steps the command line takes, in the same order and through the
+ * same functions: extract the prototype's database back into the v2 files it
+ * kept in columns, then convert them. The ADE's button and the command line must
+ * produce the same directory, and the way to be sure of that is for there to be
+ * one implementation.
+ */
+export async function serviceMigrateFromAde(
+  loaded: Loaded,
+  options: { source: string; project?: string },
+): Promise<unknown> {
+  const { extractAdeProject, migrate, renderReviewReport } = await import("@svatah/migrate");
+  const destination = loaded.root;
+
+  const extracted = extractAdeProject({
+    source: options.source,
+    destination,
+    ...(options.project === undefined ? {} : { project: options.project }),
+  });
+  const result = migrate({ source: destination, destination });
+  for (const one of extracted.intermediates) rmSync(join(destination, one), { force: true });
+
+  const files = [...new Set([...extracted.files, ...result.files])]
+    .filter((one) => !extracted.intermediates.includes(one))
+    .sort();
+  const review = renderReviewReport({
+    source: options.source,
+    destination,
+    files,
+    notes: [...extracted.notes, ...result.notes],
+    unmapped: result.unmapped,
+    stories: result.stories,
+  });
+  writeFileSync(join(destination, "migration-review.md"), review, "utf8");
+
+  return {
+    project: extracted.project,
+    files: [...files, "migration-review.md"].sort(),
+    stories: result.stories,
+    unmapped: result.unmapped,
+    notes: [...extracted.notes, ...result.notes],
+    review: "migration-review.md",
+  };
 }
