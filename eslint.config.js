@@ -24,6 +24,28 @@
 // A violation of any of the three rules fails `pnpm lint`. The fourth guard —
 // that no package.json *declares* a forbidden package — is a test, not a lint
 // rule: see `tools/repo-checks/test/import-boundaries.test.ts`.
+//
+// ## What these rules cannot see, and what does (P1-F5)
+//
+// All three work on specifiers that are literals in the source. Two forms are
+// therefore outside their reach, and no configuration of them changes that:
+//
+//   * a **computed dynamic specifier** — `await import(`@svatah/${name}`)`, or
+//     any expression the linter cannot evaluate. The selectors match a `Literal`
+//     argument; a template or a variable is not one.
+//   * **`createRequire`** — `createRequire(import.meta.url)("@svatah/gateway")`,
+//     and equally `process.getBuiltinModule`, `require.resolve` reached through
+//     an alias, or anything else that gets to a module through a value rather
+//     than through syntax.
+//
+// This is a limitation of static linting, not an oversight, and it is why LLD §1
+// requires a dependency-graph test as well: **the guard that actually holds at
+// run time is the transitive-closure test**, which reads every package.json and
+// walks the whole `@svatah/*` closure. With pnpm's strict isolation a package
+// can only resolve what its manifest declares, so a specifier the lint cannot
+// read still fails at run time unless the dependency was declared — and if it
+// was declared, the test fails first. The lint is the guard that *names the
+// rule* where the code is written; the test is the guard that *holds*.
 
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";

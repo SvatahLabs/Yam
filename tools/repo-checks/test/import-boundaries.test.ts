@@ -274,6 +274,22 @@ describe("package.json dependency graph (LLD §1, Draft 2.2)", () => {
     }
   });
 
+  /*
+   * This test is the guard that holds (P1-F5).
+   *
+   * The three lint rules in `eslint.config.js` all work on specifiers that are
+   * literals in the source, so two forms slip past them: a computed dynamic
+   * specifier — `import(`@svatah/${name}`)` — and any module reached through a
+   * value rather than through syntax, `createRequire(import.meta.url)(…)` being
+   * the obvious one. No configuration of a static linter closes that.
+   *
+   * What closes it is the manifest. Under pnpm's strict isolation a package can
+   * only resolve what its own package.json declares, so a specifier the lint
+   * cannot read still fails at run time unless the dependency was declared — and
+   * if it was declared, this test fails before anyone runs it. The transitive
+   * closure is checked rather than the direct dependencies, because a boundary
+   * crossed two packages away is crossed just the same.
+   */
   it("module (a) resolves no module (b) package, transitively (REQ-PKG-1)", () => {
     /*
      * Module (b) as HLD §12 lists it from Draft 2.3 on. `runtime` is on it, and
