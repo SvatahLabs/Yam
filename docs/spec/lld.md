@@ -14,6 +14,7 @@ Section numbers are referenced from tasks as `LLD §n`. Types are TypeScript wit
   - `runtime`, `bindings`, `healer` (relocalize path), `adapter-*`, `surface`, `playwright-test`, `workflow`, `tool` must not import `gateway`, `recorder`, `compiler`, or `trajectory`.
   - `bindings`, `healer`, `playwright-test` must not import `spec`, `steps`, `compiler` (module (a) independence, REQ-PKG-1).
   - Nothing above `surface` may import an `adapter-*` package directly except `cli` (registration) and `playwright-test` (Playwright adapter only).
+  - The lint must resolve TypeScript sources for relative imports (an `eslint-import-resolver-typescript` or equivalent) and must also cover dynamic `import()` expressions; and a repository test must assert that no package's `package.json` declares a forbidden package under `dependencies`, `devDependencies`, `peerDependencies`, or `optionalDependencies`. With pnpm's strict isolation, the dependency-graph test is the guard that holds at run time; the lint is the guard that names the rule.
 - Every package exports from `src/index.ts`. One version for all packages; `schemaVersion` is separate and bumped on any contract change.
 
 Dependency graph (arrows = depends on):
@@ -135,7 +136,7 @@ interface Step {
   guard?: { subject: "target" | "page" | "dialog" | "scope"; predicate: Predicate; mode: "onlyIf" | "unless" };
   expect?: { subject: "target" | "page" | "dialog" | "scope"; predicate: Predicate };
   capture?: { name: string; from: "text" | "value" | "attribute" | "title" | "result" | "response" | "output"; attribute?: string; jsonPath?: string };
-  custom?: { id: string; params: Record<string, ValueRef> };          // action === "custom"
+  custom?: { id: string; params: Record<string, ValueRef>; targets?: Record<string, TargetRef> };   // action === "custom"; `target` placeholders land in `targets`, never in `params`
   invoke?: { story: string; inputs: Record<string, ValueRef> };      // action === "invoke"
   sideEffect?: boolean;                                              // set by lint heuristics or declared in custom step
   timeoutMs: number;
@@ -266,7 +267,7 @@ export default defineStep(
 
 - Template placeholders: `{name:string|number|boolean|target|value}`; `target` placeholders become `TargetRef`s that the recorder grounds like any other; `value` accepts quoted literals and variable references.
 - Matching: templates compile to regexes with typed captures; matched before Tier 1; a sentence matching both a template and a grammar pattern is `E_STEP_AMBIGUOUS` (REQ-LANG-16).
-- IR: `action: "custom"`, `custom.id` = file path plus export name, `custom.params` as ValueRefs, `sideEffect` from the definition.
+- IR: `action: "custom"`, `custom.id` = file path plus export name, `custom.params` holds the `string|number|boolean|value` placeholders as ValueRefs, `custom.targets` holds the `target` placeholders as TargetRefs (so the recorder grounds them and the resolver resolves them exactly like `step.target`), `sideEffect` from the definition. A `target` placeholder must never be encoded as a literal in `params`.
 - Execution: the executor loads `steps/` at start (module (b) only) and calls the handler with a `StepContext` that exposes only the surface, resolver, scope, expectation helper, and audit; direct adapter access is not exposed.
 - Provenance: none (human-authored); lint records `W_CUSTOM` for visibility.
 
@@ -551,6 +552,7 @@ MCP server (`svatah mcp`): operation tools (`compile`, `lint`, `record`, `run`, 
 
 ## 17. Changes from Draft 1
 
+- Draft 2.2 (after Phase 0 verification): `Step.custom.targets` for Tier 0 `target` placeholders (§3.2, §5); import boundaries must resolve TypeScript sources, cover dynamic imports, and be backed by a package.json dependency-graph test (§1).
 - `Driver` replaced by the published `AgentSurface` (§2) with normalised snapshots, `locate`, `describe`, `state`/`restore`, capabilities, and wire schemas.
 - Packages regrouped by layer and by module (a)/(b)/(c); import boundaries extended for module (a) independence.
 - IR gains `guard`, `custom`, `invoke`, `sideEffect`; `Story` gains `signature` and `meta.onFailure`/`idempotent`; `TargetRef.scope` gains `desktop`/`window`; `Candidate.by` gains `accessibilityId`, `resourceId`, `automationId`, `controlPath`, `webmcp`; `StepResult.status` gains `aborted`; `FailureClass` gains `guard`; new `AuditLine`, `Checkpoint`, `Invoker`, `Signature`.
