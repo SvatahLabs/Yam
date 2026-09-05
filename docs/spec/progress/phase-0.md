@@ -331,6 +331,47 @@ produce it.
 
 ---
 
+## Post-verification corrections
+
+Phase 0 was verified after `71a009b`. The verifier ran the contract on **Node 22
+LTS**, closing K2 below: `pnpm install && pnpm -r build && pnpm -r test` and the
+additional commands all passed on Node 22, so the Node 25 result recorded above
+is not the only evidence the workspace runs on its declared runtime. The three
+operating systems of K1 were not closed — there is still no GitHub remote — and
+that gap is narrowed, not removed, by F5.
+
+The verification required four corrections, and the branch owner authorised two
+spec amendments (Draft 2.2, applied to `docs/spec/lld.md` in `d436177`) to make
+two of them expressible. Six commits on `phase-1` carry them:
+
+| # | Correction | Commit | What it closed |
+|---|---|---|---|
+| F1 | Boundary bypasses | `31e6db8` | A relative import `../../gateway/src/index.js` from `packages/runtime/src`, and `await import("@svatah/gateway")` from the same place, both passed `pnpm lint` on `71a009b`. Reproduced first, then fixed with a TypeScript-aware import resolver, `no-restricted-syntax` selectors for dynamic imports, and a package.json dependency-graph test. Both probes are now cases in `tools/repo-checks/test/import-boundaries.test.ts`. |
+| F2 | `execution.flow` | `f93289f` | The migration had renamed three of the original's seven scenarios and added a `cancel booking` scenario with `onFailure=compensate` metadata and compose/run blocks that the original never had. The original names and one-step-per-step order are restored; the compensation showcase moved to `evals/fixtures/flows/booking-compensation.flow`; the name-preservation test now parses the legacy originals instead of reading a hardcoded list. |
+| F3 | Custom-step targets | `2827bea` | A Tier 0 `target` placeholder was encoded as a literal in `custom.params`, where the recorder never grounds it and the resolver never resolves it. `Step.custom.targets` added (Draft 2.2 §3.2, §5), JSON Schemas regenerated, two refinements added, `g-149`/`g-150` and `docs/flow-language.md` §6 corrected. |
+| F4 | Read steps | `26aba10` | `g-083` carried the attribute name in `args.attribute` as well as in `capture.attribute`. `args` removed; the reference now states that `capture.attribute` is the only encoding; a golden assertion enforces it. |
+| F5 | CI | `6c3c6a9` | `bitbucket-pipelines.yml` mirrors the Linux job of `.github/workflows/ci.yml`, with a test that keeps the two in step. K1 is narrowed: the workspace job is now runnable on the repository's own remote. macOS and Windows stay unverified. |
+| F6 | This section | *this commit* | — |
+
+Two further points the corrections make, recorded here so they are not lost:
+
+- **The two boundary probes T0.2 shipped were the only shapes the configuration
+  caught.** They were both static imports by package name. That is the shape
+  `no-restricted-imports` sees, and it is the shape a developer writes by
+  accident; it is not the shape that would be written to get around the rule.
+  The dependency-graph test added in F1 is the guard that holds regardless of how
+  an import is written, because under pnpm's strict isolation a package can only
+  resolve what its `package.json` declares.
+- **K5 is now closed by measurement, not by fixture.** The relocalization number
+  the twenty variants were built for is measured in T1.5 and published by T1.8;
+  see `phase-1.md`.
+
+The rest of this document is the record as it stood at verification and has not
+been edited: where a statement here contradicts one above, this section is the
+later one.
+
+---
+
 ## Deviations
 
 Each is the closest faithful option, with the section it departs from and why.
@@ -466,11 +507,20 @@ Gradle build with no native dependencies, but that is an argument, not evidence.
 **To close this:** add a GitHub remote and push `phase-0`, or port the workflow to
 Bitbucket Pipelines. The commands are unchanged either way.
 
+*Update (F5):* the Bitbucket port exists — `bitbucket-pipelines.yml`, mirroring
+the Linux job, with a test that keeps the two files in step. The Linux half of
+this gap is closed on a runner the repository actually has; macOS and Windows are
+still unverified.
+
 ### K2 — Verified on Node 25, not Node 22 LTS
 
 The available runtime was Node v25.6.1. Everything targets and declares Node 22
 (`.nvmrc`, `engines`, `tsup` `target: node22`, the CI matrix), but no Node 22
-execution was observed. Closing K1 closes this too, since the CI matrix pins 22.
+execution was observed *in this session*.
+
+*Update:* the verifier ran the contract on Node 22 LTS and it passed, so the gap
+is closed as a matter of evidence. `bitbucket-pipelines.yml` (F5) pins `node:22`,
+so it stays closed on every push.
 
 ### K3 — Nothing executes a flow yet, by design
 
@@ -498,3 +548,6 @@ of those tasks replaces its placeholder with the real `svatah eval` invocation.
 binding reads. Whether relocalization actually recovers ≥60 % of bindings across
 them is measured in T1.5 and published in T1.8. Phase 0 provides the fixture, not
 the number.
+
+*Update:* T1.5 and T1.8 are in Phase 1. The measured number and the per-variant
+table are in `phase-1.md` and in the committed report under `reports/`.
