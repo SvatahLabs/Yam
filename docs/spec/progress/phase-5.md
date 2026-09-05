@@ -958,3 +958,75 @@ It is why `packages/cli/test/resume.test.ts` uses a one-story flow.
 `adapter-uia` and `adapter-ax` are Phase 6 (T6.1, T6.2) and remain skeletons. The
 ADE is their conformance target and now has eleven screens rather than seven,
 which is more surface for them to be validated against.
+
+---
+
+## Post-verification corrections
+
+A separate session verified `phase-5` at `0a9dfe3` and scored it **8.7 / 10**,
+accepting the phase with corrections. Its report is
+[`phase-5-verification.md`](phase-5-verification.md). The corrections were made
+on branch `phase-6` before any Phase 6 task started; the evidence for each is in
+[`phase-6.md`](phase-6.md).
+
+### What the verifier ran that this file did not
+
+| Claim | Result |
+|---|---|
+| The contract on **Node v22.23.2 with `CI=true`**, no credential | **2,743 passed**, 0 failed — the same count as Node 24 here, which closes **K1** |
+| The four secrets swept independently (a `secret` input and a `${ENV}` data secret, through `simple.flow` with checkpoints and audit on, and through a workflow with `card: secret`) | neither value in `summary.json`, `results.jsonl`, `audit.jsonl`, any checkpoint or any screenshot |
+| The stock-Chrome BiDi attach through chromedriver 152 | `attached to a driver-hosted session`, 16 of 16, 72 checks |
+| A story exposed as an MCP tool, driven by an independent client with the network blocked | outputs and `runId`; the audit's run line names the agent invoker |
+
+### The findings, and what was done about them
+
+| # | Finding | Fixed in |
+|---|---|---|
+| F1 | Compensating-story steps recorded `aborted` although they ran and passed (LLD §8.3) | `270a277` |
+| F2 | The ADE cannot choose a gateway (REQ-ADE-4, LLD §13.6) | `53dcc6b` |
+| F3 | `Step.guard.target` — the spec drift D1 absorbed into Draft 2.7 | `c2f83fc` |
+| F4 | The decision deadline (K7) and the 409 (K8) documented and enforced | `7a42b08` |
+| F5 | This section | — |
+
+**F1.** `runs/comp/results.jsonl` recorded the two steps of `cancel a booking` as
+`aborted` with no failure attached, while `audit.jsonl` showed the click, the
+locate and the check all returning `ok`. A cancellation that worked and one that
+did not produced identical lines, so the only question a reader has about a
+compensation — did it work? — had no answer in the file. §8.3 as amended: the
+compensating story's steps keep their own statuses, the failing step carries
+`policyApplied`, and the flow and the run are `aborted`. Since no step is
+labelled `aborted` any more, `abortedByPolicy(results)` reads the abort off the
+failing step's `policyApplied`; it is stated as a function on `results.jsonl`
+because the Playwright Test reporter, the runtime conformance suite and a foreign
+runtime all have that file and nothing else.
+
+**F2.** `Record.tsx` posted `{ rebind: true }` and never a gateway, so on a
+machine with no credential the first press of "Start recording" failed with a
+message naming `--gateway fake`, a flag an Electron window cannot pass. The
+screen now chooses: `GET /project` reports `gateway.credential` (the boolean,
+never the key), the control defaults to `anthropic` when there is one and `fake`
+when there is not, both options are labelled for what they are, and the choice
+goes in `POST /record`. `record.failed` is an alert whose advice is written for
+the window.
+
+**F3.** D1 was the right call for Phase 5 — a compile error naming both phrases
+beats a guard silently asking about the wrong element — and Draft 2.7 makes the
+documented sentence expressible instead. `Step.guard.target` is now carried by
+the schema, built by the compiler, grounded by the recorder and resolved by the
+executor. `E_GUARD_OTHER_TARGET` is gone; `E_GUARD_NO_TARGET` narrows to a target
+guard with no element anywhere.
+
+**F4.** K7 and K8 are closed. A pending decision expires after
+`record.decisionDeadlineMs` (config, default ten minutes): the grounding is
+rejected — never accepted by default — `record.decision.expired` goes to the
+stream, and the session stops with a report. The 409 was already the behaviour
+and is now in the OpenAPI description rather than only in the response list.
+
+### What remains open from the verifier's report
+
+**F4 in the verifier's numbering (K6) — nobody has completed a record review
+through the buttons.** Unchanged by these corrections. The Record screen now has
+one more control than it did, and the ADE remains driven by
+`apps/ade/test/review.test.ts` through the same client the screen uses. Phase 6's
+desktop adapters drive the ADE through UIA and AX, which is where this closes;
+see `phase-6.md`.
