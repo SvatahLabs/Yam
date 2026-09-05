@@ -1,0 +1,260 @@
+{
+  "apis": [],
+  "compositions": {
+    "sign in and check": [
+      "Sign in",
+      "Check the heading"
+    ]
+  },
+  "customSteps": [],
+  "generatedAt": "1970-01-01T00:00:00.000Z",
+  "hash": "ff4ee2ad80cfcfe4d0e370966a006b9f8c52338bb8095dea62d8f84f39ead432",
+  "project": "host-tests",
+  "runs": {
+    "flows/host.flow": [
+      "sign in and check"
+    ]
+  },
+  "schemaVersion": "1.0.0",
+  "stories": [
+    {
+      "file": "flows/host.flow",
+      "kind": "story",
+      "meta": {
+        "enabled": true,
+        "onFailure": "stop",
+        "tags": []
+      },
+      "name": "Sign in",
+      "signature": {
+        "inputs": {},
+        "outputs": {
+          "heading": {
+            "type": "string"
+          }
+        }
+      },
+      "steps": [
+        {
+          "action": "navigate",
+          "args": {
+            "url": {
+              "kind": "literal",
+              "value": "/"
+            }
+          },
+          "id": "Sign in#1",
+          "line": 6,
+          "origin": {
+            "confidence": 1,
+            "rule": "navigate",
+            "tier": 1
+          },
+          "storyName": "Sign in",
+          "text": "Open \"/\"",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "click",
+          "id": "Sign in#2",
+          "line": 7,
+          "origin": {
+            "confidence": 1,
+            "rule": "click",
+            "tier": 1
+          },
+          "storyName": "Sign in",
+          "target": {
+            "phrase": "the sign in button",
+            "ref": "login.sign-in-button",
+            "status": "bound"
+          },
+          "text": "Click the sign in button",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "type",
+          "args": {
+            "value": {
+              "kind": "literal",
+              "value": "connected2atul@gmail.com"
+            }
+          },
+          "id": "Sign in#3",
+          "line": 8,
+          "origin": {
+            "confidence": 1,
+            "rule": "type",
+            "tier": 1
+          },
+          "storyName": "Sign in",
+          "target": {
+            "phrase": "the username field",
+            "ref": "login.username-field",
+            "status": "bound"
+          },
+          "text": "Type \"connected2atul@gmail.com\" into the username field",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "type",
+          "args": {
+            "value": {
+              "kind": "literal",
+              "value": "qwerty123"
+            }
+          },
+          "id": "Sign in#4",
+          "line": 9,
+          "origin": {
+            "confidence": 1,
+            "rule": "type",
+            "tier": 1
+          },
+          "storyName": "Sign in",
+          "target": {
+            "phrase": "the password field",
+            "ref": "login.password-field",
+            "status": "bound"
+          },
+          "text": "Type \"qwerty123\" into the password field",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "click",
+          "id": "Sign in#5",
+          "line": 10,
+          "origin": {
+            "confidence": 1,
+            "rule": "click",
+            "tier": 1
+          },
+          "storyName": "Sign in",
+          "target": {
+            "phrase": "the login button",
+            "ref": "login.login-button",
+            "status": "bound"
+          },
+          "text": "Click the login button",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "read",
+          "capture": {
+            "from": "text",
+            "name": "heading"
+          },
+          "id": "Sign in#6",
+          "line": 11,
+          "origin": {
+            "confidence": 1,
+            "rule": "read",
+            "tier": 1
+          },
+          "storyName": "Sign in",
+          "target": {
+            "phrase": "the dashboard heading",
+            "ref": "login.dashboard-heading",
+            "status": "bound"
+          },
+          "text": "Remember the text of the dashboard heading as heading",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "expect",
+          "expect": {
+            "predicate": {
+              "kind": "visible"
+            },
+            "subject": "target"
+          },
+          "id": "Sign in#7",
+          "line": 12,
+          "origin": {
+            "confidence": 1,
+            "rule": "expect",
+            "tier": 1
+          },
+          "storyName": "Sign in",
+          "target": {
+            "phrase": "the dashboard heading",
+            "ref": "login.dashboard-heading",
+            "status": "bound"
+          },
+          "text": "The dashboard heading should be visible",
+          "timeoutMs": 10000
+        }
+      ]
+    },
+    {
+      "file": "flows/host.flow",
+      "kind": "story",
+      "meta": {
+        "enabled": true,
+        "idempotent": true,
+        "onFailure": "stop",
+        "tags": []
+      },
+      "name": "Check the heading",
+      "steps": [
+        {
+          "action": "expect",
+          "expect": {
+            "predicate": {
+              "kind": "textContains",
+              "value": {
+                "kind": "var",
+                "name": "heading",
+                "story": "Sign in"
+              }
+            },
+            "subject": "target"
+          },
+          "id": "Check the heading#1",
+          "line": 15,
+          "origin": {
+            "confidence": 1,
+            "rule": "expect",
+            "tier": 1
+          },
+          "storyName": "Check the heading",
+          "target": {
+            "phrase": "the dashboard heading",
+            "ref": "login.dashboard-heading",
+            "status": "bound"
+          },
+          "text": "The dashboard heading should contain {Sign in.heading}",
+          "timeoutMs": 10000
+        }
+      ]
+    }
+  ],
+  "targets": {
+    "login.dashboard-heading": {
+      "phrases": [
+        "the dashboard heading"
+      ]
+    },
+    "login.login-button": {
+      "phrases": [
+        "the login button"
+      ]
+    },
+    "login.password-field": {
+      "phrases": [
+        "the password field"
+      ]
+    },
+    "login.sign-in-button": {
+      "phrases": [
+        "the sign in button"
+      ]
+    },
+    "login.username-field": {
+      "phrases": [
+        "the username field"
+      ]
+    }
+  }
+}
+

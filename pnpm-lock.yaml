@@ -65,6 +65,15 @@ importers:
       '@eslint/js':
         specifier: 'catalog:'
         version: 9.39.5
+      '@svatah/compiler':
+        specifier: workspace:*
+        version: link:packages/compiler
+      '@svatah/schema':
+        specifier: workspace:*
+        version: link:packages/schema
+      '@svatah/spec':
+        specifier: workspace:*
+        version: link:packages/spec
       '@types/node':
         specifier: 'catalog:'
         version: 22.20.1
@@ -471,7 +480,35 @@ importers:
         version: 2.1.9(@types/node@22.20.1)
 
   packages/host-playwright:
+    dependencies:
+      '@svatah/adapter-playwright':
+        specifier: workspace:*
+        version: link:../adapter-playwright
+      '@svatah/bindings':
+        specifier: workspace:*
+        version: link:../bindings
+      '@svatah/playwright-test':
+        specifier: workspace:*
+        version: link:../playwright-test
+      '@svatah/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@svatah/schema':
+        specifier: workspace:*
+        version: link:../schema
+      '@svatah/surface':
+        specifier: workspace:*
+        version: link:../surface
     devDependencies:
+      '@playwright/test':
+        specifier: 'catalog:'
+        version: 1.62.1
+      playwright:
+        specifier: 'catalog:'
+        version: 1.62.1
+      sample-web:
+        specifier: workspace:*
+        version: link:../../apps/sample-web
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)
@@ -481,6 +518,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 2.1.9(@types/node@22.20.1)
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.0
 
   packages/migrate:
     dependencies:

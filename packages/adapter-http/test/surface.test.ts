@@ -54,7 +54,9 @@ describe("what it says it can do (REQ-SURF-1)", () => {
     async (method) => {
       // Someone seeing this configured `adapter: http` for a flow that clicks
       // things. What they need to know is which of the two is wrong.
-      const call = (surface as unknown as Record<string, () => Promise<unknown>>)[method]!;
+      const call = (surface as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>)[
+        method
+      ]!;
       await expect(call.call(surface, "click", "r0")).rejects.toThrow(/HTTP adapter/);
     },
   );

@@ -1,0 +1,9 @@
+# Throwaway Playwright projects the host tests scaffold (T2.8).
+#
+# They live inside the package rather than in the system temp directory so that
+# `@playwright/test` and the host's own dist resolve the way they would in a real
+# project — Node walks up to this package's node_modules. Each is removed when
+# its test finishes; the ignore is for a run that was killed.
+.host-tests/
+playwright-report/
+test-results/

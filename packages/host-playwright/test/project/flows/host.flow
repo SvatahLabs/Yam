@@ -1,0 +1,21 @@
+// The flow the host tests run. Two stories, so the serial describe and the
+// shared scope are both exercised: the second reads what the first captured.
+
+story: Sign in
+outputs: heading: string
+  Open "/"
+  Click the sign in button
+  Type "connected2atul@gmail.com" into the username field
+  Type "qwerty123" into the password field
+  Click the login button
+  Remember the text of the dashboard heading as heading
+  The dashboard heading should be visible
+
+story (idempotent): Check the heading
+  The dashboard heading should contain {Sign in.heading}
+
+compose: sign in and check
+  Sign in
+  Check the heading
+
+test: sign in and check

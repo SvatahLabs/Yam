@@ -1,0 +1,40 @@
+# Hand-written for the host tests: the sample application carries a
+# `data-testid` on every control, so a one-candidate bundle is honest here. A
+# real store is what the recorder writes (T3.x); this exists so the host can be
+# tested without one.
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "username"
+    context:
+      hash: "0000000000000000000000000000000000000000000000000000000000000000"
+      pattern: "/login"
+      platform: "web"
+    fingerprint:
+      attrs: {}
+      box:
+        - 0
+        - 0
+        - 0
+        - 0
+      index: 0
+      neighbours:
+        after: []
+        before: []
+      rolePath: []
+      tag: "button"
+      text: ""
+    provenance:
+      at: "2026-09-02T00:00:00.000Z"
+      model: "human"
+      promptVersion: "hand-written"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T00:00:00.000Z"
+    verified: false
+id: "login.username-field"
+phrases:
+  - "the username field"
+schemaVersion: "1.0.0"

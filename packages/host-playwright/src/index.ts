@@ -1,16 +1,50 @@
 /**
- * @svatah/host-playwright
+ * @svatah/host-playwright — the Playwright Test host for flows (LLD §9,
+ * REQ-RUN-12, REQ-BEH-1, module (b)).
  *
- * The Playwright Test host for Svatah flows (LLD §9, module (b)): the worker-
- * scoped `svatah` fixture, `svatah host generate`, and the reporter that writes
- * Svatah results alongside Playwright's own.
+ * A Svatah flow is prose compiled to a plan. This runs that plan *inside*
+ * Playwright Test rather than beside it, so a flow inherits the runner a web
+ * team already has: fixtures, projects, sharding, retries, reporters and the
+ * trace viewer.
  *
- * It is a separate package from `@svatah/playwright-test` because that one is
- * module (a) — `bind()` for plain Playwright tests, with no dependency on the
- * executor. The host depends on `@svatah/runtime` and therefore cannot live in
- * module (a) (REQ-PKG-1, HLD §12, Draft 2.3). It re-exports `bind()` so a flow
- * project imports one package.
- *
- * Draft 2.3 creates the package; T2.8 fills it in.
+ * It re-exports `bind()` from `@svatah/playwright-test` (module (a)), so a
+ * project that writes both flows and plain tests imports one package. The two
+ * fixtures share the adapter and the store (LLD §9.2).
  */
-export {};
+export {
+  test,
+  expect,
+  FAILURE_ANNOTATION,
+  HEALED_ANNOTATION,
+  type SvatahHostFixture,
+  type SvatahHostFixtures,
+  type SvatahHostOptions,
+} from "./fixture.js";
+
+export {
+  generateSpecs,
+  renderSpec,
+  retriesAllowed,
+  specName,
+  type GenerateOptions,
+  type GeneratedSpec,
+} from "./generate.js";
+
+export { default as SvatahReporter, RESULTS_ATTACHMENT, type SvatahReporterOptions } from "./reporter.js";
+
+/**
+ * `bind()` for plain tests, re-exported from module (a) (LLD §9.2, Draft 2.3).
+ *
+ * A flow project usually has a handful of ordinary Playwright tests too. Making
+ * them import a second package to get `bind()` would be a papercut with no
+ * upside, so the host re-exports it. The implementation stays in
+ * `@svatah/playwright-test`, which has no dependency on the executor.
+ */
+export {
+  Binder,
+  modeFromEnvironment,
+  type BindMode,
+  type BindOptions,
+  type BindOutcome,
+} from "@svatah/playwright-test";
+export { test as bindTest } from "@svatah/playwright-test";

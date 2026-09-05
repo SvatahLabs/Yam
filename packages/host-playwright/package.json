@@ -11,6 +11,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./reporter": {
+      "types": "./dist/reporter.d.ts",
+      "import": "./dist/reporter.js"
     }
   },
   "files": [
@@ -21,16 +25,31 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "tsup --config ../../tsup.config.ts",
+    "build": "tsup --config ./tsup.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "catalog:",
+    "playwright": "catalog:",
+    "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "yaml": "catalog:"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@svatah/adapter-playwright": "workspace:*",
+    "@svatah/bindings": "workspace:*",
+    "@svatah/playwright-test": "workspace:*",
+    "@svatah/runtime": "workspace:*",
+    "@svatah/schema": "workspace:*",
+    "@svatah/surface": "workspace:*"
+  },
+  "peerDependencies": {
+    "@playwright/test": "catalog:"
   }
 }
