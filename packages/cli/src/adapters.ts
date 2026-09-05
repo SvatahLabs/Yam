@@ -14,6 +14,7 @@
 import { registerPlaywrightAdapter } from "@svatah/adapter-playwright";
 import { registerBidiAdapter } from "@svatah/adapter-bidi";
 import { registerAppiumAdapter } from "@svatah/adapter-appium";
+import { registerAxAdapter } from "@svatah/adapter-ax";
 
 let registered = false;
 
@@ -22,5 +23,13 @@ export function registerAllAdapters(): void {
   registerPlaywrightAdapter();
   registerBidiAdapter();
   registerAppiumAdapter();
+  /*
+   * The desktop adapters are registered on every platform, not only on their
+   * own (T6.1, T6.2). `svatah surface doctor` has to be able to say "ax: not
+   * macOS" on Windows, and `createSurface({ adapter: "ax" })` has to fail with
+   * the adapter's own message about the host rather than with "no such
+   * adapter", which would send someone looking for a missing install.
+   */
+  registerAxAdapter();
   registered = true;
 }

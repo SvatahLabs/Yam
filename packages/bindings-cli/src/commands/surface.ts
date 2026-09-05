@@ -8,6 +8,7 @@
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import {
+  DESKTOP_CASES,
   renderMarkdown,
   renderReport,
   runSurfaceConformance,
@@ -69,21 +70,52 @@ async function conform(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const only = stringOption(args, "only");
   const json = boolOption(args, "json");
 
+  /*
+   * `--process` for the desktop adapters (T6.1, T6.2, LLD §16).
+   *
+   * A desktop conformance run drives an application that is already running,
+   * named by its process — the ADE is "Svatah ADE" — where a web run drives a
+   * browser it opens at a URL. Both go into `app`, and the adapter uses the one
+   * that means something to it.
+   */
+  const processName = stringOption(args, "process");
+  const appPath = stringOption(args, "app-path");
+
   const config: Config = {
     ...DEFAULT_CONFIG,
     project: "surface-conformance",
     adapter: adapter as Config["adapter"],
-    app: { ...target },
+    app: {
+      ...target,
+      ...(processName === undefined ? {} : { processName }),
+      ...(appPath === undefined ? {} : { appPath }),
+    },
     run: { ...DEFAULT_CONFIG.run, headless },
   };
+
+  const session = {
+    ...target,
+    ...(processName === undefined ? {} : { processName }),
+    ...(appPath === undefined ? {} : { appPath }),
+  };
+
+  /*
+   * Which suite (LLD §14, §16). A desktop adapter drives the ADE and cannot
+   * navigate; the web suite's every case begins with one. Choosing by the
+   * surface's own `kind` rather than by the adapter's name is what keeps this
+   * true for an adapter nobody here has heard of.
+   */
+  const probe = await createSurface(config);
+  const desktop = probe.kind === "desktop";
 
   const report = await runSurfaceConformance({
     adapter,
     baseUrl,
+    ...(desktop ? { cases: DESKTOP_CASES } : {}),
     ...(only === undefined ? {} : { only: only.split(",").map((s) => s.trim()) }),
     openSurface: async () => {
       const surface = await createSurface(config);
-      await surface.open({ ...target });
+      await surface.open(session as never);
       return surface;
     },
   });

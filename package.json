@@ -32,7 +32,9 @@
     "eval:compiler": "node scripts/eval-compiler.mjs --report reports/eval-compiler.md",
     "eval:conformance": "node scripts/adapter-conformance.mjs --report reports/eval-conformance.md",
     "privacy:check": "node scripts/privacy-check.mjs",
-    "examples": "node scripts/examples-check.mjs"
+    "examples": "node scripts/examples-check.mjs",
+    "conform:desktop": "node scripts/desktop-conformance.mjs",
+    "record:ax-trees": "node scripts/record-ax-tree.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

@@ -53,7 +53,39 @@ async function runCase(
   const started = Date.now();
   const checks: CheckResult[] = [];
 
-  const surface = await options.openSurface();
+  /*
+   * A surface that will not open is a *failed case*, not a crash (T6.2).
+   *
+   * It used to be thrown from here, outside the `try`, so `svatah surface
+   * conform` printed a stack trace and no report. That was survivable while
+   * every adapter's session failure meant "the browser did not launch"; the
+   * desktop adapters made it wrong. A missing macOS Accessibility permission is
+   * a normal, expected, user-fixable state, and the answer to it is a report
+   * saying every case failed and why — which is a thing a person can read and a
+   * CI job can attach.
+   */
+  let surface: AgentSurface;
+  try {
+    surface = await options.openSurface();
+  } catch (error) {
+    return {
+      id: testCase.id,
+      page: testCase.page,
+      description: testCase.description,
+      status: "failed",
+      checks: [
+        {
+          description: "the surface opens",
+          ok: false,
+          expected: "a session",
+          actual: error instanceof Error ? error.message : String(error),
+        },
+      ],
+      durationMs: Date.now() - started,
+      error: error instanceof Error ? `${error.constructor.name}: ${error.message}` : String(error),
+    };
+  }
+
   try {
     const missing = (testCase.requires ?? []).filter(
       (flag) => (surface.capabilities() as unknown as Record<string, boolean>)[flag] !== true,

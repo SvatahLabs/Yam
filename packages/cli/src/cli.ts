@@ -70,6 +70,7 @@ Bindings and healing (module a):
               [--base-url <url>] [--storage-state <path.json>]
               [--input k=v] [--apply] [--no-model] [--headed] [--json]
   svatah eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
+  svatah surface doctor [--adapter ax] [--json]
   svatah eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
                         [--limit <n>] [--report <path.md>] [--json]
   svatah eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
@@ -292,6 +293,18 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
    * `svatah-bindings` stays module (a).
    */
   await registerEveryAdapter(io);
+
+  /*
+   * `surface doctor` before module (a) sees `surface` (T6.1, T6.2, LLD §7.5).
+   *
+   * The rest of `surface` is module (a)'s, and module (a) has neither desktop
+   * adapter in its dependency tree — so the one subcommand that has to reach
+   * them is answered here, and `svatah-bindings surface doctor` correctly says
+   * it does not know it.
+   */
+  if (command === "surface" && args.command[1] === "doctor") {
+    return await (await import("./commands/surface-doctor.js")).surfaceDoctorCommand(args, io);
+  }
 
   const moduleA = await runBindingsCommand(command, prepared, io);
   if (moduleA !== undefined) return moduleA;
