@@ -10,11 +10,30 @@
  * not written anywhere: a token in a file is a token that outlives the process
  * that needed it.
  */
-import type * as ServiceExports from "@svatah/service";
 import { numberOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
 
-type ServiceModule = typeof ServiceExports;
-type RunningService = ServiceExports.RunningService;
+/**
+ * What `svatah serve` needs from `@svatah/service`, written out here.
+ *
+ * Not `import type … from "@svatah/service"`: a type import still has to
+ * *resolve*, so the package would have to be declared, and declaring it anywhere
+ * — dependency, dev dependency, optional peer — makes the workspace graph cyclic
+ * (the service depends on this package, LLD §13.5). A structural type costs four
+ * lines and says exactly what this command depends on.
+ */
+interface RunningService {
+  readonly url: string;
+  readonly token: string;
+  close(): Promise<void>;
+}
+
+interface ServiceModule {
+  createService(options: {
+    project: string;
+    port?: number;
+    token?: string;
+  }): Promise<RunningService>;
+}
 import { EXIT, type ExitCode } from "@svatah/bindings-cli";
 import type { CommandIo } from "@svatah/bindings-cli";
 
