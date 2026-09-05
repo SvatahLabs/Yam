@@ -1,0 +1,75 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "username"
+      - by: "id"
+        score: 0.95
+        value: "username"
+      - by: "role"
+        exact: true
+        name: "Username"
+        role: "textbox"
+        score: 0.92
+      - by: "label"
+        exact: true
+        score: 0.9
+        value: "Username"
+      - by: "placeholder"
+        exact: true
+        score: 0.85
+        value: "you@example.com"
+      - by: "name"
+        score: 0.82
+        value: "username"
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"username\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='username']"
+    context:
+      hash: "715520bd46efe592277e4ba3e99b000b27e1f5b4df8a2e57aed149de7ae2a661"
+      pattern: "http://127.0.0.1:65431/login"
+      platform: "web"
+      viewport:
+        - 1280
+        - 720
+    fingerprint:
+      attrs:
+        data-testid: "username"
+        id: "username"
+        name: "username"
+        placeholder: "you@example.com"
+        type: "text"
+      box:
+        - 20
+        - 149.55
+        - 380
+        - 39.25
+      index: 0
+      neighbours:
+        after:
+          - "Password"
+          - "Remember me"
+        before:
+          - "Sign in to your account"
+          - "Invalid credentials"
+          - "Username"
+      rolePath:
+        - "main"
+      tag: "input"
+      text: ""
+    provenance:
+      at: "2026-09-02T19:02:53.394Z"
+      model: "human"
+      promptVersion: "picker:programmatic"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T19:02:53.394Z"
+    verified: false
+id: "login.username-field"
+phrases:
+  - "the username field"
+schemaVersion: "1.0.0"

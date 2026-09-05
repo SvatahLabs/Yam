@@ -51,12 +51,24 @@ function githubCommands(job: string): string[] {
 const bitbucketSteps = bitbucket.pipelines.default![0]!.parallel!.map((p) => p.step);
 const workspaceStep = bitbucketSteps.find((s) => s.name?.startsWith("workspace"))!;
 const javaStep = bitbucketSteps.find((s) => s.name?.includes("Java"))!;
+const quickStartStep = bitbucketSteps.find((s) => s.name?.startsWith("quick start"))!;
 
 describe("CI mirrors (P0-F5)", () => {
   it("both workflows exist", () => {
-    expect(Object.keys(github.jobs).sort()).toEqual(["legacy-java", "workspace"]);
+    expect(Object.keys(github.jobs).sort()).toEqual(["legacy-java", "quick-start", "workspace"]);
     expect(workspaceStep).toBeDefined();
     expect(javaStep).toBeDefined();
+    expect(quickStartStep).toBeDefined();
+  });
+
+  it("the quick-start job runs the quick start and checks the recorded bindings (T1.6)", () => {
+    for (const script of [githubCommands("quick-start"), quickStartStep.script]) {
+      expect(script.join("\n"), "the quick start is not run").toContain("pnpm quick-start");
+      expect(
+        script.join("\n"),
+        "nothing checks that re-recording reproduces the committed bindings",
+      ).toContain("git diff --exit-code examples/plain-playwright/bindings");
+    }
   });
 
   it("the GitHub matrix still covers three operating systems (REQ-NFR-7)", () => {

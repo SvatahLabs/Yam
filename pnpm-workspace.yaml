@@ -2,6 +2,7 @@ packages:
   - 'packages/*'
   - 'apps/*'
   - 'tools/*'
+  - 'examples/*'
 
 onlyBuiltDependencies:
   - esbuild

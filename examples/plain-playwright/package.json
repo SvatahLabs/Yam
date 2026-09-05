@@ -1,0 +1,27 @@
+{
+  "name": "example-plain-playwright",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A plain Playwright project using @svatah/playwright-test for bindings and model-free healing (T1.6, REQ-PKG-2)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "record": "SVATAH_MODE=record playwright test",
+    "run": "SVATAH_MODE=run playwright test",
+    "heal": "SVATAH_MODE=heal playwright test",
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "build": "echo \"example-plain-playwright has nothing to build\""
+  },
+  "dependencies": {
+    "@svatah/playwright-test": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "catalog:",
+    "@svatah/bindings": "workspace:*",
+    "@types/node": "catalog:",
+    "sample-web": "workspace:*",
+    "typescript": "catalog:",
+    "yaml": "catalog:"
+  }
+}

@@ -17,7 +17,8 @@
     "check:licenses": "node scripts/check-licenses.mjs",
     "sample-web": "pnpm --filter sample-web start",
     "svatah": "node packages/cli/dist/bin.js",
-    "conform:playwright": "node scripts/conform.mjs"
+    "conform:playwright": "node scripts/conform.mjs",
+    "quick-start": "node scripts/quick-start.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

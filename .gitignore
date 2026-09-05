@@ -38,3 +38,6 @@ out/
 .DS_Store
 .COOKIE_*
 .bash_profile
+
+# --- Playwright ---
+.last-run.json

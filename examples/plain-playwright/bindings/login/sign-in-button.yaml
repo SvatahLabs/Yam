@@ -1,0 +1,58 @@
+entries:
+  - candidates:
+      - attribute: "data-testid"
+        by: "testid"
+        score: 0.98
+        value: "login-submit"
+      - by: "role"
+        exact: true
+        name: "Sign In"
+        role: "button"
+        score: 0.92
+      - by: "css"
+        score: 0.68
+        value: "[data-testid=\"login-submit\"]"
+      - by: "xpath"
+        score: 0.6
+        value: "//*[@data-testid='login-submit']"
+    context:
+      hash: "0d69e5e01fe3692ebac3056a23187c2d7703332f69512357629a7a8a0ef837ee"
+      pattern: "http://127.0.0.1:65431/login"
+      platform: "web"
+      viewport:
+        - 1280
+        - 720
+    fingerprint:
+      attrs:
+        class: "btn btn-primary"
+        data-testid: "login-submit"
+        type: "submit"
+        value: "Sign In"
+      box:
+        - 20
+        - 320.55
+        - 380
+        - 41.25
+      index: 0
+      neighbours:
+        after: []
+        before:
+          - "Username"
+          - "Password"
+          - "Remember me"
+      rolePath:
+        - "main"
+      tag: "input"
+      text: ""
+    provenance:
+      at: "2026-09-02T19:02:53.600Z"
+      model: "human"
+      promptVersion: "picker:programmatic"
+      tokensIn: 0
+      tokensOut: 0
+    recordedAt: "2026-09-02T19:02:53.600Z"
+    verified: false
+id: "login.sign-in-button"
+phrases:
+  - "the sign in button"
+schemaVersion: "1.0.0"

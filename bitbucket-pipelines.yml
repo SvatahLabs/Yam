@@ -36,6 +36,21 @@ definitions:
           - pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
           - pnpm -r test
 
+    - step: &quick-start
+        name: quick start from a fresh checkout (REQ-PKG-2)
+        caches:
+          - pnpm
+        script:
+          - corepack enable
+          - corepack prepare --activate
+          - pnpm install --frozen-lockfile
+          - pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+          - pnpm -r build
+          # T1.6 Validate: the quick start measures itself against a ten-minute
+          # budget and fails if it is over (REQ-PKG-2).
+          - pnpm quick-start
+          - git diff --exit-code examples/plain-playwright/bindings
+
     - step: &legacy-java
         name: legacy Java project compiles
         image: eclipse-temurin:17-jdk
@@ -47,14 +62,17 @@ pipelines:
   default:
     - parallel:
         - step: *workspace
+        - step: *quick-start
         - step: *legacy-java
   branches:
     '**':
       - parallel:
           - step: *workspace
+          - step: *quick-start
           - step: *legacy-java
   pull-requests:
     '**':
       - parallel:
           - step: *workspace
+          - step: *quick-start
           - step: *legacy-java

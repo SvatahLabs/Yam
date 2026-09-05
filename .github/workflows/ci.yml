@@ -56,6 +56,39 @@ jobs:
       - name: Test
         run: pnpm -r test
 
+  quick-start:
+    name: quick start from a fresh checkout (REQ-PKG-2)
+    runs-on: ubuntu-latest
+    # T1.6 Validate: "quick start doc verified by a fresh-checkout CI job that
+    # completes in under ten minutes". The job's own timeout is the outer bound;
+    # `pnpm quick-start` measures the reader-facing steps and fails at ten
+    # minutes on its own, so a slow runner and a slow quick start are told apart.
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+
+      - name: Build
+        run: pnpm -r build
+
+      - name: Quick start (record, run, heal)
+        run: pnpm quick-start
+
+      - name: The recorded bindings match the committed ones
+        run: git diff --exit-code examples/plain-playwright/bindings
+
   legacy-java:
     name: legacy Java project compiles
     runs-on: ubuntu-latest

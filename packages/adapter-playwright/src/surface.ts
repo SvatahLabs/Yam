@@ -16,6 +16,7 @@ import type {
   Dialog,
   ElementHandle,
   Frame,
+  Locator,
   Page,
 } from "playwright";
 import type {
@@ -76,6 +77,12 @@ export interface PlaywrightAdapterOptions {
   snapshotMechanism?: SnapshotMechanism | "auto";
   /** Drive an existing context instead of launching a browser (the Playwright Test host). */
   context?: BrowserContext;
+  /**
+   * Drive an existing page. The Playwright Test host hands the surface the page
+   * the test is already using, so `bind()` acts on the test's own session rather
+   * than opening a second browser beside it.
+   */
+  page?: Page;
 }
 
 /** How many neighbouring texts `describe()` collects on each side (LLD §3.3). */
@@ -130,7 +137,11 @@ export class PlaywrightSurface implements AgentSurface {
     this.baseUrl = session.baseUrl;
     this.storageStatePath = session.storageState;
 
-    if (this.options.context !== undefined) {
+    if (this.options.page !== undefined) {
+      this.context = this.options.page.context();
+      this.borrowedContext = true;
+      this.trackPage(this.options.page);
+    } else if (this.options.context !== undefined) {
       this.context = this.options.context;
       this.borrowedContext = true;
     } else {
@@ -160,7 +171,9 @@ export class PlaywrightSurface implements AgentSurface {
     for (const page of this.context.pages()) this.trackPage(page);
     if (this.pages.length === 0) this.trackPage(await this.context.newPage());
 
-    this.activePage = 0;
+    // An adopted page is the active one, whatever order the context reports.
+    this.activePage =
+      this.options.page === undefined ? 0 : Math.max(0, this.pages.indexOf(this.options.page));
     this.activeFrame = this.page().mainFrame();
     this.mechanism = await chooseMechanism(
       this.activeFrame,
@@ -269,6 +282,36 @@ export class PlaywrightSurface implements AgentSurface {
   /** The public ARIA snapshot, as the independent account of the tree (LLD §7.1). */
   async ariaSnapshot(): Promise<string> {
     return await ariaSnapshotText(this.frame());
+  }
+
+  /**
+   * The Playwright `Locator` a stored candidate names.
+   *
+   * The surface never exposes a locator to callers above it (REQ-SURF-5), and
+   * this does not break that: the Playwright Test host is *not* above the
+   * surface — it is the one place LLD §1 lets the adapter and the bindings meet,
+   * and `bind()` has to return a real `Locator` because that is the whole point
+   * of adopting a Playwright user's own test.
+   */
+  locatorForCandidate(candidate: Candidate): Locator {
+    const locator = locatorFor(this.frame(), candidate, this.testIdAttributes());
+    if (locator === null) {
+      throw new LocateError(
+        `A "${candidate.by}" candidate names no locator; it is answered by the surface itself.`,
+        { adapter: "playwright" },
+      );
+    }
+    return locator;
+  }
+
+  /** The active frame, for the host's picker. */
+  frameForHost(): Frame {
+    return this.frame();
+  }
+
+  /** Register an element handle and return a reference for it. */
+  refForHandle(handle: ElementHandle<Element>): Ref {
+    return this.refs().mint(handle);
   }
 
   async locate(candidate: Candidate): Promise<Ref[]> {

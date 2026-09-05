@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": "dist"
+    "outDir": "dist",
+    // The picker script runs in the page, so this package needs the DOM lib for
+    // the callbacks Playwright serialises and evaluates there.
+    "lib": ["ES2023", "DOM", "DOM.Iterable"]
   },
   "include": [
     "src/**/*.ts",

@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // `blockEverythingButTheApplication` replaces the global `fetch`, which is a
+    // DOM type even in Node.
+    "lib": ["ES2023", "DOM"]
+  },
+  "include": ["tests/**/*.ts", "*.ts"]
+}
