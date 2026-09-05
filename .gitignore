@@ -1,40 +1,40 @@
-### Gradle template
-.gradle
-/build/
+# --- Node / pnpm workspace ---
+node_modules/
+dist/
+*.tsbuildinfo
+.pnpm-store/
+coverage/
+.svatah/
+test-results/
+playwright-report/
 
-# Ignore Gradle GUI config
+# --- Gradle (legacy Java project) ---
+.gradle/
+build/
 gradle-app.setting
-
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
-
-# Cache of project
 .gradletasknamecache
 
-### Java template
-# Compiled class file
+# --- Java ---
 *.class
-
-# Log file
-*.log
-
-# Package Files #
-*.jar
 *.war
 *.ear
+
+# Jars are ignored except the committed Gradle wrapper
+*.jar
+!legacy/gradle/wrapper/gradle-wrapper.jar
+
+# --- Archives / logs / editors ---
 *.zip
 *.tar.gz
 *.rar
+*.log
 *.iml
-
 tmp/
 target/
-lib/
-.*.swp
+out/
 .idea/
+.vscode/
+.*.swp
+.DS_Store
 .COOKIE_*
 .bash_profile
-out/
-*.iml
-.vscode
-.vscode/settings.json

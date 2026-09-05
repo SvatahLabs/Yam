@@ -1,0 +1,418 @@
+# Svatah — Task Breakdown
+
+Status: Draft 2.1 · Date: 2026-09-02
+Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [lld.md](lld.md)
+
+## How to use this file
+
+- Tasks are grouped by delivery phase (HLD §13) and ordered so each depends only on earlier tasks unless stated. Draft 2 renumbers tasks; nothing from Draft 1 had started.
+- Each task lists **Refs** (requirement IDs and design sections), **Do**, **Validate**, and an estimate in ideal engineer-days.
+- A task is done when its Validate items pass in CI and the referenced requirements' verification methods are satisfied.
+- Phase 1 is the adoption wedge (module a). It must be releasable on its own before Phase 2 starts.
+
+---
+
+## Phase 0 — Foundation
+
+### T0.1 Freeze the Java project and clean the branch
+**Refs:** HLD ADR-2, REQ-NFR-8 · **Est:** 0.5
+**Do:** Do not commit the six uncommitted parser classes or `PARSER_IMPROVEMENTS.md`; move them under `legacy/experiments/` or delete. Remove `stanford-corenlp` (three artifacts), `onnxruntime`, and `guava` from `build.gradle` if unreferenced; confirm `./gradlew compileJava`. Move the Java project under `legacy/`. Commit the Draft 2 spec.
+**Validate:** `./gradlew compileJava` green from `legacy/`; `git status` clean; HLD §12 matches the layout.
+
+### T0.2 Workspace skeleton and boundaries
+**Refs:** LLD §1, REQ-SURF-2, REQ-PKG-1, 3, REQ-NFR-7 · **Est:** 1.5
+**Do:** pnpm workspace with every package in HLD §12 (empty `index.ts`), shared tsconfig, tsup, vitest, eslint boundary rules exactly as LLD §1, licence checker, GitHub Actions on ubuntu, macos, windows, and a `release` workflow that attaches eval reports.
+**Validate:** CI green on three OSes; a throwaway import from `bindings` to `compiler` and from `runtime` to `gateway` each fails the lint; licence check passes.
+
+### T0.3 Schema package with automation fields
+**Refs:** REQ-STD-1, 4, REQ-AUTO-1, 2, 4, 5, 6 (schema parts), LLD §3 · **Est:** 3
+**Do:** Zod definitions for everything in LLD §3 including `guard`, `custom`, `invoke`, `Signature`, `StoryMeta.onFailure`, desktop scopes and candidate kinds, `AuditLine`, `Checkpoint`, `Invoker`, `aborted`, `guard` failure class. Generate JSON Schemas at build; `canonicalJson`/`canonicalYaml`; provenance required on Tier 2/3 steps, non-human bindings, heal entries, proposals (schema refinement).
+**Validate:** Round-trip tests per schema; committed generated schemas with a drift test; a binding without provenance is rejected; a Tier 2 step without provenance is rejected; `schemaVersion` constant `1.0.0`.
+
+### T0.4 Agent surface spec
+**Refs:** REQ-SURF-1, 4, 5, LLD §2 · **Est:** 2
+**Do:** `packages/surface`: `AgentSurface`, `Snapshot`, `Capabilities`, registry, typed errors, snapshot text renderer, wire schemas generated from Zod. Write `docs/agent-surface.md` describing the contract for adapter implementers, including the role mapping tables for UIA, AX, and Appium.
+**Validate:** Wire schemas committed; a mock adapter passes registry and error-type tests; the doc lists every method and every capability flag (test greps).
+
+### T0.5 Sample web application with variants
+**Refs:** LLD §16, REQ-NFR-8, REQ-HEAL-5 · **Est:** 2.5
+**Do:** `apps/sample-web` reproducing the pages the sample flows use plus alert, select, iframe, new-tab, a canvas-only control, and `GET /api/active-count`; `?variant=1..20` deliberate UI changes documented in `VARIANTS.md`; port 4173.
+**Validate:** Smoke test per page and variant; each variant changes at least one binding-relevant property (DOM diff test).
+
+### T0.6 Language reference and golden seed
+**Refs:** REQ-LANG-12, REQ-COMP-9, LLD §4.2 · **Est:** 2
+**Do:** `docs/flow-language.md` with block grammar, signatures, guards, patterns 1–30 with two examples each, custom steps, variables, migration table. `evals/compiler/golden.jsonl` with at least 120 `tier: 1` entries. Hand-migrated v3 fixtures for the four sample flows.
+**Validate:** Every golden entry validates; the doc names every `Action` value (test).
+
+---
+
+## Phase 1 — Module (a): bindings and model-free healing for Playwright users
+
+### T1.1 Playwright adapter
+**Refs:** REQ-ADP-1, REQ-RUN-10, LLD §7.1 · **Est:** 5
+**Do:** Implement `AgentSurface` on Playwright: session, snapshot with refs (isolated `snapshot.ts` plus fallback), `locate` for every candidate kind incl. `coords`, `describe`, every action in the mapping table, `check` for every predicate, dialogs, windows, frames, masked screenshots, `state`/`restore`, tracing, capabilities.
+**Validate:** One Playwright test per action and predicate on `apps/sample-web`; snapshot refs resolve back to the same element; `restore` returns to URL and storage state; capabilities list matches implementation (test).
+
+### T1.2 Surface conformance suite (web)
+**Refs:** REQ-SURF-3, REQ-STD-2, LLD §14 · **Est:** 2
+**Do:** `packages/conformance/surface`: scripts of calls and expected invariants per sample page; `svatah surface conform --adapter playwright`.
+**Validate:** Playwright adapter passes; a deliberately broken mock adapter fails with a readable report.
+
+### T1.3 Bindings store, context hash, resolver
+**Refs:** REQ-REC-6, 9, REQ-RUN-5, LLD §6.1–6.3 · **Est:** 2.5
+**Do:** Store load/write/hash with canonical YAML; dictionary; snapshot-based context hash; resolver with candidate timeouts, exactly-one rule, `nth`, `webmcp` preference stub, `LocatorError` with candidates and drift flag.
+**Validate:** Round-trip byte identity; resolver matrix with a stub surface; hash invariance to text, sensitivity to structure.
+
+### T1.4 Synthesis and fingerprinting
+**Refs:** REQ-REC-3, 4, LLD §7.4 (Draft 1 strategy), §3.3 · **Est:** 3
+**Do:** `synthesise(surface, ref)` and `fingerprint(surface, ref)` over `describe()`: ordered strategy, uniqueness filter, auto-id heuristic, stable CSS and relative XPath, scores; neighbour text and role path.
+**Validate:** For every interactive element on every sample page, the top candidate resolves uniquely to that element; fingerprints stable across reloads; snapshot of bundles committed for review.
+
+### T1.5 Relocalization
+**Refs:** REQ-HEAL-1 (relocalize), 5 (relocalize), LLD §6.4 · **Est:** 3
+**Do:** Candidate collection, weighted score, threshold and margin, re-synthesis with lineage.
+**Validate:** Component tests on synthetic descriptions; on sample variants, record on 0 and relocalize on 1..20: at least 60 percent recovered; no false accept on the duplicate-buttons variant.
+
+### T1.6 `bind()` fixture with record, run, heal modes
+**Refs:** REQ-REC-11, REQ-HEAL-6, REQ-PKG-1, 2, LLD §6.5, §9.2 · **Est:** 4
+**Do:** `@svatah/bindings/playwright` test extension: `bind(id, phrase?)`; run mode via resolver; record mode via interactive headed picker (no model) with `provenance.model: "human"`; heal mode with inline relocalization and `healed` annotation; bind-failure lines to `.svatah/bind-failures.jsonl`; `svatah bindings list|show|verify|prune`.
+**Validate:** A plain Playwright project (fixture in `examples/plain-playwright`) records three bindings by picker in headed mode, replays headless with the model endpoint blocked, breaks on variant 3, heals inline, and the annotation reads `healed`; quick start doc verified by a fresh-checkout CI job that completes in under ten minutes.
+
+### T1.7 Model-free healer job and diff
+**Refs:** REQ-HEAL-2, 3, 6, LLD §12, §10 (plugin interface) · **Est:** 3
+**Do:** `heal --from-bind-failures` and `heal --run <id>`: select locator failures, replay to the failing point (for flows: runtime; for bind-failures: re-run the named Playwright test in record-less mode), relocalize, verify by re-run, `bindings.diff` and report; `Regrounder` plugin interface with a no-op default.
+**Validate:** Variant-based end-to-end: failure, heal, diff applies with `git apply`, re-run passes; unrepairable reported; plan and flows untouched.
+
+### T1.8 Healing eval (relocalize-only) and publish
+**Refs:** REQ-HEAL-5, REQ-PKG-4 · **Est:** 1.5
+**Do:** `svatah eval healing --no-model` over variants with a Markdown report; release workflow attaches it.
+**Validate:** Threshold 0.60 met; report artifact present on a tagged pre-release.
+
+### T1.9 Module (a) release
+**Refs:** REQ-PKG-1, 2, 3 · **Est:** 1
+**Do:** Publish `@svatah/bindings`, `@svatah/schema`, `@svatah/conformance`, `@svatah/adapter-playwright` 0.1; README with the ten-minute quick start and the published healing numbers.
+**Validate:** `npm install` in a clean Playwright project works; module (a) has no dependency on module (b) packages (test inspects the dependency tree).
+
+---
+
+## Phase 2 — Module (b): flow language, compiler, executor, test behavior
+
+### T2.1 Spec reader with signatures and guards
+**Refs:** REQ-LANG-1, 2, 3, 9, 10, 13, 14 (parse), LLD §4.1 · **Est:** 2
+**Do:** Block parser with `inputs:`/`outputs:` lines, guard lines and prefixes, meta keys incl. `onFailure`, `idempotent`, `tags`; `data.yaml` with secrets; `api/*.yaml`.
+**Validate:** Unit tests per rule; `E_DUP_STORY`, `E_TEST_EMPTY`, signature type errors, `onFailure` value validation.
+
+### T2.2 Synonym vocabulary and target dictionary
+**Refs:** REQ-COMP-5, LLD §4.3 · **Est:** 1
+**Do:** Port `ActionSynonyms.java` to `actions.yaml` under the new action names; trie resolver; normalisation; dictionary from bindings, `targets.yaml`, and unbound phrases.
+**Validate:** Every Java synonym resolves; normalisation table; ambiguity yields `W_AMBIGUOUS_TARGET`.
+
+### T2.3 Tier 0 custom typed steps
+**Refs:** REQ-LANG-15, 16, LLD §5 · **Est:** 2.5
+**Do:** `defineStep` API, template compiler with typed placeholders, loader for `steps/`, matcher ahead of Tier 1, `E_STEP_AMBIGUOUS`, `custom` IR emission, `StepContext` for execution.
+**Validate:** Example step with a `target` placeholder compiles, records (Phase 3) and runs; ambiguity test; handler cannot reach the adapter (type test).
+
+### T2.4 Tier 1 grammar
+**Refs:** REQ-COMP-1, 2, REQ-LANG-4..7, LLD §4.2 · **Est:** 4
+**Do:** `step.peggy` covering patterns 1–29 and legacy phrasings; sigil rejection; captures and ValueRefs incl. `{input.*}`; `invoke` and guard predicates.
+**Validate:** 100 percent on `tier: 1` golden; every sigil form rejected; fixtures parse with zero errors; 1,000 steps under 1 s.
+
+### T2.5 Compiler pipeline, validation, plan, lint
+**Refs:** REQ-COMP-1, 5..9, REQ-AUTO-5 (compile-time), LLD §4 (Draft 1 pipeline), §3.2 · **Est:** 3
+**Do:** Tier 0 → 1 pipeline with pluggable 2/3; target resolution; variable, input, output, and invoke validation; canonical `plan.json` with `--stable`; lint codes including `W_CUSTOM`, idempotency and long-sleep warnings.
+**Validate:** Byte-stability; error matrix; fixtures compile clean; a story exposing outputs not captured fails.
+
+### T2.6 HTTP adapter
+**Refs:** REQ-ADP-2, 3, LLD §7.2 · **Est:** 2
+**Do:** Request builder mirroring `ApiRequest`, templating, response, JSON-path capture, session-cookie sharing.
+**Validate:** Field matrix against a local server; cookie-sharing test.
+
+### T2.7 Executor core with policies, checkpoints, audit
+**Refs:** REQ-RUN-1..4, 6..9, 13, REQ-AUTO-1, 2, 4, 5, 6 (runtime), REQ-NFR-1, 4, 5, LLD §8 · **Est:** 5
+**Do:** Orchestration, scope with inputs, `runStory` with signature validation and outputs, `runStep` with guards, `invoke`, `custom`, checkpoints, audit proxy over the surface, policies `stop|continue|compensate`, failure classes, results writer, summary with outputs, exit codes, JSON-lines logging, optional OpenTelemetry.
+**Validate:** Stub-surface tests: parallelism, skip semantics, policy matrix, guard skip without act, invoke with inputs and outputs, checkpoint files per step, audit redaction of `secret` values, overhead under 5 ms per step; determinism test on the sample app.
+
+### T2.8 Playwright Test host
+**Refs:** REQ-RUN-12, REQ-BEH-1, LLD §9 · **Est:** 3
+**Do:** `svatah` fixture, `host generate`, reporter writing Svatah results, retry policy gating, annotations with failure class.
+**Validate:** Generated specs for the fixtures run under Playwright Test with two shards and the HTML reporter; Svatah `results.jsonl` produced alongside; retries disabled unless permitted (test).
+
+### T2.9 Migration tool
+**Refs:** REQ-LANG-11, LLD §11 (Draft 1) · **Est:** 3
+**Do:** v2 regex port; action and assertion mapping; sentence rewriting; `.locator` to seed bindings; inline locators to phrases; `.data` to `data.yaml` with secret indirection; review report.
+**Validate:** `src/test/resources` migrates to flows compiling clean with equal story names and step counts; candidate counts equal `&` alternatives; golden output compared byte-for-byte.
+
+### T2.10 CLI for module (b) and compatibility run (milestone)
+**Refs:** REQ-AGT-1, REQ-NFR-8, REQ-BEH-5, LLD §15 · **Est:** 2
+**Do:** `compile`, `lint`, `run` (both hosts), `migrate`, `init`, `doctor`; run the migrated fixtures with hand-completed seed bindings on `apps/sample-web` in CI, twice, diffing results.
+**Validate:** All steps pass except documented unsupported ones; identical results across the two runs; the same plan runs under `--host playwright` and `--host none` with identical statuses (REQ-BEH-5).
+
+### T2.11 Local service
+**Refs:** REQ-ADE-1, REQ-ADE-7, LLD §13.5 · **Est:** 3
+**Do:** `packages/service`: Fastify on `127.0.0.1` with a bearer token, every endpoint in LLD §13.5 delegating to the CLI's functions, WebSocket event stream (SSE fallback), `svatah serve`. No business logic in handlers (lint rule: `service` may import only `cli`'s command functions and `schema`).
+**Validate:** Contract tests per endpoint against the fixtures project; an unauthenticated request is refused; a `run` streams one `step.result` per step and a final `run.summary`; the same run started via CLI and via service produces identical `results.jsonl`.
+
+---
+
+## Phase 3 — Recorder, model healing, published evals
+
+### T3.1 Model gateway
+**Refs:** REQ-COMP-3, 4 (interfaces), REQ-AGT-3, REQ-NFR-2, 6, LLD §10 · **Est:** 3
+**Do:** Anthropic and local backends, schema-constrained output, adaptive thinking, cached system block, refusal handling, provenance, disk cache, cost table, `render()` redaction.
+**Validate:** Request-shape tests; secret never in captured request; cache hit costs zero; refusal returns `GatewayRefusal` without retry.
+
+### T3.2 Grounding over the surface
+**Refs:** REQ-REC-2, 7, LLD §11, Draft 1 §9.2 · **Est:** 3
+**Do:** `ground(step, surface, gateway)`: snapshot text with refs, pruning, prompt `g-1`, null handling, vision fallback, `describe` → synthesis, dry-check, entry construction; environment refusal.
+**Validate:** Recorded-snapshot tests with a fake gateway; pruning keeps interactive nodes; redaction; vision only when allowed; refuses in `production` without `--force-production`.
+
+### T3.3 Recorder session, report, `record` command, `Regrounder`
+**Refs:** REQ-REC-1, 5, 8, 9, REQ-HEAL-1 (model), LLD §11, §10 · **Est:** 3
+**Do:** Session loop reusing `runStep`, `--rebind`, filters, stop on failed expectation, report, `record` CLI; register the recorder as the healer's `Regrounder` and as `bind()` record mode when module (b) is installed.
+**Validate:** Recording `simple.flow` with a fake gateway produces verified bindings; impossible expectation stops without writing; `bind()` in record mode uses the model when module (b) is present (test toggles installation).
+
+### T3.4 Grounding eval and full healing eval, published
+**Refs:** REQ-REC-10, REQ-HEAL-5 (model), REQ-PKG-4 · **Est:** 2.5
+**Do:** 150 grounding cases from sample pages; `eval grounding` threshold 0.95; `eval healing` with model threshold 0.85; scheduled CI with real gateway, PR CI with cache; release attaches both reports.
+**Validate:** Thresholds met; reports attached to a tagged release.
+
+### T3.5 First real recording (milestone)
+**Refs:** REQ-REC-1..9, REQ-NFR-8 · **Est:** 1
+**Do:** Re-record the four fixtures with the real model; commit bindings and report.
+**Validate:** Replay passes with the model endpoint blocked; record cost under about $1 per 20-step story.
+
+### T3.6 New ADE shell (svatahADE repository, fresh build)
+**Refs:** REQ-ADE-2, 7, HLD ADR-17, LLD §13.6 · **Est:** 3
+**Do:** Scaffold Electron current LTS with Forge's Vite plus TypeScript template; `main/` with window, project chooser, service process lifecycle (spawn `svatah serve --port 0`, read port and token, health-check, stop on close, connect if a lock file exists), and the accessibility flag; typed preload bridge with only `openProject`, `serviceInfo`, `pickFile`, `preferences`; React renderer with a client generated from `GET /openapi.json`; preferences store; installers for macOS, Windows, Linux in CI. Archive the prototype's code on a `prototype` branch of the repository.
+**Validate:** Renderer has no Node access (test); the app opens a fixture project and shows `GET /project` data; killing the app stops the service; Electron security checklist passes; installers build on three OSes.
+
+### T3.7 ADE core screens
+**Refs:** REQ-ADE-3, LLD §13.6 · **Est:** 6
+**Do:** Project screen (open, init); flow editor with inline lint from `/compile` and a custom-step palette; plan view per story (step, tier, confidence, target status); run screen with live `step.result` events, screenshots, audit tail, and `run.summary`; results history from `GET /runs`; API client over `POST /api/request` with save to `api/`; data editor over `GET/PUT /data` with secrets masked. Screen rule: every screen renders a service response or a project file and nothing the CLI cannot produce.
+**Validate:** Editing a flow in the ADE and compiling from the CLI yields the same `plan.json`; a run started from the ADE produces the same `runs/<id>` files as the CLI; lint warnings in the editor match `svatah lint --json`; a review confirms no ADE-only logic.
+
+---
+
+## Phase 4 — Independence, tiers, agent access
+
+### T4.1 WebDriver BiDi adapter
+**Refs:** REQ-ADP-4, REQ-SURF-3, LLD §7.3 · **Est:** 8
+**Do:** Thin BiDi client; adapter actionability; injected snapshot with accessible names; candidate `locate`; dialogs, windows, frames as far as BiDi allows, with capabilities flags for gaps.
+**Validate:** Passes the surface conformance suite on stock Chrome and Firefox; fixtures replay on BiDi with identical statuses to Playwright (runtime conformance).
+
+### T4.2 Appium adapter
+**Refs:** REQ-ADP-5, LLD §7.4 · **Est:** 5
+**Do:** WebdriverIO client; webview and native contexts; page-source snapshot conversion; candidate kinds.
+**Validate:** Emulator job (or documented manual gate) replays `svatah.flow` on Android Chrome; native sample grounds and replays three steps; conformance subset passes.
+
+### T4.3 Tier 2 local model
+**Refs:** REQ-COMP-3, REQ-NFR-3, LLD §4.3 (Draft 1) · **Est:** 3
+**Do:** Local backend with schema-constrained output, digest pinning, few-shot retrieval, confidence penalty, `W_TIER2`; `docs/local-model.md`.
+**Validate:** With Tier 3 off and non-localhost network blocked, at least 80 percent exact match on the `tier: 2` golden subset (added here); byte-identical recompiles; digest mismatch fails without the flag.
+
+### T4.4 Tier 3 and compiler eval publish
+**Refs:** REQ-COMP-4, 9, REQ-PKG-4 · **Est:** 1
+**Do:** Prompt `c3-1`; `W_TIER3`; `eval compiler` per-tier report attached to releases.
+**Validate:** Overall 0.95 met; provenance on every Tier 3 step.
+
+### T4.5 REPL
+**Refs:** REQ-RUN-11 · **Est:** 2
+**Do:** Sentence-at-a-time compile, ground, execute; session flow and bindings on exit.
+**Validate:** stdin-driven integration test for three sentences; `docs/repl.md`.
+
+### T4.6 MCP server with raw surface and trajectory capture
+**Refs:** REQ-AGT-2, REQ-BEH-4 (capture), LLD §15, §13.4 · **Est:** 3
+**Do:** Operation tools plus `surface_*` tools requiring `intent`; `trajectory.jsonl` writer; streaming progress.
+**Validate:** MCP client integration test drives `compile`, `run`, and a six-call surface exploration that yields a well-formed trajectory file.
+
+### T4.7 Privacy mode
+**Refs:** REQ-NFR-3 · **Est:** 0.5
+**Do:** Documented config and a CI test blocking non-localhost network for `compile` and `run`.
+**Validate:** Test passes; doc lists which commands still need a remote model.
+
+---
+
+## Phase 5 — Automation behaviors
+
+### T5.1 Resume from checkpoint
+**Refs:** REQ-AUTO-3, LLD §8.1 · **Est:** 2
+**Do:** `--resume --from`: checkpoint load, hash verification, scope and session restore (web: URL and storage state).
+**Validate:** Interrupt a fixture run at step 5, resume, results equal a full run from step 5 onward; hash mismatch exits 12.
+
+### T5.2 Workflow runner and CLI
+**Refs:** REQ-BEH-2, REQ-AUTO-5, 7, LLD §13.2 · **Est:** 2.5
+**Do:** `runWorkflow`, `workflow run` with `--input`, outputs as JSON, environment policy enforcement (`production` requires `idempotent` or `allowSideEffects`).
+**Validate:** A story with signature runs as a function and returns typed outputs; a non-idempotent story is refused in `production` config without the override.
+
+### T5.3 Tool server
+**Refs:** REQ-BEH-3, REQ-AUTO-6, 8, LLD §13.3 · **Est:** 3
+**Do:** `tool serve`: tools from signatures; invoker identity from the MCP client; audit per call; `requireIdempotent`; no gateway import (boundary).
+**Validate:** An MCP client calls a recorded "Book a slot" story with inputs and receives outputs and a `runId`; `audit.jsonl` shows agent invoker and redacted inputs; model endpoint blocked during the test.
+
+### T5.4 Guard sentences and compensation end to end
+**Refs:** REQ-LANG-14, REQ-AUTO-1, 4 · **Est:** 1.5
+**Do:** Wire guard grammar to executor guard evaluation incl. `expr` predicates over scope; `compensate:<story>` flows on the sample app (a "Cancel booking" story).
+**Validate:** Guarded step never acts when the guard is false (audit shows no surface call); failed booking triggers cancel and the run is `aborted` with the policy recorded.
+
+### T5.5 Trajectory compiler
+**Refs:** REQ-BEH-4, LLD §13.4 · **Est:** 4
+**Do:** Group by intent, map calls to IR, sentence normalisation, ids from `describe`, synthesis at capture, proposals output, `// review:` for uncompilable steps.
+**Validate:** The trajectory from T4.6 compiles to a proposal whose Tier 1 compile succeeds for at least 80 percent of steps; nothing written outside `proposals/`.
+
+### T5.7 ADE record review, bindings and heal review
+**Refs:** REQ-ADE-4, 5, LLD §13.6 · **Est:** 5
+**Do:** Record screen: start `POST /record`, stream `record.decision` and `record.candidates`, show snapshot excerpt, chosen reference, candidate bundle, and fingerprint per target, with accept, reject, or re-pick by clicking in the driven session through `/surface/:session/snapshot`; bindings browser with context entries and dry-resolve status; heal review rendering `heal.proposal` as a before and after candidate diff with apply.
+**Validate:** Demo: author a three-step story, record against the sample web app, reject one grounding and re-pick, and confirm the written binding matches the pick; a healed variant shows a proposal that applies and re-runs green.
+
+### T5.8 ADE surface explorer and tool panel
+**Refs:** REQ-ADE-8, REQ-BEH-3, 4, LLD §13.6 · **Est:** 3
+**Do:** Surface explorer: open an adapter session, show the snapshot tree, act by clicking a node with a required `intent`, produce `trajectory.jsonl` and offer "compile to proposal"; tool panel: start and stop `tool serve` for selected stories and show invocations with audit lines.
+**Validate:** A six-step exploration compiles to a proposal in `proposals/`; an MCP client invocation appears in the tool panel with its audit record.
+
+### T5.6 Behavior docs and examples
+**Refs:** REQ-AGT-4, REQ-BEH-1..3 · **Est:** 1
+**Do:** `examples/` for CI, cron, and an MCP-driven agent invoking a tool; docs stating that orchestration is external.
+**Validate:** Examples run in CI where feasible; docs linked from README.
+
+---
+
+## Phase 6 — Reach
+
+### T6.1 Windows UIA adapter validated against the ADE
+**Refs:** REQ-ADP-6, REQ-ADE-6, REQ-SURF-3, LLD §7.5, §16 · **Est:** 9
+**Do:** UIA adapter with role mapping, `automationId` and `controlPath` candidates, patterns and input fallback, screenshots, `state`/`restore`; desktop conformance flows against the ADE (create project, open flow, run, open result, API client); add ARIA roles and names in the ADE UI where the tree is thin.
+**Validate:** Surface conformance on a Windows runner that builds and launches the ADE with `SVATAH_A11Y=1`; the desktop flows record and replay; a healing variant subset (renamed control, moved panel) passes relocalization.
+
+### T6.2 macOS Accessibility adapter validated against the ADE
+**Refs:** REQ-ADP-7, REQ-ADE-6 · **Est:** 8
+**Do:** AX adapter as LLD §7.5; `surface doctor` permission check; same desktop flows.
+**Validate:** Conformance on a macOS runner with the permission granted; the desktop flows replay.
+
+### T6.6 Prototype data import
+**Refs:** REQ-ADE-9, LLD §13.5 · **Est:** 1.5
+**Do:** `svatah migrate --from-ade <path>` reading the prototype's electron-db files and emitting config, flows (then v2→v3), seed bindings, `data.yaml`, and `api/*.yaml`; an "Import prototype database" action in the ADE project screen.
+**Validate:** A captured prototype database converts to a project that compiles clean and whose story names and step counts match.
+
+### T6.3 WebMCP candidate
+**Refs:** REQ-ADP-9, LLD §6.3, §4.2 #30 · **Est:** 2
+**Do:** Detect `navigator.modelContext` tools in the Playwright adapter; `webmcp` candidate synthesis at record; resolver preference; pattern 30.
+**Validate:** On the WebMCP sample page, replay uses the declared tool; removing the declaration falls through to locators.
+
+### T6.4 Java conformance runtime
+**Refs:** REQ-STD-3, LLD §14 · **Est:** 8
+**Do:** `runtime-java` on Playwright for Java and Jackson consuming plan, bindings, data; existing `ApiClient` for HTTP; results and summary in schema.
+**Validate:** Runtime conformance suite: zero mismatches in status and matched candidate versus the TS runtime.
+
+### T6.5 Tier 2 fine-tune pipeline
+**Refs:** ADR-4, REQ-COMP-3 · **Est:** 5
+**Do:** Export accepted pairs from merged plans; LoRA fine-tune script; publish digest; base-vs-tuned eval.
+**Validate:** At least 5 points improvement on `tier: 2` golden without Tier 1 regressions.
+
+---
+
+## Traceability matrix
+
+| Requirement | HLD | LLD | Tasks |
+|---|---|---|---|
+| REQ-SURF-1, 4, 5 | §5.1 S1 | §2 | T0.4 |
+| REQ-SURF-2 | §4 p2, §5.1 S2 | §1, §2.4 | T0.2, T0.4 |
+| REQ-SURF-3 | §5.1 S9 | §14 | T1.2, T4.1, T6.1, T6.2 |
+| REQ-ADP-1 | §5.1 S3 | §7.1 | T1.1 |
+| REQ-ADP-2, 3 | §5.1 S4 | §7.2 | T2.6 |
+| REQ-ADP-4 | §5.1 S5, ADR-8 | §7.3 | T4.1 |
+| REQ-ADP-5 | §5.1 S6 | §7.4 | T4.2 |
+| REQ-ADP-6, 7 | §5.1 S7, ADR-15, ADR-17 | §7.5 | T6.1, T6.2 |
+| REQ-ADE-1 | §5.3 B12, §6.7 | §13.5 | T2.11 |
+| REQ-ADE-2 | §5.3 B13, ADR-17 | §13.6 | T3.6 |
+| REQ-ADE-3 | §5.3 B13, ADR-17 | §13.6 | T3.7 |
+| REQ-ADE-4, 5 | §5.3 B13 | §13.6 | T5.7 |
+| REQ-ADE-6 | §5.3 B13, §14 | §7.5, §16 | T6.1, T6.2 |
+| REQ-ADE-7 | ADR-13, ADR-17 | §13.6 | T2.11, T3.6 |
+| REQ-ADE-8 | §5.3 B13 | §13.6 | T5.8 |
+| REQ-ADE-9 | §5.3 B10 | §13.5 | T6.6 |
+| REQ-ADP-8 | §5.1 S7 | §7.5 | not scheduled (P3) |
+| REQ-ADP-9 | §5.1 S8 | §6.3, §4.2 | T6.3 |
+| REQ-ADP-10, 11 | ADR-8, ADR-14 | — | not scheduled (P3) |
+| REQ-LANG-1..3, 9, 10, 13 | §5.3 B1 | §4.1 | T2.1 |
+| REQ-LANG-4..7 | §5.3 B2 | §4.2 | T2.4 |
+| REQ-LANG-8 | §5.3 B1, S4 | §4.2, §7.2 | T2.1, T2.6 |
+| REQ-LANG-11 | §5.3 B10 | §11 (Draft 1) | T2.9 |
+| REQ-LANG-12 | §13 Phase 0 | §4.2 | T0.6 |
+| REQ-LANG-14 | §5.3 B2, §10 | §4.1, §8.2 | T2.1, T5.4 |
+| REQ-LANG-15, 16 | ADR-10 | §5 | T2.3 |
+| REQ-COMP-1, 2 | §5.3 B2, ADR-4 | §4 | T2.4, T2.5 |
+| REQ-COMP-3 | ADR-4 | §4.3 (Draft 1), §10 | T3.1, T4.3 |
+| REQ-COMP-4 | ADR-4 | §10 | T3.1, T4.4 |
+| REQ-COMP-5 | §5.3 B2 | §4.3 | T2.2, T2.5 |
+| REQ-COMP-6, 7, 8 | §4 p7 | §4, §3.2 | T2.5 |
+| REQ-COMP-9 | §5.3 B11 | §16 | T0.6, T4.4 |
+| REQ-REC-1, 5, 8, 9 | §5.3 B3 | §11 | T3.3 |
+| REQ-REC-2, 7 | ADR-3, §11 | §11, §10 | T3.2, T3.1 |
+| REQ-REC-3, 4 | §5.2 D4 | §7.4 (Draft 1), §3.3 | T1.4 |
+| REQ-REC-6 | ADR-5 | §6.2 | T1.3 |
+| REQ-REC-10 | §5.3 B11 | §16 | T3.4 |
+| REQ-REC-11 | §6.2, ADR-11 | §6.5, §9.2 | T1.6, T3.3 |
+| REQ-RUN-1, 2 | §4 p1, §11 | §1, §8 | T0.2, T2.7, T2.10 |
+| REQ-RUN-3, 4, 6 | §10 | §8.1, §8.3, §8.5 | T2.7 |
+| REQ-RUN-5 | §5.2 D3 | §6.3 | T1.3 |
+| REQ-RUN-7, 8, 9 | §5.2 D6 | §3.4, §8.4, §8.6 | T2.7 |
+| REQ-RUN-10 | §4 p9 | §7.1 | T1.1 |
+| REQ-RUN-11 | §5.3 B9 | §15 | T4.5 |
+| REQ-RUN-12 | ADR-9, §5.3 B5 | §9 | T2.8 |
+| REQ-RUN-13 | ADR-9 | §8 | T2.7, T2.10 |
+| REQ-AUTO-1, 2, 4 | ADR-12, §10 | §3.2, §3.4, §8.2, §8.3 | T0.3 (schema), T2.7 (runtime), T5.4 |
+| REQ-AUTO-3 | §10 | §8.1 | T5.1 |
+| REQ-AUTO-5 | §10 | §3.2, §8.1 | T0.3, T2.5, T2.7, T5.2 |
+| REQ-AUTO-6 | §11 | §3.4, §8.6 | T0.3, T2.7, T5.3 |
+| REQ-AUTO-7 | §11 | §11, §13.2 | T3.2, T5.2 |
+| REQ-AUTO-8 | §5.3 B7 | §13.3, §4 lint | T2.5, T5.3 |
+| REQ-BEH-1 | §5.3 B5 | §13.1 | T2.8 |
+| REQ-BEH-2 | §5.3 B6 | §13.2 | T5.2 |
+| REQ-BEH-3 | §5.3 B7 | §13.3 | T5.3 |
+| REQ-BEH-4 | §5.3 B8, ADR-16 | §13.4 | T4.6, T5.5 |
+| REQ-BEH-5 | §4 p4 | §13 | T2.10 |
+| REQ-HEAL-1 | §5.2 D5, D7, ADR-6 | §6.4, §12 | T1.5, T1.7, T3.3 |
+| REQ-HEAL-2, 3 | §5.2 D7 | §12 | T1.7 |
+| REQ-HEAL-4 | ADR-6 | §12 | T3.3 (flag wiring), T2.7 |
+| REQ-HEAL-5 | §5.3 B11 | §16 | T1.8, T3.4 |
+| REQ-HEAL-6 | §6.2 | §6.5, §12 | T1.6, T1.7 |
+| REQ-AGT-1 | §5.3 B9 | §15 | T1.6, T2.10, T3.3, T5.2, T5.3 |
+| REQ-AGT-2 | §5.3 B9 | §15 | T4.6 |
+| REQ-AGT-3 | §11 | §3.5, §10 | T0.3, T3.1 |
+| REQ-AGT-4 | ADR-13 | — | T5.6 |
+| REQ-PKG-1 | ADR-11, §12 | §1 | T0.2, T1.6, T1.9 |
+| REQ-PKG-2 | §14 | §6.5 | T1.6, T1.9 |
+| REQ-PKG-3 | §8 | §1 | T0.2, T1.9 |
+| REQ-PKG-4 | §5.3 B11 | §16 | T1.8, T3.4, T4.4 |
+| REQ-STD-1, 4 | ADR-14, §5.2 D1 | §3 | T0.3 |
+| REQ-STD-2 | §5.1 S9, §5.2 D9 | §14 | T1.2, T4.1, T6.4 |
+| REQ-STD-3 | §13 Phase 6 | §14 | T6.4 |
+| REQ-NFR-1 | §11 | §1, §8 | T0.2, T2.7 |
+| REQ-NFR-2 | §11 | §10 | T3.1 |
+| REQ-NFR-3 | §8 | §4.3 (Draft 1) | T4.3, T4.7 |
+| REQ-NFR-4, 5 | §11 | §8 | T2.7 |
+| REQ-NFR-6 | §11 | §10, §8.2 | T3.1, T1.1 |
+| REQ-NFR-7 | §11 | §1 | T0.2 |
+| REQ-NFR-8 | §13 Phase 2 | §16 | T0.5, T2.9, T2.10, T3.5 |
+| REQ-NFR-9 | §5.3 B11 | §16 | all phases (CI gates) |
+| REQ-NFR-10 | §8 | §1 | T0.2 |
+
+## Estimate summary
+
+| Phase | Ideal days | Releasable outcome |
+|---|---|---|
+| 0 | 11.5 | Foundation |
+| 1 | 25 | `@svatah/bindings` 0.1 for Playwright users, with published healing numbers |
+| 2 | 30.5 | `@svatah/flow` 0.1: prose flows, test behavior in Playwright Test; local service |
+| 3 | 21.5 | Recorder with model grounding; full healing; published evals; new ADE shell and core screens |
+| 4 | 22.5 | BiDi and Appium adapters; local and frontier tiers; REPL; MCP |
+| 5 | 22 | Workflow and tool behaviors; trajectory compile; ADE record, bindings and heal review, surface explorer, tool panel |
+| 6 | 33.5 | Desktop adapters validated against the ADE; prototype import; WebMCP; Java runtime; fine-tune |
+| **Total** | **168.5** | |
+
+## Changes from Draft 1
+
+- Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
+- New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
+- Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.1: local service (T2.11); new ADE built to the vision with the prototype as blueprint: shell (T3.6), core screens (T3.7), record and heal review (T5.7), surface explorer and tool panel (T5.8), prototype data import (T6.6); T6.1 and T6.2 validate against the new ADE instead of a separate sample desktop app. Total 168.5 ideal days; module (a) release date unchanged.

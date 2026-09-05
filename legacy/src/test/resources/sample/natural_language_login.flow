@@ -1,0 +1,24 @@
+story : Login with natural language format
+    Click the sign in button on the home page
+    Type connected2atul@gmail.com into the username field
+    Type qwerty123 into the password field
+    Click the login button with xpath://input[@value='Sign In']
+    Verify the Schedule Build page appears
+
+story : Logout with natural language format
+    Click the logout button with xpath://li[9]/a/p
+    Verify the home page appears
+
+story : Validate text with natural language format
+    Type connected2atul@gmail.com into the username field with id:username
+    Type qwerty123 into the password field with id:password
+    Click the login button with xpath://input[@value='Sign In']
+    Click the Schedule Build link
+    Verify the Welcome message appears with xpath://h1
+
+compose : Login stories
+    Login with natural language format
+    Logout with natural language format
+    Validate text with natural language format
+
+test : Run all login stories
