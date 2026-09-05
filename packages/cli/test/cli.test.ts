@@ -50,10 +50,20 @@ describe("the command table (LLD §15)", () => {
   });
 
   it("says which task builds a command that is not here yet", async () => {
+    // `workflow` is LLD §15's story-as-a-function command and is Phase 5.
+    // "Not yet" and "never" are different answers.
     const io = capture();
-    expect(await main(["repl"], io)).toBe(EXIT.usage);
-    expect(io.stderr.join("\n")).toContain("T4.5");
+    expect(await main(["workflow"], io)).toBe(EXIT.usage);
+    expect(io.stderr.join("\n")).toContain("T5.4");
     expect(io.stderr.join("\n")).toContain("docs/spec/tasks.md");
+  });
+
+  it("no longer says that about a command Phase 4 built", async () => {
+    // The stale half of the same rule: `repl` and `mcp` are here now (T4.5,
+    // T4.6), and a command line that still promised them later would be lying.
+    const io = capture();
+    await main(["help"], io);
+    expect(io.stdout.join("\n")).toContain("svatah repl");
   });
 
   it("rejects an unknown command with the usage", async () => {

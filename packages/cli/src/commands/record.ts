@@ -26,20 +26,12 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { canonicalJson } from "@svatah/schema";
-import {
-  anthropicGateway,
-  credentialInEnvironment,
-  DiskCache,
-  fakeGateway,
-  GatewayUnavailable,
-  type Gateway,
-} from "@svatah/gateway";
+import { GatewayUnavailable, type Gateway } from "@svatah/gateway";
 import { EnvironmentRefused, record, renderReport, reportJson } from "@svatah/recorder";
 import { createSurface } from "@svatah/surface";
 import {
   boolOption,
   sessionTarget,
-  stringOption,
   stringOptions,
   EXIT,
   type CommandIo,
@@ -47,10 +39,10 @@ import {
   type ParsedArgs,
 } from "@svatah/bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
+import { gatewayForRecording } from "../gateway-for.js";
 import { compileProject, loadProject } from "../project.js";
 import { report as reportDiagnostics } from "./compile.js";
 import { loadBindings, projectRunners } from "./run.js";
-import { groundingAnswers } from "../grounding-answers.js";
 
 export async function recordCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const root = args.command[1] ?? ".";
@@ -81,7 +73,7 @@ export async function recordCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
 
   let gateway: Gateway;
   try {
-    gateway = gatewayFor(args, loaded, io);
+    gateway = gatewayForRecording(args, loaded, io)!;
   } catch (error) {
     if (error instanceof GatewayUnavailable) {
       io.err(error.message);
@@ -207,67 +199,6 @@ export async function recordCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
  * default: a store recorded from fixtures that a person believes came from a
  * model is the failure mode worth an extra flag.
  */
-function gatewayFor(
-  args: ParsedArgs,
-  loaded: Awaited<ReturnType<typeof loadProject>>,
-  io: CommandIo,
-): Gateway {
-  const asked = stringOption(args, "gateway") ?? (credentialInEnvironment() ? "anthropic" : "");
-
-  if (asked === "fake") {
-    const answers = groundingAnswers();
-    io.err(
-      `recording with the fake gateway: ${answers.size} answer(s) from evals/grounding/cases. ` +
-        "Nothing here measures a model.",
-    );
-    return fakeGateway({
-      label: "grounding-cases",
-      secrets: valuesOf(loaded.project.data.values, loaded.project.data.secrets),
-      answer: (request) =>
-        answers.answer(request.user) ?? {
-          ref: null,
-          why: "no committed case covers this phrase on this page",
-          confidence: 1,
-        },
-    });
-  }
-
-  if (asked !== "anthropic") {
-    throw new GatewayUnavailable(
-      "Recording needs a model. Set ANTHROPIC_API_KEY (or run `ant auth login`), or pass " +
-        "--gateway fake to record from the grounding eval's committed answers — which is a " +
-        "fixture, not a model, and the report will say so.",
-    );
-  }
-
-  return anthropicGateway({
-    model: loaded.config.record.model,
-    cache: new DiskCache(join(loaded.root, ".svatah", "model-cache")),
-    secrets: valuesOf(loaded.project.data.values, loaded.project.data.secrets),
-    onCall: (line) => io.err(`      ${line}`),
-  });
-}
-
-/** The *values* behind the declared secret paths (REQ-NFR-6 redacts by value). */
-function valuesOf(
-  data: Readonly<Record<string, unknown>>,
-  secrets: ReadonlySet<string>,
-): Set<string> {
-  const out = new Set<string>();
-  for (const path of secrets) {
-    let cursor: unknown = data;
-    for (const segment of path.split(".")) {
-      if (typeof cursor !== "object" || cursor === null) {
-        cursor = undefined;
-        break;
-      }
-      cursor = (cursor as Record<string, unknown>)[segment];
-    }
-    if (typeof cursor === "string" && cursor.length >= 4) out.add(cursor);
-  }
-  return out;
-}
-
 /** `--input k=v`, repeated. The same shape `svatah run` takes. */
 function inputsFrom(args: ParsedArgs): Record<string, unknown> | undefined {
   const out: Record<string, unknown> = {};
