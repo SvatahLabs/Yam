@@ -24,6 +24,7 @@ import { canonicalYaml, type BindingEntry, type BindingFile } from "@svatah/sche
 import type { HealInput } from "./failures.js";
 import { unifiedDiffFor, type FileChange } from "./diff.js";
 import { currentRegrounder, hasRegrounder } from "./regrounder.js";
+import { currentReplayer, type ReplayOutcome } from "./replayer.js";
 
 /** What happened to one failure. */
 export interface HealResult {
@@ -63,6 +64,8 @@ export interface HealReport {
   /** Whether anything but the no-op `Regrounder` was registered (LLD §10). */
   readonly usedModel: boolean;
   readonly regrounder: string;
+  /** How the failing page was reached: `session-state`, or module (b)'s replay. */
+  readonly replayer: string;
 }
 
 export interface HealOptions {
@@ -132,6 +135,7 @@ export async function heal(options: HealOptions): Promise<HealReport> {
     applied,
     usedModel: hasRegrounder(),
     regrounder: currentRegrounder().name,
+    replayer: currentReplayer().name,
   };
 }
 
@@ -166,9 +170,42 @@ async function healOne(
     return {
       ...base,
       outcome: "unreachable",
-      message: `could not get back to the page it failed on: ${
+      message: `could not open a session: ${
         error instanceof Error ? error.message.split("\n")[0] : String(error)
       }`,
+    };
+  }
+
+  /*
+   * Get back to where the failure happened (LLD §10, §12, Draft 2.3).
+   *
+   * The default restores the recorded session state, which is enough for a
+   * `bind()` failure and not enough for a flow whose failing step is six steps
+   * into a booking. Module (b) registers a runtime-backed replayer; either way,
+   * `unreachable` is a real answer — relocalizing against whatever happens to be
+   * on screen would verify a repair on the wrong page, which is worse than no
+   * repair (REQ-HEAL-3).
+   */
+  const replayer = currentReplayer();
+  let reached: ReplayOutcome;
+  try {
+    reached = await replayer.toFailure(input, surface);
+  } catch (error) {
+    reached = "unreachable";
+    void error;
+  }
+
+  if (reached === "unreachable") {
+    await (options.close?.(surface) ?? surface.close()).catch(() => undefined);
+    return {
+      ...base,
+      outcome: "unreachable",
+      message:
+        `could not get back to the point it failed at ("${replayer.name}"). ` +
+        (replayer.name === "session-state"
+          ? "The recorded state did not land on the right page — a flow's failing step often " +
+            "needs the story replayed to it, which `svatah heal` does when the runtime is present."
+          : "The replay did not reach the failing step."),
     };
   }
 

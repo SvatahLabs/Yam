@@ -116,10 +116,13 @@ const MODULE_A = ["bindings", "healer", "playwright-test", "bindings-cli"];
 const MODULE_B_CORE = ["spec", "steps", "compiler", "runtime"];
 
 /**
- * Only `cli` and `bindings-cli` (adapter registration) and the two Playwright
- * packages (the Playwright adapter only) may reach an adapter.
+ * Only `cli` (adapter registration) and the packages LLD §1 names may reach an
+ * adapter — and all but `cli` are restricted to the Playwright one below.
  */
 const MAY_IMPORT_ADAPTERS = ["cli", "bindings-cli", "playwright-test", "host-playwright"];
+
+/** Everything but `cli` gets the Playwright adapter and no other. */
+const PLAYWRIGHT_ONLY = ["playwright-test", "host-playwright", "bindings-cli"];
 
 /**
  * The service holds no logic (T2.11, LLD §13.5).
@@ -166,8 +169,8 @@ export const BOUNDARIES = [
       why: "LLD §1: nothing above the surface may import an adapter directly (REQ-SURF-2).",
     })),
   ),
-  // The Playwright packages may reach the Playwright adapter, and only that one.
-  ...["playwright-test", "host-playwright"].flatMap((from) =>
+  // Everything but `cli` may reach the Playwright adapter, and only that one.
+  ...PLAYWRIGHT_ONLY.flatMap((from) =>
     ADAPTERS.filter((a) => a !== "adapter-playwright").map((to) => ({
       from,
       to,

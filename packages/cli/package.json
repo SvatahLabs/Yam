@@ -33,6 +33,7 @@
     "@svatah/adapter-playwright": "workspace:*",
     "@svatah/adapter-uia": "workspace:*",
     "@svatah/bindings": "workspace:*",
+    "@svatah/bindings-cli": "workspace:*",
     "@svatah/compiler": "workspace:*",
     "@svatah/conformance": "workspace:*",
     "@svatah/gateway": "workspace:*",

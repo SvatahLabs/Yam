@@ -9,10 +9,10 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { listAdapters } from "@svatah/surface";
 import { registerAllAdapters } from "../adapters.js";
-import { boolOption, type ParsedArgs } from "../args.js";
-import { EXIT, type ExitCode } from "../exit-codes.js";
+import { boolOption, type ParsedArgs } from "@svatah/bindings-cli";
+import { EXIT, type ExitCode } from "@svatah/bindings-cli";
 import { CONFIG_FILES, loadProject } from "../project.js";
-import type { CommandIo } from "./surface.js";
+import type { CommandIo } from "@svatah/bindings-cli";
 
 interface Check {
   readonly name: string;

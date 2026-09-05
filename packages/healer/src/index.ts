@@ -25,6 +25,17 @@ export {
 } from "./failures.js";
 
 export {
+  clearReplayer,
+  currentReplayer,
+  hasReplayer,
+  registerReplayer,
+  samePath,
+  SESSION_STATE_REPLAYER,
+  type ReplayOutcome,
+  type Replayer,
+} from "./replayer.js";
+
+export {
   NO_REGROUNDER,
   registerRegrounder,
   currentRegrounder,

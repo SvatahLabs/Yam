@@ -325,7 +325,29 @@ importers:
         version: 2.1.9(@types/node@22.20.1)
 
   packages/bindings-cli:
+    dependencies:
+      '@svatah/adapter-playwright':
+        specifier: workspace:*
+        version: link:../adapter-playwright
+      '@svatah/bindings':
+        specifier: workspace:*
+        version: link:../bindings
+      '@svatah/conformance':
+        specifier: workspace:*
+        version: link:../conformance
+      '@svatah/healer':
+        specifier: workspace:*
+        version: link:../healer
+      '@svatah/schema':
+        specifier: workspace:*
+        version: link:../schema
+      '@svatah/surface':
+        specifier: workspace:*
+        version: link:../surface
     devDependencies:
+      sample-web:
+        specifier: workspace:*
+        version: link:../../apps/sample-web
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)
@@ -359,6 +381,9 @@ importers:
       '@svatah/bindings':
         specifier: workspace:*
         version: link:../bindings
+      '@svatah/bindings-cli':
+        specifier: workspace:*
+        version: link:../bindings-cli
       '@svatah/compiler':
         specifier: workspace:*
         version: link:../compiler

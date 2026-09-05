@@ -21,16 +21,28 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "tsup --config ../../tsup.config.ts",
+    "build": "tsup --config ./tsup.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "devDependencies": {
+    "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@svatah/adapter-playwright": "workspace:*",
+    "@svatah/bindings": "workspace:*",
+    "@svatah/conformance": "workspace:*",
+    "@svatah/healer": "workspace:*",
+    "@svatah/schema": "workspace:*",
+    "@svatah/surface": "workspace:*"
+  },
+  "bin": {
+    "svatah-bindings": "./dist/bin.js"
   }
 }

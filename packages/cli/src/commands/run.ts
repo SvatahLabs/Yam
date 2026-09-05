@@ -36,12 +36,12 @@ import {
   type RunOptions,
 } from "@svatah/runtime";
 import { createSurface } from "@svatah/surface";
-import { boolOption, numberOption, stringOption, stringOptions, type ParsedArgs } from "../args.js";
+import { boolOption, numberOption, stringOption, stringOptions, type ParsedArgs } from "@svatah/bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
-import { EXIT, type ExitCode } from "../exit-codes.js";
+import { EXIT, type ExitCode } from "@svatah/bindings-cli";
 import { compileProject, loadProject } from "../project.js";
 import { report } from "./compile.js";
-import type { CommandIo } from "./surface.js";
+import type { CommandIo } from "@svatah/bindings-cli";
 
 export async function runCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const root = args.command[1] ?? ".";

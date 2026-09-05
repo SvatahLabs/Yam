@@ -8,9 +8,9 @@
  */
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { boolOption, type ParsedArgs } from "../args.js";
-import { EXIT, type ExitCode } from "../exit-codes.js";
-import type { CommandIo } from "./surface.js";
+import { boolOption, type ParsedArgs } from "@svatah/bindings-cli";
+import { EXIT, type ExitCode } from "@svatah/bindings-cli";
+import type { CommandIo } from "@svatah/bindings-cli";
 
 const CONFIG = `# Svatah project configuration (LLD §3.5).
 schemaVersion: "1.0.0"

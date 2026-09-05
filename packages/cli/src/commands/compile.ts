@@ -17,10 +17,10 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { lintPlan, renderPlan } from "@svatah/compiler";
 import { formatDiagnostic, type Diagnostic } from "@svatah/spec";
-import { boolOption, stringOption, type ParsedArgs } from "../args.js";
-import { EXIT, type ExitCode } from "../exit-codes.js";
+import { boolOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
+import { EXIT, type ExitCode } from "@svatah/bindings-cli";
 import { compileProject, loadProject } from "../project.js";
-import type { CommandIo } from "./surface.js";
+import type { CommandIo } from "@svatah/bindings-cli";
 
 /** Print diagnostics, worst first, in the shape editors parse. */
 export function report(diagnostics: readonly Diagnostic[], io: CommandIo): void {

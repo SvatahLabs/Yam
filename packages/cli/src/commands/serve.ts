@@ -10,9 +10,9 @@
  * not written anywhere: a token in a file is a token that outlives the process
  * that needed it.
  */
-import { numberOption, stringOption, type ParsedArgs } from "../args.js";
-import { EXIT, type ExitCode } from "../exit-codes.js";
-import type { CommandIo } from "./surface.js";
+import { numberOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
+import { EXIT, type ExitCode } from "@svatah/bindings-cli";
+import type { CommandIo } from "@svatah/bindings-cli";
 
 export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const project = args.command[1] ?? ".";

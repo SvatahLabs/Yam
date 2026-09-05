@@ -10,11 +10,11 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { canonicalJson } from "@svatah/schema";
 import { generateSpecs } from "@svatah/host-playwright";
-import { boolOption, stringOption, type ParsedArgs } from "../args.js";
-import { EXIT, type ExitCode } from "../exit-codes.js";
+import { boolOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
+import { EXIT, type ExitCode } from "@svatah/bindings-cli";
 import { compileProject, loadProject } from "../project.js";
 import { report } from "./compile.js";
-import type { CommandIo } from "./surface.js";
+import type { CommandIo } from "@svatah/bindings-cli";
 
 export async function hostCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   if (args.command[1] !== "generate") {

@@ -1,22 +1,36 @@
 /**
  * @svatah/cli
  *
- * The `svatah` command line (LLD §15). It is the only package that registers
- * adapters, which is why the import-boundary lint lets it — and only it and the
- * Playwright Test host — import an `adapter-*` package (LLD §1).
+ * The `svatah` command line (LLD §15) — the whole of it. Module (b)'s commands
+ * live here (`compile`, `lint`, `run`, `host generate`, `migrate`, `init`,
+ * `doctor`, `serve`); module (a)'s come from `@svatah/bindings-cli` and are
+ * mounted under the same executable, so `svatah bindings list` and
+ * `svatah-bindings bindings list` are the same function (Draft 2.3).
+ *
+ * It registers every adapter, which is why the import-boundary lint lets it —
+ * and only it, `bindings-cli` and the two Playwright hosts — import an
+ * `adapter-*` package (LLD §1).
  */
 export { main } from "./cli.js";
+
+/** Re-exported from module (a), so a consumer needs one import (Draft 2.3). */
 export {
   parseArgs,
   stringOption,
   stringOptions,
   boolOption,
   numberOption,
+  EXIT,
+  surfaceCommand,
+  bindingsCommand,
+  healCommand,
+  evalCommand,
   type ParsedArgs,
-} from "./args.js";
-export { EXIT, type ExitCode } from "./exit-codes.js";
+  type ExitCode,
+  type CommandIo,
+} from "@svatah/bindings-cli";
+
 export { registerAllAdapters } from "./adapters.js";
-export type { CommandIo } from "./commands/surface.js";
 
 /**
  * The functions the local service calls (LLD §13.5: "every handler calls the
@@ -34,4 +48,12 @@ export {
   type LoadedProject,
 } from "./project.js";
 export { runProject, type RunProjectOptions } from "./commands/run.js";
+
+/**
+ * Module (b)'s `Replayer` (LLD §10, Draft 2.3).
+ *
+ * The healer is module (a) and cannot import the executor, so replaying a flow
+ * to its failing step arrives as a plugin the CLI registers.
+ */
+export { registerRuntimeReplayer, runtimeReplayer, type RuntimeReplayerOptions } from "./replayer.js";
 export { newRunId } from "@svatah/runtime";

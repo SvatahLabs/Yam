@@ -10,9 +10,14 @@
  * Commands are imported lazily. `svatah bindings list` should not pay for
  * loading the compiler, and `svatah --help` should not load anything at all.
  */
-import { parseArgs, type ParsedArgs } from "./args.js";
-import { EXIT, type ExitCode } from "./exit-codes.js";
-import { surfaceCommand, type CommandIo } from "./commands/surface.js";
+import {
+  EXIT,
+  parseArgs,
+  runBindingsCommand,
+  type CommandIo,
+  type ExitCode,
+  type ParsedArgs,
+} from "@svatah/bindings-cli";
 
 /** Commands LLD §15 lists that are not built yet, and what builds them. */
 const LATER: Record<string, string> = {
@@ -53,6 +58,49 @@ Bindings and healing (module a):
 Exit codes are the table in LLD §15.
 `;
 
+/**
+ * Wire module (b)'s replayer in, if the project this is run from has a plan.
+ *
+ * Best effort by design: a project that will not load is not a reason to refuse
+ * to heal — the session-state default still works — so a failure here leaves the
+ * default in place and says so.
+ */
+async function registerReplayerForRun(args: ParsedArgs, io: CommandIo): Promise<void> {
+  try {
+    const { loadProject } = await import("./project.js");
+    const { registerRuntimeReplayer } = await import("./replayer.js");
+    const { BindingsStore, resolve: resolveBinding } = await import("@svatah/bindings");
+
+    const root = typeof args.options["project"] === "string" ? args.options["project"] : ".";
+    const loaded = await loadProject(root);
+    const store = BindingsStore.load(`${loaded.root}/${loaded.config.bindings.dir}`);
+
+    registerRuntimeReplayer({
+      root: loaded.root,
+      data: loaded.project.data.values,
+      secrets: loaded.project.data.secrets,
+      stepTimeoutMs: loaded.config.run.stepTimeoutMs,
+      resolve: async (target, surface) => {
+        const resolution = await resolveBinding(target.ref, surface, store, {
+          candidateTimeoutMs: loaded.config.run.candidateTimeoutMs,
+          phrase: target.phrase,
+        });
+        return {
+          ref: resolution.ref,
+          candidateIndex: resolution.candidateIndex,
+          by: resolution.by,
+        };
+      },
+      onProgress: (message) => io.err(`  ${message}`),
+    });
+  } catch (error) {
+    io.err(
+      "Could not load the project, so healing will restore the recorded page rather than " +
+        `replaying the story to it: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
 export async function main(argv: readonly string[], io: CommandIo): Promise<ExitCode> {
   const args: ParsedArgs = parseArgs(argv);
   const command = args.command[0];
@@ -62,15 +110,28 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
     return command === undefined ? EXIT.usage : EXIT.ok;
   }
 
+  /*
+   * Module (a)'s commands first, from `@svatah/bindings-cli` (Draft 2.3).
+   *
+   * One implementation behind two executables: `svatah bindings list` and
+   * `svatah-bindings bindings list` are the same function, so they cannot drift
+   * apart, and someone who installed module (a) alone still has a command line.
+   */
+  /*
+   * `svatah heal --run <id>` replays the story to the failing step, which needs
+   * the executor. The healer cannot import it (module (a), REQ-PKG-1), so the
+   * CLI registers a runtime-backed `Replayer` first (LLD §10, Draft 2.3).
+   * `svatah-bindings heal --from-bind-failures` has no runtime and keeps module
+   * (a)'s session-state default, which is the right answer for a bind failure.
+   */
+  if (command === "heal" && typeof args.options["run"] === "string") {
+    await registerReplayerForRun(args, io);
+  }
+
+  const moduleA = await runBindingsCommand(command, args, io);
+  if (moduleA !== undefined) return moduleA;
+
   switch (command) {
-    case "surface":
-      return await surfaceCommand(args, io);
-    case "bindings":
-      return await (await import("./commands/bindings.js")).bindingsCommand(args, io);
-    case "heal":
-      return await (await import("./commands/heal.js")).healCommand(args, io);
-    case "eval":
-      return await (await import("./commands/eval.js")).evalCommand(args, io);
     case "compile":
       return await (await import("./commands/compile.js")).compileCommand(args, io);
     case "lint":

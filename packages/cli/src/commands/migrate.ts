@@ -9,9 +9,9 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { migrate, renderReviewReport } from "@svatah/migrate";
-import { boolOption, stringOption, type ParsedArgs } from "../args.js";
-import { EXIT, type ExitCode } from "../exit-codes.js";
-import type { CommandIo } from "./surface.js";
+import { boolOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
+import { EXIT, type ExitCode } from "@svatah/bindings-cli";
+import type { CommandIo } from "@svatah/bindings-cli";
 
 export const REVIEW_FILE = "migration-review.md";
 

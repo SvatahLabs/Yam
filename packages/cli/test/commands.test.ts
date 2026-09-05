@@ -12,7 +12,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { main } from "../src/index.js";
-import { EXIT } from "../src/exit-codes.js";
+import { EXIT } from "@svatah/bindings-cli";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
