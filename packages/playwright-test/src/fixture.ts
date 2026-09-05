@@ -29,13 +29,19 @@ export interface SvatahOptions {
    * A relative path resolves against the process's working directory, which under
    * Playwright Test is the project root.
    */
-  bindingsDir: string;
+  bindingsDir: string | undefined;
   /** Where bind failures and heal proposals are written. Also `SVATAH_OUT`. */
-  svatahOutputDir: string;
+  svatahOutputDir: string | undefined;
   /** `run` | `record` | `heal`. Also `SVATAH_MODE`. */
   svatahMode: BindMode | undefined;
   /** Attributes treated as test ids when synthesising candidates. */
   svatahTestIdAttributes: readonly string[];
+  /**
+   * Keep the origin in a recorded binding's `context.pattern`. Default false, so
+   * a store recorded against a test server on an ephemeral port can be committed
+   * and still resolves on the next run (LLD §3.5, Draft 2.3).
+   */
+  svatahMatchHost: boolean;
   /**
    * Element id → selector, so record mode can run with nobody at the keyboard.
    * Also `SVATAH_PICK`. A test affordance, not part of the quick start.
@@ -66,10 +72,14 @@ export interface SvatahFixtures {
 export const HEALED_ANNOTATION = "healed";
 
 export const test = base.extend<SvatahOptions & SvatahFixtures>({
-  bindingsDir: ["bindings", { option: true }],
-  svatahOutputDir: [".svatah", { option: true }],
+  // `undefined` rather than "bindings" so `SVATAH_BINDINGS` is reachable: a
+  // fixture option that always has a value would shadow the environment, and
+  // `Binder` is the one place that decides the precedence.
+  bindingsDir: [undefined, { option: true }],
+  svatahOutputDir: [undefined, { option: true }],
   svatahMode: [undefined, { option: true }],
   svatahTestIdAttributes: [["data-testid", "data-test-id", "data-test"], { option: true }],
+  svatahMatchHost: [false, { option: true }],
   svatahPicks: [undefined, { option: true }],
 
   // A Playwright fixture that depends on nothing is declared with an empty
@@ -80,15 +90,25 @@ export const test = base.extend<SvatahOptions & SvatahFixtures>({
   },
 
   bind: async (
-    { page, bindingsDir, svatahOutputDir, svatahMode, svatahTestIdAttributes, svatahPicks, bindOutcomes },
+    {
+      page,
+      bindingsDir,
+      svatahOutputDir,
+      svatahMode,
+      svatahTestIdAttributes,
+      svatahMatchHost,
+      svatahPicks,
+      bindOutcomes,
+    },
     use,
     testInfo,
   ) => {
     const options: BindOptions = {
-      bindingsDir,
-      outputDir: svatahOutputDir,
+      ...(bindingsDir === undefined ? {} : { bindingsDir }),
+      ...(svatahOutputDir === undefined ? {} : { outputDir: svatahOutputDir }),
       mode: svatahMode ?? modeFromEnvironment(process.env["SVATAH_MODE"]),
       testIdAttributes: svatahTestIdAttributes,
+      matchHost: svatahMatchHost,
       ...(svatahPicks === undefined ? {} : { picks: new Map(Object.entries(svatahPicks)) }),
       onOutcome: (outcome) => {
         bindOutcomes.push(outcome);

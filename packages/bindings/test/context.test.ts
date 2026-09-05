@@ -220,21 +220,51 @@ describe("scoping the context (LLD §6.2)", () => {
 
 describe("context patterns (REQ-REC-6)", () => {
   it("generalises identifiers out of a path", () => {
-    expect(contextPattern("http://app.test/orders/10482")).toBe("http://app.test/orders/:id");
-    expect(contextPattern("http://app.test/orders/10483")).toBe("http://app.test/orders/:id");
+    expect(contextPattern("http://app.test/orders/10482")).toBe("/orders/:id");
+    expect(contextPattern("http://app.test/orders/10483")).toBe("/orders/:id");
     expect(contextPattern("http://app.test/u/3f1b2c4d-1111-2222-3333-444455556666/edit")).toBe(
-      "http://app.test/u/:uuid/edit",
+      "/u/:uuid/edit",
     );
   });
 
   it("drops the query and the fragment: they change what a page shows, not its shape", () => {
-    expect(contextPattern("http://app.test/login?variant=3#top")).toBe("http://app.test/login");
+    expect(contextPattern("http://app.test/login?variant=3#top")).toBe("/login");
+  });
+
+  /*
+   * P1-F3. A store is committed and read by everyone who clones the repository.
+   * With the origin in the pattern, bindings recorded against a test server on
+   * an ephemeral port matched on exactly one run — the one that recorded them —
+   * and then silently stopped being the entry for that URL. Path-only is the
+   * default; `matchHost` is for a project that really does bind different
+   * elements on different hosts.
+   */
+  it("drops the origin by default, so a store survives a different port or host", () => {
+    expect(contextPattern("http://127.0.0.1:65431/login")).toBe("/login");
+    expect(contextPattern("http://127.0.0.1:4173/login")).toBe("/login");
+    expect(contextPattern("https://staging.example.com/login")).toBe("/login");
+  });
+
+  it("keeps the origin when the project asked for it", () => {
+    expect(contextPattern("https://app.test/login", { matchHost: true })).toBe(
+      "https://app.test/login",
+    );
+    expect(
+      patternMatches("https://app.test/login", "https://other.test/login", { matchHost: true }),
+    ).toBe(false);
   });
 
   it("matches a stored pattern against a live url", () => {
-    expect(patternMatches("http://app.test/orders/:id", "http://app.test/orders/99")).toBe(true);
-    expect(patternMatches("http://app.test/login", "http://app.test/login?variant=3")).toBe(true);
-    expect(patternMatches("http://app.test/login", "http://app.test/checkout")).toBe(false);
+    expect(patternMatches("/orders/:id", "http://app.test/orders/99")).toBe(true);
+    expect(patternMatches("/login", "http://app.test/login?variant=3")).toBe(true);
+    expect(patternMatches("/login", "http://app.test/checkout")).toBe(false);
+  });
+
+  it("still matches a store recorded before the default changed", () => {
+    // An existing store carries full origins. It has to keep resolving, or the
+    // change would break every project that recorded one.
+    expect(patternMatches("http://127.0.0.1:65431/login", "http://127.0.0.1:4173/login")).toBe(true);
+    expect(patternMatches("http://app.test/orders/:id", "http://elsewhere.test/orders/99")).toBe(true);
   });
 
   it("handles a value that is not a url at all — a window title, say", () => {

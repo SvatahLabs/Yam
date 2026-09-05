@@ -5,12 +5,11 @@
  * it already runs. It exists so the example works from a clean checkout with no
  * ports to arrange.
  *
- * Port 4173 is tried first — it is the port T0.5 fixes the sample application at,
- * and the committed bindings under `bindings/` record their context against it,
- * so the store reads as something a person wrote rather than as a machine's
- * ephemeral port. If it is busy the OS picks one; the bindings still resolve,
- * because an entry whose URL pattern does not match is still the entry for the
- * element (LLD §6.3).
+ * Port 4173 is tried first because it is the port T0.5 fixes the sample
+ * application at; if it is busy the OS picks one. Either way the committed
+ * bindings resolve, because a binding's context pattern is the *path* —
+ * `/login`, not `http://127.0.0.1:65431/login` (LLD §3.5, Draft 2.3). A store
+ * that named a port would work on the run that recorded it and on no other.
  */
 import { startSampleApp, DEFAULT_PORT, type SampleServer } from "sample-web";
 

@@ -64,6 +64,16 @@ export const configSchema = z
          * find the element would make the eval measure itself.
          */
         ignoreAttributes: z.array(z.string().min(1)).optional(),
+        /**
+         * Keep the origin in a binding's `context.pattern` (LLD §3.5, Draft
+         * 2.3). Default false: the pattern is the path.
+         *
+         * A store is committed and shared. An origin in the pattern ties it to
+         * one deployment, and a store recorded against a test server on an
+         * ephemeral port is tied to one *process*. Set this only for a project
+         * that genuinely binds different elements on different hosts.
+         */
+        matchHost: z.boolean().optional(),
       })
       .strict(),
     data: z.object({ file: z.string().min(1) }).strict(),

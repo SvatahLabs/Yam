@@ -98,7 +98,7 @@ class OneElementSurface implements AgentSurface {
   }
   async screenshot(): Promise<void> {}
   async state(): Promise<SessionState> {
-    return { url: "http://127.0.0.1/p" };
+    return { kind: "web", url: "http://127.0.0.1/p" };
   }
   async restore(): Promise<void> {}
 }

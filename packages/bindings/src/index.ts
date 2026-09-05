@@ -20,6 +20,7 @@ export {
   contextRoot,
   contextPattern,
   patternMatches,
+  type ContextPatternOptions,
   subtree,
   LANDMARK_ROLES,
 } from "./context.js";

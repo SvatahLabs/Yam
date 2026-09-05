@@ -67,6 +67,13 @@ export interface BindOptions {
   mode?: BindMode;
   /** Attributes treated as test ids. */
   testIdAttributes?: readonly string[];
+  /**
+   * Keep the origin in a recorded entry's `context.pattern`
+   * (`config.bindings.matchHost`, LLD §3.5). Default false, so a store recorded
+   * against `http://127.0.0.1:<ephemeral>` still resolves on the next run and
+   * can be committed and shared.
+   */
+  matchHost?: boolean;
   /** Per-candidate timeout for the resolver. */
   candidateTimeoutMs?: number;
   /** How long a person has to click, in record mode. */
@@ -257,7 +264,10 @@ export class Binder {
 
     const entry: BindingEntry = {
       context: {
-        pattern: contextPattern(this.page.url()),
+        // Path-only unless the project asked for the host (Draft 2.3): an
+        // origin here is a port that existed for one process, and a store that
+        // cannot be committed is not a store.
+        pattern: contextPattern(this.page.url(), { matchHost: this.options.matchHost === true }),
         hash,
         platform: "web",
         ...(await this.viewport()),

@@ -17,7 +17,7 @@ entries:
         value: "//*[@data-testid='login-submit']"
     context:
       hash: "0d69e5e01fe3692ebac3056a23187c2d7703332f69512357629a7a8a0ef837ee"
-      pattern: "http://127.0.0.1:65431/login"
+      pattern: "/login"
       platform: "web"
       viewport:
         - 1280
@@ -45,12 +45,12 @@ entries:
       tag: "input"
       text: ""
     provenance:
-      at: "2026-09-02T19:02:53.600Z"
+      at: "2026-09-02T21:17:56.620Z"
       model: "human"
       promptVersion: "picker:programmatic"
       tokensIn: 0
       tokensOut: 0
-    recordedAt: "2026-09-02T19:02:53.600Z"
+    recordedAt: "2026-09-02T21:17:56.620Z"
     verified: false
 id: "login.sign-in-button"
 phrases:

@@ -116,19 +116,41 @@ export function contextHash(
   return { hash: structuralHash(nodes), root, nodes };
 }
 
+/** Options for `contextPattern` (`config.bindings`, LLD §3.5). */
+export interface ContextPatternOptions {
+  /**
+   * Keep the origin in the pattern. Default false — see below.
+   */
+  matchHost?: boolean;
+}
+
 /**
  * The URL or window pattern an entry is stored against (REQ-REC-6).
  *
  * The path with numeric and uuid-looking segments generalised, so
  * `/orders/10482` and `/orders/10483` are one context rather than two. Query and
  * fragment are dropped: they change what a page shows, not its shape.
+ *
+ * ## Why the host is dropped by default (Draft 2.3)
+ *
+ * A bindings store is committed to a repository and shared. An origin in the
+ * pattern makes it unshareable: bindings recorded against `http://localhost:5173`
+ * do not apply on `https://staging.example.com`, and bindings recorded against a
+ * test server on an *ephemeral* port — which is how every fixture and example in
+ * this repository runs — do not apply on the next run of the same test, because
+ * the port is different. That is not a hypothetical: the example store shipped
+ * in Phase 1 carried `http://127.0.0.1:65431/login`, a port that existed for one
+ * process.
+ *
+ * So the pattern is the path. `bindings.matchHost` puts the origin back for a
+ * project that really does bind different elements on different hosts.
  */
-export function contextPattern(url: string): string {
+export function contextPattern(url: string, options: ContextPatternOptions = {}): string {
   let path: string;
   let origin = "";
   try {
     const parsed = new URL(url);
-    origin = parsed.origin;
+    if (options.matchHost === true) origin = parsed.origin;
     path = parsed.pathname;
   } catch {
     path = url;
@@ -147,8 +169,23 @@ export function contextPattern(url: string): string {
   return `${origin}${generalised === "" ? "/" : generalised}`;
 }
 
-/** Whether a stored pattern applies to a URL. */
-export function patternMatches(pattern: string, url: string): boolean {
+/**
+ * Whether a stored pattern applies to a URL.
+ *
+ * Both sides are normalised, so a store written before `matchHost` defaulted to
+ * false — one carrying a full origin — still resolves against a live URL. An old
+ * store keeps working; only newly recorded entries are path-only.
+ */
+export function patternMatches(
+  pattern: string,
+  url: string,
+  options: ContextPatternOptions = {},
+): boolean {
   if (pattern === url) return true;
-  return contextPattern(url) === pattern || contextPattern(url) === contextPattern(pattern);
+  const live = contextPattern(url, options);
+  // Normalising the *stored* pattern too is what lets an old store — one written
+  // when the origin was included — keep resolving: `http://127.0.0.1:65431/login`
+  // reduces to `/login`, which is what a live URL reduces to as well. Under
+  // `matchHost` both sides keep their origin, so a different host does not match.
+  return live === pattern || live === contextPattern(pattern, options);
 }
