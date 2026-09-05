@@ -154,3 +154,94 @@ describe("an adapter with no faults", () => {
     expect(renderReport(report)).toContain('"broken-mock" is conformant.');
   });
 });
+
+/**
+ * What the desktop reports have to publish (T7.1, Draft 2.8 §7.5).
+ *
+ * > The desktop conformance report records nodes read, wall time, and
+ * > milliseconds per node.
+ *
+ * The number the *live* gate publishes cannot be checked here — it needs macOS,
+ * the Accessibility permission and a window — but the report's contract can:
+ * that an adapter measuring its bridge has that measurement carried through the
+ * runner into both renderers, that the costliest read wins rather than the last,
+ * and that a *recorded* tree is published as a recording rather than as a zero.
+ */
+describe("the bridge cost a desktop report publishes (T7.1, LLD §7.5)", () => {
+  /** An adapter that measures a bridge, the way `AxSurface.bridgeCost()` does. */
+  interface Cost {
+    nodes: number;
+    wallMs: number;
+    msPerNode: number;
+    invocations: number;
+    appleEvents?: number;
+  }
+
+  class Measured extends BrokenAdapter {
+    constructor(private readonly next: () => Cost) {
+      super({});
+    }
+    bridgeCost(): Cost {
+      return this.next();
+    }
+  }
+
+  const withCost = async (
+    costs: ReadonlyArray<{ nodes: number; wallMs: number; msPerNode: number; invocations: number; appleEvents?: number }>,
+  ): Promise<ConformanceReport> => {
+    /*
+     * Counted when the cost is *asked for*, not when a surface is opened: the
+     * runner opens one extra surface before the suite to ask what the adapter
+     * is driving, and never asks that one what it cost.
+     */
+    let asked = 0;
+    const next = (): (typeof costs)[number] => costs[Math.min(asked++, costs.length - 1)]!;
+    return await runSurfaceConformance({
+      adapter: "measured-mock",
+      baseUrl: "http://127.0.0.1:4173",
+      only: ["home.snapshot", "login.snapshot-states"],
+      openSurface: async () => new Measured(next),
+    });
+  };
+
+  it("publishes the three numbers §7.5 names, in both renderers", async () => {
+    const report = await withCost([
+      { nodes: 488, wallMs: 5_070, msPerNode: 10.39, invocations: 1, appleEvents: 254 },
+    ]);
+    expect(report.bridge).toMatchObject({ nodes: 488, wallMs: 5070, msPerNode: 10.39 });
+    for (const rendered of [renderReport(report), renderMarkdown(report)]) {
+      expect(rendered).toContain("488 nodes in 5070 ms");
+      expect(rendered).toContain("10.39 ms per node");
+      expect(rendered).toContain("254 Apple events");
+      expect(rendered).toContain("1 process invocation");
+    }
+  });
+
+  it("keeps the costliest read, not the last one", async () => {
+    /*
+     * §7.5's budget is about the biggest window the suite touched — the ADE's
+     * project screen — and a report that published the *last* read would
+     * publish whatever the final case happened to open.
+     */
+    const report = await withCost([
+      { nodes: 488, wallMs: 5_070, msPerNode: 10.39, invocations: 1 },
+      { nodes: 35, wallMs: 400, msPerNode: 11.4, invocations: 1 },
+    ]);
+    expect(report.bridge?.nodes).toBe(488);
+  });
+
+  it("says a recorded tree is a recording rather than publishing a zero", async () => {
+    const report = await withCost([{ nodes: 199, wallMs: 0, msPerNode: 0, invocations: 0 }]);
+    for (const rendered of [renderReport(report), renderMarkdown(report)]) {
+      expect(rendered).toContain("not measured");
+      expect(rendered).toContain("199-node tree came from a recording");
+      expect(rendered).not.toContain("0 ms per node");
+    }
+  });
+
+  it("has no bridge line at all for an adapter with no process boundary", async () => {
+    const report = await run({}, ["home.snapshot"]);
+    expect(report.bridge).toBeUndefined();
+    expect(renderReport(report)).not.toContain("Bridge:");
+  });
+});
