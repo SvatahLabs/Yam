@@ -5,6 +5,7 @@
  * Refs: REQ-AGT-3, REQ-STD-4.
  */
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import {
   bindingEntrySchema,
   isHumanProvenance,
@@ -94,5 +95,93 @@ describe("IR block/action consistency", () => {
   it('rejects an invoke block on a non-invoke action', () => {
     const bad = { ...fixture.tier1Step, invoke: fixture.invokeStep.invoke };
     expect(stepSchema.safeParse(bad).success).toBe(false);
+  });
+});
+
+/**
+ * P0-F3 — Draft 2.2 gives Tier 0 `target` placeholders their own map so the
+ * recorder can ground them and the resolver can resolve them. The two encodings
+ * a compiler could produce by mistake are rejected here.
+ */
+describe("custom step targets (LLD §3.2, §5, Draft 2.2)", () => {
+  it("accepts target placeholders as TargetRefs under custom.targets", () => {
+    const parsed = stepSchema.safeParse(fixture.customStep);
+    expect(parsed.success).toBe(true);
+    expect(fixture.customStep.custom?.targets?.from).toEqual({
+      ref: "accounts.current",
+      phrase: "the current account",
+      status: "unbound",
+    });
+  });
+
+  it("accepts a custom step with no target placeholders at all", () => {
+    const noTargets = {
+      ...fixture.customStep,
+      custom: { id: "steps/seed.ts#seedDatabase", params: { fixture: { kind: "literal" as const, value: "bookings-fixture" } } },
+    };
+    expect(stepSchema.safeParse(noTargets).success).toBe(true);
+  });
+
+  it("rejects the same placeholder name in both params and targets", () => {
+    const bad = {
+      ...fixture.customStep,
+      custom: {
+        ...fixture.customStep.custom!,
+        params: {
+          ...fixture.customStep.custom!.params,
+          from: { kind: "literal" as const, value: "accounts.current" },
+        },
+      },
+    };
+    const parsed = stepSchema.safeParse(bad);
+    expect(parsed.success).toBe(false);
+    expect(JSON.stringify(parsed.error?.issues)).toContain("belongs in `targets` only");
+  });
+
+  it("rejects a params literal that repeats an element id the step already grounds", () => {
+    const bad = {
+      ...fixture.customStep,
+      custom: {
+        ...fixture.customStep.custom!,
+        params: {
+          ...fixture.customStep.custom!.params,
+          source: { kind: "literal" as const, value: "accounts.current" },
+        },
+      },
+    };
+    const parsed = stepSchema.safeParse(bad);
+    expect(parsed.success).toBe(false);
+    expect(JSON.stringify(parsed.error?.issues)).toContain("never a literal in");
+  });
+
+  it("rejects a params literal that repeats a target phrase the step already grounds", () => {
+    const bad = {
+      ...fixture.customStep,
+      custom: {
+        ...fixture.customStep.custom!,
+        params: {
+          ...fixture.customStep.custom!.params,
+          source: { kind: "literal" as const, value: "the current account" },
+        },
+      },
+    };
+    expect(stepSchema.safeParse(bad).success).toBe(false);
+  });
+
+  it("leaves ordinary literal params alone", () => {
+    for (const value of ["250", "bookings-fixture", "2026-09-03", "fixture.json", "example.com"]) {
+      const step = {
+        ...fixture.customStep,
+        custom: { id: "steps/seed.ts#seedDatabase", params: { fixture: { kind: "literal" as const, value } } },
+      };
+      expect(stepSchema.safeParse(step).success, `rejected the literal "${value}"`).toBe(true);
+    }
+  });
+
+  it("publishes custom.targets in the generated ir.schema.json", () => {
+    const generated = JSON.parse(
+      readFileSync(new URL("../json/ir.schema.json", import.meta.url), "utf8"),
+    ) as { definitions: { ir: { properties: { custom: { properties: Record<string, unknown> } } } } };
+    expect(Object.keys(generated.definitions.ir.properties.custom.properties)).toContain("targets");
   });
 });

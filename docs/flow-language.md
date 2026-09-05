@@ -1507,6 +1507,13 @@ Placeholder types are `string`, `number`, `boolean`, `target` and `value`. A
 `target` placeholder becomes a `TargetRef` the recorder grounds like any other; a
 `value` placeholder accepts a quoted literal or a variable reference.
 
+The two kinds go to different places in the IR (LLD §3.2, §5, Draft 2.2):
+`string`, `number`, `boolean` and `value` placeholders become `ValueRef`s under
+`custom.params`; `target` placeholders become `TargetRef`s under
+`custom.targets`. A target written as a literal in `params` would be invisible to
+the recorder, which grounds targets, and to the resolver, which resolves them —
+the step would silently act on nothing — so the schema rejects it.
+
 The handler receives a `StepContext` exposing only the surface, the resolver, the
 scope, an expectation helper and audit. It cannot reach the adapter — that is a
 type-level guarantee, not a convention.
@@ -1533,19 +1540,28 @@ Seed the database with "bookings-fixture"
       "amount": {
         "kind": "literal",
         "value": "250"
-      },
+      }
+    },
+    "targets": {
       "from": {
-        "kind": "literal",
-        "value": "accounts.current"
+        "ref": "accounts.current",
+        "phrase": "the current account",
+        "status": "unbound"
       },
       "to": {
-        "kind": "literal",
-        "value": "accounts.savings"
+        "ref": "accounts.savings",
+        "phrase": "the savings account",
+        "status": "unbound"
       }
     }
   }
 }
 ```
+
+`amount` is a `number` placeholder, so it is a `ValueRef` in `params`. `from` and
+`to` are `target` placeholders, so they are `TargetRef`s in `targets` with
+`status: "unbound"` until the recorder grounds them — exactly the state a
+`step.target` is in before a record pass.
 ---
 
 ## 7. The IR action vocabulary

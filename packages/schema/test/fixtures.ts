@@ -91,10 +91,15 @@ export const customStep: Step = {
   action: "custom",
   custom: {
     id: "steps/transfer.ts#default",
+    // `amount` is a `number` placeholder → a ValueRef in `params`. `from` and
+    // `to` are `target` placeholders → TargetRefs in `targets`, so the recorder
+    // grounds them and the resolver resolves them (LLD §5, Draft 2.2).
     params: {
       amount: { kind: "literal", value: "250" },
-      from: { kind: "literal", value: "accounts.current" },
-      to: { kind: "literal", value: "accounts.savings" },
+    },
+    targets: {
+      from: { ref: "accounts.current", phrase: "the current account", status: "unbound" },
+      to: { ref: "accounts.savings", phrase: "the savings account", status: "unbound" },
     },
   },
   sideEffect: true,

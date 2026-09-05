@@ -233,6 +233,7 @@ export type Origin = z.infer<typeof originSchema>;
 /** Tiers whose output came from a model and therefore requires provenance (REQ-STD-4). */
 export const MODEL_TIERS: readonly Tier[] = [2, 3];
 
+
 const stepShape = z
   .object({
     /** `<story name>/<index>`, unique within a plan. */
@@ -249,9 +250,22 @@ const stepShape = z
     guard: guardSchema.optional(),
     expect: expectationSchema.optional(),
     capture: captureSchema.optional(),
-    /** Set when `action === "custom"`; `id` is the file path plus export name (LLD §5). */
+    /**
+     * Set when `action === "custom"`; `id` is the file path plus export name (LLD §5).
+     *
+     * `params` holds the `string | number | boolean | value` placeholders as
+     * ValueRefs. `targets` holds the `target` placeholders as TargetRefs, so the
+     * recorder grounds them and the resolver resolves them exactly as it does
+     * `step.target` (LLD §3.2, §5, Draft 2.2). A `target` placeholder encoded as
+     * a literal in `params` would be invisible to both, which is why the
+     * refinement below rejects it.
+     */
     custom: z
-      .object({ id: z.string().min(1), params: z.record(z.string(), valueRefSchema) })
+      .object({
+        id: z.string().min(1),
+        params: z.record(z.string(), valueRefSchema),
+        targets: z.record(z.string(), targetRefSchema).optional(),
+      })
       .strict()
       .optional(),
     /** Set when `action === "invoke"`. */
@@ -295,6 +309,51 @@ export const stepSchema = stepShape
         path: ["custom"],
         message: 'A `custom` block is only allowed on a step with action "custom".',
       });
+    }
+    if (step.custom !== undefined) {
+      // Draft 2.2: a `target` placeholder lives in `custom.targets` and nowhere
+      // else. Two encodings of the same placeholder are rejected here.
+      const targets = step.custom.targets ?? {};
+
+      // (a) The same placeholder name in both maps. The executor would have two
+      //     bindings for one argument and no rule for which wins.
+      for (const name of Object.keys(targets)) {
+        if (name in step.custom.params) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["custom", "params", name],
+            message:
+              `Placeholder "${name}" appears in both \`custom.params\` and \`custom.targets\`. ` +
+              "A `target` placeholder belongs in `targets` only (LLD §5, Draft 2.2).",
+          });
+        }
+      }
+
+      // (b) A literal in `params` that repeats an element id or a phrase this
+      //     step already grounds as a target — the double encoding the rule
+      //     forbids. A literal is invisible to the recorder and to the resolver,
+      //     so the step would silently act on nothing.
+      const grounded = new Set<string>();
+      for (const target of [
+        ...Object.values(targets),
+        ...(step.target === undefined ? [] : [step.target]),
+        ...(step.target2 === undefined ? [] : [step.target2]),
+      ]) {
+        grounded.add(target.ref);
+        grounded.add(target.phrase);
+      }
+      for (const [name, ref] of Object.entries(step.custom.params)) {
+        if (ref.kind === "literal" && grounded.has(ref.value)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["custom", "params", name],
+            message:
+              `\`custom.params.${name}\` is the literal "${ref.value}", which this step already ` +
+              "grounds as a target. A `target` placeholder must be a TargetRef under " +
+              "`custom.targets`, never a literal in `params` (LLD §5, Draft 2.2).",
+          });
+        }
+      }
     }
     if (step.action === "invoke" && step.invoke === undefined) {
       ctx.addIssue({

@@ -414,6 +414,12 @@
                             "$ref": "#/definitions/plan/properties/stories/items/properties/steps/items/properties/args/additionalProperties/anyOf/0"
                           },
                           "type": "object"
+                        },
+                        "targets": {
+                          "additionalProperties": {
+                            "$ref": "#/definitions/plan/properties/stories/items/properties/steps/items/properties/target"
+                          },
+                          "type": "object"
                         }
                       },
                       "required": [

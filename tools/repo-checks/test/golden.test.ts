@@ -62,6 +62,42 @@ describe("evals/compiler/golden.jsonl (REQ-COMP-9)", () => {
     }
   });
 
+  /**
+   * P0-F3 — Draft 2.2: a Tier 0 `target` placeholder is a TargetRef under
+   * `custom.targets`. The mistake the correction names is encoding it as a
+   * literal in `params`, which the recorder never grounds and the resolver never
+   * resolves.
+   *
+   * `stepSchema` rejects the double encoding; this asserts the positive shape on
+   * the committed data, so a golden entry cannot quietly go back to literals.
+   */
+  it("encodes every Tier 0 target placeholder as a TargetRef (LLD §5, Draft 2.2)", () => {
+    const customEntries = entries.filter((e) => e.step.action === "custom");
+    expect(customEntries.length).toBeGreaterThan(0);
+
+    /** Dotted, kebab-cased: what a target phrase normalises to (docs §4). */
+    const ELEMENT_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)+$/;
+
+    for (const entry of customEntries) {
+      const custom = entry.step.custom;
+      expect(custom, `${entry.id} has action "custom" but no custom block`).toBeDefined();
+      for (const [name, ref] of Object.entries(custom!.params)) {
+        expect(
+          ref.kind === "literal" && ELEMENT_ID.test(ref.value),
+          `${entry.id}: custom.params.${name} is the literal "${
+            ref.kind === "literal" ? ref.value : ""
+          }", which is shaped like an element id. A target placeholder belongs in custom.targets.`,
+        ).toBe(false);
+      }
+      for (const [name, target] of Object.entries(custom!.targets ?? {})) {
+        expect(target.status, `${entry.id}: custom.targets.${name} is already bound`).toBe(
+          "unbound",
+        );
+        expect(target.phrase.length, `${entry.id}: custom.targets.${name} has no phrase`).toBeGreaterThan(0);
+      }
+    }
+  });
+
   it("covers every pattern in docs/flow-language.md", () => {
     const covered = new Set(entries.map((e) => e.pattern));
     for (let pattern = 1; pattern <= 30; pattern += 1) {
