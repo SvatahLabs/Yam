@@ -14,7 +14,15 @@
  * Nothing here may import `spec`, `steps`, `compiler` or `runtime` (REQ-PKG-1).
  */
 export { main, runBindingsCommand } from "./cli.js";
-export { parseArgs, stringOption, stringOptions, boolOption, numberOption, type ParsedArgs } from "./args.js";
+export {
+  parseArgs,
+  stringOption,
+  stringOptions,
+  boolOption,
+  numberOption,
+  inputOptions,
+  type ParsedArgs,
+} from "./args.js";
 export { EXIT, type ExitCode } from "./exit-codes.js";
 export { ConfigError, CONFIG_FILES, appConfig, loadConfig } from "./config.js";
 export {

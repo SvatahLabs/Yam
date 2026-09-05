@@ -46,7 +46,42 @@
 import type { AgentSurface } from "@svatah/surface";
 import type { HealInput } from "./failures.js";
 
-export type ReplayOutcome = "reached" | "unreachable";
+/**
+ * Whether the replayer got back to the failing step, and if not, why.
+ *
+ * The bare strings are the whole of LLD §10's contract and every replayer may
+ * return them. The object form exists for one reason (Draft 2.6): "an
+ * `unreachable` caused by a missing input names it". A replay of
+ * `Type {input.password} into the password field` that was never told the
+ * password is not a mysterious failure to arrive — it is a missing argument, and
+ * a report that says so is a report a person can act on.
+ */
+export type ReplayOutcome =
+  | "reached"
+  | "unreachable"
+  | { readonly outcome: "unreachable"; readonly reason: string };
+
+/** `unreachable` in either spelling. */
+export function unreached(outcome: ReplayOutcome): boolean {
+  return outcome !== "reached";
+}
+
+/** The explanation a replayer gave, when it gave one. */
+export function reasonOf(outcome: ReplayOutcome): string | undefined {
+  return typeof outcome === "object" ? outcome.reason : undefined;
+}
+
+/**
+ * What a replayer needs beyond the failure itself (Draft 2.6, LLD §10).
+ *
+ * Replaying a story's prefix means running its steps, and a story with a
+ * signature cannot run without its inputs. They are passed rather than read from
+ * the run, because a run records only their *names* — the values may be secrets
+ * and are never written down (REQ-NFR-6), so the caller supplies them again.
+ */
+export interface ReplayContext {
+  readonly inputs?: Readonly<Record<string, unknown>>;
+}
 
 /**
  * Did the session actually land on the page the failure was recorded on?
@@ -76,7 +111,11 @@ export async function reachedRecordedPage(
 export interface Replayer {
   /** A name for the report, so it says how the page was reached. */
   readonly name: string;
-  toFailure(input: HealInput, surface: AgentSurface): Promise<ReplayOutcome>;
+  toFailure(
+    input: HealInput,
+    surface: AgentSurface,
+    context?: ReplayContext,
+  ): Promise<ReplayOutcome>;
 }
 
 /**

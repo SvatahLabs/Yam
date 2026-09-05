@@ -12,6 +12,7 @@
  */
 import {
   EXIT,
+  inputOptions,
   parseArgs,
   runBindingsCommand,
   type CommandIo,
@@ -60,7 +61,7 @@ Bindings and healing (module a):
   svatah heal --from-bind-failures | --run <id> [--project <dir>]
               [--dir <bindings>] [--out <.svatah>] [--runs <runs>]
               [--base-url <url>] [--storage-state <path.json>]
-              [--apply] [--no-model] [--headed] [--json]
+              [--input k=v] [--apply] [--no-model] [--headed] [--json]
   svatah eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
   svatah eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
                         [--limit <n>] [--report <path.md>] [--json]
@@ -157,11 +158,24 @@ async function prepareRunHeal(args: ParsedArgs, io: CommandIo): Promise<ParsedAr
     const loaded = await loadProject(root);
     const store = BindingsStore.load(`${loaded.root}/${loaded.config.bindings.dir}`);
 
+    /*
+     * The failing stories' inputs (Draft 2.6, LLD §10).
+     *
+     * `--input k=v` and `SVATAH_INPUT_<NAME>`, read by the same function `run`
+     * reads them with. Replaying the prefix of a story that types
+     * `{input.password}` needs the password, and the run recorded only its name
+     * — a secret never reaches a run directory (REQ-NFR-6), so the caller
+     * supplies it again. Registered here as well as passed per call so a heal
+     * has them whichever route reaches the replayer.
+     */
+    const inputs = inputOptions(args);
+
     registerRuntimeReplayer({
       root: loaded.root,
       data: loaded.project.data.values,
       secrets: loaded.project.data.secrets,
       stepTimeoutMs: loaded.config.run.stepTimeoutMs,
+      ...(Object.keys(inputs).length === 0 ? {} : { inputs }),
       resolve: async (target, surface) => {
         const resolution = await resolveBinding(target.ref, surface, store, {
           candidateTimeoutMs: loaded.config.run.candidateTimeoutMs,

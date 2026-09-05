@@ -29,9 +29,12 @@ export {
   currentReplayer,
   hasReplayer,
   reachedRecordedPage,
+  reasonOf,
   registerReplayer,
   samePath,
   SESSION_STATE_REPLAYER,
+  unreached,
+  type ReplayContext,
   type ReplayOutcome,
   type Replayer,
 } from "./replayer.js";

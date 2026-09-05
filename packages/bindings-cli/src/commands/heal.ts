@@ -20,7 +20,7 @@ import {
 import { createSurface, listAdapters } from "@svatah/surface";
 import { DEFAULT_CONFIG, type Config } from "@svatah/schema";
 import { registerAllAdapters } from "../adapters.js";
-import { boolOption, stringOption, type ParsedArgs } from "../args.js";
+import { boolOption, inputOptions, stringOption, type ParsedArgs } from "../args.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
 import { sessionTarget } from "../session.js";
 import type { CommandIo } from "./surface.js";
@@ -55,6 +55,7 @@ export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
   });
   const json = boolOption(args, "json");
   const apply = boolOption(args, "apply");
+  const storyInputs = inputOptions(args);
 
   // `--no-model` is the default and is accepted for symmetry with `eval healing`:
   // module (a) ships the no-op Regrounder, so there is no model to turn off. It
@@ -97,6 +98,21 @@ export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
   const report = await heal({
     bindingsDir,
     inputs,
+    /*
+     * The failing stories' inputs (Draft 2.6, LLD §10).
+     *
+     * Healing a failure at step 5 means replaying the four steps before it, and
+     * a story with a signature cannot replay `Type {input.password} …` without
+     * being told the password. The run recorded only the names — a secret never
+     * reaches a run directory (REQ-NFR-6) — so they are supplied again here, in
+     * exactly the two ways `run` takes them.
+     *
+     * Accepted by both command lines even though only `svatah heal` has a
+     * replayer that replays: `svatah-bindings heal` restores the recorded page
+     * instead and needs no inputs, and a flag that exists under one name and not
+     * the other would be a trap for anyone moving between them.
+     */
+    ...(Object.keys(storyInputs).length === 0 ? {} : { storyInputs }),
     apply,
     testIdAttributes: DEFAULT_CONFIG.bindings.testIdAttributes,
     /**

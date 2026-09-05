@@ -38,6 +38,7 @@ import {
 import { createSurface } from "@svatah/surface";
 import {
   boolOption,
+  inputOptions,
   numberOption,
   resolveSessionTarget,
   sessionTarget,
@@ -319,19 +320,17 @@ export async function runProject(
 }
 
 /**
- * `--input k=v`, repeated (LLD §15).
+ * `--input k=v`, repeated, beneath `SVATAH_INPUT_<NAME>` (LLD §10, §15).
  *
- * A value that starts with `{` is read from the run's data or another story's
- * captures, which is how a secret is passed without putting it on a command line
- * that a process list would show.
+ * The shared parser, so `run`, `workflow run` and `heal --run` take their inputs
+ * the same way — which is what LLD §10's "exactly as `run` does" asks for, and
+ * what stops the three drifting apart one flag at a time.
+ *
+ * The environment matters for the same reason it does everywhere else: a
+ * password on a command line is a password in the process list.
  */
 function inputsFrom(args: ParsedArgs): Record<string, unknown> | undefined {
-  const out: Record<string, unknown> = {};
-  for (const one of stringOptions(args, "input")) {
-    const at = one.indexOf("=");
-    if (at <= 0) continue;
-    out[one.slice(0, at).trim()] = one.slice(at + 1);
-  }
+  const out = inputOptions(args);
   return Object.keys(out).length === 0 ? undefined : out;
 }
 

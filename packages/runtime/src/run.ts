@@ -154,6 +154,20 @@ export async function run(options: RunOptions): Promise<RunOutcome> {
     endedAt: endedAt.toISOString(),
     flows: flowStatuses,
     ...(Object.keys(outputs).length === 0 ? {} : { outputs }),
+    /*
+     * The names of the inputs this run received (Draft 2.6, LLD §10).
+     *
+     * Names only. A run directory is attached to bug reports and committed to
+     * CI artifacts, and an input may be a secret (REQ-NFR-6). What the names are
+     * for is `svatah heal --run <id>`: healing a failure at step 5 replays the
+     * four steps before it, two of which type `{input.email}` and
+     * `{input.password}`, and the replay has to be told what they were. The
+     * summary is what lets it say *which* input it is missing rather than
+     * reporting a bare `unreachable`.
+     */
+    ...(Object.keys(options.inputs ?? {}).length === 0
+      ? {}
+      : { inputs: Object.keys(options.inputs!).sort() }),
     totals,
     exitCode,
   };

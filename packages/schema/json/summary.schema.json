@@ -73,6 +73,13 @@
           },
           "type": "object"
         },
+        "inputs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
         "invoker": {
           "additionalProperties": false,
           "properties": {

@@ -33,7 +33,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { planSchema, type Plan, type Story } from "@svatah/schema";
-import type { HealInput, Replayer, ReplayOutcome } from "@svatah/healer";
+import type { HealInput, Replayer, ReplayContext, ReplayOutcome } from "@svatah/healer";
 import { reachedRecordedPage, registerReplayer } from "@svatah/healer";
 import { runStory, Scope, type Resolver } from "@svatah/runtime";
 import type { AgentSurface } from "@svatah/surface";
@@ -47,6 +47,13 @@ export interface RuntimeReplayerOptions {
   readonly data?: Readonly<Record<string, unknown>>;
   readonly secrets?: ReadonlySet<string>;
   readonly stepTimeoutMs?: number;
+  /**
+   * The failing stories' inputs (Draft 2.6, LLD §10).
+   *
+   * A fallback beneath the ones the heal job passes per call, so a caller that
+   * registers the replayer once and heals many failures can supply them once.
+   */
+  readonly inputs?: Readonly<Record<string, unknown>>;
   readonly onProgress?: (message: string) => void;
 }
 
@@ -60,7 +67,11 @@ export interface RuntimeReplayerOptions {
 export function runtimeReplayer(options: RuntimeReplayerOptions): Replayer {
   return {
     name: "runtime",
-    async toFailure(input: HealInput, surface: AgentSurface): Promise<ReplayOutcome> {
+    async toFailure(
+      input: HealInput,
+      surface: AgentSurface,
+      context?: ReplayContext,
+    ): Promise<ReplayOutcome> {
       // A bind-failure has no story to replay; the recorded state is all there
       // is, and module (a)'s default is the right answer for it.
       if (input.source !== "run" || input.story === undefined || input.stepId === undefined) {
@@ -98,15 +109,72 @@ export function runtimeReplayer(options: RuntimeReplayerOptions): Replayer {
         return await reachedRecordedPage(input, surface);
       }
 
-      const prefix: Story = { ...story, steps: story.steps.slice(0, at) };
+      /*
+       * The story's inputs (Draft 2.6, LLD §10).
+       *
+       * The prefix of `I want to validate login` types `{input.email}` and
+       * `{input.password}`; with an empty scope those two steps fail and the
+       * replay reports `unreachable` for a reason that has nothing to do with
+       * the page. The values come from `--input` / `SVATAH_INPUT_<NAME>`,
+       * because the run recorded only their names — a secret is never written
+       * into a run directory (REQ-NFR-6).
+       */
+      const declared = story.signature?.inputs ?? {};
+      /*
+       * Only what this story declares. `--input` is about the *run*, and a run
+       * holds stories with different signatures; handing a story something it
+       * never asked for is an error (`"X" has no input "y"`), and it would be a
+       * strange one to get while healing something else. `svatah run` filters
+       * the same way for the same reason.
+       */
+      const inputs = Object.fromEntries(
+        Object.entries({ ...options.inputs, ...context?.inputs }).filter(
+          ([name]) => declared[name] !== undefined,
+        ),
+      );
+
+      const missing = missingInputs(story, inputs);
+      const first = missing[0];
+      if (first !== undefined) {
+        return {
+          outcome: "unreachable",
+          reason:
+            `"${story.name}" needs the input${missing.length === 1 ? "" : "s"} ` +
+            `${missing.map((name) => `"${name}"`).join(", ")} to replay the ${at} step(s) ` +
+            `before ${input.stepId}, and ${missing.length === 1 ? "it was" : "they were"} ` +
+            `not supplied. Pass --input ${first}=… or set ` +
+            `SVATAH_INPUT_${environmentName(first)}.`,
+        };
+      }
+
+      /*
+       * A prefix is not the story, so it does not owe the story's outputs.
+       *
+       * `I want to validate login` declares `outputs: enterprise: string`,
+       * captured by its sixth step. Replaying the first four and then asking for
+       * `enterprise` would fail on a promise the prefix never made — and the
+       * healer would read that as "could not reach the page".
+       */
+      const prefix: Story = {
+        ...story,
+        steps: story.steps.slice(0, at),
+        ...(story.signature === undefined
+          ? {}
+          : { signature: { ...story.signature, outputs: {} } }),
+      };
       const scope = new Scope({
         ...(options.data === undefined ? {} : { data: options.data }),
         ...(options.secrets === undefined ? {} : { secrets: options.secrets }),
       });
 
-      options.onProgress?.(`replaying "${story.name}" to ${input.stepId} (${at} step(s))`);
+      options.onProgress?.(
+        `replaying "${story.name}" to ${input.stepId} (${at} step(s))` +
+          (Object.keys(inputs).length === 0
+            ? ""
+            : ` with ${Object.keys(inputs).sort().join(", ")}`),
+      );
 
-      const outcome = await runStory(prefix, {}, {
+      const outcome = await runStory(prefix, inputs, {
         runId: `heal-${input.stepId}`,
         behavior: "test",
         flow: story.file,
@@ -128,6 +196,26 @@ export function runtimeReplayer(options: RuntimeReplayerOptions): Replayer {
       return await reachedRecordedPage(input, surface);
     },
   };
+}
+
+/**
+ * The inputs a story declares, has no default for, and was not given.
+ *
+ * Named before the replay rather than discovered by it: the steps that read them
+ * fail with "no value for {input.password}", which reaches the report as a
+ * failure to arrive somewhere. Saying it up front is the difference between a
+ * report a person can act on and one they have to reproduce (Draft 2.6, LLD §10).
+ */
+function missingInputs(story: Story, supplied: Readonly<Record<string, unknown>>): string[] {
+  return Object.entries(story.signature?.inputs ?? {})
+    .filter(([name, declared]) => !(name in supplied) && !("default" in declared))
+    .map(([name]) => name)
+    .sort();
+}
+
+/** `password` → `PASSWORD`, the way `SVATAH_INPUT_<NAME>` spells it. */
+function environmentName(name: string): string {
+  return name.replace(/[^A-Za-z0-9]+/g, "_").toUpperCase();
 }
 
 /** Register it. `svatah heal --run <id>` calls this; nothing else does. */

@@ -104,3 +104,41 @@ export function numberOption(args: ParsedArgs, name: string): number | undefined
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
 }
+
+/**
+ * `--input k=v`, repeated, beneath `SVATAH_INPUT_<NAME>` (LLD §10, §15).
+ *
+ * Two sources because a story's inputs are two different things at once. At a
+ * terminal they are arguments and belong on the command line; in CI one of them
+ * is a password, and a password on a command line is a password in the process
+ * list. The flag wins, so an exported default can still be overridden for one
+ * invocation.
+ *
+ * `SVATAH_INPUT_PASSWORD` names the input `password`: the environment is upper
+ * case by convention and the mapping is a lower-casing, so an input whose name
+ * is not a plain lower-case word has to use the flag.
+ *
+ * Shared by `run`, `workflow run` and `heal --run` rather than written three
+ * times: LLD §10 says heal takes them "exactly as `run` does", and the only way
+ * to keep that true is for it to be the same function.
+ */
+export function inputOptions(
+  args: ParsedArgs,
+  environment: Readonly<Record<string, string | undefined>> = process.env,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(environment)) {
+    if (!key.startsWith("SVATAH_INPUT_") || value === undefined) continue;
+    const name = key.slice("SVATAH_INPUT_".length).toLowerCase();
+    if (name !== "") out[name] = value;
+  }
+
+  for (const one of stringOptions(args, "input")) {
+    const at = one.indexOf("=");
+    if (at <= 0) continue;
+    out[one.slice(0, at).trim()] = one.slice(at + 1);
+  }
+
+  return out;
+}

@@ -24,7 +24,7 @@ import { canonicalYaml, type BindingEntry, type BindingFile } from "@svatah/sche
 import type { HealInput } from "./failures.js";
 import { unifiedDiffFor, type FileChange } from "./diff.js";
 import { currentRegrounder, hasRegrounder } from "./regrounder.js";
-import { currentReplayer, type ReplayOutcome } from "./replayer.js";
+import { currentReplayer, reasonOf, unreached, type ReplayOutcome } from "./replayer.js";
 
 /** What happened to one failure. */
 export interface HealResult {
@@ -71,6 +71,17 @@ export interface HealReport {
 export interface HealOptions {
   readonly bindingsDir: string;
   readonly inputs: readonly HealInput[];
+  /**
+   * The failing stories' inputs, by name (Draft 2.6, LLD §10).
+   *
+   * `svatah heal --run` replays the steps before the failing one, and a story
+   * with `inputs: email: string, password: secret` cannot replay
+   * `Type {input.password} into the password field` without being told what it
+   * was. A run records only the input *names* (secrets are never written down,
+   * REQ-NFR-6), so the caller supplies the values again — `--input k=v` or
+   * `SVATAH_INPUT_<NAME>`, exactly as `run` takes them.
+   */
+  readonly storyInputs?: Readonly<Record<string, unknown>>;
   /** Open a session and put it on the page a failure happened on. */
   readonly open: (input: HealInput) => Promise<AgentSurface>;
   readonly close?: (surface: AgentSurface) => Promise<void>;
@@ -189,23 +200,33 @@ async function healOne(
   const replayer = currentReplayer();
   let reached: ReplayOutcome;
   try {
-    reached = await replayer.toFailure(input, surface);
+    reached = await replayer.toFailure(input, surface, {
+      ...(options.storyInputs === undefined ? {} : { inputs: options.storyInputs }),
+    });
   } catch (error) {
     reached = "unreachable";
     void error;
   }
 
-  if (reached === "unreachable") {
+  if (unreached(reached)) {
     await (options.close?.(surface) ?? surface.close()).catch(() => undefined);
+    /*
+     * A replayer that knows why it could not get there says so, and that answer
+     * wins (Draft 2.6, LLD §10). "The replay did not reach the failing step" is
+     * true of a missing `--input password`, and useless: the reader cannot tell
+     * it apart from a page that moved.
+     */
+    const reason = reasonOf(reached);
     return {
       ...base,
       outcome: "unreachable",
       message:
         `could not get back to the point it failed at ("${replayer.name}"). ` +
-        (replayer.name === "session-state"
-          ? "The recorded state did not land on the right page — a flow's failing step often " +
-            "needs the story replayed to it, which `svatah heal` does when the runtime is present."
-          : "The replay did not reach the failing step."),
+        (reason ??
+          (replayer.name === "session-state"
+            ? "The recorded state did not land on the right page — a flow's failing step often " +
+              "needs the story replayed to it, which `svatah heal` does when the runtime is present."
+            : "The replay did not reach the failing step.")),
     };
   }
 

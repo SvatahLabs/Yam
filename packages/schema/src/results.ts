@@ -134,6 +134,16 @@ export const summarySchema = z
     ),
     /** Workflow and tool behaviors return the invoked stories' outputs here. */
     outputs: z.record(z.string().min(1), z.unknown()).optional(),
+    /**
+     * The *names* of the inputs this run was given (Draft 2.6, LLD §10).
+     *
+     * Names, never values: an input may be a secret, and a run directory is a
+     * thing people attach to bug reports (REQ-NFR-6). What the names buy is that
+     * a later `svatah heal --run <id>` whose replay cannot get past
+     * `Type {input.password}` can say *which* input it is missing, instead of
+     * reporting `unreachable` and leaving the reader to guess.
+     */
+    inputs: z.array(z.string().min(1)).optional(),
     totals: z
       .object({
         passed: z.number().int().nonnegative(),

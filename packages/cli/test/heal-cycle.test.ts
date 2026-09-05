@@ -21,6 +21,20 @@
  * Both command lines and both shapes of failure are covered: one at a story's
  * first step (nothing to replay, the flow-start navigation is the whole answer)
  * and one at a later step behind a navigation (the login has to happen first).
+ *
+ * ## The inputs case (P4-F1, Draft 2.6, LLD §10)
+ *
+ * Phase 4's verification found the whole thing still broken for the flow the
+ * repository actually ships. `evals/fixtures/flows/simple.flow` signs in with
+ * `Type {input.email}` and `Type {input.password}`, and the runtime replayer ran
+ * its prefix with an empty scope: the typed steps failed, the replay reported
+ * `unreachable`, and the message blamed the page. The cycle above passed only
+ * because its own flow hard-codes the credentials, which no real one does.
+ *
+ * So the third shape: a story *with a signature*, failing behind its login. It
+ * is exercised through both command lines and both ways of supplying an input —
+ * `--input` and `SVATAH_INPUT_<NAME>` — and the no-input case is asserted too,
+ * because "unreachable" that does not name the missing input is the defect.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { spawn } from "node:child_process";
@@ -59,12 +73,36 @@ const FLOW = `story: Sign in and schedule
 test: Sign in and schedule
 `;
 
-function scaffold(): string {
+/**
+ * The same journey, with the credentials as typed inputs.
+ *
+ * A copy of `evals/fixtures/flows/simple.flow`'s signature and first five steps:
+ * the shape the shipped fixtures have, and the shape Phase 4 could not heal. The
+ * outputs line is kept, because a prefix that stops before the capture is
+ * exactly what the replayer has to tolerate.
+ */
+const FLOW_WITH_INPUTS = `story: Sign in and schedule
+inputs: email: string, password: secret
+outputs: enterprise: string
+  Click the sign in button
+  Type {input.email} into the username field
+  Type {input.password} into the password field
+  Click the login button
+  Click the Schedule Build link
+  Remember the text of the schedule heading as enterprise
+
+test: Sign in and schedule
+`;
+
+const EMAIL = "connected2atul@gmail.com";
+const PASSWORD = "qwerty123";
+
+function scaffold(flow: string = FLOW): string {
   const dir = mkdtempSync(join(tmpdir(), "svatah-heal-cycle-"));
   projects.push(dir);
   cpSync(join(FIXTURES, "bindings"), join(dir, "bindings"), { recursive: true });
   mkdirSync(join(dir, "flows"), { recursive: true });
-  writeFileSync(join(dir, "flows", "cycle.flow"), FLOW, "utf8");
+  writeFileSync(join(dir, "flows", "cycle.flow"), flow, "utf8");
   writeFileSync(
     join(dir, "svatah.config.yaml"),
     `schemaVersion: "1.0.0"
@@ -118,10 +156,15 @@ function breakBinding(project: string, id: string): void {
   writeFileSync(path, candidates + text.slice(end), "utf8");
 }
 
-function cli(bin: string, args: readonly string[], cwd: string): Promise<{ code: number; output: string }> {
+function cli(
+  bin: string,
+  args: readonly string[],
+  cwd: string,
+  env: Readonly<Record<string, string>> = {},
+): Promise<{ code: number; output: string }> {
   return new Promise((done) => {
     let output = "";
-    const child = spawn(process.execPath, [bin, ...args], { cwd, env: process.env });
+    const child = spawn(process.execPath, [bin, ...args], { cwd, env: { ...process.env, ...env } });
     child.stdout.on("data", (chunk) => (output += String(chunk)));
     child.stderr.on("data", (chunk) => (output += String(chunk)));
     child.on("close", (code) => done({ code: code ?? 1, output }));
@@ -133,8 +176,16 @@ function results(project: string, runId: string): StepResult[] {
   return text === "" ? [] : text.split("\n").map((line) => JSON.parse(line) as StepResult);
 }
 
-async function runFlow(project: string, runId: string): Promise<{ code: number; output: string }> {
-  return await cli(SVATAH, ["run", ".", "--host", "none", "--run-id", runId], project);
+async function runFlow(
+  project: string,
+  runId: string,
+  inputs: readonly string[] = [],
+): Promise<{ code: number; output: string }> {
+  return await cli(
+    SVATAH,
+    ["run", ".", "--host", "none", "--run-id", runId, ...inputs.flatMap((i) => ["--input", i])],
+    project,
+  );
 }
 
 beforeAll(async () => {
@@ -217,6 +268,121 @@ describe("healing a run repairs it, through both command lines (P2-F1, LLD §10,
         ),
       "app.schedule-build-link",
     );
+  }, 180_000);
+});
+
+/**
+ * The same cycle for a story with a signature (P4-F1, Draft 2.6, LLD §10).
+ *
+ * The run is given its inputs, so it gets far enough to fail on the broken
+ * binding; the heal has to be given them again, because the run recorded only
+ * their *names* — a secret never reaches a run directory (REQ-NFR-6).
+ */
+async function cycleWithInputs(
+  heal: (project: string) => Promise<{ code: number; output: string }>,
+): Promise<void> {
+  const project = scaffold(FLOW_WITH_INPUTS);
+  breakBinding(project, "app.schedule-build-link");
+
+  const broken = await runFlow(project, "broken", [`email=${EMAIL}`, `password=${PASSWORD}`]);
+  expect(broken.code, broken.output).toBe(1);
+
+  const failure = results(project, "broken").find((r) => r.status === "failed");
+  expect(failure?.failure?.class).toBe("locator");
+  expect(failure?.failure?.message).toContain("app.schedule-build-link");
+
+  // The run says which inputs it was given, and never what they were.
+  const summary = JSON.parse(
+    readFileSync(join(project, "runs", "broken", "summary.json"), "utf8"),
+  ) as { inputs?: string[] };
+  expect(summary.inputs).toEqual(["email", "password"]);
+  expect(readFileSync(join(project, "runs", "broken", "summary.json"), "utf8")).not.toContain(
+    PASSWORD,
+  );
+
+  const healed = await heal(project);
+  expect(healed.code, healed.output).toBe(0);
+  expect(healed.output).toMatch(/repaired/);
+
+  const store = readFileSync(
+    join(project, "bindings", "app", "schedule-build-link.yaml"),
+    "utf8",
+  );
+  expect(store).not.toContain("-GONE");
+
+  const green = await runFlow(project, "healed", [`email=${EMAIL}`, `password=${PASSWORD}`]);
+  expect(green.code, green.output).toBe(0);
+  expect(results(project, "healed").every((r) => r.status === "passed")).toBe(true);
+}
+
+describe("healing a story with inputs, behind its login (P4-F1, LLD §10)", () => {
+  it("svatah heal --run --input: the replay is given the credentials", async () => {
+    await cycleWithInputs((project) =>
+      cli(
+        SVATAH,
+        [
+          "heal",
+          "--run",
+          "broken",
+          "--apply",
+          "--input",
+          `email=${EMAIL}`,
+          "--input",
+          `password=${PASSWORD}`,
+        ],
+        project,
+      ),
+    );
+  }, 180_000);
+
+  it("svatah heal --run with SVATAH_INPUT_<NAME>: the same, from the environment", async () => {
+    await cycleWithInputs((project) =>
+      cli(SVATAH, ["heal", "--run", "broken", "--apply"], project, {
+        SVATAH_INPUT_EMAIL: EMAIL,
+        SVATAH_INPUT_PASSWORD: PASSWORD,
+      }),
+    );
+  }, 180_000);
+
+  it("svatah-bindings heal --run: restores the recorded page, inputs or not", async () => {
+    await cycleWithInputs((project) =>
+      cli(
+        SVATAH_BINDINGS,
+        [
+          "heal",
+          "--run",
+          "broken",
+          "--base-url",
+          app.origin,
+          "--apply",
+          "--input",
+          `email=${EMAIL}`,
+          "--input",
+          `password=${PASSWORD}`,
+        ],
+        project,
+      ),
+    );
+  }, 180_000);
+
+  it("an unreachable for want of an input names the input", async () => {
+    const project = scaffold(FLOW_WITH_INPUTS);
+    breakBinding(project, "app.schedule-build-link");
+    expect((await runFlow(project, "broken", [`email=${EMAIL}`, `password=${PASSWORD}`])).code).toBe(
+      1,
+    );
+
+    const healed = await cli(SVATAH, ["heal", "--run", "broken", "--json"], project);
+    expect(healed.code).toBe(7);
+
+    const report = JSON.parse(healed.output.slice(healed.output.indexOf("{"))) as {
+      results: Array<{ outcome: string; message?: string }>;
+    };
+    expect(report.results[0]?.outcome).toBe("unreachable");
+    // The point of the fix: it says *which* input, not "did not reach the step".
+    expect(report.results[0]?.message).toContain('"email"');
+    expect(report.results[0]?.message).toContain('"password"');
+    expect(report.results[0]?.message).toContain("SVATAH_INPUT_EMAIL");
   }, 180_000);
 });
 
