@@ -89,6 +89,27 @@ on the same machine. It passes alone (`pnpm --filter @svatah/adapter-bidi test`:
 wall-clock race on a busy host — Firefox's remote agent not answering
 `session.new` — and it is recorded rather than dismissed.
 
+**Two defects the suite found in this phase's own work, and what they were.**
+Both were in the ADE's Playwright cases and both turned out to be real:
+
+1. **A finished run pulled you off the screen you had walked to.** The shell
+   re-loads the Run screen when `run.summary` arrives, so a live run and a
+   historical one are the same object — and it did that whatever screen was
+   showing. Phase 9 had two screens and nowhere to walk to; with twelve it is
+   the first thing a second click finds. Guarded by a ref on the showing screen.
+2. **A one-second run is not a window anyone can press a button in.** The stop
+   case ran `guards-and-compensation.flow`: on a fast machine the run ended
+   before the Run screen rendered and Stop was never live, and on a loaded one
+   the wait for it outlived the test. It runs `execution.flow`'s thirty-one
+   steps now. Running *every* flow would be longer still and is not available —
+   several of the project's stories declare inputs and `POST /run` refuses the
+   whole run with a 400 before it starts (REQ-AUTO-5), which is the right
+   answer.
+
+And one in the tests only: `goTo` waited on `getByRole("heading", …)`, which the
+Runs screen's inspector satisfies with its own `<h3>Run 00mt…</h3>` while the
+workspace shows something else. It waits on the workspace's title now.
+
 ## The Phase 9 corrections (P9-F1..F7, together T10.4's first half)
 
 ### P9-F1 — the screen fixtures are recorded on a copy of the project
