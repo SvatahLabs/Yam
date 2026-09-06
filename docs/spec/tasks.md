@@ -387,6 +387,41 @@ Phase 8 total: 13.5 ideal days.
 
 ---
 
+## Phase 9 — Release 0.1.0 and the open P0 items (Draft 2.10)
+
+### T9.1 The desktop gate, race-free and load-aware
+**Refs:** REQ-ADP-7, REQ-SURF-3, LLD §7.5, §14 · **Est:** 1.5
+**Do:** The gate waits until no process of the previous launch remains before launching the next variant; the bridge addresses the process that owns a window when several share the name; the cost line records the one-minute load average and the CPU count; a read that exceeds the deadline is retried once and the report says so; the CI desktop legs run nothing else on their runner.
+**Validate:** Three consecutive gate runs on macOS, one started with `pnpm -r test` running in parallel, all conformant or failing only with a retried, recorded deadline; a test that fakes two same-named processes and shows the one with a window is chosen; the report's bridge line carries the load figures.
+
+### T9.2 The compiler golden set at 300
+**Refs:** REQ-COMP-9, LLD §16 · **Est:** 2.5
+**Do:** Extend `evals/compiler/golden.jsonl` to at least 300 entries across every pattern and tier, drawing Tier 2 entries from `refused.jsonl` only where a reviewer has fixed the answer and moving them out of the corpus so the test set and the training set stay disjoint; regenerate `reports/eval-compiler.md`.
+**Validate:** 300 or more entries; Tier 1 exact match 100 percent; end-to-end at least 95 percent with the pinned Tier 2 model; the corpus test still reports zero overlap with the golden set.
+
+### T9.3 The ADE names every control, and the gate makes a run before it reads results
+**Refs:** REQ-ADE-6, LLD §13.6, §16 · **Est:** 1.5
+**Do:** Name the three unnamed buttons on the Project screen and any other interactive control the desktop snapshot case finds without a name; make the snapshot case fail on an unnamed interactive control; before `ade.result`, the gate runs one story against `apps/sample-web` through the Run screen so the results table branch is exercised (K6).
+**Validate:** The live report's `ade.snapshot` asserts zero unnamed controls; `ade.result` reads a table with one run and its status; both green live.
+
+### T9.4 The three-OS matrix observed
+**Refs:** REQ-ADE-6, REQ-PKG-1, REQ-STD-2 · **Est:** 1 (plus the owner's action)
+**Do:** Write `docs/ci.md` with the exact steps to attach a self-hosted macOS and Windows runner to the Bitbucket workspace, or to mirror the repository to GitHub where the matrix already exists; the owner chooses and attaches. Once a runner exists, run `custom: desktop-gates` and the `ade-installers` matrix and record the results.
+**Validate:** The document, and either the observed pipeline runs with their reports, or the exact blocked step and what the owner has to do.
+
+### T9.5 0.1.0 published and verified from the registry
+**Refs:** REQ-PKG-1, 2, 4 · **Est:** 1.5 (plus the owner's action)
+**Do:** The owner triggers `custom: publish` with the token. Add `scripts/quick-start-registry.mjs`, which installs the four module (a) packages by version from the registry into an empty Playwright project and runs the quick start; add a `CHANGELOG.md` release date and the git tag `v0.1.0`.
+**Validate:** The registry quick start passes on Node 22 and the current LTS after the publish; until the owner publishes, the script runs in tarball mode and says so, and the tag is not created.
+
+### T9.6 The Windows UIA gate (carried)
+**Refs:** REQ-ADP-6, LLD §7.5 · **Est:** 2 (needs a Windows host)
+**Do and Validate:** as T8.6.
+
+Phase 9 total: 10 ideal days.
+
+---
+
 ## Traceability matrix
 
 | Requirement | HLD | LLD | Tasks |
@@ -492,6 +527,7 @@ Phase 8 total: 13.5 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.10 (after Phase 8 verification): Phase 9 added — T9.1 the desktop gate race-free and load-aware, T9.2 the golden set at 300, T9.3 named controls and a real run before results, T9.4 the three-OS matrix observed, T9.5 0.1.0 published by the owner and verified from the registry, T9.6 the Windows gate carried. Total 210.5 ideal days.
 - Draft 2.9 (after Phase 7 verification): Phase 8 added — T8.1 the packaged ADE opens a project, T8.2 the AX bridge within budget and the macOS gate green, T8.3 dialog arming documented, linted, audited, T8.4 the fine-tune withdrawn and its corpus, T8.5 publish 0.1.0 by a manual token-gated step, T8.6 the Windows gate carried. Total 200.5 ideal days.
 - Draft 2.8 (after Phase 6 verification): Phase 7 added — T7.1 AX live gate and desktop healing cases, T7.2 UIA live gate and the pipeline, T7.3 dialog IR and type check, T7.4 Java artifacts in the published schemas, T7.5 the fine-tune measured, T7.6 release candidate 0.1.0. Total 187 ideal days.
 - Draft 2.4 (after Phase 2 verification): T3.6 builds the ADE under `apps/ade` in this repository.
