@@ -843,3 +843,67 @@ Nothing points at the tuned model. `evals/compiler/project/svatah.config.yaml`
 still names `qwen2.5:3b`, and every published compiler number is the base
 model's.
 
+
+---
+
+## Post-verification corrections (F6)
+
+The Phase 7 adversarial verification (`docs/spec/progress/phase-7-verification.md`,
+subject `phase-7` at `33f5dc2`, scored **7.9 / 10**, accepted with corrections)
+ran the macOS gate live on an unlocked display for the first time. This section
+records what it measured and what it found, so that this file is not read as
+the last word on Phase 7. The corrections themselves are Phase 8's F1–F5 and
+their evidence is in [`phase-8.md`](phase-8.md).
+
+### What the live gate measured
+
+| | |
+|---|---|
+| The gate, three variants, unlocked display | **2 of 9 cases green at every variant** — `ade.snapshot` and `ade.no-navigation` only. The window appeared after 12.2 s, 1.7 s and 1.2 s across the three launches; the bridge read it. Every *flow* case found no project open. |
+| Pressing a Recent project through the bridge (`AXPress`) | The press reached the ADE. The ADE logged `svatah serve did not print its handshake within 30000 ms. What it did say:` and nothing followed. |
+| The packaged binary invoked as the ADE invokes it | No output, and a second ADE instance appeared; with `ELECTRON_RUN_AS_NODE=1` still no output, because the `RunAsNode` fuse is off. |
+| The unpackaged ADE with a project open, project screen read through the bridge | **176–193 nodes in 9.8–9.9 s, 51–55 ms per node**, then the bridge's own 10 s deadline. The full screen is 488 nodes — about 25 s for one snapshot. |
+| `bridge.window()` with `timeoutMs: 180000` | Still answered "did not answer within 10000 ms". |
+
+The contract itself reproduced on both Node versions, the release candidate's
+26 tarballs and packed quick start reproduced, and the fine-tune's regression
+reproduced exactly (86.8 % → 13.2 %).
+
+### The findings
+
+- **F1 — the packaged ADE cannot open a project** (REQ-ADE-2, LLD §13.6).
+  `apps/ade/src/main/service.ts` spawned `process.execPath`. Unpackaged that is
+  the development Electron and the script runs; packaged it is the ADE itself
+  with the `RunAsNode` fuse off, so the child is a second ADE that prints
+  nothing. Every path to a project goes through that spawn. `scripts/ade-smoke.mjs`
+  launched the *unpackaged* build and `apps/ade/test` never launched the
+  packaged one, so nothing in this repository could have seen it. Present since
+  Phase 3; exposed by the first live gate.
+- **F2 — the bridge missed the §7.5 budget on the real screen** (REQ-ADP-7).
+  The 10.39 ms per node this file publishes was measured on the menu-bar tree
+  and labelled an extrapolation. The label was honest and the number was wrong
+  by five: a Chromium tree is mostly containers, the walk cost one to four
+  Apple events per container, and the project screen costs 51–55 ms per node.
+- **F3 — pattern 21 is order-dependent and the reference did not say so**
+  (LLD §3.2, §4.2). A `dialog` step arms the *next* dialog. Written after the
+  click that opens one it does nothing, and the dialog is accepted by default
+  with no trace. T7.3's fix is real for the order its new test uses and
+  unchanged for the order the reference's examples suggested.
+- **F4 — two defects in the gate and the suite.** A case with zero checks was
+  reported with nothing to read, and the healing cases ran at variant 0, where
+  they cannot mean anything, and were reported failed there.
+- **F5 — the bridge's deadline did not follow the caller's.**
+  `osascriptBridge({ timeoutMs })` stopped the window read at ten seconds
+  whatever the caller asked for.
+- **F6 — this section.**
+- **F7 — the fine-tune.** The measurement stands and the diagnosis is
+  plausible. What it establishes is that ADR-4's fine-tune cannot be claimed for
+  0.1.0; Draft 2.9 records the target as not met and makes a Tier 2 corpus the
+  precondition for another attempt (T8.4).
+
+### One thing this file got wrong about its own environment
+
+"This host's display is unreachable and no application on it has a window" was
+true when it was written and is not a property of the host. The verifier ran the
+same gate on the same machine with the display unlocked and read windows all
+day. The claim should have been about the session, not the machine.
