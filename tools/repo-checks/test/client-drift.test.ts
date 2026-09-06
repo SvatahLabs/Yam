@@ -130,3 +130,34 @@ describe("a drift fails the check (T9.3 Validate)", () => {
     expect(result.output).toContain("clients/python/svatah_sdk/generated.py");
   });
 });
+
+/**
+ * P9-F2 — no compiled byte-code cache is tracked (T10.4).
+ *
+ * `clients/python` is a *generated* package that `scripts/smoke-clients.mjs`
+ * imports on every run, and CPython writes a `__pycache__` beside every module
+ * it imports. Two of those `.pyc` files were committed in Phase 9 and changed
+ * on every smoke run, so the tree was dirty after a check that had done nothing
+ * wrong. They are ignored and untracked now; this is what keeps them that way.
+ */
+describe("no compiled caches are tracked (P9-F2, T10.4)", () => {
+  it("git knows about no __pycache__ and no .pyc", () => {
+    const tracked = execFileSync("git", ["ls-files"], {
+      cwd: REPO_ROOT,
+      encoding: "utf8",
+      maxBuffer: 32 * 1024 * 1024,
+    })
+      .split("\n")
+      .filter((one) => /(^|\/)__pycache__\/|\.pyc$/.test(one));
+    expect(tracked, tracked.join("\n")).toEqual([]);
+  });
+
+  it("and .gitignore says so, so the next smoke run does not add them back", () => {
+    const ignored = execFileSync(
+      "git",
+      ["check-ignore", "clients/python/svatah_sdk/__pycache__/generated.cpython-314.pyc"],
+      { cwd: REPO_ROOT, encoding: "utf8" },
+    ).trim();
+    expect(ignored).toContain("__pycache__");
+  });
+});

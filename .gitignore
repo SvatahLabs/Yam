@@ -42,6 +42,15 @@ out/
 .COOKIE_*
 .bash_profile
 
+# --- Python (the generated client, T9.3) ---
+# `clients/python` is a generated package that gets imported by
+# `scripts/smoke-clients.mjs` on every run, and CPython writes a byte-code cache
+# beside every module it imports. Two of them were committed in Phase 9 and
+# changed on every smoke run (P9-F2); nothing reads them that cannot regenerate
+# them in milliseconds.
+__pycache__/
+*.pyc
+
 # --- Playwright ---
 .last-run.json
 
