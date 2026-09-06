@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@svatah/compiler": "workspace:*",
+    "@svatah/screens": "workspace:*",
     "@svatah/migrate": "workspace:*",
     "@svatah/spec": "workspace:*",
     "@types/node": "catalog:",

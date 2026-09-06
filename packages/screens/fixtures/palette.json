@@ -1,0 +1,254 @@
+{
+  "$comment": [
+    "The palette fixture (T9.1, LLD §13.7).",
+    "",
+    "What the command palette shows: every action's id, label, key and CLI command,",
+    "in palette order. This file is maintained by hand and is one of the three",
+    "things `tools/repo-checks/test/action-parity.test.ts` compares — the other two",
+    "being `@svatah/screens`'s registry and the CLI's own command table. A check",
+    "that generated this from the registry would compare the registry with itself,",
+    "so renaming an action here without renaming it there (or the other way round)",
+    "is exactly what has to fail.",
+    "",
+    "Regenerate it deliberately, never automatically:",
+    "  node -e \"import('./packages/screens/dist/index.js').then(m => console.log(JSON.stringify(m.ACTIONS.map(a => ({id:a.id,label:a.label,group:a.group,screen:a.screen,...(a.key?{key:a.key}:{}),...(a.cli?{cli:a.cli}:{})})), null, 2)))\"",
+    "and read the diff before committing it."
+  ],
+  "actions":
+[
+    {
+      "id": "flows.compile",
+      "label": "Compile",
+      "group": "Actions",
+      "screen": "flows",
+      "cli": "svatah compile"
+    },
+    {
+      "id": "flows.save",
+      "label": "Save flow",
+      "group": "Actions",
+      "screen": "flows",
+      "key": "⌘S"
+    },
+    {
+      "id": "run.flow",
+      "label": "Run",
+      "group": "Actions",
+      "screen": "flows",
+      "key": "⌘↵",
+      "cli": "svatah run --flow <file>"
+    },
+    {
+      "id": "run.story",
+      "label": "Run story",
+      "group": "Actions",
+      "screen": "flows",
+      "cli": "svatah run --story <name>"
+    },
+    {
+      "id": "run.again",
+      "label": "Run again",
+      "group": "Actions",
+      "screen": "run",
+      "key": "⌘↵",
+      "cli": "svatah run --flow <file>"
+    },
+    {
+      "id": "run.resume",
+      "label": "Resume from step",
+      "group": "Actions",
+      "screen": "run",
+      "cli": "svatah run --resume <runId> --from <stepId>"
+    },
+    {
+      "id": "run.stop",
+      "label": "Stop run",
+      "group": "Actions",
+      "screen": "run"
+    },
+    {
+      "id": "record.start",
+      "label": "Record",
+      "group": "Actions",
+      "screen": "flows",
+      "key": "R",
+      "cli": "svatah record --flow <file>"
+    },
+    {
+      "id": "record.accept",
+      "label": "Accept",
+      "group": "Actions",
+      "screen": "record",
+      "key": "A"
+    },
+    {
+      "id": "record.repick",
+      "label": "Re-pick",
+      "group": "Actions",
+      "screen": "record",
+      "key": "P"
+    },
+    {
+      "id": "record.reject",
+      "label": "Reject",
+      "group": "Actions",
+      "screen": "record",
+      "key": "X"
+    },
+    {
+      "id": "record.stop",
+      "label": "Stop recording",
+      "group": "Actions",
+      "screen": "record"
+    },
+    {
+      "id": "heal.run",
+      "label": "Heal",
+      "group": "Actions",
+      "screen": "run",
+      "key": "H",
+      "cli": "svatah heal --run <id>"
+    },
+    {
+      "id": "heal.bind-failures",
+      "label": "Heal from bind failures",
+      "group": "Actions",
+      "screen": "heal",
+      "cli": "svatah heal --from-bind-failures"
+    },
+    {
+      "id": "heal.apply",
+      "label": "Apply proposal",
+      "group": "Actions",
+      "screen": "heal"
+    },
+    {
+      "id": "bindings.verify",
+      "label": "Verify all bindings",
+      "group": "Actions",
+      "screen": "bindings",
+      "key": "V",
+      "cli": "svatah bindings verify"
+    },
+    {
+      "id": "bindings.prune",
+      "label": "Prune unused bindings",
+      "group": "Actions",
+      "screen": "bindings",
+      "cli": "svatah bindings prune"
+    },
+    {
+      "id": "api.send",
+      "label": "Send request",
+      "group": "Actions",
+      "screen": "api",
+      "key": "⌘↵"
+    },
+    {
+      "id": "data.save",
+      "label": "Save data",
+      "group": "Actions",
+      "screen": "data"
+    },
+    {
+      "id": "agents.serve",
+      "label": "Start the tool server",
+      "group": "Actions",
+      "screen": "agents",
+      "cli": "svatah tool serve"
+    },
+    {
+      "id": "explorer.snapshot",
+      "label": "Snapshot the session",
+      "group": "Actions",
+      "screen": "explorer",
+      "cli": "svatah surface snapshot"
+    },
+    {
+      "id": "import.prototype",
+      "label": "Import prototype database",
+      "group": "Actions",
+      "screen": "import",
+      "cli": "svatah migrate <dest> --from-ade <electron-db dir>"
+    },
+    {
+      "id": "trajectory.compile",
+      "label": "Compile a trajectory",
+      "group": "Actions",
+      "screen": "explorer",
+      "cli": "svatah trajectory compile <trajectory.jsonl>"
+    },
+    {
+      "id": "go.flows",
+      "label": "Go to Flows",
+      "group": "Go to",
+      "screen": "flows"
+    },
+    {
+      "id": "go.record",
+      "label": "Go to Record review",
+      "group": "Go to",
+      "screen": "record"
+    },
+    {
+      "id": "go.runs",
+      "label": "Go to Runs",
+      "group": "Go to",
+      "screen": "runs"
+    },
+    {
+      "id": "go.run",
+      "label": "Go to Run",
+      "group": "Go to",
+      "screen": "run"
+    },
+    {
+      "id": "go.heal",
+      "label": "Go to Heal review",
+      "group": "Go to",
+      "screen": "heal"
+    },
+    {
+      "id": "go.bindings",
+      "label": "Go to Bindings",
+      "group": "Go to",
+      "screen": "bindings"
+    },
+    {
+      "id": "go.agents",
+      "label": "Go to Agents and tools",
+      "group": "Go to",
+      "screen": "agents"
+    },
+    {
+      "id": "go.api",
+      "label": "Go to API",
+      "group": "Go to",
+      "screen": "api"
+    },
+    {
+      "id": "go.data",
+      "label": "Go to Data",
+      "group": "Go to",
+      "screen": "data"
+    },
+    {
+      "id": "go.explorer",
+      "label": "Go to Surface explorer",
+      "group": "Go to",
+      "screen": "explorer"
+    },
+    {
+      "id": "go.import",
+      "label": "Go to Import prototype database",
+      "group": "Go to",
+      "screen": "import"
+    },
+    {
+      "id": "go.settings",
+      "label": "Go to Settings",
+      "group": "Go to",
+      "screen": "settings"
+    }
+  ]
+}

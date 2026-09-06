@@ -1,0 +1,4158 @@
+{
+  "project": {
+    "root": "<repo>/evals/fixtures",
+    "config": {
+      "schemaVersion": "1.0.0",
+      "project": "svatah-fixtures",
+      "environment": "test",
+      "adapter": "playwright",
+      "app": {
+        "baseUrl": "http://127.0.0.1:PORT"
+      },
+      "flows": {
+        "dir": "flows"
+      },
+      "steps": {
+        "dir": "steps"
+      },
+      "bindings": {
+        "dir": "bindings",
+        "testIdAttributes": [
+          "data-testid",
+          "data-test",
+          "data-qa"
+        ],
+        "ignoreAttributes": [
+          "data-svatah-eval"
+        ]
+      },
+      "data": {
+        "file": "data.yaml"
+      },
+      "api": {
+        "dir": "api"
+      },
+      "run": {
+        "workers": 1,
+        "headless": true,
+        "stepTimeoutMs": 10000,
+        "candidateTimeoutMs": 2000,
+        "screenshots": "onFailure",
+        "trace": false,
+        "outputDir": "runs",
+        "checkpoints": false,
+        "audit": true
+      },
+      "compile": {
+        "confidenceThreshold": 0.8
+      },
+      "record": {
+        "model": "none",
+        "maxSnapshotTokens": 4000,
+        "visionFallback": false,
+        "decisionDeadlineMs": 600000
+      },
+      "heal": {
+        "onFail": false,
+        "relocalizeThreshold": 0.72,
+        "margin": 0.1,
+        "useModel": false
+      }
+    },
+    "flows": [
+      "flows/booking-compensation.flow",
+      "flows/booking-workflow.flow",
+      "flows/execution.flow",
+      "flows/guards-and-compensation.flow",
+      "flows/natural_language_login.flow",
+      "flows/simple.flow",
+      "flows/svatah.flow"
+    ],
+    "stories": [
+      {
+        "name": "book a slot",
+        "file": "flows/booking-compensation.flow",
+        "kind": "scenario",
+        "steps": 6
+      },
+      {
+        "name": "pay for the slot",
+        "file": "flows/booking-compensation.flow",
+        "kind": "scenario",
+        "steps": 7
+      },
+      {
+        "name": "cancel booking",
+        "file": "flows/booking-compensation.flow",
+        "kind": "scenario",
+        "steps": 2
+      },
+      {
+        "name": "Book a slot",
+        "file": "flows/booking-workflow.flow",
+        "kind": "story",
+        "steps": 7,
+        "signature": {
+          "inputs": {
+            "location": {
+              "type": "string"
+            },
+            "date": {
+              "type": "string",
+              "default": "2026-09-03"
+            }
+          },
+          "outputs": {
+            "booking": {
+              "type": "string"
+            },
+            "place": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "Pay for a slot",
+        "file": "flows/booking-workflow.flow",
+        "kind": "story",
+        "steps": 4,
+        "signature": {
+          "inputs": {
+            "card": {
+              "type": "secret"
+            }
+          },
+          "outputs": {
+            "paid": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "start zoomcar booking",
+        "file": "flows/execution.flow",
+        "kind": "scenario",
+        "steps": 1
+      },
+      {
+        "name": "perform search",
+        "file": "flows/execution.flow",
+        "kind": "scenario",
+        "steps": 5
+      },
+      {
+        "name": "select date and time",
+        "file": "flows/execution.flow",
+        "kind": "scenario",
+        "steps": 7
+      },
+      {
+        "name": "select car and login",
+        "file": "flows/execution.flow",
+        "kind": "scenario",
+        "steps": 5
+      },
+      {
+        "name": "checkout the selected car",
+        "file": "flows/execution.flow",
+        "kind": "scenario",
+        "steps": 2
+      },
+      {
+        "name": "initiate payment",
+        "file": "flows/execution.flow",
+        "kind": "scenario",
+        "steps": 9
+      },
+      {
+        "name": "logout",
+        "file": "flows/execution.flow",
+        "kind": "scenario",
+        "steps": 2
+      },
+      {
+        "name": "I want to see guards decide",
+        "file": "flows/guards-and-compensation.flow",
+        "kind": "story",
+        "steps": 7
+      },
+      {
+        "name": "I want to book and then fail",
+        "file": "flows/guards-and-compensation.flow",
+        "kind": "scenario",
+        "steps": 5
+      },
+      {
+        "name": "cancel a booking",
+        "file": "flows/guards-and-compensation.flow",
+        "kind": "scenario",
+        "steps": 2
+      },
+      {
+        "name": "Login with natural language format",
+        "file": "flows/natural_language_login.flow",
+        "kind": "story",
+        "steps": 5,
+        "signature": {
+          "inputs": {
+            "email": {
+              "type": "string",
+              "default": "connected2atul@gmail.com"
+            },
+            "password": {
+              "type": "secret"
+            }
+          },
+          "outputs": {}
+        }
+      },
+      {
+        "name": "Logout with natural language format",
+        "file": "flows/natural_language_login.flow",
+        "kind": "story",
+        "steps": 2
+      },
+      {
+        "name": "Validate text with natural language format",
+        "file": "flows/natural_language_login.flow",
+        "kind": "story",
+        "steps": 5
+      },
+      {
+        "name": "I want to validate login",
+        "file": "flows/simple.flow",
+        "kind": "story",
+        "steps": 7,
+        "signature": {
+          "inputs": {
+            "email": {
+              "type": "string"
+            },
+            "password": {
+              "type": "secret"
+            }
+          },
+          "outputs": {
+            "enterprise": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "I want to validate logout",
+        "file": "flows/simple.flow",
+        "kind": "story",
+        "steps": 1
+      },
+      {
+        "name": "I want to validate text",
+        "file": "flows/simple.flow",
+        "kind": "story",
+        "steps": 5
+      },
+      {
+        "name": "Validate Text",
+        "file": "flows/svatah.flow",
+        "kind": "story",
+        "steps": 16
+      }
+    ],
+    "compositions": {
+      "book and pay": [
+        "book a slot",
+        "pay for the slot"
+      ],
+      "Login stories": [
+        "Login with natural language format",
+        "Logout with natural language format",
+        "Validate text with natural language format"
+      ],
+      "I want to validate stories": [
+        "I want to validate login",
+        "I want to validate logout",
+        "I want to validate text"
+      ]
+    },
+    "runs": {
+      "flows/booking-compensation.flow": [
+        "book and pay"
+      ],
+      "flows/booking-workflow.flow": [],
+      "flows/execution.flow": [
+        "start zoomcar booking",
+        "perform search",
+        "select date and time",
+        "select car and login",
+        "checkout the selected car",
+        "initiate payment",
+        "logout"
+      ],
+      "flows/guards-and-compensation.flow": [
+        "I want to see guards decide"
+      ],
+      "flows/natural_language_login.flow": [
+        "Login stories"
+      ],
+      "flows/simple.flow": [
+        "I want to validate stories"
+      ],
+      "flows/svatah.flow": [
+        "Validate Text"
+      ]
+    },
+    "apis": [
+      "active count"
+    ],
+    "customSteps": [],
+    "diagnostics": [
+      {
+        "code": "W_SECRET_UNSET",
+        "severity": "warning",
+        "message": "user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+        "file": "data.yaml",
+        "line": 0
+      },
+      {
+        "code": "W_SECRET_UNSET",
+        "severity": "warning",
+        "message": "card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
+        "file": "data.yaml",
+        "line": 0
+      },
+      {
+        "code": "W_SECRET_UNSET",
+        "severity": "warning",
+        "message": "card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
+        "file": "data.yaml",
+        "line": 0
+      }
+    ],
+    "gateway": {
+      "credential": false
+    }
+  },
+  "plan": {
+    "schemaVersion": "1.0.0",
+    "generatedAt": "1970-01-01T00:00:00.000Z",
+    "project": "svatah-fixtures",
+    "stories": [
+      {
+        "name": "book a slot",
+        "kind": "scenario",
+        "file": "flows/booking-compensation.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": {
+            "compensate": "cancel booking"
+          },
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "book a slot#1",
+            "storyName": "book a slot",
+            "line": 15,
+            "text": "Click the Book a slot link",
+            "action": "click",
+            "target": {
+              "ref": "nav.book-a-slot-link",
+              "phrase": "the Book a slot link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "book a slot#2",
+            "storyName": "book a slot",
+            "line": 16,
+            "text": "Click the location field",
+            "action": "click",
+            "target": {
+              "ref": "booking.location-field",
+              "phrase": "the location field",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "book a slot#3",
+            "storyName": "book a slot",
+            "line": 17,
+            "text": "Type \"indra\" into the location field",
+            "action": "type",
+            "target": {
+              "ref": "booking.location-field",
+              "phrase": "the location field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "literal",
+                "value": "indra"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "book a slot#4",
+            "storyName": "book a slot",
+            "line": 18,
+            "text": "Click the Indiranagar suggestion",
+            "action": "click",
+            "target": {
+              "ref": "booking.indiranagar-suggestion",
+              "phrase": "the Indiranagar suggestion",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "book a slot#5",
+            "storyName": "book a slot",
+            "line": 19,
+            "text": "Click the next button",
+            "action": "click",
+            "target": {
+              "ref": "booking.next-button",
+              "phrase": "the next button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "book a slot#6",
+            "storyName": "book a slot",
+            "line": 20,
+            "text": "Click the Book now button",
+            "action": "click",
+            "target": {
+              "ref": "booking.book-now-button",
+              "phrase": "the Book now button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "pay for the slot",
+        "kind": "scenario",
+        "file": "flows/booking-compensation.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": {
+            "compensate": "cancel booking"
+          },
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "pay for the slot#1",
+            "storyName": "pay for the slot",
+            "line": 23,
+            "text": "Click the booking result",
+            "action": "click",
+            "target": {
+              "ref": "booking.booking-result",
+              "phrase": "the booking result",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "pay for the slot#2",
+            "storyName": "pay for the slot",
+            "line": 24,
+            "text": "Click the Checkout link",
+            "action": "click",
+            "target": {
+              "ref": "app.checkout-link",
+              "phrase": "the Checkout link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "pay for the slot#3",
+            "storyName": "pay for the slot",
+            "line": 25,
+            "text": "Type {data.card.number} into the card number field",
+            "action": "type",
+            "target": {
+              "ref": "checkout.card-number-field",
+              "phrase": "the card number field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "card.number",
+                "secret": true
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "pay for the slot#4",
+            "storyName": "pay for the slot",
+            "line": 26,
+            "text": "Select \"08\" in the expiry month select",
+            "action": "selectOption",
+            "target": {
+              "ref": "checkout.expiry-month-select",
+              "phrase": "the expiry month select",
+              "status": "bound"
+            },
+            "args": {
+              "label": {
+                "kind": "literal",
+                "value": "08"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "selectOption",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "pay for the slot#5",
+            "storyName": "pay for the slot",
+            "line": 27,
+            "text": "Select \"2027\" in the expiry year select",
+            "action": "selectOption",
+            "target": {
+              "ref": "checkout.expiry-year-select",
+              "phrase": "the expiry year select",
+              "status": "bound"
+            },
+            "args": {
+              "label": {
+                "kind": "literal",
+                "value": "2027"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "selectOption",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "pay for the slot#6",
+            "storyName": "pay for the slot",
+            "line": 28,
+            "text": "Type {data.card.cvv} into the CVV field",
+            "action": "type",
+            "target": {
+              "ref": "checkout.cvv-field",
+              "phrase": "the CVV field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "card.cvv",
+                "secret": true
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "pay for the slot#7",
+            "storyName": "pay for the slot",
+            "line": 29,
+            "text": "Click the pay button",
+            "action": "click",
+            "target": {
+              "ref": "checkout.pay-button",
+              "phrase": "the pay button",
+              "status": "bound"
+            },
+            "sideEffect": true,
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "cancel booking",
+        "kind": "scenario",
+        "file": "flows/booking-compensation.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": [],
+          "idempotent": true
+        },
+        "steps": [
+          {
+            "id": "cancel booking#1",
+            "storyName": "cancel booking",
+            "line": 35,
+            "text": "Click the Bookings link",
+            "action": "click",
+            "target": {
+              "ref": "app.bookings-link",
+              "phrase": "the Bookings link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "cancel booking#2",
+            "storyName": "cancel booking",
+            "line": 36,
+            "text": "Click the cancel booking button",
+            "action": "click",
+            "target": {
+              "ref": "booking.cancel-booking-button",
+              "phrase": "the cancel booking button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Book a slot",
+        "kind": "story",
+        "file": "flows/booking-workflow.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": [
+            "workflow"
+          ],
+          "idempotent": true
+        },
+        "signature": {
+          "inputs": {
+            "location": {
+              "type": "string"
+            },
+            "date": {
+              "type": "string",
+              "default": "2026-09-03"
+            }
+          },
+          "outputs": {
+            "booking": {
+              "type": "string"
+            },
+            "place": {
+              "type": "string"
+            }
+          }
+        },
+        "steps": [
+          {
+            "id": "Book a slot#1",
+            "storyName": "Book a slot",
+            "line": 20,
+            "text": "Click the Book a slot link",
+            "action": "click",
+            "target": {
+              "ref": "nav.book-a-slot-link",
+              "phrase": "the Book a slot link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Book a slot#2",
+            "storyName": "Book a slot",
+            "line": 21,
+            "text": "Type {input.location} into the location field",
+            "action": "type",
+            "target": {
+              "ref": "booking.location-field",
+              "phrase": "the location field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "input",
+                "name": "location"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Book a slot#3",
+            "storyName": "Book a slot",
+            "line": 22,
+            "text": "Type {input.date} into the slot date field",
+            "action": "type",
+            "target": {
+              "ref": "booking.slot-date-field",
+              "phrase": "the slot date field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "input",
+                "name": "date"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Book a slot#4",
+            "storyName": "Book a slot",
+            "line": 23,
+            "text": "Click the next button",
+            "action": "click",
+            "target": {
+              "ref": "booking.next-button",
+              "phrase": "the next button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Book a slot#5",
+            "storyName": "Book a slot",
+            "line": 24,
+            "text": "Click the Book now button",
+            "action": "click",
+            "target": {
+              "ref": "booking.book-now-button",
+              "phrase": "the Book now button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Book a slot#6",
+            "storyName": "Book a slot",
+            "line": 25,
+            "text": "Remember the text of the booking result as booking",
+            "action": "read",
+            "target": {
+              "ref": "booking.booking-result",
+              "phrase": "the booking result",
+              "status": "bound"
+            },
+            "capture": {
+              "name": "booking",
+              "from": "text"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "read",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Book a slot#7",
+            "storyName": "Book a slot",
+            "line": 26,
+            "text": "Remember the value of the location field as place",
+            "action": "read",
+            "target": {
+              "ref": "booking.location-field",
+              "phrase": "the location field",
+              "status": "bound"
+            },
+            "capture": {
+              "name": "place",
+              "from": "value"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "read",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Pay for a slot",
+        "kind": "story",
+        "file": "flows/booking-workflow.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": [
+            "workflow"
+          ]
+        },
+        "signature": {
+          "inputs": {
+            "card": {
+              "type": "secret"
+            }
+          },
+          "outputs": {
+            "paid": {
+              "type": "string"
+            }
+          }
+        },
+        "steps": [
+          {
+            "id": "Pay for a slot#1",
+            "storyName": "Pay for a slot",
+            "line": 34,
+            "text": "Click the Book a slot link",
+            "action": "click",
+            "target": {
+              "ref": "nav.book-a-slot-link",
+              "phrase": "the Book a slot link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Pay for a slot#2",
+            "storyName": "Pay for a slot",
+            "line": 35,
+            "text": "Click the Checkout link",
+            "action": "click",
+            "target": {
+              "ref": "app.checkout-link",
+              "phrase": "the Checkout link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Pay for a slot#3",
+            "storyName": "Pay for a slot",
+            "line": 36,
+            "text": "Type {input.card} into the card number field",
+            "action": "type",
+            "target": {
+              "ref": "checkout.card-number-field",
+              "phrase": "the card number field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "input",
+                "name": "card"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Pay for a slot#4",
+            "storyName": "Pay for a slot",
+            "line": 37,
+            "text": "Remember the value of the card number field as paid",
+            "action": "read",
+            "target": {
+              "ref": "checkout.card-number-field",
+              "phrase": "the card number field",
+              "status": "bound"
+            },
+            "capture": {
+              "name": "paid",
+              "from": "value"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "read",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "start zoomcar booking",
+        "kind": "scenario",
+        "file": "flows/execution.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "start zoomcar booking#1",
+            "storyName": "start zoomcar booking",
+            "line": 15,
+            "text": "Click the Book a slot link",
+            "action": "click",
+            "target": {
+              "ref": "nav.book-a-slot-link",
+              "phrase": "the Book a slot link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "perform search",
+        "kind": "scenario",
+        "file": "flows/execution.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "perform search#1",
+            "storyName": "perform search",
+            "line": 18,
+            "text": "Click the location field",
+            "action": "click",
+            "target": {
+              "ref": "booking.location-field",
+              "phrase": "the location field",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "perform search#2",
+            "storyName": "perform search",
+            "line": 19,
+            "text": "Clear the location field",
+            "action": "clear",
+            "target": {
+              "ref": "booking.location-field",
+              "phrase": "the location field",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "clear",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "perform search#3",
+            "storyName": "perform search",
+            "line": 20,
+            "text": "Type \"indra\" into the location field",
+            "action": "type",
+            "target": {
+              "ref": "booking.location-field",
+              "phrase": "the location field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "literal",
+                "value": "indra"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "perform search#4",
+            "storyName": "perform search",
+            "line": 21,
+            "text": "Click the Indiranagar suggestion",
+            "action": "click",
+            "target": {
+              "ref": "booking.indiranagar-suggestion",
+              "phrase": "the Indiranagar suggestion",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "perform search#5",
+            "storyName": "perform search",
+            "line": 22,
+            "text": "Click the next button",
+            "action": "click",
+            "target": {
+              "ref": "booking.next-button",
+              "phrase": "the next button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "select date and time",
+        "kind": "scenario",
+        "file": "flows/execution.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "select date and time#1",
+            "storyName": "select date and time",
+            "line": 25,
+            "text": "Click the slot date field",
+            "action": "click",
+            "target": {
+              "ref": "booking.slot-date-field",
+              "phrase": "the slot date field",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "select date and time#2",
+            "storyName": "select date and time",
+            "line": 26,
+            "text": "Click the 09:00 slot time",
+            "action": "click",
+            "target": {
+              "ref": "booking.09-00-slot-time",
+              "phrase": "the 09:00 slot time",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "select date and time#3",
+            "storyName": "select date and time",
+            "line": 27,
+            "text": "Click the next button",
+            "action": "click",
+            "target": {
+              "ref": "booking.next-button",
+              "phrase": "the next button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "select date and time#4",
+            "storyName": "select date and time",
+            "line": 28,
+            "text": "Click the slot date field",
+            "action": "click",
+            "target": {
+              "ref": "booking.slot-date-field",
+              "phrase": "the slot date field",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "select date and time#5",
+            "storyName": "select date and time",
+            "line": 29,
+            "text": "Click the 18:00 slot time",
+            "action": "click",
+            "target": {
+              "ref": "booking.18-00-slot-time",
+              "phrase": "the 18:00 slot time",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "select date and time#6",
+            "storyName": "select date and time",
+            "line": 30,
+            "text": "Click the next button",
+            "action": "click",
+            "target": {
+              "ref": "booking.next-button",
+              "phrase": "the next button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "select date and time#7",
+            "storyName": "select date and time",
+            "line": 31,
+            "text": "Wait 8 seconds",
+            "action": "sleep",
+            "args": {
+              "seconds": 8
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "sleep",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "select car and login",
+        "kind": "scenario",
+        "file": "flows/execution.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "select car and login#1",
+            "storyName": "select car and login",
+            "line": 34,
+            "text": "Click the Book now button",
+            "action": "click",
+            "target": {
+              "ref": "booking.book-now-button",
+              "phrase": "the Book now button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "select car and login#2",
+            "storyName": "select car and login",
+            "line": 35,
+            "text": "Click the username field",
+            "action": "click",
+            "target": {
+              "ref": "login.username-field",
+              "phrase": "the username field",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "select car and login#3",
+            "storyName": "select car and login",
+            "line": 36,
+            "text": "Type {data.user.email} into the username field",
+            "action": "type",
+            "target": {
+              "ref": "login.username-field",
+              "phrase": "the username field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "user.email"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "select car and login#4",
+            "storyName": "select car and login",
+            "line": 37,
+            "text": "Click the login button",
+            "action": "click",
+            "target": {
+              "ref": "login.login-button",
+              "phrase": "the login button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "select car and login#5",
+            "storyName": "select car and login",
+            "line": 38,
+            "text": "Type {data.user.password} into the password field",
+            "action": "type",
+            "target": {
+              "ref": "login.password-field",
+              "phrase": "the password field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "user.password",
+                "secret": true
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "checkout the selected car",
+        "kind": "scenario",
+        "file": "flows/execution.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "checkout the selected car#1",
+            "storyName": "checkout the selected car",
+            "line": 41,
+            "text": "Click the booking result",
+            "action": "click",
+            "target": {
+              "ref": "booking.booking-result",
+              "phrase": "the booking result",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "checkout the selected car#2",
+            "storyName": "checkout the selected car",
+            "line": 42,
+            "text": "Click the Checkout link",
+            "action": "click",
+            "target": {
+              "ref": "app.checkout-link",
+              "phrase": "the Checkout link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "initiate payment",
+        "kind": "scenario",
+        "file": "flows/execution.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "initiate payment#1",
+            "storyName": "initiate payment",
+            "line": 45,
+            "text": "Click the card number field",
+            "action": "click",
+            "target": {
+              "ref": "checkout.card-number-field",
+              "phrase": "the card number field",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "initiate payment#2",
+            "storyName": "initiate payment",
+            "line": 46,
+            "text": "Click the expiry month select",
+            "action": "click",
+            "target": {
+              "ref": "checkout.expiry-month-select",
+              "phrase": "the expiry month select",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "initiate payment#3",
+            "storyName": "initiate payment",
+            "line": 47,
+            "text": "Select \"08\" in the expiry month select",
+            "action": "selectOption",
+            "target": {
+              "ref": "checkout.expiry-month-select",
+              "phrase": "the expiry month select",
+              "status": "bound"
+            },
+            "args": {
+              "label": {
+                "kind": "literal",
+                "value": "08"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "selectOption",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "initiate payment#4",
+            "storyName": "initiate payment",
+            "line": 48,
+            "text": "Click the expiry year select",
+            "action": "click",
+            "target": {
+              "ref": "checkout.expiry-year-select",
+              "phrase": "the expiry year select",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "initiate payment#5",
+            "storyName": "initiate payment",
+            "line": 49,
+            "text": "Select \"2027\" in the expiry year select",
+            "action": "selectOption",
+            "target": {
+              "ref": "checkout.expiry-year-select",
+              "phrase": "the expiry year select",
+              "status": "bound"
+            },
+            "args": {
+              "label": {
+                "kind": "literal",
+                "value": "2027"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "selectOption",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "initiate payment#6",
+            "storyName": "initiate payment",
+            "line": 50,
+            "text": "Click the CVV field",
+            "action": "click",
+            "target": {
+              "ref": "checkout.cvv-field",
+              "phrase": "the CVV field",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "initiate payment#7",
+            "storyName": "initiate payment",
+            "line": 51,
+            "text": "Type {data.card.cvv} into the CVV field",
+            "action": "type",
+            "target": {
+              "ref": "checkout.cvv-field",
+              "phrase": "the CVV field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "card.cvv",
+                "secret": true
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "initiate payment#8",
+            "storyName": "initiate payment",
+            "line": 52,
+            "text": "Click the card number field",
+            "action": "click",
+            "target": {
+              "ref": "checkout.card-number-field",
+              "phrase": "the card number field",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "initiate payment#9",
+            "storyName": "initiate payment",
+            "line": 53,
+            "text": "Type {data.card.number} into the card number field",
+            "action": "type",
+            "target": {
+              "ref": "checkout.card-number-field",
+              "phrase": "the card number field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "card.number",
+                "secret": true
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "logout",
+        "kind": "scenario",
+        "file": "flows/execution.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "logout#1",
+            "storyName": "logout",
+            "line": 56,
+            "text": "Click the sidebar toggle",
+            "action": "click",
+            "target": {
+              "ref": "app.sidebar-toggle",
+              "phrase": "the sidebar toggle",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "logout#2",
+            "storyName": "logout",
+            "line": 57,
+            "text": "Click the logout link",
+            "action": "click",
+            "target": {
+              "ref": "app.logout-link",
+              "phrase": "the logout link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "I want to see guards decide",
+        "kind": "story",
+        "file": "flows/guards-and-compensation.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "I want to see guards decide#1",
+            "storyName": "I want to see guards decide",
+            "line": 19,
+            "text": "Click the Book a slot link",
+            "action": "click",
+            "target": {
+              "ref": "nav.book-a-slot-link",
+              "phrase": "the Book a slot link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to see guards decide#2",
+            "storyName": "I want to see guards decide",
+            "line": 20,
+            "text": "Remember the text of the booking status as status",
+            "action": "read",
+            "target": {
+              "ref": "booking.booking-status",
+              "phrase": "the booking status",
+              "status": "bound"
+            },
+            "capture": {
+              "name": "status",
+              "from": "text"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "read",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to see guards decide#3",
+            "storyName": "I want to see guards decide",
+            "line": 22,
+            "text": "Type \"Indiranagar\" into the location field",
+            "action": "type",
+            "target": {
+              "ref": "booking.location-field",
+              "phrase": "the location field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "literal",
+                "value": "Indiranagar"
+              }
+            },
+            "guard": {
+              "subject": "page",
+              "predicate": {
+                "kind": "urlContains",
+                "value": {
+                  "kind": "literal",
+                  "value": "/booking"
+                }
+              },
+              "mode": "onlyIf"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to see guards decide#4",
+            "storyName": "I want to see guards decide",
+            "line": 24,
+            "text": "Click the cancel booking button",
+            "action": "click",
+            "target": {
+              "ref": "booking.cancel-booking-button",
+              "phrase": "the cancel booking button",
+              "status": "bound"
+            },
+            "guard": {
+              "subject": "scope",
+              "predicate": {
+                "kind": "expr",
+                "left": {
+                  "kind": "var",
+                  "name": "status"
+                },
+                "op": "eq",
+                "right": {
+                  "kind": "literal",
+                  "value": "Cancelled"
+                }
+              },
+              "mode": "onlyIf"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to see guards decide#5",
+            "storyName": "I want to see guards decide",
+            "line": 26,
+            "text": "Click the cancel booking button",
+            "action": "click",
+            "target": {
+              "ref": "booking.cancel-booking-button",
+              "phrase": "the cancel booking button",
+              "status": "bound"
+            },
+            "guard": {
+              "subject": "scope",
+              "predicate": {
+                "kind": "expr",
+                "left": {
+                  "kind": "var",
+                  "name": "status"
+                },
+                "op": "eq",
+                "right": {
+                  "kind": "literal",
+                  "value": "Confirmed"
+                }
+              },
+              "mode": "unless"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to see guards decide#6",
+            "storyName": "I want to see guards decide",
+            "line": 28,
+            "text": "Click the Book now button",
+            "action": "click",
+            "target": {
+              "ref": "booking.book-now-button",
+              "phrase": "the Book now button",
+              "status": "bound"
+            },
+            "guard": {
+              "subject": "target",
+              "predicate": {
+                "kind": "visible"
+              },
+              "mode": "onlyIf"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to see guards decide#7",
+            "storyName": "I want to see guards decide",
+            "line": 29,
+            "text": "The booking result should say \"Slot booked.\"",
+            "action": "expect",
+            "target": {
+              "ref": "booking.booking-result",
+              "phrase": "the booking result",
+              "status": "bound"
+            },
+            "expect": {
+              "subject": "target",
+              "predicate": {
+                "kind": "text",
+                "value": {
+                  "kind": "literal",
+                  "value": "Slot booked."
+                }
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "expect",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "I want to book and then fail",
+        "kind": "scenario",
+        "file": "flows/guards-and-compensation.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": {
+            "compensate": "cancel a booking"
+          },
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "I want to book and then fail#1",
+            "storyName": "I want to book and then fail",
+            "line": 39,
+            "text": "Click the Book a slot link",
+            "action": "click",
+            "target": {
+              "ref": "nav.book-a-slot-link",
+              "phrase": "the Book a slot link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to book and then fail#2",
+            "storyName": "I want to book and then fail",
+            "line": 40,
+            "text": "Type \"Indiranagar\" into the location field",
+            "action": "type",
+            "target": {
+              "ref": "booking.location-field",
+              "phrase": "the location field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "literal",
+                "value": "Indiranagar"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to book and then fail#3",
+            "storyName": "I want to book and then fail",
+            "line": 41,
+            "text": "Click the Book now button",
+            "action": "click",
+            "target": {
+              "ref": "booking.book-now-button",
+              "phrase": "the Book now button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to book and then fail#4",
+            "storyName": "I want to book and then fail",
+            "line": 42,
+            "text": "Remember the text of the booking reference as reference",
+            "action": "read",
+            "target": {
+              "ref": "booking.booking-reference",
+              "phrase": "the booking reference",
+              "status": "bound"
+            },
+            "capture": {
+              "name": "reference",
+              "from": "text"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "read",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to book and then fail#5",
+            "storyName": "I want to book and then fail",
+            "line": 45,
+            "text": "Click the pay button",
+            "action": "click",
+            "target": {
+              "ref": "checkout.pay-button",
+              "phrase": "the pay button",
+              "status": "bound"
+            },
+            "sideEffect": true,
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "cancel a booking",
+        "kind": "scenario",
+        "file": "flows/guards-and-compensation.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": [],
+          "idempotent": true
+        },
+        "steps": [
+          {
+            "id": "cancel a booking#1",
+            "storyName": "cancel a booking",
+            "line": 48,
+            "text": "Click the cancel booking button",
+            "action": "click",
+            "target": {
+              "ref": "booking.cancel-booking-button",
+              "phrase": "the cancel booking button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "cancel a booking#2",
+            "storyName": "cancel a booking",
+            "line": 51,
+            "text": "The booking reference should say {I want to book and then fail.reference}",
+            "action": "expect",
+            "target": {
+              "ref": "booking.booking-reference",
+              "phrase": "the booking reference",
+              "status": "bound"
+            },
+            "expect": {
+              "subject": "target",
+              "predicate": {
+                "kind": "text",
+                "value": {
+                  "kind": "var",
+                  "name": "reference",
+                  "story": "I want to book and then fail"
+                }
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "expect",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Login with natural language format",
+        "kind": "story",
+        "file": "flows/natural_language_login.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "signature": {
+          "inputs": {
+            "email": {
+              "type": "string",
+              "default": "connected2atul@gmail.com"
+            },
+            "password": {
+              "type": "secret"
+            }
+          },
+          "outputs": {}
+        },
+        "steps": [
+          {
+            "id": "Login with natural language format#1",
+            "storyName": "Login with natural language format",
+            "line": 8,
+            "text": "Click the sign in button",
+            "action": "click",
+            "target": {
+              "ref": "home.sign-in-button",
+              "phrase": "the sign in button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Login with natural language format#2",
+            "storyName": "Login with natural language format",
+            "line": 9,
+            "text": "Type {input.email} into the username field",
+            "action": "type",
+            "target": {
+              "ref": "login.username-field",
+              "phrase": "the username field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "input",
+                "name": "email"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Login with natural language format#3",
+            "storyName": "Login with natural language format",
+            "line": 10,
+            "text": "Type {input.password} into the password field",
+            "action": "type",
+            "target": {
+              "ref": "login.password-field",
+              "phrase": "the password field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "input",
+                "name": "password"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Login with natural language format#4",
+            "storyName": "Login with natural language format",
+            "line": 11,
+            "text": "Click the login button",
+            "action": "click",
+            "target": {
+              "ref": "login.login-button",
+              "phrase": "the login button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Login with natural language format#5",
+            "storyName": "Login with natural language format",
+            "line": 12,
+            "text": "The schedule heading should be visible",
+            "action": "expect",
+            "target": {
+              "ref": "schedule.schedule-heading",
+              "phrase": "the schedule heading",
+              "status": "bound"
+            },
+            "expect": {
+              "subject": "target",
+              "predicate": {
+                "kind": "visible"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "expect",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Logout with natural language format",
+        "kind": "story",
+        "file": "flows/natural_language_login.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "Logout with natural language format#1",
+            "storyName": "Logout with natural language format",
+            "line": 15,
+            "text": "Click the logout link",
+            "action": "click",
+            "target": {
+              "ref": "app.logout-link",
+              "phrase": "the logout link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Logout with natural language format#2",
+            "storyName": "Logout with natural language format",
+            "line": 16,
+            "text": "The home heading should be visible",
+            "action": "expect",
+            "target": {
+              "ref": "home.home-heading",
+              "phrase": "the home heading",
+              "status": "bound"
+            },
+            "expect": {
+              "subject": "target",
+              "predicate": {
+                "kind": "visible"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "expect",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Validate text with natural language format",
+        "kind": "story",
+        "file": "flows/natural_language_login.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "Validate text with natural language format#1",
+            "storyName": "Validate text with natural language format",
+            "line": 19,
+            "text": "Type {data.user.email} into the username field",
+            "action": "type",
+            "target": {
+              "ref": "login.username-field",
+              "phrase": "the username field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "user.email"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate text with natural language format#2",
+            "storyName": "Validate text with natural language format",
+            "line": 20,
+            "text": "Type {data.user.password} into the password field",
+            "action": "type",
+            "target": {
+              "ref": "login.password-field",
+              "phrase": "the password field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "user.password",
+                "secret": true
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate text with natural language format#3",
+            "storyName": "Validate text with natural language format",
+            "line": 21,
+            "text": "Click the login button",
+            "action": "click",
+            "target": {
+              "ref": "login.login-button",
+              "phrase": "the login button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate text with natural language format#4",
+            "storyName": "Validate text with natural language format",
+            "line": 22,
+            "text": "Click the Schedule Build link",
+            "action": "click",
+            "target": {
+              "ref": "app.schedule-build-link",
+              "phrase": "the Schedule Build link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate text with natural language format#5",
+            "storyName": "Validate text with natural language format",
+            "line": 23,
+            "text": "The schedule heading should contain \"Enterprise\"",
+            "action": "expect",
+            "target": {
+              "ref": "schedule.schedule-heading",
+              "phrase": "the schedule heading",
+              "status": "bound"
+            },
+            "expect": {
+              "subject": "target",
+              "predicate": {
+                "kind": "textContains",
+                "value": {
+                  "kind": "literal",
+                  "value": "Enterprise"
+                }
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "expect",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "I want to validate login",
+        "kind": "story",
+        "file": "flows/simple.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": [
+            "smoke"
+          ]
+        },
+        "signature": {
+          "inputs": {
+            "email": {
+              "type": "string"
+            },
+            "password": {
+              "type": "secret"
+            }
+          },
+          "outputs": {
+            "enterprise": {
+              "type": "string"
+            }
+          }
+        },
+        "steps": [
+          {
+            "id": "I want to validate login#1",
+            "storyName": "I want to validate login",
+            "line": 9,
+            "text": "Click the sign in button",
+            "action": "click",
+            "target": {
+              "ref": "home.sign-in-button",
+              "phrase": "the sign in button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to validate login#2",
+            "storyName": "I want to validate login",
+            "line": 10,
+            "text": "Type {input.email} into the username field",
+            "action": "type",
+            "target": {
+              "ref": "login.username-field",
+              "phrase": "the username field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "input",
+                "name": "email"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to validate login#3",
+            "storyName": "I want to validate login",
+            "line": 11,
+            "text": "Type {input.password} into the password field",
+            "action": "type",
+            "target": {
+              "ref": "login.password-field",
+              "phrase": "the password field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "input",
+                "name": "password"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to validate login#4",
+            "storyName": "I want to validate login",
+            "line": 12,
+            "text": "Click the login button",
+            "action": "click",
+            "target": {
+              "ref": "login.login-button",
+              "phrase": "the login button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to validate login#5",
+            "storyName": "I want to validate login",
+            "line": 13,
+            "text": "Click the Schedule Build link",
+            "action": "click",
+            "target": {
+              "ref": "app.schedule-build-link",
+              "phrase": "the Schedule Build link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to validate login#6",
+            "storyName": "I want to validate login",
+            "line": 14,
+            "text": "Remember the text of the schedule heading as enterprise",
+            "action": "read",
+            "target": {
+              "ref": "schedule.schedule-heading",
+              "phrase": "the schedule heading",
+              "status": "bound"
+            },
+            "capture": {
+              "name": "enterprise",
+              "from": "text"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "read",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to validate login#7",
+            "storyName": "I want to validate login",
+            "line": 15,
+            "text": "The schedule heading should say {enterprise}",
+            "action": "expect",
+            "target": {
+              "ref": "schedule.schedule-heading",
+              "phrase": "the schedule heading",
+              "status": "bound"
+            },
+            "expect": {
+              "subject": "target",
+              "predicate": {
+                "kind": "text",
+                "value": {
+                  "kind": "var",
+                  "name": "enterprise"
+                }
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "expect",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "I want to validate logout",
+        "kind": "story",
+        "file": "flows/simple.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "I want to validate logout#1",
+            "storyName": "I want to validate logout",
+            "line": 18,
+            "text": "Click the logout link",
+            "action": "click",
+            "target": {
+              "ref": "app.logout-link",
+              "phrase": "the logout link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "I want to validate text",
+        "kind": "story",
+        "file": "flows/simple.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "I want to validate text#1",
+            "storyName": "I want to validate text",
+            "line": 21,
+            "text": "Type {data.user.email} into the username field",
+            "action": "type",
+            "target": {
+              "ref": "login.username-field",
+              "phrase": "the username field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "user.email"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to validate text#2",
+            "storyName": "I want to validate text",
+            "line": 22,
+            "text": "Type {data.user.password} into the password field",
+            "action": "type",
+            "target": {
+              "ref": "login.password-field",
+              "phrase": "the password field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "user.password",
+                "secret": true
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to validate text#3",
+            "storyName": "I want to validate text",
+            "line": 23,
+            "text": "Click the login button",
+            "action": "click",
+            "target": {
+              "ref": "login.login-button",
+              "phrase": "the login button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to validate text#4",
+            "storyName": "I want to validate text",
+            "line": 24,
+            "text": "Click the Schedule Build link",
+            "action": "click",
+            "target": {
+              "ref": "app.schedule-build-link",
+              "phrase": "the Schedule Build link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "I want to validate text#5",
+            "storyName": "I want to validate text",
+            "line": 25,
+            "text": "The schedule heading should say {I want to validate login.enterprise}",
+            "action": "expect",
+            "target": {
+              "ref": "schedule.schedule-heading",
+              "phrase": "the schedule heading",
+              "status": "bound"
+            },
+            "expect": {
+              "subject": "target",
+              "predicate": {
+                "kind": "text",
+                "value": {
+                  "kind": "var",
+                  "name": "enterprise",
+                  "story": "I want to validate login"
+                }
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "expect",
+              "confidence": 1
+            }
+          }
+        ]
+      },
+      {
+        "name": "Validate Text",
+        "kind": "story",
+        "file": "flows/svatah.flow",
+        "meta": {
+          "enabled": true,
+          "onFailure": "stop",
+          "tags": []
+        },
+        "steps": [
+          {
+            "id": "Validate Text#1",
+            "storyName": "Validate Text",
+            "line": 6,
+            "text": "Click the nav toggle",
+            "action": "click",
+            "target": {
+              "ref": "nav.nav-toggle",
+              "phrase": "the nav toggle",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#2",
+            "storyName": "Validate Text",
+            "line": 11,
+            "text": "Move to the dashboard link and click it",
+            "action": "hoverAndClick",
+            "target": {
+              "ref": "nav.dashboard-link",
+              "phrase": "the dashboard link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "hoverAndClick",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#3",
+            "storyName": "Validate Text",
+            "line": 12,
+            "text": "Go back",
+            "action": "back",
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "back",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#4",
+            "storyName": "Validate Text",
+            "line": 13,
+            "text": "Wait for the dashboard link to be visible",
+            "action": "waitFor",
+            "target": {
+              "ref": "nav.dashboard-link",
+              "phrase": "the dashboard link",
+              "status": "bound"
+            },
+            "expect": {
+              "subject": "target",
+              "predicate": {
+                "kind": "visible"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "waitFor",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#5",
+            "storyName": "Validate Text",
+            "line": 14,
+            "text": "Go forward",
+            "action": "forward",
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "forward",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#6",
+            "storyName": "Validate Text",
+            "line": 15,
+            "text": "Wait for the username field to be present",
+            "action": "waitFor",
+            "target": {
+              "ref": "login.username-field",
+              "phrase": "the username field",
+              "status": "bound"
+            },
+            "expect": {
+              "subject": "target",
+              "predicate": {
+                "kind": "present"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "waitFor",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#7",
+            "storyName": "Validate Text",
+            "line": 16,
+            "text": "Type {data.user.email} into the username field",
+            "action": "type",
+            "target": {
+              "ref": "login.username-field",
+              "phrase": "the username field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "user.email"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#8",
+            "storyName": "Validate Text",
+            "line": 17,
+            "text": "Type {data.user.password} into the password field",
+            "action": "type",
+            "target": {
+              "ref": "login.password-field",
+              "phrase": "the password field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "data",
+                "path": "user.password",
+                "secret": true
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#9",
+            "storyName": "Validate Text",
+            "line": 18,
+            "text": "Click the login button",
+            "action": "click",
+            "target": {
+              "ref": "login.login-button",
+              "phrase": "the login button",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#10",
+            "storyName": "Validate Text",
+            "line": 19,
+            "text": "Click the sidebar toggle",
+            "action": "click",
+            "target": {
+              "ref": "app.sidebar-toggle",
+              "phrase": "the sidebar toggle",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#11",
+            "storyName": "Validate Text",
+            "line": 20,
+            "text": "Click the Schedule Build link",
+            "action": "click",
+            "target": {
+              "ref": "app.schedule-build-link",
+              "phrase": "the Schedule Build link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#12",
+            "storyName": "Validate Text",
+            "line": 21,
+            "text": "Call the \"active count\" API and remember the response as val",
+            "action": "api",
+            "args": {
+              "request": {
+                "kind": "literal",
+                "value": "active count"
+              }
+            },
+            "capture": {
+              "name": "val",
+              "from": "response"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "api",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#13",
+            "storyName": "Validate Text",
+            "line": 22,
+            "text": "Click the sidebar toggle",
+            "action": "click",
+            "target": {
+              "ref": "app.sidebar-toggle",
+              "phrase": "the sidebar toggle",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#14",
+            "storyName": "Validate Text",
+            "line": 23,
+            "text": "Click the logout link",
+            "action": "click",
+            "target": {
+              "ref": "app.logout-link",
+              "phrase": "the logout link",
+              "status": "bound"
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "click",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#15",
+            "storyName": "Validate Text",
+            "line": 24,
+            "text": "Type {val} into the username field",
+            "action": "type",
+            "target": {
+              "ref": "login.username-field",
+              "phrase": "the username field",
+              "status": "bound"
+            },
+            "args": {
+              "value": {
+                "kind": "var",
+                "name": "val"
+              }
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "type",
+              "confidence": 1
+            }
+          },
+          {
+            "id": "Validate Text#16",
+            "storyName": "Validate Text",
+            "line": 25,
+            "text": "Wait 5 seconds",
+            "action": "sleep",
+            "args": {
+              "seconds": 5
+            },
+            "timeoutMs": 10000,
+            "origin": {
+              "tier": 1,
+              "rule": "sleep",
+              "confidence": 1
+            }
+          }
+        ]
+      }
+    ],
+    "compositions": {
+      "book and pay": [
+        "book a slot",
+        "pay for the slot"
+      ],
+      "Login stories": [
+        "Login with natural language format",
+        "Logout with natural language format",
+        "Validate text with natural language format"
+      ],
+      "I want to validate stories": [
+        "I want to validate login",
+        "I want to validate logout",
+        "I want to validate text"
+      ]
+    },
+    "runs": {
+      "flows/booking-compensation.flow": [
+        "book and pay"
+      ],
+      "flows/booking-workflow.flow": [],
+      "flows/execution.flow": [
+        "start zoomcar booking",
+        "perform search",
+        "select date and time",
+        "select car and login",
+        "checkout the selected car",
+        "initiate payment",
+        "logout"
+      ],
+      "flows/guards-and-compensation.flow": [
+        "I want to see guards decide"
+      ],
+      "flows/natural_language_login.flow": [
+        "Login stories"
+      ],
+      "flows/simple.flow": [
+        "I want to validate stories"
+      ],
+      "flows/svatah.flow": [
+        "Validate Text"
+      ]
+    },
+    "targets": {
+      "app.bookings-link": {
+        "phrases": [
+          "the Bookings link"
+        ]
+      },
+      "app.checkout-link": {
+        "phrases": [
+          "the Checkout link"
+        ]
+      },
+      "app.logout-link": {
+        "phrases": [
+          "the logout link"
+        ]
+      },
+      "app.schedule-build-link": {
+        "phrases": [
+          "the Schedule Build link"
+        ]
+      },
+      "app.sidebar-toggle": {
+        "phrases": [
+          "the sidebar toggle"
+        ]
+      },
+      "booking.09-00-slot-time": {
+        "phrases": [
+          "the 09:00 slot time"
+        ]
+      },
+      "booking.18-00-slot-time": {
+        "phrases": [
+          "the 18:00 slot time"
+        ]
+      },
+      "booking.book-now-button": {
+        "phrases": [
+          "the Book now button"
+        ]
+      },
+      "booking.booking-reference": {
+        "phrases": [
+          "the booking reference"
+        ]
+      },
+      "booking.booking-result": {
+        "phrases": [
+          "the booking result"
+        ]
+      },
+      "booking.booking-status": {
+        "phrases": [
+          "the booking status"
+        ]
+      },
+      "booking.cancel-booking-button": {
+        "phrases": [
+          "the cancel booking button"
+        ]
+      },
+      "booking.indiranagar-suggestion": {
+        "phrases": [
+          "the Indiranagar suggestion"
+        ]
+      },
+      "booking.location-field": {
+        "phrases": [
+          "the location field"
+        ]
+      },
+      "booking.next-button": {
+        "phrases": [
+          "the next button"
+        ]
+      },
+      "booking.slot-date-field": {
+        "phrases": [
+          "the slot date field"
+        ]
+      },
+      "checkout.card-number-field": {
+        "phrases": [
+          "the card number field"
+        ]
+      },
+      "checkout.cvv-field": {
+        "phrases": [
+          "the CVV field"
+        ]
+      },
+      "checkout.expiry-month-select": {
+        "phrases": [
+          "the expiry month select"
+        ]
+      },
+      "checkout.expiry-year-select": {
+        "phrases": [
+          "the expiry year select"
+        ]
+      },
+      "checkout.pay-button": {
+        "phrases": [
+          "the pay button"
+        ]
+      },
+      "home.home-heading": {
+        "phrases": [
+          "the home heading"
+        ]
+      },
+      "home.sign-in-button": {
+        "phrases": [
+          "the sign in button"
+        ]
+      },
+      "login.login-button": {
+        "phrases": [
+          "the login button"
+        ]
+      },
+      "login.password-field": {
+        "phrases": [
+          "the password field"
+        ]
+      },
+      "login.username-field": {
+        "phrases": [
+          "the username field"
+        ]
+      },
+      "nav.book-a-slot-link": {
+        "phrases": [
+          "the Book a slot link"
+        ]
+      },
+      "nav.dashboard-link": {
+        "phrases": [
+          "the dashboard link"
+        ]
+      },
+      "nav.nav-toggle": {
+        "phrases": [
+          "the nav toggle"
+        ]
+      },
+      "schedule.schedule-heading": {
+        "phrases": [
+          "the schedule heading"
+        ]
+      }
+    },
+    "apis": [
+      "active count"
+    ],
+    "customSteps": [],
+    "hash": "a60918dcfd0027d0d8b072f09dde78d39de2dbba7b854ca3fe9f05002f5d85cf"
+  },
+  "compile": {
+    "ok": true,
+    "plan": {
+      "hash": "a60918dcfd0027d0d8b072f09dde78d39de2dbba7b854ca3fe9f05002f5d85cf",
+      "stories": 22
+    },
+    "errors": [],
+    "warnings": [
+      {
+        "code": "W_SECRET_UNSET",
+        "severity": "warning",
+        "message": "user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+        "file": "data.yaml",
+        "line": 0
+      },
+      {
+        "code": "W_SECRET_UNSET",
+        "severity": "warning",
+        "message": "card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
+        "file": "data.yaml",
+        "line": 0
+      },
+      {
+        "code": "W_SECRET_UNSET",
+        "severity": "warning",
+        "message": "card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
+        "file": "data.yaml",
+        "line": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "behavior": "test",
+      "bindingsHash": "aa7c8799b30e377aaf967b3ea1203ed265e95506d6376d98e1464fc7aba13693",
+      "configHash": "694232c40866b6f13acabe51b8517dd619c2d456f2c01387d491b4e4ffdc89a6",
+      "endedAt": "2026-09-05T09:25:47.101Z",
+      "exitCode": 11,
+      "flows": {
+        "(selected)": {
+          "failed": 1,
+          "passed": 6,
+          "skipped": 0,
+          "status": "aborted"
+        }
+      },
+      "invoker": {
+        "id": "local",
+        "kind": "user",
+        "via": "cli"
+      },
+      "planHash": "a60918dcfd0027d0d8b072f09dde78d39de2dbba7b854ca3fe9f05002f5d85cf",
+      "runId": "comp",
+      "schemaVersion": "1.0.0",
+      "startedAt": "2026-09-05T09:25:46.580Z",
+      "totals": {
+        "aborted": 0,
+        "failed": 1,
+        "healed": 0,
+        "passed": 6,
+        "skipped": 0
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "app.bookings-link",
+      "file": "bindings/app/bookings-link.yaml"
+    },
+    {
+      "id": "app.checkout-link",
+      "file": "bindings/app/checkout-link.yaml"
+    },
+    {
+      "id": "app.logout-link",
+      "file": "bindings/app/logout-link.yaml"
+    },
+    {
+      "id": "app.schedule-build-link",
+      "file": "bindings/app/schedule-build-link.yaml"
+    },
+    {
+      "id": "app.sidebar-toggle",
+      "file": "bindings/app/sidebar-toggle.yaml"
+    },
+    {
+      "id": "booking.09-00-slot-time",
+      "file": "bindings/booking/09-00-slot-time.yaml"
+    },
+    {
+      "id": "booking.18-00-slot-time",
+      "file": "bindings/booking/18-00-slot-time.yaml"
+    },
+    {
+      "id": "booking.book-now-button",
+      "file": "bindings/booking/book-now-button.yaml"
+    },
+    {
+      "id": "booking.booking-reference",
+      "file": "bindings/booking/booking-reference.yaml"
+    },
+    {
+      "id": "booking.booking-result",
+      "file": "bindings/booking/booking-result.yaml"
+    },
+    {
+      "id": "booking.booking-status",
+      "file": "bindings/booking/booking-status.yaml"
+    },
+    {
+      "id": "booking.cancel-booking-button",
+      "file": "bindings/booking/cancel-booking-button.yaml"
+    },
+    {
+      "id": "booking.indiranagar-suggestion",
+      "file": "bindings/booking/indiranagar-suggestion.yaml"
+    },
+    {
+      "id": "booking.location-field",
+      "file": "bindings/booking/location-field.yaml"
+    },
+    {
+      "id": "booking.next-button",
+      "file": "bindings/booking/next-button.yaml"
+    },
+    {
+      "id": "booking.slot-date-field",
+      "file": "bindings/booking/slot-date-field.yaml"
+    },
+    {
+      "id": "checkout.card-number-field",
+      "file": "bindings/checkout/card-number-field.yaml"
+    },
+    {
+      "id": "checkout.cvv-field",
+      "file": "bindings/checkout/cvv-field.yaml"
+    },
+    {
+      "id": "checkout.expiry-month-select",
+      "file": "bindings/checkout/expiry-month-select.yaml"
+    },
+    {
+      "id": "checkout.expiry-year-select",
+      "file": "bindings/checkout/expiry-year-select.yaml"
+    },
+    {
+      "id": "checkout.pay-button",
+      "file": "bindings/checkout/pay-button.yaml"
+    },
+    {
+      "id": "home.home-heading",
+      "file": "bindings/home/home-heading.yaml"
+    },
+    {
+      "id": "home.sign-in-button",
+      "file": "bindings/home/sign-in-button.yaml"
+    },
+    {
+      "id": "login.login-button",
+      "file": "bindings/login/login-button.yaml"
+    },
+    {
+      "id": "login.password-field",
+      "file": "bindings/login/password-field.yaml"
+    },
+    {
+      "id": "login.username-field",
+      "file": "bindings/login/username-field.yaml"
+    },
+    {
+      "id": "nav.book-a-slot-link",
+      "file": "bindings/nav/book-a-slot-link.yaml"
+    },
+    {
+      "id": "nav.dashboard-link",
+      "file": "bindings/nav/dashboard-link.yaml"
+    },
+    {
+      "id": "nav.nav-toggle",
+      "file": "bindings/nav/nav-toggle.yaml"
+    },
+    {
+      "id": "schedule.schedule-heading",
+      "file": "bindings/schedule/schedule-heading.yaml"
+    }
+  ],
+  "bindingById": {
+    "app.bookings-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"nav-bookings\"\n      - by: \"role\"\n        exact: true\n        name: \"Bookings\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Bookings\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"nav-bookings\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='nav-bookings']\"\n    context:\n      hash: \"691ed4838691ef73b9105f6a60fcca52d9c149cd446ad1d9ea4ffb4d102ccfca\"\n      pattern: \"/dashboard\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"nav-bookings\"\n        href: \"/booking\"\n      box:\n        - 20\n        - 172.5\n        - 63.31\n        - 18\n      index: 0\n      neighbours:\n        after:\n          - \"Checkout\"\n          - \"Logout\"\n          - \"Welcome back, Enterprise You have 3 active builds. Refresh count BuildStatus nightly-1042passed nightly-1043running nightly-1044queued\"\n        before:\n          - \"☰\"\n          - \"Overview\"\n          - \"Schedule Build\"\n      rolePath:\n        - \"complementary\"\n        - \"list\"\n        - \"listitem\"\n      tag: \"a\"\n      text: \"Bookings\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"app.bookings-link\"\nphrases:\n  - \"the Bookings link\"\nschemaVersion: \"1.0.0\"\n",
+    "app.checkout-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"nav-checkout\"\n      - by: \"role\"\n        exact: true\n        name: \"Checkout\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Checkout\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"nav-checkout\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='nav-checkout']\"\n    context:\n      hash: \"691ed4838691ef73b9105f6a60fcca52d9c149cd446ad1d9ea4ffb4d102ccfca\"\n      pattern: \"/dashboard\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"nav-checkout\"\n        href: \"/checkout\"\n      box:\n        - 20\n        - 203.75\n        - 65.5\n        - 18\n      index: 0\n      neighbours:\n        after:\n          - \"Logout\"\n          - \"Welcome back, Enterprise You have 3 active builds. Refresh count BuildStatus nightly-1042passed nightly-1043running nightly-1044queued\"\n        before:\n          - \"Overview\"\n          - \"Schedule Build\"\n          - \"Bookings\"\n      rolePath:\n        - \"complementary\"\n        - \"list\"\n        - \"listitem\"\n      tag: \"a\"\n      text: \"Checkout\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"app.checkout-link\"\nphrases:\n  - \"the Checkout link\"\nschemaVersion: \"1.0.0\"\n",
+    "app.logout-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"nav-logout\"\n      - by: \"role\"\n        exact: true\n        name: \"Logout\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Logout\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"nav-logout\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='nav-logout']\"\n    context:\n      hash: \"93257260a0a5ddc37decbbc3e6e08b9e6dabfa73d8d48933e82d085ff6c0d59f\"\n      pattern: \"/schedule-build\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"nav-logout\"\n        href: \"/logout\"\n      box:\n        - 20\n        - 235\n        - 47.81\n        - 18\n      index: 0\n      neighbours:\n        after:\n          - \"Enterprise Schedule a build for your project. Project Core Adapters ADE Run build Build scheduled.\"\n        before:\n          - \"Schedule Build\"\n          - \"Bookings\"\n          - \"Checkout\"\n      rolePath:\n        - \"complementary\"\n        - \"list\"\n        - \"listitem\"\n      tag: \"a\"\n      text: \"Logout\"\n    provenance:\n      at: \"2026-09-03T06:05:41.545Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:41.558Z\"\n    verified: true\nid: \"app.logout-link\"\nphrases:\n  - \"the logout link\"\nschemaVersion: \"1.0.0\"\n",
+    "app.schedule-build-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"nav-schedule-build\"\n      - by: \"role\"\n        exact: true\n        name: \"Schedule Build\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Schedule Build\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"nav-schedule-build\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='nav-schedule-build']\"\n    context:\n      hash: \"93257260a0a5ddc37decbbc3e6e08b9e6dabfa73d8d48933e82d085ff6c0d59f\"\n      pattern: \"/dashboard\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"nav-schedule-build\"\n        href: \"/schedule-build\"\n      box:\n        - 20\n        - 141.25\n        - 101.95\n        - 18\n      index: 0\n      neighbours:\n        after:\n          - \"Bookings\"\n          - \"Checkout\"\n          - \"Logout\"\n        before:\n          - \"Svatah Sample Menu Dashboard Book a slot Widgets Docs\"\n          - \"☰\"\n          - \"Overview\"\n      rolePath:\n        - \"complementary\"\n        - \"list\"\n        - \"listitem\"\n      tag: \"a\"\n      text: \"Schedule Build\"\n    provenance:\n      at: \"2026-09-03T06:05:41.365Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:41.405Z\"\n    verified: true\nid: \"app.schedule-build-link\"\nphrases:\n  - \"the Schedule Build link\"\nschemaVersion: \"1.0.0\"\n",
+    "app.sidebar-toggle": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"sidebar-toggle\"\n      - by: \"role\"\n        exact: true\n        name: \"Toggle sidebar\"\n        role: \"button\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"☰\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"sidebar-toggle\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='sidebar-toggle']\"\n    context:\n      hash: \"691ed4838691ef73b9105f6a60fcca52d9c149cd446ad1d9ea4ffb4d102ccfca\"\n      pattern: \"/dashboard\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        aria-label: \"Toggle sidebar\"\n        class: \"sidebar-toggle\"\n        data-testid: \"sidebar-toggle\"\n      box:\n        - 20\n        - 70\n        - 33.73\n        - 26\n      index: 0\n      neighbours:\n        after:\n          - \"Overview Schedule Build Bookings Checkout Logout\"\n          - \"Welcome back, Enterprise You have 3 active builds. Refresh count BuildStatus nightly-1042passed nightly-1043running nightly-1044queued\"\n        before:\n          - \"Svatah Sample Menu Dashboard Book a slot Widgets Docs\"\n      rolePath:\n        - \"complementary\"\n      tag: \"button\"\n      text: \"☰\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"app.sidebar-toggle\"\nphrases:\n  - \"the sidebar toggle\"\nschemaVersion: \"1.0.0\"\n",
+    "booking.09-00-slot-time": "entries:\n  - candidates:\n      - by: \"role\"\n        exact: true\n        name: \"09:00\"\n        role: \"option\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"09:00\"\n      - by: \"css\"\n        score: 0.55\n        value: \"[data-testid=\\\"slot-times\\\"] > option:nth-of-type(1)\"\n      - by: \"xpath\"\n        score: 0.45\n        value: \"//*[@data-testid='slot-times']/option[1]\"\n    context:\n      hash: \"5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        value: \"09:00\"\n      box:\n        - 254\n        - 320.55\n        - 167\n        - 19\n      index: 0\n      neighbours:\n        after:\n          - \"12:00\"\n          - \"15:00\"\n          - \"18:00\"\n        before:\n          - \"Starting point\"\n          - \"Date\"\n          - \"Times\"\n      rolePath:\n        - \"main\"\n        - \"listbox\"\n      tag: \"option\"\n      text: \"09:00\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"booking.09-00-slot-time\"\nphrases:\n  - \"the 09:00 slot time\"\nschemaVersion: \"1.0.0\"\n",
+    "booking.18-00-slot-time": "entries:\n  - candidates:\n      - by: \"role\"\n        exact: true\n        name: \"18:00\"\n        role: \"option\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"18:00\"\n      - by: \"css\"\n        score: 0.55\n        value: \"[data-testid=\\\"slot-times\\\"] > option:nth-of-type(4)\"\n      - by: \"xpath\"\n        score: 0.45\n        value: \"//*[@data-testid='slot-times']/option[4]\"\n    context:\n      hash: \"5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        value: \"18:00\"\n      box:\n        - 254\n        - 377.55\n        - 167\n        - 19\n      index: 3\n      neighbours:\n        after:\n          - \"Next\"\n          - \"Book now\"\n          - \"Slot booked.\"\n        before:\n          - \"09:00\"\n          - \"12:00\"\n          - \"15:00\"\n      rolePath:\n        - \"main\"\n        - \"listbox\"\n      tag: \"option\"\n      text: \"18:00\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"booking.18-00-slot-time\"\nphrases:\n  - \"the 18:00 slot time\"\nschemaVersion: \"1.0.0\"\n",
+    "booking.book-now-button": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"book-now\"\n      - by: \"role\"\n        exact: true\n        name: \"Book now\"\n        role: \"button\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Book now\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"book-now\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='book-now']\"\n    context:\n      hash: \"5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        class: \"btn btn-primary\"\n        data-testid: \"book-now\"\n        type: \"button\"\n      box:\n        - 244\n        - 454.8\n        - 187\n        - 41.25\n      index: 1\n      neighbours:\n        after:\n          - \"Slot booked.\"\n        before:\n          - \"Date\"\n          - \"Times 09:00 12:00 15:00 18:00\"\n          - \"Next\"\n      rolePath:\n        - \"main\"\n      tag: \"button\"\n      text: \"Book now\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"booking.book-now-button\"\nphrases:\n  - \"the Book now button\"\nschemaVersion: \"1.0.0\"\n",
+    "booking.booking-reference": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"booking-reference\"\n      - by: \"role\"\n        exact: true\n        name: \"BK-10428\"\n        role: \"cell\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"BK-10428\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"booking-reference\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='booking-reference']\"\n    context:\n      hash: \"782c67c0c203e5c251532fa6cfba11ce7aa2ecfed8ce507973a2e021dabbf0c6\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"booking-reference\"\n      box:\n        - 244.5\n        - 647.69\n        - 99.53\n        - 36.25\n      index: 0\n      neighbours:\n        after:\n          - \"Indiranagar\"\n          - \"Confirmed\"\n          - \"Cancel booking\"\n        before:\n          - \"Slot booked.\"\n          - \"Your bookings\"\n          - \"ReferenceStarting pointStatus\"\n      rolePath:\n        - \"main\"\n        - \"region\"\n        - \"table\"\n        - \"row\"\n      tag: \"td\"\n      text: \"BK-10428\"\n    provenance:\n      at: \"2026-09-04T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-04T00:00:00.000Z\"\n    verified: true\nid: \"booking.booking-reference\"\nphrases:\n  - \"the booking reference\"\nschemaVersion: \"1.0.0\"\n",
+    "booking.booking-result": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"booking-result\"\n      - by: \"id\"\n        score: 0.95\n        value: \"booking-result\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"booking-result\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='booking-result']\"\n    context:\n      hash: \"5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"booking-result\"\n        id: \"booking-result\"\n      box:\n        - 0\n        - 0\n        - 0\n        - 0\n      index: 1\n      neighbours:\n        after: []\n        before:\n          - \"☰ Overview Schedule Build Bookings Checkout Logout\"\n          - \"Book a slot\"\n          - \"Starting point Date Times 09:00 12:00 15:00 18:00 Next Book now\"\n      rolePath:\n        - \"main\"\n      tag: \"p\"\n      text: \"Slot booked.\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"booking.booking-result\"\nphrases:\n  - \"the booking result\"\nschemaVersion: \"1.0.0\"\n",
+    "booking.booking-status": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"booking-status\"\n      - by: \"role\"\n        exact: true\n        name: \"Confirmed\"\n        role: \"cell\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Confirmed\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"booking-status\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='booking-status']\"\n    context:\n      hash: \"782c67c0c203e5c251532fa6cfba11ce7aa2ecfed8ce507973a2e021dabbf0c6\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"booking-status\"\n      box:\n        - 470\n        - 647.69\n        - 97.08\n        - 36.25\n      index: 2\n      neighbours:\n        after:\n          - \"Cancel booking\"\n        before:\n          - \"ReferenceStarting pointStatus\"\n          - \"BK-10428\"\n          - \"Indiranagar\"\n      rolePath:\n        - \"main\"\n        - \"region\"\n        - \"table\"\n        - \"row\"\n      tag: \"td\"\n      text: \"Confirmed\"\n    provenance:\n      at: \"2026-09-04T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-04T00:00:00.000Z\"\n    verified: true\nid: \"booking.booking-status\"\nphrases:\n  - \"the booking status\"\nschemaVersion: \"1.0.0\"\n",
+    "booking.cancel-booking-button": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"cancel-booking\"\n      - by: \"role\"\n        exact: true\n        name: \"Cancel booking\"\n        role: \"button\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Cancel booking\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"cancel-booking\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='cancel-booking']\"\n    context:\n      hash: \"782c67c0c203e5c251532fa6cfba11ce7aa2ecfed8ce507973a2e021dabbf0c6\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        class: \"btn btn-link\"\n        data-testid: \"cancel-booking\"\n        type: \"button\"\n      box:\n        - 244\n        - 684.44\n        - 136.16\n        - 41.25\n      index: 0\n      neighbours:\n        after: []\n        before:\n          - \"Slot booked.\"\n          - \"Your bookings\"\n          - \"ReferenceStarting pointStatus BK-10428 Indiranagar Confirmed\"\n      rolePath:\n        - \"main\"\n        - \"region\"\n      tag: \"button\"\n      text: \"Cancel booking\"\n    provenance:\n      at: \"2026-09-04T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-04T00:00:00.000Z\"\n    verified: true\nid: \"booking.cancel-booking-button\"\nphrases:\n  - \"the cancel booking button\"\nschemaVersion: \"1.0.0\"\n",
+    "booking.indiranagar-suggestion": "entries:\n  - candidates:\n      - by: \"css\"\n        score: 0.55\n        value: \"[id=\\\"locations\\\"] > option:nth-of-type(1)\"\n      - by: \"xpath\"\n        score: 0.45\n        value: \"//*[@id='locations']/option[1]\"\n    context:\n      hash: \"5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        value: \"Indiranagar\"\n      box:\n        - 0\n        - 0\n        - 0\n        - 0\n      index: 0\n      neighbours:\n        after:\n          - \"Date\"\n          - \"Times 09:00 12:00 15:00 18:00\"\n          - \"Next\"\n        before:\n          - \"☰ Overview Schedule Build Bookings Checkout Logout\"\n          - \"Book a slot\"\n          - \"Starting point\"\n      rolePath:\n        - \"main\"\n      tag: \"option\"\n      text: \"\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"booking.indiranagar-suggestion\"\nphrases:\n  - \"the Indiranagar suggestion\"\nschemaVersion: \"1.0.0\"\n",
+    "booking.location-field": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"location\"\n      - by: \"id\"\n        score: 0.95\n        value: \"location\"\n      - by: \"role\"\n        exact: true\n        name: \"Starting point\"\n        role: \"combobox\"\n        score: 0.92\n      - by: \"label\"\n        exact: true\n        score: 0.9\n        value: \"Starting point\"\n      - by: \"placeholder\"\n        exact: true\n        score: 0.85\n        value: \"Where from?\"\n      - by: \"name\"\n        score: 0.82\n        value: \"location\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"location\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='location']\"\n    context:\n      hash: \"f771bfc3c29b361824720c6bffef2948a50440e5bf279edfd529ba6037fddf33\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"location\"\n        id: \"location\"\n        name: \"location\"\n        placeholder: \"Where from?\"\n        type: \"text\"\n      box:\n        - 244\n        - 149.55\n        - 187\n        - 39.25\n      index: 0\n      neighbours:\n        after:\n          - \"Date\"\n          - \"Times 09:00 12:00 15:00 18:00\"\n          - \"Next\"\n        before:\n          - \"☰ Overview Schedule Build Bookings Checkout Logout\"\n          - \"Book a slot\"\n          - \"Starting point\"\n      rolePath:\n        - \"main\"\n      tag: \"input\"\n      text: \"\"\n    provenance:\n      at: \"2026-09-03T06:05:44.024Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:44.043Z\"\n    verified: true\nid: \"booking.location-field\"\nphrases:\n  - \"the location field\"\nschemaVersion: \"1.0.0\"\n",
+    "booking.next-button": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"booking-next\"\n      - by: \"role\"\n        exact: true\n        name: \"Next\"\n        role: \"button\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Next\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"booking-next\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='booking-next']\"\n    context:\n      hash: \"5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        class: \"btn\"\n        data-testid: \"booking-next\"\n        type: \"button\"\n      box:\n        - 244\n        - 399.55\n        - 187\n        - 41.25\n      index: 0\n      neighbours:\n        after:\n          - \"Book now\"\n          - \"Slot booked.\"\n        before:\n          - \"Starting point\"\n          - \"Date\"\n          - \"Times 09:00 12:00 15:00 18:00\"\n      rolePath:\n        - \"main\"\n      tag: \"button\"\n      text: \"Next\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"booking.next-button\"\nphrases:\n  - \"the next button\"\nschemaVersion: \"1.0.0\"\n",
+    "booking.slot-date-field": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"slot-date\"\n      - by: \"id\"\n        score: 0.95\n        value: \"slot-date\"\n      - by: \"role\"\n        exact: true\n        name: \"Date\"\n        role: \"textbox\"\n        score: 0.92\n      - by: \"label\"\n        exact: true\n        score: 0.9\n        value: \"Date\"\n      - by: \"name\"\n        score: 0.82\n        value: \"date\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"slot-date\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='slot-date']\"\n    context:\n      hash: \"5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"slot-date\"\n        id: \"slot-date\"\n        name: \"date\"\n        type: \"date\"\n        value: \"2026-09-03\"\n      box:\n        - 244\n        - 230.05\n        - 187\n        - 41.25\n      index: 0\n      neighbours:\n        after:\n          - \"Times 09:00 12:00 15:00 18:00\"\n          - \"Next\"\n          - \"Book now\"\n        before:\n          - \"Book a slot\"\n          - \"Starting point\"\n          - \"Date\"\n      rolePath:\n        - \"main\"\n      tag: \"input\"\n      text: \"\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"booking.slot-date-field\"\nphrases:\n  - \"the slot date field\"\nschemaVersion: \"1.0.0\"\n",
+    "checkout.card-number-field": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"card\"\n      - by: \"id\"\n        score: 0.95\n        value: \"card\"\n      - by: \"role\"\n        exact: true\n        name: \"Card number\"\n        role: \"textbox\"\n        score: 0.92\n      - by: \"label\"\n        exact: true\n        score: 0.9\n        value: \"Card number\"\n      - by: \"placeholder\"\n        exact: true\n        score: 0.85\n        value: \"0000 0000 0000 0000\"\n      - by: \"name\"\n        score: 0.82\n        value: \"card\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"card\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='card']\"\n    context:\n      hash: \"c32f876970fe76369c0d0836cd9a9d2d85e50833ad706b8edeb0a1bcc29f7649\"\n      pattern: \"/checkout\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"card\"\n        id: \"card\"\n        name: \"card\"\n        placeholder: \"0000 0000 0000 0000\"\n        type: \"text\"\n      box:\n        - 244\n        - 149.55\n        - 194.19\n        - 39.25\n      index: 0\n      neighbours:\n        after:\n          - \"Expiry 010812 20262027\"\n          - \"CVV\"\n          - \"Pay\"\n        before:\n          - \"☰ Overview Schedule Build Bookings Checkout Logout\"\n          - \"Checkout\"\n          - \"Card number\"\n      rolePath:\n        - \"main\"\n      tag: \"input\"\n      text: \"\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"checkout.card-number-field\"\nphrases:\n  - \"the card number field\"\nschemaVersion: \"1.0.0\"\n",
+    "checkout.cvv-field": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"cvv\"\n      - by: \"id\"\n        score: 0.95\n        value: \"cvv\"\n      - by: \"role\"\n        exact: true\n        name: \"CVV\"\n        role: \"textbox\"\n        score: 0.92\n      - by: \"label\"\n        exact: true\n        score: 0.9\n        value: \"CVV\"\n      - by: \"name\"\n        score: 0.82\n        value: \"cvv\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"cvv\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='cvv']\"\n    context:\n      hash: \"c32f876970fe76369c0d0836cd9a9d2d85e50833ad706b8edeb0a1bcc29f7649\"\n      pattern: \"/checkout\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"cvv\"\n        id: \"cvv\"\n        name: \"cvv\"\n        type: \"text\"\n      box:\n        - 244\n        - 280.05\n        - 194.19\n        - 39.25\n      index: 0\n      neighbours:\n        after:\n          - \"Pay\"\n        before:\n          - \"Card number\"\n          - \"Expiry 010812 20262027\"\n          - \"CVV\"\n      rolePath:\n        - \"main\"\n      tag: \"input\"\n      text: \"\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"checkout.cvv-field\"\nphrases:\n  - \"the CVV field\"\nschemaVersion: \"1.0.0\"\n",
+    "checkout.expiry-month-select": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"expiry-month\"\n      - by: \"id\"\n        score: 0.95\n        value: \"expiry-month\"\n      - by: \"role\"\n        exact: true\n        name: \"Expiry\"\n        role: \"combobox\"\n        score: 0.92\n      - by: \"label\"\n        exact: true\n        score: 0.9\n        value: \"Expiry\"\n      - by: \"name\"\n        score: 0.82\n        value: \"expiryMonth\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"expiry-month\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='expiry-month']\"\n    context:\n      hash: \"c32f876970fe76369c0d0836cd9a9d2d85e50833ad706b8edeb0a1bcc29f7649\"\n      pattern: \"/checkout\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"expiry-month\"\n        id: \"expiry-month\"\n        name: \"expiryMonth\"\n      box:\n        - 294.19\n        - 202.8\n        - 59\n        - 36\n      index: 0\n      neighbours:\n        after:\n          - \"20262027\"\n          - \"CVV\"\n          - \"Pay\"\n        before:\n          - \"Checkout\"\n          - \"Card number\"\n          - \"Expiry\"\n      rolePath:\n        - \"main\"\n      tag: \"select\"\n      text: \"010812\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"checkout.expiry-month-select\"\nphrases:\n  - \"the expiry month select\"\nschemaVersion: \"1.0.0\"\n",
+    "checkout.expiry-year-select": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"expiry-year\"\n      - by: \"id\"\n        score: 0.95\n        value: \"expiry-year\"\n      - by: \"name\"\n        score: 0.82\n        value: \"expiryYear\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"expiry-year\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='expiry-year']\"\n    context:\n      hash: \"c32f876970fe76369c0d0836cd9a9d2d85e50833ad706b8edeb0a1bcc29f7649\"\n      pattern: \"/checkout\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"expiry-year\"\n        id: \"expiry-year\"\n        name: \"expiryYear\"\n      box:\n        - 361.19\n        - 202.8\n        - 77\n        - 36\n      index: 1\n      neighbours:\n        after:\n          - \"CVV\"\n          - \"Pay\"\n        before:\n          - \"Card number\"\n          - \"Expiry\"\n          - \"010812\"\n      rolePath:\n        - \"main\"\n      tag: \"select\"\n      text: \"20262027\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"checkout.expiry-year-select\"\nphrases:\n  - \"the expiry year select\"\nschemaVersion: \"1.0.0\"\n",
+    "checkout.pay-button": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"pay\"\n      - by: \"role\"\n        exact: true\n        name: \"Pay\"\n        role: \"button\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Pay\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"pay\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='pay']\"\n    context:\n      hash: \"c32f876970fe76369c0d0836cd9a9d2d85e50833ad706b8edeb0a1bcc29f7649\"\n      pattern: \"/checkout\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        class: \"btn btn-primary\"\n        data-testid: \"pay\"\n        type: \"button\"\n      box:\n        - 244\n        - 333.3\n        - 194.19\n        - 41.25\n      index: 0\n      neighbours:\n        after: []\n        before:\n          - \"Card number\"\n          - \"Expiry 010812 20262027\"\n          - \"CVV\"\n      rolePath:\n        - \"main\"\n      tag: \"button\"\n      text: \"Pay\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"checkout.pay-button\"\nphrases:\n  - \"the pay button\"\nschemaVersion: \"1.0.0\"\n",
+    "home.home-heading": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"home-heading\"\n      - by: \"role\"\n        exact: true\n        name: \"Deterministic automation, once described\"\n        role: \"heading\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Deterministic automation, once described\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"home-heading\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='home-heading']\"\n    context:\n      hash: \"26f8d89fbf51c5544cac8aee328d2979e2127a910c495c7a7f3eec4c1ecd2fb2\"\n      pattern: \"/\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"home-heading\"\n      box:\n        - 20\n        - 74\n        - 720\n        - 40.3\n      index: 0\n      neighbours:\n        after:\n          - \"Describe a behaviour, record the bindings, replay it forever.\"\n          - \"Sign in\"\n          - \"Read the docs\"\n        before:\n          - \"Svatah Sample Menu Dashboard Book a slot Widgets Docs\"\n      rolePath:\n        - \"main\"\n      tag: \"h1\"\n      text: \"Deterministic automation, once described\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"home.home-heading\"\nphrases:\n  - \"the home heading\"\nschemaVersion: \"1.0.0\"\n",
+    "home.sign-in-button": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"sign-in\"\n      - by: \"role\"\n        exact: true\n        name: \"Sign in\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Sign in\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"sign-in\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='sign-in']\"\n    context:\n      hash: \"26f8d89fbf51c5544cac8aee328d2979e2127a910c495c7a7f3eec4c1ecd2fb2\"\n      pattern: \"/\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        class: \"btn btn-primary\"\n        data-testid: \"sign-in\"\n        href: \"/login\"\n      box:\n        - 20\n        - 163.55\n        - 76.2\n        - 41.25\n      index: 0\n      neighbours:\n        after:\n          - \"Read the docs\"\n        before:\n          - \"Svatah Sample Menu Dashboard Book a slot Widgets Docs\"\n          - \"Deterministic automation, once described\"\n          - \"Describe a behaviour, record the bindings, replay it forever.\"\n      rolePath:\n        - \"main\"\n      tag: \"a\"\n      text: \"Sign in\"\n    provenance:\n      at: \"2026-09-03T06:05:42.976Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:43.006Z\"\n    verified: true\nid: \"home.sign-in-button\"\nphrases:\n  - \"the sign in button\"\nschemaVersion: \"1.0.0\"\n",
+    "login.login-button": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"login-submit\"\n      - by: \"role\"\n        exact: true\n        name: \"Sign In\"\n        role: \"button\"\n        score: 0.92\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"login-submit\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='login-submit']\"\n    context:\n      hash: \"6ba51b63d6647e26c8aa89acf21a0cf010f430679086725158196752d4844f1c\"\n      pattern: \"/login\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        class: \"btn btn-primary\"\n        data-testid: \"login-submit\"\n        type: \"submit\"\n        value: \"Sign In\"\n      box:\n        - 20\n        - 320.55\n        - 380\n        - 41.25\n      index: 0\n      neighbours:\n        after: []\n        before:\n          - \"Username\"\n          - \"Password\"\n          - \"Remember me\"\n      rolePath:\n        - \"main\"\n      tag: \"input\"\n      text: \"\"\n    provenance:\n      at: \"2026-09-03T06:05:43.145Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:43.157Z\"\n    verified: true\nid: \"login.login-button\"\nphrases:\n  - \"the login button\"\nschemaVersion: \"1.0.0\"\n",
+    "login.password-field": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"password\"\n      - by: \"id\"\n        score: 0.95\n        value: \"password\"\n      - by: \"role\"\n        exact: true\n        name: \"Password\"\n        role: \"textbox\"\n        score: 0.92\n      - by: \"label\"\n        exact: true\n        score: 0.9\n        value: \"Password\"\n      - by: \"placeholder\"\n        exact: true\n        score: 0.85\n        value: \"Your password\"\n      - by: \"name\"\n        score: 0.82\n        value: \"password\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"password\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='password']\"\n    context:\n      hash: \"bbf1d0a379360308f06d072671e1afa27d008962bea88856af290b3d0da518ae\"\n      pattern: \"/login\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"password\"\n        id: \"password\"\n        name: \"password\"\n        placeholder: \"Your password\"\n        type: \"password\"\n      box:\n        - 20\n        - 230.05\n        - 380\n        - 39.25\n      index: 0\n      neighbours:\n        after:\n          - \"Remember me\"\n        before:\n          - \"Invalid credentials\"\n          - \"Username\"\n          - \"Password\"\n      rolePath:\n        - \"main\"\n      tag: \"input\"\n      text: \"\"\n    provenance:\n      at: \"2026-09-03T06:05:43.099Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:43.119Z\"\n    verified: true\nid: \"login.password-field\"\nphrases:\n  - \"the password field\"\nschemaVersion: \"1.0.0\"\n",
+    "login.username-field": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"username\"\n      - by: \"id\"\n        score: 0.95\n        value: \"username\"\n      - by: \"role\"\n        exact: true\n        name: \"Username\"\n        role: \"textbox\"\n        score: 0.92\n      - by: \"label\"\n        exact: true\n        score: 0.9\n        value: \"Username\"\n      - by: \"placeholder\"\n        exact: true\n        score: 0.85\n        value: \"you@example.com\"\n      - by: \"name\"\n        score: 0.82\n        value: \"username\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"username\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='username']\"\n    context:\n      hash: \"e3b76582ec5ee1693bf023b032849e765972348bbc3ca66582071d2b6c07d2a1\"\n      pattern: \"/login\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"username\"\n        id: \"username\"\n        name: \"username\"\n        placeholder: \"you@example.com\"\n        type: \"text\"\n      box:\n        - 20\n        - 149.55\n        - 380\n        - 39.25\n      index: 0\n      neighbours:\n        after:\n          - \"Password\"\n          - \"Remember me\"\n        before:\n          - \"Sign in to your account\"\n          - \"Invalid credentials\"\n          - \"Username\"\n      rolePath:\n        - \"main\"\n      tag: \"input\"\n      text: \"\"\n    provenance:\n      at: \"2026-09-03T06:05:43.055Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:43.092Z\"\n    verified: true\nid: \"login.username-field\"\nphrases:\n  - \"the username field\"\nschemaVersion: \"1.0.0\"\n",
+    "nav.book-a-slot-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"booking-link\"\n      - by: \"role\"\n        exact: true\n        name: \"Book a slot\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Book a slot\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"booking-link\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='booking-link']\"\n    context:\n      hash: \"87208ba43c34ae6e87bd6801fad58d49627e44cfa4ea17c51a8d2a1746e95751\"\n      pattern: \"/\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        class: \"navbar-item\"\n        data-testid: \"booking-link\"\n        href: \"/booking\"\n      box:\n        - 1064.42\n        - 12.88\n        - 75.83\n        - 23.25\n      index: 1\n      neighbours:\n        after:\n          - \"Widgets\"\n          - \"Docs\"\n          - \"Deterministic automation, once described Describe a behaviour, record the bindings, replay it forever. Sign in Read the docs\"\n        before:\n          - \"Svatah Sample\"\n          - \"Menu\"\n          - \"Dashboard\"\n      rolePath:\n        - \"navigation\"\n      tag: \"a\"\n      text: \"Book a slot\"\n    provenance:\n      at: \"2026-09-03T06:05:43.842Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:43.873Z\"\n    verified: true\nid: \"nav.book-a-slot-link\"\nphrases:\n  - \"the Book a slot link\"\nschemaVersion: \"1.0.0\"\n",
+    "nav.dashboard-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"dashboard-link\"\n      - by: \"role\"\n        exact: true\n        name: \"Dashboard\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Dashboard\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"dashboard-link\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='dashboard-link']\"\n    context:\n      hash: \"87208ba43c34ae6e87bd6801fad58d49627e44cfa4ea17c51a8d2a1746e95751\"\n      pattern: \"/\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        class: \"navbar-item\"\n        data-testid: \"dashboard-link\"\n        href: \"/dashboard\"\n      box:\n        - 975.61\n        - 12.88\n        - 74.81\n        - 23.25\n      index: 0\n      neighbours:\n        after:\n          - \"Book a slot\"\n          - \"Widgets\"\n          - \"Docs\"\n        before:\n          - \"Svatah Sample\"\n          - \"Menu\"\n      rolePath:\n        - \"navigation\"\n      tag: \"a\"\n      text: \"Dashboard\"\n    provenance:\n      at: \"2026-09-03T06:05:42.363Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:42.391Z\"\n    verified: true\nid: \"nav.dashboard-link\"\nphrases:\n  - \"the dashboard link\"\nschemaVersion: \"1.0.0\"\n",
+    "nav.nav-toggle": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"nav-toggle\"\n      - by: \"role\"\n        exact: true\n        name: \"Toggle navigation\"\n        role: \"button\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Menu\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"nav-toggle\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='nav-toggle']\"\n    context:\n      hash: \"87208ba43c34ae6e87bd6801fad58d49627e44cfa4ea17c51a8d2a1746e95751\"\n      pattern: \"/\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        aria-label: \"Toggle navigation\"\n        class: \"navbar-toggle\"\n        data-testid: \"nav-toggle\"\n      box:\n        - 137.81\n        - 12\n        - 55.36\n        - 25\n      index: 0\n      neighbours:\n        after:\n          - \"Dashboard Book a slot Widgets Docs\"\n          - \"Deterministic automation, once described Describe a behaviour, record the bindings, replay it forever. Sign in Read the docs\"\n        before:\n          - \"Svatah Sample\"\n      rolePath:\n        - \"navigation\"\n      tag: \"button\"\n      text: \"Menu\"\n    provenance:\n      at: \"2026-09-03T06:05:42.194Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:42.226Z\"\n    verified: true\nid: \"nav.nav-toggle\"\nphrases:\n  - \"the nav toggle\"\nschemaVersion: \"1.0.0\"\n",
+    "schedule.schedule-heading": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"schedule-heading\"\n      - by: \"role\"\n        exact: true\n        name: \"Enterprise\"\n        role: \"heading\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Enterprise\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"schedule-heading\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='schedule-heading']\"\n    context:\n      hash: \"ae92e58ae42e3e29bd77f775e8e2d1a0a59d546a5943ce927450cbf60f8a6a66\"\n      pattern: \"/schedule-build\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"schedule-heading\"\n      box:\n        - 244\n        - 74\n        - 226.84\n        - 40.3\n      index: 0\n      neighbours:\n        after:\n          - \"Schedule a build for your project.\"\n          - \"Project Core Adapters ADE Run build\"\n          - \"Build scheduled.\"\n        before:\n          - \"Svatah Sample Menu Dashboard Book a slot Widgets Docs\"\n          - \"☰ Overview Schedule Build Bookings Checkout Logout\"\n      rolePath:\n        - \"main\"\n      tag: \"h1\"\n      text: \"Enterprise\"\n    provenance:\n      at: \"2026-09-03T06:05:41.517Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:41.538Z\"\n    verified: true\nid: \"schedule.schedule-heading\"\nphrases:\n  - \"the schedule heading\"\nschemaVersion: \"1.0.0\"\n"
+  },
+  "data": {
+    "values": {
+      "user": {
+        "email": "connected2atul@gmail.com",
+        "password": "«redacted»"
+      },
+      "card": {
+        "number": "«redacted»",
+        "cvv": "«redacted»"
+      },
+      "env": "test",
+      "baseUrl": "http://localhost:4173",
+      "date": "2026-09-03",
+      "reportPath": "reports/summary.pdf"
+    },
+    "secrets": [
+      "user.password",
+      "card.number",
+      "card.cvv"
+    ]
+  },
+  "api": [
+    {
+      "name": "active count",
+      "method": "GET",
+      "url": "{data.baseUrl}/api/active-count",
+      "headers": {
+        "accept": "application/json"
+      },
+      "followRedirects": true,
+      "timeoutMs": 5000
+    }
+  ],
+  "tools": {
+    "tools": {
+      "tools": [],
+      "refused": []
+    },
+    "invocations": []
+  },
+  "flows": {
+    "booking-compensation.flow": "// The compensation showcase for REQ-AUTO-4.\n//\n// This flow is not a migration of anything: it is the fixture that exercises the\n// abort policy `onFailure=compensate:<story>`, which no legacy flow could express.\n// It reuses execution.flow's scenario names and steps so the two read together,\n// and adds the one scenario the original never had — \"cancel booking\" — as the\n// compensating story.\n//\n// The first migration of execution.flow folded this into that file, which cost it\n// three of its original scenario names and added a scenario the original did not\n// contain. Keeping the showcase here leaves execution.flow a faithful migration\n// (P0-F2).\n\nscenario (onFailure=compensate:cancel booking): book a slot\n  Click the Book a slot link\n  Click the location field\n  Type \"indra\" into the location field\n  Click the Indiranagar suggestion\n  Click the next button\n  Click the Book now button\n\nscenario (onFailure=compensate:cancel booking): pay for the slot\n  Click the booking result\n  Click the Checkout link\n  Type {data.card.number} into the card number field\n  Select \"08\" in the expiry month select\n  Select \"2027\" in the expiry year select\n  Type {data.card.cvv} into the CVV field\n  Click the pay button\n\n// The compensating story. It runs with the failing flow's scope and then the\n// flow stops (LLD §8.3), so a booking created before the failure is not left\n// behind.\nscenario (idempotent): cancel booking\n  Click the Bookings link\n  Click the cancel booking button\n\ncompose: book and pay\n  book a slot\n  pay for the slot\n\ntest: book and pay\n",
+    "booking-workflow.flow": "// A story with a typed signature, run as a function (T5.2, REQ-BEH-2, REQ-AUTO-5).\n//\n// This flow has no run block, so `svatah run` runs nothing from it: a `story`\n// block outside a run block is a function waiting to be called, not a test\n// (REQ-LANG-10). It is invoked by name —\n//\n//   svatah workflow run \"Book a slot\" --input location=Indiranagar\n//\n// — and by the tool server over MCP (T5.3), which derives the tool's schema from\n// the signature below.\n//\n// `idempotent` because booking the same slot twice on the sample application\n// leaves it in the same state: the page is static. A story that made a real\n// booking would not carry it, and the environment policy would refuse to run it\n// against production without `--allow-side-effects` (REQ-AUTO-7).\n\nstory (idempotent=true, tags=workflow): Book a slot\ninputs: location: string, date: string = \"2026-09-03\"\noutputs: booking: string, place: string\n  Click the Book a slot link\n  Type {input.location} into the location field\n  Type {input.date} into the slot date field\n  Click the next button\n  Click the Book now button\n  Remember the text of the booking result as booking\n  Remember the value of the location field as place\n\n// The same shape without `idempotent`, for the environment policy: booking a\n// slot is safe to repeat on a static page, but paying for one is not, and a\n// production config must refuse this one without an explicit override.\nstory (tags=workflow): Pay for a slot\ninputs: card: secret\noutputs: paid: string\n  Click the Book a slot link\n  Click the Checkout link\n  Type {input.card} into the card number field\n  Remember the value of the card number field as paid\n",
+    "execution.flow": "// Hand-migrated from legacy/src/test/resources/sample/execution.flow (v2) to v3.\n//\n// Every scenario name is the original's, verbatim, and there is exactly one step\n// per original step, in the original order (REQ-LANG-11). The original drove a\n// third-party booking site through inline XPaths; v3 forbids locators in flows,\n// so each target is rewritten as the phrase the equivalent control carries on\n// apps/sample-web, which is what makes the flow recordable and replayable at all\n// (D7, and the step mapping in docs/spec/progress/phase-1.md).\n//\n// The compensation showcase that stood here in the first migration — a \"cancel\n// booking\" scenario, onFailure=compensate metadata, and a compose/test block —\n// was not in the original. It moved to booking-compensation.flow.\n\nscenario: start zoomcar booking\n  Click the Book a slot link\n\nscenario: perform search\n  Click the location field\n  Clear the location field\n  Type \"indra\" into the location field\n  Click the Indiranagar suggestion\n  Click the next button\n\nscenario: select date and time\n  Click the slot date field\n  Click the 09:00 slot time\n  Click the next button\n  Click the slot date field\n  Click the 18:00 slot time\n  Click the next button\n  Wait 8 seconds\n\nscenario: select car and login\n  Click the Book now button\n  Click the username field\n  Type {data.user.email} into the username field\n  Click the login button\n  Type {data.user.password} into the password field\n\nscenario: checkout the selected car\n  Click the booking result\n  Click the Checkout link\n\nscenario: initiate payment\n  Click the card number field\n  Click the expiry month select\n  Select \"08\" in the expiry month select\n  Click the expiry year select\n  Select \"2027\" in the expiry year select\n  Click the CVV field\n  Type {data.card.cvv} into the CVV field\n  Click the card number field\n  Type {data.card.number} into the card number field\n\nscenario: logout\n  Click the sidebar toggle\n  Click the logout link\n",
+    "guards-and-compensation.flow": "// Guards and compensation, end to end (T5.4, REQ-LANG-14, REQ-AUTO-1, 4).\n//\n// `booking-compensation.flow` beside this one is the *policy* showcase and is a\n// faithful sibling of `execution.flow`. This file is the one that demonstrates\n// the two guarantees T5.4 is about, on the smallest thing that can show them:\n//\n//   * a guard whose predicate is false never performs its step, and the audit\n//     log has no surface call for it (REQ-AUTO-1);\n//   * a failing story runs its compensating story with the failing story's\n//     scope, and the run ends `aborted` with the policy recorded (REQ-AUTO-4).\n\n// ── guards ────────────────────────────────────────────────────────────────────\n//\n// Three guards, one of each subject the IR has: the page, the scope, and the\n// step's own element. The two that are false must leave no trace on the\n// application at all.\n\nstory: I want to see guards decide\n  Click the Book a slot link\n  Remember the text of the booking status as status\n  // True: the page is the booking page.\n  Only if the URL contains \"/booking\", Type \"Indiranagar\" into the location field\n  // False: the status says \"Confirmed\", so this never runs.\n  Only if {status} is \"Cancelled\", Click the cancel booking button\n  // False the other way round: `Unless` runs the step when the predicate fails.\n  Unless {status} is \"Confirmed\", Click the cancel booking button\n  // True: the element the step acts on is there.\n  Only if the Book now button is visible, Click the Book now button\n  The booking result should say \"Slot booked.\"\n\n// ── compensation ──────────────────────────────────────────────────────────────\n//\n// The booking is made, its reference is remembered, and then a step fails. The\n// policy runs \"cancel a booking\" — which reads `{reference}` out of the failing\n// story's scope, because that is the whole point of running it with that scope\n// (REQ-AUTO-4) — and the flow stops.\n\nscenario (onFailure=compensate:cancel a booking): I want to book and then fail\n  Click the Book a slot link\n  Type \"Indiranagar\" into the location field\n  Click the Book now button\n  Remember the text of the booking reference as reference\n  // There is no such element on the booking page: the step fails with a\n  // `locator` class, which is what triggers the policy.\n  Click the pay button\n\nscenario (idempotent=true): cancel a booking\n  Click the cancel booking button\n  // The compensating story can see what the failing one captured. A story that\n  // could not would have nothing to cancel.\n  The booking reference should say {I want to book and then fail.reference}\n\ntest: I want to see guards decide\n",
+    "natural_language_login.flow": "// Hand-migrated from legacy/src/test/resources/sample/natural_language_login.flow\n// to v3. The original was already prose; the migration removes the trailing\n// `with xpath:…` / `with id:…` locator suffixes (REQ-LANG-4) and turns the\n// \"Verify … appears\" sentences into expectations.\n\nstory: Login with natural language format\ninputs: email: string = \"connected2atul@gmail.com\", password: secret\n  Click the sign in button\n  Type {input.email} into the username field\n  Type {input.password} into the password field\n  Click the login button\n  The schedule heading should be visible\n\nstory: Logout with natural language format\n  Click the logout link\n  The home heading should be visible\n\nstory: Validate text with natural language format\n  Type {data.user.email} into the username field\n  Type {data.user.password} into the password field\n  Click the login button\n  Click the Schedule Build link\n  The schedule heading should contain \"Enterprise\"\n\ncompose: Login stories\n  Login with natural language format\n  Logout with natural language format\n  Validate text with natural language format\n\ntest: Run all login stories\n  Login stories\n",
+    "simple.flow": "// Hand-migrated from legacy/src/test/resources/sample/simple.flow (v1) to v3.\n// Story names and step order are preserved exactly (REQ-LANG-11); the sigils\n// (+action+, ~locator~, *data*) and the inline locators are gone, and the\n// literals moved to data.yaml.\n\nstory (tags=smoke): I want to validate login\ninputs: email: string, password: secret\noutputs: enterprise: string\n  Click the sign in button\n  Type {input.email} into the username field\n  Type {input.password} into the password field\n  Click the login button\n  Click the Schedule Build link\n  Remember the text of the schedule heading as enterprise\n  The schedule heading should say {enterprise}\n\nstory: I want to validate logout\n  Click the logout link\n\nstory: I want to validate text\n  Type {data.user.email} into the username field\n  Type {data.user.password} into the password field\n  Click the login button\n  Click the Schedule Build link\n  The schedule heading should say {I want to validate login.enterprise}\n\ncompose: I want to validate stories\n  I want to validate login\n  I want to validate logout\n  I want to validate text\n\ntest: I want to validate stories\n",
+    "svatah.flow": "// Hand-migrated from legacy/src/test/resources/sample/svatah.flow (v2) to v3.\n// The two commented-out steps in the original are kept commented here so the\n// migration is reviewable line for line.\n\nstory: Validate Text\n  Click the nav toggle\n  // Click the docs link\n  // Switch to the new tab\n  // Click the brand link\n  // Switch back to the main tab\n  Move to the dashboard link and click it\n  Go back\n  Wait for the dashboard link to be visible\n  Go forward\n  Wait for the username field to be present\n  Type {data.user.email} into the username field\n  Type {data.user.password} into the password field\n  Click the login button\n  Click the sidebar toggle\n  Click the Schedule Build link\n  Call the \"active count\" API and remember the response as val\n  Click the sidebar toggle\n  Click the logout link\n  Type {val} into the username field\n  Wait 5 seconds\n\ntest: Validate Text\n"
+  },
+  "runById": {
+    "comp": {
+      "summary": {
+        "behavior": "test",
+        "bindingsHash": "aa7c8799b30e377aaf967b3ea1203ed265e95506d6376d98e1464fc7aba13693",
+        "configHash": "694232c40866b6f13acabe51b8517dd619c2d456f2c01387d491b4e4ffdc89a6",
+        "endedAt": "2026-09-05T09:25:47.101Z",
+        "exitCode": 11,
+        "flows": {
+          "(selected)": {
+            "failed": 1,
+            "passed": 6,
+            "skipped": 0,
+            "status": "aborted"
+          }
+        },
+        "invoker": {
+          "id": "local",
+          "kind": "user",
+          "via": "cli"
+        },
+        "planHash": "a60918dcfd0027d0d8b072f09dde78d39de2dbba7b854ca3fe9f05002f5d85cf",
+        "runId": "comp",
+        "schemaVersion": "1.0.0",
+        "startedAt": "2026-09-05T09:25:46.580Z",
+        "totals": {
+          "aborted": 0,
+          "failed": 1,
+          "healed": 0,
+          "passed": 6,
+          "skipped": 0
+        }
+      },
+      "results": [
+        {
+          "runId": "comp",
+          "behavior": "test",
+          "flow": "(selected)",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#1",
+          "line": 39,
+          "text": "Click the Book a slot link",
+          "status": "passed",
+          "startedAt": "2026-09-05T09:25:46.826Z",
+          "endedAt": "2026-09-05T09:25:46.907Z",
+          "durationMs": 81,
+          "matched": {
+            "ref": "h0",
+            "candidateIndex": 0,
+            "by": "testid"
+          }
+        },
+        {
+          "runId": "comp",
+          "behavior": "test",
+          "flow": "(selected)",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#2",
+          "line": 40,
+          "text": "Type \"Indiranagar\" into the location field",
+          "status": "passed",
+          "startedAt": "2026-09-05T09:25:46.908Z",
+          "endedAt": "2026-09-05T09:25:46.938Z",
+          "durationMs": 30,
+          "matched": {
+            "ref": "h0",
+            "candidateIndex": 0,
+            "by": "testid"
+          }
+        },
+        {
+          "runId": "comp",
+          "behavior": "test",
+          "flow": "(selected)",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#3",
+          "line": 41,
+          "text": "Click the Book now button",
+          "status": "passed",
+          "startedAt": "2026-09-05T09:25:46.938Z",
+          "endedAt": "2026-09-05T09:25:46.980Z",
+          "durationMs": 42,
+          "matched": {
+            "ref": "h1",
+            "candidateIndex": 0,
+            "by": "testid"
+          }
+        },
+        {
+          "runId": "comp",
+          "behavior": "test",
+          "flow": "(selected)",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#4",
+          "line": 42,
+          "text": "Remember the text of the booking reference as reference",
+          "status": "passed",
+          "startedAt": "2026-09-05T09:25:46.980Z",
+          "endedAt": "2026-09-05T09:25:46.984Z",
+          "durationMs": 4,
+          "matched": {
+            "ref": "h2",
+            "candidateIndex": 0,
+            "by": "testid"
+          },
+          "captured": {
+            "reference": "BK-10428"
+          }
+        },
+        {
+          "runId": "comp",
+          "behavior": "test",
+          "flow": "(selected)",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "line": 45,
+          "text": "Click the pay button",
+          "status": "failed",
+          "startedAt": "2026-09-05T09:25:46.985Z",
+          "endedAt": "2026-09-05T09:25:47.040Z",
+          "durationMs": 55,
+          "failure": {
+            "class": "locator",
+            "message": "Could not resolve \"checkout.pay-button\" (the pay button): 5 candidates tried, none matched exactly one element.\n  testid \"pay\" — matched nothing (1 ms)\n  role button \"Pay\" — matched nothing (1 ms)\n  text \"Pay\" — matched nothing (2 ms)\n  css \"[data-testid=\\\"pay\\\"]\" — matched nothing (1 ms)\n  xpath \"//*[@data-testid='pay']\" — matched nothing (1 ms)\n  session at http://127.0.0.1:PORT/booking",
+            "candidatesTried": [
+              {
+                "by": "testid",
+                "value": "pay",
+                "attribute": "data-testid",
+                "score": 0.98
+              },
+              {
+                "by": "role",
+                "role": "button",
+                "name": "Pay",
+                "exact": true,
+                "score": 0.92
+              },
+              {
+                "by": "text",
+                "exact": true,
+                "value": "Pay",
+                "score": 0.75
+              },
+              {
+                "by": "css",
+                "value": "[data-testid=\"pay\"]",
+                "score": 0.68
+              },
+              {
+                "by": "xpath",
+                "value": "//*[@data-testid='pay']",
+                "score": 0.6
+              }
+            ],
+            "screenshot": "<repo>/evals/fixtures/runs/comp/screenshots/I-want-to-book-and-then-fail-5.png",
+            "session": {
+              "kind": "web",
+              "url": "http://127.0.0.1:PORT/booking",
+              "windowIndex": 0,
+              "windowTitle": "Booking · Svatah Sample",
+              "dialog": null
+            },
+            "policyApplied": {
+              "compensate": "cancel a booking"
+            }
+          }
+        },
+        {
+          "runId": "comp",
+          "behavior": "test",
+          "flow": "(selected)",
+          "story": "cancel a booking",
+          "stepId": "cancel a booking#1",
+          "line": 48,
+          "text": "Click the cancel booking button",
+          "status": "passed",
+          "startedAt": "2026-09-05T09:25:47.041Z",
+          "endedAt": "2026-09-05T09:25:47.078Z",
+          "durationMs": 37,
+          "matched": {
+            "ref": "h3",
+            "candidateIndex": 0,
+            "by": "testid"
+          }
+        },
+        {
+          "runId": "comp",
+          "behavior": "test",
+          "flow": "(selected)",
+          "story": "cancel a booking",
+          "stepId": "cancel a booking#2",
+          "line": 51,
+          "text": "The booking reference should say {I want to book and then fail.reference}",
+          "status": "passed",
+          "startedAt": "2026-09-05T09:25:47.078Z",
+          "endedAt": "2026-09-05T09:25:47.085Z",
+          "durationMs": 7,
+          "matched": {
+            "ref": "h4",
+            "candidateIndex": 0,
+            "by": "testid"
+          }
+        }
+      ],
+      "audit": [
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.581Z",
+          "seq": 0,
+          "kind": "run",
+          "detail": {
+            "invoker": {
+              "kind": "user",
+              "id": "local",
+              "via": "cli"
+            },
+            "inputs": {}
+          }
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.826Z",
+          "seq": 1,
+          "kind": "story",
+          "story": "I want to book and then fail",
+          "detail": {
+            "inputs": {}
+          }
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.828Z",
+          "seq": 2,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#1",
+          "call": {
+            "method": "state"
+          },
+          "outcome": "ok",
+          "durationMs": 2
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.838Z",
+          "seq": 3,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#1",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 10
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.907Z",
+          "seq": 4,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#1",
+          "call": {
+            "method": "act",
+            "action": "click",
+            "ref": "h0",
+            "args": [
+              {},
+              null
+            ]
+          },
+          "outcome": "ok",
+          "durationMs": 69
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.916Z",
+          "seq": 5,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#2",
+          "call": {
+            "method": "state"
+          },
+          "outcome": "ok",
+          "durationMs": 8
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.929Z",
+          "seq": 6,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#2",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 13
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.938Z",
+          "seq": 7,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#2",
+          "call": {
+            "method": "act",
+            "action": "type",
+            "ref": "h0",
+            "args": [
+              {
+                "value": "Indiranagar"
+              },
+              null
+            ]
+          },
+          "outcome": "ok",
+          "durationMs": 9
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.939Z",
+          "seq": 8,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#3",
+          "call": {
+            "method": "state"
+          },
+          "outcome": "ok",
+          "durationMs": 0
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.942Z",
+          "seq": 9,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#3",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 3
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.980Z",
+          "seq": 10,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#3",
+          "call": {
+            "method": "act",
+            "action": "click",
+            "ref": "h1",
+            "args": [
+              {},
+              null
+            ]
+          },
+          "outcome": "ok",
+          "durationMs": 38
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.980Z",
+          "seq": 11,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#4",
+          "call": {
+            "method": "state"
+          },
+          "outcome": "ok",
+          "durationMs": 0
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.983Z",
+          "seq": 12,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#4",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 3
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.984Z",
+          "seq": 13,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#4",
+          "call": {
+            "method": "read",
+            "ref": "h2",
+            "args": [
+              null
+            ]
+          },
+          "outcome": "ok",
+          "durationMs": 1
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.985Z",
+          "seq": 14,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "call": {
+            "method": "state"
+          },
+          "outcome": "ok",
+          "durationMs": 0
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.986Z",
+          "seq": 15,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 1
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.987Z",
+          "seq": 16,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 2
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.989Z",
+          "seq": 17,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 1
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.990Z",
+          "seq": 18,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 1
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.991Z",
+          "seq": 19,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 1
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:46.992Z",
+          "seq": 20,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "call": {
+            "method": "state"
+          },
+          "outcome": "ok",
+          "durationMs": 1
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.040Z",
+          "seq": 21,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "call": {
+            "method": "screenshot"
+          },
+          "outcome": "ok",
+          "durationMs": 47
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.040Z",
+          "seq": 22,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "call": {
+            "method": "state"
+          },
+          "outcome": "ok",
+          "durationMs": 1
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.040Z",
+          "seq": 23,
+          "kind": "policy",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "detail": {
+            "policy": {
+              "compensate": "cancel a booking"
+            }
+          }
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.041Z",
+          "seq": 24,
+          "kind": "story",
+          "story": "cancel a booking",
+          "detail": {
+            "inputs": {}
+          }
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.041Z",
+          "seq": 25,
+          "kind": "surface",
+          "story": "cancel a booking",
+          "stepId": "cancel a booking#1",
+          "call": {
+            "method": "state"
+          },
+          "outcome": "ok",
+          "durationMs": 1
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.045Z",
+          "seq": 26,
+          "kind": "surface",
+          "story": "cancel a booking",
+          "stepId": "cancel a booking#1",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 3
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.078Z",
+          "seq": 27,
+          "kind": "surface",
+          "story": "cancel a booking",
+          "stepId": "cancel a booking#1",
+          "call": {
+            "method": "act",
+            "action": "click",
+            "ref": "h3",
+            "args": [
+              {},
+              null
+            ]
+          },
+          "outcome": "ok",
+          "durationMs": 34
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.079Z",
+          "seq": 28,
+          "kind": "surface",
+          "story": "cancel a booking",
+          "stepId": "cancel a booking#2",
+          "call": {
+            "method": "state"
+          },
+          "outcome": "ok",
+          "durationMs": 0
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.081Z",
+          "seq": 29,
+          "kind": "surface",
+          "story": "cancel a booking",
+          "stepId": "cancel a booking#2",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 2
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.081Z",
+          "seq": 30,
+          "kind": "surface",
+          "story": "cancel a booking",
+          "stepId": "cancel a booking#2",
+          "call": {
+            "method": "state"
+          },
+          "outcome": "ok",
+          "durationMs": 0
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.083Z",
+          "seq": 31,
+          "kind": "surface",
+          "story": "cancel a booking",
+          "stepId": "cancel a booking#2",
+          "call": {
+            "method": "locate"
+          },
+          "outcome": "ok",
+          "durationMs": 2
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.085Z",
+          "seq": 32,
+          "kind": "surface",
+          "story": "cancel a booking",
+          "stepId": "cancel a booking#2",
+          "call": {
+            "method": "check",
+            "ref": "ref",
+            "args": [
+              "h5"
+            ]
+          },
+          "outcome": "ok",
+          "durationMs": 1
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-05T09:25:47.085Z",
+          "seq": 33,
+          "kind": "output",
+          "story": "cancel a booking",
+          "detail": {}
+        }
+      ]
+    }
+  }
+}

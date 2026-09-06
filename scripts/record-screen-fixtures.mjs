@@ -1,0 +1,260 @@
+#!/usr/bin/env node
+/**
+ * Record what the local service answers for `evals/fixtures` (T9.1, LLD §13.7).
+ *
+ *   node scripts/record-screen-fixtures.mjs            # re-record and write
+ *   node scripts/record-screen-fixtures.mjs --check    # fail if the committed
+ *                                                     # fixtures have drifted
+ *
+ * `@svatah/screens` is tested against a fake service, and a fake service is only
+ * worth testing against if its answers are ones a real service gave. So this
+ * starts `apps/sample-web`, wires the service exactly as `svatah serve` does,
+ * makes the run the mockups are drawn from, and writes every response into
+ * `packages/screens/test/fixtures/`.
+ *
+ * ## The run is the mockup's run
+ *
+ * The `Run` artboard shows `comp`: `guards-and-compensation.flow`'s two
+ * scenarios, five steps, the fifth failing with `locator`, the policy running
+ * "cancel a booking" with the failing story's scope, six passed and one failed,
+ * exit 11, `plan a60918dc`, `bindings aa7c8799`. Those are not illustrative
+ * numbers — they are what a run of that flow writes, and this script makes one.
+ *
+ * ## Why it needs a browser and the fixtures do not
+ *
+ * The recording needs Chromium and the sample application; the tests that read
+ * the recording need neither, which is what keeps `@svatah/screens` a fast,
+ * DOM-free package. `--check` is what a verifier runs to prove the recording is
+ * still what the service says.
+ */
+import { spawn } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { startSampleApp } from "sample-web";
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
+const OUT = join(ROOT, "packages", "screens", "test", "fixtures");
+const PROJECT = join(ROOT, "evals", "fixtures");
+const TOKEN = "screen-fixtures";
+const RUN_ID = "comp";
+const FLOW = "flows/guards-and-compensation.flow";
+const STORIES = ["I want to book and then fail", "cancel a booking"];
+
+const check = process.argv.includes("--check");
+
+/**
+ * What is normalised out of the recording, and why.
+ *
+ * Two things, both about *this machine* rather than about the project: the
+ * ephemeral port the sample application took, and this checkout's absolute
+ * path. Everything else is kept, timestamps included — the Run screen stamps
+ * its audit lines from the run's start (`08.451`), so a fixture with the times
+ * removed could not test the screen that shows them.
+ *
+ * Stacks are dropped: they are the only field that names files this repository
+ * will rename, and no screen shows one.
+ */
+function stable(value) {
+  const seen = JSON.stringify(value, (key, one) => {
+    if (key === "stack") return undefined;
+    if (typeof one === "string") {
+      return one.replace(/127\.0\.0\.1:\d+/g, "127.0.0.1:PORT").split(ROOT).join("<repo>");
+    }
+    return one;
+  });
+  return JSON.parse(seen);
+}
+
+/**
+ * What `--check` looks past, and what it still catches.
+ *
+ * Everything that is true of *when* and *where* the recording was made rather
+ * than of what the project contains: the wall clock, the durations, the
+ * per-candidate timings inside a resolver failure's message ("matched nothing
+ * (37 ms)"), and `configHash`, which covers `app.baseUrl` and therefore the
+ * port. All four are kept in the committed file, because the screens show
+ * them — the Run screen's audit column is a stamp and its summary line is a
+ * duration — and a fixture without them could not test those screens.
+ *
+ * A change to a status, a candidate, a captured value, a plan hash, a bindings
+ * hash, a flow, a story or a binding still fails the check.
+ */
+function comparable(text) {
+  return text
+    .replace(/\(\d+ ms\)/g, "(N ms)")
+    .replace(/"configHash": "[0-9a-f]+"/g, '"configHash": "<per-run>"')
+    .replace(/"(startedAt|endedAt|at|recordedAt)": "[^"]*"/g, '"$1": "<when>"')
+    .replace(/"durationMs": [0-9.]+/g, '"durationMs": 0');
+}
+
+/** `svatah <args>`, as a person would run it, with the sample application's URL. */
+function svatah(args, options = {}) {
+  const { NODE_OPTIONS, ...environment } = process.env;
+  void NODE_OPTIONS;
+  return new Promise((done) => {
+    let output = "";
+    const child = spawn(process.execPath, [CLI, ...args], {
+      cwd: ROOT,
+      env: { ...environment, ...(options.env ?? {}) },
+    });
+    child.stdout.on("data", (chunk) => {
+      output += String(chunk);
+      options.onStdout?.(output, child);
+    });
+    child.stderr.on("data", (chunk) => (output += String(chunk)));
+    child.on("close", (code) => done({ code: code ?? 1, output, child }));
+  });
+}
+
+if (!existsSync(CLI)) {
+  process.stderr.write("Run `pnpm -r build` first.\n");
+  process.exit(2);
+}
+
+const app = await startSampleApp(0);
+const runsDir = join(PROJECT, "runs");
+let serve;
+try {
+  /*
+   * The run first, so `GET /runs` and the Flows screen's gutter have something
+   * to read. Through the command line, because the fixtures have to be what
+   * *the service* answers and the service calls the same functions `svatah run`
+   * does — a fixture assembled in this process would be a fixture about this
+   * script.
+   *
+   * `comp` aborts by design (exit 11): the fifth step cannot resolve, the policy
+   * runs the compensating story, and that is the subject of the Run artboard.
+   */
+  rmSync(join(runsDir, RUN_ID), { recursive: true, force: true });
+  const ran = await svatah([
+    "run",
+    PROJECT,
+    "--host",
+    "none",
+    "--flow",
+    FLOW,
+    ...STORIES.flatMap((story) => ["--story", story]),
+    "--run-id",
+    RUN_ID,
+    "--base-url",
+    app.origin,
+  ]);
+  if (ran.code !== 11) {
+    process.stderr.write(
+      `\`svatah run\` exited ${ran.code}; the Run artboard is drawn from an aborted run ` +
+        `(exit 11).\n${ran.output}\n`,
+    );
+    process.exit(1);
+  }
+
+  /* The service, spawned exactly as the ADE spawns it (LLD §13.6). */
+  const handshake = await new Promise((resolve, reject) => {
+    const child = spawn(
+      process.execPath,
+      [CLI, "serve", PROJECT, "--port", "0", "--token", TOKEN],
+      { cwd: ROOT, env: { ...process.env, SVATAH_BASE_URL: app.origin } },
+    );
+    serve = child;
+    let buffer = "";
+    const timer = setTimeout(() => reject(new Error("`svatah serve` printed no handshake")), 30_000);
+    child.stdout.on("data", (chunk) => {
+      buffer += String(chunk);
+      const match = /^svatah serve listening url=(\S+) token=(\S+)$/m.exec(buffer);
+      if (match !== null) {
+        clearTimeout(timer);
+        resolve({ url: match[1], token: match[2] });
+      }
+    });
+    child.on("error", reject);
+  });
+
+  const call = async (path, options = {}) => {
+    const response = await fetch(`${handshake.url}${path}`, {
+      ...options,
+      headers: {
+        authorization: `Bearer ${handshake.token}`,
+        ...(options.body === undefined ? {} : { "content-type": "application/json" }),
+        ...(options.headers ?? {}),
+      },
+    });
+    const raw = await response.text();
+    if (!response.ok) throw new Error(`${path} answered ${response.status}: ${raw.slice(0, 300)}`);
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return raw;
+    }
+  };
+
+  const flows = {};
+  const project = await call("/project");
+  for (const file of project.flows ?? []) {
+    flows[file.split("/").pop()] = await call(`/flows/${file.split("/").pop()}`);
+  }
+
+  /*
+   * Every binding file, not only the list. `GET /bindings` answers `{ id, file }`
+   * rows and `GET /bindings/:id` answers the YAML — which is the file the CLI
+   * reads, so a screen that shows a candidate table reads the same bytes
+   * `svatah bindings show` prints.
+   */
+  const bindingList = await call("/bindings");
+  const bindingById = {};
+  for (const one of bindingList) bindingById[one.id] = await call(`/bindings/${one.id}`);
+
+  const fixtures = {
+    project,
+    plan: await call("/plan"),
+    compile: await call("/compile", { method: "POST" }),
+    runs: await call("/runs"),
+    bindings: bindingList,
+    bindingById,
+    data: await call("/data"),
+    api: await call("/api"),
+    tools: await call("/tools"),
+    flows,
+    runById: {
+      [RUN_ID]: {
+        summary: await call(`/runs/${RUN_ID}`),
+        results: await call(`/runs/${RUN_ID}/results`),
+        audit: await call(`/runs/${RUN_ID}/audit`),
+      },
+    },
+  };
+
+  const text = `${JSON.stringify(stable(fixtures), null, 2)}\n`;
+  const path = join(OUT, "fixtures-project.json");
+
+  if (check) {
+    if (!existsSync(path)) {
+      process.stderr.write(`${path} does not exist. Run this without --check.\n`);
+      process.exit(1);
+    }
+    const committed = readFileSync(path, "utf8");
+    if (comparable(committed) !== comparable(text)) {
+      process.stderr.write(
+        "The committed screen fixtures differ from what the service answers now.\n" +
+          "Run `node scripts/record-screen-fixtures.mjs` and read the diff.\n",
+      );
+      process.exit(1);
+    }
+    process.stdout.write(
+      `${path} matches the service: ${(project.flows ?? []).length} flow(s), ` +
+        `${(project.stories ?? []).length} stories, ${fixtures.bindings.length} bindings, ` +
+        `run ${RUN_ID} exit ${fixtures.runById[RUN_ID].summary.exitCode}\n`,
+    );
+  } else {
+    mkdirSync(OUT, { recursive: true });
+    writeFileSync(path, text, "utf8");
+    process.stdout.write(
+      `wrote ${path}: ${(project.flows ?? []).length} flow(s), ` +
+        `${(project.stories ?? []).length} stories, ${fixtures.bindings.length} bindings, ` +
+        `${fixtures.runs.length} run(s)\n`,
+    );
+  }
+} finally {
+  serve?.kill("SIGTERM");
+  await app.close();
+}

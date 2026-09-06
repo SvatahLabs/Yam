@@ -83,6 +83,12 @@ const ALL_PACKAGES = [
   "service",
   "migrate",
   "conformance",
+  // The builder surfaces (Draft 2.11, T9.1–T9.4).
+  "screens",
+  "sdk",
+  "ui-tokens",
+  "ui",
+  "tui",
 ];
 
 /**
@@ -145,11 +151,59 @@ const SERVICE_MAY_NOT_IMPORT = ALL_PACKAGES.filter(
   (name) => name !== "schema" && name !== "service",
 );
 
+/**
+ * The screen model is over the wire and nothing else (Draft 2.11, LLD §13.7).
+ *
+ * "A screen's logic lives in `@svatah/screens`; the ADE and `svatah ui` render
+ * it and add nothing." A screen reaches the world through a `ScreenService` it
+ * is *handed* — the interface in `packages/screens/src/service.ts` — so it may
+ * name `@svatah/schema` for the wire shapes and nothing else in the workspace.
+ *
+ * Two things this stops. A screen that imported `@svatah/runtime` or
+ * `@svatah/compiler` would be a screen doing work the CLI cannot (the review
+ * rule of §13.6, from the other side). A screen that imported `@svatah/sdk`
+ * would make the graph cyclic: the SDK takes its `actions` from here (§13.8).
+ */
+const SCREENS_MAY_NOT_IMPORT = ALL_PACKAGES.filter(
+  (name) => name !== "schema" && name !== "screens",
+);
+
+/**
+ * Neither renderer imports a runtime package (Draft 2.11, working rule 3).
+ *
+ * `@svatah/tui` is `svatah ui`; the ADE is `apps/ade` and is held to the same
+ * rule by its own manifest, which declares the surface packages and nothing
+ * that replays a plan. A renderer that could reach the executor would be a
+ * renderer that could do something the service cannot, and the whole point of
+ * two renderers over one model is that neither can.
+ */
+const RENDERER_MAY_NOT_IMPORT = ALL_PACKAGES.filter(
+  (name) => !["schema", "screens", "sdk", "ui", "ui-tokens", "tui"].includes(name),
+);
+
+/** The design system is React and tokens; it has no idea what a plan is. */
+const UI_MAY_NOT_IMPORT = ALL_PACKAGES.filter((name) => !["ui-tokens", "ui"].includes(name));
+
 export const BOUNDARIES = [
   ...SERVICE_MAY_NOT_IMPORT.map((to) => ({
     from: "service",
     to,
     why: "LLD §13.5: the service may import @svatah/cli and @svatah/schema only; no logic lives in a handler.",
+  })),
+  ...SCREENS_MAY_NOT_IMPORT.map((to) => ({
+    from: "screens",
+    to,
+    why: "LLD §13.7: the screen model is a view over the service it is handed; it may import @svatah/schema and nothing else (REQ-ADE-10).",
+  })),
+  ...RENDERER_MAY_NOT_IMPORT.map((to) => ({
+    from: "tui",
+    to,
+    why: "LLD §13.7: a renderer renders the model and adds nothing; it may not import a runtime package (REQ-TUI-1).",
+  })),
+  ...UI_MAY_NOT_IMPORT.map((to) => ({
+    from: "ui",
+    to,
+    why: "LLD §13.7: the design system is components and tokens; it knows nothing about plans, runs or bindings (REQ-ADE-12).",
   })),
   ...MODEL_FREE_CONSUMERS.flatMap((from) =>
     MODEL_AND_AUTHORING.filter((to) => to !== from).map((to) => ({
