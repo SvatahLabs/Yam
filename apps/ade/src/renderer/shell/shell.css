@@ -114,26 +114,48 @@
   overflow: hidden;
 }
 
+/*
+ * The toolbar is one row, and what gives is the words (P9-F5, Draft 2.12 §13.7).
+ *
+ * "a toolbar never wraps its buttons: a long title truncates". `Run
+ * 01k4h9m2ptw3` with a long subtitle used to squeeze the buttons until their
+ * labels wrapped onto two lines and the bar grew to eighty pixels. `nowrap` on
+ * the row, `flex: none` on the controls (`ui.css`), and `min-width: 0` on the
+ * title and subtitle so they are the things that can shrink — which is what
+ * `text-overflow: ellipsis` needs to do anything at all inside a flex item.
+ */
 .sv-toolbar {
   height: 40px;
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 8px;
   padding: 0 16px;
   border-bottom: 1px solid var(--line);
   background: var(--bg0);
   flex: none;
+  overflow: hidden;
 }
 
 .sv-toolbar-title {
   font-size: 14px;
   font-weight: 600;
   margin: 0;
+  flex: 0 1 auto;
+  min-width: 4ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sv-toolbar-sub {
   color: var(--muted);
   font-size: 12px;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sv-main {

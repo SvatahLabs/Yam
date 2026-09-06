@@ -62,6 +62,15 @@ export interface AuditRow {
   readonly seq: number;
   /** `08.451` — seconds and milliseconds within the run, as the mockup writes it. */
   readonly at: string;
+  /**
+   * The narrow second column: `locate`, `act`, `check`, `story`, `policy`.
+   *
+   * The *call's* method when the line is a surface call, and the audit line's
+   * own kind otherwise (P9-F5). `kind` is `"surface"` for every one of the
+   * twenty surface lines a run writes, so a column showing it said the same
+   * word twenty times while the thing a reader wants — which call — sat in the
+   * text beside it. The `Run` artboard's column reads `locate`.
+   */
   readonly kind: string;
   readonly text: string;
   readonly tone: "pass" | "fail" | "abort" | "neutral";
@@ -165,21 +174,56 @@ export function policyText(policy: string | { compensate?: string } | undefined)
 }
 
 /**
- * One surface call as a phrase: `act click h0 value "Indiranagar"`.
+ * A candidate as the `Run` artboard writes one: `testid "pay"`, `role button "Pay"`.
+ *
+ * The audit records a `locate` call's candidate reduced to what identifies it
+ * (`@svatah/runtime`'s `candidateOf`), and this is the sentence form of it. Not
+ * `by "testid" value "pay"` — the mockup's audit pane reads like a person
+ * describing what was tried, and `key "value"` pairs read like a dump.
+ */
+function locatorText(one: Record<string, unknown>): string | undefined {
+  const parts = [
+    typeof one["by"] === "string" ? one["by"] : undefined,
+    typeof one["value"] === "string" ? `"${one["value"]}"` : undefined,
+    typeof one["role"] === "string" ? one["role"] : undefined,
+    typeof one["name"] === "string" ? `"${one["name"]}"` : undefined,
+    typeof one["nth"] === "number" ? `#${one["nth"]}` : undefined,
+  ].filter((part) => part !== undefined);
+  return parts.length === 0 ? undefined : parts.join(" ");
+}
+
+/**
+ * One surface call as a phrase (P9-F5, Draft 2.12 §13.7).
+ *
+ * > The ADE's audit pane renders the call detail the model carries
+ * > (`locate · booking.book-now-button · testid #0 · ok`).
+ *
+ * `act click h0 value "Indiranagar"`, and — since T10.4 taught the auditor to
+ * record which element a `locate` is about and what its candidate was —
+ * `locate · checkout.pay-button · testid "pay"`, which is the `Run` artboard's
+ * own line. Before that every locate line read `locate · ok`, because the
+ * surface is handed a candidate and never the element it belongs to.
  *
  * `args` is the *argument list* — an array whose entries are whatever the method
  * takes, and mostly `{}` and `null`. Empty objects and nulls carry nothing a
  * reader wants, so they are dropped; what is left is written as `key "value"`
- * pairs, which is how the mockup's audit pane reads.
+ * pairs.
  */
 function callText(call: AuditResponse["call"]): string | undefined {
   if (call === undefined) return undefined;
-  const args = (Array.isArray(call.args) ? call.args : [call.args])
-    .filter((one): one is Record<string, unknown> => typeof one === "object" && one !== null)
+  const entries = (Array.isArray(call.args) ? call.args : [call.args]).filter(
+    (one): one is Record<string, unknown> => typeof one === "object" && one !== null,
+  );
+  if (call.method === "locate") {
+    return dotted(call.ref, ...entries.map(locatorText));
+  }
+  const args = entries
     .flatMap((one) => Object.entries(one))
     .map(([key, value]) => `${key} ${typeof value === "string" ? `"${value}"` : String(value)}`)
     .join(" ");
-  return dotted(call.method, call.action, call.ref, args === "" ? undefined : args);
+  // Not `call.method`: that is the row's `kind` column now, and a line reading
+  // `act | act · click · h0` says the word twice.
+  return dotted(call.action, call.ref, args === "" ? undefined : args);
 }
 
 /** One audit line's `detail`, which is an object on most kinds. */
@@ -187,6 +231,16 @@ function detailText(detail: unknown): string | undefined {
   if (detail === undefined || detail === null) return undefined;
   if (typeof detail === "string") return detail;
   if (typeof detail !== "object") return String(detail);
+  /*
+   * A `locate`'s match count, in the artboard's words: "matched nothing", and
+   * `matched 1` for the candidate that resolved. The resolver requires exactly
+   * one match (REQ-RUN-5), so this is the whole of what a locate line has to
+   * say about its outcome beyond `ok`.
+   */
+  const matched = (detail as Record<string, unknown>)["matched"];
+  if (typeof matched === "number" && Object.keys(detail as object).length === 1) {
+    return matched === 0 ? "matched nothing" : `matched ${matched}`;
+  }
   const parts = Object.entries(detail as Record<string, unknown>).map(([key, value]) => {
     if (value === null || value === undefined) return key;
     if (typeof value === "object") {
@@ -287,7 +341,7 @@ export function runStateFrom(
   const auditRows: AuditRow[] = audit.map((line, at) => ({
     seq: line.seq ?? at,
     at: stamp(line.at, summary.startedAt),
-    kind: String(line.kind ?? ""),
+    kind: line.call?.method ?? String(line.kind ?? ""),
     /*
      * One readable line, in the order the mockup writes one: what was called,
      * on what, what came back, and how long it took.

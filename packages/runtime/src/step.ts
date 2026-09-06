@@ -83,6 +83,36 @@ export interface StepContext {
   readonly screenshots?: "onFailure" | "always" | "never";
   /** Where a screenshot goes. Returns the path recorded in the result. */
   readonly screenshotPath?: (step: Step) => string;
+  /**
+   * Which element the resolver is about to look for, and when it is done
+   * (REQ-AUTO-6, P9-F5).
+   *
+   * The audit is written by a proxy over the surface (`audit.ts`), and the
+   * surface's `locate(candidate)` is never told which element the candidate
+   * belongs to — so every locate line read `locate · ok` and a reader could not
+   * tell which of a step's five candidates had matched nothing. This is how the
+   * executor lends the auditor the one fact it has and the surface does not.
+   */
+  readonly resolving?: (elementId: string | undefined) => void;
+}
+
+/**
+ * `context.resolve`, with the element named for the audit (P9-F5).
+ *
+ * Every resolution in this file goes through here, so a call site added later
+ * is audited by existing — the same argument the audit proxy itself is built on.
+ */
+async function resolveTarget(
+  context: StepContext,
+  target: TargetRef,
+  surface: AgentSurface,
+): Promise<{ ref: Ref; candidateIndex: number; by: Candidate["by"] }> {
+  context.resolving?.(target.ref);
+  try {
+    return await context.resolve(target, surface);
+  } finally {
+    context.resolving?.(undefined);
+  }
 }
 
 export interface StepOutcome {
@@ -142,10 +172,10 @@ export async function runStep(step: Step, context: StepContext): Promise<StepOut
   let matched: StepResult["matched"] | undefined;
   try {
     if (step.target !== undefined) {
-      matched = await context.resolve(step.target, surface);
+      matched = await resolveTarget(context, step.target, surface);
     }
     const target2 =
-      step.target2 === undefined ? undefined : await context.resolve(step.target2, surface);
+      step.target2 === undefined ? undefined : await resolveTarget(context, step.target2, surface);
 
     const captured = await perform(step, args, matched?.ref, target2?.ref, context);
 
@@ -295,7 +325,7 @@ async function evaluate(
   const element = about.target ?? step.target;
   const ref =
     subject === "target" && element !== undefined
-      ? (await context.resolve(element, context.surface)).ref
+      ? (await resolveTarget(context, element, context.surface)).ref
       : undefined;
 
   const resolved = resolvePredicateValue(predicate, context.scope);
@@ -397,7 +427,9 @@ async function screenshot(step: Step, context: StepContext): Promise<void> {
   try {
     const masks: Ref[] = [];
     if (step.target !== undefined && stepInjectsSecret(step, context.scope)) {
-      const resolved = await context.resolve(step.target, context.surface).catch(() => undefined);
+      const resolved = await resolveTarget(context, step.target, context.surface).catch(
+        () => undefined,
+      );
       if (resolved !== undefined) masks.push(resolved.ref);
     }
     await context.surface.screenshot(path, masks);

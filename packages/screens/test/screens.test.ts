@@ -252,6 +252,52 @@ describe("the Run screen against the `comp` run (the `Run` artboard)", () => {
     expect(state.audit.some((one) => one.kind === "policy" && one.tone === "abort")).toBe(true);
   });
 
+  /*
+   * P9-F5, Draft 2.12 §13.7: "The ADE's audit pane renders the call detail the
+   * model carries (`locate · booking.book-now-button · testid #0 · ok`)."
+   *
+   * The verification found every surface line reading `surface | locate · ok`:
+   * the same word in the kind column twenty times, and no way to tell which of
+   * the failing step's five candidates a line was about. The auditor records the
+   * element and the candidate now (T10.4), and this is the line it produces.
+   */
+  it("names the element and the candidate on every locate line (T10.4, P9-F5)", async () => {
+    const state = (await runScreen.load(service(), { runId: "comp" })) as RunState;
+    const locates = state.audit.filter((one) => one.kind === "locate");
+    expect(locates.length, "the comp run resolves nine targets").toBeGreaterThan(5);
+
+    // The one the mockup's example names.
+    const bookNow = locates.find((one) => one.text.includes("booking.book-now-button"));
+    expect(bookNow, JSON.stringify(locates, null, 2)).toBeDefined();
+    expect(bookNow!.text).toContain("testid");
+    expect(bookNow!.text).toContain("matched 1");
+    expect(bookNow!.text).toContain("ok");
+
+    // And the five that matched nothing, each naming its own candidate.
+    const failing = locates.filter((one) => one.text.includes("checkout.pay-button"));
+    expect(failing).toHaveLength(5);
+    expect(failing.map((one) => one.text.split(" · ")[1])).toEqual([
+      'testid "pay"',
+      'role button "Pay"',
+      'text "Pay"',
+      'css "[data-testid="pay"]"',
+      "xpath \"//*[@data-testid='pay']\"",
+    ]);
+    for (const one of failing) expect(one.text).toContain("matched nothing");
+  });
+
+  it("the kind column is the call, not the word \"surface\" twenty times (P9-F5)", async () => {
+    const state = (await runScreen.load(service(), { runId: "comp" })) as RunState;
+    expect(state.audit.some((one) => one.kind === "surface")).toBe(false);
+    expect(new Set(state.audit.map((one) => one.kind))).toEqual(
+      new Set(["run", "story", "state", "locate", "act", "read", "check", "screenshot", "policy", "output"]),
+    );
+    // And the method is not repeated in the text beside it.
+    for (const one of state.audit) {
+      expect(one.text.startsWith(`${one.kind} ·`), `"${one.kind} | ${one.text}"`).toBe(false);
+    }
+  });
+
   it("offers a resume from the step that failed", async () => {
     const state = (await runScreen.load(service(), { runId: "comp" })) as RunState;
     expect(state.resumeFrom).toBe("I want to book and then fail#5");

@@ -412,6 +412,97 @@ test("the Run screen shows the run's steps, audit and inspector", async () => {
   await expect(page.locator("#inspector-step")).toBeVisible();
 });
 
+/*
+ * P9-F5, Draft 2.12 §13.7 — the three polish defects the verification found on
+ * this screen, each checked on the packaged application.
+ */
+test("the Run toolbar keeps its buttons on one line, however long the title", async () => {
+  await expect(page.getByRole("heading", { name: /^Run / })).toBeVisible({ timeout: 60_000 });
+
+  const measured = await page.evaluate(() => {
+    const toolbar = document.querySelector(".sv-toolbar") as HTMLElement | null;
+    if (toolbar === null) return null;
+    // A title long enough to push the buttons off the end of any window.
+    const title = toolbar.querySelector(".sv-toolbar-title") as HTMLElement | null;
+    const sub = toolbar.querySelector(".sv-toolbar-sub") as HTMLElement | null;
+    const restore = { title: title?.textContent ?? "", sub: sub?.textContent ?? "" };
+    if (title !== null) title.textContent = `Run ${"01k4h9m2ptw3xyz".repeat(12)}`;
+    if (sub !== null) sub.textContent = `${"test behavior · invoker user via cli · 0.74 s ".repeat(8)}`;
+
+    const buttons = [...toolbar.querySelectorAll("button")] as HTMLElement[];
+    const answer = {
+      toolbarHeight: toolbar.getBoundingClientRect().height,
+      toolbarWidth: toolbar.getBoundingClientRect().width,
+      buttons: buttons.map((one) => ({
+        label: (one.textContent ?? "").trim(),
+        height: one.getBoundingClientRect().height,
+        right: one.getBoundingClientRect().right,
+      })),
+      titleFits:
+        title === null ? true : title.getBoundingClientRect().right <= toolbar.getBoundingClientRect().right + 1,
+    };
+    if (title !== null) title.textContent = restore.title;
+    if (sub !== null) sub.textContent = restore.sub;
+    return answer;
+  });
+
+  expect(measured, "the Run screen has no toolbar").not.toBeNull();
+  // The bar is one row: 40px, and it stays 40px (LLD §13.7's 28px controls).
+  expect(measured!.toolbarHeight).toBeLessThanOrEqual(41);
+  expect(measured!.buttons.length).toBeGreaterThan(0);
+  for (const button of measured!.buttons) {
+    // A wrapped label makes a 28px control about 44px tall.
+    expect(button.height, `"${button.label}" wrapped onto two lines`).toBeLessThanOrEqual(30);
+    // And no button is pushed out of the bar.
+    expect(button.right, `"${button.label}" is off the end of the toolbar`).toBeLessThanOrEqual(
+      measured!.toolbarWidth + 1,
+    );
+  }
+  // What gives is the title, which truncates.
+  expect(measured!.titleFits).toBe(true);
+});
+
+test("the inspector says each of its headings once", async () => {
+  await page.locator(".sv-step").first().click();
+  await expect(page.locator("#inspector-step")).toBeVisible();
+
+  const repeated = await page.evaluate(() => {
+    const inspector = document.querySelector(".sv-inspector");
+    if (inspector === null) return ["no inspector"];
+    /*
+     * A `<table>`'s `<caption>` is its accessible name and is visible
+     * (LLD §13.7), so a caption that repeats the section heading above it puts
+     * the same words on the screen twice — which is what "the 'Candidates
+     * tried' heading renders twice" was (P9-F5).
+     */
+    const said = [...inspector.querySelectorAll("h2, h3, h4, caption")].map((one) =>
+      (one.textContent ?? "").trim().toLowerCase(),
+    );
+    return said.filter((one, at) => one !== "" && said.indexOf(one) !== at);
+  });
+  expect(repeated, `the inspector says these twice: ${repeated.join(", ")}`).toEqual([]);
+});
+
+test("the audit pane renders the call detail the model carries", async () => {
+  const rows = await page.evaluate(() =>
+    [...document.querySelectorAll(".sv-audit li")].map((one) => ({
+      kind: (one.querySelector(".sv-audit-kind")?.textContent ?? "").trim(),
+      text: (one.lastElementChild?.textContent ?? "").trim(),
+    })),
+  );
+  expect(rows.length).toBeGreaterThan(5);
+
+  // The kind column is the call, not "surface" on every line (P9-F5).
+  expect(rows.every((one) => one.kind !== "surface")).toBe(true);
+
+  const locate = rows.find((one) => one.kind === "locate");
+  expect(locate, JSON.stringify(rows.slice(0, 10), null, 2)).toBeDefined();
+  // `locate · booking.book-now-button · testid "book-now" · matched 1 · ok`
+  expect(locate!.text).toMatch(/^[a-z]+\.[a-z-]+ · /);
+  expect(locate!.text).toMatch(/matched (nothing|\d+)/);
+  expect(locate!.text).toContain("ok");
+});
+
 test("Run again is a button on the Run screen, and it starts another run", async () => {
   const again = page.locator("#action-run-again");
   await expect(again).toBeVisible();

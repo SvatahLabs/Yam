@@ -82,6 +82,16 @@
   font-size: 12.5px;
   font-weight: 500;
   cursor: default;
+  /*
+   * A button is one line, always (P9-F5, Draft 2.12 §13.7: "a toolbar never
+   * wraps its buttons: a long title truncates").
+   *
+   * `flex: none` so a crowded toolbar squeezes the title beside it rather than
+   * the control, and `white-space: nowrap` so "Resume from step 5" never
+   * becomes two lines and a 28-pixel control never becomes a 44-pixel one.
+   */
+  flex: none;
+  white-space: nowrap;
 }
 
 .sv-btn-primary {

@@ -49,6 +49,26 @@ export interface AuditContext {
  */
 const NOT_A_SURFACE_CALL = new Set(["capabilities", "bridgeCost", "dialogLog", "browser"]);
 
+/**
+ * A `Candidate` reduced to the two fields that say which one it is.
+ *
+ * `by` and `value` for a locator, `role` and `name` for a role candidate — the
+ * form the `Run` artboard's audit pane shows (`testid "pay"`). The fingerprint,
+ * the score and the context stay out: they are a paragraph, and the audit line
+ * is a line.
+ */
+function candidateOf(value: unknown): Record<string, unknown> {
+  if (typeof value !== "object" || value === null) return {};
+  const one = value as Record<string, unknown>;
+  return {
+    ...(typeof one["by"] === "string" ? { by: one["by"] } : {}),
+    ...(typeof one["value"] === "string" ? { value: one["value"] } : {}),
+    ...(typeof one["role"] === "string" ? { role: one["role"] } : {}),
+    ...(typeof one["name"] === "string" ? { name: one["name"] } : {}),
+    ...(typeof one["nth"] === "number" ? { nth: one["nth"] } : {}),
+  };
+}
+
 export class Auditor {
   private seq = 0;
 
@@ -122,7 +142,10 @@ export class Auditor {
    * methods and two optional ones, and a wrapper would need updating each time
    * one is added — which is precisely when nobody remembers the audit log.
    */
-  auditing(surface: AgentSurface, at: () => { story?: string; stepId?: string }): AgentSurface {
+  auditing(
+    surface: AgentSurface,
+    at: () => { story?: string; stepId?: string; element?: string },
+  ): AgentSurface {
     if (!this.context.enabled) return surface;
     // The proxy's traps are not arrow functions — a `get` trap has its own
     // `this` — so the auditor is captured explicitly.
@@ -137,14 +160,31 @@ export class Auditor {
 
         return async function audited(...args: unknown[]): Promise<unknown> {
           const started = performance.now();
-          const where = at();
+          /*
+           * `element` is not an audit-line field: it is *which element the
+           * caller asked for*, which for `locate` is the reference the call is
+           * about (REQ-AUTO-6: "every surface call with reference and
+           * outcome"). The surface itself is handed a candidate and never the
+           * element id, so without this a `locate` line read `locate · ok` and
+           * a reader could not tell which of a step's five candidates it was
+           * (P9-F5, Draft 2.12 §13.7).
+           */
+          const { element, ...where } = at();
           const call = {
             method: property,
             ...(property === "act" && typeof args[0] === "string" ? { action: args[0] } : {}),
-            ...(typeof args[1] === "string" ? { ref: args[1] } : {}),
+            ...(property === "locate" && element !== undefined
+              ? { ref: element }
+              : typeof args[1] === "string"
+                ? { ref: args[1] }
+                : {}),
             ...(property === "act" || property === "read" || property === "check"
               ? { args: args.slice(2) }
               : {}),
+            // The candidate, reduced to what identifies it. A whole candidate
+            // carries a fingerprint and a score, which is a paragraph in a log
+            // line; `testid "pay"` is what the mockup's audit pane shows.
+            ...(property === "locate" ? { args: [candidateOf(args[0])] } : {}),
           };
 
           try {
@@ -155,6 +195,15 @@ export class Auditor {
             auditor.record("surface", {
               ...where,
               call,
+              /*
+               * How many elements a candidate matched. The resolver requires
+               * exactly one (REQ-RUN-5), so this is what says whether a
+               * candidate was the one — and it is the artboard's own words,
+               * "matched nothing".
+               */
+              ...(property === "locate" && Array.isArray(result)
+                ? { detail: { matched: result.length } }
+                : {}),
               outcome: "ok",
               durationMs: Math.round(performance.now() - started),
             });

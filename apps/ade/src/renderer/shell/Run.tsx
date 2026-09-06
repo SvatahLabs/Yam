@@ -215,9 +215,16 @@ export function RunInspector(props: RunProps): React.JSX.Element {
 
       {inspector.candidatesTried.length === 0 ? null : (
         <InspectorSection id="inspector-candidates" title="Candidates tried">
+          {/*
+            The table's caption is the table's accessible name and is visible
+            (LLD §13.7), so it must not repeat the section heading above it —
+            which is what "the 'Candidates tried' heading renders twice" was
+            (P9-F5). The section says what happened; the caption says what the
+            rows are, exactly as the Flows inspector's "Resolver order" does.
+          */}
           <Table<(typeof inspector.candidatesTried)[number]>
             id="inspector-candidates-table"
-            label="Candidates tried"
+            label="Resolver order"
             rows={[...inspector.candidatesTried]}
             rowKey={(row) => `${row.by}-${row.value}`}
             columns={[

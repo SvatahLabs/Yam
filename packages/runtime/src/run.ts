@@ -358,10 +358,18 @@ async function runFlow(
     };
   }
 
-  let where: { story?: string; stepId?: string } = {};
+  /*
+   * Where the run is, for the audit.
+   *
+   * `element` is the one the resolver is currently looking for (P9-F5): the
+   * surface's `locate(candidate)` is never told which element a candidate
+   * belongs to, so without it every locate line read `locate · ok`. It is set
+   * and cleared by `resolveTarget` in `step.ts` and never survives a step.
+   */
+  let where: { story?: string; stepId?: string; element?: string } = {};
   const at = {
     get: () => where,
-    set: (value: { story?: string; stepId?: string }) => {
+    set: (value: { story?: string; stepId?: string; element?: string }) => {
       where = value;
     },
   };
@@ -520,6 +528,25 @@ async function runFlow(
   };
 }
 
+/**
+ * Where the run is, as the audit records it.
+ *
+ * `element` is the one the resolver is looking for right now (P9-F5); it is not
+ * an audit-line field, and `audit.ts` takes it off before writing.
+ */
+export interface AuditWhere {
+  story?: string;
+  stepId?: string;
+  element?: string;
+}
+
+/** `{ story, stepId, element }` without the element. */
+function omitElement(where: AuditWhere): AuditWhere {
+  const { element, ...rest } = where;
+  void element;
+  return rest;
+}
+
 function storyContext(
   flow: string,
   story: Story,
@@ -536,8 +563,8 @@ function storyContext(
    * (REQ-AUTO-6).
    */
   at: {
-    get(): { story?: string; stepId?: string };
-    set(value: { story?: string; stepId?: string }): void;
+    get(): AuditWhere;
+    set(value: AuditWhere): void;
   },
   record: (result: StepResult) => void,
 ): StoryContext {
@@ -567,6 +594,10 @@ function storyContext(
     surface,
     scope,
     resolve: options.resolve,
+    resolving: (element) => {
+      const current = at.get();
+      at.set(element === undefined ? omitElement(current) : { ...current, element });
+    },
     ...(options.custom === undefined ? {} : { custom: options.custom }),
     ...(options.api === undefined ? {} : { api: options.api }),
     invoke,
