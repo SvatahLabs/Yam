@@ -84,6 +84,38 @@ describe("yam ui --tmux (REQ-TUI-2)", () => {
     expect(spawnSync("tmux", ["has-session", "-t", `=${session}`]).status).not.toBe(0);
   }, 60_000);
 
+  it.skipIf(!tmuxAvailable())("opens at the terminal's size, with the cockpit wide enough for its inspector", async () => {
+    /*
+     * `new-session -d` takes tmux's default 80×24, so the cockpit's pane after
+     * the splits was 40 columns — under its own 60-column minimum, which is how
+     * a fresh workspace came up truncated with the inspector collapsed
+     * (Draft 2.24). The session is born at the terminal's size instead, and the
+     * cockpit takes the larger half.
+     */
+    const dir = fixtureCopy();
+    const session = sessionNameFor(dir);
+    sessions.push(session);
+    const { code } = await cli(["workspace", dir, "--detach"], {
+      EDITOR: "",
+      YAM_SERVICE_URL: undefined,
+      YAM_SERVICE_TOKEN: undefined,
+      COLUMNS: "220",
+      LINES: "56",
+    });
+    expect(code).toBe(EXIT.ok);
+
+    const size = (target: string, format: string): string =>
+      spawnSync("tmux", ["display-message", "-p", "-t", target, format], { encoding: "utf8" }).stdout.trim();
+
+    // A test's stdout is a pipe, so the command falls back to tmux's default:
+    // what is asserted is the share, which is what left the inspector out.
+    const width = Number(size(`=${session}:yam`, "#{window_width}"));
+    const cockpit = Number(size(`=${session}:yam.0`, "#{pane_width}"));
+    expect(width).toBeGreaterThan(0);
+    expect(cockpit / width).toBeGreaterThan(0.5);
+    spawnSync("tmux", ["kill-session", "-t", `=${session}`]);
+  }, 60_000);
+
   it("without tmux, opens the cockpit alone and says so", async () => {
     const dir = fixtureCopy();
     const bin = mkdtempSync(join(tmpdir(), "yam-nopath-"));

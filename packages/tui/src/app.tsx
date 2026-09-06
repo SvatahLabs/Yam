@@ -337,8 +337,18 @@ export function App(props: AppProps): React.JSX.Element {
      * "single-letter accelerators shown on buttons"). A letter defined here
      * rather than in the model would be a key the two renderers disagreed on.
      */
+    /*
+     * `^s` is a binding, not two characters.
+     *
+     * A screen writes a control key as `^s` (the Data screen's save), and Ink
+     * delivers it as `input === "s"` with `key.ctrl`. Comparing the declaration
+     * against `input` alone could never match, so that action was unreachable
+     * from the cockpit while the app's ⌘S worked — one action, two renderers,
+     * and only one of them could run it.
+     */
+    const pressed = key.ctrl ? `^${input}` : input;
     const binding = screenById(ui.screen).keys.find(
-      (one) => (one.terminal ?? one.key.toLowerCase()) === input,
+      (one) => (one.terminal ?? one.key.toLowerCase()) === pressed,
     );
     if (binding === undefined) return;
     /*

@@ -701,3 +701,48 @@ describe("a capture happening (REQ-REC-13, Draft 2.23)", () => {
     expect(stop.ok).toBe(true);
   });
 });
+
+describe("a screen's keys and the action registry agree (T9.1, Draft 2.24)", () => {
+  /**
+   * Draft 2.23 split Record into two actions, renamed `record.start` to "Bind
+   * targets" and moved it to `B` — and left this table alone, so the cockpit's
+   * `R` ran the binding session under a label that said it recorded. The
+   * action-parity check compares the registry, the palette fixture and the CLI;
+   * a screen's own key list was in none of them.
+   */
+  it("names an action that exists, on the key the registry gives it", () => {
+    const byId = new Map(ACTIONS.map((one) => [one.id, one]));
+    for (const screen of SCREENS) {
+      for (const binding of screen.keys ?? []) {
+        const action = byId.get(binding.action);
+        expect(action, `${screen.id}: no action ${binding.action}`).toBeDefined();
+        // The registry gives a key only to the actions the palette accelerates;
+        // where it does, the screen must not invent a different one.
+        if (action!.key !== undefined) {
+          expect(action!.key, `${screen.id}: ${binding.action}`).toBe(binding.key);
+        }
+      }
+    }
+  });
+
+  it("declares terminal keys the cockpit can actually match", () => {
+    // One character, or `^` and one: what a keypress can be. `^s` was declared
+    // and unreachable until the cockpit learned to read the caret (Draft 2.24).
+    for (const screen of SCREENS) {
+      for (const binding of screen.keys ?? []) {
+        const terminal = binding.terminal ?? binding.key.toLowerCase();
+        expect(terminal, `${screen.id}: ${binding.action}`).toMatch(/^\^?[\s\S]$/u);
+      }
+    }
+  });
+
+  it("offers both recordings on the Flows screen, on different keys", () => {
+    const keys = screenById("flows").keys;
+    const record = keys.find((one) => one.action === "capture.start")!;
+    const bind = keys.find((one) => one.action === "record.start")!;
+    expect(record.terminal).toBe("R");
+    expect(record.description).toMatch(/what you do/);
+    expect(bind.terminal).toBe("b");
+    expect(bind.description).toMatch(/[Bb]ind/);
+  });
+});

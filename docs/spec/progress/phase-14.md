@@ -469,3 +469,27 @@ Verified end to end against the sample application through a real `yam serve`:
 `POST /capture` → five `capture.step` sentences → `capture.finished` with
 `flows/sign-in.flow` and two bindings under `bindings/login/`. The service
 suite covers the stream, the shared session, a failure and a 501 build.
+
+**The cockpit, after a screenshot (Draft 2.24).** Atul showed `yam ui --tmux`
+drawn at 60×24 and asked how a person runs a flow, edits a value, or manages
+anything from it. Three answers and three defects:
+
+- `R` on the Flows screen ran `record.start`, which Draft 2.23 had renamed to
+  "Bind targets" and moved to `B`, under a description that still said it
+  recorded — and the new Record had no key at all. The screen key tables were in
+  none of the three sources the action-parity check compares.
+- The Data screen declared its save as `terminal: "^s"`, and the cockpit
+  compared that two-character string against a single keypress. The action was
+  unreachable from the terminal while the app's ⌘S worked.
+- `yam workspace` created its session with `new-session -d`, which tmux sizes
+  80×24, so the cockpit's pane after the splits was 40 columns — under its own
+  60-column minimum. Reproduced exactly: pane 40×24, header `60×24`, inspector
+  collapsed. The session is now born at the terminal's size and the cockpit
+  takes 60 percent of the split, which clears the 120 columns its three-pane
+  layout wants: a 220-column terminal now opens at 131×56 with the inspector
+  beside the others, verified in tmux.
+
+Two new checks in `packages/screens/test/screens.test.ts`: every screen key
+names an action that exists and, where the registry gives that action a key,
+agrees with it; and every terminal binding is one character or a caret and one.
+The first fails on exactly the drift above.

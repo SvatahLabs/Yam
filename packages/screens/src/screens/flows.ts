@@ -470,7 +470,16 @@ export const flowsScreen: Screen<FlowsState> = {
 function FLOW_KEYS(): readonly Binding[] {
   return [
     { action: "run.flow", key: "⌘↵", terminal: "r", description: "Run the selected flow" },
-    { action: "record.start", key: "R", terminal: "R", description: "Record the selected flow" },
+    /*
+     * Two recordings, two keys (Draft 2.23, REQ-REC-13).
+     *
+     * `R` records a flow from what a person does; `b` binds the targets of a
+     * flow that already exists. Draft 2.23 split the action registry in two and
+     * left this table alone, so `R` ran the binding session under a label that
+     * said it recorded — the exact confusion the split existed to remove.
+     */
+    { action: "capture.start", key: "R", terminal: "R", description: "Record a flow from what you do" },
+    { action: "record.start", key: "B", terminal: "b", description: "Bind the selected flow's targets" },
     { action: "heal.run", key: "H", terminal: "h", description: "Heal the last run" },
     /*
      * `e` in the terminal, `⌘S` in the app (K6, T11.1).

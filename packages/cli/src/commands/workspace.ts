@@ -69,6 +69,22 @@ export async function workspaceCommand(args: ParsedArgs, io: CommandIo, options:
     url: stringOption(args, "url") ?? process.env["YAM_SERVICE_URL"],
     token: stringOption(args, "token") ?? process.env["YAM_SERVICE_TOKEN"],
   };
+  /*
+   * The size the session is born at (Draft 2.24).
+   *
+   * `new-session -d` takes tmux's default, 80×24, so the cockpit's pane after
+   * two splits is 40 columns — under its 60-column minimum, which is why a
+   * fresh workspace opened with the inspector collapsed and everything
+   * truncated. Attaching resizes it, but the first frame a person sees is the
+   * one that has to make sense, and `--detach` never attaches at all.
+   *
+   * The terminal's own size when there is one; tmux's default otherwise, which
+   * is what a pipe or a CI job gets.
+   */
+  const size =
+    process.stdout.columns !== undefined && process.stdout.rows !== undefined
+      ? ["-x", String(process.stdout.columns), "-y", String(process.stdout.rows)]
+      : [];
   let connection: { url: string; token: string };
   mkdirSync(join(project, ".yam"), { recursive: true });
   const handshake = join(project, ".yam", "workspace.handshake");
@@ -76,14 +92,14 @@ export async function workspaceCommand(args: ParsedArgs, io: CommandIo, options:
 
   if (given.url !== undefined && given.token !== undefined) {
     connection = given as { url: string; token: string };
-    const created = tmux("new-session", "-d", "-s", session, "-c", project, "-n", "service", "sh", "-c", `echo ${q("attached to " + given.url)}; sleep 2147483647`);
+    const created = tmux("new-session", "-d", ...size, "-s", session, "-c", project, "-n", "service", "sh", "-c", `echo ${q("attached to " + given.url)}; sleep 2147483647`);
     if (!created.ok) {
       io.err(`tmux could not create the session: ${created.err.trim()}`);
       return EXIT.failed;
     }
   } else {
     const created = tmux(
-      "new-session", "-d", "-s", session, "-c", project, "-n", "service",
+      "new-session", "-d", ...size, "-s", session, "-c", project, "-n", "service",
       "sh", "-c", `${yam} serve ${q(project)} --port 0 2>&1 | tee ${q(handshake)}`,
     );
     if (!created.ok) {
@@ -119,7 +135,16 @@ export async function workspaceCommand(args: ParsedArgs, io: CommandIo, options:
    */
   const cockpit = `${yam} ui ${q(project)}; tmux kill-session -t ${q("=" + session)}`;
   tmux("new-window", "-t", `=${session}`, "-c", project, "-n", "yam", ...env, "sh", "-c", cockpit);
-  tmux("split-window", "-t", `=${session}:yam`, "-h", "-c", project, ...env);
+  /*
+   * The cockpit takes the larger share (Draft 2.24).
+   *
+   * An even split gives it half the terminal, and its three-pane layout needs
+   * 120 columns before the inspector will sit beside the others — so on a
+   * 220-column terminal an even split left it at 110 and collapsed, one column
+   * short of the layout it was written for. 60/40 clears it on anything from
+   * about 200 columns, and the shell keeps a usable width.
+   */
+  tmux("split-window", "-t", `=${session}:yam`, "-h", "-l", "40%", "-c", project, ...env);
   tmux("split-window", "-t", `=${session}:yam.1`, "-v", "-c", project, ...env, "sh", "-c", `${yam} runs tail ${q(project)}`);
   const editor = process.env["EDITOR"];
   if (editor !== undefined && editor !== "") {
