@@ -287,6 +287,17 @@ pipelines:
     # Run from the Bitbucket UI once a self-hosted macOS or Windows runner is
     # attached with the labels above; they are here, definition and all, so that
     # attaching a runner is the only thing left to do.
+    # A desktop gate has a runner to itself (T12.1, LLD §7.5 Draft 2.10).
+    #
+    # > A CI leg that runs the desktop gate runs nothing else on that runner.
+    #
+    # The two steps below are `parallel:` and that is not a contradiction: each
+    # names a different `runs-on`, macOS and Windows, so they are two runners
+    # rather than two jobs on one. The bridge's budget is wall-clock — measured
+    # at 1.6 ms per node on a quiet machine and 29.6 ms beside a full test run —
+    # so a second job on the same runner would not slow the gate down, it would
+    # change what the gate measures. Neither step runs the test suite, and
+    # neither may be given a sibling that shares its `runs-on`.
     desktop-gates:
       - parallel:
           - step: *uia-gate

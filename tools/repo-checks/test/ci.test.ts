@@ -40,6 +40,8 @@ interface GithubWorkflow {
 interface BitbucketStep {
   name?: string;
   image?: string;
+  /** `runs-on:` — the labels a self-hosted runner must carry (T12.1). */
+  "runs-on"?: string[];
   script: string[];
 }
 interface BitbucketPipelines {
@@ -363,5 +365,31 @@ describe("CI mirrors (P0-F5)", () => {
       "publish",
       "release",
     ]);
+  });
+});
+
+/**
+ * T12.1, LLD §7.5 (Draft 2.10) — "a CI leg that runs the desktop gate runs
+ * nothing else on that runner".
+ *
+ * The bridge's budget is wall-clock: 1.6 ms per node on a quiet machine, 29.6 ms
+ * beside a full test run. A second job sharing the runner would not make the
+ * gate slower, it would make it measure something else — and the report would
+ * carry a per-node cost nobody could compare with anybody's.
+ */
+describe("a desktop gate has its runner to itself (T12.1)", () => {
+  it("gives the two gates different hosts, so `parallel` is two runners", () => {
+    const hosts = desktopSteps.map((step) => (step["runs-on"] ?? []).join(","));
+    expect(hosts.length, "the desktop-gates pipeline has no steps").toBeGreaterThan(1);
+    expect(new Set(hosts).size, `two gates on one host: ${hosts.join(" | ")}`).toBe(hosts.length);
+  });
+
+  it("runs no test suite beside the gate", () => {
+    for (const step of desktopSteps) {
+      const script = (step.script ?? []).join("\n");
+      expect(script, `${step.name} runs the test suite beside the gate`).not.toMatch(
+        /pnpm -r test|pnpm test\b|vitest|playwright test/,
+      );
+    }
   });
 });
