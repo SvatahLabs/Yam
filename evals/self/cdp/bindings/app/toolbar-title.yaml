@@ -1,0 +1,39 @@
+# The same control, the same id, the other adapter (T11.2, LLD §13.9).
+#
+# The AX side binds `automationId`, which on macOS Chromium publishes as
+# `AXDOMIdentifier` — the DOM `id`. So the web side binds a `css` `#id`, and it
+# is the *same fact about the application* said in the vocabulary each adapter
+# has. That is what makes a parity gate a comparison rather than two suites.
+schemaVersion: "1.0.0"
+id: "app.toolbar-title"
+phrases:
+  - "the toolbar title"
+entries:
+  - candidates:
+      - by: "css"
+        value: "#toolbar-title"
+        score: 0.99
+    context:
+      platform: "web"
+      pattern: "/"
+      hash: "449553d933f970b3e281a84d09a3a6776fd5791191ecc6a4e6e954b00ac59a10"
+    fingerprint:
+      tag: "h1"
+      attrs:
+        id: "toolbar-title"
+      text: ""
+      neighbours:
+        before: []
+        after: []
+      rolePath: []
+      box: [0, 0, 0, 0]
+      index: 0
+    provenance:
+      at: "2026-09-05T00:00:00.000Z"
+      model: "none"
+      promptVersion: "seeded"
+      tokensIn: 0
+      tokensOut: 0
+      costUsd: 0
+    recordedAt: "2026-09-05T00:00:00.000Z"
+    verified: false

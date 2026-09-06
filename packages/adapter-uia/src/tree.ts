@@ -22,7 +22,7 @@ export interface UiaSnapshotNode extends SnapshotNode {
   readonly path: readonly number[];
   /** The node this was built from, for `describe()`. */
   readonly source: UiaNode;
-  /** `Window[Yam ADE]/Group[2]/Button[Run]` (LLD §3.3). */
+  /** `Window[Yam]/Group[2]/Button[Run]` (LLD §3.3). */
   readonly controlPath: string;
 }
 
@@ -34,7 +34,7 @@ export interface UiaSnapshotNode extends SnapshotNode {
  * type is too coarse. Chromium uses it heavily: an ARIA `heading` is
  * `ControlType.Text` with `LocalizedControlType` "heading", and a `tab` inside
  * a `Tab` is a `TabItem`. Reading it first is what stops every heading in the
- * ADE being reported as text.
+ * APP_DIR being reported as text.
  *
  * Only values that are ARIA roles are honoured. `LocalizedControlType` is
  * localised — on a German Windows a button says "Schaltfläche" — so a table
@@ -293,7 +293,7 @@ export function convertTree(nodes: readonly UiaNode[], options: ConvertOptions):
 }
 
 /**
- * `Window[Yam ADE]/Group[2]/Button[Run]` (LLD §3.3, §7.5).
+ * `Window[Yam]/Group[2]/Button[Run]` (LLD §3.3, §7.5).
  *
  * > `controlPath` built from ancestor chain with names and sibling indices […]
  * > `controlPath` starts at the top-level window title.

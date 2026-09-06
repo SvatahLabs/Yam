@@ -10,10 +10,10 @@
  *
  * Server-rendered, and that is the point: the page has no bundler, no
  * `<script>` and no network, so `scripts/audit-sheet.mjs` reads it with a DOM
- * parser and a person opens it in any browser — including the packaged ADE's,
+ * parser and a person opens it in any browser — including the packaged app's,
  * which is what "the accessibility adapters can read" means.
  *
- * The interactive parts (the palette opens; the tabs switch) are what the ADE
+ * The interactive parts (the palette opens; the tabs switch) are what the app
  * itself exercises under Playwright in T9.4. A static sheet is for the *shapes*:
  * every control's role, name and id, in both themes, in one document.
  */

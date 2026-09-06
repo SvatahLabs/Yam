@@ -27,7 +27,7 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "getEvents", verb: "get", path: "/events", summary: "The event stream (WebSocket)" },
   { id: "getEventsSse", verb: "get", path: "/events/sse", summary: "The event stream (server-sent events)" },
   { id: "getFlowsByFile", verb: "get", path: "/flows/{file}", summary: "Read a flow file" },
-  { id: "getHealth", verb: "get", path: "/health", summary: "Liveness, for the ADE's spawn handshake" },
+  { id: "getHealth", verb: "get", path: "/health", summary: "Liveness, for the app's spawn handshake" },
   { id: "getOpenapijson", verb: "get", path: "/openapi.json", summary: "This document" },
   { id: "getPlan", verb: "get", path: "/plan", summary: "The compiled plan, story by story" },
   { id: "getProject", verb: "get", path: "/project", summary: "Config, flows, stories, compositions, run blocks and API names" },
@@ -41,7 +41,7 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "postBindingsVerify", verb: "post", path: "/bindings/verify", summary: "Dry-resolve the store, or one binding" },
   { id: "postCompile", verb: "post", path: "/compile", summary: "Compile and lint" },
   { id: "postHeal", verb: "post", path: "/heal", summary: "Heal a run; proposals arrive on the stream" },
-  { id: "postMigrate", verb: "post", path: "/migrate", summary: "Import a Yam ADE prototype's electron-db directory into this project" },
+  { id: "postMigrate", verb: "post", path: "/migrate", summary: "Import a Yam prototype's electron-db directory into this project" },
   { id: "postRecord", verb: "post", path: "/record", summary: "Start a recording session; decisions arrive on the stream" },
   { id: "postRecordByIdDecision", verb: "post", path: "/record/{id}/decision", summary: "Accept, re-pick or reject the grounding a session is waiting on" },
   { id: "postRecordByIdStop", verb: "post", path: "/record/{id}/stop", summary: "Stop a recording session" },
@@ -146,7 +146,7 @@ export class GeneratedClient {
     return await this.call("get", `/flows/${encodeURIComponent(file)}`, { text: true, });
   }
 
-  /** `GET /health` — Liveness, for the ADE's spawn handshake */
+  /** `GET /health` — Liveness, for the app's spawn handshake */
   async getHealth(): Promise<unknown> {
     return await this.call("get", `/health`, { });
   }
@@ -216,7 +216,7 @@ export class GeneratedClient {
     return await this.call("post", `/heal`, { body, });
   }
 
-  /** `POST /migrate` — Import a Yam ADE prototype's electron-db directory into this project */
+  /** `POST /migrate` — Import a Yam prototype's electron-db directory into this project */
   async postMigrate(body?: unknown): Promise<unknown> {
     return await this.call("post", `/migrate`, { body, });
   }

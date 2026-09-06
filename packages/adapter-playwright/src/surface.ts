@@ -103,13 +103,13 @@ export interface PlaywrightAdapterOptions {
    *
    * > The Playwright adapter attaches to an existing Chromium when
    * > `YAM_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi
-   * > adapter attaches, so a flow can drive the ADE's renderer.
+   * > adapter attaches, so a flow can drive the app's renderer.
    *
-   * The ADE is the case it exists for. Playwright's `_electron.launch` cannot
+   * The app is the case it exists for. Playwright's `_electron.launch` cannot
    * open a packaged build — it attaches to Electron's *Node* inspector, and the
    * `RunAsNode` and `EnableNodeCliInspectArguments` fuses are off by design
    * (T8.1) — but the renderer's own DevTools endpoint is a different thing and
-   * is available. Attaching to it is how one flow drives the ADE through both
+   * is available. Attaching to it is how one flow drives the app through both
    * the accessibility tree and the DOM, which is what the parity gate of §13.9
    * compares.
    */
@@ -151,7 +151,7 @@ export class PlaywrightSurface implements AgentSurface {
    * True when this session attached to a browser it did not start (T11.2).
    *
    * It closes the *connection* and not the browser: a `close()` that quit
-   * somebody's Chromium — or the ADE — because a flow ended would be the
+   * somebody's Chromium — or the app — because a flow ended would be the
    * adapter deciding what the application is for.
    */
   private attached = false;
@@ -211,7 +211,7 @@ export class PlaywrightSurface implements AgentSurface {
      * (T11.5).
      *
      * The configuration was first, so `evals/self/cdp`'s written-down port beat
-     * the one `yam eval self` had actually started an ADE on, and the
+     * the one `yam eval self` had actually started an app on, and the
      * attaching side of the parity gate reported "could not attach to
      * 127.0.0.1:9464" — a port nothing was listening on, named in a file. A
      * port in a configuration is a *default* for somebody with no better idea;
@@ -313,7 +313,7 @@ export class PlaywrightSurface implements AgentSurface {
      * An attached browser is disconnected from, not closed (T11.2).
      *
      * `Browser.close()` on a CDP connection ends the browser, and the browser
-     * here is a person's Chromium — or the ADE, mid-run. What this session owns
+     * here is a person's Chromium — or the app, mid-run. What this session owns
      * is the connection.
      */
     if (this.browser !== undefined) {
@@ -561,7 +561,7 @@ export class PlaywrightSurface implements AgentSurface {
      * from the page as it is this instant. Every flow that clicks something and
      * then looks for what the click produced therefore raced the application —
      * on the web it usually won, because a DOM update is a few milliseconds,
-     * and against the ADE's renderer it lost about a third of the time, where
+     * and against the app's renderer it lost about a third of the time, where
      * clicking a project starts a service.
      *
      * So a locate that finds nothing is retried until just short of the
@@ -1313,7 +1313,7 @@ export function createPlaywrightSurface(
     ignoreAttributes: config.bindings.ignoreAttributes ?? DEFAULT_IGNORE_ATTRIBUTES,
     outputDir: config.run.outputDir,
     // `app.attach.cdpUrl` (T11.2, LLD §13.9): drive a Chromium that is already
-    // running — the ADE's renderer, for the parity gate — instead of launching.
+    // running — the app's renderer, for the parity gate — instead of launching.
     ...(config.app.attach?.cdpUrl === undefined ? {} : { cdpUrl: config.app.attach.cdpUrl }),
     ...overrides,
   });

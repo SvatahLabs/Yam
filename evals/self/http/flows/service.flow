@@ -1,4 +1,4 @@
-# The local service, asked the questions the ADE asks it (T12.7, LLD §13.9).
+# The local service, asked the questions the app asks it (T12.7, LLD §13.9).
 #
 # > flows … over the HTTP adapter against the local service, with JSON-path
 # > expectations
@@ -19,7 +19,7 @@ story: the service says it is alive, and which project it is serving
   Wait for the "health" API to answer "$.ok" to be "true"
   Wait for the "health" API to answer "$.project" to contain "evals/fixtures"
 
-story: the service describes the project the ADE would open
+story: the service describes the project the app would open
   Wait for the "project" API to answer "$.config.project" to be "yam-fixtures"
   Wait for the "project" API to answer "$.config.adapter" to be "playwright"
   Wait for the "project" API to answer "$.root" to contain "evals/fixtures"
@@ -65,7 +65,7 @@ story: the service refuses a request with no token, and says why
 
 test: the local service over the HTTP adapter
   the service says it is alive, and which project it is serving
-  the service describes the project the ADE would open
+  the service describes the project the app would open
   the service compiles the project and answers with the plan
   the service reads the bindings store the Bindings screen shows
   the service names every secret and values none of them

@@ -18,13 +18,13 @@
  * 3. **`actions`** — `@svatah/yam-screens`'s registry, so an agent out of process
  *    runs the same action a person clicks, by the same id.
  * 4. **`connect()`** — where the service is: `YAM_SERVICE_URL` and
- *    `YAM_SERVICE_TOKEN`, or the lock file the ADE writes. Never a model
+ *    `YAM_SERVICE_TOKEN`, or the lock file the app writes. Never a model
  *    credential (§13.8).
  *
  * ## Node, not a browser
  *
  * `connect()` reads the environment and a lock file, so this package targets
- * Node — a CI job, an agent, `yam ui`. The ADE's *renderer* is a browser and
+ * Node — a CI job, an agent, `yam ui`. The app's *renderer* is a browser and
  * has neither: it is handed a `{ url, token }` by its preload bridge and
  * constructs `YamClient` directly, which needs nothing from `node:fs`.
  */
@@ -74,7 +74,7 @@ export class YamClient extends GeneratedClient implements ScreenService {
   /**
    * Every action the screen model has, runnable out of process (§13.8).
    *
-   * The same list, by the same ids, that the ADE's palette and `yam ui`'s
+   * The same list, by the same ids, that the app's palette and `yam ui`'s
    * palette show — `tools/repo-checks/test/action-parity.test.ts` is what holds
    * the three together.
    */
@@ -220,7 +220,7 @@ export class YamClient extends GeneratedClient implements ScreenService {
  * > model credential.
  *
  * In that order, and the order matters: an environment variable is what a CI job
- * and an agent set, and the lock file is what the ADE wrote for a service it is
+ * and an agent set, and the lock file is what the app wrote for a service it is
  * already running. A caller that passes a connection outright skips both.
  */
 export function connect(connection?: Partial<ServiceConnection>): YamClient {
@@ -235,15 +235,15 @@ export function connect(connection?: Partial<ServiceConnection>): YamClient {
   throw new Error(
     "No Yam service to connect to. Start one with `yam serve --project <dir>` and set " +
       "YAM_SERVICE_URL and YAM_SERVICE_TOKEN to the url and token it prints, or open the " +
-      "project in the ADE, which writes a lock file this reads. The SDK never reads a model " +
+      "project in the app, which writes a lock file this reads. The SDK never reads a model " +
       "credential (LLD §13.8).",
   );
 }
 
 /**
- * The lock file the ADE writes for a service it started (LLD §13.6).
+ * The lock file the app writes for a service it started (LLD §13.6).
  *
- * `YAM_SERVICE_LOCK` names one directly; otherwise the ADE's user-data
+ * `YAM_SERVICE_LOCK` names one directly; otherwise the app's user-data
  * directory is searched for the newest. Read lazily and defensively: a stale
  * lock from a service that died is a file that parses and a port that refuses,
  * and the connection error a caller then gets says which.

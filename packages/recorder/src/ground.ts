@@ -124,7 +124,7 @@ export interface GroundingResult {
   /**
    * The snapshot text the model was shown (T5.7, REQ-ADE-4).
    *
-   * "The ADE shows the snapshot excerpt … per target": a reviewer deciding
+   * "The app shows the snapshot excerpt … per target": a reviewer deciding
    * whether the model picked the right element needs to see what it was choosing
    * *from*. It is the same string the prompt carried, so what the reviewer reads
    * is what the model read, rather than a fresh snapshot taken afterwards of a
@@ -193,7 +193,7 @@ async function whereItIs(
  *
  * A desktop snapshot is a *moment*. A web page's is too, but Playwright's
  * locators wait and a DOM update is a few milliseconds; a desktop application
- * answers a click by doing work — the ADE starts a `yam serve` — and a
+ * answers a click by doing work — the app starts a `yam serve` — and a
  * recorder that grounded the next step against the tree as it was the instant
  * after the click was asking the model about a screen that had not arrived.
  * Measured: "the Flows rail item" grounded `not-found` against a 303-token

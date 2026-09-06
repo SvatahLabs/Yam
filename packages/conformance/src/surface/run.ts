@@ -27,7 +27,7 @@ export interface RunOptions {
   /** The suite to run; the web suite by default. */
   cases?: readonly ConformanceCase[];
   /**
-   * Which ADE accessibility variant the application under test is showing
+   * Which APP_DIR accessibility variant the application under test is showing
    * (LLD §16). Cases that do not declare this variant are skipped, so one
    * variant's report can be read against another's.
    */
@@ -116,7 +116,7 @@ async function runCase(
 
   try {
     /*
-     * A case that belongs to another ADE variant is skipped rather than
+     * A case that belongs to another app variant is skipped rather than
      * dropped (LLD §16): three passes over the same suite produce three reports
      * that line up case for case, and a case that quietly vanished from one of
      * them would be invisible.
@@ -129,7 +129,7 @@ async function runCase(
         page: testCase.page,
         description: testCase.description,
         status: "skipped",
-        skipReason: `the case runs at ADE variant ${variants.join(" and ")}, and this is ${variant}`,
+        skipReason: `the case runs at APP_DIR variant ${variants.join(" and ")}, and this is ${variant}`,
         checks: [],
         durationMs: Date.now() - started,
       };
@@ -267,7 +267,7 @@ export async function runSurfaceConformance(options: RunOptions): Promise<Confor
 
   /*
    * The costliest read across every case, not the last and not a mean: §7.5's
-   * budget is about the biggest window the suite touched, and the ADE's project
+   * budget is about the biggest window the suite touched, and the app's project
    * screen is that window.
    */
   let bridge: BridgeCost | undefined;

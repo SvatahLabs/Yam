@@ -1,7 +1,7 @@
 /**
  * Resolving the Node that runs `yam serve` (T8.1, P7-F1, Draft 2.9 §13.6).
  *
- * The order, the version floor, and the message — the three things the ADE's
+ * The order, the version floor, and the message — the three things the app's
  * behaviour rests on. Every candidate is probed through an injected function, so
  * these say what the resolver does rather than what this machine happens to have
  * installed.

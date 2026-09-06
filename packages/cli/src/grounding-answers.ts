@@ -35,10 +35,10 @@ export interface GroundingCase {
    *
    * A desktop snapshot is grounded the way a web one is, and what says *which
    * screen* is the window title rather than a URL. `scripts/desktop-grounding-cases.mjs`
-   * records them from the real ADE.
+   * records them from the real app.
    */
   readonly window?: string;
-  /** Which ADE screen a desktop case was recorded on. For a reader, not a key. */
+  /** Which app screen a desktop case was recorded on. For a reader, not a key. */
   readonly screen?: string;
   readonly variant?: number;
   readonly phrase: string;
@@ -92,7 +92,7 @@ export function groundingAnswers(path?: string): GroundingAnswers {
     ...readCases(path),
     ...readCases(unscoredPath(path)),
     /*
-     * The desktop set, recorded from the ADE (T11.3), and the phrases the self
+     * The desktop set, recorded from the app (T11.3), and the phrases the self
      * flows use that a *generated* case cannot cover.
      *
      * The generated phrase for a control comes from its accessible name — "the
@@ -124,7 +124,7 @@ export function groundingAnswers(path?: string): GroundingAnswers {
        * A desktop snapshot is grounded the way a web one is, and the thing that
        * says *which screen* is the window title rather than a URL. A window
        * title is a name and not a path, so it is matched as it is — there is
-       * nothing in "Yam ADE" to generalise.
+       * nothing in "Yam" to generalise.
        */
       const url = /^Page: (.+)$/m.exec(question)?.[1]?.trim();
       const window = /^Window: (.+)$/m.exec(question)?.[1]?.trim();

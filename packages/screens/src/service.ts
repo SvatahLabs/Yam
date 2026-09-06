@@ -1,7 +1,7 @@
 /**
  * What a screen may ask the world (T9.1, LLD §13.7, §13.5).
  *
- * > The ADE and the terminal cockpit `yam ui` are two renderers of one
+ * > The app and the terminal cockpit `yam ui` are two renderers of one
  * > headless **screen model**, and both are views over the local service
  * > (§13.5) and nothing else.
  *
@@ -21,7 +21,7 @@
  *
  * `getProject`, `postRun`, `getRunsByIdResults` — the names
  * `scripts/generate-service-client.mjs` derives from the paths. A screen can
- * therefore only ask for a route the service publishes, and the ADE's client,
+ * therefore only ask for a route the service publishes, and the app's client,
  * the SDK and the fake all satisfy this structurally with nothing to adapt.
  */
 

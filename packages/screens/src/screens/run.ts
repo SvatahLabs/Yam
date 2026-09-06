@@ -210,7 +210,7 @@ function locatorText(one: Record<string, unknown>): string | undefined {
 /**
  * One surface call as a phrase (P9-F5, Draft 2.12 §13.7).
  *
- * > The ADE's audit pane renders the call detail the model carries
+ * > The app's audit pane renders the call detail the model carries
  * > (`locate · booking.book-now-button · testid #0 · ok`).
  *
  * `act click h0 value "Indiranagar"`, and — since T10.4 taught the auditor to
@@ -493,7 +493,7 @@ export const runScreen: Screen<RunState> = {
     const sources = new Sources();
 
     /*
-     * The run in `params`, or the newest one. "Open the ADE on the Run screen"
+     * The run in `params`, or the newest one. "Open the app on the Run screen"
      * has to mean something without a run id, and the newest run is what a
      * person opening the screen is looking for.
      */

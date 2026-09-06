@@ -288,7 +288,7 @@ describe("the bridge cost a desktop report publishes (T7.1, LLD §7.5)", () => {
 
   it("keeps the costliest read, not the last one", async () => {
     /*
-     * §7.5's budget is about the biggest window the suite touched — the ADE's
+     * §7.5's budget is about the biggest window the suite touched — the app's
      * project screen — and a report that published the *last* read would
      * publish whatever the final case happened to open.
      */
@@ -353,12 +353,12 @@ describe("the bridge cost a desktop report publishes (T7.1, LLD §7.5)", () => {
 /**
  * P8-F3 — the desktop snapshot case fails on an unnamed interactive control.
  *
- * > Three unnamed buttons on the ADE's Project screen. Name them; make the
+ * > Three unnamed buttons on the app's Project screen. Name them; make the
  * > desktop snapshot case fail on an unnamed interactive control.
  *
  * The case is run here against two hand-built snapshots that differ in one
  * thing: whether the button has a name. A rule that cannot be shown to bite is
- * not a rule, and the live gate needs macOS, a packaged ADE and a granted
+ * not a rule, and the live gate needs macOS, a packaged app and a granted
  * permission to show it.
  */
 describe("the desktop snapshot case and unnamed controls (P8-F3, LLD §13.7)", () => {
@@ -371,9 +371,9 @@ describe("the desktop snapshot case and unnamed controls (P8-F3, LLD §13.7)", (
     native?: Record<string, string>;
   }
 
-  /** The smallest window that satisfies every other check in `ade.snapshot`. */
+  /** The smallest window that satisfies every other check in `app.snapshot`. */
   const windowWith = (nodes: readonly FakeNode[]): readonly FakeNode[] => [
-    { ref: "e0", role: "window", name: "Yam ADE", states: [], box: [0, 0, 1440, 900] },
+    { ref: "e0", role: "window", name: "Yam", states: [], box: [0, 0, 1440, 900] },
     ...nodes,
   ];
 
@@ -396,7 +396,7 @@ describe("the desktop snapshot case and unnamed controls (P8-F3, LLD §13.7)", (
     await runSurfaceConformance({
       adapter: "fake-desktop",
       baseUrl: "",
-      cases: DESKTOP_CASES.filter((one) => one.id === "ade.snapshot"),
+      cases: DESKTOP_CASES.filter((one) => one.id === "app.snapshot"),
       openSurface: async () => new Window(nodes),
     });
 

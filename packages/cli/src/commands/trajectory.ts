@@ -20,7 +20,7 @@
  * LLD §15 does not list a `trajectory` command — Phase 4 wrote trajectories from
  * `yam mcp` and nothing read them. This is the command that reads them, and
  * it is recorded as a deviation in `docs/spec/progress/phase-5.md`: the
- * alternative was a compiler with no way to invoke it, and the ADE's "compile to
+ * alternative was a compiler with no way to invoke it, and the app's "compile to
  * proposal" (T5.8) needs one function that both it and a person can call.
  */
 import { relative, resolve } from "node:path";

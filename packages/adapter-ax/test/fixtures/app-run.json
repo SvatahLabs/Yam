@@ -1,0 +1,5812 @@
+{
+  "process": "Yam",
+  "title": "Yam",
+  "truncated": false,
+  "nodes": [
+    {
+      "parent": -1,
+      "role": "AXWindow",
+      "subrole": "AXStandardWindow",
+      "title": "Yam",
+      "box": [
+        0,
+        0,
+        1280,
+        860
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXWebArea",
+      "description": "Yam",
+      "enabled": true,
+      "focused": true,
+      "box": [
+        0,
+        0,
+        1280,
+        828
+      ]
+    },
+    {
+      "parent": 1,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        828
+      ]
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        828
+      ],
+      "domIdentifier": "root"
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkBanner",
+      "enabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        44
+      ]
+    },
+    {
+      "parent": 4,
+      "role": "AXStaticText",
+      "title": "Yam",
+      "enabled": true,
+      "box": [
+        50,
+        21,
+        42,
+        17
+      ]
+    },
+    {
+      "parent": 5,
+      "role": "AXStaticText",
+      "title": "Yam",
+      "enabled": true
+    },
+    {
+      "parent": 4,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Project",
+      "enabled": true,
+      "box": [
+        104,
+        20,
+        132,
+        19
+      ],
+      "domIdentifier": "topbar-crumb"
+    },
+    {
+      "parent": 7,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        115,
+        20,
+        46,
+        19
+      ],
+      "domIdentifier": "crumb-project"
+    },
+    {
+      "parent": 8,
+      "role": "AXStaticText",
+      "title": "fixtures",
+      "enabled": true,
+      "box": [
+        115,
+        21,
+        46,
+        17
+      ]
+    },
+    {
+      "parent": 9,
+      "role": "AXStaticText",
+      "title": "fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 7,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        177,
+        20,
+        59,
+        19
+      ],
+      "domIdentifier": "crumb-screen"
+    },
+    {
+      "parent": 11,
+      "role": "AXStaticText",
+      "title": "Run comp",
+      "enabled": true,
+      "box": [
+        177,
+        21,
+        59,
+        17
+      ]
+    },
+    {
+      "parent": 12,
+      "role": "AXStaticText",
+      "title": "Run comp",
+      "enabled": true
+    },
+    {
+      "parent": 4,
+      "role": "AXButton",
+      "title": "Search or run a command",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        896,
+        16,
+        199,
+        28
+      ],
+      "domIdentifier": "open-command-palette"
+    },
+    {
+      "parent": 14,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true,
+      "box": [
+        907,
+        21,
+        146,
+        17
+      ]
+    },
+    {
+      "parent": 15,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true
+    },
+    {
+      "parent": 4,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        1106,
+        19,
+        154,
+        22
+      ],
+      "domIdentifier": "service-chip"
+    },
+    {
+      "parent": 17,
+      "role": "AXStaticText",
+      "title": "service",
+      "enabled": true,
+      "box": [
+        1128,
+        22,
+        38,
+        15
+      ]
+    },
+    {
+      "parent": 18,
+      "role": "AXStaticText",
+      "title": "service",
+      "enabled": true
+    },
+    {
+      "parent": 17,
+      "role": "AXStaticText",
+      "title": "127.0.0.1:62171",
+      "enabled": true,
+      "box": [
+        1166,
+        22,
+        85,
+        15
+      ]
+    },
+    {
+      "parent": 20,
+      "role": "AXStaticText",
+      "title": "127.0.0.1:62171",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Sections",
+      "enabled": true,
+      "box": [
+        8,
+        52,
+        220,
+        756
+      ],
+      "domIdentifier": "rail"
+    },
+    {
+      "parent": 22,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        16,
+        62,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 23,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true,
+      "box": [
+        24,
+        73,
+        50,
+        14
+      ]
+    },
+    {
+      "parent": 24,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true
+    },
+    {
+      "parent": 22,
+      "role": "AXButton",
+      "title": "Flows",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        91,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-flows"
+    },
+    {
+      "parent": 26,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        24,
+        98,
+        34,
+        17
+      ]
+    },
+    {
+      "parent": 27,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true
+    },
+    {
+      "parent": 22,
+      "role": "AXButton",
+      "title": "Runs",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        122,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-runs"
+    },
+    {
+      "parent": 29,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true,
+      "box": [
+        24,
+        129,
+        29,
+        17
+      ]
+    },
+    {
+      "parent": 30,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true
+    },
+    {
+      "parent": 22,
+      "role": "AXButton",
+      "title": "Bindings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        153,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-bindings"
+    },
+    {
+      "parent": 32,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true,
+      "box": [
+        24,
+        159,
+        50,
+        17
+      ]
+    },
+    {
+      "parent": 33,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true
+    },
+    {
+      "parent": 22,
+      "role": "AXButton",
+      "title": "Agents and tools",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        184,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-agents"
+    },
+    {
+      "parent": 35,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true,
+      "box": [
+        24,
+        190,
+        97,
+        17
+      ]
+    },
+    {
+      "parent": 36,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true
+    },
+    {
+      "parent": 22,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        16,
+        217,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 38,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true,
+      "box": [
+        24,
+        227,
+        66,
+        14
+      ]
+    },
+    {
+      "parent": 39,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true
+    },
+    {
+      "parent": 22,
+      "role": "AXButton",
+      "title": "API",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        246,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-api"
+    },
+    {
+      "parent": 41,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true,
+      "box": [
+        24,
+        252,
+        21,
+        17
+      ]
+    },
+    {
+      "parent": 42,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true
+    },
+    {
+      "parent": 22,
+      "role": "AXButton",
+      "title": "Data",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        277,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-data"
+    },
+    {
+      "parent": 44,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true,
+      "box": [
+        24,
+        283,
+        27,
+        17
+      ]
+    },
+    {
+      "parent": 45,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true
+    },
+    {
+      "parent": 22,
+      "role": "AXButton",
+      "title": "Import prototype database",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        736,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-import"
+    },
+    {
+      "parent": 47,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true,
+      "box": [
+        24,
+        743,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 48,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true
+    },
+    {
+      "parent": 22,
+      "role": "AXButton",
+      "title": "Settings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        767,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-settings"
+    },
+    {
+      "parent": 50,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true,
+      "box": [
+        24,
+        774,
+        48,
+        17
+      ]
+    },
+    {
+      "parent": 51,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "Workspace",
+      "enabled": true,
+      "box": [
+        228,
+        52,
+        684,
+        756
+      ],
+      "domIdentifier": "workspace"
+    },
+    {
+      "parent": 53,
+      "role": "AXHeading",
+      "title": "Run comp",
+      "enabled": true,
+      "box": [
+        244,
+        62,
+        34,
+        20
+      ]
+    },
+    {
+      "parent": 54,
+      "role": "AXStaticText",
+      "title": "Run",
+      "enabled": true,
+      "box": [
+        244,
+        62,
+        30,
+        19
+      ]
+    },
+    {
+      "parent": 55,
+      "role": "AXStaticText",
+      "title": "Run",
+      "enabled": true
+    },
+    {
+      "parent": 55,
+      "role": "AXStaticText",
+      "title": "Ru",
+      "enabled": true
+    },
+    {
+      "parent": 55,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 54,
+      "role": "AXStaticText",
+      "title": "comp",
+      "enabled": true,
+      "box": [
+        244,
+        62,
+        0,
+        0
+      ]
+    },
+    {
+      "parent": 59,
+      "role": "AXStaticText",
+      "title": "comp",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXStaticText",
+      "title": "aborted",
+      "enabled": true,
+      "box": [
+        293,
+        65,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 61,
+      "role": "AXStaticText",
+      "title": "aborted",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXStaticText",
+      "title": "test behavior · invoker user via cli · 0.88 s",
+      "enabled": true,
+      "box": [
+        354,
+        64,
+        60,
+        16
+      ]
+    },
+    {
+      "parent": 63,
+      "role": "AXStaticText",
+      "title": "test behavior · invoker user via cli · 0.88 s",
+      "enabled": true
+    },
+    {
+      "parent": 63,
+      "role": "AXStaticText",
+      "title": "test beha",
+      "enabled": true
+    },
+    {
+      "parent": 63,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXButton",
+      "title": "Run again",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        434,
+        58,
+        109,
+        28
+      ],
+      "domIdentifier": "action-run-again"
+    },
+    {
+      "parent": 67,
+      "role": "AXStaticText",
+      "title": "Run again",
+      "enabled": true,
+      "box": [
+        445,
+        63,
+        57,
+        17
+      ]
+    },
+    {
+      "parent": 68,
+      "role": "AXStaticText",
+      "title": "Run again",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXButton",
+      "title": "Resume from step",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        552,
+        58,
+        126,
+        28
+      ],
+      "domIdentifier": "action-run-resume"
+    },
+    {
+      "parent": 70,
+      "role": "AXStaticText",
+      "title": "Resume from step",
+      "enabled": true,
+      "box": [
+        563,
+        63,
+        104,
+        17
+      ]
+    },
+    {
+      "parent": 71,
+      "role": "AXStaticText",
+      "title": "Resume from step",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXButton",
+      "title": "Stop",
+      "enabled": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        686,
+        58,
+        73,
+        28
+      ],
+      "domIdentifier": "action-run-stop"
+    },
+    {
+      "parent": 73,
+      "role": "AXStaticText",
+      "title": "Stop",
+      "enabled": true,
+      "box": [
+        697,
+        63,
+        26,
+        17
+      ]
+    },
+    {
+      "parent": 74,
+      "role": "AXStaticText",
+      "title": "Stop",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXButton",
+      "title": "Heal run comp",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        766,
+        58,
+        130,
+        28
+      ],
+      "domIdentifier": "action-heal-run"
+    },
+    {
+      "parent": 76,
+      "role": "AXStaticText",
+      "title": "Heal run comp",
+      "enabled": true,
+      "box": [
+        777,
+        63,
+        83,
+        17
+      ]
+    },
+    {
+      "parent": 77,
+      "role": "AXStaticText",
+      "title": "Heal run comp",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkComplementary",
+      "description": "Stories",
+      "enabled": true,
+      "box": [
+        228,
+        93,
+        301,
+        715
+      ],
+      "domIdentifier": "run-stories-pane"
+    },
+    {
+      "parent": 79,
+      "role": "AXStaticText",
+      "title": "6 passed",
+      "enabled": true,
+      "box": [
+        247,
+        105,
+        53,
+        15
+      ]
+    },
+    {
+      "parent": 80,
+      "role": "AXStaticText",
+      "title": "6 passed",
+      "enabled": true
+    },
+    {
+      "parent": 79,
+      "role": "AXStaticText",
+      "title": "1 failed",
+      "enabled": true,
+      "box": [
+        320,
+        105,
+        53,
+        15
+      ]
+    },
+    {
+      "parent": 82,
+      "role": "AXStaticText",
+      "title": "1 failed",
+      "enabled": true
+    },
+    {
+      "parent": 79,
+      "role": "AXStaticText",
+      "title": "0 skipped",
+      "enabled": true,
+      "box": [
+        393,
+        105,
+        59,
+        15
+      ]
+    },
+    {
+      "parent": 84,
+      "role": "AXStaticText",
+      "title": "0 skipped",
+      "enabled": true
+    },
+    {
+      "parent": 79,
+      "role": "AXTable",
+      "description": "STORIES IN THIS RUN",
+      "enabled": true,
+      "box": [
+        228,
+        132,
+        300,
+        185
+      ],
+      "domIdentifier": "run-stories"
+    },
+    {
+      "parent": 86,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        132,
+        300,
+        21
+      ]
+    },
+    {
+      "parent": 87,
+      "role": "AXStaticText",
+      "title": "STORIES IN THIS RUN",
+      "enabled": true,
+      "box": [
+        240,
+        133,
+        125,
+        14
+      ]
+    },
+    {
+      "parent": 88,
+      "role": "AXStaticText",
+      "title": "STORIES IN THIS RUN",
+      "enabled": true
+    },
+    {
+      "parent": 86,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        153,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 90,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        153,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 91,
+      "role": "AXCell",
+      "title": "STORY",
+      "enabled": true,
+      "box": [
+        228,
+        153,
+        222,
+        32
+      ]
+    },
+    {
+      "parent": 92,
+      "role": "AXStaticText",
+      "title": "STORY",
+      "enabled": true,
+      "box": [
+        240,
+        162,
+        36,
+        14
+      ]
+    },
+    {
+      "parent": 93,
+      "role": "AXStaticText",
+      "title": "STORY",
+      "enabled": true
+    },
+    {
+      "parent": 91,
+      "role": "AXCell",
+      "title": "OUTCOME",
+      "enabled": true,
+      "box": [
+        450,
+        153,
+        78,
+        32
+      ]
+    },
+    {
+      "parent": 95,
+      "role": "AXStaticText",
+      "title": "OUTCOME",
+      "enabled": true,
+      "box": [
+        462,
+        162,
+        54,
+        14
+      ]
+    },
+    {
+      "parent": 96,
+      "role": "AXStaticText",
+      "title": "OUTCOME",
+      "enabled": true
+    },
+    {
+      "parent": 86,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        185,
+        300,
+        66
+      ]
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "I want to book and then fail 5 steps · policy compensate: cancel a booking",
+      "enabled": true,
+      "box": [
+        228,
+        185,
+        222,
+        66
+      ]
+    },
+    {
+      "parent": 99,
+      "role": "AXStaticText",
+      "title": "I want to book and then fail",
+      "enabled": true,
+      "box": [
+        240,
+        193,
+        150,
+        16
+      ]
+    },
+    {
+      "parent": 100,
+      "role": "AXStaticText",
+      "title": "I want to book and then fail",
+      "enabled": true
+    },
+    {
+      "parent": 99,
+      "role": "AXStaticText",
+      "title": "5 steps · policy compensate: cancel a booking",
+      "enabled": true,
+      "box": [
+        240,
+        210,
+        193,
+        32
+      ]
+    },
+    {
+      "parent": 102,
+      "role": "AXStaticText",
+      "title": "5 steps · policy compensate: cancel a",
+      "enabled": true
+    },
+    {
+      "parent": 102,
+      "role": "AXStaticText",
+      "title": "booking",
+      "enabled": true
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "failed",
+      "enabled": true,
+      "box": [
+        450,
+        185,
+        78,
+        66
+      ]
+    },
+    {
+      "parent": 105,
+      "role": "AXStaticText",
+      "title": "failed",
+      "enabled": true,
+      "box": [
+        469,
+        210,
+        40,
+        15
+      ]
+    },
+    {
+      "parent": 106,
+      "role": "AXStaticText",
+      "title": "failed",
+      "enabled": true
+    },
+    {
+      "parent": 86,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        251,
+        300,
+        66
+      ]
+    },
+    {
+      "parent": 108,
+      "role": "AXCell",
+      "title": "cancel a booking 2 steps · compensation, ran with the failing scope",
+      "enabled": true,
+      "box": [
+        228,
+        251,
+        222,
+        66
+      ]
+    },
+    {
+      "parent": 109,
+      "role": "AXStaticText",
+      "title": "cancel a booking",
+      "enabled": true,
+      "box": [
+        240,
+        259,
+        92,
+        16
+      ]
+    },
+    {
+      "parent": 110,
+      "role": "AXStaticText",
+      "title": "cancel a booking",
+      "enabled": true
+    },
+    {
+      "parent": 109,
+      "role": "AXStaticText",
+      "title": "2 steps · compensation, ran with the failing scope",
+      "enabled": true,
+      "box": [
+        240,
+        276,
+        188,
+        32
+      ]
+    },
+    {
+      "parent": 112,
+      "role": "AXStaticText",
+      "title": "2 steps · compensation, ran with the",
+      "enabled": true
+    },
+    {
+      "parent": 112,
+      "role": "AXStaticText",
+      "title": "failing scope",
+      "enabled": true
+    },
+    {
+      "parent": 108,
+      "role": "AXCell",
+      "title": "passed",
+      "enabled": true,
+      "box": [
+        450,
+        251,
+        78,
+        66
+      ]
+    },
+    {
+      "parent": 115,
+      "role": "AXStaticText",
+      "title": "passed",
+      "enabled": true,
+      "box": [
+        469,
+        276,
+        40,
+        15
+      ]
+    },
+    {
+      "parent": 116,
+      "role": "AXStaticText",
+      "title": "passed",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXGroup",
+      "description": "Steps",
+      "enabled": true,
+      "box": [
+        529,
+        93,
+        383,
+        495
+      ],
+      "domIdentifier": "run-steps"
+    },
+    {
+      "parent": 118,
+      "role": "AXButton",
+      "title": "✓ Click the Book a slot link testid #0 84 ms",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        529,
+        93,
+        383,
+        29
+      ],
+      "domIdentifier": "run-step-i-want-to-book-and-then-fail-1"
+    },
+    {
+      "parent": 119,
+      "role": "AXGroup",
+      "help": "passed",
+      "enabled": true,
+      "box": [
+        545,
+        99,
+        16,
+        16
+      ]
+    },
+    {
+      "parent": 120,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true,
+      "box": [
+        549,
+        99,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 121,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true
+    },
+    {
+      "parent": 119,
+      "role": "AXStaticText",
+      "title": "Click the Book a slot link",
+      "enabled": true,
+      "box": [
+        571,
+        99,
+        187,
+        16
+      ]
+    },
+    {
+      "parent": 123,
+      "role": "AXStaticText",
+      "title": "Click the Book a slot link",
+      "enabled": true
+    },
+    {
+      "parent": 119,
+      "role": "AXStaticText",
+      "title": "testid #0",
+      "enabled": true,
+      "box": [
+        794,
+        100,
+        59,
+        15
+      ]
+    },
+    {
+      "parent": 125,
+      "role": "AXStaticText",
+      "title": "testid #0",
+      "enabled": true
+    },
+    {
+      "parent": 119,
+      "role": "AXStaticText",
+      "title": "84 ms",
+      "enabled": true,
+      "box": [
+        863,
+        100,
+        33,
+        15
+      ]
+    },
+    {
+      "parent": 127,
+      "role": "AXStaticText",
+      "title": "84 ms",
+      "enabled": true
+    },
+    {
+      "parent": 118,
+      "role": "AXButton",
+      "title": "✓ Type \"Indiranagar\" into the location field testid #0 58 ms",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        529,
+        122,
+        383,
+        29
+      ],
+      "domIdentifier": "run-step-i-want-to-book-and-then-fail-2"
+    },
+    {
+      "parent": 129,
+      "role": "AXGroup",
+      "help": "passed",
+      "enabled": true,
+      "box": [
+        545,
+        128,
+        16,
+        16
+      ]
+    },
+    {
+      "parent": 130,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true,
+      "box": [
+        549,
+        128,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 131,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true
+    },
+    {
+      "parent": 129,
+      "role": "AXStaticText",
+      "title": "Type \"Indiranagar\" into the location field",
+      "enabled": true,
+      "box": [
+        571,
+        128,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 133,
+      "role": "AXStaticText",
+      "title": "Type \"Indiranagar\" into the location field",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXStaticText",
+      "title": "Type \"Indiranagar\" into the",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 129,
+      "role": "AXStaticText",
+      "title": "testid #0",
+      "enabled": true,
+      "box": [
+        794,
+        129,
+        59,
+        15
+      ]
+    },
+    {
+      "parent": 137,
+      "role": "AXStaticText",
+      "title": "testid #0",
+      "enabled": true
+    },
+    {
+      "parent": 129,
+      "role": "AXStaticText",
+      "title": "58 ms",
+      "enabled": true,
+      "box": [
+        863,
+        129,
+        33,
+        15
+      ]
+    },
+    {
+      "parent": 139,
+      "role": "AXStaticText",
+      "title": "58 ms",
+      "enabled": true
+    },
+    {
+      "parent": 118,
+      "role": "AXButton",
+      "title": "✓ Click the Book now button testid #0 45 ms",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        529,
+        151,
+        383,
+        29
+      ],
+      "domIdentifier": "run-step-i-want-to-book-and-then-fail-3"
+    },
+    {
+      "parent": 141,
+      "role": "AXGroup",
+      "help": "passed",
+      "enabled": true,
+      "box": [
+        545,
+        157,
+        16,
+        16
+      ]
+    },
+    {
+      "parent": 142,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true,
+      "box": [
+        549,
+        157,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 143,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true
+    },
+    {
+      "parent": 141,
+      "role": "AXStaticText",
+      "title": "Click the Book now button",
+      "enabled": true,
+      "box": [
+        571,
+        157,
+        180,
+        16
+      ]
+    },
+    {
+      "parent": 145,
+      "role": "AXStaticText",
+      "title": "Click the Book now button",
+      "enabled": true
+    },
+    {
+      "parent": 141,
+      "role": "AXStaticText",
+      "title": "testid #0",
+      "enabled": true,
+      "box": [
+        794,
+        158,
+        59,
+        15
+      ]
+    },
+    {
+      "parent": 147,
+      "role": "AXStaticText",
+      "title": "testid #0",
+      "enabled": true
+    },
+    {
+      "parent": 141,
+      "role": "AXStaticText",
+      "title": "45 ms",
+      "enabled": true,
+      "box": [
+        863,
+        158,
+        33,
+        15
+      ]
+    },
+    {
+      "parent": 149,
+      "role": "AXStaticText",
+      "title": "45 ms",
+      "enabled": true
+    },
+    {
+      "parent": 118,
+      "role": "AXButton",
+      "title": "✓ Remember the text of the booking reference as reference = BK-10428 9 ms",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        529,
+        180,
+        383,
+        29
+      ],
+      "domIdentifier": "run-step-i-want-to-book-and-then-fail-4"
+    },
+    {
+      "parent": 151,
+      "role": "AXGroup",
+      "help": "passed",
+      "enabled": true,
+      "box": [
+        545,
+        186,
+        16,
+        16
+      ]
+    },
+    {
+      "parent": 152,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true,
+      "box": [
+        549,
+        186,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 153,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true
+    },
+    {
+      "parent": 151,
+      "role": "AXStaticText",
+      "title": "Remember the text of the booking reference as reference",
+      "enabled": true,
+      "box": [
+        571,
+        186,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 155,
+      "role": "AXStaticText",
+      "title": "Remember the text of the booking reference as reference",
+      "enabled": true
+    },
+    {
+      "parent": 155,
+      "role": "AXStaticText",
+      "title": "Remember the text of the boo",
+      "enabled": true
+    },
+    {
+      "parent": 155,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 151,
+      "role": "AXStaticText",
+      "title": "= BK-10428",
+      "enabled": true,
+      "box": [
+        794,
+        187,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 159,
+      "role": "AXStaticText",
+      "title": "= BK-10428",
+      "enabled": true
+    },
+    {
+      "parent": 151,
+      "role": "AXStaticText",
+      "title": "9 ms",
+      "enabled": true,
+      "box": [
+        870,
+        187,
+        26,
+        15
+      ]
+    },
+    {
+      "parent": 161,
+      "role": "AXStaticText",
+      "title": "9 ms",
+      "enabled": true
+    },
+    {
+      "parent": 118,
+      "role": "AXButton",
+      "title": "✗ Click the pay button locator 110 ms",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        529,
+        209,
+        383,
+        31
+      ],
+      "domIdentifier": "run-step-i-want-to-book-and-then-fail-5"
+    },
+    {
+      "parent": 163,
+      "role": "AXGroup",
+      "help": "failed",
+      "enabled": true,
+      "box": [
+        545,
+        216,
+        16,
+        16
+      ]
+    },
+    {
+      "parent": 164,
+      "role": "AXStaticText",
+      "title": "✗",
+      "enabled": true,
+      "box": [
+        549,
+        216,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 165,
+      "role": "AXStaticText",
+      "title": "✗",
+      "enabled": true
+    },
+    {
+      "parent": 163,
+      "role": "AXStaticText",
+      "title": "Click the pay button",
+      "enabled": true,
+      "box": [
+        571,
+        216,
+        144,
+        16
+      ]
+    },
+    {
+      "parent": 167,
+      "role": "AXStaticText",
+      "title": "Click the pay button",
+      "enabled": true
+    },
+    {
+      "parent": 163,
+      "role": "AXStaticText",
+      "title": "locator",
+      "enabled": true,
+      "box": [
+        793,
+        217,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 169,
+      "role": "AXStaticText",
+      "title": "locator",
+      "enabled": true
+    },
+    {
+      "parent": 163,
+      "role": "AXStaticText",
+      "title": "110 ms",
+      "enabled": true,
+      "box": [
+        856,
+        217,
+        40,
+        15
+      ]
+    },
+    {
+      "parent": 171,
+      "role": "AXStaticText",
+      "title": "110 ms",
+      "enabled": true
+    },
+    {
+      "parent": 118,
+      "role": "AXStaticText",
+      "title": "Could not resolve \"checkout.pay-button\" (the pay button): 5 candidates tried, none matched exactly one element.",
+      "enabled": true,
+      "box": [
+        577,
+        249,
+        178,
+        68
+      ]
+    },
+    {
+      "parent": 173,
+      "role": "AXStaticText",
+      "title": "Could not resolve \"checkout.pay-",
+      "enabled": true
+    },
+    {
+      "parent": 173,
+      "role": "AXStaticText",
+      "title": "button\" (the pay button): 5",
+      "enabled": true
+    },
+    {
+      "parent": 173,
+      "role": "AXStaticText",
+      "title": "candidates tried, none matched",
+      "enabled": true
+    },
+    {
+      "parent": 173,
+      "role": "AXStaticText",
+      "title": "exactly one element.",
+      "enabled": true
+    },
+    {
+      "parent": 118,
+      "role": "AXStaticText",
+      "title": "policy applied · compensate: cancel a booking",
+      "enabled": true,
+      "box": [
+        792,
+        251,
+        92,
+        62
+      ]
+    },
+    {
+      "parent": 178,
+      "role": "AXStaticText",
+      "title": "policy applied",
+      "enabled": true
+    },
+    {
+      "parent": 178,
+      "role": "AXStaticText",
+      "title": "· compensate:",
+      "enabled": true
+    },
+    {
+      "parent": 178,
+      "role": "AXStaticText",
+      "title": "cancel a",
+      "enabled": true
+    },
+    {
+      "parent": 178,
+      "role": "AXStaticText",
+      "title": "booking",
+      "enabled": true
+    },
+    {
+      "parent": 118,
+      "role": "AXButton",
+      "title": "✓ Click the cancel booking button testid #0 44 ms",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        529,
+        327,
+        383,
+        29
+      ],
+      "domIdentifier": "run-step-cancel-a-booking-1"
+    },
+    {
+      "parent": 183,
+      "role": "AXGroup",
+      "help": "passed",
+      "enabled": true,
+      "box": [
+        545,
+        333,
+        16,
+        16
+      ]
+    },
+    {
+      "parent": 184,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true,
+      "box": [
+        549,
+        333,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 185,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true
+    },
+    {
+      "parent": 183,
+      "role": "AXStaticText",
+      "title": "Click the cancel booking button",
+      "enabled": true,
+      "box": [
+        571,
+        333,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 187,
+      "role": "AXStaticText",
+      "title": "Click the cancel booking button",
+      "enabled": true
+    },
+    {
+      "parent": 187,
+      "role": "AXStaticText",
+      "title": "Click the cancel booking but",
+      "enabled": true
+    },
+    {
+      "parent": 187,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 183,
+      "role": "AXStaticText",
+      "title": "testid #0",
+      "enabled": true,
+      "box": [
+        794,
+        333,
+        59,
+        15
+      ]
+    },
+    {
+      "parent": 191,
+      "role": "AXStaticText",
+      "title": "testid #0",
+      "enabled": true
+    },
+    {
+      "parent": 183,
+      "role": "AXStaticText",
+      "title": "44 ms",
+      "enabled": true,
+      "box": [
+        863,
+        333,
+        33,
+        15
+      ]
+    },
+    {
+      "parent": 193,
+      "role": "AXStaticText",
+      "title": "44 ms",
+      "enabled": true
+    },
+    {
+      "parent": 118,
+      "role": "AXButton",
+      "title": "✓ The booking reference should say {I want to book and then fail.reference} testid #0 11 ms",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        529,
+        356,
+        383,
+        29
+      ],
+      "domIdentifier": "run-step-cancel-a-booking-2"
+    },
+    {
+      "parent": 195,
+      "role": "AXGroup",
+      "help": "passed",
+      "enabled": true,
+      "box": [
+        545,
+        362,
+        16,
+        16
+      ]
+    },
+    {
+      "parent": 196,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true,
+      "box": [
+        549,
+        362,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 197,
+      "role": "AXStaticText",
+      "title": "✓",
+      "enabled": true
+    },
+    {
+      "parent": 195,
+      "role": "AXStaticText",
+      "title": "The booking reference should say {I want to book and then fail.reference}",
+      "enabled": true,
+      "box": [
+        571,
+        362,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 199,
+      "role": "AXStaticText",
+      "title": "The booking reference should say {I want to book and then fail.reference}",
+      "enabled": true
+    },
+    {
+      "parent": 199,
+      "role": "AXStaticText",
+      "title": "The booking reference should",
+      "enabled": true
+    },
+    {
+      "parent": 199,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 195,
+      "role": "AXStaticText",
+      "title": "testid #0",
+      "enabled": true,
+      "box": [
+        794,
+        362,
+        59,
+        15
+      ]
+    },
+    {
+      "parent": 203,
+      "role": "AXStaticText",
+      "title": "testid #0",
+      "enabled": true
+    },
+    {
+      "parent": 195,
+      "role": "AXStaticText",
+      "title": "11 ms",
+      "enabled": true,
+      "box": [
+        863,
+        362,
+        33,
+        15
+      ]
+    },
+    {
+      "parent": 205,
+      "role": "AXStaticText",
+      "title": "11 ms",
+      "enabled": true
+    },
+    {
+      "parent": 118,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        385,
+        383,
+        37
+      ]
+    },
+    {
+      "parent": 207,
+      "role": "AXStaticText",
+      "title": "flow",
+      "enabled": true,
+      "box": [
+        545,
+        395,
+        26,
+        16
+      ]
+    },
+    {
+      "parent": 208,
+      "role": "AXStaticText",
+      "title": "flow",
+      "enabled": true
+    },
+    {
+      "parent": 207,
+      "role": "AXStaticText",
+      "title": "aborted",
+      "enabled": true,
+      "box": [
+        571,
+        395,
+        42,
+        16
+      ]
+    },
+    {
+      "parent": 210,
+      "role": "AXStaticText",
+      "title": "aborted",
+      "enabled": true
+    },
+    {
+      "parent": 207,
+      "role": "AXStaticText",
+      "title": "· exit",
+      "enabled": true,
+      "box": [
+        613,
+        395,
+        32,
+        16
+      ]
+    },
+    {
+      "parent": 212,
+      "role": "AXStaticText",
+      "title": "· exit",
+      "enabled": true
+    },
+    {
+      "parent": 207,
+      "role": "AXStaticText",
+      "title": "11",
+      "enabled": true,
+      "box": [
+        645,
+        395,
+        14,
+        16
+      ]
+    },
+    {
+      "parent": 214,
+      "role": "AXStaticText",
+      "title": "11",
+      "enabled": true
+    },
+    {
+      "parent": 207,
+      "role": "AXStaticText",
+      "title": "· the compensation itself passed",
+      "enabled": true,
+      "box": [
+        660,
+        395,
+        178,
+        16
+      ]
+    },
+    {
+      "parent": 216,
+      "role": "AXStaticText",
+      "title": "· the compensation itself passed",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXStaticText",
+      "title": "AUDIT",
+      "enabled": true,
+      "box": [
+        545,
+        601,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 218,
+      "role": "AXStaticText",
+      "title": "AUDIT",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXStaticText",
+      "title": "34",
+      "enabled": true,
+      "box": [
+        835,
+        601,
+        15,
+        15
+      ]
+    },
+    {
+      "parent": 220,
+      "role": "AXStaticText",
+      "title": "34",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXStaticText",
+      "title": "LINES",
+      "enabled": true,
+      "box": [
+        850,
+        601,
+        37,
+        15
+      ]
+    },
+    {
+      "parent": 222,
+      "role": "AXStaticText",
+      "title": "LINES",
+      "enabled": true
+    },
+    {
+      "parent": 53,
+      "role": "AXList",
+      "description": "Audit",
+      "enabled": true,
+      "box": [
+        529,
+        628,
+        383,
+        180
+      ],
+      "domIdentifier": "run-audit"
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        632,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 225,
+      "role": "AXStaticText",
+      "title": "00.001",
+      "enabled": true,
+      "box": [
+        545,
+        634,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 226,
+      "role": "AXStaticText",
+      "title": "00.001",
+      "enabled": true
+    },
+    {
+      "parent": 225,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true,
+      "box": [
+        617,
+        635,
+        21,
+        15
+      ]
+    },
+    {
+      "parent": 228,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true
+    },
+    {
+      "parent": 225,
+      "role": "AXStaticText",
+      "title": "invoker kind user id local via cli · inputs",
+      "enabled": true,
+      "box": [
+        685,
+        635,
+        297,
+        15
+      ]
+    },
+    {
+      "parent": 230,
+      "role": "AXStaticText",
+      "title": "invoker kind user id local via cli · inputs",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        652,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 232,
+      "role": "AXStaticText",
+      "title": "00.470",
+      "enabled": true,
+      "box": [
+        545,
+        654,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 233,
+      "role": "AXStaticText",
+      "title": "00.470",
+      "enabled": true
+    },
+    {
+      "parent": 232,
+      "role": "AXStaticText",
+      "title": "story",
+      "enabled": true,
+      "box": [
+        617,
+        655,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 235,
+      "role": "AXStaticText",
+      "title": "story",
+      "enabled": true
+    },
+    {
+      "parent": 232,
+      "role": "AXStaticText",
+      "title": "inputs",
+      "enabled": true,
+      "box": [
+        685,
+        655,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 237,
+      "role": "AXStaticText",
+      "title": "inputs",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        672,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 239,
+      "role": "AXStaticText",
+      "title": "00.473",
+      "enabled": true,
+      "box": [
+        545,
+        674,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 240,
+      "role": "AXStaticText",
+      "title": "00.473",
+      "enabled": true
+    },
+    {
+      "parent": 239,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true,
+      "box": [
+        617,
+        675,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 242,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true
+    },
+    {
+      "parent": 239,
+      "role": "AXStaticText",
+      "title": "ok · 3 ms",
+      "enabled": true,
+      "box": [
+        685,
+        675,
+        62,
+        15
+      ]
+    },
+    {
+      "parent": 244,
+      "role": "AXStaticText",
+      "title": "ok · 3 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        692,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 246,
+      "role": "AXStaticText",
+      "title": "00.494",
+      "enabled": true,
+      "box": [
+        545,
+        694,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 247,
+      "role": "AXStaticText",
+      "title": "00.494",
+      "enabled": true
+    },
+    {
+      "parent": 246,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        695,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 249,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 246,
+      "role": "AXStaticText",
+      "title": "nav.book-a-slot-link · testid \"booking-link\" · matched 1 · ok · 21 ms",
+      "enabled": true,
+      "box": [
+        685,
+        695,
+        476,
+        15
+      ]
+    },
+    {
+      "parent": 251,
+      "role": "AXStaticText",
+      "title": "nav.book-a-slot-link · testid \"booking-link\" · matched 1 · ok · 21 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        712,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 253,
+      "role": "AXStaticText",
+      "title": "00.554",
+      "enabled": true,
+      "box": [
+        545,
+        714,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 254,
+      "role": "AXStaticText",
+      "title": "00.554",
+      "enabled": true
+    },
+    {
+      "parent": 253,
+      "role": "AXStaticText",
+      "title": "act",
+      "enabled": true,
+      "box": [
+        617,
+        715,
+        21,
+        15
+      ]
+    },
+    {
+      "parent": 256,
+      "role": "AXStaticText",
+      "title": "act",
+      "enabled": true
+    },
+    {
+      "parent": 253,
+      "role": "AXStaticText",
+      "title": "click · h0 · ok · 60 ms",
+      "enabled": true,
+      "box": [
+        685,
+        715,
+        159,
+        15
+      ]
+    },
+    {
+      "parent": 258,
+      "role": "AXStaticText",
+      "title": "click · h0 · ok · 60 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        732,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 260,
+      "role": "AXStaticText",
+      "title": "00.574",
+      "enabled": true,
+      "box": [
+        545,
+        734,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 261,
+      "role": "AXStaticText",
+      "title": "00.574",
+      "enabled": true
+    },
+    {
+      "parent": 260,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true,
+      "box": [
+        617,
+        735,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 263,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true
+    },
+    {
+      "parent": 260,
+      "role": "AXStaticText",
+      "title": "ok · 19 ms",
+      "enabled": true,
+      "box": [
+        685,
+        735,
+        69,
+        15
+      ]
+    },
+    {
+      "parent": 265,
+      "role": "AXStaticText",
+      "title": "ok · 19 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        752,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 267,
+      "role": "AXStaticText",
+      "title": "00.595",
+      "enabled": true,
+      "box": [
+        545,
+        754,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 268,
+      "role": "AXStaticText",
+      "title": "00.595",
+      "enabled": true
+    },
+    {
+      "parent": 267,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        755,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 270,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 267,
+      "role": "AXStaticText",
+      "title": "booking.location-field · testid \"location\" · matched 1 · ok · 20 ms",
+      "enabled": true,
+      "box": [
+        685,
+        755,
+        462,
+        15
+      ]
+    },
+    {
+      "parent": 272,
+      "role": "AXStaticText",
+      "title": "booking.location-field · testid \"location\" · matched 1 · ok · 20 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        772,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 274,
+      "role": "AXStaticText",
+      "title": "00.612",
+      "enabled": true,
+      "box": [
+        545,
+        774,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 275,
+      "role": "AXStaticText",
+      "title": "00.612",
+      "enabled": true
+    },
+    {
+      "parent": 274,
+      "role": "AXStaticText",
+      "title": "act",
+      "enabled": true,
+      "box": [
+        617,
+        775,
+        21,
+        15
+      ]
+    },
+    {
+      "parent": 277,
+      "role": "AXStaticText",
+      "title": "act",
+      "enabled": true
+    },
+    {
+      "parent": 274,
+      "role": "AXStaticText",
+      "title": "type · h0 · value \"Indiranagar\" · ok · 17 ms",
+      "enabled": true,
+      "box": [
+        685,
+        775,
+        304,
+        15
+      ]
+    },
+    {
+      "parent": 279,
+      "role": "AXStaticText",
+      "title": "type · h0 · value \"Indiranagar\" · ok · 17 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        792,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 281,
+      "role": "AXStaticText",
+      "title": "00.614",
+      "enabled": true,
+      "box": [
+        545,
+        794,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 282,
+      "role": "AXStaticText",
+      "title": "00.614",
+      "enabled": true
+    },
+    {
+      "parent": 281,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true,
+      "box": [
+        617,
+        795,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 284,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true
+    },
+    {
+      "parent": 281,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true,
+      "box": [
+        685,
+        795,
+        62,
+        15
+      ]
+    },
+    {
+      "parent": 286,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        812,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 288,
+      "role": "AXStaticText",
+      "title": "00.618",
+      "enabled": true,
+      "box": [
+        545,
+        814,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 289,
+      "role": "AXStaticText",
+      "title": "00.618",
+      "enabled": true
+    },
+    {
+      "parent": 288,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        815,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 291,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 288,
+      "role": "AXStaticText",
+      "title": "booking.book-now-button · testid \"book-now\" · matched 1 · ok · 3 ms",
+      "enabled": true,
+      "box": [
+        685,
+        815,
+        462,
+        15
+      ]
+    },
+    {
+      "parent": 293,
+      "role": "AXStaticText",
+      "title": "booking.book-now-button · testid \"book-now\" · matched 1 · ok · 3 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        832,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 295,
+      "role": "AXStaticText",
+      "title": "00.658",
+      "enabled": true,
+      "box": [
+        545,
+        834,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 296,
+      "role": "AXStaticText",
+      "title": "00.658",
+      "enabled": true
+    },
+    {
+      "parent": 295,
+      "role": "AXStaticText",
+      "title": "act",
+      "enabled": true,
+      "box": [
+        617,
+        835,
+        21,
+        15
+      ]
+    },
+    {
+      "parent": 298,
+      "role": "AXStaticText",
+      "title": "act",
+      "enabled": true
+    },
+    {
+      "parent": 295,
+      "role": "AXStaticText",
+      "title": "click · h1 · ok · 40 ms",
+      "enabled": true,
+      "box": [
+        685,
+        835,
+        159,
+        15
+      ]
+    },
+    {
+      "parent": 300,
+      "role": "AXStaticText",
+      "title": "click · h1 · ok · 40 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        852,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 302,
+      "role": "AXStaticText",
+      "title": "00.659",
+      "enabled": true,
+      "box": [
+        545,
+        854,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 303,
+      "role": "AXStaticText",
+      "title": "00.659",
+      "enabled": true
+    },
+    {
+      "parent": 302,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true,
+      "box": [
+        617,
+        855,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 305,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true
+    },
+    {
+      "parent": 302,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true,
+      "box": [
+        685,
+        855,
+        62,
+        15
+      ]
+    },
+    {
+      "parent": 307,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        872,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 309,
+      "role": "AXStaticText",
+      "title": "00.663",
+      "enabled": true,
+      "box": [
+        545,
+        874,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 310,
+      "role": "AXStaticText",
+      "title": "00.663",
+      "enabled": true
+    },
+    {
+      "parent": 309,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        875,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 312,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 309,
+      "role": "AXStaticText",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 4 ms",
+      "enabled": true,
+      "box": [
+        685,
+        875,
+        538,
+        15
+      ]
+    },
+    {
+      "parent": 314,
+      "role": "AXStaticText",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 4 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        892,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 316,
+      "role": "AXStaticText",
+      "title": "00.666",
+      "enabled": true,
+      "box": [
+        545,
+        894,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 317,
+      "role": "AXStaticText",
+      "title": "00.666",
+      "enabled": true
+    },
+    {
+      "parent": 316,
+      "role": "AXStaticText",
+      "title": "read",
+      "enabled": true,
+      "box": [
+        617,
+        895,
+        28,
+        15
+      ]
+    },
+    {
+      "parent": 319,
+      "role": "AXStaticText",
+      "title": "read",
+      "enabled": true
+    },
+    {
+      "parent": 316,
+      "role": "AXStaticText",
+      "title": "h2 · ok · 4 ms",
+      "enabled": true,
+      "box": [
+        685,
+        895,
+        97,
+        15
+      ]
+    },
+    {
+      "parent": 321,
+      "role": "AXStaticText",
+      "title": "h2 · ok · 4 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        912,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 323,
+      "role": "AXStaticText",
+      "title": "00.721",
+      "enabled": true,
+      "box": [
+        545,
+        914,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 324,
+      "role": "AXStaticText",
+      "title": "00.721",
+      "enabled": true
+    },
+    {
+      "parent": 323,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true,
+      "box": [
+        617,
+        915,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 326,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true
+    },
+    {
+      "parent": 323,
+      "role": "AXStaticText",
+      "title": "ok · 54 ms",
+      "enabled": true,
+      "box": [
+        685,
+        915,
+        69,
+        15
+      ]
+    },
+    {
+      "parent": 328,
+      "role": "AXStaticText",
+      "title": "ok · 54 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        932,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 330,
+      "role": "AXStaticText",
+      "title": "00.723",
+      "enabled": true,
+      "box": [
+        545,
+        934,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 331,
+      "role": "AXStaticText",
+      "title": "00.723",
+      "enabled": true
+    },
+    {
+      "parent": 330,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        935,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 333,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 330,
+      "role": "AXStaticText",
+      "title": "checkout.pay-button · testid \"pay\" · matched nothing · ok · 2 ms",
+      "enabled": true,
+      "box": [
+        685,
+        935,
+        442,
+        15
+      ]
+    },
+    {
+      "parent": 335,
+      "role": "AXStaticText",
+      "title": "checkout.pay-button · testid \"pay\" · matched nothing · ok · 2 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        952,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 337,
+      "role": "AXStaticText",
+      "title": "00.727",
+      "enabled": true,
+      "box": [
+        545,
+        954,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 338,
+      "role": "AXStaticText",
+      "title": "00.727",
+      "enabled": true
+    },
+    {
+      "parent": 337,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        955,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 340,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 337,
+      "role": "AXStaticText",
+      "title": "checkout.pay-button · role button \"Pay\" · matched nothing · ok · 4 ms",
+      "enabled": true,
+      "box": [
+        685,
+        955,
+        476,
+        15
+      ]
+    },
+    {
+      "parent": 342,
+      "role": "AXStaticText",
+      "title": "checkout.pay-button · role button \"Pay\" · matched nothing · ok · 4 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        972,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 344,
+      "role": "AXStaticText",
+      "title": "00.729",
+      "enabled": true,
+      "box": [
+        545,
+        974,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 345,
+      "role": "AXStaticText",
+      "title": "00.729",
+      "enabled": true
+    },
+    {
+      "parent": 344,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        975,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 347,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 344,
+      "role": "AXStaticText",
+      "title": "checkout.pay-button · text \"Pay\" · matched nothing · ok · 2 ms",
+      "enabled": true,
+      "box": [
+        685,
+        975,
+        428,
+        15
+      ]
+    },
+    {
+      "parent": 349,
+      "role": "AXStaticText",
+      "title": "checkout.pay-button · text \"Pay\" · matched nothing · ok · 2 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        992,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 351,
+      "role": "AXStaticText",
+      "title": "00.730",
+      "enabled": true,
+      "box": [
+        545,
+        994,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 352,
+      "role": "AXStaticText",
+      "title": "00.730",
+      "enabled": true
+    },
+    {
+      "parent": 351,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        995,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 354,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 351,
+      "role": "AXStaticText",
+      "title": "checkout.pay-button · css \"[data-testid=\"pay\"]\" · matched nothing · ok · 1 ms",
+      "enabled": true,
+      "box": [
+        685,
+        995,
+        531,
+        15
+      ]
+    },
+    {
+      "parent": 356,
+      "role": "AXStaticText",
+      "title": "checkout.pay-button · css \"[data-testid=\"pay\"]\" · matched nothing · ok · 1 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1012,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 358,
+      "role": "AXStaticText",
+      "title": "00.734",
+      "enabled": true,
+      "box": [
+        545,
+        1014,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 359,
+      "role": "AXStaticText",
+      "title": "00.734",
+      "enabled": true
+    },
+    {
+      "parent": 358,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        1015,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 361,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 358,
+      "role": "AXStaticText",
+      "title": "checkout.pay-button · xpath \"//*[@data-testid='pay']\" · matched nothing · ok · 3 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1015,
+        573,
+        15
+      ]
+    },
+    {
+      "parent": 363,
+      "role": "AXStaticText",
+      "title": "checkout.pay-button · xpath \"//*[@data-testid='pay']\" · matched nothing · ok · 3 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1032,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 365,
+      "role": "AXStaticText",
+      "title": "00.737",
+      "enabled": true,
+      "box": [
+        545,
+        1034,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 366,
+      "role": "AXStaticText",
+      "title": "00.737",
+      "enabled": true
+    },
+    {
+      "parent": 365,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true,
+      "box": [
+        617,
+        1035,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 368,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true
+    },
+    {
+      "parent": 365,
+      "role": "AXStaticText",
+      "title": "ok · 3 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1035,
+        62,
+        15
+      ]
+    },
+    {
+      "parent": 370,
+      "role": "AXStaticText",
+      "title": "ok · 3 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1052,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 372,
+      "role": "AXStaticText",
+      "title": "00.776",
+      "enabled": true,
+      "box": [
+        545,
+        1054,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 373,
+      "role": "AXStaticText",
+      "title": "00.776",
+      "enabled": true
+    },
+    {
+      "parent": 372,
+      "role": "AXStaticText",
+      "title": "screenshot",
+      "enabled": true,
+      "box": [
+        617,
+        1055,
+        69,
+        15
+      ]
+    },
+    {
+      "parent": 375,
+      "role": "AXStaticText",
+      "title": "screenshot",
+      "enabled": true
+    },
+    {
+      "parent": 372,
+      "role": "AXStaticText",
+      "title": "ok · 38 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1055,
+        69,
+        15
+      ]
+    },
+    {
+      "parent": 377,
+      "role": "AXStaticText",
+      "title": "ok · 38 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1072,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 379,
+      "role": "AXStaticText",
+      "title": "00.777",
+      "enabled": true,
+      "box": [
+        545,
+        1074,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 380,
+      "role": "AXStaticText",
+      "title": "00.777",
+      "enabled": true
+    },
+    {
+      "parent": 379,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true,
+      "box": [
+        617,
+        1075,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 382,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true
+    },
+    {
+      "parent": 379,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1075,
+        62,
+        15
+      ]
+    },
+    {
+      "parent": 384,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1092,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 386,
+      "role": "AXStaticText",
+      "title": "00.777",
+      "enabled": true,
+      "box": [
+        545,
+        1094,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 387,
+      "role": "AXStaticText",
+      "title": "00.777",
+      "enabled": true
+    },
+    {
+      "parent": 386,
+      "role": "AXStaticText",
+      "title": "policy",
+      "enabled": true,
+      "box": [
+        617,
+        1095,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 389,
+      "role": "AXStaticText",
+      "title": "policy",
+      "enabled": true
+    },
+    {
+      "parent": 386,
+      "role": "AXStaticText",
+      "title": "policy compensate cancel a booking",
+      "enabled": true,
+      "box": [
+        685,
+        1095,
+        235,
+        15
+      ]
+    },
+    {
+      "parent": 391,
+      "role": "AXStaticText",
+      "title": "policy compensate cancel a booking",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1112,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 393,
+      "role": "AXStaticText",
+      "title": "00.778",
+      "enabled": true,
+      "box": [
+        545,
+        1114,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 394,
+      "role": "AXStaticText",
+      "title": "00.778",
+      "enabled": true
+    },
+    {
+      "parent": 393,
+      "role": "AXStaticText",
+      "title": "story",
+      "enabled": true,
+      "box": [
+        617,
+        1115,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 396,
+      "role": "AXStaticText",
+      "title": "story",
+      "enabled": true
+    },
+    {
+      "parent": 393,
+      "role": "AXStaticText",
+      "title": "inputs",
+      "enabled": true,
+      "box": [
+        685,
+        1115,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 398,
+      "role": "AXStaticText",
+      "title": "inputs",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1132,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 400,
+      "role": "AXStaticText",
+      "title": "00.779",
+      "enabled": true,
+      "box": [
+        545,
+        1134,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 401,
+      "role": "AXStaticText",
+      "title": "00.779",
+      "enabled": true
+    },
+    {
+      "parent": 400,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true,
+      "box": [
+        617,
+        1135,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 403,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true
+    },
+    {
+      "parent": 400,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1135,
+        62,
+        15
+      ]
+    },
+    {
+      "parent": 405,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1152,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 407,
+      "role": "AXStaticText",
+      "title": "00.783",
+      "enabled": true,
+      "box": [
+        545,
+        1154,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 408,
+      "role": "AXStaticText",
+      "title": "00.783",
+      "enabled": true
+    },
+    {
+      "parent": 407,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        1155,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 410,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 407,
+      "role": "AXStaticText",
+      "title": "booking.cancel-booking-button · testid \"cancel-booking\" · matched 1 · ok · 4 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1155,
+        545,
+        15
+      ]
+    },
+    {
+      "parent": 412,
+      "role": "AXStaticText",
+      "title": "booking.cancel-booking-button · testid \"cancel-booking\" · matched 1 · ok · 4 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1172,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 414,
+      "role": "AXStaticText",
+      "title": "00.822",
+      "enabled": true,
+      "box": [
+        545,
+        1174,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 415,
+      "role": "AXStaticText",
+      "title": "00.822",
+      "enabled": true
+    },
+    {
+      "parent": 414,
+      "role": "AXStaticText",
+      "title": "act",
+      "enabled": true,
+      "box": [
+        617,
+        1175,
+        21,
+        15
+      ]
+    },
+    {
+      "parent": 417,
+      "role": "AXStaticText",
+      "title": "act",
+      "enabled": true
+    },
+    {
+      "parent": 414,
+      "role": "AXStaticText",
+      "title": "click · h3 · ok · 39 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1175,
+        159,
+        15
+      ]
+    },
+    {
+      "parent": 419,
+      "role": "AXStaticText",
+      "title": "click · h3 · ok · 39 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1192,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 421,
+      "role": "AXStaticText",
+      "title": "00.823",
+      "enabled": true,
+      "box": [
+        545,
+        1194,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 422,
+      "role": "AXStaticText",
+      "title": "00.823",
+      "enabled": true
+    },
+    {
+      "parent": 421,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true,
+      "box": [
+        617,
+        1195,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 424,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true
+    },
+    {
+      "parent": 421,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1195,
+        62,
+        15
+      ]
+    },
+    {
+      "parent": 426,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1212,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 428,
+      "role": "AXStaticText",
+      "title": "00.826",
+      "enabled": true,
+      "box": [
+        545,
+        1214,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 429,
+      "role": "AXStaticText",
+      "title": "00.826",
+      "enabled": true
+    },
+    {
+      "parent": 428,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        1215,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 431,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 428,
+      "role": "AXStaticText",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 3 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1215,
+        538,
+        15
+      ]
+    },
+    {
+      "parent": 433,
+      "role": "AXStaticText",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 3 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1232,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 435,
+      "role": "AXStaticText",
+      "title": "00.827",
+      "enabled": true,
+      "box": [
+        545,
+        1234,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 436,
+      "role": "AXStaticText",
+      "title": "00.827",
+      "enabled": true
+    },
+    {
+      "parent": 435,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true,
+      "box": [
+        617,
+        1235,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 438,
+      "role": "AXStaticText",
+      "title": "state",
+      "enabled": true
+    },
+    {
+      "parent": 435,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1235,
+        62,
+        15
+      ]
+    },
+    {
+      "parent": 440,
+      "role": "AXStaticText",
+      "title": "ok · 1 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1252,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 442,
+      "role": "AXStaticText",
+      "title": "00.830",
+      "enabled": true,
+      "box": [
+        545,
+        1254,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 443,
+      "role": "AXStaticText",
+      "title": "00.830",
+      "enabled": true
+    },
+    {
+      "parent": 442,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true,
+      "box": [
+        617,
+        1255,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 445,
+      "role": "AXStaticText",
+      "title": "locate",
+      "enabled": true
+    },
+    {
+      "parent": 442,
+      "role": "AXStaticText",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 3 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1255,
+        538,
+        15
+      ]
+    },
+    {
+      "parent": 447,
+      "role": "AXStaticText",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 3 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1272,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 449,
+      "role": "AXStaticText",
+      "title": "00.833",
+      "enabled": true,
+      "box": [
+        545,
+        1274,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 450,
+      "role": "AXStaticText",
+      "title": "00.833",
+      "enabled": true
+    },
+    {
+      "parent": 449,
+      "role": "AXStaticText",
+      "title": "check",
+      "enabled": true,
+      "box": [
+        617,
+        1275,
+        35,
+        15
+      ]
+    },
+    {
+      "parent": 452,
+      "role": "AXStaticText",
+      "title": "check",
+      "enabled": true
+    },
+    {
+      "parent": 449,
+      "role": "AXStaticText",
+      "title": "ref · ok · 2 ms",
+      "enabled": true,
+      "box": [
+        685,
+        1275,
+        104,
+        15
+      ]
+    },
+    {
+      "parent": 454,
+      "role": "AXStaticText",
+      "title": "ref · ok · 2 ms",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1292,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 456,
+      "role": "AXStaticText",
+      "title": "00.833",
+      "enabled": true,
+      "box": [
+        545,
+        1294,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 457,
+      "role": "AXStaticText",
+      "title": "00.833",
+      "enabled": true
+    },
+    {
+      "parent": 456,
+      "role": "AXStaticText",
+      "title": "output",
+      "enabled": true,
+      "box": [
+        617,
+        1295,
+        41,
+        15
+      ]
+    },
+    {
+      "parent": 459,
+      "role": "AXStaticText",
+      "title": "output",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkComplementary",
+      "description": "Inspector",
+      "enabled": true,
+      "box": [
+        912,
+        52,
+        360,
+        756
+      ],
+      "domIdentifier": "inspector"
+    },
+    {
+      "parent": 461,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "STEP 5 · CLICK THE PAY BUTTON",
+      "enabled": true,
+      "box": [
+        913,
+        52,
+        359,
+        349
+      ],
+      "domIdentifier": "inspector-step"
+    },
+    {
+      "parent": 462,
+      "role": "AXHeading",
+      "title": "STEP 5 · CLICK THE PAY BUTTON",
+      "enabled": true,
+      "box": [
+        913,
+        58,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-step-heading"
+    },
+    {
+      "parent": 463,
+      "role": "AXStaticText",
+      "title": "STEP 5 · CLICK THE PAY BUTTON",
+      "enabled": true,
+      "box": [
+        929,
+        73,
+        185,
+        14
+      ]
+    },
+    {
+      "parent": 464,
+      "role": "AXStaticText",
+      "title": "STEP 5 · CLICK THE PAY BUTTON",
+      "enabled": true
+    },
+    {
+      "parent": 462,
+      "role": "AXImage",
+      "description": "The screen at Step 5 · Click the pay button",
+      "enabled": true,
+      "box": [
+        929,
+        101,
+        329,
+        186
+      ]
+    },
+    {
+      "parent": 462,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        913,
+        287,
+        359,
+        104
+      ]
+    },
+    {
+      "parent": 467,
+      "role": "AXUnknown",
+      "title": "Failure",
+      "enabled": true,
+      "box": [
+        929,
+        287,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 468,
+      "role": "AXStaticText",
+      "title": "Failure",
+      "enabled": true,
+      "box": [
+        929,
+        288,
+        37,
+        16
+      ]
+    },
+    {
+      "parent": 469,
+      "role": "AXStaticText",
+      "title": "Failure",
+      "enabled": true
+    },
+    {
+      "parent": 467,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        287,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 471,
+      "role": "AXStaticText",
+      "title": "locator",
+      "enabled": true,
+      "box": [
+        1056,
+        289,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 472,
+      "role": "AXStaticText",
+      "title": "locator",
+      "enabled": true
+    },
+    {
+      "parent": 467,
+      "role": "AXUnknown",
+      "title": "Session",
+      "enabled": true,
+      "box": [
+        929,
+        309,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 474,
+      "role": "AXStaticText",
+      "title": "Session",
+      "enabled": true,
+      "box": [
+        929,
+        310,
+        42,
+        16
+      ]
+    },
+    {
+      "parent": 475,
+      "role": "AXStaticText",
+      "title": "Session",
+      "enabled": true
+    },
+    {
+      "parent": 467,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        309,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 477,
+      "role": "AXStaticText",
+      "title": "/booking · window 0",
+      "enabled": true,
+      "box": [
+        1049,
+        310,
+        143,
+        17
+      ]
+    },
+    {
+      "parent": 478,
+      "role": "AXStaticText",
+      "title": "/booking · window 0",
+      "enabled": true
+    },
+    {
+      "parent": 467,
+      "role": "AXUnknown",
+      "title": "Title",
+      "enabled": true,
+      "box": [
+        929,
+        331,
+        110,
+        17
+      ]
+    },
+    {
+      "parent": 480,
+      "role": "AXStaticText",
+      "title": "Title",
+      "enabled": true,
+      "box": [
+        929,
+        332,
+        24,
+        16
+      ]
+    },
+    {
+      "parent": 481,
+      "role": "AXStaticText",
+      "title": "Title",
+      "enabled": true
+    },
+    {
+      "parent": 467,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        331,
+        207,
+        17
+      ]
+    },
+    {
+      "parent": 483,
+      "role": "AXStaticText",
+      "title": "Booking · Yam Sample",
+      "enabled": true,
+      "box": [
+        1049,
+        332,
+        133,
+        16
+      ]
+    },
+    {
+      "parent": 484,
+      "role": "AXStaticText",
+      "title": "Booking · Yam Sample",
+      "enabled": true
+    },
+    {
+      "parent": 467,
+      "role": "AXUnknown",
+      "title": "Dialog",
+      "enabled": true,
+      "box": [
+        929,
+        353,
+        110,
+        17
+      ]
+    },
+    {
+      "parent": 486,
+      "role": "AXStaticText",
+      "title": "Dialog",
+      "enabled": true,
+      "box": [
+        929,
+        353,
+        34,
+        16
+      ]
+    },
+    {
+      "parent": 487,
+      "role": "AXStaticText",
+      "title": "Dialog",
+      "enabled": true
+    },
+    {
+      "parent": 467,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        353,
+        207,
+        17
+      ]
+    },
+    {
+      "parent": 489,
+      "role": "AXStaticText",
+      "title": "none",
+      "enabled": true,
+      "box": [
+        1049,
+        353,
+        27,
+        16
+      ]
+    },
+    {
+      "parent": 490,
+      "role": "AXStaticText",
+      "title": "none",
+      "enabled": true
+    },
+    {
+      "parent": 467,
+      "role": "AXUnknown",
+      "title": "Policy",
+      "enabled": true,
+      "box": [
+        929,
+        374,
+        110,
+        17
+      ]
+    },
+    {
+      "parent": 492,
+      "role": "AXStaticText",
+      "title": "Policy",
+      "enabled": true,
+      "box": [
+        929,
+        375,
+        32,
+        16
+      ]
+    },
+    {
+      "parent": 493,
+      "role": "AXStaticText",
+      "title": "Policy",
+      "enabled": true
+    },
+    {
+      "parent": 467,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        374,
+        207,
+        17
+      ]
+    },
+    {
+      "parent": 495,
+      "role": "AXStaticText",
+      "title": "compensate: cancel a booking",
+      "enabled": true,
+      "box": [
+        1049,
+        375,
+        163,
+        16
+      ]
+    },
+    {
+      "parent": 496,
+      "role": "AXStaticText",
+      "title": "compensate: cancel a booking",
+      "enabled": true
+    },
+    {
+      "parent": 461,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "CANDIDATES TRIED",
+      "enabled": true,
+      "box": [
+        913,
+        401,
+        359,
+        270
+      ],
+      "domIdentifier": "inspector-candidates"
+    },
+    {
+      "parent": 498,
+      "role": "AXHeading",
+      "title": "CANDIDATES TRIED",
+      "enabled": true,
+      "box": [
+        913,
+        407,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-candidates-heading"
+    },
+    {
+      "parent": 499,
+      "role": "AXStaticText",
+      "title": "CANDIDATES TRIED",
+      "enabled": true,
+      "box": [
+        929,
+        422,
+        112,
+        14
+      ]
+    },
+    {
+      "parent": 500,
+      "role": "AXStaticText",
+      "title": "CANDIDATES TRIED",
+      "enabled": true
+    },
+    {
+      "parent": 498,
+      "role": "AXTable",
+      "description": "RESOLVER ORDER",
+      "enabled": true,
+      "box": [
+        913,
+        443,
+        359,
+        219
+      ],
+      "domIdentifier": "inspector-candidates-table"
+    },
+    {
+      "parent": 502,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        913,
+        443,
+        359,
+        21
+      ]
+    },
+    {
+      "parent": 503,
+      "role": "AXStaticText",
+      "title": "RESOLVER ORDER",
+      "enabled": true,
+      "box": [
+        925,
+        443,
+        101,
+        14
+      ]
+    },
+    {
+      "parent": 504,
+      "role": "AXStaticText",
+      "title": "RESOLVER ORDER",
+      "enabled": true
+    },
+    {
+      "parent": 502,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        913,
+        464,
+        359,
+        32
+      ]
+    },
+    {
+      "parent": 506,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        913,
+        464,
+        359,
+        32
+      ]
+    },
+    {
+      "parent": 507,
+      "role": "AXCell",
+      "title": "BY",
+      "enabled": true,
+      "box": [
+        913,
+        464,
+        73,
+        32
+      ]
+    },
+    {
+      "parent": 508,
+      "role": "AXStaticText",
+      "title": "BY",
+      "enabled": true,
+      "box": [
+        925,
+        472,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 509,
+      "role": "AXStaticText",
+      "title": "BY",
+      "enabled": true
+    },
+    {
+      "parent": 507,
+      "role": "AXCell",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        986,
+        464,
+        209,
+        32
+      ]
+    },
+    {
+      "parent": 511,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        998,
+        472,
+        35,
+        14
+      ]
+    },
+    {
+      "parent": 512,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true
+    },
+    {
+      "parent": 507,
+      "role": "AXCell",
+      "title": "MATCHED",
+      "enabled": true,
+      "box": [
+        1195,
+        464,
+        77,
+        32
+      ]
+    },
+    {
+      "parent": 514,
+      "role": "AXStaticText",
+      "title": "MATCHED",
+      "enabled": true,
+      "box": [
+        1211,
+        472,
+        49,
+        14
+      ]
+    },
+    {
+      "parent": 515,
+      "role": "AXStaticText",
+      "title": "MATCHED",
+      "enabled": true
+    },
+    {
+      "parent": 502,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        913,
+        496,
+        359,
+        33
+      ]
+    },
+    {
+      "parent": 517,
+      "role": "AXCell",
+      "title": "testid",
+      "enabled": true,
+      "box": [
+        913,
+        496,
+        73,
+        33
+      ]
+    },
+    {
+      "parent": 518,
+      "role": "AXStaticText",
+      "title": "testid",
+      "enabled": true,
+      "box": [
+        925,
+        504,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 519,
+      "role": "AXStaticText",
+      "title": "testid",
+      "enabled": true
+    },
+    {
+      "parent": 517,
+      "role": "AXCell",
+      "title": "pay",
+      "enabled": true,
+      "box": [
+        986,
+        496,
+        209,
+        33
+      ]
+    },
+    {
+      "parent": 521,
+      "role": "AXStaticText",
+      "title": "pay",
+      "enabled": true,
+      "box": [
+        998,
+        504,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 522,
+      "role": "AXStaticText",
+      "title": "pay",
+      "enabled": true
+    },
+    {
+      "parent": 517,
+      "role": "AXCell",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        1195,
+        496,
+        77,
+        33
+      ]
+    },
+    {
+      "parent": 524,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        1253,
+        504,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 525,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true
+    },
+    {
+      "parent": 502,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        913,
+        529,
+        359,
+        33
+      ]
+    },
+    {
+      "parent": 527,
+      "role": "AXCell",
+      "title": "role",
+      "enabled": true,
+      "box": [
+        913,
+        529,
+        73,
+        33
+      ]
+    },
+    {
+      "parent": 528,
+      "role": "AXStaticText",
+      "title": "role",
+      "enabled": true,
+      "box": [
+        925,
+        537,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 529,
+      "role": "AXStaticText",
+      "title": "role",
+      "enabled": true
+    },
+    {
+      "parent": 527,
+      "role": "AXCell",
+      "title": "button · \"Pay\"",
+      "enabled": true,
+      "box": [
+        986,
+        529,
+        209,
+        33
+      ]
+    },
+    {
+      "parent": 531,
+      "role": "AXStaticText",
+      "title": "button · \"Pay\"",
+      "enabled": true,
+      "box": [
+        998,
+        537,
+        105,
+        17
+      ]
+    },
+    {
+      "parent": 532,
+      "role": "AXStaticText",
+      "title": "button · \"Pay\"",
+      "enabled": true
+    },
+    {
+      "parent": 527,
+      "role": "AXCell",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        1195,
+        529,
+        77,
+        33
+      ]
+    },
+    {
+      "parent": 534,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        1253,
+        537,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 535,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true
+    },
+    {
+      "parent": 502,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        913,
+        562,
+        359,
+        33
+      ]
+    },
+    {
+      "parent": 537,
+      "role": "AXCell",
+      "title": "text",
+      "enabled": true,
+      "box": [
+        913,
+        562,
+        73,
+        33
+      ]
+    },
+    {
+      "parent": 538,
+      "role": "AXStaticText",
+      "title": "text",
+      "enabled": true,
+      "box": [
+        925,
+        570,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 539,
+      "role": "AXStaticText",
+      "title": "text",
+      "enabled": true
+    },
+    {
+      "parent": 537,
+      "role": "AXCell",
+      "title": "Pay",
+      "enabled": true,
+      "box": [
+        986,
+        562,
+        209,
+        33
+      ]
+    },
+    {
+      "parent": 541,
+      "role": "AXStaticText",
+      "title": "Pay",
+      "enabled": true,
+      "box": [
+        998,
+        570,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 542,
+      "role": "AXStaticText",
+      "title": "Pay",
+      "enabled": true
+    },
+    {
+      "parent": 537,
+      "role": "AXCell",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        1195,
+        562,
+        77,
+        33
+      ]
+    },
+    {
+      "parent": 544,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        1253,
+        570,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 545,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true
+    },
+    {
+      "parent": 502,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        913,
+        595,
+        359,
+        33
+      ]
+    },
+    {
+      "parent": 547,
+      "role": "AXCell",
+      "title": "css",
+      "enabled": true,
+      "box": [
+        913,
+        595,
+        73,
+        33
+      ]
+    },
+    {
+      "parent": 548,
+      "role": "AXStaticText",
+      "title": "css",
+      "enabled": true,
+      "box": [
+        925,
+        603,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 549,
+      "role": "AXStaticText",
+      "title": "css",
+      "enabled": true
+    },
+    {
+      "parent": 547,
+      "role": "AXCell",
+      "title": "[data-testid=\"pay\"]",
+      "enabled": true,
+      "box": [
+        986,
+        595,
+        209,
+        33
+      ]
+    },
+    {
+      "parent": 551,
+      "role": "AXStaticText",
+      "title": "[data-testid=\"pay\"]",
+      "enabled": true,
+      "box": [
+        998,
+        603,
+        143,
+        17
+      ]
+    },
+    {
+      "parent": 552,
+      "role": "AXStaticText",
+      "title": "[data-testid=\"pay\"]",
+      "enabled": true
+    },
+    {
+      "parent": 547,
+      "role": "AXCell",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        1195,
+        595,
+        77,
+        33
+      ]
+    },
+    {
+      "parent": 554,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        1253,
+        603,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 555,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true
+    },
+    {
+      "parent": 502,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        913,
+        628,
+        359,
+        33
+      ]
+    },
+    {
+      "parent": 557,
+      "role": "AXCell",
+      "title": "xpath",
+      "enabled": true,
+      "box": [
+        913,
+        628,
+        73,
+        33
+      ]
+    },
+    {
+      "parent": 558,
+      "role": "AXStaticText",
+      "title": "xpath",
+      "enabled": true,
+      "box": [
+        925,
+        636,
+        38,
+        17
+      ]
+    },
+    {
+      "parent": 559,
+      "role": "AXStaticText",
+      "title": "xpath",
+      "enabled": true
+    },
+    {
+      "parent": 557,
+      "role": "AXCell",
+      "title": "//*[@data-testid='pay']",
+      "enabled": true,
+      "box": [
+        986,
+        628,
+        209,
+        33
+      ]
+    },
+    {
+      "parent": 561,
+      "role": "AXStaticText",
+      "title": "//*[@data-testid='pay']",
+      "enabled": true,
+      "box": [
+        998,
+        636,
+        173,
+        17
+      ]
+    },
+    {
+      "parent": 562,
+      "role": "AXStaticText",
+      "title": "//*[@data-testid='pay']",
+      "enabled": true
+    },
+    {
+      "parent": 557,
+      "role": "AXCell",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        1195,
+        628,
+        77,
+        33
+      ]
+    },
+    {
+      "parent": 564,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        1253,
+        636,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 565,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true
+    },
+    {
+      "parent": 461,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "WHAT TO DO",
+      "enabled": true,
+      "box": [
+        913,
+        672,
+        359,
+        187
+      ],
+      "domIdentifier": "inspector-advice"
+    },
+    {
+      "parent": 567,
+      "role": "AXHeading",
+      "title": "WHAT TO DO",
+      "enabled": true,
+      "box": [
+        913,
+        678,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-advice-heading"
+    },
+    {
+      "parent": 568,
+      "role": "AXStaticText",
+      "title": "WHAT TO DO",
+      "enabled": true,
+      "box": [
+        929,
+        692,
+        71,
+        14
+      ]
+    },
+    {
+      "parent": 569,
+      "role": "AXStaticText",
+      "title": "WHAT TO DO",
+      "enabled": true
+    },
+    {
+      "parent": 567,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        929,
+        719,
+        327,
+        74
+      ]
+    },
+    {
+      "parent": 571,
+      "role": "AXStaticText",
+      "title": "Could not resolve \"checkout.pay-button\" (the pay button): 5 candidates tried, none matched exactly one element.",
+      "enabled": true,
+      "box": [
+        942,
+        730,
+        291,
+        51
+      ]
+    },
+    {
+      "parent": 572,
+      "role": "AXStaticText",
+      "title": "Could not resolve \"checkout.pay-button\" (the pay",
+      "enabled": true
+    },
+    {
+      "parent": 572,
+      "role": "AXStaticText",
+      "title": "button): 5 candidates tried, none matched exactly one",
+      "enabled": true
+    },
+    {
+      "parent": 572,
+      "role": "AXStaticText",
+      "title": "element.",
+      "enabled": true
+    },
+    {
+      "parent": 567,
+      "role": "AXButton",
+      "title": "Open step in editor",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        929,
+        807,
+        131,
+        28
+      ],
+      "domIdentifier": "inspector-open-step"
+    },
+    {
+      "parent": 576,
+      "role": "AXStaticText",
+      "title": "Open step in editor",
+      "enabled": true,
+      "box": [
+        940,
+        813,
+        109,
+        17
+      ]
+    },
+    {
+      "parent": 577,
+      "role": "AXStaticText",
+      "title": "Open step in editor",
+      "enabled": true
+    },
+    {
+      "parent": 567,
+      "role": "AXButton",
+      "title": "Heal run comp",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        1068,
+        807,
+        105,
+        28
+      ],
+      "domIdentifier": "inspector-heal-run"
+    },
+    {
+      "parent": 579,
+      "role": "AXStaticText",
+      "title": "Heal run comp",
+      "enabled": true,
+      "box": [
+        1079,
+        813,
+        83,
+        17
+      ]
+    },
+    {
+      "parent": 580,
+      "role": "AXStaticText",
+      "title": "Heal run comp",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkContentInfo",
+      "enabled": true,
+      "box": [
+        8,
+        808,
+        1264,
+        28
+      ]
+    },
+    {
+      "parent": 582,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        24,
+        814,
+        117,
+        17
+      ],
+      "domIdentifier": "status-context"
+    },
+    {
+      "parent": 583,
+      "role": "AXStaticText",
+      "title": "comp · 7 steps · 0.88 s",
+      "enabled": true,
+      "box": [
+        24,
+        815,
+        117,
+        15
+      ]
+    },
+    {
+      "parent": 584,
+      "role": "AXStaticText",
+      "title": "comp · 7 steps · 0.88 s",
+      "enabled": true
+    },
+    {
+      "parent": 582,
+      "role": "AXStaticText",
+      "title": "⌘K",
+      "enabled": true,
+      "box": [
+        1117,
+        816,
+        13,
+        14
+      ]
+    },
+    {
+      "parent": 586,
+      "role": "AXStaticText",
+      "title": "⌘K",
+      "enabled": true
+    },
+    {
+      "parent": 582,
+      "role": "AXStaticText",
+      "title": "commands",
+      "enabled": true,
+      "box": [
+        1136,
+        815,
+        60,
+        15
+      ]
+    },
+    {
+      "parent": 588,
+      "role": "AXStaticText",
+      "title": "commands",
+      "enabled": true
+    },
+    {
+      "parent": 582,
+      "role": "AXStaticText",
+      "title": "?",
+      "enabled": true,
+      "box": [
+        1218,
+        816,
+        6,
+        14
+      ]
+    },
+    {
+      "parent": 590,
+      "role": "AXStaticText",
+      "title": "?",
+      "enabled": true
+    },
+    {
+      "parent": 582,
+      "role": "AXStaticText",
+      "title": "keys",
+      "enabled": true,
+      "box": [
+        1230,
+        815,
+        26,
+        15
+      ]
+    },
+    {
+      "parent": 592,
+      "role": "AXStaticText",
+      "title": "keys",
+      "enabled": true
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXCloseButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        8,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXMinimizeButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        28,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXZoomButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        48,
+        8,
+        14,
+        14
+      ]
+    }
+  ]
+}

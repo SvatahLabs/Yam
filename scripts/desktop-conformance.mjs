@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * The desktop conformance run: launch the ADE, drive it, write the report
+ * The desktop conformance run: launch the app, drive it, write the report
  * (T6.1, T6.2, T7.1, LLD §7.5, §14, §16, REQ-ADE-6).
  *
  *   node scripts/desktop-conformance.mjs --adapter ax   [--report reports/adapter-ax.md]
  *   node scripts/desktop-conformance.mjs --adapter uia  [--report reports/adapter-uia.md]
  *
  * One command, because the gate has three parts that are easy to get wrong
- * separately: the ADE has to be *packaged*, it has to be launched with
+ * separately: the app has to be *packaged*, it has to be launched with
  * `YAM_A11Y=1` so Chromium publishes its accessibility tree, and the host
  * permission has to be in place. This checks all three, says which one is
  * missing, and only then runs the suite.
@@ -18,10 +18,10 @@
  *
  * ## Three passes, because a healing case needs a before and an after
  *
- * Draft 2.8 LLD §16 makes T6.1's "healing variant subset" concrete: the ADE
+ * Draft 2.8 LLD §16 makes T6.1's "healing variant subset" concrete: the app
  * gains `YAM_A11Y_VARIANT=1|2`, and a binding recorded at variant 0 must
  * relocalize at both. The variant is fixed when the window is created, so this
- * launches the ADE three times — variant 0 records, variants 1 and 2 heal —
+ * launches the app three times — variant 0 records, variants 1 and 2 heal —
  * carrying the recorded fingerprints between the passes in a state file, and
  * writes one report with every case's outcome at every variant it ran at.
  *
@@ -32,7 +32,7 @@
  * current directory now, which is what LLD §15's command table says and what
  * anyone typing a relative path means.
  *
- * And the wait for the ADE's window was a fixed eight-second sleep, which is
+ * And the wait for the app's window was a fixed eight-second sleep, which is
  * shorter than the fifteen seconds this machine has taken twice. It is a poll
  * for an actual window now, up to sixty seconds (§15), and a launch that never
  * shows one is reported as that rather than as seven failing cases.
@@ -58,10 +58,10 @@ const adapter = option("adapter", process.platform === "darwin" ? "ax" : "uia");
 const report = resolve(option("report", join(ROOT, "reports", `adapter-${adapter}.md`)));
 const project = option("project", join(ROOT, "evals", "fixtures"));
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
-const PROCESS_NAME = "Yam ADE";
+const PROCESS_NAME = "Yam";
 /** What LaunchServices calls this build; the graceful quit route addresses it. */
-const BUNDLE_ID = process.env["YAM_ADE_BUNDLE_ID"] ?? "com.electron.yam-ade";
-/** LLD §15: "polls for the ADE window up to 60 s". */
+const BUNDLE_ID = process.env["YAM_APP_BUNDLE_ID"] ?? "com.electron.yam";
+/** LLD §15: "polls for the app window up to 60 s". */
 const WINDOW_TIMEOUT_MS = Number(option("window-timeout-ms", "60000"));
 
 const die = (code, message) => {
@@ -74,7 +74,7 @@ const die = (code, message) => {
  *
  * The defect was that a relative `--report` landed somewhere nobody asked for,
  * and the only way it could be *seen* was by completing a run — which needs a
- * packaged ADE, a granted permission and a window, none of which a CI runner
+ * packaged app, a granted permission and a window, none of which a CI runner
  * on Linux has. One flag makes the resolution testable anywhere, in one line,
  * and it is the line `tools/repo-checks` runs.
  */
@@ -90,9 +90,9 @@ if (!existsSync(cli)) die(2, "Run `pnpm -r build` first.");
  *
  * `yam surface doctor --adapter uia` on macOS answers `skip  uia/platform
  * not Windows` and exits 0 — correctly, because a skipped check is not a failed
- * one — so the gate went on to launch an ADE and wait sixty seconds for a
+ * one — so the gate went on to launch an app and wait sixty seconds for a
  * window it was never going to read. "The host cannot run this adapter" and
- * "the ADE would not start" are different answers and sent a reader to
+ * "the app would not start" are different answers and sent a reader to
  * different places.
  */
 const HOST_FOR = { ax: "darwin", uia: "win32" };
@@ -172,20 +172,20 @@ function lockedDisplay() {
   return session.state === "locked" || session.state === "no-session" ? session : undefined;
 }
 
-/* ── 2. the ADE ───────────────────────────────────────────────────────────── */
+/* ── 2. the app ───────────────────────────────────────────────────────────── */
 
 /** The macOS application bundle, which is what LaunchServices opens. */
-const bundle = join(ROOT, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
+const bundle = join(ROOT, "apps", "desktop", "out", "Yam-darwin-arm64", "Yam.app");
 const app =
   process.platform === "darwin"
-    ? join(bundle, "Contents", "MacOS", "Yam ADE")
-    : join(ROOT, "apps", "ade", "out", `Yam ADE-win32-x64`, "Yam ADE.exe");
+    ? join(bundle, "Contents", "MacOS", "Yam")
+    : join(ROOT, "apps", "desktop", "out", `Yam-win32-x64`, "Yam.exe");
 
 if (!existsSync(app)) {
   die(
     2,
-    `The ADE is not packaged (${app}).\n` +
-      "Run: pnpm --filter @svatah/yam-ade exec electron-forge package\n" +
+    `The app is not packaged (${app}).\n` +
+      "Run: pnpm --filter @svatah/yam-desktop exec electron-forge package\n" +
       `Nothing was written to ${report}.`,
   );
 }
@@ -233,7 +233,7 @@ function hasWindow() {
      * `count windows` over an Apple event asks System Events to do the same
      * accessibility read this does, one process away, under a second
      * permission — and it answers `0` for *every* application on a host where
-     * the read is refused, which is indistinguishable from "the ADE has no
+     * the read is refused, which is indistinguishable from "the app has no
      * window yet". The role is the test, because a locked screen answers
      * `AXWindows` with a one-element list holding the application itself.
      */
@@ -260,9 +260,9 @@ function hasWindow() {
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
 /**
- * Is a project open on the ADE's window yet (T8.1)?
+ * Is a project open on the app's window yet (T8.1)?
  *
- * The window appearing is not enough: `YAM_ADE_PROJECT` opens the project
+ * The window appearing is not enough: `YAM_APP_PROJECT` opens the project
  * *after* ready, and every case is about a control that exists only once one is
  * open. Phase 7's gate asked for those controls on the welcome screen and
  * reported five adapter failures for a launch that had not finished (P7-F1).
@@ -330,7 +330,7 @@ function hasProject() {
 /**
  * The environment every launch gets.
  *
- * `YAM_ADE_PROJECT` is Draft 2.9 §13.6: "the desktop conformance gate passes
+ * `YAM_APP_PROJECT` is Draft 2.9 §13.6: "the desktop conformance gate passes
  * the fixtures project this way, so its cases read a project screen rather than
  * the welcome screen."
  */
@@ -339,8 +339,8 @@ function launchEnvironment(variant) {
     YAM_A11Y: "1",
     ...(variant === 0 ? {} : { YAM_A11Y_VARIANT: String(variant) }),
     YAM_CLI: cli,
-    YAM_ADE_SMOKE: "",
-    YAM_ADE_PROJECT: project,
+    YAM_APP_SMOKE: "",
+    YAM_APP_PROJECT: project,
     /*
      * The window-lifecycle log (Draft 2.13 §13.6, P10-F1).
      *
@@ -349,17 +349,17 @@ function launchEnvironment(variant) {
      * and this host will not show it", and the log is the only thing that can:
      * every probe the gate has is outside the application.
      */
-    YAM_ADE_DEBUG: "1",
+    YAM_APP_DEBUG: "1",
   };
 }
 
 /**
- * The ADE's graceful quit route on this platform (Draft 2.13 §13.6, §13.9).
+ * The app's graceful quit route on this platform (Draft 2.13 §13.6, §13.9).
  *
  * > the gate stops an instance through a graceful quit route before it signals
  *
  * On macOS an Apple-event `quit`, which Electron delivers as `before-quit`, so
- * the ADE stops the `yam serve` it spawned and writes its preferences. On
+ * the app stops the `yam serve` it spawned and writes its preferences. On
  * Windows, `CloseMainWindow`. Both are best-effort and neither is waited on
  * here: `stop()` polls for the process to be gone and escalates on its own
  * clock, which is what makes the route an *addition* to the signal rather than
@@ -386,7 +386,7 @@ function requestQuit() {
 }
 
 /**
- * Start the ADE so that it has a window (T8.2).
+ * Start the app so that it has a window (T8.2).
  *
  * On macOS through `open`, not by executing the binary. A GUI application
  * forked from a process that is not in the user's Aqua session never attaches
@@ -416,7 +416,7 @@ function start(variant) {
   return undefined;
 }
 
-/** Launch the ADE at one variant and wait for its project screen. */
+/** Launch the app at one variant and wait for its project screen. */
 async function launch(variant) {
   const child = start(variant);
   const startedAt = Date.now();
@@ -426,7 +426,7 @@ async function launch(variant) {
     if (windowAt === undefined && hasWindow()) {
       windowAt = Date.now() - startedAt;
       process.stderr.write(
-        `variant ${variant}: the ADE's window appeared after ${windowAt} ms\n`,
+        `variant ${variant}: the app's window appeared after ${windowAt} ms\n`,
       );
     }
     if (windowAt !== undefined && hasProject()) {
@@ -449,10 +449,10 @@ const passes = [];
 let running;
 
 /**
- * The process ids of this checkout's packaged ADE, right now (P8-F1).
+ * The process ids of this checkout's packaged app, right now (P8-F1).
  *
  * The executable path is what identifies them: it is unique to this checkout's
- * build, so a second Yam ADE installed elsewhere on the machine is not
+ * build, so a second Yam installed elsewhere on the machine is not
  * counted and not killed.
  */
 function processIds() {
@@ -485,14 +485,14 @@ const TEARDOWN_TIMEOUT_MS = Number(option("teardown-timeout-ms", "30000"));
 const GRACEFUL_QUIT_MS = Number(option("graceful-quit-ms", "10000"));
 
 /**
- * Stop the ADE, and do not come back until it is gone (P8-F1, Draft 2.10 §7.5).
+ * Stop the app, and do not come back until it is gone (P8-F1, Draft 2.10 §7.5).
  *
  * > the gate does not launch the next variant until no process of the previous
  * > launch remains.
  *
  * The defect this closes: `pkill` returns as soon as the signal is *delivered*,
  * and an Electron application takes a second or two to unwind. The gate then
- * opened the next variant, the bridge asked macOS for "Yam ADE", and the
+ * opened the next variant, the bridge asked macOS for "Yam", and the
  * answer was sometimes the instance that was still exiting — which owns no
  * window, so every case at the new variant threw `no-window`. One of the
  * verifier's three runs did exactly that, under load.
@@ -513,8 +513,8 @@ const stop = () => {
    *
    * A `pkill` is a `SIGTERM`, and Node's default handling of one ends the main
    * process where it stands: `before-quit` never ran, so the `yam serve` the
-   * ADE had spawned was left with no parent to stop it and went on holding the
-   * project's `runs/` directory for the next variant. The ADE runs its own quit
+   * APP_DIR had spawned was left with no parent to stop it and went on holding the
+   * project's `runs/` directory for the next variant. The app runs its own quit
    * on a signal now, and this asks it to quit before sending one at all.
    */
   const startedAt = Date.now();
@@ -570,7 +570,7 @@ process.on("exit", stop);
 /** The variants whose first read exceeded the deadline and were run again. */
 const retries = [];
 
-/** Run the conformance suite once against the ADE that is up, and parse it. */
+/** Run the conformance suite once against the app that is up, and parse it. */
 function runSuite(variant, statePath) {
   const conform = spawnSync(
     process.execPath,
@@ -623,7 +623,7 @@ function exceededDeadline(report) {
 /*
  * The application the fixtures project drives (T12.3, K6).
  *
- * `ade.result` presses Run on the Flows screen so that the branch of the case
+ * `app.result` presses Run on the Flows screen so that the branch of the case
  * which reads a table of runs is the branch the live gate takes, and the
  * fixtures flow drives `apps/sample-web` at the base URL its config names. The
  * gate starts one; if the port is taken — by a person's own `pnpm sample-web`,
@@ -669,23 +669,23 @@ try {
        *
        * On a locked display nothing an application does will produce one, so
        * "showed no window within 60000 ms" is true and useless: it sends the
-       * reader to look at the ADE. When the session check says the display is
+       * reader to look at the app. When the session check says the display is
        * locked, that is the cause and it is what this says.
        */
       const locked = lockedDisplay();
       die(
         2,
         locked === undefined
-          ? `The ADE was launched at variant ${variant} but ` +
+          ? `The app was launched at variant ${variant} but ` +
               (launched.windowAt === undefined
                 ? `showed no window within ${WINDOW_TIMEOUT_MS} ms`
                 : `showed no open project within ${WINDOW_TIMEOUT_MS} ms ` +
-                  `(its window appeared after ${launched.windowAt} ms; YAM_ADE_PROJECT=${project})`) +
+                  `(its window appeared after ${launched.windowAt} ms; YAM_APP_PROJECT=${project})`) +
               ". That is a launch failure, not an adapter failure, and it is " +
               "reported as one so the report is not a list of cases that never had anything to " +
               `read.\nNothing was written to ${report}.\n` +
               `\`yam surface doctor --adapter ${adapter}\` said:\n${doctorOutput}`
-          : `The ADE showed no window at variant ${variant} because this login session cannot ` +
+          : `The app showed no window at variant ${variant} because this login session cannot ` +
               `show one: ${locked.detail}.\n` +
               "That is the cause, not a launch failure and not an adapter failure — nothing " +
               "launched here would get a window.\n" +
@@ -759,7 +759,7 @@ try {
     `Run at ${new Date().toISOString()} on ${process.platform} ${process.arch}, Node ${process.version}.`,
     "",
     conformant
-      ? `**Conformant.** ${passedCount} cases passed across ADE variants 0, 1 and 2 ` +
+      ? `**Conformant.** ${passedCount} cases passed across APP_DIR variants 0, 1 and 2 ` +
         "(REQ-SURF-3, REQ-ADE-6)."
       : `**Not conformant.** ${failed.length} case(s) failed (REQ-SURF-3).`,
     "",
@@ -795,7 +795,7 @@ try {
     "|---|---|---|",
     ...passes.flatMap((pass) =>
       pass.report.cases
-        .filter((one) => one.id.startsWith("ade.heal.") && one.status !== "skipped")
+        .filter((one) => one.id.startsWith("app.heal.") && one.status !== "skipped")
         .map(
           (one) =>
             `| \`${one.id}\` | ${pass.variant} | ${one.status === "passed" ? (pass.variant === 0 ? "recorded" : "relocalized") : one.status} |`,
@@ -803,7 +803,7 @@ try {
     ),
     "",
     ...passes.flatMap((pass) => [
-      `## ADE variant ${pass.variant}`,
+      `## APP_DIR variant ${pass.variant}`,
       "",
       renderMarkdown(pass.report)
         .split("\n")

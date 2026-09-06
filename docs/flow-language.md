@@ -581,7 +581,7 @@ Type "story: smoke\nOpen \"/login\"\n" into the flow editor
 Four escapes and no more: `\n`, `\t`, `\"` and `\\`. Anything else after a
 backslash stays exactly as it was written, so a Windows path in a value does not
 silently lose its separators. Until Draft 2.15 there was only `\"`, and "a flow
-is edited and saved through the ADE" was a check only the external oracle could
+is edited and saved through the app" was a check only the external oracle could
 reach: typing a whole file into a text area is a multi-line value and nothing
 else.
 
@@ -1023,7 +1023,7 @@ polls it every half second until the value at the path satisfies the predicate,
 or its own timeout runs out; a request that throws is not a failure yet, because
 a service that has not finished starting answers with a connection refused.
 
-This is the sentence four one-sided checks were waiting for: a button in the ADE
+This is the sentence four one-sided checks were waiting for: a button in the app
 starts a **second** Yam run, and until Draft 2.15 a flow had no way to wait
 for a run other than its own and read its result.
 
@@ -1998,14 +1998,14 @@ viewport, so the same sentence resizes the same thing whichever oracle is
 driving. An adapter with no window (`http`, `appium`) refuses it at the start of
 the run rather than halfway through, because it needs the `windows` capability.
 
-**`app.launch.size` is the initial size.** The ADE remembers its own window size
+**`app.launch.size` is the initial size.** The app remembers its own window size
 between runs, so a suite that measures a toolbar at 1440 points was measuring
 whatever width the last person left it at:
 
 ```yaml
 app:
   launch:
-    bundle: "…/Yam ADE.app"
+    bundle: "…/Yam.app"
     size: [1440, 900]
 ```
 

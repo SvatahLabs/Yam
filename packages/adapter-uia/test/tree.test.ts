@@ -1,5 +1,5 @@
 /**
- * The tree mapping and candidates, against the ADE's recorded UIA trees (T6.1).
+ * The tree mapping and candidates, against the app's recorded UIA trees (T6.1).
  *
  * Everything here is a pure function of a `UiaNode[]`, so being on macOS costs
  * nothing: the input is a real tree from a real application, read as
@@ -35,7 +35,7 @@ const record = convert("record");
 const api = convert("api");
 
 describe("control types are normalised to the ARIA vocabulary (REQ-SURF-4)", () => {
-  it("maps every ControlType the ADE produces", () => {
+  it("maps every ControlType the app produces", () => {
     for (const screen of ADE_SCREENS) {
       const unmapped = [...new Set(nodesOf(screen).map((node) => node.controlType))].filter(
         (type) => UIA_ROLE_MAP[type] === undefined,
@@ -48,7 +48,7 @@ describe("control types are normalised to the ARIA vocabulary (REQ-SURF-4)", () 
     /*
      * Chromium publishes an ARIA `heading` as `ControlType.Text` and says
      * "heading" in `LocalizedControlType`. Without this every heading in the
-     * ADE would be reported as text.
+     * APP_DIR would be reported as text.
      */
     expect(roleOf({ controlType: "Text", localizedControlType: "heading" })).toBe("heading");
     expect(roleOf({ controlType: "Text" })).toBe("text");
@@ -69,9 +69,9 @@ describe("control types are normalised to the ARIA vocabulary (REQ-SURF-4)", () 
     expect(roleOf({ controlType: "SomethingNew" })).toBe("generic");
   });
 
-  it("gives the ADE's rail rows the role `button` and its view tabs `tab` (T10.3)", () => {
+  it("gives the app's rail rows the role `button` and its view tabs `tab` (T10.3)", () => {
     /*
-     * The eleven screen tabs are gone (T10.3). The ADE is a rail of eight
+     * The eleven screen tabs are gone (T10.3). The app is a rail of eight
      * `<button>`s — a rail item is a button with `aria-current`, not a link,
      * because nothing navigates — and the only real tabs left are the Flows
      * screen's three views.
@@ -142,7 +142,7 @@ describe("automationId (LLD §3.3, §7.5)", () => {
     expect(automationIdOf({ parent: 0, controlType: "Edit", name: "Request name" })).toBeUndefined();
   });
 
-  it("gives the ADE's gateway control the id its markup has", () => {
+  it("gives the app's gateway control the id its markup has", () => {
     const gateway = record.find((node) => node.native?.["automationId"] === "record-gateway");
     expect(gateway?.role).toBe("combobox");
     expect(gateway?.name).toBe("Gateway");
@@ -178,22 +178,22 @@ describe("controlPath (LLD §3.3, §7.5)", () => {
      * person checks by hand in Inspect or Accessibility Insights, and those
      * show `Button`, not `button`.
      */
-    expect(record[0]!.controlPath).toBe("Window[Yam ADE]");
+    expect(record[0]!.controlPath).toBe("Window[Yam]");
     const button = record.find((node) => node.name === "Stop recording");
     expect(button?.controlPath).toContain("Button[Stop recording]");
   });
 
   it("addresses a named element by name and an anonymous one by index", () => {
     const raw: UiaNode[] = [
-      { parent: -1, controlType: "Window", name: "Yam ADE" },
+      { parent: -1, controlType: "Window", name: "Yam" },
       { parent: 0, controlType: "Group" },
       { parent: 0, controlType: "Group" },
       { parent: 2, controlType: "Button", name: "Stop recording" },
     ];
     const children = childIndex(raw);
-    expect(controlPathOf(raw, 2, children, "Yam ADE")).toBe("Window[Yam ADE]/Group[1]");
-    expect(controlPathOf(raw, 3, children, "Yam ADE")).toBe(
-      "Window[Yam ADE]/Group[1]/Button[Stop recording]",
+    expect(controlPathOf(raw, 2, children, "Yam")).toBe("Window[Yam]/Group[1]");
+    expect(controlPathOf(raw, 3, children, "Yam")).toBe(
+      "Window[Yam]/Group[1]/Button[Stop recording]",
     );
   });
 

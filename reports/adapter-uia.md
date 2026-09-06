@@ -18,7 +18,7 @@ $ echo $?
 
 $ node packages/cli/dist/bin.js surface doctor --adapter uia
 ok    -/platform             darwin arm64, Node v25.6.1
-ok    ade/node-runtime       runtime: /opt/homebrew/bin/node (v25.6.1, from PATH)
+ok    app/node-runtime       runtime: /opt/homebrew/bin/node (v25.6.1, from PATH)
 skip  uia/platform           not Windows
 
 $ which pwsh powershell powershell.exe
@@ -33,7 +33,7 @@ skipped rather than failed, which is the honest answer: UI Automation is not a
 permission this machine has not granted, it is an API this machine does not
 have.
 
-The gate itself refuses the run now rather than launching an ADE and waiting a
+The gate itself refuses the run now rather than launching an app and waiting a
 minute for a window it could not have read (T8.6). Exit 2 is "the host is not
 ready", which is the same code a missing macOS permission produces and a
 different one from "the adapter is wrong".
@@ -42,7 +42,7 @@ different one from "the adapter is wrong".
 
 ```powershell
 pnpm -r build
-pnpm --filter @svatah/yam-ade exec electron-forge package
+pnpm --filter @svatah/yam-desktop exec electron-forge package
 node scripts/desktop-conformance.mjs --adapter uia --report reports/adapter-uia.md
 ```
 
@@ -66,9 +66,9 @@ every Windows machine**.
 ```console
 ParserError:
 Line |
-   6 |  -Request {"process":"Yam ADE","maxNodes":1500}
+   6 |  -Request {"process":"Yam","maxNodes":1500}
      |                     ~~~~~~~~~~~~~
-     | Unexpected token ':"Yam ADE"' in expression or statement.
+     | Unexpected token ':"Yam"' in expression or statement.
 ```
 
 The bridge spawned `powershell.exe -Command <script> -Request <json>` and every
@@ -88,7 +88,7 @@ UTF-8. The conformance target's own buttons are called **Open a project…** and
 **Import prototype database…**. The preamble now sets
 `[Console]::OutputEncoding` to UTF-8 as its first line, before anything writes.
 
-Verified: `Yam ADE — “Open a project…”` round-trips through
+Verified: `Yam — “Open a project…”` round-trips through
 `encodePowershell` and back out of PowerShell byte for byte.
 
 ### 3. A one-pattern element answered a string, not a list
@@ -139,10 +139,10 @@ it is the one script of the four that this exercise could not check.
 Nothing in the UIA bridge, and three things in the harness it runs through, all
 of which a Windows run will exercise for the first time:
 
-- The gate launches the ADE with `YAM_ADE_PROJECT` and waits for the
+- The gate launches the app with `YAM_APP_PROJECT` and waits for the
   **project screen**, not merely for a window (T8.1). On Windows that wait uses
   `Get-Process … MainWindowTitle`; on macOS it reads the accessibility tree.
-- The packaged ADE resolves a Node runtime and bundles its own CLI (T8.1). The
+- The packaged app resolves a Node runtime and bundles its own CLI (T8.1). The
   Windows packaged app has never been launched by this gate at all.
 - A case with no checks is `skipped`, and each healing case is measured only at
   its own variant (T8.2). The UIA report's shape changes with it.

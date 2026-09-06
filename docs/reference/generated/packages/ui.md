@@ -14,7 +14,7 @@ The Yam design system: React components on Radix primitives, every one of them n
 |---|---|---|---|
 | `Alert` | function | `export function Alert(props: AlertProps): React.JSX.Element` | The alert the mockups draw for a failed load or a missing runtime. |
 | `AlertProps` | interface | `export interface AlertProps` |  |
-| `AUTOMATION_ID_FORM` | variable | `AUTOMATION_ID_FORM = ID_FORM` | The id form, exported so the ADE and the TUI can check their own ids. |
+| `AUTOMATION_ID_FORM` | variable | `AUTOMATION_ID_FORM = ID_FORM` | The id form, exported so the app and the TUI can check their own ids. |
 | `Button` | function | `export function Button(props: ButtonProps): React.JSX.Element` | A button. |
 | `ButtonProps` | interface | `export interface ButtonProps extends Named` |  |
 | `Chip` | function | `export function Chip(` | A neutral chip: a fact, not a status. "page: all", "step 5 only". |
@@ -30,10 +30,10 @@ The Yam design system: React components on Radix primitives, every one of them n
 | `Named` | interface | `export interface Named` | Everything interactive takes these two, and neither is optional. |
 | `NAMED_COMPONENTS` | variable | `NAMED_COMPONENTS = [` | Every component that takes a `label` and an `id`, by name. |
 | `PaletteProps` | interface | `export interface PaletteProps` |  |
-| `PaletteRow` | interface | `export interface PaletteRow` | One row of the palette, as the ADE and `yam ui` both build it. |
+| `PaletteRow` | interface | `export interface PaletteRow` | One row of the palette, as the app and `yam ui` both build it. |
 | `Pill` | function | `export function Pill(props: PillProps): React.JSX.Element` | A status pill: a word, in a colour, with the colour's glyph if asked. |
 | `PillProps` | interface | `export interface PillProps` |  |
-| `PORTAL_HOST_ID` | variable | `PORTAL_HOST_ID = "sv-portal-host"` | The id of the element every overlay in the ADE is portalled into. |
+| `PORTAL_HOST_ID` | variable | `PORTAL_HOST_ID = "sv-portal-host"` | The id of the element every overlay in the app is portalled into. |
 | `portalHost` | function | `export function portalHost(): HTMLElement \| undefined` |  |
 | `RailItem` | function | `export function RailItem(props: RailItemProps): React.JSX.Element` | One row of the left rail. |
 | `RailItemProps` | interface | `export interface RailItemProps extends Named` |  |

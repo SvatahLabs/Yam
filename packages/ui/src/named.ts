@@ -18,8 +18,8 @@
  * 2. **This function, in development.** A `label` that is the empty string, or
  *    whitespace, or an id that is not in the `automationId` form, throws where
  *    the component is written rather than showing up in a conformance report a
- *    week later. It is a no-op in production, because a shipped ADE should not
- *    take its window down over a label — the ADE renders an alert for a screen
+ *    week later. It is a no-op in production, because a shipped APP_DIR should not
+ *    take its window down over a label — the app renders an alert for a screen
  *    that could not load, and this is a developer's mistake, not a user's.
  * 3. **`packages/ui/test/named.test.ts`.** Every component is rendered without a
  *    label and expected to throw, so the rule is demonstrated rather than
@@ -114,5 +114,5 @@ export function requireNamed(component: string, named: Partial<Named>): string {
   return named.label ?? "";
 }
 
-/** The id form, exported so the ADE and the TUI can check their own ids. */
+/** The id form, exported so the app and the TUI can check their own ids. */
 export const AUTOMATION_ID_FORM = ID_FORM;

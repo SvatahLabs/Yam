@@ -1,0 +1,1814 @@
+{
+  "process": "Yam",
+  "title": "Yam",
+  "truncated": false,
+  "nodes": [
+    {
+      "parent": -1,
+      "role": "AXWindow",
+      "subrole": "AXStandardWindow",
+      "title": "Yam",
+      "box": [
+        0,
+        0,
+        1280,
+        860
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXWebArea",
+      "description": "Yam",
+      "enabled": true,
+      "focused": true,
+      "box": [
+        0,
+        0,
+        1280,
+        828
+      ]
+    },
+    {
+      "parent": 1,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        828
+      ],
+      "domIdentifier": "root"
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkBanner",
+      "enabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        44
+      ]
+    },
+    {
+      "parent": 3,
+      "role": "AXStaticText",
+      "title": "Yam",
+      "enabled": true,
+      "box": [
+        50,
+        21,
+        42,
+        17
+      ]
+    },
+    {
+      "parent": 4,
+      "role": "AXStaticText",
+      "title": "Yam",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Project",
+      "enabled": true,
+      "box": [
+        104,
+        20,
+        95,
+        19
+      ],
+      "domIdentifier": "topbar-crumb"
+    },
+    {
+      "parent": 6,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        115,
+        20,
+        46,
+        19
+      ],
+      "domIdentifier": "crumb-project"
+    },
+    {
+      "parent": 7,
+      "role": "AXStaticText",
+      "title": "fixtures",
+      "enabled": true,
+      "box": [
+        115,
+        21,
+        46,
+        17
+      ]
+    },
+    {
+      "parent": 8,
+      "role": "AXStaticText",
+      "title": "fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 6,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        177,
+        20,
+        21,
+        19
+      ],
+      "domIdentifier": "crumb-screen"
+    },
+    {
+      "parent": 10,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true,
+      "box": [
+        177,
+        21,
+        21,
+        17
+      ]
+    },
+    {
+      "parent": 11,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXButton",
+      "title": "Search or run a command",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        896,
+        16,
+        199,
+        28
+      ],
+      "domIdentifier": "open-command-palette"
+    },
+    {
+      "parent": 13,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true,
+      "box": [
+        907,
+        21,
+        146,
+        17
+      ]
+    },
+    {
+      "parent": 14,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        1106,
+        19,
+        154,
+        22
+      ],
+      "domIdentifier": "service-chip"
+    },
+    {
+      "parent": 16,
+      "role": "AXStaticText",
+      "title": "service",
+      "enabled": true,
+      "box": [
+        1128,
+        22,
+        38,
+        15
+      ]
+    },
+    {
+      "parent": 17,
+      "role": "AXStaticText",
+      "title": "service",
+      "enabled": true
+    },
+    {
+      "parent": 16,
+      "role": "AXStaticText",
+      "title": "127.0.0.1:62171",
+      "enabled": true,
+      "box": [
+        1166,
+        22,
+        85,
+        15
+      ]
+    },
+    {
+      "parent": 19,
+      "role": "AXStaticText",
+      "title": "127.0.0.1:62171",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Sections",
+      "enabled": true,
+      "box": [
+        8,
+        52,
+        220,
+        756
+      ],
+      "domIdentifier": "rail"
+    },
+    {
+      "parent": 21,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        16,
+        62,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 22,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true,
+      "box": [
+        24,
+        73,
+        50,
+        14
+      ]
+    },
+    {
+      "parent": 23,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Flows",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        91,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-flows"
+    },
+    {
+      "parent": 25,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        24,
+        98,
+        34,
+        17
+      ]
+    },
+    {
+      "parent": 26,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Runs",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        122,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-runs"
+    },
+    {
+      "parent": 28,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true,
+      "box": [
+        24,
+        129,
+        29,
+        17
+      ]
+    },
+    {
+      "parent": 29,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Bindings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        153,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-bindings"
+    },
+    {
+      "parent": 31,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true,
+      "box": [
+        24,
+        159,
+        50,
+        17
+      ]
+    },
+    {
+      "parent": 32,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Agents and tools",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        184,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-agents"
+    },
+    {
+      "parent": 34,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true,
+      "box": [
+        24,
+        190,
+        97,
+        17
+      ]
+    },
+    {
+      "parent": 35,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        16,
+        217,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 37,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true,
+      "box": [
+        24,
+        227,
+        66,
+        14
+      ]
+    },
+    {
+      "parent": 38,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "API",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        246,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-api"
+    },
+    {
+      "parent": 40,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true,
+      "box": [
+        24,
+        252,
+        21,
+        17
+      ]
+    },
+    {
+      "parent": 41,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Data",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        277,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-data"
+    },
+    {
+      "parent": 43,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true,
+      "box": [
+        24,
+        283,
+        27,
+        17
+      ]
+    },
+    {
+      "parent": 44,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Import prototype database",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        736,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-import"
+    },
+    {
+      "parent": 46,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true,
+      "box": [
+        24,
+        743,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 47,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Settings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        767,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-settings"
+    },
+    {
+      "parent": 49,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true,
+      "box": [
+        24,
+        774,
+        48,
+        17
+      ]
+    },
+    {
+      "parent": 50,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "Workspace",
+      "enabled": true,
+      "box": [
+        228,
+        52,
+        684,
+        756
+      ],
+      "domIdentifier": "workspace"
+    },
+    {
+      "parent": 52,
+      "role": "AXHeading",
+      "title": "API",
+      "enabled": true,
+      "box": [
+        244,
+        62,
+        34,
+        20
+      ]
+    },
+    {
+      "parent": 53,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true,
+      "box": [
+        244,
+        62,
+        24,
+        19
+      ]
+    },
+    {
+      "parent": 54,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXStaticText",
+      "title": "1 named request · api/*.yaml",
+      "enabled": true,
+      "box": [
+        286,
+        64,
+        155,
+        16
+      ]
+    },
+    {
+      "parent": 56,
+      "role": "AXStaticText",
+      "title": "1 named request · api/*.yaml",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXButton",
+      "title": "Send request",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        767,
+        58,
+        129,
+        28
+      ],
+      "domIdentifier": "action-api-send"
+    },
+    {
+      "parent": 58,
+      "role": "AXStaticText",
+      "title": "Send request",
+      "enabled": true,
+      "box": [
+        778,
+        63,
+        76,
+        17
+      ]
+    },
+    {
+      "parent": 59,
+      "role": "AXStaticText",
+      "title": "Send request",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkComplementary",
+      "description": "Named requests",
+      "enabled": true,
+      "box": [
+        228,
+        93,
+        301,
+        715
+      ],
+      "domIdentifier": "api-requests-pane"
+    },
+    {
+      "parent": 61,
+      "role": "AXTable",
+      "description": "NAMED REQUESTS",
+      "enabled": true,
+      "box": [
+        228,
+        93,
+        300,
+        119
+      ],
+      "domIdentifier": "api-requests"
+    },
+    {
+      "parent": 62,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        93,
+        300,
+        21
+      ]
+    },
+    {
+      "parent": 63,
+      "role": "AXStaticText",
+      "title": "NAMED REQUESTS",
+      "enabled": true,
+      "box": [
+        240,
+        94,
+        104,
+        14
+      ]
+    },
+    {
+      "parent": 64,
+      "role": "AXStaticText",
+      "title": "NAMED REQUESTS",
+      "enabled": true
+    },
+    {
+      "parent": 62,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 66,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 67,
+      "role": "AXCell",
+      "title": "REQUEST",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        229,
+        32
+      ]
+    },
+    {
+      "parent": 68,
+      "role": "AXStaticText",
+      "title": "REQUEST",
+      "enabled": true,
+      "box": [
+        240,
+        123,
+        51,
+        14
+      ]
+    },
+    {
+      "parent": 69,
+      "role": "AXStaticText",
+      "title": "REQUEST",
+      "enabled": true
+    },
+    {
+      "parent": 67,
+      "role": "AXCell",
+      "title": "METHOD",
+      "enabled": true,
+      "box": [
+        457,
+        114,
+        71,
+        32
+      ]
+    },
+    {
+      "parent": 71,
+      "role": "AXStaticText",
+      "title": "METHOD",
+      "enabled": true,
+      "box": [
+        469,
+        123,
+        47,
+        14
+      ]
+    },
+    {
+      "parent": 72,
+      "role": "AXStaticText",
+      "title": "METHOD",
+      "enabled": true
+    },
+    {
+      "parent": 62,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        146,
+        300,
+        66
+      ]
+    },
+    {
+      "parent": 74,
+      "role": "AXCell",
+      "title": "active count {data.baseUrl}/api/active-count",
+      "enabled": true,
+      "box": [
+        228,
+        146,
+        229,
+        66
+      ]
+    },
+    {
+      "parent": 75,
+      "role": "AXStaticText",
+      "title": "active count",
+      "enabled": true,
+      "box": [
+        240,
+        154,
+        67,
+        16
+      ]
+    },
+    {
+      "parent": 76,
+      "role": "AXStaticText",
+      "title": "active count",
+      "enabled": true
+    },
+    {
+      "parent": 75,
+      "role": "AXStaticText",
+      "title": "{data.baseUrl}/api/active-count",
+      "enabled": true,
+      "box": [
+        240,
+        171,
+        179,
+        32
+      ]
+    },
+    {
+      "parent": 78,
+      "role": "AXStaticText",
+      "title": "{data.baseUrl}/api/active-",
+      "enabled": true
+    },
+    {
+      "parent": 78,
+      "role": "AXStaticText",
+      "title": "count",
+      "enabled": true
+    },
+    {
+      "parent": 74,
+      "role": "AXCell",
+      "title": "GET",
+      "enabled": true,
+      "box": [
+        457,
+        146,
+        71,
+        66
+      ]
+    },
+    {
+      "parent": 81,
+      "role": "AXStaticText",
+      "title": "GET",
+      "enabled": true,
+      "box": [
+        476,
+        171,
+        20,
+        15
+      ]
+    },
+    {
+      "parent": 82,
+      "role": "AXStaticText",
+      "title": "GET",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXGroup",
+      "description": "Request",
+      "enabled": true,
+      "box": [
+        529,
+        93,
+        383,
+        495
+      ],
+      "domIdentifier": "api-request"
+    },
+    {
+      "parent": 84,
+      "role": "AXStaticText",
+      "title": "GET",
+      "enabled": true,
+      "box": [
+        545,
+        113,
+        22,
+        15
+      ]
+    },
+    {
+      "parent": 85,
+      "role": "AXStaticText",
+      "title": "GET",
+      "enabled": true
+    },
+    {
+      "parent": 84,
+      "role": "AXStaticText",
+      "title": "{DATA.BASEURL}/API/ACTIVE-COUNT",
+      "enabled": true,
+      "box": [
+        577,
+        103,
+        212,
+        35
+      ]
+    },
+    {
+      "parent": 87,
+      "role": "AXStaticText",
+      "title": "{DATA.BASEURL}/API/ACTIVE-",
+      "enabled": true
+    },
+    {
+      "parent": 87,
+      "role": "AXStaticText",
+      "title": "COUNT",
+      "enabled": true
+    },
+    {
+      "parent": 84,
+      "role": "AXStaticText",
+      "title": "API/ACTIVE-COUNT.YAML",
+      "enabled": true,
+      "box": [
+        819,
+        105,
+        71,
+        30
+      ]
+    },
+    {
+      "parent": 90,
+      "role": "AXStaticText",
+      "title": "API/ACTIVE-",
+      "enabled": true
+    },
+    {
+      "parent": 90,
+      "role": "AXStaticText",
+      "title": "COUNT.YAML",
+      "enabled": true
+    },
+    {
+      "parent": 84,
+      "role": "AXTable",
+      "description": "HEADERS",
+      "enabled": true,
+      "box": [
+        529,
+        147,
+        383,
+        87
+      ],
+      "domIdentifier": "api-headers"
+    },
+    {
+      "parent": 93,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        529,
+        147,
+        383,
+        21
+      ]
+    },
+    {
+      "parent": 94,
+      "role": "AXStaticText",
+      "title": "HEADERS",
+      "enabled": true,
+      "box": [
+        541,
+        148,
+        54,
+        14
+      ]
+    },
+    {
+      "parent": 95,
+      "role": "AXStaticText",
+      "title": "HEADERS",
+      "enabled": true
+    },
+    {
+      "parent": 93,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        529,
+        168,
+        383,
+        32
+      ]
+    },
+    {
+      "parent": 97,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        529,
+        168,
+        383,
+        32
+      ]
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "HEADER",
+      "enabled": true,
+      "box": [
+        529,
+        168,
+        124,
+        32
+      ]
+    },
+    {
+      "parent": 99,
+      "role": "AXStaticText",
+      "title": "HEADER",
+      "enabled": true,
+      "box": [
+        541,
+        177,
+        45,
+        14
+      ]
+    },
+    {
+      "parent": 100,
+      "role": "AXStaticText",
+      "title": "HEADER",
+      "enabled": true
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        653,
+        168,
+        259,
+        32
+      ]
+    },
+    {
+      "parent": 102,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        665,
+        177,
+        35,
+        14
+      ]
+    },
+    {
+      "parent": 103,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true
+    },
+    {
+      "parent": 93,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        529,
+        200,
+        383,
+        33
+      ]
+    },
+    {
+      "parent": 105,
+      "role": "AXCell",
+      "title": "accept",
+      "enabled": true,
+      "box": [
+        529,
+        200,
+        124,
+        33
+      ]
+    },
+    {
+      "parent": 106,
+      "role": "AXStaticText",
+      "title": "accept",
+      "enabled": true,
+      "box": [
+        541,
+        208,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 107,
+      "role": "AXStaticText",
+      "title": "accept",
+      "enabled": true
+    },
+    {
+      "parent": 105,
+      "role": "AXCell",
+      "title": "application/json",
+      "enabled": true,
+      "box": [
+        653,
+        200,
+        259,
+        33
+      ]
+    },
+    {
+      "parent": 109,
+      "role": "AXStaticText",
+      "title": "application/json",
+      "enabled": true,
+      "box": [
+        665,
+        208,
+        120,
+        17
+      ]
+    },
+    {
+      "parent": 110,
+      "role": "AXStaticText",
+      "title": "application/json",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXStaticText",
+      "title": "RESPONSE",
+      "enabled": true,
+      "box": [
+        545,
+        598,
+        60,
+        15
+      ]
+    },
+    {
+      "parent": 112,
+      "role": "AXStaticText",
+      "title": "RESPONSE",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        634,
+        383,
+        84
+      ]
+    },
+    {
+      "parent": 114,
+      "role": "AXStaticText",
+      "title": "Press Send. Nothing is written to the project, and a response body is never stored.",
+      "enabled": true,
+      "box": [
+        545,
+        659,
+        338,
+        35
+      ]
+    },
+    {
+      "parent": 115,
+      "role": "AXStaticText",
+      "title": "Press Send. Nothing is written to the project, and a response",
+      "enabled": true
+    },
+    {
+      "parent": 115,
+      "role": "AXStaticText",
+      "title": "body is never stored.",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkComplementary",
+      "description": "Inspector",
+      "enabled": true,
+      "box": [
+        912,
+        52,
+        360,
+        756
+      ],
+      "domIdentifier": "inspector"
+    },
+    {
+      "parent": 118,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "ACTIVE COUNT",
+      "enabled": true,
+      "box": [
+        913,
+        52,
+        359,
+        235
+      ],
+      "domIdentifier": "inspector-request"
+    },
+    {
+      "parent": 119,
+      "role": "AXHeading",
+      "title": "ACTIVE COUNT",
+      "enabled": true,
+      "box": [
+        913,
+        58,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-request-heading"
+    },
+    {
+      "parent": 120,
+      "role": "AXStaticText",
+      "title": "ACTIVE COUNT",
+      "enabled": true,
+      "box": [
+        929,
+        73,
+        85,
+        14
+      ]
+    },
+    {
+      "parent": 121,
+      "role": "AXStaticText",
+      "title": "ACTIVE COUNT",
+      "enabled": true
+    },
+    {
+      "parent": 119,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        913,
+        93,
+        359,
+        102
+      ]
+    },
+    {
+      "parent": 123,
+      "role": "AXUnknown",
+      "title": "Method",
+      "enabled": true,
+      "box": [
+        929,
+        93,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 124,
+      "role": "AXStaticText",
+      "title": "Method",
+      "enabled": true,
+      "box": [
+        929,
+        94,
+        41,
+        16
+      ]
+    },
+    {
+      "parent": 125,
+      "role": "AXStaticText",
+      "title": "Method",
+      "enabled": true
+    },
+    {
+      "parent": 123,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        93,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 127,
+      "role": "AXStaticText",
+      "title": "GET",
+      "enabled": true,
+      "box": [
+        1049,
+        94,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 128,
+      "role": "AXStaticText",
+      "title": "GET",
+      "enabled": true
+    },
+    {
+      "parent": 123,
+      "role": "AXUnknown",
+      "title": "URL",
+      "enabled": true,
+      "box": [
+        929,
+        115,
+        110,
+        36
+      ]
+    },
+    {
+      "parent": 130,
+      "role": "AXStaticText",
+      "title": "URL",
+      "enabled": true,
+      "box": [
+        929,
+        116,
+        22,
+        16
+      ]
+    },
+    {
+      "parent": 131,
+      "role": "AXStaticText",
+      "title": "URL",
+      "enabled": true
+    },
+    {
+      "parent": 123,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        115,
+        207,
+        36
+      ]
+    },
+    {
+      "parent": 133,
+      "role": "AXStaticText",
+      "title": "{data.baseUrl}/api/active-count",
+      "enabled": true,
+      "box": [
+        1049,
+        116,
+        195,
+        35
+      ]
+    },
+    {
+      "parent": 134,
+      "role": "AXStaticText",
+      "title": "{data.baseUrl}/api/active-",
+      "enabled": true
+    },
+    {
+      "parent": 134,
+      "role": "AXStaticText",
+      "title": "count",
+      "enabled": true
+    },
+    {
+      "parent": 123,
+      "role": "AXUnknown",
+      "title": "File",
+      "enabled": true,
+      "box": [
+        929,
+        156,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 137,
+      "role": "AXStaticText",
+      "title": "File",
+      "enabled": true,
+      "box": [
+        929,
+        156,
+        20,
+        16
+      ]
+    },
+    {
+      "parent": 138,
+      "role": "AXStaticText",
+      "title": "File",
+      "enabled": true
+    },
+    {
+      "parent": 123,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        156,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 140,
+      "role": "AXStaticText",
+      "title": "api/active-count.yaml",
+      "enabled": true,
+      "box": [
+        1049,
+        156,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 141,
+      "role": "AXStaticText",
+      "title": "api/active-count.yaml",
+      "enabled": true
+    },
+    {
+      "parent": 123,
+      "role": "AXUnknown",
+      "title": "Headers",
+      "enabled": true,
+      "box": [
+        929,
+        178,
+        110,
+        17
+      ]
+    },
+    {
+      "parent": 143,
+      "role": "AXStaticText",
+      "title": "Headers",
+      "enabled": true,
+      "box": [
+        929,
+        178,
+        45,
+        16
+      ]
+    },
+    {
+      "parent": 144,
+      "role": "AXStaticText",
+      "title": "Headers",
+      "enabled": true
+    },
+    {
+      "parent": 123,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        178,
+        207,
+        17
+      ]
+    },
+    {
+      "parent": 146,
+      "role": "AXStaticText",
+      "title": "1",
+      "enabled": true,
+      "box": [
+        1049,
+        178,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 147,
+      "role": "AXStaticText",
+      "title": "1",
+      "enabled": true
+    },
+    {
+      "parent": 119,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        929,
+        201,
+        327,
+        76
+      ]
+    },
+    {
+      "parent": 149,
+      "role": "AXStaticText",
+      "title": "Sent through the same function",
+      "enabled": true,
+      "box": [
+        942,
+        213,
+        172,
+        16
+      ]
+    },
+    {
+      "parent": 150,
+      "role": "AXStaticText",
+      "title": "Sent through the same function",
+      "enabled": true
+    },
+    {
+      "parent": 149,
+      "role": "AXStaticText",
+      "title": "yam run",
+      "enabled": true,
+      "box": [
+        1114,
+        213,
+        75,
+        17
+      ]
+    },
+    {
+      "parent": 152,
+      "role": "AXStaticText",
+      "title": "yam run",
+      "enabled": true
+    },
+    {
+      "parent": 149,
+      "role": "AXStaticText",
+      "title": "uses for an",
+      "enabled": true,
+      "box": [
+        942,
+        213,
+        293,
+        34
+      ]
+    },
+    {
+      "parent": 154,
+      "role": "AXStaticText",
+      "title": "uses for",
+      "enabled": true
+    },
+    {
+      "parent": 154,
+      "role": "AXStaticText",
+      "title": "an",
+      "enabled": true
+    },
+    {
+      "parent": 149,
+      "role": "AXStaticText",
+      "title": "api",
+      "enabled": true,
+      "box": [
+        955,
+        231,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 157,
+      "role": "AXStaticText",
+      "title": "api",
+      "enabled": true
+    },
+    {
+      "parent": 149,
+      "role": "AXStaticText",
+      "title": "step, so this is not a second HTTP client with its own idea of a header.",
+      "enabled": true,
+      "box": [
+        942,
+        231,
+        285,
+        34
+      ]
+    },
+    {
+      "parent": 159,
+      "role": "AXStaticText",
+      "title": "step, so this is not a second HTTP client with",
+      "enabled": true
+    },
+    {
+      "parent": 159,
+      "role": "AXStaticText",
+      "title": "its own idea of a header.",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkContentInfo",
+      "enabled": true,
+      "box": [
+        8,
+        808,
+        1264,
+        28
+      ]
+    },
+    {
+      "parent": 162,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        24,
+        814,
+        63,
+        17
+      ],
+      "domIdentifier": "status-context"
+    },
+    {
+      "parent": 163,
+      "role": "AXStaticText",
+      "title": "active count",
+      "enabled": true,
+      "box": [
+        24,
+        815,
+        63,
+        15
+      ]
+    },
+    {
+      "parent": 164,
+      "role": "AXStaticText",
+      "title": "active count",
+      "enabled": true
+    },
+    {
+      "parent": 162,
+      "role": "AXStaticText",
+      "title": "⌘K",
+      "enabled": true,
+      "box": [
+        1117,
+        816,
+        13,
+        14
+      ]
+    },
+    {
+      "parent": 166,
+      "role": "AXStaticText",
+      "title": "⌘K",
+      "enabled": true
+    },
+    {
+      "parent": 162,
+      "role": "AXStaticText",
+      "title": "commands",
+      "enabled": true,
+      "box": [
+        1136,
+        815,
+        60,
+        15
+      ]
+    },
+    {
+      "parent": 168,
+      "role": "AXStaticText",
+      "title": "commands",
+      "enabled": true
+    },
+    {
+      "parent": 162,
+      "role": "AXStaticText",
+      "title": "?",
+      "enabled": true,
+      "box": [
+        1218,
+        816,
+        6,
+        14
+      ]
+    },
+    {
+      "parent": 170,
+      "role": "AXStaticText",
+      "title": "?",
+      "enabled": true
+    },
+    {
+      "parent": 162,
+      "role": "AXStaticText",
+      "title": "keys",
+      "enabled": true,
+      "box": [
+        1230,
+        815,
+        26,
+        15
+      ]
+    },
+    {
+      "parent": 172,
+      "role": "AXStaticText",
+      "title": "keys",
+      "enabled": true
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXCloseButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        8,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXMinimizeButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        28,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXZoomButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        48,
+        8,
+        14,
+        14
+      ]
+    }
+  ]
+}

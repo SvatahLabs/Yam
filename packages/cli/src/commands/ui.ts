@@ -7,11 +7,11 @@
  *
  * > `yam ui` is a full authoring cockpit in the terminal: a standalone Ink
  * > application over the local service rendering the same screen model as the
- * > ADE […] It opens or adopts a service exactly as the ADE does.
+ * > APP_DIR […] It opens or adopts a service exactly as the app does.
  *
- * ## "Exactly as the ADE does"
+ * ## "Exactly as the app does"
  *
- * The ADE, on project open: look for a service already serving this directory,
+ * The app, on project open: look for a service already serving this directory,
  * and connect to it if there is one; otherwise spawn `yam serve --port 0`,
  * read the url and token off its stdout, and stop it on quit (LLD §13.6). This
  * does the same three things, with one difference that is the terminal's: a

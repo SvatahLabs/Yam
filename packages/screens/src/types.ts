@@ -21,7 +21,7 @@ import type { ScreenService } from "./service.js";
  * > (proposals), `bindings`, `agents` (tool server, invocations, trajectories),
  * > `api`, `data`, `explorer`, `import`, `settings`.
  *
- * The eleven tabs of the old ADE map onto these; `runs` and `run` are two
+ * The eleven tabs of the old app map onto these; `runs` and `run` are two
  * screens because a list of runs and one run happening are different subjects
  * with different actions, which the mockups draw as two artboards.
  */
@@ -47,7 +47,7 @@ export type ScreenId = (typeof SCREEN_IDS)[number];
  *
  * A screen is a function of the service and this, and of nothing else — which
  * is what makes `yam ui --json` able to print "exactly the model's state"
- * (T9.1 Validate) and the ADE able to render the same thing from the same two
+ * (T9.1 Validate) and the app able to render the same thing from the same two
  * arguments.
  */
 export interface ScreenParams {
@@ -121,13 +121,13 @@ export interface Pill {
  * One key binding, as both renderers read it (LLD §13.7).
  *
  * `key` is written the way the mockups write it — `⌘↵`, `R`, `^K` — and each
- * renderer maps it to its own event. The ADE reads `mac`/`win`; the TUI reads
+ * renderer maps it to its own event. The app reads `mac`/`win`; the TUI reads
  * `terminal`, because a terminal has no ⌘.
  */
 export interface Binding {
   /** The action this key runs, or a navigation intent for `Go to` rows. */
   readonly action: string;
-  /** How the ADE prints it: `⌘↵`, `R`, `⌘K`. */
+  /** How the app prints it: `⌘↵`, `R`, `⌘K`. */
   readonly key: string;
   /** How the terminal prints it: `^K`, `r`. Defaults to `key` lower-cased. */
   readonly terminal?: string;
@@ -156,7 +156,7 @@ export interface ActionOutcome {
 /**
  * One action (LLD §13.7).
  *
- * The same object is in the ADE's palette, the TUI's palette, the SDK's
+ * The same object is in the app's palette, the TUI's palette, the SDK's
  * `actions`, and — through `cli` — the command line.
  * `tools/repo-checks/test/action-parity.test.ts` fails when the three disagree.
  */

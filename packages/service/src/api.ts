@@ -60,7 +60,7 @@ export interface RunOutcome {
  * The functions a handler may call. Every one of them is the CLI's own.
  *
  * The list grows only when a screen needs something the CLI can already do —
- * that is the ADE's screen rule read from this side (LLD §13.6): a handler that
+ * that is the app's screen rule read from this side (LLD §13.6): a handler that
  * needed a fifth capability nobody could reach from a command line would be the
  * service growing logic of its own.
  */
@@ -71,7 +71,7 @@ export interface ServiceApi {
    *
    * `GET /project` reports the answer so the Record screen can offer
    * `anthropic` when there is one and `fake` when there is not. Deliberately a
-   * boolean and not the key: the ADE never needs the value, and a service that
+   * boolean and not the key: the app never needs the value, and a service that
    * handed it out over HTTP — even on loopback, even behind the bearer token —
    * would be a place a credential leaks from (REQ-NFR-6).
    *
@@ -101,11 +101,11 @@ export interface ServiceApi {
   ): Promise<RunOutcome>;
   newRunId(): string;
   /**
-   * Execute one `ApiRequest` ad hoc, for the ADE's API client (LLD §13.5).
+   * Execute one `ApiRequest` ad hoc, for the app's API client (LLD §13.5).
    *
    * The HTTP adapter is module (b)'s and the service imports only
    * `@svatah/yam-schema`, so this arrives the same way the others do. `yam run`
-   * calls the same function for an `api` step, which is what keeps the ADE's API
+   * calls the same function for an `api` step, which is what keeps the app's API
    * client from being a second HTTP client with its own idea of a header.
    */
   apiRequest?(
@@ -162,7 +162,7 @@ export interface ServiceApi {
   /* ── T5.8: the surface explorer and the tool panel (REQ-ADE-8) ─────────── */
 
   /**
-   * Open a surface session an agent — or the ADE's explorer — drives call by
+   * Open a surface session an agent — or the app's explorer — drives call by
    * call, writing `trajectory.jsonl` (LLD §13.5's `POST /surface/:sessionId/*`).
    */
   openSurfaceSession?(
@@ -189,17 +189,17 @@ export interface ServiceApi {
   /* ── T6.6: the prototype database import (REQ-ADE-9, LLD §13.5) ────────── */
 
   /**
-   * Import a Yam ADE prototype's electron-db directory into this project.
+   * Import a Yam prototype's electron-db directory into this project.
    *
    * Into *this* project, deliberately: the service confines every write to the
    * directory it was opened on, and an import that could write anywhere would
-   * be the one route around that. The ADE's flow is therefore "open an empty
+   * be the one route around that. The app's flow is therefore "open an empty
    * directory as a project, then import into it", which is also what
-   * `yam migrate <dest> --from-ade <src>` does.
+   * `yam migrate <dest> --from-prototype <src>` does.
    *
    * The source is a path outside the project, and reading it is the point.
    */
-  migrateFromAde?(
+  migrateFromPrototype?(
     loaded: ProjectHandle,
     options: { source: string; project?: string },
   ): Promise<unknown>;

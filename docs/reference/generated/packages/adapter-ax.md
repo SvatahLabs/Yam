@@ -31,7 +31,7 @@ macOS Accessibility adapter: the Yam agent surface over AXUIElement
 | `AxSurface` | class | `export class AxSurface implements AgentSurface` |  |
 | `AxWindow` | interface | `export interface AxWindow` | What the bridge was asked to do, and what came back. |
 | `childIndex` | function | `export function childIndex(nodes: readonly AxNode[]): Map<number, number[]>` | The `children` index `controlPathOf` needs, for callers that have only nodes. |
-| `controlPathOf` | function | `export function controlPathOf(` | `Window[Yam ADE]/AXGroup[2]/AXButton[Run]` (LLD §3.3, §7.5). |
+| `controlPathOf` | function | `export function controlPathOf(` | `Window[Yam]/AXGroup[2]/AXButton[Run]` (LLD §3.3, §7.5). |
 | `ConvertOptions` | interface | `export interface ConvertOptions` |  |
 | `convertTree` | function | `export function convertTree(nodes: readonly AxNode[], options: ConvertOptions): AxSnapshotNode[]` | Flatten one window's tree into snapshot nodes. |
 | `createAxSurface` | function | `export function createAxSurface(config:` | The factory the registry calls (LLD §2.4). |

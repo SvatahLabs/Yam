@@ -47,7 +47,7 @@ function githubCommands(job: string): string[] {
 describe("the CI workflow (T0.2, T13.2)", () => {
   it("is the one workflow, with every job a phase pinned", () => {
     expect(Object.keys(github.jobs).sort()).toEqual([
-      "ade-installers",
+      "app-installers",
       // T9.3: the generated clients against a live service (REQ-SDK-1, 2).
       "clients-smoke",
       "desktop-conformance",
@@ -110,20 +110,20 @@ describe("the CI workflow (T0.2, T13.2)", () => {
     expect(script).toContain("--gateway fake");
   });
 
-  it("builds the ADE's installers on all three operating systems (T3.6)", () => {
-    expect(github.jobs["ade-installers"]!.strategy?.matrix?.os).toEqual([
+  it("builds the app's installers on all three operating systems (T3.6)", () => {
+    expect(github.jobs["app-installers"]!.strategy?.matrix?.os).toEqual([
       "ubuntu-latest",
       "macos-latest",
       "windows-latest",
     ]);
-    const script = githubCommands("ade-installers").join("\n");
-    expect(script).toContain("pnpm --filter @svatah/yam-ade make");
+    const script = githubCommands("app-installers").join("\n");
+    expect(script).toContain("pnpm --filter @svatah/yam-desktop make");
     /*
      * And it launches the thing it just built (T3.6's Validate item), against
-     * the *packaged* application (T8.1's). `pnpm ade:smoke` picks the packaged
-     * app when `apps/ade/out/` holds one, which `make` has just filled.
+     * the *packaged* application (T8.1's). `pnpm app:smoke` picks the packaged
+     * app when `apps/desktop/out/` holds one, which `make` has just filled.
      */
-    expect(script).toContain("pnpm ade:smoke");
+    expect(script).toContain("pnpm app:smoke");
     expect(script).toContain("xvfb-run");
   });
 
@@ -144,7 +144,7 @@ describe("the CI workflow (T0.2, T13.2)", () => {
     // The host requirement first and on its own, so a failure reads as "the
     // runner cannot do this" rather than as a failed suite.
     expect(script).toContain("surface doctor --adapter");
-    // The conformance target is the ADE itself, packaged (LLD §16, REQ-ADE-6).
+    // The conformance target is the app itself, packaged (LLD §16, REQ-ADE-6).
     expect(script).toContain("electron-forge package");
     expect(script).toContain("scripts/desktop-conformance.mjs");
 

@@ -70,7 +70,7 @@ export const configSchema = z
              * The window's size when the session opens (pattern 33, T12.7).
              *
              * `[width, height]` in points, applied once the window exists. The
-             * ADE remembers its own size between runs, so a suite that measures
+             * APP_DIR remembers its own size between runs, so a suite that measures
              * a toolbar at 1440 points was measuring whatever width the last
              * person left it at; naming the size is what makes those checks
              * reproducible on somebody else's machine (LLD §13.9 Draft 2.15).
@@ -84,7 +84,7 @@ export const configSchema = z
          * How to stop it: a graceful route, then a signal (T11.2, LLD §13.9).
          *
          * The graceful route is what lets an application put its own house in
-         * order — the ADE stops the `yam serve` it spawned and writes its
+         * order — the app stops the `yam serve` it spawned and writes its
          * preferences. A bare signal ends the main process where it stands, and
          * P10-F1 measured what that leaves behind.
          */
@@ -105,7 +105,7 @@ export const configSchema = z
          *
          * > The Playwright adapter attaches to an existing Chromium when
          * > `YAM_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi
-         * > adapter attaches, so a flow can drive the ADE's renderer.
+         * > adapter attaches, so a flow can drive the app's renderer.
          */
         attach: z
           .object({

@@ -2,7 +2,7 @@
  * The things that show rather than do (T9.2, REQ-ADE-12, LLD §13.7).
  *
  * Pills, chips, tables, alerts, inspector sections, rail items and tabs — the
- * `Tokens` artboard's second half, and the parts of the ADE's chrome that are
+ * `Tokens` artboard's second half, and the parts of the app's chrome that are
  * the same on every screen.
  *
  * ## The rule these exist to keep
@@ -77,7 +77,7 @@ export interface AlertProps {
 /**
  * The alert the mockups draw for a failed load or a missing runtime.
  *
- * `role="alert"`, so a screen reader says it when it appears — the ADE's
+ * `role="alert"`, so a screen reader says it when it appears — the app's
  * "could not find a Node 22" message is one of these, and a person who cannot
  * see the screen has the same three places to look.
  */

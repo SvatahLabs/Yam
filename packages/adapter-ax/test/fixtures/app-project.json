@@ -1,0 +1,2529 @@
+{
+  "process": "Yam",
+  "title": "Yam",
+  "truncated": false,
+  "nodes": [
+    {
+      "parent": -1,
+      "role": "AXWindow",
+      "subrole": "AXStandardWindow",
+      "title": "Yam",
+      "box": [
+        0,
+        0,
+        1280,
+        860
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXWebArea",
+      "description": "Yam",
+      "enabled": true,
+      "focused": true,
+      "box": [
+        0,
+        0,
+        1280,
+        821
+      ]
+    },
+    {
+      "parent": 1,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        821
+      ],
+      "domIdentifier": "root"
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkBanner",
+      "enabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        44
+      ]
+    },
+    {
+      "parent": 3,
+      "role": "AXStaticText",
+      "title": "Yam",
+      "enabled": true,
+      "box": [
+        50,
+        21,
+        42,
+        17
+      ]
+    },
+    {
+      "parent": 4,
+      "role": "AXStaticText",
+      "title": "Yam",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Project",
+      "enabled": true,
+      "box": [
+        104,
+        20,
+        121,
+        19
+      ],
+      "domIdentifier": "topbar-crumb"
+    },
+    {
+      "parent": 6,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        115,
+        20,
+        46,
+        19
+      ],
+      "domIdentifier": "crumb-project"
+    },
+    {
+      "parent": 7,
+      "role": "AXStaticText",
+      "title": "fixtures",
+      "enabled": true,
+      "box": [
+        115,
+        21,
+        46,
+        17
+      ]
+    },
+    {
+      "parent": 8,
+      "role": "AXStaticText",
+      "title": "fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 6,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        177,
+        20,
+        48,
+        19
+      ],
+      "domIdentifier": "crumb-screen"
+    },
+    {
+      "parent": 10,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true,
+      "box": [
+        177,
+        21,
+        48,
+        17
+      ]
+    },
+    {
+      "parent": 11,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXButton",
+      "title": "Search or run a command",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        896,
+        16,
+        199,
+        28
+      ],
+      "domIdentifier": "open-command-palette"
+    },
+    {
+      "parent": 13,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true,
+      "box": [
+        907,
+        21,
+        146,
+        17
+      ]
+    },
+    {
+      "parent": 14,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        1106,
+        19,
+        154,
+        22
+      ],
+      "domIdentifier": "service-chip"
+    },
+    {
+      "parent": 16,
+      "role": "AXStaticText",
+      "title": "service",
+      "enabled": true,
+      "box": [
+        1128,
+        22,
+        38,
+        15
+      ]
+    },
+    {
+      "parent": 17,
+      "role": "AXStaticText",
+      "title": "service",
+      "enabled": true
+    },
+    {
+      "parent": 16,
+      "role": "AXStaticText",
+      "title": "127.0.0.1:62031",
+      "enabled": true,
+      "box": [
+        1166,
+        22,
+        85,
+        15
+      ]
+    },
+    {
+      "parent": 19,
+      "role": "AXStaticText",
+      "title": "127.0.0.1:62031",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Sections",
+      "enabled": true,
+      "box": [
+        8,
+        52,
+        220,
+        749
+      ],
+      "domIdentifier": "rail"
+    },
+    {
+      "parent": 21,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        16,
+        62,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 22,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true,
+      "box": [
+        24,
+        73,
+        50,
+        14
+      ]
+    },
+    {
+      "parent": 23,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Flows",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        91,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-flows"
+    },
+    {
+      "parent": 25,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        24,
+        98,
+        34,
+        17
+      ]
+    },
+    {
+      "parent": 26,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Runs",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        122,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-runs"
+    },
+    {
+      "parent": 28,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true,
+      "box": [
+        24,
+        129,
+        29,
+        17
+      ]
+    },
+    {
+      "parent": 29,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Bindings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        153,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-bindings"
+    },
+    {
+      "parent": 31,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true,
+      "box": [
+        24,
+        159,
+        50,
+        17
+      ]
+    },
+    {
+      "parent": 32,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Agents and tools",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        184,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-agents"
+    },
+    {
+      "parent": 34,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true,
+      "box": [
+        24,
+        190,
+        97,
+        17
+      ]
+    },
+    {
+      "parent": 35,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        16,
+        217,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 37,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true,
+      "box": [
+        24,
+        227,
+        66,
+        14
+      ]
+    },
+    {
+      "parent": 38,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "API",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        246,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-api"
+    },
+    {
+      "parent": 40,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true,
+      "box": [
+        24,
+        252,
+        21,
+        17
+      ]
+    },
+    {
+      "parent": 41,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Data",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        277,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-data"
+    },
+    {
+      "parent": 43,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true,
+      "box": [
+        24,
+        283,
+        27,
+        17
+      ]
+    },
+    {
+      "parent": 44,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Import prototype database",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        729,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-import"
+    },
+    {
+      "parent": 46,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true,
+      "box": [
+        24,
+        736,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 47,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Settings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        760,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-settings"
+    },
+    {
+      "parent": 49,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true,
+      "box": [
+        24,
+        767,
+        48,
+        17
+      ]
+    },
+    {
+      "parent": 50,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "Workspace",
+      "enabled": true,
+      "box": [
+        228,
+        52,
+        684,
+        749
+      ],
+      "domIdentifier": "workspace"
+    },
+    {
+      "parent": 52,
+      "role": "AXHeading",
+      "title": "Settings",
+      "enabled": true,
+      "box": [
+        244,
+        62,
+        53,
+        20
+      ]
+    },
+    {
+      "parent": 53,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true,
+      "box": [
+        244,
+        62,
+        53,
+        19
+      ]
+    },
+    {
+      "parent": 54,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXStaticText",
+      "title": "yam-fixtures · test · playwright",
+      "enabled": true,
+      "box": [
+        305,
+        64,
+        177,
+        16
+      ]
+    },
+    {
+      "parent": 56,
+      "role": "AXStaticText",
+      "title": "yam-fixtures · test · playwright",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXTable",
+      "description": "PROJECT",
+      "enabled": true,
+      "box": [
+        228,
+        93,
+        684,
+        237
+      ],
+      "domIdentifier": "settings-project"
+    },
+    {
+      "parent": 58,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        93,
+        684,
+        21
+      ]
+    },
+    {
+      "parent": 59,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true,
+      "box": [
+        240,
+        94,
+        52,
+        14
+      ]
+    },
+    {
+      "parent": 60,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true
+    },
+    {
+      "parent": 58,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        684,
+        32
+      ]
+    },
+    {
+      "parent": 62,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        684,
+        32
+      ]
+    },
+    {
+      "parent": 63,
+      "role": "AXCell",
+      "title": "SETTING",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        93,
+        32
+      ]
+    },
+    {
+      "parent": 64,
+      "role": "AXStaticText",
+      "title": "SETTING",
+      "enabled": true,
+      "box": [
+        240,
+        123,
+        48,
+        14
+      ]
+    },
+    {
+      "parent": 65,
+      "role": "AXStaticText",
+      "title": "SETTING",
+      "enabled": true
+    },
+    {
+      "parent": 63,
+      "role": "AXCell",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        321,
+        114,
+        591,
+        32
+      ]
+    },
+    {
+      "parent": 67,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        333,
+        123,
+        35,
+        14
+      ]
+    },
+    {
+      "parent": 68,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true
+    },
+    {
+      "parent": 58,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        146,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 70,
+      "role": "AXCell",
+      "title": "Name",
+      "enabled": true,
+      "box": [
+        228,
+        146,
+        93,
+        33
+      ]
+    },
+    {
+      "parent": 71,
+      "role": "AXStaticText",
+      "title": "Name",
+      "enabled": true,
+      "box": [
+        240,
+        154,
+        32,
+        16
+      ]
+    },
+    {
+      "parent": 72,
+      "role": "AXStaticText",
+      "title": "Name",
+      "enabled": true
+    },
+    {
+      "parent": 70,
+      "role": "AXCell",
+      "title": "yam-fixtures",
+      "enabled": true,
+      "box": [
+        321,
+        146,
+        591,
+        33
+      ]
+    },
+    {
+      "parent": 74,
+      "role": "AXStaticText",
+      "title": "yam-fixtures",
+      "enabled": true,
+      "box": [
+        333,
+        154,
+        113,
+        17
+      ]
+    },
+    {
+      "parent": 75,
+      "role": "AXStaticText",
+      "title": "yam-fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 58,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        179,
+        684,
+        51
+      ]
+    },
+    {
+      "parent": 77,
+      "role": "AXCell",
+      "title": "Directory",
+      "enabled": true,
+      "box": [
+        228,
+        179,
+        93,
+        51
+      ]
+    },
+    {
+      "parent": 78,
+      "role": "AXStaticText",
+      "title": "Directory",
+      "enabled": true,
+      "box": [
+        240,
+        196,
+        49,
+        16
+      ]
+    },
+    {
+      "parent": 79,
+      "role": "AXStaticText",
+      "title": "Directory",
+      "enabled": true
+    },
+    {
+      "parent": 77,
+      "role": "AXCell",
+      "title": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "enabled": true,
+      "box": [
+        321,
+        179,
+        591,
+        51
+      ]
+    },
+    {
+      "parent": 81,
+      "role": "AXStaticText",
+      "title": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "enabled": true,
+      "box": [
+        333,
+        187,
+        480,
+        35
+      ]
+    },
+    {
+      "parent": 82,
+      "role": "AXStaticText",
+      "title": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-",
+      "enabled": true
+    },
+    {
+      "parent": 82,
+      "role": "AXStaticText",
+      "title": "cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 58,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        230,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 85,
+      "role": "AXCell",
+      "title": "Environment",
+      "enabled": true,
+      "box": [
+        228,
+        230,
+        93,
+        33
+      ]
+    },
+    {
+      "parent": 86,
+      "role": "AXStaticText",
+      "title": "Environment",
+      "enabled": true,
+      "box": [
+        240,
+        239,
+        69,
+        16
+      ]
+    },
+    {
+      "parent": 87,
+      "role": "AXStaticText",
+      "title": "Environment",
+      "enabled": true
+    },
+    {
+      "parent": 85,
+      "role": "AXCell",
+      "title": "test",
+      "enabled": true,
+      "box": [
+        321,
+        230,
+        591,
+        33
+      ]
+    },
+    {
+      "parent": 89,
+      "role": "AXStaticText",
+      "title": "test",
+      "enabled": true,
+      "box": [
+        333,
+        238,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 90,
+      "role": "AXStaticText",
+      "title": "test",
+      "enabled": true
+    },
+    {
+      "parent": 58,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        263,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 92,
+      "role": "AXCell",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        228,
+        263,
+        93,
+        33
+      ]
+    },
+    {
+      "parent": 93,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        240,
+        272,
+        32,
+        16
+      ]
+    },
+    {
+      "parent": 94,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true
+    },
+    {
+      "parent": 92,
+      "role": "AXCell",
+      "title": "flows",
+      "enabled": true,
+      "box": [
+        321,
+        263,
+        591,
+        33
+      ]
+    },
+    {
+      "parent": 96,
+      "role": "AXStaticText",
+      "title": "flows",
+      "enabled": true,
+      "box": [
+        333,
+        271,
+        38,
+        17
+      ]
+    },
+    {
+      "parent": 97,
+      "role": "AXStaticText",
+      "title": "flows",
+      "enabled": true
+    },
+    {
+      "parent": 58,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        297,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 99,
+      "role": "AXCell",
+      "title": "Bindings",
+      "enabled": true,
+      "box": [
+        228,
+        297,
+        93,
+        33
+      ]
+    },
+    {
+      "parent": 100,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true,
+      "box": [
+        240,
+        305,
+        47,
+        16
+      ]
+    },
+    {
+      "parent": 101,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true
+    },
+    {
+      "parent": 99,
+      "role": "AXCell",
+      "title": "bindings",
+      "enabled": true,
+      "box": [
+        321,
+        297,
+        591,
+        33
+      ]
+    },
+    {
+      "parent": 103,
+      "role": "AXStaticText",
+      "title": "bindings",
+      "enabled": true,
+      "box": [
+        333,
+        305,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 104,
+      "role": "AXStaticText",
+      "title": "bindings",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXTable",
+      "description": "RUN",
+      "enabled": true,
+      "box": [
+        228,
+        330,
+        684,
+        219
+      ],
+      "domIdentifier": "settings-run"
+    },
+    {
+      "parent": 106,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        330,
+        684,
+        21
+      ]
+    },
+    {
+      "parent": 107,
+      "role": "AXStaticText",
+      "title": "RUN",
+      "enabled": true,
+      "box": [
+        240,
+        331,
+        24,
+        14
+      ]
+    },
+    {
+      "parent": 108,
+      "role": "AXStaticText",
+      "title": "RUN",
+      "enabled": true
+    },
+    {
+      "parent": 106,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        351,
+        684,
+        32
+      ]
+    },
+    {
+      "parent": 110,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        351,
+        684,
+        32
+      ]
+    },
+    {
+      "parent": 111,
+      "role": "AXCell",
+      "title": "SETTING",
+      "enabled": true,
+      "box": [
+        228,
+        351,
+        201,
+        32
+      ]
+    },
+    {
+      "parent": 112,
+      "role": "AXStaticText",
+      "title": "SETTING",
+      "enabled": true,
+      "box": [
+        240,
+        360,
+        48,
+        14
+      ]
+    },
+    {
+      "parent": 113,
+      "role": "AXStaticText",
+      "title": "SETTING",
+      "enabled": true
+    },
+    {
+      "parent": 111,
+      "role": "AXCell",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        429,
+        351,
+        483,
+        32
+      ]
+    },
+    {
+      "parent": 115,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        441,
+        360,
+        35,
+        14
+      ]
+    },
+    {
+      "parent": 116,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true
+    },
+    {
+      "parent": 106,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        383,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 118,
+      "role": "AXCell",
+      "title": "Adapter",
+      "enabled": true,
+      "box": [
+        228,
+        383,
+        201,
+        33
+      ]
+    },
+    {
+      "parent": 119,
+      "role": "AXStaticText",
+      "title": "Adapter",
+      "enabled": true,
+      "box": [
+        240,
+        391,
+        43,
+        16
+      ]
+    },
+    {
+      "parent": 120,
+      "role": "AXStaticText",
+      "title": "Adapter",
+      "enabled": true
+    },
+    {
+      "parent": 118,
+      "role": "AXCell",
+      "title": "playwright",
+      "enabled": true,
+      "box": [
+        429,
+        383,
+        483,
+        33
+      ]
+    },
+    {
+      "parent": 122,
+      "role": "AXStaticText",
+      "title": "playwright",
+      "enabled": true,
+      "box": [
+        441,
+        391,
+        75,
+        17
+      ]
+    },
+    {
+      "parent": 123,
+      "role": "AXStaticText",
+      "title": "playwright",
+      "enabled": true
+    },
+    {
+      "parent": 106,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        416,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 125,
+      "role": "AXCell",
+      "title": "Base URL",
+      "enabled": true,
+      "box": [
+        228,
+        416,
+        201,
+        33
+      ]
+    },
+    {
+      "parent": 126,
+      "role": "AXStaticText",
+      "title": "Base URL",
+      "enabled": true,
+      "box": [
+        240,
+        425,
+        51,
+        16
+      ]
+    },
+    {
+      "parent": 127,
+      "role": "AXStaticText",
+      "title": "Base URL",
+      "enabled": true
+    },
+    {
+      "parent": 125,
+      "role": "AXCell",
+      "title": "http://127.0.0.1:4173",
+      "enabled": true,
+      "box": [
+        429,
+        416,
+        483,
+        33
+      ]
+    },
+    {
+      "parent": 129,
+      "role": "AXStaticText",
+      "title": "http://127.0.0.1:4173",
+      "enabled": true,
+      "box": [
+        441,
+        424,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 130,
+      "role": "AXStaticText",
+      "title": "http://127.0.0.1:4173",
+      "enabled": true
+    },
+    {
+      "parent": 106,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        449,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 132,
+      "role": "AXCell",
+      "title": "Workers",
+      "enabled": true,
+      "box": [
+        228,
+        449,
+        201,
+        33
+      ]
+    },
+    {
+      "parent": 133,
+      "role": "AXStaticText",
+      "title": "Workers",
+      "enabled": true,
+      "box": [
+        240,
+        458,
+        45,
+        16
+      ]
+    },
+    {
+      "parent": 134,
+      "role": "AXStaticText",
+      "title": "Workers",
+      "enabled": true
+    },
+    {
+      "parent": 132,
+      "role": "AXCell",
+      "title": "1",
+      "enabled": true,
+      "box": [
+        429,
+        449,
+        483,
+        33
+      ]
+    },
+    {
+      "parent": 136,
+      "role": "AXStaticText",
+      "title": "1",
+      "enabled": true,
+      "box": [
+        441,
+        457,
+        8,
+        17
+      ]
+    },
+    {
+      "parent": 137,
+      "role": "AXStaticText",
+      "title": "1",
+      "enabled": true
+    },
+    {
+      "parent": 106,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        483,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 139,
+      "role": "AXCell",
+      "title": "Headless",
+      "enabled": true,
+      "box": [
+        228,
+        483,
+        201,
+        33
+      ]
+    },
+    {
+      "parent": 140,
+      "role": "AXStaticText",
+      "title": "Headless",
+      "enabled": true,
+      "box": [
+        240,
+        491,
+        50,
+        16
+      ]
+    },
+    {
+      "parent": 141,
+      "role": "AXStaticText",
+      "title": "Headless",
+      "enabled": true
+    },
+    {
+      "parent": 139,
+      "role": "AXCell",
+      "title": "true",
+      "enabled": true,
+      "box": [
+        429,
+        483,
+        483,
+        33
+      ]
+    },
+    {
+      "parent": 143,
+      "role": "AXStaticText",
+      "title": "true",
+      "enabled": true,
+      "box": [
+        441,
+        491,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 144,
+      "role": "AXStaticText",
+      "title": "true",
+      "enabled": true
+    },
+    {
+      "parent": 106,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        516,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 146,
+      "role": "AXCell",
+      "title": "Output",
+      "enabled": true,
+      "box": [
+        228,
+        516,
+        201,
+        33
+      ]
+    },
+    {
+      "parent": 147,
+      "role": "AXStaticText",
+      "title": "Output",
+      "enabled": true,
+      "box": [
+        240,
+        524,
+        38,
+        16
+      ]
+    },
+    {
+      "parent": 148,
+      "role": "AXStaticText",
+      "title": "Output",
+      "enabled": true
+    },
+    {
+      "parent": 146,
+      "role": "AXCell",
+      "title": "runs",
+      "enabled": true,
+      "box": [
+        429,
+        516,
+        483,
+        33
+      ]
+    },
+    {
+      "parent": 150,
+      "role": "AXStaticText",
+      "title": "runs",
+      "enabled": true,
+      "box": [
+        441,
+        524,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 151,
+      "role": "AXStaticText",
+      "title": "runs",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXTable",
+      "description": "SERVICE",
+      "enabled": true,
+      "box": [
+        228,
+        549,
+        684,
+        120
+      ],
+      "domIdentifier": "settings-service"
+    },
+    {
+      "parent": 153,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        549,
+        684,
+        21
+      ]
+    },
+    {
+      "parent": 154,
+      "role": "AXStaticText",
+      "title": "SERVICE",
+      "enabled": true,
+      "box": [
+        240,
+        550,
+        49,
+        14
+      ]
+    },
+    {
+      "parent": 155,
+      "role": "AXStaticText",
+      "title": "SERVICE",
+      "enabled": true
+    },
+    {
+      "parent": 153,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        570,
+        684,
+        32
+      ]
+    },
+    {
+      "parent": 157,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        570,
+        684,
+        32
+      ]
+    },
+    {
+      "parent": 158,
+      "role": "AXCell",
+      "title": "SETTING",
+      "enabled": true,
+      "box": [
+        228,
+        570,
+        332,
+        32
+      ]
+    },
+    {
+      "parent": 159,
+      "role": "AXStaticText",
+      "title": "SETTING",
+      "enabled": true,
+      "box": [
+        240,
+        579,
+        48,
+        14
+      ]
+    },
+    {
+      "parent": 160,
+      "role": "AXStaticText",
+      "title": "SETTING",
+      "enabled": true
+    },
+    {
+      "parent": 158,
+      "role": "AXCell",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        560,
+        570,
+        352,
+        32
+      ]
+    },
+    {
+      "parent": 162,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        572,
+        579,
+        35,
+        14
+      ]
+    },
+    {
+      "parent": 163,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true
+    },
+    {
+      "parent": 153,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        602,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 165,
+      "role": "AXCell",
+      "title": "Model credential",
+      "enabled": true,
+      "box": [
+        228,
+        602,
+        332,
+        33
+      ]
+    },
+    {
+      "parent": 166,
+      "role": "AXStaticText",
+      "title": "Model credential",
+      "enabled": true,
+      "box": [
+        240,
+        611,
+        90,
+        16
+      ]
+    },
+    {
+      "parent": 167,
+      "role": "AXStaticText",
+      "title": "Model credential",
+      "enabled": true
+    },
+    {
+      "parent": 165,
+      "role": "AXCell",
+      "title": "none",
+      "enabled": true,
+      "box": [
+        560,
+        602,
+        352,
+        33
+      ]
+    },
+    {
+      "parent": 169,
+      "role": "AXStaticText",
+      "title": "none",
+      "enabled": true,
+      "box": [
+        572,
+        610,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 170,
+      "role": "AXStaticText",
+      "title": "none",
+      "enabled": true
+    },
+    {
+      "parent": 153,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        635,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 172,
+      "role": "AXCell",
+      "title": "Custom steps",
+      "enabled": true,
+      "box": [
+        228,
+        635,
+        332,
+        33
+      ]
+    },
+    {
+      "parent": 173,
+      "role": "AXStaticText",
+      "title": "Custom steps",
+      "enabled": true,
+      "box": [
+        240,
+        644,
+        74,
+        16
+      ]
+    },
+    {
+      "parent": 174,
+      "role": "AXStaticText",
+      "title": "Custom steps",
+      "enabled": true
+    },
+    {
+      "parent": 172,
+      "role": "AXCell",
+      "title": "0 definitions",
+      "enabled": true,
+      "box": [
+        560,
+        635,
+        352,
+        33
+      ]
+    },
+    {
+      "parent": 176,
+      "role": "AXStaticText",
+      "title": "0 definitions",
+      "enabled": true,
+      "box": [
+        572,
+        643,
+        98,
+        17
+      ]
+    },
+    {
+      "parent": 177,
+      "role": "AXStaticText",
+      "title": "0 definitions",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkComplementary",
+      "description": "Inspector",
+      "enabled": true,
+      "box": [
+        912,
+        52,
+        360,
+        749
+      ],
+      "domIdentifier": "inspector"
+    },
+    {
+      "parent": 179,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "DIAGNOSTICS",
+      "enabled": true,
+      "box": [
+        913,
+        52,
+        359,
+        347
+      ],
+      "domIdentifier": "inspector-diagnostics"
+    },
+    {
+      "parent": 180,
+      "role": "AXHeading",
+      "title": "DIAGNOSTICS",
+      "enabled": true,
+      "box": [
+        913,
+        58,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-diagnostics-heading"
+    },
+    {
+      "parent": 181,
+      "role": "AXStaticText",
+      "title": "DIAGNOSTICS",
+      "enabled": true,
+      "box": [
+        929,
+        73,
+        80,
+        14
+      ]
+    },
+    {
+      "parent": 182,
+      "role": "AXStaticText",
+      "title": "DIAGNOSTICS",
+      "enabled": true
+    },
+    {
+      "parent": 180,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        929,
+        99,
+        327,
+        93
+      ]
+    },
+    {
+      "parent": 184,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        942,
+        111,
+        60,
+        18
+      ]
+    },
+    {
+      "parent": 185,
+      "role": "AXStaticText",
+      "title": "warning",
+      "enabled": true,
+      "box": [
+        949,
+        112,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 186,
+      "role": "AXStaticText",
+      "title": "warning",
+      "enabled": true
+    },
+    {
+      "parent": 184,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true,
+      "box": [
+        1005,
+        111,
+        105,
+        17
+      ]
+    },
+    {
+      "parent": 188,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true
+    },
+    {
+      "parent": 184,
+      "role": "AXStaticText",
+      "enabled": true,
+      "box": [
+        1110,
+        111,
+        3,
+        16
+      ]
+    },
+    {
+      "parent": 190,
+      "role": "AXStaticText",
+      "enabled": true
+    },
+    {
+      "parent": 184,
+      "role": "AXStaticText",
+      "title": "data.yaml · line 0 · user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+      "enabled": true,
+      "box": [
+        942,
+        111,
+        296,
+        69
+      ]
+    },
+    {
+      "parent": 192,
+      "role": "AXStaticText",
+      "title": "data.yaml · line 0 ·",
+      "enabled": true
+    },
+    {
+      "parent": 192,
+      "role": "AXStaticText",
+      "title": "user.password reads ${YAM_SAMPLE_PASSWORD},",
+      "enabled": true
+    },
+    {
+      "parent": 192,
+      "role": "AXStaticText",
+      "title": "which is not set. Compiling does not need the value;",
+      "enabled": true
+    },
+    {
+      "parent": 192,
+      "role": "AXStaticText",
+      "title": "running will.",
+      "enabled": true
+    },
+    {
+      "parent": 180,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        929,
+        198,
+        327,
+        93
+      ]
+    },
+    {
+      "parent": 197,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        942,
+        209,
+        60,
+        18
+      ]
+    },
+    {
+      "parent": 198,
+      "role": "AXStaticText",
+      "title": "warning",
+      "enabled": true,
+      "box": [
+        949,
+        211,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 199,
+      "role": "AXStaticText",
+      "title": "warning",
+      "enabled": true
+    },
+    {
+      "parent": 197,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true,
+      "box": [
+        1005,
+        209,
+        105,
+        17
+      ]
+    },
+    {
+      "parent": 201,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true
+    },
+    {
+      "parent": 197,
+      "role": "AXStaticText",
+      "enabled": true,
+      "box": [
+        1110,
+        210,
+        3,
+        16
+      ]
+    },
+    {
+      "parent": 203,
+      "role": "AXStaticText",
+      "enabled": true
+    },
+    {
+      "parent": 197,
+      "role": "AXStaticText",
+      "title": "data.yaml · line 0 · card.number reads ${YAM_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
+      "enabled": true,
+      "box": [
+        942,
+        210,
+        294,
+        69
+      ]
+    },
+    {
+      "parent": 205,
+      "role": "AXStaticText",
+      "title": "data.yaml · line 0 ·",
+      "enabled": true
+    },
+    {
+      "parent": 205,
+      "role": "AXStaticText",
+      "title": "card.number reads",
+      "enabled": true
+    },
+    {
+      "parent": 205,
+      "role": "AXStaticText",
+      "title": "${YAM_SAMPLE_CARD_NUMBER}, which is not set.",
+      "enabled": true
+    },
+    {
+      "parent": 205,
+      "role": "AXStaticText",
+      "title": "Compiling does not need the value; running will.",
+      "enabled": true
+    },
+    {
+      "parent": 180,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        929,
+        297,
+        327,
+        93
+      ]
+    },
+    {
+      "parent": 210,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        942,
+        308,
+        60,
+        18
+      ]
+    },
+    {
+      "parent": 211,
+      "role": "AXStaticText",
+      "title": "warning",
+      "enabled": true,
+      "box": [
+        949,
+        310,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 212,
+      "role": "AXStaticText",
+      "title": "warning",
+      "enabled": true
+    },
+    {
+      "parent": 210,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true,
+      "box": [
+        1005,
+        308,
+        105,
+        17
+      ]
+    },
+    {
+      "parent": 214,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true
+    },
+    {
+      "parent": 210,
+      "role": "AXStaticText",
+      "enabled": true,
+      "box": [
+        1110,
+        309,
+        3,
+        16
+      ]
+    },
+    {
+      "parent": 216,
+      "role": "AXStaticText",
+      "enabled": true
+    },
+    {
+      "parent": 210,
+      "role": "AXStaticText",
+      "title": "data.yaml · line 0 · card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
+      "enabled": true,
+      "box": [
+        942,
+        309,
+        292,
+        69
+      ]
+    },
+    {
+      "parent": 218,
+      "role": "AXStaticText",
+      "title": "data.yaml · line 0 ·",
+      "enabled": true
+    },
+    {
+      "parent": 218,
+      "role": "AXStaticText",
+      "title": "card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which",
+      "enabled": true
+    },
+    {
+      "parent": 218,
+      "role": "AXStaticText",
+      "title": "is not set. Compiling does not need the value; running",
+      "enabled": true
+    },
+    {
+      "parent": 218,
+      "role": "AXStaticText",
+      "title": "will.",
+      "enabled": true
+    },
+    {
+      "parent": 179,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "WHERE THIS CAME FROM",
+      "enabled": true,
+      "box": [
+        913,
+        399,
+        359,
+        69
+      ],
+      "domIdentifier": "inspector-sources"
+    },
+    {
+      "parent": 223,
+      "role": "AXHeading",
+      "title": "WHERE THIS CAME FROM",
+      "enabled": true,
+      "box": [
+        913,
+        405,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-sources-heading"
+    },
+    {
+      "parent": 224,
+      "role": "AXStaticText",
+      "title": "WHERE THIS CAME FROM",
+      "enabled": true,
+      "box": [
+        929,
+        420,
+        143,
+        14
+      ]
+    },
+    {
+      "parent": 225,
+      "role": "AXStaticText",
+      "title": "WHERE THIS CAME FROM",
+      "enabled": true
+    },
+    {
+      "parent": 223,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        913,
+        440,
+        359,
+        17
+      ]
+    },
+    {
+      "parent": 227,
+      "role": "AXUnknown",
+      "title": "#1",
+      "enabled": true,
+      "box": [
+        929,
+        440,
+        110,
+        17
+      ]
+    },
+    {
+      "parent": 228,
+      "role": "AXStaticText",
+      "title": "#1",
+      "enabled": true,
+      "box": [
+        929,
+        441,
+        16,
+        16
+      ]
+    },
+    {
+      "parent": 229,
+      "role": "AXStaticText",
+      "title": "#1",
+      "enabled": true
+    },
+    {
+      "parent": 227,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        440,
+        207,
+        17
+      ]
+    },
+    {
+      "parent": 231,
+      "role": "AXStaticText",
+      "title": "GET /project",
+      "enabled": true,
+      "box": [
+        1049,
+        441,
+        67,
+        16
+      ]
+    },
+    {
+      "parent": 232,
+      "role": "AXStaticText",
+      "title": "GET /project",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkContentInfo",
+      "enabled": true,
+      "box": [
+        8,
+        801,
+        1264,
+        28
+      ]
+    },
+    {
+      "parent": 234,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        24,
+        807,
+        604,
+        17
+      ],
+      "domIdentifier": "status-context"
+    },
+    {
+      "parent": 235,
+      "role": "AXStaticText",
+      "title": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "enabled": true,
+      "box": [
+        24,
+        808,
+        604,
+        15
+      ]
+    },
+    {
+      "parent": 236,
+      "role": "AXStaticText",
+      "title": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 234,
+      "role": "AXStaticText",
+      "title": "⌘K",
+      "enabled": true,
+      "box": [
+        1117,
+        809,
+        13,
+        14
+      ]
+    },
+    {
+      "parent": 238,
+      "role": "AXStaticText",
+      "title": "⌘K",
+      "enabled": true
+    },
+    {
+      "parent": 234,
+      "role": "AXStaticText",
+      "title": "commands",
+      "enabled": true,
+      "box": [
+        1136,
+        808,
+        60,
+        15
+      ]
+    },
+    {
+      "parent": 240,
+      "role": "AXStaticText",
+      "title": "commands",
+      "enabled": true
+    },
+    {
+      "parent": 234,
+      "role": "AXStaticText",
+      "title": "?",
+      "enabled": true,
+      "box": [
+        1218,
+        809,
+        6,
+        14
+      ]
+    },
+    {
+      "parent": 242,
+      "role": "AXStaticText",
+      "title": "?",
+      "enabled": true
+    },
+    {
+      "parent": 234,
+      "role": "AXStaticText",
+      "title": "keys",
+      "enabled": true,
+      "box": [
+        1230,
+        808,
+        26,
+        15
+      ]
+    },
+    {
+      "parent": 244,
+      "role": "AXStaticText",
+      "title": "keys",
+      "enabled": true
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXCloseButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        8,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXMinimizeButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        28,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXZoomButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        48,
+        8,
+        14,
+        14
+      ]
+    }
+  ]
+}

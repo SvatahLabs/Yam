@@ -7,7 +7,7 @@
  * > the three agree by id.
  *
  * This file is that list. There is one of it, and every surface resolves an
- * action from here rather than declaring its own: the ADE's palette and toolbar
+ * action from here rather than declaring its own: the app's palette and toolbar
  * buttons, `yam ui`'s palette and single-letter keys, `@svatah/yam-sdk`'s
  * `actions`, and — through `cli` — the command line.
  *
@@ -268,7 +268,7 @@ const ACTIONS_ONLY: readonly Action[] = [
      * `yam run` is the run: stopping it from a terminal is `^C`, which is
      * not a command anyone types into a palette. What the route exists for is a
      * run somebody started from a *screen* and can no longer reach with a
-     * keyboard interrupt — the ADE's and the cockpit's.
+     * keyboard interrupt — the app's and the cockpit's.
      */
     availableWhen: (state) => (state as { live?: boolean }).live === true,
     async run(service, args): Promise<ActionOutcome> {
@@ -372,7 +372,7 @@ const ACTIONS_ONLY: readonly Action[] = [
      * `api` step reads (K7, T11.1). The Phase 10 verification: "a release
      * cannot ship an 'editor' that does not edit" — the API screen could send a
      * saved request and not change one, so the only way to fix a header was a
-     * text editor outside the ADE.
+     * text editor outside the app.
      */
     availableWhen: has("request"),
     async run(service, args): Promise<ActionOutcome> {
@@ -520,7 +520,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Import the database",
     group: "Actions",
     screen: "import",
-    cli: "yam migrate <dest> --from-ade <electron-db dir>",
+    cli: "yam migrate <dest> --from-prototype <electron-db dir>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
       const source = args["source"];

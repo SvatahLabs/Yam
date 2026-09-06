@@ -29,7 +29,7 @@ export interface AxSnapshotNode extends SnapshotNode {
   readonly path: readonly number[];
   /** The node this was built from, for `describe()`. */
   readonly source: AxNode;
-  /** `Window[Yam ADE]/AXGroup[2]/AXButton[Run]` (LLD §3.3). */
+  /** `Window[Yam]/AXGroup[2]/AXButton[Run]` (LLD §3.3). */
   readonly controlPath: string;
 }
 
@@ -106,7 +106,7 @@ export function insidePopUp(nodes: readonly AxNode[], index: number): boolean {
 export const AX_SUBROLE_MAP: Readonly<Record<string, string>> = {
   /*
    * `AXApplicationAlert` and `AXApplicationStatus` are subroles on an `AXGroup`
-   * (T10.3). Without them a `role="alert"` — which is how the ADE draws a
+   * (T10.3). Without them a `role="alert"` — which is how the app draws a
    * failed record session and the explorer's missing intent — normalised to
    * `group` on macOS and to `alert` on Windows, because UIA publishes it in
    * `LocalizedControlType`. `packages/adapter-uia/test/parity.test.ts` is what
@@ -365,7 +365,7 @@ export function convertTree(nodes: readonly AxNode[], options: ConvertOptions): 
 }
 
 /**
- * `Window[Yam ADE]/AXGroup[2]/AXButton[Run]` (LLD §3.3, §7.5).
+ * `Window[Yam]/AXGroup[2]/AXButton[Run]` (LLD §3.3, §7.5).
  *
  * > `controlPath` built from the ancestor chain with names and sibling indices
  * > […] `controlPath` starts at the top-level window title.

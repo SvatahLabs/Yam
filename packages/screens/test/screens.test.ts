@@ -46,7 +46,7 @@ describe("the model covers every screen (LLD §13.7)", () => {
     expect(new Set(SCREENS.map((one) => one.id)).size).toBe(SCREEN_IDS.length);
   });
 
-  it("gives every rail item a screen, and every old ADE screen a home", () => {
+  it("gives every rail item a screen, and every old app screen a home", () => {
     for (const item of RAIL) expect(() => screenById(item.screen)).not.toThrow();
     /*
      * "The eleven tabs are removed; each old screen has exactly one home"
@@ -254,7 +254,7 @@ describe("the Run screen against the `comp` run (the `Run` artboard)", () => {
   });
 
   /*
-   * P9-F5, Draft 2.12 §13.7: "The ADE's audit pane renders the call detail the
+   * P9-F5, Draft 2.12 §13.7: "The app's audit pane renders the call detail the
    * model carries (`locate · booking.book-now-button · testid #0 · ok`)."
    *
    * The verification found every surface line reading `surface | locate · ok`:
@@ -508,11 +508,11 @@ describe("a screen's state does not change when nothing does (T10.4, P9-F4)", ()
  * A screen with a list opens on its first row (P10-F2, LLD §13.7's artboards).
  *
  * The Phase 10 live gate found the Bindings screen's inspector empty, because
- * nothing was chosen and the inspector is a view of a choice: `ade.inspector`
+ * nothing was chosen and the inspector is a view of a choice: `app.inspector`
  * looked for `inspector-candidate-table` on a screen that had drawn a list and
  * an empty panel. The artboards draw the first row selected, and both renderers
  * take the selection from a *screen parameter* (§13.7) — so "select the first
- * one" belongs to the model, where the ADE and the cockpit get it for free, and
+ * one" belongs to the model, where the app and the cockpit get it for free, and
  * not to either renderer.
  *
  * Stated once here for every screen that has a list, so a screen added later

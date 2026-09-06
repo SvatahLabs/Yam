@@ -3247,9 +3247,9 @@
   "runs": [
     {
       "behavior": "test",
-      "bindingsHash": "46bcb5b1916689756a0cd6db35c6e30cd2d79cf964692c530723b4536331593b",
-      "configHash": "4ec3139b3c51dfef18795b80d8ea129cb24fe4315b68694bad908d5e8c58651f",
-      "endedAt": "2026-09-07T05:57:44.513Z",
+      "bindingsHash": "551b0a87e3d8f6aa9d560ed1f2969e165bfe2b3b52cec72a7707b0a6085bfb19",
+      "configHash": "5085979f548d5fbdc6da7a0bb15db0deba4f33d09106b912aaa8e8bcab381f5e",
+      "endedAt": "2026-09-07T06:53:19.544Z",
       "exitCode": 11,
       "flows": {
         "(selected)": {
@@ -3267,7 +3267,7 @@
       "planHash": "7a56729f1c9526f1f9f5418d7f1e75e797cb90335686e82654682497c00b1202",
       "runId": "comp",
       "schemaVersion": "1.0.0",
-      "startedAt": "2026-09-07T05:57:34.765Z",
+      "startedAt": "2026-09-07T06:53:09.490Z",
       "totals": {
         "aborted": 0,
         "failed": 1,
@@ -3402,7 +3402,7 @@
   "bindingById": {
     "app.bookings-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"nav-bookings\"\n      - by: \"role\"\n        exact: true\n        name: \"Bookings\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Bookings\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"nav-bookings\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='nav-bookings']\"\n    context:\n      hash: \"691ed4838691ef73b9105f6a60fcca52d9c149cd446ad1d9ea4ffb4d102ccfca\"\n      pattern: \"/dashboard\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"nav-bookings\"\n        href: \"/booking\"\n      box:\n        - 20\n        - 172.5\n        - 63.31\n        - 18\n      index: 0\n      neighbours:\n        after:\n          - \"Checkout\"\n          - \"Logout\"\n          - \"Welcome back, Enterprise You have 3 active builds. Refresh count BuildStatus nightly-1042passed nightly-1043running nightly-1044queued\"\n        before:\n          - \"☰\"\n          - \"Overview\"\n          - \"Schedule Build\"\n      rolePath:\n        - \"complementary\"\n        - \"list\"\n        - \"listitem\"\n      tag: \"a\"\n      text: \"Bookings\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"app.bookings-link\"\nphrases:\n  - \"the Bookings link\"\nschemaVersion: \"1.0.0\"\n",
     "app.checkout-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"nav-checkout\"\n      - by: \"role\"\n        exact: true\n        name: \"Checkout\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Checkout\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"nav-checkout\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='nav-checkout']\"\n    context:\n      hash: \"691ed4838691ef73b9105f6a60fcca52d9c149cd446ad1d9ea4ffb4d102ccfca\"\n      pattern: \"/dashboard\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"nav-checkout\"\n        href: \"/checkout\"\n      box:\n        - 20\n        - 203.75\n        - 65.5\n        - 18\n      index: 0\n      neighbours:\n        after:\n          - \"Logout\"\n          - \"Welcome back, Enterprise You have 3 active builds. Refresh count BuildStatus nightly-1042passed nightly-1043running nightly-1044queued\"\n        before:\n          - \"Overview\"\n          - \"Schedule Build\"\n          - \"Bookings\"\n      rolePath:\n        - \"complementary\"\n        - \"list\"\n        - \"listitem\"\n      tag: \"a\"\n      text: \"Checkout\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"app.checkout-link\"\nphrases:\n  - \"the Checkout link\"\nschemaVersion: \"1.0.0\"\n",
-    "app.logout-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"nav-logout\"\n      - by: \"role\"\n        exact: true\n        name: \"Logout\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Logout\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"nav-logout\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='nav-logout']\"\n    context:\n      hash: \"93257260a0a5ddc37decbbc3e6e08b9e6dabfa73d8d48933e82d085ff6c0d59f\"\n      pattern: \"/schedule-build\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"nav-logout\"\n        href: \"/logout\"\n      box:\n        - 20\n        - 235\n        - 47.81\n        - 18\n      index: 0\n      neighbours:\n        after:\n          - \"Enterprise Schedule a build for your project. Project Core Adapters ADE Run build Build scheduled.\"\n        before:\n          - \"Schedule Build\"\n          - \"Bookings\"\n          - \"Checkout\"\n      rolePath:\n        - \"complementary\"\n        - \"list\"\n        - \"listitem\"\n      tag: \"a\"\n      text: \"Logout\"\n    provenance:\n      at: \"2026-09-03T06:05:41.545Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:41.558Z\"\n    verified: true\nid: \"app.logout-link\"\nphrases:\n  - \"the logout link\"\nschemaVersion: \"1.0.0\"\n",
+    "app.logout-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"nav-logout\"\n      - by: \"role\"\n        exact: true\n        name: \"Logout\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Logout\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"nav-logout\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='nav-logout']\"\n    context:\n      hash: \"93257260a0a5ddc37decbbc3e6e08b9e6dabfa73d8d48933e82d085ff6c0d59f\"\n      pattern: \"/schedule-build\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"nav-logout\"\n        href: \"/logout\"\n      box:\n        - 20\n        - 235\n        - 47.81\n        - 18\n      index: 0\n      neighbours:\n        after:\n          - \"Enterprise Schedule a build for your project. Project Core Adapters app Run build Build scheduled.\"\n        before:\n          - \"Schedule Build\"\n          - \"Bookings\"\n          - \"Checkout\"\n      rolePath:\n        - \"complementary\"\n        - \"list\"\n        - \"listitem\"\n      tag: \"a\"\n      text: \"Logout\"\n    provenance:\n      at: \"2026-09-03T06:05:41.545Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:41.558Z\"\n    verified: true\nid: \"app.logout-link\"\nphrases:\n  - \"the logout link\"\nschemaVersion: \"1.0.0\"\n",
     "app.schedule-build-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"nav-schedule-build\"\n      - by: \"role\"\n        exact: true\n        name: \"Schedule Build\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Schedule Build\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"nav-schedule-build\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='nav-schedule-build']\"\n    context:\n      hash: \"93257260a0a5ddc37decbbc3e6e08b9e6dabfa73d8d48933e82d085ff6c0d59f\"\n      pattern: \"/dashboard\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"nav-schedule-build\"\n        href: \"/schedule-build\"\n      box:\n        - 20\n        - 141.25\n        - 101.95\n        - 18\n      index: 0\n      neighbours:\n        after:\n          - \"Bookings\"\n          - \"Checkout\"\n          - \"Logout\"\n        before:\n          - \"Yam Sample Menu Dashboard Book a slot Widgets Docs\"\n          - \"☰\"\n          - \"Overview\"\n      rolePath:\n        - \"complementary\"\n        - \"list\"\n        - \"listitem\"\n      tag: \"a\"\n      text: \"Schedule Build\"\n    provenance:\n      at: \"2026-09-03T06:05:41.365Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:41.405Z\"\n    verified: true\nid: \"app.schedule-build-link\"\nphrases:\n  - \"the Schedule Build link\"\nschemaVersion: \"1.0.0\"\n",
     "app.sidebar-toggle": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"sidebar-toggle\"\n      - by: \"role\"\n        exact: true\n        name: \"Toggle sidebar\"\n        role: \"button\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"☰\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"sidebar-toggle\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='sidebar-toggle']\"\n    context:\n      hash: \"691ed4838691ef73b9105f6a60fcca52d9c149cd446ad1d9ea4ffb4d102ccfca\"\n      pattern: \"/dashboard\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        aria-label: \"Toggle sidebar\"\n        class: \"sidebar-toggle\"\n        data-testid: \"sidebar-toggle\"\n      box:\n        - 20\n        - 70\n        - 33.73\n        - 26\n      index: 0\n      neighbours:\n        after:\n          - \"Overview Schedule Build Bookings Checkout Logout\"\n          - \"Welcome back, Enterprise You have 3 active builds. Refresh count BuildStatus nightly-1042passed nightly-1043running nightly-1044queued\"\n        before:\n          - \"Yam Sample Menu Dashboard Book a slot Widgets Docs\"\n      rolePath:\n        - \"complementary\"\n      tag: \"button\"\n      text: \"☰\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"app.sidebar-toggle\"\nphrases:\n  - \"the sidebar toggle\"\nschemaVersion: \"1.0.0\"\n",
     "booking.09-00-slot-time": "entries:\n  - candidates:\n      - by: \"role\"\n        exact: true\n        name: \"09:00\"\n        role: \"option\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"09:00\"\n      - by: \"css\"\n        score: 0.55\n        value: \"[data-testid=\\\"slot-times\\\"] > option:nth-of-type(1)\"\n      - by: \"xpath\"\n        score: 0.45\n        value: \"//*[@data-testid='slot-times']/option[1]\"\n    context:\n      hash: \"5194b40be90e5656f72d6390d5fdcc52001cbb39707e9c522f9d54ae73c9c4f9\"\n      pattern: \"/booking\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        value: \"09:00\"\n      box:\n        - 254\n        - 320.55\n        - 167\n        - 19\n      index: 0\n      neighbours:\n        after:\n          - \"12:00\"\n          - \"15:00\"\n          - \"18:00\"\n        before:\n          - \"Starting point\"\n          - \"Date\"\n          - \"Times\"\n      rolePath:\n        - \"main\"\n        - \"listbox\"\n      tag: \"option\"\n      text: \"09:00\"\n    provenance:\n      at: \"2026-09-02T00:00:00.000Z\"\n      model: \"human\"\n      promptVersion: \"seed:hand-completed\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-02T00:00:00.000Z\"\n    verified: true\nid: \"booking.09-00-slot-time\"\nphrases:\n  - \"the 09:00 slot time\"\nschemaVersion: \"1.0.0\"\n",
@@ -3429,7 +3429,7 @@
     "nav.book-a-slot-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"booking-link\"\n      - by: \"role\"\n        exact: true\n        name: \"Book a slot\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Book a slot\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"booking-link\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='booking-link']\"\n    context:\n      hash: \"87208ba43c34ae6e87bd6801fad58d49627e44cfa4ea17c51a8d2a1746e95751\"\n      pattern: \"/\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        class: \"navbar-item\"\n        data-testid: \"booking-link\"\n        href: \"/booking\"\n      box:\n        - 1064.42\n        - 12.88\n        - 75.83\n        - 23.25\n      index: 1\n      neighbours:\n        after:\n          - \"Widgets\"\n          - \"Docs\"\n          - \"Deterministic automation, once described Describe a behaviour, record the bindings, replay it forever. Sign in Read the docs\"\n        before:\n          - \"Yam Sample\"\n          - \"Menu\"\n          - \"Dashboard\"\n      rolePath:\n        - \"navigation\"\n      tag: \"a\"\n      text: \"Book a slot\"\n    provenance:\n      at: \"2026-09-03T06:05:43.842Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:43.873Z\"\n    verified: true\nid: \"nav.book-a-slot-link\"\nphrases:\n  - \"the Book a slot link\"\nschemaVersion: \"1.0.0\"\n",
     "nav.dashboard-link": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"dashboard-link\"\n      - by: \"role\"\n        exact: true\n        name: \"Dashboard\"\n        role: \"link\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Dashboard\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"dashboard-link\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='dashboard-link']\"\n    context:\n      hash: \"87208ba43c34ae6e87bd6801fad58d49627e44cfa4ea17c51a8d2a1746e95751\"\n      pattern: \"/\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        class: \"navbar-item\"\n        data-testid: \"dashboard-link\"\n        href: \"/dashboard\"\n      box:\n        - 975.61\n        - 12.88\n        - 74.81\n        - 23.25\n      index: 0\n      neighbours:\n        after:\n          - \"Book a slot\"\n          - \"Widgets\"\n          - \"Docs\"\n        before:\n          - \"Yam Sample\"\n          - \"Menu\"\n      rolePath:\n        - \"navigation\"\n      tag: \"a\"\n      text: \"Dashboard\"\n    provenance:\n      at: \"2026-09-03T06:05:42.363Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:42.391Z\"\n    verified: true\nid: \"nav.dashboard-link\"\nphrases:\n  - \"the dashboard link\"\nschemaVersion: \"1.0.0\"\n",
     "nav.nav-toggle": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"nav-toggle\"\n      - by: \"role\"\n        exact: true\n        name: \"Toggle navigation\"\n        role: \"button\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Menu\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"nav-toggle\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='nav-toggle']\"\n    context:\n      hash: \"87208ba43c34ae6e87bd6801fad58d49627e44cfa4ea17c51a8d2a1746e95751\"\n      pattern: \"/\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        aria-label: \"Toggle navigation\"\n        class: \"navbar-toggle\"\n        data-testid: \"nav-toggle\"\n      box:\n        - 137.81\n        - 12\n        - 55.36\n        - 25\n      index: 0\n      neighbours:\n        after:\n          - \"Dashboard Book a slot Widgets Docs\"\n          - \"Deterministic automation, once described Describe a behaviour, record the bindings, replay it forever. Sign in Read the docs\"\n        before:\n          - \"Yam Sample\"\n      rolePath:\n        - \"navigation\"\n      tag: \"button\"\n      text: \"Menu\"\n    provenance:\n      at: \"2026-09-03T06:05:42.194Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:42.226Z\"\n    verified: true\nid: \"nav.nav-toggle\"\nphrases:\n  - \"the nav toggle\"\nschemaVersion: \"1.0.0\"\n",
-    "schedule.schedule-heading": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"schedule-heading\"\n      - by: \"role\"\n        exact: true\n        name: \"Enterprise\"\n        role: \"heading\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Enterprise\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"schedule-heading\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='schedule-heading']\"\n    context:\n      hash: \"ae92e58ae42e3e29bd77f775e8e2d1a0a59d546a5943ce927450cbf60f8a6a66\"\n      pattern: \"/schedule-build\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"schedule-heading\"\n      box:\n        - 244\n        - 74\n        - 226.84\n        - 40.3\n      index: 0\n      neighbours:\n        after:\n          - \"Schedule a build for your project.\"\n          - \"Project Core Adapters ADE Run build\"\n          - \"Build scheduled.\"\n        before:\n          - \"Yam Sample Menu Dashboard Book a slot Widgets Docs\"\n          - \"☰ Overview Schedule Build Bookings Checkout Logout\"\n      rolePath:\n        - \"main\"\n      tag: \"h1\"\n      text: \"Enterprise\"\n    provenance:\n      at: \"2026-09-03T06:05:41.517Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:41.538Z\"\n    verified: true\nid: \"schedule.schedule-heading\"\nphrases:\n  - \"the schedule heading\"\nschemaVersion: \"1.0.0\"\n"
+    "schedule.schedule-heading": "entries:\n  - candidates:\n      - attribute: \"data-testid\"\n        by: \"testid\"\n        score: 0.98\n        value: \"schedule-heading\"\n      - by: \"role\"\n        exact: true\n        name: \"Enterprise\"\n        role: \"heading\"\n        score: 0.92\n      - by: \"text\"\n        exact: true\n        score: 0.75\n        value: \"Enterprise\"\n      - by: \"css\"\n        score: 0.68\n        value: \"[data-testid=\\\"schedule-heading\\\"]\"\n      - by: \"xpath\"\n        score: 0.6\n        value: \"//*[@data-testid='schedule-heading']\"\n    context:\n      hash: \"ae92e58ae42e3e29bd77f775e8e2d1a0a59d546a5943ce927450cbf60f8a6a66\"\n      pattern: \"/schedule-build\"\n      platform: \"web\"\n    fingerprint:\n      attrs:\n        data-testid: \"schedule-heading\"\n      box:\n        - 244\n        - 74\n        - 226.84\n        - 40.3\n      index: 0\n      neighbours:\n        after:\n          - \"Schedule a build for your project.\"\n          - \"Project Core Adapters app Run build\"\n          - \"Build scheduled.\"\n        before:\n          - \"Yam Sample Menu Dashboard Book a slot Widgets Docs\"\n          - \"☰ Overview Schedule Build Bookings Checkout Logout\"\n      rolePath:\n        - \"main\"\n      tag: \"h1\"\n      text: \"Enterprise\"\n    provenance:\n      at: \"2026-09-03T06:05:41.517Z\"\n      costUsd: 0\n      model: \"fake:grounding-cases\"\n      promptVersion: \"g-1\"\n      tokensIn: 0\n      tokensOut: 0\n    recordedAt: \"2026-09-03T06:05:41.538Z\"\n    verified: true\nid: \"schedule.schedule-heading\"\nphrases:\n  - \"the schedule heading\"\nschemaVersion: \"1.0.0\"\n"
   },
   "data": {
     "values": {
@@ -3498,9 +3498,9 @@
     "comp": {
       "summary": {
         "behavior": "test",
-        "bindingsHash": "46bcb5b1916689756a0cd6db35c6e30cd2d79cf964692c530723b4536331593b",
-        "configHash": "4ec3139b3c51dfef18795b80d8ea129cb24fe4315b68694bad908d5e8c58651f",
-        "endedAt": "2026-09-07T05:57:44.513Z",
+        "bindingsHash": "551b0a87e3d8f6aa9d560ed1f2969e165bfe2b3b52cec72a7707b0a6085bfb19",
+        "configHash": "5085979f548d5fbdc6da7a0bb15db0deba4f33d09106b912aaa8e8bcab381f5e",
+        "endedAt": "2026-09-07T06:53:19.544Z",
         "exitCode": 11,
         "flows": {
           "(selected)": {
@@ -3518,7 +3518,7 @@
         "planHash": "7a56729f1c9526f1f9f5418d7f1e75e797cb90335686e82654682497c00b1202",
         "runId": "comp",
         "schemaVersion": "1.0.0",
-        "startedAt": "2026-09-07T05:57:34.765Z",
+        "startedAt": "2026-09-07T06:53:09.490Z",
         "totals": {
           "aborted": 0,
           "failed": 1,
@@ -3537,9 +3537,9 @@
           "line": 39,
           "text": "Click the Book a slot link",
           "status": "passed",
-          "startedAt": "2026-09-07T05:57:35.337Z",
-          "endedAt": "2026-09-07T05:57:35.454Z",
-          "durationMs": 117,
+          "startedAt": "2026-09-07T06:53:10.012Z",
+          "endedAt": "2026-09-07T06:53:10.140Z",
+          "durationMs": 128,
           "matched": {
             "ref": "h0",
             "candidateIndex": 0,
@@ -3555,9 +3555,9 @@
           "line": 40,
           "text": "Type \"Indiranagar\" into the location field",
           "status": "passed",
-          "startedAt": "2026-09-07T05:57:35.455Z",
-          "endedAt": "2026-09-07T05:57:35.495Z",
-          "durationMs": 40,
+          "startedAt": "2026-09-07T06:53:10.141Z",
+          "endedAt": "2026-09-07T06:53:10.170Z",
+          "durationMs": 29,
           "matched": {
             "ref": "h0",
             "candidateIndex": 0,
@@ -3573,9 +3573,9 @@
           "line": 41,
           "text": "Click the Book now button",
           "status": "passed",
-          "startedAt": "2026-09-07T05:57:35.496Z",
-          "endedAt": "2026-09-07T05:57:35.529Z",
-          "durationMs": 33,
+          "startedAt": "2026-09-07T06:53:10.170Z",
+          "endedAt": "2026-09-07T06:53:10.207Z",
+          "durationMs": 37,
           "matched": {
             "ref": "h1",
             "candidateIndex": 0,
@@ -3591,9 +3591,9 @@
           "line": 42,
           "text": "Remember the text of the booking reference as reference",
           "status": "passed",
-          "startedAt": "2026-09-07T05:57:35.529Z",
-          "endedAt": "2026-09-07T05:57:35.534Z",
-          "durationMs": 5,
+          "startedAt": "2026-09-07T06:53:10.207Z",
+          "endedAt": "2026-09-07T06:53:10.210Z",
+          "durationMs": 3,
           "matched": {
             "ref": "h2",
             "candidateIndex": 0,
@@ -3612,12 +3612,12 @@
           "line": 45,
           "text": "Click the pay button",
           "status": "failed",
-          "startedAt": "2026-09-07T05:57:35.534Z",
-          "endedAt": "2026-09-07T05:57:44.446Z",
-          "durationMs": 8912,
+          "startedAt": "2026-09-07T06:53:10.210Z",
+          "endedAt": "2026-09-07T06:53:19.478Z",
+          "durationMs": 9268,
           "failure": {
             "class": "locator",
-            "message": "Could not resolve \"checkout.pay-button\" (the pay button): 5 candidates tried, none matched exactly one element.\n  testid \"pay\" — matched nothing (1758 ms)\n  role button \"Pay\" — matched nothing (1758 ms)\n  text \"Pay\" — matched nothing (1754 ms)\n  css \"[data-testid=\\\"pay\\\"]\" — matched nothing (1793 ms)\n  xpath \"//*[@data-testid='pay']\" — matched nothing (1797 ms)\n  session at http://127.0.0.1:PORT/booking",
+            "message": "Could not resolve \"checkout.pay-button\" (the pay button): 5 candidates tried, none matched exactly one element.\n  testid \"pay\" — matched nothing (1858 ms)\n  role button \"Pay\" — matched nothing (1930 ms)\n  text \"Pay\" — matched nothing (1788 ms)\n  css \"[data-testid=\\\"pay\\\"]\" — matched nothing (1783 ms)\n  xpath \"//*[@data-testid='pay']\" — matched nothing (1797 ms)\n  session at http://127.0.0.1:PORT/booking",
             "candidatesTried": [
               {
                 "by": "testid",
@@ -3671,9 +3671,9 @@
           "line": 48,
           "text": "Click the cancel booking button",
           "status": "passed",
-          "startedAt": "2026-09-07T05:57:44.447Z",
-          "endedAt": "2026-09-07T05:57:44.477Z",
-          "durationMs": 30,
+          "startedAt": "2026-09-07T06:53:19.479Z",
+          "endedAt": "2026-09-07T06:53:19.507Z",
+          "durationMs": 28,
           "matched": {
             "ref": "h3",
             "candidateIndex": 0,
@@ -3689,9 +3689,9 @@
           "line": 51,
           "text": "The booking reference should say {I want to book and then fail.reference}",
           "status": "passed",
-          "startedAt": "2026-09-07T05:57:44.477Z",
-          "endedAt": "2026-09-07T05:57:44.485Z",
-          "durationMs": 8,
+          "startedAt": "2026-09-07T06:53:19.507Z",
+          "endedAt": "2026-09-07T06:53:19.514Z",
+          "durationMs": 7,
           "matched": {
             "ref": "h4",
             "candidateIndex": 0,
@@ -3702,7 +3702,7 @@
       "audit": [
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:34.766Z",
+          "at": "2026-09-07T06:53:09.491Z",
           "seq": 0,
           "kind": "run",
           "detail": {
@@ -3716,7 +3716,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.337Z",
+          "at": "2026-09-07T06:53:10.012Z",
           "seq": 1,
           "kind": "story",
           "story": "I want to book and then fail",
@@ -3726,7 +3726,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.342Z",
+          "at": "2026-09-07T06:53:10.020Z",
           "seq": 2,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3735,11 +3735,11 @@
             "method": "state"
           },
           "outcome": "ok",
-          "durationMs": 4
+          "durationMs": 8
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.355Z",
+          "at": "2026-09-07T06:53:10.032Z",
           "seq": 3,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3758,11 +3758,11 @@
             "matched": 1
           },
           "outcome": "ok",
-          "durationMs": 13
+          "durationMs": 11
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.454Z",
+          "at": "2026-09-07T06:53:10.140Z",
           "seq": 4,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3777,11 +3777,11 @@
             ]
           },
           "outcome": "ok",
-          "durationMs": 99
+          "durationMs": 108
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.460Z",
+          "at": "2026-09-07T06:53:10.146Z",
           "seq": 5,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3790,11 +3790,11 @@
             "method": "state"
           },
           "outcome": "ok",
-          "durationMs": 4
+          "durationMs": 5
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.477Z",
+          "at": "2026-09-07T06:53:10.157Z",
           "seq": 6,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3813,11 +3813,11 @@
             "matched": 1
           },
           "outcome": "ok",
-          "durationMs": 17
+          "durationMs": 11
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.494Z",
+          "at": "2026-09-07T06:53:10.170Z",
           "seq": 7,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3834,11 +3834,11 @@
             ]
           },
           "outcome": "ok",
-          "durationMs": 18
+          "durationMs": 13
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.498Z",
+          "at": "2026-09-07T06:53:10.172Z",
           "seq": 8,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3851,7 +3851,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.501Z",
+          "at": "2026-09-07T06:53:10.174Z",
           "seq": 9,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3870,11 +3870,11 @@
             "matched": 1
           },
           "outcome": "ok",
-          "durationMs": 3
+          "durationMs": 2
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.529Z",
+          "at": "2026-09-07T06:53:10.207Z",
           "seq": 10,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3889,11 +3889,11 @@
             ]
           },
           "outcome": "ok",
-          "durationMs": 28
+          "durationMs": 32
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.529Z",
+          "at": "2026-09-07T06:53:10.207Z",
           "seq": 11,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3906,7 +3906,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.532Z",
+          "at": "2026-09-07T06:53:10.209Z",
           "seq": 12,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3929,7 +3929,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.534Z",
+          "at": "2026-09-07T06:53:10.210Z",
           "seq": 13,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3942,11 +3942,11 @@
             ]
           },
           "outcome": "ok",
-          "durationMs": 2
+          "durationMs": 1
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:35.535Z",
+          "at": "2026-09-07T06:53:10.210Z",
           "seq": 14,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3955,11 +3955,11 @@
             "method": "state"
           },
           "outcome": "ok",
-          "durationMs": 1
+          "durationMs": 0
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:37.293Z",
+          "at": "2026-09-07T06:53:12.069Z",
           "seq": 15,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3978,11 +3978,11 @@
             "matched": 0
           },
           "outcome": "ok",
-          "durationMs": 1758
+          "durationMs": 1833
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:39.051Z",
+          "at": "2026-09-07T06:53:14.041Z",
           "seq": 16,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -4002,11 +4002,11 @@
             "matched": 0
           },
           "outcome": "ok",
-          "durationMs": 1758
+          "durationMs": 1924
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:40.805Z",
+          "at": "2026-09-07T06:53:15.831Z",
           "seq": 17,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -4025,11 +4025,11 @@
             "matched": 0
           },
           "outcome": "ok",
-          "durationMs": 1753
+          "durationMs": 1787
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:42.598Z",
+          "at": "2026-09-07T06:53:17.614Z",
           "seq": 18,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -4048,11 +4048,11 @@
             "matched": 0
           },
           "outcome": "ok",
-          "durationMs": 1793
+          "durationMs": 1783
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.395Z",
+          "at": "2026-09-07T06:53:19.411Z",
           "seq": 19,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -4071,11 +4071,11 @@
             "matched": 0
           },
           "outcome": "ok",
-          "durationMs": 1797
+          "durationMs": 1796
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.396Z",
+          "at": "2026-09-07T06:53:19.412Z",
           "seq": 20,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -4088,7 +4088,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.444Z",
+          "at": "2026-09-07T06:53:19.477Z",
           "seq": 21,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -4097,11 +4097,11 @@
             "method": "screenshot"
           },
           "outcome": "ok",
-          "durationMs": 47
+          "durationMs": 64
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.445Z",
+          "at": "2026-09-07T06:53:19.478Z",
           "seq": 22,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -4114,7 +4114,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.446Z",
+          "at": "2026-09-07T06:53:19.478Z",
           "seq": 23,
           "kind": "policy",
           "story": "I want to book and then fail",
@@ -4127,7 +4127,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.447Z",
+          "at": "2026-09-07T06:53:19.479Z",
           "seq": 24,
           "kind": "story",
           "story": "cancel a booking",
@@ -4137,7 +4137,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.448Z",
+          "at": "2026-09-07T06:53:19.480Z",
           "seq": 25,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4150,7 +4150,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.453Z",
+          "at": "2026-09-07T06:53:19.484Z",
           "seq": 26,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4173,7 +4173,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.477Z",
+          "at": "2026-09-07T06:53:19.507Z",
           "seq": 27,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4188,11 +4188,11 @@
             ]
           },
           "outcome": "ok",
-          "durationMs": 24
+          "durationMs": 23
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.477Z",
+          "at": "2026-09-07T06:53:19.508Z",
           "seq": 28,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4205,7 +4205,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.480Z",
+          "at": "2026-09-07T06:53:19.510Z",
           "seq": 29,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4224,11 +4224,11 @@
             "matched": 1
           },
           "outcome": "ok",
-          "durationMs": 3
+          "durationMs": 2
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.481Z",
+          "at": "2026-09-07T06:53:19.510Z",
           "seq": 30,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4241,7 +4241,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.483Z",
+          "at": "2026-09-07T06:53:19.512Z",
           "seq": 31,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4260,11 +4260,11 @@
             "matched": 1
           },
           "outcome": "ok",
-          "durationMs": 3
+          "durationMs": 2
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.485Z",
+          "at": "2026-09-07T06:53:19.514Z",
           "seq": 32,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4281,7 +4281,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T05:57:44.485Z",
+          "at": "2026-09-07T06:53:19.514Z",
           "seq": 33,
           "kind": "output",
           "story": "cancel a booking",

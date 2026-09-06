@@ -161,7 +161,7 @@ export class UiaSurface implements AgentSurface {
     if (name === undefined || name.trim() === "") {
       throw new SessionError(
         "The UIA adapter needs the name of the process to drive. Set `app.processName` in " +
-          '`yam.config.yaml` (the ADE is "Yam ADE"). Driving whatever happens to be ' +
+          '`yam.config.yaml` (the app is "Yam"). Driving whatever happens to be ' +
           "frontmost would make a run depend on what was last clicked.",
         { adapter: "uia" },
       );
@@ -690,7 +690,7 @@ export class UiaSurface implements AgentSurface {
     /*
      * A tab, an option and a radio have no `Invoke`: pressing one *selects* it,
      * and `SelectionItemPattern.Select()` is what that is. Without this a click
-     * on the ADE's screen tabs would fall through to the mouse for no reason.
+     * on the app's screen tabs would fall through to the mouse for no reason.
      */
     if (this.supports(node, "SelectionItem")) {
       await this.live().perform({

@@ -20,7 +20,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Kbd } from "./controls.js";
 import { portalHost } from "./portal.js";
 
-/** One row of the palette, as the ADE and `yam ui` both build it. */
+/** One row of the palette, as the app and `yam ui` both build it. */
 export interface PaletteRow {
   readonly id: string;
   readonly label: string;

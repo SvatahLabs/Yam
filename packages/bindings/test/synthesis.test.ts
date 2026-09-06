@@ -353,7 +353,7 @@ describe("ignoreAttributes (LLD §3.5)", () => {
  * The desktop candidate kinds (T11.3, LLD §6.2, §7.5, REQ-REC-3).
  *
  * REQ-REC-3 asks for "a ranked list **per adapter kind**", and this list had
- * only the web's: a recording against the ADE came out with `role` and `text`
+ * only the web's: a recording against the app came out with `role` and `text`
  * and nothing that survives a rewording — which is the one thing a desktop
  * binding usually *does* have, because LLD §13.7's accessibility contract
  * requires an id on every control and the live gate fails when one is missing.
@@ -391,7 +391,7 @@ describe("desktop candidates (T11.3)", () => {
     const candidates = candidatesFor(
       desktop({
         automationId: "rail-flows",
-        controlPath: "Window[Yam ADE]/AXGroup[0]/AXButton[Flows]",
+        controlPath: "Window[Yam]/AXGroup[0]/AXButton[Flows]",
       }),
     );
     const kinds = candidates.map((one) => one.by);

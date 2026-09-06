@@ -6,20 +6,20 @@
  * the exit code says the output is not finished. A missing step is much harder
  * to notice than an obviously unfinished one.
  *
- * ## `--from-ade` (T6.6, REQ-ADE-9)
+ * ## `--from-prototype` (T6.6, REQ-ADE-9)
  *
  * ```
- * yam migrate <dest> --from-ade <electron-db dir> [--project <name>]
+ * yam migrate <dest> --from-prototype <electron-db dir> [--project <name>]
  * ```
  *
- * The prototype ADE kept a project's flows, locators and data in an electron-db
- * directory. `--from-ade` extracts them back into the files this command already
+ * The prototype APP_DIR kept a project's flows, locators and data in an electron-db
+ * directory. `--from-prototype` extracts them back into the files this command already
  * reads and then converts them in the same run, so the output is the same
  * project directory a person with those files on disk would get.
  */
 import { rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { extractAdeProject, migrate, renderReviewReport } from "@svatah/yam-migrate";
+import { extractPrototypeProject, migrate, renderReviewReport } from "@svatah/yam-migrate";
 import { boolOption, stringOption, type ParsedArgs } from "@svatah/yam-bindings-cli";
 import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import type { CommandIo } from "@svatah/yam-bindings-cli";
@@ -27,14 +27,14 @@ import type { CommandIo } from "@svatah/yam-bindings-cli";
 export const REVIEW_FILE = "migration-review.md";
 
 export async function migrateCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
-  const fromAde = stringOption(args, "from-ade");
-  const source = fromAde ?? args.command[1];
-  const destination = fromAde === undefined ? args.command[2] : args.command[1];
+  const fromPrototype = stringOption(args, "from-prototype");
+  const source = fromPrototype ?? args.command[1];
+  const destination = fromPrototype === undefined ? args.command[2] : args.command[1];
 
   if (source === undefined || destination === undefined) {
     io.err(
       "Usage: yam migrate <src> <dest> [--keep-original] [--json]\n" +
-        "       yam migrate <dest> --from-ade <electron-db dir> [--project <name>]",
+        "       yam migrate <dest> --from-prototype <electron-db dir> [--project <name>]",
     );
     return EXIT.usage;
   }
@@ -51,9 +51,9 @@ export async function migrateCommand(args: ParsedArgs, io: CommandIo): Promise<E
    * it, and the two would drift.
    */
   const extracted =
-    fromAde === undefined
+    fromPrototype === undefined
       ? undefined
-      : extractAdeProject({
+      : extractPrototypeProject({
           source,
           destination,
           ...(stringOption(args, "project") === undefined

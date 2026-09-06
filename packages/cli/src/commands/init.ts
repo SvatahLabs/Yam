@@ -47,7 +47,7 @@ record:
   model: "none"
   maxSnapshotTokens: 4000
   visionFallback: false
-  # How long a grounding waits for a review in the ADE before the session
+  # How long a grounding waits for a review in the app before the session
   # gives up and writes its report (LLD §13.5). Ten minutes.
   decisionDeadlineMs: 600000
 

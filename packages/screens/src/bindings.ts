@@ -4,7 +4,7 @@
  * `GET /bindings/:id` answers the YAML on disk — the file `yam bindings show`
  * prints and a reviewer reads in a pull request. So a screen that shows a
  * candidate table is reading the same bytes the CLI reads, which is the screen
- * rule (§13.6) at its most literal: there is no "binding as the ADE sees it".
+ * rule (§13.6) at its most literal: there is no "binding as the app sees it".
  *
  * Parsing it here rather than asking the service for JSON is deliberate. A
  * `GET /bindings/:id.json` would be a second representation of the store, and

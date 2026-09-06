@@ -154,7 +154,7 @@ const SERVICE_MAY_NOT_IMPORT = ALL_PACKAGES.filter(
 /**
  * The screen model is over the wire and nothing else (Draft 2.11, LLD §13.7).
  *
- * "A screen's logic lives in `@svatah/yam-screens`; the ADE and `yam ui` render
+ * "A screen's logic lives in `@svatah/yam-screens`; the app and `yam ui` render
  * it and add nothing." A screen reaches the world through a `ScreenService` it
  * is *handed* — the interface in `packages/screens/src/service.ts` — so it may
  * name `@svatah/yam-schema` for the wire shapes and nothing else in the workspace.
@@ -171,7 +171,7 @@ const SCREENS_MAY_NOT_IMPORT = ALL_PACKAGES.filter(
 /**
  * Neither renderer imports a runtime package (Draft 2.11, working rule 3).
  *
- * `@svatah/yam-tui` is `yam ui`; the ADE is `apps/ade` and is held to the same
+ * `@svatah/yam-tui` is `yam ui`; the app is `apps/desktop` and is held to the same
  * rule by its own manifest, which declares the surface packages and nothing
  * that replays a plan. A renderer that could reach the executor would be a
  * renderer that could do something the service cannot, and the whole point of
@@ -304,7 +304,7 @@ export default tseslint.config(
       // Electron Forge's Vite output and its installers (T3.6). Bundled code is
       // not source and linting it says nothing about this repository.
       "**/.vite/**",
-      "apps/ade/out/**",
+      "apps/desktop/out/**",
       // `.yam/` is a project's scratch directory — a compiled plan, a heal
       // diff, a model cache — and is git-ignored everywhere. It is generated
       // output, not source, and linting it says nothing about this repository.

@@ -9,12 +9,12 @@
  *    `evals/adapter-ax.md`, because the path was handed to a CLI whose working
  *    directory is the fixture project. LLD §15's command table says `--report`
  *    is "resolved against the current directory".
- * 2. The wait for the ADE's window was a fixed eight-second sleep, on a machine
- *    that took fifteen seconds twice. §15 says the gate "polls for the ADE
+ * 2. The wait for the app's window was a fixed eight-second sleep, on a machine
+ *    that took fifteen seconds twice. §15 says the gate "polls for the app
  *    window up to 60 s".
  *
  * Neither can be tested by running the gate on a Linux CI runner: it needs a
- * packaged ADE and a granted permission. So the path is tested through
+ * packaged app and a granted permission. So the path is tested through
  * `--print-report-path`, which resolves and stops, and the poll is read from the
  * source — which is weaker, and is why the flag exists for the half that can be
  * executed.
@@ -62,7 +62,7 @@ describe("the desktop gate's --report path (P6-F6, LLD §15)", () => {
   });
 });
 
-describe("the desktop gate's wait for the ADE window (P6-F6, LLD §15)", () => {
+describe("the desktop gate's wait for the app window (P6-F6, LLD §15)", () => {
   const source = readFileSync(SCRIPT, "utf8");
 
   it("polls for a window rather than sleeping a fixed time", () => {
@@ -92,13 +92,13 @@ describe("the desktop gate's wait for the ADE window (P6-F6, LLD §15)", () => {
  * P8-F1 — the gate may not launch the next variant while the previous one is
  * still exiting, and the bridge may not drive a process with no window.
  *
- * > Between variants the gate stops the ADE with `pkill -f <app>` and launches
+ * > Between variants the gate stops the app with `pkill -f <app>` and launches
  * > the next with `open -n`, and the bridge addresses the process by name. When
  * > the previous instance is still shutting down,
- * > `applicationProcesses.byName("Yam ADE")` can answer the dying one, which
+ * > `applicationProcesses.byName("Yam")` can answer the dying one, which
  * > owns no window, so every case at the new variant throws `no-window`.
  *
- * Neither half can be executed on a runner with no packaged ADE and no
+ * Neither half can be executed on a runner with no packaged app and no
  * Accessibility grant — the whole finding is about a live macOS gate — so both
  * are read from the source, and the *behaviour* is tested where it is testable:
  * `packages/adapter-ax/test/bridge.test.ts` drives the perform script's process
@@ -109,7 +109,7 @@ describe("the desktop gate waits for the previous launch to go (P8-F1, LLD §7.5
 
   it("can list the processes of this checkout's build", () => {
     expect(source).toContain("function processIds()");
-    // By the executable path, so another Yam ADE on the machine is neither
+    // By the executable path, so another Yam on the machine is neither
     // counted nor killed.
     expect(source).toContain('spawnSync("pgrep", ["-f", app]');
   });
@@ -119,7 +119,7 @@ describe("the desktop gate waits for the previous launch to go (P8-F1, LLD §7.5
      * The clock is the *signal's*, not the whole teardown's (T11.1).
      *
      * Draft 2.13 puts a graceful quit route in front of the signal (P10-F1), so
-     * `stop()` has two phases with two budgets: ten seconds asking the ADE to
+     * `stop()` has two phases with two budgets: ten seconds asking the app to
      * quit, then thirty waiting for a `SIGTERM` it may still be unwinding from.
      * Sharing one clock meant escalating to `SIGKILL` five seconds after
      * `SIGTERM` — the defect P8-F1 is about, in a new place.
@@ -131,7 +131,7 @@ describe("the desktop gate waits for the previous launch to go (P8-F1, LLD §7.5
   it("asks the application to quit before it signals (Draft 2.13, P10-F1)", () => {
     expect(source).toContain("function requestQuit()");
     // The graceful route on each platform: an Apple-event quit, a
-    // `CloseMainWindow`. Both reach the ADE's `before-quit`, which stops the
+    // `CloseMainWindow`. Both reach the app's `before-quit`, which stops the
     // `yam serve` it spawned; a bare signal used to leave one behind.
     expect(source).toContain("to quit");
     expect(source).toContain("CloseMainWindow");
@@ -148,7 +148,7 @@ describe("the desktop gate waits for the previous launch to go (P8-F1, LLD §7.5
      * `count windows` over an Apple event asks System Events to do the same
      * accessibility read, one process away, under a second permission — and it
      * answers 0 for *every* application when that read is refused, which is
-     * indistinguishable from "the ADE has no window yet".
+     * indistinguishable from "the app has no window yet".
      */
     expect(source).toContain("REAL_WINDOW_SCRIPT");
     expect(source).not.toContain("to count windows");
@@ -170,9 +170,9 @@ describe("the desktop gate waits for the previous launch to go (P8-F1, LLD §7.5
   it("clears leftovers before the first variant too", () => {
     /*
      * The intent, not the adjacency: `stop()` runs before the variant loop and
-     * nothing launches an ADE between the two. Asserted as a *window* of source
+     * nothing launches an app between the two. Asserted as a *window* of source
      * rather than as two lines touching, because T12.3 put the sample
-     * application's start-up in that window — it is not an ADE and it is not a
+     * application's start-up in that window — it is not an app and it is not a
      * leftover, and a check that read the two lines as one string would have
      * failed for a reason it is not about.
      */
@@ -181,7 +181,7 @@ describe("the desktop gate waits for the previous launch to go (P8-F1, LLD §7.5
     expect(from, "the gate does not call stop() before the loop").toBeGreaterThan(0);
     expect(to, "the gate has no variant loop").toBeGreaterThan(from);
     const between = source.slice(from, to);
-    expect(between, "something launches an ADE between the clean slate and the first variant")
+    expect(between, "something launches an app between the clean slate and the first variant")
       .not.toMatch(/\blaunch\(|\brunSuite\(/);
   });
 });
@@ -226,11 +226,11 @@ describe("the gate records the load and retries once (P8-F2, LLD §7.5)", () => 
  *
  * The Phase 9 live gate could not run for either the implementer or the
  * verifier: both had a locked display, and both got "showed no window within
- * 60000 ms" — true, and useless, because it sends a reader to look at the ADE
+ * 60000 ms" — true, and useless, because it sends a reader to look at the app
  * when nothing launched on that machine would get a window.
  *
  * Draft 2.12 §7.5 adds `ax/session` to `yam surface doctor` and asks the gate
- * to name it. The gate itself needs a packaged ADE and a granted permission, so
+ * to name it. The gate itself needs a packaged app and a granted permission, so
  * what is checked here is that the source has the branch and the doctor has the
  * check — the same bargain the poll above is tested under, and for the same
  * reason.

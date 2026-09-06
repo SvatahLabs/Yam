@@ -6,7 +6,7 @@
  *       [--out evals/grounding/desktop-cases.jsonl] [--variant 0]
  *
  * > The recorder grounds a desktop snapshot the way it grounds a web one; the
- * > fake gateway gains a **desktop case set recorded from the ADE**.
+ * > fake gateway gains a **desktop case set recorded from the app**.
  *
  * A case is a phrase a person might write, the *window* it is said in, and the
  * control it means — the desktop twin of `scripts/grounding-cases.mjs`, whose
@@ -17,20 +17,20 @@
  *   binding's context pattern is "a URL *or window-title* pattern"; a window has
  *   no segments to generalise.
  * * **The ground truth is the `automationId`.** `apps/sample-web` stamps
- *   `data-yam-eval` on every element for the web eval; the ADE needs no such
+ *   `data-yam-eval` on every element for the web eval; the app needs no such
  *   stamp, because LLD §13.7's accessibility contract already requires an id on
  *   every button, link, tab, field and row action, and the desktop snapshot case
  *   fails the live gate when one is missing. The id is the answer key.
  *
- * ## Recorded from the ADE, not written down
+ * ## Recorded from the app, not written down
  *
  * The cases come from a **real read of the real application**, through the same
- * CDP path `scripts/record-desktop-tree.mjs` uses: launch the packaged ADE, open
+ * CDP path `scripts/record-desktop-tree.mjs` uses: launch the packaged app, open
  * the fixtures project, walk each screen, and turn every control with a name and
  * an id into a case. Hand-writing them would be writing down what somebody
- * believed the ADE looked like.
+ * believed the app looked like.
  *
- * Exit 0 when the cases are written, 2 when the ADE is not packaged.
+ * Exit 0 when the cases are written, 2 when the app is not packaged.
  */
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
@@ -38,7 +38,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const ADE = join(ROOT, "apps", "ade");
+const APP_DIR = join(ROOT, "apps", "desktop");
 
 const args = process.argv.slice(2);
 const option = (name, fallback) => {
@@ -49,16 +49,16 @@ const out = join(ROOT, option("out", "evals/grounding/desktop-cases.jsonl"));
 const variant = option("variant", "0");
 const project = join(ROOT, "evals", "fixtures");
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
-const entry = join(ADE, ".vite", "build", "main.js");
+const entry = join(APP_DIR, ".vite", "build", "main.js");
 
 for (const [what, path] of [
   ["the CLI", cli],
-  ["the ADE build", entry],
+  ["the app build", entry],
 ]) {
   if (!existsSync(path)) {
     process.stderr.write(
       `${what} is not built (${path}). Run \`pnpm -r build\` and ` +
-        "`pnpm --filter @svatah/yam-ade package`.\n",
+        "`pnpm --filter @svatah/yam-desktop package`.\n",
     );
     process.exit(2);
   }
@@ -68,9 +68,9 @@ const PORT = 9700 + Math.floor(Math.random() * 200);
 const electron = join(ROOT, "node_modules", "electron", "cli.js");
 const child = spawn(
   process.execPath,
-  [electron, `--remote-debugging-port=${PORT}`, "--remote-allow-origins=*", ADE],
+  [electron, `--remote-debugging-port=${PORT}`, "--remote-allow-origins=*", APP_DIR],
   {
-    cwd: ADE,
+    cwd: APP_DIR,
     stdio: ["ignore", "pipe", "pipe"],
     env: {
       ...process.env,
@@ -95,7 +95,7 @@ child.stderr.on("data", (chunk) => (log += String(chunk)));
 
 const deadline = setTimeout(() => {
   child.kill("SIGKILL");
-  process.stderr.write(`timed out waiting for the ADE\n${log}\n`);
+  process.stderr.write(`timed out waiting for the app\n${log}\n`);
   process.exit(1);
 }, 120_000);
 
@@ -111,7 +111,7 @@ async function target() {
     }
     await new Promise((done) => setTimeout(done, 500));
   }
-  throw new Error("the ADE never opened a debuggable page");
+  throw new Error("the app never opened a debuggable page");
 }
 
 async function connect(url) {
@@ -142,7 +142,7 @@ async function connect(url) {
 }
 
 /**
- * The screens to walk, and how the ADE reaches each.
+ * The screens to walk, and how the app reaches each.
  *
  * The rail's eight, plus the palette's four. The same navigation the desktop
  * conformance suite uses, so a case recorded here is a case those cases could
@@ -209,7 +209,7 @@ const main = async () => {
     return result.value;
   };
 
-  /** Every control with a name *and* an id, as the ADE renders it right now. */
+  /** Every control with a name *and* an id, as the app renders it right now. */
   const controlsNow = async () =>
     await evaluate(`(() => {
       const roleOf = (el) => {
@@ -231,7 +231,7 @@ const main = async () => {
       };
       /*
        * The accessible name, the way an accessibility tree computes one:
-       * aria-hidden subtrees are not part of it. The ADE has them — a button's
+       * aria-hidden subtrees are not part of it. The app has them — a button's
        * accelerator is a kbd element marked aria-hidden — so textContent alone
        * produced "the Open a sessionO button", a phrase no person would write
        * and no adapter would ever match.
@@ -284,7 +284,7 @@ const main = async () => {
   /**
    * Wait for the screen to arrive, then read it.
    *
-   * A rail click is a request the ADE answers with a `load()` over five or six
+   * A rail click is a request the app answers with a `load()` over five or six
    * endpoints, and a read taken the instant after it is a read of an empty
    * workspace. The first version of this script recorded nine controls — the
    * rail, and nothing any screen has.
@@ -302,7 +302,7 @@ const main = async () => {
   };
 
   await evaluate(
-    `window.ade.preferences({ recentProjects: [${JSON.stringify(project)}] }).then(() => "ok")`,
+    `window.desktopApp.preferences({ recentProjects: [${JSON.stringify(project)}] }).then(() => "ok")`,
   );
 
   /*
@@ -318,7 +318,7 @@ const main = async () => {
   }
   await recordNow("welcome");
 
-  // Then the project, through the ADE's own Recent button — the same gesture a
+  // Then the project, through the app's own Recent button — the same gesture a
   // person makes, and the same one `evals/self`'s flow makes.
   const opened = await (async () => {
     for (let attempt = 0; attempt < 60; attempt += 1) {
@@ -336,7 +336,7 @@ const main = async () => {
   })();
   if (opened !== true) {
     throw new Error(
-      `the ADE did not open ${project}; it shows:\n` +
+      `the app did not open ${project}; it shows:\n` +
         String(await evaluate("document.body.innerText.slice(0, 400)")),
     );
   }
@@ -367,7 +367,7 @@ const main = async () => {
     }
   }
 
-  const title = (await evaluate("document.title")) ?? "Yam ADE";
+  const title = (await evaluate("document.title")) ?? "Yam";
   const cases = [];
   let n = 0;
   for (const control of [...seen.values()].sort((a, b) => a.id.localeCompare(b.id))) {

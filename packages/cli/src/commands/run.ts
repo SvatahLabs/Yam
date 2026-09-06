@@ -286,7 +286,7 @@ export interface RunProjectOptions {
  *
  * Exported because the local service (T2.11) calls it: LLD §13.5 says every
  * service handler calls the same function the CLI calls, and this is that
- * function. A second implementation behind `POST /run` is how the ADE and the
+ * function. A second implementation behind `POST /run` is how the app and the
  * CLI would start disagreeing about what a run is.
  */
 export async function runProject(

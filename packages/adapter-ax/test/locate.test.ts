@@ -1,5 +1,5 @@
 /**
- * Candidate matching and synthesis, against the ADE's recorded trees (T6.2,
+ * Candidate matching and synthesis, against the app's recorded trees (T6.2,
  * LLD §3.3, §6.3, REQ-REC-3).
  */
 import { describe, expect, it } from "vitest";
@@ -125,7 +125,7 @@ describe("synthesising a candidate bundle (REQ-REC-3, LLD §3.3)", () => {
   it("drops a candidate that matches more than one element", () => {
     /*
      * REQ-REC-3: "candidates matching more than one element are dropped." The
-     * ADE's `<label>Gateway</label>` and the control it labels share a name, so
+     * app's `<label>Gateway</label>` and the control it labels share a name, so
      * a role+name candidate for the *label* would be fine and one asking only
      * for the name would not.
      */

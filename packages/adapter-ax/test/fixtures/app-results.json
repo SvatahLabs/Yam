@@ -1,0 +1,2400 @@
+{
+  "process": "Yam",
+  "title": "Yam",
+  "truncated": false,
+  "nodes": [
+    {
+      "parent": -1,
+      "role": "AXWindow",
+      "subrole": "AXStandardWindow",
+      "title": "Yam",
+      "box": [
+        0,
+        0,
+        1280,
+        860
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXWebArea",
+      "description": "Yam",
+      "enabled": true,
+      "focused": true,
+      "box": [
+        0,
+        0,
+        1280,
+        828
+      ]
+    },
+    {
+      "parent": 1,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        828
+      ],
+      "domIdentifier": "root"
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkBanner",
+      "enabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        44
+      ]
+    },
+    {
+      "parent": 3,
+      "role": "AXStaticText",
+      "title": "Yam",
+      "enabled": true,
+      "box": [
+        50,
+        21,
+        42,
+        17
+      ]
+    },
+    {
+      "parent": 4,
+      "role": "AXStaticText",
+      "title": "Yam",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Project",
+      "enabled": true,
+      "box": [
+        104,
+        20,
+        103,
+        19
+      ],
+      "domIdentifier": "topbar-crumb"
+    },
+    {
+      "parent": 6,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        115,
+        20,
+        46,
+        19
+      ],
+      "domIdentifier": "crumb-project"
+    },
+    {
+      "parent": 7,
+      "role": "AXStaticText",
+      "title": "fixtures",
+      "enabled": true,
+      "box": [
+        115,
+        21,
+        46,
+        17
+      ]
+    },
+    {
+      "parent": 8,
+      "role": "AXStaticText",
+      "title": "fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 6,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        177,
+        20,
+        29,
+        19
+      ],
+      "domIdentifier": "crumb-screen"
+    },
+    {
+      "parent": 10,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true,
+      "box": [
+        177,
+        21,
+        29,
+        17
+      ]
+    },
+    {
+      "parent": 11,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXButton",
+      "title": "Search or run a command",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        896,
+        16,
+        199,
+        28
+      ],
+      "domIdentifier": "open-command-palette"
+    },
+    {
+      "parent": 13,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true,
+      "box": [
+        907,
+        21,
+        146,
+        17
+      ]
+    },
+    {
+      "parent": 14,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        1106,
+        19,
+        154,
+        22
+      ],
+      "domIdentifier": "service-chip"
+    },
+    {
+      "parent": 16,
+      "role": "AXStaticText",
+      "title": "service",
+      "enabled": true,
+      "box": [
+        1128,
+        22,
+        38,
+        15
+      ]
+    },
+    {
+      "parent": 17,
+      "role": "AXStaticText",
+      "title": "service",
+      "enabled": true
+    },
+    {
+      "parent": 16,
+      "role": "AXStaticText",
+      "title": "127.0.0.1:62171",
+      "enabled": true,
+      "box": [
+        1166,
+        22,
+        85,
+        15
+      ]
+    },
+    {
+      "parent": 19,
+      "role": "AXStaticText",
+      "title": "127.0.0.1:62171",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Sections",
+      "enabled": true,
+      "box": [
+        8,
+        52,
+        220,
+        756
+      ],
+      "domIdentifier": "rail"
+    },
+    {
+      "parent": 21,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        16,
+        62,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 22,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true,
+      "box": [
+        24,
+        73,
+        50,
+        14
+      ]
+    },
+    {
+      "parent": 23,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Flows",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        91,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-flows"
+    },
+    {
+      "parent": 25,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        24,
+        98,
+        34,
+        17
+      ]
+    },
+    {
+      "parent": 26,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Runs",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        122,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-runs"
+    },
+    {
+      "parent": 28,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true,
+      "box": [
+        24,
+        129,
+        29,
+        17
+      ]
+    },
+    {
+      "parent": 29,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Bindings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        153,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-bindings"
+    },
+    {
+      "parent": 31,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true,
+      "box": [
+        24,
+        159,
+        50,
+        17
+      ]
+    },
+    {
+      "parent": 32,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Agents and tools",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        184,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-agents"
+    },
+    {
+      "parent": 34,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true,
+      "box": [
+        24,
+        190,
+        97,
+        17
+      ]
+    },
+    {
+      "parent": 35,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        16,
+        217,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 37,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true,
+      "box": [
+        24,
+        227,
+        66,
+        14
+      ]
+    },
+    {
+      "parent": 38,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "API",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        246,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-api"
+    },
+    {
+      "parent": 40,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true,
+      "box": [
+        24,
+        252,
+        21,
+        17
+      ]
+    },
+    {
+      "parent": 41,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Data",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        277,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-data"
+    },
+    {
+      "parent": 43,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true,
+      "box": [
+        24,
+        283,
+        27,
+        17
+      ]
+    },
+    {
+      "parent": 44,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Import prototype database",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        736,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-import"
+    },
+    {
+      "parent": 46,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true,
+      "box": [
+        24,
+        743,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 47,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Settings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        767,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-settings"
+    },
+    {
+      "parent": 49,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true,
+      "box": [
+        24,
+        774,
+        48,
+        17
+      ]
+    },
+    {
+      "parent": 50,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "Workspace",
+      "enabled": true,
+      "box": [
+        228,
+        52,
+        684,
+        756
+      ],
+      "domIdentifier": "workspace"
+    },
+    {
+      "parent": 52,
+      "role": "AXHeading",
+      "title": "Runs",
+      "enabled": true,
+      "box": [
+        244,
+        62,
+        34,
+        20
+      ]
+    },
+    {
+      "parent": 53,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true,
+      "box": [
+        244,
+        62,
+        33,
+        19
+      ]
+    },
+    {
+      "parent": 54,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXStaticText",
+      "title": "1 run",
+      "enabled": true,
+      "box": [
+        286,
+        64,
+        28,
+        16
+      ]
+    },
+    {
+      "parent": 56,
+      "role": "AXStaticText",
+      "title": "1 run",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXButton",
+      "title": "behavior: all",
+      "help": "Cycle the behavior filter (next: test)",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        624,
+        58,
+        93,
+        28
+      ],
+      "domIdentifier": "runs-filter-behavior"
+    },
+    {
+      "parent": 58,
+      "role": "AXStaticText",
+      "title": "behavior: all",
+      "enabled": true,
+      "box": [
+        635,
+        63,
+        71,
+        17
+      ]
+    },
+    {
+      "parent": 59,
+      "role": "AXStaticText",
+      "title": "behavior: all",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXButton",
+      "title": "invoker: all",
+      "help": "Cycle the invoker filter (next: user)",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        725,
+        58,
+        85,
+        28
+      ],
+      "domIdentifier": "runs-filter-invoker"
+    },
+    {
+      "parent": 61,
+      "role": "AXStaticText",
+      "title": "invoker: all",
+      "enabled": true,
+      "box": [
+        736,
+        63,
+        63,
+        17
+      ]
+    },
+    {
+      "parent": 62,
+      "role": "AXStaticText",
+      "title": "invoker: all",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXButton",
+      "title": "status: all",
+      "help": "Cycle the status filter (next: aborted)",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        818,
+        58,
+        78,
+        28
+      ],
+      "domIdentifier": "runs-filter-status"
+    },
+    {
+      "parent": 64,
+      "role": "AXStaticText",
+      "title": "status: all",
+      "enabled": true,
+      "box": [
+        829,
+        63,
+        56,
+        17
+      ]
+    },
+    {
+      "parent": 65,
+      "role": "AXStaticText",
+      "title": "status: all",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXTable",
+      "description": "RUNS",
+      "enabled": true,
+      "box": [
+        228,
+        93,
+        684,
+        120
+      ],
+      "domIdentifier": "runs-table"
+    },
+    {
+      "parent": 67,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        93,
+        684,
+        21
+      ]
+    },
+    {
+      "parent": 68,
+      "role": "AXStaticText",
+      "title": "RUNS",
+      "enabled": true,
+      "box": [
+        240,
+        94,
+        31,
+        14
+      ]
+    },
+    {
+      "parent": 69,
+      "role": "AXStaticText",
+      "title": "RUNS",
+      "enabled": true
+    },
+    {
+      "parent": 67,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        684,
+        47
+      ]
+    },
+    {
+      "parent": 71,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        684,
+        47
+      ]
+    },
+    {
+      "parent": 72,
+      "role": "AXCell",
+      "title": "RUN",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        54,
+        47
+      ]
+    },
+    {
+      "parent": 73,
+      "role": "AXStaticText",
+      "title": "RUN",
+      "enabled": true,
+      "box": [
+        240,
+        130,
+        23,
+        14
+      ]
+    },
+    {
+      "parent": 74,
+      "role": "AXStaticText",
+      "title": "RUN",
+      "enabled": true
+    },
+    {
+      "parent": 72,
+      "role": "AXCell",
+      "title": "FLOW / STORY",
+      "enabled": true,
+      "box": [
+        282,
+        114,
+        166,
+        47
+      ]
+    },
+    {
+      "parent": 76,
+      "role": "AXStaticText",
+      "title": "FLOW / STORY",
+      "enabled": true,
+      "box": [
+        294,
+        130,
+        77,
+        14
+      ]
+    },
+    {
+      "parent": 77,
+      "role": "AXStaticText",
+      "title": "FLOW / STORY",
+      "enabled": true
+    },
+    {
+      "parent": 72,
+      "role": "AXCell",
+      "title": "BEHAVIOR",
+      "enabled": true,
+      "box": [
+        448,
+        114,
+        81,
+        47
+      ]
+    },
+    {
+      "parent": 79,
+      "role": "AXStaticText",
+      "title": "BEHAVIOR",
+      "enabled": true,
+      "box": [
+        460,
+        130,
+        57,
+        14
+      ]
+    },
+    {
+      "parent": 80,
+      "role": "AXStaticText",
+      "title": "BEHAVIOR",
+      "enabled": true
+    },
+    {
+      "parent": 72,
+      "role": "AXCell",
+      "title": "INVOKER",
+      "enabled": true,
+      "box": [
+        529,
+        114,
+        89,
+        47
+      ]
+    },
+    {
+      "parent": 82,
+      "role": "AXStaticText",
+      "title": "INVOKER",
+      "enabled": true,
+      "box": [
+        541,
+        130,
+        50,
+        14
+      ]
+    },
+    {
+      "parent": 83,
+      "role": "AXStaticText",
+      "title": "INVOKER",
+      "enabled": true
+    },
+    {
+      "parent": 72,
+      "role": "AXCell",
+      "title": "STATUS",
+      "enabled": true,
+      "box": [
+        618,
+        114,
+        84,
+        47
+      ]
+    },
+    {
+      "parent": 85,
+      "role": "AXStaticText",
+      "title": "STATUS",
+      "enabled": true,
+      "box": [
+        630,
+        130,
+        41,
+        14
+      ]
+    },
+    {
+      "parent": 86,
+      "role": "AXStaticText",
+      "title": "STATUS",
+      "enabled": true
+    },
+    {
+      "parent": 72,
+      "role": "AXCell",
+      "title": "PASS · FAIL · SKIP",
+      "enabled": true,
+      "box": [
+        702,
+        114,
+        87,
+        47
+      ]
+    },
+    {
+      "parent": 88,
+      "role": "AXStaticText",
+      "title": "PASS · FAIL · SKIP",
+      "enabled": true,
+      "box": [
+        714,
+        123,
+        62,
+        29
+      ]
+    },
+    {
+      "parent": 89,
+      "role": "AXStaticText",
+      "title": "PASS ·",
+      "enabled": true
+    },
+    {
+      "parent": 89,
+      "role": "AXStaticText",
+      "title": "FAIL · SKIP",
+      "enabled": true
+    },
+    {
+      "parent": 72,
+      "role": "AXCell",
+      "title": "TIME",
+      "enabled": true,
+      "box": [
+        789,
+        114,
+        60,
+        47
+      ]
+    },
+    {
+      "parent": 92,
+      "role": "AXStaticText",
+      "title": "TIME",
+      "enabled": true,
+      "box": [
+        809,
+        130,
+        28,
+        14
+      ]
+    },
+    {
+      "parent": 93,
+      "role": "AXStaticText",
+      "title": "TIME",
+      "enabled": true
+    },
+    {
+      "parent": 72,
+      "role": "AXCell",
+      "title": "WHEN",
+      "enabled": true,
+      "box": [
+        849,
+        114,
+        63,
+        47
+      ]
+    },
+    {
+      "parent": 95,
+      "role": "AXStaticText",
+      "title": "WHEN",
+      "enabled": true,
+      "box": [
+        861,
+        130,
+        33,
+        14
+      ]
+    },
+    {
+      "parent": 96,
+      "role": "AXStaticText",
+      "title": "WHEN",
+      "enabled": true
+    },
+    {
+      "parent": 67,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        161,
+        684,
+        51
+      ]
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "comp",
+      "enabled": true,
+      "box": [
+        228,
+        161,
+        54,
+        51
+      ]
+    },
+    {
+      "parent": 99,
+      "role": "AXStaticText",
+      "title": "comp",
+      "enabled": true,
+      "box": [
+        240,
+        178,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 100,
+      "role": "AXStaticText",
+      "title": "comp",
+      "enabled": true
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "I want to book and then fail · cancel a booking",
+      "enabled": true,
+      "box": [
+        282,
+        161,
+        166,
+        51
+      ]
+    },
+    {
+      "parent": 102,
+      "role": "AXStaticText",
+      "title": "I want to book and then fail · cancel a booking",
+      "enabled": true,
+      "box": [
+        294,
+        170,
+        128,
+        33
+      ]
+    },
+    {
+      "parent": 103,
+      "role": "AXStaticText",
+      "title": "I want to book and then",
+      "enabled": true
+    },
+    {
+      "parent": 103,
+      "role": "AXStaticText",
+      "title": "fail · cancel a booking",
+      "enabled": true
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "test",
+      "enabled": true,
+      "box": [
+        448,
+        161,
+        81,
+        51
+      ]
+    },
+    {
+      "parent": 106,
+      "role": "AXStaticText",
+      "title": "test",
+      "enabled": true,
+      "box": [
+        460,
+        179,
+        21,
+        16
+      ]
+    },
+    {
+      "parent": 107,
+      "role": "AXStaticText",
+      "title": "test",
+      "enabled": true
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "user · local · cli",
+      "enabled": true,
+      "box": [
+        529,
+        161,
+        89,
+        51
+      ]
+    },
+    {
+      "parent": 109,
+      "role": "AXStaticText",
+      "title": "user · local · cli",
+      "enabled": true,
+      "box": [
+        541,
+        170,
+        59,
+        33
+      ]
+    },
+    {
+      "parent": 110,
+      "role": "AXStaticText",
+      "title": "user · local",
+      "enabled": true
+    },
+    {
+      "parent": 110,
+      "role": "AXStaticText",
+      "title": "· cli",
+      "enabled": true
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "aborted",
+      "enabled": true,
+      "box": [
+        618,
+        161,
+        84,
+        51
+      ]
+    },
+    {
+      "parent": 113,
+      "role": "AXStaticText",
+      "title": "aborted",
+      "enabled": true,
+      "box": [
+        637,
+        179,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 114,
+      "role": "AXStaticText",
+      "title": "aborted",
+      "enabled": true
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "6 · 1 · 0",
+      "enabled": true,
+      "box": [
+        702,
+        161,
+        87,
+        51
+      ]
+    },
+    {
+      "parent": 116,
+      "role": "AXStaticText",
+      "title": "6 · 1 · 0",
+      "enabled": true,
+      "box": [
+        714,
+        169,
+        53,
+        35
+      ]
+    },
+    {
+      "parent": 117,
+      "role": "AXStaticText",
+      "title": "6 · 1 ·",
+      "enabled": true
+    },
+    {
+      "parent": 117,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "0.88 s",
+      "enabled": true,
+      "box": [
+        789,
+        161,
+        60,
+        51
+      ]
+    },
+    {
+      "parent": 120,
+      "role": "AXStaticText",
+      "title": "0.88 s",
+      "enabled": true,
+      "box": [
+        808,
+        170,
+        29,
+        33
+      ]
+    },
+    {
+      "parent": 121,
+      "role": "AXStaticText",
+      "title": "0.88",
+      "enabled": true
+    },
+    {
+      "parent": 121,
+      "role": "AXStaticText",
+      "title": "s",
+      "enabled": true
+    },
+    {
+      "parent": 98,
+      "role": "AXCell",
+      "title": "11 s ago",
+      "enabled": true,
+      "box": [
+        849,
+        161,
+        63,
+        51
+      ]
+    },
+    {
+      "parent": 124,
+      "role": "AXStaticText",
+      "title": "11 s ago",
+      "enabled": true,
+      "box": [
+        861,
+        170,
+        23,
+        33
+      ]
+    },
+    {
+      "parent": 125,
+      "role": "AXStaticText",
+      "title": "11 s",
+      "enabled": true
+    },
+    {
+      "parent": 125,
+      "role": "AXStaticText",
+      "title": "ago",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkComplementary",
+      "description": "Inspector",
+      "enabled": true,
+      "box": [
+        912,
+        52,
+        360,
+        756
+      ],
+      "domIdentifier": "inspector"
+    },
+    {
+      "parent": 128,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "RUN COMP",
+      "enabled": true,
+      "box": [
+        913,
+        52,
+        359,
+        199
+      ],
+      "domIdentifier": "inspector-run"
+    },
+    {
+      "parent": 129,
+      "role": "AXHeading",
+      "title": "RUN COMP",
+      "enabled": true,
+      "box": [
+        913,
+        58,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-run-heading"
+    },
+    {
+      "parent": 130,
+      "role": "AXStaticText",
+      "title": "RUN COMP",
+      "enabled": true,
+      "box": [
+        929,
+        73,
+        60,
+        14
+      ]
+    },
+    {
+      "parent": 131,
+      "role": "AXStaticText",
+      "title": "RUN COMP",
+      "enabled": true
+    },
+    {
+      "parent": 129,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        913,
+        93,
+        359,
+        148
+      ]
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "title": "Outcome",
+      "enabled": true,
+      "box": [
+        929,
+        93,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 134,
+      "role": "AXStaticText",
+      "title": "Outcome",
+      "enabled": true,
+      "box": [
+        929,
+        94,
+        49,
+        16
+      ]
+    },
+    {
+      "parent": 135,
+      "role": "AXStaticText",
+      "title": "Outcome",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        93,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 137,
+      "role": "AXStaticText",
+      "title": "aborted",
+      "enabled": true,
+      "box": [
+        1056,
+        95,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 138,
+      "role": "AXStaticText",
+      "title": "aborted",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "title": "Behavior",
+      "enabled": true,
+      "box": [
+        929,
+        115,
+        110,
+        17
+      ]
+    },
+    {
+      "parent": 140,
+      "role": "AXStaticText",
+      "title": "Behavior",
+      "enabled": true,
+      "box": [
+        929,
+        116,
+        48,
+        16
+      ]
+    },
+    {
+      "parent": 141,
+      "role": "AXStaticText",
+      "title": "Behavior",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        115,
+        207,
+        17
+      ]
+    },
+    {
+      "parent": 143,
+      "role": "AXStaticText",
+      "title": "test",
+      "enabled": true,
+      "box": [
+        1049,
+        116,
+        21,
+        16
+      ]
+    },
+    {
+      "parent": 144,
+      "role": "AXStaticText",
+      "title": "test",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "title": "Invoker",
+      "enabled": true,
+      "box": [
+        929,
+        137,
+        110,
+        17
+      ]
+    },
+    {
+      "parent": 146,
+      "role": "AXStaticText",
+      "title": "Invoker",
+      "enabled": true,
+      "box": [
+        929,
+        137,
+        41,
+        16
+      ]
+    },
+    {
+      "parent": 147,
+      "role": "AXStaticText",
+      "title": "Invoker",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        137,
+        207,
+        17
+      ]
+    },
+    {
+      "parent": 149,
+      "role": "AXStaticText",
+      "title": "user · local · cli",
+      "enabled": true,
+      "box": [
+        1049,
+        137,
+        81,
+        16
+      ]
+    },
+    {
+      "parent": 150,
+      "role": "AXStaticText",
+      "title": "user · local · cli",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "title": "Duration",
+      "enabled": true,
+      "box": [
+        929,
+        158,
+        110,
+        17
+      ]
+    },
+    {
+      "parent": 152,
+      "role": "AXStaticText",
+      "title": "Duration",
+      "enabled": true,
+      "box": [
+        929,
+        159,
+        46,
+        16
+      ]
+    },
+    {
+      "parent": 153,
+      "role": "AXStaticText",
+      "title": "Duration",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        158,
+        207,
+        17
+      ]
+    },
+    {
+      "parent": 155,
+      "role": "AXStaticText",
+      "title": "0.88 s",
+      "enabled": true,
+      "box": [
+        1049,
+        159,
+        34,
+        16
+      ]
+    },
+    {
+      "parent": 156,
+      "role": "AXStaticText",
+      "title": "0.88 s",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "title": "Exit",
+      "enabled": true,
+      "box": [
+        929,
+        179,
+        110,
+        17
+      ]
+    },
+    {
+      "parent": 158,
+      "role": "AXStaticText",
+      "title": "Exit",
+      "enabled": true,
+      "box": [
+        929,
+        180,
+        20,
+        16
+      ]
+    },
+    {
+      "parent": 159,
+      "role": "AXStaticText",
+      "title": "Exit",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        179,
+        207,
+        17
+      ]
+    },
+    {
+      "parent": 161,
+      "role": "AXStaticText",
+      "title": "11",
+      "enabled": true,
+      "box": [
+        1049,
+        180,
+        14,
+        16
+      ]
+    },
+    {
+      "parent": 162,
+      "role": "AXStaticText",
+      "title": "11",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "title": "Plan",
+      "enabled": true,
+      "box": [
+        929,
+        201,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 164,
+      "role": "AXStaticText",
+      "title": "Plan",
+      "enabled": true,
+      "box": [
+        929,
+        201,
+        24,
+        16
+      ]
+    },
+    {
+      "parent": 165,
+      "role": "AXStaticText",
+      "title": "Plan",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        201,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 167,
+      "role": "AXStaticText",
+      "title": "a60918dc",
+      "enabled": true,
+      "box": [
+        1049,
+        201,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 168,
+      "role": "AXStaticText",
+      "title": "a60918dc",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "title": "Bindings",
+      "enabled": true,
+      "box": [
+        929,
+        223,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 170,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true,
+      "box": [
+        929,
+        223,
+        47,
+        16
+      ]
+    },
+    {
+      "parent": 171,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true
+    },
+    {
+      "parent": 133,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        223,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 173,
+      "role": "AXStaticText",
+      "title": "aa7c8799",
+      "enabled": true,
+      "box": [
+        1049,
+        223,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 174,
+      "role": "AXStaticText",
+      "title": "aa7c8799",
+      "enabled": true
+    },
+    {
+      "parent": 128,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "FAILING STEP",
+      "enabled": true,
+      "box": [
+        913,
+        251,
+        359,
+        451
+      ],
+      "domIdentifier": "inspector-failure"
+    },
+    {
+      "parent": 176,
+      "role": "AXHeading",
+      "title": "FAILING STEP",
+      "enabled": true,
+      "box": [
+        913,
+        257,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-failure-heading"
+    },
+    {
+      "parent": 177,
+      "role": "AXStaticText",
+      "title": "FAILING STEP",
+      "enabled": true,
+      "box": [
+        929,
+        272,
+        80,
+        14
+      ]
+    },
+    {
+      "parent": 178,
+      "role": "AXStaticText",
+      "title": "FAILING STEP",
+      "enabled": true
+    },
+    {
+      "parent": 176,
+      "role": "AXImage",
+      "description": "The screen at Click the pay button",
+      "enabled": true,
+      "box": [
+        929,
+        300,
+        329,
+        186
+      ]
+    },
+    {
+      "parent": 176,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        913,
+        486,
+        359,
+        27
+      ]
+    },
+    {
+      "parent": 181,
+      "role": "AXStaticText",
+      "title": "Click the pay button",
+      "enabled": true,
+      "box": [
+        929,
+        487,
+        116,
+        17
+      ]
+    },
+    {
+      "parent": 182,
+      "role": "AXStaticText",
+      "title": "Click the pay button",
+      "enabled": true
+    },
+    {
+      "parent": 176,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        913,
+        513,
+        359,
+        99
+      ]
+    },
+    {
+      "parent": 184,
+      "role": "AXUnknown",
+      "title": "Class",
+      "enabled": true,
+      "box": [
+        929,
+        513,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 185,
+      "role": "AXStaticText",
+      "title": "Class",
+      "enabled": true,
+      "box": [
+        929,
+        514,
+        29,
+        16
+      ]
+    },
+    {
+      "parent": 186,
+      "role": "AXStaticText",
+      "title": "Class",
+      "enabled": true
+    },
+    {
+      "parent": 184,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        513,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 188,
+      "role": "AXStaticText",
+      "title": "locator",
+      "enabled": true,
+      "box": [
+        1056,
+        515,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 189,
+      "role": "AXStaticText",
+      "title": "locator",
+      "enabled": true
+    },
+    {
+      "parent": 184,
+      "role": "AXUnknown",
+      "title": "Step",
+      "enabled": true,
+      "box": [
+        929,
+        535,
+        110,
+        36
+      ]
+    },
+    {
+      "parent": 191,
+      "role": "AXStaticText",
+      "title": "Step",
+      "enabled": true,
+      "box": [
+        929,
+        536,
+        25,
+        16
+      ]
+    },
+    {
+      "parent": 192,
+      "role": "AXStaticText",
+      "title": "Step",
+      "enabled": true
+    },
+    {
+      "parent": 184,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        535,
+        207,
+        36
+      ]
+    },
+    {
+      "parent": 194,
+      "role": "AXStaticText",
+      "title": "I want to book and then fail#5",
+      "enabled": true,
+      "box": [
+        1049,
+        536,
+        173,
+        35
+      ]
+    },
+    {
+      "parent": 195,
+      "role": "AXStaticText",
+      "title": "I want to book and then",
+      "enabled": true
+    },
+    {
+      "parent": 195,
+      "role": "AXStaticText",
+      "title": "fail#5",
+      "enabled": true
+    },
+    {
+      "parent": 184,
+      "role": "AXUnknown",
+      "title": "Screenshot",
+      "enabled": true,
+      "box": [
+        929,
+        575,
+        110,
+        36
+      ]
+    },
+    {
+      "parent": 198,
+      "role": "AXStaticText",
+      "title": "Screenshot",
+      "enabled": true,
+      "box": [
+        929,
+        576,
+        61,
+        16
+      ]
+    },
+    {
+      "parent": 199,
+      "role": "AXStaticText",
+      "title": "Screenshot",
+      "enabled": true
+    },
+    {
+      "parent": 184,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        1049,
+        575,
+        207,
+        36
+      ]
+    },
+    {
+      "parent": 201,
+      "role": "AXStaticText",
+      "title": "I-want-to-book-and-then-fail-5.png",
+      "enabled": true,
+      "box": [
+        1049,
+        576,
+        180,
+        35
+      ]
+    },
+    {
+      "parent": 202,
+      "role": "AXStaticText",
+      "title": "I-want-to-book-and-then-",
+      "enabled": true
+    },
+    {
+      "parent": 202,
+      "role": "AXStaticText",
+      "title": "fail-5.png",
+      "enabled": true
+    },
+    {
+      "parent": 176,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        929,
+        618,
+        327,
+        74
+      ]
+    },
+    {
+      "parent": 205,
+      "role": "AXStaticText",
+      "title": "Could not resolve \"checkout.pay-button\" (the pay button): 5 candidates tried, none matched exactly one element.",
+      "enabled": true,
+      "box": [
+        942,
+        629,
+        291,
+        51
+      ]
+    },
+    {
+      "parent": 206,
+      "role": "AXStaticText",
+      "title": "Could not resolve \"checkout.pay-button\" (the pay",
+      "enabled": true
+    },
+    {
+      "parent": 206,
+      "role": "AXStaticText",
+      "title": "button): 5 candidates tried, none matched exactly one",
+      "enabled": true
+    },
+    {
+      "parent": 206,
+      "role": "AXStaticText",
+      "title": "element.",
+      "enabled": true
+    },
+    {
+      "parent": 128,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "WHAT IT WROTE",
+      "enabled": true,
+      "box": [
+        913,
+        702,
+        359,
+        85
+      ],
+      "domIdentifier": "inspector-artifacts"
+    },
+    {
+      "parent": 210,
+      "role": "AXHeading",
+      "title": "WHAT IT WROTE",
+      "enabled": true,
+      "box": [
+        913,
+        708,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-artifacts-heading"
+    },
+    {
+      "parent": 211,
+      "role": "AXStaticText",
+      "title": "WHAT IT WROTE",
+      "enabled": true,
+      "box": [
+        929,
+        722,
+        93,
+        14
+      ]
+    },
+    {
+      "parent": 212,
+      "role": "AXStaticText",
+      "title": "WHAT IT WROTE",
+      "enabled": true
+    },
+    {
+      "parent": 210,
+      "role": "AXStaticText",
+      "title": "7 results · results.jsonl",
+      "enabled": true,
+      "box": [
+        938,
+        751,
+        112,
+        15
+      ]
+    },
+    {
+      "parent": 214,
+      "role": "AXStaticText",
+      "title": "7 results · results.jsonl",
+      "enabled": true
+    },
+    {
+      "parent": 210,
+      "role": "AXStaticText",
+      "title": "audit.jsonl",
+      "enabled": true,
+      "box": [
+        1078,
+        751,
+        52,
+        15
+      ]
+    },
+    {
+      "parent": 216,
+      "role": "AXStaticText",
+      "title": "audit.jsonl",
+      "enabled": true
+    },
+    {
+      "parent": 210,
+      "role": "AXStaticText",
+      "title": "1 screenshot",
+      "enabled": true,
+      "box": [
+        1158,
+        751,
+        64,
+        15
+      ]
+    },
+    {
+      "parent": 218,
+      "role": "AXStaticText",
+      "title": "1 screenshot",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkContentInfo",
+      "enabled": true,
+      "box": [
+        8,
+        808,
+        1264,
+        28
+      ]
+    },
+    {
+      "parent": 220,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        24,
+        814,
+        29,
+        17
+      ],
+      "domIdentifier": "status-context"
+    },
+    {
+      "parent": 221,
+      "role": "AXStaticText",
+      "title": "comp",
+      "enabled": true,
+      "box": [
+        24,
+        815,
+        29,
+        15
+      ]
+    },
+    {
+      "parent": 222,
+      "role": "AXStaticText",
+      "title": "comp",
+      "enabled": true
+    },
+    {
+      "parent": 220,
+      "role": "AXStaticText",
+      "title": "⌘K",
+      "enabled": true,
+      "box": [
+        1117,
+        816,
+        13,
+        14
+      ]
+    },
+    {
+      "parent": 224,
+      "role": "AXStaticText",
+      "title": "⌘K",
+      "enabled": true
+    },
+    {
+      "parent": 220,
+      "role": "AXStaticText",
+      "title": "commands",
+      "enabled": true,
+      "box": [
+        1136,
+        815,
+        60,
+        15
+      ]
+    },
+    {
+      "parent": 226,
+      "role": "AXStaticText",
+      "title": "commands",
+      "enabled": true
+    },
+    {
+      "parent": 220,
+      "role": "AXStaticText",
+      "title": "?",
+      "enabled": true,
+      "box": [
+        1218,
+        816,
+        6,
+        14
+      ]
+    },
+    {
+      "parent": 228,
+      "role": "AXStaticText",
+      "title": "?",
+      "enabled": true
+    },
+    {
+      "parent": 220,
+      "role": "AXStaticText",
+      "title": "keys",
+      "enabled": true,
+      "box": [
+        1230,
+        815,
+        26,
+        15
+      ]
+    },
+    {
+      "parent": 230,
+      "role": "AXStaticText",
+      "title": "keys",
+      "enabled": true
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXCloseButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        8,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXMinimizeButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        28,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXZoomButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        48,
+        8,
+        14,
+        14
+      ]
+    }
+  ]
+}

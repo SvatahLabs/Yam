@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Record the ADE's accessibility tree for the desktop adapters (T6.1, T6.2,
+ * Record the app's accessibility tree for the desktop adapters (T6.1, T6.2,
  * LLD §7.5).
  *
  *   node scripts/record-desktop-tree.mjs --shape ax  [--screen record]
@@ -8,7 +8,7 @@
  *
  * ## What this records, and what it does not
  *
- * It records **Chromium's own accessibility tree** for the ADE's window,
+ * It records **Chromium's own accessibility tree** for the app's window,
  * through `Accessibility.getFullAXTree` over the DevTools protocol, and maps it
  * into the shape one of the desktop adapters consumes: the `AXRole` /
  * `AXTitle` / `AXDOMIdentifier` names Chromium publishes on macOS, or the
@@ -47,7 +47,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const ADE = join(ROOT, "apps", "ade");
+const APP_DIR = join(ROOT, "apps", "desktop");
 
 const args = process.argv.slice(2);
 const option = (name, fallback) => {
@@ -65,14 +65,14 @@ if (!["ax", "uia", "both"].includes(shapeOption)) {
  *
  * `packages/adapter-uia/test/parity.test.ts` compares the two adapters'
  * normalisation of the same window, and two separate launches are not the same
- * window: the ADE's service takes an ephemeral port, so the URL in its header
+ * window: the app's service takes an ephemeral port, so the URL in its header
  * differs, and the Results screen lists the runs that exist at the time. Both
  * showed up as parity failures that were really recording noise.
  */
 const shapes = shapeOption === "both" ? ["ax", "uia"] : [shapeOption];
 const outOption = option("out", undefined);
 /**
- * Which ADE accessibility variant to record (Draft 2.8 LLD §16, T7.1).
+ * Which APP_DIR accessibility variant to record (Draft 2.8 LLD §16, T7.1).
  *
  * `0` is the real interface. `1` renames a screen tab and a Project button; `2`
  * moves the Record screen's gateway control into another panel. The desktop
@@ -87,10 +87,10 @@ if (!["0", "1", "2"].includes(variant)) {
 }
 
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
-const entry = join(ADE, ".vite", "build", "main.js");
-for (const [what, path] of [["the CLI", cli], ["the ADE build", entry]]) {
+const entry = join(APP_DIR, ".vite", "build", "main.js");
+for (const [what, path] of [["the CLI", cli], ["the app build", entry]]) {
   if (!existsSync(path)) {
-    process.stderr.write(`${what} is not built (${path}). Run \`pnpm -r build\` and \`pnpm --filter @svatah/yam-ade exec electron-forge package\`.\n`);
+    process.stderr.write(`${what} is not built (${path}). Run \`pnpm -r build\` and \`pnpm --filter @svatah/yam-desktop exec electron-forge package\`.\n`);
     process.exit(1);
   }
 }
@@ -100,9 +100,9 @@ const PORT = 9300 + Math.floor(Math.random() * 400);
 const electron = join(ROOT, "node_modules", "electron", "cli.js");
 const child = spawn(
   process.execPath,
-  [electron, `--remote-debugging-port=${PORT}`, "--remote-allow-origins=*", ADE],
+  [electron, `--remote-debugging-port=${PORT}`, "--remote-allow-origins=*", APP_DIR],
   {
-    cwd: ADE,
+    cwd: APP_DIR,
     stdio: ["ignore", "pipe", "pipe"],
     env: {
       ...process.env,
@@ -110,16 +110,16 @@ const child = spawn(
       YAM_A11Y: "1",
       ...(variant === "0" ? {} : { YAM_A11Y_VARIANT: variant }),
       /*
-       * The project the ADE opens on (T8.1, §13.6, T10.3).
+       * The project the app opens on (T8.1, §13.6, T10.3).
        *
-       * `YAM_ADE_PROJECT` is the variable the main process reads; the name
-       * here used to be `YAM_ADE_RECORD_PROJECT`, which nothing read, so
-       * every tree was recorded against an ADE with no project open. That was
+       * `YAM_APP_PROJECT` is the variable the main process reads; the name
+       * here used to be `YAM_APP_RECORD_PROJECT`, which nothing read, so
+       * every tree was recorded against an app with no project open. That was
        * invisible while the Project screen was the default and drew its "Open a
        * project…" button either way; with the rail it is not — a project-less
        * window has no rail at all.
        */
-      YAM_ADE_PROJECT: project,
+      YAM_APP_PROJECT: project,
     },
   },
 );
@@ -129,7 +129,7 @@ child.stderr.on("data", (chunk) => (log += String(chunk)));
 
 const deadline = setTimeout(() => {
   child.kill("SIGKILL");
-  process.stderr.write(`timed out waiting for the ADE\n${log}\n`);
+  process.stderr.write(`timed out waiting for the app\n${log}\n`);
   process.exit(1);
 }, 120_000);
 
@@ -146,7 +146,7 @@ async function target() {
     }
     await new Promise((done) => setTimeout(done, 500));
   }
-  throw new Error("the ADE never opened a debuggable page");
+  throw new Error("the app never opened a debuggable page");
 }
 
 /** A minimal CDP client: one socket, numbered messages. */
@@ -189,12 +189,12 @@ async function connect(url) {
 /**
  * How each recordable screen is reached (T10.3).
  *
- * The eleven tabs are gone; the ADE is a rail of eight and a palette that has a
+ * The eleven tabs are gone; the app is a rail of eight and a palette that has a
  * `Go to` row for every screen (LLD §13.7). So a screen is either a rail item's
  * `automationId` or a palette label — and the recorder navigates the way the
  * conformance cases do, so a tree it records is a tree they can be run against.
  *
- * The names on the left are the *file* names: `ade-flows.json` and the rest are
+ * The names on the left are the *file* names: `app-flows.json` and the rest are
  * read by `packages/adapter-ax/test` and `packages/adapter-uia/test`, and
  * renaming them would be renaming fixtures for no reason.
  */
@@ -281,7 +281,7 @@ const AX_ROLE_FOR = {
  * `ControlType.Button` on Windows; an `<input type=text>` is `AXTextField` and
  * `ControlType.Edit`; an ARIA `tab` is `AXRadioButton` (with the `AXTabButton`
  * subrole) and `ControlType.TabItem`. The adapters map both back to `button`,
- * `textbox` and `tab`, which is what makes one flow drive the ADE on both.
+ * `textbox` and `tab`, which is what makes one flow drive the app on both.
  */
 const UIA_CONTROL_TYPE_FOR = {
   RootWebArea: "Document",
@@ -336,7 +336,7 @@ const UIA_CONTROL_TYPE_FOR = {
  *
  * UIA has no landmark control types and no subrole: a `<header>` is
  * `ControlType.Group` and a `<h1>` is `ControlType.Text`, and the refinement is
- * this string. Without it every landmark in the ADE reads as a plain group and
+ * this string. Without it every landmark in the app reads as a plain group and
  * every heading as text — which is exactly what the cross-adapter parity check
  * found (`packages/adapter-uia/test/parity.test.ts`).
  */
@@ -402,10 +402,10 @@ async function main() {
   await cdp.send("Runtime.enable");
 
   /*
-   * Open the project through the ADE's own preload bridge, and then click the
+   * Open the project through the app's own preload bridge, and then click the
    * screen's tab — the same two things a person does, driven from outside.
    *
-   * `window.ade.openProject` is the bridge the renderer uses; using it rather
+   * `window.desktopApp.openProject` is the bridge the renderer uses; using it rather
    * than reaching into React's state is what makes this a recording of the
    * application rather than of a rendering of it. The tab is clicked by its
    * accessible name, which is the name the AX tree will show and the name a
@@ -424,16 +424,16 @@ async function main() {
   /*
    * The project opens two ways, and this waits for whichever happened (T10.3).
    *
-   * `YAM_ADE_PROJECT` opens one on ready (§13.6), so the shell is usually
+   * `YAM_APP_PROJECT` opens one on ready (§13.6), so the shell is usually
    * already up by the time this attaches — and then there is no Recent list to
    * click, because the welcome screen is not showing. When the renderer came up
    * before the main process announced the project, it *is* showing, and the
-   * Recent button is what a person would press: the ADE's own click handler is
+   * Recent button is what a person would press: the app's own click handler is
    * what calls `setInfo` and renders the rail, so calling `openProject` from
    * here would start the service and leave React none the wiser.
    */
   await evaluate(
-    `window.ade.preferences({ recentProjects: [${JSON.stringify(project)}] }).then(() => "ok")`,
+    `window.desktopApp.preferences({ recentProjects: [${JSON.stringify(project)}] }).then(() => "ok")`,
   );
 
   const name = project.split(/[\\/]/).pop();
@@ -456,7 +456,7 @@ async function main() {
   })();
   if (opened !== true) {
     const body = await evaluate(`document.body.innerText.slice(0, 400)`);
-    throw new Error(`the ADE did not open "${name}"; it shows:\n${body}`);
+    throw new Error(`the app did not open "${name}"; it shows:\n${body}`);
   }
 
   for (let attempt = 0; attempt < 60; attempt += 1) {
@@ -499,7 +499,7 @@ async function main() {
       `JSON.stringify([...document.querySelectorAll("[id^='rail-']")].map((o) => o.id))`,
     );
     const body = await evaluate(`document.body.innerText.slice(0, 400)`);
-    throw new Error(`the ADE cannot reach the "${where.label}" screen; its rail is ${seen}\n${body}`);
+    throw new Error(`the app cannot reach the "${where.label}" screen; its rail is ${seen}\n${body}`);
   }
 
   if (where.open === true) {
@@ -563,7 +563,7 @@ async function main() {
        * between "has not rendered" and "has rendered its own empty state",
        * which is a section, a heading and a sentence. The Runs screen's
        * inspector loads a second request after the table, and a tree taken
-       * before it landed is a tree the `ade.result` case cannot read.
+       * before it landed is a tree the `app.result` case cannot read.
        */
       const filled = await evaluate(
         `document.querySelectorAll(".sv-workspace *").length > 30 &&
@@ -612,7 +612,7 @@ async function main() {
   }
 
   const { result } = await cdp.send("Runtime.evaluate", { expression: "document.title" });
-  const title = result.value ?? "Yam ADE";
+  const title = result.value ?? "Yam";
 
   for (const shape of shapes) {
     writeShape(shape, { nodes, byId, geometry, title, screen });
@@ -760,7 +760,7 @@ function writeShape(shape, { nodes, byId, geometry, title, screen }) {
    * Close, minimise and zoom belong to the window manager, and CDP describes
    * the *page*, so they are not in the tree this reads — exactly as the window
    * above them is not. Synthesising them alongside the window is the same
-   * fidelity decision: a real `AXUIElement` walk of the ADE returns them, the
+   * fidelity decision: a real `AXUIElement` walk of the app returns them, the
    * desktop snapshot case checks that a snapshot has them (a tree that stopped
    * reading the window frame is a tree that silently shrank), and a fixture
    * without them is a fixture that cannot answer the question.
@@ -805,10 +805,10 @@ function writeShape(shape, { nodes, byId, geometry, title, screen }) {
 
   const out = resolve(ROOT, outOption ?? `packages/adapter-${shape}/test/fixtures`);
   mkdirSync(out, { recursive: true });
-  const file = join(out, `ade-${screen}${variant === "0" ? "" : `-v${variant}`}.json`);
+  const file = join(out, `app-${screen}${variant === "0" ? "" : `-v${variant}`}.json`);
   writeFileSync(
     file,
-    `${JSON.stringify({ process: "Yam ADE", title, truncated: false, nodes: window }, null, 2)}\n`,
+    `${JSON.stringify({ process: "Yam", title, truncated: false, nodes: window }, null, 2)}\n`,
     "utf8",
   );
   process.stdout.write(`wrote ${window.length} node(s) to ${file}\n`);

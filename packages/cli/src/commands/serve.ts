@@ -5,7 +5,7 @@
  * yam serve [dir] [--port 0] [--token <t>]
  * ```
  *
- * Prints the port and the token on stdout, once, in a line the ADE parses when
+ * Prints the port and the token on stdout, once, in a line the app parses when
  * it spawns this as a child process. The token is generated per process and is
  * not written anywhere: a token in a file is a token that outlives the process
  * that needed it.
@@ -19,7 +19,7 @@ import { compileProject, loadProject } from "../project.js";
 import {
   serviceCompileTrajectory,
   serviceHeal,
-  serviceMigrateFromAde,
+  serviceMigrateFromPrototype,
   serviceOpenSurfaceSession,
   serviceRecord,
   serviceToolsFor,
@@ -31,11 +31,11 @@ import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import type { CommandIo } from "@svatah/yam-bindings-cli";
 
 /**
- * The ADE's API client, through the adapter a run uses (LLD §13.5).
+ * The app's API client, through the adapter a run uses (LLD §13.5).
  *
  * The service cannot import `adapter-http` — it imports only `@svatah/yam-schema` —
  * so this arrives the same way its other functions do. Sharing the adapter is
- * the point: an ADE with its own HTTP client would have its own idea of a
+ * the point: an app with its own HTTP client would have its own idea of a
  * header, a redirect and a cookie, and "the API client agrees with the run"
  * would be a coincidence rather than a fact.
  *
@@ -77,7 +77,7 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
     /*
      * Nine functions since T5.7 and T5.8, and every one of them the CLI's own.
      *
-     * The ADE's record review, bindings browser, heal review, surface explorer
+     * The app's record review, bindings browser, heal review, surface explorer
      * and tool panel need capabilities a command line already has; injecting
      * them here rather than letting the service reach for them is what keeps
      * "an agent and a person get the same artifact" true (LLD §13.5).
@@ -101,13 +101,13 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
       openSurfaceSession: serviceOpenSurfaceSession,
       compileTrajectory: serviceCompileTrajectory,
       toolsFor: serviceToolsFor,
-      migrateFromAde: serviceMigrateFromAde,
+      migrateFromPrototype: serviceMigrateFromPrototype,
     } as never,
     ...(numberOption(args, "port") === undefined ? {} : { port: numberOption(args, "port")! }),
     ...(stringOption(args, "token") === undefined ? {} : { token: stringOption(args, "token")! }),
   });
 
-  // One line, parsed by the ADE's spawn handshake (LLD §13.6).
+  // One line, parsed by the app's spawn handshake (LLD §13.6).
   io.out(`yam serve listening url=${service.url} token=${service.token}`);
   io.err(
     `Serving ${project} on ${service.url}\n` +

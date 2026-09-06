@@ -55,7 +55,7 @@ export { ComponentSheet } from "./sheet.js";
  *
  * `test/named.test.ts` walks this list rather than a hand-written one, so a
  * component added without the rule is a failing test rather than an omission
- * nobody noticed — which is exactly how the ADE's Project screen ended up with
+ * nobody noticed — which is exactly how the app's Project screen ended up with
  * three unnamed buttons (P8-F3).
  */
 export const NAMED_COMPONENTS = [

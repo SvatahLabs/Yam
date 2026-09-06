@@ -197,7 +197,7 @@
       "label": "Import the database",
       "group": "Actions",
       "screen": "import",
-      "cli": "yam migrate <dest> --from-ade <electron-db dir>"
+      "cli": "yam migrate <dest> --from-prototype <electron-db dir>"
     },
     {
       "id": "trajectory.compile",

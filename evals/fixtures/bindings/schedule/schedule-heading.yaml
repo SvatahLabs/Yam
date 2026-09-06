@@ -35,7 +35,7 @@ entries:
       neighbours:
         after:
           - "Schedule a build for your project."
-          - "Project Core Adapters ADE Run build"
+          - "Project Core Adapters app Run build"
           - "Build scheduled."
         before:
           - "Yam Sample Menu Dashboard Book a slot Widgets Docs"

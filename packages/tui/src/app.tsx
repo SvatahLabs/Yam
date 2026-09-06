@@ -3,13 +3,13 @@
  *
  * > Full authoring cockpit: four numbered panes (tree, main, inspector, audit),
  * > `1–4` focus a pane, `Tab` cycles, `j/k` move, the same actions and keys as
- * > the ADE, the same palette. It opens or adopts a service exactly as the ADE
+ * > the app, the same palette. It opens or adopts a service exactly as the app
  * > does. `--json` prints screen state and audit lines as JSON and draws
  * > nothing. No tmux dependency; it runs in any terminal.
  *
  * Everything a person reads here is a `ScreenState` from `@svatah/yam-screens`,
- * loaded by the same `load()` the ADE calls; every key runs an `Action` from
- * the same registry the ADE's palette shows. This file is the *terminal* half
+ * loaded by the same `load()` the app calls; every key runs an `Action` from
+ * the same registry the app's palette shows. This file is the *terminal* half
  * and nothing else: panes, keys, and a palette drawn with Ink.
  */
 import { Box, Text, useApp, useInput, useStdout } from "ink";
@@ -58,7 +58,7 @@ export interface AppProps {
   readonly onState?: (ui: UiState) => void;
 }
 
-/** The palette's rows, from the registry — the same list the ADE's ⌘K shows. */
+/** The palette's rows, from the registry — the same list the app's ⌘K shows. */
 function paletteRows(ui: UiState): Array<{ id: string; label: string; area: string; cli?: string }> {
   const query = ui.paletteQuery.trim().toLowerCase();
   return ACTIONS.filter((action) => {
@@ -304,7 +304,7 @@ export function App(props: AppProps): React.JSX.Element {
      * `Enter` opens what the cursor is on — a flow, a run, a binding, a filter,
      * a snapshot node — and *what* that means is the pane model's, not this
      * file's (T10.1, T10.2). Selection is a screen parameter in both renderers
-     * (§13.7), so opening a row here and clicking it in the ADE reach the same
+     * (§13.7), so opening a row here and clicking it in the app reach the same
      * state, and a screen added later needs no arm in this switch because there
      * is no switch.
      */
@@ -333,7 +333,7 @@ export function App(props: AppProps): React.JSX.Element {
 
     /*
      * Single letters run actions, and *which* letter is the screen's own key
-     * binding — the same table the ADE draws on its buttons (LLD §13.7's
+     * binding — the same table the app draws on its buttons (LLD §13.7's
      * "single-letter accelerators shown on buttons"). A letter defined here
      * rather than in the model would be a key the two renderers disagreed on.
      */
@@ -344,7 +344,7 @@ export function App(props: AppProps): React.JSX.Element {
     /*
      * `flows.save` in a terminal means "open this in my editor" (K6, T11.1).
      *
-     * The action is the same one the ADE's Save button runs and it writes
+     * The action is the same one the app's Save button runs and it writes
      * through the same `PUT /flows/:file`; what differs is where the text comes
      * from. A cockpit that built a modal text editor inside Ink would be a
      * worse `vi` that nobody asked this project to write.
@@ -459,7 +459,7 @@ export function App(props: AppProps): React.JSX.Element {
         </Text>
       )}
 
-      {/* the palette: the same rows the ADE's ⌘K shows */}
+      {/* the palette: the same rows the app's ⌘K shows */}
       {ui.paletteOpen ? (
         <Box
           flexDirection="column"
@@ -481,7 +481,7 @@ export function App(props: AppProps): React.JSX.Element {
                 <Text color="gray">{row.cli ?? ""}</Text>
               </Text>
             ))}
-          <Text color="gray">same list as the ADE&apos;s ⌘K and the SDK&apos;s actions</Text>
+          <Text color="gray">same list as the app&apos;s ⌘K and the SDK&apos;s actions</Text>
         </Box>
       ) : null}
     </Box>

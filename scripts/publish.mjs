@@ -152,7 +152,7 @@ if (asJson) {
   for (const one of commands) process.stdout.write(`  ${one.command}\n`);
   process.stdout.write(
     "\nThen, from the release job:\n" +
-      "  the ADE installers from apps/ade/out/make/** and reports/*.md are attached to the release.\n\n",
+      "  the app installers from apps/desktop/out/make/** and reports/*.md are attached to the release.\n\n",
   );
 }
 

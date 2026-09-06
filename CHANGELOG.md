@@ -36,7 +36,7 @@ exists somewhere, and until the owner dispatches the release workflow with `publ
 | | |
 |---|---|
 | Compiler, exact match | 98.0 % overall over **303** pairs; tier 1 100 % (250/250), tier 2 88.0 % (`reports/eval-compiler.md`) |
-| macOS Accessibility conformance | conformant — 10 cases across ADE variants 0, 1 and 2, live against the packaged ADE; 1017 nodes in 1488 ms, 1.46 ms per node at load average 5.15 over 8 CPUs (`reports/adapter-ax.md`) |
+| macOS Accessibility conformance | conformant — 10 cases across app variants 0, 1 and 2, live against the packaged app; 1017 nodes in 1488 ms, 1.46 ms per node at load average 5.15 over 8 CPUs (`reports/adapter-ax.md`) |
 | Yam verifies Yam | 100 % agreement over the 29 checks both sides reach; Yam 30 of 48, external 47 of 48 (`reports/self-parity.md`) |
 | Java runtime conformance | artifacts valid, zero mismatches (`reports/runtime-java.md`) |
 | Healing, grounding, adapter conformance | `reports/eval-healing.md`, `reports/eval-grounding.md`, `reports/eval-conformance.md` |
@@ -53,7 +53,7 @@ declarations and its README and nothing else.
 | The command line — module (b) | `@svatah/yam`, whose bin is `yam`, and its workspace dependencies |
 | The published contract (REQ-STD-1, 2) | `@svatah/yam-schema`, with the generated JSON Schemas under `json/` and the runtime conformance fixture under `conformance/` |
 
-`yam` and `@svatah/yam-ade` are the two things a person runs; every other package
+`yam` and `@svatah/yam-desktop` are the two things a person runs; every other package
 is a library another package depends on.
 
 ### Added
@@ -73,7 +73,7 @@ is a library another package depends on.
   REQ-STD-2).
 - **The recorder** — model grounding through a gateway, with every decision
   carrying its provenance and reviewable before anything is written.
-- **The ADE** — an Electron application over the local service, eleven screens,
+- **The app** — an Electron application over the local service, eleven screens,
   installers on three operating systems.
 - **A foreign runtime** — `runtimes/java`, conformant against the published
   fixture and writing the published schemas (REQ-STD-3).
@@ -85,7 +85,7 @@ before it was fixed:
 
 - **The macOS Accessibility bridge could not read a window inside the surface's
   deadline.** It asked for one attribute per Apple event — 650 ms per node — so
-  the ADE's smallest window took ten seconds and the live gate failed 0 of 7. It
+  the app's smallest window took ten seconds and the live gate failed 0 of 7. It
   reads in bulk now: 10.4 ms per node, measured (LLD §7.5).
 - **The Java runtime's artifacts were not in the published schemas.** Every line
   of `results.jsonl` lacked `startedAt`, `endedAt` and `durationMs`, and the
@@ -95,7 +95,7 @@ before it was fixed:
   `args.action` and the adapters read `args.accept`, which nothing carried, and
   defaulted to accept. Both read `action` now, and refuse a step without one
   (LLD §3.2).
-- **The desktop healing cases** T6.1 asked for and Phase 6 dropped: the ADE
+- **The desktop healing cases** T6.1 asked for and Phase 6 dropped: the app
   gains `YAM_A11Y_VARIANT=1|2`, and a binding recorded against the real
   interface relocalizes against both (LLD §16).
 - **`pnpm -r typecheck` was red** in three packages and outside the verification
@@ -113,21 +113,21 @@ The corrections the Phase 7 adversarial verification required — it scored 7.9 
 found that the *packaged* product could not open a project — each reproduced
 before it was fixed:
 
-- **The packaged ADE could not open a project.** It spawned `process.execPath` to
-  run `yam serve`; packaged, with the `RunAsNode` fuse off, that is the ADE
-  itself, so the child was a second ADE that printed no handshake. The runtime is
+- **The packaged app could not open a project.** It spawned `process.execPath` to
+  run `yam serve`; packaged, with the `RunAsNode` fuse off, that is the app
+  itself, so the child was a second app that printed no handshake. The runtime is
   resolved from `YAM_NODE`, then a `node` on `PATH` of Node 22 or newer, then
   a Node beside the CLI under `resources/`, and the Project screen's alert names
   all three when none is found (LLD §13.6). The packager now ships the CLI, which
-  it never did; `YAM_ADE_PROJECT=<dir>` opens a project on ready; and the
+  it never did; `YAM_APP_PROJECT=<dir>` opens a project on ready; and the
   smoke check runs against the packaged application.
 - **The macOS Accessibility bridge missed its budget on the screen the budget is
   about.** Phase 7's 10.4 ms per node was measured on the menu-bar tree; the
-  ADE's project screen cost 51–55 ms per node, about 25 s for one snapshot. The
+  app's project screen cost 51–55 ms per node, about 25 s for one snapshot. The
   window read is a native helper now — `AXUIElement` directly, no Apple events —
   at **1.5–1.7 ms per node for 588 nodes** (LLD §7.5).
 - **The macOS desktop conformance gate is green**: 7 of 7 flow cases and both
-  healing cases, live, against the packaged ADE. `reports/adapter-ax.md`.
+  healing cases, live, against the packaged app. `reports/adapter-ax.md`.
 - **A `dialog` step arms the *next* dialog**, and the reference now says so.
   `W_DIALOG_UNARMED` and `W_DIALOG_NEVER_OPENED` in lint, and an audit line when
   a dialog is answered with nothing armed (LLD §3.2, §4.2).

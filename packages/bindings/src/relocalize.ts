@@ -168,7 +168,7 @@ export function neighbourSimilarity(
  * an element is a fact about somebody's stylesheet, not about the element. They
  * are dropped before the paths are compared, so what is left is the landmark
  * ancestry and the roles that mean something — which is the same reasoning LLD
- * §13.6 gives for the ADE carrying landmark roles at all ("screen containers
+ * §13.6 gives for the app carrying landmark roles at all ("screen containers
  * carry landmark roles so `controlPath` candidates are short and stable").
  */
 const ANONYMOUS_ROLES: ReadonlySet<string> = new Set([

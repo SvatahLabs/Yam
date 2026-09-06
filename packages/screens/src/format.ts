@@ -15,7 +15,7 @@
  * A state is a value. A value that changes when nothing changed cannot be
  * compared, cached, or printed for an agent twice — so the model carries the
  * instant (`lastRunAt`, an ISO timestamp the service wrote) and this is what the
- * ADE and `yam ui` each call to turn it into words. Both call the *same*
+ * app and `yam ui` each call to turn it into words. Both call the *same*
  * function, so the two renderers still say the same thing.
  */
 

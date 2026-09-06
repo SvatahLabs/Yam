@@ -89,7 +89,7 @@ See [`examples/mcp-agent/`](../examples/mcp-agent/).
 ## Trajectory compile (REQ-BEH-4)
 
 Not a fourth behavior — the other direction. An agent explores through the raw
-surface (`yam mcp`, or the ADE's surface explorer), every call carrying what
+surface (`yam mcp`, or the app's surface explorer), every call carrying what
 it was trying to do, and `yam trajectory compile` turns the result into a
 **proposal**: a `.flow` draft, a plan fragment and `verified: false` bindings
 under `proposals/<date>/`, for a person to read.
@@ -108,7 +108,7 @@ point rather than an omission:
   to know nothing else.
 - The **run directory** is the record. Nothing has to call back to a service to
   find out what happened.
-- The **project directory** is the only source of truth (REQ-ADE-2). The ADE,
+- The **project directory** is the only source of truth (REQ-ADE-2). The app,
   the CLI, CI and an agent over MCP all see the same files.
 
 A scheduler would be a second product with its own failure modes, and every

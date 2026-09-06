@@ -32,7 +32,7 @@ The documentation is organised by what you are trying to do.
 - [Expose a story as an MCP tool](guides/expose-a-tool-over-mcp.md)
 - [Add an adapter and pass conformance](guides/add-an-adapter.md)
 - [Write a foreign runtime](guides/write-a-foreign-runtime.md)
-- [Use the ADE](guides/use-the-ade.md)
+- [Use the desktop app](guides/use-the-app.md)
 
 ## Concepts
 

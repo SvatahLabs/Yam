@@ -41,7 +41,7 @@ Flows (module b):
              [--workers <n>] [--headed] [--out runs] [--run-id <id>] [--json]
   yam host generate [dir] [--out .yam/specs]
   yam migrate <src> <dest> [--keep-original] [--json]
-  yam migrate <dest> --from-ade <electron-db dir> [--project <name>]
+  yam migrate <dest> --from-prototype <electron-db dir> [--project <name>]
   yam doctor [dir] [--json]
   yam serve [dir] [--port 0] [--token <t>]
   yam ui [dir] [--screen flows|run] [--flow <file>] [--run <id>] [--story <name>]

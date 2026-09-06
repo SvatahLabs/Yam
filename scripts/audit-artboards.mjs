@@ -21,7 +21,7 @@
  *   3. nothing in the inspector is wider than the inspector;
  *   4. no element anywhere is past the right edge of the window.
  *
- * These are the same rules `apps/ade/test/shell.spec.ts` measures on the built
+ * These are the same rules `apps/desktop/test/shell.spec.ts` measures on the built
  * application. A design that fails them is a design the build cannot be held
  * to — which is why the two F4 findings were findings and not opinions.
  *

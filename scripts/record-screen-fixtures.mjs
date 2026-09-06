@@ -215,7 +215,7 @@ try {
     process.exit(1);
   }
 
-  /* The service, spawned exactly as the ADE spawns it (LLD §13.6). */
+  /* The service, spawned exactly as the app spawns it (LLD §13.6). */
   const handshake = await new Promise((resolve, reject) => {
     const child = spawn(
       process.execPath,

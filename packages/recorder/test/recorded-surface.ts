@@ -63,7 +63,7 @@ export interface RecordedSurfaceOptions {
   readonly screenshot?: boolean;
   /** `desktop` replays the same page as a window with a title (T11.3). */
   readonly kind?: "web" | "desktop";
-  /** The window title a desktop session reports; default "Yam ADE". */
+  /** The window title a desktop session reports; default "Yam". */
   readonly windowTitle?: string;
   /** Called instead of writing a file. */
   readonly onScreenshot?: (path: string) => void;
@@ -131,7 +131,7 @@ export class RecordedSurface implements AgentSurface {
   async state(): Promise<SessionState> {
     // A desktop session says which *window* it is in; a web one, which page.
     return this.kind === "desktop"
-      ? { kind: "desktop", windowTitle: this.options.windowTitle ?? "Yam ADE", windowIndex: 0 }
+      ? { kind: "desktop", windowTitle: this.options.windowTitle ?? "Yam", windowIndex: 0 }
       : { kind: "web", url: `http://sample.test${this.page.url}` };
   }
 

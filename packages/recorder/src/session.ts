@@ -152,7 +152,7 @@ export interface RecordSessionOptions {
   /**
    * Review each grounding **before the binding is written** (REQ-ADE-4, T5.7).
    *
-   * "A record session streams grounding decisions; the ADE shows the snapshot
+   * "A record session streams grounding decisions; the app shows the snapshot
    * excerpt, chosen reference, candidate bundle, and fingerprint per target,
    * with accept, re-pick by clicking in the driven session, or reject, before
    * bindings are written."

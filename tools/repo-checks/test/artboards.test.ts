@@ -9,7 +9,7 @@
  *
  * So the reading is a command now — `pnpm artboards` — and this is the check
  * that keeps it green. The rules are the ones the *build* is held to in
- * `apps/ade/test/shell.spec.ts`: a toolbar is one row with nothing past its end
+ * `apps/desktop/test/shell.spec.ts`: a toolbar is one row with nothing past its end
  * and a title that keeps twelve characters, an inspector's contents are inside
  * the inspector, and nothing is past the edge of the 1440 px frame.
  *

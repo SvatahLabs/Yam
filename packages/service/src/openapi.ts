@@ -2,7 +2,7 @@
  * The OpenAPI description (REQ-ADE-1, LLD §13.5).
  *
  * "The service publishes an OpenAPI description at `GET /openapi.json`, from
- * which the ADE's typed client is generated."
+ * which the app's typed client is generated."
  *
  * Written out rather than derived from decorated routes: a generated document is
  * only as good as the annotations, and the annotations are the thing that rots.
@@ -46,7 +46,7 @@ export function openApiDocument(version: string): Record<string, unknown> {
       title: "Yam local service",
       version,
       description:
-        "The local integration point for the Yam ADE and any other client " +
+        "The local integration point for the Yam app and any other client " +
         "(REQ-ADE-1, LLD §13.5). Bound to 127.0.0.1, behind a bearer token printed " +
         "on stdout. Every handler calls the same function the CLI calls; no logic " +
         "lives here.",
@@ -137,7 +137,7 @@ export function openApiDocument(version: string): Record<string, unknown> {
           summary: "The compiled plan, story by story",
           description:
             "The object `yam compile` writes to `.yam/plan.json`. `POST /compile` " +
-            "answers with a reference; this is the plan the ADE's Plan screen renders.",
+            "answers with a reference; this is the plan the app's Plan screen renders.",
           security: bearer,
           responses: { 200: { description: "Plan", ...json(ref("plan")) } },
         },
@@ -275,7 +275,7 @@ export function openApiDocument(version: string): Record<string, unknown> {
         post: {
           summary: "Execute one API request ad hoc",
           description:
-            "Through the same function `yam run` uses for an `api` step, so the ADE's " +
+            "Through the same function `yam run` uses for an `api` step, so the app's " +
             "API client is not a second HTTP client (LLD §13.5).",
           security: bearer,
           requestBody: json({
@@ -379,7 +379,7 @@ export function openApiDocument(version: string): Record<string, unknown> {
       },
       "/migrate": {
         post: {
-          summary: "Import a Yam ADE prototype's electron-db directory into this project",
+          summary: "Import a Yam prototype's electron-db directory into this project",
           description:
             "Reads the prototype's `project`, `config`, `flows` and `api` tables and writes " +
             "`yam.config.yaml`, `flows/`, seed `bindings/`, `data.yaml` and `api/*.yaml` " +
@@ -571,7 +571,7 @@ export function openApiDocument(version: string): Record<string, unknown> {
         get: { summary: "This document", security: [], responses: { 200: { description: "The OpenAPI document", ...json({ type: "object" }) } } },
       },
       "/health": {
-        get: { summary: "Liveness, for the ADE's spawn handshake", security: [], responses: { 200: { description: "ok", ...json({ type: "object" }) } } },
+        get: { summary: "Liveness, for the app's spawn handshake", security: [], responses: { 200: { description: "ok", ...json({ type: "object" }) } } },
       },
     },
   };

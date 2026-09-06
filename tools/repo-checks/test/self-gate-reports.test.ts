@@ -9,10 +9,10 @@
  * a change or an echo (the Phase 11 verification, F3).
  *
  * `--update` refreshes the committed set; without it every report goes to a
- * temporary directory and the gate says where. That is the rule `ade:shoot`
+ * temporary directory and the gate says where. That is the rule `app:shoot`
  * already follows (P10-F6), and this holds all three reports to it.
  *
- * The gate itself takes eight minutes and needs a packaged ADE, so what runs
+ * The gate itself takes eight minutes and needs a packaged app, so what runs
  * here is one check whose source is a script — the artboards audit, about a
  * second — and the tree is read before and after.
  */

@@ -1,8 +1,8 @@
-# Yam verifies Yam: the ADE, through the desktop adapters (T11.2, T11.4,
+# Yam verifies Yam: the app, through the desktop adapters (T11.2, T11.4,
 # REQ-SELF-1, LLD §13.9).
 #
 # > `evals/self/` is a Yam project: flows over the Playwright adapter against
-# > `apps/sample-web`, over the AX and UIA adapters against the packaged ADE,
+# > `apps/sample-web`, over the AX and UIA adapters against the packaged app,
 # > over the HTTP adapter against the local service, and over the SDK against
 # > `yam ui --json`.
 #
@@ -22,7 +22,7 @@
 #
 # This project is *of* this repository — the application it drives is the one
 # this checkout builds — so a path that pointed anywhere else would be a suite
-# about somebody else's ADE. `yam eval self` resolves them from the project
+# about somebody else's app. `yam eval self` resolves them from the project
 # directory.
 schemaVersion: "1.0.0"
 project: "yam-self"
@@ -30,16 +30,16 @@ environment: test
 adapter: ax
 
 app:
-  processName: "Yam ADE"
+  processName: "Yam"
   launch:
-    bundle: "../../apps/ade/out/Yam ADE-darwin-arm64/Yam ADE.app"
+    bundle: "../../apps/desktop/out/Yam-darwin-arm64/Yam.app"
     env:
-      # The ADE is the desktop conformance target and an Electron application
+      # The app is the desktop conformance target and an Electron application
       # publishes almost nothing to UIA or AX until it is told to (REQ-ADE-6).
       YAM_A11Y: "1"
       # The window-lifecycle log, so a launch that goes wrong says so in the
       # application's own words rather than only in a probe's (Draft 2.13).
-      YAM_ADE_DEBUG: "1"
+      YAM_APP_DEBUG: "1"
       # A secret that is genuinely set, and a credential that genuinely exists
       # (T12.7, REQ-NFR-6). `data.yaml` holds the same two strings, so
       # `No text on this screen should contain {data.injected.password}` is a
@@ -50,12 +50,12 @@ app:
       ANTHROPIC_API_KEY: "sk-not-a-real-key-3d90ab"
     timeoutMs: 60000
     # The window's size, so a toolbar measured at 1440 points is measured at
-    # 1440 points on somebody else's machine too (pattern 33, T12.7). The ADE
+    # 1440 points on somebody else's machine too (pattern 33, T12.7). The app
     # remembers its own size between runs, and a suite that did not name one was
     # reading whatever width the last person left it at.
     size: [1440, 900]
   quit:
-    bundleId: "com.electron.yam-ade"
+    bundleId: "com.electron.yam"
     gracefulMs: 10000
     signalMs: 20000
 
@@ -72,7 +72,7 @@ api: { dir: api }
 # `yam eval self` runs this project *after* the healing eval — four minutes of
 # Chromium — and beside whatever else the machine is doing, and a desktop
 # adapter's locate is a fresh accessibility read of a thousand-node tree each
-# time round. At five seconds a candidate, a click that the ADE answered a
+# time round. At five seconds a candidate, a click that the app answered a
 # moment later than usual failed the step after it; measured on this host under
 # the gate, and never on its own. Fifteen seconds is the same waiting a person
 # does before deciding a screen did not open. Nothing here changes the product's

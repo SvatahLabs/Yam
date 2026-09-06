@@ -28,10 +28,10 @@ node scripts/migrate-legacy.mjs
 
 `tools/repo-checks/test/migrate.test.ts` fails when the two disagree.
 
-## `ade-db/` — the prototype database fixture (T6.6, REQ-ADE-9)
+## `prototype-db/` — the prototype database fixture (T6.6, REQ-ADE-9)
 
-The Yam ADE prototype kept a project's flows, locators and data in an
-electron-db directory rather than on disk, and `yam migrate <dest> --from-ade
+The Yam prototype kept a project's flows, locators and data in an
+electron-db directory rather than on disk, and `yam migrate <dest> --from-prototype
 <src>` reads one. REQ-ADE-9's Validate needs a database to read.
 
 **This one is synthesised, and no prototype database was available on the
@@ -56,5 +56,5 @@ excludes — so every branch of the importer has an input.
 Regenerate with:
 
 ```bash
-node scripts/build-ade-fixture.mjs
+node scripts/build-prototype-fixture.mjs
 ```

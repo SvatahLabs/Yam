@@ -6,7 +6,7 @@
  *   node scripts/seed-fixture-run.mjs --remove   # deletes it
  *   node scripts/seed-fixture-run.mjs --run-id x
  *
- * Two of the ADE's screens are *about* a run — Runs and Run — and
+ * Two of the app's screens are *about* a run — Runs and Run — and
  * `scripts/record-desktop-tree.mjs` records their accessibility trees from the
  * real application, which means a real run has to be in the project while it
  * does. `evals/fixtures/runs/` is ignored by git and is empty in a fresh
@@ -67,7 +67,7 @@ process.stderr.write(`sample-web on ${app.origin}\n`);
  * `apps/sample-web` runs *in this process*, so a synchronous spawn would block
  * the event loop that has to answer the run's own `page.goto` — every step then
  * fails with a navigation timeout against an application that is up.
- * `apps/ade/test/parity.test.ts` and `tools/repo-checks/test/tui-pty.test.ts`
+ * `apps/desktop/test/parity.test.ts` and `tools/repo-checks/test/tui-pty.test.ts`
  * both record the same trap.
  */
 const code = await new Promise((done) => {

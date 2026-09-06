@@ -1,7 +1,7 @@
 /**
  * `@svatah/yam-adapter-uia` — the Windows UI Automation adapter (T6.1, REQ-ADP-6).
  *
- * The conformance target is the Yam ADE, launched with `YAM_A11Y=1` so
+ * The conformance target is the Yam app, launched with `YAM_A11Y=1` so
  * Chromium publishes the renderer's accessibility tree (LLD §7.5, REQ-ADE-6).
  * See `README.md` for what this needs of a Windows host.
  */

@@ -19,7 +19,7 @@ const ALLOWED: ReadonlyArray<[RegExp, string]> = [
   [/Svatah (is|as) the (brand|organisation)|the Svatah brand/g, "prose about the brand"],
   [/svatah\.com/g, "the brand's domain"],
   [/Svatah Labs|SvatahLabs/g, "the organisation"],
-  [/svatahADE/g, "the prototype repository the ADE was designed from"],
+  [/svatahADE/g, "the prototype repository the app was designed from"],
   [/svatah[_-]yam/g, "the PyPI and Python client names carry the brand"],
   [/com[./]svatah[./]yam/g, "the Java package and the bundle id carry the brand"],
   [/svatah\.(flow|locator|data)/g, "the legacy sample fixtures keep their file names"],

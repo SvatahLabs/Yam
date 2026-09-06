@@ -7,7 +7,7 @@
  * T9.2's Validate asks for "a screenshot of it in both themes"; T9.5 asks for
  * the screenshots to be in the progress record. Chromium through Playwright,
  * which the repository already installs (`pnpm browsers`) — no new dependency,
- * and the same engine the packaged ADE renders in.
+ * and the same engine the packaged app renders in.
  *
  * The page is loaded from the filesystem, so it needs no server; the fonts are
  * beside it, so the screenshot shows IBM Plex rather than a fallback.

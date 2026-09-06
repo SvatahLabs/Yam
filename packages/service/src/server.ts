@@ -11,7 +11,7 @@
  * shapes the answer. That is the whole rule, and LLD §1's import boundary is
  * what enforces it: `service` may import `cli` and `schema` and nothing else. If
  * the service could reach the compiler or the runtime directly, it would grow a
- * second implementation of `run`, and the ADE and the CLI would start disagreeing
+ * second implementation of `run`, and the app and the CLI would start disagreeing
  * about what a run is.
  *
  * ## Bound to loopback, behind a token
@@ -20,7 +20,7 @@
  * files in a project. Two things make that acceptable: it listens on 127.0.0.1
  * only, and every route but `/health` and `/openapi.json` needs a bearer token
  * that is generated per process and printed once on stdout — which is how the
- * ADE reads it from the child process it spawned. It is not a server, it has no
+ * app reads it from the child process it spawned. It is not a server, it has no
  * users, and REQ-ADE-7 says it never becomes one.
  */
 import { randomBytes } from "node:crypto";
@@ -43,7 +43,7 @@ export interface ServeOptions {
    * and a handler literally cannot reach the compiler or the executor.
    */
   readonly api: ServiceApi;
-  /** 0 asks the OS for a free port, which is what the ADE wants. */
+  /** 0 asks the OS for a free port, which is what the app wants. */
   readonly port?: number;
   /** Supplied only by a test; otherwise generated per process. */
   readonly token?: string;
@@ -80,9 +80,9 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     /*
      * A close is a close (P10-F1).
      *
-     * `/events` is a server-sent-event stream and the ADE holds one open for as
+     * `/events` is a server-sent-event stream and the app holds one open for as
      * long as a project is open, so `fastify.close()` waited for a response
-     * that is never going to end: every ADE quit took the five seconds its
+     * that is never going to end: every app quit took the five seconds its
      * child-stop escalation allows before the `SIGKILL`, and a `yam serve`
      * stopped from a terminal took the same. The streams are ended by the
      * shutdown hook below; this is what stops an idle keep-alive socket from
@@ -180,7 +180,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
    * The compiled plan itself (T3.7).
    *
    * `POST /compile` answers with a reference — the hash and a count — because
-   * that is what a caller checking whether a project compiles wants. The ADE's
+   * that is what a caller checking whether a project compiles wants. The app's
    * Plan screen wants the steps: their tier, their confidence, and which targets
    * are still `unbound`. That is exactly the object `yam compile` writes to
    * `.yam/plan.json`, so serving it keeps the screen rule (T3.7: "every screen
@@ -215,7 +215,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
        * A story with a signature is a function (REQ-AUTO-5), and calling one
        * without its arguments is a mistake in the call, not a run that failed.
        * Answering 202 and letting the executor fail on the first step would give
-       * the ADE a red run to display and a person a screenshot of a login page
+       * the app a red run to display and a person a screenshot of a login page
        * to puzzle over — when what happened is that nobody typed a password.
        *
        * `GET /project` carries each story's signature so a client can ask for
@@ -249,7 +249,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
       /*
        * Started, then answered. A client gets the run id immediately and
        * watches the stream; blocking until a browser run finished would make
-       * the ADE's Run screen a spinner (REQ-ADE-3).
+       * the app's Run screen a spinner (REQ-ADE-3).
        */
       void (async () => {
         try {
@@ -388,7 +388,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     /*
      * Secrets are redacted on read (LLD §13.5).
      *
-     * The ADE shows a data editor, and a value that is a `${ENV}` indirection is
+     * The app shows a data editor, and a value that is a `${ENV}` indirection is
      * a name rather than a secret — but a *resolved* one is the secret itself,
      * and it must not travel to a renderer that could log it (REQ-NFR-6).
      */
@@ -503,10 +503,10 @@ export async function createService(options: ServeOptions): Promise<RunningServi
   );
 
   /**
-   * Execute one request ad hoc, for the ADE's API client (LLD §13.5).
+   * Execute one request ad hoc, for the app's API client (LLD §13.5).
    *
    * Through the same function `yam run` uses for an `api` step, injected like
-   * every other. An ADE that had its own HTTP client would have its own idea of
+   * every other. An app that had its own HTTP client would have its own idea of
    * a header, a redirect and a cookie, and "the API client agrees with the run"
    * would be a coincidence.
    */
@@ -645,7 +645,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
                *
                * A session blocked here holds a browser open and, because only
                * one session may be open at a time, answers 409 to everyone
-               * else — so a reviewer who closes the ADE window without
+               * else — so a reviewer who closes the app window without
                * deciding used to leave the service unusable until it was
                * restarted. On expiry the pending grounding is rejected and the
                * session is aborted, which stops it with a report: the same
@@ -755,7 +755,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
   fastify.post<{ Body?: { source?: string; project?: string } }>(
     "/migrate",
     async (request, reply) => {
-      if (api.migrateFromAde === undefined) {
+      if (api.migrateFromPrototype === undefined) {
         return reply
           .code(501)
           .send({ error: "not-available", message: "This build has no migration." });
@@ -768,7 +768,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
         });
       }
       try {
-        const result = await api.migrateFromAde(await load(), {
+        const result = await api.migrateFromPrototype(await load(), {
           source,
           ...(request.body?.project === undefined ? {} : { project: request.body.project }),
         });
@@ -980,7 +980,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
    * `/events/sse` hijacks the socket and never ends its response, which is
    * exactly right for a stream and exactly wrong for `fastify.close()`: it
    * waited for a body that was never going to finish, so stopping the service
-   * took the five seconds the ADE's child-stop allows before its `SIGKILL` —
+   * took the five seconds the app's child-stop allows before its `SIGKILL` —
    * on every quit, and after a `Ctrl-C` in a terminal too.
    */
   const openStreams = new Set<() => void>();

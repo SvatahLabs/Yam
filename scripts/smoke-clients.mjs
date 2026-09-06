@@ -10,7 +10,7 @@
  * > service (`GET /project`, `POST /run`, events) in CI.
  *
  * This is the *harness*: it starts `apps/sample-web`, starts `yam serve` on
- * a copy of the fixtures project exactly as the ADE spawns it, and runs each
+ * a copy of the fixtures project exactly as the app spawns it, and runs each
  * smoke script with the url and token in the environment. The scripts
  * themselves start nothing, so the same command a person types against a
  * service they already have open is what runs here.

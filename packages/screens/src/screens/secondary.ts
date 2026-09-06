@@ -551,7 +551,7 @@ const importScreen: Screen<ImportState> = {
       ...sources.base(
         "import",
         "Import prototype database",
-        "Reads a Yam ADE prototype's electron-db into the open project",
+        "Reads a Yam prototype's electron-db into the open project",
         project.root ?? "",
       ),
       screen: "import",

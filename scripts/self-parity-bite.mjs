@@ -17,7 +17,7 @@
  * ## What is broken, and where
  *
  * A copy of `evals/self` — never the committed project — with one expectation
- * changed to something the ADE does not say: the Flows toolbar's title becomes
+ * changed to something the app does not say: the Flows toolbar's title becomes
  * `"Frobnicate"`. The Playwright side is untouched, so it still passes; the two
  * sides then disagree about one check, and the gate must exit 1 and print both
  * verdicts with the evidence each side gave.
@@ -34,7 +34,7 @@ import { copyProjectParts } from "./lib/self-project.mjs";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 const source = join(ROOT, "evals", "self");
-const bundle = join(ROOT, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
+const bundle = join(ROOT, "apps", "desktop", "out", "Yam-darwin-arm64", "Yam.app");
 const keep = process.argv.includes("--keep");
 
 const scratch = mkdtempSync(join(tmpdir(), "yam-parity-bite-"));
@@ -56,7 +56,7 @@ writeFileSync(
 
 /* ── the lie ──────────────────────────────────────────────────────────────── */
 
-const flow = join(project, "flows", "02-ade-screen.flow");
+const flow = join(project, "flows", "02-app-screen.flow");
 const before = readFileSync(flow, "utf8");
 const after = before.replace(
   'The toolbar title should contain "Flows"',
@@ -72,7 +72,7 @@ writeFileSync(flow, after, "utf8");
  * One check, and it is the one whose two sides are both Yam's own — the
  * accessibility tree and the DOM over CDP. Breaking the flow breaks *both*
  * sides of that one, which is not a disagreement; so the check the gate is
- * asked about is the ADE screen one, whose external side is a Playwright case
+ * asked about is the app screen one, whose external side is a Playwright case
  * the lie cannot touch.
  */
 const catalogue = join(scratch, "checks.yaml");
@@ -84,14 +84,14 @@ writeFileSync(
     "# it; nothing reads it twice.",
     'schemaVersion: "1.0.0"',
     "checks:",
-    '  - id: "ade.opens-into-the-new-flows-screen-not-the-eleven-tabs"',
+    '  - id: "app.opens-into-the-new-flows-screen-not-the-eleven-tabs"',
     '    says: "opens into the new Flows screen, not the eleven tabs"',
     "    yam:",
     '      source: "yam"',
     '      project: "self"',
-    '      name: "the ADE opens a project and shows its flows"',
+    '      name: "the app opens a project and shows its flows"',
     "    external:",
-    '      source: "ade-playwright"',
+    '      source: "app-playwright"',
     '      name: "opens into the new Flows screen, not the eleven tabs"',
     "",
   ].join("\n"),
@@ -111,7 +111,7 @@ const bit =
   ran.status === 1 &&
   /Not conformant/.test(text) &&
   /## Disagreements/.test(text) &&
-  /ade\.opens-into-the-new-flows-screen/.test(text) &&
+  /app\.opens-into-the-new-flows-screen/.test(text) &&
   // Both pieces of evidence: what Yam saw, and what the external side saw.
   /Frobnicate/.test(text) &&
   /pass/.test(text.split("## Disagreements")[1]?.split("##")[0] ?? "");

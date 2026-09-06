@@ -4,13 +4,13 @@
  *
  * Both palettes are built from `ACTIONS`, so the claim is really "neither
  * renderer filters the list, and neither adds to it". That is a property of two
- * source files, and it is checked by reading them: the ADE's `Shell.tsx` and the
+ * source files, and it is checked by reading them: the app's `Shell.tsx` and the
  * TUI's `app.tsx`.
  *
  * A test that rendered both and compared the visible rows would compare two
- * *viewports* — the ADE's palette scrolls and the TUI's shows eight rows — so it
+ * *viewports* — the app's palette scrolls and the TUI's shows eight rows — so it
  * would pass with a renderer that silently dropped everything below the fold.
- * `packages/tui/test/cockpit.test.tsx` and `apps/ade/test/shell.spec.ts` are
+ * `packages/tui/test/cockpit.test.tsx` and `apps/desktop/test/shell.spec.ts` are
  * where each palette is opened and its rows read; this is where the two are held
  * to the same source.
  */
@@ -20,13 +20,13 @@ import { ACTIONS } from "@svatah/yam-screens";
 import { EVENT_KINDS } from "@svatah/yam-sdk";
 import { fromRoot } from "../src/repo.js";
 
-const ADE = readFileSync(fromRoot("apps/ade/src/renderer/shell/Shell.tsx"), "utf8");
+const APP_DIR = readFileSync(fromRoot("apps/desktop/src/renderer/shell/Shell.tsx"), "utf8");
 const TUI = readFileSync(fromRoot("packages/tui/src/app.tsx"), "utf8");
 
 describe("both palettes are the one registry (T9.4)", () => {
   it("builds its rows from ACTIONS, in each renderer", () => {
-    // The ADE maps the whole list; the TUI filters it by the typed query only.
-    expect(ADE).toMatch(/ACTIONS\.map\(/);
+    // The app maps the whole list; the TUI filters it by the typed query only.
+    expect(APP_DIR).toMatch(/ACTIONS\.map\(/);
     expect(TUI).toMatch(/ACTIONS\.filter\(/);
   });
 
@@ -42,7 +42,7 @@ describe("both palettes are the one registry (T9.4)", () => {
      */
     const known = new Set<string>([...ACTIONS.map((one) => one.id), ...EVENT_KINDS]);
     for (const [name, source] of [
-      ["the ADE", ADE],
+      ["the app", APP_DIR],
       ["yam ui", TUI],
     ] as const) {
       const mentioned = [...source.matchAll(/"([a-z]+\.[a-z][a-z-]*)"/g)].map((match) => match[1]!);
@@ -55,13 +55,13 @@ describe("both palettes are the one registry (T9.4)", () => {
 
   it("neither renderer hides a group", () => {
     /*
-     * `Actions` then `Go to` (§13.7). The ADE draws the headings, because it has
+     * `Actions` then `Go to` (§13.7). The app draws the headings, because it has
      * the room; `yam ui` lists the same rows in the same order without them,
      * which is what the `TUI` artboard shows. What neither may do is *filter* on
      * the group — that would make every screen but its own unreachable from the
      * palette.
      */
-    expect(ADE).toContain("group: action.group");
+    expect(APP_DIR).toContain("group: action.group");
     expect(TUI).not.toMatch(/\.group\s*[=!]==?\s*"(Actions|Go to)"/);
     expect(TUI).toMatch(/ACTIONS\.filter\(\(action\) => \{\s*if \(query === ""\) return true;/);
   });
@@ -69,19 +69,19 @@ describe("both palettes are the one registry (T9.4)", () => {
   it("shows the CLI command beside a CLI-backed row, in both", () => {
     // "each row showing the action's key and, for CLI-backed actions, the CLI
     // command" (§13.7). It is what makes the palette teach the command line.
-    expect(ADE).toMatch(/cli: action\.cli/);
+    expect(APP_DIR).toMatch(/cli: action\.cli/);
     expect(TUI).toMatch(/cli: action\.cli/);
   });
 
-  it("opens on ⌘K in the ADE and ^K in the terminal", () => {
-    expect(ADE).toMatch(/event\.key\.toLowerCase\(\) === "k"/);
-    expect(ADE).toMatch(/metaKey \|\| event\.ctrlKey/);
+  it("opens on ⌘K in the app and ^K in the terminal", () => {
+    expect(APP_DIR).toMatch(/event\.key\.toLowerCase\(\) === "k"/);
+    expect(APP_DIR).toMatch(/metaKey \|\| event\.ctrlKey/);
     expect(TUI).toMatch(/key\.ctrl && input === "k"/);
   });
 
   it("runs an action through the registry rather than through a switch", () => {
     for (const [name, source] of [
-      ["the ADE", ADE],
+      ["the app", APP_DIR],
       ["yam ui", TUI],
     ] as const) {
       expect(source, `${name} does not resolve actions by id`).toContain("actionById(");
@@ -94,7 +94,7 @@ describe("both palettes are the one registry (T9.4)", () => {
   it("binds its single-letter keys from the screen's own table", () => {
     // Not from a list in the renderer: `screenById(screen).keys` is the one
     // place a key is attached to an action (§13.7's "the same actions and keys").
-    for (const source of [ADE, TUI]) {
+    for (const source of [APP_DIR, TUI]) {
       expect(source).toMatch(/screenById\([\w.]+\)\.keys/);
     }
   });

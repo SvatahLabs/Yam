@@ -186,7 +186,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
 
       <InspectorSection id={`sheet-alerts${suffix}`} title={named("Alerts")}>
         <Alert id={`sheet-alert-fail${suffix}`} tone="fail">
-          The Yam ADE could not find a Node 22 or newer to run{" "}
+          The Yam could not find a Node 22 or newer to run{" "}
           <span className="sv-mono">yam serve</span>. It looked in three places: YAM_NODE,
           PATH, resources/yam/node.
         </Alert>

@@ -1,0 +1,31 @@
+# The app's Flows screen, driven by whichever adapter is pointed at it
+# (T11.2, T11.4, LLD §13.9).
+#
+# This is the flow **both sides of the parity gate run**: the AX adapter reads
+# the accessibility tree macOS publishes, and the Playwright adapter attached
+# over CDP reads the DOM that tree is serialised from. Same sentences, same
+# application, two oracles — and a disagreement is a finding rather than a
+# flake.
+#
+# It stops short of quitting, and that is the point of it being a separate file:
+# `Quit the app` is a desktop step and a web adapter refuses it (pattern 31), so
+# a flow with it in cannot be the one both sides run. `app-lifecycle.flow` is
+# the whole journey, and the parity report lists its last step as one-sided.
+#
+# ## The number in the file name
+#
+# `yam run` executes a project's `test:` blocks in file order, and one
+# session serves the whole run — so a flow that ends with `Quit the app` has to
+# be the last one, or every flow after it drives an application that is not
+# there. `99-` says that out loud; `01-` and `02-` say the rest may run in any
+# order.
+
+story: the app opens a project and shows its flows
+  The first recent project should be visible
+  Click the first recent project
+  The Flows rail item should be visible
+  Click the Flows rail item
+  The toolbar title should contain "Flows"
+
+test: the app screen
+  the app opens a project and shows its flows

@@ -1,0 +1,2255 @@
+{
+  "process": "Yam",
+  "title": "Yam",
+  "truncated": false,
+  "nodes": [
+    {
+      "parent": -1,
+      "controlType": "Window",
+      "name": "Yam",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "box": [
+        0,
+        0,
+        1280,
+        860
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Document",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Yam",
+      "isEnabled": true,
+      "hasKeyboardFocus": true,
+      "box": [
+        0,
+        0,
+        1280,
+        828
+      ]
+    },
+    {
+      "parent": 1,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        828
+      ]
+    },
+    {
+      "parent": 2,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        828
+      ],
+      "automationId": "root"
+    },
+    {
+      "parent": 3,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "banner",
+      "isEnabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        44
+      ]
+    },
+    {
+      "parent": 4,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Yam",
+      "isEnabled": true,
+      "box": [
+        50,
+        21,
+        42,
+        17
+      ]
+    },
+    {
+      "parent": 5,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Yam",
+      "isEnabled": true
+    },
+    {
+      "parent": 4,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "navigation",
+      "name": "Project",
+      "isEnabled": true,
+      "box": [
+        104,
+        20,
+        170,
+        19
+      ],
+      "automationId": "topbar-crumb"
+    },
+    {
+      "parent": 7,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        115,
+        20,
+        46,
+        19
+      ],
+      "automationId": "crumb-project"
+    },
+    {
+      "parent": 8,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "fixtures",
+      "isEnabled": true,
+      "box": [
+        115,
+        21,
+        46,
+        17
+      ]
+    },
+    {
+      "parent": 9,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "fixtures",
+      "isEnabled": true
+    },
+    {
+      "parent": 7,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        177,
+        20,
+        96,
+        19
+      ],
+      "automationId": "crumb-screen"
+    },
+    {
+      "parent": 11,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Surface explorer",
+      "isEnabled": true,
+      "box": [
+        177,
+        21,
+        96,
+        17
+      ]
+    },
+    {
+      "parent": 12,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Surface explorer",
+      "isEnabled": true
+    },
+    {
+      "parent": 4,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Search or run a command",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        896,
+        16,
+        199,
+        28
+      ],
+      "automationId": "open-command-palette"
+    },
+    {
+      "parent": 14,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Search or run a command",
+      "isEnabled": true,
+      "box": [
+        907,
+        21,
+        146,
+        17
+      ]
+    },
+    {
+      "parent": 15,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Search or run a command",
+      "isEnabled": true
+    },
+    {
+      "parent": 4,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        1106,
+        19,
+        154,
+        22
+      ],
+      "automationId": "service-chip"
+    },
+    {
+      "parent": 17,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "service",
+      "isEnabled": true,
+      "box": [
+        1128,
+        22,
+        38,
+        15
+      ]
+    },
+    {
+      "parent": 18,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "service",
+      "isEnabled": true
+    },
+    {
+      "parent": 17,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "127.0.0.1:62171",
+      "isEnabled": true,
+      "box": [
+        1166,
+        22,
+        85,
+        15
+      ]
+    },
+    {
+      "parent": 20,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "127.0.0.1:62171",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "navigation",
+      "name": "Sections",
+      "isEnabled": true,
+      "box": [
+        8,
+        52,
+        220,
+        756
+      ],
+      "automationId": "rail"
+    },
+    {
+      "parent": 22,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        62,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 23,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "PROJECT",
+      "isEnabled": true,
+      "box": [
+        24,
+        73,
+        50,
+        14
+      ]
+    },
+    {
+      "parent": 24,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "PROJECT",
+      "isEnabled": true
+    },
+    {
+      "parent": 22,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Flows",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        91,
+        203,
+        31
+      ],
+      "automationId": "rail-flows"
+    },
+    {
+      "parent": 26,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Flows",
+      "isEnabled": true,
+      "box": [
+        24,
+        98,
+        34,
+        17
+      ]
+    },
+    {
+      "parent": 27,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Flows",
+      "isEnabled": true
+    },
+    {
+      "parent": 22,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Runs",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        122,
+        203,
+        31
+      ],
+      "automationId": "rail-runs"
+    },
+    {
+      "parent": 29,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Runs",
+      "isEnabled": true,
+      "box": [
+        24,
+        129,
+        29,
+        17
+      ]
+    },
+    {
+      "parent": 30,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Runs",
+      "isEnabled": true
+    },
+    {
+      "parent": 22,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Bindings",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        153,
+        203,
+        31
+      ],
+      "automationId": "rail-bindings"
+    },
+    {
+      "parent": 32,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Bindings",
+      "isEnabled": true,
+      "box": [
+        24,
+        159,
+        50,
+        17
+      ]
+    },
+    {
+      "parent": 33,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Bindings",
+      "isEnabled": true
+    },
+    {
+      "parent": 22,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Agents and tools",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        184,
+        203,
+        31
+      ],
+      "automationId": "rail-agents"
+    },
+    {
+      "parent": 35,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Agents and tools",
+      "isEnabled": true,
+      "box": [
+        24,
+        190,
+        97,
+        17
+      ]
+    },
+    {
+      "parent": 36,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Agents and tools",
+      "isEnabled": true
+    },
+    {
+      "parent": 22,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        217,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 38,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "RESOURCES",
+      "isEnabled": true,
+      "box": [
+        24,
+        227,
+        66,
+        14
+      ]
+    },
+    {
+      "parent": 39,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "RESOURCES",
+      "isEnabled": true
+    },
+    {
+      "parent": 22,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "API",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        246,
+        203,
+        31
+      ],
+      "automationId": "rail-api"
+    },
+    {
+      "parent": 41,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "API",
+      "isEnabled": true,
+      "box": [
+        24,
+        252,
+        21,
+        17
+      ]
+    },
+    {
+      "parent": 42,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "API",
+      "isEnabled": true
+    },
+    {
+      "parent": 22,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Data",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        277,
+        203,
+        31
+      ],
+      "automationId": "rail-data"
+    },
+    {
+      "parent": 44,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Data",
+      "isEnabled": true,
+      "box": [
+        24,
+        283,
+        27,
+        17
+      ]
+    },
+    {
+      "parent": 45,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Data",
+      "isEnabled": true
+    },
+    {
+      "parent": 22,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Import prototype database",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        736,
+        203,
+        31
+      ],
+      "automationId": "rail-import"
+    },
+    {
+      "parent": 47,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Import prototype database",
+      "isEnabled": true,
+      "box": [
+        24,
+        743,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 48,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Import prototype database",
+      "isEnabled": true
+    },
+    {
+      "parent": 22,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Settings",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        767,
+        203,
+        31
+      ],
+      "automationId": "rail-settings"
+    },
+    {
+      "parent": 50,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Settings",
+      "isEnabled": true,
+      "box": [
+        24,
+        774,
+        48,
+        17
+      ]
+    },
+    {
+      "parent": 51,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Settings",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "region",
+      "name": "Workspace",
+      "isEnabled": true,
+      "box": [
+        228,
+        52,
+        684,
+        756
+      ],
+      "automationId": "workspace"
+    },
+    {
+      "parent": 53,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        52,
+        684,
+        41
+      ]
+    },
+    {
+      "parent": 54,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "heading",
+      "name": "Surface explorer",
+      "isEnabled": true,
+      "box": [
+        244,
+        62,
+        34,
+        20
+      ]
+    },
+    {
+      "parent": 55,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Surface explorer",
+      "isEnabled": true,
+      "box": [
+        244,
+        62,
+        29,
+        19
+      ]
+    },
+    {
+      "parent": 56,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Surface explorer",
+      "isEnabled": true
+    },
+    {
+      "parent": 56,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Su",
+      "isEnabled": true
+    },
+    {
+      "parent": 56,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 54,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "playwright · http://127.0.0.1:4173 · no session",
+      "isEnabled": true,
+      "box": [
+        286,
+        64,
+        251,
+        16
+      ]
+    },
+    {
+      "parent": 60,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "playwright · http://127.0.0.1:4173 · no session",
+      "isEnabled": true
+    },
+    {
+      "parent": 54,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        302,
+        49,
+        200,
+        15
+      ]
+    },
+    {
+      "parent": 62,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "ADAPTER",
+      "isEnabled": true,
+      "box": [
+        302,
+        49,
+        53,
+        14
+      ]
+    },
+    {
+      "parent": 63,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "ADAPTER",
+      "isEnabled": true
+    },
+    {
+      "parent": 54,
+      "controlType": "ComboBox",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Adapter",
+      "value": "playwright",
+      "isEnabled": true,
+      "expandCollapseState": "Collapsed",
+      "patterns": [
+        "Value",
+        "ExpandCollapse"
+      ],
+      "box": [
+        302,
+        67,
+        200,
+        28
+      ],
+      "automationId": "explorer-adapter"
+    },
+    {
+      "parent": 65,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "playwright",
+      "isEnabled": true,
+      "box": [
+        311,
+        73,
+        59,
+        17
+      ]
+    },
+    {
+      "parent": 66,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "playwright",
+      "isEnabled": true
+    },
+    {
+      "parent": 54,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open a session",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        510,
+        58,
+        133,
+        28
+      ],
+      "automationId": "action-explorer-open"
+    },
+    {
+      "parent": 68,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open a session",
+      "isEnabled": true,
+      "box": [
+        521,
+        63,
+        86,
+        17
+      ]
+    },
+    {
+      "parent": 69,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open a session",
+      "isEnabled": true
+    },
+    {
+      "parent": 54,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Close the session",
+      "isEnabled": false,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        650,
+        58,
+        121,
+        28
+      ],
+      "automationId": "action-explorer-close"
+    },
+    {
+      "parent": 71,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Close the session",
+      "isEnabled": true,
+      "box": [
+        661,
+        63,
+        99,
+        17
+      ]
+    },
+    {
+      "parent": 72,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Close the session",
+      "isEnabled": true
+    },
+    {
+      "parent": 54,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Act on the element",
+      "isEnabled": false,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        779,
+        58,
+        130,
+        28
+      ],
+      "automationId": "action-explorer-act"
+    },
+    {
+      "parent": 74,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Act on the element",
+      "isEnabled": true,
+      "box": [
+        790,
+        63,
+        108,
+        17
+      ]
+    },
+    {
+      "parent": 75,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Act on the element",
+      "isEnabled": true
+    },
+    {
+      "parent": 54,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Snapshot the session",
+      "isEnabled": false,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        918,
+        58,
+        144,
+        28
+      ],
+      "automationId": "action-explorer-snapshot"
+    },
+    {
+      "parent": 77,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Snapshot the session",
+      "isEnabled": true,
+      "box": [
+        929,
+        63,
+        122,
+        17
+      ]
+    },
+    {
+      "parent": 78,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Snapshot the session",
+      "isEnabled": true
+    },
+    {
+      "parent": 54,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Compile a trajectory",
+      "isEnabled": false,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1069,
+        58,
+        138,
+        28
+      ],
+      "automationId": "action-trajectory-compile"
+    },
+    {
+      "parent": 80,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Compile a trajectory",
+      "isEnabled": true,
+      "box": [
+        1080,
+        63,
+        116,
+        17
+      ]
+    },
+    {
+      "parent": 81,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Compile a trajectory",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "complementary",
+      "name": "Snapshot",
+      "isEnabled": true,
+      "box": [
+        228,
+        93,
+        301,
+        715
+      ],
+      "automationId": "explorer-snapshot-pane"
+    },
+    {
+      "parent": 83,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        106,
+        300,
+        66
+      ]
+    },
+    {
+      "parent": 84,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open a session to read its accessibility tree.",
+      "isEnabled": true,
+      "box": [
+        244,
+        130,
+        244,
+        17
+      ]
+    },
+    {
+      "parent": 85,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open a session to read its accessibility tree.",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        93,
+        383,
+        41
+      ]
+    },
+    {
+      "parent": 87,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        545,
+        89,
+        218,
+        15
+      ]
+    },
+    {
+      "parent": 88,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "INTENT",
+      "isEnabled": true,
+      "box": [
+        545,
+        89,
+        43,
+        14
+      ]
+    },
+    {
+      "parent": 89,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "INTENT",
+      "isEnabled": true
+    },
+    {
+      "parent": 87,
+      "controlType": "Edit",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "INTENT",
+      "isEnabled": true,
+      "patterns": [
+        "Value"
+      ],
+      "box": [
+        545,
+        107,
+        218,
+        30
+      ],
+      "automationId": "explorer-intent"
+    },
+    {
+      "parent": 91,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        554,
+        114,
+        200,
+        17
+      ]
+    },
+    {
+      "parent": 53,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "alert",
+      "isEnabled": true,
+      "box": [
+        545,
+        146,
+        351,
+        92
+      ],
+      "automationId": "explorer-intent-required"
+    },
+    {
+      "parent": 93,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Every call records an intent.",
+      "isEnabled": true,
+      "box": [
+        575,
+        158,
+        157,
+        16
+      ]
+    },
+    {
+      "parent": 94,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Every call records an intent.",
+      "isEnabled": true
+    },
+    {
+      "parent": 93,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "A surface call is refused without one: the intent is what",
+      "isEnabled": true,
+      "box": [
+        575,
+        158,
+        288,
+        34
+      ]
+    },
+    {
+      "parent": 96,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "A surface call is refused",
+      "isEnabled": true
+    },
+    {
+      "parent": 96,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "without one: the intent is what",
+      "isEnabled": true
+    },
+    {
+      "parent": 93,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "trajectory compile",
+      "isEnabled": true,
+      "box": [
+        742,
+        175,
+        135,
+        17
+      ]
+    },
+    {
+      "parent": 99,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "trajectory compile",
+      "isEnabled": true
+    },
+    {
+      "parent": 93,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "turns into a step, and a call without it is a line the compiler has to throw away (REQ-BEH-4).",
+      "isEnabled": true,
+      "box": [
+        575,
+        193,
+        262,
+        33
+      ]
+    },
+    {
+      "parent": 101,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "turns into a step, and a call without it is a line the",
+      "isEnabled": true
+    },
+    {
+      "parent": 101,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "compiler has to throw away (REQ-BEH-4).",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Table",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "TRAJECTORY",
+      "isEnabled": true,
+      "patterns": [
+        "Scroll"
+      ],
+      "box": [
+        529,
+        238,
+        383,
+        87
+      ],
+      "automationId": "explorer-calls"
+    },
+    {
+      "parent": 104,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        238,
+        383,
+        21
+      ]
+    },
+    {
+      "parent": 105,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "TRAJECTORY",
+      "isEnabled": true,
+      "box": [
+        541,
+        239,
+        74,
+        14
+      ]
+    },
+    {
+      "parent": 106,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "TRAJECTORY",
+      "isEnabled": true
+    },
+    {
+      "parent": 104,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        260,
+        383,
+        32
+      ]
+    },
+    {
+      "parent": 108,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        260,
+        383,
+        32
+      ]
+    },
+    {
+      "parent": 109,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "#",
+      "isEnabled": true,
+      "box": [
+        529,
+        260,
+        43,
+        32
+      ]
+    },
+    {
+      "parent": 110,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "#",
+      "isEnabled": true,
+      "box": [
+        553,
+        268,
+        7,
+        14
+      ]
+    },
+    {
+      "parent": 111,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "#",
+      "isEnabled": true
+    },
+    {
+      "parent": 109,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "CALL",
+      "isEnabled": true,
+      "box": [
+        572,
+        260,
+        70,
+        32
+      ]
+    },
+    {
+      "parent": 113,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "CALL",
+      "isEnabled": true,
+      "box": [
+        584,
+        268,
+        27,
+        14
+      ]
+    },
+    {
+      "parent": 114,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "CALL",
+      "isEnabled": true
+    },
+    {
+      "parent": 109,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "INTENT",
+      "isEnabled": true,
+      "box": [
+        642,
+        260,
+        91,
+        32
+      ]
+    },
+    {
+      "parent": 116,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "INTENT",
+      "isEnabled": true,
+      "box": [
+        654,
+        268,
+        41,
+        14
+      ]
+    },
+    {
+      "parent": 117,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "INTENT",
+      "isEnabled": true
+    },
+    {
+      "parent": 109,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "OUTCOME",
+      "isEnabled": true,
+      "box": [
+        733,
+        260,
+        108,
+        32
+      ]
+    },
+    {
+      "parent": 119,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "OUTCOME",
+      "isEnabled": true,
+      "box": [
+        745,
+        268,
+        54,
+        14
+      ]
+    },
+    {
+      "parent": 120,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "OUTCOME",
+      "isEnabled": true
+    },
+    {
+      "parent": 109,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "TIME",
+      "isEnabled": true,
+      "box": [
+        840,
+        260,
+        72,
+        32
+      ]
+    },
+    {
+      "parent": 122,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "TIME",
+      "isEnabled": true,
+      "box": [
+        872,
+        268,
+        28,
+        14
+      ]
+    },
+    {
+      "parent": 123,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "TIME",
+      "isEnabled": true
+    },
+    {
+      "parent": 104,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        291,
+        383,
+        33
+      ]
+    },
+    {
+      "parent": 125,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "No call yet. Each one is written to trajectory.jsonl with its intent.",
+      "isEnabled": true,
+      "box": [
+        529,
+        291,
+        383,
+        33
+      ]
+    },
+    {
+      "parent": 126,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "No call yet. Each one is written to trajectory.jsonl with its intent.",
+      "isEnabled": true,
+      "box": [
+        541,
+        299,
+        355,
+        17
+      ]
+    },
+    {
+      "parent": 127,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "No call yet. Each one is written to trajectory.jsonl with its intent.",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "complementary",
+      "name": "Inspector",
+      "isEnabled": true,
+      "box": [
+        912,
+        52,
+        360,
+        756
+      ],
+      "automationId": "inspector"
+    },
+    {
+      "parent": 129,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "region",
+      "name": "SESSION",
+      "isEnabled": true,
+      "box": [
+        913,
+        52,
+        359,
+        157
+      ],
+      "automationId": "inspector-session"
+    },
+    {
+      "parent": 130,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "heading",
+      "name": "SESSION",
+      "isEnabled": true,
+      "box": [
+        913,
+        58,
+        359,
+        35
+      ],
+      "automationId": "inspector-session-heading"
+    },
+    {
+      "parent": 131,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "SESSION",
+      "isEnabled": true,
+      "box": [
+        929,
+        73,
+        51,
+        14
+      ]
+    },
+    {
+      "parent": 132,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "SESSION",
+      "isEnabled": true
+    },
+    {
+      "parent": 130,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        913,
+        93,
+        359,
+        106
+      ]
+    },
+    {
+      "parent": 134,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Adapter",
+      "isEnabled": true,
+      "box": [
+        929,
+        93,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 135,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Adapter",
+      "isEnabled": true,
+      "box": [
+        929,
+        94,
+        43,
+        16
+      ]
+    },
+    {
+      "parent": 136,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Adapter",
+      "isEnabled": true
+    },
+    {
+      "parent": 134,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        1049,
+        93,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 138,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "playwright",
+      "isEnabled": true,
+      "box": [
+        1049,
+        94,
+        75,
+        17
+      ]
+    },
+    {
+      "parent": 139,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "playwright",
+      "isEnabled": true
+    },
+    {
+      "parent": 134,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Base URL",
+      "isEnabled": true,
+      "box": [
+        929,
+        115,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 141,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Base URL",
+      "isEnabled": true,
+      "box": [
+        929,
+        116,
+        51,
+        16
+      ]
+    },
+    {
+      "parent": 142,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Base URL",
+      "isEnabled": true
+    },
+    {
+      "parent": 134,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        1049,
+        115,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 144,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "http://127.0.0.1:4173",
+      "isEnabled": true,
+      "box": [
+        1049,
+        116,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 145,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "http://127.0.0.1:4173",
+      "isEnabled": true
+    },
+    {
+      "parent": 134,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Session",
+      "isEnabled": true,
+      "box": [
+        929,
+        137,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 147,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Session",
+      "isEnabled": true,
+      "box": [
+        929,
+        138,
+        42,
+        16
+      ]
+    },
+    {
+      "parent": 148,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Session",
+      "isEnabled": true
+    },
+    {
+      "parent": 134,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        1049,
+        137,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 150,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "none",
+      "isEnabled": true,
+      "box": [
+        1049,
+        138,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 151,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "none",
+      "isEnabled": true
+    },
+    {
+      "parent": 134,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Trajectory",
+      "isEnabled": true,
+      "box": [
+        929,
+        160,
+        110,
+        18
+      ]
+    },
+    {
+      "parent": 153,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Trajectory",
+      "isEnabled": true,
+      "box": [
+        929,
+        160,
+        54,
+        16
+      ]
+    },
+    {
+      "parent": 154,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Trajectory",
+      "isEnabled": true
+    },
+    {
+      "parent": 134,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        1049,
+        160,
+        207,
+        18
+      ]
+    },
+    {
+      "parent": 156,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "—",
+      "isEnabled": true,
+      "box": [
+        1049,
+        160,
+        8,
+        17
+      ]
+    },
+    {
+      "parent": 157,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "—",
+      "isEnabled": true
+    },
+    {
+      "parent": 134,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Calls",
+      "isEnabled": true,
+      "box": [
+        929,
+        182,
+        110,
+        17
+      ]
+    },
+    {
+      "parent": 159,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Calls",
+      "isEnabled": true,
+      "box": [
+        929,
+        182,
+        26,
+        16
+      ]
+    },
+    {
+      "parent": 160,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Calls",
+      "isEnabled": true
+    },
+    {
+      "parent": 134,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        1049,
+        182,
+        207,
+        17
+      ]
+    },
+    {
+      "parent": 162,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        1049,
+        182,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 163,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true
+    },
+    {
+      "parent": 129,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "region",
+      "name": "COMPILE TO PROPOSAL",
+      "isEnabled": true,
+      "box": [
+        913,
+        209,
+        359,
+        184
+      ],
+      "automationId": "inspector-compile"
+    },
+    {
+      "parent": 165,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "heading",
+      "name": "COMPILE TO PROPOSAL",
+      "isEnabled": true,
+      "box": [
+        913,
+        215,
+        359,
+        35
+      ],
+      "automationId": "inspector-compile-heading"
+    },
+    {
+      "parent": 166,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "COMPILE TO PROPOSAL",
+      "isEnabled": true,
+      "box": [
+        929,
+        230,
+        134,
+        14
+      ]
+    },
+    {
+      "parent": 167,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "COMPILE TO PROPOSAL",
+      "isEnabled": true
+    },
+    {
+      "parent": 165,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        929,
+        256,
+        327,
+        127
+      ]
+    },
+    {
+      "parent": 169,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Writes a story draft, a plan and a seed bindings store under",
+      "isEnabled": true,
+      "box": [
+        942,
+        268,
+        281,
+        34
+      ]
+    },
+    {
+      "parent": 170,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Writes a story draft, a plan and a seed bindings store",
+      "isEnabled": true
+    },
+    {
+      "parent": 170,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "under",
+      "isEnabled": true
+    },
+    {
+      "parent": 169,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        974,
+        286,
+        3,
+        16
+      ]
+    },
+    {
+      "parent": 173,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true
+    },
+    {
+      "parent": 169,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "proposals/",
+      "isEnabled": true,
+      "box": [
+        976,
+        285,
+        75,
+        17
+      ]
+    },
+    {
+      "parent": 175,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "proposals/",
+      "isEnabled": true
+    },
+    {
+      "parent": 169,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": ", every binding marked unverified. It writes nowhere else, and it keeps the calls that failed: a trajectory is an account of what an agent did, and dropping the mistakes would make the proposal a story of a session that never happened.",
+      "isEnabled": true,
+      "box": [
+        942,
+        286,
+        300,
+        86
+      ]
+    },
+    {
+      "parent": 177,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": ", every binding marked unverified.",
+      "isEnabled": true
+    },
+    {
+      "parent": 177,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "It writes nowhere else, and it keeps the calls that failed:",
+      "isEnabled": true
+    },
+    {
+      "parent": 177,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "a trajectory is an account of what an agent did, and",
+      "isEnabled": true
+    },
+    {
+      "parent": 177,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "dropping the mistakes would make the proposal a story",
+      "isEnabled": true
+    },
+    {
+      "parent": 177,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "of a session that never happened.",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "contentinfo",
+      "isEnabled": true,
+      "box": [
+        8,
+        808,
+        1264,
+        28
+      ]
+    },
+    {
+      "parent": 183,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        24,
+        814,
+        139,
+        17
+      ],
+      "automationId": "status-context"
+    },
+    {
+      "parent": 184,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "every call records an intent",
+      "isEnabled": true,
+      "box": [
+        24,
+        815,
+        139,
+        15
+      ]
+    },
+    {
+      "parent": 185,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "every call records an intent",
+      "isEnabled": true
+    },
+    {
+      "parent": 183,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "⌘K",
+      "isEnabled": true,
+      "box": [
+        1117,
+        816,
+        13,
+        14
+      ]
+    },
+    {
+      "parent": 187,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "⌘K",
+      "isEnabled": true
+    },
+    {
+      "parent": 183,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "commands",
+      "isEnabled": true,
+      "box": [
+        1136,
+        815,
+        60,
+        15
+      ]
+    },
+    {
+      "parent": 189,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "commands",
+      "isEnabled": true
+    },
+    {
+      "parent": 183,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "?",
+      "isEnabled": true,
+      "box": [
+        1218,
+        816,
+        6,
+        14
+      ]
+    },
+    {
+      "parent": 191,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "?",
+      "isEnabled": true
+    },
+    {
+      "parent": 183,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "keys",
+      "isEnabled": true,
+      "box": [
+        1230,
+        815,
+        26,
+        15
+      ]
+    },
+    {
+      "parent": 193,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "keys",
+      "isEnabled": true
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Close",
+      "automationId": "Close",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1180,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Minimize",
+      "automationId": "Minimize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1204,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Maximize",
+      "automationId": "Maximize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1228,
+        4,
+        20,
+        20
+      ]
+    }
+  ]
+}

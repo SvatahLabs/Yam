@@ -1,5 +1,5 @@
 /**
- * The AX adapter as an `AgentSurface`, against the ADE's recorded trees (T6.2,
+ * The AX adapter as an `AgentSurface`, against the app's recorded trees (T6.2,
  * REQ-ADP-7, REQ-SURF-1, 4, 5).
  *
  * The bridge is injected (`test/recorded.ts`), so this drives the whole adapter
@@ -16,14 +16,14 @@ import {
   SessionError,
 } from "@svatah/yam-surface";
 import { AxSurface, AX_CAPABILITIES, keyChord } from "../src/index.js";
-import { recordedBridge, type AdeScreen, type RecordedBridge } from "./recorded.js";
+import { recordedBridge, type AppScreen, type RecordedBridge } from "./recorded.js";
 
 async function open(
   options: Parameters<typeof recordedBridge>[0] = {},
 ): Promise<{ surface: AxSurface; bridge: RecordedBridge }> {
   const bridge = recordedBridge({ screen: "record", ...options });
-  const surface = new AxSurface({ processName: "Yam ADE", bridge });
-  await surface.open({ kind: "desktop", processName: "Yam ADE" } as never);
+  const surface = new AxSurface({ processName: "Yam", bridge });
+  await surface.open({ kind: "desktop", processName: "Yam" } as never);
   return { surface, bridge };
 }
 
@@ -47,7 +47,7 @@ describe("opening a session (REQ-ADP-7, LLD §7.5)", () => {
         advice: "Open System Settings → Privacy & Security → Accessibility.",
       },
     });
-    const surface = new AxSurface({ processName: "Yam ADE", bridge });
+    const surface = new AxSurface({ processName: "Yam", bridge });
     await expect(surface.open({ kind: "desktop" } as never)).rejects.toThrow(
       /Accessibility permission is not granted \(prompt-pending\)/,
     );
@@ -90,7 +90,7 @@ describe("snapshot (REQ-SURF-1, 4, LLD §2.2)", () => {
     }
   });
 
-  it("names the ADE's controls the way a flow would", async () => {
+  it("names the app's controls the way a flow would", async () => {
     const { surface } = await open();
     const snapshot = await surface.snapshot({ interactiveOnly: true });
     const names = snapshot.nodes.map((node) => node.name);
@@ -104,7 +104,7 @@ describe("snapshot (REQ-SURF-1, 4, LLD §2.2)", () => {
   it("takes a fresh tree each time, because a window changes", async () => {
     const { surface, bridge } = await open({
       onCommand: (command) =>
-        command.kind === "action" || command.kind === "click" ? ("run" as AdeScreen) : undefined,
+        command.kind === "action" || command.kind === "click" ? ("run" as AppScreen) : undefined,
     });
     const before = await surface.snapshot();
     /*
@@ -125,7 +125,7 @@ describe("snapshot (REQ-SURF-1, 4, LLD §2.2)", () => {
     const { surface } = await open();
     const whole = await surface.snapshot();
     // The rail: a `navigation` landmark with eight rows under it, which is the
-    // densest subtree the ADE has that is not the whole window (T10.3).
+    // densest subtree the app has that is not the whole window (T10.3).
     const rail = whole.nodes.find((node) => node.role === "navigation")!;
     const part = await surface.snapshot({ root: rail.ref });
     expect(part.nodes.length).toBeLessThan(whole.nodes.length);
@@ -142,7 +142,7 @@ describe("locate and describe (LLD §6.3, §3.3)", () => {
     expect(described.role).toBe("combobox");
     expect(described.tag).toBe("AXPopUpButton");
     expect(described.attrs["automationId"]).toBe("record-gateway");
-    expect(described.native?.["controlPath"]).toContain("Window[Yam ADE]");
+    expect(described.native?.["controlPath"]).toContain("Window[Yam]");
   });
 
   it("applies `nth`, which is the binding's decision and not the adapter's", async () => {
@@ -223,21 +223,21 @@ describe("act (LLD §7.5)", () => {
 
   it("refuses to act on a disabled element", async () => {
     const bridge = recordedBridge({ screen: "record" });
-    const surface = new AxSurface({ processName: "Yam ADE", bridge });
+    const surface = new AxSurface({ processName: "Yam", bridge });
     await surface.open({ kind: "desktop" } as never);
     const snapshot = await surface.snapshot();
     const disabled = snapshot.nodes.find((node) => node.states.includes("disabled"));
     if (disabled !== undefined) {
       await expect(surface.act("click", disabled.ref)).rejects.toThrow(ActionabilityError);
     }
-    // The ADE's Record screen disables the `anthropic` option when there is no
+    // The app's Record screen disables the `anthropic` option when there is no
     // credential, which is what makes this reachable at all (P5-F2).
     expect(snapshot.nodes.some((node) => node.states.includes("disabled"))).toBe(true);
   });
 
   it("types by setting the value, and falls back to keystrokes", async () => {
     /*
-     * The Surface explorer's intent field (T10.3): the one text field the ADE
+     * The Surface explorer's intent field (T10.3): the one text field the app
      * has that a person types a sentence into, and the control REQ-BEH-4's
      * "every call records an intent" is about.
      */
@@ -286,7 +286,7 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
       score: 1,
     });
     expect(await surface.read("text", ref)).toBe("Stop recording");
-    expect(await surface.read("title")).toBe("Yam ADE");
+    expect(await surface.read("title")).toBe("Yam");
     await expect(surface.read("url")).rejects.toThrow(NavigationError);
   });
 
@@ -316,7 +316,7 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
   it("reports the window it is on, and restores by activating it", async () => {
     const { surface, bridge } = await open();
     const state = await surface.state();
-    expect(state).toEqual({ kind: "desktop", windowTitle: "Yam ADE", windowIndex: 0 });
+    expect(state).toEqual({ kind: "desktop", windowTitle: "Yam", windowIndex: 0 });
 
     await surface.restore(state);
     expect(bridge.commands.filter((one) => one.kind === "activate").length).toBeGreaterThan(1);
@@ -336,7 +336,7 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
 
   it("takes a screenshot through the OS, and does not pretend to mask it", async () => {
     const { surface, bridge } = await open();
-    await surface.screenshot("/tmp/ade.png", ["r1"]);
-    expect(bridge.screenshots).toEqual(["/tmp/ade.png"]);
+    await surface.screenshot("/tmp/app.png", ["r1"]);
+    expect(bridge.screenshots).toEqual(["/tmp/app.png"]);
   });
 });

@@ -1,5 +1,5 @@
 /**
- * The tree mapping, against the ADE's recorded accessibility trees (T6.2).
+ * The tree mapping, against the app's recorded accessibility trees (T6.2).
  *
  * Everything here is a pure function of an `AxNode[]` (`src/tree.ts`), so the
  * missing Accessibility permission costs nothing: the input is a real tree from
@@ -30,7 +30,7 @@ const convert = (screen: Parameters<typeof recordedWindow>[0], interactiveOnly =
   });
 
 describe("roles are normalised to the ARIA vocabulary (REQ-SURF-4, LLD §2.2)", () => {
-  it("maps every AXRole the ADE produces", () => {
+  it("maps every AXRole the app produces", () => {
     for (const screen of ADE_SCREENS) {
       const unmapped = [...new Set(nodesOf(screen).map((node) => node.role))].filter(
         (role) => AX_ROLE_MAP[role] === undefined,
@@ -44,7 +44,7 @@ describe("roles are normalised to the ARIA vocabulary (REQ-SURF-4, LLD §2.2)", 
 
   it("prefers the subrole, because it is the closer answer", () => {
     // Chromium publishes an ARIA `tab` as `AXRadioButton` with the subrole
-    // `AXTabButton`. The role alone would call the ADE's screen tabs radios.
+    // `AXTabButton`. The role alone would call the app's screen tabs radios.
     expect(roleOf({ role: "AXRadioButton", subrole: "AXTabButton" })).toBe("tab");
     expect(roleOf({ role: "AXRadioButton" })).toBe("radio");
     expect(roleOf({ role: "AXTextField", subrole: "AXSearchField" })).toBe("searchbox");
@@ -57,9 +57,9 @@ describe("roles are normalised to the ARIA vocabulary (REQ-SURF-4, LLD §2.2)", 
     expect(roleOf({ role: "AXSomethingNew" })).toBe("generic");
   });
 
-  it("gives the ADE's rail rows the role `button` and its view tabs `tab` (T10.3)", () => {
+  it("gives the app's rail rows the role `button` and its view tabs `tab` (T10.3)", () => {
     /*
-     * The eleven screen tabs are gone (T10.3). The ADE is a rail of eight
+     * The eleven screen tabs are gone (T10.3). The app is a rail of eight
      * `<button>`s — a rail item is a button with `aria-current`, not a link,
      * because nothing navigates — and the only real tabs left are the Flows
      * screen's three views.
@@ -145,7 +145,7 @@ describe("automationId (LLD §3.3, §7.5)", () => {
     expect(automationIdOf(base)).toBeUndefined();
   });
 
-  it("gives the ADE's gateway control the id its markup has", () => {
+  it("gives the app's gateway control the id its markup has", () => {
     // `<select id="record-gateway" aria-label="Gateway">` — the id wins, because
     // an id is an identity and a label is wording (P5-F2, REQ-ADE-4).
     const gateway = convert("record").find(
@@ -209,7 +209,7 @@ describe("the snapshot shape (LLD §2.2)", () => {
     const budgeted = convertTree(nodesOf("project"), {
       maxNodes: 20,
       interactiveOnly: false,
-      windowTitle: "Yam ADE",
+      windowTitle: "Yam",
     });
     expect(budgeted).toHaveLength(20);
     expect(budgeted[0]!.role).toBe("window");
@@ -219,25 +219,25 @@ describe("the snapshot shape (LLD §2.2)", () => {
 describe("controlPath (LLD §3.3, §7.5)", () => {
   it("starts at the window title", () => {
     const nodes = convert("record");
-    expect(nodes[0]!.controlPath).toBe("Window[Yam ADE]");
-    expect(nodes.every((node) => node.controlPath.startsWith("Window[Yam ADE]"))).toBe(true);
+    expect(nodes[0]!.controlPath).toBe("Window[Yam]");
+    expect(nodes.every((node) => node.controlPath.startsWith("Window[Yam]"))).toBe(true);
   });
 
   it("addresses a named element by its name and an anonymous one by its index", () => {
     const raw: AxNode[] = [
-      { parent: -1, role: "AXWindow", title: "Yam ADE" },
+      { parent: -1, role: "AXWindow", title: "Yam" },
       { parent: 0, role: "AXGroup" },
       { parent: 0, role: "AXGroup" },
       { parent: 2, role: "AXButton", title: "Stop recording" },
     ];
     const children = childIndex(raw);
-    expect(controlPathOf(raw, 2, children, "Yam ADE")).toBe("Window[Yam ADE]/AXGroup[1]");
-    expect(controlPathOf(raw, 3, children, "Yam ADE")).toBe(
-      "Window[Yam ADE]/AXGroup[1]/AXButton[Stop recording]",
+    expect(controlPathOf(raw, 2, children, "Yam")).toBe("Window[Yam]/AXGroup[1]");
+    expect(controlPathOf(raw, 3, children, "Yam")).toBe(
+      "Window[Yam]/AXGroup[1]/AXButton[Stop recording]",
     );
   });
 
-  it("identifies the ADE's Stop recording button", () => {
+  it("identifies the app's Stop recording button", () => {
     const button = convert("record").find((node) => node.name === "Stop recording");
     expect(button?.role).toBe("button");
     expect(button?.controlPath).toContain("AXButton[Stop recording]");

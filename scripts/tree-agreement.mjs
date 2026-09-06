@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * The ADE's renderer tree, over CDP, against its accessibility snapshot
+ * The app's renderer tree, over CDP, against its accessibility snapshot
  * (T11.5, REQ-SELF-3, LLD §13.9).
  *
  *   node scripts/tree-agreement.mjs [--json]
  *
  * > What stays external on purpose: the ground-truth keys of the healing eval,
  * > axe-core on the component sheet, and **the tree-agreement oracle, which
- * > reads the ADE's renderer tree over CDP and compares roles, names, and ids
+ * > reads the app's renderer tree over CDP and compares roles, names, and ids
  * > with the AX or UIA snapshot of the same screen**. Those three sit below the
  * > surface and are what keeps the gate from grading its own homework.
  *
@@ -31,7 +31,7 @@
  * tree is right to leave it out.
  *
  * Exit 0 when they agree, 1 when they do not, 2 when the host cannot be asked —
- * no macOS, no packaged ADE, no accessibility permission, a locked display.
+ * no macOS, no packaged app, no accessibility permission, a locked display.
  */
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -41,8 +41,8 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const json = args.includes("--json");
-const bundle = join(ROOT, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
-const executable = join(bundle, "Contents", "MacOS", "Yam ADE");
+const bundle = join(ROOT, "apps", "desktop", "out", "Yam-darwin-arm64", "Yam.app");
+const executable = join(bundle, "Contents", "MacOS", "Yam");
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 const project = join(ROOT, "evals", "fixtures");
 const PORT = 9800 + Math.floor(Math.random() * 150);
@@ -56,7 +56,7 @@ if (process.platform !== "darwin") {
   unreachable("The tree-agreement oracle compares an AX snapshot; that needs macOS.");
 }
 if (!existsSync(executable)) {
-  unreachable(`The ADE is not packaged (${executable}). Run \`pnpm --filter @svatah/yam-ade package\`.`);
+  unreachable(`The app is not packaged (${executable}). Run \`pnpm --filter @svatah/yam-desktop package\`.`);
 }
 if (!existsSync(cli)) unreachable("Run `pnpm -r build` first.");
 
@@ -68,7 +68,7 @@ const alive = () =>
 
 function stop() {
   if (alive().length === 0) return;
-  spawnSync("osascript", ["-e", 'tell application id "com.electron.yam-ade" to quit'], {
+  spawnSync("osascript", ["-e", 'tell application id "com.electron.yam" to quit'], {
     encoding: "utf8",
   });
   for (let waited = 0; waited < 20_000 && alive().length > 0; waited += 250) {
@@ -77,14 +77,14 @@ function stop() {
   if (alive().length > 0) spawnSync("pkill", ["-f", executable], { encoding: "utf8" });
 }
 
-/* ── 1. one ADE, with a debugging port and the accessibility tree published ── */
+/* ── 1. one app, with a debugging port and the accessibility tree published ── */
 
 stop();
 const environment = {
   YAM_A11Y: "1",
-  YAM_ADE_DEBUG: "1",
+  YAM_APP_DEBUG: "1",
   YAM_CLI: cli,
-  YAM_ADE_PROJECT: project,
+  YAM_APP_PROJECT: project,
 };
 const open = ["-n", "-F"];
 for (const [name, value] of Object.entries(environment)) open.push("--env", `${name}=${value}`);
@@ -112,7 +112,7 @@ async function page() {
 const target = await page();
 if (target === undefined) {
   stop();
-  unreachable(`The ADE published no DevTools endpoint on ${PORT} within 45 s.`);
+  unreachable(`The app published no DevTools endpoint on ${PORT} within 45 s.`);
 }
 
 /* ── 2. the renderer's own controls, over CDP ─────────────────────────────── */
@@ -124,7 +124,7 @@ const renderer = context?.pages()[0];
 if (renderer === undefined) {
   await browser.close();
   stop();
-  unreachable("The ADE's browser context has no page.");
+  unreachable("The app's browser context has no page.");
 }
 
 // Wait for the project, so both sides are looking at the same screen.
@@ -235,9 +235,9 @@ try {
     ...DEFAULT_CONFIG,
     project: "tree-agreement",
     adapter: "ax",
-    app: { processName: "Yam ADE" },
+    app: { processName: "Yam" },
   });
-  await surface.open({ processName: "Yam ADE" });
+  await surface.open({ processName: "Yam" });
   snapshot = await surface.snapshot();
 } catch (error) {
   stop();

@@ -11,7 +11,7 @@ in the code rather than in a review:
    and an id in the `automationId` form.** `requireNamed` throws in development
    when either is missing; `test/named.test.tsx` renders every component without
    one to show it. This is the rule the Phase 8 verification found three
-   violations of on the ADE's Project screen.
+   violations of on the app's Project screen.
 2. **A status colour never appears without a word.** `Pill` refuses an empty
    label. There is no way through this package to draw a bare coloured dot.
 

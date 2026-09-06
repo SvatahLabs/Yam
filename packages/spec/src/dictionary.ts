@@ -19,7 +19,7 @@
  *
  * The dictionary does not import the bindings store: `@svatah/yam-spec` is module
  * (b) and the store is module (a) (LLD §1). It takes ids and phrases as data,
- * which also means the service and the ADE can build one from anything.
+ * which also means the service and the app can build one from anything.
  */
 import { elementId, phraseKey } from "./normalise.js";
 import { diagnostic, type Diagnostic } from "./diagnostics.js";

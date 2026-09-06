@@ -8,11 +8,11 @@
  *
  * Nothing here computes a number, a status word or a label. Every string is the
  * model's; what this decides is which pane it belongs in and how wide its column
- * is, which is a terminal's business and not the ADE's.
+ * is, which is a terminal's business and not the app's.
  *
  * `select` is what `Enter` does to a row: the screen parameters to re-load with.
  * Selection is a *screen parameter* in both renderers (§13.7), so opening a row
- * in the cockpit and clicking it in the ADE reach the same state.
+ * in the cockpit and clicking it in the app reach the same state.
  */
 import type { StatusTone } from "@svatah/yam-ui-tokens";
 import {
@@ -1039,7 +1039,7 @@ function importing(state: ImportState): PaneModel {
         heading("the same thing from a terminal"),
         {
           key: "cli",
-          cells: [text(`yam migrate ${state.root ?? "<dest>"} --from-ade <src>`, { grow: true })],
+          cells: [text(`yam migrate ${state.root ?? "<dest>"} --from-prototype <src>`, { grow: true })],
         },
       ],
     },

@@ -1,0 +1,39 @@
+# The same control, the same id, the other adapter (T11.2, LLD §13.9).
+#
+# The AX side binds `automationId`, which on macOS Chromium publishes as
+# `AXDOMIdentifier` — the DOM `id`. So the web side binds a `css` `#id`, and it
+# is the *same fact about the application* said in the vocabulary each adapter
+# has. That is what makes a parity gate a comparison rather than two suites.
+schemaVersion: "1.0.0"
+id: "app.flows-rail-item"
+phrases:
+  - "the Flows rail item"
+entries:
+  - candidates:
+      - by: "css"
+        value: "#rail-flows"
+        score: 0.99
+    context:
+      platform: "web"
+      pattern: "/"
+      hash: "05a407a3efb2c5ca888b4bd700bb2b32f32546445e710e86d6a97736593be8ee"
+    fingerprint:
+      tag: "button"
+      attrs:
+        id: "rail-flows"
+      text: ""
+      neighbours:
+        before: []
+        after: []
+      rolePath: []
+      box: [0, 0, 0, 0]
+      index: 0
+    provenance:
+      at: "2026-09-05T00:00:00.000Z"
+      model: "none"
+      promptVersion: "seeded"
+      tokensIn: 0
+      tokensOut: 0
+      costUsd: 0
+    recordedAt: "2026-09-05T00:00:00.000Z"
+    verified: false

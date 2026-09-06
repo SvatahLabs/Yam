@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
- * Seed `evals/self`'s ADE bindings from the recorded desktop cases (T11.4,
+ * Seed `evals/self`'s APP_DIR bindings from the recorded desktop cases (T11.4,
  * LLD §13.9).
  *
  *   node scripts/seed-self-bindings.mjs
  *
- * > Its bindings for the ADE are seeded from `automationId`s with no model and
+ * > Its bindings for the app are seeded from `automationId`s with no model and
  * > no recording.
  *
- * `evals/grounding/desktop-cases.jsonl` already holds every control of the ADE
+ * `evals/grounding/desktop-cases.jsonl` already holds every control of the app
  * with its id, its role and the phrase a person would write — read from the
  * real application by `scripts/desktop-grounding-cases.mjs`. A binding seeded
  * from one of those is the id, the phrase, and nothing invented: no box nobody
  * measured, no neighbours nobody read, and `verified: false` until
- * `yam bindings verify` says otherwise against a running ADE.
+ * `yam bindings verify` says otherwise against a running APP_DIR.
  *
  * Written by a script rather than by hand because there are eighty of them and
  * because a hand-copied id is a typo waiting to be a flake.
@@ -24,7 +24,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const out = join(ROOT, "evals", "self", "bindings", "ade");
+const out = join(ROOT, "evals", "self", "bindings", "app");
 const cases = ["desktop-cases.jsonl", "desktop-answers.jsonl"].flatMap((name) => {
   const path = join(ROOT, "evals", "grounding", name);
   try {
@@ -49,7 +49,7 @@ const NATIVE_ROLE = {
   heading: "AXHeading",
 };
 
-/** `rail-flows` → `ade.rail-flows`, and one file per control. */
+/** `rail-flows` → `app.rail-flows`, and one file per control. */
 const byElement = new Map();
 for (const one of cases) {
   if (one.expect !== "present" || one.element === undefined) continue;
@@ -61,7 +61,7 @@ for (const one of cases) {
 /*
  * A phrase that names two controls names neither.
  *
- * The generated phrase comes from a control's accessible name, and the ADE has
+ * The generated phrase comes from a control's accessible name, and the app has
  * two that say the same thing: the rail's "Import prototype database" row and
  * the Import screen's button of that name. A store with both would compile
  * every sentence using it to `W_AMBIGUOUS_TARGET` — so the phrase is dropped
@@ -95,7 +95,7 @@ const template = (control) => `# Seeded from an \`automationId\`, with no model 
 #
 # Written by \`node scripts/seed-self-bindings.mjs\` from
 # \`evals/grounding/desktop-cases.jsonl\`, which \`pnpm grounding:desktop-cases\`
-# reads out of the real ADE. The ADE's controls all carry an id a rewording
+# reads out of the real app. The app's controls all carry an id a rewording
 # cannot break — LLD §13.7's accessibility contract requires one on every
 # button, link, tab, field and row action — so a self-suite binding needs no
 # grounding: the id *is* the answer.
@@ -103,9 +103,9 @@ const template = (control) => `# Seeded from an \`automationId\`, with no model 
 # The fingerprint carries the role and the id and nothing invented: no box
 # nobody measured, no neighbours nobody read. \`verified: false\` says the same
 # thing in one word, and \`yam bindings verify\` is what turns it true against
-# a running ADE.
+# a running APP_DIR.
 schemaVersion: "1.0.0"
-id: "ade.${control.element}"
+id: "app.${control.element}"
 phrases:
 ${control.phrases.map((one) => `  - ${JSON.stringify(one)}`).join("\n")}
 entries:
@@ -115,7 +115,7 @@ entries:
         score: 0.99
     context:
       platform: "desktop"
-      pattern: ${JSON.stringify(control.window ?? "Yam ADE")}
+      pattern: ${JSON.stringify(control.window ?? "Yam")}
       hash: ${JSON.stringify(createHash("sha256").update(`seed:${control.element}`).digest("hex"))}
     fingerprint:
       tag: ${JSON.stringify(NATIVE_ROLE[control.role] ?? "AXUnknown")}

@@ -1,6 +1,6 @@
 # Builder surfaces — design source (Draft 2.11)
 
-The approved mockups for the ADE redesign, the `yam ui` terminal cockpit, and the design system beneath both. Reviewed and approved by the owner on 2026-09-05 on the design canvas: https://claude.ai/code/artifact/62b56432-b5c4-4226-9c37-444f6fa134f8
+The approved mockups for the app redesign, the `yam ui` terminal cockpit, and the design system beneath both. Reviewed and approved by the owner on 2026-09-05 on the design canvas: https://claude.ai/code/artifact/62b56432-b5c4-4226-9c37-444f6fa134f8
 
 - `base.css` — the tokens, type ramp, and component styles every artboard shares. This is the seed of `@svatah/yam-ui-tokens`.
 - `artboards/*.html` — one file per screen: Main (Flows), RecordReview, Run, Results, HealReview, Bindings, Agents, Palette, TUI, Tokens, Secondary. `@@TOPBAR`, `@@SIDEBAR`, `@@STATUS` are expanded by `build.mjs`.
@@ -15,7 +15,7 @@ expanded, and asks the browser the four questions the Phase 10 verification's F4
 was: a toolbar is one row with nothing past its end, its title keeps twelve
 characters where it is cut at all, an inspector's contents are inside the
 inspector, and nothing is past the edge of the 1440 px frame. Those are the same
-rules `apps/ade/test/shell.spec.ts` measures on the built application, so a
+rules `apps/desktop/test/shell.spec.ts` measures on the built application, so a
 design that fails them is a design the build cannot be held to.
 
 `pnpm artboards --shoot <dir>` writes a PNG of each one beside the answers.

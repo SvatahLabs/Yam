@@ -295,7 +295,7 @@ describe("what the compiler will not phrase, it says out loud", () => {
 /**
  * `yam trajectory compile` — the same compile, through the command line.
  *
- * The ADE's "compile to proposal" (T5.8) and a person at a terminal call one
+ * The app's "compile to proposal" (T5.8) and a person at a terminal call one
  * function, which is the rule LLD §13.5 states for the service and §15 for MCP:
  * an agent and a person must get the same artifact.
  */

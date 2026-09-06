@@ -1,5 +1,5 @@
 /**
- * The desktop conformance suite, against the ADE's recorded trees (T6.2,
+ * The desktop conformance suite, against the app's recorded trees (T6.2,
  * REQ-SURF-3, REQ-ADE-6, LLD §14, §16).
  *
  * ## What this is, and what it is not
@@ -9,17 +9,17 @@
  * describes. Every case, every check, the real runner and the real report.
  *
  * It is **not** the conformance result REQ-ADP-7 asks for. That needs the macOS
- * Accessibility permission and a running ADE, and the command for it is in
+ * Accessibility permission and a running APP_DIR, and the command for it is in
  * `docs/spec/progress/phase-6.md` beside the reason it could not be run here.
- * A green run of this file says the suite and the adapter agree about the ADE's
+ * A green run of this file says the suite and the adapter agree about the app's
  * accessibility tree; it does not say `osascript` reads that tree correctly.
  */
 import { describe, expect, it } from "vitest";
 import { DESKTOP_CASES, runSurfaceConformance } from "@svatah/yam-conformance";
 import { AxSurface } from "../src/index.js";
-import { ADE_SCREENS, recordedBridge, type AdeScreen } from "./recorded.js";
+import { ADE_SCREENS, recordedBridge, type AppScreen } from "./recorded.js";
 
-describe("the desktop conformance suite against the recorded ADE (T6.2)", () => {
+describe("the desktop conformance suite against the recorded APP_DIR (T6.2)", () => {
   it("runs every case, and every check holds", async () => {
     /*
      * The bridge maps a press on a **rail item** to the screen it opens, by
@@ -32,7 +32,7 @@ describe("the desktop conformance suite against the recorded ADE (T6.2)", () => 
      * `explorer` — are reached through the palette's `Go to` rows, and those are
      * mapped the same way.
      */
-    const byPath = new Map<string, AdeScreen>();
+    const byPath = new Map<string, AppScreen>();
     const bridge = recordedBridge({
       screen: "flows",
       onCommand: (command) => {
@@ -42,11 +42,11 @@ describe("the desktop conformance suite against the recorded ADE (T6.2)", () => 
       },
     });
 
-    const surface = new AxSurface({ processName: "Yam ADE", bridge });
-    await surface.open({ kind: "desktop", processName: "Yam ADE" } as never);
+    const surface = new AxSurface({ processName: "Yam", bridge });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
 
     /** Which fixture each navigable control opens, by `automationId`. */
-    const screens: Record<string, AdeScreen> = {
+    const screens: Record<string, AppScreen> = {
       "rail-flows": "flows",
       "rail-runs": "results",
       "rail-bindings": "bindings",
@@ -64,7 +64,7 @@ describe("the desktop conformance suite against the recorded ADE (T6.2)", () => 
       /*
        * Pressing Run on the Flows screen serves the Run screen (T12.3).
        *
-       * `ade.result` makes a run before it reads the table, because the branch
+       * `app.result` makes a run before it reads the table, because the branch
        * that reads rows was never exercised otherwise. The stand-in has to
        * behave like the application here too, or the case would wait three
        * minutes for a screen a recording will never change to.
@@ -107,8 +107,8 @@ describe("the desktop conformance suite against the recorded ADE (T6.2)", () => 
       baseUrl: "",
       cases: DESKTOP_CASES,
       openSurface: async () => {
-        const one = new AxSurface({ processName: "Yam ADE", bridge });
-        await one.open({ kind: "desktop", processName: "Yam ADE" } as never);
+        const one = new AxSurface({ processName: "Yam", bridge });
+        await one.open({ kind: "desktop", processName: "Yam" } as never);
         return one;
       },
     });
@@ -127,14 +127,14 @@ describe("the desktop conformance suite against the recorded ADE (T6.2)", () => 
 
   it("covers the five flows LLD §16 names, and nothing else claims to be one", () => {
     expect(DESKTOP_CASES.map((one) => one.id)).toEqual([
-      "ade.snapshot",
-      "ade.project",
-      "ade.flow",
-      "ade.run",
-      "ade.result",
-      "ade.api-client",
-      "ade.inspector",
-      "ade.no-navigation",
+      "app.snapshot",
+      "app.project",
+      "app.flow",
+      "app.run",
+      "app.result",
+      "app.api-client",
+      "app.inspector",
+      "app.no-navigation",
     ]);
   });
 });

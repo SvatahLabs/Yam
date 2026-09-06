@@ -295,7 +295,7 @@ WaitFor
  * > <predicate>` over a service response.
  *
  * Four of the parity gate's one-sided checks were the same shape: a button in
- * the ADE starts a *second* Yam run and the flow has no way to wait for it
+ * the app starts a *second* Yam run and the flow has no way to wait for it
  * and read its result. A run is a thing the local service answers about, so
  * what was missing was not a new kind of waiting but a subject: this polls the
  * named request until the value at the JSON path satisfies the predicate, or
@@ -841,7 +841,7 @@ QuotedString
  * A flow's step is one line — the file grammar says so (LLD §4.1) — so a value
  * with a newline in it has to be written with an escape, and until Draft 2.15
  * `\n` in a quoted string was a backslash followed by an `n`. "A flow is edited
- * and saved through the ADE" was a one-sided check because of it: typing a
+ * and saved through the app" was a one-sided check because of it: typing a
  * whole flow file into a text area is a multi-line value and nothing else.
  *
  * Four escapes and no more: `\n`, `\t`, `\"` and `\\`. Anything else after a

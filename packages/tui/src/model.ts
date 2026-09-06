@@ -4,7 +4,7 @@
  * The cockpit is a *renderer*: it owns which pane has focus, which row the
  * cursor is on, and whether the palette is open — and nothing else. Everything
  * a person reads on it is a `ScreenState` from `@svatah/yam-screens`, loaded by the
- * same `load()` the ADE calls.
+ * same `load()` the app calls.
  *
  * That separation is what `--json` is: printing this object's `state` prints
  * the model, and `tools/repo-checks/test/tui-pty.test.ts` compares it with what
@@ -90,7 +90,7 @@ export function moveCursor(ui: UiState, by: number, rows: number): UiState {
  * What `--json` prints, and what the model produces on its own.
  *
  * The screen's state, plus where the cockpit is looking. Nothing computed: a
- * field here that the model does not have would be a field the ADE cannot show,
+ * field here that the model does not have would be a field the app cannot show,
  * and REQ-ADE-13 is that every screen's state is available as JSON.
  */
 export function asJson(ui: UiState): Record<string, unknown> {

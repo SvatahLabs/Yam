@@ -1,10 +1,10 @@
 /**
- * The recorded ADE trees, and a bridge that replays one (T6.1).
+ * The recorded APP_DIR trees, and a bridge that replays one (T6.1).
  *
  * ## Where these came from, exactly
  *
- * `node scripts/record-desktop-tree.mjs --shape uia --screen <name>` launches the real ADE with
- * `YAM_A11Y=1`, opens `evals/fixtures` **through the ADE's own Recent-project
+ * `node scripts/record-desktop-tree.mjs --shape uia --screen <name>` launches the real app with
+ * `YAM_A11Y=1`, opens `evals/fixtures` **through the app's own Recent-project
  * button**, clicks the screen's tab, and reads Chromium's accessibility tree
  * over the DevTools protocol — roles, names, values, DOM ids, boxes — mapping it
  * into the `UiaNode` shape this adapter consumes: `ControlType`, `Name`,
@@ -29,7 +29,7 @@ import type { UiaAvailability, UiaBridge, UiaCommand, UiaNode, UiaWindow } from 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
 
 /** The five screens LLD §16's desktop conformance flows visit, plus Record. */
-export type AdeScreen =
+export type AppScreen =
   | "project"
   | "flows"
   | "run"
@@ -40,7 +40,7 @@ export type AdeScreen =
   | "palette"
   | "bindings";
 
-export const ADE_SCREENS: readonly AdeScreen[] = [
+export const ADE_SCREENS: readonly AppScreen[] = [
   "project",
   "flows",
   "run",
@@ -52,8 +52,8 @@ export const ADE_SCREENS: readonly AdeScreen[] = [
   "bindings",
 ];
 
-export function recordedWindow(screen: AdeScreen): UiaWindow {
-  const text = readFileSync(join(FIXTURES, `ade-${screen}.json`), "utf8");
+export function recordedWindow(screen: AppScreen): UiaWindow {
+  const text = readFileSync(join(FIXTURES, `app-${screen}.json`), "utf8");
   const window = JSON.parse(text) as Omit<UiaWindow, "cost">;
   /*
    * A recorded tree has a node count and no wall time, and says so:
@@ -80,7 +80,7 @@ export function recordedWindow(screen: AdeScreen): UiaWindow {
 
 export interface RecordedBridgeOptions {
   /** The screen the window starts on. */
-  readonly screen?: AdeScreen;
+  readonly screen?: AppScreen;
   readonly availability?: UiaAvailability;
   /**
    * What a command does to the window.
@@ -90,16 +90,16 @@ export interface RecordedBridgeOptions {
    * test says "pressing the Run tab shows the Run screen" without needing the
    * application.
    */
-  readonly onCommand?: (command: UiaCommand, current: AdeScreen) => AdeScreen | void;
+  readonly onCommand?: (command: UiaCommand, current: AppScreen) => AppScreen | void;
 }
 
 export interface RecordedBridge extends UiaBridge {
   /** Every command the adapter sent, in order. */
   readonly commands: UiaCommand[];
   /** Which screen the window is showing now. */
-  screen(): AdeScreen;
+  screen(): AppScreen;
   /** Put the bridge on a screen, for a test that has to learn two trees. */
-  setScreen(screen: AdeScreen): void;
+  setScreen(screen: AppScreen): void;
   /** Files `screenshot()` was asked to write. */
   readonly screenshots: string[];
 }
@@ -140,7 +140,7 @@ function indexOfPath(nodes: readonly UiaNode[], path: readonly number[]): number
  * Windows does change the value; so does this.
  */
 export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBridge {
-  let screen: AdeScreen = options.screen ?? "record";
+  let screen: AppScreen = options.screen ?? "record";
   const commands: UiaCommand[] = [];
   const screenshots: string[] = [];
   /** `screen:pathIndex` → the value set on it. */
@@ -150,7 +150,7 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
     commands,
     screenshots,
     screen: () => screen,
-    setScreen: (one: AdeScreen) => {
+    setScreen: (one: AppScreen) => {
       screen = one;
     },
     async availability(): Promise<UiaAvailability> {

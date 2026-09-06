@@ -13,7 +13,7 @@ listed by hand.
   must know about, and the conformance fixture changes with it.
 - **The tag** `v<version>` is created at the published commit and nowhere else.
   A tag is a claim that a version exists on a registry.
-- **What a release contains**: the tarballs, the ADE installers for three
+- **What a release contains**: the tarballs, the app installers for three
   operating systems, and every report under `reports/`, generated on the
   release's commit.
 

@@ -2,7 +2,7 @@
  * The self project survives a clean checkout (P11-F1, LLD §13.9).
  *
  * The Phase 11 verification ran `pnpm self:bite` and `pnpm self:record` from a
- * detached worktree and both crashed before they reached the ADE:
+ * detached worktree and both crashed before they reached the app:
  *
  *   ENOENT: no such file or directory, … 'evals/self/steps'
  *   ENOENT: no such file or directory, … 'evals/self/api'
@@ -12,7 +12,7 @@
  * each, and a copy that tolerates a missing *optional* part — and so is this:
  * either half alone leaves a way to break it again.
  *
- * The scripts themselves need a packaged ADE and several minutes; what this
+ * The scripts themselves need a packaged app and several minutes; what this
  * asserts is the thing that failed, which is the copy, in milliseconds.
  */
 import { describe, expect, it } from "vitest";

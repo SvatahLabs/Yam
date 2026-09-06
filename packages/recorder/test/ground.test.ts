@@ -540,13 +540,13 @@ describe("prompt g-1 (Draft 1 §9.2)", () => {
  * question was asked without saying which screen it was about.
  */
 describe("a desktop session grounds by window (T11.3)", () => {
-  const ade = () =>
-    new RecordedSurface(recordedPage("/login"), { kind: "desktop", windowTitle: "Yam ADE" });
+  const desktopApp = () =>
+    new RecordedSurface(recordedPage("/login"), { kind: "desktop", windowTitle: "Yam" });
 
   it("asks about the window, not the page", async () => {
     const { gateway, questions } = reads(() => null);
-    await ground({ id: "sign-in", phrase: "the Sign in button" }, ade(), options(gateway));
-    expect(questions[0]).toContain("Window: Yam ADE");
+    await ground({ id: "sign-in", phrase: "the Sign in button" }, desktopApp(), options(gateway));
+    expect(questions[0]).toContain("Window: Yam");
     expect(questions[0]).not.toContain("Page:");
   });
 
@@ -558,7 +558,7 @@ describe("a desktop session grounds by window (T11.3)", () => {
   });
 
   it("keys the binding on the window title, not on `/`", async () => {
-    const surface = ade();
+    const surface = desktopApp();
     const first = (await surface.snapshot()).nodes.find((one) => one.role === "button");
     const { entry, decision } = await ground(
       { id: "sign-in", phrase: "the Sign in button" },
@@ -568,6 +568,6 @@ describe("a desktop session grounds by window (T11.3)", () => {
     expect(decision.outcome, JSON.stringify(decision)).toBe("grounded");
     expect(entry?.context.platform).toBe("desktop");
     // A desktop pattern has no segments to generalise; `/` is not where it is.
-    expect(entry?.context.pattern).toBe("Yam ADE");
+    expect(entry?.context.pattern).toBe("Yam");
   });
 });

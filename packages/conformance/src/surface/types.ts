@@ -47,7 +47,7 @@ export interface RecordedElement {
   /**
    * And the path it was addressed by (LLD §7.5's `controlPath` candidate).
    *
-   * The role path alone is too coarse for the ADE T10.3 left: the toolbar and
+   * The role path alone is too coarse for the app T10.3 left: the toolbar and
    * the session panel are both groups inside the workspace, so a control moved
    * between them has an identical `rolePath` and a different `controlPath` —
    * and it is the `controlPath` a desktop binding would have matched on.
@@ -63,7 +63,7 @@ export interface HealOutcome {
 }
 
 export interface DesktopHealing {
-  /** Which ADE variant this window is showing: 0 records, 1 and 2 relocalize. */
+  /** Which APP_DIR variant this window is showing: 0 records, 1 and 2 relocalize. */
   readonly variant: number;
   /** Fingerprint one element, with the ground-truth attribute excluded. */
   fingerprint(surface: AgentSurface, ref: Ref): Promise<Fingerprint>;
@@ -123,7 +123,7 @@ export interface ConformanceCase {
   /** Capability flags the case needs; skipped, not failed, when the adapter lacks one. */
   readonly requires?: readonly string[];
   /**
-   * Which ADE accessibility variants this case runs at (LLD §16); `[0]` by
+   * Which APP_DIR accessibility variants this case runs at (LLD §16); `[0]` by
    * default, which is every case that is not a healing case. A case is
    * *skipped* at the other variants rather than dropped, so one report can be
    * read against another and a missing case is visible.

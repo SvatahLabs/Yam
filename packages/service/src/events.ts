@@ -5,11 +5,11 @@
  * `record.decision`, `record.candidates`, `heal.proposal`, `run.summary`, `log`."
  *
  * A run is the reason this exists: a client that had to poll `GET /runs/:id`
- * would show a run that finished three seconds ago, and the ADE's whole point is
+ * would show a run that finished three seconds ago, and the app's whole point is
  * watching one happen (REQ-ADE-3).
  *
  * Both transports carry the same JSON. WebSocket is the primary because it is
- * bidirectional and the ADE will eventually send as well as receive; SSE is
+ * bidirectional and the app will eventually send as well as receive; SSE is
  * there because it survives proxies that eat upgrades, and because `curl` can
  * read it.
  */

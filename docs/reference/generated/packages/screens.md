@@ -2,7 +2,7 @@
 
 # `@svatah/yam-screens`
 
-The headless screen model: one set of screens, actions and keys behind the ADE, `yam ui`, the SDK and the CLI
+The headless screen model: one set of screens, actions and keys behind the app, `yam ui`, the SDK and the CLI
 
 - Source: [`packages/screens`](../../../../packages/screens) · README: [`packages/screens/README.md`](../../../../packages/screens/README.md)
 - Install: `npm install @svatah/yam-screens`

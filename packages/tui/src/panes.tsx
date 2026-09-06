@@ -2,7 +2,7 @@
  * The four panes (T9.4, T10.1, T10.2, REQ-TUI-1, LLD §13.7; the `TUI` artboard).
  *
  * > four numbered panes (tree, main, inspector, audit), `1–4` focus a pane,
- * > `Tab` cycles, `j/k` move, the same actions and keys as the ADE, the same
+ * > `Tab` cycles, `j/k` move, the same actions and keys as the app, the same
  * > palette.
  *
  * Each pane draws one `PaneContent` from `rows.ts` — a title, a list of lines,
@@ -11,7 +11,7 @@
  * of four switches: this file is *how a terminal draws a row*, and `rows.ts` is
  * *which rows a screen has*.
  *
- * There is no fetching here, no formatting decision and no arithmetic the ADE
+ * There is no fetching here, no formatting decision and no arithmetic the app
  * does differently — the numbers, the words and the status labels are the
  * model's. Colour comes from `@svatah/yam-ui-tokens`'s `STATUS` table, by the same
  * names the browser uses: a terminal has no CSS variables; it has the same seven

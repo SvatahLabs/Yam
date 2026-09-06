@@ -8,7 +8,7 @@
  * Phase 9 modelled these four thinly — enough for T9.1's "every screen loads
  * against the fake service" — and rendered neither. This file is what the
  * `Results`, `Bindings`, `RecordReview` and `HealReview` artboards actually
- * show, and it is the only place that decides what any of it means: the ADE and
+ * show, and it is the only place that decides what any of it means: the app and
  * `yam ui` draw these rows differently and agree about every word in them.
  *
  * ## The two that have no `GET`

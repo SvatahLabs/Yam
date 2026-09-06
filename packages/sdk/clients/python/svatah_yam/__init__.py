@@ -53,7 +53,7 @@ def connect(url: Optional[str] = None, token: Optional[str] = None) -> YamClient
     """Where the service is (LLD §13.8).
 
     `YAM_SERVICE_URL` and `YAM_SERVICE_TOKEN`, then the lock file named by
-    `YAM_SERVICE_LOCK`, which is what the ADE writes for a service it started.
+    `YAM_SERVICE_LOCK`, which is what the app writes for a service it started.
     In that order: an environment variable is what a CI job and an agent set.
     """
     resolved_url = url or os.environ.get("YAM_SERVICE_URL")

@@ -29,12 +29,12 @@ readable without running anything, and so a change to it is a diff someone sees.
 | Artefact | What it shows | Regenerate with |
 |---|---|---|
 | `sheet-dark.png`, `sheet-light.png` | The component sheet: every `@svatah/yam-ui` component in both themes (T9.2) | `pnpm sheet && pnpm sheet:shoot` |
-| `ade-flows.png`, `ade-run.png` | The **packaged** ADE's two rebuilt screens, opened on the fixtures project and the `comp` run (T9.4) | `pnpm --filter @svatah/yam-ade package && pnpm ade:shoot` |
+| `app-flows.png`, `app-run.png` | The **packaged** app's two rebuilt screens, opened on the fixtures project and the `comp` run (T9.4) | `pnpm --filter @svatah/yam-desktop package && pnpm app:shoot` |
 | `ui-flows.txt`, `ui-run.txt` | `yam ui`'s own frames for the same two screens, captured inside a pseudo-terminal (T9.4) | `pnpm ui:capture` |
-| `ade-flows-ax.png` | The ADE's window read through the AX adapter | `pnpm ade:shoot` on macOS **with the Screen Recording grant**; absent here, see `docs/spec/progress/phase-9.md` K1 |
+| `app-flows-ax.png` | The app's window read through the AX adapter | `pnpm app:shoot` on macOS **with the Screen Recording grant**; absent here, see `docs/spec/progress/phase-9.md` K1 |
 
 The two renderers' artefacts are of the same project and the same run, which is
-the comparison T9.5 is for: the ADE's flow list and `yam ui`'s pane 1 are the
+the comparison T9.5 is for: the app's flow list and `yam ui`'s pane 1 are the
 same seven files with the same statuses.
 
 `adapter-uia.md` is the only report here that records a **blocked** run rather
@@ -44,7 +44,7 @@ omitted the distinction would be the thing Phase 6's verification caught (F1,
 F8).
 
 `adapter-ax.md` was blocked through Phase 7 and is a live measurement as of
-Phase 8 (T8.2): conformant, against the *packaged* ADE, with the project screen
+Phase 8 (T8.2): conformant, against the *packaged* app, with the project screen
 read in under a second.
 
 `node scripts/eval-reports.mjs --out reports` regenerates all four; the suites

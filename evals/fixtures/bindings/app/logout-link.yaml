@@ -35,7 +35,7 @@ entries:
       index: 0
       neighbours:
         after:
-          - "Enterprise Schedule a build for your project. Project Core Adapters ADE Run build Build scheduled."
+          - "Enterprise Schedule a build for your project. Project Core Adapters app Run build Build scheduled."
         before:
           - "Schedule Build"
           - "Bookings"

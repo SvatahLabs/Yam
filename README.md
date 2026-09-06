@@ -130,7 +130,7 @@ compiler with three tiers; the runtime with policies, guards, compensation,
 checkpoints, resume and a redacted audit log; the three behaviors; the agent
 surface over six adapters (Playwright, WebDriver BiDi, HTTP, Appium, Windows UI
 Automation, macOS Accessibility) with a conformance suite; the recorder with
-model grounding; the ADE, an Electron application over the local service with
+model grounding; Yam.app, the Electron desktop client over the local service with
 installers for three operating systems; a Java conformance runtime; and Python
 and Java clients generated from the service's description.
 
@@ -172,7 +172,7 @@ Module (b) is the command line and everything under it:
 | [`@svatah/yam-service`](packages/service), [`-sdk`](packages/sdk), [`-screens`](packages/screens), [`-ui`](packages/ui), [`-ui-tokens`](packages/ui-tokens), [`-tui`](packages/tui) | The local service, its typed client, the screen model and its two renderers |
 | [`@svatah/yam-migrate`](packages/migrate) | v1 and v2 flows, and prototype databases, to v3 |
 
-Not published: [`@svatah/yam-ade`](apps/ade), whose installers are attached to
+Not published: [`@svatah/yam-desktop`](apps/desktop), whose installers are attached to
 the release; `sample-web`; and `@svatah/yam-repo-checks`.
 
 ## Repository layout
@@ -273,7 +273,7 @@ that report lists as one-sided (REQ-SELF-2, LLD §13.9).
 ```
 pnpm install --frozen-lockfile && pnpm browsers && pnpm -r build \
   && pnpm -r typecheck && pnpm -r test && pnpm lint     # the tree, on two Node LTSes
-pnpm --filter @svatah/yam-ade package                        # the conformance target
+pnpm --filter @svatah/yam-desktop package                        # the conformance target
 node packages/cli/dist/bin.js eval self --update    # or `pnpm self`
 ```
 

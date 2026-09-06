@@ -19,12 +19,12 @@ export interface ReviewNote {
     | "unmapped-locator"
     | "duplicate-locator"
     /* T6.6: what the prototype's database held and this could not carry across. */
-    | "ade-multiple-projects"
-    | "ade-unknown-browser"
-    | "ade-no-flows"
-    | "ade-unmapped-field"
-    | "ade-unparseable"
-    | "ade-not-imported";
+    | "prototype-multiple-projects"
+    | "prototype-unknown-browser"
+    | "prototype-no-flows"
+    | "prototype-unmapped-field"
+    | "prototype-unparseable"
+    | "prototype-not-imported";
   readonly message: string;
   /** The original line, when there is one. */
   readonly source?: string;
@@ -35,12 +35,12 @@ const HEADINGS: Record<ReviewNote["kind"], string> = {
   secret: "Values that became secrets",
   "unmapped-locator": "Locator forms that were dropped",
   "duplicate-locator": "Elements defined more than once",
-  "ade-multiple-projects": "The database holds more than one project",
-  "ade-unknown-browser": "Browsers with no equivalent",
-  "ade-no-flows": "The project had no flows",
-  "ade-unmapped-field": "Fields the prototype had and v3 does not",
-  "ade-unparseable": "Records that could not be read",
-  "ade-not-imported": "Tables that were deliberately left behind",
+  "prototype-multiple-projects": "The database holds more than one project",
+  "prototype-unknown-browser": "Browsers with no equivalent",
+  "prototype-no-flows": "The project had no flows",
+  "prototype-unmapped-field": "Fields the prototype had and v3 does not",
+  "prototype-unparseable": "Records that could not be read",
+  "prototype-not-imported": "Tables that were deliberately left behind",
 };
 
 const EXPLANATIONS: Record<ReviewNote["kind"], string> = {
@@ -59,20 +59,20 @@ const EXPLANATIONS: Record<ReviewNote["kind"], string> = {
   "duplicate-locator":
     "Two files defined the same element. The first definition was kept; check that it is " +
     "the one you want.",
-  "ade-multiple-projects":
+  "prototype-multiple-projects":
     "One project was imported. Run the import again with --project to bring another across; " +
     "each becomes its own directory, because a Yam project is a directory.",
-  "ade-unknown-browser":
+  "prototype-unknown-browser":
     "The prototype's browser names are Selenium's. Where one has no Playwright equivalent " +
     "the setting was left out rather than passed through to fail at run time.",
-  "ade-no-flows": "There was nothing under `flows/` to write.",
-  "ade-unmapped-field":
+  "prototype-no-flows": "There was nothing under `flows/` to write.",
+  "prototype-unmapped-field":
     "The prototype's record carried a field v3 has no equivalent for. It was dropped rather " +
     "than written into a file that would then fail to validate.",
-  "ade-unparseable":
+  "prototype-unparseable":
     "The prototype stored these as whatever was typed into an editor, so a record that is " +
     "not the shape it should be is normal. Each was skipped, not guessed at.",
-  "ade-not-imported":
+  "prototype-not-imported":
     "REQ-ADE-9: results and screenshots stay in the prototype. A `runs/` directory " +
     "reconstructed from another tool's database would look like something you could re-run " +
     "and diff, and would be neither.",

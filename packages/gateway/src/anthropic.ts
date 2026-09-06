@@ -160,7 +160,7 @@ export function anthropicGateway(options: AnthropicGatewayOptions = {}): Gateway
          * sentence about `apiKey, authToken, credentials, config, or profile`.
          *
          * That sentence is about the SDK's options, not about anything a
-         * caller of Yam did or can do, and it is what the ADE's Record
+         * caller of Yam did or can do, and it is what the app's Record
          * screen ends up showing when a person picks `anthropic` on a machine
          * with no key. `GatewayUnavailable` is the type every caller already
          * handles, and the message names the two things that fix it.

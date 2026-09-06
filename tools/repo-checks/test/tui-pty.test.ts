@@ -89,7 +89,7 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
    * `apps/sample-web` runs *in this process*, and a synchronous `spawnSync`
    * would block the event loop that has to answer the child's `page.goto` —
    * every step then fails with a navigation timeout against an application that
-   * is up. `apps/ade/test/parity.test.ts` records the same trap.
+   * is up. `apps/desktop/test/parity.test.ts` records the same trap.
    */
   const ran = await new Promise<{ code: number; output: string }>((done) => {
     let output = "";

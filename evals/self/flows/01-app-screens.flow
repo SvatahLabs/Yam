@@ -1,0 +1,80 @@
+# Every screen of the app, opened and read by Yam (T11.4, REQ-SELF-1).
+#
+# > flows covering every app screen's Validate items of Phases 9 and 10 through
+# > the AX adapter
+#
+# One story per screen, and each one is the same three things a person does:
+# reach it, see that it is the screen it should be, and see a control that only
+# that screen has. The rail reaches eight; the command palette reaches the four
+# that are not on it (LLD §13.7's information architecture, T10.3).
+#
+# ## What these are the *other side* of
+#
+# `apps/desktop/test/shell.spec.ts` has a Playwright case per screen — "flows opens
+# and every control on it is named and id'd" and its eleven siblings — and
+# `evals/self/checks.yaml` pairs them by check id. The two drive the same
+# packaged application through different oracles: this one through the
+# accessibility tree macOS publishes, that one through the DOM. A disagreement
+# is a finding, and the ids are how the gate knows which two answers to compare.
+#
+# The phrases are the desktop grounding cases' own, read out of the real app by
+# `pnpm grounding:desktop-cases`, and the bindings are seeded from the
+# `automationId`s by `node scripts/seed-self-bindings.mjs` — no model, no
+# recording (LLD §13.9).
+#
+# ## The number in the file name
+#
+# `yam run` executes a project's `test:` blocks in file order, and one
+# session serves the whole run — so a flow that ends with `Quit the app` has to
+# be the last one, or every flow after it drives an application that is not
+# there. `99-` says that out loud; `01-` and `02-` say the rest may run in any
+# order.
+
+# The project is opened once, by the first story, through the app's own Recent
+# list — the same gesture a person makes. Every story after it is on a window
+# that already has one.
+story: the Flows screen opens and shows its own controls
+  The first recent project should be visible
+  Click the first recent project
+  The Flows rail item should be visible
+  Click the Flows rail item
+  The Flows heading should be visible
+  The Save flow button should be visible
+
+story: the Runs screen opens and shows its own controls
+  Click the Runs rail item
+  The status: all button should be visible
+
+story: the Bindings screen opens and shows its own controls
+  Click the Bindings rail item
+  The Verify all bindings button should be visible
+
+story: the Agents screen opens and shows its own controls
+  Click the Agents and tools rail item
+  The Start the tool server button should be visible
+
+story: the API screen opens and shows its own controls
+  Click the API rail item
+  The Send request button should be visible
+
+story: the Data screen opens and shows its own controls
+  Click the Data rail item
+  The Save data button should be visible
+
+story: the Import screen opens and shows its own controls
+  Click the Import prototype database rail item
+  The Import the database button should be visible
+
+story: the Settings screen opens and shows its own controls
+  Click the Settings rail item
+  The Where this came from heading should be visible
+
+test: the app's eight rail screens
+  the Flows screen opens and shows its own controls
+  the Runs screen opens and shows its own controls
+  the Bindings screen opens and shows its own controls
+  the Agents screen opens and shows its own controls
+  the API screen opens and shows its own controls
+  the Data screen opens and shows its own controls
+  the Import screen opens and shows its own controls
+  the Settings screen opens and shows its own controls

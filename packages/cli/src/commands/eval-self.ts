@@ -14,13 +14,13 @@
  * ## Why the runners are per *source*, not per check
  *
  * A check's external side is a Playwright case, a vitest case, a script's exit
- * code. Running the suite that holds it once per check would run the ADE's
+ * code. Running the suite that holds it once per check would run the app's
  * Playwright suite thirty-eight times. So each **source** runs once and answers
  * with a map of name → verdict, and the catalogue says which name belongs to
  * which check. The same for the Yam side: one `yam run` per project, and
  * a story name per check.
  *
- * That also means a source that cannot run at all — no macOS, no packaged ADE,
+ * That also means a source that cannot run at all — no macOS, no packaged app,
  * a locked display — makes every check it carries `unreachable` *with the same
  * reason*, which is exactly what the one-sided list is for.
  *
@@ -182,19 +182,19 @@ function yamSource(project: string, options: { attach?: boolean } = {}): SourceS
       /*
        * The attaching side needs something to attach to (T11.5).
        *
-       * `evals/self/cdp` drives the ADE's *renderer* over CDP, and a renderer
+       * `evals/self/cdp` drives the app's *renderer* over CDP, and a renderer
        * has a DevTools endpoint only when the application was started with
-       * one. The AX side launches its own ADE through `app.launch`; this side
+       * one. The AX side launches its own APP_DIR through `app.launch`; this side
        * deliberately does not — a session that launched its own would be
        * reading a different application from the one the other side read,
        * which is the one thing a parity gate must not do. So the gate starts
        * one, points `YAM_CDP_URL` at it, and stops it afterwards.
        */
-      const ade = options.attach === true ? startAdeWithDebugging(root, io) : undefined;
-      if (ade?.error !== undefined) {
+      const desktopApp = options.attach === true ? startAppWithDebugging(root, io) : undefined;
+      if (desktopApp?.error !== undefined) {
         return {
           byName: new Map(),
-          unreachable: ade.error,
+          unreachable: desktopApp.error,
           wallMs: 0,
           command: `yam run ${project}`,
         };
@@ -203,9 +203,9 @@ function yamSource(project: string, options: { attach?: boolean } = {}): SourceS
       io.err(`  running ${project}…`);
       const ran = shell(process.execPath, [cli, "run", directory, "--host", "none"], {
         cwd: root,
-        ...(ade?.url === undefined ? {} : { env: { YAM_CDP_URL: ade.url } }),
+        ...(desktopApp?.url === undefined ? {} : { env: { YAM_CDP_URL: desktopApp.url } }),
       });
-      ade?.stop();
+      desktopApp?.stop();
 
       const runs = join(directory, "runs");
       const latest = existsSync(runs)
@@ -262,27 +262,27 @@ function yamSource(project: string, options: { attach?: boolean } = {}): SourceS
 }
 
 /**
- * A packaged ADE with a DevTools endpoint, for the attaching side (T11.5).
+ * A packaged app with a DevTools endpoint, for the attaching side (T11.5).
  *
  * Through `open` on macOS, because a GUI application forked from a process that
  * is not in the user's Aqua session never attaches to the WindowServer
  * (LLD §7.5) — and the point of this side is to drive the *same* application
  * the accessibility side drives, window and all.
  */
-function startAdeWithDebugging(
+function startAppWithDebugging(
   root: string,
   io: CommandIo,
 ): { url?: string; error?: string; stop: () => void } {
-  const bundle = join(root, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
-  const executable = join(bundle, "Contents", "MacOS", "Yam ADE");
+  const bundle = join(root, "apps", "desktop", "out", "Yam-darwin-arm64", "Yam.app");
+  const executable = join(bundle, "Contents", "MacOS", "Yam");
   const noop = { stop: () => undefined };
   if (process.platform !== "darwin") {
-    return { ...noop, error: "attaching to the ADE's renderer needs the packaged macOS build" };
+    return { ...noop, error: "attaching to the app's renderer needs the packaged macOS build" };
   }
   if (!existsSync(executable)) {
     return {
       ...noop,
-      error: `the ADE is not packaged (${executable}); run \`pnpm --filter @svatah/yam-ade package\``,
+      error: `the app is not packaged (${executable}); run \`pnpm --filter @svatah/yam-desktop package\``,
     };
   }
 
@@ -292,7 +292,7 @@ function startAdeWithDebugging(
       .filter((one) => one.trim() !== "");
   const stop = (): void => {
     if (alive().length === 0) return;
-    spawnSync("osascript", ["-e", 'tell application id "com.electron.yam-ade" to quit'], {
+    spawnSync("osascript", ["-e", 'tell application id "com.electron.yam" to quit'], {
       encoding: "utf8",
     });
     for (let waited = 0; waited < 20_000 && alive().length > 0; waited += 250) {
@@ -306,18 +306,18 @@ function startAdeWithDebugging(
   const open = ["-n", "-F"];
   /*
    * The *same* environment the accessibility side's `app.launch` gives it, and
-   * `YAM_ADE_PROJECT` is deliberately not in it (T11.5).
+   * `YAM_APP_PROJECT` is deliberately not in it (T11.5).
    *
-   * That variable opens a project *for* the ADE on ready, so the welcome screen
+   * That variable opens a project *for* the app on ready, so the welcome screen
    * never appears — and the self flows open the fixtures project through the
    * Recent list, which is the gesture T11.2's Validate names. Two sides looking
    * at applications that started differently is the one thing a parity gate
-   * must not do. `node scripts/seed-ade-recents.mjs` is what puts the project
+   * must not do. `node scripts/seed-app-recents.mjs` is what puts the project
    * in that list.
    */
   for (const [name, value] of Object.entries({
     YAM_A11Y: "1",
-    YAM_ADE_DEBUG: "1",
+    YAM_APP_DEBUG: "1",
     YAM_CLI: join(root, "packages", "cli", "dist", "bin.js"),
   })) {
     open.push("--env", `${name}=${value}`);
@@ -326,7 +326,7 @@ function startAdeWithDebugging(
   if (spawnSync("open", open, { encoding: "utf8" }).status !== 0) {
     return { ...noop, error: `\`open\` refused to launch ${bundle}` };
   }
-  io.err(`  started the ADE with a DevTools endpoint on ${port}…`);
+  io.err(`  started the app with a DevTools endpoint on ${port}…`);
 
   const url = `http://127.0.0.1:${port}`;
   for (let waited = 0; waited < 60_000; waited += 500) {
@@ -335,7 +335,7 @@ function startAdeWithDebugging(
     spawnSync(process.execPath, ["-e", "setTimeout(() => {}, 500)"]);
   }
   stop();
-  return { ...noop, error: `the ADE published no DevTools endpoint on ${port} within 60 s` };
+  return { ...noop, error: `the app published no DevTools endpoint on ${port} within 60 s` };
 }
 
 /** Playwright's JSON reporter, mapped test title → verdict. */
@@ -542,7 +542,7 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
    * desktop gate writes `reports/adapter-ax.md`. So a clean checkout was dirty
    * after running the contract's own gate, and a verifier reading `git status`
    * had to work out whether two modified files were a change or an echo (the
-   * Phase 11 verification, F3). This is the rule `ade:shoot` already follows:
+   * Phase 11 verification, F3). This is the rule `app:shoot` already follows:
    * committed artefacts are refreshed when somebody asks for that, and a run
    * that only wants an answer leaves the tree alone.
    */
@@ -710,8 +710,8 @@ function sourcesFor(catalogue: Catalogue, reportsDir: string): Record<string, So
     yam: yamSource("."),
     /** The same flows through the Playwright adapter attached over CDP. */
     "yam-cdp": yamSource("cdp", { attach: true }),
-    /** The ADE's own Playwright cases, over CDP against the packaged build. */
-    "ade-playwright": playwrightSource("apps/ade", "the ADE's Playwright cases"),
+    /** The app's own Playwright cases, over CDP against the packaged build. */
+    "app-playwright": playwrightSource("apps/desktop", "the app's Playwright cases"),
     /** The cockpit in a real pseudo-terminal, and `--json` against the model. */
     "tui-pty": vitestSource(
       "tools/repo-checks",
@@ -750,7 +750,7 @@ function sourcesFor(catalogue: Catalogue, reportsDir: string): Record<string, So
       "tree",
       "node",
       [join("scripts", "tree-agreement.mjs")],
-      "the ADE's renderer tree over CDP against its AX snapshot",
+      "the app's renderer tree over CDP against its AX snapshot",
     ),
     /** The live desktop conformance gate. */
     "desktop-gate": commandSource(

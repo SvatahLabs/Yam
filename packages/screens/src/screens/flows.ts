@@ -18,7 +18,7 @@
  *   * `GET /bindings` — the binding behind a step's target, verified or not.
  *   * `GET /flows/:file` — the text in the editor.
  *
- * A renderer adds nothing to this. That is the point of the model: the ADE and
+ * A renderer adds nothing to this. That is the point of the model: the app and
  * `yam ui` draw the same rows differently and agree about every word in them.
  */
 import { Sources, dotted, plural } from "../load.js";
@@ -125,7 +125,7 @@ export interface FlowsState extends ScreenStateBase {
    * `lines` is the *annotated* view — the gutter, the note, the lint warning —
    * and it is what a reader reads. This is what an editor edits, and what
    * `flows.save` sends back to `PUT /flows/:file`. Keeping the two apart is what
-   * lets the ADE draw the annotations beside a `<textarea>` without either of
+   * lets the app draw the annotations beside a `<textarea>` without either of
    * them being derived from the other and drifting: a round trip through
    * `lines` would lose a trailing newline the first time somebody saved.
    */
@@ -473,9 +473,9 @@ function FLOW_KEYS(): readonly Binding[] {
     { action: "record.start", key: "R", terminal: "R", description: "Record the selected flow" },
     { action: "heal.run", key: "H", terminal: "h", description: "Heal the last run" },
     /*
-     * `e` in the terminal, `⌘S` in the ADE (K6, T11.1).
+     * `e` in the terminal, `⌘S` in the app (K6, T11.1).
      *
-     * The two renderers edit a file the way their own medium does. The ADE has
+     * The two renderers edit a file the way their own medium does. The app has
      * a text area and a Save button; a terminal has `$EDITOR`, and a cockpit
      * that built its own modal editor inside Ink would be a worse `vi` nobody
      * asked for. `yam ui` opens the file in the editor a person already has,

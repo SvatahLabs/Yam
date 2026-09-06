@@ -28,12 +28,12 @@
  * ## The cost, twice measured and twice wrong before this
  *
  * Phase 6 walked the tree element by element, seventeen Apple events per
- * element: **650 ms per node**, and the ADE's smallest window took ten seconds.
+ * element: **650 ms per node**, and the app's smallest window took ten seconds.
  *
  * Phase 7 replaced that with bulk reads over System Events — `properties of
  * every UI element of C` and one event per optional attribute — and measured
- * **10.4 ms per node** on the ADE's 199-node menu-bar tree. That number was
- * honest and it was about the wrong tree. On the ADE's *project screen*, which
+ * **10.4 ms per node** on the app's 199-node menu-bar tree. That number was
+ * honest and it was about the wrong tree. On the app's *project screen*, which
  * is what §7.5's budget is about, the same bridge reads **51–55 ms per node**
  * and needs about 25 s for 488 nodes: a Chromium tree is mostly nested
  * containers, the walk costs per container, and containers are what it is made
@@ -46,7 +46,7 @@
  * `entire contents` yields specifiers one at a time and nothing else, which is
  * the per-element read again. So the section's other option is the one taken.
  *
- * Measured here on the packaged ADE's project screen with the fixtures project
+ * Measured here on the packaged app's project screen with the fixtures project
  * open: **587 nodes in 696 ms — 1.19 ms per node**, one `osascript` invocation,
  * no Apple events. Forty times cheaper than the read it replaces, and inside
  * §7.5's ten seconds with a factor of fourteen to spare.
@@ -197,10 +197,10 @@ export interface AxPermission {
  * > WindowServer, and the gate names that as the cause of its exit 2 rather than
  * > a launch failure.
  *
- * The desktop gate launches the ADE and polls for its window for sixty seconds.
+ * The desktop gate launches the app and polls for its window for sixty seconds.
  * On a locked display no application gets one — `loginwindow` owns the screen —
  * so the gate reported "showed no window within 60000 ms" and a reader had to
- * guess whether the ADE was broken or the machine was asleep. It happened to
+ * guess whether the app was broken or the machine was asleep. It happened to
  * both the Phase 9 implementer and its verifier, on different hosts, and cost
  * the live measurement twice.
  */
@@ -451,7 +451,7 @@ function attribute(element, name) {
  * itself* — the same cycle LLD §7.5's front-window search already refuses — so
  * a count of one meant "owns a window" for every application on a machine
  * nobody could read a window on. Measured on this defect: TextEdit, Notes,
- * System Settings and the ADE all answered one; none of them answered
+ * System Settings and the app all answered one; none of them answered
  * \`AXWindow\`.
  */
 function ownsRealWindow(pid) {
@@ -552,7 +552,7 @@ function run(argv) {
  *
  * `NSWorkspace.runningApplications`, filtered by `localizedName` and then by
  * *having a window*. An Electron application registers several processes under
- * one name — helpers among them — and "the first one called Yam ADE" is
+ * one name — helpers among them — and "the first one called Yam" is
  * sometimes a helper with no window, which read as a window that had not
  * appeared yet. Asking for the one with a window removes a whole class of
  * flake from the gate's launch poll.
@@ -958,7 +958,7 @@ function processWithWindow(se, name) {
   var matches = [];
   // System Events answers this under *its* accessibility permission and its own
   // load, and a busy answer is an empty list rather than an error: a click
-  // against a window the ADE's own log shows open answered no-window once in
+  // against a window the app's own log shows open answered no-window once in
   // roughly fifty (P11). An application does not lose its window between two
   // reads a fifth of a second apart, so an empty answer is asked again before
   // it is believed — and only a run of them is reported as a cause.
@@ -1041,7 +1041,7 @@ function run(argv) {
 }`;
 
 export interface OsascriptBridgeOptions {
-  /** The application process to drive: the ADE is `Yam ADE` (LLD §16). */
+  /** The application process to drive: the app is `Yam` (LLD §16). */
   readonly process: string;
   /** How long one Apple event may take. Default 20 s; `permission()` uses 5 s. */
   readonly timeoutMs?: number;
@@ -1284,7 +1284,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
        * A locked screen keeps every application's windows and refuses them all
        * to an accessibility client, so the owner count says "eleven
        * applications own a window" on a machine where nothing can be read —
-       * which is how a launch that had worked was reported as an ADE with no
+       * which is how a launch that had worked was reported as an app with no
        * window, four times, over two sessions.
        */
       if (answer.lockKnown === true && answer.locked === true) {
@@ -1455,7 +1455,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
        * System Events, and the two do not answer the same question. A **hidden**
        * application keeps its windows in `AXWindows` — a read of the tree
        * succeeds — and `System Events`' `windows()` is empty, because a hidden
-       * window is not one a user could click. Measured: the ADE's own log has
+       * window is not one a user could click. Measured: the app's own log has
        * `window.hide` 4.1 s before a click that came back `no-window`, and
        * `window.show` between the two, with the assertion one step earlier
        * passing off the very tree the click could not reach.

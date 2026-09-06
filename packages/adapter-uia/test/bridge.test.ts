@@ -34,12 +34,12 @@ describe("availability (`yam surface doctor`)", () => {
     Object.defineProperty(process, "platform", { value: "win32", configurable: true });
     try {
       const { run, calls } = answering('{"ok":true,"root":"Desktop"}');
-      const availability = await powershellBridge({ process: "Yam ADE", run }).availability();
+      const availability = await powershellBridge({ process: "Yam", run }).availability();
       expect(availability.state).toBe("available");
       // The smallest call: load the assembly and read the root. It touches no
       // application, so a failure is about the host rather than about the target.
       expect(calls[0]!.script).toContain("UIAutomationClient");
-      expect(calls[0]!.script).not.toContain("Yam ADE");
+      expect(calls[0]!.script).not.toContain("Yam");
     } finally {
       Object.defineProperty(process, "platform", platform);
     }
@@ -83,18 +83,18 @@ describe("reading a window", () => {
     const { run, calls } = answering(
       JSON.stringify({
         ok: true,
-        process: "Yam ADE",
-        title: "Yam ADE",
+        process: "Yam",
+        title: "Yam",
         truncated: false,
-        nodes: [{ parent: -1, controlType: "Window", name: "Yam ADE" }],
+        nodes: [{ parent: -1, controlType: "Window", name: "Yam" }],
       }),
     );
-    const window = await powershellBridge({ process: "Yam ADE", run }).window({
-      process: "Yam ADE",
+    const window = await powershellBridge({ process: "Yam", run }).window({
+      process: "Yam",
       maxNodes: 500,
     });
     expect(window.nodes).toHaveLength(1);
-    expect(calls[0]!.argument).toEqual({ process: "Yam ADE", maxNodes: 500 });
+    expect(calls[0]!.argument).toEqual({ process: "Yam", maxNodes: 500 });
     // Breadth-first with a budget, and the ControlView walker — not the raw
     // tree, which is full of nodes no user can see.
     expect(calls[0]!.script).toContain("ControlViewWalker");
@@ -108,8 +108,8 @@ describe("reading a window", () => {
      */
     const { run } = answering(JSON.stringify({ ok: false, error: "no-window" }));
     await expect(
-      powershellBridge({ process: "Yam ADE", run }).window({
-        process: "Yam ADE",
+      powershellBridge({ process: "Yam", run }).window({
+        process: "Yam",
         maxNodes: 10,
       }),
     ).rejects.toThrow(/higher integrity level/);
@@ -136,7 +136,7 @@ describe("reading a window", () => {
 describe("performing a command", () => {
   it("addresses an element by its path, because a COM object does not survive", async () => {
     const { run, calls } = answering('{"ok":true}');
-    await powershellBridge({ process: "Yam ADE", run }).perform({
+    await powershellBridge({ process: "Yam", run }).perform({
       kind: "pattern",
       path: [0, 3, 1],
       pattern: "Invoke",
@@ -147,7 +147,7 @@ describe("performing a command", () => {
       path: [0, 3, 1],
       pattern: "Invoke",
       method: "Invoke",
-      process: "Yam ADE",
+      process: "Yam",
     });
   });
 
@@ -196,14 +196,14 @@ describe("how the request reaches the script (T7.2)", () => {
      * arguments". The JSON was appended to the script as *text* and parsed:
      *
      *   ParserError:
-     *      6 |  -Request {"process":"Yam ADE","maxNodes":1500}
-     *        | Unexpected token ':"Yam ADE"' in expression or statement.
+     *      6 |  -Request {"process":"Yam","maxNodes":1500}
+     *        | Unexpected token ':"Yam"' in expression or statement.
      */
     const decoded = Buffer.from(
-      encodePowershell("$req = $Request | ConvertFrom-Json", { process: "Yam ADE" }),
+      encodePowershell("$req = $Request | ConvertFrom-Json", { process: "Yam" }),
       "base64",
     ).toString("utf16le");
-    expect(decoded).toContain(`$Request = '{"process":"Yam ADE"}'`);
+    expect(decoded).toContain(`$Request = '{"process":"Yam"}'`);
     expect(decoded).toContain("$req = $Request | ConvertFrom-Json");
   });
 
@@ -219,7 +219,7 @@ describe("how the request reaches the script (T7.2)", () => {
   it("sets the console to UTF-8 before anything writes", () => {
     /*
      * The second defect. A redirected `powershell.exe` writes stdout in the
-     * console code page, and Node reads UTF-8 — so every name in the ADE
+     * console code page, and Node reads UTF-8 — so every name in the app
      * containing "…" or "—" would have arrived mangled, and the conformance
      * target's buttons are called "Open a project…" and "Import prototype
      * database…".

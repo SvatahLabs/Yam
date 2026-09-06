@@ -2,7 +2,7 @@
 
 Implementer: this session · Branch `yam-bootstrap` from `master` at `8e7969d` · Host: macOS 15 (Darwin 25.3.0), arm64, Node v25.6.1, pnpm 10.30.2
 
-Spec: Draft 2.18, written on this branch as its first commit (`b2fd9c1`): Phase 13 inserted, process and terminal renumbered to Phase 14, the four documents' change logs extended. No requirement text changed.
+Spec: Draft 2.18, written on this branch as its first commit (`b2fd9c1`), and Draft 2.19 (the desktop client is Yam) later on the same branch: Phase 13 inserted, process and terminal renumbered to Phase 14, the four documents' change logs extended. No requirement text changed.
 
 ## The owner's decisions this phase implements
 
@@ -60,6 +60,19 @@ By hand afterwards: the ESLint boundary rules and the repo checks derive a packa
 3. `@svatah/` in the dynamic-import lint pattern escaped the scope protection; the pattern is now built from `specifierOf`, and the repo check for it went red, which is what it is for.
 
 `tools/repo-checks/test/yam.test.ts` enumerates every allowed form of the old name and fails on any other; the umbrella package's bin; the release set's count in the documents; the manifests' metadata.
+
+### The desktop client is Yam (Draft 2.19)
+
+A second owner decision, after the first rename had landed: the Electron client is not "the ADE", it is **Yam** — the product's own surface, so that a person can say `Yam.app`. One more scripted pass, with the same shape as T13.3's:
+
+- `Yam ADE` → `Yam` (product name, process name, bundle `Yam.app`, application-support directory); `Yam ADE Test` → `Yam Test`; bundle ids `com.svatah.yam` and `com.svatah.yam.test`; installer names `yam` and `yam_test`.
+- `@svatah/yam-ade` → `@svatah/yam-desktop`, and `apps/ade` → `apps/desktop`.
+- `YAM_ADE_*` → `YAM_APP_*`; the `ade:*` scripts and IPC channels → `app:*`; the scripts, fixtures, flows, bindings directory, screenshots and the guide renamed from `ade` to `app`.
+- The prototype-database import, which was named after the *old* Electron prototype's database, is `yam migrate --from-prototype`, `evals/migrate/prototype-db`, and `prototype-*` diagnostic codes.
+- Prose: "the ADE" → "the app"; "Automation Development Environment" → "desktop app".
+- Kept: the `REQ-ADE-*` ids, because requirements.md §0 forbids renumbering an id once referenced; the prototype repository's name `svatahADE`; and the Phase 0–12 records and prompts, as history.
+
+Two things the pass needed by hand. Code files were regenerated from their originals with a rule that tells an identifier (`ADE`, a path constant, → `APP_DIR`; `ade`, a process, → `desktopApp`) from prose and from string ids, because several test files already had an `app` in scope and a blind `ade → app` collided with it. And HLD §12's layout line names `desktop/`. The app client, the screen fixtures and the generated documentation were regenerated; the contract below was re-run in full.
 
 ## T13.4 The readiness corrections
 

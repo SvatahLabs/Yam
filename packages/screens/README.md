@@ -3,7 +3,7 @@
 The headless screen model behind every Yam builder surface (REQ-ADE-10,
 REQ-ADE-13, LLD §13.7).
 
-> The ADE and the terminal cockpit `yam ui` are two renderers of one headless
+> The app and the terminal cockpit `yam ui` are two renderers of one headless
 > screen model, and both are views over the local service and nothing else.
 
 Three things live here and nowhere else:
@@ -12,7 +12,7 @@ Three things live here and nowhere else:
   `agents`, `api`, `data`, `explorer`, `import`, `settings`. A screen is
   `{ id, title, load(service, params), actions, keys }` and its `load` turns
   service responses into rows. No DOM, no terminal, no `process`.
-- **The action registry.** One list behind the ADE's command palette, `yam
+- **The action registry.** One list behind the app's command palette, `yam
   ui`'s palette, `@svatah/yam-sdk`'s `actions`, and — through each action's `cli`
   string — the command line. `tools/repo-checks/test/action-parity.test.ts`
   fails when the registry, the CLI's command table and `fixtures/palette.json`
@@ -31,7 +31,7 @@ if (action.availableWhen(state)) await action.run(client, { runId: state.runId }
 ```
 
 `client` is anything satisfying `ScreenService` — `@svatah/yam-sdk`'s client, the
-ADE's generated one, or `fakeService()` from this package.
+app's generated one, or `fakeService()` from this package.
 
 ## The fake service, and why its answers are real
 

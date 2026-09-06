@@ -7,7 +7,7 @@
  * The second is the load-bearing one. LLD §13.5 says every handler calls the
  * same functions the CLI calls, and the way to know that is not to read the
  * handler — it is to run the same thing both ways and diff the output. If they
- * ever differ, the service has grown logic of its own and the ADE has started
+ * ever differ, the service has grown logic of its own and the app has started
  * showing something the CLI does not agree with.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";

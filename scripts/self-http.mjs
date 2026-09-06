@@ -19,7 +19,7 @@
  *
  * The service serves *a* project, and the questions the flow asks are about a
  * real one: a plan with stories in it, a bindings store, a `data.yaml` with a
- * secret. `evals/fixtures` is that project and is what the ADE opens; pointing
+ * secret. `evals/fixtures` is that project and is what the app opens; pointing
  * the service at `evals/self` would be asking it about the suite that is asking.
  *
  * Exit 0 when the flow is green.

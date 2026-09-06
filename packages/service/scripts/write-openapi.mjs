@@ -1,7 +1,7 @@
 /**
  * Writes `packages/service/openapi.json` (REQ-ADE-1, LLD §13.5).
  *
- * Committed, so the ADE's typed client can be generated from a file in the
+ * Committed, so the app's typed client can be generated from a file in the
  * repository rather than from a running service, and so a change to the contract
  * is a diff in a pull request. `test/openapi.test.ts` fails when the committed
  * document differs from what the service serves.

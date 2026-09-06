@@ -5,10 +5,10 @@
  * service. The functions are injected through a `ServiceApi` interface so the
  * service imports only `@svatah/yam-schema`."
  *
- * Phase 3 injected four. Phase 5's ADE screens need five more — record with a
+ * Phase 3 injected four. Phase 5's app screens need five more — record with a
  * reviewer, bindings verify, heal, a surface session, and the tool list — and
  * every one of them is here rather than in the service for the reason the rule
- * exists: an ADE that recorded through its own code and a person who recorded
+ * exists: an app that recorded through its own code and a person who recorded
  * through `yam record` would be doing two different things, and the store
  * would be the place they disagreed.
  *
@@ -88,7 +88,7 @@ export async function serviceRecord(
   /*
    * The same gateway the command line chooses, by the same rule: `--gateway
    * fake` is the eval's committed answers, `anthropic` needs a credential, and
-   * the default is whichever of those is available. A recorder in the ADE and a
+   * the default is whichever of those is available. A recorder in the app and a
    * recorder at a terminal must be grounding against the same thing.
    */
   const gateway = gatewayForRecording(
@@ -445,22 +445,22 @@ export async function serviceToolsFor(
 /* ── T6.6: the prototype database import (REQ-ADE-9, LLD §13.5) ───────────── */
 
 /**
- * `POST /migrate`, which is `yam migrate <dest> --from-ade <src>`.
+ * `POST /migrate`, which is `yam migrate <dest> --from-prototype <src>`.
  *
  * The same two steps the command line takes, in the same order and through the
  * same functions: extract the prototype's database back into the v2 files it
- * kept in columns, then convert them. The ADE's button and the command line must
+ * kept in columns, then convert them. The app's button and the command line must
  * produce the same directory, and the way to be sure of that is for there to be
  * one implementation.
  */
-export async function serviceMigrateFromAde(
+export async function serviceMigrateFromPrototype(
   loaded: Loaded,
   options: { source: string; project?: string },
 ): Promise<unknown> {
-  const { extractAdeProject, migrate, renderReviewReport } = await import("@svatah/yam-migrate");
+  const { extractPrototypeProject, migrate, renderReviewReport } = await import("@svatah/yam-migrate");
   const destination = loaded.root;
 
-  const extracted = extractAdeProject({
+  const extracted = extractPrototypeProject({
     source: options.source,
     destination,
     ...(options.project === undefined ? {} : { project: options.project }),

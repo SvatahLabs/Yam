@@ -1,0 +1,63 @@
+{
+  "name": "@svatah/yam-desktop",
+  "productName": "Yam",
+  "version": "0.1.0",
+  "description": "The Yam desktop app: the reference client for the local service",
+  "license": "Apache-2.0",
+  "homepage": "https://yam.svatah.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SvatahLabs/yam.git",
+    "directory": "apps/desktop"
+  },
+  "bugs": {
+    "url": "https://github.com/SvatahLabs/yam/issues"
+  },
+  "private": true,
+  "main": ".vite/build/main.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "node ../../scripts/generate-app-client.mjs && tsc --noEmit -p tsconfig.json",
+    "ensure-electron": "node ../../scripts/ensure-electron.mjs",
+    "make": "node ../../scripts/package-app.mjs --make",
+    "package": "node ../../scripts/package-app.mjs",
+    "package:test": "node ../../scripts/package-app.mjs --test",
+    "smoke": "pnpm run ensure-electron && node ../../scripts/app-smoke.mjs",
+    "start": "pnpm run ensure-electron && electron-forge start",
+    "test": "vitest run && playwright test",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "stage-cli": "node ../../scripts/stage-app-cli.mjs"
+  },
+  "dependencies": {
+    "@svatah/yam-schema": "workspace:*",
+    "@svatah/yam-screens": "workspace:*",
+    "@svatah/yam-ui": "workspace:*",
+    "@svatah/yam-ui-tokens": "workspace:*"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.11.2",
+    "@electron-forge/maker-deb": "^7.11.2",
+    "@electron-forge/maker-squirrel": "^7.11.2",
+    "@electron-forge/maker-zip": "^7.11.2",
+    "@electron-forge/plugin-fuses": "^7.11.2",
+    "@electron-forge/plugin-vite": "^7.11.2",
+    "@electron-forge/shared-types": "^7.11.2",
+    "@electron/fuses": "^1.8.0",
+    "@svatah/yam": "workspace:*",
+    "@svatah/yam-service": "workspace:*",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^44.1.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "sample-web": "workspace:*",
+    "scheduler": "^0.27.0",
+    "typescript": "catalog:",
+    "vite": "^7.3.6",
+    "vitest": "catalog:",
+    "@playwright/test": "catalog:"
+  }
+}

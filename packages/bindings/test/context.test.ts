@@ -268,7 +268,7 @@ describe("context patterns (REQ-REC-6)", () => {
   });
 
   it("handles a value that is not a url at all — a window title, say", () => {
-    expect(contextPattern("Yam ADE — booking.flow")).toBe("Yam ADE — booking.flow");
-    expect(patternMatches("Yam ADE — booking.flow", "Yam ADE — booking.flow")).toBe(true);
+    expect(contextPattern("Yam — booking.flow")).toBe("Yam — booking.flow");
+    expect(patternMatches("Yam — booking.flow", "Yam — booking.flow")).toBe(true);
   });
 });

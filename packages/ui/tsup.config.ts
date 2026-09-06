@@ -9,7 +9,7 @@ import { defineConfig } from "tsup";
  * bundled**: it is an implementation detail of this package — nothing outside
  * imports `@radix-ui/*`, and `eslint.config.js` forbids a screen doing so — and
  * leaving it external made every consumer responsible for resolving Radix's own
- * transitive imports. Under pnpm's strict isolation the ADE's Vite build could
+ * transitive imports. Under pnpm's strict isolation the app's Vite build could
  * not: it found `@radix-ui/react-tabs` in this package's `node_modules` and then
  * failed on `@radix-ui/primitive`, which is nested one level further in.
  */

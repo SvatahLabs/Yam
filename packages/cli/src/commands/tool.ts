@@ -53,7 +53,7 @@ const USAGE = `yam tool serve [dir] [--expose "Story one,Story two"] [--stdio]
 export interface ToolServerBuild {
   readonly server: McpServer;
   readonly tools: readonly ToolDefinition[];
-  /** Every invocation, in order, for the ADE's tool panel (T5.8). */
+  /** Every invocation, in order, for the app's tool panel (T5.8). */
   readonly invocations: readonly Invocation[];
   close(): Promise<void>;
 }
@@ -250,7 +250,7 @@ export async function toolCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
 
   if (boolOption(args, "json")) {
     // A description of the server rather than the server: what an operator wants
-    // before pointing an agent at it, and what the ADE's tool panel lists.
+    // before pointing an agent at it, and what the app's tool panel lists.
     io.out(JSON.stringify({ tools: built.tools }, null, 2));
     await built.close();
     return EXIT.ok;

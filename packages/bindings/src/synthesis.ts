@@ -165,7 +165,7 @@ export function candidatesFor(
    * `text` and nothing that survives a rewording, which is the one thing a
    * desktop binding has that a web one often does not. `AXDOMIdentifier` on
    * macOS, `AutomationId` on Windows; LLD §13.7's accessibility contract
-   * requires one on every control of the ADE, and the desktop snapshot case
+   * requires one on every control of the app, and the desktop snapshot case
    * fails a live gate when one is missing.
    *
    * Ranked just under a test id and above a role-and-name, for the same reason
@@ -241,7 +241,7 @@ export function candidatesFor(
   /*
    * 11. The desktop's own path (T11.3, LLD §7.5).
    *
-   * `Window[Yam ADE]/AXGroup[0]/…/AXButton[Flows]` — the accessibility
+   * `Window[Yam]/AXGroup[0]/…/AXButton[Flows]` — the accessibility
    * ancestry, which is what a desktop adapter can address an element by when
    * nothing else identifies it. Scored where a CSS path is, and for the same
    * reason: it is a route rather than an identity, and a panel inserted above

@@ -230,7 +230,7 @@ function stripAnsi(text: string): string {
  * anything. PowerShell's own documentation says it: when the value of
  * `-Command` is a *string*, "Command must be the last parameter in the command,
  * because any characters typed after the command are interpreted as the command
- * arguments" — so `-Request {"process":"Yam ADE",…}` was appended to the
+ * arguments" — so `-Request {"process":"Yam",…}` was appended to the
  * script as **text** and parsed as PowerShell.
  *
  * Run against a real PowerShell it fails before it reaches UI Automation at all:
@@ -238,9 +238,9 @@ function stripAnsi(text: string): string {
  * ```
  * ParserError:
  * Line |
- *    6 |  -Request {"process":"Yam ADE","maxNodes":1500}
+ *    6 |  -Request {"process":"Yam","maxNodes":1500}
  *      |                     ~~~~~~~~~~~~~
- *      | Unexpected token ':"Yam ADE"' in expression or statement.
+ *      | Unexpected token ':"Yam"' in expression or statement.
  * ```
  *
  * Every UIA test injects its own runner, so nothing in this repository had ever
@@ -609,7 +609,7 @@ ConvertTo-Json -Compress @{ ok = $true }
 `;
 
 export interface PowershellBridgeOptions {
-  /** The process to drive, without `.exe`: the ADE is `Yam ADE`. */
+  /** The process to drive, without `.exe`: the app is `Yam`. */
   readonly process: string;
   readonly timeoutMs?: number;
   /** For tests: run a script without spawning anything. */

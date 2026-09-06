@@ -30,7 +30,7 @@
  * deliberately *not* typed from the schemas: their types are `@svatah/yam-schema`'s
  * (`StepResult`, `Summary`, `BindingFile`), and re-deriving them from a JSON
  * Schema round-trip would produce a second, subtly different set of the same
- * types — the reasoning `scripts/generate-ade-client.mjs` already records.
+ * types — the reasoning `scripts/generate-app-client.mjs` already records.
  *
  * So this is about two hundred lines that emit three files, and the drift check
  * is what makes it trustworthy: a route added to the service and not
@@ -89,7 +89,7 @@ for (const [path, operations] of Object.entries(document.paths)) {
        *
        * `GET /bindings/:id` answers `text/yaml` — the file on disk — and a
        * client that ran `JSON.parse` over it threw on every call, silently, in
-       * three languages: the ADE's Bindings inspector was empty against a real
+       * three languages: the app's Bindings inspector was empty against a real
        * service and full against the recorded fixtures, which is the worst way
        * for a defect to present itself (T10.1).
        */

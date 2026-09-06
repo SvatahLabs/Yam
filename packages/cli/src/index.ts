@@ -91,14 +91,14 @@ export { groundingEvalCommand } from "./commands/eval-grounding.js";
  * The functions `yam serve` gives the local service beyond the first four
  * (T5.7, T5.8, LLD §13.5).
  *
- * Exported so the ADE's own tests can build a service wired exactly as the
+ * Exported so the app's own tests can build a service wired exactly as the
  * command wires one: the properties they check are about the service boundary,
  * and a test that wired it differently would be checking a different boundary.
  */
 export {
   serviceCompileTrajectory,
   serviceHeal,
-  serviceMigrateFromAde,
+  serviceMigrateFromPrototype,
   serviceOpenSurfaceSession,
   serviceRecord,
   serviceToolsFor,

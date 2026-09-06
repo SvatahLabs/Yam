@@ -255,12 +255,12 @@ jobs:
 
   # T3.6: "installers build on three OSes."
   #
-  # The ADE is an Electron application developed in this repository until its
+  # The app is an Electron application developed in this repository until its
   # first release (ADR-17), and `electron-forge make` is the only check that says
   # it can actually be shipped — a build that passes on a developer's machine and
   # cannot be packaged is a build nobody can install.
-  ade-installers:
-    name: ADE installers (${{ matrix.os }})
+  app-installers:
+    name: app installers (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -279,7 +279,7 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # The ADE spawns `yam serve`, so the CLI has to exist before it runs —
+      # The app spawns `yam serve`, so the CLI has to exist before it runs —
       # and the generated service client is written from the service's build.
       - name: Build the workspace
         run: pnpm -r build
@@ -291,13 +291,13 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y fakeroot dpkg xvfb
 
       - name: Make
-        run: pnpm --filter @svatah/yam-ade make
+        run: pnpm --filter @svatah/yam-desktop make
 
       # T3.6's Validate item: the app opens a fixture project and shows
       # `GET /project` data, and quitting stops the service. Linux runners have
       # no display, so Electron gets a virtual one.
       #
-      # T8.1: `make` has run, so `apps/ade/out/` holds a packaged application and
+      # T8.1: `make` has run, so `apps/desktop/out/` holds a packaged application and
       # this runs against *that* — with no `YAM_CLI`, so the app has to find
       # its own bundled CLI and resolve its own Node. Phase 7's smoke check
       # always launched the development Electron, which has the `RunAsNode` fuse
@@ -305,19 +305,19 @@ jobs:
       # failed. The line it prints says which target it used.
       - name: Smoke against the packaged app (Linux)
         if: runner.os == 'Linux'
-        run: xvfb-run --auto-servernum pnpm ade:smoke
+        run: xvfb-run --auto-servernum pnpm app:smoke
 
       - name: Smoke against the packaged app
         if: runner.os != 'Linux'
-        run: pnpm ade:smoke
+        run: pnpm app:smoke
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ade-${{ matrix.os }}
-          path: apps/ade/out/make/**
+          name: app-${{ matrix.os }}
+          path: apps/desktop/out/make/**
           if-no-files-found: error
 
-  # T6.1, T6.2: the desktop adapters against the ADE (REQ-ADP-6, 7, REQ-ADE-6).
+  # T6.1, T6.2: the desktop adapters against the app (REQ-ADP-6, 7, REQ-ADE-6).
   #
   # The only place either adapter can be *run*: the AX one needs macOS with the
   # Accessibility permission granted, the UIA one needs Windows. Everything below
@@ -370,10 +370,10 @@ jobs:
       - name: Host check
         run: node packages/cli/dist/bin.js surface doctor --adapter ${{ matrix.adapter }}
 
-      # The conformance target is the ADE itself, packaged and launched with
+      # The conformance target is the app itself, packaged and launched with
       # `YAM_A11Y=1` (LLD §16, REQ-ADE-6).
-      - name: Package the ADE
-        run: pnpm --filter @svatah/yam-ade exec electron-forge package
+      - name: Package the app
+        run: pnpm --filter @svatah/yam-desktop exec electron-forge package
 
       # Exit 2 (host not ready) is tolerated and says so; exit 1 (not
       # conformant) fails the leg. Never the other way round.

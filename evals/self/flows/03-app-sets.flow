@@ -1,0 +1,102 @@
+# The checks pattern 32 closed: an assertion about a set (T12.7, REQ-SELF-2).
+#
+# Nineteen rows of the Phase 11 parity report said the same thing in different
+# words — "the language asserts about one element, not about a set" — and
+# Draft 2.15 gave the language the sentence. This file is what that sentence
+# bought: every story here is the Yam side of a check that had only the
+# Playwright one, and the check ids in `checks.yaml` pair them.
+#
+# ## Why the scope is named
+#
+# `Every row of the named requests table` names the table, and the table's
+# binding is an `automationId` like every other. A sentence scoped to `this
+# screen` reads the whole window, which is right for "no secret is anywhere"
+# and wrong for "every row of a table" — the second would sweep the rail, the
+# toolbar and the inspector too, and pass or fail for reasons nobody wrote down.
+#
+# ## Why an empty set fails
+#
+# It is the executor's rule, not this file's (LLD §13.9): a screen that has not
+# finished loading has no rows, and "every row is visible" over none of them is
+# true. So each story clicks its way to the screen and asserts one control it
+# owns *before* it asserts about a set — the same order a person reads in.
+#
+# ## The project is opened by the first story
+#
+# A flow owns one session on its adapter (REQ-RUN-3), so each file arrives at an
+# app that is showing whatever the last one left — and the Recent list is what
+# opens a project, exactly as `02-app-screen.flow` does it. Only the first story
+# here does it; every story after it is on a window that already has one, which
+# is the arrangement `01-app-screens.flow` uses too.
+#
+# ## The number in the file name
+#
+# `yam run` executes a project's `test:` blocks in file order and one session
+# serves the whole run, so `99-` — the flow that quits — stays last.
+
+story: every interactive control on the Flows screen is named and id'd
+  The first recent project should be visible
+  Click the first recent project
+  The Flows rail item should be visible
+  Click the Flows rail item
+  The Flows heading should be visible
+  Every control on this screen should have a name
+  Every control on this screen should have an id
+
+story: the Data screen names every secret and shows none of them
+  Click the Data rail item
+  The Save data button should be visible
+  The run data table should contain "YAM_SAMPLE_PASSWORD"
+  No text on this screen should contain {data.injected.password}
+
+story: the Settings screen shows the project and never a credential
+  Click the Settings rail item
+  The project settings table should contain "yam-fixtures"
+  The run settings table should contain "playwright"
+  The diagnostics panel should be visible
+  No text on this screen should contain {data.injected.modelKey}
+
+story: the Agents screen lists what an agent may call
+  Click the Agents and tools rail item
+  The exposed tools table should be visible
+  The invocations table should be visible
+  The refused panel should be visible
+  Every row of the exposed tools table should be visible
+
+story: the API screen shows a saved request and its headers
+  Click the API rail item
+  The named requests table should be visible
+  The named requests table should contain "active count"
+  The request pane should be visible
+  Every row of the named requests table should be visible
+
+story: the Import screen previews into the open project and nowhere else
+  Click the Import prototype database rail item
+  The prototype database field should be visible
+  The where it may write panel should contain "anything outside it"
+  The terminal panel should contain "yam migrate"
+
+story: the Bindings screen shows the store and one element's resolver order
+  Click the Bindings rail item
+  The bindings table should be visible
+  Every row of the bindings table should be visible
+  Click the Verify all bindings button
+
+story: the legacy screens are gone
+  Click the Flows rail item
+  The Flows heading should be visible
+  No control on this screen should have the "id" attribute "rail-legacy"
+  No element on this screen should have the "id" attribute "screen-project"
+  No element on this screen should have the "id" attribute "screen-plan"
+  No element on this screen should have the "id" attribute "screen-results"
+  No element on this screen should have the "id" attribute "screen-tools"
+
+test: the app's sets
+  every interactive control on the Flows screen is named and id'd
+  the Data screen names every secret and shows none of them
+  the Settings screen shows the project and never a credential
+  the Agents screen lists what an agent may call
+  the API screen shows a saved request and its headers
+  the Import screen previews into the open project and nowhere else
+  the Bindings screen shows the store and one element's resolver order
+  the legacy screens are gone

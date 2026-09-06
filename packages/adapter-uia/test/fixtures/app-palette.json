@@ -1,0 +1,2812 @@
+{
+  "process": "Yam",
+  "title": "Yam",
+  "truncated": false,
+  "nodes": [
+    {
+      "parent": -1,
+      "controlType": "Window",
+      "name": "Yam",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "box": [
+        0,
+        0,
+        1280,
+        860
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Document",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Yam",
+      "isEnabled": true,
+      "hasKeyboardFocus": true,
+      "box": [
+        0,
+        0,
+        1280,
+        828
+      ]
+    },
+    {
+      "parent": 1,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        0,
+        0,
+        1280,
+        836
+      ]
+    },
+    {
+      "parent": 2,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Command palette",
+      "isEnabled": true,
+      "box": [
+        319,
+        120,
+        642,
+        478
+      ],
+      "automationId": "command-palette"
+    },
+    {
+      "parent": 3,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "heading",
+      "name": "Command palette",
+      "isEnabled": true,
+      "box": [
+        319,
+        120,
+        1,
+        1
+      ],
+      "automationId": "radix-_r_1_"
+    },
+    {
+      "parent": 4,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Command palette",
+      "isEnabled": true,
+      "box": [
+        319,
+        120,
+        183,
+        28
+      ]
+    },
+    {
+      "parent": 5,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Command palette",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        333,
+        142,
+        1,
+        1
+      ]
+    },
+    {
+      "parent": 7,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Search or run a command",
+      "isEnabled": true,
+      "box": [
+        333,
+        142,
+        144,
+        16
+      ]
+    },
+    {
+      "parent": 8,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Search or run a command",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Edit",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Search or run a command",
+      "isEnabled": true,
+      "hasKeyboardFocus": true,
+      "patterns": [
+        "Value"
+      ],
+      "box": [
+        352,
+        134,
+        553,
+        18
+      ],
+      "automationId": "command-palette-query"
+    },
+    {
+      "parent": 10,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        354,
+        135,
+        549,
+        16
+      ]
+    },
+    {
+      "parent": 3,
+      "controlType": "List",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Commands",
+      "isEnabled": true,
+      "patterns": [
+        "Scroll"
+      ],
+      "box": [
+        320,
+        165,
+        640,
+        432
+      ]
+    },
+    {
+      "parent": 12,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        320,
+        171,
+        640,
+        22
+      ]
+    },
+    {
+      "parent": 13,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "ACTIONS",
+      "isEnabled": true,
+      "box": [
+        334,
+        179,
+        51,
+        12
+      ]
+    },
+    {
+      "parent": 14,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "ACTIONS",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "flows Compile yam compile",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        193,
+        640,
+        31
+      ],
+      "automationId": "palette-flows-compile"
+    },
+    {
+      "parent": 16,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "flows",
+      "isEnabled": true,
+      "box": [
+        334,
+        200,
+        38,
+        17
+      ]
+    },
+    {
+      "parent": 17,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "flows",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Compile",
+      "isEnabled": true,
+      "box": [
+        408,
+        201,
+        43,
+        15
+      ]
+    },
+    {
+      "parent": 19,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Compile",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam compile",
+      "isEnabled": true,
+      "box": [
+        841,
+        200,
+        105,
+        17
+      ]
+    },
+    {
+      "parent": 21,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam compile",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "flows Save flow",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        224,
+        640,
+        33
+      ],
+      "automationId": "palette-flows-save"
+    },
+    {
+      "parent": 23,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "flows",
+      "isEnabled": true,
+      "box": [
+        334,
+        232,
+        38,
+        17
+      ]
+    },
+    {
+      "parent": 24,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "flows",
+      "isEnabled": true
+    },
+    {
+      "parent": 23,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Save flow",
+      "isEnabled": true,
+      "box": [
+        408,
+        233,
+        50,
+        15
+      ]
+    },
+    {
+      "parent": 26,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Save flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run Run yam run --flow <file>",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        257,
+        640,
+        33
+      ],
+      "automationId": "palette-run-flow"
+    },
+    {
+      "parent": 28,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run",
+      "isEnabled": true,
+      "box": [
+        334,
+        265,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 29,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run",
+      "isEnabled": true
+    },
+    {
+      "parent": 28,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run",
+      "isEnabled": true,
+      "box": [
+        408,
+        266,
+        21,
+        15
+      ]
+    },
+    {
+      "parent": 31,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run",
+      "isEnabled": true
+    },
+    {
+      "parent": 28,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam run --flow <file>",
+      "isEnabled": true,
+      "box": [
+        731,
+        265,
+        180,
+        17
+      ]
+    },
+    {
+      "parent": 33,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam run --flow <file>",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run Run story yam run --story <name>",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        290,
+        640,
+        31
+      ],
+      "automationId": "palette-run-story"
+    },
+    {
+      "parent": 35,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run",
+      "isEnabled": true,
+      "box": [
+        334,
+        297,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 36,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run",
+      "isEnabled": true
+    },
+    {
+      "parent": 35,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run story",
+      "isEnabled": true,
+      "box": [
+        408,
+        298,
+        49,
+        15
+      ]
+    },
+    {
+      "parent": 38,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run story",
+      "isEnabled": true
+    },
+    {
+      "parent": 35,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam run --story <name>",
+      "isEnabled": true,
+      "box": [
+        759,
+        297,
+        188,
+        17
+      ]
+    },
+    {
+      "parent": 40,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam run --story <name>",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run Run again yam run --flow <file>",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        320,
+        640,
+        33
+      ],
+      "automationId": "palette-run-again"
+    },
+    {
+      "parent": 42,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run",
+      "isEnabled": true,
+      "box": [
+        334,
+        328,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 43,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run",
+      "isEnabled": true
+    },
+    {
+      "parent": 42,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run again",
+      "isEnabled": true,
+      "box": [
+        408,
+        329,
+        51,
+        15
+      ]
+    },
+    {
+      "parent": 45,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run again",
+      "isEnabled": true
+    },
+    {
+      "parent": 42,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam run --flow <file>",
+      "isEnabled": true,
+      "box": [
+        731,
+        328,
+        180,
+        17
+      ]
+    },
+    {
+      "parent": 47,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam run --flow <file>",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run Resume from step yam run --resume <runId> --from <stepId>",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        353,
+        640,
+        31
+      ],
+      "automationId": "palette-run-resume"
+    },
+    {
+      "parent": 49,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run",
+      "isEnabled": true,
+      "box": [
+        334,
+        360,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 50,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run",
+      "isEnabled": true
+    },
+    {
+      "parent": 49,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Resume from step",
+      "isEnabled": true,
+      "box": [
+        408,
+        361,
+        91,
+        15
+      ]
+    },
+    {
+      "parent": 52,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Resume from step",
+      "isEnabled": true
+    },
+    {
+      "parent": 49,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam run --resume <runId> --from <stepId>",
+      "isEnabled": true,
+      "box": [
+        624,
+        360,
+        323,
+        17
+      ]
+    },
+    {
+      "parent": 54,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam run --resume <runId> --from <stepId>",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record Record yam record --flow <file>",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        384,
+        640,
+        33
+      ],
+      "automationId": "palette-record-start"
+    },
+    {
+      "parent": 56,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record",
+      "isEnabled": true,
+      "box": [
+        334,
+        392,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 57,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record",
+      "isEnabled": true
+    },
+    {
+      "parent": 56,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Record",
+      "isEnabled": true,
+      "box": [
+        408,
+        393,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 59,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Record",
+      "isEnabled": true
+    },
+    {
+      "parent": 56,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam record --flow <file>",
+      "isEnabled": true,
+      "box": [
+        715,
+        392,
+        203,
+        17
+      ]
+    },
+    {
+      "parent": 61,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam record --flow <file>",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record Accept",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        417,
+        640,
+        33
+      ],
+      "automationId": "palette-record-accept"
+    },
+    {
+      "parent": 63,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record",
+      "isEnabled": true,
+      "box": [
+        334,
+        425,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 64,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record",
+      "isEnabled": true
+    },
+    {
+      "parent": 63,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Accept",
+      "isEnabled": true,
+      "box": [
+        408,
+        426,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 66,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Accept",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record Re-pick",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        450,
+        640,
+        33
+      ],
+      "automationId": "palette-record-repick"
+    },
+    {
+      "parent": 68,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record",
+      "isEnabled": true,
+      "box": [
+        334,
+        458,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 69,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record",
+      "isEnabled": true
+    },
+    {
+      "parent": 68,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Re-pick",
+      "isEnabled": true,
+      "box": [
+        408,
+        459,
+        40,
+        15
+      ]
+    },
+    {
+      "parent": 71,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Re-pick",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record Reject",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        483,
+        640,
+        33
+      ],
+      "automationId": "palette-record-reject"
+    },
+    {
+      "parent": 73,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record",
+      "isEnabled": true,
+      "box": [
+        334,
+        491,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 74,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record",
+      "isEnabled": true
+    },
+    {
+      "parent": 73,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Reject",
+      "isEnabled": true,
+      "box": [
+        408,
+        492,
+        32,
+        15
+      ]
+    },
+    {
+      "parent": 76,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Reject",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record Stop recording",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        516,
+        640,
+        31
+      ],
+      "automationId": "palette-record-stop"
+    },
+    {
+      "parent": 78,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record",
+      "isEnabled": true,
+      "box": [
+        334,
+        523,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 79,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "record",
+      "isEnabled": true
+    },
+    {
+      "parent": 78,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Stop recording",
+      "isEnabled": true,
+      "box": [
+        408,
+        524,
+        74,
+        15
+      ]
+    },
+    {
+      "parent": 81,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Stop recording",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run Stop",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        546,
+        640,
+        33
+      ],
+      "automationId": "palette-run-stop"
+    },
+    {
+      "parent": 83,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run",
+      "isEnabled": true,
+      "box": [
+        334,
+        554,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 84,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "run",
+      "isEnabled": true
+    },
+    {
+      "parent": 83,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Stop",
+      "isEnabled": true,
+      "box": [
+        408,
+        555,
+        23,
+        15
+      ]
+    },
+    {
+      "parent": 86,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Stop",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "heal Heal yam heal --run <id>",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        579,
+        640,
+        33
+      ],
+      "automationId": "palette-heal-run"
+    },
+    {
+      "parent": 88,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "heal",
+      "isEnabled": true,
+      "box": [
+        334,
+        587,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 89,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "heal",
+      "isEnabled": true
+    },
+    {
+      "parent": 88,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Heal",
+      "isEnabled": true,
+      "box": [
+        408,
+        588,
+        24,
+        15
+      ]
+    },
+    {
+      "parent": 91,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Heal",
+      "isEnabled": true
+    },
+    {
+      "parent": 88,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam heal --run <id>",
+      "isEnabled": true,
+      "box": [
+        753,
+        587,
+        165,
+        17
+      ]
+    },
+    {
+      "parent": 93,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam heal --run <id>",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "heal Heal from bind failures yam heal --from-bind-failures",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        612,
+        640,
+        31
+      ],
+      "automationId": "palette-heal-bind-failures"
+    },
+    {
+      "parent": 95,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "heal",
+      "isEnabled": true,
+      "box": [
+        334,
+        619,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 96,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "heal",
+      "isEnabled": true
+    },
+    {
+      "parent": 95,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Heal from bind failures",
+      "isEnabled": true,
+      "box": [
+        408,
+        620,
+        117,
+        15
+      ]
+    },
+    {
+      "parent": 98,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Heal from bind failures",
+      "isEnabled": true
+    },
+    {
+      "parent": 95,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam heal --from-bind-failures",
+      "isEnabled": true,
+      "box": [
+        706,
+        619,
+        240,
+        17
+      ]
+    },
+    {
+      "parent": 100,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam heal --from-bind-failures",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "heal Apply proposal",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        643,
+        640,
+        31
+      ],
+      "automationId": "palette-heal-apply"
+    },
+    {
+      "parent": 102,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "heal",
+      "isEnabled": true,
+      "box": [
+        334,
+        650,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 103,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "heal",
+      "isEnabled": true
+    },
+    {
+      "parent": 102,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Apply proposal",
+      "isEnabled": true,
+      "box": [
+        408,
+        651,
+        77,
+        15
+      ]
+    },
+    {
+      "parent": 105,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Apply proposal",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "bindings Verify all bindings yam bindings verify",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        673,
+        640,
+        33
+      ],
+      "automationId": "palette-bindings-verify"
+    },
+    {
+      "parent": 107,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "bindings",
+      "isEnabled": true,
+      "box": [
+        334,
+        681,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 108,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "bindings",
+      "isEnabled": true
+    },
+    {
+      "parent": 107,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Verify all bindings",
+      "isEnabled": true,
+      "box": [
+        408,
+        682,
+        93,
+        15
+      ]
+    },
+    {
+      "parent": 110,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Verify all bindings",
+      "isEnabled": true
+    },
+    {
+      "parent": 107,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam bindings verify",
+      "isEnabled": true,
+      "box": [
+        753,
+        681,
+        165,
+        17
+      ]
+    },
+    {
+      "parent": 112,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam bindings verify",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "bindings Prune unused bindings yam bindings prune",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        706,
+        640,
+        31
+      ],
+      "automationId": "palette-bindings-prune"
+    },
+    {
+      "parent": 114,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "bindings",
+      "isEnabled": true,
+      "box": [
+        334,
+        713,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 115,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "bindings",
+      "isEnabled": true
+    },
+    {
+      "parent": 114,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Prune unused bindings",
+      "isEnabled": true,
+      "box": [
+        408,
+        714,
+        114,
+        15
+      ]
+    },
+    {
+      "parent": 117,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Prune unused bindings",
+      "isEnabled": true
+    },
+    {
+      "parent": 114,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam bindings prune",
+      "isEnabled": true,
+      "box": [
+        789,
+        713,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 119,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam bindings prune",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "api Send request",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        737,
+        640,
+        33
+      ],
+      "automationId": "palette-api-send"
+    },
+    {
+      "parent": 121,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "api",
+      "isEnabled": true,
+      "box": [
+        334,
+        745,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 122,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "api",
+      "isEnabled": true
+    },
+    {
+      "parent": 121,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Send request",
+      "isEnabled": true,
+      "box": [
+        408,
+        746,
+        65,
+        15
+      ]
+    },
+    {
+      "parent": 124,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Send request",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "data Save data",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        770,
+        640,
+        31
+      ],
+      "automationId": "palette-data-save"
+    },
+    {
+      "parent": 126,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "data",
+      "isEnabled": true,
+      "box": [
+        334,
+        777,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 127,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "data",
+      "isEnabled": true
+    },
+    {
+      "parent": 126,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Save data",
+      "isEnabled": true,
+      "box": [
+        408,
+        778,
+        48,
+        15
+      ]
+    },
+    {
+      "parent": 129,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Save data",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "agents Start the tool server yam tool serve",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        800,
+        640,
+        31
+      ],
+      "automationId": "palette-agents-serve"
+    },
+    {
+      "parent": 131,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "agents",
+      "isEnabled": true,
+      "box": [
+        334,
+        807,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 132,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "agents",
+      "isEnabled": true
+    },
+    {
+      "parent": 131,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Start the tool server",
+      "isEnabled": true,
+      "box": [
+        408,
+        808,
+        99,
+        15
+      ]
+    },
+    {
+      "parent": 134,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Start the tool server",
+      "isEnabled": true
+    },
+    {
+      "parent": 131,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam tool serve",
+      "isEnabled": true,
+      "box": [
+        819,
+        807,
+        128,
+        17
+      ]
+    },
+    {
+      "parent": 136,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam tool serve",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer Open a session yam surface snapshot",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        831,
+        640,
+        33
+      ],
+      "automationId": "palette-explorer-open"
+    },
+    {
+      "parent": 138,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer",
+      "isEnabled": true,
+      "box": [
+        334,
+        839,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 139,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer",
+      "isEnabled": true
+    },
+    {
+      "parent": 138,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open a session",
+      "isEnabled": true,
+      "box": [
+        408,
+        840,
+        75,
+        15
+      ]
+    },
+    {
+      "parent": 141,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Open a session",
+      "isEnabled": true
+    },
+    {
+      "parent": 138,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam surface snapshot",
+      "isEnabled": true,
+      "box": [
+        745,
+        839,
+        173,
+        17
+      ]
+    },
+    {
+      "parent": 143,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam surface snapshot",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer Close the session",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        864,
+        640,
+        31
+      ],
+      "automationId": "palette-explorer-close"
+    },
+    {
+      "parent": 145,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer",
+      "isEnabled": true,
+      "box": [
+        334,
+        871,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 146,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer",
+      "isEnabled": true
+    },
+    {
+      "parent": 145,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Close the session",
+      "isEnabled": true,
+      "box": [
+        408,
+        872,
+        86,
+        15
+      ]
+    },
+    {
+      "parent": 148,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Close the session",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer Act on the element yam surface act",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        894,
+        640,
+        31
+      ],
+      "automationId": "palette-explorer-act"
+    },
+    {
+      "parent": 150,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer",
+      "isEnabled": true,
+      "box": [
+        334,
+        901,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 151,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer",
+      "isEnabled": true
+    },
+    {
+      "parent": 150,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Act on the element",
+      "isEnabled": true,
+      "box": [
+        408,
+        902,
+        95,
+        15
+      ]
+    },
+    {
+      "parent": 153,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Act on the element",
+      "isEnabled": true
+    },
+    {
+      "parent": 150,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam surface act",
+      "isEnabled": true,
+      "box": [
+        811,
+        901,
+        135,
+        17
+      ]
+    },
+    {
+      "parent": 155,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam surface act",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer Snapshot the session yam surface snapshot",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        925,
+        640,
+        31
+      ],
+      "automationId": "palette-explorer-snapshot"
+    },
+    {
+      "parent": 157,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer",
+      "isEnabled": true,
+      "box": [
+        334,
+        932,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 158,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "explorer",
+      "isEnabled": true
+    },
+    {
+      "parent": 157,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Snapshot the session",
+      "isEnabled": true,
+      "box": [
+        408,
+        933,
+        103,
+        15
+      ]
+    },
+    {
+      "parent": 160,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Snapshot the session",
+      "isEnabled": true
+    },
+    {
+      "parent": 157,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam surface snapshot",
+      "isEnabled": true,
+      "box": [
+        774,
+        932,
+        173,
+        17
+      ]
+    },
+    {
+      "parent": 162,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam surface snapshot",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "import Import prototype database yam migrate <dest> --from-prototype <electron-db dir>",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        955,
+        640,
+        31
+      ],
+      "automationId": "palette-import-prototype"
+    },
+    {
+      "parent": 164,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "import",
+      "isEnabled": true,
+      "box": [
+        334,
+        962,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 165,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "import",
+      "isEnabled": true
+    },
+    {
+      "parent": 164,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Import prototype database",
+      "isEnabled": true,
+      "box": [
+        408,
+        963,
+        131,
+        15
+      ]
+    },
+    {
+      "parent": 167,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Import prototype database",
+      "isEnabled": true
+    },
+    {
+      "parent": 164,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam migrate <dest> --from-prototype <electron-db dir>",
+      "isEnabled": true,
+      "box": [
+        571,
+        962,
+        375,
+        17
+      ]
+    },
+    {
+      "parent": 169,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam migrate <dest> --from-prototype <electron-db dir>",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "trajectory Compile a trajectory yam trajectory compile <trajectory.jsonl>",
+      "isEnabled": false,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        986,
+        640,
+        31
+      ],
+      "automationId": "palette-trajectory-compile"
+    },
+    {
+      "parent": 171,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "trajectory",
+      "isEnabled": true,
+      "box": [
+        334,
+        993,
+        75,
+        17
+      ]
+    },
+    {
+      "parent": 172,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "trajectory",
+      "isEnabled": true
+    },
+    {
+      "parent": 171,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Compile a trajectory",
+      "isEnabled": true,
+      "box": [
+        408,
+        994,
+        103,
+        15
+      ]
+    },
+    {
+      "parent": 174,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Compile a trajectory",
+      "isEnabled": true
+    },
+    {
+      "parent": 171,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam trajectory compile <trajectory.jsonl>",
+      "isEnabled": true,
+      "box": [
+        616,
+        993,
+        330,
+        17
+      ]
+    },
+    {
+      "parent": 176,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "yam trajectory compile <trajectory.jsonl>",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        320,
+        1016,
+        640,
+        22
+      ]
+    },
+    {
+      "parent": 178,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "GO TO",
+      "isEnabled": true,
+      "box": [
+        334,
+        1024,
+        36,
+        12
+      ]
+    },
+    {
+      "parent": 179,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "GO TO",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to Flows",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1038,
+        640,
+        31
+      ],
+      "automationId": "palette-go-flows"
+    },
+    {
+      "parent": 181,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1045,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 182,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 181,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Flows",
+      "isEnabled": true,
+      "box": [
+        408,
+        1046,
+        62,
+        15
+      ]
+    },
+    {
+      "parent": 184,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Flows",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to Record review",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1069,
+        640,
+        31
+      ],
+      "automationId": "palette-go-record"
+    },
+    {
+      "parent": 186,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1076,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 187,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 186,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Record review",
+      "isEnabled": true,
+      "box": [
+        408,
+        1077,
+        104,
+        15
+      ]
+    },
+    {
+      "parent": 189,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Record review",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to Runs",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1099,
+        640,
+        31
+      ],
+      "automationId": "palette-go-runs"
+    },
+    {
+      "parent": 191,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1106,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 192,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 191,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Runs",
+      "isEnabled": true,
+      "box": [
+        408,
+        1107,
+        57,
+        15
+      ]
+    },
+    {
+      "parent": 194,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Runs",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to Run",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1130,
+        640,
+        31
+      ],
+      "automationId": "palette-go-run"
+    },
+    {
+      "parent": 196,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1137,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 197,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 196,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Run",
+      "isEnabled": true,
+      "box": [
+        408,
+        1138,
+        52,
+        15
+      ]
+    },
+    {
+      "parent": 199,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Run",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to Heal review",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1160,
+        640,
+        31
+      ],
+      "automationId": "palette-go-heal"
+    },
+    {
+      "parent": 201,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1167,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 202,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 201,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Heal review",
+      "isEnabled": true,
+      "box": [
+        408,
+        1168,
+        92,
+        15
+      ]
+    },
+    {
+      "parent": 204,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Heal review",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to Bindings",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1191,
+        640,
+        31
+      ],
+      "automationId": "palette-go-bindings"
+    },
+    {
+      "parent": 206,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1198,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 207,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 206,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Bindings",
+      "isEnabled": true,
+      "box": [
+        408,
+        1199,
+        76,
+        15
+      ]
+    },
+    {
+      "parent": 209,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Bindings",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to Agents and tools",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1221,
+        640,
+        31
+      ],
+      "automationId": "palette-go-agents"
+    },
+    {
+      "parent": 211,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1228,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 212,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 211,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Agents and tools",
+      "isEnabled": true,
+      "box": [
+        408,
+        1229,
+        115,
+        15
+      ]
+    },
+    {
+      "parent": 214,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Agents and tools",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to API",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1252,
+        640,
+        31
+      ],
+      "automationId": "palette-go-api"
+    },
+    {
+      "parent": 216,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1259,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 217,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 216,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to API",
+      "isEnabled": true,
+      "box": [
+        408,
+        1260,
+        51,
+        15
+      ]
+    },
+    {
+      "parent": 219,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to API",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to Data",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1282,
+        640,
+        31
+      ],
+      "automationId": "palette-go-data"
+    },
+    {
+      "parent": 221,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1289,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 222,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 221,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Data",
+      "isEnabled": true,
+      "box": [
+        408,
+        1290,
+        55,
+        15
+      ]
+    },
+    {
+      "parent": 224,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Data",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to Surface explorer",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1313,
+        640,
+        31
+      ],
+      "automationId": "palette-go-explorer"
+    },
+    {
+      "parent": 226,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1320,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 227,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 226,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Surface explorer",
+      "isEnabled": true,
+      "box": [
+        408,
+        1321,
+        115,
+        15
+      ]
+    },
+    {
+      "parent": 229,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Surface explorer",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to Import prototype database",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1343,
+        640,
+        31
+      ],
+      "automationId": "palette-go-import"
+    },
+    {
+      "parent": 231,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1350,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 232,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 231,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Import prototype database",
+      "isEnabled": true,
+      "box": [
+        408,
+        1351,
+        162,
+        15
+      ]
+    },
+    {
+      "parent": 234,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Import prototype database",
+      "isEnabled": true
+    },
+    {
+      "parent": 12,
+      "controlType": "ListItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go Go to Settings",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        320,
+        1374,
+        640,
+        31
+      ],
+      "automationId": "palette-go-settings"
+    },
+    {
+      "parent": 236,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true,
+      "box": [
+        334,
+        1381,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 237,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "go",
+      "isEnabled": true
+    },
+    {
+      "parent": 236,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Settings",
+      "isEnabled": true,
+      "box": [
+        408,
+        1382,
+        72,
+        15
+      ]
+    },
+    {
+      "parent": 239,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Go to Settings",
+      "isEnabled": true
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Close",
+      "automationId": "Close",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1180,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Minimize",
+      "automationId": "Minimize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1204,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Maximize",
+      "automationId": "Maximize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1228,
+        4,
+        20,
+        20
+      ]
+    }
+  ]
+}

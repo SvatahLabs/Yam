@@ -185,7 +185,7 @@ public class GeneratedClient {
     return call("get", "/flows/" + segment(file), null, "text/plain");
   }
 
-  /** {@code GET /health} — Liveness, for the ADE's spawn handshake */
+  /** {@code GET /health} — Liveness, for the app's spawn handshake */
   public String getHealth() {
     return call("get", "/health", null, "application/json");
   }
@@ -255,7 +255,7 @@ public class GeneratedClient {
     return call("post", "/heal", body, "application/json");
   }
 
-  /** {@code POST /migrate} — Import a Yam ADE prototype's electron-db directory into this project */
+  /** {@code POST /migrate} — Import a Yam prototype's electron-db directory into this project */
   public String postMigrate(String body) {
     return call("post", "/migrate", body, "application/json");
   }

@@ -1,20 +1,20 @@
 /**
  * Which Node runs `yam serve` (Draft 2.9 LLD §13.6, T8.1, P7-F1).
  *
- * > The ADE never runs the CLI with its own binary: the `RunAsNode` fuse is off
+ * > The app never runs the CLI with its own binary: the `RunAsNode` fuse is off
  * > in a packaged build, so `process.execPath` there is an application, not an
- * > interpreter, and the spawn produces a second ADE that prints no handshake.
+ * > interpreter, and the spawn produces a second APP_DIR that prints no handshake.
  * > The runtime is resolved, in order, from `YAM_NODE`, then a `node` on
  * > `PATH` of the supported major or newer, then a Node binary shipped beside
  * > the CLI under `resources/` when the packager includes one.
  *
- * ## Why this lives in the service package and not in the ADE
+ * ## Why this lives in the service package and not in the app
  *
- * Two programs have to agree about it. The ADE resolves the runtime to spawn
- * the service; `yam surface doctor` reports which runtime the ADE *would*
- * choose, so a person can find out why a packaged ADE opens nothing without
+ * Two programs have to agree about it. The app resolves the runtime to spawn
+ * the service; `yam surface doctor` reports which runtime the app *would*
+ * choose, so a person can find out why a packaged app opens nothing without
  * launching it. A second copy of the order in the CLI is a second copy that
- * drifts, and the ADE already depends on this package.
+ * drifts, and the app already depends on this package.
  *
  * ## Why a version check and not just "a file called node"
  *
@@ -93,8 +93,8 @@ export function majorOf(version: string): number | undefined {
 /**
  * Resolve the runtime, and say what was looked at either way.
  *
- * Never `process.execPath`: in a packaged ADE that is the ADE (§13.6), and the
- * whole point of this function is that the ADE is not an interpreter.
+ * Never `process.execPath`: in a packaged app that is the app (§13.6), and the
+ * whole point of this function is that the app is not an interpreter.
  */
 export function resolveNodeRuntime(options: ResolveOptions = {}): RuntimeResolution {
   const env = options.env ?? process.env;
@@ -185,7 +185,7 @@ export function runtimeNotFoundMessage(attempts: readonly RuntimeAttempt[]): str
       `${attempt.rejected === undefined ? "" : `: ${attempt.rejected}`}`,
   );
   return (
-    `The Yam ADE could not find a Node ${SUPPORTED_NODE_MAJOR} or newer to run ` +
+    `The Yam could not find a Node ${SUPPORTED_NODE_MAJOR} or newer to run ` +
     "`yam serve` with, so no project was opened. It looked in three places:\n" +
     `${lines.join("\n")}\n` +
     "Install Node 22 LTS (or newer) so that `node` is on PATH, or set YAM_NODE to the " +
@@ -193,7 +193,7 @@ export function runtimeNotFoundMessage(attempts: readonly RuntimeAttempt[]): str
   );
 }
 
-/** One line for `yam surface doctor` and the ADE's smoke check (§13.6). */
+/** One line for `yam surface doctor` and the app's smoke check (§13.6). */
 export function describeRuntime(resolution: RuntimeResolution): string {
   const { runtime } = resolution;
   if (runtime === undefined) return "runtime: none found (YAM_NODE, PATH, resources/)";

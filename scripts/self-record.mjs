@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Record `evals/self`'s flow against the ADE, and replay it (T11.3).
+ * Record `evals/self`'s flow against the app, and replay it (T11.3).
  *
  *   node scripts/self-record.mjs [--keep]
  *
  * The T11.3 Validate items, as a command:
  *
- *   > `yam record --gateway fake` on a self flow against the ADE writes
+ *   > `yam record --gateway fake` on a self flow against the app writes
  *   > every binding; the same flow replays.
  *
  * ## Against a copy, always
@@ -34,7 +34,7 @@ import { copyProjectParts } from "./lib/self-project.mjs";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 const source = join(ROOT, "evals", "self");
-const bundle = join(ROOT, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
+const bundle = join(ROOT, "apps", "desktop", "out", "Yam-darwin-arm64", "Yam.app");
 const keep = process.argv.includes("--keep");
 
 const project = mkdtempSync(join(tmpdir(), "yam-self-record-"));
@@ -51,10 +51,10 @@ const config = readFileSync(join(source, "yam.config.yaml"), "utf8").replace(
 );
 writeFileSync(join(project, "yam.config.yaml"), config, "utf8");
 
-const executable = join(bundle, "Contents", "MacOS", "Yam ADE");
+const executable = join(bundle, "Contents", "MacOS", "Yam");
 
 /**
- * Stop the ADE, and do not come back until it is gone.
+ * Stop the app, and do not come back until it is gone.
  *
  * A signal is a request and a quit is a request: an Electron application takes
  * a second or two to unwind, and the *next* launch then finds a process of that
@@ -68,7 +68,7 @@ const stop = () => {
       .split("\n")
       .filter((one) => one.trim() !== "");
   if (alive().length === 0) return;
-  spawnSync("osascript", ["-e", 'tell application id "com.electron.yam-ade" to quit'], {
+  spawnSync("osascript", ["-e", 'tell application id "com.electron.yam" to quit'], {
     encoding: "utf8",
   });
   for (let waited = 0; waited < 20_000 && alive().length > 0; waited += 250) {
@@ -94,9 +94,9 @@ const run = (what, extra) => {
 };
 
 stop();
-const recorded = run("record", ["--gateway", "fake", "--flow", "flows/02-ade-screen.flow"]);
+const recorded = run("record", ["--gateway", "fake", "--flow", "flows/02-app-screen.flow"]);
 stop();
-const replayed = run("run", ["--host", "none", "--flow", "flows/02-ade-screen.flow"]);
+const replayed = run("run", ["--host", "none", "--flow", "flows/02-app-screen.flow"]);
 stop();
 
 const written = readdirSync(join(project, "bindings"), { recursive: true }).filter((one) =>

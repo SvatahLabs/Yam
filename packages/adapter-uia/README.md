@@ -5,7 +5,7 @@ The Windows UI Automation adapter (REQ-ADP-6,
 over `UIAutomationClient`, so a Yam flow drives a desktop application through
 the same `snapshot` / `act` / `read` / `check` calls it uses on a web page.
 
-Its conformance target is the **Yam ADE** (REQ-ADE-6): an Electron
+Its conformance target is the **Yam** (REQ-ADE-6): an Electron
 application whose Chromium publishes the renderer's accessibility tree once
 `app.setAccessibilitySupportEnabled(true)` has been called, which is what
 `YAM_A11Y=1` does.
@@ -14,7 +14,7 @@ application whose Chromium publishes the renderer's accessibility tree once
 # yam.config.yaml
 adapter: uia
 app:
-  processName: "Yam ADE"
+  processName: "Yam"
 ```
 
 There is no default process name. Driving "whatever is frontmost" would make a
@@ -115,7 +115,7 @@ which here is Control.
 
 ```powershell
 pnpm -r build
-pnpm --filter @svatah/yam-ade exec electron-forge package
+pnpm --filter @svatah/yam-desktop exec electron-forge package
 node scripts/desktop-conformance.mjs --adapter uia --report reports/adapter-uia.md
 ```
 
@@ -127,9 +127,9 @@ start. CI runs it on a `windows-latest` runner (`desktop-conformance` in
 
 Every rule above the bridge is a pure function of a `UiaNode[]`, and the bridge
 is an interface. `test/recorded.ts` replays UI Automation trees recorded from the
-real ADE (`node scripts/record-desktop-tree.mjs --shape uia --screen <name>`).
+real app (`node scripts/record-desktop-tree.mjs --shape uia --screen <name>`).
 
-`test/parity.test.ts` is the one worth reading: it records **one** ADE window in
+`test/parity.test.ts` is the one worth reading: it records **one** app window in
 both platform vocabularies and checks that this adapter and `@svatah/yam-adapter-ax`
 normalise it to the same tree — which is REQ-SURF-4 stated as a test rather than
 as a claim. It found two real defects that neither adapter's own tests could

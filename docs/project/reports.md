@@ -10,12 +10,12 @@ report is a slogan.
 | `eval-compiler.md` | exact match per tier over the golden set | `pnpm eval:compiler` (`--tier2` needs the local model) |
 | `eval-grounding.md` | the recorder's grounding accuracy; against the fake gateway it says it measures the harness | `pnpm eval:grounding` |
 | `eval-conformance.md` | the surface conformance suite per adapter | `pnpm eval:conformance` |
-| `adapter-ax.md`, `adapter-uia.md` | the desktop gates, live against the packaged ADE, with the per-node cost and the load average | `pnpm conform:desktop` on a host with the permission |
+| `adapter-ax.md`, `adapter-uia.md` | the desktop gates, live against the packaged app, with the per-node cost and the load average | `pnpm conform:desktop` on a host with the permission |
 | `adapter-bidi.md` | the BiDi adapter's independence from Playwright | `pnpm bidi:independence` |
 | `runtime-java.md` | the Java runtime's conformance against the published fixture | `pnpm conform:runtime` |
 | `self-parity.md` | Yam verifying Yam: agreement between Yam's own flows and the external oracles over every check | `pnpm self` |
 | `eval-finetune.md` | the withdrawn Tier 2 fine-tune, with the number it missed | `pnpm finetune:eval` |
-| `ade-*.png`, `sheet-*.png`, `ui-*.txt` | screenshots of every ADE screen, the component sheet, and the terminal cockpit | `pnpm ade:shoot`, `pnpm sheet:shoot`, `pnpm ui:capture` |
+| `app-*.png`, `sheet-*.png`, `ui-*.txt` | screenshots of every app screen, the component sheet, and the terminal cockpit | `pnpm app:shoot`, `pnpm sheet:shoot`, `pnpm ui:capture` |
 
 A report names the machine it was taken on and the load beside the number,
 because a per-node cost without the load is not a number. The desktop gate

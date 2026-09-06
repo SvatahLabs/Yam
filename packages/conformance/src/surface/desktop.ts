@@ -1,8 +1,8 @@
 /**
- * The desktop conformance suite: the Yam ADE (T6.1, T6.2, LLD §14, §16,
+ * The desktop conformance suite: the Yam app (T6.1, T6.2, LLD §14, §16,
  * REQ-ADE-6, REQ-SURF-3).
  *
- * > Desktop conformance target (P2): the Yam ADE itself, built from its
+ * > Desktop conformance target (P2): the Yam app itself, built from its
  * > repository in CI on Windows and macOS runners and launched with
  * > `YAM_A11Y=1`. The desktop conformance flows are: create a project, open a
  * > flow, run it, open the result, use the API client. No separate sample
@@ -97,10 +97,10 @@ async function openScreen(
 /**
  * Snapshot once the screen has finished arriving (T11.1).
  *
- * A rail click is a request the ADE answers with a `load()` over five or six
+ * A rail click is a request the app answers with a `load()` over five or six
  * endpoints, and a snapshot taken the instant after it is a snapshot of the
  * screen that was there before — or of half the one that is coming. The live
- * gate found `ade.inspector` missing `inspector-candidate-table` on a Bindings
+ * gate found `app.inspector` missing `inspector-candidate-table` on a Bindings
  * screen that had it a second later, intermittently, which is the worst way for
  * a check to be wrong: it fails on a slow machine and passes on a fast one, and
  * says nothing about either.
@@ -143,7 +143,7 @@ async function settled(
  * from starting one, a decision from a recording session — and the palette's
  * `Go to` group is the one place every screen has a row (LLD §13.7). This is the
  * suite driving the application the way LLD §13.7 says a person does, rather
- * than the ADE growing a rail row so that a test could click it.
+ * than the app growing a rail row so that a test could click it.
  */
 async function openFromPalette(
   context: Parameters<ConformanceCase["run"]>[0],
@@ -216,7 +216,7 @@ function subtreeText(nodes: readonly Node[], node: Node): string {
 /**
  * Press Run on the Flows screen and wait for the Run screen (T12.3, K6).
  *
- * The gesture a person makes, so that the branch of `ade.result` that reads a
+ * The gesture a person makes, so that the branch of `app.result` that reads a
  * table with rows in it is the branch the live gate takes. It is best effort in
  * one direction only: a Run button that is not there, or a Run screen that
  * never arrives, is *checked* — the point is a run — but the run's own verdict
@@ -227,7 +227,7 @@ async function startARun(context: Parameters<ConformanceCase["run"]>[0]): Promis
   let flows = await openScreen(context, "rail-flows");
 
   /*
-   * One flow, chosen first — the same thing the ADE's own Playwright case does,
+   * One flow, chosen first — the same thing the app's own Playwright case does,
    * and for the same reason.
    *
    * Run with nothing selected runs *every* flow the project has, and two of the
@@ -286,8 +286,8 @@ async function startARun(context: Parameters<ConformanceCase["run"]>[0]): Promis
 
 export const DESKTOP_CASES: readonly ConformanceCase[] = [
   {
-    id: "ade.snapshot",
-    page: "Yam ADE",
+    id: "app.snapshot",
+    page: "Yam",
     description:
       "The window's snapshot is the normalised shape of LLD §2.2, in the ARIA role vocabulary.",
     async run({ surface, check, equals }) {
@@ -337,7 +337,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
        * > desktop adapters read; the desktop snapshot case fails on an unnamed
        * > interactive control.
        *
-       * The Phase 8 verification found three unnamed `AXButton`s on the ADE's
+       * The Phase 8 verification found three unnamed `AXButton`s on the app's
        * Project screen and this suite said nothing, because no case asked. A
        * control with no name cannot be addressed by a flow sentence ("Click the
        * … button"), cannot be bound by a `role`+`name` candidate, and is
@@ -363,7 +363,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
        * still in the application and several of their controls were named and
        * not identified, so the check would have failed the live gate on screens
        * that phase was not allowed to rebuild. T10.3 deleted them. Every control
-       * in the ADE now comes from `@svatah/yam-ui`, which refuses one without both.
+       * in the app now comes from `@svatah/yam-ui`, which refuses one without both.
        *
        * Chromium publishes an element's `id` as `AXDOMIdentifier` on macOS and
        * as `AutomationId` on Windows, and `automationIdOf` in each adapter reads
@@ -379,7 +379,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
        * subrole (P8-F3's table), and gives an application no way to put an
        * `AXIdentifier` or a DOM `id` on them. Without this the rule fails on
        * every macOS window that has ever existed, which is a rule about the
-       * platform rather than about the ADE — and a live gate that can never go
+       * platform rather than about the app — and a live gate that can never go
        * green teaches a reader to ignore it.
        *
        * The exemption is a closed list of controls the platform owns
@@ -419,8 +419,8 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   },
 
   {
-    id: "ade.project",
-    page: "Yam ADE",
+    id: "app.project",
+    page: "Yam",
     description:
       "Flow 1: a project is open, and every rail item of LLD §13.7 is addressable by its id.",
     async run(context) {
@@ -429,7 +429,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
 
       /*
        * "Create a project" (LLD §16) is read as "the window has one open". The
-       * ADE opens one through a *native* file chooser, which is another
+       * app opens one through a *native* file chooser, which is another
        * application's window and outside this adapter's session — so the flow
        * the suite drives is what a person sees after that.
        */
@@ -480,8 +480,8 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   },
 
   {
-    id: "ade.flow",
-    page: "Yam ADE",
+    id: "app.flow",
+    page: "Yam",
     description: "Flow 2: a flow file opens in the editor, with its plan and its lint beside it.",
     async run(context) {
       const { check } = context;
@@ -511,8 +511,8 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   },
 
   {
-    id: "ade.run",
-    page: "Yam ADE",
+    id: "app.run",
+    page: "Yam",
     description: "Flow 3: the Flows toolbar offers Record and Run, and the Run screen renders.",
     async run(context) {
       const { check } = context;
@@ -551,8 +551,8 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   },
 
   {
-    id: "ade.result",
-    page: "Yam ADE",
+    id: "app.result",
+    page: "Yam",
     description:
       "Flow 4: the gate makes a run through the Run screen, then the Runs screen lists it.",
     async run(context) {
@@ -630,8 +630,8 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   },
 
   {
-    id: "ade.api-client",
-    page: "Yam ADE",
+    id: "app.api-client",
+    page: "Yam",
     description: "Flow 5: the API screen's request list and its headers are addressable.",
     async run(context) {
       const { check } = context;
@@ -659,8 +659,8 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   },
 
   {
-    id: "ade.inspector",
-    page: "Yam ADE",
+    id: "app.inspector",
+    page: "Yam",
     description:
       "T10.3: the right inspector is a list of landmarks, which is what makes controlPath short.",
     async run(context) {
@@ -693,8 +693,8 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   },
 
   {
-    id: "ade.no-navigation",
-    page: "Yam ADE",
+    id: "app.no-navigation",
+    page: "Yam",
     description: "A desktop adapter refuses the web-only calls rather than pretending.",
     async run({ surface, throws }) {
       /*
@@ -722,7 +722,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
  * ──────────────────────────────────────────────────────────────────────────── */
 
 /**
- * > the ADE gains `YAM_A11Y_VARIANT=1|2`, where variant 1 renames one screen
+ * > the app gains `YAM_A11Y_VARIANT=1|2`, where variant 1 renames one screen
  * > tab and one button on the Project screen and variant 2 moves the Record
  * > screen's gateway control into a different panel; a binding recorded at
  * > variant 0 must relocalize on both through the desktop adapter with the same
@@ -749,7 +749,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
  *   key, never by the name or the position, either of which is the thing the
  *   variant broke. This is the pass the report counts.
  *
- * `scripts/desktop-conformance.mjs` is what launches the ADE three times and
+ * `scripts/desktop-conformance.mjs` is what launches the app three times and
  * carries the recorded state between the passes.
  *
  * ## Why the key cannot help
@@ -818,7 +818,7 @@ async function healingCase(
      * T10.3 had this look first and navigate only if the subject was not on the
      * window, because a rail item is on every screen and pressing a rail row
      * for nothing is waste. It cost the live gate its healing case. The
-     * variant-0 pass runs after `ade.inspector`, which leaves the ADE on the
+     * variant-0 pass runs after `app.inspector`, which leaves the app on the
      * Bindings screen, and the variant-1 pass runs alone on the Flows screen —
      * so the fingerprint was recorded through one ancestry
      * (`…/document/group/group/navigation/button`) and matched against another
@@ -913,7 +913,7 @@ async function healingCase(
     /*
      * "Moved" is a change to where the control is *addressed from* — its
      * `controlPath`, which is the desktop candidate kind (LLD §7.5) — or to its
-     * ancestor roles. The role path alone is too coarse for the ADE T10.3 left:
+     * ancestor roles. The role path alone is too coarse for the app T10.3 left:
      * the toolbar and the session panel are both groups inside the workspace,
      * so a control moved between them kept an identical `rolePath` and the case
      * reported that nothing had changed when the whole tree around it had.
@@ -955,8 +955,8 @@ async function healingCase(
 
 export const DESKTOP_HEALING_CASES: readonly ConformanceCase[] = [
   {
-    id: "ade.heal.renamed-control",
-    page: "Yam ADE",
+    id: "app.heal.renamed-control",
+    page: "Yam",
     description:
       "LLD §16 variant 1: a rail item is renamed, and a binding recorded at variant 0 " +
       "relocalizes onto it.",
@@ -964,7 +964,7 @@ export const DESKTOP_HEALING_CASES: readonly ConformanceCase[] = [
     async run(context) {
       await healingCase(
         context,
-        "ade.heal.renamed-control",
+        "app.heal.renamed-control",
         [
           /*
            * The rail item and the welcome screen's button, which is where
@@ -978,8 +978,8 @@ export const DESKTOP_HEALING_CASES: readonly ConformanceCase[] = [
     },
   },
   {
-    id: "ade.heal.moved-panel",
-    page: "Yam ADE",
+    id: "app.heal.moved-panel",
+    page: "Yam",
     description:
       "LLD §16 variant 2: the Record screen's gateway control moves into another panel, and a " +
       "binding recorded at variant 0 relocalizes onto it.",
@@ -987,7 +987,7 @@ export const DESKTOP_HEALING_CASES: readonly ConformanceCase[] = [
     async run(context) {
       await healingCase(
         context,
-        "ade.heal.moved-panel",
+        "app.heal.moved-panel",
         [{ key: "record-gateway", role: "combobox", screen: "palette:record", nameAtZero: "Gateway" }],
         2,
       );

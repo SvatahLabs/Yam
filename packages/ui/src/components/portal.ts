@@ -19,7 +19,7 @@
  * and never removed, makes the shape the same whatever anyone has pressed.
  */
 
-/** The id of the element every overlay in the ADE is portalled into. */
+/** The id of the element every overlay in the app is portalled into. */
 export const PORTAL_HOST_ID = "sv-portal-host";
 
 export function portalHost(): HTMLElement | undefined {

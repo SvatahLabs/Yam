@@ -148,7 +148,7 @@ class GeneratedClient:
         return self._call("get", f"/flows/{file}", text=True)
 
     def get_health(self) -> Any:
-        """`GET /health` — Liveness, for the ADE's spawn handshake"""
+        """`GET /health` — Liveness, for the app's spawn handshake"""
         return self._call("get", f"/health")
 
     def get_openapijson(self) -> Any:
@@ -204,7 +204,7 @@ class GeneratedClient:
         return self._call("post", f"/heal", body=body)
 
     def post_migrate(self, body: Any = None) -> Any:
-        """`POST /migrate` — Import a Yam ADE prototype's electron-db directory into this project"""
+        """`POST /migrate` — Import a Yam prototype's electron-db directory into this project"""
         return self._call("post", f"/migrate", body=body)
 
     def post_record(self, body: Any = None) -> Any:

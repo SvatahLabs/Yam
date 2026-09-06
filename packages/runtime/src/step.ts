@@ -292,7 +292,7 @@ async function perform(
      * Every other `waitFor` is the adapter's: it is waiting for an element on
      * the screen in front of it. This one is not — it polls a service until it
      * answers something, which is what four of the parity gate's one-sided
-     * checks needed: the ADE's Run button starts a *second* Yam run, and a
+     * checks needed: the app's Run button starts a *second* Yam run, and a
      * flow could not wait for it or read its result.
      *
      * The poll is the step's own timeout, half a second apart. A request that

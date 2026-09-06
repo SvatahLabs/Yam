@@ -12,14 +12,14 @@
  */
 export { migrate, type MigrateOptions, type MigrateResult } from "./migrate.js";
 export {
-  extractAdeProject,
-  readAdeDatabase,
+  extractPrototypeProject,
+  readPrototypeDatabase,
   NOT_IMPORTED,
-  type AdeDatabase,
-  type FromAdeOptions,
-  type FromAdeResult,
+  type PrototypeDatabase,
+  type FromPrototypeOptions,
+  type FromPrototypeResult,
   type Table,
-} from "./from-ade.js";
+} from "./from-prototype.js";
 export { renderReviewReport, type ReportInput, type ReviewNote } from "./report.js";
 export {
   parseLegacyStep,

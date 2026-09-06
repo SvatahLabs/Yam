@@ -190,10 +190,10 @@ export const bindingEntry: BindingEntry = {
 
 /** A desktop binding, exercising the `automationId` and `controlPath` candidate kinds. */
 export const desktopBindingEntry: BindingEntry = {
-  context: { pattern: "Yam ADE*", hash: "2".repeat(64), platform: "desktop" },
+  context: { pattern: "Yam*", hash: "2".repeat(64), platform: "desktop" },
   candidates: [
     { by: "automationId", value: "project-open", score: 0.95 },
-    { by: "controlPath", value: "Window[Yam ADE]/Pane[2]/Button[Open project]", score: 0.7 },
+    { by: "controlPath", value: "Window[Yam]/Pane[2]/Button[Open project]", score: 0.7 },
     { by: "coords", value: "412,86", score: 0.1 },
   ],
   fingerprint: {

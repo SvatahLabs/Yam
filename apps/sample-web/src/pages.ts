@@ -143,7 +143,7 @@ ${SIDEBAR}
             <select id="project" name="project" data-testid="project">
               <option value="core">Core</option>
               <option value="adapters">Adapters</option>
-              <option value="ade">ADE</option>
+              <option value="app">APP_DIR</option>
             </select>
           </div>
           <button type="button" class="btn btn-primary" data-testid="run-build" onclick="if(confirm('Schedule this build?')){document.getElementById('schedule-result').hidden=false;}">Run build</button>

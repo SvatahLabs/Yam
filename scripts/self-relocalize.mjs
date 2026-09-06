@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * A binding *recorded* against the ADE relocalizes at variant 1 (T11.3).
+ * A binding *recorded* against the app relocalizes at variant 1 (T11.3).
  *
  *   node scripts/self-relocalize.mjs --project <a recorded self project>
  *
@@ -15,7 +15,7 @@
  * the repair is the fingerprint the recorder wrote, and what says the repair is
  * *right* is that the element it proposes has the recorded id.
  *
- * Separate from `scripts/self-record.mjs` because it needs the ADE at a
+ * Separate from `scripts/self-record.mjs` because it needs the app at a
  * different variant: a relocalization measured against the window the binding
  * was recorded from would measure nothing.
  */
@@ -28,8 +28,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const at = args.indexOf("--project");
 const project = at < 0 ? join(ROOT, "evals", "self") : args[at + 1];
-const bundle = join(ROOT, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
-const executable = join(bundle, "Contents", "MacOS", "Yam ADE");
+const bundle = join(ROOT, "apps", "desktop", "out", "Yam-darwin-arm64", "Yam.app");
+const executable = join(bundle, "Contents", "MacOS", "Yam");
 
 const store = join(project, "bindings", "flows-rail-item.yaml");
 if (!existsSync(store)) {
@@ -52,7 +52,7 @@ const alive = () =>
 
 function stop() {
   if (alive().length === 0) return;
-  spawnSync("osascript", ["-e", 'tell application id "com.electron.yam-ade" to quit'], {
+  spawnSync("osascript", ["-e", 'tell application id "com.electron.yam" to quit'], {
     encoding: "utf8",
   });
   for (let waited = 0; waited < 20_000 && alive().length > 0; waited += 250) {
@@ -72,7 +72,7 @@ const environment = {
   YAM_A11Y: "1",
   YAM_A11Y_VARIANT: "1",
   YAM_CLI: join(ROOT, "packages", "cli", "dist", "bin.js"),
-  YAM_ADE_PROJECT: join(ROOT, "evals", "fixtures"),
+  YAM_APP_PROJECT: join(ROOT, "evals", "fixtures"),
 };
 const open = ["-n", "-F"];
 for (const [name, value] of Object.entries(environment)) open.push("--env", `${name}=${value}`);
@@ -84,10 +84,10 @@ const surface = await createSurface({
   ...DEFAULT_CONFIG,
   project: "self-relocalize",
   adapter: "ax",
-  app: { processName: "Yam ADE" },
+  app: { processName: "Yam" },
   run: { ...DEFAULT_CONFIG.run, candidateTimeoutMs: 8_000 },
 });
-await surface.open({ processName: "Yam ADE" });
+await surface.open({ processName: "Yam" });
 
 const live = (await surface.snapshot()).nodes.find(
   (one) => one.native?.["automationId"] === "rail-flows",

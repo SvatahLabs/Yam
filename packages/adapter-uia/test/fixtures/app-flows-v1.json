@@ -1,0 +1,5456 @@
+{
+  "process": "Yam",
+  "title": "Yam",
+  "truncated": false,
+  "nodes": [
+    {
+      "parent": -1,
+      "controlType": "Window",
+      "name": "Yam",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "box": [
+        0,
+        0,
+        1280,
+        860
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Document",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Yam",
+      "isEnabled": true,
+      "hasKeyboardFocus": true,
+      "box": [
+        0,
+        0,
+        1280,
+        828
+      ]
+    },
+    {
+      "parent": 1,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        828
+      ],
+      "automationId": "root"
+    },
+    {
+      "parent": 2,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "banner",
+      "isEnabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        44
+      ]
+    },
+    {
+      "parent": 3,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Yam",
+      "isEnabled": true,
+      "box": [
+        50,
+        21,
+        42,
+        17
+      ]
+    },
+    {
+      "parent": 4,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Yam",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "navigation",
+      "name": "Project",
+      "isEnabled": true,
+      "box": [
+        104,
+        20,
+        108,
+        19
+      ],
+      "automationId": "topbar-crumb"
+    },
+    {
+      "parent": 6,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        115,
+        20,
+        46,
+        19
+      ],
+      "automationId": "crumb-project"
+    },
+    {
+      "parent": 7,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "fixtures",
+      "isEnabled": true,
+      "box": [
+        115,
+        21,
+        46,
+        17
+      ]
+    },
+    {
+      "parent": 8,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "fixtures",
+      "isEnabled": true
+    },
+    {
+      "parent": 6,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        177,
+        20,
+        34,
+        19
+      ],
+      "automationId": "crumb-screen"
+    },
+    {
+      "parent": 10,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Flows",
+      "isEnabled": true,
+      "box": [
+        177,
+        21,
+        34,
+        17
+      ]
+    },
+    {
+      "parent": 11,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Flows",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Search or run a command",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        896,
+        16,
+        199,
+        28
+      ],
+      "automationId": "open-command-palette"
+    },
+    {
+      "parent": 13,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Search or run a command",
+      "isEnabled": true,
+      "box": [
+        907,
+        21,
+        146,
+        17
+      ]
+    },
+    {
+      "parent": 14,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Search or run a command",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        1106,
+        19,
+        154,
+        22
+      ],
+      "automationId": "service-chip"
+    },
+    {
+      "parent": 16,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "service",
+      "isEnabled": true,
+      "box": [
+        1128,
+        22,
+        38,
+        15
+      ]
+    },
+    {
+      "parent": 17,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "service",
+      "isEnabled": true
+    },
+    {
+      "parent": 16,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "127.0.0.1:62171",
+      "isEnabled": true,
+      "box": [
+        1166,
+        22,
+        85,
+        15
+      ]
+    },
+    {
+      "parent": 19,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "127.0.0.1:62171",
+      "isEnabled": true
+    },
+    {
+      "parent": 2,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "navigation",
+      "name": "Sections",
+      "isEnabled": true,
+      "box": [
+        8,
+        52,
+        220,
+        756
+      ],
+      "automationId": "rail"
+    },
+    {
+      "parent": 21,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        62,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 22,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "PROJECT",
+      "isEnabled": true,
+      "box": [
+        24,
+        73,
+        50,
+        14
+      ]
+    },
+    {
+      "parent": 23,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "PROJECT",
+      "isEnabled": true
+    },
+    {
+      "parent": 21,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Editor",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        91,
+        203,
+        31
+      ],
+      "automationId": "rail-flows"
+    },
+    {
+      "parent": 25,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Editor",
+      "isEnabled": true,
+      "box": [
+        24,
+        98,
+        35,
+        17
+      ]
+    },
+    {
+      "parent": 26,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Editor",
+      "isEnabled": true
+    },
+    {
+      "parent": 21,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Runs",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        122,
+        203,
+        31
+      ],
+      "automationId": "rail-runs"
+    },
+    {
+      "parent": 28,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Runs",
+      "isEnabled": true,
+      "box": [
+        24,
+        129,
+        29,
+        17
+      ]
+    },
+    {
+      "parent": 29,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Runs",
+      "isEnabled": true
+    },
+    {
+      "parent": 21,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Bindings",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        153,
+        203,
+        31
+      ],
+      "automationId": "rail-bindings"
+    },
+    {
+      "parent": 31,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Bindings",
+      "isEnabled": true,
+      "box": [
+        24,
+        159,
+        50,
+        17
+      ]
+    },
+    {
+      "parent": 32,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Bindings",
+      "isEnabled": true
+    },
+    {
+      "parent": 21,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Agents and tools",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        184,
+        203,
+        31
+      ],
+      "automationId": "rail-agents"
+    },
+    {
+      "parent": 34,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Agents and tools",
+      "isEnabled": true,
+      "box": [
+        24,
+        190,
+        97,
+        17
+      ]
+    },
+    {
+      "parent": 35,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Agents and tools",
+      "isEnabled": true
+    },
+    {
+      "parent": 21,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        217,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 37,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "RESOURCES",
+      "isEnabled": true,
+      "box": [
+        24,
+        227,
+        66,
+        14
+      ]
+    },
+    {
+      "parent": 38,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "RESOURCES",
+      "isEnabled": true
+    },
+    {
+      "parent": 21,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "API",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        246,
+        203,
+        31
+      ],
+      "automationId": "rail-api"
+    },
+    {
+      "parent": 40,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "API",
+      "isEnabled": true,
+      "box": [
+        24,
+        252,
+        21,
+        17
+      ]
+    },
+    {
+      "parent": 41,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "API",
+      "isEnabled": true
+    },
+    {
+      "parent": 21,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Data",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        277,
+        203,
+        31
+      ],
+      "automationId": "rail-data"
+    },
+    {
+      "parent": 43,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Data",
+      "isEnabled": true,
+      "box": [
+        24,
+        283,
+        27,
+        17
+      ]
+    },
+    {
+      "parent": 44,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Data",
+      "isEnabled": true
+    },
+    {
+      "parent": 21,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Import prototype database",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        736,
+        203,
+        31
+      ],
+      "automationId": "rail-import"
+    },
+    {
+      "parent": 46,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Import prototype database",
+      "isEnabled": true,
+      "box": [
+        24,
+        743,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 47,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Import prototype database",
+      "isEnabled": true
+    },
+    {
+      "parent": 21,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Settings",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        16,
+        767,
+        203,
+        31
+      ],
+      "automationId": "rail-settings"
+    },
+    {
+      "parent": 49,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Settings",
+      "isEnabled": true,
+      "box": [
+        24,
+        774,
+        48,
+        17
+      ]
+    },
+    {
+      "parent": 50,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Settings",
+      "isEnabled": true
+    },
+    {
+      "parent": 2,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "region",
+      "name": "Workspace",
+      "isEnabled": true,
+      "box": [
+        228,
+        52,
+        684,
+        756
+      ],
+      "automationId": "workspace"
+    },
+    {
+      "parent": 52,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "heading",
+      "name": "Flows",
+      "isEnabled": true,
+      "box": [
+        244,
+        62,
+        38,
+        20
+      ]
+    },
+    {
+      "parent": 53,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Flows",
+      "isEnabled": true,
+      "box": [
+        244,
+        62,
+        38,
+        19
+      ]
+    },
+    {
+      "parent": 54,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Flows",
+      "isEnabled": true
+    },
+    {
+      "parent": 52,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 files · 22 stories · 30 bindings, 0 unverified",
+      "isEnabled": true,
+      "box": [
+        290,
+        64,
+        238,
+        16
+      ]
+    },
+    {
+      "parent": 56,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 files · 22 stories · 30 bindings, 0 unverified",
+      "isEnabled": true
+    },
+    {
+      "parent": 52,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        726,
+        58,
+        75,
+        28
+      ],
+      "automationId": "action-run-flow"
+    },
+    {
+      "parent": 58,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run",
+      "isEnabled": true,
+      "box": [
+        737,
+        63,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 59,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Run",
+      "isEnabled": true
+    },
+    {
+      "parent": 52,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Record",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        809,
+        58,
+        87,
+        28
+      ],
+      "automationId": "action-record-start"
+    },
+    {
+      "parent": 61,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Record",
+      "isEnabled": true,
+      "box": [
+        820,
+        63,
+        40,
+        17
+      ]
+    },
+    {
+      "parent": 62,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Record",
+      "isEnabled": true
+    },
+    {
+      "parent": 52,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "complementary",
+      "name": "Flow files",
+      "isEnabled": true,
+      "box": [
+        228,
+        93,
+        301,
+        715
+      ],
+      "automationId": "flows-files-pane"
+    },
+    {
+      "parent": 64,
+      "controlType": "Table",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOW FILES",
+      "isEnabled": true,
+      "patterns": [
+        "Scroll"
+      ],
+      "box": [
+        228,
+        93,
+        300,
+        397
+      ],
+      "automationId": "flows-list"
+    },
+    {
+      "parent": 65,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        93,
+        300,
+        21
+      ]
+    },
+    {
+      "parent": 66,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOW FILES",
+      "isEnabled": true,
+      "box": [
+        240,
+        94,
+        68,
+        14
+      ]
+    },
+    {
+      "parent": 67,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOW FILES",
+      "isEnabled": true
+    },
+    {
+      "parent": 65,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        114,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 69,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        114,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 70,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOW",
+      "isEnabled": true,
+      "box": [
+        228,
+        114,
+        210,
+        32
+      ]
+    },
+    {
+      "parent": 71,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOW",
+      "isEnabled": true,
+      "box": [
+        240,
+        123,
+        31,
+        14
+      ]
+    },
+    {
+      "parent": 72,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOW",
+      "isEnabled": true
+    },
+    {
+      "parent": 70,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "LAST RUN",
+      "isEnabled": true,
+      "box": [
+        438,
+        114,
+        90,
+        32
+      ]
+    },
+    {
+      "parent": 74,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "LAST RUN",
+      "isEnabled": true,
+      "box": [
+        450,
+        123,
+        54,
+        14
+      ]
+    },
+    {
+      "parent": 75,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "LAST RUN",
+      "isEnabled": true
+    },
+    {
+      "parent": 65,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        146,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 77,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-compensation.flow 3 stories",
+      "isEnabled": true,
+      "box": [
+        228,
+        146,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 78,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-compensation.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        154,
+        154,
+        16
+      ]
+    },
+    {
+      "parent": 79,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-compensation.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 78,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3 stories",
+      "isEnabled": true,
+      "box": [
+        240,
+        171,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 81,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3 stories",
+      "isEnabled": true
+    },
+    {
+      "parent": 77,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        438,
+        146,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 83,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        457,
+        163,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 84,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true
+    },
+    {
+      "parent": 65,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        195,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 86,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-workflow.flow 2 stories",
+      "isEnabled": true,
+      "box": [
+        228,
+        195,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 87,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-workflow.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        203,
+        126,
+        16
+      ]
+    },
+    {
+      "parent": 88,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-workflow.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 87,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2 stories",
+      "isEnabled": true,
+      "box": [
+        240,
+        220,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 90,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2 stories",
+      "isEnabled": true
+    },
+    {
+      "parent": 86,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        438,
+        195,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 92,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        457,
+        212,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 93,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true
+    },
+    {
+      "parent": 65,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        244,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 95,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "execution.flow 7 stories",
+      "isEnabled": true,
+      "box": [
+        228,
+        244,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 96,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "execution.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        252,
+        81,
+        16
+      ]
+    },
+    {
+      "parent": 97,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "execution.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 96,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 stories",
+      "isEnabled": true,
+      "box": [
+        240,
+        269,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 99,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 stories",
+      "isEnabled": true
+    },
+    {
+      "parent": 95,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        438,
+        244,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 101,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        457,
+        261,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 102,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true
+    },
+    {
+      "parent": 65,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        293,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 104,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "guards-and-compensation.flow 3 stories",
+      "isEnabled": true,
+      "box": [
+        228,
+        293,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 105,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "guards-and-compensation.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        301,
+        173,
+        16
+      ]
+    },
+    {
+      "parent": 106,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "guards-and-compensation.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 105,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3 stories",
+      "isEnabled": true,
+      "box": [
+        240,
+        319,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 108,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3 stories",
+      "isEnabled": true
+    },
+    {
+      "parent": 104,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        438,
+        293,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 110,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        457,
+        310,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 111,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true
+    },
+    {
+      "parent": 65,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        342,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 113,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "natural_language_login.flow 3 stories",
+      "isEnabled": true,
+      "box": [
+        228,
+        342,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 114,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "natural_language_login.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        350,
+        156,
+        16
+      ]
+    },
+    {
+      "parent": 115,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "natural_language_login.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 114,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3 stories",
+      "isEnabled": true,
+      "box": [
+        240,
+        368,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 117,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3 stories",
+      "isEnabled": true
+    },
+    {
+      "parent": 113,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        438,
+        342,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 119,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        457,
+        359,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 120,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true
+    },
+    {
+      "parent": 65,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        391,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 122,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "simple.flow 3 stories",
+      "isEnabled": true,
+      "box": [
+        228,
+        391,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 123,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "simple.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        399,
+        64,
+        16
+      ]
+    },
+    {
+      "parent": 124,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "simple.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 123,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3 stories",
+      "isEnabled": true,
+      "box": [
+        240,
+        417,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 126,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3 stories",
+      "isEnabled": true
+    },
+    {
+      "parent": 122,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        438,
+        391,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 128,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        457,
+        408,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 129,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true
+    },
+    {
+      "parent": 65,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        440,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 131,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "svatah.flow 1 story",
+      "isEnabled": true,
+      "box": [
+        228,
+        440,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 132,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "svatah.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        448,
+        63,
+        16
+      ]
+    },
+    {
+      "parent": 133,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "svatah.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 132,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "1 story",
+      "isEnabled": true,
+      "box": [
+        240,
+        466,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 135,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "1 story",
+      "isEnabled": true
+    },
+    {
+      "parent": 131,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        438,
+        440,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 137,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true,
+      "box": [
+        457,
+        457,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 138,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "not run",
+      "isEnabled": true
+    },
+    {
+      "parent": 52,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        93,
+        383,
+        715
+      ]
+    },
+    {
+      "parent": 140,
+      "controlType": "Tab",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Flow views",
+      "isEnabled": true,
+      "box": [
+        529,
+        93,
+        383,
+        40
+      ],
+      "automationId": "flows-tabs"
+    },
+    {
+      "parent": 141,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "booking-compensation.flow",
+      "isEnabled": true,
+      "isSelected": true,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        541,
+        101,
+        179,
+        32
+      ],
+      "automationId": "editor"
+    },
+    {
+      "parent": 142,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-compensation.flow",
+      "isEnabled": true,
+      "box": [
+        552,
+        109,
+        157,
+        17
+      ]
+    },
+    {
+      "parent": 143,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-compensation.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 141,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "Plan",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        722,
+        101,
+        47,
+        31
+      ],
+      "automationId": "plan"
+    },
+    {
+      "parent": 145,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Plan",
+      "isEnabled": true,
+      "box": [
+        733,
+        109,
+        25,
+        17
+      ]
+    },
+    {
+      "parent": 146,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Plan",
+      "isEnabled": true
+    },
+    {
+      "parent": 141,
+      "controlType": "TabItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "tab",
+      "name": "History",
+      "isEnabled": true,
+      "isSelected": false,
+      "patterns": [
+        "SelectionItem"
+      ],
+      "box": [
+        770,
+        101,
+        62,
+        31
+      ],
+      "automationId": "history"
+    },
+    {
+      "parent": 148,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "History",
+      "isEnabled": true,
+      "box": [
+        781,
+        109,
+        40,
+        17
+      ]
+    },
+    {
+      "parent": 149,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "History",
+      "isEnabled": true
+    },
+    {
+      "parent": 140,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        133,
+        383,
+        966
+      ],
+      "automationId": "radix-_r_3_-content-editor"
+    },
+    {
+      "parent": 151,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Flow editor",
+      "isEnabled": true,
+      "box": [
+        541,
+        143,
+        359,
+        946
+      ],
+      "automationId": "flows-editor"
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "1 // The compensation showcase for REQ-AUTO-4.",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        143,
+        359,
+        22
+      ],
+      "automationId": "flow-line-1"
+    },
+    {
+      "parent": 153,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "1",
+      "isEnabled": true,
+      "box": [
+        568,
+        147,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 154,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "1",
+      "isEnabled": true
+    },
+    {
+      "parent": 153,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// The compensation showcase for REQ-AUTO-4.",
+      "isEnabled": true,
+      "box": [
+        605,
+        146,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 156,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// The compensation showcase for REQ-AUTO-4.",
+      "isEnabled": true
+    },
+    {
+      "parent": 156,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// The compensation showcase for REQ-",
+      "isEnabled": true
+    },
+    {
+      "parent": 156,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2 //",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        165,
+        359,
+        22
+      ],
+      "automationId": "flow-line-2"
+    },
+    {
+      "parent": 160,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2",
+      "isEnabled": true,
+      "box": [
+        568,
+        169,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 161,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "2",
+      "isEnabled": true
+    },
+    {
+      "parent": 160,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "//",
+      "isEnabled": true,
+      "box": [
+        605,
+        168,
+        14,
+        16
+      ]
+    },
+    {
+      "parent": 163,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "//",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3 // This flow is not a migration of anything: it is the fixture that exercises the",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        187,
+        359,
+        22
+      ],
+      "automationId": "flow-line-3"
+    },
+    {
+      "parent": 165,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3",
+      "isEnabled": true,
+      "box": [
+        568,
+        191,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 166,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3",
+      "isEnabled": true
+    },
+    {
+      "parent": 165,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// This flow is not a migration of anything: it is the fixture that exercises the",
+      "isEnabled": true,
+      "box": [
+        605,
+        190,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 168,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// This flow is not a migration of anything: it is the fixture that exercises the",
+      "isEnabled": true
+    },
+    {
+      "parent": 168,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// This flow is not a migration of an",
+      "isEnabled": true
+    },
+    {
+      "parent": 168,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "4 // abort policy `onFailure=compensate:<story>`, which no legacy flow could express.",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        209,
+        359,
+        22
+      ],
+      "automationId": "flow-line-4"
+    },
+    {
+      "parent": 172,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "4",
+      "isEnabled": true,
+      "box": [
+        568,
+        213,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 173,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "4",
+      "isEnabled": true
+    },
+    {
+      "parent": 172,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// abort policy `onFailure=compensate:<story>`, which no legacy flow could express.",
+      "isEnabled": true,
+      "box": [
+        605,
+        212,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 175,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// abort policy `onFailure=compensate:<story>`, which no legacy flow could express.",
+      "isEnabled": true
+    },
+    {
+      "parent": 175,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// abort policy `onFailure=compensate",
+      "isEnabled": true
+    },
+    {
+      "parent": 175,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "5 // It reuses execution.flow's scenario names and steps so the two read together,",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        231,
+        359,
+        22
+      ],
+      "automationId": "flow-line-5"
+    },
+    {
+      "parent": 179,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "5",
+      "isEnabled": true,
+      "box": [
+        568,
+        235,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 180,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "5",
+      "isEnabled": true
+    },
+    {
+      "parent": 179,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// It reuses execution.flow's scenario names and steps so the two read together,",
+      "isEnabled": true,
+      "box": [
+        605,
+        234,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 182,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// It reuses execution.flow's scenario names and steps so the two read together,",
+      "isEnabled": true
+    },
+    {
+      "parent": 182,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// It reuses execution.flow's scenari",
+      "isEnabled": true
+    },
+    {
+      "parent": 182,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "6 // and adds the one scenario the original never had — \"cancel booking\" — as the",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        253,
+        359,
+        22
+      ],
+      "automationId": "flow-line-6"
+    },
+    {
+      "parent": 186,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "6",
+      "isEnabled": true,
+      "box": [
+        568,
+        257,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 187,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "6",
+      "isEnabled": true
+    },
+    {
+      "parent": 186,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// and adds the one scenario the original never had — \"cancel booking\" — as the",
+      "isEnabled": true,
+      "box": [
+        605,
+        256,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 189,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// and adds the one scenario the original never had — \"cancel booking\" — as the",
+      "isEnabled": true
+    },
+    {
+      "parent": 189,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// and adds the one scenario the orig",
+      "isEnabled": true
+    },
+    {
+      "parent": 189,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7 // compensating story.",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        275,
+        359,
+        22
+      ],
+      "automationId": "flow-line-7"
+    },
+    {
+      "parent": 193,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7",
+      "isEnabled": true,
+      "box": [
+        568,
+        279,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 194,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "7",
+      "isEnabled": true
+    },
+    {
+      "parent": 193,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// compensating story.",
+      "isEnabled": true,
+      "box": [
+        605,
+        278,
+        158,
+        16
+      ]
+    },
+    {
+      "parent": 196,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// compensating story.",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "8 //",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        297,
+        359,
+        22
+      ],
+      "automationId": "flow-line-8"
+    },
+    {
+      "parent": 198,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "8",
+      "isEnabled": true,
+      "box": [
+        568,
+        301,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 199,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "8",
+      "isEnabled": true
+    },
+    {
+      "parent": 198,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "//",
+      "isEnabled": true,
+      "box": [
+        605,
+        300,
+        14,
+        16
+      ]
+    },
+    {
+      "parent": 201,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "//",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "9 // The first migration of execution.flow folded this into that file, which cost it",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        319,
+        359,
+        22
+      ],
+      "automationId": "flow-line-9"
+    },
+    {
+      "parent": 203,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "9",
+      "isEnabled": true,
+      "box": [
+        568,
+        323,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 204,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "9",
+      "isEnabled": true
+    },
+    {
+      "parent": 203,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// The first migration of execution.flow folded this into that file, which cost it",
+      "isEnabled": true,
+      "box": [
+        605,
+        322,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 206,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// The first migration of execution.flow folded this into that file, which cost it",
+      "isEnabled": true
+    },
+    {
+      "parent": 206,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// The first migration of execution.f",
+      "isEnabled": true
+    },
+    {
+      "parent": 206,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "10 // three of its original scenario names and added a scenario the original did not",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        341,
+        359,
+        22
+      ],
+      "automationId": "flow-line-10"
+    },
+    {
+      "parent": 210,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "10",
+      "isEnabled": true,
+      "box": [
+        562,
+        345,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 211,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "10",
+      "isEnabled": true
+    },
+    {
+      "parent": 210,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// three of its original scenario names and added a scenario the original did not",
+      "isEnabled": true,
+      "box": [
+        605,
+        344,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 213,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// three of its original scenario names and added a scenario the original did not",
+      "isEnabled": true
+    },
+    {
+      "parent": 213,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// three of its original scenario nam",
+      "isEnabled": true
+    },
+    {
+      "parent": 213,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "11 // contain. Keeping the showcase here leaves execution.flow a faithful migration",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        363,
+        359,
+        22
+      ],
+      "automationId": "flow-line-11"
+    },
+    {
+      "parent": 217,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "11",
+      "isEnabled": true,
+      "box": [
+        562,
+        367,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 218,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "11",
+      "isEnabled": true
+    },
+    {
+      "parent": 217,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// contain. Keeping the showcase here leaves execution.flow a faithful migration",
+      "isEnabled": true,
+      "box": [
+        605,
+        366,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 220,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// contain. Keeping the showcase here leaves execution.flow a faithful migration",
+      "isEnabled": true
+    },
+    {
+      "parent": 220,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// contain. Keeping the showcase here",
+      "isEnabled": true
+    },
+    {
+      "parent": 220,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "12 // (P0-F2).",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        385,
+        359,
+        22
+      ],
+      "automationId": "flow-line-12"
+    },
+    {
+      "parent": 224,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "12",
+      "isEnabled": true,
+      "box": [
+        562,
+        389,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 225,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "12",
+      "isEnabled": true
+    },
+    {
+      "parent": 224,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// (P0-F2).",
+      "isEnabled": true,
+      "box": [
+        605,
+        388,
+        79,
+        16
+      ]
+    },
+    {
+      "parent": 227,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// (P0-F2).",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "13",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        407,
+        359,
+        22
+      ],
+      "automationId": "flow-line-13"
+    },
+    {
+      "parent": 229,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "13",
+      "isEnabled": true,
+      "box": [
+        562,
+        411,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 230,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "13",
+      "isEnabled": true
+    },
+    {
+      "parent": 229,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        605,
+        410,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 232,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "14 scenario (onFailure=compensate:cancel booking): book a slot",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        429,
+        359,
+        22
+      ],
+      "automationId": "flow-line-14"
+    },
+    {
+      "parent": 234,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "14",
+      "isEnabled": true,
+      "box": [
+        562,
+        433,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 235,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "14",
+      "isEnabled": true
+    },
+    {
+      "parent": 234,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "scenario (onFailure=compensate:cancel booking): book a slot",
+      "isEnabled": true,
+      "box": [
+        605,
+        432,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 237,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "scenario (onFailure=compensate:cancel booking): book a slot",
+      "isEnabled": true
+    },
+    {
+      "parent": 237,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "scenario (onFailure=compensate:cancel",
+      "isEnabled": true
+    },
+    {
+      "parent": 237,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "15 Click the Book a slot link tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        451,
+        359,
+        22
+      ],
+      "automationId": "flow-line-15"
+    },
+    {
+      "parent": 241,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "15",
+      "isEnabled": true,
+      "box": [
+        562,
+        455,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 242,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "15",
+      "isEnabled": true
+    },
+    {
+      "parent": 241,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the Book a slot link",
+      "isEnabled": true,
+      "box": [
+        605,
+        454,
+        202,
+        16
+      ]
+    },
+    {
+      "parent": 244,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the Book a slot link",
+      "isEnabled": true
+    },
+    {
+      "parent": 241,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        455,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 246,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "16 Click the location field tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        473,
+        359,
+        22
+      ],
+      "automationId": "flow-line-16"
+    },
+    {
+      "parent": 248,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "16",
+      "isEnabled": true,
+      "box": [
+        562,
+        477,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 249,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "16",
+      "isEnabled": true
+    },
+    {
+      "parent": 248,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the location field",
+      "isEnabled": true,
+      "box": [
+        605,
+        476,
+        187,
+        16
+      ]
+    },
+    {
+      "parent": 251,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the location field",
+      "isEnabled": true
+    },
+    {
+      "parent": 248,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        477,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 253,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "17 Type \"indra\" into the location field tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        495,
+        359,
+        22
+      ],
+      "automationId": "flow-line-17"
+    },
+    {
+      "parent": 255,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "17",
+      "isEnabled": true,
+      "box": [
+        562,
+        499,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 256,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "17",
+      "isEnabled": true
+    },
+    {
+      "parent": 255,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Type \"indra\" into the location field",
+      "isEnabled": true,
+      "box": [
+        605,
+        498,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 258,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Type \"indra\" into the location field",
+      "isEnabled": true
+    },
+    {
+      "parent": 258,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Type \"indra\" into the loca",
+      "isEnabled": true
+    },
+    {
+      "parent": 258,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 255,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        499,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 262,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "18 Click the Indiranagar suggestion tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        517,
+        359,
+        22
+      ],
+      "automationId": "flow-line-18"
+    },
+    {
+      "parent": 264,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "18",
+      "isEnabled": true,
+      "box": [
+        562,
+        521,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 265,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "18",
+      "isEnabled": true
+    },
+    {
+      "parent": 264,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the Indiranagar suggestion",
+      "isEnabled": true,
+      "box": [
+        605,
+        520,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 267,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the Indiranagar suggestion",
+      "isEnabled": true
+    },
+    {
+      "parent": 267,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the Indiranagar sugg",
+      "isEnabled": true
+    },
+    {
+      "parent": 267,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 264,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        521,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 271,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "19 Click the next button tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        539,
+        359,
+        22
+      ],
+      "automationId": "flow-line-19"
+    },
+    {
+      "parent": 273,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "19",
+      "isEnabled": true,
+      "box": [
+        562,
+        543,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 274,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "19",
+      "isEnabled": true
+    },
+    {
+      "parent": 273,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the next button",
+      "isEnabled": true,
+      "box": [
+        605,
+        542,
+        166,
+        16
+      ]
+    },
+    {
+      "parent": 276,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the next button",
+      "isEnabled": true
+    },
+    {
+      "parent": 273,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        543,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 278,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "20 Click the Book now button tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        561,
+        359,
+        22
+      ],
+      "automationId": "flow-line-20"
+    },
+    {
+      "parent": 280,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "20",
+      "isEnabled": true,
+      "box": [
+        562,
+        565,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 281,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "20",
+      "isEnabled": true
+    },
+    {
+      "parent": 280,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the Book now button",
+      "isEnabled": true,
+      "box": [
+        605,
+        564,
+        194,
+        16
+      ]
+    },
+    {
+      "parent": 283,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the Book now button",
+      "isEnabled": true
+    },
+    {
+      "parent": 280,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        565,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 285,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "21",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        583,
+        359,
+        22
+      ],
+      "automationId": "flow-line-21"
+    },
+    {
+      "parent": 287,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "21",
+      "isEnabled": true,
+      "box": [
+        562,
+        587,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 288,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "21",
+      "isEnabled": true
+    },
+    {
+      "parent": 287,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        605,
+        586,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 290,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "22 scenario (onFailure=compensate:cancel booking): pay for the slot",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        605,
+        359,
+        22
+      ],
+      "automationId": "flow-line-22"
+    },
+    {
+      "parent": 292,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "22",
+      "isEnabled": true,
+      "box": [
+        562,
+        609,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 293,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "22",
+      "isEnabled": true
+    },
+    {
+      "parent": 292,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "scenario (onFailure=compensate:cancel booking): pay for the slot",
+      "isEnabled": true,
+      "box": [
+        605,
+        608,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 295,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "scenario (onFailure=compensate:cancel booking): pay for the slot",
+      "isEnabled": true
+    },
+    {
+      "parent": 295,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "scenario (onFailure=compensate:cancel",
+      "isEnabled": true
+    },
+    {
+      "parent": 295,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "23 Click the booking result tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        627,
+        359,
+        22
+      ],
+      "automationId": "flow-line-23"
+    },
+    {
+      "parent": 299,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "23",
+      "isEnabled": true,
+      "box": [
+        562,
+        631,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 300,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "23",
+      "isEnabled": true
+    },
+    {
+      "parent": 299,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the booking result",
+      "isEnabled": true,
+      "box": [
+        605,
+        630,
+        187,
+        16
+      ]
+    },
+    {
+      "parent": 302,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the booking result",
+      "isEnabled": true
+    },
+    {
+      "parent": 299,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        631,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 304,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "24 Click the Checkout link tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        649,
+        359,
+        22
+      ],
+      "automationId": "flow-line-24"
+    },
+    {
+      "parent": 306,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "24",
+      "isEnabled": true,
+      "box": [
+        562,
+        653,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 307,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "24",
+      "isEnabled": true
+    },
+    {
+      "parent": 306,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the Checkout link",
+      "isEnabled": true,
+      "box": [
+        605,
+        652,
+        180,
+        16
+      ]
+    },
+    {
+      "parent": 309,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the Checkout link",
+      "isEnabled": true
+    },
+    {
+      "parent": 306,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        653,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 311,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "25 Type {data.card.number} into the card number field tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        671,
+        359,
+        22
+      ],
+      "automationId": "flow-line-25"
+    },
+    {
+      "parent": 313,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "25",
+      "isEnabled": true,
+      "box": [
+        562,
+        675,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 314,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "25",
+      "isEnabled": true
+    },
+    {
+      "parent": 313,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Type {data.card.number} into the card number field",
+      "isEnabled": true,
+      "box": [
+        605,
+        674,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 316,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Type {data.card.number} into the card number field",
+      "isEnabled": true
+    },
+    {
+      "parent": 316,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Type {data.card.number} in",
+      "isEnabled": true
+    },
+    {
+      "parent": 316,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 313,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        675,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 320,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "26 Select \"08\" in the expiry month select tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        693,
+        359,
+        22
+      ],
+      "automationId": "flow-line-26"
+    },
+    {
+      "parent": 322,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "26",
+      "isEnabled": true,
+      "box": [
+        562,
+        697,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 323,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "26",
+      "isEnabled": true
+    },
+    {
+      "parent": 322,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Select \"08\" in the expiry month select",
+      "isEnabled": true,
+      "box": [
+        605,
+        696,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 325,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Select \"08\" in the expiry month select",
+      "isEnabled": true
+    },
+    {
+      "parent": 325,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Select \"08\" in the expiry",
+      "isEnabled": true
+    },
+    {
+      "parent": 325,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 322,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        697,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 329,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "27 Select \"2027\" in the expiry year select tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        715,
+        359,
+        22
+      ],
+      "automationId": "flow-line-27"
+    },
+    {
+      "parent": 331,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "27",
+      "isEnabled": true,
+      "box": [
+        562,
+        719,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 332,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "27",
+      "isEnabled": true
+    },
+    {
+      "parent": 331,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Select \"2027\" in the expiry year select",
+      "isEnabled": true,
+      "box": [
+        605,
+        718,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 334,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Select \"2027\" in the expiry year select",
+      "isEnabled": true
+    },
+    {
+      "parent": 334,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Select \"2027\" in the expir",
+      "isEnabled": true
+    },
+    {
+      "parent": 334,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 331,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        719,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 338,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "28 Type {data.card.cvv} into the CVV field tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        737,
+        359,
+        22
+      ],
+      "automationId": "flow-line-28"
+    },
+    {
+      "parent": 340,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "28",
+      "isEnabled": true,
+      "box": [
+        562,
+        741,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 341,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "28",
+      "isEnabled": true
+    },
+    {
+      "parent": 340,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Type {data.card.cvv} into the CVV field",
+      "isEnabled": true,
+      "box": [
+        605,
+        740,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 343,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Type {data.card.cvv} into the CVV field",
+      "isEnabled": true
+    },
+    {
+      "parent": 343,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Type {data.card.cvv} into",
+      "isEnabled": true
+    },
+    {
+      "parent": 343,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 340,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        741,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 347,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "29 Click the pay button tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        759,
+        359,
+        22
+      ],
+      "automationId": "flow-line-29"
+    },
+    {
+      "parent": 349,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "29",
+      "isEnabled": true,
+      "box": [
+        562,
+        763,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 350,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "29",
+      "isEnabled": true
+    },
+    {
+      "parent": 349,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the pay button",
+      "isEnabled": true,
+      "box": [
+        605,
+        762,
+        158,
+        16
+      ]
+    },
+    {
+      "parent": 352,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the pay button",
+      "isEnabled": true
+    },
+    {
+      "parent": 349,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        763,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 354,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "30",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        781,
+        359,
+        22
+      ],
+      "automationId": "flow-line-30"
+    },
+    {
+      "parent": 356,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "30",
+      "isEnabled": true,
+      "box": [
+        562,
+        785,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 357,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "30",
+      "isEnabled": true
+    },
+    {
+      "parent": 356,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        605,
+        784,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 359,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "31 // The compensating story. It runs with the failing flow's scope and then the",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        803,
+        359,
+        22
+      ],
+      "automationId": "flow-line-31"
+    },
+    {
+      "parent": 361,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "31",
+      "isEnabled": true,
+      "box": [
+        562,
+        807,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 362,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "31",
+      "isEnabled": true
+    },
+    {
+      "parent": 361,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// The compensating story. It runs with the failing flow's scope and then the",
+      "isEnabled": true,
+      "box": [
+        605,
+        806,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 364,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// The compensating story. It runs with the failing flow's scope and then the",
+      "isEnabled": true
+    },
+    {
+      "parent": 364,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// The compensating story. It runs wi",
+      "isEnabled": true
+    },
+    {
+      "parent": 364,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "32 // flow stops (LLD §8.3), so a booking created before the failure is not left",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        825,
+        359,
+        22
+      ],
+      "automationId": "flow-line-32"
+    },
+    {
+      "parent": 368,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "32",
+      "isEnabled": true,
+      "box": [
+        562,
+        829,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 369,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "32",
+      "isEnabled": true
+    },
+    {
+      "parent": 368,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// flow stops (LLD §8.3), so a booking created before the failure is not left",
+      "isEnabled": true,
+      "box": [
+        605,
+        828,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 371,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// flow stops (LLD §8.3), so a booking created before the failure is not left",
+      "isEnabled": true
+    },
+    {
+      "parent": 371,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// flow stops (LLD §8.3), so a bookin",
+      "isEnabled": true
+    },
+    {
+      "parent": 371,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "33 // behind.",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        847,
+        359,
+        22
+      ],
+      "automationId": "flow-line-33"
+    },
+    {
+      "parent": 375,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "33",
+      "isEnabled": true,
+      "box": [
+        562,
+        851,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 376,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "33",
+      "isEnabled": true
+    },
+    {
+      "parent": 375,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// behind.",
+      "isEnabled": true,
+      "box": [
+        605,
+        850,
+        72,
+        16
+      ]
+    },
+    {
+      "parent": 378,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "// behind.",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "34 scenario (idempotent): cancel booking",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        869,
+        359,
+        22
+      ],
+      "automationId": "flow-line-34"
+    },
+    {
+      "parent": 380,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "34",
+      "isEnabled": true,
+      "box": [
+        562,
+        873,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 381,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "34",
+      "isEnabled": true
+    },
+    {
+      "parent": 380,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "scenario (idempotent): cancel booking",
+      "isEnabled": true,
+      "box": [
+        605,
+        872,
+        266,
+        16
+      ]
+    },
+    {
+      "parent": 383,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "scenario (idempotent): cancel booking",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "35 Click the Bookings link tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        891,
+        359,
+        22
+      ],
+      "automationId": "flow-line-35"
+    },
+    {
+      "parent": 385,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "35",
+      "isEnabled": true,
+      "box": [
+        562,
+        895,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 386,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "35",
+      "isEnabled": true
+    },
+    {
+      "parent": 385,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the Bookings link",
+      "isEnabled": true,
+      "box": [
+        605,
+        894,
+        180,
+        16
+      ]
+    },
+    {
+      "parent": 388,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the Bookings link",
+      "isEnabled": true
+    },
+    {
+      "parent": 385,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        895,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 390,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "36 Click the cancel booking button tier 1 · bound",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        913,
+        359,
+        22
+      ],
+      "automationId": "flow-line-36"
+    },
+    {
+      "parent": 392,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "36",
+      "isEnabled": true,
+      "box": [
+        562,
+        917,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 393,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "36",
+      "isEnabled": true
+    },
+    {
+      "parent": 392,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the cancel booking button",
+      "isEnabled": true,
+      "box": [
+        605,
+        916,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 395,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the cancel booking button",
+      "isEnabled": true
+    },
+    {
+      "parent": 395,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Click the cancel booking b",
+      "isEnabled": true
+    },
+    {
+      "parent": 395,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 392,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true,
+      "box": [
+        818,
+        917,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 399,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "tier 1 · bound",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "37",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        935,
+        359,
+        22
+      ],
+      "automationId": "flow-line-37"
+    },
+    {
+      "parent": 401,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "37",
+      "isEnabled": true,
+      "box": [
+        562,
+        939,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 402,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "37",
+      "isEnabled": true
+    },
+    {
+      "parent": 401,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        605,
+        938,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 404,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "38 compose: book and pay",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        957,
+        359,
+        22
+      ],
+      "automationId": "flow-line-38"
+    },
+    {
+      "parent": 406,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "38",
+      "isEnabled": true,
+      "box": [
+        562,
+        961,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 407,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "38",
+      "isEnabled": true
+    },
+    {
+      "parent": 406,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "compose: book and pay",
+      "isEnabled": true,
+      "box": [
+        605,
+        960,
+        151,
+        16
+      ]
+    },
+    {
+      "parent": 409,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "compose: book and pay",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "39 book a slot",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        979,
+        359,
+        22
+      ],
+      "automationId": "flow-line-39"
+    },
+    {
+      "parent": 411,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "39",
+      "isEnabled": true,
+      "box": [
+        562,
+        983,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 412,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "39",
+      "isEnabled": true
+    },
+    {
+      "parent": 411,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "book a slot",
+      "isEnabled": true,
+      "box": [
+        605,
+        982,
+        94,
+        16
+      ]
+    },
+    {
+      "parent": 414,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "book a slot",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "40 pay for the slot",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        1001,
+        359,
+        22
+      ],
+      "automationId": "flow-line-40"
+    },
+    {
+      "parent": 416,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "40",
+      "isEnabled": true,
+      "box": [
+        562,
+        1005,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 417,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "40",
+      "isEnabled": true
+    },
+    {
+      "parent": 416,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "pay for the slot",
+      "isEnabled": true,
+      "box": [
+        605,
+        1004,
+        130,
+        16
+      ]
+    },
+    {
+      "parent": 419,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "pay for the slot",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "41",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        1023,
+        359,
+        22
+      ],
+      "automationId": "flow-line-41"
+    },
+    {
+      "parent": 421,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "41",
+      "isEnabled": true,
+      "box": [
+        562,
+        1027,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 422,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "41",
+      "isEnabled": true
+    },
+    {
+      "parent": 421,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        605,
+        1026,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 424,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "42 test: book and pay",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        1045,
+        359,
+        22
+      ],
+      "automationId": "flow-line-42"
+    },
+    {
+      "parent": 426,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "42",
+      "isEnabled": true,
+      "box": [
+        562,
+        1049,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 427,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "42",
+      "isEnabled": true
+    },
+    {
+      "parent": 426,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "test: book and pay",
+      "isEnabled": true,
+      "box": [
+        605,
+        1048,
+        130,
+        16
+      ]
+    },
+    {
+      "parent": 429,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "test: book and pay",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "43",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        541,
+        1067,
+        359,
+        22
+      ],
+      "automationId": "flow-line-43"
+    },
+    {
+      "parent": 431,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "43",
+      "isEnabled": true,
+      "box": [
+        562,
+        1071,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 432,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "43",
+      "isEnabled": true
+    },
+    {
+      "parent": 431,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        605,
+        1070,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 434,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true
+    },
+    {
+      "parent": 140,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "LINT",
+      "isEnabled": true,
+      "box": [
+        545,
+        1110,
+        27,
+        15
+      ]
+    },
+    {
+      "parent": 436,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "LINT",
+      "isEnabled": true
+    },
+    {
+      "parent": 140,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0 ERRORS",
+      "isEnabled": true,
+      "box": [
+        734,
+        1110,
+        58,
+        15
+      ]
+    },
+    {
+      "parent": 438,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0 ERRORS",
+      "isEnabled": true
+    },
+    {
+      "parent": 140,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3 WARNINGS",
+      "isEnabled": true,
+      "box": [
+        816,
+        1110,
+        73,
+        15
+      ]
+    },
+    {
+      "parent": 440,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "3 WARNINGS",
+      "isEnabled": true
+    },
+    {
+      "parent": 140,
+      "controlType": "List",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Lint diagnostics",
+      "isEnabled": true,
+      "patterns": [
+        "Scroll"
+      ],
+      "box": [
+        529,
+        1135,
+        383,
+        12
+      ],
+      "automationId": "flows-lint"
+    },
+    {
+      "parent": 442,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        1141,
+        383,
+        104
+      ]
+    },
+    {
+      "parent": 443,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        582,
+        1142,
+        8,
+        17
+      ]
+    },
+    {
+      "parent": 444,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true
+    },
+    {
+      "parent": 443,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "W_SECRET_UNSET",
+      "isEnabled": true,
+      "box": [
+        599,
+        1142,
+        97,
+        15
+      ]
+    },
+    {
+      "parent": 446,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "W_SECRET_UNSET",
+      "isEnabled": true
+    },
+    {
+      "parent": 443,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+      "isEnabled": true,
+      "box": [
+        779,
+        1142,
+        183,
+        103
+      ]
+    },
+    {
+      "parent": 448,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "user.password reads",
+      "isEnabled": true
+    },
+    {
+      "parent": 448,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "${YAM_SAMPLE_PASSWORD},",
+      "isEnabled": true
+    },
+    {
+      "parent": 448,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "which is not set.",
+      "isEnabled": true
+    },
+    {
+      "parent": 448,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Compiling does not",
+      "isEnabled": true
+    },
+    {
+      "parent": 448,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "need the value;",
+      "isEnabled": true
+    },
+    {
+      "parent": 448,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "running will.",
+      "isEnabled": true
+    },
+    {
+      "parent": 442,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        1246,
+        383,
+        104
+      ]
+    },
+    {
+      "parent": 455,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        582,
+        1246,
+        8,
+        17
+      ]
+    },
+    {
+      "parent": 456,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true
+    },
+    {
+      "parent": 455,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "W_SECRET_UNSET",
+      "isEnabled": true,
+      "box": [
+        599,
+        1246,
+        97,
+        15
+      ]
+    },
+    {
+      "parent": 458,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "W_SECRET_UNSET",
+      "isEnabled": true
+    },
+    {
+      "parent": 455,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "card.number reads ${YAM_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
+      "isEnabled": true,
+      "box": [
+        779,
+        1246,
+        204,
+        103
+      ]
+    },
+    {
+      "parent": 460,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "card.number reads",
+      "isEnabled": true
+    },
+    {
+      "parent": 460,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "${YAM_SAMPLE_CARD_NUMBER},",
+      "isEnabled": true
+    },
+    {
+      "parent": 460,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "which is not set.",
+      "isEnabled": true
+    },
+    {
+      "parent": 460,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Compiling does not",
+      "isEnabled": true
+    },
+    {
+      "parent": 460,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "need the value;",
+      "isEnabled": true
+    },
+    {
+      "parent": 460,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "running will.",
+      "isEnabled": true
+    },
+    {
+      "parent": 442,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        1350,
+        383,
+        104
+      ]
+    },
+    {
+      "parent": 467,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        582,
+        1350,
+        8,
+        17
+      ]
+    },
+    {
+      "parent": 468,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true
+    },
+    {
+      "parent": 467,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "W_SECRET_UNSET",
+      "isEnabled": true,
+      "box": [
+        599,
+        1350,
+        97,
+        15
+      ]
+    },
+    {
+      "parent": 470,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "W_SECRET_UNSET",
+      "isEnabled": true
+    },
+    {
+      "parent": 467,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
+      "isEnabled": true,
+      "box": [
+        779,
+        1350,
+        176,
+        103
+      ]
+    },
+    {
+      "parent": 472,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "card.cvv reads",
+      "isEnabled": true
+    },
+    {
+      "parent": 472,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "${YAM_SAMPLE_CARD_CVV},",
+      "isEnabled": true
+    },
+    {
+      "parent": 472,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "which is not set.",
+      "isEnabled": true
+    },
+    {
+      "parent": 472,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Compiling does not",
+      "isEnabled": true
+    },
+    {
+      "parent": 472,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "need the value;",
+      "isEnabled": true
+    },
+    {
+      "parent": 472,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "running will.",
+      "isEnabled": true
+    },
+    {
+      "parent": 2,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "complementary",
+      "name": "Inspector",
+      "isEnabled": true,
+      "box": [
+        912,
+        52,
+        360,
+        756
+      ],
+      "automationId": "inspector"
+    },
+    {
+      "parent": 479,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "region",
+      "name": "INSPECTOR",
+      "isEnabled": true,
+      "box": [
+        913,
+        52,
+        359,
+        142
+      ],
+      "automationId": "inspector-empty"
+    },
+    {
+      "parent": 480,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "heading",
+      "name": "INSPECTOR",
+      "isEnabled": true,
+      "box": [
+        913,
+        58,
+        359,
+        35
+      ],
+      "automationId": "inspector-empty-heading"
+    },
+    {
+      "parent": 481,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "INSPECTOR",
+      "isEnabled": true,
+      "box": [
+        929,
+        73,
+        66,
+        14
+      ]
+    },
+    {
+      "parent": 482,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "INSPECTOR",
+      "isEnabled": true
+    },
+    {
+      "parent": 480,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        913,
+        106,
+        359,
+        66
+      ]
+    },
+    {
+      "parent": 484,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Choose a step to see its binding, its tier and its last run.",
+      "isEnabled": true,
+      "box": [
+        929,
+        130,
+        308,
+        17
+      ]
+    },
+    {
+      "parent": 485,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Choose a step to see its binding, its tier and its last run.",
+      "isEnabled": true
+    },
+    {
+      "parent": 2,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "contentinfo",
+      "isEnabled": true,
+      "box": [
+        8,
+        808,
+        1264,
+        28
+      ]
+    },
+    {
+      "parent": 487,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        24,
+        814,
+        144,
+        17
+      ],
+      "automationId": "status-context"
+    },
+    {
+      "parent": 488,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-compensation.flow",
+      "isEnabled": true,
+      "box": [
+        24,
+        815,
+        144,
+        15
+      ]
+    },
+    {
+      "parent": 489,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-compensation.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 487,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "⌘K",
+      "isEnabled": true,
+      "box": [
+        1117,
+        816,
+        13,
+        14
+      ]
+    },
+    {
+      "parent": 491,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "⌘K",
+      "isEnabled": true
+    },
+    {
+      "parent": 487,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "commands",
+      "isEnabled": true,
+      "box": [
+        1136,
+        815,
+        60,
+        15
+      ]
+    },
+    {
+      "parent": 493,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "commands",
+      "isEnabled": true
+    },
+    {
+      "parent": 487,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "?",
+      "isEnabled": true,
+      "box": [
+        1218,
+        816,
+        6,
+        14
+      ]
+    },
+    {
+      "parent": 495,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "?",
+      "isEnabled": true
+    },
+    {
+      "parent": 487,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "keys",
+      "isEnabled": true,
+      "box": [
+        1230,
+        815,
+        26,
+        15
+      ]
+    },
+    {
+      "parent": 497,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "keys",
+      "isEnabled": true
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Close",
+      "automationId": "Close",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1180,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Minimize",
+      "automationId": "Minimize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1204,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Maximize",
+      "automationId": "Maximize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1228,
+        4,
+        20,
+        20
+      ]
+    }
+  ]
+}

@@ -26,7 +26,7 @@
  *
  * **A signal is not a quit.** Node's default `SIGTERM` handling ends a main
  * process where it stands, so an Electron application never runs `before-quit`
- * — the ADE's `yam serve` child was left with no parent to stop it, one
+ * — the app's `yam serve` child was left with no parent to stop it, one
  * orphan per launch (P10-F1). The graceful route is an Apple-event `quit` on
  * macOS and `CloseMainWindow` on Windows; the signal is what follows if it does
  * not work, and `SIGKILL` is what follows that.

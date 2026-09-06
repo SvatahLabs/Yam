@@ -14,7 +14,7 @@ Windows UI Automation adapter: the Yam agent surface over UIAutomationClient
 |---|---|---|---|
 | `automationIdOf` | function | `export function automationIdOf(node: UiaNode): string \| undefined` | The `automationId` candidate's value (LLD §3.3, §7.5). |
 | `childIndex` | function | `export function childIndex(nodes: readonly UiaNode[]): Map<number, number[]>` | Every node's children, by parent index. |
-| `controlPathOf` | function | `export function controlPathOf(` | `Window[Yam ADE]/Group[2]/Button[Run]` (LLD §3.3, §7.5). |
+| `controlPathOf` | function | `export function controlPathOf(` | `Window[Yam]/Group[2]/Button[Run]` (LLD §3.3, §7.5). |
 | `ConvertOptions` | interface | `export interface ConvertOptions` |  |
 | `convertTree` | function | `export function convertTree(nodes: readonly UiaNode[], options: ConvertOptions): UiaSnapshotNode[]` | Flatten one window's tree into snapshot nodes. See the AX sibling for the rule. |
 | `createUiaSurface` | function | `export function createUiaSurface(config:` | The factory the registry calls (LLD §2.4). |

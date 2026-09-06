@@ -186,15 +186,15 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 **Do:** Re-record the four fixtures with the real model; commit bindings and report.
 **Validate:** Replay passes with the model endpoint blocked; record cost under about $1 per 20-step story.
 
-### T3.6 New ADE shell (`apps/ade`, fresh build; split to the svatahADE repository at first release)
+### T3.6 New app shell (`apps/desktop`, fresh build; split to the svatahADE repository at first release)
 **Refs:** REQ-ADE-2, 7, HLD ADR-17, LLD §13.6 · **Est:** 3
 **Do:** Scaffold Electron current LTS with Forge's Vite plus TypeScript template; `main/` with window, project chooser, service process lifecycle (spawn `yam serve --port 0`, read port and token, health-check, stop on close, connect if a lock file exists), and the accessibility flag; typed preload bridge with only `openProject`, `serviceInfo`, `pickFile`, `preferences`; React renderer with a client generated from `GET /openapi.json`; preferences store; installers for macOS, Windows, Linux in CI. Archive the prototype's code on a `prototype` branch of the repository.
 **Validate:** Renderer has no Node access (test); the app opens a fixture project and shows `GET /project` data; killing the app stops the service; Electron security checklist passes; installers build on three OSes.
 
-### T3.7 ADE core screens
+### T3.7 app core screens
 **Refs:** REQ-ADE-3, LLD §13.6 · **Est:** 6
 **Do:** Project screen (open, init); flow editor with inline lint from `/compile` and a custom-step palette; plan view per story (step, tier, confidence, target status); run screen with live `step.result` events, screenshots, audit tail, and `run.summary`; results history from `GET /runs`; API client over `POST /api/request` with save to `api/`; data editor over `GET/PUT /data` with secrets masked. Screen rule: every screen renders a service response or a project file and nothing the CLI cannot produce.
-**Validate:** Editing a flow in the ADE and compiling from the CLI yields the same `plan.json`; a run started from the ADE produces the same `runs/<id>` files as the CLI; lint warnings in the editor match `yam lint --json`; a review confirms no ADE-only logic.
+**Validate:** Editing a flow in the app and compiling from the CLI yields the same `plan.json`; a run started from the app produces the same `runs/<id>` files as the CLI; lint warnings in the editor match `yam lint --json`; a review confirms no app-only logic.
 
 ---
 
@@ -264,12 +264,12 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 **Do:** Group by intent, map calls to IR, sentence normalisation, ids from `describe`, synthesis at capture, proposals output, `// review:` for uncompilable steps.
 **Validate:** The trajectory from T4.6 compiles to a proposal whose Tier 1 compile succeeds for at least 80 percent of steps; nothing written outside `proposals/`.
 
-### T5.7 ADE record review, bindings and heal review
+### T5.7 app record review, bindings and heal review
 **Refs:** REQ-ADE-4, 5, LLD §13.6 · **Est:** 5
 **Do:** Record screen: start `POST /record`, stream `record.decision` and `record.candidates`, show snapshot excerpt, chosen reference, candidate bundle, and fingerprint per target, with accept, reject, or re-pick by clicking in the driven session through `/surface/:session/snapshot`; bindings browser with context entries and dry-resolve status; heal review rendering `heal.proposal` as a before and after candidate diff with apply.
 **Validate:** Demo: author a three-step story, record against the sample web app, reject one grounding and re-pick, and confirm the written binding matches the pick; a healed variant shows a proposal that applies and re-runs green.
 
-### T5.8 ADE surface explorer and tool panel
+### T5.8 app surface explorer and tool panel
 **Refs:** REQ-ADE-8, REQ-BEH-3, 4, LLD §13.6 · **Est:** 3
 **Do:** Surface explorer: open an adapter session, show the snapshot tree, act by clicking a node with a required `intent`, produce `trajectory.jsonl` and offer "compile to proposal"; tool panel: start and stop `tool serve` for selected stories and show invocations with audit lines.
 **Validate:** A six-step exploration compiles to a proposal in `proposals/`; an MCP client invocation appears in the tool panel with its audit record.
@@ -283,19 +283,19 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ## Phase 6 — Reach
 
-### T6.1 Windows UIA adapter validated against the ADE
+### T6.1 Windows UIA adapter validated against the app
 **Refs:** REQ-ADP-6, REQ-ADE-6, REQ-SURF-3, LLD §7.5, §16 · **Est:** 9
-**Do:** UIA adapter with role mapping, `automationId` and `controlPath` candidates, patterns and input fallback, screenshots, `state`/`restore`; desktop conformance flows against the ADE (create project, open flow, run, open result, API client); add ARIA roles and names in the ADE UI where the tree is thin.
-**Validate:** Surface conformance on a Windows runner that builds and launches the ADE with `YAM_A11Y=1`; the desktop flows record and replay; a healing variant subset (renamed control, moved panel) passes relocalization.
+**Do:** UIA adapter with role mapping, `automationId` and `controlPath` candidates, patterns and input fallback, screenshots, `state`/`restore`; desktop conformance flows against the app (create project, open flow, run, open result, API client); add ARIA roles and names in the app UI where the tree is thin.
+**Validate:** Surface conformance on a Windows runner that builds and launches the app with `YAM_A11Y=1`; the desktop flows record and replay; a healing variant subset (renamed control, moved panel) passes relocalization.
 
-### T6.2 macOS Accessibility adapter validated against the ADE
+### T6.2 macOS Accessibility adapter validated against the app
 **Refs:** REQ-ADP-7, REQ-ADE-6 · **Est:** 8
 **Do:** AX adapter as LLD §7.5; `surface doctor` permission check; same desktop flows.
 **Validate:** Conformance on a macOS runner with the permission granted; the desktop flows replay.
 
 ### T6.6 Prototype data import
 **Refs:** REQ-ADE-9, LLD §13.5 · **Est:** 1.5
-**Do:** `yam migrate --from-ade <path>` reading the prototype's electron-db files and emitting config, flows (then v2→v3), seed bindings, `data.yaml`, and `api/*.yaml`; an "Import prototype database" action in the ADE project screen.
+**Do:** `yam migrate --from-prototype <path>` reading the prototype's electron-db files and emitting config, flows (then v2→v3), seed bindings, `data.yaml`, and `api/*.yaml`; an "Import prototype database" action in the app project screen.
 **Validate:** A captured prototype database converts to a project that compiles clean and whose story names and step counts match.
 
 ### T6.3 WebMCP candidate
@@ -319,7 +319,7 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T7.1 The macOS Accessibility live gate passes, and the desktop healing cases
 **Refs:** REQ-ADP-7, REQ-SURF-3, REQ-ADE-6, LLD §7.5, §14, §16 · **Est:** 4
-**Do:** Rewrite the AX bridge's window read to bulk attribute reads (`entire contents` plus `properties`, one process invocation per snapshot); make the timeout message a bridge timeout with nodes and milliseconds when `doctor` has said `granted`; poll for the ADE window up to 60 s; resolve `--report` against the current directory; record nodes read, wall time, and ms per node in the report. Add `YAM_A11Y_VARIANT=1|2` to the ADE (LLD §16) and the desktop healing cases to the desktop suite for both adapters.
+**Do:** Rewrite the AX bridge's window read to bulk attribute reads (`entire contents` plus `properties`, one process invocation per snapshot); make the timeout message a bridge timeout with nodes and milliseconds when `doctor` has said `granted`; poll for the app window up to 60 s; resolve `--report` against the current directory; record nodes read, wall time, and ms per node in the report. Add `YAM_A11Y_VARIANT=1|2` to the app (LLD §16) and the desktop healing cases to the desktop suite for both adapters.
 **Validate:** `node scripts/desktop-conformance.mjs --adapter ax` passes 7 of 7 on a macOS host with the permission granted, with the project screen (≥400 nodes) read within 10 s and the cost in the report; the two healing cases relocalize at variant 1 and 2 and the report says so; `yam surface doctor` still reports `denied` and `prompt-pending` correctly against recorded exchanges.
 
 ### T7.2 Windows UIA live gate and the pipeline that carries every gate
@@ -344,7 +344,7 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T7.6 Release candidate 0.1.0
 **Refs:** REQ-PKG-1, 2, 3, 4, REQ-STD-1, 2, LLD §16 · **Est:** 4
-**Do:** Version every publishable package 0.1.0 with a changelog; `npm pack` dry runs for module (a) (`@svatah/yam-bindings`, `@svatah/yam-healer`, `@svatah/yam-playwright-test`, `@svatah/yam-bindings-cli`), the `yam` CLI, and `@svatah/yam-schema` with the JSON Schema files and the conformance fixtures included; a release workflow that builds the ADE installers on the three-OS matrix and attaches `reports/*.md` to the release notes; the module (a) ten-minute quick start executed from the packed tarballs in an empty Playwright project by a script, not by hand.
+**Do:** Version every publishable package 0.1.0 with a changelog; `npm pack` dry runs for module (a) (`@svatah/yam-bindings`, `@svatah/yam-healer`, `@svatah/yam-playwright-test`, `@svatah/yam-bindings-cli`), the `yam` CLI, and `@svatah/yam-schema` with the JSON Schema files and the conformance fixtures included; a release workflow that builds the app installers on the three-OS matrix and attaches `reports/*.md` to the release notes; the module (a) ten-minute quick start executed from the packed tarballs in an empty Playwright project by a script, not by hand.
 **Validate:** `pnpm release:dry-run` produces the tarballs and lists their contents; the quick-start script passes against the tarballs on Node 22 and the current LTS with no credential; the licence check passes on the packed dependency trees; the release workflow runs to the artifact step on the pipeline that exists.
 
 Phase 7 total: 16.5 ideal days.
@@ -353,10 +353,10 @@ Phase 7 total: 16.5 ideal days.
 
 ## Phase 8 — Ship (Draft 2.9)
 
-### T8.1 The packaged ADE opens a project
+### T8.1 The packaged app opens a project
 **Refs:** REQ-ADE-2, REQ-ADE-6, LLD §13.6 · **Est:** 2.5
-**Do:** Resolve the service's runtime as §13.6 states (`YAM_NODE`, then `node` on `PATH` of the supported major or newer, then a Node beside the CLI under `resources/` when packaged with one); never `process.execPath` in a packaged build; the Project screen's alert names the three places when none is found; `doctor` and the smoke check report the chosen runtime. `YAM_ADE_PROJECT=<dir>` opens a project on ready. `scripts/ade-smoke.mjs` and the ADE smoke test run against the packaged application when `apps/ade/out/` exists and say so. The desktop gate passes the fixtures project through `YAM_ADE_PROJECT`.
-**Validate:** The packaged ADE, launched by hand with no environment, opens a project from its Recent list within 30 s and shows the eleven tabs; with `PATH` emptied it shows the alert and opens nothing; `pnpm ade:smoke` runs against the packaged app in CI on the three-OS matrix; the gate's variant 0 log shows the project screen open before the first case.
+**Do:** Resolve the service's runtime as §13.6 states (`YAM_NODE`, then `node` on `PATH` of the supported major or newer, then a Node beside the CLI under `resources/` when packaged with one); never `process.execPath` in a packaged build; the Project screen's alert names the three places when none is found; `doctor` and the smoke check report the chosen runtime. `YAM_APP_PROJECT=<dir>` opens a project on ready. `scripts/app-smoke.mjs` and the app smoke test run against the packaged application when `apps/desktop/out/` exists and say so. The desktop gate passes the fixtures project through `YAM_APP_PROJECT`.
+**Validate:** The packaged app, launched by hand with no environment, opens a project from its Recent list within 30 s and shows the eleven tabs; with `PATH` emptied it shows the alert and opens nothing; `pnpm app:smoke` runs against the packaged app in CI on the three-OS matrix; the gate's variant 0 log shows the project screen open before the first case.
 
 ### T8.2 The AX bridge within budget, and the macOS gate green
 **Refs:** REQ-ADP-7, REQ-SURF-3, REQ-ADE-6, LLD §7.5, §14, §16 · **Est:** 4
@@ -375,7 +375,7 @@ Phase 7 total: 16.5 ideal days.
 
 ### T8.5 Publish 0.1.0
 **Refs:** REQ-PKG-1, 2, 3, 4, REQ-STD-1, 2, LLD §16 · **Est:** 2
-**Do:** A `custom: publish` Bitbucket pipeline and a manually dispatched GitHub workflow that run the release dry run, the packed quick start, the reports, then `npm publish` for the 26 packages under the owner's scope using a token supplied as a pipeline secret, and attach the ADE installers and `reports/*.md` to the release. The implementer prepares and dry-runs it; the owner triggers it.
+**Do:** A `custom: publish` Bitbucket pipeline and a manually dispatched GitHub workflow that run the release dry run, the packed quick start, the reports, then `npm publish` for the 26 packages under the owner's scope using a token supplied as a pipeline secret, and attach the app installers and `reports/*.md` to the release. The implementer prepares and dry-runs it; the owner triggers it.
 **Validate:** The pipeline's dry-run mode runs end to end from a clean checkout and prints the exact publish commands it would run, with the token absent; the publish step refuses to run without the manual trigger and the token; a `CHANGELOG.md` entry for 0.1.0 lists what is in, what is measured, and what is withdrawn.
 
 ### T8.6 The Windows UIA gate (carried)
@@ -389,7 +389,7 @@ Phase 8 total: 13.5 ideal days.
 
 ## Phase 9 — Builder surfaces, foundation (Draft 2.11)
 
-The owner reviewed and approved the mockups under `docs/spec/design/` on 2026-09-05. This phase builds the foundations both renderers stand on and proves them with two screens end to end. Nothing in the old ADE is deleted until Phase 10 replaces it.
+The owner reviewed and approved the mockups under `docs/spec/design/` on 2026-09-05. This phase builds the foundations both renderers stand on and proves them with two screens end to end. Nothing in the old app is deleted until Phase 10 replaces it.
 
 ### T9.1 The screen model and the action registry
 **Refs:** REQ-ADE-10, REQ-ADE-13, LLD §13.7 · **Est:** 4
@@ -408,12 +408,12 @@ The owner reviewed and approved the mockups under `docs/spec/design/` on 2026-09
 
 ### T9.4 The two renderers, two screens each
 **Refs:** REQ-ADE-11, REQ-TUI-1, REQ-ADE-6, LLD §13.6, §13.7 · **Est:** 5
-**Do:** The ADE shell rebuilt as top bar, rail, workspace, inspector, status bar, and palette on `@svatah/yam-ui`, rendering `flows` (list, editor with lint, plan inspector) and `run` (live steps, audit, evidence) from the model; the other screens still reachable through the old tabs behind a "Legacy" rail item until Phase 10. `yam ui` (`@svatah/yam-tui`, Ink) rendering the same two screens with four panes, keys, and the palette; `--json`. Both open or adopt the service the same way. Apply the Phase 8 corrections to the desktop gate first (P8-F1..F3).
-**Validate:** The packaged ADE opens the fixtures project into the new Flows screen, and the desktop suite's snapshot case finds every control on it named and id'd; a record and a run driven through the new Run screen's buttons under Playwright; `yam ui` runs `comp` in a pseudo-terminal test and its `--json` output equals the model's state; the same action ids appear in both palettes.
+**Do:** The app shell rebuilt as top bar, rail, workspace, inspector, status bar, and palette on `@svatah/yam-ui`, rendering `flows` (list, editor with lint, plan inspector) and `run` (live steps, audit, evidence) from the model; the other screens still reachable through the old tabs behind a "Legacy" rail item until Phase 10. `yam ui` (`@svatah/yam-tui`, Ink) rendering the same two screens with four panes, keys, and the palette; `--json`. Both open or adopt the service the same way. Apply the Phase 8 corrections to the desktop gate first (P8-F1..F3).
+**Validate:** The packaged app opens the fixtures project into the new Flows screen, and the desktop suite's snapshot case finds every control on it named and id'd; a record and a run driven through the new Run screen's buttons under Playwright; `yam ui` runs `comp` in a pseudo-terminal test and its `--json` output equals the model's state; the same action ids appear in both palettes.
 
 ### T9.5 Progress and the design record
 **Refs:** LLD §13.7 · **Est:** 0.5
-**Do:** `docs/spec/progress/phase-9.md`; where a mockup and the LLD disagreed, the deviation and the choice; screenshots of both renderers for the two screens, the ADE's taken through the AX adapter.
+**Do:** `docs/spec/progress/phase-9.md`; where a mockup and the LLD disagreed, the deviation and the choice; screenshots of both renderers for the two screens, the app's taken through the AX adapter.
 **Validate:** The two screenshots exist and match the mockups' structure; every deviation names its section.
 
 Phase 9 total: 15.5 ideal days.
@@ -425,7 +425,7 @@ Phase 9 total: 15.5 ideal days.
 ### T10.1 The authoring loop screens
 **Refs:** REQ-ADE-10..13, REQ-TUI-1, LLD §13.7 · **Est:** 6
 **Do:** `record` (session, decisions, re-pick through the snapshot, deadline), `runs` (list, filters, evidence inspector), `heal` (proposals, before and after, scores, apply), `bindings` (table, resolver order, verify, prune) on the model in both renderers, to the mockups.
-**Validate:** Each screen driven end to end through its own controls in the ADE under Playwright and in `yam ui` under a pseudo-terminal, against the fixtures project with the fake gateway; every control named and id'd; the palette lists every action of the four screens.
+**Validate:** Each screen driven end to end through its own controls in the app under Playwright and in `yam ui` under a pseudo-terminal, against the fixtures project with the fake gateway; every control named and id'd; the palette lists every action of the four screens.
 
 ### T10.2 Agents and tools, API, Data, Explorer, Import, Settings
 **Refs:** REQ-ADE-10..13, REQ-TUI-1, LLD §13.7 · **Est:** 5
@@ -435,7 +435,7 @@ Phase 9 total: 15.5 ideal days.
 ### T10.3 Retire the old screens, re-validate the target
 **Refs:** REQ-ADE-6, REQ-ADP-7, LLD §7.5, §16 · **Est:** 2
 **Do:** Delete the legacy screens and `app.css`; update the desktop conformance cases to the new structure (rail items, inspector, palette) and the recorded trees; rebuild installers.
-**Validate:** The macOS gate green live against the rebuilt packaged ADE, 7 of 7 plus healing; the snapshot case asserts zero unnamed controls; the ADE smoke passes on the three-OS matrix definition.
+**Validate:** The macOS gate green live against the rebuilt packaged app, 7 of 7 plus healing; the snapshot case asserts zero unnamed controls; the app smoke passes on the three-OS matrix definition.
 
 ### T10.4 The Phase 9 verification's corrections and the run-stop route
 **Refs:** REQ-ADE-13, REQ-TUI-1, LLD §13.5, §13.7, §7.5 · **Est:** 2
@@ -448,28 +448,28 @@ Phase 10 total: 15 ideal days.
 
 ## Phase 11 — Corrections, and Yam verifies Yam (Draft 2.14)
 
-The owner's decision of 2026-09-05: verification, validation, and the ADE's own testing are driven by Yam itself, with the verifier's external tools kept as the second side of a parity gate. Corrections first, because the windowless launch blocks every desktop flow.
+The owner's decision of 2026-09-05: verification, validation, and the app's own testing are driven by Yam itself, with the verifier's external tools kept as the second side of a parity gate. Corrections first, because the windowless launch blocks every desktop flow.
 
 ### T11.1 The Phase 10 verification's corrections, the windowless launch, and the editing a release needs
 **Refs:** REQ-ADE-6, REQ-ADE-10..13, LLD §13.6, §13.7, §7.5, §16 · **Est:** 5
-**Do:** Diagnose and fix the windowless packaged launch (F1) with the debug log and the graceful quit route of Draft 2.13; exempt standard window chrome from the id rule, select the first row by default, re-record the variant-1 fixture against the live app and make `rail-flows` relocalize live (F2); the Record screen's toolbar to the title budget, one-line select, and `availableWhen` on its buttons (F3); the Explorer toolbar and the Data inspector per F4, then build the four secondary screens to the corrected artboards; a timed-out session probe is "could not tell" (F5); `ade:shoot` writes outside the tree unless `--update` (F6); the test build's own bundle name (F7); the flow editor edits and saves with lint on save, and the API screen edits a saved request (K6, K7).
-**Validate:** The live macOS gate 7 of 7 plus both healing cases on three consecutive runs with the project screen's cost on the bridge line, the ADE launched and stopped by the gate ten times in a row with a window every time; the Record screen's toolbar case under Playwright at 1440 and 1100 px; a flow edited, saved, and re-linted through the ADE and through `yam ui`; a request edited and saved; the suite green while a person's ADE is open.
+**Do:** Diagnose and fix the windowless packaged launch (F1) with the debug log and the graceful quit route of Draft 2.13; exempt standard window chrome from the id rule, select the first row by default, re-record the variant-1 fixture against the live app and make `rail-flows` relocalize live (F2); the Record screen's toolbar to the title budget, one-line select, and `availableWhen` on its buttons (F3); the Explorer toolbar and the Data inspector per F4, then build the four secondary screens to the corrected artboards; a timed-out session probe is "could not tell" (F5); `app:shoot` writes outside the tree unless `--update` (F6); the test build's own bundle name (F7); the flow editor edits and saves with lint on save, and the API screen edits a saved request (K6, K7).
+**Validate:** The live macOS gate 7 of 7 plus both healing cases on three consecutive runs with the project screen's cost on the bridge line, the app launched and stopped by the gate ten times in a row with a window every time; the Record screen's toolbar case under Playwright at 1440 and 1100 px; a flow edited, saved, and re-linted through the app and through `yam ui`; a request edited and saved; the suite green while a person's app is open.
 
 
 ### T11.2 Launch, quit, and attach
 **Refs:** REQ-SELF-1, REQ-ADP-1, REQ-ADP-7, LLD §13.9, §4.2, §7.1, §7.5 · **Est:** 3
-**Do:** Desktop adapters take `app.launch` and `app.quit` in configuration and open a session by launching when no process of that name owns a window; the language gains `Quit the app` (pattern 31) with a golden entry and a run against the packaged ADE; the Playwright adapter attaches to an existing Chromium through `YAM_CDP_URL` or `app.attach.cdpUrl`, tested against recorded exchanges and live against the packaged ADE's renderer.
-**Validate:** A flow that launches the ADE, opens the fixtures project through its Recent list, reads the Flows toolbar, and quits, green through the AX adapter three times running; the same flow through the Playwright adapter attached over CDP; the ADE launched and quit ten times without a leftover process.
+**Do:** Desktop adapters take `app.launch` and `app.quit` in configuration and open a session by launching when no process of that name owns a window; the language gains `Quit the app` (pattern 31) with a golden entry and a run against the packaged app; the Playwright adapter attaches to an existing Chromium through `YAM_CDP_URL` or `app.attach.cdpUrl`, tested against recorded exchanges and live against the packaged app's renderer.
+**Validate:** A flow that launches the app, opens the fixtures project through its Recent list, reads the Flows toolbar, and quits, green through the AX adapter three times running; the same flow through the Playwright adapter attached over CDP; the app launched and quit ten times without a leftover process.
 
 ### T11.3 Desktop grounding
 **Refs:** REQ-REC-1, REQ-ADP-7, LLD §13.9, §7.5 · **Est:** 2
-**Do:** The recorder grounds a desktop snapshot the way it grounds a web one; the fake gateway gains a desktop case set recorded from the ADE; `yam record` on a desktop project writes bindings with `automationId` and `controlPath` candidates and a fingerprint.
-**Validate:** `yam record --gateway fake` on a self flow against the ADE writes every binding; the same flow replays; a variant-1 rename relocalizes live.
+**Do:** The recorder grounds a desktop snapshot the way it grounds a web one; the fake gateway gains a desktop case set recorded from the app; `yam record` on a desktop project writes bindings with `automationId` and `controlPath` candidates and a fingerprint.
+**Validate:** `yam record --gateway fake` on a self flow against the app writes every binding; the same flow replays; a variant-1 rename relocalizes live.
 
 ### T11.4 The self-verification suite
 **Refs:** REQ-SELF-1, LLD §13.9 · **Est:** 5
-**Do:** `evals/self` as a Yam project: flows covering every ADE screen's Validate items of Phases 9 and 10 through the AX adapter, the service's endpoints through the HTTP adapter with JSON-path expectations, the sample application's behaviours (compensation, guards, dialogs, WebMCP, resume, workflow, tool) through the Playwright adapter, and the cockpit through `yam ui --json` and the SDK; `evals/self/checks.yaml` naming every check's `yam` story and its `external` implementation.
-**Validate:** `yam run evals/self` green on this host; every Playwright case of `apps/ade/test/shell.spec.ts` has a self story with the same check id; every check has both implementations or names why one is unreachable.
+**Do:** `evals/self` as a Yam project: flows covering every app screen's Validate items of Phases 9 and 10 through the AX adapter, the service's endpoints through the HTTP adapter with JSON-path expectations, the sample application's behaviours (compensation, guards, dialogs, WebMCP, resume, workflow, tool) through the Playwright adapter, and the cockpit through `yam ui --json` and the SDK; `evals/self/checks.yaml` naming every check's `yam` story and its `external` implementation.
+**Validate:** `yam run evals/self` green on this host; every Playwright case of `apps/desktop/test/shell.spec.ts` has a self story with the same check id; every check has both implementations or names why one is unreachable.
 
 ### T11.5 The parity gate
 **Refs:** REQ-SELF-2, REQ-SELF-3, LLD §13.9, §15 · **Est:** 3
@@ -497,14 +497,14 @@ Phase 11 total: 18.5 ideal days.
 **Do:** Extend `evals/compiler/golden.jsonl` to at least 300 entries across every pattern and tier, drawing Tier 2 entries from `refused.jsonl` only where a reviewer has fixed the answer and moving them out of the corpus so the test set and the training set stay disjoint; regenerate `reports/eval-compiler.md`.
 **Validate:** 300 or more entries; Tier 1 exact match 100 percent; end-to-end at least 95 percent with the pinned Tier 2 model; the corpus test still reports zero overlap with the golden set.
 
-### T12.3 The ADE names every control, and the gate makes a run before it reads results
+### T12.3 The app names every control, and the gate makes a run before it reads results
 **Refs:** REQ-ADE-6, LLD §13.6, §16 · **Est:** 1.5
-**Do:** Name the three unnamed buttons on the Project screen and any other interactive control the desktop snapshot case finds without a name; make the snapshot case fail on an unnamed interactive control; before `ade.result`, the gate runs one story against `apps/sample-web` through the Run screen so the results table branch is exercised (K6).
-**Validate:** The live report's `ade.snapshot` asserts zero unnamed controls; `ade.result` reads a table with one run and its status; both green live.
+**Do:** Name the three unnamed buttons on the Project screen and any other interactive control the desktop snapshot case finds without a name; make the snapshot case fail on an unnamed interactive control; before `app.result`, the gate runs one story against `apps/sample-web` through the Run screen so the results table branch is exercised (K6).
+**Validate:** The live report's `app.snapshot` asserts zero unnamed controls; `app.result` reads a table with one run and its status; both green live.
 
 ### T12.4 The three-OS matrix observed
 **Refs:** REQ-ADE-6, REQ-PKG-1, REQ-STD-2 · **Est:** 1 (plus the owner's action)
-**Do:** Write `docs/ci.md` with the exact steps to attach a self-hosted macOS and Windows runner to the Bitbucket workspace, or to mirror the repository to GitHub where the matrix already exists; the owner chooses and attaches. Once a runner exists, run `custom: desktop-gates` and the `ade-installers` matrix and record the results.
+**Do:** Write `docs/ci.md` with the exact steps to attach a self-hosted macOS and Windows runner to the Bitbucket workspace, or to mirror the repository to GitHub where the matrix already exists; the owner chooses and attaches. Once a runner exists, run `custom: desktop-gates` and the `app-installers` matrix and record the results.
 **Validate:** The document, and either the observed pipeline runs with their reports, or the exact blocked step and what the owner has to do.
 
 ### T12.5 0.1.0 published and verified from the registry
@@ -536,12 +536,12 @@ The owner's decisions of 2026-09-06: Svatah is the brand and the organisation, a
 
 ### T13.2 The clean repository
 **Refs:** REQ-NFR-8, HLD §12 · **Est:** 1
-**Do:** Move the four legacy sample flows, the locator file and `ActionSynonyms.java` to `evals/migrate/source/` as committed inputs; delete `legacy/`; repoint the migrate script, the ADE fixture builder, the layout, golden and vocabulary checks, the CLI import test and the screens fixture; remove `bitbucket-pipelines.yml` and its twin-file test — GitHub Actions is the only CI; export the history to the new repository with `git filter-repo` dropping `legacy/` so the driver binaries leave and the phase records stay.
+**Do:** Move the four legacy sample flows, the locator file and `ActionSynonyms.java` to `evals/migrate/source/` as committed inputs; delete `legacy/`; repoint the migrate script, the app fixture builder, the layout, golden and vocabulary checks, the CLI import test and the screens fixture; remove `bitbucket-pipelines.yml` and its twin-file test — GitHub Actions is the only CI; export the history to the new repository with `git filter-repo` dropping `legacy/` so the driver binaries leave and the phase records stay.
 **Validate:** No file under `legacy/`; `node scripts/migrate-legacy.mjs --check` green from the moved inputs; every repo check green; the largest tracked blob in the new repository under 2 MB; `git log` intact from Phase 0.
 
 ### T13.3 The rename
 **Refs:** REQ-PKG-1, REQ-STD-1, LLD §1, §15, HLD §12 · **Est:** 2
-**Do:** `@svatah/yam` becomes `@svatah/yam` with the bin `yam`; every other package becomes `@svatah/yam-<name>`; `yam-bindings` becomes `yam-bindings`; `yam.config.yaml`, `.yam/`, `~/.yam-node`, `YAM_*`; the ADE is `Yam ADE` with the bundle id `com.svatah.yam.ade`; the Java packages are `com.svatah.yam`, the Python client `svatah_yam` (`svatah-yam` on PyPI); the schema `$id`s live under `https://yam.svatah.com/schema/`; every manifest gains `repository`, `homepage` and `bugs` pointing at `SvatahLabs/yam`; `Yam` stays wherever it names the brand, the organisation or the copyright; the progress records and prompts of Phases 0 to 12 keep their text as history.
+**Do:** `@svatah/yam` becomes `@svatah/yam` with the bin `yam`; every other package becomes `@svatah/yam-<name>`; `yam-bindings` becomes `yam-bindings`; `yam.config.yaml`, `.yam/`, `~/.yam-node`, `YAM_*`; the app is `Yam` with the bundle id `com.svatah.yam`; the Java packages are `com.svatah.yam`, the Python client `svatah_yam` (`svatah-yam` on PyPI); the schema `$id`s live under `https://yam.svatah.com/schema/`; every manifest gains `repository`, `homepage` and `bugs` pointing at `SvatahLabs/yam`; `Yam` stays wherever it names the brand, the organisation or the copyright; the progress records and prompts of Phases 0 to 12 keep their text as history.
 **Validate:** A repo check enumerates every allowed form of the old name (the scope, the domain, the organisation, the copyright, the historical records) and fails on any other; the six-command contract green; the generated schemas regenerated and their drift test clean; the Java runtime and both generated clients build; the release dry run's thirty tarballs carry the new names and no `workspace:*`.
 
 ### T13.4 The readiness corrections
@@ -551,12 +551,12 @@ The owner's decisions of 2026-09-06: Svatah is the brand and the organisation, a
 
 ### T13.5 The documentation set
 **Refs:** REQ-PKG-2, REQ-STD-1, 2, REQ-LANG-12, REQ-SURF-1 · **Est:** 4
-**Do:** `docs/` reorganised by kind, in markdown: *getting started* (the Playwright quick start, the first flow, one plan run three ways); *guides*, one task each (record, heal, write a flow, run in CI, run from cron, expose a tool over MCP, add an adapter and pass conformance, write a foreign runtime, use the ADE); *concepts* (the three layers, the surface contract, determinism and provenance, bindings and fingerprints, the compiler tiers, privacy mode), reshaped from the specification; *reference* — one page per package from a shared template, the API of every package generated from its shipped declarations, the CLI from its own help, the flow language, the JSON Schemas rendered, the HTTP service from its OpenAPI description; *project* (changelog, versioning, reports, contributing, security). Generated pages come from `pnpm docs` and have a drift check.
+**Do:** `docs/` reorganised by kind, in markdown: *getting started* (the Playwright quick start, the first flow, one plan run three ways); *guides*, one task each (record, heal, write a flow, run in CI, run from cron, expose a tool over MCP, add an adapter and pass conformance, write a foreign runtime, use the app); *concepts* (the three layers, the surface contract, determinism and provenance, bindings and fingerprints, the compiler tiers, privacy mode), reshaped from the specification; *reference* — one page per package from a shared template, the API of every package generated from its shipped declarations, the CLI from its own help, the flow language, the JSON Schemas rendered, the HTTP service from its OpenAPI description; *project* (changelog, versioning, reports, contributing, security). Generated pages come from `pnpm docs` and have a drift check.
 **Validate:** Every published package has a reference page that names its exports (test); `pnpm docs --check` clean in CI; no dead relative link anywhere under `docs/` (test); every command a guide shows is one `scripts/examples-check.mjs` or the docs check runs.
 
 ### T13.6 0.1.0 published as Yam and verified from the registry (owner)
 **Refs:** REQ-PKG-1, 2, 4 · **Est:** 0.5 (plus the owner's action)
-**Do:** T12.5 under the new names: the owner dispatches `release.yml` with `publish`; the tag `v0.1.0` at the published commit; `pnpm quick-start:registry`; the GitHub release carries the reports and the ADE installers.
+**Do:** T12.5 under the new names: the owner dispatches `release.yml` with `publish`; the tag `v0.1.0` at the published commit; `pnpm quick-start:registry`; the GitHub release carries the reports and the app installers.
 **Validate:** The registry quick start green by name, with no overrides, on Node 22 and the current release; the tag exists at the published commit and nowhere else.
 
 Phase 13 total: 8.5 ideal days.
@@ -572,7 +572,7 @@ Phase 13 total: 8.5 ideal days.
 
 ### T14.2 Patterns 34 to 38
 **Refs:** REQ-LANG-12, LLD §4.2 · **Est:** 2
-**Do:** The five process sentences and the pattern 19 form in the grammar, the IR, the reference with two examples each, and golden entries; the recorder binds `t<n>` and `f<path>` references without a model. Draft 2.17: also `Exactly one …` and `… should be unique` (pattern 32), the two-element form of pattern 24, the capture comparison of pattern 22, and `app.attach.serviceLock` with `{app.serviceUrl}` and `{app.serviceToken}`; and the ADE's Playwright cases refuse to start while another instance of the test bundle is running.
+**Do:** The five process sentences and the pattern 19 form in the grammar, the IR, the reference with two examples each, and golden entries; the recorder binds `t<n>` and `f<path>` references without a model. Draft 2.17: also `Exactly one …` and `… should be unique` (pattern 32), the two-element form of pattern 24, the capture comparison of pattern 22, and `app.attach.serviceLock` with `{app.serviceUrl}` and `{app.serviceToken}`; and the app's Playwright cases refuse to start while another instance of the test bundle is running.
 **Validate:** Tier 1 golden at 100 percent; a flow that runs `yam ui --json`, waits for the screen, and checks the exit code, green. Draft 2.17: the four run-inside-a-run checks, the count check, the geometry check, and the label-comparison check each two-sided.
 
 ### T14.3 The six checks move to Yam's side
@@ -684,10 +684,10 @@ Phase 14 total: 11 ideal days.
 | 0 | 11.5 | Foundation |
 | 1 | 25 | `@svatah/yam-bindings` 0.1 for Playwright users, with published healing numbers |
 | 2 | 32.5 | Module (b) 0.1: prose flows, test behavior in Playwright Test; local service; module (a) CLI and replay plugin |
-| 3 | 21.5 | Recorder with model grounding; full healing; published evals; new ADE shell and core screens |
+| 3 | 21.5 | Recorder with model grounding; full healing; published evals; new app shell and core screens |
 | 4 | 22.5 | BiDi and Appium adapters; local and frontier tiers; REPL; MCP |
-| 5 | 22 | Workflow and tool behaviors; trajectory compile; ADE record, bindings and heal review, surface explorer, tool panel |
-| 6 | 33.5 | Desktop adapters validated against the ADE; prototype import; WebMCP; Java runtime; fine-tune |
+| 5 | 22 | Workflow and tool behaviors; trajectory compile; app record, bindings and heal review, surface explorer, tool panel |
+| 6 | 33.5 | Desktop adapters validated against the app; prototype import; WebMCP; Java runtime; fine-tune |
 | **Total** | **170.5** | |
 
 ## Changes from Draft 1
@@ -695,6 +695,7 @@ Phase 14 total: 11 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.19 (the desktop client is Yam): no new tasks; the rename of the client from "the ADE" to Yam is recorded under Phase 13's T13.3.
 - Draft 2.18 (Yam, owner decisions of 2026-09-06): Phase 13 inserted — the organisation and accounts, the clean repository without `legacy/`, the rename to Yam under the `@svatah` scope, the readiness corrections, the documentation set, and the publish under the new names; process and terminal becomes Phase 14 with T14.1–T14.4. Total 284 ideal days.
 - Draft 2.17 (after Phase 12 verification): T13.2 extended with the last non-oracle sentences and the service lock; estimate unchanged at the phase level, 275.5 ideal days.
 - Draft 2.16 (process and terminal): Phase 13 added — the process adapter, patterns 34–38, the six checks moved, the verification library. Total 275.5 ideal days.
@@ -704,8 +705,8 @@ Phase 14 total: 11 ideal days.
 - Draft 2.12 (after Phase 9 verification): T10.4 added for the verification's corrections and the run-stop route. Total 241 ideal days.
 - Draft 2.11 (builder surfaces, after the owner's design review): Phase 9 (foundation: screen model, design system, SDK, two screens in both renderers) and Phase 10 (every screen, retire the old ones) inserted; the release phase and its tasks renumbered 11 and T11.x. Total 239 ideal days.
 - Draft 2.10 (after Phase 8 verification): Phase 9 added — T9.1 the desktop gate race-free and load-aware, T9.2 the golden set at 300, T9.3 named controls and a real run before results, T9.4 the three-OS matrix observed, T9.5 0.1.0 published by the owner and verified from the registry, T9.6 the Windows gate carried. Total 210.5 ideal days.
-- Draft 2.9 (after Phase 7 verification): Phase 8 added — T8.1 the packaged ADE opens a project, T8.2 the AX bridge within budget and the macOS gate green, T8.3 dialog arming documented, linted, audited, T8.4 the fine-tune withdrawn and its corpus, T8.5 publish 0.1.0 by a manual token-gated step, T8.6 the Windows gate carried. Total 200.5 ideal days.
+- Draft 2.9 (after Phase 7 verification): Phase 8 added — T8.1 the packaged app opens a project, T8.2 the AX bridge within budget and the macOS gate green, T8.3 dialog arming documented, linted, audited, T8.4 the fine-tune withdrawn and its corpus, T8.5 publish 0.1.0 by a manual token-gated step, T8.6 the Windows gate carried. Total 200.5 ideal days.
 - Draft 2.8 (after Phase 6 verification): Phase 7 added — T7.1 AX live gate and desktop healing cases, T7.2 UIA live gate and the pipeline, T7.3 dialog IR and type check, T7.4 Java artifacts in the published schemas, T7.5 the fine-tune measured, T7.6 release candidate 0.1.0. Total 187 ideal days.
-- Draft 2.4 (after Phase 2 verification): T3.6 builds the ADE under `apps/ade` in this repository.
+- Draft 2.4 (after Phase 2 verification): T3.6 builds the app under `apps/desktop` in this repository.
 - Draft 2.3 (after Phase 1 verification): T2.8 targets the new `host-playwright` package; T2.12 added for `bindings-cli` and the healer `Replayer` plugin. Total 170.5 ideal days.
-- Draft 2.1: local service (T2.11); new ADE built to the vision with the prototype as blueprint: shell (T3.6), core screens (T3.7), record and heal review (T5.7), surface explorer and tool panel (T5.8), prototype data import (T6.6); T6.1 and T6.2 validate against the new ADE instead of a separate sample desktop app. Total 168.5 ideal days; module (a) release date unchanged.
+- Draft 2.1: local service (T2.11); new app built to the vision with the prototype as blueprint: shell (T3.6), core screens (T3.7), record and heal review (T5.7), surface explorer and tool panel (T5.8), prototype data import (T6.6); T6.1 and T6.2 validate against the new app instead of a separate sample desktop app. Total 168.5 ideal days; module (a) release date unchanged.

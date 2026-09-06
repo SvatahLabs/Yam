@@ -24,8 +24,8 @@ const story = process.argv[3] ?? "Book a slot";
 /*
  * The server is spawned by the client, which is what MCP over stdio means: the
  * pipe is the transport, and whoever launched the process is the client. That
- * is why the ADE's tool panel shows the command rather than starting one — a
- * server the ADE spawned would have the ADE as its client.
+ * is why the app's tool panel shows the command rather than starting one — a
+ * server the app spawned would have the app as its client.
  */
 const transport = new StdioClientTransport({
   command: process.execPath,

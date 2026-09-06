@@ -1,0 +1,703 @@
+/*
+ * The app's layout (T9.4, REQ-ADE-11, LLD §13.7; the `Main` and `Run` artboards).
+ *
+ * Layout only. Every colour is a token from `@svatah/yam-ui-tokens` and every
+ * control's own appearance is `@svatah/yam-ui`'s `ui.css` — this file says where
+ * things go, which is the one thing a component library cannot.
+ *
+ * The grid is the artboard's: a 220 px rail, a workspace, a 360 px inspector,
+ * with a 44 px top bar and a 28 px status bar across all three.
+ */
+
+.sv-app {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--inspector-w);
+  grid-template-rows: var(--topbar-h) minmax(0, 1fr) var(--statusbar-h);
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg0);
+  color: var(--fg);
+}
+
+.sv-spacer {
+  flex: 1;
+}
+
+/* ── top bar ──────────────────────────────────────────────────────────────── */
+
+.sv-topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg1);
+}
+
+.sv-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.sv-brand-mark {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r);
+  background: var(--accent);
+  display: inline-block;
+}
+
+.sv-crumb {
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sv-crumb b {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.sv-crumb-sep {
+  color: var(--dim);
+}
+
+.sv-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  background: currentColor;
+}
+
+/* ── rail ─────────────────────────────────────────────────────────────────── */
+
+.sv-rail {
+  border-right: 1px solid var(--line);
+  background: var(--bg1);
+  display: flex;
+  flex-direction: column;
+  padding: 10px 8px;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.sv-rail-heading {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 10px 8px 4px;
+  margin: 0;
+}
+
+.sv-rail-bottom {
+  margin-top: auto;
+}
+
+.sv-rail-legacy {
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+/* ── workspace ────────────────────────────────────────────────────────────── */
+
+.sv-workspace {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/*
+ * The toolbar is one row, and what gives is the words (P9-F5, Draft 2.12 §13.7).
+ *
+ * "a toolbar never wraps its buttons: a long title truncates". `Run
+ * 01k4h9m2ptw3` with a long subtitle used to squeeze the buttons until their
+ * labels wrapped onto two lines and the bar grew to eighty pixels. `nowrap` on
+ * the row, `flex: none` on the controls (`ui.css`), and `min-width: 0` on the
+ * title and subtitle so they are the things that can shrink — which is what
+ * `text-overflow: ellipsis` needs to do anything at all inside a flex item.
+ */
+.sv-toolbar {
+  height: 40px;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg0);
+  flex: none;
+  overflow: hidden;
+}
+
+/*
+ * Twelve characters, and not one fewer (P10-F3, Draft 2.13).
+ *
+ * The Phase 10 verification found the Record screen's title truncated to "Re…":
+ * a title shrunk to two letters has stopped being a title. `min-width: 12ch` is
+ * a floor the flexbox cannot go under, so a bar with too much in it *overflows*
+ * — which is what `Toolbar` in `parts.tsx` watches for, and what makes it shed
+ * a secondary button into the command palette instead.
+ */
+.sv-toolbar-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  flex: 0 1 auto;
+  min-width: 12ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/** "⌘K +2": how many of this bar's actions are only in the palette. */
+.sv-toolbar-shed {
+  color: var(--muted);
+  font-size: 11px;
+  flex: none;
+  min-width: 5ch;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/*
+ * A field in a toolbar is a row, not a column (P10-F3).
+ *
+ * `.sv-field` stacks its label over its control, which is right in a panel and
+ * wrong in a forty-pixel bar: the Record screen's gateway select came out as
+ * two clipped lines. Beside its label it is one line, and `flex: none` keeps it
+ * from being squeezed into an unreadable sliver when the bar fills up.
+ */
+.sv-toolbar .sv-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  /*
+   * Shrinkable, down to a control that is still a control. A field that could
+   * not give way at all made the bar overflow on a narrow window even after
+   * every button had been shed into the palette, which is a bar that has run
+   * out of things it is allowed to do.
+   */
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.sv-toolbar .sv-field-label {
+  white-space: nowrap;
+}
+
+/*
+ * And it is a control, not a paragraph. The gateway's option label is a
+ * sentence ("fake — committed answers from evals/grounding/cases"), which made
+ * the select four hundred pixels wide and the toolbar overflow before a single
+ * button had been drawn. The value truncates; the whole label is in the menu,
+ * which is where a person reads it.
+ */
+.sv-toolbar .sv-select {
+  min-width: 88px;
+  max-width: 220px;
+  flex: 0 1 auto;
+}
+
+.sv-toolbar .sv-select > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sv-toolbar-sub {
+  color: var(--muted);
+  font-size: 12px;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sv-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.sv-list {
+  width: 300px;
+  flex: none;
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+}
+
+.sv-flow-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.sv-flow-name {
+  font-weight: 500;
+}
+
+.sv-flow-meta {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.sv-editor {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sv-split {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 220px;
+}
+
+.sv-totals {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ── the editor ───────────────────────────────────────────────────────────── */
+
+.sv-code {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 22px;
+  overflow-y: auto;
+  flex: 1;
+  background: var(--bg0);
+}
+
+.sv-code-line {
+  display: grid;
+  grid-template-columns: 44px 20px minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  padding: 0 16px 0 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+
+.sv-code-current {
+  background: var(--bg2);
+}
+
+.sv-code-number {
+  color: var(--dim);
+  text-align: right;
+  padding-right: 10px;
+  font-size: 11px;
+}
+
+.sv-code-gutter {
+  text-align: center;
+}
+
+.sv-code-text {
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sv-code-comment {
+  color: var(--dim);
+}
+
+.sv-code-header {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.sv-code-note {
+  color: var(--dim);
+  font-size: 11px;
+  font-family: var(--sans);
+}
+
+.sv-code-warning {
+  color: var(--abort);
+  font-size: 11px;
+  font-family: var(--sans);
+}
+
+/* ── lint ─────────────────────────────────────────────────────────────────── */
+
+.sv-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg1);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dim);
+  flex: none;
+}
+
+.sv-lint {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+  font-size: 12px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.sv-lint li {
+  display: grid;
+  grid-template-columns: 44px 170px minmax(0, 1fr);
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.sv-lint-line {
+  color: var(--dim);
+  text-align: right;
+}
+
+.sv-lint-code {
+  color: var(--abort);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+
+/* ── the run's steps and audit ────────────────────────────────────────────── */
+
+.sv-steps {
+  overflow-y: auto;
+}
+
+.sv-step {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 6px 16px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: left;
+  cursor: default;
+}
+
+.sv-step-selected {
+  background: var(--bg2);
+}
+
+.sv-step-glyph {
+  text-align: center;
+}
+
+.sv-step-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sv-step-detail {
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.sv-step-failure {
+  margin: 0;
+  padding: 8px 16px 8px 48px;
+  font-size: 12px;
+  color: var(--fg2);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sv-run-outcome {
+  padding: 10px 16px;
+  font-size: 12px;
+  margin: 0;
+}
+
+.sv-audit-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sv-audit {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 20px;
+  color: var(--fg2);
+  overflow-y: auto;
+}
+
+.sv-audit li {
+  display: grid;
+  grid-template-columns: 62px 58px minmax(0, 1fr);
+  gap: 10px;
+  padding: 0 16px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sv-audit-at {
+  color: var(--dim);
+}
+
+.sv-audit-kind {
+  color: var(--muted);
+}
+
+/*
+ * In the audit a tone is a *colour*, not a pill.
+ *
+ * `@svatah/yam-ui`'s `.sv-tone-*` carry a soft background because they are what a
+ * `Pill` is painted with; on a log line that reads as a highlighted block behind
+ * every `ok`. The word is still there and still coloured, which is the rule
+ * (§13.7); the background is not.
+ */
+.sv-audit .sv-tone-pass,
+.sv-audit .sv-tone-fail,
+.sv-audit .sv-tone-abort,
+.sv-audit .sv-tone-info,
+.sv-audit .sv-tone-healed,
+.sv-audit .sv-tone-skip {
+  background: transparent;
+}
+
+/* The same, for the editor's gutter and a step's glyph. */
+.sv-code-gutter [class^="sv-tone-"],
+.sv-step-glyph[class*="sv-tone-"] {
+  background: transparent;
+}
+
+/* ── inspector ────────────────────────────────────────────────────────────── */
+
+.sv-inspector {
+  border-left: 1px solid var(--line);
+  background: var(--bg1);
+  overflow-y: auto;
+}
+
+.sv-inspector-subject {
+  margin: 0;
+  padding: 0 16px 8px;
+  font-size: 13px;
+}
+
+.sv-inspector-actions {
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px;
+}
+
+.sv-card {
+  margin: 6px 16px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  background: var(--bg0);
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+.sv-thumb {
+  display: block;
+  margin: 8px 16px 0;
+  width: calc(100% - 32px);
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  background: var(--bg0);
+}
+
+/* ── status bar ───────────────────────────────────────────────────────────── */
+
+.sv-statusbar {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--line);
+  background: var(--bg1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+/* ── the legacy screens, until Phase 10 ───────────────────────────────────── */
+
+.sv-legacy {
+  overflow: auto;
+  padding: 12px 16px;
+}
+
+/* ── T10.1, T10.2: the shapes the ten rebuilt screens added ───────────────── */
+
+/*
+ * A monospace block: a snapshot excerpt, a response body, a flow file.
+ *
+ * `pre` rather than a stack of `<div>`s, because what it holds is text whose
+ * whitespace is the point — an accessibility tree's indentation is its
+ * structure. It scrolls rather than wrapping, for the same reason a table row
+ * does not wrap (P9-F5).
+ */
+.sv-block {
+  margin: 8px 16px 0;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  background: var(--bg0);
+  color: var(--fg2);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 19px;
+  white-space: pre;
+  overflow: auto;
+  max-height: 260px;
+}
+
+/* The line the model chose, in the record review's snapshot excerpt. */
+.sv-block-hit {
+  display: inline-block;
+  width: 100%;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* The heal review's diff: what the store says, and what the healer would write. */
+.sv-diff {
+  margin: 6px 16px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+
+.sv-diff p {
+  margin: 0;
+  padding: 2px 10px;
+}
+
+.sv-diff-del {
+  background: rgba(238, 106, 95, 0.12);
+  color: #f0a49d;
+}
+
+.sv-diff-add {
+  background: rgba(79, 196, 138, 0.12);
+  color: #8fe0b7;
+}
+
+.sv-muted {
+  color: var(--muted);
+}
+
+/*
+ * The welcome screen: the app with no project open (T10.3).
+ *
+ * Not a shell — `.sv-app`'s three columns over an empty window would be eight
+ * rail rows that all say "open a project first" — so it is its own small
+ * layout, centred, with the two things there are to do on it.
+ */
+.sv-welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 64px;
+  height: 100vh;
+  background: var(--bg0);
+  color: var(--fg);
+}
+
+.sv-welcome-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 60ch;
+}
+
+.sv-welcome-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sv-welcome-log {
+  color: var(--muted);
+  font-size: 12px;
+  max-width: 100%;
+}
+
+.sv-welcome-log summary {
+  cursor: default;
+}
+
+/*
+ * The flow editor's text view (K6, T11.1).
+ *
+ * The same monospace, the same line height and the same background as the
+ * annotated view above it, so switching between Read and Edit is the same file
+ * rather than two different-looking things. `resize: none` because the pane is
+ * sized by the layout: a textarea a person could drag out of its panel is the
+ * toolbar defect of P10-F3 in another place.
+ */
+.sv-code-edit {
+  display: block;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  border: 0;
+  outline: 0;
+  resize: none;
+  padding: 8px 12px;
+  background: var(--bg1);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 20px;
+  tab-size: 2;
+}
+
+.sv-code-edit:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/*
+ * The API screen's headers, editable (K7, T11.1).
+ *
+ * A row per header, the name and the value side by side, and a blank last row
+ * that is how one is added. `1fr 2fr` because a value is longer than a name and
+ * a `Content-Type` that wrapped would be a header nobody could read.
+ */
+.sv-headers { padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+.sv-header-row { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; }
+.sv-header-row .sv-field { min-width: 0; }
+.sv-header-row .sv-input { min-width: 0; width: 100%; }

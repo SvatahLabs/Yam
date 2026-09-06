@@ -1,7 +1,7 @@
 /**
  * The check catalogue covers what it claims to (T11.4, REQ-SELF-2, LLD §13.9).
  *
- * T11.4's Validate: "every Playwright case of `apps/ade/test/shell.spec.ts` has
+ * T11.4's Validate: "every Playwright case of `apps/desktop/test/shell.spec.ts` has
  * a self story with the same check id; every check has both implementations or
  * names why one is unreachable."
  *
@@ -41,9 +41,9 @@ const catalogue = parseYaml(readFileSync(fromRoot("evals/self/checks.yaml"), "ut
 };
 const checks = catalogue.checks;
 
-/** Every `test("…")` title in the ADE's Playwright spec. */
+/** Every `test("…")` title in the app's Playwright spec. */
 function playwrightTitles(): string[] {
-  const source = readFileSync(fromRoot("apps/ade/test/shell.spec.ts"), "utf8");
+  const source = readFileSync(fromRoot("apps/desktop/test/shell.spec.ts"), "utf8");
   const out: string[] = [];
   for (const match of source.matchAll(/^\s*test(?:\.each\([^)]*\))?\(\s*(["'`])((?:[^\\]|\\.)*?)\1/gm)) {
     const title = match[2]!;
@@ -59,10 +59,10 @@ function playwrightTitles(): string[] {
 }
 
 describe("the catalogue and the suites agree (T11.4)", () => {
-  it("has a check for every Playwright case of the ADE's spec", () => {
+  it("has a check for every Playwright case of the app's spec", () => {
     const named = new Set(
       checks
-        .filter((one) => one.external?.source === "ade-playwright")
+        .filter((one) => one.external?.source === "app-playwright")
         .map((one) => one.external!.name),
     );
     const missing = playwrightTitles().filter((one) => !named.has(one));
@@ -88,7 +88,7 @@ describe("the catalogue and the suites agree (T11.4)", () => {
       ].map((one) => `${one} opens and every control on it is named and id'd`),
     ]);
     const invented = checks
-      .filter((one) => one.external?.source === "ade-playwright")
+      .filter((one) => one.external?.source === "app-playwright")
       .map((one) => one.external!.name!)
       .filter((one) => !titles.has(one));
     expect(invented, `the catalogue names cases the spec does not have: ${invented.join("; ")}`)

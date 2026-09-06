@@ -148,11 +148,11 @@ jobs:
           files: release/*.tgz
           fail_on_unmatched_files: false
 
-  # T7.6: "a release workflow that builds the ADE installers on the three-OS
+  # T7.6: "a release workflow that builds the app installers on the three-OS
   # matrix". `ci.yml` builds them on every push to prove they *can* be built;
   # this one builds the ones a release ships and attaches them.
-  ade-installers:
-    name: ADE installers (${{ matrix.os }})
+  app-installers:
+    name: app installers (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -171,7 +171,7 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # The ADE spawns `yam serve`, so the CLI has to exist before it runs.
+      # The app spawns `yam serve`, so the CLI has to exist before it runs.
       - name: Build the workspace
         run: pnpm -r build
 
@@ -180,19 +180,19 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y fakeroot dpkg xvfb
 
       - name: Make
-        run: pnpm --filter @svatah/yam-ade make
+        run: pnpm --filter @svatah/yam-desktop make
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ade-installers-${{ matrix.os }}
-          path: apps/ade/out/make/**
+          name: app-installers-${{ matrix.os }}
+          path: apps/desktop/out/make/**
           if-no-files-found: error
 
       - name: Attach the installers to the release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: apps/ade/out/make/**/*
+          files: apps/desktop/out/make/**/*
           fail_on_unmatched_files: false
 
   # T8.5: publish 0.1.0 — or say exactly what publishing would do.
@@ -210,7 +210,7 @@ jobs:
   # from the same commit.
   publish:
     name: publish to npm (dry run unless asked)
-    needs: [tarballs, eval-reports, ade-installers]
+    needs: [tarballs, eval-reports, app-installers]
     runs-on: ubuntu-latest
     environment: release
     # Trusted publishing (T13.1): the job's OIDC token is the publish identity,
@@ -273,7 +273,7 @@ jobs:
         run: pnpm quick-start:registry
 
       # The installers and the reports are attached by the jobs that produce
-      # them — `ade-installers` on its three-OS matrix, `eval-reports` and
+      # them — `app-installers` on its three-OS matrix, `eval-reports` and
       # `tarballs` on theirs — and this job waits for all three. Attaching them
       # again here would upload the same files twice from a job that does not
       # have them.

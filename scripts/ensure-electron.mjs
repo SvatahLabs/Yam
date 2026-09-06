@@ -6,7 +6,7 @@
  * reliably run: `onlyBuiltDependencies` lists it, and a store hit still installs
  * the package without its binary. The failure is confusing — `electron-forge
  * package` gets a long way in and then cannot find an executable — and the fix
- * is one idempotent command, so the ADE's own scripts run it first rather than
+ * is one idempotent command, so the app's own scripts run it first rather than
  * leaving a person to discover it.
  *
  * `install.js` is Electron's own downloader: it checks `path.txt`, verifies the

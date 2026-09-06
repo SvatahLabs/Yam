@@ -1,8 +1,8 @@
 /**
- * The desktop healing cases, against the ADE's recorded variant trees
+ * The desktop healing cases, against the app's recorded variant trees
  * (T7.1, P6-F3, Draft 2.8 LLD §16, REQ-HEAL-5, REQ-ADE-6).
  *
- * > the ADE gains `YAM_A11Y_VARIANT=1|2`, where variant 1 renames one screen
+ * > the app gains `YAM_A11Y_VARIANT=1|2`, where variant 1 renames one screen
  * > tab and one button on the Project screen and variant 2 moves the Record
  * > screen's gateway control into a different panel; a binding recorded at
  * > variant 0 must relocalize on both through the desktop adapter with the same
@@ -13,12 +13,12 @@
  * published healing cases, the real runner, the real `relocalize` from
  * `@svatah/yam-bindings` with its own weights and threshold, and both desktop
  * adapters — driven against the trees `scripts/record-desktop-tree.mjs` recorded
- * from the real ADE at variants 0, 1 and 2.
+ * from the real app at variants 0, 1 and 2.
  *
  * What it does *not* do is read `AXUIElement` or a UIA tree; that is the live
  * gate, and `docs/spec/progress/phase-7.md` states where it stands. A green run
  * here says the healing cases, the adapters' normalisation and the relocalizer
- * agree about the ADE's tree at all three variants. It does not say a bridge
+ * agree about the app's tree at all three variants. It does not say a bridge
  * read that tree.
  *
  * ## Why this test lives in `cli`
@@ -72,13 +72,13 @@ function axSurface(file: string): AgentSurface {
       return { state: "granted", advice: "granted (recorded)" };
     },
     // These cases replay a recorded tree; the login session behind them is one
-    // in which the ADE had a window, because that is where the trees came from.
+    // in which the app had a window, because that is where the trees came from.
     async session() {
       return {
         usable: true,
         state: "usable",
-        owners: ["Yam ADE"],
-        detail: "1 application(s) own a window: Yam ADE",
+        owners: ["Yam"],
+        detail: "1 application(s) own a window: Yam",
         advice: "recorded",
       };
     },
@@ -90,7 +90,7 @@ function axSurface(file: string): AgentSurface {
     },
     async screenshot() {},
   };
-  return new AxSurface({ processName: "Yam ADE", bridge });
+  return new AxSurface({ processName: "Yam", bridge });
 }
 
 function uiaSurface(file: string): AgentSurface {
@@ -104,7 +104,7 @@ function uiaSurface(file: string): AgentSurface {
     async perform() {},
     async screenshot() {},
   };
-  return new UiaSurface({ processName: "Yam ADE", bridge });
+  return new UiaSurface({ processName: "Yam", bridge });
 }
 
 /**
@@ -139,8 +139,8 @@ function healingFor(variant: number, state: Record<string, RecordedElement>): De
 }
 
 const CASES = {
-  renamed: DESKTOP_HEALING_CASES.filter((one) => one.id === "ade.heal.renamed-control"),
-  moved: DESKTOP_HEALING_CASES.filter((one) => one.id === "ade.heal.moved-panel"),
+  renamed: DESKTOP_HEALING_CASES.filter((one) => one.id === "app.heal.renamed-control"),
+  moved: DESKTOP_HEALING_CASES.filter((one) => one.id === "app.heal.moved-panel"),
 };
 
 async function pass(
@@ -159,7 +159,7 @@ async function pass(
     healing: healingFor(variant, state),
     openSurface: async () => {
       const surface = open(join(fixtures(adapter), `${screen}.json`));
-      await surface.open({ kind: "desktop", processName: "Yam ADE" } as never);
+      await surface.open({ kind: "desktop", processName: "Yam" } as never);
       return surface;
     },
   });
@@ -178,7 +178,7 @@ for (const [adapter, open] of [
     it("records at variant 0 and relocalizes the renamed tab and button at variant 1", async () => {
       const state: Record<string, RecordedElement> = {};
 
-      const recorded = await pass(adapter, open, "ade-flows", 0, CASES.renamed, state);
+      const recorded = await pass(adapter, open, "app-flows", 0, CASES.renamed, state);
       expect(failures(recorded), JSON.stringify(failures(recorded), null, 2)).toEqual([]);
       /*
        * One binding now (T10.3): the **rail item** §16's variant 1 renames. It
@@ -187,9 +187,9 @@ for (const [adapter, open] of [
        * ground-truth key that survives the rename, and the fingerprint cannot
        * see that key.
        */
-      expect(Object.keys(state).sort()).toEqual(["ade.heal.renamed-control:rail-flows"]);
+      expect(Object.keys(state).sort()).toEqual(["app.heal.renamed-control:rail-flows"]);
 
-      const healed = await pass(adapter, open, "ade-flows-v1", 1, CASES.renamed, state);
+      const healed = await pass(adapter, open, "app-flows-v1", 1, CASES.renamed, state);
       expect(failures(healed), JSON.stringify(failures(healed), null, 2)).toEqual([]);
       expect(healed.conformant).toBe(true);
     }, 120_000);
@@ -197,11 +197,11 @@ for (const [adapter, open] of [
     it("records at variant 0 and relocalizes the moved gateway control at variant 2", async () => {
       const state: Record<string, RecordedElement> = {};
 
-      const recorded = await pass(adapter, open, "ade-record", 0, CASES.moved, state);
+      const recorded = await pass(adapter, open, "app-record", 0, CASES.moved, state);
       expect(failures(recorded), JSON.stringify(failures(recorded), null, 2)).toEqual([]);
-      expect(Object.keys(state)).toEqual(["ade.heal.moved-panel:record-gateway"]);
+      expect(Object.keys(state)).toEqual(["app.heal.moved-panel:record-gateway"]);
 
-      const healed = await pass(adapter, open, "ade-record-v2", 2, CASES.moved, state);
+      const healed = await pass(adapter, open, "app-record-v2", 2, CASES.moved, state);
       expect(failures(healed), JSON.stringify(failures(healed), null, 2)).toEqual([]);
       expect(healed.conformant).toBe(true);
     }, 120_000);
@@ -218,8 +218,8 @@ for (const [adapter, open] of [
         cases: CASES.renamed,
         variant: 1,
         openSurface: async () => {
-          const surface = open(join(fixtures(adapter), "ade-flows-v1.json"));
-          await surface.open({ kind: "desktop", processName: "Yam ADE" } as never);
+          const surface = open(join(fixtures(adapter), "app-flows-v1.json"));
+          await surface.open({ kind: "desktop", processName: "Yam" } as never);
           return surface;
         },
       });

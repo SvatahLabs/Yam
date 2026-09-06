@@ -32,7 +32,7 @@ export interface ButtonProps extends Named {
   /**
    * `data-*` attributes the caller needs on the element itself.
    *
-   * One caller and one reason: the ADE's toolbar marks its secondary buttons so
+   * One caller and one reason: the app's toolbar marks its secondary buttons so
    * it can shed them into the palette when the bar runs out of room before the
    * title's twelve-character floor does (P10-F3). A `data-` attribute rather
    * than a class, because a class is a styling hook and something would style

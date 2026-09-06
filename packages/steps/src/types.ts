@@ -44,7 +44,7 @@ export interface StepMeta {
    * exposed as a tool without being marked `idempotent`.
    */
   readonly sideEffect?: boolean;
-  /** One line, shown by `yam lint` and by the ADE's step list. */
+  /** One line, shown by `yam lint` and by the app's step list. */
   readonly description?: string;
   /** Overrides `config.run.stepTimeoutMs` for this step. */
   readonly timeoutMs?: number;

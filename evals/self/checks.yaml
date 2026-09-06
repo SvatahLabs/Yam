@@ -36,8 +36,8 @@
 #
 # What is left, and each row below says which it is:
 #
-#   * **a run inside a run** — the ADE's Run button starts a Yam run, and
-#     pattern 19 can now wait on a service's answer, but the ADE's service
+#   * **a run inside a run** — the app's Run button starts a Yam run, and
+#     pattern 19 can now wait on a service's answer, but the app's service
 #     listens on a port it chose at start-up and an `api/` request names a URL.
 #   * **a count** — pattern 32 quantifies (`Every`, `No`) and does not count, so
 #     "each heading appears once" has no sentence.
@@ -54,25 +54,25 @@
 
 schemaVersion: "1.0.0"
 checks:
-  - id: "ade.launch-open-read-quit"
-    says: "Yam launches the packaged ADE, opens the fixtures project through its Recent list, reads the Flows toolbar, and quits it."
+  - id: "app.launch-open-read-quit"
+    says: "Yam launches the packaged app, opens the fixtures project through its Recent list, reads the Flows toolbar, and quits it."
     yam:
       source: "yam"
-      name: "the ADE opens a project, shows its flows, and quits"
+      name: "the app opens a project, shows its flows, and quits"
     external:
-      unreachable: "no Playwright case launches or quits the application: `_electron.launch` cannot open a packaged build with the `RunAsNode` fuse off (T8.1), so the ADE's own suite attaches to a build somebody else started. Launching and quitting is what T11.2 gave Yam and the external side does not have."
-  - id: "ade.screen-through-two-adapters"
-    says: "The same flow drives the ADE's Flows screen through the accessibility tree and through the DOM over CDP."
+      unreachable: "no Playwright case launches or quits the application: `_electron.launch` cannot open a packaged build with the `RunAsNode` fuse off (T8.1), so the app's own suite attaches to a build somebody else started. Launching and quitting is what T11.2 gave Yam and the external side does not have."
+  - id: "app.screen-through-two-adapters"
+    says: "The same flow drives the app's Flows screen through the accessibility tree and through the DOM over CDP."
     yam:
       source: "yam"
-      name: "the ADE opens a project and shows its flows"
+      name: "the app opens a project and shows its flows"
     external:
       source: "yam-cdp"
-      name: "the ADE opens a project and shows its flows"
+      name: "the app opens a project and shows its flows"
   - id: "gate.desktop-conformance"
-    says: "The live macOS desktop conformance gate is conformant at ADE variants 0, 1 and 2."
+    says: "The live macOS desktop conformance gate is conformant at app variants 0, 1 and 2."
     yam:
-      unreachable: "the gate *is* Yam's surface conformance suite, driven by a script that launches three ADE variants and carries recorded fingerprints between them. A flow cannot relaunch its own application at a different variant mid-run: `app.launch` opens the session, and there is no sentence for a second one."
+      unreachable: "the gate *is* Yam's surface conformance suite, driven by a script that launches three app variants and carries recorded fingerprints between them. A flow cannot relaunch its own application at a different variant mid-run: `app.launch` opens the session, and there is no sentence for a second one."
     external:
       source: "desktop-gate"
       name: "gate"
@@ -121,304 +121,304 @@ checks:
       source: "healing-eval"
       name: "healing"
   - id: "oracle.tree-agreement"
-    says: "The ADE's renderer tree over CDP and its accessibility snapshot agree about every identified control's role and name."
+    says: "The app's renderer tree over CDP and its accessibility snapshot agree about every identified control's role and name."
     externalByDesign: "REQ-SELF-3. This is the check that the *adapter's picture of a window is the window*: its two sides are the DOM Chromium renders and the accessibility tree macOS publishes from it, and Yam is in neither. Every other check goes through something Yam wrote."
     yam:
       unreachable: "external by design (REQ-SELF-3)."
     external:
       source: "tree-agreement"
       name: "tree"
-  - id: "ade.opens-into-the-new-flows-screen-not-the-eleven-tabs"
+  - id: "app.opens-into-the-new-flows-screen-not-the-eleven-tabs"
     says: "opens into the new Flows screen, not the eleven tabs"
     yam:
       source: "yam"
-      name: "the ADE opens a project and shows its flows"
+      name: "the app opens a project and shows its flows"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "opens into the new Flows screen, not the eleven tabs"
-  - id: "ade.every-interactive-control-on-the-flows-screen-is-named-and-i"
+  - id: "app.every-interactive-control-on-the-flows-screen-is-named-and-i"
     says: "every interactive control on the Flows screen is named and id'd (P8-F3)"
     yam:
       source: "yam"
       name: "every interactive control on the Flows screen is named and id'd"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "every interactive control on the Flows screen is named and id'd (P8-F3)"
-  - id: "ade.record-on-the-flows-screen-starts-a-session-with-the-fake-ga"
+  - id: "app.record-on-the-flows-screen-starts-a-session-with-the-fake-ga"
     says: "Record on the Flows screen starts a session with the fake gateway"
     yam:
       unreachable: "the Record button starts a recording session, and a recording session is what a Yam *run* is not: `yam record` and `yam run` are different commands, and a flow cannot ask for one from inside the other."
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "Record on the Flows screen starts a session with the fake gateway"
-  - id: "ade.run-on-the-flows-screen-starts-a-run-and-opens-the-run-scree"
+  - id: "app.run-on-the-flows-screen-starts-a-run-and-opens-the-run-scree"
     says: "Run on the Flows screen starts a run and opens the Run screen"
     yam:
-      unreachable: "pattern 19 now waits on a service's answer, so the *sentence* exists. What is missing is the request: the ADE's own service listens on a port it chose at start-up, and an `api/` request names a URL. A flow that could ask the ADE which port it is on would close this one."
+      unreachable: "pattern 19 now waits on a service's answer, so the *sentence* exists. What is missing is the request: the app's own service listens on a port it chose at start-up, and an `api/` request names a URL. A flow that could ask the app which port it is on would close this one."
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "Run on the Flows screen starts a run and opens the Run screen"
-  - id: "ade.the-run-screen-shows-the-run-s-steps-audit-and-inspector"
+  - id: "app.the-run-screen-shows-the-run-s-steps-audit-and-inspector"
     says: "the Run screen shows the run's steps, audit and inspector"
     yam:
       unreachable: "needs a run to read, and starting one means starting a Yam run from inside a Yam run: the click works, and what is missing is a sentence that waits for a *second* run to finish and reads its result. The screen itself is reachable and every control on it is bound."
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Run screen shows the run's steps, audit and inspector"
-  - id: "ade.the-run-toolbar-keeps-its-buttons-on-one-line-however-long-t"
+  - id: "app.the-run-toolbar-keeps-its-buttons-on-one-line-however-long-t"
     says: "the Run toolbar keeps its buttons on one line, however long the title"
     yam:
       unreachable: "a *geometry* assertion \u2014 box heights and right edges across the toolbar's children. `Expect \u2026 to have size/location` exists for one element (pattern 24); comparing two elements' boxes does not."
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Run toolbar keeps its buttons on one line, however long the title"
-  - id: "ade.the-inspector-says-each-of-its-headings-once"
+  - id: "app.the-inspector-says-each-of-its-headings-once"
     says: "the inspector says each of its headings once"
     yam:
       unreachable: "pattern 32 quantifies over a set \u2014 `Every`, `No` \u2014 and this needs a *count*: \"each heading appears once\" is a uniqueness claim, and neither quantifier can say it. An `Exactly one \u2026` or a `\u2026 should be unique` is the sentence that would close it."
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the inspector says each of its headings once"
-  - id: "ade.the-audit-pane-renders-the-call-detail-the-model-carries"
+  - id: "app.the-audit-pane-renders-the-call-detail-the-model-carries"
     says: "the audit pane renders the call detail the model carries"
     yam:
       source: "yam"
       name: "the audit pane renders the call detail the model carries"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the audit pane renders the call detail the model carries"
-  - id: "ade.run-again-is-a-button-on-the-run-screen-and-it-starts-anothe"
+  - id: "app.run-again-is-a-button-on-the-run-screen-and-it-starts-anothe"
     says: "Run again is a button on the Run screen, and it starts another run"
     yam:
       unreachable: "the button is bound and clickable; what cannot be asserted is that a second run started, because a flow has no sentence that waits for a run other than its own and reads its result."
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "Run again is a button on the Run screen, and it starts another run"
-  - id: "ade.a-run-started-from-the-run-screen-can-be-stopped-from-it-t10"
+  - id: "app.a-run-started-from-the-run-screen-can-be-stopped-from-it-t10"
     says: "a run started from the Run screen can be stopped from it (T10.4)"
     yam:
       unreachable: "needs a run in flight to stop, which means starting a Yam run from inside a Yam run — and no sentence waits for a second run or reads its state while it is going."
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "a run started from the Run screen can be stopped from it (T10.4)"
-  - id: "ade.the-command-palette-opens-on-k-and-lists-the-registry-s-acti"
+  - id: "app.the-command-palette-opens-on-k-and-lists-the-registry-s-acti"
     says: "the command palette opens on \u2318K and lists the registry's actions"
     yam:
       source: "yam"
       name: "the command palette opens on the chord and lists the registry's actions"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the command palette opens on \u2318K and lists the registry's actions"
-  - id: "ade.flows-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.flows-opens-and-every-control-on-it-is-named-and-id-d"
     says: "flows opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the Flows screen opens and shows its own controls"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "flows opens and every control on it is named and id'd"
-  - id: "ade.runs-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.runs-opens-and-every-control-on-it-is-named-and-id-d"
     says: "runs opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the Runs screen opens and shows its own controls"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "runs opens and every control on it is named and id'd"
-  - id: "ade.bindings-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.bindings-opens-and-every-control-on-it-is-named-and-id-d"
     says: "bindings opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the Bindings screen opens and shows its own controls"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "bindings opens and every control on it is named and id'd"
-  - id: "ade.agents-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.agents-opens-and-every-control-on-it-is-named-and-id-d"
     says: "agents opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the Agents screen opens and shows its own controls"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "agents opens and every control on it is named and id'd"
-  - id: "ade.api-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.api-opens-and-every-control-on-it-is-named-and-id-d"
     says: "api opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the API screen opens and shows its own controls"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "api opens and every control on it is named and id'd"
-  - id: "ade.data-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.data-opens-and-every-control-on-it-is-named-and-id-d"
     says: "data opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the Data screen opens and shows its own controls"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "data opens and every control on it is named and id'd"
-  - id: "ade.import-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.import-opens-and-every-control-on-it-is-named-and-id-d"
     says: "import opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the Import screen opens and shows its own controls"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "import opens and every control on it is named and id'd"
-  - id: "ade.settings-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.settings-opens-and-every-control-on-it-is-named-and-id-d"
     says: "settings opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the Settings screen opens and shows its own controls"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "settings opens and every control on it is named and id'd"
-  - id: "ade.record-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.record-opens-and-every-control-on-it-is-named-and-id-d"
     says: "record opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the Record review opens from the palette and chooses its gateway"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "record opens and every control on it is named and id'd"
-  - id: "ade.run-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.run-opens-and-every-control-on-it-is-named-and-id-d"
     says: "run opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the Run screen opens from the palette and shows its own controls"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "run opens and every control on it is named and id'd"
-  - id: "ade.heal-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.heal-opens-and-every-control-on-it-is-named-and-id-d"
     says: "heal opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the Heal review opens from the palette and offers the runs worth healing"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "heal opens and every control on it is named and id'd"
-  - id: "ade.explorer-opens-and-every-control-on-it-is-named-and-id-d"
+  - id: "app.explorer-opens-and-every-control-on-it-is-named-and-id-d"
     says: "explorer opens and every control on it is named and id'd"
     yam:
       source: "yam"
       name: "the Surface explorer opens from the palette and refuses a call with no intent"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "explorer opens and every control on it is named and id'd"
-  - id: "ade.the-runs-screen-filters-and-its-inspector-shows-the-failing-"
+  - id: "app.the-runs-screen-filters-and-its-inspector-shows-the-failing-"
     says: "the Runs screen filters, and its inspector shows the failing step's evidence"
     yam:
       unreachable: "the filter chips cycle through the values the *run history* has, so `status: all \u2192 status: passed` on one machine is `status: all \u2192 status: failed` on another. A flow that named a value would be a flow about one machine's runs; what it needs is to read a control's label back and compare it with the one before, and a captured value has no sentence that compares it (pattern 29's `expr` is a guard over scope, not an assertion). This was written as a two-sided check in T12.7 and the gate caught it \u2014 a disagreement whose cause was the check, not either oracle."
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Runs screen filters, and its inspector shows the failing step's evidence"
-  - id: "ade.the-bindings-screen-shows-the-store-and-one-element-s-resolv"
+  - id: "app.the-bindings-screen-shows-the-store-and-one-element-s-resolv"
     says: "the Bindings screen shows the store and one element's resolver order"
     yam:
       source: "yam"
       name: "the Bindings screen shows the store and one element's resolver order"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Bindings screen shows the store and one element's resolver order"
-  - id: "ade.the-heal-review-offers-the-runs-worth-healing"
+  - id: "app.the-heal-review-offers-the-runs-worth-healing"
     says: "the Heal review offers the runs worth healing"
     yam:
       source: "yam"
       name: "the Heal review opens from the palette and offers the runs worth healing"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Heal review offers the runs worth healing"
-  - id: "ade.the-record-review-chooses-its-gateway-and-says-what-a-fake-s"
+  - id: "app.the-record-review-chooses-its-gateway-and-says-what-a-fake-s"
     says: "the Record review chooses its gateway and says what a fake session is"
     yam:
       source: "yam"
       name: "the Record review opens from the palette and chooses its gateway"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Record review chooses its gateway and says what a fake session is"
-  - id: "ade.the-api-screen-shows-a-saved-request-and-its-headers"
+  - id: "app.the-api-screen-shows-a-saved-request-and-its-headers"
     says: "the API screen shows a saved request and its headers"
     yam:
       source: "yam"
       name: "the API screen shows a saved request and its headers"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the API screen shows a saved request and its headers"
-  - id: "ade.the-data-screen-names-every-secret-and-shows-none-of-them"
+  - id: "app.the-data-screen-names-every-secret-and-shows-none-of-them"
     says: "the Data screen names every secret and shows none of them"
     yam:
       source: "yam"
       name: "the Data screen names every secret and shows none of them"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Data screen names every secret and shows none of them"
-  - id: "ade.the-surface-explorer-refuses-a-call-with-no-intent"
+  - id: "app.the-surface-explorer-refuses-a-call-with-no-intent"
     says: "the Surface explorer refuses a call with no intent"
     yam:
       source: "yam"
       name: "the Surface explorer opens from the palette and refuses a call with no intent"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Surface explorer refuses a call with no intent"
-  - id: "ade.the-import-screen-previews-into-the-open-project-and-nowhere"
+  - id: "app.the-import-screen-previews-into-the-open-project-and-nowhere"
     says: "the Import screen previews into the open project and nowhere else"
     yam:
       source: "yam"
       name: "the Import screen previews into the open project and nowhere else"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Import screen previews into the open project and nowhere else"
-  - id: "ade.the-settings-screen-shows-the-project-and-never-a-credential"
+  - id: "app.the-settings-screen-shows-the-project-and-never-a-credential"
     says: "the Settings screen shows the project and never a credential"
     yam:
       source: "yam"
       name: "the Settings screen shows the project and never a credential"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Settings screen shows the project and never a credential"
-  - id: "ade.the-agents-screen-lists-what-an-agent-may-call"
+  - id: "app.the-agents-screen-lists-what-an-agent-may-call"
     says: "the Agents screen lists what an agent may call"
     yam:
       source: "yam"
       name: "the Agents screen lists what an agent may call"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Agents screen lists what an agent may call"
-  - id: "ade.the-legacy-screens-are-gone-t10-3"
+  - id: "app.the-legacy-screens-are-gone-t10-3"
     says: "the legacy screens are gone (T10.3)"
     yam:
       source: "yam"
       name: "the legacy screens are gone"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the legacy screens are gone (T10.3)"
-  - id: "ade.the-record-screen-s-toolbar-keeps-its-title-its-select-and-a"
+  - id: "app.the-record-screen-s-toolbar-keeps-its-title-its-select-and-a"
     says: "the Record screen's toolbar keeps its title, its select and availableWhen (P10-F3)"
     yam:
       source: "yam"
       name: "the Record toolbar keeps its title and its select at two widths"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "the Record screen's toolbar keeps its title, its select and availableWhen (P10-F3)"
-  - id: "ade.a-toolbar-that-runs-out-of-room-sheds-into-the-palette-and-s"
+  - id: "app.a-toolbar-that-runs-out-of-room-sheds-into-the-palette-and-s"
     says: "a toolbar that runs out of room sheds into the palette, and says so (P10-F3)"
     yam:
       source: "yam"
       name: "a toolbar that runs out of room sheds into the palette"
     external:
-      source: "ade-playwright"
+      source: "app-playwright"
       name: "a toolbar that runs out of room sheds into the palette, and says so (P10-F3)"
-  - id: "ade.a-flow-is-edited-and-saved-through-the-ade-and-re-linted-k6"
-    says: "a flow is edited and saved through the ADE, and re-linted (K6)"
+  - id: "app.a-flow-is-edited-and-saved-through-the-app-and-re-linted-k6"
+    says: "a flow is edited and saved through the app, and re-linted (K6)"
     yam:
       unreachable: "Draft 2.15 gave `Type` its multi-line value, which was the sentence this needed. What is left is the *restore*: the case rewrites a file in the committed fixtures project and puts it back, and a flow that failed between the two would leave the checkout modified. `onFailure: compensate:<flow>` is the mechanism (REQ-AUTO-4) and no compensating story is written, so this stays the external side's."
     external:
-      source: "ade-playwright"
-      name: "a flow is edited and saved through the ADE, and re-linted (K6)"
-  - id: "ade.a-saved-api-request-is-edited-and-saved-through-the-ade-k7"
-    says: "a saved API request is edited and saved through the ADE (K7)"
+      source: "app-playwright"
+      name: "a flow is edited and saved through the app, and re-linted (K6)"
+  - id: "app.a-saved-api-request-is-edited-and-saved-through-the-app-k7"
+    says: "a saved API request is edited and saved through the app (K7)"
     yam:
       unreachable: "adds a header by filling the blank last row of a table, and addressing \"the last row\" of a growing list is a positional target the language has no sentence for."
     external:
-      source: "ade-playwright"
-      name: "a saved API request is edited and saved through the ADE (K7)"
+      source: "app-playwright"
+      name: "a saved API request is edited and saved through the app (K7)"

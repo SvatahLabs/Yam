@@ -94,26 +94,26 @@ export async function surfaceDoctorCommand(
 }
 
 /**
- * Which Node the ADE would run `yam serve` with (Draft 2.9 §13.6, T8.1).
+ * Which Node the app would run `yam serve` with (Draft 2.9 §13.6, T8.1).
  *
- * "`yam surface doctor` and the ADE's own smoke check report which runtime
+ * "`yam surface doctor` and the app's own smoke check report which runtime
  * was chosen." It is a desktop-gate check like the other two: the gate drives
- * the ADE's project screen, and an ADE that cannot resolve a runtime never has
+ * the app's project screen, and an app that cannot resolve a runtime never has
  * one. Asking here means the answer is available without launching an
  * application and watching it fail to open anything.
  *
- * The CLI passed to the resolver is *this* CLI, which is where a packaged ADE
+ * The CLI passed to the resolver is *this* CLI, which is where a packaged app
  * looks for a Node beside it.
  */
 function runtimeCheck(): SurfaceCheck {
   const resolution = resolveNodeRuntime({ cli: fileURLToPath(import.meta.url) });
   return {
-    adapter: "ade",
+    adapter: "app",
     name: "node-runtime",
     ok: resolution.runtime !== undefined,
     detail: describeRuntime(resolution),
     fix:
-      `The ADE spawns \`yam serve\` with a resolved Node, never with its own binary. ` +
+      `The app spawns \`yam serve\` with a resolved Node, never with its own binary. ` +
       `Install Node ${SUPPORTED_NODE_MAJOR} LTS or newer so that \`node\` is on PATH, or set ` +
       "YAM_NODE to the interpreter to use. Looked in: " +
       resolution.attempts

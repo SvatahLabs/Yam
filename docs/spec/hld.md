@@ -87,7 +87,7 @@ Actors: authors (people or agents) who write flows or explore; reviewers who app
 | B10 | **Migration tool** | v1/v2 → v3 flows, seed bindings, data. | REQ-LANG-11 |
 | B11 | **Evals** | Compiler, grounding, healing, conformance; published reports. | REQ-COMP-9, REQ-REC-10, REQ-HEAL-5, REQ-PKG-4 |
 | B12 | **Local service** | `yam serve`: HTTP plus event stream over the CLI operations, results, bindings, API client, and raw surface; the single integration point for clients. | REQ-ADE-1 |
-| B13 | **Yam ADE** (separate repository, new build) | Electron desktop client designed around the new artifacts: project, prose flow editor with lint, plan view, record with review, run with live events, results and audit, bindings and heal review, API client, data editor, surface explorer, tool panel. Reference client of B12. Also the desktop conformance target for S7. | REQ-ADE-2..9, REQ-ADP-6, 7 |
+| B13 | **Yam** (separate repository, new build) | Electron desktop client designed around the new artifacts: project, prose flow editor with lint, plan view, record with review, run with live events, results and audit, bindings and heal review, API client, data editor, surface explorer, tool panel. Reference client of B12. Also the desktop conformance target for S7. | REQ-ADE-2..9, REQ-ADP-6, 7 |
 
 ## 6. Data flows
 
@@ -137,16 +137,16 @@ agent ─MCP─► B9 raw surface (snapshot/act/read with stated intent per call
 trajectory.jsonl ─► B8 ─► proposals/<date>/<name>.flow + plan fragment + bindings (verified: false) ─► review
 ```
 
-### 6.7 ADE session
+### 6.7 app session
 
 ```
-ADE (Electron main) ─spawn─► B12 yam serve --port <p> --project <dir>
-ADE renderer ─HTTP─► B12: projects, compile, lint, record, run, results, bindings, api, surface
-ADE renderer ◄─events─ B12: step results, record decisions, heal proposals (WebSocket or SSE)
+app (Electron main) ─spawn─► B12 yam serve --port <p> --project <dir>
+app renderer ─HTTP─► B12: projects, compile, lint, record, run, results, bindings, api, surface
+app renderer ◄─events─ B12: step results, record decisions, heal proposals (WebSocket or SSE)
 B12 ─► B2/B3/D6/D7 exactly as the CLI does; all artifacts land in the project directory
 ```
 
-The prototype spawned `jar/yam-service-1.0.3.jar` on port 8095 and kept projects, flows, locators, data, and results in electron-db, so the client and the framework had separate sources of truth. The new ADE keeps only UI preferences locally; every screen is a view over files in the project directory reached through the service, so the ADE, the CLI, CI, and an agent over MCP all see the same artifacts.
+The prototype spawned `jar/yam-service-1.0.3.jar` on port 8095 and kept projects, flows, locators, data, and results in electron-db, so the client and the framework had separate sources of truth. The new app keeps only UI preferences locally; every screen is a view over files in the project directory reached through the service, so the app, the CLI, CI, and an agent over MCP all see the same artifacts.
 
 ## 7. Artifact contracts
 
@@ -204,8 +204,8 @@ Step IR (abridged; full in LLD §3):
 | Frontier model | Anthropic API, Claude Opus 5, adaptive thinking, structured outputs, prompt caching | Few calls needing page understanding; cached instruction block. | Any provider behind the gateway. |
 | MCP | `@modelcontextprotocol/sdk` | Tool server and raw surface exposure. | — |
 | Persistence | Files in the repo | Reviewable, diffable, no service. | SQLite index for results (P2). |
-| Local service | Fastify plus WebSocket (or SSE) in `packages/service` | Thin HTTP façade over the same functions the CLI calls; one integration point for the ADE and other clients. | gRPC (heavier for an Electron renderer). |
-| Desktop client | New Yam ADE: Electron current LTS via Electron Forge's Vite template, TypeScript throughout, React renderer, context isolation with a typed preload bridge, a generated service client from the local service's OpenAPI description, bundled CLI. | The prototype proves the jobs; its Electron 8 shell, jQuery renderer, and electron-db storage conflict with the service boundary, the file-based source of truth, and the security baseline, so a new build is cheaper than retrofitting. Electron keeps it a UIA and AX conformance target. | Upgrade the prototype in place (rejected: three foundations to replace); Tauri (rejected: WebView accessibility trees are less uniform than Chromium's for the desktop adapters). |
+| Local service | Fastify plus WebSocket (or SSE) in `packages/service` | Thin HTTP façapp over the same functions the CLI calls; one integration point for the app and other clients. | gRPC (heavier for an Electron renderer). |
+| Desktop client | New Yam: Electron current LTS via Electron Forge's Vite template, TypeScript throughout, React renderer, context isolation with a typed preload bridge, a generated service client from the local service's OpenAPI description, bundled CLI. | The prototype proves the jobs; its Electron 8 shell, jQuery renderer, and electron-db storage conflict with the service boundary, the file-based source of truth, and the security baseline, so a new build is cheaper than retrofitting. Electron keeps it a UIA and AX conformance target. | Upgrade the prototype in place (rejected: three foundations to replace); Tauri (rejected: WebView accessibility trees are less uniform than Chromium's for the desktop adapters). |
 | Testing | vitest; Playwright Test for adapters; sample web, mobile, and desktop apps | Fast unit loop; real platforms for conformance. | — |
 
 ## 9. Architecture decisions
@@ -240,7 +240,7 @@ Step IR (abridged; full in LLD §3):
 
 **ADR-15 Desktop through the same surface.** OS accessibility trees map to the same snapshot shape; UIA first, AX second, AT-SPI third; vision fallback only where trees are absent.
 
-**ADR-17 The ADE is rebuilt to the vision; the prototype is the blueprint of jobs, not code to retain.** The prototype establishes that a desktop client must let a person manage a project, author flows, run them, inspect results and screenshots, and exercise APIs. The new ADE delivers those jobs redesigned around the new artifacts (prose flows with lint, plan view, record with review, bindings and heal review, audit, surface explorer, tool panel), talks to the core only through the local service, and stores nothing but UI preferences. Because it is an Electron app whose Chromium exposes an accessibility tree through UIA and AX, it replaces a separate desktop sample application for validating the OS adapters. Rejected: upgrading the prototype in place (its shell, renderer, and storage all conflict with the new boundaries), keeping electron-db as a second source of truth, letting the renderer import core packages directly, and building a separate desktop sample app. Until its first tagged release the new ADE is developed in this repository under `apps/ade`, so Phase 3 and the desktop conformance work verify in one checkout; the split to the `svatahADE` repository happens at that release, and the prototype's code is archived there on a `prototype` branch.
+**ADR-17 The app is rebuilt to the vision; the prototype is the blueprint of jobs, not code to retain.** The prototype establishes that a desktop client must let a person manage a project, author flows, run them, inspect results and screenshots, and exercise APIs. The new app delivers those jobs redesigned around the new artifacts (prose flows with lint, plan view, record with review, bindings and heal review, audit, surface explorer, tool panel), talks to the core only through the local service, and stores nothing but UI preferences. Because it is an Electron app whose Chromium exposes an accessibility tree through UIA and AX, it replaces a separate desktop sample application for validating the OS adapters. Rejected: upgrading the prototype in place (its shell, renderer, and storage all conflict with the new boundaries), keeping electron-db as a second source of truth, letting the renderer import core packages directly, and building a separate desktop sample app. Until its first tagged release the new app is developed in this repository under `apps/desktop`, so Phase 3 and the desktop conformance work verify in one checkout; the split to the `svatahADE` repository happens at that release, and the prototype's code is archived there on a `prototype` branch.
 
 **ADR-16 Trajectory compile replaces a standalone explorer.** Agents explore through Yam's raw surface so their trajectories are captured and compiled into deterministic tools, rather than Yam owning an exploration agent.
 
@@ -307,14 +307,14 @@ yam/                      github.com/SvatahLabs/yam (Draft 2.18)
     verify/               catalogue schema, source runners, comparison, report — the parity gate as a package (Draft 2.16, planned: Phase 14)
     trajectory/           trajectory capture and compile (P2)
     cli/                  yam CLI + MCP server (operations + raw surface)
-    service/              local HTTP + event-stream service (yam serve) for the ADE and other clients
+    service/              local HTTP + event-stream service (yam serve) for the app and other clients
     migrate/              v1/v2 → v3, plus prototype database import (P2)
     conformance/          surface and runtime conformance suites
   clients/
     python/, java/        clients generated from the same description (Draft 2.11)
   apps/
     sample-web/           sample web app with variants
-    ade/                  the new Yam ADE (Electron), developed in-repo until its first release, then split to the svatahADE repository (ADR-17); also the desktop conformance target
+    desktop/              Yam, the desktop client (Electron; Draft 2.19), developed in-repo until its first release (ADR-17); also the desktop conformance target
   evals/
     compiler/  grounding/  healing/  conformance/
   docs/spec/              this document set
@@ -330,16 +330,16 @@ Published npm modules (Draft 2.3; no aggregate packages, each package publishes 
 | 0 | Skeleton, schemas with automation fields, surface spec, sample web app with variants, language reference, golden seed | REQ-STD-1, REQ-SURF-1, REQ-LANG-12 |
 | 1 | **Module (a):** Playwright adapter, bindings store, resolver, synthesis, fingerprints, relocalization, `bind()` fixture, model-free healer, `yam bindings` CLI, adapter conformance suite; published healing eval (relocalize-only) | REQ-ADP-1, REQ-SURF-2..5, REQ-REC-3, 4, 6, 9, 11, REQ-RUN-5, REQ-HEAL-1(relocalize), 2, 3, 5(relocalize), 6, REQ-PKG-1(a), 2 |
 | 2 | **Module (b) test behavior:** reader, Tier 0 and Tier 1, lint, executor core, HTTP adapter, Playwright Test host, migration, local service, compatibility run | REQ-LANG-*, REQ-COMP-1, 2, 5..9, REQ-RUN-1..4, 6..10, 12, 13, REQ-ADP-2, 3, REQ-BEH-1, 5, REQ-AUTO-5, 6, REQ-NFR-8, REQ-ADE-1 |
-| 3 | **Recorder, model healing, ADE foundation:** gateway, grounding, session, report, `record`; healer with re-grounding; grounding and full healing evals published; new ADE shell and core screens (project, flow editor with lint, plan view, run with live events, results, API client, data editor) | REQ-REC-1, 2, 5, 7, 8, 10, REQ-HEAL-1(model), 4, 5(model), REQ-AGT-3, REQ-NFR-2, 6, REQ-ADE-2, 3, 7 |
+| 3 | **Recorder, model healing, app foundation:** gateway, grounding, session, report, `record`; healer with re-grounding; grounding and full healing evals published; new app shell and core screens (project, flow editor with lint, plan view, run with live events, results, API client, data editor) | REQ-REC-1, 2, 5, 7, 8, 10, REQ-HEAL-1(model), 4, 5(model), REQ-AGT-3, REQ-NFR-2, 6, REQ-ADE-2, 3, 7 |
 | 4 | **Independence and tiers:** BiDi adapter, Appium adapter, Tier 2 and 3, privacy mode, REPL, MCP server with raw surface | REQ-ADP-4, 5, REQ-COMP-3, 4, REQ-NFR-3, REQ-RUN-11, REQ-AGT-2 |
-| 5 | **Automation behaviors:** guards, checkpoints, resume, abort policies, workflow runner, tool server, environment policy, trajectory compiler; ADE record review, bindings and heal review, surface explorer and tool panel | REQ-AUTO-1..4, 7, 8, REQ-BEH-2, 3, 4, REQ-LANG-14, REQ-ADE-4, 5, 8 |
-| 6 | **Reach:** Windows UIA and macOS AX validated against the ADE, prototype data import, WebMCP candidate, Java conformance runtime, Tier 2 fine-tune | REQ-ADP-6, 7, 9, REQ-STD-3, REQ-ADE-6, 9 |
-| 7 | **Hardening and release candidate (Draft 2.8):** the live desktop gates pass on the hosts that can run them and the pipeline carries every gate; the Java runtime's artifacts validate; the dialog IR and the type check join the contract; the fine-tune is measured or stated blocked; module (a), the CLI, the schemas, and the ADE installers are packaged as a 0.1.0 release candidate with the published evals attached | REQ-PKG-1, 2, 4, REQ-STD-2, 3, REQ-ADP-6, 7 (closed live) |
-| 8 | **Ship (Draft 2.9):** the packaged ADE opens a project with a resolved Node runtime and the gate opens one without a dialog; the AX bridge meets the budget on the measured project screen and the macOS gate passes live; dialog arming is documented, linted and audited; the fine-tune is withdrawn from 0.1.0's claims with the Tier 2 corpus as its precondition; 0.1.0 is published from the pipeline by a manual, token-gated step the owner triggers, with installers and the eval reports attached | REQ-ADE-2, 6 (packaged), REQ-ADP-7 (budget), REQ-PKG-1, 4 (published) |
-| 9 | **Builder surfaces, foundation (Draft 2.11):** the headless screen model and its action registry, the design system on Radix with the approved tokens, `@svatah/yam-sdk` generated from the OpenAPI description with Python and Java clients, the ADE shell rebuilt as rail, workspace and inspector with the Flows and Run screens live, `yam ui` rendering the same two screens; the Phase 8 corrections applied | REQ-ADE-10, 11, 12, 13, REQ-TUI-1, REQ-SDK-1, 2 (foundation) |
-| 10 | **Builder surfaces, complete (Draft 2.11):** every screen of the former eleven rebuilt on the model in both renderers (record review, runs and evidence, heal review, bindings, agents and tools, API, data, explorer, import, settings), the command palette with parity asserted, the accessibility contract enforced by the desktop suite, the ADE installers rebuilt, the packaged ADE the conformance target again | REQ-ADE-10..13, REQ-TUI-1, REQ-ADE-6 (re-validated) |
+| 5 | **Automation behaviors:** guards, checkpoints, resume, abort policies, workflow runner, tool server, environment policy, trajectory compiler; app record review, bindings and heal review, surface explorer and tool panel | REQ-AUTO-1..4, 7, 8, REQ-BEH-2, 3, 4, REQ-LANG-14, REQ-ADE-4, 5, 8 |
+| 6 | **Reach:** Windows UIA and macOS AX validated against the app, prototype data import, WebMCP candidate, Java conformance runtime, Tier 2 fine-tune | REQ-ADP-6, 7, 9, REQ-STD-3, REQ-ADE-6, 9 |
+| 7 | **Hardening and release candidate (Draft 2.8):** the live desktop gates pass on the hosts that can run them and the pipeline carries every gate; the Java runtime's artifacts validate; the dialog IR and the type check join the contract; the fine-tune is measured or stated blocked; module (a), the CLI, the schemas, and the app installers are packaged as a 0.1.0 release candidate with the published evals attached | REQ-PKG-1, 2, 4, REQ-STD-2, 3, REQ-ADP-6, 7 (closed live) |
+| 8 | **Ship (Draft 2.9):** the packaged app opens a project with a resolved Node runtime and the gate opens one without a dialog; the AX bridge meets the budget on the measured project screen and the macOS gate passes live; dialog arming is documented, linted and audited; the fine-tune is withdrawn from 0.1.0's claims with the Tier 2 corpus as its precondition; 0.1.0 is published from the pipeline by a manual, token-gated step the owner triggers, with installers and the eval reports attached | REQ-ADE-2, 6 (packaged), REQ-ADP-7 (budget), REQ-PKG-1, 4 (published) |
+| 9 | **Builder surfaces, foundation (Draft 2.11):** the headless screen model and its action registry, the design system on Radix with the approved tokens, `@svatah/yam-sdk` generated from the OpenAPI description with Python and Java clients, the app shell rebuilt as rail, workspace and inspector with the Flows and Run screens live, `yam ui` rendering the same two screens; the Phase 8 corrections applied | REQ-ADE-10, 11, 12, 13, REQ-TUI-1, REQ-SDK-1, 2 (foundation) |
+| 10 | **Builder surfaces, complete (Draft 2.11):** every screen of the former eleven rebuilt on the model in both renderers (record review, runs and evidence, heal review, bindings, agents and tools, API, data, explorer, import, settings), the command palette with parity asserted, the accessibility contract enforced by the desktop suite, the app installers rebuilt, the packaged app the conformance target again | REQ-ADE-10..13, REQ-TUI-1, REQ-ADE-6 (re-validated) |
 | 11 | **Corrections, and Yam verifies Yam (Draft 2.14):** the Phase 10 corrections including the windowless launch; `app.launch`/`app.quit`, `Quit the app`, CDP attach, desktop grounding; `evals/self` and `yam eval self`, the two-sided parity gate at 100 percent agreement with coverage and one-sided checks published; the verification contract becomes the gate | REQ-SELF-1, 2, 3, REQ-ADE-6, REQ-ADP-1, 7 |
-| 12 | **Release 0.1.0 and the open P0 items (Draft 2.10, renumbered 2.14):** the desktop gate is race-free and load-aware; the compiler golden set reaches 300; the ADE names every control and the gate makes a real run before reading results; the three-OS CI matrix is observed on a runner the owner attaches; 0.1.0 is published by the owner's trigger and verified from the registry by a scripted install into an empty project; the Windows gate carried | REQ-COMP-9, REQ-PKG-1, 2, 4 (from the registry), REQ-ADE-6, REQ-ADP-6 (carried) |
+| 12 | **Release 0.1.0 and the open P0 items (Draft 2.10, renumbered 2.14):** the desktop gate is race-free and load-aware; the compiler golden set reaches 300; the app names every control and the gate makes a real run before reading results; the three-OS CI matrix is observed on a runner the owner attaches; 0.1.0 is published by the owner's trigger and verified from the registry by a scripted install into an empty project; the Windows gate carried | REQ-COMP-9, REQ-PKG-1, 2, 4 (from the registry), REQ-ADE-6, REQ-ADP-6 (carried) |
 | 13 | **Process and terminal (Draft 2.16):** the `process` surface kind and adapter, patterns 34–38, the six outside-surface checks moved to Yam's side, `@svatah/yam-verify` published for third parties; the parity gate's ceiling reaches 45 of 48 | REQ-ADP-10, REQ-SELF-1, 2, 4 |
 
 ## 14. Risks and mitigations
@@ -351,9 +351,9 @@ Published npm modules (Draft 2.3; no aggregate packages, each package publishes 
 | Playwright internal snapshot API changes | Isolated in the adapter; public `ariaSnapshot()` fallback with own refs | LLD §7.3 |
 | Playwright Test host limits (retries vs policies) | Retries disabled unless the flow policy permits; documented | REQ-RUN-12 |
 | Surface abstraction leaks platform specifics | Conformance suite; capabilities descriptor for optional features | REQ-SURF-3 |
-| Desktop adapters are large and CI-hostile | Last phase; UIA first; documented host requirements; vision fallback where trees are absent; the ADE as target means CI can build and launch it on Windows and macOS runners | REQ-ADP-6, 7, REQ-ADE-6 |
-| New ADE grows into a second product and slows the core | The ADE is a view over the service; a screen exists only when the service endpoint and file it renders already exist; no screen has logic the CLI lacks (review rule) | REQ-ADE-2, 3 |
-| Electron accessibility tree is incomplete for custom widgets | Enable `app.setAccessibilitySupportEnabled(true)` in the ADE; add ARIA roles and names in the ADE UI where the tree is thin, which also improves its accessibility | REQ-ADE-6 |
+| Desktop adapters are large and CI-hostile | Last phase; UIA first; documented host requirements; vision fallback where trees are absent; the app as target means CI can build and launch it on Windows and macOS runners | REQ-ADP-6, 7, REQ-ADE-6 |
+| New app grows into a second product and slows the core | The app is a view over the service; a screen exists only when the service endpoint and file it renders already exist; no screen has logic the CLI lacks (review rule) | REQ-ADE-2, 3 |
+| Electron accessibility tree is incomplete for custom widgets | Enable `app.setAccessibilitySupportEnabled(true)` in the app; add ARIA roles and names in the app UI where the tree is thin, which also improves its accessibility | REQ-ADE-6 |
 | Automation in production causes side effects | Environment policy, idempotency declaration, guards, compensation, audit | REQ-AUTO-* |
 | Scope creep into an RPA platform | Non-goals; external orchestration only | ADR-13 |
 | Natural-language ambiguity | Compile errors with suggestions; Tier 0 for logic; lint on multi-match targets | REQ-COMP-1, 8, REQ-LANG-15, 16 |

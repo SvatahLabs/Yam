@@ -5,7 +5,7 @@
  * `@svatah/yam-schema`'s (`StepResult`, `Summary`, `BindingFile`) and the service's
  * OpenAPI description; re-declaring them in full here would make a second,
  * subtly different set of the same types — the mistake
- * `scripts/generate-ade-client.mjs` avoids by returning `unknown`.
+ * `scripts/generate-app-client.mjs` avoids by returning `unknown`.
  *
  * So these are read-shapes: the fields a screen actually renders, every one of
  * them optional, so a response that grew a field still parses and a response

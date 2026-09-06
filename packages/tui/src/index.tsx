@@ -3,7 +3,7 @@
  * LLD §13.7).
  *
  * The second renderer of the screen model. It opens or adopts a service exactly
- * as the ADE does, loads the same screens, runs the same actions from the same
+ * as the app does, loads the same screens, runs the same actions from the same
  * registry, and draws them with Ink.
  *
  * ```console

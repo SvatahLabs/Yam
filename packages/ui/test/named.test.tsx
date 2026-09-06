@@ -3,7 +3,7 @@
  * label and an id".
  *
  * The rule is LLD §13.7's accessibility contract, and the reason it is a test
- * rather than a review note is P8-F3: the ADE's Project screen shipped with
+ * rather than a review note is P8-F3: the app's Project screen shipped with
  * three unnamed buttons and the only thing that noticed was a verifier reading
  * an accessibility tree by hand a phase later.
  *

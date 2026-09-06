@@ -18,8 +18,8 @@ tmux; it runs in any terminal.
 ## It renders the model and adds nothing
 
 Everything a person reads here is a `ScreenState` from `@svatah/yam-screens`, loaded
-by the same `load()` the ADE calls. Every key runs an `Action` from the same
-registry the ADE's ⌘K shows, resolved by the same id.
+by the same `load()` the app calls. Every key runs an `Action` from the same
+registry the app's ⌘K shows, resolved by the same id.
 `tools/repo-checks/test/palette-parity.test.ts` holds the two renderers to that.
 
 That is what `--json` is for: it prints the loaded screen and draws nothing, and
@@ -34,7 +34,7 @@ word.
 
 ## Opening a service
 
-Exactly as the ADE does (LLD §13.6): `--url`/`--token`, or
+Exactly as the app does (LLD §13.6): `--url`/`--token`, or
 `YAM_SERVICE_URL`/`YAM_SERVICE_TOKEN`, or else `yam serve --port 0` is
 spawned, its handshake read, and it is stopped on exit.
 

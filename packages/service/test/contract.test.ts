@@ -48,7 +48,7 @@ const get = async (path: string, init: RequestInit = {}): Promise<Response> =>
  *
  * These are contract tests over JSON, not a generated client: asserting on
  * `body.stories[0].name` is the readable thing to write, and giving every shape
- * an interface here would be writing the ADE's client twice.
+ * an interface here would be writing the app's client twice.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const json = async (response: Response): Promise<any> => (await response.json()) as unknown;
@@ -70,7 +70,7 @@ describe("the token (REQ-ADE-7)", () => {
   });
 
   it("lets /health and /openapi.json through, because a client needs them first", async () => {
-    // The ADE reads the token from the child's stdout and health-checks before
+    // The app reads the token from the child's stdout and health-checks before
     // it has parsed anything; a typed client is generated from the document.
     expect((await fetch(`${service.url}/health`)).status).toBe(200);
     expect((await fetch(`${service.url}/openapi.json`)).status).toBe(200);
@@ -155,7 +155,7 @@ describe("POST /compile (REQ-COMP-7)", () => {
 
 describe("data and api (LLD §13.5)", () => {
   it("redacts secrets on read (REQ-NFR-6)", async () => {
-    // The ADE shows a data editor in a renderer process. A resolved secret must
+    // The app shows a data editor in a renderer process. A resolved secret must
     // not travel there.
     const body = await json(await get("/data"));
     expect(body.values.user.password).toBe("«redacted»");
@@ -242,7 +242,7 @@ describe("the event stream (REQ-ADE-1)", () => {
 
 describe("POST /run (REQ-ADE-1, REQ-ADE-3)", () => {
   it("answers with a run id immediately rather than blocking", async () => {
-    // The ADE's Run screen watches a run happen; a blocking call would make it
+    // The app's Run screen watches a run happen; a blocking call would make it
     // a spinner.
     const runs = mkdtempSync(join(tmpdir(), "yam-service-"));
     try {
@@ -355,7 +355,7 @@ describe("POST /runs/:id/stop (T10.4, LLD §13.5)", () => {
  *
  * The fake project's "Sign in" declares `email: string` with no default, and its
  * run block invokes it. Calling a function without its arguments is a mistake in
- * the call; answering 202 and letting the executor fail would give the ADE a red
+ * the call; answering 202 and letting the executor fail would give the app a red
  * run to display when what happened is that nobody typed an address.
  */
 describe("POST /run validates inputs (REQ-AUTO-5, LLD §13.5)", () => {
@@ -612,7 +612,7 @@ describe("POST /record: one session, and a decision that expires (P5-F4, LLD §1
     /*
      * The reason the deadline exists (Draft 2.7). A blocked session holds the
      * browser open *and* answers 409 to everyone else, so a reviewer who closed
-     * the ADE window without deciding used to leave the service unusable until
+     * the app window without deciding used to leave the service unusable until
      * it was restarted.
      */
     const { service, decisions } = await recordingService(150);

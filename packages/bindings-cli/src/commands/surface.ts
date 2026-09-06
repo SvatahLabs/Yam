@@ -47,12 +47,12 @@ const GROUND_TRUTH_ATTRIBUTE = "automationId";
 
 /**
  * The healer the desktop healing cases are handed, and the file that carries
- * their state between the three passes over three ADE variants.
+ * their state between the three passes over three APP_DIR variants.
  *
  * The suite knows nothing about `@svatah/yam-bindings`; the CLI does, and is the
  * only place that can hand it over (the same rule that makes this the only
  * place that registers adapters). The state is a file because each pass is a
- * separate `yam surface conform` against a separately launched ADE.
+ * separate `yam surface conform` against a separately launched APP_DIR.
  */
 function desktopHealing(variant: number, statePath: string): DesktopHealing {
   const state: Record<string, RecordedElement> =
@@ -136,7 +136,7 @@ async function conform(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
    * `--process` for the desktop adapters (T6.1, T6.2, LLD §16).
    *
    * A desktop conformance run drives an application that is already running,
-   * named by its process — the ADE is "Yam ADE" — where a web run drives a
+   * named by its process — the app is "Yam" — where a web run drives a
    * browser it opens at a URL. Both go into `app`, and the adapter uses the one
    * that means something to it.
    */
@@ -162,7 +162,7 @@ async function conform(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   };
 
   /*
-   * Which suite (LLD §14, §16). A desktop adapter drives the ADE and cannot
+   * Which suite (LLD §14, §16). A desktop adapter drives the app and cannot
    * navigate; the web suite's every case begins with one. Choosing by the
    * surface's own `kind` rather than by the adapter's name is what keeps this
    * true for an adapter nobody here has heard of.
@@ -171,7 +171,7 @@ async function conform(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const desktop = probe.kind === "desktop";
 
   /*
-   * The ADE variant this pass is looking at, and where the healing cases keep
+   * The app variant this pass is looking at, and where the healing cases keep
    * what they recorded (Draft 2.8 LLD §16, T7.1). Without `--heal-state` the
    * healing cases have no healer and say so rather than passing.
    */

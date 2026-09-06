@@ -15,7 +15,7 @@ only place a publish can happen (`scripts/publish.mjs`, T8.5).
 | `quick-start` | ubuntu | the ten-minute quick start, timed, and the committed bindings reproduce (REQ-PKG-2) |
 | `runtime-conformance` | ubuntu with a JDK | the Java runtime writes the published schemas and agrees with the fixture (REQ-STD-3) |
 | `clients-smoke` | ubuntu with a JDK and a Python | the generated clients have not drifted and drive a live service (REQ-SDK-1, 2) |
-| `ade-installers` | ubuntu, macOS, Windows | the ADE packages on all three and the packaged app opens a project (REQ-ADE-6) |
+| `app-installers` | ubuntu, macOS, Windows | the app packages on all three and the packaged app opens a project (REQ-ADE-6) |
 | `desktop-conformance` (windows, uia) | Windows | the Windows UI Automation gate (REQ-ADP-6) |
 | `desktop-conformance` (macos, ax) | macOS | **exits 2 on a hosted runner** — see §3 |
 | `grounding-eval` | ubuntu | replays the committed answer cache; never spends |

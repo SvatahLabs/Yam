@@ -202,7 +202,7 @@ test.describe("state and restore (REQ-AUTO-2)", () => {
   test("restore refuses a state from another kind of adapter", async ({ openSurface }) => {
     const surface = await openSurface("own", "/");
     await expect(
-      surface.restore({ kind: "desktop", windowTitle: "Yam ADE" }),
+      surface.restore({ kind: "desktop", windowTitle: "Yam" }),
     ).rejects.toBeInstanceOf(SessionError);
   });
 
@@ -322,11 +322,11 @@ test.describe("session lifecycle", () => {
  *
  * > The Playwright adapter attaches to an existing Chromium when
  * > `YAM_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi adapter
- * > attaches, so a flow can drive the ADE's renderer.
+ * > attaches, so a flow can drive the app's renderer.
  *
  * A real Chromium with a real DevTools endpoint, because the thing worth
  * checking is that it drives the browser *that is already running* rather than
- * one of its own — and a fake endpoint cannot fail that way. What the ADE adds
+ * one of its own — and a fake endpoint cannot fail that way. What the app adds
  * on top is a packaged Electron and a granted permission, and that is
  * `evals/self/cdp` and `docs/spec/progress/phase-11.md`.
  */
@@ -366,7 +366,7 @@ test.describe("attaching over CDP (T11.2, LLD §13.9)", () => {
       /*
        * And it is still running. `close()` on an attached session ends the
        * connection, not the browser: a session that quit somebody's Chromium —
-       * or the ADE, mid-run — because a flow ended would be the adapter
+       * or the app, mid-run — because a flow ended would be the adapter
        * deciding what the application is for.
        */
       const { chromium } = await import("playwright");

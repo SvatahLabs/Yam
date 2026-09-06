@@ -12,11 +12,10 @@ v1/v2 to v3 migration and prototype database import
 
 | Export | Kind | Signature | |
 |---|---|---|---|
-| `AdeDatabase` | interface | `export interface AdeDatabase` |  |
 | `environmentName` | function | `export function environmentName(key: string): string` | `user.password` → `YAM_USER_PASSWORD`. |
-| `extractAdeProject` | function | `export function extractAdeProject(options: FromAdeOptions): FromAdeResult` | Extract the prototype's database into the *inputs* a v2 migration takes. |
-| `FromAdeOptions` | interface | `export interface FromAdeOptions` |  |
-| `FromAdeResult` | interface | `export interface FromAdeResult` |  |
+| `extractPrototypeProject` | function | `export function extractPrototypeProject(options: FromPrototypeOptions): FromPrototypeResult` | Extract the prototype's database into the *inputs* a v2 migration takes. |
+| `FromPrototypeOptions` | interface | `export interface FromPrototypeOptions` |  |
+| `FromPrototypeResult` | interface | `export interface FromPrototypeResult` |  |
 | `hasInteriorPreposition` | function | `export function hasInteriorPreposition(phrase: string): boolean` | A phrase that still has a preposition inside it, which usually means the |
 | `LegacyBlock` | interface | `export interface LegacyBlock` |  |
 | `LegacyFlow` | interface | `export interface LegacyFlow` |  |
@@ -35,8 +34,9 @@ v1/v2 to v3 migration and prototype database import
 | `parseLocatorFile` | function | `export function parseLocatorFile(text: string): MigratedLocator[]` | Parse a whole `.locator` / `.properties` file. |
 | `parseLocatorLine` | function | `export function parseLocatorLine(line: string): MigratedLocator \| undefined` | Parse one `name = a & b & c` line. |
 | `phraseFor` | function | `export function phraseFor(` | A phrase for an element, from the prose beside it or from the locator. |
-| `readAdeDatabase` | function | `export function readAdeDatabase(path: string): AdeDatabase` | Read an electron-db directory. |
+| `PrototypeDatabase` | interface | `export interface PrototypeDatabase` |  |
 | `readLegacyFlow` | function | `export function readLegacyFlow(text: string, file: string): LegacyFlow` | Read a v1/v2 flow file. |
+| `readPrototypeDatabase` | function | `export function readPrototypeDatabase(path: string): PrototypeDatabase` | Read an electron-db directory. |
 | `renderReviewReport` | function | `export function renderReviewReport(input: ReportInput): string` |  |
 | `ReportInput` | interface | `export interface ReportInput` |  |
 | `ReviewNote` | interface | `export interface ReviewNote` | The migration review report (REQ-LANG-11: verified by `T, R`). |

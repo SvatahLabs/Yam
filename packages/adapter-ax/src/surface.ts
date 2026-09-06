@@ -106,7 +106,7 @@ export interface AxAdapterOptions {
    * The application process to drive.
    *
    * `config.app.processName`, and for the desktop conformance suite it is the
-   * ADE's own process name (LLD §16). There is no default: driving "whatever is
+   * app's own process name (LLD §16). There is no default: driving "whatever is
    * frontmost" would make a run depend on what the person at the machine last
    * clicked.
    */
@@ -150,7 +150,7 @@ export class AxSurface implements AgentSurface {
    * The costliest window read of this session (Draft 2.8 §7.5).
    *
    * The *costliest*, not the last: the claim §7.5 asks the conformance report
-   * to publish is about the largest window the suite touched — "the ADE's
+   * to publish is about the largest window the suite touched — "the app's
    * project screen with every tab present, at least 400 nodes, snapshots
    * within the surface's default deadline of 10 s". A mean over a session that
    * spent most of its reads on the welcome window would hide exactly the read
@@ -195,7 +195,7 @@ export class AxSurface implements AgentSurface {
     if (name === undefined || name.trim() === "") {
       throw new SessionError(
         "The AX adapter needs the name of the application process to drive. Set " +
-          "`app.processName` in `yam.config.yaml` (the ADE is \"Yam ADE\"). Driving " +
+          "`app.processName` in `yam.config.yaml` (the app is \"Yam\"). Driving " +
           "whatever happens to be frontmost would make a run depend on what was last clicked.",
         { adapter: "ax" },
       );

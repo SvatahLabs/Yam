@@ -331,7 +331,7 @@ describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
     expect(release).toContain("pnpm release:dry-run");
     expect(release).toContain("pnpm quick-start:packed");
     // The three-OS installer matrix, and the reports on the release notes.
-    expect(release).toContain("pnpm --filter @svatah/yam-ade make");
+    expect(release).toContain("pnpm --filter @svatah/yam-desktop make");
     expect(release).toContain("files: reports/*.md");
 
   });

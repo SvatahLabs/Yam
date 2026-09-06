@@ -2,9 +2,9 @@
  * `@svatah/yam-screens` — the headless screen model (T9.1, REQ-ADE-10, REQ-ADE-13,
  * LLD §13.7).
  *
- * > The ADE and the terminal cockpit `yam ui` are two renderers of one
+ * > The app and the terminal cockpit `yam ui` are two renderers of one
  * > headless **screen model**, and both are views over the local service and
- * > nothing else. […] A screen's logic lives in `@svatah/yam-screens`; the ADE and
+ * > nothing else. […] A screen's logic lives in `@svatah/yam-screens`; the app and
  * > `yam ui` render it and add nothing.
  *
  * Three things live here and nowhere else: the twelve screens, the action

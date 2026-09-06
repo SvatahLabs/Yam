@@ -1,0 +1,4943 @@
+{
+  "process": "Yam",
+  "title": "Yam",
+  "truncated": false,
+  "nodes": [
+    {
+      "parent": -1,
+      "role": "AXWindow",
+      "subrole": "AXStandardWindow",
+      "title": "Yam",
+      "box": [
+        0,
+        0,
+        1280,
+        860
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXWebArea",
+      "description": "Yam",
+      "enabled": true,
+      "focused": true,
+      "box": [
+        0,
+        0,
+        1280,
+        828
+      ]
+    },
+    {
+      "parent": 1,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        828
+      ],
+      "domIdentifier": "root"
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkBanner",
+      "enabled": true,
+      "box": [
+        8,
+        8,
+        1264,
+        44
+      ]
+    },
+    {
+      "parent": 3,
+      "role": "AXStaticText",
+      "title": "Yam",
+      "enabled": true,
+      "box": [
+        50,
+        21,
+        42,
+        17
+      ]
+    },
+    {
+      "parent": 4,
+      "role": "AXStaticText",
+      "title": "Yam",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Project",
+      "enabled": true,
+      "box": [
+        104,
+        20,
+        108,
+        19
+      ],
+      "domIdentifier": "topbar-crumb"
+    },
+    {
+      "parent": 6,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        115,
+        20,
+        46,
+        19
+      ],
+      "domIdentifier": "crumb-project"
+    },
+    {
+      "parent": 7,
+      "role": "AXStaticText",
+      "title": "fixtures",
+      "enabled": true,
+      "box": [
+        115,
+        21,
+        46,
+        17
+      ]
+    },
+    {
+      "parent": 8,
+      "role": "AXStaticText",
+      "title": "fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 6,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        177,
+        20,
+        34,
+        19
+      ],
+      "domIdentifier": "crumb-screen"
+    },
+    {
+      "parent": 10,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        177,
+        21,
+        34,
+        17
+      ]
+    },
+    {
+      "parent": 11,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXButton",
+      "title": "Search or run a command",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        896,
+        16,
+        199,
+        28
+      ],
+      "domIdentifier": "open-command-palette"
+    },
+    {
+      "parent": 13,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true,
+      "box": [
+        907,
+        21,
+        146,
+        17
+      ]
+    },
+    {
+      "parent": 14,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        1106,
+        19,
+        154,
+        22
+      ],
+      "domIdentifier": "service-chip"
+    },
+    {
+      "parent": 16,
+      "role": "AXStaticText",
+      "title": "service",
+      "enabled": true,
+      "box": [
+        1128,
+        22,
+        38,
+        15
+      ]
+    },
+    {
+      "parent": 17,
+      "role": "AXStaticText",
+      "title": "service",
+      "enabled": true
+    },
+    {
+      "parent": 16,
+      "role": "AXStaticText",
+      "title": "127.0.0.1:62171",
+      "enabled": true,
+      "box": [
+        1166,
+        22,
+        85,
+        15
+      ]
+    },
+    {
+      "parent": 19,
+      "role": "AXStaticText",
+      "title": "127.0.0.1:62171",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Sections",
+      "enabled": true,
+      "box": [
+        8,
+        52,
+        220,
+        756
+      ],
+      "domIdentifier": "rail"
+    },
+    {
+      "parent": 21,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        16,
+        62,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 22,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true,
+      "box": [
+        24,
+        73,
+        50,
+        14
+      ]
+    },
+    {
+      "parent": 23,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Flows",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        91,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-flows"
+    },
+    {
+      "parent": 25,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        24,
+        98,
+        34,
+        17
+      ]
+    },
+    {
+      "parent": 26,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Runs",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        122,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-runs"
+    },
+    {
+      "parent": 28,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true,
+      "box": [
+        24,
+        129,
+        29,
+        17
+      ]
+    },
+    {
+      "parent": 29,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Bindings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        153,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-bindings"
+    },
+    {
+      "parent": 31,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true,
+      "box": [
+        24,
+        159,
+        50,
+        17
+      ]
+    },
+    {
+      "parent": 32,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Agents and tools",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        184,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-agents"
+    },
+    {
+      "parent": 34,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true,
+      "box": [
+        24,
+        190,
+        97,
+        17
+      ]
+    },
+    {
+      "parent": 35,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        16,
+        217,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 37,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true,
+      "box": [
+        24,
+        227,
+        66,
+        14
+      ]
+    },
+    {
+      "parent": 38,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "API",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        246,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-api"
+    },
+    {
+      "parent": 40,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true,
+      "box": [
+        24,
+        252,
+        21,
+        17
+      ]
+    },
+    {
+      "parent": 41,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Data",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        277,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-data"
+    },
+    {
+      "parent": 43,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true,
+      "box": [
+        24,
+        283,
+        27,
+        17
+      ]
+    },
+    {
+      "parent": 44,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Import prototype database",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        736,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-import"
+    },
+    {
+      "parent": 46,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true,
+      "box": [
+        24,
+        743,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 47,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Settings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        767,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-settings"
+    },
+    {
+      "parent": 49,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true,
+      "box": [
+        24,
+        774,
+        48,
+        17
+      ]
+    },
+    {
+      "parent": 50,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "Workspace",
+      "enabled": true,
+      "box": [
+        228,
+        52,
+        684,
+        756
+      ],
+      "domIdentifier": "workspace"
+    },
+    {
+      "parent": 52,
+      "role": "AXHeading",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        244,
+        62,
+        38,
+        20
+      ]
+    },
+    {
+      "parent": 53,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        244,
+        62,
+        38,
+        19
+      ]
+    },
+    {
+      "parent": 54,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXStaticText",
+      "title": "7 files · 22 stories · 30 bindings, 0 unverified",
+      "enabled": true,
+      "box": [
+        290,
+        64,
+        238,
+        16
+      ]
+    },
+    {
+      "parent": 56,
+      "role": "AXStaticText",
+      "title": "7 files · 22 stories · 30 bindings, 0 unverified",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXButton",
+      "title": "Run",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        726,
+        58,
+        75,
+        28
+      ],
+      "domIdentifier": "action-run-flow"
+    },
+    {
+      "parent": 58,
+      "role": "AXStaticText",
+      "title": "Run",
+      "enabled": true,
+      "box": [
+        737,
+        63,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 59,
+      "role": "AXStaticText",
+      "title": "Run",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXButton",
+      "title": "Record",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        809,
+        58,
+        87,
+        28
+      ],
+      "domIdentifier": "action-record-start"
+    },
+    {
+      "parent": 61,
+      "role": "AXStaticText",
+      "title": "Record",
+      "enabled": true,
+      "box": [
+        820,
+        63,
+        40,
+        17
+      ]
+    },
+    {
+      "parent": 62,
+      "role": "AXStaticText",
+      "title": "Record",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkComplementary",
+      "description": "Flow files",
+      "enabled": true,
+      "box": [
+        228,
+        93,
+        301,
+        715
+      ],
+      "domIdentifier": "flows-files-pane"
+    },
+    {
+      "parent": 64,
+      "role": "AXTable",
+      "description": "FLOW FILES",
+      "enabled": true,
+      "box": [
+        228,
+        93,
+        300,
+        397
+      ],
+      "domIdentifier": "flows-list"
+    },
+    {
+      "parent": 65,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        93,
+        300,
+        21
+      ]
+    },
+    {
+      "parent": 66,
+      "role": "AXStaticText",
+      "title": "FLOW FILES",
+      "enabled": true,
+      "box": [
+        240,
+        94,
+        68,
+        14
+      ]
+    },
+    {
+      "parent": 67,
+      "role": "AXStaticText",
+      "title": "FLOW FILES",
+      "enabled": true
+    },
+    {
+      "parent": 65,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 69,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 70,
+      "role": "AXCell",
+      "title": "FLOW",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        210,
+        32
+      ]
+    },
+    {
+      "parent": 71,
+      "role": "AXStaticText",
+      "title": "FLOW",
+      "enabled": true,
+      "box": [
+        240,
+        123,
+        31,
+        14
+      ]
+    },
+    {
+      "parent": 72,
+      "role": "AXStaticText",
+      "title": "FLOW",
+      "enabled": true
+    },
+    {
+      "parent": 70,
+      "role": "AXCell",
+      "title": "LAST RUN",
+      "enabled": true,
+      "box": [
+        438,
+        114,
+        90,
+        32
+      ]
+    },
+    {
+      "parent": 74,
+      "role": "AXStaticText",
+      "title": "LAST RUN",
+      "enabled": true,
+      "box": [
+        450,
+        123,
+        54,
+        14
+      ]
+    },
+    {
+      "parent": 75,
+      "role": "AXStaticText",
+      "title": "LAST RUN",
+      "enabled": true
+    },
+    {
+      "parent": 65,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        146,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 77,
+      "role": "AXCell",
+      "title": "booking-compensation.flow 3 stories",
+      "enabled": true,
+      "box": [
+        228,
+        146,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 78,
+      "role": "AXStaticText",
+      "title": "booking-compensation.flow",
+      "enabled": true,
+      "box": [
+        240,
+        154,
+        154,
+        16
+      ]
+    },
+    {
+      "parent": 79,
+      "role": "AXStaticText",
+      "title": "booking-compensation.flow",
+      "enabled": true
+    },
+    {
+      "parent": 78,
+      "role": "AXStaticText",
+      "title": "3 stories",
+      "enabled": true,
+      "box": [
+        240,
+        171,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 81,
+      "role": "AXStaticText",
+      "title": "3 stories",
+      "enabled": true
+    },
+    {
+      "parent": 77,
+      "role": "AXCell",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        438,
+        146,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 83,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        457,
+        163,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 84,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true
+    },
+    {
+      "parent": 65,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        195,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 86,
+      "role": "AXCell",
+      "title": "booking-workflow.flow 2 stories",
+      "enabled": true,
+      "box": [
+        228,
+        195,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 87,
+      "role": "AXStaticText",
+      "title": "booking-workflow.flow",
+      "enabled": true,
+      "box": [
+        240,
+        203,
+        126,
+        16
+      ]
+    },
+    {
+      "parent": 88,
+      "role": "AXStaticText",
+      "title": "booking-workflow.flow",
+      "enabled": true
+    },
+    {
+      "parent": 87,
+      "role": "AXStaticText",
+      "title": "2 stories",
+      "enabled": true,
+      "box": [
+        240,
+        220,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 90,
+      "role": "AXStaticText",
+      "title": "2 stories",
+      "enabled": true
+    },
+    {
+      "parent": 86,
+      "role": "AXCell",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        438,
+        195,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 92,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        457,
+        212,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 93,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true
+    },
+    {
+      "parent": 65,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        244,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 95,
+      "role": "AXCell",
+      "title": "execution.flow 7 stories",
+      "enabled": true,
+      "box": [
+        228,
+        244,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 96,
+      "role": "AXStaticText",
+      "title": "execution.flow",
+      "enabled": true,
+      "box": [
+        240,
+        252,
+        81,
+        16
+      ]
+    },
+    {
+      "parent": 97,
+      "role": "AXStaticText",
+      "title": "execution.flow",
+      "enabled": true
+    },
+    {
+      "parent": 96,
+      "role": "AXStaticText",
+      "title": "7 stories",
+      "enabled": true,
+      "box": [
+        240,
+        269,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 99,
+      "role": "AXStaticText",
+      "title": "7 stories",
+      "enabled": true
+    },
+    {
+      "parent": 95,
+      "role": "AXCell",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        438,
+        244,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 101,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        457,
+        261,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 102,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true
+    },
+    {
+      "parent": 65,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        293,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 104,
+      "role": "AXCell",
+      "title": "guards-and-compensation.flow 3 stories",
+      "enabled": true,
+      "box": [
+        228,
+        293,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 105,
+      "role": "AXStaticText",
+      "title": "guards-and-compensation.flow",
+      "enabled": true,
+      "box": [
+        240,
+        301,
+        173,
+        16
+      ]
+    },
+    {
+      "parent": 106,
+      "role": "AXStaticText",
+      "title": "guards-and-compensation.flow",
+      "enabled": true
+    },
+    {
+      "parent": 105,
+      "role": "AXStaticText",
+      "title": "3 stories",
+      "enabled": true,
+      "box": [
+        240,
+        319,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 108,
+      "role": "AXStaticText",
+      "title": "3 stories",
+      "enabled": true
+    },
+    {
+      "parent": 104,
+      "role": "AXCell",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        438,
+        293,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 110,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        457,
+        310,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 111,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true
+    },
+    {
+      "parent": 65,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        342,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 113,
+      "role": "AXCell",
+      "title": "natural_language_login.flow 3 stories",
+      "enabled": true,
+      "box": [
+        228,
+        342,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 114,
+      "role": "AXStaticText",
+      "title": "natural_language_login.flow",
+      "enabled": true,
+      "box": [
+        240,
+        350,
+        156,
+        16
+      ]
+    },
+    {
+      "parent": 115,
+      "role": "AXStaticText",
+      "title": "natural_language_login.flow",
+      "enabled": true
+    },
+    {
+      "parent": 114,
+      "role": "AXStaticText",
+      "title": "3 stories",
+      "enabled": true,
+      "box": [
+        240,
+        368,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 117,
+      "role": "AXStaticText",
+      "title": "3 stories",
+      "enabled": true
+    },
+    {
+      "parent": 113,
+      "role": "AXCell",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        438,
+        342,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 119,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        457,
+        359,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 120,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true
+    },
+    {
+      "parent": 65,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        391,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 122,
+      "role": "AXCell",
+      "title": "simple.flow 3 stories",
+      "enabled": true,
+      "box": [
+        228,
+        391,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 123,
+      "role": "AXStaticText",
+      "title": "simple.flow",
+      "enabled": true,
+      "box": [
+        240,
+        399,
+        64,
+        16
+      ]
+    },
+    {
+      "parent": 124,
+      "role": "AXStaticText",
+      "title": "simple.flow",
+      "enabled": true
+    },
+    {
+      "parent": 123,
+      "role": "AXStaticText",
+      "title": "3 stories",
+      "enabled": true,
+      "box": [
+        240,
+        417,
+        45,
+        15
+      ]
+    },
+    {
+      "parent": 126,
+      "role": "AXStaticText",
+      "title": "3 stories",
+      "enabled": true
+    },
+    {
+      "parent": 122,
+      "role": "AXCell",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        438,
+        391,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 128,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        457,
+        408,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 129,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true
+    },
+    {
+      "parent": 65,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        440,
+        300,
+        49
+      ]
+    },
+    {
+      "parent": 131,
+      "role": "AXCell",
+      "title": "svatah.flow 1 story",
+      "enabled": true,
+      "box": [
+        228,
+        440,
+        210,
+        49
+      ]
+    },
+    {
+      "parent": 132,
+      "role": "AXStaticText",
+      "title": "svatah.flow",
+      "enabled": true,
+      "box": [
+        240,
+        448,
+        63,
+        16
+      ]
+    },
+    {
+      "parent": 133,
+      "role": "AXStaticText",
+      "title": "svatah.flow",
+      "enabled": true
+    },
+    {
+      "parent": 132,
+      "role": "AXStaticText",
+      "title": "1 story",
+      "enabled": true,
+      "box": [
+        240,
+        466,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 135,
+      "role": "AXStaticText",
+      "title": "1 story",
+      "enabled": true
+    },
+    {
+      "parent": 131,
+      "role": "AXCell",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        438,
+        440,
+        90,
+        49
+      ]
+    },
+    {
+      "parent": 137,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true,
+      "box": [
+        457,
+        457,
+        46,
+        15
+      ]
+    },
+    {
+      "parent": 138,
+      "role": "AXStaticText",
+      "title": "not run",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        93,
+        383,
+        715
+      ]
+    },
+    {
+      "parent": 140,
+      "role": "AXTabGroup",
+      "description": "Flow views",
+      "enabled": true,
+      "box": [
+        529,
+        93,
+        383,
+        40
+      ],
+      "domIdentifier": "flows-tabs"
+    },
+    {
+      "parent": 141,
+      "role": "AXRadioButton",
+      "subrole": "AXTabButton",
+      "title": "booking-compensation.flow",
+      "enabled": true,
+      "selected": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        101,
+        179,
+        32
+      ],
+      "domIdentifier": "editor"
+    },
+    {
+      "parent": 142,
+      "role": "AXStaticText",
+      "title": "booking-compensation.flow",
+      "enabled": true,
+      "box": [
+        552,
+        109,
+        157,
+        17
+      ]
+    },
+    {
+      "parent": 143,
+      "role": "AXStaticText",
+      "title": "booking-compensation.flow",
+      "enabled": true
+    },
+    {
+      "parent": 141,
+      "role": "AXRadioButton",
+      "subrole": "AXTabButton",
+      "title": "Plan",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        722,
+        101,
+        47,
+        31
+      ],
+      "domIdentifier": "plan"
+    },
+    {
+      "parent": 145,
+      "role": "AXStaticText",
+      "title": "Plan",
+      "enabled": true,
+      "box": [
+        733,
+        109,
+        25,
+        17
+      ]
+    },
+    {
+      "parent": 146,
+      "role": "AXStaticText",
+      "title": "Plan",
+      "enabled": true
+    },
+    {
+      "parent": 141,
+      "role": "AXRadioButton",
+      "subrole": "AXTabButton",
+      "title": "History",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        770,
+        101,
+        62,
+        31
+      ],
+      "domIdentifier": "history"
+    },
+    {
+      "parent": 148,
+      "role": "AXStaticText",
+      "title": "History",
+      "enabled": true,
+      "box": [
+        781,
+        109,
+        40,
+        17
+      ]
+    },
+    {
+      "parent": 149,
+      "role": "AXStaticText",
+      "title": "History",
+      "enabled": true
+    },
+    {
+      "parent": 140,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        529,
+        133,
+        383,
+        966
+      ],
+      "domIdentifier": "radix-_r_3_-content-editor"
+    },
+    {
+      "parent": 151,
+      "role": "AXGroup",
+      "description": "Flow editor",
+      "enabled": true,
+      "box": [
+        541,
+        143,
+        359,
+        946
+      ],
+      "domIdentifier": "flows-editor"
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "1 // The compensation showcase for REQ-AUTO-4.",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        143,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-1"
+    },
+    {
+      "parent": 153,
+      "role": "AXStaticText",
+      "title": "1",
+      "enabled": true,
+      "box": [
+        568,
+        147,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 154,
+      "role": "AXStaticText",
+      "title": "1",
+      "enabled": true
+    },
+    {
+      "parent": 153,
+      "role": "AXStaticText",
+      "title": "// The compensation showcase for REQ-AUTO-4.",
+      "enabled": true,
+      "box": [
+        605,
+        146,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 156,
+      "role": "AXStaticText",
+      "title": "// The compensation showcase for REQ-AUTO-4.",
+      "enabled": true
+    },
+    {
+      "parent": 156,
+      "role": "AXStaticText",
+      "title": "// The compensation showcase for REQ-",
+      "enabled": true
+    },
+    {
+      "parent": 156,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "2 //",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        165,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-2"
+    },
+    {
+      "parent": 160,
+      "role": "AXStaticText",
+      "title": "2",
+      "enabled": true,
+      "box": [
+        568,
+        169,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 161,
+      "role": "AXStaticText",
+      "title": "2",
+      "enabled": true
+    },
+    {
+      "parent": 160,
+      "role": "AXStaticText",
+      "title": "//",
+      "enabled": true,
+      "box": [
+        605,
+        168,
+        14,
+        16
+      ]
+    },
+    {
+      "parent": 163,
+      "role": "AXStaticText",
+      "title": "//",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "3 // This flow is not a migration of anything: it is the fixture that exercises the",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        187,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-3"
+    },
+    {
+      "parent": 165,
+      "role": "AXStaticText",
+      "title": "3",
+      "enabled": true,
+      "box": [
+        568,
+        191,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 166,
+      "role": "AXStaticText",
+      "title": "3",
+      "enabled": true
+    },
+    {
+      "parent": 165,
+      "role": "AXStaticText",
+      "title": "// This flow is not a migration of anything: it is the fixture that exercises the",
+      "enabled": true,
+      "box": [
+        605,
+        190,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 168,
+      "role": "AXStaticText",
+      "title": "// This flow is not a migration of anything: it is the fixture that exercises the",
+      "enabled": true
+    },
+    {
+      "parent": 168,
+      "role": "AXStaticText",
+      "title": "// This flow is not a migration of an",
+      "enabled": true
+    },
+    {
+      "parent": 168,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "4 // abort policy `onFailure=compensate:<story>`, which no legacy flow could express.",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        209,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-4"
+    },
+    {
+      "parent": 172,
+      "role": "AXStaticText",
+      "title": "4",
+      "enabled": true,
+      "box": [
+        568,
+        213,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 173,
+      "role": "AXStaticText",
+      "title": "4",
+      "enabled": true
+    },
+    {
+      "parent": 172,
+      "role": "AXStaticText",
+      "title": "// abort policy `onFailure=compensate:<story>`, which no legacy flow could express.",
+      "enabled": true,
+      "box": [
+        605,
+        212,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 175,
+      "role": "AXStaticText",
+      "title": "// abort policy `onFailure=compensate:<story>`, which no legacy flow could express.",
+      "enabled": true
+    },
+    {
+      "parent": 175,
+      "role": "AXStaticText",
+      "title": "// abort policy `onFailure=compensate",
+      "enabled": true
+    },
+    {
+      "parent": 175,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "5 // It reuses execution.flow's scenario names and steps so the two read together,",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        231,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-5"
+    },
+    {
+      "parent": 179,
+      "role": "AXStaticText",
+      "title": "5",
+      "enabled": true,
+      "box": [
+        568,
+        235,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 180,
+      "role": "AXStaticText",
+      "title": "5",
+      "enabled": true
+    },
+    {
+      "parent": 179,
+      "role": "AXStaticText",
+      "title": "// It reuses execution.flow's scenario names and steps so the two read together,",
+      "enabled": true,
+      "box": [
+        605,
+        234,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 182,
+      "role": "AXStaticText",
+      "title": "// It reuses execution.flow's scenario names and steps so the two read together,",
+      "enabled": true
+    },
+    {
+      "parent": 182,
+      "role": "AXStaticText",
+      "title": "// It reuses execution.flow's scenari",
+      "enabled": true
+    },
+    {
+      "parent": 182,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "6 // and adds the one scenario the original never had — \"cancel booking\" — as the",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        253,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-6"
+    },
+    {
+      "parent": 186,
+      "role": "AXStaticText",
+      "title": "6",
+      "enabled": true,
+      "box": [
+        568,
+        257,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 187,
+      "role": "AXStaticText",
+      "title": "6",
+      "enabled": true
+    },
+    {
+      "parent": 186,
+      "role": "AXStaticText",
+      "title": "// and adds the one scenario the original never had — \"cancel booking\" — as the",
+      "enabled": true,
+      "box": [
+        605,
+        256,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 189,
+      "role": "AXStaticText",
+      "title": "// and adds the one scenario the original never had — \"cancel booking\" — as the",
+      "enabled": true
+    },
+    {
+      "parent": 189,
+      "role": "AXStaticText",
+      "title": "// and adds the one scenario the orig",
+      "enabled": true
+    },
+    {
+      "parent": 189,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "7 // compensating story.",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        275,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-7"
+    },
+    {
+      "parent": 193,
+      "role": "AXStaticText",
+      "title": "7",
+      "enabled": true,
+      "box": [
+        568,
+        279,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 194,
+      "role": "AXStaticText",
+      "title": "7",
+      "enabled": true
+    },
+    {
+      "parent": 193,
+      "role": "AXStaticText",
+      "title": "// compensating story.",
+      "enabled": true,
+      "box": [
+        605,
+        278,
+        158,
+        16
+      ]
+    },
+    {
+      "parent": 196,
+      "role": "AXStaticText",
+      "title": "// compensating story.",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "8 //",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        297,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-8"
+    },
+    {
+      "parent": 198,
+      "role": "AXStaticText",
+      "title": "8",
+      "enabled": true,
+      "box": [
+        568,
+        301,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 199,
+      "role": "AXStaticText",
+      "title": "8",
+      "enabled": true
+    },
+    {
+      "parent": 198,
+      "role": "AXStaticText",
+      "title": "//",
+      "enabled": true,
+      "box": [
+        605,
+        300,
+        14,
+        16
+      ]
+    },
+    {
+      "parent": 201,
+      "role": "AXStaticText",
+      "title": "//",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "9 // The first migration of execution.flow folded this into that file, which cost it",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        319,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-9"
+    },
+    {
+      "parent": 203,
+      "role": "AXStaticText",
+      "title": "9",
+      "enabled": true,
+      "box": [
+        568,
+        323,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 204,
+      "role": "AXStaticText",
+      "title": "9",
+      "enabled": true
+    },
+    {
+      "parent": 203,
+      "role": "AXStaticText",
+      "title": "// The first migration of execution.flow folded this into that file, which cost it",
+      "enabled": true,
+      "box": [
+        605,
+        322,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 206,
+      "role": "AXStaticText",
+      "title": "// The first migration of execution.flow folded this into that file, which cost it",
+      "enabled": true
+    },
+    {
+      "parent": 206,
+      "role": "AXStaticText",
+      "title": "// The first migration of execution.f",
+      "enabled": true
+    },
+    {
+      "parent": 206,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "10 // three of its original scenario names and added a scenario the original did not",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        341,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-10"
+    },
+    {
+      "parent": 210,
+      "role": "AXStaticText",
+      "title": "10",
+      "enabled": true,
+      "box": [
+        562,
+        345,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 211,
+      "role": "AXStaticText",
+      "title": "10",
+      "enabled": true
+    },
+    {
+      "parent": 210,
+      "role": "AXStaticText",
+      "title": "// three of its original scenario names and added a scenario the original did not",
+      "enabled": true,
+      "box": [
+        605,
+        344,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 213,
+      "role": "AXStaticText",
+      "title": "// three of its original scenario names and added a scenario the original did not",
+      "enabled": true
+    },
+    {
+      "parent": 213,
+      "role": "AXStaticText",
+      "title": "// three of its original scenario nam",
+      "enabled": true
+    },
+    {
+      "parent": 213,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "11 // contain. Keeping the showcase here leaves execution.flow a faithful migration",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        363,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-11"
+    },
+    {
+      "parent": 217,
+      "role": "AXStaticText",
+      "title": "11",
+      "enabled": true,
+      "box": [
+        562,
+        367,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 218,
+      "role": "AXStaticText",
+      "title": "11",
+      "enabled": true
+    },
+    {
+      "parent": 217,
+      "role": "AXStaticText",
+      "title": "// contain. Keeping the showcase here leaves execution.flow a faithful migration",
+      "enabled": true,
+      "box": [
+        605,
+        366,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 220,
+      "role": "AXStaticText",
+      "title": "// contain. Keeping the showcase here leaves execution.flow a faithful migration",
+      "enabled": true
+    },
+    {
+      "parent": 220,
+      "role": "AXStaticText",
+      "title": "// contain. Keeping the showcase here",
+      "enabled": true
+    },
+    {
+      "parent": 220,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "12 // (P0-F2).",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        385,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-12"
+    },
+    {
+      "parent": 224,
+      "role": "AXStaticText",
+      "title": "12",
+      "enabled": true,
+      "box": [
+        562,
+        389,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 225,
+      "role": "AXStaticText",
+      "title": "12",
+      "enabled": true
+    },
+    {
+      "parent": 224,
+      "role": "AXStaticText",
+      "title": "// (P0-F2).",
+      "enabled": true,
+      "box": [
+        605,
+        388,
+        79,
+        16
+      ]
+    },
+    {
+      "parent": 227,
+      "role": "AXStaticText",
+      "title": "// (P0-F2).",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "13",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        407,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-13"
+    },
+    {
+      "parent": 229,
+      "role": "AXStaticText",
+      "title": "13",
+      "enabled": true,
+      "box": [
+        562,
+        411,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 230,
+      "role": "AXStaticText",
+      "title": "13",
+      "enabled": true
+    },
+    {
+      "parent": 229,
+      "role": "AXStaticText",
+      "enabled": true,
+      "box": [
+        605,
+        410,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 232,
+      "role": "AXStaticText",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "14 scenario (onFailure=compensate:cancel booking): book a slot",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        429,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-14"
+    },
+    {
+      "parent": 234,
+      "role": "AXStaticText",
+      "title": "14",
+      "enabled": true,
+      "box": [
+        562,
+        433,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 235,
+      "role": "AXStaticText",
+      "title": "14",
+      "enabled": true
+    },
+    {
+      "parent": 234,
+      "role": "AXStaticText",
+      "title": "scenario (onFailure=compensate:cancel booking): book a slot",
+      "enabled": true,
+      "box": [
+        605,
+        432,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 237,
+      "role": "AXStaticText",
+      "title": "scenario (onFailure=compensate:cancel booking): book a slot",
+      "enabled": true
+    },
+    {
+      "parent": 237,
+      "role": "AXStaticText",
+      "title": "scenario (onFailure=compensate:cancel",
+      "enabled": true
+    },
+    {
+      "parent": 237,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "15 Click the Book a slot link tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        451,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-15"
+    },
+    {
+      "parent": 241,
+      "role": "AXStaticText",
+      "title": "15",
+      "enabled": true,
+      "box": [
+        562,
+        455,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 242,
+      "role": "AXStaticText",
+      "title": "15",
+      "enabled": true
+    },
+    {
+      "parent": 241,
+      "role": "AXStaticText",
+      "title": "Click the Book a slot link",
+      "enabled": true,
+      "box": [
+        605,
+        454,
+        202,
+        16
+      ]
+    },
+    {
+      "parent": 244,
+      "role": "AXStaticText",
+      "title": "Click the Book a slot link",
+      "enabled": true
+    },
+    {
+      "parent": 241,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        455,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 246,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "16 Click the location field tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        473,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-16"
+    },
+    {
+      "parent": 248,
+      "role": "AXStaticText",
+      "title": "16",
+      "enabled": true,
+      "box": [
+        562,
+        477,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 249,
+      "role": "AXStaticText",
+      "title": "16",
+      "enabled": true
+    },
+    {
+      "parent": 248,
+      "role": "AXStaticText",
+      "title": "Click the location field",
+      "enabled": true,
+      "box": [
+        605,
+        476,
+        187,
+        16
+      ]
+    },
+    {
+      "parent": 251,
+      "role": "AXStaticText",
+      "title": "Click the location field",
+      "enabled": true
+    },
+    {
+      "parent": 248,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        477,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 253,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "17 Type \"indra\" into the location field tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        495,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-17"
+    },
+    {
+      "parent": 255,
+      "role": "AXStaticText",
+      "title": "17",
+      "enabled": true,
+      "box": [
+        562,
+        499,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 256,
+      "role": "AXStaticText",
+      "title": "17",
+      "enabled": true
+    },
+    {
+      "parent": 255,
+      "role": "AXStaticText",
+      "title": "Type \"indra\" into the location field",
+      "enabled": true,
+      "box": [
+        605,
+        498,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 258,
+      "role": "AXStaticText",
+      "title": "Type \"indra\" into the location field",
+      "enabled": true
+    },
+    {
+      "parent": 258,
+      "role": "AXStaticText",
+      "title": "Type \"indra\" into the loca",
+      "enabled": true
+    },
+    {
+      "parent": 258,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 255,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        499,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 262,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "18 Click the Indiranagar suggestion tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        517,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-18"
+    },
+    {
+      "parent": 264,
+      "role": "AXStaticText",
+      "title": "18",
+      "enabled": true,
+      "box": [
+        562,
+        521,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 265,
+      "role": "AXStaticText",
+      "title": "18",
+      "enabled": true
+    },
+    {
+      "parent": 264,
+      "role": "AXStaticText",
+      "title": "Click the Indiranagar suggestion",
+      "enabled": true,
+      "box": [
+        605,
+        520,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 267,
+      "role": "AXStaticText",
+      "title": "Click the Indiranagar suggestion",
+      "enabled": true
+    },
+    {
+      "parent": 267,
+      "role": "AXStaticText",
+      "title": "Click the Indiranagar sugg",
+      "enabled": true
+    },
+    {
+      "parent": 267,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 264,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        521,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 271,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "19 Click the next button tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        539,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-19"
+    },
+    {
+      "parent": 273,
+      "role": "AXStaticText",
+      "title": "19",
+      "enabled": true,
+      "box": [
+        562,
+        543,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 274,
+      "role": "AXStaticText",
+      "title": "19",
+      "enabled": true
+    },
+    {
+      "parent": 273,
+      "role": "AXStaticText",
+      "title": "Click the next button",
+      "enabled": true,
+      "box": [
+        605,
+        542,
+        166,
+        16
+      ]
+    },
+    {
+      "parent": 276,
+      "role": "AXStaticText",
+      "title": "Click the next button",
+      "enabled": true
+    },
+    {
+      "parent": 273,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        543,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 278,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "20 Click the Book now button tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        561,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-20"
+    },
+    {
+      "parent": 280,
+      "role": "AXStaticText",
+      "title": "20",
+      "enabled": true,
+      "box": [
+        562,
+        565,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 281,
+      "role": "AXStaticText",
+      "title": "20",
+      "enabled": true
+    },
+    {
+      "parent": 280,
+      "role": "AXStaticText",
+      "title": "Click the Book now button",
+      "enabled": true,
+      "box": [
+        605,
+        564,
+        194,
+        16
+      ]
+    },
+    {
+      "parent": 283,
+      "role": "AXStaticText",
+      "title": "Click the Book now button",
+      "enabled": true
+    },
+    {
+      "parent": 280,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        565,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 285,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "21",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        583,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-21"
+    },
+    {
+      "parent": 287,
+      "role": "AXStaticText",
+      "title": "21",
+      "enabled": true,
+      "box": [
+        562,
+        587,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 288,
+      "role": "AXStaticText",
+      "title": "21",
+      "enabled": true
+    },
+    {
+      "parent": 287,
+      "role": "AXStaticText",
+      "enabled": true,
+      "box": [
+        605,
+        586,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 290,
+      "role": "AXStaticText",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "22 scenario (onFailure=compensate:cancel booking): pay for the slot",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        605,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-22"
+    },
+    {
+      "parent": 292,
+      "role": "AXStaticText",
+      "title": "22",
+      "enabled": true,
+      "box": [
+        562,
+        609,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 293,
+      "role": "AXStaticText",
+      "title": "22",
+      "enabled": true
+    },
+    {
+      "parent": 292,
+      "role": "AXStaticText",
+      "title": "scenario (onFailure=compensate:cancel booking): pay for the slot",
+      "enabled": true,
+      "box": [
+        605,
+        608,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 295,
+      "role": "AXStaticText",
+      "title": "scenario (onFailure=compensate:cancel booking): pay for the slot",
+      "enabled": true
+    },
+    {
+      "parent": 295,
+      "role": "AXStaticText",
+      "title": "scenario (onFailure=compensate:cancel",
+      "enabled": true
+    },
+    {
+      "parent": 295,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "23 Click the booking result tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        627,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-23"
+    },
+    {
+      "parent": 299,
+      "role": "AXStaticText",
+      "title": "23",
+      "enabled": true,
+      "box": [
+        562,
+        631,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 300,
+      "role": "AXStaticText",
+      "title": "23",
+      "enabled": true
+    },
+    {
+      "parent": 299,
+      "role": "AXStaticText",
+      "title": "Click the booking result",
+      "enabled": true,
+      "box": [
+        605,
+        630,
+        187,
+        16
+      ]
+    },
+    {
+      "parent": 302,
+      "role": "AXStaticText",
+      "title": "Click the booking result",
+      "enabled": true
+    },
+    {
+      "parent": 299,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        631,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 304,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "24 Click the Checkout link tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        649,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-24"
+    },
+    {
+      "parent": 306,
+      "role": "AXStaticText",
+      "title": "24",
+      "enabled": true,
+      "box": [
+        562,
+        653,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 307,
+      "role": "AXStaticText",
+      "title": "24",
+      "enabled": true
+    },
+    {
+      "parent": 306,
+      "role": "AXStaticText",
+      "title": "Click the Checkout link",
+      "enabled": true,
+      "box": [
+        605,
+        652,
+        180,
+        16
+      ]
+    },
+    {
+      "parent": 309,
+      "role": "AXStaticText",
+      "title": "Click the Checkout link",
+      "enabled": true
+    },
+    {
+      "parent": 306,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        653,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 311,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "25 Type {data.card.number} into the card number field tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        671,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-25"
+    },
+    {
+      "parent": 313,
+      "role": "AXStaticText",
+      "title": "25",
+      "enabled": true,
+      "box": [
+        562,
+        675,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 314,
+      "role": "AXStaticText",
+      "title": "25",
+      "enabled": true
+    },
+    {
+      "parent": 313,
+      "role": "AXStaticText",
+      "title": "Type {data.card.number} into the card number field",
+      "enabled": true,
+      "box": [
+        605,
+        674,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 316,
+      "role": "AXStaticText",
+      "title": "Type {data.card.number} into the card number field",
+      "enabled": true
+    },
+    {
+      "parent": 316,
+      "role": "AXStaticText",
+      "title": "Type {data.card.number} in",
+      "enabled": true
+    },
+    {
+      "parent": 316,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 313,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        675,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 320,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "26 Select \"08\" in the expiry month select tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        693,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-26"
+    },
+    {
+      "parent": 322,
+      "role": "AXStaticText",
+      "title": "26",
+      "enabled": true,
+      "box": [
+        562,
+        697,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 323,
+      "role": "AXStaticText",
+      "title": "26",
+      "enabled": true
+    },
+    {
+      "parent": 322,
+      "role": "AXStaticText",
+      "title": "Select \"08\" in the expiry month select",
+      "enabled": true,
+      "box": [
+        605,
+        696,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 325,
+      "role": "AXStaticText",
+      "title": "Select \"08\" in the expiry month select",
+      "enabled": true
+    },
+    {
+      "parent": 325,
+      "role": "AXStaticText",
+      "title": "Select \"08\" in the expiry",
+      "enabled": true
+    },
+    {
+      "parent": 325,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 322,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        697,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 329,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "27 Select \"2027\" in the expiry year select tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        715,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-27"
+    },
+    {
+      "parent": 331,
+      "role": "AXStaticText",
+      "title": "27",
+      "enabled": true,
+      "box": [
+        562,
+        719,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 332,
+      "role": "AXStaticText",
+      "title": "27",
+      "enabled": true
+    },
+    {
+      "parent": 331,
+      "role": "AXStaticText",
+      "title": "Select \"2027\" in the expiry year select",
+      "enabled": true,
+      "box": [
+        605,
+        718,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 334,
+      "role": "AXStaticText",
+      "title": "Select \"2027\" in the expiry year select",
+      "enabled": true
+    },
+    {
+      "parent": 334,
+      "role": "AXStaticText",
+      "title": "Select \"2027\" in the expir",
+      "enabled": true
+    },
+    {
+      "parent": 334,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 331,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        719,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 338,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "28 Type {data.card.cvv} into the CVV field tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        737,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-28"
+    },
+    {
+      "parent": 340,
+      "role": "AXStaticText",
+      "title": "28",
+      "enabled": true,
+      "box": [
+        562,
+        741,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 341,
+      "role": "AXStaticText",
+      "title": "28",
+      "enabled": true
+    },
+    {
+      "parent": 340,
+      "role": "AXStaticText",
+      "title": "Type {data.card.cvv} into the CVV field",
+      "enabled": true,
+      "box": [
+        605,
+        740,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 343,
+      "role": "AXStaticText",
+      "title": "Type {data.card.cvv} into the CVV field",
+      "enabled": true
+    },
+    {
+      "parent": 343,
+      "role": "AXStaticText",
+      "title": "Type {data.card.cvv} into",
+      "enabled": true
+    },
+    {
+      "parent": 343,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 340,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        741,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 347,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "29 Click the pay button tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        759,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-29"
+    },
+    {
+      "parent": 349,
+      "role": "AXStaticText",
+      "title": "29",
+      "enabled": true,
+      "box": [
+        562,
+        763,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 350,
+      "role": "AXStaticText",
+      "title": "29",
+      "enabled": true
+    },
+    {
+      "parent": 349,
+      "role": "AXStaticText",
+      "title": "Click the pay button",
+      "enabled": true,
+      "box": [
+        605,
+        762,
+        158,
+        16
+      ]
+    },
+    {
+      "parent": 352,
+      "role": "AXStaticText",
+      "title": "Click the pay button",
+      "enabled": true
+    },
+    {
+      "parent": 349,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        763,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 354,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "30",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        781,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-30"
+    },
+    {
+      "parent": 356,
+      "role": "AXStaticText",
+      "title": "30",
+      "enabled": true,
+      "box": [
+        562,
+        785,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 357,
+      "role": "AXStaticText",
+      "title": "30",
+      "enabled": true
+    },
+    {
+      "parent": 356,
+      "role": "AXStaticText",
+      "enabled": true,
+      "box": [
+        605,
+        784,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 359,
+      "role": "AXStaticText",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "31 // The compensating story. It runs with the failing flow's scope and then the",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        803,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-31"
+    },
+    {
+      "parent": 361,
+      "role": "AXStaticText",
+      "title": "31",
+      "enabled": true,
+      "box": [
+        562,
+        807,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 362,
+      "role": "AXStaticText",
+      "title": "31",
+      "enabled": true
+    },
+    {
+      "parent": 361,
+      "role": "AXStaticText",
+      "title": "// The compensating story. It runs with the failing flow's scope and then the",
+      "enabled": true,
+      "box": [
+        605,
+        806,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 364,
+      "role": "AXStaticText",
+      "title": "// The compensating story. It runs with the failing flow's scope and then the",
+      "enabled": true
+    },
+    {
+      "parent": 364,
+      "role": "AXStaticText",
+      "title": "// The compensating story. It runs wi",
+      "enabled": true
+    },
+    {
+      "parent": 364,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "32 // flow stops (LLD §8.3), so a booking created before the failure is not left",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        825,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-32"
+    },
+    {
+      "parent": 368,
+      "role": "AXStaticText",
+      "title": "32",
+      "enabled": true,
+      "box": [
+        562,
+        829,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 369,
+      "role": "AXStaticText",
+      "title": "32",
+      "enabled": true
+    },
+    {
+      "parent": 368,
+      "role": "AXStaticText",
+      "title": "// flow stops (LLD §8.3), so a booking created before the failure is not left",
+      "enabled": true,
+      "box": [
+        605,
+        828,
+        274,
+        16
+      ]
+    },
+    {
+      "parent": 371,
+      "role": "AXStaticText",
+      "title": "// flow stops (LLD §8.3), so a booking created before the failure is not left",
+      "enabled": true
+    },
+    {
+      "parent": 371,
+      "role": "AXStaticText",
+      "title": "// flow stops (LLD §8.3), so a bookin",
+      "enabled": true
+    },
+    {
+      "parent": 371,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "33 // behind.",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        847,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-33"
+    },
+    {
+      "parent": 375,
+      "role": "AXStaticText",
+      "title": "33",
+      "enabled": true,
+      "box": [
+        562,
+        851,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 376,
+      "role": "AXStaticText",
+      "title": "33",
+      "enabled": true
+    },
+    {
+      "parent": 375,
+      "role": "AXStaticText",
+      "title": "// behind.",
+      "enabled": true,
+      "box": [
+        605,
+        850,
+        72,
+        16
+      ]
+    },
+    {
+      "parent": 378,
+      "role": "AXStaticText",
+      "title": "// behind.",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "34 scenario (idempotent): cancel booking",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        869,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-34"
+    },
+    {
+      "parent": 380,
+      "role": "AXStaticText",
+      "title": "34",
+      "enabled": true,
+      "box": [
+        562,
+        873,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 381,
+      "role": "AXStaticText",
+      "title": "34",
+      "enabled": true
+    },
+    {
+      "parent": 380,
+      "role": "AXStaticText",
+      "title": "scenario (idempotent): cancel booking",
+      "enabled": true,
+      "box": [
+        605,
+        872,
+        266,
+        16
+      ]
+    },
+    {
+      "parent": 383,
+      "role": "AXStaticText",
+      "title": "scenario (idempotent): cancel booking",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "35 Click the Bookings link tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        891,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-35"
+    },
+    {
+      "parent": 385,
+      "role": "AXStaticText",
+      "title": "35",
+      "enabled": true,
+      "box": [
+        562,
+        895,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 386,
+      "role": "AXStaticText",
+      "title": "35",
+      "enabled": true
+    },
+    {
+      "parent": 385,
+      "role": "AXStaticText",
+      "title": "Click the Bookings link",
+      "enabled": true,
+      "box": [
+        605,
+        894,
+        180,
+        16
+      ]
+    },
+    {
+      "parent": 388,
+      "role": "AXStaticText",
+      "title": "Click the Bookings link",
+      "enabled": true
+    },
+    {
+      "parent": 385,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        895,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 390,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "36 Click the cancel booking button tier 1 · bound",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        913,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-36"
+    },
+    {
+      "parent": 392,
+      "role": "AXStaticText",
+      "title": "36",
+      "enabled": true,
+      "box": [
+        562,
+        917,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 393,
+      "role": "AXStaticText",
+      "title": "36",
+      "enabled": true
+    },
+    {
+      "parent": 392,
+      "role": "AXStaticText",
+      "title": "Click the cancel booking button",
+      "enabled": true,
+      "box": [
+        605,
+        916,
+        209,
+        16
+      ]
+    },
+    {
+      "parent": 395,
+      "role": "AXStaticText",
+      "title": "Click the cancel booking button",
+      "enabled": true
+    },
+    {
+      "parent": 395,
+      "role": "AXStaticText",
+      "title": "Click the cancel booking b",
+      "enabled": true
+    },
+    {
+      "parent": 395,
+      "role": "AXStaticText",
+      "title": "…",
+      "enabled": true
+    },
+    {
+      "parent": 392,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true,
+      "box": [
+        818,
+        917,
+        66,
+        15
+      ]
+    },
+    {
+      "parent": 399,
+      "role": "AXStaticText",
+      "title": "tier 1 · bound",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "37",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        935,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-37"
+    },
+    {
+      "parent": 401,
+      "role": "AXStaticText",
+      "title": "37",
+      "enabled": true,
+      "box": [
+        562,
+        939,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 402,
+      "role": "AXStaticText",
+      "title": "37",
+      "enabled": true
+    },
+    {
+      "parent": 401,
+      "role": "AXStaticText",
+      "enabled": true,
+      "box": [
+        605,
+        938,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 404,
+      "role": "AXStaticText",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "38 compose: book and pay",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        957,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-38"
+    },
+    {
+      "parent": 406,
+      "role": "AXStaticText",
+      "title": "38",
+      "enabled": true,
+      "box": [
+        562,
+        961,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 407,
+      "role": "AXStaticText",
+      "title": "38",
+      "enabled": true
+    },
+    {
+      "parent": 406,
+      "role": "AXStaticText",
+      "title": "compose: book and pay",
+      "enabled": true,
+      "box": [
+        605,
+        960,
+        151,
+        16
+      ]
+    },
+    {
+      "parent": 409,
+      "role": "AXStaticText",
+      "title": "compose: book and pay",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "39 book a slot",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        979,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-39"
+    },
+    {
+      "parent": 411,
+      "role": "AXStaticText",
+      "title": "39",
+      "enabled": true,
+      "box": [
+        562,
+        983,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 412,
+      "role": "AXStaticText",
+      "title": "39",
+      "enabled": true
+    },
+    {
+      "parent": 411,
+      "role": "AXStaticText",
+      "title": "book a slot",
+      "enabled": true,
+      "box": [
+        605,
+        982,
+        94,
+        16
+      ]
+    },
+    {
+      "parent": 414,
+      "role": "AXStaticText",
+      "title": "book a slot",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "40 pay for the slot",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        1001,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-40"
+    },
+    {
+      "parent": 416,
+      "role": "AXStaticText",
+      "title": "40",
+      "enabled": true,
+      "box": [
+        562,
+        1005,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 417,
+      "role": "AXStaticText",
+      "title": "40",
+      "enabled": true
+    },
+    {
+      "parent": 416,
+      "role": "AXStaticText",
+      "title": "pay for the slot",
+      "enabled": true,
+      "box": [
+        605,
+        1004,
+        130,
+        16
+      ]
+    },
+    {
+      "parent": 419,
+      "role": "AXStaticText",
+      "title": "pay for the slot",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "41",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        1023,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-41"
+    },
+    {
+      "parent": 421,
+      "role": "AXStaticText",
+      "title": "41",
+      "enabled": true,
+      "box": [
+        562,
+        1027,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 422,
+      "role": "AXStaticText",
+      "title": "41",
+      "enabled": true
+    },
+    {
+      "parent": 421,
+      "role": "AXStaticText",
+      "enabled": true,
+      "box": [
+        605,
+        1026,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 424,
+      "role": "AXStaticText",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "42 test: book and pay",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        1045,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-42"
+    },
+    {
+      "parent": 426,
+      "role": "AXStaticText",
+      "title": "42",
+      "enabled": true,
+      "box": [
+        562,
+        1049,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 427,
+      "role": "AXStaticText",
+      "title": "42",
+      "enabled": true
+    },
+    {
+      "parent": 426,
+      "role": "AXStaticText",
+      "title": "test: book and pay",
+      "enabled": true,
+      "box": [
+        605,
+        1048,
+        130,
+        16
+      ]
+    },
+    {
+      "parent": 429,
+      "role": "AXStaticText",
+      "title": "test: book and pay",
+      "enabled": true
+    },
+    {
+      "parent": 152,
+      "role": "AXButton",
+      "title": "43",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        541,
+        1067,
+        359,
+        22
+      ],
+      "domIdentifier": "flow-line-43"
+    },
+    {
+      "parent": 431,
+      "role": "AXStaticText",
+      "title": "43",
+      "enabled": true,
+      "box": [
+        562,
+        1071,
+        13,
+        15
+      ]
+    },
+    {
+      "parent": 432,
+      "role": "AXStaticText",
+      "title": "43",
+      "enabled": true
+    },
+    {
+      "parent": 431,
+      "role": "AXStaticText",
+      "enabled": true,
+      "box": [
+        605,
+        1070,
+        7,
+        16
+      ]
+    },
+    {
+      "parent": 434,
+      "role": "AXStaticText",
+      "enabled": true
+    },
+    {
+      "parent": 140,
+      "role": "AXStaticText",
+      "title": "LINT",
+      "enabled": true,
+      "box": [
+        545,
+        1110,
+        27,
+        15
+      ]
+    },
+    {
+      "parent": 436,
+      "role": "AXStaticText",
+      "title": "LINT",
+      "enabled": true
+    },
+    {
+      "parent": 140,
+      "role": "AXStaticText",
+      "title": "0 ERRORS",
+      "enabled": true,
+      "box": [
+        734,
+        1110,
+        58,
+        15
+      ]
+    },
+    {
+      "parent": 438,
+      "role": "AXStaticText",
+      "title": "0 ERRORS",
+      "enabled": true
+    },
+    {
+      "parent": 140,
+      "role": "AXStaticText",
+      "title": "3 WARNINGS",
+      "enabled": true,
+      "box": [
+        816,
+        1110,
+        73,
+        15
+      ]
+    },
+    {
+      "parent": 440,
+      "role": "AXStaticText",
+      "title": "3 WARNINGS",
+      "enabled": true
+    },
+    {
+      "parent": 140,
+      "role": "AXList",
+      "description": "Lint diagnostics",
+      "enabled": true,
+      "box": [
+        529,
+        1135,
+        383,
+        12
+      ],
+      "domIdentifier": "flows-lint"
+    },
+    {
+      "parent": 442,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1141,
+        383,
+        104
+      ]
+    },
+    {
+      "parent": 443,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        582,
+        1142,
+        8,
+        17
+      ]
+    },
+    {
+      "parent": 444,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true
+    },
+    {
+      "parent": 443,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true,
+      "box": [
+        599,
+        1142,
+        97,
+        15
+      ]
+    },
+    {
+      "parent": 446,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true
+    },
+    {
+      "parent": 443,
+      "role": "AXStaticText",
+      "title": "user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+      "enabled": true,
+      "box": [
+        779,
+        1142,
+        183,
+        103
+      ]
+    },
+    {
+      "parent": 448,
+      "role": "AXStaticText",
+      "title": "user.password reads",
+      "enabled": true
+    },
+    {
+      "parent": 448,
+      "role": "AXStaticText",
+      "title": "${YAM_SAMPLE_PASSWORD},",
+      "enabled": true
+    },
+    {
+      "parent": 448,
+      "role": "AXStaticText",
+      "title": "which is not set.",
+      "enabled": true
+    },
+    {
+      "parent": 448,
+      "role": "AXStaticText",
+      "title": "Compiling does not",
+      "enabled": true
+    },
+    {
+      "parent": 448,
+      "role": "AXStaticText",
+      "title": "need the value;",
+      "enabled": true
+    },
+    {
+      "parent": 448,
+      "role": "AXStaticText",
+      "title": "running will.",
+      "enabled": true
+    },
+    {
+      "parent": 442,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1246,
+        383,
+        104
+      ]
+    },
+    {
+      "parent": 455,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        582,
+        1246,
+        8,
+        17
+      ]
+    },
+    {
+      "parent": 456,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true
+    },
+    {
+      "parent": 455,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true,
+      "box": [
+        599,
+        1246,
+        97,
+        15
+      ]
+    },
+    {
+      "parent": 458,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true
+    },
+    {
+      "parent": 455,
+      "role": "AXStaticText",
+      "title": "card.number reads ${YAM_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
+      "enabled": true,
+      "box": [
+        779,
+        1246,
+        204,
+        103
+      ]
+    },
+    {
+      "parent": 460,
+      "role": "AXStaticText",
+      "title": "card.number reads",
+      "enabled": true
+    },
+    {
+      "parent": 460,
+      "role": "AXStaticText",
+      "title": "${YAM_SAMPLE_CARD_NUMBER},",
+      "enabled": true
+    },
+    {
+      "parent": 460,
+      "role": "AXStaticText",
+      "title": "which is not set.",
+      "enabled": true
+    },
+    {
+      "parent": 460,
+      "role": "AXStaticText",
+      "title": "Compiling does not",
+      "enabled": true
+    },
+    {
+      "parent": 460,
+      "role": "AXStaticText",
+      "title": "need the value;",
+      "enabled": true
+    },
+    {
+      "parent": 460,
+      "role": "AXStaticText",
+      "title": "running will.",
+      "enabled": true
+    },
+    {
+      "parent": 442,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        529,
+        1350,
+        383,
+        104
+      ]
+    },
+    {
+      "parent": 467,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true,
+      "box": [
+        582,
+        1350,
+        8,
+        17
+      ]
+    },
+    {
+      "parent": 468,
+      "role": "AXStaticText",
+      "title": "0",
+      "enabled": true
+    },
+    {
+      "parent": 467,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true,
+      "box": [
+        599,
+        1350,
+        97,
+        15
+      ]
+    },
+    {
+      "parent": 470,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
+      "enabled": true
+    },
+    {
+      "parent": 467,
+      "role": "AXStaticText",
+      "title": "card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
+      "enabled": true,
+      "box": [
+        779,
+        1350,
+        176,
+        103
+      ]
+    },
+    {
+      "parent": 472,
+      "role": "AXStaticText",
+      "title": "card.cvv reads",
+      "enabled": true
+    },
+    {
+      "parent": 472,
+      "role": "AXStaticText",
+      "title": "${YAM_SAMPLE_CARD_CVV},",
+      "enabled": true
+    },
+    {
+      "parent": 472,
+      "role": "AXStaticText",
+      "title": "which is not set.",
+      "enabled": true
+    },
+    {
+      "parent": 472,
+      "role": "AXStaticText",
+      "title": "Compiling does not",
+      "enabled": true
+    },
+    {
+      "parent": 472,
+      "role": "AXStaticText",
+      "title": "need the value;",
+      "enabled": true
+    },
+    {
+      "parent": 472,
+      "role": "AXStaticText",
+      "title": "running will.",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkComplementary",
+      "description": "Inspector",
+      "enabled": true,
+      "box": [
+        912,
+        52,
+        360,
+        756
+      ],
+      "domIdentifier": "inspector"
+    },
+    {
+      "parent": 479,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "INSPECTOR",
+      "enabled": true,
+      "box": [
+        913,
+        52,
+        359,
+        142
+      ],
+      "domIdentifier": "inspector-empty"
+    },
+    {
+      "parent": 480,
+      "role": "AXHeading",
+      "title": "INSPECTOR",
+      "enabled": true,
+      "box": [
+        913,
+        58,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-empty-heading"
+    },
+    {
+      "parent": 481,
+      "role": "AXStaticText",
+      "title": "INSPECTOR",
+      "enabled": true,
+      "box": [
+        929,
+        73,
+        66,
+        14
+      ]
+    },
+    {
+      "parent": 482,
+      "role": "AXStaticText",
+      "title": "INSPECTOR",
+      "enabled": true
+    },
+    {
+      "parent": 480,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        913,
+        106,
+        359,
+        66
+      ]
+    },
+    {
+      "parent": 484,
+      "role": "AXStaticText",
+      "title": "Choose a step to see its binding, its tier and its last run.",
+      "enabled": true,
+      "box": [
+        929,
+        130,
+        308,
+        17
+      ]
+    },
+    {
+      "parent": 485,
+      "role": "AXStaticText",
+      "title": "Choose a step to see its binding, its tier and its last run.",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkContentInfo",
+      "enabled": true,
+      "box": [
+        8,
+        808,
+        1264,
+        28
+      ]
+    },
+    {
+      "parent": 487,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        24,
+        814,
+        144,
+        17
+      ],
+      "domIdentifier": "status-context"
+    },
+    {
+      "parent": 488,
+      "role": "AXStaticText",
+      "title": "booking-compensation.flow",
+      "enabled": true,
+      "box": [
+        24,
+        815,
+        144,
+        15
+      ]
+    },
+    {
+      "parent": 489,
+      "role": "AXStaticText",
+      "title": "booking-compensation.flow",
+      "enabled": true
+    },
+    {
+      "parent": 487,
+      "role": "AXStaticText",
+      "title": "⌘K",
+      "enabled": true,
+      "box": [
+        1117,
+        816,
+        13,
+        14
+      ]
+    },
+    {
+      "parent": 491,
+      "role": "AXStaticText",
+      "title": "⌘K",
+      "enabled": true
+    },
+    {
+      "parent": 487,
+      "role": "AXStaticText",
+      "title": "commands",
+      "enabled": true,
+      "box": [
+        1136,
+        815,
+        60,
+        15
+      ]
+    },
+    {
+      "parent": 493,
+      "role": "AXStaticText",
+      "title": "commands",
+      "enabled": true
+    },
+    {
+      "parent": 487,
+      "role": "AXStaticText",
+      "title": "?",
+      "enabled": true,
+      "box": [
+        1218,
+        816,
+        6,
+        14
+      ]
+    },
+    {
+      "parent": 495,
+      "role": "AXStaticText",
+      "title": "?",
+      "enabled": true
+    },
+    {
+      "parent": 487,
+      "role": "AXStaticText",
+      "title": "keys",
+      "enabled": true,
+      "box": [
+        1230,
+        815,
+        26,
+        15
+      ]
+    },
+    {
+      "parent": 497,
+      "role": "AXStaticText",
+      "title": "keys",
+      "enabled": true
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXCloseButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        8,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXMinimizeButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        28,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXZoomButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        48,
+        8,
+        14,
+        14
+      ]
+    }
+  ]
+}

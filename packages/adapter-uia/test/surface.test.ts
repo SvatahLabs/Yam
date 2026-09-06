@@ -1,5 +1,5 @@
 /**
- * The UIA adapter as an `AgentSurface`, against the ADE's recorded trees (T6.1,
+ * The UIA adapter as an `AgentSurface`, against the app's recorded trees (T6.1,
  * REQ-ADP-6, REQ-SURF-1, 4, 5).
  *
  * The bridge is injected, so this drives the whole adapter without Windows.
@@ -15,8 +15,8 @@ async function open(
   options: Parameters<typeof recordedBridge>[0] = {},
 ): Promise<{ surface: UiaSurface; bridge: RecordedBridge }> {
   const bridge = recordedBridge({ screen: "record", ...options });
-  const surface = new UiaSurface({ processName: "Yam ADE", bridge });
-  await surface.open({ kind: "desktop", processName: "Yam ADE" } as never);
+  const surface = new UiaSurface({ processName: "Yam", bridge });
+  await surface.open({ kind: "desktop", processName: "Yam" } as never);
   return { surface, bridge };
 }
 
@@ -39,7 +39,7 @@ describe("opening a session (REQ-ADP-6, LLD §7.5)", () => {
         advice: "`UIAutomationClient` would not load; check Constrained Language Mode.",
       },
     });
-    const surface = new UiaSurface({ processName: "Yam ADE", bridge });
+    const surface = new UiaSurface({ processName: "Yam", bridge });
     await expect(surface.open({ kind: "desktop" } as never)).rejects.toThrow(SessionError);
     await expect(surface.open({ kind: "desktop" } as never)).rejects.toThrow(
       /not reachable \(unavailable\).*yam surface doctor/s,
@@ -79,7 +79,7 @@ describe("snapshot, locate and describe", () => {
     // The patterns are what `act` chooses from, so a report of a failed action
     // can say which one was available.
     expect(described.attrs["patterns"]).toContain("Value");
-    expect(described.native?.["controlPath"]).toContain("Window[Yam ADE]");
+    expect(described.native?.["controlPath"]).toContain("Window[Yam]");
     expect(described.rolePath[0]).toBe("window");
   });
 
@@ -125,7 +125,7 @@ describe("act through UIA patterns (LLD §7.5)", () => {
      * tabs would fall through to the mouse for no reason at all.
      */
     const { surface, bridge } = await open({ screen: "flows" });
-    // The Flows screen's three view tabs are the only tabs the ADE has (T10.3).
+    // The Flows screen's three view tabs are the only tabs the app has (T10.3).
     const [ref] = await surface.locate({ by: "automationId", value: "plan", score: 1 });
     await surface.act("click", ref!);
     expect(bridge.commands.filter((one) => one.kind === "pattern")).toEqual([
@@ -146,7 +146,7 @@ describe("act through UIA patterns (LLD §7.5)", () => {
 
   it("types through ValuePattern, and reads the value back", async () => {
     /*
-     * The Surface explorer's intent field (T10.3): the one text field the ADE
+     * The Surface explorer's intent field (T10.3): the one text field the app
      * has that a person types a sentence into, and the control REQ-BEH-4's
      * "every call records an intent" is about.
      */
@@ -209,7 +209,7 @@ describe("state and restore", () => {
   it("reports the window it is on, and restores by activating it", async () => {
     const { surface, bridge } = await open();
     const state = await surface.state();
-    expect(state).toEqual({ kind: "desktop", windowTitle: "Yam ADE", windowIndex: 0 });
+    expect(state).toEqual({ kind: "desktop", windowTitle: "Yam", windowIndex: 0 });
     await surface.restore(state);
     expect(bridge.commands.filter((one) => one.kind === "activate").length).toBeGreaterThan(1);
   });

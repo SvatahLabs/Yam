@@ -2,7 +2,7 @@
 
 # Local service HTTP API
 
-The local integration point for the Yam ADE and any other client (REQ-ADE-1, LLD §13.5). Bound to 127.0.0.1, behind a bearer token printed on stdout. Every handler calls the same function the CLI calls; no logic lives here.
+The local integration point for the Yam app and any other client (REQ-ADE-1, LLD §13.5). Bound to 127.0.0.1, behind a bearer token printed on stdout. Every handler calls the same function the CLI calls; no logic lives here.
 
 OpenAPI 3.1.0, service version 0.1.0. The document itself is `openApiDocument()` in `@svatah/yam-service`; the Python and Java clients under `clients/` and `@svatah/yam-sdk` are generated from it.
 
@@ -30,7 +30,7 @@ OpenAPI 3.1.0, service version 0.1.0. The document itself is `openApiDocument()`
 | `POST` | `/record` | Start a recording session; decisions arrive on the stream |
 | `POST` | `/record/{id}/decision` | Accept, re-pick or reject the grounding a session is waiting on |
 | `POST` | `/record/{id}/stop` | Stop a recording session |
-| `POST` | `/migrate` | Import a Yam ADE prototype's electron-db directory into this project |
+| `POST` | `/migrate` | Import a Yam prototype's electron-db directory into this project |
 | `POST` | `/bindings/verify` | Dry-resolve the store, or one binding |
 | `POST` | `/heal` | Heal a run; proposals arrive on the stream |
 | `POST` | `/surface/{session}/open` | Open a surface session the explorer drives |
@@ -44,4 +44,4 @@ OpenAPI 3.1.0, service version 0.1.0. The document itself is `openApiDocument()`
 | `GET` | `/events` | The event stream (WebSocket) |
 | `GET` | `/events/sse` | The event stream (server-sent events) |
 | `GET` | `/openapi.json` | This document |
-| `GET` | `/health` | Liveness, for the ADE's spawn handshake |
+| `GET` | `/health` | Liveness, for the app's spawn handshake |

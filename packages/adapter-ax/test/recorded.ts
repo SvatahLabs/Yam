@@ -1,10 +1,10 @@
 /**
- * The recorded ADE trees, and a bridge that replays one (T6.2).
+ * The recorded APP_DIR trees, and a bridge that replays one (T6.2).
  *
  * ## Where these came from, exactly
  *
- * `node scripts/record-desktop-tree.mjs --shape ax --screen <name>` launches the real ADE with
- * `YAM_A11Y=1`, opens `evals/fixtures` **through the ADE's own Recent-project
+ * `node scripts/record-desktop-tree.mjs --shape ax --screen <name>` launches the real app with
+ * `YAM_A11Y=1`, opens `evals/fixtures` **through the app's own Recent-project
  * button**, clicks the screen's tab, and reads Chromium's accessibility tree
  * over the DevTools protocol — roles, names, values, DOM ids, boxes — mapping it
  * into the `AxNode` shape this adapter consumes.
@@ -35,7 +35,7 @@ import type {
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
 
 /** The five screens LLD §16's desktop conformance flows visit, plus Record. */
-export type AdeScreen =
+export type AppScreen =
   | "project"
   | "flows"
   | "run"
@@ -46,7 +46,7 @@ export type AdeScreen =
   | "palette"
   | "bindings";
 
-export const ADE_SCREENS: readonly AdeScreen[] = [
+export const ADE_SCREENS: readonly AppScreen[] = [
   "project",
   "flows",
   "run",
@@ -58,8 +58,8 @@ export const ADE_SCREENS: readonly AdeScreen[] = [
   "bindings",
 ];
 
-export function recordedWindow(screen: AdeScreen): AxWindow {
-  const text = readFileSync(join(FIXTURES, `ade-${screen}.json`), "utf8");
+export function recordedWindow(screen: AppScreen): AxWindow {
+  const text = readFileSync(join(FIXTURES, `app-${screen}.json`), "utf8");
   const window = JSON.parse(text) as Omit<AxWindow, "cost">;
   /*
    * A recorded tree has a node count and no wall time, and says so:
@@ -90,7 +90,7 @@ export function recordedWindow(screen: AdeScreen): AxWindow {
 
 export interface RecordedBridgeOptions {
   /** The screen the window starts on. */
-  readonly screen?: AdeScreen;
+  readonly screen?: AppScreen;
   readonly permission?: AxPermission;
   /** What `session()` answers; the default is a session with a window on it. */
   readonly session?: AxSession;
@@ -102,16 +102,16 @@ export interface RecordedBridgeOptions {
    * test says "pressing the Run tab shows the Run screen" without needing the
    * application.
    */
-  readonly onCommand?: (command: AxCommand, current: AdeScreen) => AdeScreen | void;
+  readonly onCommand?: (command: AxCommand, current: AppScreen) => AppScreen | void;
 }
 
 export interface RecordedBridge extends AxBridge {
   /** Every command the adapter sent, in order. */
   readonly commands: AxCommand[];
   /** Which screen the window is showing now. */
-  screen(): AdeScreen;
+  screen(): AppScreen;
   /** Put the bridge on a screen, for a test that has to learn two trees. */
-  setScreen(screen: AdeScreen): void;
+  setScreen(screen: AppScreen): void;
   /** Files `screenshot()` was asked to write. */
   readonly screenshots: string[];
 }
@@ -152,7 +152,7 @@ function indexOfPath(nodes: readonly AxNode[], path: readonly number[]): number 
  * so does this.
  */
 export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBridge {
-  let screen: AdeScreen = options.screen ?? "record";
+  let screen: AppScreen = options.screen ?? "record";
   const commands: AxCommand[] = [];
   const screenshots: string[] = [];
   /** `screen:pathIndex` → the value set on it. */
@@ -162,14 +162,14 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
     commands,
     screenshots,
     screen: () => screen,
-    setScreen: (one: AdeScreen) => {
+    setScreen: (one: AppScreen) => {
       screen = one;
     },
     async permission(): Promise<AxPermission> {
       return options.permission ?? { state: "granted", advice: "granted (recorded)" };
     },
     /*
-     * A recorded session is a usable one: these fixtures are of an ADE with a
+     * A recorded session is a usable one: these fixtures are of an app with a
      * window on screen (Draft 2.12 §7.5). `options.session` overrides it, which
      * is how a test can be about a locked display.
      */
@@ -178,8 +178,8 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
         options.session ?? {
           usable: true,
           state: "usable",
-          owners: ["Yam ADE"],
-          detail: "1 application(s) own a window: Yam ADE",
+          owners: ["Yam"],
+          detail: "1 application(s) own a window: Yam",
           advice: "This session has a WindowServer and applications can show windows.",
         }
       );

@@ -60,9 +60,9 @@ run against a real gateway is REQ-REC-10's number.
 
 ## The desktop set (T11.3, LLD §13.9)
 
-`desktop-cases.jsonl` is the same idea for the ADE, and `pnpm
+`desktop-cases.jsonl` is the same idea for the app, and `pnpm
 grounding:desktop-cases` rebuilds it from a real read of the real application:
-launch the packaged ADE, record the welcome screen, open the fixtures project
+launch the packaged app, record the welcome screen, open the fixtures project
 through its own Recent button, walk the rail's eight screens and the palette's
 four, and turn every control with a name and an id into a case.
 
@@ -72,11 +72,11 @@ application is.
 **The key is the window title**, not a URL path. LLD §3.3 has always said a
 binding's context pattern is "a URL *or window-title* pattern"; a window has no
 segments to generalise. So a case carries `window` where a web case carries
-`page`, and the grounding question says `Window: Yam ADE` where a web one
+`page`, and the grounding question says `Window: Yam` where a web one
 says `Page: …`.
 
 **The ground truth is the `automationId`.** `apps/sample-web` stamps
-`data-yam-eval` on every element for the web eval; the ADE needs no such
+`data-yam-eval` on every element for the web eval; the app needs no such
 stamp, because LLD §13.7's accessibility contract already requires an id on
 every button, link, tab, field and row action and the desktop snapshot case
 fails a live gate when one is missing.

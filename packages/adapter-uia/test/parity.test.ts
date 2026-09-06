@@ -9,18 +9,18 @@
  * each adapter's tests asserted against its own fixtures, so both could drift in
  * the same direction and stay green.
  *
- * This is the check. `scripts/record-desktop-tree.mjs` reads the ADE's window
+ * This is the check. `scripts/record-desktop-tree.mjs` reads the app's window
  * **once** and writes it twice — as the AX attributes Chromium publishes on
  * macOS and as the UIA properties it publishes on Windows — so the two fixtures
  * are the same window rather than two launches of the same application. (They
- * were two launches at first, and the ADE's ephemeral service port and its
+ * were two launches at first, and the app's ephemeral service port and its
  * growing list of runs both showed up as parity failures that were really
  * recording noise.)
  *
  * ## What it establishes
  *
  * The tree has the same shape, the same references, and the same controls under
- * the same names. That is what makes one flow drive the ADE on both platforms.
+ * the same names. That is what makes one flow drive the app on both platforms.
  *
  * ## What it does not
  *
@@ -47,7 +47,7 @@ import { fileURLToPath } from "node:url";
 import { convertTree as convertAx, type AxNode } from "@svatah/yam-adapter-ax";
 import { convertTree as convertUia } from "../src/index.js";
 import { isWindowChrome } from "@svatah/yam-surface";
-import { ADE_SCREENS, recordedWindow, type AdeScreen } from "./recorded.js";
+import { ADE_SCREENS, recordedWindow, type AppScreen } from "./recorded.js";
 
 const AX_FIXTURES = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -58,8 +58,8 @@ const AX_FIXTURES = join(
   "fixtures",
 );
 
-function axWindow(screen: AdeScreen): { title: string; nodes: AxNode[] } {
-  return JSON.parse(readFileSync(join(AX_FIXTURES, `ade-${screen}.json`), "utf8")) as {
+function axWindow(screen: AppScreen): { title: string; nodes: AxNode[] } {
+  return JSON.parse(readFileSync(join(AX_FIXTURES, `app-${screen}.json`), "utf8")) as {
     title: string;
     nodes: AxNode[];
   };
@@ -77,7 +77,7 @@ interface Node {
   readonly controlPath: string;
 }
 
-const fromAx = (screen: AdeScreen, interactiveOnly = false): Node[] => {
+const fromAx = (screen: AppScreen, interactiveOnly = false): Node[] => {
   const window = axWindow(screen);
   return convertAx(window.nodes, {
     maxNodes: 2_000,
@@ -86,7 +86,7 @@ const fromAx = (screen: AdeScreen, interactiveOnly = false): Node[] => {
   }) as unknown as Node[];
 };
 
-const fromUia = (screen: AdeScreen, interactiveOnly = false): Node[] => {
+const fromUia = (screen: AppScreen, interactiveOnly = false): Node[] => {
   const window = recordedWindow(screen);
   return convertUia(window.nodes, {
     maxNodes: 2_000,
@@ -108,7 +108,7 @@ const KNOWN_ROLE_DIFFERENCES = new Set(["cell → columnheader"]);
  * makes "minimise" and "Minimize" the same string.
  *
  * That costs a flow nothing, which is the test for whether this exclusion is
- * honest: the claim these cases establish is "one flow drives the ADE on both
+ * honest: the claim these cases establish is "one flow drives the app on both
  * platforms", and a flow names the *application's* controls. Their roles,
  * references, depths, parents and states are still compared, so a tree that
  * stopped reading the window frame on one platform still fails.
@@ -118,7 +118,7 @@ const isChrome = (node: { native?: Readonly<Record<string, string>> }): boolean 
 
 describe("the two desktop adapters normalise one window the same way (REQ-SURF-4)", () => {
   for (const screen of ADE_SCREENS) {
-    it(`gives the ADE's ${screen} screen the same tree shape and the same references`, () => {
+    it(`gives the app's ${screen} screen the same tree shape and the same references`, () => {
       const ax = fromAx(screen);
       const uia = fromUia(screen);
 
@@ -128,7 +128,7 @@ describe("the two desktop adapters normalise one window the same way (REQ-SURF-4
       expect(uia.map((node) => node.parent)).toEqual(ax.map((node) => node.parent));
     });
 
-    it(`names the ADE's ${screen} controls identically, so one flow drives both`, () => {
+    it(`names the app's ${screen} controls identically, so one flow drives both`, () => {
       /*
        * The assertion that matters to a flow author: "click the Stop recording
        * button" has to find the same thing on both platforms, which means the

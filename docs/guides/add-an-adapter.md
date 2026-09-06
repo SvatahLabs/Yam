@@ -62,6 +62,6 @@ error types. It is handed an `AgentSurface` and knows nothing else, which is
 what lets you run it against your own adapter. Every failing check carries what
 it expected and what it saw. Exit `0` is conformant.
 
-Desktop adapters have their own case list driven against the ADE; see
+Desktop adapters have their own case list driven against the app; see
 `scripts/desktop-conformance.mjs` and [`reports/adapter-ax.md`](../../reports/adapter-ax.md)
 for the shape of a passing report, including the per-node cost line.

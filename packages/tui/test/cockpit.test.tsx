@@ -349,13 +349,13 @@ describe("the keys (LLD §13.7's conventional keys)", () => {
   });
 });
 
-describe("the palette (^K) is the ADE's list (T9.4, REQ-ADE-10)", () => {
+describe("the palette (^K) is the app's list (T9.4, REQ-ADE-10)", () => {
   it("opens on ^K and lists actions with their CLI commands", async () => {
     const { stdin, lastFrame } = track(await cockpit("run", { runId: "comp" }));
     stdin.write("\u000b"); // ^K
     await settle();
     const frame = lastFrame() ?? "";
-    expect(frame).toContain("same list as the ADE");
+    expect(frame).toContain("same list as the app");
     // The rows are the registry's, by label and by command.
     expect(frame).toContain("Compile");
     expect(frame).toContain("yam compile");
@@ -378,10 +378,10 @@ describe("the palette (^K) is the ADE's list (T9.4, REQ-ADE-10)", () => {
     const { stdin, lastFrame } = track(await cockpit("run", { runId: "comp" }));
     stdin.write("\u000b");
     await settle();
-    expect(lastFrame()).toContain("same list as the ADE");
+    expect(lastFrame()).toContain("same list as the app");
     stdin.write("\u001b");
     await settle();
-    expect(lastFrame()).not.toContain("same list as the ADE");
+    expect(lastFrame()).not.toContain("same list as the app");
   });
 
   it("offers every action the registry has, so neither palette is a subset", async () => {
@@ -391,11 +391,11 @@ describe("the palette (^K) is the ADE's list (T9.4, REQ-ADE-10)", () => {
     /*
      * The pane shows eight rows at a time, so this checks the *source* rather
      * than the frame: `ACTIONS` is what both palettes are built from, and
-     * `tools/repo-checks/test/action-parity.test.ts` is what holds the ADE's
+     * `tools/repo-checks/test/action-parity.test.ts` is what holds the app's
      * palette, this one, the SDK and the CLI to it.
      */
     expect(ACTIONS.length).toBeGreaterThan(20);
-    expect(lastFrame()).toContain("same list as the ADE");
+    expect(lastFrame()).toContain("same list as the app");
   });
 });
 
@@ -660,7 +660,7 @@ describe("all twelve screens draw in the cockpit (T10.1, T10.2)", () => {
 /**
  * `e` opens the flow in `$EDITOR`, and what comes back is saved (K6, T11.1).
  *
- * The ADE's answer to "the editor edits" is a text area and a Save button; a
+ * The app's answer to "the editor edits" is a text area and a Save button; a
  * terminal's is the editor a person already has. Both run the *same*
  * `flows.save` action against the same `PUT /flows/:file`, which is what makes
  * this one feature with two renderings rather than two features.
