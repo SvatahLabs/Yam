@@ -1,0 +1,63 @@
+<div class="app">
+@@TOPBAR(Surface explorer)
+@@SIDEBAR(agents)
+<section class="workspace">
+  <div class="toolbar"><h1>Surface explorer</h1><span class="sub">playwright · http://127.0.0.1:4173 · session ex-7f3 · 6 calls</span><div class="spacer"></div>
+    <span class="chip">adapter: playwright</span>
+    <button class="btn">Snapshot <kbd>S</kbd></button>
+    <button class="btn">Close session</button>
+    <button class="btn primary">Compile to proposal</button>
+  </div>
+  <div class="main">
+    <aside class="list" aria-label="Snapshot">
+      <div class="filter">Filter by role or name…</div>
+      <div class="snap" style="margin:8px 12px">- document
+  - banner
+    - link <span class="hit">"Book a slot"</span> h0
+  - main
+    - heading "Book a slot" h1
+    - textbox "Location" h2
+    - listbox
+      - option "Indiranagar" h3
+    - button "Next" h4
+    - button "Book now" h5
+  - contentinfo</div>
+      <div class="group"><b>h0</b><span>link · “Book a slot”</span></div>
+    </aside>
+    <div class="editor">
+      <div class="tabs"><div class="tab active">Call</div><div class="tab">Capabilities</div></div>
+      <div style="padding:12px 16px;display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 12px;align-items:center">
+        <span style="color:var(--muted)">Intent</span>
+        <div class="filter" style="margin:0"><span>open the booking page so a slot can be chosen</span></div>
+        <span style="color:var(--muted)">Call</span>
+        <div style="display:flex;gap:8px"><span class="pill neutral">act</span><span class="pill neutral">click</span><span class="chip mono">h0</span><span class="spacer"></span><button class="btn">Send</button></div>
+      </div>
+      <div class="alert warn"><svg viewBox="0 0 16 16"><path d="M8 5v4M8 11h.01"/><path d="M7 2.2L1.4 12a1 1 0 00.9 1.5h11.4a1 1 0 00.9-1.5L9 2.2a1 1 0 00-1.8 0z"/></svg><span><b>Every call records an intent.</b> Send is refused until this sentence is written: the intent is what <span class="mono">trajectory compile</span> turns into a step, and a call without one is a line the compiler has to throw away (REQ-BEH-4).</span></div>
+      <div class="panel-h"><span>trajectory.jsonl</span><span class="spacer"></span><span class="chip mono">6 calls</span><span class="chip">1 error</span></div>
+      <div class="audit">
+        <div class="l"><span class="ts">1</span><span class="k">snapshot</span><span>look at the home page · <span class="ok">31 nodes</span> · 42 ms</span></div>
+        <div class="l"><span class="ts">2</span><span class="k">act</span><span>open the booking page · click h0 · <span class="ok">ok</span> · 65 ms</span></div>
+        <div class="l"><span class="ts">3</span><span class="k">snapshot</span><span>see what the booking page offers · <span class="ok">44 nodes</span> · 38 ms</span></div>
+        <div class="l"><span class="ts">4</span><span class="k">act</span><span>type the location I want · type h2 "Indiranagar" · <span class="ok">ok</span> · 10 ms</span></div>
+        <div class="l"><span class="ts">5</span><span class="k">act</span><span>choose the suggestion · click h9 · <span class="bad">no element h9</span> · 12 ms</span></div>
+        <div class="l"><span class="ts">6</span><span class="k">check</span><span>confirm the slot was taken · ref h5 visible · <span class="ok">true</span> · 4 ms</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<aside class="inspector" aria-label="Inspector">
+  <h2 class="mono">h0 · link “Book a slot”</h2>
+  <div class="kv"><span class="k">Role</span><span class="v mono">link</span><span class="k">Name</span><span class="v">Book a slot</span><span class="k">States</span><span class="v mono">visible · enabled</span><span class="k">Box</span><span class="v mono">184,96 152×24</span></div>
+  <h3>Candidates the recorder would write</h3>
+  <table class="table"><tr><th>#</th><th>by</th><th>value</th><th class="num">score</th></tr>
+    <tr><td class="mono">0</td><td class="mono">testid</td><td class="mono">booking-link</td><td class="num">0.98</td></tr>
+    <tr><td class="mono">1</td><td class="mono">role</td><td class="mono">link "Book a slot"</td><td class="num">0.92</td></tr>
+    <tr><td class="mono">2</td><td class="mono">text</td><td class="mono">Book a slot</td><td class="num">0.74</td></tr>
+  </table>
+  <h3>Compile to proposal</h3>
+  <div class="card"><p>Six calls, five with an intent, one error. <b>Compile to proposal</b> writes <span class="mono">proposals/2026-09-05/booking.flow</span> and a seed bindings store, both marked <span class="pill warn" style="height:16px">unverified</span>. It writes only under <span class="mono">proposals/</span> and never into <span class="mono">flows/</span>.</p></div>
+  <div class="card"><p>The failed call is kept. A trajectory is an account of what an agent did, and dropping the mistake would make the proposal a story of a session that never happened.</p></div>
+  <div style="display:flex;gap:8px;padding:14px 16px"><button class="btn">Re-pick in session</button><button class="btn">Open trajectory.jsonl</button></div>
+</aside>
+@@STATUS(<span>session ex-7f3 · playwright · 6 calls · 1 error</span><span>POST /surface/ex-7f3/* · proposals/ only</span>)
+</div>

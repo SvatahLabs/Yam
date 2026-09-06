@@ -1,0 +1,52 @@
+<div class="app">
+@@TOPBAR(Import prototype database)
+@@SIDEBAR(import)
+<section class="workspace">
+  <div class="toolbar"><h1>Import prototype database</h1><span class="sub">reads a Svatah ADE prototype's electron-db into the open project</span><div class="spacer"></div>
+    <button class="btn">Choose folder…</button>
+    <button class="btn primary">Import</button>
+  </div>
+  <div class="main">
+    <div class="editor">
+      <div style="padding:12px 16px;display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 12px;align-items:center">
+        <span style="color:var(--muted)">From</span>
+        <div class="filter" style="margin:0"><span class="mono">~/Library/Application Support/svatah-ade/db</span></div>
+        <span style="color:var(--muted)">Into</span>
+        <div class="filter" style="margin:0"><span class="mono">evals/fixtures</span><span class="spacer"></span><span class="chip">the open project · nowhere else</span></div>
+      </div>
+      <div class="panel-h"><span>Preview · nothing has been written</span><span class="spacer"></span><span class="chip">project “Zoomcar regression”</span></div>
+      <table class="table" aria-label="What would be imported">
+        <tr><th>from</th><th>becomes</th><th style="width:110px">count</th><th style="width:130px">state</th></tr>
+        <tr><td class="mono">project</td><td class="mono">svatah.config.yaml</td><td class="num">1</td><td><span class="pill neutral">merged</span></td></tr>
+        <tr><td class="mono">flows</td><td class="mono">flows/*.flow (v2 → v3)</td><td class="num">4</td><td><span class="pill pass">new</span></td></tr>
+        <tr><td class="mono">project.locatorFile</td><td class="mono">bindings/**/*.yaml</td><td class="num">9</td><td><span class="pill warn">unverified</span></td></tr>
+        <tr><td class="mono">config.dataFile</td><td class="mono">data.yaml</td><td class="num">1</td><td><span class="pill neutral">merged</span></td></tr>
+        <tr><td class="mono">apirequests</td><td class="mono">api/*.yaml</td><td class="num">3</td><td><span class="pill pass">new</span></td></tr>
+        <tr><td class="mono">results, images</td><td style="color:var(--muted)">—</td><td class="num">318</td><td><span class="pill skip">not imported</span></td></tr>
+      </table>
+      <div class="alert warn"><svg viewBox="0 0 16 16"><path d="M8 5v4M8 11h.01"/><path d="M7 2.2L1.4 12a1 1 0 00.9 1.5h11.4a1 1 0 00.9-1.5L9 2.2a1 1 0 00-1.8 0z"/></svg><span><b>Two flow names already exist</b> — <span class="mono">login.flow</span> and <span class="mono">booking.flow</span>. They are written as <span class="mono">login.imported.flow</span> and <span class="mono">booking.imported.flow</span>; nothing in the project is overwritten.</span></div>
+      <div class="panel-h"><span>migration-review.md · 40 notes</span><span class="spacer"></span><span class="chip">12 need a decision</span></div>
+      <div class="audit">
+        <div class="l"><span class="ts">1</span><span class="k">flow</span><span>login.flow:7 · <span class="pol">#user#</span> → <span class="ok">{data.user.email}</span></span></div>
+        <div class="l"><span class="ts">2</span><span class="k">flow</span><span>login.flow:9 · <span class="pol">var : token</span> → <span class="ok">… as token</span></span></div>
+        <div class="l"><span class="ts">3</span><span class="k">locator</span><span>pay_button · xpath only, no test id · <span class="bad">record to verify</span></span></div>
+        <div class="l"><span class="ts">4</span><span class="k">flow</span><span>booking.flow:22 · <span class="bad">sleep 30000</span> · unmapped, left as a comment</span></div>
+        <div class="l"><span class="ts">5</span><span class="k">api</span><span>create_booking · basic auth from the prototype's keychain · <span class="bad">not imported</span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<aside class="inspector" aria-label="Inspector">
+  <h2>After the import</h2>
+  <div class="card"><p>The Flows screen opens on the four migrated files with every imported binding marked <span class="pill warn" style="height:16px">unverified</span>, and one <b>Record</b> verifies them all against the running application.</p></div>
+  <h3>Where it may write</h3>
+  <div class="kv"><span class="k">Reads</span><span class="v mono">~/…/svatah-ade/db</span><span class="k">Writes</span><span class="v mono">evals/fixtures/**</span><span class="k">Refuses</span><span class="v">anything outside it</span></div>
+  <div class="card"><p>The service confines every write to the directory it was opened on, and an import that could write anywhere would be the one route around that (LLD §13.5). The flow is: open an empty directory as a project, then import into it.</p></div>
+  <h3>The same thing from a terminal</h3>
+  <div class="card"><p class="mono" style="color:var(--fg2)">svatah migrate evals/fixtures --from-ade ~/…/svatah-ade/db</p><p>No screen holds logic the CLI lacks (the review rule, §13.6).</p></div>
+  <h3>Not imported</h3>
+  <div class="kv"><span class="k">Results</span><span class="v">318 runs</span><span class="k">Screenshots</span><span class="v">1,204 images</span><span class="k">Why</span><span class="v">a run is evidence of a plan this project does not have</span></div>
+  <div style="display:flex;gap:8px;padding:14px 16px"><button class="btn">Open migration-review.md</button><button class="btn ghost">Cancel</button></div>
+</aside>
+@@STATUS(<span>preview only · nothing written</span><span>POST /migrate · into evals/fixtures</span>)
+</div>

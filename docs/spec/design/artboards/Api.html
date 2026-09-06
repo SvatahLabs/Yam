@@ -1,0 +1,53 @@
+<div class="app">
+@@TOPBAR(API)
+@@SIDEBAR(api)
+<section class="workspace">
+  <div class="toolbar"><h1>API</h1><span class="sub">3 named requests · api/*.yaml</span><div class="spacer"></div>
+    <span class="chip">share session cookies</span>
+    <button class="btn">Save as…</button>
+    <button class="btn primary">Send <kbd>⌘↵</kbd></button>
+  </div>
+  <div class="main">
+    <aside class="list" aria-label="Named requests">
+      <div class="filter">Filter requests…</div>
+      <div class="row active"><span class="name">active count</span><span class="pill neutral">GET</span><span class="meta"><span class="mono">/api/active-count</span><span>sent 2 min ago</span></span></div>
+      <div class="row"><span class="name">create booking</span><span class="pill neutral">POST</span><span class="meta"><span class="mono">/api/bookings</span><span>used by 1 story</span></span></div>
+      <div class="row"><span class="name">cancel booking</span><span class="pill neutral">DELETE</span><span class="meta"><span class="mono">/api/bookings/{bookingId}</span><span>used by 1 story</span></span></div>
+    </aside>
+    <div class="editor">
+      <div class="tabs"><div class="tab active">Request</div><div class="tab">Headers · 1</div><div class="tab">Body</div><div class="tab">Auth</div></div>
+      <div style="padding:12px 16px;display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;align-items:center">
+        <span class="pill neutral">GET</span>
+        <div class="filter" style="margin:0"><span class="mono"><span class="ref">{data.baseUrl}</span>/api/active-count</span></div>
+      </div>
+      <table class="table" aria-label="Headers">
+        <tr><th>header</th><th>value</th><th style="width:120px">from</th></tr>
+        <tr><td class="mono">accept</td><td class="mono">application/json</td><td>api/active-count.yaml</td></tr>
+        <tr><td class="mono" style="color:var(--dim)">add a header…</td><td></td><td></td></tr>
+      </table>
+      <div class="panel-h"><span>Response</span><span class="spacer"></span><span class="pill pass">200 OK</span><span class="chip mono">41 ms</span><span class="chip mono">86 B</span></div>
+      <div class="snap" style="margin:10px 16px">{
+  "active": <span class="hit">7</span>,
+  "asOf": "2026-09-05T09:25:41.004Z",
+  "location": "Indiranagar"
+}</div>
+      <div class="group"><b>$.active</b><span>picked · writes</span><span class="mono ref">Remember the response as activeCount</span><span class="spacer"></span></div>
+    </div>
+  </div>
+</section>
+<aside class="inspector" aria-label="Inspector">
+  <h2>active count</h2>
+  <div class="kv"><span class="k">File</span><span class="v mono">api/active-count.yaml</span><span class="k">Method</span><span class="v mono">GET</span><span class="k">Timeout</span><span class="v mono">5000 ms</span><span class="k">Redirects</span><span class="v">followed</span><span class="k">Cookies</span><span class="v">shared with the flow's session</span></div>
+  <h3>Used by</h3>
+  <div class="card"><p><span class="mono">svatah.flow</span> · “Check the active count”, line 7</p><p class="mono" style="color:var(--fg2)">Call the "active count" API and remember the response as activeCount</p></div>
+  <h3>Sends</h3>
+  <table class="table"><tr><th>when</th><th>status</th><th class="num">time</th><th class="num">size</th></tr>
+    <tr class="sel"><td>2 min ago</td><td><span class="pill pass">200</span></td><td class="num">41 ms</td><td class="num">86 B</td></tr>
+    <tr><td>18 min ago</td><td><span class="pill pass">200</span></td><td class="num">38 ms</td><td class="num">86 B</td></tr>
+    <tr><td>1 h ago</td><td><span class="pill fail">502</span></td><td class="num">2003 ms</td><td class="num">0 B</td></tr>
+  </table>
+  <div class="card"><p>Sends are this window's, not a file. Nothing here is written to the project until <b>Save as…</b>, and a response body is never stored — <span class="mono">{data.*}</span> values in a request may be secrets (REQ-NFR-6).</p></div>
+  <div style="display:flex;gap:8px;padding:14px 16px"><button class="btn">Use in flow</button><button class="btn">Open YAML</button><button class="btn ghost">Copy as curl</button></div>
+</aside>
+@@STATUS(<span>api/active-count.yaml · GET 200 · 41 ms</span><span>POST /api/request · never written to the project</span>)
+</div>

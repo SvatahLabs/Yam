@@ -1,0 +1,49 @@
+<div class="app">
+@@TOPBAR(Data)
+@@SIDEBAR(data)
+<section class="workspace">
+  <div class="toolbar"><h1>Data</h1><span class="sub">8 values · 3 secrets, redacted · data.yaml</span><div class="spacer"></div>
+    <span class="chip">1 secret unset</span>
+    <button class="btn">Reload</button>
+    <button class="btn primary">Save <kbd>⌘S</kbd></button>
+  </div>
+  <div class="main">
+    <div class="editor">
+      <table class="table" aria-label="Run data">
+        <tr><th>key</th><th>value</th><th style="width:150px">kind</th><th style="width:130px">read by</th></tr>
+        <tr><td class="mono">baseUrl</td><td class="mono">http://localhost:4173</td><td><span class="pill neutral">string</span></td><td>config · 4 stories</td></tr>
+        <tr><td class="mono">env</td><td class="mono">test</td><td><span class="pill neutral">string</span></td><td>1 story</td></tr>
+        <tr><td class="mono">date</td><td class="mono">2026-09-03</td><td><span class="pill neutral">string</span></td><td>2 stories</td></tr>
+        <tr><td class="mono">reportPath</td><td class="mono">reports/summary.pdf</td><td><span class="pill neutral">string</span></td><td>1 story</td></tr>
+        <tr><td class="mono">user.email</td><td class="mono">connected2atul@gmail.com</td><td><span class="pill neutral">string</span></td><td>3 stories</td></tr>
+        <tr class="sel"><td class="mono">user.password</td><td class="mono" style="color:var(--muted)">reads <span class="ref">${SVATAH_SAMPLE_PASSWORD}</span></td><td><span class="pill pass">secret · set</span></td><td>3 stories</td></tr>
+        <tr><td class="mono">card.number</td><td class="mono" style="color:var(--muted)">reads <span class="ref">${SVATAH_SAMPLE_CARD_NUMBER}</span></td><td><span class="pill warn">secret · unset</span></td><td>1 story</td></tr>
+        <tr><td class="mono">card.cvv</td><td class="mono" style="color:var(--muted)">reads <span class="ref">${SVATAH_SAMPLE_CARD_CVV}</span></td><td><span class="pill pass">secret · set</span></td><td>1 story</td></tr>
+      </table>
+      <div class="panel-h"><span>data.yaml</span><span class="spacer"></span><span class="chip">YAML valid</span><span class="chip mono">21 lines</span></div>
+      <div class="code" style="flex:none">
+        <div class="ln"><span class="n">7</span><span class="g"></span><span><span class="head">user:</span></span><span></span></div>
+        <div class="ln"><span class="n">8</span><span class="g"></span><span>  <span class="kw">email</span>: <span class="str">"connected2atul@gmail.com"</span></span><span></span></div>
+        <div class="ln cur"><span class="n">9</span><span class="g"></span><span>  <span class="kw">password</span>: <span class="str">"${SVATAH_SAMPLE_PASSWORD}"</span></span><span class="warn">read at run time · never stored</span></div>
+        <div class="ln"><span class="n">10</span><span class="g"></span><span></span><span></span></div>
+        <div class="ln"><span class="n">11</span><span class="g"></span><span><span class="head">card:</span></span><span></span></div>
+        <div class="ln"><span class="n">12</span><span class="g"></span><span>  <span class="kw">number</span>: <span class="str">"${SVATAH_SAMPLE_CARD_NUMBER}"</span></span><span class="warn">W_SECRET_UNSET</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<aside class="inspector" aria-label="Inspector">
+  <h2 class="mono">user.password</h2>
+  <div class="kv"><span class="k">Kind</span><span class="v">secret (REQ-LANG-9)</span><span class="k">Reads</span><span class="v mono">${SVATAH_SAMPLE_PASSWORD}</span><span class="k">On this machine</span><span class="v">set · 14 characters</span><span class="k">Written to</span><span class="v">nothing</span></div>
+  <div class="card"><p>The value is never shown, never saved to <span class="mono">data.yaml</span>, and never reaches a prompt, the audit, a result, a trace or a screenshot (REQ-NFR-6). What is edited here is the <i>name</i> of the variable it is read from.</p></div>
+  <h3>Read by</h3>
+  <table class="table"><tr><th>story</th><th>step</th></tr>
+    <tr><td>I want to validate login</td><td class="mono">#3 Type {data.user.password} into the password field</td></tr>
+    <tr><td>Sign in and book</td><td class="mono">#2 Type {data.user.password} into the password field</td></tr>
+    <tr><td>Log in as the test user</td><td class="mono">#4 Type {data.user.password} into the password field</td></tr>
+  </table>
+  <div class="card"><p>Renaming this key breaks those three steps. The rename offers to rewrite them; a step it cannot rewrite is listed rather than changed.</p></div>
+  <div style="display:flex;gap:8px;padding:14px 16px"><button class="btn">Rename key</button><button class="btn">Open data.yaml</button></div>
+</aside>
+@@STATUS(<span>data.yaml · 8 values · 3 secrets</span><span>GET/PUT /data · values redacted on read</span>)
+</div>
