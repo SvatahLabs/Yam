@@ -1,46 +1,25 @@
 /**
- * `yam mcp` — the MCP server (T4.6, REQ-AGT-2, LLD §15, §13.4).
+ * `yam mcp` — the MCP server (T4.6, T11', REQ-AGT-2, LLD §15, §13.4).
  *
- * > MCP server exposes the CLI operations and the raw agent surface (`snapshot`,
- * > `act`, `read`, `check`) so external agents can explore through Yam and
- * > have trajectories captured.
- *
- * Two halves, and the second is the interesting one.
+ * Three groups of tools:
  *
  * **The operation tools** — `yam_compile`, `yam_lint`, `yam_run`,
- * `yam_record`, `yam_heal`, `yam_bindings`, `yam_results` — run *the same
- * functions the CLI runs*, through the same entry points the local service
- * calls (`serviceRecord`, `serviceHeal`). No logic lives in this file, exactly
- * as none lives in the service (LLD §13.5): an agent that compiled a project
- * through MCP and a person who compiled it on a terminal must get the same
- * `plan.json`, and the only way to guarantee that is for there to be one
- * implementation. `docs/mcp.md` lists the same seven and a test compares them,
- * because this comment once claimed `record` and `heal` while no such tool was
- * registered (Draft 2.24).
+ * `yam_record`, `yam_heal`, `yam_bindings`, `yam_results` — require a project
+ * and run the same functions the CLI runs.
  *
- * Two things those two do *not* let an agent do, both deliberate:
+ * **The surface tools** — `surface_connect`, `surface_snapshot`, `surface_act`,
+ * `surface_read`, `surface_check`, `surface_close`, `surface_sessions`,
+ * `surface_capabilities`, `surface_describe`, `surface_screenshot` — drive a
+ * live target through session IDs, with no project needed and intent optional.
+ * Registered from the operation catalogue so one source of truth generates CLI,
+ * MCP and service interfaces.
  *
- *   * `yam_record` binds the targets of a flow that already exists. The other
- *     recording — a person driving the browser while Yam writes the flow, which
- *     is what `yam record` alone means since Draft 2.23 — is not offered,
- *     because there is nobody at an MCP session to drive. The human gateway is
- *     refused here for the same reason: it waits for a click that will not come.
- *   * `yam_heal` proposes by default and writes only when the caller says
- *     `apply`. That is `yam heal`'s own default, and it keeps "a proposal is
- *     where the work waits for a person" true unless an agent is told otherwise.
+ * **`surface_trajectory`** — where the trajectory file is and how many calls it
+ * holds. Only available when a project root is provided.
  *
- * `workflow` and `tool` remain elsewhere: a story called as a function is its
- * own server, `yam tool serve` (REQ-BEH-3), whose tools are the stories.
- *
- * **The raw surface tools** — `surface_snapshot`, `surface_act`, `surface_read`,
- * `surface_check` — hand an agent the actual `AgentSurface`, with one addition:
- * every call requires an `intent`. That is what turns an exploration into a
- * *trajectory* rather than a log, and what makes REQ-BEH-4's "compile an agent's
- * exploration into a deterministic tool" possible at all. An agent that cannot
- * say what it is doing is an agent whose exploration cannot become a tool.
- *
- * ADR-16: Yam does not own an exploration agent. It owns the surface the
- * agent explores through, and the file that comes out.
+ * When intent is provided on a surface call and a trajectory writer exists,
+ * the call is recorded. Without intent the call still works — it just doesn't
+ * produce a compilable trajectory line.
  */
 import { randomUUID } from "node:crypto";
 import { join, resolve } from "node:path";
@@ -49,9 +28,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { lintPlan, renderPlan } from "@svatah/yam-compiler";
 import { TrajectoryWriter } from "@svatah/yam-trajectory";
-import { createSurface, type AgentSurface } from "@svatah/yam-surface";
+import { createSurface, listAdapters, type AgentSurface } from "@svatah/yam-surface";
 import type { ActArgs, Config, Predicate, ReadKind, Ref, SurfaceAction } from "@svatah/yam-schema";
-import { predicateSchema, surfaceActionSchema } from "@svatah/yam-schema";
+import { predicateSchema, surfaceActionSchema, SURFACE_ACTIONS } from "@svatah/yam-schema";
 import { formatDiagnostic } from "@svatah/yam-spec";
 import {
   boolOption,
@@ -63,21 +42,37 @@ import {
   type ParsedArgs,
 } from "@svatah/yam-bindings-cli";
 import { credentialInEnvironment } from "@svatah/yam-gateway";
+import {
+  createSessionStore,
+  createAdapterFactory,
+  OPERATIONS,
+  dispatchConnect,
+  dispatchSnapshot,
+  dispatchAct,
+  dispatchRead,
+  dispatchCheck,
+  dispatchClose,
+  dispatchSessions,
+  dispatchCapabilities,
+  dispatchDescribe,
+  dispatchScreenshot,
+  type DispatchContext,
+} from "@svatah/yam-surface-control";
 import { registerAllAdapters } from "../adapters.js";
 import { compileProject, loadProject, type LoadedProject } from "../project.js";
 
-/** What every raw-surface tool takes, on top of its own arguments (LLD §13.4). */
-const INTENT = z
+const OPTIONAL_INTENT = z
   .string()
   .min(1)
+  .optional()
   .describe(
     "What you are trying to do, in the words you would use to describe the step to a person: " +
-      '"sign in as the enterprise user", not "click r14". Required: it is the sentence this ' +
-      "call compiles into when the trajectory becomes a flow.",
+      '"sign in as the enterprise user", not "click r14". Optional; when provided the call is ' +
+      "recorded to the trajectory and the sentence compiles into a flow step.",
   );
 
 export interface McpServerOptions {
-  readonly root: string;
+  readonly root?: string;
   readonly io: CommandIo;
   /** Where `trajectory.jsonl` goes. `<root>/runs/<id>/` by default. */
   readonly trajectoryPath?: string;
@@ -94,15 +89,19 @@ export interface McpServerOptions {
  */
 export async function buildMcpServer(options: McpServerOptions): Promise<{
   server: McpServer;
-  trajectory: TrajectoryWriter;
+  trajectory: TrajectoryWriter | undefined;
   close(): Promise<void>;
 }> {
   const { io } = options;
-  const root = resolve(options.root);
+  const root = options.root !== undefined ? resolve(options.root) : undefined;
   const sessionId = options.sessionId ?? randomUUID();
-  const trajectory = new TrajectoryWriter(
-    options.trajectoryPath ?? join(root, "runs", sessionId, "trajectory.jsonl"),
-  );
+  const trajectory = root !== undefined
+    ? new TrajectoryWriter(
+        options.trajectoryPath ?? join(root, "runs", sessionId, "trajectory.jsonl"),
+      )
+    : options.trajectoryPath !== undefined
+      ? new TrajectoryWriter(options.trajectoryPath)
+      : undefined;
 
   registerAllAdapters();
 
@@ -110,113 +109,54 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
     { name: "yam", version: "0.1.0" },
     {
       instructions:
-        "Yam is a deterministic automation runtime. The `yam_*` tools run the same " +
-        "operations the command line runs. The `surface_*` tools drive a live session " +
-        "directly; each needs an `intent`, and the sequence is written to trajectory.jsonl " +
-        "so the exploration can be compiled into a flow that replays without a model.",
+        "Yam is a deterministic automation runtime. The `yam_*` tools compile, run, " +
+        "record, heal and inspect a project. The `surface_*` tools drive a live target " +
+        "directly through session IDs — call `surface_connect` first. No project needed " +
+        "for surface tools. When `intent` is provided on a surface call the sequence is " +
+        "written to trajectory.jsonl so the exploration can be compiled into a flow.",
     },
   );
 
-  /* ── the session the surface tools drive ────────────────────────────────── */
+  /* ── surface session management via surface-control ─────────────────────── */
 
-  let surface: AgentSurface | undefined;
+  const store = createSessionStore();
+  const factory = createAdapterFactory(
+    (name, config) => createSurface(config),
+    listAdapters,
+  );
+  const ctx: DispatchContext = { sessions: store };
+
   let loaded: LoadedProject | undefined;
 
   const project = async (): Promise<LoadedProject> => {
+    if (root === undefined) throw new Error("This tool requires a project. Start with: yam mcp <project-dir>");
     loaded ??= await loadProject(root);
     return loaded;
   };
 
   /**
-   * Opened on the first surface call, not at start.
-   *
-   * An agent that only ever calls `yam_compile` should not have started a
-   * browser, and a server that opened one eagerly would make every operation
-   * tool wait for it.
+   * Write to the trajectory when intent is provided.
+   * Evidence is lazy: no pre-call snapshot or describe (T11').
    */
-  const session = async (): Promise<AgentSurface> => {
-    if (surface !== undefined) return surface;
-    const project0 = await project();
-    const target = sessionTarget({ command: [], options: {}, rest: [] }, {
-      config: project0.config.app,
-    });
-    const config: Config = {
-      ...project0.config,
-      app: { ...project0.config.app, ...target },
-    };
-    surface = await createSurface(config);
-    await surface.open({ ...target });
-    if (target.baseUrl !== undefined && surface.kind === "web") {
-      await surface.act("navigate", undefined, { url: target.baseUrl });
-    }
-    io.err(`surface session opened on ${config.adapter}`);
-    return surface;
-  };
-
-  /**
-   * Run one surface call and record it (LLD §13.4).
-   *
-   * The recording is not optional and not a wrapper the caller can skip: every
-   * path through a surface tool goes through here, including the ones that
-   * throw. A trajectory records what *happened*, and an agent that drove the
-   * application into a bad state has produced the most interesting trajectory
-   * there is.
-   */
-  const captured = async <T>(
+  const captureToTrajectory = (
     call: "snapshot" | "act" | "read" | "check",
-    intent: string,
+    intent: string | undefined,
     args: Record<string, unknown>,
-    ref: Ref | undefined,
-    run: (live: AgentSurface) => Promise<T>,
-  ): Promise<T> => {
-    const live = await session();
-
-    /*
-     * The page's structural hash and the element's description, read *now*.
-     * A reference is stable within a snapshot and lost on navigation, so an
-     * element described later is a different element or none at all — and
-     * candidates and fingerprints are synthesised from this (LLD §13.4).
-     */
-    const snapshotHash = await live
-      .snapshot({ interactiveOnly: true })
-      .then((one) => one.hash)
-      .catch(() => undefined);
-    const describe = ref === undefined ? undefined : await live.describe(ref).catch(() => undefined);
-    /*
-     * And where the call was made (T5.5). A binding entry is keyed by a context,
-     * and a context is a URL pattern plus the structural hash above — so a
-     * trajectory with the hash and not the URL is one the compiler can group but
-     * cannot address. Best effort: a non-web surface has no URL and says so by
-     * having none.
-     */
-    const url = (await live.state().catch(() => undefined))?.url;
-
-    try {
-      const result = await run(live);
-      trajectory.write({
-        intent,
-        call,
-        ...(Object.keys(args).length === 0 ? {} : { args }),
-        ...(snapshotHash === undefined ? {} : { snapshotHash }),
-        ...(url === undefined ? {} : { url }),
-        ...(ref === undefined ? {} : { ref }),
-        ...(describe === undefined ? {} : { describe }),
-        ...(result === undefined ? {} : { result }),
-      });
-      return result;
-    } catch (error) {
-      trajectory.write({
-        intent,
-        call,
-        ...(Object.keys(args).length === 0 ? {} : { args }),
-        ...(snapshotHash === undefined ? {} : { snapshotHash }),
-        ...(url === undefined ? {} : { url }),
-        ...(ref === undefined ? {} : { ref }),
-        ...(describe === undefined ? {} : { describe }),
-        error: error instanceof Error ? error.message.split("\n")[0]! : String(error),
-      });
-      throw error;
-    }
+    ref: string | undefined,
+    result: Record<string, unknown>,
+  ): void => {
+    if (!trajectory || !intent) return;
+    const isError = (result as { status?: string }).status === "failed";
+    const errorMsg = isError
+      ? ((result as { error?: { message?: string } }).error?.message ?? "unknown error")
+      : undefined;
+    trajectory.write({
+      intent,
+      call,
+      ...(Object.keys(args).length === 0 ? {} : { args }),
+      ...(ref === undefined ? {} : { ref: ref as Ref }),
+      ...(isError ? { error: errorMsg } : { result: (result as { result?: unknown }).result }),
+    });
   };
 
   const text = (value: unknown) => ({
@@ -546,125 +486,227 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
     },
   );
 
-  /* ── the raw surface tools (LLD §15, §13.4) ─────────────────────────────── */
+  /* ── the surface tools, driven from the operation catalogue ──────────── */
+
+  server.registerTool(
+    "surface_connect",
+    {
+      title: "Connect to a surface",
+      description:
+        "Open a new surface session against a target. Returns a session ID for subsequent calls. " +
+        "No project needed.",
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+      inputSchema: {
+        url: z.string().optional().describe("URL to connect to"),
+        adapter: z.string().optional().describe("Adapter to use (playwright, bidi, appium, uia, ax, http)"),
+        headed: z.boolean().optional().describe("Run in headed mode"),
+        intent: OPTIONAL_INTENT,
+      },
+    },
+    async ({ url, adapter, headed, intent }) => {
+      const result = await dispatchConnect(ctx, {
+        url, adapter, headed,
+        adapterFactory: factory,
+      });
+      io.err(`surface session opened: ${(result as { result?: { sessionId?: string } }).result?.sessionId}`);
+      return text(result);
+    },
+  );
 
   server.registerTool(
     "surface_snapshot",
     {
-      title: "The page, as a semantic tree",
+      title: "Take a surface snapshot",
       description:
-        "A snapshot with stable references: roles, names, states, one `[ref=…]` per element. " +
-        "This is what you address elements by — never a CSS selector, which the surface does " +
-        "not expose.",
+        "A snapshot with stable references: roles, names, states, one `[ref=…]` per element.",
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
       inputSchema: {
-        intent: INTENT,
+        session: z.string().min(1).describe("Session ID from surface_connect"),
         interactiveOnly: z
           .boolean()
           .optional()
           .describe("Only elements worth acting on. Smaller, and usually what you want."),
         maxNodes: z.number().int().positive().optional(),
+        root: z.string().optional().describe("Subtree root ref"),
+        intent: OPTIONAL_INTENT,
       },
     },
-    async ({ intent, interactiveOnly, maxNodes }) =>
-      text(
-        await captured("snapshot", intent, { interactiveOnly, maxNodes }, undefined, async (live) => {
-          const snapshot = await live.snapshot({
-            ...(interactiveOnly === undefined ? {} : { interactiveOnly }),
-            ...(maxNodes === undefined ? {} : { maxNodes }),
-          });
-          return { hash: snapshot.hash, nodes: snapshot.nodes.length, text: snapshot.text };
-        }),
-      ),
+    async ({ session, interactiveOnly, maxNodes, root, intent }) => {
+      const result = await dispatchSnapshot(ctx, { session, interactiveOnly, maxNodes, root });
+      captureToTrajectory("snapshot", intent, { interactiveOnly, maxNodes }, undefined, result);
+      return text(result);
+    },
   );
 
   server.registerTool(
     "surface_act",
     {
-      title: "Act on the page",
+      title: "Perform a surface action",
       description:
         "Perform one action, addressed by a reference from `surface_snapshot`. Navigation and " +
         "scrolling take no reference; everything else does.",
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
       inputSchema: {
-        intent: INTENT,
-        action: surfaceActionSchema.describe("The action to perform."),
+        session: z.string().min(1).describe("Session ID from surface_connect"),
+        action: z.enum(SURFACE_ACTIONS as unknown as [string, ...string[]]).describe("The action to perform."),
         ref: z.string().optional().describe("The `[ref=…]` from the most recent snapshot."),
         args: z
           .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]))
           .optional()
           .describe('Arguments: {"url": "/login"}, {"value": "hello"}, {"key": "Enter"}.'),
         ref2: z.string().optional().describe("The second element, for dragTo."),
+        intent: OPTIONAL_INTENT,
       },
     },
-    async ({ intent, action, ref, args, ref2 }) =>
-      text(
-        await captured("act", intent, { action, args, ref2 }, ref, (live) =>
-          live.act(action as SurfaceAction, ref, (args ?? {}) as ActArgs, ref2),
-        ),
-      ),
+    async ({ session, action, ref, args, ref2, intent }) => {
+      const result = await dispatchAct(ctx, {
+        session, action, ref, args: args as ActArgs | undefined, ref2,
+      });
+      captureToTrajectory("act", intent, { action, args, ref2 }, ref, result);
+      return text(result);
+    },
   );
 
   server.registerTool(
     "surface_read",
     {
-      title: "Read from the page",
+      title: "Read a surface value",
       description: "The text, value, an attribute, the title or the URL.",
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
       inputSchema: {
-        intent: INTENT,
+        session: z.string().min(1).describe("Session ID from surface_connect"),
         kind: z.enum(["text", "value", "attribute", "title", "url", "result"]),
         ref: z.string().optional().describe("Required for everything but title and url."),
         name: z.string().optional().describe('The attribute name, for kind "attribute".'),
+        intent: OPTIONAL_INTENT,
       },
     },
-    async ({ intent, kind, ref, name }) =>
-      text(
-        await captured("read", intent, { kind, name }, ref, (live) =>
-          live.read(kind as ReadKind, ref, name),
-        ),
-      ),
+    async ({ session, kind, ref, name, intent }) => {
+      const result = await dispatchRead(ctx, {
+        session, kind: kind as ReadKind, ref, name,
+      });
+      captureToTrajectory("read", intent, { kind, name }, ref, result);
+      return text(result);
+    },
   );
 
   server.registerTool(
     "surface_check",
     {
-      title: "Check a predicate",
+      title: "Check a surface predicate",
       description:
         "Ask whether something is true, without asserting it: visible, enabled, checked, the " +
         "text, the URL. Returns what it saw as well as whether it held.",
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
       inputSchema: {
-        intent: INTENT,
+        session: z.string().min(1).describe("Session ID from surface_connect"),
         predicate: z
           .record(z.string(), z.unknown())
-          .describe('The predicate, e.g. {"kind":"visible"} or {"kind":"textContains","value":{"kind":"literal","value":"Welcome"}}.'),
+          .describe('The predicate, e.g. {"kind":"visible"} or {"kind":"textContains","value":"Welcome"}.'),
         subject: z.enum(["ref", "page", "dialog"]).default("ref"),
         ref: z.string().optional(),
+        intent: OPTIONAL_INTENT,
       },
     },
-    async ({ intent, predicate, subject, ref }) =>
-      text(
-        await captured("check", intent, { predicate, subject }, ref, (live) =>
-          live.check(predicateSchema.parse(predicate) as Predicate, subject, ref),
-        ),
-      ),
+    async ({ session, predicate, subject, ref, intent }) => {
+      const result = await dispatchCheck(ctx, {
+        session,
+        predicate: predicate as { kind: string; value?: string; name?: string; negate?: boolean },
+        subject,
+        ref,
+      });
+      captureToTrajectory("check", intent, { predicate, subject }, ref, result);
+      return text(result);
+    },
   );
 
   server.registerTool(
-    "surface_trajectory",
+    "surface_close",
     {
-      title: "The trajectory so far",
-      description:
-        "Where the trajectory of this session is being written, and how many calls it holds. " +
-        "The file compiles into a story draft, a plan fragment and bindings (REQ-BEH-4).",
+      title: "Close a surface session",
+      description: "Close a session and release its resources.",
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+      inputSchema: {
+        session: z.string().min(1).describe("Session ID"),
+        intent: OPTIONAL_INTENT,
+      },
+    },
+    async ({ session }) => text(await dispatchClose(ctx, { session })),
+  );
+
+  server.registerTool(
+    "surface_sessions",
+    {
+      title: "List surface sessions",
+      description: "List all active surface sessions.",
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
       inputSchema: {},
     },
-    async () => text({ path: trajectory.path, calls: trajectory.count }),
+    async () => text(await dispatchSessions(ctx)),
   );
+
+  server.registerTool(
+    "surface_capabilities",
+    {
+      title: "Get adapter capabilities",
+      description: "Get the capabilities of a session's adapter.",
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+      inputSchema: {
+        session: z.string().min(1).describe("Session ID"),
+      },
+    },
+    async ({ session }) => text(await dispatchCapabilities(ctx, { session })),
+  );
+
+  server.registerTool(
+    "surface_describe",
+    {
+      title: "Describe a surface element",
+      description: "Describe a specific element on the surface by reference.",
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+      inputSchema: {
+        session: z.string().min(1).describe("Session ID"),
+        ref: z.string().min(1).describe("Element reference"),
+        intent: OPTIONAL_INTENT,
+      },
+    },
+    async ({ session, ref }) => text(await dispatchDescribe(ctx, { session, ref })),
+  );
+
+  server.registerTool(
+    "surface_screenshot",
+    {
+      title: "Take a screenshot",
+      description: "Take a screenshot of the current surface.",
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+      inputSchema: {
+        session: z.string().min(1).describe("Session ID"),
+        path: z.string().optional().describe("Output file path"),
+        intent: OPTIONAL_INTENT,
+      },
+    },
+    async ({ session, path }) => text(await dispatchScreenshot(ctx, { session, path })),
+  );
+
+  if (trajectory) {
+    server.registerTool(
+      "surface_trajectory",
+      {
+        title: "The trajectory so far",
+        description:
+          "Where the trajectory of this session is being written, and how many calls it holds. " +
+          "The file compiles into a story draft, a plan fragment and bindings (REQ-BEH-4).",
+        inputSchema: {},
+      },
+      async () => text({ path: trajectory.path, calls: trajectory.count }),
+    );
+  }
 
   return {
     server,
     trajectory,
     close: async () => {
-      await surface?.close().catch(() => undefined);
-      surface = undefined;
+      await store.closeAll();
     },
   };
 }
@@ -677,9 +719,9 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
  * server's own output therefore goes to stderr: stdout is the protocol.
  */
 export async function mcpCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
-  const root = args.command[1] ?? ".";
+  const root = args.command[1];
   const built = await buildMcpServer({
-    root,
+    ...(root === undefined ? {} : { root }),
     io,
     ...(stringOption(args, "trajectory") === undefined
       ? {}
@@ -689,14 +731,16 @@ export async function mcpCommand(args: ParsedArgs, io: CommandIo): Promise<ExitC
       : { sessionId: stringOption(args, "session")! }),
   });
 
-  io.err(`yam mcp — trajectory at ${built.trajectory.path}`);
+  if (built.trajectory) {
+    io.err(`yam mcp — trajectory at ${built.trajectory.path}`);
+  } else {
+    io.err("yam mcp — surface tools ready (no project, no trajectory)");
+  }
   if (boolOption(args, "json")) io.err("(--json has no meaning for a protocol server)");
 
   const transport = new StdioServerTransport();
   await built.server.connect(transport);
 
-  // The server owns the process until the client disconnects; `connect` returns
-  // as soon as the transport is wired, so the close is what keeps it alive.
   await new Promise<void>((done) => {
     transport.onclose = () => done();
     process.once("SIGINT", () => done());

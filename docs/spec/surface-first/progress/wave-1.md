@@ -146,7 +146,25 @@
 
 ## T11' — Narrow MCP surface profile
 
-**Status:** pending
+**Status:** complete
+
+**Files modified:**
+- `packages/cli/src/commands/mcp.ts`: Replaced 4 legacy surface tools (surface_snapshot/act/read/check with lazy session) with 10 catalogue-driven tools using the surface-control dispatcher. Added surface_connect, surface_close, surface_sessions, surface_capabilities, surface_describe, surface_screenshot. Intent optional on all surface tools. Project root optional — surface tools work without a project. Trajectory capture is lazy: no pre-call snapshot (previously every surface call took a full `snapshot({interactiveOnly: true})` before dispatching).
+- `docs/mcp.md`: Updated to document 11 surface tools (10 + trajectory), optional intent, projectless mode. Fixed `npx yam` → `npx @svatah/yam` (G11). Reorganised to put surface tools first. Simplified trajectory documentation.
+- `packages/cli/test/mcp.test.ts`: Updated tool list (12 → 18 published tools). Updated intent test: was "required", now "optional". Added session ID requirement test. Rewritten exploration test to use connect/session/close flow. Added no-intent test proving calls work without intent but don't write trajectory.
+
+**Done conditions verified:**
+- Surface tools work without a project (no root argument to buildMcpServer)
+- Intent is optional on all surface tools
+- Session-based workflow: connect → snapshot → act → read → check → close
+- Trajectory written only when intent is provided and project exists
+- Lazy evidence: removed pre-call snapshot (previously every call did a full page read)
+- All 10 operations from the catalogue registered as MCP tools
+- docs/mcp.md documents exactly the tools the server offers
+
+**Deviations:** Trajectory evidence is lazy (no pre-call snapshotHash or describe capture). The spec says "make the trajectory's evidence cheap or lazy" — this is the lazy path. A future wave can add opt-in rich evidence.
+
+**Known gaps:** none.
 
 ---
 

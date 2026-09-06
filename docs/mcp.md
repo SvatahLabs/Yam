@@ -1,16 +1,28 @@
 # `yam mcp`
 
-Yam's operations and its raw agent surface, over the Model Context Protocol,
-so an external agent can drive a project and have its exploration captured
-(REQ-AGT-2, REQ-BEH-4, LLD §15, §13.4).
+Yam's operations and its live surface, over the Model Context Protocol,
+so an external agent can drive an application and optionally have its exploration
+captured (REQ-AGT-2, REQ-BEH-4, LLD §15, §13.4).
 
 ```jsonc
-// An MCP client's server list
+// An MCP client's server list — surface tools only, no project needed
 {
   "mcpServers": {
     "yam": {
       "command": "npx",
-      "args": ["yam", "mcp", "/path/to/the/project"]
+      "args": ["@svatah/yam", "mcp"]
+    }
+  }
+}
+```
+
+```jsonc
+// With a project, for operation tools and trajectory capture
+{
+  "mcpServers": {
+    "yam": {
+      "command": "npx",
+      "args": ["@svatah/yam", "mcp", "/path/to/the/project"]
     }
   }
 }
@@ -19,12 +31,37 @@ so an external agent can drive a project and have its exploration captured
 Stdio: no port to collide, no token to leak, and the client owns the process.
 The server's own output goes to stderr, because stdout is the protocol.
 
+## The surface tools
+
+These drive a live target through session IDs. Call `surface_connect` first;
+subsequent calls reference the session it returns. **No project needed.** Intent
+is optional; when provided on snapshot/act/read/check, the call is recorded to
+the trajectory so the exploration can be compiled into a flow.
+
+| Tool | |
+|---|---|
+| `surface_connect` | Open a surface session against a target. Returns a session ID |
+| `surface_snapshot` | The page as a semantic tree, with a stable `[ref=…]` per element |
+| `surface_act` | One action, addressed by a reference |
+| `surface_read` | Text, value, an attribute, the title, the URL |
+| `surface_check` | Whether a predicate holds, and what it saw |
+| `surface_close` | Close a session and release its resources |
+| `surface_sessions` | List all active sessions |
+| `surface_capabilities` | What the session's adapter can do |
+| `surface_describe` | Describe a specific element by reference |
+| `surface_screenshot` | Take a screenshot of the current surface |
+| `surface_trajectory` | Where this session's trajectory is, and how many calls it holds (project only) |
+
+Elements are addressed by reference and never by selector. The surface does not
+expose one (REQ-SURF-5), which is what makes an agent's exploration compilable:
+a reference points at an element a snapshot described, and a description is what
+candidates and fingerprints are synthesised from.
+
 ## The operation tools
 
-They run **the same functions the command line runs**. An agent that compiles a
-project through MCP and a person who compiles it on a terminal get the same
-`plan.json` — the only way to guarantee that is for there to be one
-implementation, which is the same rule the local service follows (LLD §13.5).
+They run **the same functions the command line runs** and **require a project**.
+An agent that compiles a project through MCP and a person who compiles it on a
+terminal get the same `plan.json`.
 
 | Tool | |
 |---|---|
@@ -35,8 +72,6 @@ implementation, which is the same rule the local service follows (LLD §13.5).
 | `yam_heal` | Relocalize the bindings a run could not resolve and report what can be repaired. Proposes; `apply: true` writes |
 | `yam_bindings` | The store: every element the project has recorded, and the phrases that name it |
 | `yam_results` | The summary and step results of a run under `runs/` |
-
-Seven, and no more.
 
 `yam_record` is the **binding** half of recording — `yam record --flow <file>`.
 The other half, a person driving the browser while Yam writes the flow, is what
@@ -51,64 +86,35 @@ applied only after the story it came from replayed green.
 server, [`yam tool serve`](behaviors.md), whose tools *are* the stories, with the
 agent recorded as the invoker.
 
-## The raw surface tools
-
-These hand an agent the actual `AgentSurface` — `snapshot`, `act`, `read`,
-`check` — with one addition: **every call requires an `intent`**.
-
-| Tool | |
-|---|---|
-| `surface_snapshot` | The page as a semantic tree, with a stable `[ref=…]` per element |
-| `surface_act` | One action, addressed by a reference |
-| `surface_read` | Text, value, an attribute, the title, the URL |
-| `surface_check` | Whether a predicate holds, and what it saw |
-| `surface_trajectory` | Where this session's trajectory is, and how many calls it holds |
-
-The session opens on the first surface call, not at start: an agent that only
-compiles should not have started a browser.
-
-Elements are addressed by reference and never by selector. The surface does not
-expose one (REQ-SURF-5), which is what makes an agent's exploration compilable:
-a reference points at an element a snapshot described, and a description is what
-candidates and fingerprints are synthesised from.
-
 ## The trajectory
 
-Every surface call is written to `runs/<session>/trajectory.jsonl`, one canonical
-JSON object per line:
+When a project root is provided and `intent` is passed on a surface call, the
+call is written to `runs/<session>/trajectory.jsonl`, one canonical JSON object
+per line:
 
 ```json
-{"at":"2026-09-03T20:31:04.211Z","call":"act","describe":{…},"intent":"go to the sign-in page","ref":"r3","seq":2,"snapshotHash":"9f2c…"}
+{"at":"2026-09-03T20:31:04.211Z","call":"act","intent":"go to the sign-in page","ref":"r3","seq":2}
 ```
 
 | Field | |
 |---|---|
 | `seq` | 1-based, in the order the calls were made |
-| `intent` | What the agent said it was doing. **Required** |
+| `intent` | What the agent said it was doing |
 | `call` | `snapshot`, `act`, `read` or `check` |
-| `snapshotHash` | The page's structural hash (LLD §6.2), so a compiler can tell one screen from the next |
-| `ref`, `describe` | The element, and everything synthesis needs about it — read **at the time of the call** |
+| `ref` | The element the call acted on, when it acted on one |
 | `result`, `error` | What the call returned, or why it did not |
 
-### Why `intent` is required
+### Why intent matters
 
 A trajectory of surface calls with no intents is a log. What makes it
 *compilable* is that each call says what the agent was trying to do — "sign in as
 the enterprise user", not "click r14" — because the sentence a step compiles from
-is the intent and nothing else could be (LLD §13.4: "the intent becomes the
-sentence after normalisation through the synonym vocabulary").
+is the intent (LLD §13.4).
 
-So an agent that cannot say what it is doing is an agent whose exploration cannot
-become a deterministic tool, and the protocol says so rather than discovering it
-later.
-
-### Why the description is captured at the time of the call
-
-A reference is stable within a snapshot and lost on navigation. An element
-described an hour later is a different element or none at all, and candidates and
-fingerprints are synthesised from the description with no model (LLD §13.4). So
-`describe` is read when the call is made, which is the only moment it means
-anything.
+Intent is optional for direct control: an agent that just wants to drive a
+surface doesn't need to say why. But an agent whose exploration should become a
+deterministic flow needs to provide intents, so the trajectory compiler can turn
+each call into a sentence.
 
 ### A call that failed is recorded too
 
@@ -130,9 +136,10 @@ surface an agent explores through, and the file that comes out.
 
 | | |
 |---|---|
-| `yam mcp [dir]` | the project; the current directory by default |
+| `yam mcp [dir]` | the project; omit for surface-only mode |
 | `--trajectory <path.jsonl>` | where the trajectory goes; `runs/<session>/trajectory.jsonl` by default |
 | `--session <id>` | fix the session id, so the trajectory's path is predictable |
 
-The session opens where `config.app.baseUrl` says, subject to LLD §15's
-precedence — the flag, then `YAM_BASE_URL`, then the config.
+When a project is provided, the session opens where `config.app.baseUrl` says,
+subject to LLD §15's precedence — the flag, then `YAM_BASE_URL`, then the
+config.

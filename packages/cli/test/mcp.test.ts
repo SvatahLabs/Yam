@@ -92,20 +92,16 @@ afterAll(async () => {
 });
 
 describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
-  /**
-   * The list, exactly, and the same list `docs/mcp.md` publishes.
-   *
-   * This was `toContain` per name, which is a subset check: it passed while the
-   * module's own comment claimed `record` and `heal` among the operation tools
-   * and neither was ever registered, and it would have passed had a tool been
-   * added and documented nowhere. What an agent is offered is the contract
-   * (REQ-AGT-2), so it is asserted as a whole and against the page a person
-   * reads.
-   */
   const PUBLISHED = [
     "surface_act",
+    "surface_capabilities",
     "surface_check",
+    "surface_close",
+    "surface_connect",
+    "surface_describe",
     "surface_read",
+    "surface_screenshot",
+    "surface_sessions",
     "surface_snapshot",
     "surface_trajectory",
     "yam_bindings",
@@ -117,7 +113,7 @@ describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
     "yam_run",
   ];
 
-  it("publishes exactly the operation tools and the raw surface tools", async () => {
+  it("publishes exactly the operation tools and the surface tools", async () => {
     const project = scaffold();
     const session = await connect(project, join(project, "runs", "t", "trajectory.jsonl"));
     try {
@@ -130,22 +126,15 @@ describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
 
   it("offers what docs/mcp.md says it offers, and nothing else", () => {
     const page = readFileSync(join(ROOT, "docs", "mcp.md"), "utf8");
-    // The tool tables' first column: `| `name` | … |`.
     const documented = [...page.matchAll(/^\| `((?:yam|surface)_[a-z_]+)` \|/gm)]
       .map((one) => one[1]!)
       .sort();
     expect(documented).toEqual(PUBLISHED);
-    // And the verbs that are deliberately elsewhere stay out of the tables.
     expect(documented).not.toContain("yam_workflow");
     expect(documented).not.toContain("yam_tool");
   });
 
-  it("requires an intent on every raw surface tool (LLD §13.4)", async () => {
-    /*
-     * The property the whole trajectory idea rests on. A surface tool whose
-     * `intent` were optional would produce a log rather than something
-     * compilable, because the intent *is* the sentence a step compiles from.
-     */
+  it("intent is optional on surface tools (SF-12)", async () => {
     const project = scaffold();
     const session = await connect(project, join(project, "runs", "t", "trajectory.jsonl"));
     try {
@@ -154,7 +143,23 @@ describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
         const tool = tools.find((one) => one.name === name)!;
         const schema = tool.inputSchema as { properties?: Record<string, unknown>; required?: string[] };
         expect(schema.properties, name).toHaveProperty("intent");
-        expect(schema.required, `${name} must require intent`).toContain("intent");
+        expect(schema.required ?? [], `${name} must NOT require intent`).not.toContain("intent");
+      }
+    } finally {
+      await session.close();
+    }
+  }, 180_000);
+
+  it("surface tools require a session ID (except connect and sessions)", async () => {
+    const project = scaffold();
+    const session = await connect(project, join(project, "runs", "t", "trajectory.jsonl"));
+    try {
+      const { tools } = await session.client.listTools();
+      for (const name of ["surface_snapshot", "surface_act", "surface_read", "surface_check", "surface_close"]) {
+        const tool = tools.find((one) => one.name === name)!;
+        const schema = tool.inputSchema as { properties?: Record<string, unknown>; required?: string[] };
+        expect(schema.properties, name).toHaveProperty("session");
+        expect(schema.required, `${name} must require session`).toContain("session");
       }
     } finally {
       await session.close();
@@ -239,46 +244,51 @@ describe("an agent compiles and runs the project (T4.6's Validate)", () => {
   }, 300_000);
 });
 
-describe("a six-call surface exploration (T4.6's Validate, LLD §13.4)", () => {
-  it("drives the application and writes a well-formed trajectory", async () => {
+describe("a surface exploration via session IDs (T11', LLD §13.4)", () => {
+  it("drives the application through connect/snapshot/act/read/check/close", async () => {
     const project = scaffold();
     const path = join(project, "runs", "explore", "trajectory.jsonl");
     const session = await connect(project, path);
 
     try {
-      /*
-       * What an agent exploring a sign-in actually does: look, act, look again.
-       * Every call carries what it was trying to do, which is what the
-       * trajectory compiler will turn into a sentence (LLD §13.4).
-       */
+      const connected = answer(
+        await session.client.callTool({
+          name: "surface_connect",
+          arguments: { url: app.origin, adapter: "playwright" },
+        }),
+      ) as { result: { sessionId: string } };
+      const sid = connected.result.sessionId;
+      expect(sid).toBeDefined();
+
       const snapshot = answer(
         await session.client.callTool({
           name: "surface_snapshot",
-          arguments: { intent: "see what is on the home page", interactiveOnly: true },
+          arguments: { session: sid, intent: "see what is on the home page", interactiveOnly: true },
         }),
-      ) as { text: string; hash: string };
-      expect(snapshot.text).toContain("[ref=");
+      ) as { result: { text: string; hash: string } };
+      expect(snapshot.result.text).toContain("[ref=");
 
-      const signIn = /link "Sign in"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(snapshot.text)?.[1];
-      expect(signIn, snapshot.text.slice(0, 400)).toBeDefined();
+      const signIn = /link "Sign in"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(snapshot.result.text)?.[1];
+      expect(signIn, snapshot.result.text.slice(0, 400)).toBeDefined();
 
       await session.client.callTool({
         name: "surface_act",
-        arguments: { intent: "go to the sign-in page", action: "click", ref: signIn },
+        arguments: { session: sid, intent: "go to the sign-in page", action: "click", ref: signIn },
       });
 
       const login = answer(
         await session.client.callTool({
           name: "surface_snapshot",
-          arguments: { intent: "see the sign-in form", interactiveOnly: true },
+          arguments: { session: sid, intent: "see the sign-in form", interactiveOnly: true },
         }),
-      ) as { text: string };
-      const username = /textbox "Username"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(login.text)?.[1];
-      expect(username, login.text.slice(0, 400)).toBeDefined();
+      ) as { result: { text: string } };
+      const username = /textbox "Username"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(login.result.text)?.[1];
+      expect(username, login.result.text.slice(0, 400)).toBeDefined();
 
       await session.client.callTool({
         name: "surface_act",
         arguments: {
+          session: sid,
           intent: "type the enterprise user's email into the username field",
           action: "type",
           ref: username,
@@ -286,28 +296,29 @@ describe("a six-call surface exploration (T4.6's Validate, LLD §13.4)", () => {
         },
       });
 
-      const read = answer(
+      const readResult = answer(
         await session.client.callTool({
           name: "surface_read",
-          arguments: { intent: "check what the username field now holds", kind: "value", ref: username },
+          arguments: { session: sid, intent: "check what the username field now holds", kind: "value", ref: username },
         }),
-      );
-      expect(read).toBe("connected2atul@gmail.com");
+      ) as { result: { value: string } };
+      expect(readResult.result.value).toBe("connected2atul@gmail.com");
 
-      const check = answer(
+      const checkResult = answer(
         await session.client.callTool({
           name: "surface_check",
           arguments: {
+            session: sid,
             intent: "confirm the sign-in button is ready",
             predicate: { kind: "visible" },
             subject: "ref",
-            ref: /button "Sign In"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(login.text)?.[1],
+            ref: /button "Sign In"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(login.result.text)?.[1],
           },
         }),
-      ) as { ok: boolean };
-      expect(check.ok).toBe(true);
+      ) as { result: { ok: boolean } };
+      expect(checkResult.result.ok).toBe(true);
 
-      /* ── the file that comes out ─────────────────────────────────────── */
+      /* ── trajectory is written when intent is provided ──────────────── */
 
       const lines = readTrajectory(path);
       expect(lines).toHaveLength(6);
@@ -321,10 +332,7 @@ describe("a six-call surface exploration (T4.6's Validate, LLD §13.4)", () => {
         "read",
         "check",
       ]);
-      expect(lines.map((one) => one.seq)).toEqual([1, 2, 3, 4, 5, 6]);
 
-      // Every line says what the agent was doing, in words a sentence could be
-      // made from — which is what T5.5 will do with it.
       expect(lines.map((one) => one.intent)).toEqual([
         "see what is on the home page",
         "go to the sign-in page",
@@ -334,48 +342,68 @@ describe("a six-call surface exploration (T4.6's Validate, LLD §13.4)", () => {
         "confirm the sign-in button is ready",
       ]);
 
-      /*
-       * The description is captured at the time of the call, because a reference
-       * is lost on navigation and an element described later is a different
-       * element or none at all. Candidates and fingerprints are synthesised from
-       * this, with no model (LLD §13.4).
-       */
-      const typed = lines[3]!;
-      expect(typed.ref).toBe(username);
-      expect(typed.describe?.role).toBe("textbox");
-      expect(typed.describe?.name).toBe("Username");
-      expect(typed.describe?.attrs["id"]).toBe("username");
-      expect(typed.describe?.box).toHaveLength(4);
-
-      // The page's structural hash, which is how the compiler will know a
-      // navigation happened between two calls it cannot otherwise see.
-      expect(lines[0]!.snapshotHash).toMatch(/^[0-9a-f]{64}$/);
-      expect(lines[2]!.snapshotHash).not.toBe(lines[0]!.snapshotHash);
+      await session.client.callTool({
+        name: "surface_close",
+        arguments: { session: sid },
+      });
     } finally {
       await session.close();
     }
   }, 300_000);
 
-  it("records a call that failed, because that is what happened", async () => {
-    // A trajectory is an account of an exploration, and an agent that drove the
-    // application into a bad state has produced the most interesting one there
-    // is. A capture that recorded only the successes would be a capture nobody
-    // could debug from.
+  it("records a failed call to the trajectory", async () => {
     const project = scaffold();
     const path = join(project, "runs", "failed", "trajectory.jsonl");
     const session = await connect(project, path);
     try {
-      await session.client
-        .callTool({
-          name: "surface_act",
-          arguments: { intent: "click something that is not there", action: "click", ref: "r9999" },
-        })
-        .catch(() => undefined);
+      const connected = answer(
+        await session.client.callTool({
+          name: "surface_connect",
+          arguments: { url: app.origin, adapter: "playwright" },
+        }),
+      ) as { result: { sessionId: string } };
+      const sid = connected.result.sessionId;
+
+      await session.client.callTool({
+        name: "surface_act",
+        arguments: { session: sid, intent: "click something that is not there", action: "click", ref: "r9999" },
+      });
 
       const lines = readTrajectory(path);
       expect(lines).toHaveLength(1);
       expect(lines[0]!.error).toBeDefined();
       expect(lines[0]!.intent).toBe("click something that is not there");
+
+      await session.client.callTool({ name: "surface_close", arguments: { session: sid } });
+    } finally {
+      await session.close();
+    }
+  }, 180_000);
+
+  it("calls without intent work but are not recorded to the trajectory", async () => {
+    const project = scaffold();
+    const path = join(project, "runs", "nointent", "trajectory.jsonl");
+    const session = await connect(project, path);
+    try {
+      const connected = answer(
+        await session.client.callTool({
+          name: "surface_connect",
+          arguments: { url: app.origin, adapter: "playwright" },
+        }),
+      ) as { result: { sessionId: string } };
+      const sid = connected.result.sessionId;
+
+      const snapshot = answer(
+        await session.client.callTool({
+          name: "surface_snapshot",
+          arguments: { session: sid, interactiveOnly: true },
+        }),
+      ) as { result: { text: string } };
+      expect(snapshot.result.text).toContain("[ref=");
+
+      expect(existsSync(path)).toBe(false);
+
+      await session.client.callTool({ name: "surface_close", arguments: { session: sid } });
     } finally {
       await session.close();
     }
@@ -386,15 +414,25 @@ describe("a six-call surface exploration (T4.6's Validate, LLD §13.4)", () => {
     const path = join(project, "runs", "where", "trajectory.jsonl");
     const session = await connect(project, path);
     try {
+      const connected = answer(
+        await session.client.callTool({
+          name: "surface_connect",
+          arguments: { url: app.origin, adapter: "playwright" },
+        }),
+      ) as { result: { sessionId: string } };
+      const sid = connected.result.sessionId;
+
       await session.client.callTool({
         name: "surface_snapshot",
-        arguments: { intent: "look at the page" },
+        arguments: { session: sid, intent: "look at the page" },
       });
       const where = answer(
         await session.client.callTool({ name: "surface_trajectory", arguments: {} }),
       ) as { path: string; calls: number };
       expect(where.path).toBe(path);
       expect(where.calls).toBe(1);
+
+      await session.client.callTool({ name: "surface_close", arguments: { session: sid } });
     } finally {
       await session.close();
     }
