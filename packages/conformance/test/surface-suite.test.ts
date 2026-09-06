@@ -11,6 +11,7 @@
  */
 import { describe, expect, it } from "vitest";
 import {
+  DESKTOP_CASES,
   renderMarkdown,
   renderReport,
   runSurfaceConformance,
@@ -311,5 +312,138 @@ describe("the bridge cost a desktop report publishes (T7.1, LLD §7.5)", () => {
     const report = await run({}, ["home.snapshot"]);
     expect(report.bridge).toBeUndefined();
     expect(renderReport(report)).not.toContain("Bridge:");
+  });
+
+  /**
+   * P8-F2 — the same read costs 1.6 ms per node at load average seven and 29.6
+   * beside a full test run, so the sentence is not comparable without the
+   * machine beside it (Draft 2.10 §7.5).
+   */
+  it("names the load average and the CPU count beside the cost (P8-F2)", async () => {
+    const report = await withCost([
+      {
+        nodes: 589,
+        wallMs: 17_460,
+        msPerNode: 29.64,
+        invocations: 1,
+        axCalls: 9_431,
+        loadAverage1m: 11.28,
+        cpus: 12,
+      },
+    ]);
+    for (const rendered of [renderReport(report), renderMarkdown(report)]) {
+      expect(rendered).toContain("load average 11.28");
+      expect(rendered).toContain("over 12 CPUs");
+    }
+  });
+
+  it("says when the numbers are a retry rather than a first read (P8-F2)", async () => {
+    const report = await withCost([
+      { nodes: 589, wallMs: 990, msPerNode: 1.68, invocations: 1, loadAverage1m: 6.9, cpus: 12, retried: true },
+    ]);
+    expect(renderMarkdown(report)).toContain("The first read exceeded the deadline and this is the retry");
+  });
+
+  it("leaves the load out rather than printing a zero when it was not recorded", async () => {
+    const report = await withCost([{ nodes: 10, wallMs: 20, msPerNode: 2, invocations: 1 }]);
+    expect(renderReport(report)).not.toContain("load average");
+  });
+});
+
+/**
+ * P8-F3 — the desktop snapshot case fails on an unnamed interactive control.
+ *
+ * > Three unnamed buttons on the ADE's Project screen. Name them; make the
+ * > desktop snapshot case fail on an unnamed interactive control.
+ *
+ * The case is run here against two hand-built snapshots that differ in one
+ * thing: whether the button has a name. A rule that cannot be shown to bite is
+ * not a rule, and the live gate needs macOS, a packaged ADE and a granted
+ * permission to show it.
+ */
+describe("the desktop snapshot case and unnamed controls (P8-F3, LLD §13.7)", () => {
+  interface FakeNode {
+    ref: string;
+    role: string;
+    name?: string;
+    states: string[];
+    box?: number[];
+    native?: Record<string, string>;
+  }
+
+  /** The smallest window that satisfies every other check in `ade.snapshot`. */
+  const windowWith = (nodes: readonly FakeNode[]): readonly FakeNode[] => [
+    { ref: "e0", role: "window", name: "Svatah ADE", states: [], box: [0, 0, 1440, 900] },
+    ...nodes,
+  ];
+
+  const snapshotOf = (nodes: readonly FakeNode[]): unknown => ({
+    nodes,
+    hash: "a60918dcb7c34118",
+    text: nodes.map((one) => `${one.role} "${one.name ?? ""}" [ref=${one.ref}]`).join("\n"),
+  });
+
+  class Window extends BrokenAdapter {
+    constructor(private readonly nodes: readonly FakeNode[]) {
+      super({});
+    }
+    override async snapshot(): Promise<never> {
+      return snapshotOf(this.nodes) as never;
+    }
+  }
+
+  const runSnapshotCase = async (nodes: readonly FakeNode[]): Promise<ConformanceReport> =>
+    await runSurfaceConformance({
+      adapter: "fake-desktop",
+      baseUrl: "",
+      cases: DESKTOP_CASES.filter((one) => one.id === "ade.snapshot"),
+      openSurface: async () => new Window(nodes),
+    });
+
+  const named: FakeNode = {
+    ref: "e1",
+    role: "button",
+    name: "Open a project…",
+    states: [],
+    box: [16, 60, 120, 28],
+    native: { automationId: "project-open" },
+  };
+
+  it("passes when every button, tab and field is named", async () => {
+    const report = await runSnapshotCase(windowWith([named]));
+    const checks = report.cases[0]!.checks;
+    const rule = checks.find((one) => one.description.includes("accessible name"));
+    expect(rule?.ok, JSON.stringify(rule)).toBe(true);
+  });
+
+  it("fails, and names them, when three buttons have none", async () => {
+    const chrome = ["e2", "e3", "e4"].map((ref, at) => ({
+      ref,
+      role: "button",
+      states: [] as string[],
+      box: [8 + at * 20, 8, 12, 12],
+    }));
+    const report = await runSnapshotCase(windowWith([named, ...chrome]));
+    const rule = report.cases[0]!.checks.find((one) => one.description.includes("accessible name"));
+    expect(rule?.ok).toBe(false);
+    expect(JSON.stringify(rule?.actual)).toContain("button e2");
+    expect(report.cases[0]!.status).toBe("failed");
+    expect(report.conformant).toBe(false);
+  });
+
+  it("counts a whitespace-only name as no name", async () => {
+    const report = await runSnapshotCase(
+      windowWith([named, { ref: "e5", role: "tab", name: "   ", states: [], box: [0, 0, 8, 8] }]),
+    );
+    const rule = report.cases[0]!.checks.find((one) => one.description.includes("accessible name"));
+    expect(rule?.ok).toBe(false);
+  });
+
+  it("says nothing about a group or a static text, which are not operated", async () => {
+    const report = await runSnapshotCase(
+      windowWith([named, { ref: "e6", role: "generic", states: [] }, { ref: "e7", role: "text", states: [] }]),
+    );
+    const rule = report.cases[0]!.checks.find((one) => one.description.includes("accessible name"));
+    expect(rule?.ok).toBe(true);
   });
 });

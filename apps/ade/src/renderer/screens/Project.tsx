@@ -44,6 +44,21 @@ interface ProjectSummary {
   diagnostics: Array<{ severity: string; message?: string; code?: string }>;
 }
 
+/**
+ * What a Recent button says (P8-F3).
+ *
+ * The last path segment, which is the project directory's name and what someone
+ * would call it. `"/a/b/".split("/").pop()` is the empty string, and a trailing
+ * separator is exactly what a path pasted from a file manager carries — so a
+ * button with no accessible name was one preference away, which is the class of
+ * defect the Phase 8 verification found three of on this screen. The whole path
+ * is the fallback: long, and a name.
+ */
+export function recentLabel(path: string): string {
+  const segments = path.split(/[\\/]/).filter((one) => one !== "");
+  return segments[segments.length - 1] ?? path;
+}
+
 export function ProjectScreen({
   client,
   onOpen,
@@ -124,6 +139,7 @@ export function ProjectScreen({
           {a11yVariant() === 1 ? "Choose a project…" : "Open a project…"}
         </button>
         <button
+          id="project-import"
           type="button"
           onClick={() => void importPrototype()}
           disabled={client === undefined || importing}
@@ -132,9 +148,15 @@ export function ProjectScreen({
           {importing ? "Importing…" : "Import prototype database…"}
         </button>
         {recent.length > 0 ? <span className="muted">Recent:</span> : null}
-        {recent.slice(0, 3).map((one) => (
-          <button key={one} type="button" onClick={() => void onOpen(one)}>
-            {one.split(/[\\/]/).pop()}
+        {recent.slice(0, 3).map((one, at) => (
+          <button
+            key={one}
+            id={`project-recent-${at}`}
+            type="button"
+            onClick={() => void onOpen(one)}
+            title={one}
+          >
+            {recentLabel(one)}
           </button>
         ))}
       </div>

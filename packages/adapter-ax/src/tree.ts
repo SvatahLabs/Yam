@@ -154,8 +154,39 @@ export function nameOf(node: AxNode): string {
     const trimmed = (candidate ?? "").replace(/\s+/g, " ").trim();
     if (trimmed !== "") return trimmed;
   }
-  return "";
+  /*
+   * The window's own controls, which macOS names by their subrole and not by a
+   * title (P8-F3).
+   *
+   * A standard macOS window carries three buttons with no `AXTitle`,
+   * `AXDescription` or `AXHelp` — close, minimise and zoom — and the desktop
+   * suite's snapshot case, which now fails on an unnamed interactive control,
+   * would fail on every window in existence because of them. They are not
+   * anonymous: macOS publishes `AXRoleDescription` "close button" for the first,
+   * and VoiceOver reads it. Reading that attribute would cost one more
+   * `AXUIElementCopyAttributeValue` on *every* node of the tree, roughly six per
+   * cent of the read, to learn something the subrole already says — so the
+   * subrole is what it is derived from, statically and at no cost.
+   */
+  return node.subrole === undefined ? "" : (AX_SUBROLE_NAME[node.subrole] ?? "");
 }
+
+/**
+ * The accessible name a window-chrome control has by virtue of its subrole
+ * (P8-F3, LLD §7.5).
+ *
+ * Only controls whose name macOS itself supplies rather than the application.
+ * A subrole that merely refines a role — `AXSearchField`, `AXTabButton` — is
+ * deliberately absent: those carry the application's own label, and inventing
+ * one for them would hide exactly the defect this map exists to stop hiding.
+ */
+export const AX_SUBROLE_NAME: Readonly<Record<string, string>> = {
+  AXCloseButton: "close",
+  AXMinimizeButton: "minimise",
+  AXZoomButton: "zoom",
+  AXFullScreenButton: "full screen",
+  AXCollapseButton: "collapse",
+};
 
 /** The states LLD §2.2 lists, from the attributes macOS exposes. */
 export function statesOf(node: AxNode): NodeState[] {

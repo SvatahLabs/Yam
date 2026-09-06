@@ -24,6 +24,7 @@ export {
 } from "./bridge.js";
 export {
   AX_SUBROLE_MAP,
+  AX_SUBROLE_NAME,
   automationIdOf,
   childIndex,
   controlPathOf,

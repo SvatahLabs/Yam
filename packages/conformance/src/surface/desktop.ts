@@ -31,6 +31,7 @@
  * both is the evidence for that requirement; a case that had to ask about
  * `AXButton` would be evidence against it.
  */
+import { isInteractiveRole } from "@svatah/surface";
 import type { CaseContext, ConformanceCase, DesktopHealing } from "./types.js";
 
 interface Node {
@@ -123,6 +124,45 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
           .every((node) => Array.isArray(node.box) && node.box.length === 4),
         { expected: "[x, y, width, height] on every control" },
       );
+      /*
+       * Every interactive control is named (P8-F3, LLD §13.7's accessibility
+       * contract, §7.5).
+       *
+       * > Every button, link, tab, field, and row action has a visible label
+       * > that is its accessible name, and an id in the `automationId` form the
+       * > desktop adapters read; the desktop snapshot case fails on an unnamed
+       * > interactive control.
+       *
+       * The Phase 8 verification found three unnamed `AXButton`s on the ADE's
+       * Project screen and this suite said nothing, because no case asked. A
+       * control with no name cannot be addressed by a flow sentence ("Click the
+       * … button"), cannot be bound by a `role`+`name` candidate, and is
+       * unreachable with a screen reader — three separate failures of the same
+       * omission.
+       */
+      const unnamed = nodes.filter(
+        (node) => isInteractiveRole(node.role) && (node.name ?? "").trim() === "",
+      );
+      check("every interactive control has an accessible name", unnamed.length === 0, {
+        expected: "0 unnamed buttons, links, tabs, fields or menu items",
+        actual: unnamed.map((node) => `${node.role} ${node.ref}`).slice(0, 20),
+      });
+
+      /*
+       * The *id* half of §13.7's contract is not a check here, and that is a
+       * deliberate line rather than an omission.
+       *
+       * F3 asks for one rule — "make the desktop snapshot case fail on an
+       * unnamed interactive control" — and the ADE still carries the eleven
+       * legacy screens until Phase 10 deletes them (T9.4: they stay reachable
+       * behind a "Legacy" rail item). Several of their controls are named and
+       * not identified, and a check added here would fail the live gate on
+       * screens this phase is not allowed to rebuild. T11.3 ("The ADE names
+       * every control") is where that becomes a gate condition; the new screens
+       * satisfy it from the start, and `apps/ade/test/a11y.test.ts` holds them
+       * to it.
+       */
+
       equals("the snapshot hash is a hash", /^[0-9a-f]{16,}$/.test(snapshot.hash), true);
       check("the snapshot renders text with references", snapshot.text.includes("[ref="), {
         expected: "[ref=…] annotations in Snapshot.text",
