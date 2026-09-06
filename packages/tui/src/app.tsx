@@ -16,16 +16,23 @@ import { Box, Text, useApp, useInput, useStdout } from "ink";
 import { useCallback, useEffect, useState } from "react";
 import {
   ACTIONS,
+  RAIL,
   actionById,
   actionsForScreen,
   screenById,
-  type FlowsState,
-  type RunState,
   type ScreenId,
   type ScreenParams,
   type ScreenService,
 } from "@svatah/screens";
-import { AuditPane, InspectorPane, MainPane, TreePane, colourOf, rowsIn } from "./panes.js";
+import {
+  AuditPane,
+  InspectorPane,
+  MainPane,
+  TreePane,
+  colourOf,
+  rowsIn,
+  selectionAt,
+} from "./panes.js";
 import {
   PANES,
   focusPane,
@@ -237,28 +244,33 @@ export function App(props: AppProps): React.JSX.Element {
     }
 
     /*
-     * `Enter` opens what the cursor is on: a flow in the tree, a step in the
-     * main pane. Selection is a *screen parameter*, so opening a row is
-     * re-loading the screen — which is how the ADE does it too, and why the two
-     * cannot disagree about what a selected row shows.
+     * `Enter` opens what the cursor is on — a flow, a run, a binding, a filter,
+     * a snapshot node — and *what* that means is the pane model's, not this
+     * file's (T10.1, T10.2). Selection is a screen parameter in both renderers
+     * (§13.7), so opening a row here and clicking it in the ADE reach the same
+     * state, and a screen added later needs no arm in this switch because there
+     * is no switch.
      */
     if (key.return) {
-      if (ui.state.screen === "flows" && ui.focus === "tree") {
-        const file = (ui.state as FlowsState).files[ui.cursor.tree];
-        if (file !== undefined) void reload("flows", { ...ui.params, file: file.file });
-        return;
-      }
-      if (ui.state.screen === "flows" && ui.focus === "main") {
-        const line = (ui.state as FlowsState).lines[ui.cursor.main];
-        if (line !== undefined) {
-          void reload("flows", { ...ui.params, selected: `line:${line.line}` });
-        }
-        return;
-      }
-      if (ui.state.screen === "run" && ui.focus === "main") {
-        const step = (ui.state as RunState).steps[ui.cursor.main];
-        if (step !== undefined) void reload("run", { ...ui.params, selected: step.stepId });
-      }
+      const select = selectionAt(ui, ui.focus);
+      if (select !== undefined) void reload(ui.screen, { ...ui.params, ...select });
+      return;
+    }
+
+    /*
+     * `g` then a rail letter is not a thing; the palette's Go-to rows are how a
+     * screen is reached, and `^K` opens it. What `[` and `]` do is walk the rail
+     * in order, which is the terminal's equivalent of clicking the next item —
+     * conventional, and one keystroke rather than four.
+     */
+    if (input === "[" || input === "]") {
+      const order = RAIL.map((one) => one.screen);
+      const at = order.indexOf(ui.screen);
+      const next =
+        at < 0
+          ? order[0]
+          : order[(at + (input === "]" ? 1 : order.length - 1)) % order.length];
+      if (next !== undefined) void reload(next, {});
       return;
     }
 
@@ -303,13 +315,6 @@ export function App(props: AppProps): React.JSX.Element {
         <Box flexShrink={0}>
           <Text color="magenta">svatah ui</Text>
           <Text color="white"> {sizeOf(ui.layout)}</Text>
-          {ui.layout.inspectorCollapsed ? (
-            <Text color="gray">
-              {" "}
-              · inspector collapsed at {ui.layout.columns} cols ({INSPECTOR_MIN_COLUMNS} to sit
-              beside); 3 opens it
-            </Text>
-          ) : null}
         </Box>
         <Box flexShrink={1} overflow="hidden">
           <Text color="gray" wrap="truncate-end">
@@ -335,6 +340,19 @@ export function App(props: AppProps): React.JSX.Element {
         )}
       </Box>
 
+      {/*
+        Why there are three panes and not four, on its own line (T10.4, P9-F4).
+        Not in the header: at a hundred columns the sentence would push the
+        project and the screen's own subtitle off the end, which is the same
+        defect this correction is about, one row higher.
+      */}
+      {ui.layout.inspectorCollapsed ? (
+        <Text color="gray">
+          {` inspector collapsed at ${ui.layout.columns} cols ` +
+            `(${INSPECTOR_MIN_COLUMNS} to sit beside) · press 3 to open it below`}
+        </Text>
+      ) : null}
+
       {/* Collapsed, and asked for: full width, under the main pane. */}
       {ui.layout.inspectorCollapsed && ui.focus === "inspector" ? (
         <InspectorPane ui={ui} />
@@ -349,7 +367,8 @@ export function App(props: AppProps): React.JSX.Element {
           <Text color="white">1-4</Text> pane {"  "}
           <Text color="white">Tab</Text> next {"  "}
           <Text color="white">j k</Text> move {"  "}
-          <Text color="white">Enter</Text> open{" "}
+          <Text color="white">Enter</Text> open {"  "}
+          <Text color="white">[ ]</Text> screen{" "}
           {actions
             .filter((one) => one.key !== undefined && one.key.length === 1)
             .map((one) => `  ${one.key!.toLowerCase()} ${one.label.toLowerCase()}`)

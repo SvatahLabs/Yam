@@ -305,7 +305,7 @@ describe.runIf(hasScript)("`svatah ui` draws in a pseudo-terminal (T9.4)", () =>
     expect(captured).toContain("Audit");
     // The fourth is collapsed rather than cut in half, and it says so.
     expect(captured).toContain("inspector collapsed at 100 cols");
-    expect(captured).not.toContain("candidates tried");
+    expect(captured).not.toContain("CANDIDATES TRIED");
 
     /*
      * And nothing was drawn past the right edge, which is the defect itself.
@@ -322,12 +322,51 @@ describe.runIf(hasScript)("`svatah ui` draws in a pseudo-terminal (T9.4)", () =>
     );
   }, 60_000);
 
+  /*
+   * T10.1 and T10.2's Validate: "each screen driven end to end through its own
+   * controls … in `svatah ui` under a pseudo-terminal, against the fixtures
+   * project with the fake gateway."
+   *
+   * Every one of the twelve, in a real terminal, against a real service — which
+   * is what `packages/tui/test/cockpit.test.tsx` cannot say, because
+   * `ink-testing-library` writes into a stream and the fake service is a
+   * recording. What each screen *shows* is checked there and in
+   * `@svatah/screens`; what this says is that it draws, in colour, with its
+   * four numbered panes, on a project a person could open.
+   */
+  it.each([
+    ["flows", "Flows"],
+    ["record", "Record review"],
+    ["runs", "Runs"],
+    ["run", "Run"],
+    ["heal", "Heal review"],
+    ["bindings", "Bindings"],
+    ["agents", "Agents and tools"],
+    ["api", "API"],
+    ["data", "Data"],
+    ["explorer", "Surface explorer"],
+    ["import", "Import prototype database"],
+    ["settings", "Settings"],
+  ] as const)("draws the %s screen in a real terminal (T10.1, T10.2)", (screen, title) => {
+    const captured = plain(inPty(["--screen", screen], 2_500));
+
+    // Its own title, from the model, on the header.
+    expect(captured, `the ${screen} screen drew no title`).toContain(title);
+    // Four numbered panes, which is what the `TUI` artboard draws.
+    for (const number of ["1 ", "2 ", "3 ", "4 "]) {
+      expect(captured, `the ${screen} screen is missing pane ${number.trim()}`).toContain(number);
+    }
+    // And the footer's keys, so a person can get out of it.
+    expect(captured).toContain("^K");
+    expect(captured).toContain("q");
+  }, 90_000);
+
   it("at 160 columns: four panes, and that size", () => {
     const captured = plain(
       inPty(["--screen", "run", "--run", RUN_ID], 3_000, { columns: 160, rows: 40 }),
     );
     expect(captured).toContain("160×40");
-    expect(captured).toContain("candidates tried");
+    expect(captured).toContain("CANDIDATES TRIED");
     expect(captured).not.toContain("inspector collapsed");
   }, 60_000);
 });

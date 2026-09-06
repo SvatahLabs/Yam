@@ -158,6 +158,27 @@
       "cli": "svatah tool serve"
     },
     {
+      "id": "explorer.open",
+      "label": "Open a session",
+      "group": "Actions",
+      "screen": "explorer",
+      "key": "O",
+      "cli": "svatah surface snapshot"
+    },
+    {
+      "id": "explorer.close",
+      "label": "Close the session",
+      "group": "Actions",
+      "screen": "explorer"
+    },
+    {
+      "id": "explorer.act",
+      "label": "Act on the element",
+      "group": "Actions",
+      "screen": "explorer",
+      "cli": "svatah surface act"
+    },
+    {
       "id": "explorer.snapshot",
       "label": "Snapshot the session",
       "group": "Actions",

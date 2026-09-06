@@ -424,7 +424,8 @@ describe("the other ten screens against the fixtures project", () => {
       rows: Array<{ label: string; value: string }>;
     };
     const byLabel = Object.fromEntries(state.rows.map((one) => [one.label, one.value]));
-    expect(byLabel["Project"]).toBe("svatah-fixtures");
+    // T10.2 groups the rows; the labels within a group are what the screen says.
+    expect(byLabel["Name"]).toBe("svatah-fixtures");
     expect(byLabel["Adapter"]).toBe("playwright");
     // A boolean, never the key (REQ-NFR-6, REQ-ADE-4).
     expect(["available", "none"]).toContain(byLabel["Model credential"]);

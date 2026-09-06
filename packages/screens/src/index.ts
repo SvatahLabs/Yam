@@ -36,21 +36,42 @@ export type { FlowsState, FlowRow, FlowLine, StepInspector } from "./screens/flo
 export { runScreen, applyEvent, runStateFrom, stamp, policyText } from "./screens/run.js";
 export type { RunState, RunStepRow, RunStoryRow, AuditRow, RunInspector } from "./screens/run.js";
 
-export { OTHER_SCREENS } from "./screens/rest.js";
+export { AUTHORING_SCREENS, applyHealEvent, applyRecordEvent, outcomeOf } from "./screens/authoring.js";
 export type {
-  AgentsState,
-  ApiState,
-  BindingsState,
+  BindingCandidate,
+  BindingInspector,
   BindingRow,
-  DataState,
-  ExplorerState,
+  BindingsState,
+  HealProposal,
   HealState,
-  ImportState,
+  RecordDecision,
   RecordState,
+  RunsFilters,
+  RunsInspector,
   RunsRow,
   RunsState,
+} from "./screens/authoring.js";
+
+export {
+  SECONDARY_SCREENS,
+  apiResponseView,
+  applyExplorerEvent,
+  importResultView,
+  snapshotLines,
+} from "./screens/secondary.js";
+export type {
+  AgentsState,
+  ApiRequestRow,
+  ApiResponseView,
+  ApiState,
+  DataRow,
+  DataState,
+  ExplorerState,
+  ImportState,
   SettingsState,
-} from "./screens/rest.js";
+  SnapshotLine,
+  TrajectoryCall,
+} from "./screens/secondary.js";
 
 export { fakeService, FakeNotFound } from "./fake.js";
 export type { FakeResponses, FakeService, FakeCall } from "./fake.js";
@@ -63,7 +84,8 @@ export type * from "./shapes.js";
 
 import { flowsScreen } from "./screens/flows.js";
 import { runScreen } from "./screens/run.js";
-import { OTHER_SCREENS } from "./screens/rest.js";
+import { AUTHORING_SCREENS } from "./screens/authoring.js";
+import { SECONDARY_SCREENS } from "./screens/secondary.js";
 import { SCREEN_IDS, type Screen, type ScreenId, type ScreenStateBase } from "./types.js";
 
 /**
@@ -78,7 +100,8 @@ import { SCREEN_IDS, type Screen, type ScreenId, type ScreenStateBase } from "./
 export const SCREENS: readonly Screen<ScreenStateBase>[] = [
   flowsScreen as Screen<ScreenStateBase>,
   runScreen as Screen<ScreenStateBase>,
-  ...(OTHER_SCREENS as readonly Screen<ScreenStateBase>[]),
+  ...(AUTHORING_SCREENS as readonly Screen<ScreenStateBase>[]),
+  ...(SECONDARY_SCREENS as readonly Screen<ScreenStateBase>[]),
 ];
 
 /** One screen by id. Throws rather than answering `undefined`: ids are a union. */

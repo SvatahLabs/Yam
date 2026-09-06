@@ -19,10 +19,18 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { EventEmitter } from "node:events";
 import { render } from "ink";
-import { ACTIONS, fakeService, type FakeResponses } from "@svatah/screens";
+import {
+  ACTIONS,
+  SCREEN_IDS,
+  actionsForScreen,
+  fakeService,
+  screenById,
+  type FakeResponses,
+} from "@svatah/screens";
 import { App } from "../src/app.js";
 import type { UiState } from "../src/model.js";
 import { INSPECTOR_MIN_COLUMNS, layoutFor } from "../src/layout.js";
+import { paneModel } from "../src/rows.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURES = JSON.parse(
@@ -202,7 +210,10 @@ describe("the four panes (the `TUI` artboard)", () => {
   it("puts the failing step's candidates in the inspector", async () => {
     const { lastFrame } = track(await cockpit("run", { runId: "comp" }));
     const frame = lastFrame() ?? "";
-    expect(frame).toContain("candidates tried");
+    // The artboards write an inspector's section labels in small capitals
+    // (`base.css`: `.inspector h3 { text-transform: uppercase }`), and the
+    // cockpit does the same with the letters it has.
+    expect(frame).toContain("CANDIDATES TRIED");
     expect(frame).toContain("testid");
     expect(frame).toContain("xpath");
   });
@@ -427,7 +438,7 @@ describe("the panes are sized to the terminal (T10.4, P9-F4)", () => {
     expect(frame).toContain("Run comp");
     expect(frame).toContain("Audit");
     // The one that is not, and the reason, in words.
-    expect(frame).not.toContain("candidates tried");
+    expect(frame).not.toContain("CANDIDATES TRIED");
     expect(frame).toContain("inspector collapsed at 100 cols");
     // And the size, so the capture is self-describing.
     expect(frame).toContain("100×30");
@@ -437,10 +448,24 @@ describe("the panes are sized to the terminal (T10.4, P9-F4)", () => {
     const { lastFrame, stdin } = track(await cockpit("run", { runId: "comp" }, NARROW));
     stdin.write("3");
     await settle();
-    const frame = lastFrame() ?? "";
-    expect(frame).toContain("candidates tried");
+
+    // It is there, under the main pane, with the failing step's detail on it.
+    expect(lastFrame()).toContain("3 Step 5 · Click the pay button");
+    expect(lastFrame()).toContain("locator");
+
+    /*
+     * And it scrolls, which is what a collapsed pane needs instead of the extra
+     * columns it has given up: `j` walks to the candidate table further down.
+     */
+    for (let press = 0; press < 8; press += 1) {
+      if ((lastFrame() ?? "").includes("CANDIDATES TRIED")) break;
+      stdin.write("j");
+      await settle();
+    }
+    expect(lastFrame()).toContain("CANDIDATES TRIED");
+
     // Still inside the terminal: collapsed means below, not clipped beside.
-    const widest = Math.max(...frame.split("\n").map((one) => one.length));
+    const widest = Math.max(...(lastFrame() ?? "").split("\n").map((one) => one.length));
     expect(widest).toBeLessThanOrEqual(NARROW.columns);
   });
 
@@ -473,5 +498,148 @@ describe("the panes are sized to the terminal (T10.4, P9-F4)", () => {
       expect(layout.auditRows).toBeGreaterThan(0);
       expect(layout.tree + layout.main + (layout.inspector ?? 0)).toBe(layout.columns);
     }
+  });
+});
+
+/**
+ * Every screen draws, and every pane says what it has (T10.1, T10.2).
+ *
+ * T10.1 and T10.2's Validate is "each screen driven end to end through its own
+ * controls … in `svatah ui` under a pseudo-terminal". The pseudo-terminal half
+ * is `tools/repo-checks/test/tui-pty.test.ts`, which needs a real service; this
+ * is the half that runs everywhere, against the recorded fixtures, and it is
+ * what says the cockpit has twelve screens rather than two.
+ */
+describe("all twelve screens draw in the cockpit (T10.1, T10.2)", () => {
+  const service = () => fakeService(FIXTURES);
+
+  it.each(SCREEN_IDS)("%s draws four numbered panes with titles", async (id) => {
+    const state = await screenById(id).load(service(), {});
+    const model = paneModel(state, Date.parse("2026-09-05T20:12:00.000Z"));
+
+    for (const pane of ["tree", "main", "inspector", "audit"] as const) {
+      const content = model[pane];
+      expect(content.title, `${id}'s ${pane} pane has no title`).not.toBe("");
+      // A pane with no rows says what would put some there, rather than drawing
+      // a blank box (LLD §13.7: a screen is a view over the service, and "there
+      // is nothing" is a thing the service said).
+      expect(content.empty, `${id}'s ${pane} pane has no empty message`).not.toBe("");
+      for (const line of content.lines) {
+        expect(line.cells.length, `${id}'s ${pane} has an empty line`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it.each(SCREEN_IDS)("%s renders without throwing, at both widths", async (id) => {
+    for (const size of [WIDE, NARROW]) {
+      const { lastFrame } = track(
+        renderApp(
+          <App service={service()} connection={CONNECTION} screen={id} params={{}} />,
+          size,
+        ),
+      );
+      await settle();
+      const frame = lastFrame();
+      expect(frame, `${id} drew nothing at ${size.columns} columns`).not.toBe("");
+      // The screen's own title is on the header, from the model.
+      expect(frame).toContain(screenById(id).title.split(" ")[0]!);
+      const widest = Math.max(...frame.split("\n").map((one) => one.length));
+      expect(widest, `${id} drew past the right edge at ${size.columns}`).toBeLessThanOrEqual(
+        size.columns,
+      );
+    }
+  });
+
+  it("no status colour is drawn without its word (LLD §13.7)", async () => {
+    for (const id of SCREEN_IDS) {
+      const state = await screenById(id).load(service(), {});
+      const model = paneModel(state);
+      for (const pane of ["tree", "main", "inspector", "audit"] as const) {
+        for (const line of model[pane].lines) {
+          for (const cell of line.cells) {
+            if (cell.tone === undefined) continue;
+            expect(
+              cell.text.trim(),
+              `${id}'s ${pane} draws a ${cell.tone} cell with no word in it`,
+            ).not.toBe("");
+          }
+        }
+      }
+    }
+  });
+
+  it("the authoring screens' keys name registry actions (T10.1)", () => {
+    for (const id of ["record", "runs", "heal", "bindings"] as const) {
+      for (const binding of screenById(id).keys) {
+        expect(
+          ACTIONS.some((one) => one.id === binding.action),
+          `${id} binds ${binding.key} to unknown action ${binding.action}`,
+        ).toBe(true);
+      }
+    }
+    /*
+     * Three of the four own actions; `runs` owns none, and that is right rather
+     * than missing. Its two keys are `go.run` — navigation, which the palette's
+     * second group carries — and `heal.run`, which belongs to the Run screen
+     * (Draft 2.12's D6). An action invented so a screen would have one would be
+     * a palette row nothing answers.
+     */
+    for (const id of ["record", "heal", "bindings"] as const) {
+      expect(actionsForScreen(id).length, `${id} has no action of its own`).toBeGreaterThan(0);
+    }
+    expect(actionsForScreen("runs")).toEqual([]);
+  });
+
+  it("`[` and `]` walk the rail", async () => {
+    const seen: UiState[] = [];
+    const instance = track(
+      renderApp(
+        <App
+          service={service()}
+          connection={CONNECTION}
+          screen="flows"
+          onState={(one) => seen.push(one)}
+        />,
+      ),
+    );
+    await until(() => seen.at(-1), "the first load");
+
+    instance.stdin.write("]");
+    expect(
+      await until(() => (seen.at(-1)?.screen === "runs" ? "runs" : undefined), "`]`"),
+    ).toBe("runs");
+
+    instance.stdin.write("[");
+    expect(
+      await until(() => (seen.at(-1)?.screen === "flows" ? "flows" : undefined), "`[`"),
+    ).toBe("flows");
+  });
+
+  it("Enter opens what the cursor is on, whatever the screen", async () => {
+    const seen: UiState[] = [];
+    const instance = track(
+      renderApp(
+        <App
+          service={service()}
+          connection={CONNECTION}
+          screen="bindings"
+          onState={(one) => seen.push(one)}
+        />,
+      ),
+    );
+    await until(() => seen.at(-1), "the first load");
+
+    // Pane 1, second row, Enter: the screen re-loads with that binding.
+    instance.stdin.write("1");
+    await settle();
+    instance.stdin.write("j");
+    await settle();
+    instance.stdin.write("\r");
+
+    const chosen = await until(
+      () => (seen.at(-1)?.params.bindingId === "app.checkout-link" ? "yes" : undefined),
+      "Enter on the bindings tree",
+    );
+    expect(chosen).toBe("yes");
   });
 });

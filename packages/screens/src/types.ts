@@ -63,6 +63,28 @@ export interface ScreenParams {
   readonly sessionId?: string;
   /** Which row the inspector is describing, when a screen has rows. */
   readonly selected?: string;
+
+  /* ── the filters and choices the screens of T10.1 and T10.2 carry ───────── */
+
+  /** `runs`: the behaviour chip. `"all"` or one of `test|workflow|tool`. */
+  readonly behavior?: string;
+  /** `runs`: the invoker chip. `"all"` or one of `user|ci|agent`. */
+  readonly invoker?: string;
+  /** `runs`: the status chip. `"all"` or a status word. */
+  readonly status?: string;
+  /** `record`: which gateway the session would use (REQ-ADE-4, Draft 2.7). */
+  readonly gateway?: string;
+  /** `explorer`: which adapter a session opens on. */
+  readonly adapter?: string;
+  /**
+   * `explorer`: what the next surface call is *for* (REQ-BEH-4).
+   *
+   * A parameter rather than renderer state, because the model refuses a call
+   * without one and `svatah ui --json` has to be able to show that refusal.
+   */
+  readonly intent?: string;
+  /** `import`: the prototype's electron-db directory somebody chose. */
+  readonly source?: string;
 }
 
 /**

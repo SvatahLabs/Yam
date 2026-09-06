@@ -30,8 +30,13 @@ export {
   treeRows,
   mainRows,
   rowsIn,
+  selectionAt,
+  paneModel,
+  GLYPH,
+  fit,
   window as listWindow,
 } from "./panes.js";
+export type { Cell, Line, PaneContent, PaneModel } from "./panes.js";
 export { layoutFor, sizeOf, INSPECTOR_MIN_COLUMNS } from "./layout.js";
 export type { Layout } from "./layout.js";
 

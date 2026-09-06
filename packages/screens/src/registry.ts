@@ -378,6 +378,74 @@ const ACTIONS_ONLY: readonly Action[] = [
     },
   },
   {
+    id: "explorer.open",
+    label: "Open a session",
+    group: "Actions",
+    screen: "explorer",
+    key: "O",
+    cli: "svatah surface snapshot",
+    // A session that is already open is not opened twice; `explorer.close`
+    // is what ends one.
+    availableWhen: (state) => (state as { sessionId?: string }).sessionId === undefined,
+    async run(service, args): Promise<ActionOutcome> {
+      /*
+       * The session id is the *caller's* (LLD §13.5's `POST
+       * /surface/:sessionId/open`): the route is keyed by it, so a client that
+       * waited for the service to name one could not address the session it had
+       * just asked for.
+       */
+      const sessionId =
+        typeof args.sessionId === "string" && args.sessionId !== ""
+          ? args.sessionId
+          : `ex-${Date.now().toString(36)}`;
+      const value = await service.postSurfaceBySessionOpen(sessionId, {
+        ...(typeof args.adapter === "string" ? { adapter: args.adapter } : {}),
+      });
+      return ok(`Opened surface session ${sessionId}.`, {
+        value,
+        goTo: "explorer",
+        params: { sessionId },
+      });
+    },
+  },
+  {
+    id: "explorer.close",
+    label: "Close the session",
+    group: "Actions",
+    screen: "explorer",
+    availableWhen: has("sessionId"),
+    async run(service, args): Promise<ActionOutcome> {
+      if (typeof args.sessionId !== "string") return refused("No surface session is open.");
+      const value = await service.postSurfaceBySessionClose(args.sessionId);
+      return ok("Closed the surface session.", { value, goTo: "explorer", params: {} });
+    },
+  },
+  {
+    id: "explorer.act",
+    label: "Act on the element",
+    group: "Actions",
+    screen: "explorer",
+    cli: "svatah surface act",
+    availableWhen: has("sessionId"),
+    async run(service, args): Promise<ActionOutcome> {
+      if (typeof args.sessionId !== "string") return refused("No surface session is open.");
+      const intent = args.intent;
+      if (typeof intent !== "string" || intent.trim() === "") {
+        // REQ-BEH-4 and LLD §8: every raw surface call records why it was made.
+        return refused("Say what you are doing: every surface call records an intent.");
+      }
+      const action = args["action"];
+      if (typeof action !== "string") return refused("Choose an action.");
+      const value = await service.postSurfaceBySessionAct(args.sessionId, {
+        intent,
+        action,
+        ...(typeof args["ref"] === "string" ? { ref: args["ref"] } : {}),
+        ...(args["args"] === undefined ? {} : { args: args["args"] }),
+      });
+      return ok(`Performed ${action}.`, { value });
+    },
+  },
+  {
     id: "explorer.snapshot",
     label: "Snapshot the session",
     group: "Actions",
@@ -386,7 +454,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     availableWhen: has("sessionId"),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No surface session is open.");
-      const intent = args["intent"];
+      const intent = args.intent;
       if (typeof intent !== "string" || intent.trim() === "") {
         // REQ-BEH-4 and LLD §8: every raw surface call records why it was made.
         return refused("Say what you are looking for: every surface call records an intent.");
