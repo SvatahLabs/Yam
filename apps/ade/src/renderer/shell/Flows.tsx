@@ -31,6 +31,8 @@ export interface FlowsProps {
   readonly onTab: (tab: "editor" | "plan" | "history") => void;
 }
 
+import { Toolbar } from "./parts.js";
+
 /** `flows/guards-and-compensation.flow` → an id a desktop adapter can bind to. */
 const rowId = (prefix: string, value: string): string =>
   `${prefix}-${value.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase()}`;
@@ -40,24 +42,16 @@ export function FlowsScreen(props: FlowsProps): React.JSX.Element {
 
   return (
     <>
-      <div className="sv-toolbar">
-        <h1 className="sv-toolbar-title">{state.title}</h1>
-        <span className="sv-toolbar-sub">{state.subtitle}</span>
-        <span className="sv-spacer" />
-        {props.actions
-          .filter((one) => ["record.start", "heal.run", "run.flow"].includes(one.id))
-          .map((one) => (
-            <Button
-              key={one.id}
-              id={rowId("action", one.id)}
-              label={one.label}
-              variant={one.id === "run.flow" ? "primary" : "default"}
-              {...(one.key === undefined ? {} : { accelerator: one.key })}
-              disabled={!one.availableWhen(state)}
-              onPress={() => props.onAction(one.id)}
-            />
-          ))}
-      </div>
+      {/* The shared `Toolbar`, so the title floor and the shedding of
+          Draft 2.13 apply here too (P10-F3). */}
+      <Toolbar
+        state={state}
+        actions={props.actions.filter((one) =>
+          ["record.start", "heal.run", "run.flow"].includes(one.id),
+        )}
+        onAction={props.onAction}
+        primary="run.flow"
+      />
 
       <div className="sv-main">
         <aside className="sv-list" id="flows-files-pane" aria-label="Flow files">

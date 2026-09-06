@@ -10,6 +10,7 @@
  * strings the model produced. That is the same rule `@svatah/ui` keeps one layer
  * down, applied to this application's own layout.
  */
+import { useLayoutEffect, useRef, useState } from "react";
 import { Button, Chip, InspectorSection } from "@svatah/ui";
 import type { Action, ScreenStateBase } from "@svatah/screens";
 
@@ -44,6 +45,16 @@ export interface ToolbarProps {
   readonly children?: React.ReactNode;
   /** A different title from the model's, when a screen has a subject. */
   readonly title?: React.ReactNode;
+  /** A pill or a chip that belongs beside the title rather than at the end. */
+  readonly beside?: React.ReactNode;
+  /**
+   * A label for an action, when the screen says it better than the registry.
+   *
+   * The Run screen's `heal.run` is "Heal run 01k4h9m2ptw3", which is the
+   * registry's "Heal from this run" made specific. Returning `undefined` keeps
+   * the registry's own label, which is what every other action wants.
+   */
+  readonly labelFor?: (action: Action) => string | undefined;
 }
 
 /**
@@ -51,11 +62,72 @@ export interface ToolbarProps {
  *
  * One row, always. `ui.css` and `shell.css` make the buttons unshrinkable and
  * the title the thing that truncates (P9-F5); this is where that gets used.
+ *
+ * ## The title's floor, and what gives way instead (P10-F3, Draft 2.13)
+ *
+ * > a toolbar title keeps at least twelve characters and the toolbar sheds
+ * > secondary controls into the palette before that
+ *
+ * Phase 10's toolbar truncated the title to two letters on the Record screen:
+ * "Re…" is not a title, it is a bar that has run out of room and taken it from
+ * the one element that says where you are. The floor is `min-width: 12ch` in
+ * `shell.css`, so the title *cannot* shrink past it — and what a bar that no
+ * longer fits does instead is drop its **secondary** buttons, right to left,
+ * until it does.
+ *
+ * Nothing becomes unreachable: every action in the toolbar is in the command
+ * palette by construction (`actionsForScreen` is the palette's list too), and
+ * the bar says how many it has put there. The primary and the dangerous action
+ * are never shed: those are the two a person came to this screen to press.
+ *
+ * The measurement is a `ResizeObserver` on the bar and one pass of hiding from
+ * the end, because a shed button is still in the DOM — hidden, so it is out of
+ * the accessibility tree and out of the tab order, and still measurable when the
+ * window is widened again. The palette hint holds its space whether or not
+ * anything is shed, so showing it can never be what makes the bar overflow.
  */
 export function Toolbar(props: ToolbarProps): React.JSX.Element {
+  const bar = useRef<HTMLDivElement>(null);
+  const [shed, setShed] = useState(0);
+
+  useLayoutEffect(() => {
+    const element = bar.current;
+    if (element === null || typeof ResizeObserver === "undefined") return undefined;
+
+    const recompute = (): void => {
+      const buttons = [...element.querySelectorAll<HTMLElement>("[data-toolbar-action]")];
+      for (const one of buttons) one.hidden = false;
+
+      /*
+       * Secondary first, right to left; then, if the bar still does not fit,
+       * the primary and the dangerous one — because the title's twelve
+       * characters are the floor and a button is never worth breaking it. On a
+       * bar narrow enough for that to happen, every one of them is a `⌘K` away
+       * and the bar says how many.
+       */
+      const order = [
+        ...buttons.filter((one) => one.dataset["toolbarSecondary"] === "true").reverse(),
+        ...buttons.filter((one) => one.dataset["toolbarSecondary"] !== "true").reverse(),
+      ];
+      let dropped = 0;
+      for (const one of order) {
+        if (element.scrollWidth <= element.clientWidth) break;
+        one.hidden = true;
+        dropped += 1;
+      }
+      setShed(dropped);
+    };
+
+    recompute();
+    const observer = new ResizeObserver(recompute);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [props.actions, props.state, props.children]);
+
   return (
-    <div className="sv-toolbar">
+    <div className="sv-toolbar" ref={bar}>
       <h1 className="sv-toolbar-title">{props.title ?? props.state.title}</h1>
+      {props.beside}
       <span className="sv-toolbar-sub">{props.state.subtitle}</span>
       <span className="sv-spacer" />
       {props.children}
@@ -63,7 +135,7 @@ export function Toolbar(props: ToolbarProps): React.JSX.Element {
         <Button
           key={one.id}
           id={actionId(one.id)}
-          label={one.label}
+          label={props.labelFor?.(one) ?? one.label}
           variant={
             one.id === props.danger
               ? "danger"
@@ -74,8 +146,27 @@ export function Toolbar(props: ToolbarProps): React.JSX.Element {
           {...(one.key === undefined ? {} : { accelerator: one.key })}
           disabled={!one.availableWhen(props.state)}
           onPress={() => props.onAction(one.id)}
+          data={{
+            "toolbar-action": one.id,
+            ...(one.id === props.primary || one.id === props.danger
+              ? {}
+              : { "toolbar-secondary": "true" }),
+          }}
         />
       ))}
+      {/*
+        Reserved whether or not anything is shed: a hint that appeared only once
+        the bar was full would widen the bar at the moment it was already too
+        narrow, which is a loop rather than a layout.
+      */}
+      <span
+        className="sv-toolbar-shed"
+        id="toolbar-in-palette"
+        {...(shed === 0 ? { "aria-hidden": true } : {})}
+        style={shed === 0 ? { visibility: "hidden" } : undefined}
+      >
+        ⌘K +{shed}
+      </span>
     </div>
   );
 }

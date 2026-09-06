@@ -139,6 +139,20 @@
   color: var(--accent-ink);
 }
 
+/*
+ * `hidden` means hidden, whatever a component's own `display` is (P10-F3).
+ *
+ * The UA stylesheet's `[hidden] { display: none }` is a type-selector rule and
+ * loses to any class that sets `display` — `.sv-btn { display: inline-flex }`
+ * among them. So a button the ADE's toolbar hid to make room stayed exactly
+ * where it was, laid out and measurable, and the bar went on overflowing while
+ * reporting that it had shed two controls. One rule, once, rather than a
+ * `display: none` in every component that might ever be hidden.
+ */
+[hidden] {
+  display: none !important;
+}
+
 /* ── fields ───────────────────────────────────────────────────────────────── */
 
 .sv-field {

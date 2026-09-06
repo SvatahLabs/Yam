@@ -137,12 +137,76 @@
   overflow: hidden;
 }
 
+/*
+ * Twelve characters, and not one fewer (P10-F3, Draft 2.13).
+ *
+ * The Phase 10 verification found the Record screen's title truncated to "Re…":
+ * a title shrunk to two letters has stopped being a title. `min-width: 12ch` is
+ * a floor the flexbox cannot go under, so a bar with too much in it *overflows*
+ * — which is what `Toolbar` in `parts.tsx` watches for, and what makes it shed
+ * a secondary button into the command palette instead.
+ */
 .sv-toolbar-title {
   font-size: 14px;
   font-weight: 600;
   margin: 0;
   flex: 0 1 auto;
-  min-width: 4ch;
+  min-width: 12ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/** "⌘K +2": how many of this bar's actions are only in the palette. */
+.sv-toolbar-shed {
+  color: var(--muted);
+  font-size: 11px;
+  flex: none;
+  min-width: 5ch;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/*
+ * A field in a toolbar is a row, not a column (P10-F3).
+ *
+ * `.sv-field` stacks its label over its control, which is right in a panel and
+ * wrong in a forty-pixel bar: the Record screen's gateway select came out as
+ * two clipped lines. Beside its label it is one line, and `flex: none` keeps it
+ * from being squeezed into an unreadable sliver when the bar fills up.
+ */
+.sv-toolbar .sv-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  /*
+   * Shrinkable, down to a control that is still a control. A field that could
+   * not give way at all made the bar overflow on a narrow window even after
+   * every button had been shed into the palette, which is a bar that has run
+   * out of things it is allowed to do.
+   */
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.sv-toolbar .sv-field-label {
+  white-space: nowrap;
+}
+
+/*
+ * And it is a control, not a paragraph. The gateway's option label is a
+ * sentence ("fake — committed answers from evals/grounding/cases"), which made
+ * the select four hundred pixels wide and the toolbar overflow before a single
+ * button had been drawn. The value truncates; the whole label is in the menu,
+ * which is where a person reads it.
+ */
+.sv-toolbar .sv-select {
+  min-width: 88px;
+  max-width: 220px;
+  flex: 0 1 auto;
+}
+
+.sv-toolbar .sv-select > span:first-child {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

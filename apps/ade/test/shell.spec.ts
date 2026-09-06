@@ -1023,3 +1023,229 @@ test("the legacy screens are gone (T10.3)", async () => {
     await expect(page.locator(`#${id}`)).toBeVisible();
   }
 });
+
+/**
+ * The Record screen's toolbar (T11.1, P10-F3, Draft 2.13 §13.7).
+ *
+ * The Phase 10 verification found it failing the toolbar rule three ways: the
+ * title truncated to two letters, the gateway select overflowed its box onto
+ * two clipped lines, and Accept, Re-pick and Reject were enabled with no
+ * session open although `availableWhen` says otherwise. Draft 2.13's answer:
+ *
+ * > a toolbar title keeps at least twelve characters and the toolbar sheds
+ * > secondary controls into the palette before that; a select never exceeds one
+ * > line; buttons render the model's `availableWhen`.
+ *
+ * Measured at two widths, because the rule is about what happens when the bar
+ * runs out of room: 1440 px is the window the artboards are drawn at, and
+ * 1100 px is a laptop with the ADE not maximised — the width the Phase 10
+ * screenshots were taken at, and the one the title was two letters at.
+ *
+ * The width is applied with a `<style>` on `.sv-app` rather than by resizing
+ * the window: the renderer is attached over CDP and has no control of the
+ * Electron window, and the layout is the same either way — every pane inside
+ * the shell is sized from its container.
+ */
+async function atWidth<T>(px: number, read: () => Promise<T>): Promise<T> {
+  /*
+   * The renderer's own viewport, through the DevTools protocol.
+   *
+   * Not a `<style>` on `.sv-app`: forcing the application wider than the window
+   * it is in makes `scrollWidth` a measure of the *window's* overflow rather
+   * than the toolbar's, and the numbers then say nothing about the rule. This
+   * is what a person dragging the window's corner does, as far as the layout is
+   * concerned — and `Emulation.setDeviceMetricsOverride` is available over the
+   * same CDP session the whole of this file drives the ADE through.
+   */
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setDeviceMetricsOverride", {
+    width: px,
+    height: 860,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  // One frame, so the `ResizeObserver` in `Toolbar` has run.
+  await page.waitForTimeout(300);
+  try {
+    return await read();
+  } finally {
+    await cdp.send("Emulation.clearDeviceMetricsOverride");
+    await cdp.detach();
+    await page.waitForTimeout(200);
+  }
+}
+
+test("the Record screen's toolbar keeps its title, its select and availableWhen (P10-F3)", async () => {
+  page = await livePage();
+  await page.locator("#rail-flows").click();
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
+  await page.locator("#palette-go-record").click();
+  await expect(page.locator("#record-gateway")).toBeVisible({ timeout: 60_000 });
+
+  for (const width of [1440, 1100]) {
+    const measured = await atWidth(width, async () =>
+      page.evaluate(() => {
+        const bar = document.querySelector(".sv-toolbar") as HTMLElement;
+        const title = bar.querySelector(".sv-toolbar-title") as HTMLElement;
+        const select = document.querySelector("#record-gateway") as HTMLElement | null;
+        const shed = bar.querySelector(".sv-toolbar-shed") as HTMLElement | null;
+        const line = parseFloat(getComputedStyle(bar).fontSize) * 1.6;
+        return {
+          barHeight: bar.getBoundingClientRect().height,
+          overflow: bar.scrollWidth - bar.clientWidth,
+          titleText: (title.textContent ?? "").trim(),
+          // How many characters actually fit, from the width the box has.
+          titleFits: Math.floor(
+            title.clientWidth / (title.scrollWidth / Math.max(1, (title.textContent ?? "").length)),
+          ),
+          select:
+            select === null
+              ? null
+              : {
+                  height: select.getBoundingClientRect().height,
+                  lines: Math.round(select.getBoundingClientRect().height / line),
+                  right: select.getBoundingClientRect().right,
+                  inside: select.getBoundingClientRect().right <= bar.getBoundingClientRect().right + 1,
+                },
+          shedText: (shed?.textContent ?? "").trim(),
+          buttons: [...bar.querySelectorAll("button")]
+            .filter((one) => !(one as HTMLElement).hidden)
+            .map((one) => ({
+              id: one.id,
+              label: (one.textContent ?? "").trim(),
+              disabled: (one as HTMLButtonElement).disabled,
+              right: one.getBoundingClientRect().right,
+              inside:
+                one.getBoundingClientRect().right <= bar.getBoundingClientRect().right + 1,
+            })),
+        };
+      }),
+    );
+
+    // 1. The bar is one row and nothing is off its end.
+    expect(measured.barHeight, `${width}px: the toolbar is ${measured.barHeight}px tall`)
+      .toBeLessThanOrEqual(48);
+    expect(measured.overflow, `${width}px: the toolbar overflows by ${measured.overflow}px`)
+      .toBeLessThanOrEqual(1);
+    for (const button of measured.buttons) {
+      expect(button.inside, `${width}px: "${button.label}" is off the end of the toolbar`).toBe(
+        true,
+      );
+    }
+
+    // 2. Twelve characters of title, at least.
+    expect(
+      measured.titleFits,
+      `${width}px: the title "${measured.titleText}" has room for ${measured.titleFits} characters`,
+    ).toBeGreaterThanOrEqual(12);
+
+    // 3. The gateway select is one line, inside the bar.
+    expect(measured.select, `${width}px: the Record toolbar has no gateway select`).not.toBeNull();
+    expect(measured.select!.lines, `${width}px: the select is ${measured.select!.height}px tall`)
+      .toBe(1);
+    expect(measured.select!.inside, `${width}px: the select runs past the toolbar`).toBe(true);
+
+    /*
+     * 4. `availableWhen`, rendered. No session is open on this screen, so the
+     *    three decision actions are unavailable and the buttons say so — which
+     *    is the difference between a control a person can press to no effect
+     *    and a control that tells them why not.
+     */
+    for (const id of ["action-record-accept", "action-record-repick", "action-record-reject"]) {
+      const button = measured.buttons.find((one) => one.id === id);
+      if (button === undefined) {
+        // Shed into the palette at this width, which is the other half of the
+        // rule and is checked below.
+        continue;
+      }
+      expect(button.disabled, `${width}px: ${id} is enabled with no session open`).toBe(true);
+    }
+  }
+});
+
+test("a toolbar that runs out of room sheds into the palette, and says so (P10-F3)", async () => {
+  page = await livePage();
+  await page.locator("#rail-flows").click();
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
+  await page.locator("#palette-go-record").click();
+  await expect(page.locator("#record-gateway")).toBeVisible({ timeout: 60_000 });
+
+  const read = async () =>
+    await page.evaluate(() => {
+      const bar = document.querySelector(".sv-toolbar") as HTMLElement;
+      const title = bar.querySelector(".sv-toolbar-title") as HTMLElement;
+      const buttons = [...bar.querySelectorAll<HTMLElement>("[data-toolbar-action]")];
+      return {
+        barWidth: bar.clientWidth,
+        height: bar.getBoundingClientRect().height,
+        overflow: bar.scrollWidth - bar.clientWidth,
+        hidden: buttons.filter((one) => one.hidden).map((one) => one.id),
+        secondary: buttons
+          .filter((one) => one.dataset["toolbarSecondary"] === "true")
+          .map((one) => one.id),
+        shedText: (bar.querySelector(".sv-toolbar-shed")?.textContent ?? "").trim(),
+        titleWidth: title.clientWidth,
+        titleFloor: parseFloat(getComputedStyle(title).minWidth),
+      };
+    });
+
+  /*
+   * Swept rather than asserted at a width somebody guessed.
+   *
+   * How wide the window has to be before a bar runs out of room depends on the
+   * rail, the inspector and the length of the screen's own labels, and a test
+   * that hard-coded one number would be a test of this month's wording. What is
+   * *invariant* is stated below, at every width: the bar never overflows, the
+   * title never goes under its floor, the hint counts what went, and a primary
+   * is never shed while a secondary is still on the bar.
+   */
+  const widths = [1900, 1700, 1500, 1300, 1100, 900, 760];
+  const seen: Array<Awaited<ReturnType<typeof read>> & { width: number }> = [];
+  for (const width of widths) {
+    seen.push({ width, ...(await atWidth(width, read)) });
+  }
+
+  for (const one of seen) {
+    /*
+     * The bar fits at every width the rule is about (F3 names 1440 and 1100).
+     * Below that the workspace column is narrower than a twelve-character title
+     * and a usable control put together, and `overflow: hidden` clips — which
+     * is the Draft 2.12 rule ("a toolbar never wraps its buttons: a long title
+     * truncates") reaching its own floor. What must hold at *every* width is
+     * that it is still one row and the title still has its twelve characters.
+     */
+    if (one.width >= 1100) {
+      expect(one.overflow, `${one.width}px: the toolbar overflows by ${one.overflow}px`)
+        .toBeLessThanOrEqual(1);
+    }
+    expect(one.height, `${one.width}px: the toolbar wrapped to ${one.height}px`)
+      .toBeLessThanOrEqual(48);
+    expect(one.titleWidth, `${one.width}px: the title is under its floor`)
+      .toBeGreaterThanOrEqual(one.titleFloor - 1);
+    expect(one.shedText, `${one.width}px: the hint does not count what went`).toBe(
+      one.hidden.length === 0 ? "⌘K +0" : `⌘K +${one.hidden.length}`,
+    );
+    // Secondary before primary, always.
+    const shedAPrimary = one.hidden.some((id) => !one.secondary.includes(id));
+    if (shedAPrimary) {
+      for (const id of one.secondary) {
+        expect(one.hidden, `${one.width}px: ${id} is on a bar that shed a primary`).toContain(id);
+      }
+    }
+  }
+
+  // The sweep has to actually bite, or it says nothing.
+  const widest = seen.find((one) => one.hidden.length === 0);
+  expect(widest, `every width shed something: ${JSON.stringify(seen.map((o) => [o.width, o.barWidth, o.hidden.length]))}`).toBeDefined();
+  const narrowest = seen.at(-1)!;
+  expect(narrowest.hidden.length, "nothing was ever shed").toBeGreaterThan(0);
+
+  // And what went is in the palette, which is where the bar said it was.
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
+  const palette = page.getByRole("dialog", { name: "Command palette" });
+  await expect(palette).toBeVisible();
+  for (const id of narrowest.hidden) {
+    await expect(palette.locator(`#palette-${id.replace(/^action-/, "")}`)).toHaveCount(1);
+  }
+  await page.keyboard.press("Escape");
+});

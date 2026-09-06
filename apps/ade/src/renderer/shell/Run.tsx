@@ -12,6 +12,7 @@
  */
 import { Button, InspectorSection, KeyValues, Pill, Table } from "@svatah/ui";
 import type { Action, RunState, ScreenParams } from "@svatah/screens";
+import { Toolbar } from "./parts.js";
 
 export interface RunProps {
   readonly state: RunState;
@@ -28,38 +29,36 @@ export function RunScreen(props: RunProps): React.JSX.Element {
 
   return (
     <>
-      <div className="sv-toolbar">
-        <h1 className="sv-toolbar-title">
-          Run <span className="sv-mono">{state.runId ?? "—"}</span>
-        </h1>
-        <Pill tone={state.outcome.tone} label={state.outcome.label} />
-        <span className="sv-toolbar-sub">{state.subtitle}</span>
-        <span className="sv-spacer" />
-        {/*
-          Stop first, because while a run is going it is the only one of the
-          four that does anything (T10.4). It disables itself the moment the
-          run ends: `run.stop`'s `availableWhen` is the model's `live`.
-        */}
-        {props.actions
-          .filter((one) => ["run.stop", "heal.run", "run.resume", "run.again"].includes(one.id))
-          .map((one) => (
-            <Button
-              key={one.id}
-              id={`action-${one.id.replace(/\./g, "-")}`}
-              label={one.id === "heal.run" ? `Heal run ${state.runId ?? ""}`.trim() : one.label}
-              variant={
-                one.id === "run.stop" && state.live
-                  ? "danger"
-                  : one.id === "run.again"
-                    ? "primary"
-                    : "default"
-              }
-              {...(one.key === undefined ? {} : { accelerator: one.key })}
-              disabled={!one.availableWhen(state)}
-              onPress={() => props.onAction(one.id)}
-            />
-          ))}
-      </div>
+      {/*
+        The shared `Toolbar`, not a fourth copy of one (P10-F3).
+        
+        Phase 10 had three screens building their own bar, and the title floor
+        and the shedding that Draft 2.13 asks for live in the shared one — so a
+        screen with its own copy was a screen where neither happened. The Run
+        toolbar was the one the verifier measured overflowing.
+        
+        Stop first, because while a run is going it is the only one of the four
+        that does anything (T10.4). It disables itself the moment the run ends:
+        `run.stop`'s `availableWhen` is the model's `live`.
+      */}
+      <Toolbar
+        state={state}
+        actions={props.actions.filter((one) =>
+          ["run.stop", "heal.run", "run.resume", "run.again"].includes(one.id),
+        )}
+        onAction={props.onAction}
+        primary="run.again"
+        {...(state.live ? { danger: "run.stop" } : {})}
+        title={
+          <>
+            Run <span className="sv-mono">{state.runId ?? "—"}</span>
+          </>
+        }
+        beside={<Pill tone={state.outcome.tone} label={state.outcome.label} />}
+        labelFor={(one) =>
+          one.id === "heal.run" ? `Heal run ${state.runId ?? ""}`.trim() : undefined
+        }
+      />
 
       <div className="sv-main">
         <aside className="sv-list" id="run-stories-pane" aria-label="Stories">

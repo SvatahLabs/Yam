@@ -28,6 +28,17 @@ export interface ButtonProps extends Named {
   /** An icon before the label. Decorative: the label is the name. */
   readonly icon?: ReactNode;
   readonly title?: string;
+  /**
+   * `data-*` attributes the caller needs on the element itself.
+   *
+   * One caller and one reason: the ADE's toolbar marks its secondary buttons so
+   * it can shed them into the palette when the bar runs out of room before the
+   * title's twelve-character floor does (P10-F3). A `data-` attribute rather
+   * than a class, because a class is a styling hook and something would style
+   * it; and named `data`, not spread props, so this component still cannot be
+   * handed arbitrary DOM attributes.
+   */
+  readonly data?: Readonly<Record<string, string>>;
 }
 
 /**
@@ -46,6 +57,9 @@ export function Button(props: ButtonProps): React.JSX.Element {
       disabled={props.disabled === true}
       onClick={props.onPress}
       {...(props.title === undefined ? {} : { title: props.title })}
+      {...Object.fromEntries(
+        Object.entries(props.data ?? {}).map(([name, value]) => [`data-${name}`, value]),
+      )}
     >
       {props.icon === undefined ? null : (
         <span className="sv-btn-icon" aria-hidden="true">
