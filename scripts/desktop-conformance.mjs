@@ -305,6 +305,56 @@ const healState = join(workspace, "heal-state.json");
 const passes = [];
 let running;
 
+/**
+ * The process ids of this checkout's packaged ADE, right now (P8-F1).
+ *
+ * The executable path is what identifies them: it is unique to this checkout's
+ * build, so a second Svatah ADE installed elsewhere on the machine is not
+ * counted and not killed.
+ */
+function processIds() {
+  if (process.platform === "darwin") {
+    const found = spawnSync("pgrep", ["-f", app], { encoding: "utf8" });
+    return (found.stdout ?? "")
+      .split("\n")
+      .map((one) => Number(one.trim()))
+      .filter((one) => Number.isInteger(one) && one > 0);
+  }
+  const found = spawnSync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-Command",
+      `Get-Process -Name '${PROCESS_NAME}' -ErrorAction SilentlyContinue | ` +
+        "Select-Object -ExpandProperty Id",
+    ],
+    { encoding: "utf8", timeout: 20_000 },
+  );
+  return (found.stdout ?? "")
+    .split("\n")
+    .map((one) => Number(one.trim()))
+    .filter((one) => Number.isInteger(one) && one > 0);
+}
+
+/** How long `stop()` waits for the previous launch to finish exiting. */
+const TEARDOWN_TIMEOUT_MS = Number(option("teardown-timeout-ms", "30000"));
+
+/**
+ * Stop the ADE, and do not come back until it is gone (P8-F1, Draft 2.10 §7.5).
+ *
+ * > the gate does not launch the next variant until no process of the previous
+ * > launch remains.
+ *
+ * The defect this closes: `pkill` returns as soon as the signal is *delivered*,
+ * and an Electron application takes a second or two to unwind. The gate then
+ * opened the next variant, the bridge asked macOS for "Svatah ADE", and the
+ * answer was sometimes the instance that was still exiting — which owns no
+ * window, so every case at the new variant threw `no-window`. One of the
+ * verifier's three runs did exactly that, under load.
+ *
+ * Synchronous on purpose: this also runs from `process.on("exit")`, where a
+ * promise would never be awaited.
+ */
 const stop = () => {
   try {
     running?.kill("SIGTERM");
@@ -317,6 +367,29 @@ const stop = () => {
     // path is unique to this checkout's packaged build.
     spawnSync("pkill", ["-f", app], { encoding: "utf8" });
   }
+
+  const startedAt = Date.now();
+  let remaining = processIds();
+  let escalated = false;
+  while (remaining.length > 0 && Date.now() - startedAt < TEARDOWN_TIMEOUT_MS) {
+    // 250 ms, spent in another process rather than in a busy loop.
+    spawnSync(process.execPath, ["-e", "setTimeout(() => {}, 250)"], { encoding: "utf8" });
+    remaining = processIds();
+    if (!escalated && remaining.length > 0 && Date.now() - startedAt > TEARDOWN_TIMEOUT_MS / 2) {
+      escalated = true;
+      if (process.platform === "darwin") spawnSync("pkill", ["-9", "-f", app], { encoding: "utf8" });
+      else for (const pid of remaining) spawnSync("taskkill", ["/PID", String(pid), "/F"]);
+    }
+  }
+  if (remaining.length > 0) {
+    process.stderr.write(
+      `warning: ${remaining.length} process(es) of the previous launch (${remaining.join(", ")}) ` +
+        `were still running after ${Date.now() - startedAt} ms. The next variant is launched ` +
+        "anyway, and the bridge addresses the process that owns a window (LLD §7.5).\n",
+    );
+    return;
+  }
+  process.stderr.write(`the previous launch was gone after ${Date.now() - startedAt} ms\n`);
 };
 process.on("exit", stop);
 

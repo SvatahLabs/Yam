@@ -9,6 +9,7 @@ export {
   osascriptBridge,
   parseWindow,
   runOsascript,
+  PERFORM_SCRIPT,
   AxBridgeError,
   type AxBridge,
   type AxCommand,
