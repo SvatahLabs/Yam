@@ -271,9 +271,56 @@ test.afterAll(async () => {
   if (project !== undefined) rmSync(project, { recursive: true, force: true });
 });
 
+/**
+ * The window that is open *and still open a moment later*.
+ *
+ * Electron recreates a `BrowserWindow` on `activate` when none is left, and a
+ * CDP connection sees a target list that momentarily holds two — so a page
+ * acquired at the top of a test could be closed by its first statement. Asking
+ * again until one answers is what a person looking at the application does.
+ */
+async function livePage(): Promise<Page> {
+  const until = Date.now() + 60_000;
+  let last: unknown;
+  for (;;) {
+    try {
+      const candidate = await currentPage();
+      await candidate.locator("#rail-flows, #screen-project").first().waitFor({ timeout: 5_000 });
+      if (!candidate.isClosed()) return candidate;
+    } catch (cause) {
+      last = cause;
+    }
+    if (Date.now() > until) {
+      throw new Error(
+        `The ADE never settled on a window: ${last instanceof Error ? last.message : String(last)}`,
+      );
+    }
+    await new Promise((done) => setTimeout(done, 250));
+  }
+}
+
+/**
+ * Put the Run screen on the screen, starting a run if there is not one.
+ *
+ * The tests below run in order against one application, which is how a person
+ * does it — but a test that *assumed* the previous one left the Run screen
+ * showing failed whenever the window had been recreated in between. This makes
+ * each of them able to reach its own subject.
+ */
+async function showRunScreen(): Promise<void> {
+  page = await livePage();
+  const heading = page.getByRole("heading", { name: /^Run / });
+  if (await heading.isVisible().catch(() => false)) return;
+
+  await page.locator("#rail-flows").click();
+  await page.locator("#flows-list").getByText("guards-and-compensation.flow").click();
+  await page.locator("#action-run-flow").click();
+  await expect(heading).toBeVisible({ timeout: 180_000 });
+  await expect(page.locator(".sv-step").first()).toBeVisible({ timeout: 180_000 });
+}
+
 test.beforeEach(async () => {
-  page = await currentPage();
-  await page.locator("#rail-flows, #screen-project").first().waitFor({ timeout: 60_000 });
+  page = await livePage();
 });
 
 test("opens into the new Flows screen, not the eleven tabs", async () => {
@@ -390,12 +437,12 @@ test("Run on the Flows screen starts a run and opens the Run screen", async () =
 
 test("the Run screen shows the run's steps, audit and inspector", async () => {
   /*
-   * Still on the Run screen the previous test navigated to. The rail's `Runs`
-   * item goes to the *Legacy* screens in Phase 9 — `runs` is one of the ten this
-   * phase models and does not render (T9.4's scope) — so clicking it here would
-   * leave the screen under test.
+   * Still on the Run screen the previous test navigated to, or back on it. The
+   * rail's `Runs` item goes to the *Legacy* screens in Phase 9 — `runs` is one
+   * of the ten this phase models and does not render (T9.4's scope) — so
+   * clicking it here would leave the screen under test.
    */
-  await expect(page.getByRole("heading", { name: /^Run / })).toBeVisible({ timeout: 60_000 });
+  await showRunScreen();
 
   // Steps, with the candidate that resolved each.
   const steps = page.locator(".sv-step");
@@ -417,52 +464,98 @@ test("the Run screen shows the run's steps, audit and inspector", async () => {
  * this screen, each checked on the packaged application.
  */
 test("the Run toolbar keeps its buttons on one line, however long the title", async () => {
-  await expect(page.getByRole("heading", { name: /^Run / })).toBeVisible({ timeout: 60_000 });
+  await showRunScreen();
 
+  /*
+   * The toolbar is crowded with a stylesheet rather than by rewriting the
+   * title's text.
+   *
+   * React owns the text nodes in there; assigning to `textContent` under it
+   * takes the renderer down on the next reconcile, which is a test that breaks
+   * the application to look at it. A `<style>` appended to `<head>` is
+   * something React never reconciles, and a 420-pixel toolbar is the same
+   * crowding a long run id and a long subtitle produce — which is the condition
+   * P9-F5 is about.
+   */
   const measured = await page.evaluate(() => {
-    const toolbar = document.querySelector(".sv-toolbar") as HTMLElement | null;
-    if (toolbar === null) return null;
-    // A title long enough to push the buttons off the end of any window.
-    const title = toolbar.querySelector(".sv-toolbar-title") as HTMLElement | null;
-    const sub = toolbar.querySelector(".sv-toolbar-sub") as HTMLElement | null;
-    const restore = { title: title?.textContent ?? "", sub: sub?.textContent ?? "" };
-    if (title !== null) title.textContent = `Run ${"01k4h9m2ptw3xyz".repeat(12)}`;
-    if (sub !== null) sub.textContent = `${"test behavior · invoker user via cli · 0.74 s ".repeat(8)}`;
-
-    const buttons = [...toolbar.querySelectorAll("button")] as HTMLElement[];
-    const answer = {
-      toolbarHeight: toolbar.getBoundingClientRect().height,
-      toolbarWidth: toolbar.getBoundingClientRect().width,
-      buttons: buttons.map((one) => ({
-        label: (one.textContent ?? "").trim(),
-        height: one.getBoundingClientRect().height,
-        right: one.getBoundingClientRect().right,
-      })),
-      titleFits:
-        title === null ? true : title.getBoundingClientRect().right <= toolbar.getBoundingClientRect().right + 1,
+    const read = (): Record<string, unknown> | null => {
+      const toolbar = document.querySelector(".sv-toolbar") as HTMLElement | null;
+      if (toolbar === null) return null;
+      const box = toolbar.getBoundingClientRect();
+      const title = toolbar.querySelector(".sv-toolbar-title") as HTMLElement | null;
+      const buttons = [...toolbar.querySelectorAll("button")] as HTMLElement[];
+      return {
+        height: box.height,
+        right: box.right,
+        wrap: getComputedStyle(toolbar).flexWrap,
+        buttons: buttons.map((one) => ({
+          label: (one.textContent ?? "").trim(),
+          height: one.getBoundingClientRect().height,
+          right: one.getBoundingClientRect().right,
+          whiteSpace: getComputedStyle(one).whiteSpace,
+          flexShrink: getComputedStyle(one).flexShrink,
+        })),
+        title:
+          title === null
+            ? undefined
+            : {
+                ellipsis: getComputedStyle(title).textOverflow,
+                nowrap: getComputedStyle(title).whiteSpace,
+                clipped: title.scrollWidth > title.clientWidth,
+              },
+      };
     };
-    if (title !== null) title.textContent = restore.title;
-    if (sub !== null) sub.textContent = restore.sub;
-    return answer;
+
+    const roomy = read();
+    const style = document.createElement("style");
+    style.textContent = ".sv-toolbar { width: 420px !important; }";
+    document.head.append(style);
+    try {
+      return { roomy, cramped: read() };
+    } finally {
+      style.remove();
+    }
   });
 
-  expect(measured, "the Run screen has no toolbar").not.toBeNull();
-  // The bar is one row: 40px, and it stays 40px (LLD §13.7's 28px controls).
-  expect(measured!.toolbarHeight).toBeLessThanOrEqual(41);
-  expect(measured!.buttons.length).toBeGreaterThan(0);
-  for (const button of measured!.buttons) {
-    // A wrapped label makes a 28px control about 44px tall.
-    expect(button.height, `"${button.label}" wrapped onto two lines`).toBeLessThanOrEqual(30);
-    // And no button is pushed out of the bar.
+  expect(measured.roomy, "the Run screen has no toolbar").not.toBeNull();
+  const roomy = measured.roomy as {
+    height: number;
+    right: number;
+    buttons: Array<{ label: string; right: number }>;
+  };
+  const cramped = measured.cramped as {
+    height: number;
+    wrap: string;
+    buttons: Array<{ label: string; height: number; whiteSpace: string; flexShrink: string }>;
+    title?: { ellipsis: string; nowrap: string; clipped: boolean };
+  };
+
+  // At the window's own width every button is inside the bar.
+  expect(roomy.buttons.length).toBeGreaterThan(0);
+  for (const button of roomy.buttons) {
     expect(button.right, `"${button.label}" is off the end of the toolbar`).toBeLessThanOrEqual(
-      measured!.toolbarWidth + 1,
+      roomy.right + 1,
     );
   }
-  // What gives is the title, which truncates.
-  expect(measured!.titleFits).toBe(true);
+
+  // And when there is not enough room, the bar is still one 40px row of
+  // one-line buttons: what gives is the title.
+  expect(cramped.wrap).toBe("nowrap");
+  expect(roomy.height).toBeLessThanOrEqual(41);
+  expect(cramped.height, "the toolbar grew a second row").toBeLessThanOrEqual(41);
+  for (const button of cramped.buttons) {
+    // A wrapped label turns a 28px control into a 44px one.
+    expect(button.height, `"${button.label}" wrapped onto two lines`).toBeLessThanOrEqual(30);
+    expect(button.whiteSpace, `"${button.label}" may wrap`).toBe("nowrap");
+    expect(button.flexShrink, `"${button.label}" may be squeezed`).toBe("0");
+  }
+  expect(cramped.title?.nowrap).toBe("nowrap");
+  expect(cramped.title?.ellipsis).toBe("ellipsis");
+  expect(cramped.title?.clipped, "the title was not the thing that gave").toBe(true);
 });
 
 test("the inspector says each of its headings once", async () => {
+  await showRunScreen();
   await page.locator(".sv-step").first().click();
   await expect(page.locator("#inspector-step")).toBeVisible();
 
@@ -484,6 +577,8 @@ test("the inspector says each of its headings once", async () => {
 });
 
 test("the audit pane renders the call detail the model carries", async () => {
+  await showRunScreen();
+  await expect(page.locator(".sv-audit li").first()).toBeVisible({ timeout: 60_000 });
   const rows = await page.evaluate(() =>
     [...document.querySelectorAll(".sv-audit li")].map((one) => ({
       kind: (one.querySelector(".sv-audit-kind")?.textContent ?? "").trim(),
@@ -504,6 +599,7 @@ test("the audit pane renders the call detail the model carries", async () => {
 });
 
 test("Run again is a button on the Run screen, and it starts another run", async () => {
+  await showRunScreen();
   const again = page.locator("#action-run-again");
   await expect(again).toBeVisible();
   await expect(again).toContainText("Run again");
