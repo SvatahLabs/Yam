@@ -29,6 +29,8 @@ Default web adapter: AgentSurface on Playwright
 | `literalValue` | function | `export function literalValue(ref: ValueRef): string` |  |
 | `locatorFor` | function | `export function locatorFor(` | Build the locator a candidate names, or `null` when the candidate is one the |
 | `parseAiSnapshot` | function | `export function parseAiSnapshot(text: string): SnapshotNode[]` |  |
+| `PICKED_ATTRIBUTE` | variable | `PICKED_ATTRIBUTE = "data-yam-picked"` | The attribute the picker stamps on the clicked element. |
+| `PICKER_SCRIPT` | variable | `PICKER_SCRIPT = `(id) =>` | The in-page picker: highlight what the pointer is over, resolve on click. |
 | `PLAYWRIGHT_ADAPTER_NAME` | variable | `PLAYWRIGHT_ADAPTER_NAME = "playwright"` | The name this adapter is selected by in `yam.config.yaml` (LLD §2.4). |
 | `PLAYWRIGHT_CAPABILITIES` | variable | `PLAYWRIGHT_CAPABILITIES: Capabilities ` | The capability descriptor for this adapter (LLD §2.4). |
 | `PlaywrightAdapterOptions` | interface | `export interface PlaywrightAdapterOptions` | Everything the adapter needs that is not in `SessionInit`. |

@@ -10,6 +10,7 @@ What `yam help` prints, then every command's own `--help`, then the help topics.
 yam — describe a behaviour once, bind it to the real application, replay it without a model
 
   yam init [dir]      start a project here
+  yam explore         let an agent drive the application; its exploration becomes a proposal
   yam check           read, lint and compile the flows; writes .yam/plan.json
   yam record          bind the targets by driving the real application
   yam run             replay the plan; the exit code is the verdict
@@ -35,6 +36,20 @@ Start a project: yam.config.yaml, flows/ with an example, data.yaml, and the dir
   --force  write into a directory that already has a project
 
 Exit codes: 0 ok · 64 usage
+```
+
+### `yam explore`
+
+```text
+yam explore [dir] [--name <story>] [--trajectory <path.jsonl>]
+
+Let an agent write the first draft. Serves the MCP surface for one exploration of the application and, when the agent disconnects, compiles what it did into a proposal under proposals/<date>/ for you to review. --trajectory compiles one yam mcp or the app's Explorer wrote.
+
+  --name <story>             the proposed story's name
+  --trajectory <path.jsonl>  compile an existing trajectory instead of serving a session
+  --json                     one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 64 usage · 1 failed
 ```
 
 ### `yam check`
@@ -84,16 +99,16 @@ Exit codes: 0 ok · 2 compile errors · 3 model unavailable
 ### `yam record`
 
 ```text
-yam record [dir] [--flow <file>] [--story <name>] [--rebind] [--gateway anthropic|fake] [--force-production] [--json]
+yam record [dir] [--flow <file>] [--story <name>] [--rebind] [--gateway human|anthropic|fake] [--force-production] [--json]
 
-Drive the plan against the real application and bind every target to an element: by your click in a headed browser, or through a model gateway when one is configured. Nothing is written before you have seen it.
+Drive the plan against the real application and bind every target to an element: by your click in the browser that opens (human, the default at a terminal with no credential), or through a model gateway. Nothing is written before you have seen it.
 
-  --flow <file>             only this flow
-  --story <name>            only this story; repeatable
-  --rebind                  record elements that already have a binding
-  --gateway anthropic|fake  who grounds a phrase to an element; fake needs no credential
-  --force-production        record against a production configuration anyway
-  --json                    one JSON document on stdout, nothing else
+  --flow <file>                   only this flow
+  --story <name>                  only this story; repeatable
+  --rebind                        record elements that already have a binding
+  --gateway human|anthropic|fake  who grounds a phrase to an element: you, in the browser; a model; or the committed answers
+  --force-production              record against a production configuration anyway
+  --json                          one JSON document on stdout, nothing else
 
   session options: see `yam help session`
 

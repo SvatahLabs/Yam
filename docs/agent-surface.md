@@ -42,6 +42,7 @@ interface AgentSurface {
 
   trace?(start: boolean, path?: string): Promise<void>;
   request?(req: ApiRequest, opts: { withSessionCookies: boolean }): Promise<ApiResponse>;
+  pick?(phrase: string, opts?: { id?: string; timeoutMs?: number }): Promise<Ref | undefined>;
 }
 ```
 
@@ -63,13 +64,14 @@ interface AgentSurface {
 | `restore` | yes | Put the session back into a previously returned state. | `surface.session-state.schema.json` |
 | `trace` | optional | Start or stop adapter tracing. Present only when `capabilities().trace`. | — |
 | `request` | optional | Execute a named HTTP request, optionally sharing the web session's cookies (REQ-ADP-3). | `surface.api-request.schema.json`, `surface.api-response.schema.json` |
+| `pick` | optional | Put an overlay over the application naming `phrase`, wait for a person's click, and return the element clicked as a reference; `undefined` when the person cancelled. `opts.id` is the element id, so a scripted pick can answer it. Present only when `capabilities().pick` (Draft 2.21, REQ-REC-12). | — |
 
-An adapter that does not implement `trace` or `request` must omit them, not
+An adapter that does not implement `trace`, `request` or `pick` must omit them, not
 implement them as throwing stubs — callers check for presence.
 
 ### Every capability flag
 
-`capabilities()` returns exactly these nine booleans. Default every one to `false`
+`capabilities()` returns exactly these ten booleans. Default every one to `false`
 and opt in to what you actually support: the executor checks a plan against them
 **before the run starts**, so a missing feature is a refusal to begin rather than a
 failure halfway through a flow (LLD §2.4).
@@ -82,6 +84,7 @@ failure halfway through a flow (LLD §2.4).
 | `upload` | Files can be attached to a file control. | `upload` |
 | `drag` | One element can be dragged onto another. | `dragTo` |
 | `trace` | `trace()` is implemented. | — |
+| `pick` | The adapter can overlay the application and take a person's click as an element; what the recorder's human gateway needs (Draft 2.21). The Playwright adapter has it. | — |
 | `webmcp` | The adapter can read a page's declared tools and call one (REQ-ADP-9). Says nothing about whether the *current* page declares any — that is `locate({ by: "webmcp" })`, asked per resolution. | — |
 | `screenshot` | `screenshot()` produces an image. | `screenshot` |
 | `restore` | `restore()` can put the session back into a stored state. | — |
@@ -435,7 +438,7 @@ contract they check.
 
 ## 9. Checklist for a new adapter
 
-1. Implement every required method in §1; omit `trace` and `request` if you do not
+1. Implement every required method in §1; omit `trace`, `request` and `pick` if you do not
    have them.
 2. Return honest `capabilities()`.
 3. Normalise roles with the tables in §3; map unknowns to `generic`, never drop.

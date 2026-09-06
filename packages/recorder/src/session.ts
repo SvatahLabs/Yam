@@ -75,6 +75,7 @@ import {
   type GroundingDecision,
   type GroundOptions,
   type GroundingTarget,
+  type GroundingResult,
 } from "./ground.js";
 
 /** One step of the session, as the report records it (REQ-REC-8). */
@@ -291,7 +292,18 @@ export async function record(options: RecordSessionOptions): Promise<RecordRepor
           },
         );
 
-        const result = declared ?? (await ground(
+        /*
+         * The human gateway (Draft 2.21, REQ-REC-12): the person is the
+         * grounder. The driven session's overlay names the phrase, the click
+         * comes back as a reference, and the entry is synthesised from it with
+         * provenance `human`/`pick`. Escape is a rejection, as a reviewer's is.
+         */
+        const picked = declared === undefined && gateway.name === "human" ? await pickByPerson(target, surface) : undefined;
+        if (picked !== undefined && "stopped" in picked) {
+          stoppedBecause = picked.stopped;
+          break outer;
+        }
+        const result = declared ?? picked ?? (await ground(
           {
             id: target.ref,
             phrase: target.phrase,
@@ -628,4 +640,39 @@ function readPath(tree: Readonly<Record<string, unknown>>, path: string): unknow
     cursor = (cursor as Record<string, unknown>)[segment];
   }
   return cursor;
+}
+
+/**
+ * A person's pick as a grounding result (Draft 2.21). `stopped` when the
+ * adapter cannot take a click or the person pressed Escape.
+ */
+async function pickByPerson(
+  target: { readonly ref: string; readonly phrase: string },
+  surface: AgentSurface,
+): Promise<GroundingResult | { readonly stopped: string }> {
+  if (surface.pick === undefined || surface.capabilities().pick !== true) {
+    return { stopped: `The ${surface.kind} adapter cannot take a click, so a person cannot record on it; use a model gateway.` };
+  }
+  const ref = await surface.pick(target.phrase, { id: target.ref });
+  if (ref === undefined) {
+    return { stopped: `Nothing was picked for "${target.phrase}" (${target.ref}); the person pressed Escape.` };
+  }
+  const entry = await entryFor(surface, ref, { promptVersion: "pick" });
+  const snapshot = await surface.snapshot().catch(() => undefined);
+  return {
+    decision: {
+      id: target.ref,
+      phrase: target.phrase,
+      outcome: "grounded",
+      ref,
+      confidence: 1,
+      usedVision: false,
+      cached: false,
+      snapshotTokens: snapshot?.tokensEstimate ?? 0,
+      pruned: false,
+      message: "picked by a person in the driven session",
+    },
+    entry,
+    ...(snapshot === undefined ? {} : { snapshot: snapshot.text }),
+  };
 }

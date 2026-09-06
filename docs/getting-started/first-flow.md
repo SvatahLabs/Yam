@@ -63,12 +63,13 @@ on one line.
 ## 4. Record the bindings
 
 ```bash
-yam record --headed
+yam record
 ```
 
-The recorder drives the plan against your application. For each target phrase
-it asks you to click the element, or grounds it through a model gateway when
-one is configured, then writes `bindings/<app>/<page>/<element>.yaml` with
+The recorder drives the plan against your application. A browser opens and,
+for each target phrase, an overlay names it and waits for your click; with a
+model credential configured a model grounds it instead and shows you its
+choice. Either way the recorder then writes `bindings/<app>/<page>/<element>.yaml` with
 its candidates and fingerprint. Nothing is written before you have seen it.
 `yam` now says `next  yam run`.
 

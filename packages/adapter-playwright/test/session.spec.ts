@@ -45,6 +45,26 @@ test.describe("capabilities (LLD §2.4)", () => {
     // without a proof here would be a promise the executor's capability gate
     // makes on the adapter's behalf and the adapter cannot keep.
     const proofs: Record<string, () => Promise<unknown>> = {
+      // Draft 2.21: a person's click as an element, here scripted through YAM_PICK.
+      // The proofs run in the schema's flag order, so this one runs last, after
+      // `restore` has moved the page; it goes back to the widgets page first.
+      pick: async () => {
+        const saved = process.env["YAM_PICK"];
+        // `show-alert` survives the proofs that ran before this one; the drag
+        // source does not, once it has been dropped.
+        process.env["YAM_PICK"] = JSON.stringify({ "the show alert button": "show-alert" });
+        try {
+          const origin = new URL((await surface.state()).url ?? "http://127.0.0.1").origin;
+          await surface.act("navigate", undefined, { url: `${origin}/widgets` });
+          const ref = await surface.pick!("the show alert button");
+          if (ref === undefined) return false;
+          const expected = await refByTestId(surface, "show-alert");
+          return (await surface.describe(ref)).role === (await surface.describe(expected)).role;
+        } finally {
+          if (saved === undefined) delete process.env["YAM_PICK"];
+          else process.env["YAM_PICK"] = saved;
+        }
+      },
       dialogs: async () => {
         await surface.act("dialog", undefined, { action: "accept" });
         await surface.act("click", await refByTestId(surface, "show-alert"));

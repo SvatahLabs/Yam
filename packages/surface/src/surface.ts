@@ -69,6 +69,13 @@ export interface AgentSurface {
 
   /** Optional: HTTP-capable adapters (REQ-ADP-2, REQ-ADP-3). */
   request?(req: ApiRequest, opts: { withSessionCookies: boolean }): Promise<ApiResponse>;
+  /**
+   * Draft 2.21 (REQ-REC-12): put an overlay over the application naming the
+   * phrase, wait for a person's click, and return the element clicked; undefined
+   * when the person pressed Escape. Only adapters with the `pick` capability.
+   * `opts.id` is the element id, so a scripted pick (`YAM_PICK`) can answer it.
+   */
+  pick?(phrase: string, opts?: { id?: string; timeoutMs?: number }): Promise<Ref | undefined>;
 }
 
 /** Every method name on `AgentSurface`, required first, then the optional ones. */
@@ -87,12 +94,13 @@ export const SURFACE_METHODS = [
   "restore",
   "trace",
   "request",
+  "pick",
 ] as const;
 export type SurfaceMethod = (typeof SURFACE_METHODS)[number];
 
 /** The methods every adapter must implement; `trace` and `request` are optional. */
 export const REQUIRED_SURFACE_METHODS = SURFACE_METHODS.filter(
-  (m): m is Exclude<SurfaceMethod, "trace" | "request"> => m !== "trace" && m !== "request",
+  (m): m is Exclude<SurfaceMethod, "trace" | "request" | "pick"> => m !== "trace" && m !== "request" && m !== "pick",
 );
 
 /** All capability flags default to false, so an adapter opts in to what it supports. */
@@ -106,6 +114,7 @@ export const NO_CAPABILITIES: Capabilities = {
   webmcp: false,
   screenshot: false,
   restore: false,
+  pick: false,
 };
 
 /**

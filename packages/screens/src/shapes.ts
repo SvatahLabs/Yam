@@ -36,7 +36,7 @@ export interface ProjectResponse {
   apis?: string[];
   customSteps?: string[];
   diagnostics?: Array<{ severity?: string; code?: string; message?: string; line?: number; file?: string }>;
-  gateway?: { credential?: boolean };
+  gateway?: { credential?: boolean; display?: boolean };
 }
 
 export interface CompileResponse {

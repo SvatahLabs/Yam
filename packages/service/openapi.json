@@ -108,7 +108,7 @@
                     },
                     "gateway": {
                       "type": "object",
-                      "description": "Whether a model credential is available to this service, so a client can offer a gateway it can reach (REQ-ADE-4). The credential itself is never sent.",
+                      "description": "Whether a model credential is available to this service (and, under `display`, whether a person at the service's machine can click in a headed browser, Draft 2.21), so a client can offer a gateway it can reach (REQ-ADE-4). The credential itself is never sent.",
                       "properties": {
                         "credential": {
                           "type": "boolean"

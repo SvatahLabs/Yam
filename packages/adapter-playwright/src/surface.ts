@@ -50,6 +50,7 @@ import {
   TimeoutError,
 } from "@svatah/yam-surface";
 import { describeElement } from "./page-script.js";
+import { PICKED_ATTRIBUTE, PICKER_SCRIPT } from "./picker.js";
 import { coordsOf, locatorFor } from "./locate.js";
 import { callTool, declaredTools, declaresTool, type DeclaredTool } from "./webmcp.js";
 import { evaluatePredicate } from "./predicates.js";
@@ -136,6 +137,7 @@ export const PLAYWRIGHT_CAPABILITIES: Capabilities = {
    * recorded behind it are tried in the same run (LLD §6.3).
    */
   webmcp: true,
+  pick: true,
   screenshot: true,
   restore: true,
 };
@@ -188,6 +190,44 @@ export class PlaywrightSurface implements AgentSurface {
 
   capabilities(): Capabilities {
     return { ...PLAYWRIGHT_CAPABILITIES };
+  }
+
+  /**
+   * A person's click as an element (Draft 2.21, REQ-REC-12, LLD §2.1).
+   *
+   * The overlay names the phrase; the click stamps the element; the stamp is
+   * located, minted as a reference, and removed. `YAM_PICK` — a JSON object of
+   * element id (or phrase) to selector, module (a)'s test affordance — answers
+   * without a person, so a test can drive the human gateway headless.
+   */
+  async pick(phrase: string, opts: { id?: string; timeoutMs?: number } = {}): Promise<Ref | undefined> {
+    const page = this.page();
+    const scripted = process.env["YAM_PICK"];
+    if (scripted !== undefined && scripted !== "") {
+      const picks = JSON.parse(scripted) as Record<string, string>;
+      const value =
+        (opts.id === undefined ? undefined : (picks[opts.id] ?? picks[opts.id.split(".").pop() ?? opts.id])) ??
+        picks[phrase];
+      if (value !== undefined) {
+        const selector = /^[A-Za-z0-9_-]+$/.test(value) ? `[data-testid="${value}"]` : value;
+        const element = await page.$(selector);
+        return element === null ? undefined : this.refs().mint(element as ElementHandle<Element>);
+      }
+    }
+    const stamp = opts.id ?? phrase;
+    const clicked = (await Promise.race([
+      page.evaluate(PICKER_SCRIPT, stamp),
+      new Promise<false>((done) => setTimeout(() => done(false), opts.timeoutMs ?? 300_000)),
+    ])) as boolean;
+    if (!clicked) {
+      await page.evaluate("() => { if (window.__yamPicker__) window.__yamPicker__.cancel(); }").catch(() => undefined);
+      return undefined;
+    }
+    const element = await page.$(`[${PICKED_ATTRIBUTE}="${stamp.replace(/"/g, '\\"')}"]`);
+    if (element === null) return undefined;
+    const ref = this.refs().mint(element as ElementHandle<Element>);
+    await element.evaluate((node, attribute) => node.removeAttribute(attribute), PICKED_ATTRIBUTE).catch(() => undefined);
+    return ref;
   }
 
   async open(session: SessionInit): Promise<void> {

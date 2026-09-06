@@ -29,7 +29,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `Candidate` | typealias | `type Candidate = z.infer<typeof candidateSchema>;` |  |
 | `Capabilities` | typealias | `type Capabilities = z.infer<typeof capabilitiesSchema>;` |  |
 | `capabilitiesSchema` | variable | `capabilitiesSchema: z.ZodObject<` |  |
-| `CAPABILITY_FLAGS` | variable | `CAPABILITY_FLAGS: readonly ["dialogs", "frames", "windows", "upload", "drag", "trace", "webmcp", "screenshot", "restore"]` |  |
+| `CAPABILITY_FLAGS` | variable | `CAPABILITY_FLAGS: readonly ["dialogs", "frames", "windows", "upload", "drag", "trace", "webmcp", "screenshot", "restore", "pick"]` |  |
 | `CapabilityFlag` | typealias | `type CapabilityFlag = (typeof CAPABILITY_FLAGS)[number];` |  |
 | `capabilityForAction` | function | `export function capabilityForAction(action: SurfaceAction): keyof Capabilities \| undefined` | The capability an action requires, or `undefined` when every adapter must support it. |
 | `CheckError` | class | `export class CheckError extends SurfaceError` | A `check()` predicate did not hold. Maps to the `assertion` failure class. |

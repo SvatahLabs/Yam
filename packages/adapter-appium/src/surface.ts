@@ -96,6 +96,7 @@ export const APPIUM_CAPABILITIES: Capabilities = {
   drag: true,
   trace: false,
   webmcp: false,
+  pick: false,
   screenshot: true,
   restore: true,
 };

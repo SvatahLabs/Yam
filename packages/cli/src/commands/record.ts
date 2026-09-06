@@ -42,6 +42,7 @@ import { registerAllAdapters } from "../adapters.js";
 import { gatewayForRecording } from "../gateway-for.js";
 import { compileProject, loadProject } from "../project.js";
 import { noteCheck, preflight } from "../front-door.js";
+import { diagnostic, say } from "../diagnostics.js";
 import { report as reportDiagnostics } from "./compile.js";
 import { loadBindings, projectRunners } from "./run.js";
 
@@ -95,10 +96,15 @@ export async function recordCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
   const config = {
     ...loaded.config,
     app: { ...loaded.config.app, ...target },
-    run: { ...loaded.config.run, headless: !boolOption(args, "headed") },
+    // A person cannot click in a headless browser: the human gateway is headed.
+    run: { ...loaded.config.run, headless: gateway.name === "human" ? false : !boolOption(args, "headed") },
   };
 
   const surface = await createSurface(config);
+  if (gateway.name === "human" && surface.capabilities().pick !== true) {
+    say(io, args, diagnostic("cannot-pick", config.adapter));
+    return EXIT.usage;
+  }
   await surface.open({
     ...(config.app.baseUrl === undefined ? {} : { baseUrl: config.app.baseUrl }),
     ...(config.app.storageState === undefined ? {} : { storageState: config.app.storageState }),

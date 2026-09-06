@@ -21,7 +21,7 @@ import { a11yVariant } from "../a11y-variant.js";
 import { Code, EmptyInspector, GLYPH, Toolbar } from "./parts.js";
 
 /** The two gateways a record session can run against (LLD §13.5, §13.6). */
-export type GatewayChoice = "anthropic" | "fake";
+export type GatewayChoice = "human" | "anthropic" | "fake";
 
 /**
  * Advice a person at this window can act on (REQ-ADE-4, LLD §13.6).

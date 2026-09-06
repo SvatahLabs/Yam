@@ -48,9 +48,17 @@ export function gatewayForRecording(
   io: CommandIo,
   options: GatewayChoiceOptions = {},
 ): Gateway | undefined {
-  const asked = stringOption(args, "gateway") ?? (credentialInEnvironment() ? "anthropic" : "");
+  const asked =
+    stringOption(args, "gateway") ??
+    (credentialInEnvironment() ? "anthropic" : personCanPick() ? "human" : "");
 
   if (asked === "none") return undefined;
+
+  // Draft 2.21 (REQ-REC-12): a person is the grounder; the recorder picks in the session.
+  if (asked === "human") {
+    io.err("recording as a person: the driven browser opens and asks for a click at each unbound target.");
+    return humanGateway();
+  }
 
   if (asked === "fake") {
     const answers = groundingAnswers();
@@ -113,4 +121,27 @@ export function secretValues(
     if (typeof cursor === "string" && cursor.length >= 4) out.add(cursor);
   }
   return out;
+}
+
+/**
+ * Whether a person is here to click (Draft 2.21, REQ-REC-12, LLD §11): a
+ * terminal, no CI, and a display. On Linux a display is `DISPLAY` or
+ * `WAYLAND_DISPLAY`; macOS and Windows always have one when a person is at
+ * a terminal.
+ */
+export function personCanPick(env: NodeJS.ProcessEnv = process.env, isTty: boolean = process.stdout.isTTY === true): boolean {
+  if (!isTty || (env["CI"] ?? "") !== "") return false;
+  if (process.platform === "linux") return (env["DISPLAY"] ?? "") !== "" || (env["WAYLAND_DISPLAY"] ?? "") !== "";
+  return true;
+}
+
+/** The gateway whose `ask` is never called: the person answers in the browser (LLD §11). */
+export function humanGateway(): Gateway {
+  return {
+    name: "human",
+    model: "human",
+    real: false,
+    ask: () => Promise.reject(new Error("The human gateway is never asked; the recorder picks in the session.")),
+    usage: () => ({ calls: 0, cacheHits: 0, tokensIn: 0, tokensOut: 0, cacheRead: 0, costUsd: 0 }),
+  };
 }

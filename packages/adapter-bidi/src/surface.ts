@@ -81,6 +81,7 @@ export const BIDI_CAPABILITIES: Capabilities = {
   drag: true,
   trace: false,
   webmcp: false,
+  pick: false,
   screenshot: true,
   restore: true,
 };

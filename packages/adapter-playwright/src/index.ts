@@ -46,3 +46,4 @@ export {
   type DeclaredTool,
   type ToolCall,
 } from "./webmcp.js";
+export { PICKER_SCRIPT, PICKED_ATTRIBUTE } from "./picker.js";

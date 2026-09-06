@@ -169,6 +169,7 @@ describe("capabilities declare what a phone does not have (LLD §2.4)", () => {
       frames: false,
       trace: false,
       webmcp: false,
+      pick: false,
     });
   });
 

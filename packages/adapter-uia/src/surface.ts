@@ -89,6 +89,7 @@ export const UIA_CAPABILITIES: Capabilities = {
   drag: false,
   trace: false,
   webmcp: false,
+  pick: false,
   screenshot: true,
   restore: true,
 };

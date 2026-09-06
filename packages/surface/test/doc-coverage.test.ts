@@ -47,8 +47,8 @@ describe("docs/agent-surface.md (REQ-SURF-1)", () => {
   });
 
   it("states how many capability flags there are, and that is how many exist", () => {
-    expect(CAPABILITY_FLAGS).toHaveLength(9);
-    expect(doc).toContain("exactly these nine booleans");
+    expect(CAPABILITY_FLAGS).toHaveLength(10);
+    expect(doc).toContain("exactly these ten booleans");
   });
 
   it.each(SURFACE_ACTIONS)("names the `%s` action", (action) => {

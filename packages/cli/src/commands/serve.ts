@@ -10,6 +10,7 @@
  * not written anywhere: a token in a file is a token that outlives the process
  * that needed it.
  */
+import { personCanPick } from "../gateway-for.js";
 import { createService } from "@svatah/yam-service";
 import { credentialInEnvironment } from "@svatah/yam-gateway";
 import { HttpSurface } from "@svatah/yam-adapter-http";
@@ -95,6 +96,8 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
        * and the session come to disagree about whether there is a model.
        */
       hasModelCredential: credentialInEnvironment,
+      // Draft 2.21: whether a person at this machine can click in a headed browser.
+      hasDisplay: () => personCanPick(process.env, true),
       record: serviceRecord,
       verifyBindings: serviceVerifyBindings,
       heal: serviceHeal,

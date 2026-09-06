@@ -11,7 +11,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-adapter-ax`](adapter-ax.md) | 44 | macOS Accessibility adapter: the Yam agent surface over AXUIElement |
 | [`@svatah/yam-adapter-bidi`](adapter-bidi.md) | 40 | WebDriver BiDi adapter (independence proof) |
 | [`@svatah/yam-adapter-http`](adapter-http.md) | 14 | HTTP/API adapter |
-| [`@svatah/yam-adapter-playwright`](adapter-playwright.md) | 35 | Default web adapter: AgentSurface on Playwright |
+| [`@svatah/yam-adapter-playwright`](adapter-playwright.md) | 37 | Default web adapter: AgentSurface on Playwright |
 | [`@svatah/yam-adapter-uia`](adapter-uia.md) | 39 | Windows UI Automation adapter: the Yam agent surface over UIAutomationClient |
 | [`@svatah/yam-bindings`](bindings.md) | 53 | Bindings store, context hash, resolver, synthesis, fingerprint, relocalization |
 | [`@svatah/yam-bindings-cli`](bindings-cli.md) | 27 | The yam-bindings command line: bindings, heal, surface conform and the healing eval for module (a) |

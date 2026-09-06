@@ -34,7 +34,7 @@ const BLANK = 'schemaVersion: "1.0.0"\napp: { baseUrl: "about:blank" }\n';
 
 describe("the diagnostics catalogue (REQ-CLI-5)", () => {
   it("every row has a sentence and a verb, and none says anything internal", () => {
-    expect(DIAGNOSTICS.length).toBe(10);
+    expect(DIAGNOSTICS.length).toBe(12);
     for (const one of DIAGNOSTICS) {
       expect(one.message.length).toBeGreaterThan(8);
       expect(one.next.length).toBeGreaterThan(3);

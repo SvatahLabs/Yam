@@ -604,8 +604,8 @@ The owner's decision of 2026-09-07: the command line is hard to understand and f
 
 ### T14.9 `yam explore`, and the proposal on the front door (Draft 2.21)
 **Refs:** REQ-AGT-5, REQ-CLI-10, LLD §13.4, §15.1 · **Est:** 1.5
-**Do:** `yam explore [dir] [--name <story>] [--from <trajectory.jsonl>]`: the MCP server as `yam mcp` runs it, the trajectory under `.yam/explore/<id>/`, the compile on disconnect, the proposal named; `projectState` gains `proposals`, `nextVerb` names the newest before it looks at the plan; `explore` in the help text, the topic `agents`, the getting-started page and the README; the self suite gains a two-sided check that an exploration through the MCP client example becomes a proposal.
-**Validate:** The MCP client example under `examples/mcp-agent/` pointed at `yam explore` produces `proposals/<date>/<name>.flow` with the intents as sentences and `verified: false` bindings, and `yam` then says `next  review proposals/<date>`; an empty exploration writes nothing and says so; `--from` compiles a trajectory `yam mcp` wrote; `yam help` matches LLD §15.1 with the new line; the vocabulary check still passes.
+**Do:** `yam explore [dir] [--name <story>] [--trajectory <path.jsonl>]`: the MCP server as `yam mcp` runs it, the trajectory under `.yam/explore/<id>/`, the compile on disconnect, the proposal named; `projectState` gains `proposals`, `nextVerb` names the newest before it looks at the plan; `explore` in the help text, the topic `agents`, the getting-started page and the README; the self suite gains a two-sided check that an exploration through the MCP client example becomes a proposal.
+**Validate:** The MCP client example under `examples/mcp-agent/` pointed at `yam explore` produces `proposals/<date>/<name>.flow` with the intents as sentences and `verified: false` bindings, and `yam` then says `next  review proposals/<date>`; an empty exploration writes nothing and says so; `--trajectory` compiles a trajectory `yam mcp` wrote; `yam help` matches LLD §15.1 with the new line; the vocabulary check still passes.
 
 Phase 14 total: 10.5 ideal days.
 

@@ -365,7 +365,9 @@ describe("the Record screen chooses the gateway (P5-F2, REQ-ADE-4, LLD ยง13.5, ย
     // And a machine with no key is *told* it has none, rather than being
     // offered a gateway that fails on submit.
     const offered = without.gateways;
-    expect(offered.map((one) => one.id)).toEqual(["anthropic", "fake"]);
+    // Draft 2.21: `human` is always offered, available only when the service reports a display.
+    expect(offered.map((one) => one.id)).toEqual(["human", "anthropic", "fake"]);
+    expect(offered.find((one) => one.id === "human")?.available).toBe(false);
     expect(offered.find((one) => one.id === "anthropic")!.available).toBe(false);
     expect(offered.find((one) => one.id === "fake")!.label).toContain("evals/grounding/cases");
 

@@ -33,8 +33,8 @@ describe("the top-level help (REQ-CLI-2)", () => {
 
   it("is one screen: the seven verbs in order, then how to go deeper", () => {
     const verbs = TOP_LEVEL.split("\n").filter((line) => /^ {2}yam [a-z]+ /.test(line)).map((line) => line.trim().split(/\s+/)[1]);
-    expect(verbs.slice(0, 7)).toEqual(["init", "check", "record", "run", "heal", "ui", "serve"]);
-    expect(TOP_LEVEL.split("\n").length).toBeLessThanOrEqual(16);
+    expect(verbs.slice(0, 8)).toEqual(["init", "explore", "check", "record", "run", "heal", "ui", "serve"]);
+    expect(TOP_LEVEL.split("\n").length).toBeLessThanOrEqual(17);
   });
 
   it("is what `yam help` prints, exit 0", async () => {

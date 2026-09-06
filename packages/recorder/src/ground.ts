@@ -507,7 +507,7 @@ export async function ground(
 export async function entryFor(
   surface: AgentSurface,
   ref: Ref,
-  options: Omit<GroundOptions, "gateway" | "snapshot"> = {},
+  options: Omit<GroundOptions, "gateway" | "snapshot"> & { readonly promptVersion?: string } = {},
 ): Promise<BindingEntry> {
   const candidates = await synthesise(surface, ref, {
     ...(options.testIdAttributes === undefined
@@ -546,7 +546,7 @@ export async function entryFor(
     recordedAt: new Date().toISOString(),
     provenance: {
       model: "human",
-      promptVersion: "review:re-pick",
+      promptVersion: options.promptVersion ?? "review:re-pick",
       at: new Date().toISOString(),
       tokensIn: 0,
       tokensOut: 0,

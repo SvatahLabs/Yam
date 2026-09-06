@@ -147,7 +147,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
        * that question needs, and it is all the service will say. The key never
        * crosses the wire.
        */
-      gateway: { credential: api.hasModelCredential?.() ?? false },
+      gateway: { credential: api.hasModelCredential?.() ?? false, display: api.hasDisplay?.() ?? false },
     };
   });
 

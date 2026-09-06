@@ -577,6 +577,7 @@ const recordScreen: Screen<RecordState> = {
     const sources = new Sources();
     const project = await sources.get<ProjectResponse>("GET /project", () => service.getProject(), {});
     const credential = project.gateway?.credential === true;
+    const display = project.gateway?.display === true;
     const file = params.file ?? project.flows?.[0];
     return {
       ...sources.base(
@@ -590,6 +591,13 @@ const recordScreen: Screen<RecordState> = {
       screen: "record",
       ...(params.sessionId === undefined ? {} : { sessionId: params.sessionId }),
       gateways: [
+        {
+          id: "human",
+          label: display
+            ? "human — you click each element in the browser that opens"
+            : "human — no display on the service's machine",
+          available: display,
+        },
         {
           id: "anthropic",
           label: credential
@@ -608,7 +616,9 @@ const recordScreen: Screen<RecordState> = {
           ? params.gateway
           : credential
             ? "anthropic"
-            : "fake",
+            : display
+              ? "human"
+              : "fake",
       flows: project.flows ?? [],
       ...(file === undefined ? {} : { file }),
       decisions: [],

@@ -80,6 +80,8 @@ export const CAPABILITY_FLAGS = [
   "webmcp",
   "screenshot",
   "restore",
+  // Draft 2.21: the adapter can overlay the application and take a person's click as an element.
+  "pick",
 ] as const;
 export type CapabilityFlag = (typeof CAPABILITY_FLAGS)[number];
 

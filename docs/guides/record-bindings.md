@@ -26,15 +26,17 @@ for exercising the record path headless, not a way to write selectors again.
 ## In a flow project
 
 ```bash
-yam record --headed                      # a person clicks
+yam record                               # you click: the default at a terminal with no credential
 yam record --gateway anthropic           # a model grounds each phrase
 yam record --flow flows/login.flow --story "Sign in" --rebind
 ```
 
 The recorder drives the compiled plan on the configured adapter. For every
-target phrase it takes a snapshot, grounds the phrase to a reference, either by
-your click or through the model gateway, then calls `describe()` on the element
-and synthesises candidates and a fingerprint. With a model, every proposal is
+target phrase it takes a snapshot and grounds the phrase to a reference. With
+the `human` gateway the browser that opened shows an overlay naming the phrase
+and waits for your click; Escape stops the session. With a model gateway the
+model reads the snapshot and proposes. Either way the recorder then calls
+`describe()` on the element and synthesises candidates and a fingerprint. With a model, every proposal is
 shown for review before anything is written, and the binding carries the model,
 the prompt version and the snapshot hash as provenance.
 

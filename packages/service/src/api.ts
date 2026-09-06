@@ -79,6 +79,8 @@ export interface ServiceApi {
    * which is the truth for it.
    */
   hasModelCredential?(): boolean;
+  /** Draft 2.21: whether a person at this machine can click in a headed browser (the human gateway). */
+  hasDisplay?(): boolean;
   compileProject(loaded: ProjectHandle, options?: { stable?: boolean }): CompileOutcome;
   runProject(
     loaded: ProjectHandle,

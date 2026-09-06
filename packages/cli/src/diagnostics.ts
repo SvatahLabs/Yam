@@ -27,6 +27,14 @@ const CATALOGUE = {
   }),
   "no-browser": (which: string) => ({ message: `No ${which} for Playwright.`, next: `npx playwright install ${which.toLowerCase()}` }),
   "host-not-ready": (line: string, adapter: string) => ({ message: line, next: `yam surface doctor --adapter ${adapter}` }),
+  "no-display": () => ({
+    message: "Recording as a person needs a terminal and a display.",
+    next: "--gateway fake, or a model credential",
+  }),
+  "cannot-pick": (adapter: string) => ({
+    message: `The ${adapter} adapter cannot take a click.`,
+    next: "--gateway anthropic, or re-pick after a model's proposal",
+  }),
   "cannot-resume": () => ({ message: "The plan or the bindings changed since the checkpoint.", next: "yam run, without --resume" }),
   "not-idempotent": (story: string) => ({
     message: `\`${story}\` is not marked idempotent and this is production.`,
@@ -58,6 +66,8 @@ export const DIAGNOSTICS: readonly Diagnostic[] = [
   diagnostic("secret-unset", "user.password", "YAM_INPUT_PASSWORD"),
   diagnostic("no-browser", "Chromium"),
   diagnostic("host-not-ready", "ax/accessibility refused", "ax"),
+  diagnostic("no-display"),
+  diagnostic("cannot-pick", "http"),
   diagnostic("cannot-resume"),
   diagnostic("not-idempotent", "Book a slot"),
 ];
