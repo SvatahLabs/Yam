@@ -28,14 +28,16 @@ const USAGE = `yam — a deterministic automation runtime with a standard agent 
 
 Flows (module b):
 
+  yam                (no arguments: where you are, and what is next)
   yam init [dir] [--force]
+  yam check [dir] [--json]         lint and compile in one verb
   yam lint [dir] [--json]
   yam compile [dir] [--stable] [--out .yam/plan.json] [--json]
                  [--tier2] [--tier3] [--allow-model-drift]
   yam record [dir] [--flow <file>] [--story <name>] [--rebind] [--headed]
                 [--base-url <url>] [--storage-state <path.json>]
                 [--gateway anthropic|fake] [--input k=v] [--force-production] [--json]
-  yam run [dir] [--host playwright|none] [--flow <file>] [--story <name>]
+  yam run [dir] [--host playwright|none] [--no-check] [--flow <file>] [--story <name>]
              [--base-url <url>] [--storage-state <path.json>] [--input k=v]
              [--resume <runId> --from <stepId>]
              [--workers <n>] [--headed] [--out runs] [--run-id <id>] [--json]
@@ -68,7 +70,7 @@ Bindings and healing (module a):
   yam bindings show <id> [--dir <bindings>] [--json]
   yam bindings verify [--adapter <name>] [--base-url <url>] [--id <id>] [--json]
   yam bindings prune [--used-in <dirs>] [--apply] [--json]
-  yam heal --from-bind-failures | --run <id> [--project <dir>]
+  yam heal [--run <id> | --from-bind-failures] [--project <dir>]     (no --run: the last run)
               [--dir <bindings>] [--out <.yam>] [--runs <runs>]
               [--base-url <url>] [--storage-state <path.json>]
               [--input k=v] [--apply] [--no-model] [--headed] [--json]
@@ -313,10 +315,28 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
     await registerModelRegrounder(args, io);
   }
 
+  /*
+   * `yam heal` with nothing else heals the last run of this project (T14.2,
+   * REQ-CLI-6): `run` wrote `.yam/last-run`, and asking a newcomer for an id
+   * they have to find in a directory listing is the kind of thing the front
+   * door exists to stop.
+   */
+  let healArgs = args;
+  if (command === "heal" && args.options["run"] === undefined && args.options["from-bind-failures"] === undefined) {
+    const { findProjectRoot, readLastRun } = await import("./front-door.js");
+    const root = findProjectRoot(typeof args.options["project"] === "string" ? args.options["project"] : ".");
+    const last = root === undefined ? undefined : readLastRun(root);
+    if (root === undefined || last === undefined) {
+      io.err("There is no run to heal yet. Run `yam run` first; `yam heal` then heals that run.");
+      return EXIT.usage;
+    }
+    io.err(`healing the last run, ${last.runId}`);
+    healArgs = { ...args, options: { project: root, ...args.options, run: last.runId } };
+  }
   const prepared =
-    command === "heal" && typeof args.options["run"] === "string"
-      ? await prepareRunHeal(args, io)
-      : args;
+    command === "heal" && typeof healArgs.options["run"] === "string"
+      ? await prepareRunHeal(healArgs, io)
+      : healArgs;
 
   /*
    * Every adapter, before module (a)'s commands run (LLD §1, REQ-SURF-2).
@@ -362,6 +382,8 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
 
 async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   switch (command) {
+    case "check":
+      return await (await import("./commands/compile.js")).checkCommand(args, io);
     case "compile":
       return await (await import("./commands/compile.js")).compileCommand(args, io);
     case "lint":

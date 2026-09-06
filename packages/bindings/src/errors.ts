@@ -81,8 +81,10 @@ function summarise(candidate: Candidate): string {
 function describe(detail: LocatorErrorDetail): string {
   const lines: string[] = [];
   lines.push(
-    `Could not resolve "${detail.id}"${detail.phrase === undefined ? "" : ` (${detail.phrase})`}: ` +
-      `${detail.tried.length} candidate${detail.tried.length === 1 ? "" : "s"} tried, none matched exactly one element.`,
+    detail.tried.length === 0
+      ? `No binding for ${detail.phrase === undefined ? `"${detail.id}"` : `\`${detail.phrase}\` (${detail.id})`}.`
+      : `Could not resolve "${detail.id}"${detail.phrase === undefined ? "" : ` (${detail.phrase})`}: ` +
+        `${detail.tried.length} candidate${detail.tried.length === 1 ? "" : "s"} tried, none matched exactly one element.`,
   );
   for (const attempt of detail.tried) {
     const outcome =

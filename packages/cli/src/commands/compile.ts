@@ -140,12 +140,22 @@ export async function compileCommand(args: ParsedArgs, io: CommandIo): Promise<E
   writeFileSync(out, renderPlan(compiled.plan), "utf8");
   writePlanInputs(loaded);
   if (!boolOption(args, "json")) {
+    const steps = compiled.plan.stories.flatMap((story) => story.steps);
+    const tier = (n: number): number => steps.filter((step) => step.origin.tier === n).length;
     io.err(
-      `wrote ${out} — ${compiled.plan.stories.length} stories, ` +
-        `${compiled.plan.stories.reduce((n, s) => n + s.steps.length, 0)} steps, hash ${compiled.plan.hash.slice(0, 12)}`,
+      `plan written: ${steps.length} step${steps.length === 1 ? "" : "s"}, ` +
+        `tier 0 ${tier(0)}, tier 1 ${tier(1)}, tier 2 ${tier(2)}, tier 3 ${tier(3)} → ${out}`,
     );
   }
   return EXIT.ok;
+}
+
+/**
+ * `yam check` (T14.2, REQ-CLI-3): read, lint and compile in one verb, one
+ * report, the plan written. `lint` and `compile` remain as its two halves.
+ */
+export async function checkCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
+  return await compileCommand(args, io);
 }
 
 export async function lintCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {

@@ -41,12 +41,14 @@ import {
 import { registerAllAdapters } from "../adapters.js";
 import { gatewayForRecording } from "../gateway-for.js";
 import { compileProject, loadProject } from "../project.js";
+import { noteCheck } from "../front-door.js";
 import { report as reportDiagnostics } from "./compile.js";
 import { loadBindings, projectRunners } from "./run.js";
 
 export async function recordCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const root = args.command[1] ?? ".";
   const loaded = await loadProject(root);
+  noteCheck(loaded, io);
   const compiled = compileProject(loaded, { stable: true });
   const diagnostics = [...loaded.diagnostics, ...compiled.diagnostics];
 

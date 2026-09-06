@@ -358,3 +358,50 @@ function ago(iso: string, now = Date.now()): string {
   if (hours < 48) return `${hours} h ago`;
   return `${Math.round(hours / 24)} days ago`;
 }
+
+/** Whether `.yam/plan.json` is compiled from what is on disk now (T14.2). */
+export function planStaleness(loaded: LoadedProject): "current" | "stale" | "missing" {
+  if (!existsSync(join(loaded.root, ".yam", "plan.json"))) return "missing";
+  const inputs = planInputsPath(loaded.root);
+  if (!existsSync(inputs)) return "stale";
+  try {
+    const recorded = (JSON.parse(readFileSync(inputs, "utf8")) as { inputHash?: string }).inputHash;
+    return recorded === inputHash(loaded) ? "current" : "stale";
+  } catch {
+    return "stale";
+  }
+}
+
+/**
+ * The one line `run`, `record` and `heal` print when they had to check first
+ * (REQ-CLI-3). They always compile from the flows; this says why that mattered.
+ */
+export function noteCheck(loaded: LoadedProject, io: CommandIo): void {
+  const state = planStaleness(loaded);
+  if (state === "stale") io.err("plan was stale; checked");
+  else if (state === "missing") io.err("no plan yet; checked");
+}
+
+/** A failure's reason in one line, and the verb that resolves it (REQ-CLI-5, REQ-CLI-6). */
+export function reasonFor(failure: { readonly class: string; readonly message: string }): {
+  readonly message: string;
+  readonly next?: string;
+} {
+  const message = failure.message.split("\n")[0] ?? failure.message;
+  switch (failure.class) {
+    case "locator":
+      return message.startsWith("No binding for")
+        ? { message, next: "yam record" }
+        : { message, next: "yam heal" };
+    case "data":
+      return /reads \$\{?YAM_INPUT_[A-Z0-9_]+\}?, which is not set/.test(message)
+        ? { message, next: "export the variable the message names, then yam run" }
+        : { message };
+    case "infrastructure":
+      return /browser|chromium|executable doesn't exist|playwright install/i.test(message)
+        ? { message, next: "npx playwright install chromium" }
+        : { message };
+    default:
+      return { message };
+  }
+}

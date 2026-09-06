@@ -148,7 +148,8 @@ describe("the resolver matrix (LLD §6.3)", () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.error.detail.tried).toEqual([]);
-    expect(result.error.message).toContain("0 candidates tried");
+    // Draft 2.20 (REQ-CLI-5): a missing binding says so in words a newcomer can act on.
+    expect(result.error.message).toContain("No binding for");
   });
 });
 

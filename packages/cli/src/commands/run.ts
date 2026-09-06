@@ -18,11 +18,12 @@
  * results, which is the check that keeps it true.
  */
 import { spawn } from "node:child_process";
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import type { Invoker, Plan, StepResult, Summary } from "@svatah/yam-schema";
-import { canonicalJson } from "@svatah/yam-schema";
+import type { Diagnostic } from "@svatah/yam-spec";
+import { canonicalJson, planSchema } from "@svatah/yam-schema";
 import { BindingsStore, resolve as resolveBinding } from "@svatah/yam-bindings";
 import { HttpSurface } from "@svatah/yam-adapter-http";
 import { generateSpecs } from "@svatah/yam-host-playwright";
@@ -56,14 +57,39 @@ import { registerAllAdapters } from "../adapters.js";
 import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import { ConfigError } from "../config-error.js";
 import { compileProject, loadProject } from "../project.js";
-import { writeLastRun, writePlanInputs } from "../front-door.js";
+import { noteCheck, planStaleness, reasonFor, writeLastRun, writePlanInputs } from "../front-door.js";
 import { report } from "./compile.js";
 import type { CommandIo } from "@svatah/yam-bindings-cli";
 
 export async function runCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const root = args.command[1] ?? ".";
   const loaded = await loadProject(root);
-  const compiled = compileProject(loaded, { stable: true });
+
+  /*
+   * The plan is compiled from the flows on every run (REQ-CLI-3); when it was
+   * stale or missing, one line says so. `--no-check` runs the plan on disk as
+   * it is, for the person who knows — and refuses a stale one, because a run of
+   * an old plan is the newcomer's mistake nobody would notice.
+   */
+  let compiled: { plan: Plan; diagnostics: readonly Diagnostic[] };
+  if (boolOption(args, "no-check")) {
+    const staleness = planStaleness(loaded);
+    if (staleness !== "current") {
+      io.err(
+        staleness === "missing"
+          ? "There is no plan yet. Run `yam check` to write one."
+          : "The plan is older than the flows. Run `yam check` to rewrite it, or drop --no-check.",
+      );
+      return EXIT.compileErrors;
+    }
+    compiled = {
+      plan: planSchema.parse(JSON.parse(readFileSync(resolve(loaded.root, ".yam", "plan.json"), "utf8"))),
+      diagnostics: [],
+    };
+  } else {
+    noteCheck(loaded, io);
+    compiled = compileProject(loaded, { stable: true });
+  }
   const diagnostics = [...loaded.diagnostics, ...compiled.diagnostics];
 
   if (diagnostics.some((d) => d.severity === "error")) {
@@ -164,6 +190,11 @@ async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCo
       };
       const mark = marks[result.status];
       io.err(`  ${mark} ${result.story} · ${result.text}`);
+      // The reason under the line, and the verb that resolves it (REQ-CLI-6).
+      if (result.status === "failed" && result.failure !== undefined) {
+        const reason = reasonFor(result.failure);
+        io.err(`      ${reason.message}${reason.next === undefined ? "" : ` → ${reason.next}`}`);
+      }
     },
     log: (message) => io.err(`  ${message}`),
   });
