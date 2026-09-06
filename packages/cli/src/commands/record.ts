@@ -28,6 +28,7 @@ import { join, resolve } from "node:path";
 import { canonicalJson } from "@svatah/yam-schema";
 import { GatewayUnavailable, type Gateway } from "@svatah/yam-gateway";
 import { EnvironmentRefused, record, renderReport, reportJson } from "@svatah/yam-recorder";
+import { scaffoldStories, stoppedHint } from "../scaffold.js";
 import { createSurface } from "@svatah/yam-surface";
 import {
   boolOption,
@@ -193,6 +194,10 @@ export async function recordCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
      * would, which is the expectation answer.
      */
     const stopped = outcome.steps.at(-1);
+    if (stopped !== undefined && !boolOption(args, "json")) {
+      const hint = stoppedHint(stopped, scaffoldStories(loaded.root, config.flows.dir));
+      if (hint !== undefined) io.err(`\n  ${hint.split("\n").join("\n  ")}`);
+    }
     const groundingFailed =
       (stopped?.decision !== undefined && stopped.decision.outcome !== "grounded") ||
       stopped?.failure?.class === "locator";

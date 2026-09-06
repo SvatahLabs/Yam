@@ -56,7 +56,10 @@ export function gatewayForRecording(
 
   // Draft 2.21 (REQ-REC-12): a person is the grounder; the recorder picks in the session.
   if (asked === "human") {
-    io.err("recording as a person: the driven browser opens and asks for a click at each unbound target.");
+    io.err(
+      "recording as a person: Yam performs the flow as written, step by step, and the driven browser " +
+        "asks for a click at each target that has no binding yet.",
+    );
     return humanGateway();
   }
 

@@ -371,3 +371,12 @@ $ yam run --endpoint qa
 No endpoint named "qa"; the config declares "staging", "production".
 (exit 64)
 ```
+
+**Follow-up (the same day).** Atul's project kept the earlier `flows/sign-in.flow`
+after `init --force`, and `yam record` stopped on its `Open "/login"` with a 404
+from an application that has no such page — a failure in a flow he did not write.
+So: `init --force` retires the example it wrote before (recognised by its header,
+never a person's flow); `record` prints, under a stopped step, that a 4xx/5xx is
+a page the application does not have and that the story is `init`'s example when
+it is; the human-gateway preamble says that record performs the flow as written.
+`packages/cli/src/scaffold.ts`, `packages/cli/test/scaffold.test.ts`.

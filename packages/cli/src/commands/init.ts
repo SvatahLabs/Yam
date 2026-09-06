@@ -6,12 +6,13 @@
  * an existing project is almost always a mistake, and the one time it is not,
  * `--force` says so.
  */
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { boolOption, stringOption, stringOptions, type ParsedArgs } from "@svatah/yam-bindings-cli";
 import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import type { CommandIo } from "@svatah/yam-bindings-cli";
+import { OLD_SCAFFOLD_MARKER } from "../scaffold.js";
 
 const CONFIG = `# Yam project configuration.
 schemaVersion: "1.0.0"
@@ -266,6 +267,16 @@ export async function initCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
   for (const dir of ["flows", "steps", "bindings", "api", "runs"]) {
     mkdirSync(join(root, dir), { recursive: true });
   }
+  /*
+   * The example this command wrote before Draft 2.22 was a sign-in against a
+   * `/login` route that most applications lack; `init --force` over such a
+   * project replaced the config and left that flow to fail the next
+   * `yam record`. An example is this command's to retire — a flow a person
+   * edited carries no marker and is left alone.
+   */
+  const earlier = join(root, "flows", "sign-in.flow");
+  const retired = existsSync(earlier) && readFileSync(earlier, "utf8").includes(OLD_SCAFFOLD_MARKER);
+  if (retired) unlinkSync(earlier);
   for (const [name, contents] of files) {
     if (name === ".gitignore" && existsSync(join(root, name))) continue;
     mkdirSync(join(root, name, ".."), { recursive: true });
@@ -279,6 +290,7 @@ export async function initCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
       : `  Application: ${a.baseUrl}${a.endpoints.length === 0 ? "" : `; endpoints: ${a.endpoints.map((one) => one.name).join(", ")} (--endpoint <name>)`}\n\n`;
   io.err(
     `Initialised ${where} as "${a.name}".\n` +
+      (retired ? "  Removed flows/sign-in.flow, the example an earlier init wrote.\n" : "") +
       note +
       "  yam check     read, lint and compile the flows\n" +
       "  yam record    bind the targets by driving the real application\n" +
