@@ -8,23 +8,29 @@
  * Two halves, and the second is the interesting one.
  *
  * **The operation tools** — `yam_compile`, `yam_lint`, `yam_run`,
- * `yam_bindings`, `yam_results` — run *the same functions the CLI runs*. No
- * logic lives in this file, exactly as none lives in the local service
- * (LLD §13.5): an agent that compiled a project through MCP and a person who
- * compiled it on a terminal must get the same `plan.json`, and the only way to
- * guarantee that is for there to be one implementation.
+ * `yam_record`, `yam_heal`, `yam_bindings`, `yam_results` — run *the same
+ * functions the CLI runs*, through the same entry points the local service
+ * calls (`serviceRecord`, `serviceHeal`). No logic lives in this file, exactly
+ * as none lives in the service (LLD §13.5): an agent that compiled a project
+ * through MCP and a person who compiled it on a terminal must get the same
+ * `plan.json`, and the only way to guarantee that is for there to be one
+ * implementation. `docs/mcp.md` lists the same seven and a test compares them,
+ * because this comment once claimed `record` and `heal` while no such tool was
+ * registered (Draft 2.24).
  *
- * Five, and `docs/mcp.md` lists the same five — a test compares them, because
- * this comment claimed `record` and `heal` for four phases and no such tool was
- * ever registered. What is *not* here, and why:
+ * Two things those two do *not* let an agent do, both deliberate:
  *
- *   * `record` — a recording is driven by a person or a gateway and its result
- *     is reviewed before it reaches the store. Since Draft 2.23 the verb alone
- *     means a person driving the browser, which is not a call an agent makes.
- *   * `heal` — proposes repairs for a person to read; `yam heal` is where that
- *     review happens.
- *   * `workflow` and `tool` — a story called as a function is its own server,
- *     `yam tool serve` (REQ-BEH-3), whose tools are the stories themselves.
+ *   * `yam_record` binds the targets of a flow that already exists. The other
+ *     recording — a person driving the browser while Yam writes the flow, which
+ *     is what `yam record` alone means since Draft 2.23 — is not offered,
+ *     because there is nobody at an MCP session to drive. The human gateway is
+ *     refused here for the same reason: it waits for a click that will not come.
+ *   * `yam_heal` proposes by default and writes only when the caller says
+ *     `apply`. That is `yam heal`'s own default, and it keeps "a proposal is
+ *     where the work waits for a person" true unless an agent is told otherwise.
+ *
+ * `workflow` and `tool` remain elsewhere: a story called as a function is its
+ * own server, `yam tool serve` (REQ-BEH-3), whose tools are the stories.
  *
  * **The raw surface tools** — `surface_snapshot`, `surface_act`, `surface_read`,
  * `surface_check` — hand an agent the actual `AgentSurface`, with one addition:
@@ -56,6 +62,7 @@ import {
   type ExitCode,
   type ParsedArgs,
 } from "@svatah/yam-bindings-cli";
+import { credentialInEnvironment } from "@svatah/yam-gateway";
 import { registerAllAdapters } from "../adapters.js";
 import { compileProject, loadProject, type LoadedProject } from "../project.js";
 
@@ -320,6 +327,155 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
           status: one.status,
           ...(one.failure === undefined ? {} : { failure: one.failure.class }),
         })),
+      });
+    },
+  );
+
+  server.registerTool(
+    "yam_record",
+    {
+      title: "Bind the targets of a flow",
+      description:
+        "Drive a flow that already exists against the application and bind every target that has " +
+        "no binding yet, through a model gateway. Each step is performed and its expectation " +
+        "verified before the binding is kept, so a binding that is written is one that worked " +
+        "(REQ-REC-5).\n\n" +
+        "This is `yam record --flow <file>`. It is not the other recording: `yam record` alone " +
+        "means a person driving the browser while Yam writes the flow, and there is nobody at " +
+        "this session to drive.\n\n" +
+        "Writes to the bindings store. If a step fails the session stops and says where, and only " +
+        "what a passing step proved is written.",
+      inputSchema: {
+        flows: z
+          .array(z.string())
+          .optional()
+          .describe("Flow files whose targets to bind; all of them by default."),
+        stories: z
+          .array(z.string())
+          .optional()
+          .describe("Stories to record; all of them by default."),
+        rebind: z
+          .boolean()
+          .optional()
+          .describe("Record elements that already have a binding. Default false."),
+        gateway: z
+          .enum(["anthropic", "fake"])
+          .optional()
+          .describe(
+            "Which gateway grounds each target: `anthropic` needs a credential in the " +
+              "environment; `fake` answers from evals/grounding/cases and is a fixture, not a " +
+              "model. Defaults to whichever is available.",
+          ),
+        inputs: z.record(z.string(), z.unknown()).optional().describe("Story inputs, by name."),
+      },
+    },
+    async ({ flows, stories, rebind, gateway, inputs }) => {
+      const { serviceRecord } = await import("../service-api.js");
+      const report = (await serviceRecord(await project(), {
+        ...(flows === undefined ? {} : { flows }),
+        ...(stories === undefined ? {} : { stories }),
+        ...(rebind === undefined ? {} : { rebind }),
+        /*
+         * Never `human`, whatever the host looks like.
+         *
+         * The schema does not offer it, and the default is named here rather
+         * than left to `gatewayForRecording`, whose default reaches for a
+         * person when one could be at the terminal. Under an MCP session
+         * nobody is: the recorder would open a browser and wait for a click
+         * that never comes. Only the credential *probe* is borrowed — which
+         * gateway suits which situation stays where it was.
+         */
+        gateway: gateway ?? (credentialInEnvironment() ? "anthropic" : "fake"),
+        ...(inputs === undefined ? {} : { inputs }),
+        log: (message) => io.err(`  ${message}`),
+      })) as {
+        gateway: { name: string; model: string; real: boolean };
+        totals: Record<string, number>;
+        complete: boolean;
+        stoppedBecause?: string;
+        written: readonly string[];
+        steps: ReadonlyArray<{ story: string; text: string; status: string }>;
+      };
+      return text({
+        /*
+         * Which gateway decided, and whether it was a model at all (REQ-PKG-4).
+         * An agent reporting "recorded" from the committed fixture answers
+         * would be reporting something nobody measured.
+         */
+        gateway: report.gateway,
+        complete: report.complete,
+        ...(report.stoppedBecause === undefined ? {} : { stoppedBecause: report.stoppedBecause }),
+        totals: report.totals,
+        written: report.written,
+        steps: report.steps.map((one) => ({
+          story: one.story,
+          text: one.text,
+          status: one.status,
+        })),
+      });
+    },
+  );
+
+  server.registerTool(
+    "yam_heal",
+    {
+      title: "Repair the bindings a run could not resolve",
+      description:
+        "Take a run that failed to find elements, relocalize each binding against its recorded " +
+        "fingerprint, and report what could be repaired and how confidently. Model-free by " +
+        "default: relocalization compares what the page says now with what it said when the " +
+        "binding was recorded.\n\n" +
+        "Proposes; it does not write. Pass `apply: true` to write the repairs to the store — and " +
+        "a repair is applied only after the story it came from replayed green (REQ-HEAL-3).",
+      inputSchema: {
+        runId: z
+          .string()
+          .min(1)
+          .describe("The run under runs/ to heal, as `yam_run` returned it."),
+        apply: z
+          .boolean()
+          .optional()
+          .describe("Write the repairs to the bindings store. Default false: propose only."),
+        useModel: z
+          .boolean()
+          .optional()
+          .describe(
+            "Let a model re-ground what relocalization could not place. Default false, which is " +
+              "the project's own default and needs no credential.",
+          ),
+        inputs: z
+          .record(z.string(), z.unknown())
+          .optional()
+          .describe("Story inputs, for the replay that verifies a repair."),
+      },
+    },
+    async ({ runId, apply, useModel, inputs }) => {
+      const { serviceHeal } = await import("../service-api.js");
+      const report = (await serviceHeal(await project(), {
+        runId,
+        ...(apply === undefined ? {} : { apply }),
+        ...(useModel === undefined ? {} : { useModel }),
+        ...(inputs === undefined ? {} : { inputs }),
+      })) as {
+        totals: Record<string, number>;
+        applied: boolean;
+        usedModel: boolean;
+        diff: string;
+        results: ReadonlyArray<{ id: string; phrase?: string; outcome: string; score?: number }>;
+      };
+      return text({
+        applied: report.applied,
+        usedModel: report.usedModel,
+        totals: report.totals,
+        results: report.results.map((one) => ({
+          id: one.id,
+          ...(one.phrase === undefined ? {} : { phrase: one.phrase }),
+          outcome: one.outcome,
+          ...(one.score === undefined ? {} : { score: one.score }),
+        })),
+        // The artifact a person applies by hand; an agent that proposed a
+        // repair should be able to show it rather than describe it.
+        diff: report.diff,
       });
     },
   );

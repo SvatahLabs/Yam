@@ -194,7 +194,7 @@ Constraints stated by the owner:
 | ID | Requirement | Pri | Ver |
 |---|---|---|---|
 | REQ-AGT-1 | CLI: `compile`, `lint`, `record`, `run`, `heal`, `migrate`, `repl`, `eval`, `bindings`, `workflow`, `tool`, `surface` (interactive surface calls for agents), with `--json`. | P0 | T |
-| REQ-AGT-2 | MCP server exposes the CLI operations and the raw agent surface (`snapshot`, `act`, `read`, `check`) so external agents can explore through Yam and have trajectories captured. | P1 | D |
+| REQ-AGT-2 | MCP server exposes the CLI operations and the raw agent surface (`snapshot`, `act`, `read`, `check`) so external agents can explore through Yam and have trajectories captured. The operations are `yam_compile`, `yam_lint`, `yam_run`, `yam_record`, `yam_heal`, `yam_bindings` and `yam_results`, named here because "the CLI operations" let the server and its documentation disagree for four phases; `yam_record` binds the targets of a flow that exists and refuses the human gateway, having nobody to click, and `yam_heal` proposes unless told to apply (Draft 2.24). | P1 | T |
 | REQ-AGT-3 | Every model-produced artifact carries provenance: model id or digest, prompt version, timestamp, tokens, cost, cache hit. | P0 | T |
 | REQ-AGT-4 | Orchestration is external: the project ships examples for CI, cron, and an MCP-driven agent, and no scheduler, queue, or UI of its own. | P0 | R |
 | REQ-AGT-5 | `yam explore` is an agent's way of writing a flow: it serves the MCP surface for one exploration of the project's application, records the trajectory, and when the agent disconnects compiles it into a proposal under `proposals/<date>/` and names it. Nothing an agent did reaches `flows/` or the bindings store until a person moves it there; the proposal's bindings stay `verified: false` until `yam record` verifies them (Draft 2.21). | P0 | T, D |
@@ -313,6 +313,7 @@ Each requirement is referenced by at least one HLD section, one LLD section, and
 - Draft 2.14 (Yam verifies Yam): `REQ-SELF-1..3` added; Phase 11 becomes corrections plus the self-verification suite and parity gate; the release moves to Phase 12.
 - Draft 2.15 (after Phase 11 verification): no requirement text changes; T12.7 added to close the one-sided list's language gaps and the verification's three findings before the release.
 - Draft 2.16 (process and terminal): `REQ-ADP-10` and `REQ-SELF-4` added; Phase 13 added after the release.
+- Draft 2.24 (the MCP operations, owner decision of 2026-09-07): `REQ-AGT-2` names its seven operation tools; `yam_record` and `yam_heal` added, and the requirement's verification moves from D to T.
 - Draft 2.23 (record is capture, owner decision of 2026-09-07): `REQ-REC-13` added — `yam record` records a flow from what a person does; `--flow`/`--all` bind a written one; the `observe` capability; T14.11.
 - Draft 2.22 (endpoints, owner decision of 2026-09-07): `REQ-CLI-11` added — `init` configures the project and never assumes the sample application; the config gains `endpoints` and `--endpoint`; T14.10.
 - Draft 2.21 (the human gateway and the agent's explore, owner decision of 2026-09-07): `REQ-REC-12`, `REQ-AGT-5` and `REQ-CLI-10` added at P0 — a person is a primary grounder through the driven session, an agent writes a first draft through `yam explore`, and the front door knows both; T14.8 and T14.9 added to Phase 14.

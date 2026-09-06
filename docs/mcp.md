@@ -31,15 +31,25 @@ implementation, which is the same rule the local service follows (LLD §13.5).
 | `yam_compile` | Compile every flow into a plan, with the diagnostics `yam compile` reports. `write: true` also writes `.yam/plan.json` |
 | `yam_lint` | Everything `yam lint` reports |
 | `yam_run` | Replay the plan, deterministically and with no model. Returns the run id, the totals and every step's status |
+| `yam_record` | Bind the targets of a flow that already exists, driving it through a model gateway. Each step is performed and verified before its binding is kept. Writes to the store |
+| `yam_heal` | Relocalize the bindings a run could not resolve and report what can be repaired. Proposes; `apply: true` writes |
 | `yam_bindings` | The store: every element the project has recorded, and the phrases that name it |
 | `yam_results` | The summary and step results of a run under `runs/` |
 
-Five, and no more. `record` is not here: a recording is driven by a person or a
-gateway and reviewed before it reaches the store, and since Draft 2.23 the verb
-alone means a person driving the browser. `heal` is not here: it proposes
-repairs for a person to read. `workflow` and `tool` are not here either,
-because a story called as a function has its own server — [`yam tool serve`](behaviors.md),
-whose tools *are* the stories, with the agent recorded as the invoker.
+Seven, and no more.
+
+`yam_record` is the **binding** half of recording — `yam record --flow <file>`.
+The other half, a person driving the browser while Yam writes the flow, is what
+`yam record` alone means since Draft 2.23, and it is not offered here because
+there is nobody at an MCP session to drive. For the same reason `gateway` takes
+`anthropic` or `fake` and not `human`: the human gateway waits for a click.
+
+`yam_heal` proposes and does not write. `apply: true` writes, and a repair is
+applied only after the story it came from replayed green.
+
+`workflow` and `tool` are not here: a story called as a function has its own
+server, [`yam tool serve`](behaviors.md), whose tools *are* the stories, with the
+agent recorded as the invoker.
 
 ## The raw surface tools
 

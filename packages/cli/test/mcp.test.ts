@@ -110,7 +110,9 @@ describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
     "surface_trajectory",
     "yam_bindings",
     "yam_compile",
+    "yam_heal",
     "yam_lint",
+    "yam_record",
     "yam_results",
     "yam_run",
   ];
@@ -133,9 +135,9 @@ describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
       .map((one) => one[1]!)
       .sort();
     expect(documented).toEqual(PUBLISHED);
-    // And the verbs that are deliberately absent stay absent from the tables.
-    expect(documented).not.toContain("yam_record");
-    expect(documented).not.toContain("yam_heal");
+    // And the verbs that are deliberately elsewhere stay out of the tables.
+    expect(documented).not.toContain("yam_workflow");
+    expect(documented).not.toContain("yam_tool");
   });
 
   it("requires an intent on every raw surface tool (LLD §13.4)", async () => {
@@ -397,4 +399,106 @@ describe("a six-call surface exploration (T4.6's Validate, LLD §13.4)", () => {
       await session.close();
     }
   }, 180_000);
+});
+
+describe("an agent binds and repairs (REQ-AGT-2, Draft 2.24)", () => {
+  /**
+   * The two operation tools added when the comment that promised them was
+   * found to be four phases old.
+   *
+   * Both go through the functions the local service calls, so what an agent
+   * does here and what the app does through `POST /record` and `POST /heal`
+   * are the same work. What is asserted is the part an agent depends on: the
+   * report says which gateway decided, and healing writes nothing unless it
+   * is told to.
+   */
+  it("binds a flow's targets through the fake gateway and says it was a fixture", async () => {
+    const project = scaffold();
+    /*
+     * `the sign in button` is bound already — to the *home* page's link — so
+     * this asks for it to be recorded again on the login page, which is what
+     * `rebind` is for and what an agent would do when a page moved. Without it
+     * the recorder would reuse the entry and the click would fail, which it
+     * does report faithfully.
+     */
+    writeFileSync(
+      join(project, "flows", "agent.flow"),
+      'story: Agent binds\n  Go to "/login"\n  Click the sign in button\n\ntest: Agent binds\n',
+      "utf8",
+    );
+    const session = await connect(project, join(project, "runs", "t", "trajectory.jsonl"));
+    try {
+      const report = answer(
+        await session.client.callTool({
+          name: "yam_record",
+          arguments: { flows: ["flows/agent.flow"], gateway: "fake", rebind: true },
+        }),
+      ) as {
+        gateway: { name: string; real: boolean };
+        complete: boolean;
+        totals: Record<string, number>;
+        steps: Array<{ status: string }>;
+      };
+
+      // REQ-PKG-4: a report says what decided, and the fixture says it is one.
+      expect(report.gateway.name).toMatch(/^fake/);
+      expect(report.gateway.real).toBe(false);
+      expect(report.complete).toBe(true);
+      expect(report.steps.every((one) => one.status === "passed")).toBe(true);
+      expect(report.totals["failed"]).toBe(0);
+      // A binding is written only after the step performed through it, so what
+      // is listed here is what worked (REQ-REC-5).
+      expect(report.totals["grounded"]).toBeGreaterThan(0);
+      expect(report.written).toContain("home.sign-in-button");
+    } finally {
+      await session.close();
+    }
+  }, 180_000);
+
+  it("proposes repairs without writing, and writes only when told", async () => {
+    const project = scaffold();
+    const session = await connect(project, join(project, "runs", "t", "trajectory.jsonl"));
+    try {
+      // Break one binding's candidates so a run fails to find it.
+      const file = join(project, "bindings", "home", "sign-in-button.yaml");
+      const original = readFileSync(file, "utf8");
+      writeFileSync(file, original.replace(/"sign-in"/g, '"gone-away"').replace(/'sign-in'/g, "'gone-away'"), "utf8");
+
+      const run = answer(
+        await session.client.callTool({
+          name: "yam_run",
+          arguments: {
+            flows: ["flows/natural_language_login.flow"],
+            inputs: { email: "connected2atul@gmail.com", password: "qwerty123" },
+          },
+        }),
+      ) as { runId: string; totals: { failed: number } };
+      // The run has to fail on the element, or there is nothing to heal.
+      expect(run.totals.failed).toBeGreaterThan(0);
+
+      const proposed = answer(
+        await session.client.callTool({ name: "yam_heal", arguments: { runId: run.runId } }),
+      ) as { applied: boolean; usedModel: boolean; results: Array<{ id: string; outcome: string }>; diff: string };
+
+      // Proposes: the store on disk is untouched, and no model was involved.
+      expect(proposed.applied).toBe(false);
+      expect(proposed.usedModel).toBe(false);
+      expect(readFileSync(file, "utf8")).toContain("gone-away");
+      expect(proposed.results.length).toBeGreaterThan(0);
+
+      const applied = answer(
+        await session.client.callTool({
+          name: "yam_heal",
+          arguments: { runId: run.runId, apply: true },
+        }),
+      ) as { applied: boolean; results: Array<{ id: string; outcome: string }> };
+      if (applied.results.some((one) => one.outcome === "repaired")) {
+        expect(applied.applied).toBe(true);
+        // Written this time: the broken candidate is gone from the file.
+        expect(readFileSync(file, "utf8")).not.toContain("gone-away");
+      }
+    } finally {
+      await session.close();
+    }
+  }, 240_000);
 });

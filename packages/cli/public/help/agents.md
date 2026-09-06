@@ -14,9 +14,15 @@ Agents — the same plan, called by something that is not a person
 
   yam mcp
       The operations and the raw surface (snapshot, act, read, check) over
-      stdio, for an agent that explores. Every call is recorded as a
+      stdio, for an agent that explores. Every surface call is recorded as a
       trajectory; yam trajectory compile turns one into a proposal under
       proposals/ for a person to read.
+
+      The operations are compile, lint, run, record, heal, bindings and
+      results. Record binds the targets of a flow that exists, through a
+      model or the committed fixture answers — never by asking a person,
+      since nobody is at the session. Heal proposes repairs and writes only
+      when the call says apply.
 
   yam workflow run <story> --input k=v
       One story as a function, outputs on stdout as JSON; what a scheduler or
