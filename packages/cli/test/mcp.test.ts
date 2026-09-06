@@ -103,6 +103,7 @@ describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
     "surface_screenshot",
     "surface_sessions",
     "surface_snapshot",
+    "surface_targets",
     "surface_trajectory",
     "yam_bindings",
     "yam_compile",

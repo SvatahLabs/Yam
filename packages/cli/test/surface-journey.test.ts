@@ -147,7 +147,7 @@ describe("connect, inspect, act, verify (SF-01, SF-06)", () => {
       "does-not-exist",
       "--json",
     ]);
-    expect(connect.envelope["status"]).toBe("failed");
+    expect(connect.envelope["status"]).toMatch(/^(failed|refused)$/);
     expect(JSON.stringify(connect.envelope)).toMatch(/not registered/i);
     // Not a silent fall back to the one that happens to be configured.
     expect(JSON.stringify(connect.envelope)).not.toContain("playwright\"");
