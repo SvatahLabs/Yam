@@ -134,6 +134,7 @@ Constraints stated by the owner:
 | REQ-REC-9 | Recorder output is plain files inside the project directory, suitable for a pull request. | P0 | R |
 | REQ-REC-10 | Grounding eval of at least 150 cases; accuracy at least 95 percent on the sample application; report published. | P1 | E |
 | REQ-REC-11 | Bindings can be recorded for plain host tests without any flow file: `bind("page.element")` in a Playwright test triggers recording on first use in record mode and resolves from the store in run mode. | P0 | T, D |
+| REQ-REC-12 | A person is a primary grounder. `yam record --gateway human` drives the session headed and, for each target, highlights the phrase in the application and takes the person's click as the grounding, with provenance `human`; it is the default when no model credential is configured, the command runs in a person's terminal, and a display exists. Under CI, without a display, or with `--gateway` naming another, the recorder behaves as before. The app and the cockpit offer `human` as a gateway and show each click on the decision panel for confirmation or re-pick. Adapters that can take a click declare the `pick` capability; the recorder refuses `human` on one that cannot, naming the adapter (Draft 2.21). | P0 | T, D |
 
 ### 3.5 Runtime executor (`REQ-RUN`)
 
@@ -195,6 +196,7 @@ Constraints stated by the owner:
 | REQ-AGT-2 | MCP server exposes the CLI operations and the raw agent surface (`snapshot`, `act`, `read`, `check`) so external agents can explore through Yam and have trajectories captured. | P1 | D |
 | REQ-AGT-3 | Every model-produced artifact carries provenance: model id or digest, prompt version, timestamp, tokens, cost, cache hit. | P0 | T |
 | REQ-AGT-4 | Orchestration is external: the project ships examples for CI, cron, and an MCP-driven agent, and no scheduler, queue, or UI of its own. | P0 | R |
+| REQ-AGT-5 | `yam explore` is an agent's way of writing a flow: it serves the MCP surface for one exploration of the project's application, records the trajectory, and when the agent disconnects compiles it into a proposal under `proposals/<date>/` and names it. Nothing an agent did reaches `flows/` or the bindings store until a person moves it there; the proposal's bindings stay `verified: false` until `yam record` verifies them (Draft 2.21). | P0 | T, D |
 
 ### 3.10 Packaging and adoption (`REQ-PKG`)
 
@@ -255,6 +257,7 @@ The command line is the product's front door, and a newcomer judges the product 
 | REQ-CLI-7 | The session context (`--base-url`, `--storage-state`, `--input`, `--headed`, `--out`, `--run-id`) is one group, documented once under `yam help session` with the precedence config, then environment, then flag; the top-level help does not restate it per command. | P0 | T, R |
 | REQ-CLI-8 | `yam help <topic>` exists for `flows`, `bindings`, `exit-codes`, `session`, `adapters` and `agents`; the exit-code table is in the product, and every code the executor can return is in it. | P0 | T, R |
 | REQ-CLI-9 | No internal vocabulary reaches a person: "module (a)", "module (b)", "LLD §", "REQ-", "Draft", "T\d+.\d+" and "P\d+-F\d+" never appear in help, in a diagnostic, or in `init`'s output; a test greps the CLI's user-facing strings. | P0 | T |
+| REQ-CLI-10 | The front door knows the two other authors. `yam help` lists `explore` in the journey; `yam` names the newest proposal as the next thing to review while one is waiting, before it looks at the plan; the diagnostics catalogue gains the rows for a display that is not there and an adapter that cannot take a click (Draft 2.21). | P0 | T |
 
 ## 4. Non-functional requirements
 
@@ -308,6 +311,7 @@ Each requirement is referenced by at least one HLD section, one LLD section, and
 - Draft 2.14 (Yam verifies Yam): `REQ-SELF-1..3` added; Phase 11 becomes corrections plus the self-verification suite and parity gate; the release moves to Phase 12.
 - Draft 2.15 (after Phase 11 verification): no requirement text changes; T12.7 added to close the one-sided list's language gaps and the verification's three findings before the release.
 - Draft 2.16 (process and terminal): `REQ-ADP-10` and `REQ-SELF-4` added; Phase 13 added after the release.
+- Draft 2.21 (the human gateway and the agent's explore, owner decision of 2026-09-07): `REQ-REC-12`, `REQ-AGT-5` and `REQ-CLI-10` added at P0 — a person is a primary grounder through the driven session, an agent writes a first draft through `yam explore`, and the front door knows both; T14.8 and T14.9 added to Phase 14.
 - Draft 2.20 (the front door, owner decision of 2026-09-07): `REQ-CLI-1..9` and `REQ-TUI-2` added at P0 — the command line's default is the project's state and the next verb, the journey `init → check → record → run → heal` is the top level, per-command help, next-step diagnostics, the session context documented once, help topics, no internal vocabulary, and the tmux workspace; Phase 14 inserted for it before the publish, process and terminal renumbered to Phase 15.
 - Draft 2.19 (the desktop client is Yam, owner decision of 2026-09-06): the Electron client is no longer called the ADE; it is **Yam** — `Yam.app`, bundle id `com.svatah.yam`, package `@svatah/yam-desktop` under `apps/desktop` — and prose says "the app". The `REQ-ADE-*` ids keep their letters, as §0 requires; the prototype-database import is `--from-prototype`. No requirement text changes.
 - Draft 2.18 (Yam, owner decisions of 2026-09-06): no requirement text changes; the product is named Yam under the Svatah brand and the `@svatah` scope, the frozen Java project leaves the repository, and the repository moves to `github.com/SvatahLabs/yam`; Phase 13 inserted for that work, process and terminal renumbered to Phase 14.

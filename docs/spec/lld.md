@@ -58,6 +58,7 @@ interface AgentSurface {
   restore(state: SessionState): Promise<void>;
   trace?(start: boolean, path?: string): Promise<void>;
   request?(req: ApiRequest, opts: { withSessionCookies: boolean }): Promise<ApiResponse>;  // http-capable adapters
+  pick?(phrase: string, opts?: { timeoutMs?: number }): Promise<Ref | undefined>;         // Draft 2.21: highlight the phrase, wait for a person's click, return the element; undefined on Escape
 }
 ```
 
@@ -85,7 +86,7 @@ type Ref = string;               // "r12" style; opaque above the surface
 
 ### 2.4 Registry and capabilities
 
-`registerAdapter(name, factory)`; `createSurface(config)` picks by `config.adapter` (`playwright|bidi|appium|uia|ax|http` and, from Draft 2.16, `process`. `Capabilities` lists optional features: `dialogs`, `frames`, `windows`, `upload`, `drag`, `trace`, `webmcp`, `screenshot`, `restore`. The executor refuses a plan whose actions need a missing capability at start, not mid-run.
+`registerAdapter(name, factory)`; `createSurface(config)` picks by `config.adapter` (`playwright|bidi|appium|uia|ax|http` and, from Draft 2.16, `process`. `Capabilities` lists optional features: `dialogs`, `frames`, `windows`, `upload`, `drag`, `trace`, `webmcp`, `screenshot`, `restore`, and from Draft 2.21 `pick` — the adapter can put an overlay over the application and take a person's click as an element. The Playwright adapter has it; the others answer `false` until they do. The executor refuses a plan whose actions need a missing capability at start, not mid-run.
 
 - The `process` kind (Draft 2.16). A fifth surface kind beside `web`, `desktop`, `mobile`, and `http`: a session is a spawned command in a pseudo-terminal, or an attached one. `snapshot()` is the terminal screen as rows (`t<n>` references, each row an element with its text), plus the process state (running, exit code) and, under a configured root, the files the session may read (`f<path>` references). `act`: `type` and `press` send keystrokes to the terminal, `run` starts a command, `signal` sends one. `read`: `screen`, `stdout`, `stderr`, `exit`, `file`. `check`: text and pattern predicates over the screen and the streams, `exitCode`, `exists` and `contains` over a file. Capabilities: `pty`, `files`, `signals`. The adapter (`adapter-process`) uses a pseudo-terminal library under a permissive licence and falls back to a plain pipe for a command that needs no terminal, saying which in `capabilities()`. It never reads outside its root and never prints a secret it was handed as an input.
 
@@ -484,6 +485,7 @@ Session loop and report unchanged from Draft 1 §9. Grounding (§9.2 there) now 
 - Implements `Regrounder` for the healer and the `bind()` record mode.
 - Refuses to run when `config.environment === "production"` unless `--force-production` (REQ-AUTO-7).
 - For `custom` steps with `target` placeholders, grounds those targets exactly like grammar steps.
+- **The human gateway (Draft 2.21, REQ-REC-12).** A `Gateway` whose `ask` is never called: when the session's gateway is `human`, the per-target step skips `ground()` and calls `surface.pick(phrase)` on the driven, headed session — the adapter's overlay names the phrase, the person clicks, the reference comes back — then `entryFor(surface, ref)` synthesises the binding with provenance `{ model: "human", promptVersion: "pick" }` and the same verification every other entry gets. The review hook still fires, with the click as the decision, so the app and the cockpit show it for confirmation or re-pick; Escape is a rejection that stops the session as a reviewer's rejection does. `pick` on an adapter without the capability is refused before the session opens, naming the adapter. The rule for the default: `--gateway` when given; else `anthropic` when a credential is in the environment; else `human` when stdout is a terminal, `CI` is unset and a display exists (`DISPLAY` or `WAYLAND_DISPLAY` on Linux, always on macOS and Windows); else refused, naming `--gateway fake` and the credential, as before.
 
 ---
 
@@ -508,6 +510,8 @@ Plan run with expectations; web through the Playwright Test host (§9), other ad
 `yam tool serve --expose "Book a slot,Cancel booking"`: an MCP server whose tools are derived from story signatures (`inputSchema` from `inputs`, description from meta or the first comment line). Each call runs `runWorkflow` with `invoker: { kind: "agent", id: <mcp client id>, via: "mcp" }`, returns `outputs` plus `runId`, and never touches a model. Refuses to expose non-idempotent stories when `tool.requireIdempotent` (default true in `production`).
 
 ### 13.4 Trajectory compile (package `trajectory`, P2)
+
+**`yam explore` (Draft 2.21, REQ-AGT-5).** One verb over the two halves: it serves the MCP surface on stdio exactly as `yam mcp` does, with the trajectory written to `.yam/explore/<id>/trajectory.jsonl`, and when the client disconnects it compiles the trajectory as `trajectory compile` would and writes the proposal under `proposals/<date>/`, printing the directory and the review notes. An agent host configures `yam explore <project>` as an MCP server command; `--name` names the proposed story. An empty trajectory writes no proposal and says so. `yam explore --from <trajectory.jsonl>` compiles an existing one, for a session recorded by `yam mcp` or the app's Explorer.
 
 - Capture: the MCP raw-surface tools (`surface.snapshot|act|read|check`) require an `intent` string per call; the CLI writes `trajectory.jsonl` lines `{ seq, at, intent, call, args?, ref?, describe?, result?, error?, snapshotHash?, url? }` (Draft 2.7; `describe` is read at the moment of the call, `url` is what a proposal's binding context is addressed to). A proposal's binding context carries the hash of the whole page as it was, which is broader than a recorded binding's landmark hash and is expected to drift sooner.
 - Compile: group calls into steps by intent; map `act` kinds to IR actions; the intent becomes the sentence after normalisation through the synonym vocabulary; targets get element ids from `describe`; candidates and fingerprints are synthesised at capture time (no model); a story draft, plan fragment, and `verified: false` bindings go to `proposals/<date>/`. A Tier 1 compile of the draft must succeed or the step is emitted as a comment with `// review:`.
@@ -631,7 +635,7 @@ The functions behind every verb are unchanged; this section is how they are arra
 | `plan` | `current` when `.yam/plan.json` exists and its recorded input hash equals the hash of the flows, `data.yaml`, `api/` and the config; else `stale` or `missing` |
 | `lastRun` | `.yam/last-run` (the run id `run` writes on start, and `heal` reads) resolved to its `summary.json`: verdict, when, how many steps |
 
-**The next verb** is a pure function of the state, in this order: no project → `init`; read errors → `check`; no flows → "write a flow" with the reference's link; plan missing or stale → `check`; unbound targets → `record`; last run failed with a locator failure → `heal`; last run failed otherwise → `run` with the failing step named; no run yet → `run`; else "green; `yam run` to replay". `yam` prints the state in four lines and the verb on the fifth; `yam --json` prints the state object with `next`. Exit 0 in every case: reporting a state is not a failure.
+**The next verb** is a pure function of the state, in this order: no project → `init`; read errors → `check`; a proposal waiting under `proposals/` → "review proposals/<newest>", with `yam check` after it (Draft 2.21: a proposal waits until its directory is moved or removed); no flows → "write a flow" with the reference's link; plan missing or stale → `check`; unbound targets → `record`; last run failed with a locator failure → `heal`; last run failed otherwise → `run` with the failing step named; no run yet → `run`; else "green; `yam run` to replay". `yam` prints the state in four lines and the verb on the fifth; `yam --json` prints the state object with `next`. Exit 0 in every case: reporting a state is not a failure.
 
 **The top-level help** is this text, and a test compares it verbatim:
 
@@ -639,6 +643,7 @@ The functions behind every verb are unchanged; this section is how they are arra
 yam — describe a behaviour once, bind it to the real application, replay it without a model
 
   yam init [dir]      start a project here
+  yam explore         let an agent drive the application; its exploration becomes a proposal
   yam check           read, lint and compile the flows; writes .yam/plan.json
   yam record          bind the targets by driving the real application
   yam run             replay the plan; the exit code is the verdict
@@ -667,6 +672,8 @@ More, one level down: yam bindings · workflow · tool · mcp · eval · surface
 | a `secret` read from an unset variable, at run | "`user.password` reads `$YAM_INPUT_PASSWORD`, which is not set." | `export YAM_INPUT_PASSWORD=…` |
 | Playwright's browser missing | "No Chromium for Playwright." | `npx playwright install chromium` |
 | the desktop adapter's host not ready | the doctor's own line | `yam surface doctor --adapter ax` |
+| `--gateway human` with no display, or under CI (Draft 2.21) | "Recording as a person needs a display and a terminal." | `--gateway fake`, or a credential |
+| `--gateway human` on an adapter without `pick` (Draft 2.21) | "The `<adapter>` adapter cannot take a click." | `--gateway anthropic`, or a person's re-pick after a model's proposal |
 | `--resume` with a moved plan or store | "The plan or the bindings changed since the checkpoint." | `yam run` without `--resume` |
 | a story not idempotent against production | "`Book a slot` is not marked idempotent and this is production." | `--allow-side-effects`, or `idempotent` in the flow |
 
@@ -705,6 +712,7 @@ MCP server (`yam mcp`): operation tools (`compile`, `lint`, `record`, `run`, `he
 ## 17. Changes from Draft 1
 
 - Draft 2.7 (after Phase 5 verification): `Step.guard.target` (§3.2); compensating-story steps keep their own statuses (§8.3); `yam trajectory compile` in the command table (§15); the trajectory line shape and the proposal context hash (§13.4); `POST /record` gateway, 409, and decision deadline (§13.5); the app Record screen chooses the gateway and renders failures (§13.6).
+- Draft 2.21 (the human gateway and explore): `pick?` on the surface and the `pick` capability (§2.1, §2.4); the human gateway and the default rule (§11); `yam explore` (§13.4); the proposal on the front door, `explore` in the help text, two catalogue rows (§15.1).
 - Draft 2.20 (the front door): §15.1 — the project state and the next verb, the one-screen help, per-command help, `check` and plan staleness, the diagnostics catalogue, `heal` on the last run, the session context group, the help topics, the no-internal-vocabulary check, and the tmux workspace; Phase 15's process adapter takes the workspace as its first target.
 - Draft 2.19 (the desktop client is Yam): the client of §13.6 is `apps/desktop`, product name `Yam`, bundle id `com.svatah.yam`; the desktop adapters address the process `Yam` (§7.5); `YAM_APP_*` replaces `YAM_ADE_*`; `yam migrate --from-prototype` (§13.5, §15).
 - Draft 2.18 (Yam): the umbrella package `@svatah/yam` carries the `yam` bin (§15); every other package is `@svatah/yam-<name>` and the import boundaries of §1 hold under the new names; project files are `yam.config.yaml` and `.yam/`, the environment prefix is `YAM_`, the schema `$id`s are under `https://yam.svatah.com/schema/` (§3); `legacy/` leaves and the migrate inputs are `evals/migrate/source/` (§16); Phase 13's packages of Draft 2.16 are now Phase 14's.

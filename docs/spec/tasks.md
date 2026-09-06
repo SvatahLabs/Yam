@@ -597,7 +597,17 @@ The owner's decision of 2026-09-07: the command line is hard to understand and f
 **Do:** `docs/getting-started/first-flow.md` and the README's flow section rewritten around the six verbs and `yam`'s state line; `docs/reference/generated/cli.md` becomes the top-level help plus every command's `--help`, generated; the self suite gains checks for `yam` with no arguments, `yam check` and `yam help exit-codes` through the command source, two-sided.
 **Validate:** `pnpm docs:check` clean; the quick start's commands are the six verbs; `yam eval self` green with the three new checks two-sided; the ten-minute quick start still under budget.
 
-Phase 14 total: 7 ideal days.
+### T14.8 The human gateway (Draft 2.21)
+**Refs:** REQ-REC-12, LLD §2.1, §2.4, §11, §15 · **Est:** 2
+**Do:** `pick?` on the surface and the `pick` capability; the Playwright adapter implements it with the module (a) picker's overlay moved beside it and re-exported for `bind()`; the recorder's `human` path (skip `ground()`, `pick`, `entryFor`, provenance `pick`, the review hook with the click as the decision, Escape as rejection); `--gateway human` and the default rule in `gatewayForRecording`; the service accepts `human` and the screen model offers it when the service reports a display; the app and the cockpit show the click for confirmation or re-pick; the two catalogue rows.
+**Validate:** A test drives `yam record --gateway human` against the sample application with a scripted click (the adapter's `pick` answered by a test hook) and asserts the binding's provenance is `human`/`pick` and it verifies; under `CI=true` with no `--gateway` the recorder still refuses and names `fake` and the credential; `--gateway human` with the HTTP adapter is the catalogue's row; the conformance suite's capability case sees `pick` true for Playwright and false for the rest; the Record screen offers `human` and its decision panel shows a click; the record guide's claim is true.
+
+### T14.9 `yam explore`, and the proposal on the front door (Draft 2.21)
+**Refs:** REQ-AGT-5, REQ-CLI-10, LLD §13.4, §15.1 · **Est:** 1.5
+**Do:** `yam explore [dir] [--name <story>] [--from <trajectory.jsonl>]`: the MCP server as `yam mcp` runs it, the trajectory under `.yam/explore/<id>/`, the compile on disconnect, the proposal named; `projectState` gains `proposals`, `nextVerb` names the newest before it looks at the plan; `explore` in the help text, the topic `agents`, the getting-started page and the README; the self suite gains a two-sided check that an exploration through the MCP client example becomes a proposal.
+**Validate:** The MCP client example under `examples/mcp-agent/` pointed at `yam explore` produces `proposals/<date>/<name>.flow` with the intents as sentences and `verified: false` bindings, and `yam` then says `next  review proposals/<date>`; an empty exploration writes nothing and says so; `--from` compiles a trajectory `yam mcp` wrote; `yam help` matches LLD §15.1 with the new line; the vocabulary check still passes.
+
+Phase 14 total: 10.5 ideal days.
 
 ---
 
@@ -733,6 +743,7 @@ Phase 15 total: 11 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.21 (the human gateway and explore, owner decision of 2026-09-07): T14.8 and T14.9 added to Phase 14. Total 294.5 ideal days.
 - Draft 2.20 (the front door, owner decision of 2026-09-07): Phase 14 inserted before the publish — the state-and-next-verb default, `check` and plan currency, one-screen help with per-command help and topics, the diagnostics catalogue, the tmux workspace, the documentation and self checks; process and terminal becomes Phase 15 with T15.1–T15.4. Total 291 ideal days.
 - Draft 2.19 (the desktop client is Yam): no new tasks; the rename of the client from "the ADE" to Yam is recorded under Phase 13's T13.3.
 - Draft 2.18 (Yam, owner decisions of 2026-09-06): Phase 13 inserted — the organisation and accounts, the clean repository without `legacy/`, the rename to Yam under the `@svatah` scope, the readiness corrections, the documentation set, and the publish under the new names; process and terminal becomes Phase 14 with T14.1–T14.4. Total 284 ideal days.
