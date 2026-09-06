@@ -298,6 +298,13 @@ svatah/
     recorder/             grounding, session, report; bind() record mode
     workflow/             story-as-function runner, resume
     tool/                 MCP tool server over stories
+    screens/              headless screen model and action registry (Draft 2.11, LLD §13.7)
+    ui-tokens/            design tokens for both themes, TS and generated CSS (Draft 2.11)
+    ui/                   React components on Radix primitives, the component sheet (Draft 2.11)
+    tui/                  svatah ui, the Ink terminal cockpit (Draft 2.11, REQ-TUI-1)
+    sdk/                  typed client generated from the OpenAPI description (Draft 2.11, LLD §13.8)
+  clients/
+    python/, java/        clients generated from the same description (Draft 2.11)
     trajectory/           trajectory capture and compile (P2)
     cli/                  svatah CLI + MCP server (operations + raw surface)
     service/              local HTTP + event-stream service (svatah serve) for the ADE and other clients

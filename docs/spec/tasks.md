@@ -437,7 +437,12 @@ Phase 9 total: 15.5 ideal days.
 **Do:** Delete the legacy screens and `app.css`; update the desktop conformance cases to the new structure (rail items, inspector, palette) and the recorded trees; rebuild installers.
 **Validate:** The macOS gate green live against the rebuilt packaged ADE, 7 of 7 plus healing; the snapshot case asserts zero unnamed controls; the ADE smoke passes on the three-OS matrix definition.
 
-Phase 10 total: 13 ideal days.
+### T10.4 The Phase 9 verification's corrections and the run-stop route
+**Refs:** REQ-ADE-13, REQ-TUI-1, LLD §13.5, §13.7, §7.5 · **Est:** 2
+**Do:** The fixture recorder and its check work on a temporary copy of the fixtures project; state carries timestamps and renderers format relative time; the cockpit sizes panes to the terminal and collapses the inspector below 120 columns, and captures record their size; the in-house audit gains `landmark-unique` and every axe rule the sheet fails, with axe-core fetched at test time in CI to run beside it; `__pycache__` and `*.pyc` ignored and untracked; `POST /runs/:id/stop` cancels a run between steps and the Run screen's Stop action calls it; `surface doctor --adapter ax` reports `ax/session`.
+**Validate:** The fixture check passes with three unrelated runs in `evals/fixtures/runs`; the `--json` equality test runs ten times without a diff; a 100-column capture shows three panes and says its size; the audit and a real axe run agree on the sheet with zero violations; a run started from the Run screen is stopped from it and its summary says `stopped`; `doctor` names the locked display when only `loginwindow` owns a window.
+
+Phase 10 total: 15 ideal days.
 
 ---
 
@@ -581,6 +586,7 @@ Phase 11 total: 10 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.12 (after Phase 9 verification): T10.4 added for the verification's corrections and the run-stop route. Total 241 ideal days.
 - Draft 2.11 (builder surfaces, after the owner's design review): Phase 9 (foundation: screen model, design system, SDK, two screens in both renderers) and Phase 10 (every screen, retire the old ones) inserted; the release phase and its tasks renumbered 11 and T11.x. Total 239 ideal days.
 - Draft 2.10 (after Phase 8 verification): Phase 9 added — T9.1 the desktop gate race-free and load-aware, T9.2 the golden set at 300, T9.3 named controls and a real run before results, T9.4 the three-OS matrix observed, T9.5 0.1.0 published by the owner and verified from the registry, T9.6 the Windows gate carried. Total 210.5 ideal days.
 - Draft 2.9 (after Phase 7 verification): Phase 8 added — T8.1 the packaged ADE opens a project, T8.2 the AX bridge within budget and the macOS gate green, T8.3 dialog arming documented, linted, audited, T8.4 the fine-tune withdrawn and its corpus, T8.5 publish 0.1.0 by a manual token-gated step, T8.6 the Windows gate carried. Total 200.5 ideal days.
