@@ -58,10 +58,29 @@ interface GoldenLine {
 export function asExample(step: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = { action: step["action"] };
 
-  const target = step["target"] as { phrase?: string; scope?: string } | undefined;
-  if (target?.phrase !== undefined) {
-    out["target"] = target.scope === undefined ? { phrase: target.phrase } : { phrase: target.phrase, scope: target.scope };
-  }
+  const asTarget = (
+    value: unknown,
+  ): { phrase: string; scope?: string } | undefined => {
+    const target = value as { phrase?: string; scope?: string } | undefined;
+    if (target?.phrase === undefined) return undefined;
+    return target.scope === undefined
+      ? { phrase: target.phrase }
+      : { phrase: target.phrase, scope: target.scope };
+  };
+
+  const target = asTarget(step["target"]);
+  if (target !== undefined) out["target"] = target;
+
+  /*
+   * The second element (T8.4).
+   *
+   * `modelStepSchema` has had `target2` since Draft 2 — it is what `dragTo` and
+   * `hoverAndClick` need — and this converter dropped it. So every `dragTo`
+   * example in the Tier 2 prompt showed the model a drag with a source and no
+   * destination, and a training pair for one would have taught the same thing.
+   */
+  const target2 = asTarget(step["target2"]);
+  if (target2 !== undefined) out["target2"] = target2;
 
   const args: Record<string, unknown> = {};
   const argRefs: Record<string, unknown> = {};

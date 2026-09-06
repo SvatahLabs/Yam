@@ -79,16 +79,55 @@ before it was fixed:
 - **The desktop gate script** resolved `--report` against the wrong directory
   and waited a fixed eight seconds for a window that takes fifteen.
 
+### Fixed in Phase 8
+
+The corrections the Phase 7 adversarial verification required — it scored 7.9 and
+found that the *packaged* product could not open a project — each reproduced
+before it was fixed:
+
+- **The packaged ADE could not open a project.** It spawned `process.execPath` to
+  run `svatah serve`; packaged, with the `RunAsNode` fuse off, that is the ADE
+  itself, so the child was a second ADE that printed no handshake. The runtime is
+  resolved from `SVATAH_NODE`, then a `node` on `PATH` of Node 22 or newer, then
+  a Node beside the CLI under `resources/`, and the Project screen's alert names
+  all three when none is found (LLD §13.6). The packager now ships the CLI, which
+  it never did; `SVATAH_ADE_PROJECT=<dir>` opens a project on ready; and the
+  smoke check runs against the packaged application.
+- **The macOS Accessibility bridge missed its budget on the screen the budget is
+  about.** Phase 7's 10.4 ms per node was measured on the menu-bar tree; the
+  ADE's project screen cost 51–55 ms per node, about 25 s for one snapshot. The
+  window read is a native helper now — `AXUIElement` directly, no Apple events —
+  at **1.5–1.7 ms per node for 588 nodes** (LLD §7.5).
+- **The macOS desktop conformance gate is green**: 7 of 7 flow cases and both
+  healing cases, live, against the packaged ADE. `reports/adapter-ax.md`.
+- **A `dialog` step arms the *next* dialog**, and the reference now says so.
+  `W_DIALOG_UNARMED` and `W_DIALOG_NEVER_OPENED` in lint, and an audit line when
+  a dialog is answered with nothing armed (LLD §3.2, §4.2).
+- **The bridge honoured its own deadline rather than the caller's**, a case with
+  no checks was not reported as having none, and healing cases were scored at a
+  variant they cannot mean anything at. All three fixed.
+
+### Withdrawn from 0.1.0
+
+- **The Tier 2 fine-tune.** ADR-4's five-point target is **not met** — measured
+  86.8 % → 13.2 % — the tuned adapter is not used, and no package depends on
+  one. Every published compiler number is the base model's. The diagnosis is the
+  training set: 83 pairs, all of them sentences the grammar *accepts*, against a
+  tier that exists for the ones it refuses. `evals/compiler/refused.jsonl` — 184
+  reviewed pairs of a refused sentence and the step it means — is the corpus that
+  would make another attempt worth making, and `svatah eval finetune corpus`
+  reports it. `reports/eval-finetune.md`.
+
 ### Known gaps
 
 Recorded rather than closed, with the command that closes each in
-`docs/spec/progress/phase-7.md`:
+`docs/spec/progress/phase-8.md`:
 
-- The macOS Accessibility gate has not been run against a live window: the only
-  host available has no reachable display. `reports/adapter-ax.md` has the
-  evidence and the command.
 - The Windows UI Automation gate has no Windows host.
-  `reports/adapter-uia.md` has the four defects found without one.
-- Nothing is published to a registry, by design.
+  `reports/adapter-uia.md` has the defects found without one.
+- No screenshot was taken through the macOS adapter on this host: `screencapture`
+  needs the Screen Recording grant, which is separate from Accessibility.
+  `svatah surface doctor` reports it as an advisory check.
+- Nothing is published to a registry until the owner triggers the pipeline.
 
 [0.1.0]: https://bitbucket.org/svatah/automator/src/master/

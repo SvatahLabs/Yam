@@ -181,6 +181,25 @@ const met = delta >= THRESHOLD && !regressed;
 const lines = [
   "# Tier 2 fine-tune — base versus tuned",
   "",
+  /*
+   * The withdrawal, written by the script rather than by hand (T8.4).
+   *
+   * This report is regenerated wholesale, so a note added to the file would be
+   * gone the next time anyone ran the comparison — and the one thing that must
+   * not be lost is that 0.1.0 ships the base model. It is emitted only when the
+   * target is missed, so a run that finally meets it publishes a clean report.
+   */
+  ...(met
+    ? []
+    : [
+        "> **Withdrawn from 0.1.0 (T8.4, Draft 2.9).** ADR-4's Tier 2 fine-tune target is",
+        "> **not met**, the tuned adapter is **not used**, and no Svatah release depends on",
+        "> one. `evals/compiler/project/svatah.config.yaml` names the base model, and every",
+        "> published compiler number is the base model's. Draft 2.9 makes a Tier 2 corpus the",
+        "> precondition for another attempt: `evals/compiler/refused.jsonl`, read by",
+        "> `svatah eval finetune corpus`.",
+        "",
+      ]),
   `Run at ${new Date().toISOString()}`,
   "",
   `| | base | tuned | delta |`,
@@ -205,7 +224,8 @@ const lines = [
    */
   "| | |",
   "|---|---|",
-  ...(digest.pairs === undefined ? [] : [`| training pairs | ${digest.pairs}, from merged flows |`]),
+  ...(digest.pairs === undefined ? [] : [`| training pairs | ${digest.pairs} |`]),
+  ...(digest.pairsSource === undefined ? [] : [`| training set | ${digest.pairsSource} |`]),
   ...(digest.iterations === undefined ? [] : [`| iterations | ${digest.iterations} (${digest.epochs} epochs) |`]),
   ...(digest.batchSize === undefined
     ? []
@@ -228,6 +248,35 @@ const lines = [
   "The golden set is the test set and is excluded from the training pairs " +
     "(`evals/compiler/finetune/manifest.json` reports the count). A tuned model measured on " +
     "sentences it was trained on would report an improvement that means nothing.",
+  "",
+  "A measured improvement is reported only when it is measured on a held-out split that is " +
+    "not the training set, with early stopping (T8.4). No training run has been made against " +
+    "the T8.4 corpus.",
+  ...(met
+    ? []
+    : [
+        "",
+        "## Why it got worse, and what replaces the training set (T8.4)",
+        "",
+        "The regression is not a harness artefact: the harness's own two defects were fixed",
+        "before this run, Tier 1 held, and quantization was ruled out with a like-for-like",
+        "`q4_K_M` build of the base. What is left is the training set.",
+        "",
+        "| | Phase 7 | T8.4 |",
+        "|---|---|---|",
+        "| Source | merged flows, via `git show <ref>:<path>` | `evals/compiler/refused.jsonl` |",
+        "| What a pair is | a sentence **Tier 1 compiled**, with the grammar's step | a sentence **Tier 1 refuses**, with a reviewed step |",
+        "| Golden set excluded | yes | yes |",
+        "",
+        "Tier 2 exists for the sentences the grammar refuses. Training it on the sentences the",
+        "grammar *accepts* teaches it the one job it never has to do, and the measurement says",
+        "how much that costs.",
+        "",
+        "```",
+        "svatah eval finetune corpus     # the three sources and what each contributes",
+        "svatah eval finetune export     # writes evals/compiler/finetune/pairs.jsonl",
+        "```",
+      ]),
 ];
 
 mkdirSync(dirname(report), { recursive: true });

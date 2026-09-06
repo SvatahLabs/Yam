@@ -74,7 +74,8 @@ Bindings and healing (module a):
   svatah surface doctor [--adapter ax|uia] [--json]
   svatah eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
                         [--limit <n>] [--report <path.md>] [--json]
-  svatah eval finetune export [--project <dir>]… [--ref master] [--out <path.jsonl>]
+  svatah eval finetune corpus [--json]
+  svatah eval finetune export [--out <path.jsonl>] [--json]
   svatah eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
                        [--only tier1,tier2] [--report <path.md>] [--json]
 
@@ -275,8 +276,10 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
   }
 
   /*
-   * `eval finetune` is module (b)'s: it compiles merged flows to export the
-   * pairs a Tier 2 fine-tune trains on (T6.5, ADR-4).
+   * `eval finetune` is module (b)'s: it reads the Tier 2 corpus — sentences the
+   * grammar refuses, each with a reviewed step — and exports the pairs a
+   * fine-tune would train on (T8.4, T6.5, ADR-4). Phase 7's version exported
+   * from merged flows and the tuned model got worse.
    */
   if (command === "eval" && args.command[1] === "finetune") {
     return await (await import("./commands/finetune.js")).finetuneCommand(args, io);

@@ -1,19 +1,35 @@
 {
-  "generatedAt": "2026-09-04T20:44:03.424Z",
-  "ref": "master",
-  "commit": "7ba35a59e707990759775e54a68091048cde1bb4",
-  "projects": [
-    "evals/fixtures",
-    "evals/migrate/expected",
-    "packages/host-playwright/test/project"
+  "generatedAt": "2026-09-05T04:51:01.205Z",
+  "sources": [
+    {
+      "path": "evals/compiler/golden.jsonl",
+      "kind": "test-set",
+      "found": 38,
+      "exported": 0,
+      "note": "the golden set's `tier: 2` entries — the sentences the eval measures. Counted here so the corpus can be read against them, and never exported: a tuned model scored on what it was trained on reports nothing."
+    },
+    {
+      "path": "evals/migrate/expected/migration-review.md",
+      "kind": "candidate",
+      "found": 38,
+      "exported": 0,
+      "note": "legacy sentences the migration flagged for review. Refused by the v3 grammar by construction, and real prose — but no reviewed step yet, so they are where the next entries in evals/compiler/refused.jsonl should come from."
+    },
+    {
+      "path": "evals/compiler/refused.jsonl",
+      "kind": "reviewed",
+      "found": 184,
+      "exported": 184,
+      "note": "sentences the grammar refuses, each with the step a reviewer says it means. The only source that contributes a training pair."
+    }
   ],
-  "pairs": 83,
+  "pairs": 184,
   "shape": "modelStepSchema (@svatah/compiler raw-schema.ts) — the shape a Tier 2 answer has",
   "promptVersion": "c2-1",
   "excluded": {
-    "golden": 60,
-    "duplicate": 49,
-    "unparsed": 0
+    "golden": 0,
+    "duplicate": 0
   },
-  "note": "Exported from merged flows only (ADR-4). Every sentence in evals/compiler/golden.jsonl is excluded: it is the test set, and a tuned model measured on sentences it was trained on would report an improvement that means nothing."
+  "candidates": 38,
+  "note": "Every pair is a sentence the grammar refuses, with the step a reviewer says it means (T8.4). Phase 7 exported tier 1 grammar compiles instead and the tuned model fell from 86.8 % to 13.2 % on the golden `tier: 2` subset. Every sentence in evals/compiler/golden.jsonl is excluded: it is the test set."
 }

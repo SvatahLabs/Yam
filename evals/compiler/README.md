@@ -96,3 +96,42 @@ enabled` and `Ensure the booking result reads "confirmed"` were `tier: 2` cases
 only because the grammar refused them; now that it accepts them (LLD §4.2,
 Draft 2.6) they never reach the model, and a `tier: 2` entry the grammar answers
 is not a Tier 2 measurement — it is a Tier 1 one wearing the wrong label.
+
+## `refused.jsonl` — the Tier 2 corpus (T8.4)
+
+`refused.jsonl` is the training corpus for Tier 2, and every line in it is a
+sentence the **grammar refuses**, with the step a reviewer says it means:
+
+```json
+{"id":"r-007","rule":"click","text":"Give the sign in button a click","step":{ … },"why":"colloquial","reviewedBy":"T8.4"}
+```
+
+| Field | Meaning |
+|---|---|
+| `id` | `r-NNN`, unique and sequential. |
+| `rule` | The action the sentence means, so the corpus can be read by family. |
+| `text` | The sentence. `tools/repo-checks` compiles every one of them and fails if the grammar accepts it. |
+| `step` | The same shape a `golden.jsonl` entry's `step` has. The export converts it to the shape a Tier 2 *answer* has. |
+| `why` | What makes this sentence Tier 2's work rather than Tier 1's. |
+| `reviewedBy` | Who accepted the pair. |
+
+### Why it exists
+
+Phase 7 trained the Tier 2 LoRA on pairs exported from **merged flows**: 83
+sentences, every one of them a tier 1 grammar compile. The tuned model went from
+86.8 % to **13.2 %** on the golden `tier: 2` subset — it had been taught to
+answer the questions it is never asked (T7.5, and Phase 7 verification F7).
+Draft 2.9 withdraws the fine-tune from 0.1.0 and makes this corpus the
+precondition for another attempt.
+
+`svatah eval finetune corpus` reports the three sources it draws on and what
+each contributes; `svatah eval finetune export` writes the pairs from this file
+and nothing else. The golden set is the test set and is never exported.
+
+### What is not in it
+
+Sentences whose step a Tier 2 answer cannot express. `modelStepSchema` has no
+`invoke`, so `Run the "Sign in" story` — a sentence the grammar does refuse —
+would export as `{"action":"invoke"}` with the story name lost, and teach the
+model to answer with a step nobody can execute. Five such pairs were written and
+removed; the schema is the boundary of what this corpus can hold.
