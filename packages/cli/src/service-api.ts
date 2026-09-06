@@ -25,7 +25,7 @@ import {
   type HealResult,
 } from "@svatah/yam-healer";
 import { record, type GroundingProposal, type ReviewDecision } from "@svatah/yam-recorder";
-import { createSurface, type AgentSurface } from "@svatah/yam-surface";
+import { listAdapters, createSurface, type AgentSurface } from "@svatah/yam-surface";
 import { toolsFor as deriveTools } from "@svatah/yam-tool";
 import {
   compileTrajectory,
@@ -46,11 +46,13 @@ type Loaded = Awaited<ReturnType<typeof loadProject>>;
 /** A session opened the way `yam run` and `yam record` open one. */
 async function open(
   loaded: Loaded,
-  options: { headed?: boolean } = {},
+  options: { headed?: boolean; adapter?: string } = {},
 ): Promise<{ surface: AgentSurface; config: Config }> {
   registerAllAdapters();
   const config: Config = {
     ...loaded.config,
+    // Checked against the registry by the caller before we get here.
+    ...(options.adapter === undefined ? {} : { adapter: options.adapter as Config["adapter"] }),
     run: { ...loaded.config.run, headless: options.headed !== true },
   };
   const surface = await createSurface(config);
@@ -379,13 +381,40 @@ export async function serviceHeal(
  */
 export async function serviceOpenSurfaceSession(
   loaded: Loaded,
-  options: { sessionId: string; headed?: boolean },
+  options: { sessionId: string; headed?: boolean; adapter?: string },
 ): Promise<{
   call(call: "snapshot" | "act" | "read" | "check", args: Record<string, unknown>): Promise<unknown>;
   trajectoryPath: string;
   close(): Promise<void>;
 }> {
+  /*
+   * The adapter the caller asked for, refused when it is not one (SF-04, G04).
+   *
+   * The route used to forward `adapter` into a function that dropped it, so
+   * `{"adapter": "does-not-exist"}` answered 200 and opened the project's
+   * configured Playwright surface. A person cannot trust a choice the service
+   * silently overrules, so an unregistered name is refused before anything is
+   * launched, naming what this host actually has.
+   */
+  if (options.adapter !== undefined && options.adapter !== loaded.config.adapter) {
+    registerAllAdapters();
+    const known = listAdapters();
+    if (!known.includes(options.adapter)) {
+      /*
+       * A `code` the service reads structurally, so a caller's mistake is a
+       * 400 rather than a 500 and no package imports another to say so.
+       */
+      throw Object.assign(
+        new Error(
+          `Adapter "${options.adapter}" is not registered on this host. Available: ` +
+            `${known.length === 0 ? "(none)" : known.join(", ")}.`,
+        ),
+        { code: "UNSUPPORTED_ADAPTER" },
+      );
+    }
+  }
   const { surface } = await open(loaded, {
+    ...(options.adapter === undefined ? {} : { adapter: options.adapter }),
     ...(options.headed === undefined ? {} : { headed: options.headed }),
   });
   const trajectoryPath = join(
@@ -399,7 +428,10 @@ export async function serviceOpenSurfaceSession(
   return {
     trajectoryPath,
     async call(call, args) {
-      const intent = String(args["intent"] ?? "");
+      // Absent, not empty: the schema now permits a call nobody narrated.
+      const intent = typeof args["intent"] === "string" && args["intent"].trim() !== ""
+        ? args["intent"]
+        : undefined;
       const ref = args["ref"] === undefined ? undefined : (String(args["ref"]) as Ref);
       const { intent: _i, ...rest } = args;
       void _i;
@@ -413,7 +445,7 @@ export async function serviceOpenSurfaceSession(
 
       const record_ = (result: unknown, error?: string): void => {
         trajectory.write({
-          intent,
+          ...(intent === undefined ? {} : { intent }),
           call,
           ...(Object.keys(rest).length === 0 ? {} : { args: rest }),
           ...(snapshotHash === undefined ? {} : { snapshotHash }),
@@ -427,7 +459,15 @@ export async function serviceOpenSurfaceSession(
       try {
         const result =
           call === "snapshot"
-            ? await surface.snapshot({ interactiveOnly: rest["interactiveOnly"] === true })
+            ? await surface.snapshot({
+                ...(rest["interactiveOnly"] === undefined
+                  ? {}
+                  : { interactiveOnly: rest["interactiveOnly"] === true }),
+                // Dropped until Draft 2.25 (G07): a caller asking for a bounded
+                // or scoped snapshot got the whole page instead.
+                ...(typeof rest["maxNodes"] === "number" ? { maxNodes: rest["maxNodes"] } : {}),
+                ...(typeof rest["root"] === "string" ? { root: rest["root"] as Ref } : {}),
+              })
             : call === "act"
               ? await surface.act(
                   rest["action"] as never,

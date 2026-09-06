@@ -116,9 +116,15 @@
 - Token lifecycle: generateToken produces unique 32-char hex tokens
 - OS-specific paths: brokerStateDir returns platform-appropriate directories
 
-**Deviations:** Wave 1 does not implement multi-process broker sharing (full broker service with HTTP). The descriptor is written/discovered, but wave 1 CLI processes are self-contained — each manages its own sessions in-process. The broker descriptor is the foundation for T10'/T11' to share sessions across processes.
+**Deviations:** the first cut wrote the descriptor but no broker, so each CLI
+process kept its sessions in memory. Corrected in verification: `packages/surface-control/src/server.ts`
+serves the dispatcher over loopback with a bearer token, and `yam surface broker`
+runs it. The first command that needs one starts it detached; it exits after
+fifteen idle minutes, closing what it launched.
 
-**Known gaps:** none.
+**Known gaps:** the broker holds one store for the machine. Two projects share
+it, which wave 1 does not scope or partition. Sessions do not survive a broker
+restart.
 
 ---
 
@@ -138,7 +144,9 @@
 - CLI help includes connect, snapshot, act, read, check, close, sessions
 - Each command maps to the catalogue's exit codes
 
-**Deviations:** Wave 1 CLI processes are self-contained (each manages its own session store in-process). The journey across separate processes requires a broker service (wave 2). Within a single process, all 6 commands work.
+**Deviations:** none, after verification. The journey across separate
+processes was the wave's acceptance criterion and is now met; see the transcript
+below.
 
 **Known gaps:** none.
 
@@ -205,3 +213,71 @@
 **Deviations:** none.
 
 **Known gaps:** none.
+
+---
+
+## Verification, 2026-09-08
+
+Verified against the wave-1 prompt's contract rather than the progress notes.
+Six defects were found in the delivered branch; all six are fixed here.
+
+| # | What was wrong | Where |
+|---|---|---|
+| 1 | The branch did not build. The Explorer's action control set a `ScreenParams` field that was never declared, and its regression test only grepped the renderer for a string. | `packages/screens/src/types.ts` |
+| 2 | **The journey did not work.** Sessions lived in the CLI process, so `connect` printed an id and took the browser down with it; the next command answered `SESSION_NOT_FOUND`. | `packages/surface-control/src/server.ts`, `packages/cli/src/commands/surface-control.ts` |
+| 3 | **`connect --url` never navigated.** `open` sets a base URL; it does not go there. Every snapshot, read and check ran green against a blank tab. | `packages/surface-control/src/dispatcher.ts` |
+| 4 | G05 was made worse, not fixed: the `missing-intent` gate came off but the trajectory schema still required an intent, so a clean 400 became a 500. | `packages/trajectory/src/capture.ts`, `packages/cli/src/service-api.ts` |
+| 5 | G04 was not fixed: the route forwarded `adapter` into a function that dropped it, so a nonexistent adapter still answered 200. | `packages/cli/src/service-api.ts`, `packages/service/src/server.ts` |
+| 6 | G07 was two-thirds fixed: `ref2` and `name` were forwarded, `maxNodes` and `root` still dropped. | `packages/cli/src/service-api.ts` |
+| 7 | **The explore path was gutted.** "Lazy evidence" removed the per-call page read, which was right, but removed `describe` and `url` with it. `yam explore` still wrote a trajectory; compiling it produced a proposal with no bindings and steps that could not name what they touched. The tests that cover it failed for an unrelated reason, so the regression was invisible. | `packages/cli/src/commands/mcp.ts` |
+
+Also fixed: a predicate's `value` had to be a `ValueRef` object, so a `check`
+file carried protocol payload and the plain reading failed with "Unknown value
+reference". A bare string is now a literal.
+
+The seventh needed care rather than reversal. Evidence is now gathered
+*before* the call and only when an intent says the caller is authoring: one
+`describe` of the element the call names, the URL from session state, and the
+snapshot's own hash when the call was a snapshot. Not the page read per
+operation that wave 1 rightly removed. Before the call, because after a click
+that navigates there is nothing left to describe — which is exactly when the
+step is worth recording.
+
+The surface tools now address a session by id rather than opening one lazily,
+so an exploration connects first. `packages/cli/test/explore.test.ts` and
+`packages/cli/test/trajectory-compile.test.ts` were updated to do that; both
+suites pass, and the proposal carries its bindings again.
+
+**Why the tests did not catch any of it.** T03's regression cases assert that
+strings appear in source files. A grep passes when the code does not compile,
+when a gate is removed and replaced by a worse failure, and when an argument is
+forwarded one layer and dropped the next. Replaced with two behavioural suites
+that drive the built binary and a real service:
+`packages/cli/test/surface-journey.test.ts` and
+`packages/cli/test/surface-service.test.ts`.
+
+**The journey, in an empty directory, six separate processes:**
+
+```
+$ yam surface connect --url http://127.0.0.1:4173 --json
+{ "status": "succeeded", "result": { "sessionId": "s_7fcbdb801101", "adapter": "playwright", … } }
+
+$ yam surface snapshot --session s_7fcbdb801101 --max-nodes 3 --json
+{ "status": "succeeded", "result": { "nodes": [ { "ref": "r0", "role": "navigation", … } ] } }
+
+$ yam surface read --session s_7fcbdb801101 --kind title --json
+{ "status": "succeeded", "result": { "value": "Home · Yam Sample" } }
+
+$ yam surface check --session s_7fcbdb801101 --input check.json --json
+{ "status": "succeeded", "result": { "ok": true, "actual": "Home · Yam Sample", "expected": "Yam" } }
+
+$ yam surface close --session s_7fcbdb801101 --json
+{ "status": "succeeded", "result": { "closed": true } }
+
+$ yam surface snapshot --session s_7fcbdb801101 --json      # after close
+{ "status": "failed", "error": { "code": "SESSION_NOT_FOUND" } }   (exit 21)
+```
+
+The same journey through a generic MCP SDK client over stdio, with no project
+and no intent: `surface_connect`, `surface_snapshot`, `surface_read`,
+`surface_check`, `surface_close` all `succeeded`; ten surface tools published.

@@ -41,8 +41,16 @@ export const trajectoryLineSchema = z
   .object({
     /** 1-based, and the order the calls were made in. */
     seq: z.number().int().positive(),
-    /** What the agent said it was doing. Required (LLD §13.4). */
-    intent: z.string().min(1),
+    /**
+     * What the caller said it was doing, when it said anything (SF-12).
+     *
+     * Required until Draft 2.25. Direct control is not authoring: an agent
+     * inspecting a page owes nobody a sentence, and demanding one made a
+     * snapshot without intent fail schema validation and escape as a 500.
+     * Absent here means absent; a compile turns such a call into a step marked
+     * for review rather than refusing the file, and nothing invents a sentence.
+     */
+    intent: z.string().min(1).optional(),
     call: trajectoryCallSchema,
     at: z.string().min(1),
     /** The arguments the call was made with, less the intent. */
@@ -149,17 +157,23 @@ export function readTrajectory(path: string): TrajectoryLine[] {
 }
 
 /**
- * Whether a trajectory is well formed: sequential, intent-carrying, and in order.
+ * Whether a trajectory is well formed: sequential and in order.
  *
- * The three properties T5.5's compiler will depend on, checked here so a capture
- * that broke one of them is a failure at capture time rather than a puzzle a
- * phase later.
+ * The properties the compiler depends on, checked here so a capture that broke
+ * one of them is a failure at capture time rather than a puzzle a phase later.
+ *
+ * An intent is no longer among them (Draft 2.25, SF-12). Direct control writes
+ * lines nobody narrated; what the compiler does with one is mark the step for
+ * review, which is a job for a person rather than a malformed file. An intent
+ * that is *present* and blank is still a defect, because something wrote it.
  */
 export function checkTrajectory(lines: readonly TrajectoryLine[]): string[] {
   const problems: string[] = [];
   lines.forEach((line, index) => {
     if (line.seq !== index + 1) problems.push(`line ${index + 1} has seq ${line.seq}`);
-    if (line.intent.trim() === "") problems.push(`line ${index + 1} has an empty intent`);
+    if (line.intent !== undefined && line.intent.trim() === "") {
+      problems.push(`line ${index + 1} has an empty intent`);
+    }
     if (index > 0 && line.at < lines[index - 1]!.at) {
       problems.push(`line ${index + 1} is timestamped before the one before it`);
     }

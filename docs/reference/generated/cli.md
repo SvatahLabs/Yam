@@ -408,6 +408,110 @@ Find bindings no flow or test names any more; --apply removes them.
 Exit codes: 0 ok · 1 failed
 ```
 
+### `yam surface connect`
+
+```text
+yam surface connect [--url <url>] [--adapter <name>] [--headed] [--json]
+
+Connect to a target and open a surface session. Prints the session ID on stdout.
+
+  --url <url>       the URL to connect to
+  --adapter <name>  which adapter to use (default: playwright)
+  --headed          show the browser
+  --json            one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam surface snapshot`
+
+```text
+yam surface snapshot --session <id> [--root <ref>] [--max-nodes <n>] [--interactive-only] [--json]
+
+Take a semantic snapshot of the current surface state.
+
+  --session <id>      the session to snapshot
+  --root <ref>        subtree root ref
+  --max-nodes <n>     max nodes to return
+  --interactive-only  only interactive elements
+  --json              one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam surface act`
+
+```text
+yam surface act --session <id> --action <name> [--ref <ref>] [--ref2 <ref>] [--input <args.json>] [--json]
+
+Perform an action on the surface.
+
+  --session <id>       the session
+  --action <name>      the action to perform (click, type, etc.)
+  --ref <ref>          the element reference
+  --ref2 <ref>         second reference (for dragTo)
+  --input <args.json>  action arguments as a JSON file or - for stdin
+  --json               one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam surface read`
+
+```text
+yam surface read --session <id> --kind <kind> [--ref <ref>] [--name <attr>] [--json]
+
+Read a value from the surface: text, value, attribute, title, url, or result.
+
+  --session <id>  the session
+  --kind <kind>   what to read: text, value, attribute, title, url, result
+  --ref <ref>     the element reference
+  --name <attr>   the attribute name (when kind=attribute)
+  --json          one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam surface check`
+
+```text
+yam surface check --session <id> --input <check.json> [--ref <ref>] [--json]
+
+Check a predicate against the surface.
+
+  --session <id>        the session
+  --input <check.json>  the check predicate as a JSON file or - for stdin
+  --ref <ref>           the element reference
+  --json                one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 20 · 1 failed
+```
+
+### `yam surface close`
+
+```text
+yam surface close --session <id> [--json]
+
+Close a surface session.
+
+  --session <id>  the session to close
+  --json          one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam surface sessions`
+
+```text
+yam surface sessions [--json]
+
+List active surface sessions.
+
+  --json  one JSON document on stdout, nothing else
+
+Exit codes: 0 ok
+```
+
 ### `yam surface conform`
 
 ```text

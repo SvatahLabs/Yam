@@ -916,11 +916,26 @@ export async function createService(options: ServeOptions): Promise<RunningServi
       const existing = exploring.get(id);
       if (existing !== undefined) return { sessionId: id, trajectory: existing.trajectoryPath };
 
-      const session = await api.openSurfaceSession(await load(), {
-        sessionId: id,
-        ...(request.body?.headed === undefined ? {} : { headed: request.body.headed }),
-        ...(request.body?.adapter === undefined ? {} : { adapter: request.body.adapter }),
-      });
+      /*
+       * An adapter this host does not have is the caller's mistake, not the
+       * service's fault: 400 with the domain code, never a 500 (SF-04, G04).
+       */
+      let session;
+      try {
+        session = await api.openSurfaceSession(await load(), {
+          sessionId: id,
+          ...(request.body?.headed === undefined ? {} : { headed: request.body.headed }),
+          ...(request.body?.adapter === undefined ? {} : { adapter: request.body.adapter }),
+        });
+      } catch (error) {
+        if ((error as { code?: string }).code === "UNSUPPORTED_ADAPTER") {
+          return reply.code(400).send({
+            error: "unsupported-adapter",
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
+        throw error;
+      }
       exploring.set(id, session);
       return { sessionId: id, trajectory: session.trajectoryPath };
     },

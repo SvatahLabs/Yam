@@ -79,6 +79,15 @@ export interface ScreenParams {
   /** `explorer`: which adapter a session opens on. */
   readonly adapter?: string;
   /**
+   * `explorer`: the surface action the next call performs (SF-11, SF-17).
+   *
+   * A screen parameter rather than renderer state, for the reason `intent` is
+   * one: the action is what the screen re-loads with, and `explorer.act` reads
+   * it from the parameters. Without it here the Act button had nothing to send
+   * and refused every press with "Choose an action."
+   */
+  readonly action?: string;
+  /**
    * `explorer`: what the next surface call is *for* (REQ-BEH-4).
    *
    * A parameter rather than renderer state, because the model refuses a call

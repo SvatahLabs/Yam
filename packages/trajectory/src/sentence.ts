@@ -252,11 +252,20 @@ function capitalise(phrase: string): string {
  * snapshots it needs. Recording them as steps would put a `screenshot` in the
  * flow for every glance the agent took.
  */
+/** What a call with no intent is called while it waits for a person (SF-12). */
+export const NO_INTENT = "(no intent recorded)";
+
 export function draftFor(line: TrajectoryLine): DraftStep | undefined {
   if (line.call === "snapshot") return undefined;
 
   const base = {
-    intent: line.intent,
+    /*
+     * A call nobody narrated still becomes a step, labelled rather than
+     * dropped (Draft 2.25, SF-12). Direct control does not owe the compiler a
+     * sentence; what it owes a person is an honest line saying so, which
+     * `compile` turns into a `// review:` comment.
+     */
+    intent: line.intent ?? NO_INTENT,
     seq: [line.seq],
     ...(line.url === undefined ? {} : { url: line.url }),
     ...(line.snapshotHash === undefined ? {} : { snapshotHash: line.snapshotHash }),

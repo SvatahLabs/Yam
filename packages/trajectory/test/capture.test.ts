@@ -111,8 +111,23 @@ describe("readTrajectory", () => {
 
   it("names the line when one is not a trajectory line", () => {
     const path = join(temp(), "trajectory.jsonl");
+    // `call` is required; the name of what is missing is the whole point.
+    writeFileSync(path, '{"seq":1,"at":"2026"}\n', "utf8");
+    expect(() => readTrajectory(path)).toThrow(/call/);
+  });
+
+  it("reads a line nobody narrated (Draft 2.25, SF-12)", () => {
+    /*
+     * An intent was required until direct control existed. An agent that
+     * inspects a page owes nobody a sentence, and a file full of such calls is
+     * a trajectory, not a malformed one — what the compiler does with it is
+     * mark the step for review.
+     */
+    const path = join(temp(), "trajectory.jsonl");
     writeFileSync(path, '{"seq":1,"call":"snapshot","at":"2026"}\n', "utf8");
-    expect(() => readTrajectory(path)).toThrow(/intent/);
+    const lines = readTrajectory(path);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]!.intent).toBeUndefined();
   });
 
   it("ignores blank lines, including a trailing newline", () => {

@@ -77,7 +77,7 @@ function tree(dir: string): string[] {
  * about the *capture* and this one is about what the capture can be turned into.
  * A helper the two shared would make a change to one silently change the other.
  */
-async function explore(project: string, path: string): Promise<TrajectoryLine[]> {
+async function explore(project: string, path: string, baseUrl: string): Promise<TrajectoryLine[]> {
   const built = await buildMcpServer({
     root: project,
     trajectoryPath: path,
@@ -92,32 +92,43 @@ async function explore(project: string, path: string): Promise<TrajectoryLine[]>
     JSON.parse(((result as { content: Array<{ text: string }> }).content[0]!).text);
 
   try {
-    const home = answer(
+    /*
+     * Connect first (Draft 2.25). The surface tools address a session by id
+     * rather than opening one lazily on the first call, which is what makes
+     * the same tools usable with no project at all.
+     */
+    const opened = answer(
+      await client.callTool({ name: "surface_connect", arguments: { url: baseUrl } }),
+    ) as { result: { sessionId: string } };
+    const session = opened.result.sessionId;
+
+    const home = (answer(
       await client.callTool({
         name: "surface_snapshot",
-        arguments: { intent: "see what is on the home page", interactiveOnly: true },
+        arguments: { session, intent: "see what is on the home page", interactiveOnly: true },
       }),
-    ) as { text: string };
+    ) as { result: { text: string } }).result;
     const signIn = /link "Sign in"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(home.text)?.[1];
     expect(signIn, home.text.slice(0, 400)).toBeDefined();
 
     await client.callTool({
       name: "surface_act",
-      arguments: { intent: "go to the sign-in page", action: "click", ref: signIn },
+      arguments: { session, intent: "go to the sign-in page", action: "click", ref: signIn },
     });
 
-    const login = answer(
+    const login = (answer(
       await client.callTool({
         name: "surface_snapshot",
-        arguments: { intent: "see the sign-in form", interactiveOnly: true },
+        arguments: { session, intent: "see the sign-in form", interactiveOnly: true },
       }),
-    ) as { text: string };
+    ) as { result: { text: string } }).result;
     const username = /textbox "Username"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(login.text)?.[1];
     expect(username, login.text.slice(0, 400)).toBeDefined();
 
     await client.callTool({
       name: "surface_act",
       arguments: {
+        session,
         intent: "type the enterprise user's email into the username field",
         action: "type",
         ref: username,
@@ -128,6 +139,7 @@ async function explore(project: string, path: string): Promise<TrajectoryLine[]>
     await client.callTool({
       name: "surface_read",
       arguments: {
+        session,
         intent: "check what the username field now holds",
         kind: "value",
         ref: username,
@@ -137,12 +149,14 @@ async function explore(project: string, path: string): Promise<TrajectoryLine[]>
     await client.callTool({
       name: "surface_check",
       arguments: {
+        session,
         intent: "confirm the sign-in button is ready",
         predicate: { kind: "visible" },
         subject: "ref",
         ref: /button "Sign In"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(login.text)?.[1],
       },
     });
+    await client.callTool({ name: "surface_close", arguments: { session } });
   } finally {
     await client.close().catch(() => undefined);
     await built.close();
@@ -163,7 +177,7 @@ afterAll(async () => {
 describe("the T4.6 exploration compiles to a proposal (T5.5's Validate)", () => {
   it("compiles at least 80 percent of its steps at Tier 1", async () => {
     const project = scaffold();
-    const lines = await explore(project, join(project, "runs", "t", "trajectory.jsonl"));
+    const lines = await explore(project, join(project, "runs", "t", "trajectory.jsonl"), app.origin);
     expect(lines).toHaveLength(6);
 
     const compiled = compileTrajectory(lines, { now: "2026-09-04T00:00:00.000Z" });
@@ -190,7 +204,7 @@ describe("the T4.6 exploration compiles to a proposal (T5.5's Validate)", () => 
      * wrong is worse than `// review:`.
      */
     const project = scaffold();
-    const lines = await explore(project, join(project, "runs", "t", "trajectory.jsonl"));
+    const lines = await explore(project, join(project, "runs", "t", "trajectory.jsonl"), app.origin);
     const { proposal } = compileTrajectory(lines, { now: "2026-09-04T00:00:00.000Z" });
 
     expect(proposal.flow).toContain("Click the Sign in link");
@@ -204,7 +218,7 @@ describe("the T4.6 exploration compiles to a proposal (T5.5's Validate)", () => 
 
   it("carries a compiled story fragment and unverified bindings", async () => {
     const project = scaffold();
-    const lines = await explore(project, join(project, "runs", "t", "trajectory.jsonl"));
+    const lines = await explore(project, join(project, "runs", "t", "trajectory.jsonl"), app.origin);
     const { proposal } = compileTrajectory(lines, { now: "2026-09-04T00:00:00.000Z" });
 
     // It validates against the published schema, which refuses `verified: true`.
@@ -224,7 +238,7 @@ describe("the T4.6 exploration compiles to a proposal (T5.5's Validate)", () => 
 
   it("writes nothing outside proposals/", async () => {
     const project = scaffold();
-    const lines = await explore(project, join(project, "runs", "t", "trajectory.jsonl"));
+    const lines = await explore(project, join(project, "runs", "t", "trajectory.jsonl"), app.origin);
 
     const before = tree(project);
     const compiled = compileTrajectory(lines, { now: "2026-09-04T00:00:00.000Z" });
@@ -241,7 +255,7 @@ describe("the T4.6 exploration compiles to a proposal (T5.5's Validate)", () => 
 
   it("writes a flow, a proposal and the bindings, under the date", async () => {
     const project = scaffold();
-    const lines = await explore(project, join(project, "runs", "t", "trajectory.jsonl"));
+    const lines = await explore(project, join(project, "runs", "t", "trajectory.jsonl"), app.origin);
     const compiled = compileTrajectory(lines, { now: "2026-09-04T00:00:00.000Z" });
     const { dir, files } = writeProposal(join(project, "proposals"), compiled);
 
@@ -273,10 +287,22 @@ describe("what the compiler will not phrase, it says out loud", () => {
     await Promise.all([built.server.connect(serverSide), client.connect(clientSide)]);
 
     try {
+      const answer = (result: unknown): unknown =>
+        JSON.parse(((result as { content: Array<{ text: string }> }).content[0]!).text);
+      const opened = answer(
+        await client.callTool({ name: "surface_connect", arguments: { url: app.origin } }),
+      ) as { result: { sessionId: string } };
+      const session = opened.result.sessionId;
       await client.callTool({
         name: "surface_act",
-        arguments: { intent: "click something that is not there", action: "click", ref: "r9999" },
+        arguments: {
+          session,
+          intent: "click something that is not there",
+          action: "click",
+          ref: "r9999",
+        },
       });
+      await client.callTool({ name: "surface_close", arguments: { session } });
     } finally {
       await client.close().catch(() => undefined);
       await built.close();
@@ -303,7 +329,7 @@ describe("yam trajectory compile (T5.5, REQ-AGT-1)", () => {
   it("writes the proposal and reports the rate", async () => {
     const project = scaffold();
     const path = join(project, "runs", "t", "trajectory.jsonl");
-    await explore(project, path);
+    await explore(project, path, app.origin);
 
     const before = tree(project);
     const result = await cli(["trajectory", "compile", path, ".", "--json"], project);
@@ -324,7 +350,7 @@ describe("yam trajectory compile (T5.5, REQ-AGT-1)", () => {
   it("takes a story name, so a proposal can be called what it is", async () => {
     const project = scaffold();
     const path = join(project, "runs", "t", "trajectory.jsonl");
-    await explore(project, path);
+    await explore(project, path, app.origin);
 
     const result = await cli(
       ["trajectory", "compile", path, ".", "--name", "Sign in as the enterprise user", "--json"],

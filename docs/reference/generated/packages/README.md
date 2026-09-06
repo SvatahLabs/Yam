@@ -31,8 +31,9 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-spec`](spec.md) | 54 | Flow reader, grammar, target dictionary, signatures |
 | [`@svatah/yam-steps`](steps.md) | 30 | defineStep API and the Tier 0 matcher |
 | [`@svatah/yam-surface`](surface.md) | 100 | The published AgentSurface interface, adapter registry and wire schemas |
+| [`@svatah/yam-surface-control`](surface-control.md) | 71 | Shared surface operation dispatcher, session lifecycle and operation catalogue |
 | [`@svatah/yam-tool`](tool.md) | 17 | MCP tool server exposing stories as deterministic tools |
-| [`@svatah/yam-trajectory`](trajectory.md) | 18 | Trajectory capture and compile to proposals |
+| [`@svatah/yam-trajectory`](trajectory.md) | 19 | Trajectory capture and compile to proposals |
 | [`@svatah/yam-tui`](tui.md) | 34 | `yam ui` — the terminal cockpit, a second renderer of the screen model (REQ-TUI-1) |
 | [`@svatah/yam-ui`](ui.md) | 33 | The Yam design system: React components on Radix primitives, every one of them named and id'd (REQ-ADE-12) |
 | [`@svatah/yam-ui-tokens`](ui-tokens.md) | 16 | The Yam design tokens: two themes, one type ramp, one status set (REQ-ADE-12) |

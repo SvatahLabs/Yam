@@ -9,15 +9,7 @@ import {
   actResultSchema,
   checkResultSchema,
   capabilitiesSchema,
-  type Ref,
-  type ActArgs,
-  type ReadKind,
-  type CheckSubject,
-  type Snapshot,
-  type ActResult,
-  type CheckResult,
-  type Capabilities,
-} from "@svatah/yam-schema";
+  } from "@svatah/yam-schema";
 import { SURFACE_ACTIONS } from "@svatah/yam-schema";
 
 const sessionIdSchema = z.string().min(1);

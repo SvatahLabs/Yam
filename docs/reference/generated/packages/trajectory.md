@@ -13,12 +13,13 @@ Trajectory capture and compile to proposals
 | Export | Kind | Signature | |
 |---|---|---|---|
 | `captureNameFor` | function | `export function captureNameFor(phrase: string, kind: string): string` | A capture name for a `read`: `usernameFieldValue`, from the phrase and kind. |
-| `checkTrajectory` | function | `export function checkTrajectory(lines: readonly TrajectoryLine[]): string[]` | Whether a trajectory is well formed: sequential, intent-carrying, and in order. |
+| `checkTrajectory` | function | `export function checkTrajectory(lines: readonly TrajectoryLine[]): string[]` | Whether a trajectory is well formed: sequential and in order. |
 | `CompiledTrajectory` | interface | `export interface CompiledTrajectory` |  |
 | `compileTrajectory` | function | `export function compileTrajectory(` | Compile a trajectory. Writes nothing; `writeProposal` does that. |
 | `CompileTrajectoryOptions` | interface | `export interface CompileTrajectoryOptions` |  |
-| `draftFor` | function | `export function draftFor(line: TrajectoryLine): DraftStep \| undefined` | Turn one trajectory line into a drafted step. |
+| `draftFor` | function | `export function draftFor(line: TrajectoryLine): DraftStep \| undefined` |  |
 | `DraftStep` | interface | `export interface DraftStep` | A step drafted from one or more calls. |
+| `NO_INTENT` | variable | `NO_INTENT = "(no intent recorded)"` | What a call with no intent is called while it waits for a person (SF-12). |
 | `phraseFor` | function | `export function phraseFor(describe: ElementDescription): string` | `the Sign in link`, `the username field`, `the booking-result element`. |
 | `readTrajectory` | function | `export function readTrajectory(path: string): TrajectoryLine[]` | Read a `trajectory.jsonl`, validating every line (REQ-STD-1). |
 | `sentenceForAct` | function | `export function sentenceForAct(` | The canonical sentence for one action (LLD §13.4's "map `act` kinds to IR |

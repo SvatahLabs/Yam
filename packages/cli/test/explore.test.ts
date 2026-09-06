@@ -54,10 +54,12 @@ describe("yam explore (REQ-AGT-5)", () => {
     const client = new Client({ name: "explorer", version: "1.0.0" });
     const served = explore({ root: dir, io: silent, transport: serverSide, sessionId: "test", name: "Explored sign in" });
     await client.connect(clientSide);
-    const home = answer(await client.callTool({ name: "surface_snapshot", arguments: { intent: "see what is on the home page", interactiveOnly: true } }));
+    const opened = answer(await client.callTool({ name: "surface_connect", arguments: { url: app.origin } })) as { result: { sessionId: string } };
+    const session = opened.result.sessionId;
+    const home = (answer(await client.callTool({ name: "surface_snapshot", arguments: { session, intent: "see what is on the home page", interactiveOnly: true } })) as { result: { text: string } }).result;
     const signIn = /link "Sign in"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(home.text)?.[1];
     expect(signIn, home.text.slice(0, 300)).toBeDefined();
-    await client.callTool({ name: "surface_act", arguments: { intent: "go to the sign-in page", action: "click", ref: signIn } });
+    await client.callTool({ name: "surface_act", arguments: { session, intent: "go to the sign-in page", action: "click", ref: signIn } });
     await client.close();
     const proposal = await served;
 
@@ -99,7 +101,8 @@ describe("yam explore (REQ-AGT-5)", () => {
     const client = new Client({ name: "explorer", version: "1.0.0" });
     const served = explore({ root: dir, io: silent, transport: serverSide, sessionId: "first", out: join(dir, "elsewhere") });
     await client.connect(clientSide);
-    await client.callTool({ name: "surface_snapshot", arguments: { intent: "look at the home page", interactiveOnly: true } });
+    const first = answer(await client.callTool({ name: "surface_connect", arguments: { url: app.origin } })) as { result: { sessionId: string } };
+    await client.callTool({ name: "surface_snapshot", arguments: { session: first.result.sessionId, intent: "look at the home page", interactiveOnly: true } });
     await client.close();
     await served;
     const trajectory = join(dir, ".yam", "explore", "first", "trajectory.jsonl");

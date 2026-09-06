@@ -28,14 +28,13 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { lintPlan, renderPlan } from "@svatah/yam-compiler";
 import { TrajectoryWriter } from "@svatah/yam-trajectory";
-import { createSurface, listAdapters, type AgentSurface } from "@svatah/yam-surface";
-import type { ActArgs, Config, Predicate, ReadKind, Ref, SurfaceAction } from "@svatah/yam-schema";
-import { predicateSchema, surfaceActionSchema, SURFACE_ACTIONS } from "@svatah/yam-schema";
+import { createSurface, listAdapters } from "@svatah/yam-surface";
+import type { ElementDescription, ActArgs, ReadKind, Ref } from "@svatah/yam-schema";
+import { SURFACE_ACTIONS } from "@svatah/yam-schema";
 import { formatDiagnostic } from "@svatah/yam-spec";
 import {
   boolOption,
   EXIT,
-  sessionTarget,
   stringOption,
   type CommandIo,
   type ExitCode,
@@ -45,7 +44,6 @@ import { credentialInEnvironment } from "@svatah/yam-gateway";
 import {
   createSessionStore,
   createAdapterFactory,
-  OPERATIONS,
   dispatchConnect,
   dispatchSnapshot,
   dispatchAct,
@@ -135,17 +133,61 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
   };
 
   /**
-   * Write to the trajectory when intent is provided.
-   * Evidence is lazy: no pre-call snapshot or describe (T11').
+   * Write to the trajectory when an intent was given (SF-12, REQ-BEH-4).
+   *
+   * An intent is what says this call is authoring rather than looking, so it is
+   * also what decides whether evidence is worth gathering. Direct control pays
+   * nothing: no intent, no line, no reads.
+   *
+   * What is gathered when it *is* authoring is targeted, not a page. Wave 1's
+   * first cut removed the per-call `snapshot({interactiveOnly:true})`, which was
+   * right — it was a full page read before every operation — but removed
+   * `describe` and `url` with it, and those are what the compiler turns into a
+   * step's phrase and a binding's context. A trajectory without them still
+   * compiles, to a proposal with no bindings and steps that cannot name what
+   * they touched. So: `describe` for the one element a call names, the URL from
+   * session state, and the snapshot's own hash when the call was a snapshot and
+   * already has it. All cheap, all only while authoring.
    */
-  const captureToTrajectory = (
+  /**
+   * What the element was, read *before* the call (REQ-BEH-4).
+   *
+   * After a click that navigates there is no element left to describe, so
+   * evidence gathered afterwards is empty exactly when the step is most worth
+   * recording. This is the one read that has to happen up front — one element,
+   * not a page, and only when an intent says the caller is authoring.
+   */
+  const evidenceBefore = async (
+    intent: string | undefined,
+    session: string | undefined,
+    ref: string | undefined,
+  ): Promise<{ url?: string; describe?: ElementDescription }> => {
+    if (trajectory === undefined || intent === undefined || session === undefined) return {};
+    const surface = ctx.sessions.get(session)?.surface;
+    if (surface === undefined) return {};
+    const url = (await surface.state().catch(() => undefined))?.url;
+    const describe =
+      ref === undefined ? undefined : await surface.describe(ref as Ref).catch(() => undefined);
+    return {
+      ...(url === undefined ? {} : { url }),
+      ...(describe === undefined ? {} : { describe }),
+    };
+  };
+
+  const captureToTrajectory = async (
     call: "snapshot" | "act" | "read" | "check",
     intent: string | undefined,
     args: Record<string, unknown>,
     ref: string | undefined,
     result: Record<string, unknown>,
-  ): void => {
+    before: { url?: string; describe?: ElementDescription } = {},
+  ): Promise<void> => {
     if (!trajectory || !intent) return;
+    const { url, describe } = before;
+    const hash =
+      call === "snapshot"
+        ? ((result as { result?: { hash?: string } }).result?.hash ?? undefined)
+        : undefined;
     const isError = (result as { status?: string }).status === "failed";
     const errorMsg = isError
       ? ((result as { error?: { message?: string } }).error?.message ?? "unknown error")
@@ -154,7 +196,10 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       intent,
       call,
       ...(Object.keys(args).length === 0 ? {} : { args }),
+      ...(hash === undefined ? {} : { snapshotHash: hash }),
+      ...(url === undefined ? {} : { url }),
       ...(ref === undefined ? {} : { ref: ref as Ref }),
+      ...(describe === undefined ? {} : { describe }),
       ...(isError ? { error: errorMsg } : { result: (result as { result?: unknown }).result }),
     });
   };
@@ -503,7 +548,9 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
         intent: OPTIONAL_INTENT,
       },
     },
-    async ({ url, adapter, headed, intent }) => {
+    // `intent` is accepted and unused here: connect starts a session, and a
+    // sentence describes a step. Taking it keeps one shape across the tools.
+    async ({ url, adapter, headed }) => {
       const result = await dispatchConnect(ctx, {
         url, adapter, headed,
         adapterFactory: factory,
@@ -532,8 +579,9 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ session, interactiveOnly, maxNodes, root, intent }) => {
+      const before = await evidenceBefore(intent, session, undefined);
       const result = await dispatchSnapshot(ctx, { session, interactiveOnly, maxNodes, root });
-      captureToTrajectory("snapshot", intent, { interactiveOnly, maxNodes }, undefined, result);
+      await captureToTrajectory("snapshot", intent, { interactiveOnly, maxNodes }, undefined, result, before);
       return text(result);
     },
   );
@@ -559,10 +607,11 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ session, action, ref, args, ref2, intent }) => {
+      const before = await evidenceBefore(intent, session, ref);
       const result = await dispatchAct(ctx, {
         session, action, ref, args: args as ActArgs | undefined, ref2,
       });
-      captureToTrajectory("act", intent, { action, args, ref2 }, ref, result);
+      await captureToTrajectory("act", intent, { action, args, ref2 }, ref, result, before);
       return text(result);
     },
   );
@@ -582,10 +631,11 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ session, kind, ref, name, intent }) => {
+      const before = await evidenceBefore(intent, session, ref);
       const result = await dispatchRead(ctx, {
         session, kind: kind as ReadKind, ref, name,
       });
-      captureToTrajectory("read", intent, { kind, name }, ref, result);
+      await captureToTrajectory("read", intent, { kind, name }, ref, result, before);
       return text(result);
     },
   );
@@ -609,13 +659,14 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ session, predicate, subject, ref, intent }) => {
+      const before = await evidenceBefore(intent, session, ref);
       const result = await dispatchCheck(ctx, {
         session,
         predicate: predicate as { kind: string; value?: string; name?: string; negate?: boolean },
         subject,
         ref,
       });
-      captureToTrajectory("check", intent, { predicate, subject }, ref, result);
+      await captureToTrajectory("check", intent, { predicate, subject }, ref, result, before);
       return text(result);
     },
   );

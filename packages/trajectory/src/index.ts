@@ -25,7 +25,7 @@ export {
   type CompiledTrajectory,
   type CompileTrajectoryOptions,
 } from "./compile.js";
-export {
+export { NO_INTENT,
   captureNameFor,
   draftFor,
   phraseFor,

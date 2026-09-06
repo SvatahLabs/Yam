@@ -1,7 +1,7 @@
 import type { AgentSurface } from "@svatah/yam-surface";
-import type { ReadKind, CheckSubject, Ref, ActArgs, Capabilities } from "@svatah/yam-schema";
+import type { ReadKind, CheckSubject, Ref, ActArgs } from "@svatah/yam-schema";
 import { SurfaceError } from "@svatah/yam-surface";
-import { makeRequestId, successEnvelope, failedEnvelope, refusedEnvelope } from "./envelope.js";
+import { makeRequestId, successEnvelope, failedEnvelope } from "./envelope.js";
 import type { SessionStore } from "./sessions.js";
 import type { ErrorCode } from "./catalogue.js";
 
@@ -26,8 +26,20 @@ export async function dispatchConnect(
     const sessionId = ctx.sessions.create(surface, adapterName);
 
     await surface.open({
-      baseUrl: input.url,
+      ...(input.url === undefined ? {} : { baseUrl: input.url }),
     });
+    /*
+     * A session is not a page (LLD §8, Draft 2.4).
+     *
+     * `open` gives the session its base URL; it does not go there. Without
+     * this, `yam surface connect --url …` returned a session id for a blank
+     * tab and every snapshot, read and check after it saw nothing — the
+     * journey ran green against an empty page. The executor and the recorder
+     * both perform this navigation for the same reason.
+     */
+    if (input.url !== undefined && surface.kind === "web") {
+      await surface.act("navigate", undefined, { url: input.url });
+    }
 
     const caps = surface.capabilities();
     const elapsed = Date.now() - start;
@@ -129,6 +141,24 @@ export async function dispatchRead(
   }
 }
 
+/**
+ * A predicate a person can write (SF-06, SF-16).
+ *
+ * A predicate's `value` is a `ValueRef` — `{kind: "literal", value: "Yam"}` —
+ * because a compiled step's value may come from data, an input or a template.
+ * Direct control has none of those: there is no project to hold them. So a bare
+ * string means what it says, and the shape a flow needs is still accepted.
+ *
+ * Without this, `--input` files carried protocol payload, and the plain reading
+ * — `{"kind":"titleContains","value":"Yam"}` — failed with "Unknown value
+ * reference", which tells a person nothing about what to write instead.
+ */
+function literalValues(predicate: Record<string, unknown>): Record<string, unknown> {
+  const value = predicate["value"];
+  if (typeof value !== "string") return predicate;
+  return { ...predicate, value: { kind: "literal", value } };
+}
+
 export async function dispatchCheck(
   ctx: DispatchContext,
   input: {
@@ -146,7 +176,7 @@ export async function dispatchCheck(
   }
   try {
     const result = await entry.surface.check(
-      input.predicate as Parameters<AgentSurface["check"]>[0],
+      literalValues(input.predicate) as Parameters<AgentSurface["check"]>[0],
       input.subject,
       input.ref as Ref | undefined,
     );
