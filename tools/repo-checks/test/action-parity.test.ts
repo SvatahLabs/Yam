@@ -48,8 +48,11 @@ const BINDINGS_CLI_SOURCE = readFileSync(
  * in both to count: one without the other is either an undocumented command or
  * a documented one that answers "unknown command".
  */
+// Draft 2.20: the table a person reads is `help.ts`'s COMMANDS, one synopsis
+// each, rather than a usage block in `cli.ts`.
+const HELP_SOURCE = readFileSync(fromRoot("packages/cli/src/help.ts"), "utf8");
 const documented = new Set(
-  [...CLI_SOURCE.matchAll(/^\s{2}yam ([a-z-]+)/gm)].map((match) => match[1]!),
+  [...HELP_SOURCE.matchAll(/synopsis: "yam ([a-z-]+)/g)].map((match) => match[1]!),
 );
 
 /**

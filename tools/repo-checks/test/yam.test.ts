@@ -22,7 +22,7 @@ const ALLOWED: ReadonlyArray<[RegExp, string]> = [
   [/svatahADE/g, "the prototype repository the app was designed from"],
   [/svatah[_-]yam/g, "the PyPI and Python client names carry the brand"],
   [/com[./]svatah[./]yam/g, "the Java package and the bundle id carry the brand"],
-  [/svatah\.(flow|locator|data)/g, "the legacy sample fixtures keep their file names"],
+  [/svatah\.(flow|locator|data|fl…)/g, "the legacy sample fixtures keep their file names, truncated in a capture"],
   [/Workspace\/Svatah/g, "the implementer's machine path inside a recording"],
 ];
 

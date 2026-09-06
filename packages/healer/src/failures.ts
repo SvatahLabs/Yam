@@ -118,8 +118,10 @@ export function readRunFailures(runDir: string): HealInput[] {
      */
     const session = result.failure.session;
 
+    const phrase = phraseOf(result);
     inputs.push({
       id,
+      ...(phrase === undefined ? {} : { phrase }),
       source: "run",
       ...(session?.url === undefined ? {} : { url: session.url }),
       ...(session === undefined ? {} : { state: session }),
@@ -140,6 +142,12 @@ export function readRunFailures(runDir: string): HealInput[] {
  * failure message the resolver wrote — which always names it in quotes, because
  * `LocatorError` builds its message from the id.
  */
+/** The phrase a failure names, from either wording of the resolver's message. */
+function phraseOf(result: StepResult): string | undefined {
+  const message = result.failure?.message ?? "";
+  return /Could not resolve "[^"]+" \(([^)]+)\)/.exec(message)?.[1] ?? /No binding for `([^`]+)` \(/.exec(message)?.[1];
+}
+
 function elementIdOf(result: StepResult): string | undefined {
   const message = result.failure?.message ?? "";
   // "Could not resolve "<id>"" when candidates were tried; "No binding for
