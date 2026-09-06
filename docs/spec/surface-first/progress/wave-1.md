@@ -57,7 +57,26 @@
 
 ## T03 — Turn audit failures into regression cases
 
-**Status:** pending
+**Status:** complete
+
+**Files created:**
+- `packages/surface-control/test/audit-regressions.test.ts`: 15 tests covering all 6 verified defects from the gap analysis. 6 tests fail on the baseline (demonstrating the defects), 9 pass (verifying the new catalogue has correct schemas).
+
+**Defect → regression test mapping:**
+- G02 (SF-03, SF-06): surface subcommands must exist beyond "conform" — tests catalogue subcommands and checks source for hard-coded single-command gate
+- G03 (SF-11, SF-17): Explorer must provide a surface action selector — tests renderer source for action selection UI
+- G04 (SF-03, SF-04, SF-09): adapter selection must be real — tests catalogue schema, dispatcher rejection, and service source for adapter in request body
+- G05 (SF-03, SF-12): intent must be optional for direct control — tests catalogue schemas and checks service source for "missing-intent" gate
+- G07 (SF-03, SF-06, SF-11): ref2, name, and snapshot options must not be dropped — tests catalogue schemas, dispatcher forwarding, and service source for ref2/name in calls
+- G11 (SF-02, SF-20): docs must reference @svatah/yam, not bare yam — tests docs/mcp.md for unscoped package references
+
+**Evidence:** 6 tests fail for the observed baseline reason; 9 tests pass validating the correct contract in the new catalogue and dispatcher. Tests do not encode broken behavior as correct.
+
+**Import boundaries:** regression tests read source files for cross-package assertions rather than importing from CLI, screens, or service packages.
+
+**Deviations:** none.
+
+**Known gaps:** none.
 
 ---
 
