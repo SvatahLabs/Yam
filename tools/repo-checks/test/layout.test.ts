@@ -57,11 +57,8 @@ const isDir = (p: string) => existsSync(p) && statSync(p).isDirectory();
  * `docs/spec/progress/phase-9.md`.
  */
 const DRAFT_2_11_PACKAGES: ReadonlyArray<{ name: string; because: string }> = [
-  { name: "screens", because: "LLD §13.7, REQ-ADE-10: the headless screen model" },
-  { name: "ui-tokens", because: "LLD §13.7, REQ-ADE-12: the design tokens, both themes" },
-  { name: "ui", because: "LLD §13.7, REQ-ADE-12: the React components on Radix primitives" },
-  { name: "sdk", because: "LLD §13.8, REQ-SDK-1: the generated TypeScript client" },
-  { name: "tui", because: "LLD §13.7, REQ-TUI-1: `svatah ui`, the terminal cockpit" },
+  // Draft 2.12 put screens, ui-tokens, ui, sdk and tui into HLD §12 itself, so the
+  // list of packages the LLD requires and §12 omits is empty; `fromHld` carries them.
 ];
 
 describe("repository layout (HLD §12)", () => {
@@ -71,7 +68,7 @@ describe("repository layout (HLD §12)", () => {
   it("HLD §12 lists the expected number of packages", () => {
     // 24 through Draft 2.2; Draft 2.3 splits `playwright-test` into the module
     // (a) `bind()` package, `bindings-cli`, and the module (b) `host-playwright`.
-    expect(fromHld.length).toBe(26);
+    expect(fromHld.length).toBe(31);
   });
 
   it("names every Draft 2.11 package the LLD requires, with the section", () => {
