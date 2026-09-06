@@ -25,6 +25,8 @@
  * printing a state no other client could reach.
  */
 import { spawn, type ChildProcess } from "node:child_process";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import {
   EXIT,
   numberOption,
@@ -33,7 +35,21 @@ import {
   type ExitCode,
   type ParsedArgs,
 } from "@svatah/yam-bindings-cli";
-import { resolve } from "node:path";
+import { resolve, dirname, join } from "node:path";
+
+/**
+ * The `yam` executable to spawn for a service. `process.argv[1]` when this is
+ * the executable; otherwise the built `bin.js` beside this module (`dist/`) or
+ * under the package (`src/` in a test), because a test runner's own entry is
+ * not a command line anyone can serve from.
+ */
+export function yamBin(): string {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const candidates = [join(here, "bin.js"), join(here, "..", "..", "dist", "bin.js")];
+  const argv = process.argv[1];
+  if (argv !== undefined && /(^|\/)(bin\.js|yam)$/.test(argv)) return argv;
+  return candidates.find((one) => existsSync(one)) ?? argv ?? "yam";
+}
 
 /** The one line `yam serve` prints when it is listening (LLD §13.6). */
 export function parseHandshake(line: string): { url: string; token: string } | undefined {
@@ -45,7 +61,7 @@ export function parseHandshake(line: string): { url: string; token: string } | u
 async function openService(
   project: string,
 ): Promise<{ url: string; token: string; child: ChildProcess }> {
-  const child = spawn(process.execPath, [process.argv[1]!, "serve", project, "--port", "0"], {
+  const child = spawn(process.execPath, [yamBin(), "serve", project, "--port", "0"], {
     env: process.env,
   });
   let buffer = "";
@@ -88,6 +104,9 @@ async function openService(
 }
 
 export async function uiCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
+  if (args.options["tmux"] !== undefined) {
+    return await (await import("./workspace.js")).workspaceCommand(args, io);
+  }
   const project = resolve(args.command[1] ?? ".");
   const asJson = args.options["json"] !== undefined;
 

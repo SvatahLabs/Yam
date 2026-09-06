@@ -19,11 +19,15 @@ The yam CLI and MCP server
 | `compileProject` | function | `export function compileProject(` | Compile a loaded project with the grammar alone. Offline, always. |
 | `CONFIG_FILES` | variable | `CONFIG_FILES: string[]` |  |
 | `defaultCasesPath` | function | `export function defaultCasesPath(): string` | Where the cases live, relative to the repository this package is built in. |
+| `diagnostic` | function | `export function diagnostic<C extends DiagnosticCode>(code: C, ...params: Parameters<(typeof CATALOGUE)[C]>): Diagnostic` | A row of the catalogue, with its parameters filled in. |
+| `DiagnosticCode` | typealias | `export type DiagnosticCode = keyof typeof CATALOGUE;` |  |
+| `DIAGNOSTICS` | variable | `DIAGNOSTICS: readonly Diagnostic[] = [` | Every row with example parameters, for the vocabulary check and the docs. |
 | `evalCommand` | function | `declare function evalCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode>;` |  |
 | `evalSelfCommand` | function | `export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode>` |  |
 | `EXIT` | variable | `EXIT:` | The exit codes of LLD §15. |
 | `EXIT_MEANINGS` | variable | `EXIT_MEANINGS: ReadonlyArray<readonly [number, string, string]> = [` | What each exit code means, in the words `yam help exit-codes` prints. |
 | `ExitCode` | typealias | `type ExitCode = (typeof EXIT)[keyof typeof EXIT];` |  |
+| `FrontDoorDiagnostic` | interface | `export interface Diagnostic` |  |
 | `GroundingAnswer` | interface | `export interface GroundingAnswer` |  |
 | `groundingAnswers` | function | `export function groundingAnswers(path?: string): GroundingAnswers` |  |
 | `GroundingAnswers` | interface | `export interface GroundingAnswers` |  |

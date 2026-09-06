@@ -1,14 +1,13 @@
-loading…
-yam ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-ui-capture-2LBoaA   http://127.0.0.1:61768   Run comp · test behavior · invoker user …
+yam ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-ui-capture-ttqDhr   http://127.0.0.1:52776   Run comp · test behavior · invoker user via cl…
 ┌────────────────────────────────┐┌──────────────────────────────────────────────────────────────────────────────┐┌────────────────────────────────────────────┐
 │ 1 Stories                      ││ 2 Run comp · aborted                                                         ││ 3 Step 5 · Click the pay button            │
-│ I want to book and… failed     ││ ✓  1 Click the Book a slot link                        testid #0    104 ms   ││ failure       locator                      │
-│ cancel a booking    passed     ││ ✓  2 Type "Indiranagar" into the location field        testid #0    38 ms    ││ session       /booking · window 0          │
-└────────────────────────────────┘│ ✓  3 Click the Book now button                         testid #0    46 ms    ││ window        Booking · Yam Sample      │
-                                  │ ✓  4 Remember the text of the booking reference as re… = BK-10428   54 ms    ││ dialog        none                         │
-                                  │ ✗  5 Click the pay button                                           9123 ms  ││ policy        compensate: cancel a booking │
-                                  │ ✓  1 Click the cancel booking button                   testid #0    36 ms    ││ CANDIDATES TRIED                           │
-                                  │ ✓  2 The booking reference should say {I want to book… testid #0    9 ms     ││ testid   pay                           0   │
+│ I want to book and… failed     ││ ✓  1 Click the Book a slot link                        testid #0    105 ms   ││ failure       locator                      │
+│ cancel a booking    passed     ││ ✓  2 Type "Indiranagar" into the location field        testid #0    26 ms    ││ session       /booking · window 0          │
+└────────────────────────────────┘│ ✓  3 Click the Book now button                         testid #0    27 ms    ││ window        Booking · Yam Sample         │
+                                  │ ✓  4 Remember the text of the booking reference as re… = BK-10428   3 ms     ││ dialog        none                         │
+                                  │ ✗  5 Click the pay button                                           8951 ms  ││ policy        compensate: cancel a booking │
+                                  │ ✓  1 Click the cancel booking button                   testid #0    29 ms    ││ CANDIDATES TRIED                           │
+                                  │ ✓  2 The booking reference should say {I want to book… testid #0    5 ms     ││ testid   pay                           0   │
                                   │ flow aborted · exit 11                                                       ││ role     button · "Pay"                0   │
                                   └──────────────────────────────────────────────────────────────────────────────┘│ text     Pay                           0   │
                                                                                                                   │ css      [data-testid="pay"]           0   │
@@ -19,12 +18,12 @@ yam ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-ui-capture-
                                                                                                                   └────────────────────────────────────────────┘
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ 4 Audit                                                                                                                                                      │
-│ 00.001 run        invoker kind user id local via cli · inputs                                                                                                │
-│ 00.395 story      inputs                                                                                                                                     │
-│ 00.405 state      ok · 7 ms                                                                                                                                  │
-│ 00.428 locate     nav.book-a-slot-link · testid "booking-link" · matched 1 · ok · 22 ms                                                                      │
-│ 00.499 act        click · h0 · ok · 71 ms                                                                                                                    │
-│ 00.503 state      ok · 3 ms                                                                                                                                  │
-│ yam ui --json streams these same lines to stdout for an agent                                                                                             │
+│ 00.000 run        invoker kind user id local via cli · inputs                                                                                                │
+│ 00.527 story      inputs                                                                                                                                     │
+│ 00.529 state      ok · 1 ms                                                                                                                                  │
+│ 00.545 locate     nav.book-a-slot-link · testid "booking-link" · matched 1 · ok · 16 ms                                                                      │
+│ 00.632 act        click · h0 · ok · 87 ms                                                                                                                    │
+│ 00.634 state      ok · 1 ms                                                                                                                                  │
+│ yam ui --json streams these same lines to stdout for an agent                                                                                                │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  s stop  h heal  q quit

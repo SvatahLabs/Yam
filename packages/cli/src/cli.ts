@@ -361,6 +361,10 @@ async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Pro
       return await (await import("./commands/serve.js")).serveCommand(args, io);
     case "ui":
       return await (await import("./commands/ui.js")).uiCommand(args, io);
+    case "workspace":
+      return await (await import("./commands/workspace.js")).workspaceCommand(args, io);
+    case "runs":
+      return await (await import("./commands/runs.js")).runsCommand(args, io);
     case "repl":
       return await (await import("./commands/repl.js")).replCommand(args, io);
     case "mcp":
