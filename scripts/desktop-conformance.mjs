@@ -83,6 +83,27 @@ if (args.includes("--print-report-path")) {
 
 if (!existsSync(cli)) die(2, "Run `pnpm -r build` first.");
 
+/*
+ * The adapter's own platform, before anything is launched (T8.6).
+ *
+ * `svatah surface doctor --adapter uia` on macOS answers `skip  uia/platform
+ * not Windows` and exits 0 — correctly, because a skipped check is not a failed
+ * one — so the gate went on to launch an ADE and wait sixty seconds for a
+ * window it was never going to read. "The host cannot run this adapter" and
+ * "the ADE would not start" are different answers and sent a reader to
+ * different places.
+ */
+const HOST_FOR = { ax: "darwin", uia: "win32" };
+if (HOST_FOR[adapter] !== undefined && HOST_FOR[adapter] !== process.platform) {
+  die(
+    2,
+    `The "${adapter}" adapter runs on ${HOST_FOR[adapter]} and this host is ${process.platform}, ` +
+      "so the conformance suite was not run and nothing was written to " +
+      `${report}.\nRun this on a ${HOST_FOR[adapter]} host, or attach one as a runner ` +
+      "(`bitbucket-pipelines.yml`, the `desktop-gates` pipeline).",
+  );
+}
+
 /* ── 1. the host ──────────────────────────────────────────────────────────── */
 
 const doctor = spawnSync(process.execPath, [cli, "surface", "doctor", "--adapter", adapter], {

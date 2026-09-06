@@ -1,21 +1,42 @@
 # Desktop conformance — `uia` (Windows UI Automation)
 
 Status: **blocked — no Windows host.** Four defects found and fixed without one.
-Date: 2026-09-04 · Adapter: `@svatah/adapter-uia` · Task: T7.2 (LLD §7.5, §14, REQ-ADP-6, REQ-STD-2)
+Date: 2026-09-05 · Adapter: `@svatah/adapter-uia` · Task: T8.6 (carried from T7.2; LLD §7.5, §14, REQ-ADP-6, REQ-STD-2)
 
 ## The blocked command, and the host's answer
 
+Re-attempted for T8.6 on 2026-09-05, unchanged:
+
 ```console
 $ node scripts/desktop-conformance.mjs --adapter uia --report reports/adapter-uia.md
+The "uia" adapter runs on win32 and this host is darwin, so the conformance suite was not run
+and nothing was written to …/reports/adapter-uia.md.
+Run this on a win32 host, or attach one as a runner (`bitbucket-pipelines.yml`, the
+`desktop-gates` pipeline).
+$ echo $?
+2
+
 $ node packages/cli/dist/bin.js surface doctor --adapter uia
 ok    -/platform             darwin arm64, Node v25.6.1
+ok    ade/node-runtime       runtime: /opt/homebrew/bin/node (v25.6.1, from PATH)
 skip  uia/platform           not Windows
+
+$ which pwsh powershell powershell.exe
+pwsh not found
+powershell not found
+powershell.exe not found
 ```
 
-The only host available is macOS. `doctor` reports the adapter as skipped
-rather than failed, which is the honest answer: UI Automation is not a
+The only host available is macOS, and it no longer has the PowerShell 7 install
+that T7.2's four defects were found through. `doctor` reports the adapter as
+skipped rather than failed, which is the honest answer: UI Automation is not a
 permission this machine has not granted, it is an API this machine does not
 have.
+
+The gate itself refuses the run now rather than launching an ADE and waiting a
+minute for a window it could not have read (T8.6). Exit 2 is "the host is not
+ready", which is the same code a missing macOS permission produces and a
+different one from "the adapter is wrong".
 
 **To close this gate**, on Windows:
 
@@ -112,6 +133,19 @@ resolve there, and PowerShell reports it as "an error occurred while creating
 the pipeline". Those types exist on Windows, so this is a limitation of the test
 host rather than a finding — and it is listed here rather than left out, because
 it is the one script of the four that this exercise could not check.
+
+## What Phase 8 changed underneath this gate
+
+Nothing in the UIA bridge, and three things in the harness it runs through, all
+of which a Windows run will exercise for the first time:
+
+- The gate launches the ADE with `SVATAH_ADE_PROJECT` and waits for the
+  **project screen**, not merely for a window (T8.1). On Windows that wait uses
+  `Get-Process … MainWindowTitle`; on macOS it reads the accessibility tree.
+- The packaged ADE resolves a Node runtime and bundles its own CLI (T8.1). The
+  Windows packaged app has never been launched by this gate at all.
+- A case with no checks is `skipped`, and each healing case is measured only at
+  its own variant (T8.2). The UIA report's shape changes with it.
 
 ## What this report does not say
 
