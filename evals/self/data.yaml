@@ -1,0 +1,6 @@
+# What the self suite needs to say out loud. No secret is here that is not
+# `${ENV}` (LLD §13.9), and nothing here is a credential at all: the suite runs
+# with `--gateway fake` and never opens a model.
+project:
+  name: "svatah-fixtures"
+  flow: "guards-and-compensation.flow"

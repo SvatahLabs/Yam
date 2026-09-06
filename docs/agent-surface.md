@@ -316,6 +316,7 @@ actions such as `dragTo`.
 | Scrolling | `scrollIntoView`, `scrollToTop`, `scrollToBottom` |
 | Waiting | `sleep`, `waitFor` |
 | Windows and frames | `switchWindow`, `closeOtherWindows`, `switchFrame` |
+| Application lifecycle | `quit` |
 | Dialogs | `dialog` |
 | Reading and diagnostics | `read`, `evaluate`, `screenshot` |
 | Story composition | `invoke` |
@@ -323,6 +324,21 @@ actions such as `dragTo`.
 An adapter must implement every action its capabilities claim. Actions that need a
 capability it does not have are never sent, because the executor refuses the plan
 at start.
+
+**`quit` is a desktop action** (T11.2, LLD §13.9). A desktop adapter ends the
+session through the application's own graceful route — an Apple-event `quit` on
+macOS, `CloseMainWindow` on Windows — then a signal, then `SIGKILL`, and *fails*
+when the process survives all three: a signal that ends a main process where it
+stands leaves whatever it had spawned behind. A web adapter refuses it, exactly
+as a desktop adapter refuses `navigate` (REQ-SURF-5): a browser tab is not an
+application a flow closes, and a silent no-op would let a desktop flow "pass"
+against something it never quit.
+
+The other half is `app.launch`: a desktop session **opens by launching** when no
+process of that name owns a window. "Owns a window", not "is running" — a
+process that is still exiting and a helper that shares its application's name are
+both running and neither can be driven. A session that found the application
+already up does not remember a launch and will not quit it.
 
 ---
 

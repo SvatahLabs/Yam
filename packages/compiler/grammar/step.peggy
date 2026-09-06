@@ -92,6 +92,7 @@ Sentence
   / Sleep
   / Frames
   / Windows
+  / Quit
   / Dialog
   / Read
   / Expectation
@@ -291,6 +292,38 @@ Windows
     }
   / ("close the other"i / "closes the other"i) __ ("tabs"i / "windows"i) {
       return step({ action: "closeOtherWindows" });
+    }
+
+/* ── 31. quitting the application (T11.2, LLD §13.9) ──────────────────────── */
+
+/*
+ * "Quit the app", and the words a person would actually write for it.
+ *
+ * The desktop equivalent of closing the browser, and it is a *step* rather than
+ * teardown because a flow that launches an application should be able to say
+ * where it stops using it — LLD §13.9: "the language gains `Quit the app`
+ * (pattern 31, `action: "quit"`), which ends the session through the graceful
+ * route and fails if the process survives it."
+ *
+ * "Close the app" is here too, and it is deliberately not "close the window":
+ * closing a window is something a window manager does and an application may
+ * survive; quitting is what this means. A web adapter refuses the action
+ * outright, the way a desktop adapter refuses `navigate`.
+ */
+Quit
+  /*
+   * Longest alternative first, in both choices.
+   *
+   * PEG does not backtrack into a choice that has already matched: `"quit"i`
+   * matches the first four letters of "quits" and the sequence then fails on
+   * the `s`, and `"app"i` matches the first three of "application" and leaves
+   * `lication` for a caller that wants the end of the sentence. Both were real:
+   * `Quits the application` and `Exit the application` fell through to a model
+   * tier until this order was fixed.
+   */
+  = ("quits"i / "quit"i / "closes"i / "close"i / "exits"i / "exit"i) __ "the"i __
+    ("application"i / "app"i) {
+      return step({ action: "quit" });
     }
 
 Frames

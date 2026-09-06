@@ -335,6 +335,19 @@ for (const mechanism of MECHANISMS) {
   });
 }
 
+/**
+ * `[quit]` — the desktop step this adapter refuses (pattern 31, T11.2).
+ *
+ * Its "implementation" is a refusal, and a refusal is a behaviour worth a test:
+ * a web adapter that quietly did nothing would let a desktop flow "pass"
+ * against a browser it never quit. The boundary is the one REQ-SURF-5 draws
+ * from the other side, where a desktop adapter refuses `navigate`.
+ */
+test("[quit] quit is a desktop step and this adapter says so", async ({ openSurface }) => {
+  const surface = await openSurface("own", "/");
+  await expect(surface.act("quit", undefined)).rejects.toThrow(/desktop step/);
+});
+
 test("every surface action has a test (REQ-RUN-10)", async () => {
   const { readFileSync } = await import("node:fs");
   const source = readFileSync(new URL(import.meta.url), "utf8");

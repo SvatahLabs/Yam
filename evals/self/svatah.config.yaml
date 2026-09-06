@@ -1,0 +1,80 @@
+# Svatah verifies Svatah: the ADE, through the desktop adapters (T11.2, T11.4,
+# REQ-SELF-1, LLD §13.9).
+#
+# > `evals/self/` is a Svatah project: flows over the Playwright adapter against
+# > `apps/sample-web`, over the AX and UIA adapters against the packaged ADE,
+# > over the HTTP adapter against the local service, and over the SDK against
+# > `svatah ui --json`.
+#
+# This is the *desktop* half's configuration and it is the default, because it
+# is the half that needs `app.launch` and `app.quit` — the others are selected
+# with `--adapter` and their own `app` block by `svatah eval self` (T11.5).
+#
+# ## Why the bundle and not the executable
+#
+# A GUI application forked from a process that is not in the user's Aqua session
+# never attaches to the WindowServer: it runs, its renderer runs, and it has no
+# window either the accessibility API or System Events can see, for ever
+# (LLD §7.5, measured). `app.launch.bundle` is opened through LaunchServices,
+# which places it in the session a person is looking at.
+#
+# ## Why the paths are relative to the repository
+#
+# This project is *of* this repository — the application it drives is the one
+# this checkout builds — so a path that pointed anywhere else would be a suite
+# about somebody else's ADE. `svatah eval self` resolves them from the project
+# directory.
+schemaVersion: "1.0.0"
+project: "svatah-self"
+environment: test
+adapter: ax
+
+app:
+  processName: "Svatah ADE"
+  launch:
+    bundle: "../../apps/ade/out/Svatah ADE-darwin-arm64/Svatah ADE.app"
+    env:
+      # The ADE is the desktop conformance target and an Electron application
+      # publishes almost nothing to UIA or AX until it is told to (REQ-ADE-6).
+      SVATAH_A11Y: "1"
+      # The window-lifecycle log, so a launch that goes wrong says so in the
+      # application's own words rather than only in a probe's (Draft 2.13).
+      SVATAH_ADE_DEBUG: "1"
+    timeoutMs: 60000
+  quit:
+    bundleId: "com.electron.svatah-ade"
+    gracefulMs: 10000
+    signalMs: 20000
+
+flows: { dir: flows }
+steps: { dir: steps }
+bindings:
+  dir: bindings
+  testIdAttributes: ["data-testid", "data-test", "data-qa"]
+data: { file: data.yaml }
+api: { dir: api }
+
+run:
+  workers: 1
+  headless: true
+  stepTimeoutMs: 20000
+  candidateTimeoutMs: 5000
+  screenshots: onFailure
+  trace: false
+  outputDir: runs
+  checkpoints: false
+  audit: true
+
+compile:
+  confidenceThreshold: 0.8
+
+record:
+  model: "none"
+  maxSnapshotTokens: 4000
+  visionFallback: false
+
+heal:
+  onFail: false
+  relocalizeThreshold: 0.72
+  margin: 0.1
+  useModel: false

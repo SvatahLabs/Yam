@@ -51,11 +51,17 @@ import type { AgentSurface } from "@svatah/surface";
 import {
   ActionabilityError,
   buildSnapshot,
+  executableOf,
+  launchApplication,
   LocateError,
   NavigationError,
+  quitApplication,
   ScriptError,
   SessionError,
   structuralHash,
+  waitFor,
+  type LaunchConfig,
+  type QuitConfig,
   type SnapshotNode,
 } from "@svatah/surface";
 import {
@@ -106,6 +112,18 @@ export interface AxAdapterOptions {
   readonly processName?: string;
   /** `config.app.appPath` — launched by `open` when the process is not running. */
   readonly appPath?: string;
+  /**
+   * `config.run.candidateTimeoutMs` — how long a `locate` may keep re-reading
+   * the window before it answers "nothing" (T11.2).
+   *
+   * Zero is one read, which is what every caller had before and what a
+   * `snapshot()` still is.
+   */
+  readonly candidateTimeoutMs?: number;
+  /** `config.app.launch` — how to start it when nothing of that name has a window. */
+  readonly launch?: LaunchConfig;
+  /** `config.app.quit` — the graceful route, then a signal. */
+  readonly quit?: QuitConfig;
   readonly maxNodes?: number;
   readonly timeoutMs?: number;
   /** Injected by the tests, so the whole adapter runs against a recorded tree. */
@@ -120,6 +138,13 @@ export class AxSurface implements AgentSurface {
   /** The nodes of the most recent snapshot; `rN` indexes this. */
   private nodes: AxSnapshotNode[] = [];
   private windowTitle = "";
+  /**
+   * What this session launched, and so what it is responsible for quitting
+   * (T11.2). Undefined when it attached to an application that was already
+   * running: an adapter that quit a person's own window because a flow finished
+   * would be a very poor guest.
+   */
+  private launched: LaunchConfig | undefined;
   /**
    * The costliest window read of this session (Draft 2.8 §7.5).
    *
@@ -176,12 +201,113 @@ export class AxSurface implements AgentSurface {
     }
     this.processName = name;
 
+    /*
+     * Launch it, if nothing of that name owns a window yet (T11.2, LLD §13.9).
+     *
+     * > the session opens by launching when no process of that name owns a
+     * > window and closes by quitting.
+     *
+     * "Owns a window", not "is running": a process that is still exiting and a
+     * helper that shares its application's name are both running and neither
+     * can be driven (P8-F1). The question is the one the bridge answers, which
+     * is why this is here and the *how* is `@svatah/surface`'s.
+     *
+     * A session that found the application already up does not remember a
+     * launch, and so will not quit it: an adapter that closed a person's own
+     * window because a flow finished would be a very poor guest.
+     */
+    const launch = session.launch ?? this.options.launch;
+    if (launch !== undefined && !(await this.hasWindow())) {
+      const started = launchApplication(launch);
+      if (!started.ok) {
+        throw new SessionError(
+          `Could not launch the application: ${started.command}` +
+            `${started.detail === undefined ? "" : ` — ${started.detail}`}`,
+          { adapter: "ax" },
+        );
+      }
+      const appeared = await waitFor(() => this.hasWindow(), {
+        ...(launch.timeoutMs === undefined ? {} : { timeoutMs: launch.timeoutMs }),
+      });
+      if (!appeared.ready) {
+        const session_ = await this.bridge.session();
+        throw new SessionError(
+          `"${name}" was launched and showed no window within ${appeared.ms} ms. ` +
+            `The login session says: ${session_.detail}. ${session_.advice}`,
+          { adapter: "ax" },
+        );
+      }
+      this.launched = launch;
+    }
+
     // Bring the window forward, so the tree is the one a person would see.
     await this.bridge.perform({ kind: "activate" }).catch(() => undefined);
     await this.refresh();
   }
 
+  /**
+   * Does a process of this name own a window an accessibility client can read?
+   *
+   * The role is the test and not the count: a locked screen answers `AXWindows`
+   * with a one-element list holding the *application* (P10-F1), so "the list is
+   * not empty" was true of every application on a machine where nothing could
+   * be read. `window()` already refuses that list, so asking it is asking the
+   * question this session is actually about.
+   */
+  private async hasWindow(): Promise<boolean> {
+    if (this.bridge === undefined || this.processName === undefined) return false;
+    try {
+      await this.bridge.window({ process: this.processName, maxNodes: 1, deadlineMs: 8_000 });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * The graceful route, then a signal — and a failure when it survives both
+   * (T11.2, LLD §13.9's pattern 31).
+   */
+  private async quitTheApplication(): Promise<string> {
+    const launch = this.launched ?? this.options.launch;
+    const executable = launch === undefined ? undefined : executableOf(launch, process.platform);
+    if (executable === undefined) {
+      throw new SessionError(
+        "`Quit the app` needs to know which application to quit. Set `app.launch.bundle` " +
+          "(macOS) or `app.launch.path` in `svatah.config.yaml`: a quit addressed by process " +
+          "name alone would reach somebody else's copy of the same application.",
+        { adapter: "ax" },
+      );
+    }
+
+    const outcome = await quitApplication(executable, this.options.quit ?? {});
+    /*
+     * The session is over whether or not the process went: every ref points
+     * into a tree that is gone, and a step after this one must fail as a step
+     * against an application that is not there rather than against a stale
+     * snapshot.
+     */
+    this.nodes = [];
+    this.launched = undefined;
+    if (!outcome.gone) {
+      throw new SessionError(
+        `"${this.processName ?? executable}" was asked to quit and did not: ` +
+          `${outcome.steps.map((one) => one.what).join(" → ")} over ${outcome.ms} ms.`,
+        { adapter: "ax" },
+      );
+    }
+    return `quit in ${outcome.ms} ms (${outcome.steps.map((one) => one.what).join(" → ")})`;
+  }
+
   async close(): Promise<void> {
+    /*
+     * A session that launched the application quits it (T11.2, LLD §13.9:
+     * "closes by quitting"). One that attached to a running one leaves it
+     * exactly as it found it.
+     */
+    if (this.launched !== undefined) {
+      await this.quitTheApplication().catch(() => undefined);
+    }
     this.bridge = undefined;
     this.nodes = [];
   }
@@ -273,12 +399,30 @@ export class AxSurface implements AgentSurface {
      * Against the *current* window, not the last snapshot. A resolver calls
      * `locate` to find out what is on screen now, and answering from a snapshot
      * taken before the last click would report an element that is gone.
+     *
+     * ## And it waits, because a desktop tree has no auto-wait (T11.2)
+     *
+     * A web adapter's locator retries inside Playwright until its timeout: a
+     * click is a request the page answers, and the next `locate` is expected to
+     * find something that was not there when the click was sent. A desktop
+     * snapshot is a *moment*, so the same flow — click a project, then look for
+     * the rail — failed whenever the screen took longer to arrive than one
+     * read, which is intermittently, which is the worst way to fail. Measured:
+     * one run in three on this host.
+     *
+     * So a locate that finds nothing is re-read until it does or the candidate
+     * timeout passes. A locate that finds *something* returns at once, so
+     * nothing pays for this but the case that was going to fail anyway.
      */
-    await this.refresh();
-    const found = matchNodes(candidate, this.nodes);
-    const chosen =
-      candidate.nth === undefined ? found : found.slice(candidate.nth, candidate.nth + 1);
-    return chosen.map((node) => node.ref);
+    const deadline = Date.now() + (this.options.candidateTimeoutMs ?? 0);
+    for (;;) {
+      await this.refresh();
+      const found = matchNodes(candidate, this.nodes);
+      const chosen =
+        candidate.nth === undefined ? found : found.slice(candidate.nth, candidate.nth + 1);
+      if (chosen.length > 0 || Date.now() >= deadline) return chosen.map((node) => node.ref);
+      await new Promise((done) => setTimeout(done, 250));
+    }
   }
 
   async describe(ref: Ref): Promise<ElementDescription> {
@@ -376,6 +520,25 @@ export class AxSurface implements AgentSurface {
             "AX adapter has no address bar to type into.",
           { adapter: "ax" },
         );
+
+      /**
+       * `Quit the app` (pattern 31, T11.2, LLD §13.9).
+       *
+       * > which ends the session through the graceful route and fails if the
+       * > process survives it.
+       *
+       * The graceful route and the escalation are `@svatah/surface`'s
+       * `quitApplication`, because they are the same three decisions on every
+       * platform; what belongs here is only that a quit *ends this session* —
+       * the tree is gone and every ref with it, so a step after this one is a
+       * step against an application that is not there.
+       */
+      case "quit": {
+        // `value`, not a field of its own: `ActResult` carries what an action
+        // produced, and what a quit produced is how it went.
+        const outcome = await this.quitTheApplication();
+        return { ok: true, value: outcome };
+      }
 
       case "click":
       case "submit":
@@ -745,13 +908,19 @@ const KEY_CODES: Readonly<Record<string, number>> = {
 
 /** The factory the registry calls (LLD §2.4). */
 export function createAxSurface(config: {
-  app?: { appPath?: string; processName?: string };
-  run?: { stepTimeoutMs?: number };
+  app?: { appPath?: string; processName?: string; launch?: LaunchConfig; quit?: QuitConfig };
+  run?: { stepTimeoutMs?: number; candidateTimeoutMs?: number };
 }): AgentSurface {
   return new AxSurface({
     ...(config.app?.processName === undefined ? {} : { processName: config.app.processName }),
     ...(config.app?.appPath === undefined ? {} : { appPath: config.app.appPath }),
+    // `app.launch` and `app.quit` (T11.2, LLD §13.9).
+    ...(config.app?.launch === undefined ? {} : { launch: config.app.launch }),
+    ...(config.app?.quit === undefined ? {} : { quit: config.app.quit }),
     ...(config.run?.stepTimeoutMs === undefined ? {} : { timeoutMs: config.run.stepTimeoutMs }),
+    ...(config.run?.candidateTimeoutMs === undefined
+      ? {}
+      : { candidateTimeoutMs: config.run.candidateTimeoutMs }),
   });
 }
 

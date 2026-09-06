@@ -1759,6 +1759,40 @@ strength of a shared word, and candidate synthesis is model-free (REQ-REC-3).
 
 ---
 
+### Pattern 31 — Quit the application (T11.2, LLD §13.9)
+
+A desktop flow can start an application and it can stop one. `Quit the app` ends
+the session through the application's own graceful route — an Apple-event `quit`
+on macOS, `CloseMainWindow` on Windows — and **fails if the process survives
+it**, which is the whole point: a signal that ends a main process where it
+stands leaves whatever it had spawned behind (P10-F1 measured one orphaned
+service per launch).
+
+| Sentence | Action |
+|---|---|
+| `Quit the app` | `quit` |
+| `Quits the application` | `quit` |
+| `Close the app` | `quit` |
+| `Exit the application` | `quit` |
+
+**"Close the app", never "close the window."** Closing a window is something a
+window manager does and an application may well survive; quitting is what this
+sentence means, and the two are different steps with different failure modes.
+
+A **web adapter refuses it**, the way a desktop adapter refuses `navigate`
+(REQ-SURF-5): a browser tab is not an application a flow closes, and a silent
+no-op would let a desktop flow "pass" against a browser it never quit.
+
+`Quit the app` compiles to:
+
+```json
+{
+  "action": "quit"
+}
+```
+
+---
+
 ## 6. Custom typed steps (Tier 0) — REQ-LANG-15, REQ-LANG-16
 
 The prose model needs an escape hatch for logic. A `steps/` directory of
@@ -1857,6 +1891,7 @@ schema is [`packages/schema/json/ir.schema.json`](../packages/schema/json/ir.sch
 | Scrolling | `scrollIntoView`, `scrollToTop`, `scrollToBottom` | 18 |
 | Waiting | `sleep`, `waitFor` | 19 |
 | Windows and frames | `switchWindow`, `closeOtherWindows`, `switchFrame` | 20 |
+| Application lifecycle | `quit` | 31 |
 | Dialogs | `dialog` | 21 |
 | Reading and diagnostics | `read`, `expect`, `evaluate`, `screenshot` | 22–25 |
 | Services | `api` | 26 |

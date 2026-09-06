@@ -267,6 +267,23 @@ export interface ProjectPaths {
   root: string;
   /** `config.flows.dir`. Default `flows`. */
   flowsDir?: string;
+  /**
+   * `config.flows.include` and `config.flows.exclude` (T11.2).
+   *
+   * A file matches when it matches *any* `include` — or when there is no
+   * `include` at all — and no `exclude`. Both were in the config schema from
+   * Draft 1 and nothing read them, so a project that narrowed its flows was
+   * silently running all of them; `evals/self/cdp` is the first caller that
+   * needs one, because a web adapter refuses `Quit the app` by design and the
+   * flow that ends with it is not a flow it can be asked to run.
+   *
+   * The patterns are matched against the path *relative to the flows
+   * directory*, with `/` separators on every platform, so a config reads the
+   * same on Windows. `*` matches within a segment and `**` across them, which
+   * is what anybody writing `flows/**\/smoke.flow` means.
+   */
+  flowsInclude?: readonly string[];
+  flowsExclude?: readonly string[];
   /** `config.data.file`. Default `data.yaml`. */
   dataFile?: string;
   /** `config.api.dir`. Default `api`. */
@@ -275,6 +292,40 @@ export interface ProjectPaths {
   targetsFile?: string;
   bindings?: ReadonlyArray<{ id: string; phrases: readonly string[] }>;
   env?: NodeJS.ProcessEnv;
+}
+
+/**
+ * A glob, in the small form a config file needs (T11.2).
+ *
+ * `*` within a segment, `**` across them, `?` for one character. Written here
+ * rather than taken as a dependency: this is thirty characters of regular
+ * expression and the alternative is a package with a transitive tree, for
+ * `config.flows.include`.
+ */
+function matchesGlob(path: string, pattern: string): boolean {
+  const expression = pattern
+    .split(/(\*\*\/|\*\*|\*|\?)/)
+    .map((part) => {
+      if (part === "**/") return "(?:.*\\/)?";
+      if (part === "**") return ".*";
+      if (part === "*") return "[^/]*";
+      if (part === "?") return "[^/]";
+      return part.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+    })
+    .join("");
+  return new RegExp(`^${expression}$`).test(path);
+}
+
+/** Does `config.flows.include`/`exclude` let this file through? */
+function selects(
+  path: string,
+  include: readonly string[] | undefined,
+  exclude: readonly string[] | undefined,
+): boolean {
+  const relative_ = path.split(sep).join("/");
+  if (exclude !== undefined && exclude.some((one) => matchesGlob(relative_, one))) return false;
+  if (include === undefined || include.length === 0) return true;
+  return include.some((one) => matchesGlob(relative_, one));
 }
 
 function filesUnder(dir: string, extensions: readonly string[]): string[] {
@@ -302,7 +353,10 @@ export function readProjectFrom(paths: ProjectPaths): {
   // Posix separators in diagnostics, so a report reads the same on Windows.
   const rel = (path: string): string => relative(root, path).split(sep).join("/");
 
-  const flowFiles = filesUnder(join(root, paths.flowsDir ?? "flows"), [".flow"]);
+  const flowsDir = join(root, paths.flowsDir ?? "flows");
+  const flowFiles = filesUnder(flowsDir, [".flow"]).filter((path) =>
+    selects(relative(flowsDir, path), paths.flowsInclude, paths.flowsExclude),
+  );
   const apiFiles = filesUnder(join(root, paths.apiDir ?? "api"), [".yaml", ".yml"]);
 
   /** An optional file: absent is the normal case for both of these. */

@@ -12,7 +12,7 @@
  * parser, and the defaults.
  */
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
 import { DEFAULT_CONFIG, configSchema, type Config } from "@svatah/schema";
 
@@ -58,6 +58,38 @@ function withDefaults(parsed: Record<string, unknown>, project: string): Record<
   return merged;
 }
 
+/**
+ * The paths in `app.launch` are the *project's*, so they are resolved from it
+ * (T11.2, LLD §13.9).
+ *
+ * `flows.dir` and the rest are read relative to the project root by whoever
+ * reads them; `app.launch.bundle` is handed to `open` and to `pgrep`, which are
+ * run from wherever the person is standing. A relative bundle path is the
+ * natural thing for a self-suite to write — the application it drives is the
+ * one this checkout builds — and it has to mean the same thing whatever
+ * directory `svatah run` was typed in.
+ *
+ * `resolve` leaves an absolute path alone, so a configuration that names one is
+ * untouched.
+ */
+function rooted(config: Config, root: string): Config {
+  const launch = config.app.launch;
+  if (launch === undefined) return config;
+  const at = (path: string | undefined): string | undefined =>
+    path === undefined ? undefined : resolve(root, path);
+  return {
+    ...config,
+    app: {
+      ...config.app,
+      launch: {
+        ...launch,
+        ...(launch.bundle === undefined ? {} : { bundle: at(launch.bundle)! }),
+        ...(launch.path === undefined ? {} : { path: at(launch.path)! }),
+      },
+    },
+  };
+}
+
 /** The config a project declares, or the defaults. */
 export function loadConfig(root: string): { config: Config; file?: string } {
   for (const name of CONFIG_FILES) {
@@ -80,7 +112,7 @@ export function loadConfig(root: string): { config: Config; file?: string } {
         .join("\n");
       throw new ConfigError(`${name} is not a valid Svatah config:\n${issues}`, name);
     }
-    return { config: result.data, file: name };
+    return { config: rooted(result.data, root), file: name };
   }
   return {
     config: configSchema.parse({

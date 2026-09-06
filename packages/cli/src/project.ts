@@ -100,6 +100,11 @@ export async function loadProject(root: string): Promise<LoadedProject> {
   const read = readProjectFrom({
     root: absolute,
     flowsDir: config.flows.dir,
+    // `config.flows.include` / `exclude` (T11.2): in the schema since Draft 1
+    // and read by nothing, so a project that narrowed its flows was quietly
+    // running all of them.
+    ...(config.flows.include === undefined ? {} : { flowsInclude: config.flows.include }),
+    ...(config.flows.exclude === undefined ? {} : { flowsExclude: config.flows.exclude }),
     dataFile: config.data.file,
     apiDir: config.api.dir,
     bindings: bindings.entries,

@@ -37,6 +37,72 @@ export const configSchema = z
         storageState: z.string().min(1).optional(),
         appPath: z.string().min(1).optional(),
         processName: z.string().min(1).optional(),
+
+        /**
+         * How to start the application, when it is not already running
+         * (T11.2, LLD §13.9).
+         *
+         * > Desktop adapters take `app.launch` (the executable or bundle,
+         * > arguments, environment) and `app.quit` (a graceful route, then a
+         * > signal) in configuration; the session opens by launching when no
+         * > process of that name owns a window and closes by quitting.
+         *
+         * `bundle` rather than `path` on macOS is not a nicety: a GUI
+         * application forked from a process that is not in the user's Aqua
+         * session never attaches to the WindowServer — it runs, its renderer
+         * runs, and it has no window either the accessibility API or System
+         * Events can see, for ever (LLD §7.5, measured). `open -n` hands the
+         * launch to LaunchServices, which places it in the session a person is
+         * looking at.
+         */
+        launch: z
+          .object({
+            /** A macOS `.app` bundle, opened through LaunchServices. */
+            bundle: z.string().min(1).optional(),
+            /** An executable, spawned directly. Windows and Linux. */
+            path: z.string().min(1).optional(),
+            args: z.array(z.string()).optional(),
+            /** Added to the launched process's environment, never to Svatah's. */
+            env: z.record(z.string(), z.string()).optional(),
+            /** How long to wait for a window before the session fails. */
+            timeoutMs: z.number().int().positive().optional(),
+          })
+          .strict()
+          .optional(),
+
+        /**
+         * How to stop it: a graceful route, then a signal (T11.2, LLD §13.9).
+         *
+         * The graceful route is what lets an application put its own house in
+         * order — the ADE stops the `svatah serve` it spawned and writes its
+         * preferences. A bare signal ends the main process where it stands, and
+         * P10-F1 measured what that leaves behind.
+         */
+        quit: z
+          .object({
+            /** macOS: an Apple-event `quit` to this bundle identifier. */
+            bundleId: z.string().min(1).optional(),
+            /** How long the graceful route is given before a signal. */
+            gracefulMs: z.number().int().positive().optional(),
+            /** How long the signal is given before `SIGKILL`. */
+            signalMs: z.number().int().positive().optional(),
+          })
+          .strict()
+          .optional(),
+
+        /**
+         * Attach to a Chromium that is already running (T11.2, LLD §13.9).
+         *
+         * > The Playwright adapter attaches to an existing Chromium when
+         * > `SVATAH_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi
+         * > adapter attaches, so a flow can drive the ADE's renderer.
+         */
+        attach: z
+          .object({
+            cdpUrl: z.string().min(1).optional(),
+          })
+          .strict()
+          .optional(),
       })
       .strict(),
 

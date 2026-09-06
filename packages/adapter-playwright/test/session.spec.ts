@@ -316,3 +316,117 @@ test.describe("session lifecycle", () => {
     await surface.close();
   });
 });
+
+/**
+ * Attaching to a Chromium that is already running (T11.2, LLD §13.9).
+ *
+ * > The Playwright adapter attaches to an existing Chromium when
+ * > `SVATAH_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi adapter
+ * > attaches, so a flow can drive the ADE's renderer.
+ *
+ * A real Chromium with a real DevTools endpoint, because the thing worth
+ * checking is that it drives the browser *that is already running* rather than
+ * one of its own — and a fake endpoint cannot fail that way. What the ADE adds
+ * on top is a packaged Electron and a granted permission, and that is
+ * `evals/self/cdp` and `docs/spec/progress/phase-11.md`.
+ */
+test.describe("attaching over CDP (T11.2, LLD §13.9)", () => {
+  /** A Chromium with a DevTools endpoint, and its URL. */
+  async function running(): Promise<{ url: string; close: () => Promise<void> }> {
+    const { chromium } = await import("playwright");
+    const port = 9500 + Math.floor(Math.random() * 400);
+    const browser = await chromium.launch({
+      headless: true,
+      args: [`--remote-debugging-port=${port}`],
+    });
+    // One page, so the attached session has a context to adopt: a browser with
+    // nothing open is a browser with nothing to drive, and the adapter says so.
+    const page = await browser.newPage();
+    await page.setContent('<button id="attached-button">Attached</button>');
+    return {
+      url: `http://127.0.0.1:${port}`,
+      close: async () => {
+        await browser.close();
+      },
+    };
+  }
+
+  test("drives the browser that is already running, not one of its own", async () => {
+    const other = await running();
+    try {
+      const surface = new PlaywrightSurface({ cdpUrl: other.url });
+      await surface.open({});
+      try {
+        const snapshot = await surface.snapshot();
+        // The page *that browser* had open, which a launched Chromium would not.
+        expect(snapshot.nodes.some((node) => node.name === "Attached")).toBe(true);
+      } finally {
+        await surface.close();
+      }
+      /*
+       * And it is still running. `close()` on an attached session ends the
+       * connection, not the browser: a session that quit somebody's Chromium —
+       * or the ADE, mid-run — because a flow ended would be the adapter
+       * deciding what the application is for.
+       */
+      const { chromium } = await import("playwright");
+      const again = await chromium.connectOverCDP(other.url);
+      expect(again.contexts().length).toBeGreaterThan(0);
+      await again.close();
+    } finally {
+      await other.close();
+    }
+  });
+
+  test("reads `SVATAH_CDP_URL` when nothing else names one", async () => {
+    const other = await running();
+    const before = process.env["SVATAH_CDP_URL"];
+    process.env["SVATAH_CDP_URL"] = other.url;
+    try {
+      const surface = new PlaywrightSurface({});
+      await surface.open({});
+      try {
+        const snapshot = await surface.snapshot();
+        expect(snapshot.nodes.some((node) => node.name === "Attached")).toBe(true);
+      } finally {
+        await surface.close();
+      }
+    } finally {
+      if (before === undefined) delete process.env["SVATAH_CDP_URL"];
+      else process.env["SVATAH_CDP_URL"] = before;
+      await other.close();
+    }
+  });
+
+  test("the session's own `attach.cdpUrl` wins over the environment", async () => {
+    const other = await running();
+    const before = process.env["SVATAH_CDP_URL"];
+    // A URL nothing is listening on: if the environment won, this would attach
+    // to `other` and pass for the wrong reason.
+    process.env["SVATAH_CDP_URL"] = "http://127.0.0.1:1";
+    try {
+      const surface = new PlaywrightSurface({});
+      await surface.open({ attach: { cdpUrl: other.url } });
+      try {
+        const snapshot = await surface.snapshot();
+        expect(snapshot.nodes.some((node) => node.name === "Attached")).toBe(true);
+      } finally {
+        await surface.close();
+      }
+    } finally {
+      if (before === undefined) delete process.env["SVATAH_CDP_URL"];
+      else process.env["SVATAH_CDP_URL"] = before;
+      await other.close();
+    }
+  });
+
+  test("says what to do when nothing is listening", async () => {
+    const surface = new PlaywrightSurface({ cdpUrl: "http://127.0.0.1:1" });
+    await expect(surface.open({})).rejects.toThrow(/--remote-debugging-port/);
+  });
+
+  test("refuses `Quit the app`, which is a desktop step (pattern 31)", async ({ openSurface }) => {
+    const surface = await openSurface("own", "/");
+    await expect(surface.act("quit", undefined)).rejects.toThrow(/desktop step/);
+  });
+});

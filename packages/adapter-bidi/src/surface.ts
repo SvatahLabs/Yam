@@ -644,6 +644,21 @@ export class BidiSurface implements AgentSurface {
           '"invoke" calls another story and is the executor\'s, not an adapter\'s (LLD §8.2).',
           { adapter: "bidi" },
         );
+      /*
+       * `Quit the app` is a desktop step (pattern 31, T11.2, LLD §13.9).
+       *
+       * Refused rather than approximated, which is the boundary REQ-SURF-5
+       * draws from the other side: a desktop adapter refuses `navigate`, and a
+       * browser refuses this. Closing the page instead would let a desktop
+       * flow "pass" against something it never quit.
+       */
+      case "quit":
+        throw new NavigationError(
+          'There is no application to quit here. "Quit the app" is a desktop step ' +
+            "(pattern 31); drive this application through its own controls instead.",
+          { adapter: "bidi" },
+        );
+
       default: {
         const never: never = action;
         throw new ScriptError(`The BiDi adapter has no row for "${String(never)}".`, {

@@ -220,3 +220,7 @@
 {"id":"g-220","tier":1,"pattern":24,"rule":"expect-title","text":"Check that the page title is \"Dashboard · Svatah Sample\"","step":{"action":"expect","expect":{"subject":"page","predicate":{"kind":"title","value":{"kind":"literal","value":"Dashboard · Svatah Sample"}}}}}
 {"id":"g-221","tier":1,"pattern":24,"rule":"expect-url","text":"Ensure the URL contains \"/dashboard\"","step":{"action":"expect","expect":{"subject":"page","predicate":{"kind":"urlContains","value":{"kind":"literal","value":"/dashboard"}}}}}
 {"id":"g-222","tier":1,"pattern":24,"rule":"expect-url","text":"Make sure the URL is \"https://sample.test/dashboard\"","step":{"action":"expect","expect":{"subject":"page","predicate":{"kind":"url","value":{"kind":"literal","value":"https://sample.test/dashboard"}}}}}
+{"id": "g-223", "tier": 1, "pattern": 31, "rule": "quit", "text": "Quit the app", "step": {"action": "quit"}}
+{"id": "g-224", "tier": 1, "pattern": 31, "rule": "quit", "text": "Quits the application", "step": {"action": "quit"}}
+{"id": "g-225", "tier": 1, "pattern": 31, "rule": "quit", "text": "Close the app", "step": {"action": "quit"}}
+{"id": "g-226", "tier": 1, "pattern": 31, "rule": "quit", "text": "Exit the application", "step": {"action": "quit"}}

@@ -40,13 +40,71 @@
               "minLength": 1,
               "type": "string"
             },
+            "attach": {
+              "additionalProperties": false,
+              "properties": {
+                "cdpUrl": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
             "baseUrl": {
               "minLength": 1,
               "type": "string"
             },
+            "launch": {
+              "additionalProperties": false,
+              "properties": {
+                "args": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "bundle": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "env": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "path": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "timeoutMs": {
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
             "processName": {
               "minLength": 1,
               "type": "string"
+            },
+            "quit": {
+              "additionalProperties": false,
+              "properties": {
+                "bundleId": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "gracefulMs": {
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                },
+                "signalMs": {
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                }
+              },
+              "type": "object"
             },
             "storageState": {
               "minLength": 1,

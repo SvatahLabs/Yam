@@ -6,7 +6,10 @@
  * checks live in `readProject`, and this is where they are tested.
  */
 import { describe, expect, it } from "vitest";
-import { readProject } from "../src/index.js";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { readProject, readProjectFrom } from "../src/index.js";
 
 const flow = (file: string, text: string) => ({ file, text });
 
@@ -266,5 +269,64 @@ describe("named API requests (REQ-LANG-8, REQ-ADP-2)", () => {
     expect(diagnostics.map((d) => d.code)).toEqual(["E_DUP_API"]);
     expect(diagnostics[0]!.message).toContain("api/a.yaml");
     expect(diagnostics[0]!.message).toContain("api/b.yaml");
+  });
+});
+
+/**
+ * `config.flows.include` and `config.flows.exclude` (T11.2).
+ *
+ * Both have been in the config schema since Draft 1 and nothing read them, so a
+ * project that narrowed its flows was quietly running all of them — a
+ * configuration option that does nothing is worse than one that is missing,
+ * because it reads as an answer.
+ *
+ * `evals/self/cdp` is the first caller that needs one: a web adapter refuses
+ * `Quit the app` by design (pattern 31), so the flow that ends with it is not
+ * one that side can be asked to run.
+ */
+describe("flows.include and flows.exclude (T11.2)", () => {
+  const project = (files: Record<string, string>, paths: Record<string, unknown> = {}) => {
+    const root = mkdtempSync(join(tmpdir(), "svatah-include-"));
+    for (const [name, text] of Object.entries(files)) {
+      mkdirSync(dirname(join(root, "flows", name)), { recursive: true });
+      writeFileSync(join(root, "flows", name), text, "utf8");
+    }
+    const read = readProjectFrom({ root, ...paths } as never);
+    rmSync(root, { recursive: true, force: true });
+    return read.project.flows.map((one) => one.file.split(/[\\/]/).slice(-2).join("/"));
+  };
+
+  const FLOW = "story: a\n  Open \"/x\"\n";
+
+  it("reads everything when neither is given", () => {
+    expect(project({ "a.flow": FLOW, "b.flow": FLOW }).sort()).toEqual(["flows/a.flow", "flows/b.flow"]);
+  });
+
+  it("keeps only what `include` names", () => {
+    expect(project({ "a.flow": FLOW, "b.flow": FLOW }, { flowsInclude: ["a.flow"] })).toEqual([
+      "flows/a.flow",
+    ]);
+  });
+
+  it("drops what `exclude` names, and `exclude` wins", () => {
+    expect(
+      project({ "a.flow": FLOW, "b.flow": FLOW }, { flowsInclude: ["*.flow"], flowsExclude: ["b.flow"] }),
+    ).toEqual(["flows/a.flow"]);
+  });
+
+  it("matches `*` within a segment and `**` across them", () => {
+    // `*` does not cross a directory: `*.flow` is the top level only.
+    expect(
+      project({ "a.flow": FLOW, "deep/b.flow": FLOW }, { flowsInclude: ["*.flow"] }),
+    ).toEqual(["flows/a.flow"]);
+    expect(
+      project({ "a.flow": FLOW, "deep/b.flow": FLOW }, { flowsInclude: ["**/b.flow"] }),
+    ).toEqual(["deep/b.flow"]);
+  });
+
+  it("is not a regular expression: a dot is a dot", () => {
+    expect(project({ "a.flow": FLOW, "axflow.flow": FLOW }, { flowsInclude: ["a.flow"] })).toEqual([
+      "flows/a.flow",
+    ]);
   });
 });

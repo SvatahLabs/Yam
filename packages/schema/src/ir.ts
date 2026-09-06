@@ -45,6 +45,18 @@ export const ACTIONS = [
   "closeOtherWindows",
   "switchFrame",
 
+  /**
+   * End the session by quitting the application (pattern 31, LLD §13.9).
+   *
+   * > the language gains `Quit the app` (pattern 31, `action: "quit"`), which
+   * > ends the session through the graceful route and fails if the process
+   * > survives it.
+   *
+   * A desktop action, and one an adapter may refuse the way a desktop adapter
+   * refuses `navigate` — a browser tab is not an application a flow closes.
+   */
+  "quit",
+
   "dialog",
 
   "read",

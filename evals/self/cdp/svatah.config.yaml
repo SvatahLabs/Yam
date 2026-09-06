@@ -1,0 +1,60 @@
+# The same flow, the same application, the other adapter (T11.2, LLD §13.9).
+#
+# > The Playwright adapter attaches to an existing Chromium when
+# > `SVATAH_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi adapter
+# > attaches, so a flow can drive the ADE's renderer.
+#
+# This is the second side of the parity gate for every desktop check: the AX
+# adapter reads the accessibility tree that macOS publishes, and this reads the
+# DOM that tree is *serialised from*. Two adapters, one application, the same
+# sentences — and a disagreement between them is a finding rather than a flake.
+#
+# The URL is left to `SVATAH_CDP_URL` because the port is the launcher's: the
+# ADE is started with `--remote-debugging-port` by whoever is driving, and
+# writing a port here would be a configuration that is wrong for everybody but
+# the person who wrote it.
+#
+# `app.launch` is deliberately absent. This side *attaches*, and a session that
+# launched its own ADE would be reading a different application from the one the
+# AX side read — which is the one thing a parity gate must not do.
+schemaVersion: "1.0.0"
+project: "svatah-self-cdp"
+environment: test
+adapter: playwright
+
+app:
+  # `SVATAH_CDP_URL` overrides this, and normally does.
+  attach:
+    cdpUrl: "http://127.0.0.1:9464"
+
+# The *same* flows, read from the project beside this one: two adapters driving
+# one application means one set of sentences, or the gate is comparing two
+# suites rather than two oracles (LLD §13.9).
+flows:
+  dir: ../flows
+  # `ade-lifecycle.flow` ends with `Quit the app`, which a web adapter refuses
+  # by design (pattern 31, REQ-SURF-5). The parity report lists that step as
+  # one-sided; running it here would be asking this adapter to do the one thing
+  # it is documented as refusing.
+  include: ["ade-screen.flow"]
+steps: { dir: ../steps }
+bindings:
+  dir: bindings
+  testIdAttributes: ["data-testid", "data-test", "data-qa"]
+data: { file: ../data.yaml }
+api: { dir: ../api }
+
+run:
+  workers: 1
+  headless: true
+  stepTimeoutMs: 20000
+  candidateTimeoutMs: 5000
+  screenshots: onFailure
+  trace: false
+  outputDir: runs
+  checkpoints: false
+  audit: true
+
+compile: { confidenceThreshold: 0.8 }
+record: { model: "none", maxSnapshotTokens: 4000, visionFallback: false }
+heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }

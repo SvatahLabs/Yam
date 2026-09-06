@@ -7,3 +7,15 @@ The approved mockups for the ADE redesign, the `svatah ui` terminal cockpit, and
 - `canvas.json` — the layout and the notes that were on the canvas.
 
 Every value in the mockups is real project data (the fixtures project, the `comp` run, the fake-gateway decision, the WebMCP binding, the healed schedule link). The implementer builds to LLD §13.7 and §13.8, using these files as the visual reference; where a mockup and the LLD disagree, the LLD wins and the disagreement is recorded as a deviation.
+
+## Reading them as designs
+
+`pnpm artboards` renders every artboard with `base.css` and `build.mjs`'s macros
+expanded, and asks the browser the four questions the Phase 10 verification's F4
+was: a toolbar is one row with nothing past its end, its title keeps twelve
+characters where it is cut at all, an inspector's contents are inside the
+inspector, and nothing is past the edge of the 1440 px frame. Those are the same
+rules `apps/ade/test/shell.spec.ts` measures on the built application, so a
+design that fails them is a design the build cannot be held to.
+
+`pnpm artboards --shoot <dir>` writes a PNG of each one beside the answers.

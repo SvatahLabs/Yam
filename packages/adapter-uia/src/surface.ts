@@ -46,11 +46,17 @@ import type { AgentSurface } from "@svatah/surface";
 import {
   ActionabilityError,
   buildSnapshot,
+  executableOf,
+  launchApplication,
   LocateError,
   NavigationError,
+  quitApplication,
   ScriptError,
   SessionError,
   structuralHash,
+  waitFor,
+  type LaunchConfig,
+  type QuitConfig,
   type SnapshotNode,
 } from "@svatah/surface";
 import {
@@ -90,6 +96,12 @@ export interface UiaAdapterOptions {
   /** The process to drive, without `.exe`; `config.app.processName`. */
   readonly processName?: string;
   readonly appPath?: string;
+  /** `config.run.candidateTimeoutMs` — how long a `locate` may keep re-reading. */
+  readonly candidateTimeoutMs?: number;
+  /** `config.app.launch` — how to start it when nothing of that name has a window. */
+  readonly launch?: LaunchConfig;
+  /** `config.app.quit` — the graceful route, then a signal. */
+  readonly quit?: QuitConfig;
   readonly maxNodes?: number;
   readonly timeoutMs?: number;
   /** Injected by the tests, so the whole adapter runs against a recorded tree. */
@@ -103,6 +115,8 @@ export class UiaSurface implements AgentSurface {
   private processName: string | undefined;
   private nodes: UiaSnapshotNode[] = [];
   private windowTitle = "";
+  /** What this session launched, and so what it is responsible for quitting. */
+  private launched: LaunchConfig | undefined;
   /**
    * The costliest window read of this session (Draft 2.8 §7.5), as the AX
    * adapter keeps it: the biggest window the suite touched is the read the
@@ -153,11 +167,80 @@ export class UiaSurface implements AgentSurface {
     }
     this.processName = name;
 
+    /*
+     * Launch it, if nothing of that name owns a window yet (T11.2, LLD §13.9).
+     *
+     * The same rule and the same helper as the AX adapter: "owns a window", not
+     * "is running", because a process that is still exiting and a helper that
+     * shares its application's name are both running and neither can be driven.
+     * A session that found the application already up will not quit it.
+     */
+    const launch = session.launch ?? this.options.launch;
+    if (launch !== undefined && !(await this.hasWindow())) {
+      const started = launchApplication(launch);
+      if (!started.ok) {
+        throw new SessionError(
+          `Could not launch the application: ${started.command}` +
+            `${started.detail === undefined ? "" : ` — ${started.detail}`}`,
+          { adapter: "uia" },
+        );
+      }
+      const appeared = await waitFor(() => this.hasWindow(), {
+        ...(launch.timeoutMs === undefined ? {} : { timeoutMs: launch.timeoutMs }),
+      });
+      if (!appeared.ready) {
+        throw new SessionError(
+          `"${name}" was launched and showed no window within ${appeared.ms} ms.`,
+          { adapter: "uia" },
+        );
+      }
+      this.launched = launch;
+    }
+
     await this.bridge.perform({ kind: "activate" }).catch(() => undefined);
     await this.refresh();
   }
 
+  /** Does a process of this name own a window this adapter can read? */
+  private async hasWindow(): Promise<boolean> {
+    if (this.bridge === undefined || this.processName === undefined) return false;
+    try {
+      await this.bridge.window({ process: this.processName, maxNodes: 1 });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /** The graceful route, then a signal — and a failure when it survives both. */
+  private async quitTheApplication(): Promise<string> {
+    const launch = this.launched ?? this.options.launch;
+    const executable = launch === undefined ? undefined : executableOf(launch, process.platform);
+    if (executable === undefined) {
+      throw new SessionError(
+        "`Quit the app` needs to know which application to quit. Set `app.launch.path` in " +
+          "`svatah.config.yaml`: a quit addressed by process name alone would reach somebody " +
+          "else's copy of the same application.",
+        { adapter: "uia" },
+      );
+    }
+    const outcome = await quitApplication(executable, this.options.quit ?? {});
+    this.nodes = [];
+    this.launched = undefined;
+    if (!outcome.gone) {
+      throw new SessionError(
+        `"${this.processName ?? executable}" was asked to quit and did not: ` +
+          `${outcome.steps.map((one) => one.what).join(" → ")} over ${outcome.ms} ms.`,
+        { adapter: "uia" },
+      );
+    }
+    return `quit in ${outcome.ms} ms (${outcome.steps.map((one) => one.what).join(" → ")})`;
+  }
+
   async close(): Promise<void> {
+    if (this.launched !== undefined) {
+      await this.quitTheApplication().catch(() => undefined);
+    }
     this.bridge = undefined;
     this.nodes = [];
   }
@@ -238,11 +321,23 @@ export class UiaSurface implements AgentSurface {
   }
 
   async locate(candidate: Candidate): Promise<Ref[]> {
-    await this.refresh();
-    const found = matchNodes(candidate, this.nodes);
-    const chosen =
-      candidate.nth === undefined ? found : found.slice(candidate.nth, candidate.nth + 1);
-    return chosen.map((node) => node.ref);
+    /*
+     * Re-read until it is there, or the candidate timeout passes (T11.2).
+     *
+     * The same reasoning as the AX adapter's: a web adapter's locator retries
+     * inside Playwright, and a desktop snapshot is a moment. A click is a
+     * request the application answers, and the next `locate` is expected to
+     * find something that was not there when the click was sent.
+     */
+    const deadline = Date.now() + (this.options.candidateTimeoutMs ?? 0);
+    for (;;) {
+      await this.refresh();
+      const found = matchNodes(candidate, this.nodes);
+      const chosen =
+        candidate.nth === undefined ? found : found.slice(candidate.nth, candidate.nth + 1);
+      if (chosen.length > 0 || Date.now() >= deadline) return chosen.map((node) => node.ref);
+      await new Promise((done) => setTimeout(done, 250));
+    }
   }
 
   async describe(ref: Ref): Promise<ElementDescription> {
@@ -342,6 +437,10 @@ export class UiaSurface implements AgentSurface {
             "UIA adapter has no address bar to type into.",
           { adapter: "uia" },
         );
+
+      /** `Quit the app` (pattern 31, T11.2, LLD §13.9). */
+      case "quit":
+        return { ok: true, value: await this.quitTheApplication() };
 
       case "click":
       case "submit":
@@ -754,12 +853,18 @@ const KEY_NAMES: Readonly<Record<string, string>> = {
 
 /** The factory the registry calls (LLD §2.4). */
 export function createUiaSurface(config: {
-  app?: { appPath?: string; processName?: string };
-  run?: { stepTimeoutMs?: number };
+  app?: { appPath?: string; processName?: string; launch?: LaunchConfig; quit?: QuitConfig };
+  run?: { stepTimeoutMs?: number; candidateTimeoutMs?: number };
 }): AgentSurface {
   return new UiaSurface({
     ...(config.app?.processName === undefined ? {} : { processName: config.app.processName }),
     ...(config.app?.appPath === undefined ? {} : { appPath: config.app.appPath }),
+    // `app.launch` and `app.quit` (T11.2, LLD §13.9).
+    ...(config.app?.launch === undefined ? {} : { launch: config.app.launch }),
+    ...(config.app?.quit === undefined ? {} : { quit: config.app.quit }),
     ...(config.run?.stepTimeoutMs === undefined ? {} : { timeoutMs: config.run.stepTimeoutMs }),
+    ...(config.run?.candidateTimeoutMs === undefined
+      ? {}
+      : { candidateTimeoutMs: config.run.candidateTimeoutMs }),
   });
 }

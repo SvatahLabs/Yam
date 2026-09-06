@@ -60,6 +60,19 @@ export {
 } from "./render.js";
 
 export {
+  executableOf,
+  launchApplication,
+  processIdsOf,
+  quitApplication,
+  systemRunner,
+  waitFor,
+  type LaunchConfig,
+  type LifecycleStep,
+  type QuitConfig,
+  type Runner,
+} from "./lifecycle.js";
+
+export {
   FALLBACK_ROLE,
   INTERACTIVE_ROLES,
   isInteractiveRole,

@@ -136,7 +136,18 @@ export function Toolbar(props: ToolbarProps): React.JSX.Element {
 
   return (
     <div className="sv-toolbar" ref={bar}>
-      <h1 className="sv-toolbar-title">{props.title ?? props.state.title}</h1>
+      {/*
+        `id="toolbar-title"`, so a desktop flow can read where it is (T11.2).
+        
+        The self suite's first flow says "the toolbar title should contain
+        Flows", and a heading with no id is a heading a desktop adapter can only
+        find by its text — which is the one thing that changes when a screen is
+        renamed. Not an interactive control, so the snapshot case's id rule does
+        not reach it; it is here because something has to read it.
+      */}
+      <h1 className="sv-toolbar-title" id="toolbar-title">
+        {props.title ?? props.state.title}
+      </h1>
       {props.beside}
       <span className="sv-toolbar-sub">{props.state.subtitle}</span>
       <span className="sv-spacer" />

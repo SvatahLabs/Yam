@@ -72,6 +72,12 @@ export interface PlaywrightAdapterOptions {
   viewport?: [number, number];
   /** Per-action timeout; `Config.run.stepTimeoutMs`. */
   timeoutMs?: number;
+  /**
+   * `config.run.candidateTimeoutMs` — how long a `locate` may keep asking
+   * before it answers "nothing" (T11.2). Zero is one query, which is what every
+   * caller had before.
+   */
+  candidateTimeoutMs?: number;
   testIdAttributes?: readonly string[];
   /**
    * `config.bindings.ignoreAttributes` (LLD §3.5): attribute names the surface
@@ -91,6 +97,22 @@ export interface PlaywrightAdapterOptions {
    * than opening a second browser beside it.
    */
   page?: Page;
+  /**
+   * Attach to a Chromium that is already running, over CDP (T11.2, LLD §13.9).
+   *
+   * > The Playwright adapter attaches to an existing Chromium when
+   * > `SVATAH_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi
+   * > adapter attaches, so a flow can drive the ADE's renderer.
+   *
+   * The ADE is the case it exists for. Playwright's `_electron.launch` cannot
+   * open a packaged build — it attaches to Electron's *Node* inspector, and the
+   * `RunAsNode` and `EnableNodeCliInspectArguments` fuses are off by design
+   * (T8.1) — but the renderer's own DevTools endpoint is a different thing and
+   * is available. Attaching to it is how one flow drives the ADE through both
+   * the accessibility tree and the DOM, which is what the parity gate of §13.9
+   * compares.
+   */
+  cdpUrl?: string;
 }
 
 /** How many neighbouring texts `describe()` collects on each side (LLD §3.3). */
@@ -124,6 +146,14 @@ export class PlaywrightSurface implements AgentSurface {
   private context: BrowserContext | undefined;
   /** True when the context was handed in and must not be closed by us. */
   private borrowedContext = false;
+  /**
+   * True when this session attached to a browser it did not start (T11.2).
+   *
+   * It closes the *connection* and not the browser: a `close()` that quit
+   * somebody's Chromium — or the ADE — because a flow ended would be the
+   * adapter deciding what the application is for.
+   */
+  private attached = false;
   private pages: Page[] = [];
   private activePage = 0;
   private activeFrame: Frame | undefined;
@@ -166,12 +196,58 @@ export class PlaywrightSurface implements AgentSurface {
     this.baseUrl = session.baseUrl;
     this.storageStatePath = session.storageState;
 
+    /*
+     * Flag or configuration, then the environment (LLD §15, Draft 2.5's
+     * precedence for every session-opening command).
+     */
+    const cdpUrl =
+      session.attach?.cdpUrl ??
+      this.options.cdpUrl ??
+      (process.env["SVATAH_CDP_URL"] === undefined || process.env["SVATAH_CDP_URL"] === ""
+        ? undefined
+        : process.env["SVATAH_CDP_URL"]);
+
     if (this.options.page !== undefined) {
       this.context = this.options.page.context();
       this.borrowedContext = true;
       this.trackPage(this.options.page);
     } else if (this.options.context !== undefined) {
       this.context = this.options.context;
+      this.borrowedContext = true;
+    } else if (cdpUrl !== undefined) {
+      /*
+       * Attach, do not launch (T11.2, LLD §13.9).
+       *
+       * The precedence is the one every session-opening command uses (LLD §15,
+       * Draft 2.5): the flag or the configuration, then the environment
+       * variable. `connectOverCDP` gives back the browser's *existing*
+       * contexts, and taking the first is what makes this the application that
+       * is running rather than a fresh window beside it — the BiDi adapter's
+       * `attach` makes the same distinction, and P4-F's finding there was that
+       * a second session on a driver-hosted endpoint is not an attachment.
+       */
+      try {
+        this.browser = await chromium.connectOverCDP(cdpUrl);
+      } catch (cause) {
+        throw new SessionError(
+          `Could not attach to a Chromium at ${cdpUrl}. Start it with ` +
+            "`--remote-debugging-port=<port>` and check the URL: this is the renderer's " +
+            "DevTools endpoint, not a Node inspector.",
+          { cause, adapter: "playwright" },
+        );
+      }
+      this.attached = true;
+      const existing = this.browser.contexts();
+      const context = existing[0];
+      if (context === undefined) {
+        throw new SessionError(
+          `The Chromium at ${cdpUrl} has no browser context to drive. It is running and it ` +
+            "has no page open.",
+          { adapter: "playwright" },
+        );
+      }
+      this.context = context;
+      // Borrowed: closing it would close somebody else's browser.
       this.borrowedContext = true;
     } else {
       const name = this.options.browser ?? "chromium";
@@ -221,9 +297,20 @@ export class PlaywrightSurface implements AgentSurface {
     this.space = undefined;
     if (this.tracing) await this.trace(false).catch(() => undefined);
     if (this.context !== undefined && !this.borrowedContext) await this.context.close();
-    if (this.browser !== undefined) await this.browser.close();
+    /*
+     * An attached browser is disconnected from, not closed (T11.2).
+     *
+     * `Browser.close()` on a CDP connection ends the browser, and the browser
+     * here is a person's Chromium — or the ADE, mid-run. What this session owns
+     * is the connection.
+     */
+    if (this.browser !== undefined) {
+      if (this.attached) await this.browser.close({ reason: "svatah detaching" }).catch(() => undefined);
+      else await this.browser.close();
+    }
     this.context = undefined;
     this.browser = undefined;
+    this.attached = false;
     this.pages = [];
     this.activeFrame = undefined;
   }
@@ -455,13 +542,35 @@ export class PlaywrightSurface implements AgentSurface {
     const locator = locatorFor(this.frame(), candidate, this.testIdAttributes());
     if (locator === null) return [];
 
-    const all = await locator.all();
-    const refs: Ref[] = [];
-    for (const one of all) {
-      const handle = await one.elementHandle();
-      if (handle !== null) refs.push(space.mint(handle as ElementHandle<Element>));
+    /*
+     * `all()` does not wait, and a click is a request (T11.2).
+     *
+     * Playwright's *actions* auto-wait; `locator.all()` is a query and answers
+     * from the page as it is this instant. Every flow that clicks something and
+     * then looks for what the click produced therefore raced the application —
+     * on the web it usually won, because a DOM update is a few milliseconds,
+     * and against the ADE's renderer it lost about a third of the time, where
+     * clicking a project starts a service.
+     *
+     * So a locate that finds nothing is retried until the candidate timeout,
+     * exactly as the desktop adapters' now is. One that finds something answers
+     * at once, so only the case that was going to fail pays for it — and the
+     * two sides of the parity gate behave the same, which is the thing a gate
+     * comparing them depends on.
+     */
+    const deadline = Date.now() + (this.options.candidateTimeoutMs ?? 0);
+    for (;;) {
+      const all = await locator.all();
+      if (all.length > 0 || Date.now() >= deadline) {
+        const refs: Ref[] = [];
+        for (const one of all) {
+          const handle = await one.elementHandle();
+          if (handle !== null) refs.push(space.mint(handle as ElementHandle<Element>));
+        }
+        return refs;
+      }
+      await this.page().waitForTimeout(100);
     }
-    return refs;
   }
 
   async describe(ref: Ref): Promise<ElementDescription> {
@@ -897,6 +1006,23 @@ export class PlaywrightSurface implements AgentSurface {
             { adapter: "playwright" },
           );
 
+      /*
+       * `Quit the app` is a desktop step (pattern 31, T11.2, LLD §13.9).
+       *
+       * Refused rather than approximated, which is the boundary REQ-SURF-5
+       * draws from the other side: a desktop adapter refuses `navigate`, and a
+       * web adapter refuses this. A browser tab is not an application a flow
+       * closes, and closing the page instead would let a desktop flow "pass"
+       * against a browser it never quit.
+       */
+      case "quit":
+        throw new NavigationError(
+          'A browser has no application to quit. "Quit the app" is a desktop step ' +
+            "(pattern 31); drive a web application through its own controls, and let the " +
+            "session close when the run ends.",
+          { adapter: "playwright" },
+        );
+
         default: {
           const exhaustive: never = action;
           throw new ActionabilityError(`Unknown action "${String(exhaustive)}".`, {
@@ -1143,9 +1269,13 @@ export function createPlaywrightSurface(
     headless: config.run.headless,
     ...(config.run.viewport === undefined ? {} : { viewport: config.run.viewport }),
     timeoutMs: config.run.stepTimeoutMs,
+    candidateTimeoutMs: config.run.candidateTimeoutMs,
     testIdAttributes: config.bindings.testIdAttributes,
     ignoreAttributes: config.bindings.ignoreAttributes ?? DEFAULT_IGNORE_ATTRIBUTES,
     outputDir: config.run.outputDir,
+    // `app.attach.cdpUrl` (T11.2, LLD §13.9): drive a Chromium that is already
+    // running — the ADE's renderer, for the parity gate — instead of launching.
+    ...(config.app.attach?.cdpUrl === undefined ? {} : { cdpUrl: config.app.attach.cdpUrl }),
     ...overrides,
   });
 }

@@ -106,6 +106,38 @@ export const sessionInitSchema = z
     appPath: z.string().min(1).optional(),
     /** Desktop: an already-running process to attach to. */
     processName: z.string().min(1).optional(),
+
+    /**
+     * Desktop: how to start the application when it is not running (T11.2,
+     * LLD §13.9). `config.app.launch`, carried through so an adapter opens a
+     * session by launching rather than by asking a caller to have done it.
+     */
+    launch: z
+      .object({
+        bundle: z.string().min(1).optional(),
+        path: z.string().min(1).optional(),
+        args: z.array(z.string()).optional(),
+        env: z.record(z.string(), z.string()).optional(),
+        timeoutMs: z.number().int().positive().optional(),
+      })
+      .strict()
+      .optional(),
+
+    /** Desktop: how to stop it — a graceful route, then a signal (T11.2). */
+    quit: z
+      .object({
+        bundleId: z.string().min(1).optional(),
+        gracefulMs: z.number().int().positive().optional(),
+        signalMs: z.number().int().positive().optional(),
+      })
+      .strict()
+      .optional(),
+
+    /** Web: a Chromium that is already running, over CDP (T11.2, LLD §13.9). */
+    attach: z
+      .object({ cdpUrl: z.string().min(1).optional() })
+      .strict()
+      .optional(),
   })
   .strict();
 export type SessionInit = z.infer<typeof sessionInitSchema>;
