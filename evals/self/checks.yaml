@@ -422,3 +422,30 @@ checks:
     external:
       source: "app-playwright"
       name: "a saved API request is edited and saved through the app (K7)"
+  # The front door (T14.6, Draft 2.20). Yam's side is the built binary run as
+  # a newcomer would run it; the external side is the command line's own
+  # cases, which hold the words to the design document.
+  - id: "front-door.yam-says-where-you-are-and-what-is-next"
+    says: "`yam` with no arguments prints the project's state and the next verb, exit 0, and `--json` agrees with the text."
+    yam:
+      source: "front-door-status"
+      name: "status"
+    external:
+      source: "cli-vitest"
+      name: "`yam` with no arguments (REQ-CLI-1) > on the fixture project: check when there is no plan, run once it is current, record after a binding is removed"
+  - id: "front-door.check-writes-the-plan-and-its-inputs"
+    says: "`yam check` lints and compiles in one verb, says what it wrote, and records the inputs the plan came from."
+    yam:
+      source: "front-door-check"
+      name: "check"
+    external:
+      source: "cli-vitest"
+      name: "yam check (REQ-CLI-3) > lints and compiles in one verb and says what it wrote"
+  - id: "front-door.help-carries-every-exit-code"
+    says: "`yam help exit-codes` lists every code the executor and the commands can return, and the top-level help is the design's text."
+    yam:
+      source: "front-door-help"
+      name: "help"
+    external:
+      source: "cli-vitest"
+      name: "help topics (REQ-CLI-8) > the exit-code table carries every code the executor and the commands can return"

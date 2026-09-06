@@ -766,6 +766,17 @@ function sourcesFor(catalogue: Catalogue, reportsDir: string): Record<string, So
       "the live macOS desktop conformance gate",
     ),
     /** The artboards, read as designs. */
+    // The front door (T14.6, REQ-CLI-1, 3, 8): Yam's side runs the built
+    // binary as a newcomer would; the external side is the command line's own
+    // cases, which compare the words with the design document.
+    "front-door-status": commandSource("status", "node", [join("scripts", "front-door-self.mjs"), "status"], "`yam` with no arguments, on a fresh project"),
+    "front-door-check": commandSource("check", "node", [join("scripts", "front-door-self.mjs"), "check"], "`yam check`, and the plan it writes"),
+    "front-door-help": commandSource("help", "node", [join("scripts", "front-door-self.mjs"), "help"], "`yam help exit-codes` and the top-level help"),
+    "cli-vitest": vitestSource(
+      "packages/cli",
+      ["test/front-door.test.ts", "test/check.test.ts", "test/help.test.ts"],
+      "the command line's own front-door cases",
+    ),
     artboards: commandSource(
       "artboards",
       "node",

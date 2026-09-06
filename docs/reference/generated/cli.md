@@ -2,7 +2,9 @@
 
 # `yam` command line
 
-The text below is `yam --help`, verbatim. Every command that takes `--json` prints one JSON document and nothing else on stdout.
+What `yam help` prints, then every command's own `--help`, then the help topics. `yam` alone prints where you are and what is next. Every command that takes `--json` prints one JSON document and nothing else on stdout.
+
+## `yam help`
 
 ```text
 yam — describe a behaviour once, bind it to the real application, replay it without a model
@@ -19,4 +21,651 @@ yam — describe a behaviour once, bind it to the real application, replay it wi
   yam help <topic>       flows · bindings · exit-codes · session · adapters · agents
 
 More, one level down: yam bindings · workflow · tool · mcp · eval · surface · migrate · repl · trajectory · host
+```
+
+## Commands
+
+### `yam init`
+
+```text
+yam init [dir] [--force]
+
+Start a project: yam.config.yaml, flows/ with an example, data.yaml, and the directories the other verbs use.
+
+  --force  write into a directory that already has a project
+
+Exit codes: 0 ok · 64 usage
+```
+
+### `yam check`
+
+```text
+yam check [dir] [--tier2] [--tier3] [--allow-model-drift] [--json]
+
+Read, lint and compile the flows in one verb, and write .yam/plan.json. lint and compile are its two halves, kept as commands of their own.
+
+  --tier2              let the local model compile sentences the grammar refuses
+  --tier3              let the frontier model compile what the local model cannot
+  --allow-model-drift  compile even though the pinned model digest changed
+  --json               one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 2 compile errors · 3 model unavailable
+```
+
+### `yam lint`
+
+```text
+yam lint [dir] [--json]
+
+Read the flows and report errors and warnings without writing a plan.
+
+  --json  one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 2 compile errors
+```
+
+### `yam compile`
+
+```text
+yam compile [dir] [--stable] [--out .yam/plan.json] [--tier2] [--tier3] [--allow-model-drift] [--json]
+
+Compile the flows into the plan. --stable makes the output byte for byte reproducible, which is what lets the plan be committed.
+
+  --stable             reproducible output; the same flows give the same bytes
+  --out <path>         where to write the plan
+  --tier2              let the local model compile sentences the grammar refuses
+  --tier3              let the frontier model compile what the local model cannot
+  --allow-model-drift  compile even though the pinned model digest changed
+  --json               one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 2 compile errors · 3 model unavailable
+```
+
+### `yam record`
+
+```text
+yam record [dir] [--flow <file>] [--story <name>] [--rebind] [--gateway anthropic|fake] [--force-production] [--json]
+
+Drive the plan against the real application and bind every target to an element: by your click in a headed browser, or through a model gateway when one is configured. Nothing is written before you have seen it.
+
+  --flow <file>             only this flow
+  --story <name>            only this story; repeatable
+  --rebind                  record elements that already have a binding
+  --gateway anthropic|fake  who grounds a phrase to an element; fake needs no credential
+  --force-production        record against a production configuration anyway
+  --json                    one JSON document on stdout, nothing else
+
+  session options: see `yam help session`
+
+Exit codes: 0 ok · 2 compile errors · 4 grounding failed · 5 expectation failed · 10 refused
+```
+
+### `yam run`
+
+```text
+yam run [dir] [--host playwright|none] [--flow <file>] [--story <name>] [--workers <n>] [--resume <runId> --from <stepId>] [--no-check] [--json]
+
+Replay the plan. The plan is checked first when the flows changed; the run directory holds results, summary, audit, checkpoints and screenshots; the exit code is the verdict.
+
+  --host playwright|none            inside Playwright Test, or the standalone executor (default: none)
+  --flow <file>                     only this flow
+  --story <name>                    only this story; repeatable
+  --workers <n>                     flows in parallel
+  --resume <runId> --from <stepId>  pick a run up at a checkpoint
+  --no-check                        run the plan on disk as it is; refused when it is stale
+  --json                            one JSON document on stdout, nothing else
+
+  session options: see `yam help session`
+
+Exit codes: 0 ok · 1 failed · 2 compile errors · 6 healed · 11 aborted · 12 cannot resume
+```
+
+### `yam heal`
+
+```text
+yam heal [--run <id> | --from-bind-failures] [--project <dir>] [--apply] [--no-model] [--json]
+
+Repair the bindings the interface moved. With no arguments, the last run of this project. A repair is a proposed diff and a report; --apply writes it to the store.
+
+  --run <id>            the run to heal (default: the last run)
+  --from-bind-failures  the failures a plain Playwright project wrote under .yam/
+  --project <dir>       the project (default: the nearest one above the working directory)
+  --apply               write the accepted repairs into the store
+  --no-model            relocalize only; never ask a model to re-ground
+  --dir <bindings>      the store (default: bindings/)
+  --runs <dir>          where runs are (default: runs/)
+  --json                one JSON document on stdout, nothing else
+
+  session options: see `yam help session`
+
+Exit codes: 0 ok · 7 some unrepaired · 64 usage
+```
+
+### `yam ui`
+
+```text
+yam ui [dir] [--screen flows|run] [--flow <file>] [--run <id>] [--story <name>] [--url <url> --token <t>] [--tmux] [--json] [--capture <ms>]
+
+The terminal cockpit: four panes, the same screens and actions as Yam.app. --tmux opens the workspace: the cockpit, a shell, the audit tail and your editor in one tmux session.
+
+  --screen flows|run  open on a screen
+  --flow <file>       open on a flow
+  --run <id>          open on a run
+  --story <name>      open on a story
+  --url <url>         attach to a service that is already running
+  --token <t>         that service's bearer token
+  --tmux              the workspace, in a tmux session named for the project
+  --capture <ms>      draw for that long, then quit; for scripts
+  --json              one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 64 usage
+```
+
+### `yam runs tail`
+
+```text
+yam runs tail [--url <url> --token <t>]
+
+The current run's events as they happen, one line each, from a running service. The workspace's bottom-right pane runs this.
+
+  --url <url>  the service
+  --token <t>  its bearer token
+
+Exit codes: 0 ok · 64 usage
+```
+
+### `yam workspace`
+
+```text
+yam workspace [dir]
+
+The same as yam ui --tmux.
+
+Exit codes: 0 ok · 64 usage
+```
+
+### `yam serve`
+
+```text
+yam serve [dir] [--port 0] [--token <t>]
+
+The local service on 127.0.0.1, behind a bearer token printed once on stdout. Yam.app, the cockpit and the SDK talk to it; every handler calls the same functions the command line calls.
+
+  --port <n>   the port (default: one the system chooses)
+  --token <t>  the bearer token (default: generated)
+
+Exit codes: 0 ok
+```
+
+### `yam status`
+
+```text
+yam status [dir] [--json]     (the same as yam with nothing after it)
+
+Where you are and what is next: the flows, the plan, the unbound targets, the last run, and the one verb to run now. This is what yam alone prints.
+
+  --json  one JSON document on stdout, nothing else
+
+Exit codes: 0 ok
+```
+
+### `yam doctor`
+
+```text
+yam doctor [dir] [--json]
+
+Check the host and the project: Node, the adapters, the config, the flows, the bindings, the data.
+
+  --json  one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam repl`
+
+```text
+yam repl [dir] [--adapter <name>] [--headless] [--gateway anthropic|fake|none] [--tier2] [--tier3] [--out <flows>] [--name <flow name>] [--json]
+
+Type sentences and watch them run against a live session; save what worked as a flow.
+
+  --adapter <name>               which adapter opens the session
+  --headless                     no browser window
+  --gateway anthropic|fake|none  who grounds a phrase
+  --tier2                        the local model for refused sentences
+  --tier3                        the frontier model
+  --out <flows>                  where a saved flow goes
+  --name <flow name>             the saved flow's name
+  --json                         one JSON document on stdout, nothing else
+
+  session options: see `yam help session`
+
+Exit codes: 0 ok · 64 usage
+```
+
+### `yam mcp`
+
+```text
+yam mcp [dir] [--trajectory <path.jsonl>] [--session <id>]
+
+An MCP server over stdio with the operations and the raw surface, for an agent that explores; every call is recorded as a trajectory.
+
+  --trajectory <path.jsonl>  where the trajectory is written
+  --session <id>             attach to a session
+
+Exit codes: 0 ok
+```
+
+### `yam migrate`
+
+```text
+yam migrate <src> <dest> [--keep-original] [--json]  ·  yam migrate <dest> --from-prototype <db dir> [--project <name>]
+
+Bring v1 and v2 flows, or a prototype database, into a v3 project.
+
+  --keep-original         leave the source files beside the migrated ones
+  --from-prototype <dir>  import the prototype's database instead of flow files
+  --project <name>        the imported project's name
+  --json                  one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 8 unmapped
+```
+
+### `yam host generate`
+
+```text
+yam host generate [dir] [--out .yam/specs]
+
+Write one Playwright Test spec per flow, for a project that runs under Playwright Test directly.
+
+  --out <dir>  where the specs go
+
+Exit codes: 0 ok
+```
+
+### `yam workflow run`
+
+```text
+yam workflow run <story> [dir] [--input k=v] [--allow-side-effects] [--resume <runId> --from <stepId>] [--json]
+
+Run one story as a function: typed inputs in, outputs on stdout as JSON. Checkpoints and audit are always on; a story not marked idempotent is refused against production.
+
+  --allow-side-effects              run a story that is not marked idempotent against production
+  --resume <runId> --from <stepId>  pick the run up at a checkpoint
+  --json                            one JSON document on stdout, nothing else
+
+  session options: see `yam help session`
+
+Exit codes: 0 ok · 1 failed · 6 healed · 10 refused · 11 aborted · 12 cannot resume
+```
+
+### `yam tool serve`
+
+```text
+yam tool serve [dir] [--expose "Story one,Story two"] [--stdio] [--allow-side-effects] [--json]
+
+An MCP server whose tools are the stories: each tool's schema comes from the story's signature, each call is an audited run.
+
+  --expose <stories>    which stories to expose, comma separated
+  --stdio               serve over stdio
+  --allow-side-effects  list stories that are not marked idempotent, even in production
+  --json                one JSON document on stdout, nothing else
+
+  session options: see `yam help session`
+
+Exit codes: 0 ok
+```
+
+### `yam trajectory compile`
+
+```text
+yam trajectory compile <trajectory.jsonl> [dir] [--name "Story name"] [--out proposals] [--app proposed] [--json]
+
+Turn an agent's exploration into a proposal: a flow draft, a plan fragment and unverified bindings under proposals/, for a person to read.
+
+  --name <story>  the proposed story's name
+  --out <dir>     where the proposal goes (default: proposals/)
+  --app <name>    the app name the bindings are filed under
+  --json          one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 64 usage
+```
+
+### `yam bindings list`
+
+```text
+yam bindings list [--dir <bindings>] [--json]
+
+Every binding in the store, with its phrases.
+
+  --dir <bindings>  the store (default: bindings/)
+  --json            one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam bindings show`
+
+```text
+yam bindings show <id> [--dir <bindings>] [--json]
+
+One binding: its candidates, its fingerprint, its provenance.
+
+  --dir <bindings>  the store (default: bindings/)
+  --json            one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam bindings verify`
+
+```text
+yam bindings verify [--adapter <name>] [--id <id>] [--json]
+
+Resolve every binding against the live application without acting, and report which still find exactly one element.
+
+  --adapter <name>  which adapter opens the session
+  --id <id>         only this binding; repeatable
+  --json            one JSON document on stdout, nothing else
+
+  session options: see `yam help session`
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam bindings prune`
+
+```text
+yam bindings prune [--used-in <dirs>] [--apply] [--json]
+
+Find bindings no flow or test names any more; --apply removes them.
+
+  --used-in <dirs>  where to look for uses
+  --apply           delete what nothing uses
+  --json            one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam surface conform`
+
+```text
+yam surface conform --adapter <name> [--only <ids>] [--report <path.md>] [--json]
+
+Run the conformance suite against an adapter; exit 0 is conformant.
+
+  --adapter <name>    the adapter under test
+  --only <ids>        a subset of cases
+  --report <path.md>  write the report
+  --json              one JSON document on stdout, nothing else
+
+  session options: see `yam help session`
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam surface doctor`
+
+```text
+yam surface doctor [--adapter ax|uia] [--json]
+
+Whether this host can run a desktop adapter: the permission, the session, screen recording.
+
+  --adapter ax|uia  which adapter
+  --json            one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam eval healing`
+
+```text
+yam eval healing [--no-model] [--report <path.md>] [--json]
+
+The healing numbers over the sample application's variants.
+
+  --no-model          relocalize only
+  --report <path.md>  write the report
+  --json              one JSON document on stdout, nothing else
+
+  session options: see `yam help session`
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam eval grounding`
+
+```text
+yam eval grounding [--gateway anthropic|fake] [--cases <path.jsonl>] [--limit <n>] [--report <path.md>] [--json]
+
+The recorder's grounding accuracy over a case file.
+
+  --gateway anthropic|fake  who grounds
+  --cases <path.jsonl>      the cases
+  --limit <n>               only the first n
+  --report <path.md>        write the report
+  --json                    one JSON document on stdout, nothing else
+
+  session options: see `yam help session`
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam eval compiler`
+
+```text
+yam eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake] [--only tier1,tier2] [--report <path.md>] [--json]
+
+Exact-match accuracy of the compiler over the golden set, per tier.
+
+  --tier2                         include the local model
+  --tier3                         include the frontier model
+  --gateway local|anthropic|fake  which backend
+  --only <tiers>                  a subset of tiers
+  --report <path.md>              write the report
+  --json                          one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed · 3 model unavailable
+```
+
+### `yam eval self`
+
+```text
+yam eval self [--update] [--report <path.md>] [--only <check-id>] [--side yam|external]
+
+Yam verifies Yam: every check run two ways, and the agreement between them.
+
+  --update             refresh the committed reports
+  --report <path.md>   write the report elsewhere
+  --only <check-id>    one check
+  --side yam|external  one side only
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam eval finetune corpus`
+
+```text
+yam eval finetune corpus [--json]
+
+Describe the local model's training corpus: the refused sentences with their reviewed steps.
+
+  --json  one JSON document on stdout, nothing else
+
+Exit codes: 0 ok
+```
+
+### `yam eval finetune export`
+
+```text
+yam eval finetune export [--out <path.jsonl>] [--json]
+
+Export the corpus as training pairs.
+
+  --out <path.jsonl>  where to write them
+  --json              one JSON document on stdout, nothing else
+
+Exit codes: 0 ok
+```
+
+## Topics
+
+### `yam help flows`
+
+```text
+Flows — plain sentences with a signature
+
+A flow file has blocks. A story is the unit of behaviour; a scenario is a
+story that runs in file order when there is no run block; compose names a
+sequence of stories; test and run say what a run executes.
+
+  story (tags=smoke): Sign in
+  inputs: username: string, password: secret
+    Go to "/login"
+    Type {input.username} into the username field
+    Type {input.password} into the password field
+    Click the sign in button
+    The dashboard heading should be visible
+
+  test: Sign in
+
+Targets are phrases, never selectors: "the username field", "the sign in
+button". Values come from {input.name}, {data.path}, {name} for a capture in
+this story, or {Story.name} for another story's capture.
+
+Ten sentences that cover most flows:
+
+  Go to "/path"                              Click the sign in button
+  Type "text" into the username field        Select "Option" in the country select
+  Press Enter                                 Wait for the dashboard heading to be visible
+  The page title should contain "Home"        The URL should contain "/dashboard"
+  Remember the text of the total as amount    Only if the cookie banner is visible, Click the accept button
+
+Guards: "Only if <predicate>, <sentence>" and "Unless …" skip a step without
+acting. A story's onFailure is stop, continue or compensate:<story>; idempotent
+is what lets a story be exposed to an agent in production.
+
+Every pattern, with two examples each, is in the flow language reference:
+docs/flow-language.md in the repository, or https://yam.svatah.com.
+```
+
+### `yam help bindings`
+
+```text
+Bindings — an element named once, in a file
+
+A binding lives at bindings/<app>/<page>/<element>.yaml and carries a ranked
+list of candidates (a test id, an id, a role and name, a label, a CSS path…)
+plus a structural fingerprint. The resolver tries the candidates in order and
+accepts one only when it matches exactly one element. The fingerprint is used
+only when every candidate fails: healing scores every element on the page
+against it, and a clear winner is proposed, never silently applied.
+
+Three ways a binding comes to exist:
+
+  yam record                 drive the plan; click each unbound element, or let a
+                             model gateway ground it; review, then it is written
+  YAM_MODE=record            the same, from a plain Playwright test using bind()
+  yam heal                   propose a repair for a binding that stopped resolving
+
+Reading the store:
+
+  yam bindings list          every binding and its phrases
+  yam bindings show <id>     one binding in full
+  yam bindings verify        resolve every binding live, act on nothing
+  yam bindings prune         find bindings nothing names any more
+
+A run that only passed because a binding was healed exits 6, not 0. The
+repair is a diff under .yam/ for a person to read; --apply writes it.
+```
+
+### `yam help exit-codes`
+
+```text
+Exit codes — what a script or a CI job branches on
+
+    0  ok                  everything passed, or the command did what it was asked
+    1  failed              a step failed, or a check found something wrong
+    2  compile errors      the flows, data or config have errors; nothing was written or run
+    3  model unavailable   a model tier was asked for and its backend could not be reached
+    4  grounding failed    record could not bind a target to an element
+    5  expectation failed  an expectation failed while recording
+    6  healed              the run passed only because a binding was healed; review the repair
+    7  some unrepaired     heal could not repair every failure
+    8  unmapped            migrate found something in the source it has no mapping for
+   10  refused             a story that is not marked idempotent, against a production configuration
+   11  aborted             a flow stopped under its failure policy; a compensating story may have run
+   12  cannot resume       the plan or the bindings changed since the checkpoint
+   64  usage               the command line itself was wrong
+
+A healed run is its own code on purpose: the application works and a binding drifted, and a job should decide about that deliberately.
+```
+
+### `yam help session`
+
+```text
+Session options — the same on every command that opens a session
+
+  --base-url <url>            where the application is
+  --storage-state <path.json> a saved browser state to start from (cookies, local storage)
+  --input k=v                 a value for a story's declared input; repeatable
+  --headed                    show the browser
+  --out <dir>                 where runs are written (default: runs/)
+  --run-id <id>               name the run yourself
+
+Where each value comes from, first match wins:
+
+  1. the flag on the command line
+  2. the environment: YAM_BASE_URL, YAM_STORAGE_STATE, YAM_INPUT_<NAME>
+  3. the project's yam.config.yaml, under app:
+
+A secret input belongs in the environment (YAM_INPUT_PASSWORD=…), never on
+the command line, where it would be visible in the process list. It reaches
+the story and is redacted in every file a run writes.
+```
+
+### `yam help adapters`
+
+```text
+Adapters — the platforms a plan can replay on
+
+The adapter is named in yam.config.yaml under adapter:, and every adapter
+implements the same surface, so the plan and the bindings do not change
+between them.
+
+  playwright   web, the default; needs a browser: npx playwright install chromium
+  bidi         web through WebDriver BiDi in a stock browser (Firefox, Chrome)
+  http         named requests from api/*.yaml; no browser
+  appium       Android Chrome and native apps; needs an Appium server
+  uia          Windows applications through UI Automation; Windows only
+  ax           macOS applications through Accessibility; needs the permission
+               granted to the terminal (System Settings → Privacy & Security)
+
+yam surface doctor --adapter ax|uia says whether this host is ready for a
+desktop adapter. yam surface conform --adapter <name> runs the conformance
+suite against one, which is how a new adapter proves itself.
+```
+
+### `yam help agents`
+
+```text
+Agents — the same plan, called by something that is not a person
+
+  yam tool serve --expose "Story one,Story two"
+      An MCP server whose tools are the stories. Each tool's input schema is
+      the story's signature; each call is a run with the agent recorded as the
+      invoker. A story not marked idempotent is not listed in production.
+
+  yam mcp
+      The operations and the raw surface (snapshot, act, read, check) over
+      stdio, for an agent that explores. Every call is recorded as a
+      trajectory; yam trajectory compile turns one into a proposal under
+      proposals/ for a person to read.
+
+  yam workflow run <story> --input k=v
+      One story as a function, outputs on stdout as JSON; what a scheduler or
+      a script calls.
+
+Replay never calls a model: what a model decided, it decided at authoring
+time and it is in the files. The audit line in runs/<id>/audit.jsonl is the
+only account of why the system changed.
 ```

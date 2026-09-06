@@ -99,18 +99,24 @@ inputs: username: string, password: secret
 test: Sign in
 ```
 
+Six verbs, in order, and `yam` alone says which one is next:
+
 ```bash
-yam compile                    # flows -> plan.json, byte-stable
-yam lint                       # long sleeps, unused captures, side effects in tools
-yam run --host playwright      # or --host none for the runner-agnostic executor
-yam migrate ./legacy ./flows   # v1/v2 flows and prototype databases
-yam serve                      # the local HTTP and event-stream service
+yam init                       # start a project here
+yam                            # where you are, and what to do next
+yam check                      # read, lint and compile the flows; writes .yam/plan.json
+yam record                     # bind the targets by driving the real application
+yam run                        # replay the plan; the exit code is the verdict
+yam heal                       # repair the bindings the interface moved, from the last run
+yam ui --tmux                  # the cockpit, a shell, the run's events, your editor
 ```
 
-The same plan runs under both hosts and produces identical results — statuses and
-matched candidates alike. `node scripts/compatibility.mjs` demonstrates that over
-the four migrated fixtures, twice under each host, and is what
-[`evals/conformance/runtime/`](evals/conformance/runtime) is a recording of.
+Every failure names the verb that resolves it. `yam <command> --help` is one
+command's options and exit codes; `yam help exit-codes`, `flows`, `bindings`,
+`session`, `adapters` and `agents` are the topics. The same plan runs under
+both hosts and produces identical results; `node scripts/compatibility.mjs`
+demonstrates that over the four migrated fixtures, twice under each host, and is
+what [`evals/conformance/runtime/`](evals/conformance/runtime) is a recording of.
 
 Every sentence pattern and IR action is in
 [`docs/flow-language.md`](docs/flow-language.md).

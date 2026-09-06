@@ -11,7 +11,6 @@
  * files `@svatah/yam-schema` ships, and the HTTP API from the service's OpenAPI
  * description. Everything else under `docs/` is written by hand.
  */
-import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -28,14 +27,18 @@ const page = (path, body) => pages.set(path, HEADER + body.trimEnd() + "\n");
 
 /* ── 1. the CLI, from its own help ───────────────────────────────────────── */
 
-// `yam --help` prints usage and exits 64, as usage does; the text is what matters.
-const help = spawnSync(process.execPath, [join(ROOT, "packages", "cli", "dist", "bin.js"), "--help"], {
-  encoding: "utf8",
-}).stdout;
-if (!help || !help.startsWith("yam")) throw new Error("yam --help printed nothing usable");
+// From the built package (T14.3, T14.6): the top-level help, every command's
+// own help, and the topics, so the page is what `yam help` prints.
+const cliPackage = await import(pathToFileURL(join(ROOT, "packages", "cli", "dist", "index.js")).href);
+const fence = (text) => `\`\`\`text\n${text.trimEnd()}\n\`\`\``;
 page(
   "cli.md",
-  `# \`yam\` command line\n\nThe text below is \`yam --help\`, verbatim. Every command that takes \`--json\` prints one JSON document and nothing else on stdout.\n\n\`\`\`text\n${help.trimEnd()}\n\`\`\`\n`,
+  `# \`yam\` command line\n\nWhat \`yam help\` prints, then every command's own \`--help\`, then the help topics. \`yam\` alone prints where you are and what is next. Every command that takes \`--json\` prints one JSON document and nothing else on stdout.\n\n` +
+    `## \`yam help\`\n\n${fence(cliPackage.TOP_LEVEL)}\n\n` +
+    `## Commands\n\n` +
+    cliPackage.COMMANDS.map((one) => `### \`yam ${one.name}\`\n\n${fence(cliPackage.helpFor(one.name.split(" ")) ?? "")}\n`).join("\n") +
+    `\n## Topics\n\n` +
+    cliPackage.TOPICS.map((name) => `### \`yam help ${name}\`\n\n${fence(cliPackage.topic(name) ?? "")}\n`).join("\n"),
 );
 
 /* ── 2. every published package's exports, from its entry point ──────────── */

@@ -265,8 +265,10 @@ describe("every external name is one its source reports (P11-F2)", () => {
 
   it("names a story the self project has, on every `yam` side", () => {
     const stories = new Set(storyNames());
+    // Only the flow sources name stories; a command source on the `yam` side
+    // (the front door, T14.6) answers to its own one name, checked below.
     const invented = checks
-      .filter((one) => one.yam?.source !== undefined)
+      .filter((one) => one.yam?.source === "yam" || one.yam?.source === "yam-cdp")
       .map((one) => one.yam!.name!)
       .filter((one) => !stories.has(one));
     expect(invented, `the catalogue names stories the self flows do not have: ${invented.join("; ")}`)
