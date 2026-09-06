@@ -651,25 +651,34 @@ test("Run again is a button on the Run screen, and it starts another run", async
  * pressed the moment the first step's row appears rather than after a sleep.
  */
 test("a run started from the Run screen can be stopped from it (T10.4)", async () => {
-  page = await livePage();
-
-  // Start one from the Flows screen, as a person does.
-  await page.locator("#rail-flows").click();
-  await page.locator("#flows-list").getByText("guards-and-compensation.flow").click();
+  /*
+   * The longest flow the project has that needs no input.
+   *
+   * `execution.flow` is thirty-one steps; `guards-and-compensation.flow` is
+   * seven and takes about a second, which is not a window anyone — a person or
+   * a test — can reliably press a button in. Running *every* flow would be
+   * longer still and is not available: several of the project's stories declare
+   * inputs, and `POST /run` refuses the whole run with a 400 before it starts
+   * (REQ-AUTO-5), which is the right answer to a run nobody supplied arguments
+   * for.
+   */
+  await goTo("flows", "Flows");
+  await page.locator("#flows-list").getByText("execution.flow", { exact: true }).click();
   await page.locator("#action-run-flow").click();
-  await expect(page.getByRole("heading", { name: /^Run / })).toBeVisible({ timeout: 180_000 });
 
+  // The workspace's own title, not any heading: the Runs screen's inspector
+  // has an `<h3>Run …</h3>` in it, which a role query happily matches.
+  await expect(page.locator(".sv-toolbar-title")).toContainText(/^Run /, { timeout: 180_000 });
+
+  /*
+   * `run.stop`'s `availableWhen` is the model's `live`, so an enabled Stop *is*
+   * the screen saying there is a run to stop — a better signal to wait for than
+   * a step row, and the thing the button's contract is about.
+   */
   const stop = page.locator("#action-run-stop");
   await expect(stop).toBeVisible();
   await expect(stop).toContainText("Stop");
-
-  /*
-   * Pressed as soon as the button is live. `run.stop`'s `availableWhen` is the
-   * model's `live`, so an enabled Stop *is* the screen saying there is a run to
-   * stop — which is a better signal to wait for than a step row, and is the
-   * thing the button's contract is about.
-   */
-  await expect(stop).toBeEnabled({ timeout: 180_000 });
+  await expect(stop).toBeEnabled({ timeout: 120_000 });
   await stop.click();
 
   await expect(page.locator("#status-context")).toContainText(/Stopping run/, {
@@ -757,13 +766,20 @@ async function goTo(screen: string, label: string): Promise<void> {
     await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
     const palette = page.getByRole("dialog", { name: "Command palette" });
     await expect(palette).toBeVisible();
-    await palette.getByLabel("Search or run a command").fill(`Go to ${label}`);
-    await palette.getByText(`Go to ${label}`, { exact: true }).first().click();
+    /*
+     * By id, not by text. A palette row's accessible name is its whole
+     * contents, and "Go to Run" is a substring of "Go to Runs" — a text search
+     * picks the wrong row and opens the wrong screen.
+     */
+    await page.locator(`#palette-go-${screen}`).click();
     await expect(palette).toBeHidden();
   }
-  await expect(page.getByRole("heading", { name: label, exact: false })).toBeVisible({
-    timeout: 60_000,
-  });
+  /*
+   * The *workspace's* title, not any heading with that name: the Runs screen's
+   * inspector has an `<h3>Run 00mt…</h3>` in it, and a role query happily
+   * matches that while the workspace is still showing something else.
+   */
+  await expect(page.locator(".sv-toolbar-title")).toContainText(label, { timeout: 60_000 });
 }
 
 test.describe("every screen (T10.1, T10.2)", () => {
@@ -799,13 +815,23 @@ test("the Runs screen filters, and its inspector shows the failing step's eviden
   for (const id of ["runs-filter-behavior", "runs-filter-invoker", "runs-filter-status"]) {
     await expect(page.locator(`#${id}`)).toBeVisible();
   }
+  /*
+   * The chip cycles through the values the *runs* have, which is `all` plus
+   * whatever behaviours are in the project — so a project with no run has one
+   * choice and cycling is a no-op. The chip's title names the next value, which
+   * is what makes this checkable either way.
+   */
   const behavior = page.locator("#runs-filter-behavior");
   await expect(behavior).toContainText("behavior: all");
+  const next = (await behavior.getAttribute("title")) ?? "";
   await behavior.click();
-  await expect(behavior).not.toContainText("behavior: all");
-  // And back, so the rest of this file sees the screen it expects.
-  await behavior.click();
-  await expect(behavior).toContainText("behavior: all");
+  await expect(behavior).toContainText(
+    `behavior: ${/next: (.+)\)$/.exec(next)?.[1] ?? "all"}`,
+  );
+  // And back to `all`, so the rest of this file sees the screen it expects.
+  while (!((await behavior.textContent()) ?? "").includes("behavior: all")) {
+    await behavior.click();
+  }
 
   // Choosing a run fills the inspector with what that run wrote.
   await page.locator("#runs-table tbody tr").first().click();

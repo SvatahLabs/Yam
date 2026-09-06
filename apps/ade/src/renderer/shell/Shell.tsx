@@ -144,6 +144,17 @@ export function Shell(props: ShellProps): React.JSX.Element {
     paramsRef.current = params;
   }, [params]);
 
+  /*
+   * Which screen is showing, for the subscription (T10.1).
+   *
+   * A ref and not the state, for the same reason `paramsRef` is one: the
+   * subscription is set up once and must not be torn down on every navigation.
+   */
+  const showingRef = useRef<Showing>("flows");
+  useEffect(() => {
+    showingRef.current = showing;
+  }, [showing]);
+
   useEffect(() => {
     return props.client.subscribe((event) => {
       /*
@@ -172,7 +183,19 @@ export function Shell(props: ShellProps): React.JSX.Element {
        * the one someone opening the same run tomorrow sees. One re-load makes
        * the live screen and the historical screen the same object.
        */
-      if (event.kind === "run.summary" || event.kind === "run.failed") {
+      /*
+       * …but only while the Run screen is the one showing.
+       *
+       * A run that finishes after someone has walked away used to pull them
+       * back: `load("run", …)` replaced the state whatever screen was on it, so
+       * the rail said Bindings and the workspace drew a run. Phase 9 had two
+       * screens and nowhere to walk to; with twelve it is the first thing a
+       * second click finds.
+       */
+      if (
+        showingRef.current === "run" &&
+        (event.kind === "run.summary" || event.kind === "run.failed")
+      ) {
         const runId = typeof event["runId"] === "string" ? event["runId"] : undefined;
         const next = runId === undefined ? paramsRef.current : { ...paramsRef.current, runId };
         if (runId !== undefined) setParams(next);
