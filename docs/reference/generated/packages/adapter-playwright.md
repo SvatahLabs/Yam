@@ -28,6 +28,9 @@ Default web adapter: AgentSurface on Playwright
 | `lengthBucket` | function | `declare function lengthBucket(value: string \| undefined): string;` | Names collapse to a length bucket: `0`, `1-8`, `9-32`, `33+` (LLD §6.2). |
 | `literalValue` | function | `export function literalValue(ref: ValueRef): string` |  |
 | `locatorFor` | function | `export function locatorFor(` | Build the locator a candidate names, or `null` when the candidate is one the |
+| `OBSERVED_ATTRIBUTE` | variable | `OBSERVED_ATTRIBUTE = "data-yam-observed"` | The in-page observer (Draft 2.23, REQ-REC-13): what a person does in the |
+| `OBSERVER_BINDING` | variable | `OBSERVER_BINDING = "__yamObserved"` |  |
+| `OBSERVER_SCRIPT` | variable | `OBSERVER_SCRIPT = `(() =>` |  |
 | `parseAiSnapshot` | function | `export function parseAiSnapshot(text: string): SnapshotNode[]` |  |
 | `PICKED_ATTRIBUTE` | variable | `PICKED_ATTRIBUTE = "data-yam-picked"` | The attribute the picker stamps on the clicked element. |
 | `PICKER_SCRIPT` | variable | `PICKER_SCRIPT = `(id) =>` | The in-page picker: highlight what the pointer is over, resolve on click. |
@@ -42,6 +45,7 @@ Default web adapter: AgentSurface on Playwright
 | `registerPlaywrightAdapter` | function | `export function registerPlaywrightAdapter(): void` | Register the adapter. Idempotent, because the registry refuses a silent |
 | `REGISTRY` | variable | `REGISTRY = "__yamRefs__"` | The in-page array `walkDocument` fills; see `page-script.ts`. |
 | `renderForHash` | function | `declare function renderForHash(nodes: readonly SnapshotNode[]): string;` | The canonical rendering the hash is taken over: one line per node, indented by |
+| `ScriptedAction` | interface | `export interface ScriptedAction` | One action a scripted person performs (`YAM_OBSERVE`, the test affordance). |
 | `SnapshotMechanism` | typealias | `export type SnapshotMechanism = "playwright" \| "own";` |  |
 | `SnapshotOptions` | interface | `export interface SnapshotOptions` |  |
 | `structuralHash` | function | `declare function structuralHash(nodes: readonly SnapshotNode[]): string;` | sha256 of `renderForHash`, hex encoded. |

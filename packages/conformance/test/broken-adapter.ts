@@ -127,6 +127,7 @@ export class BrokenAdapter implements AgentSurface {
         trace: true,
         webmcp: true,
         pick: false,
+        observe: false,
         screenshot: true,
         restore: true,
       };

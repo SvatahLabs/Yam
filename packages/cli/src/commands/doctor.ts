@@ -70,7 +70,7 @@ export async function doctorCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
       name: "bindings",
       ok: bindings,
       detail: bindings ? loaded.config.bindings.dir : "none",
-      fix: "Record them: `yam record`, or `YAM_MODE=record` in a Playwright test.",
+      fix: "Bind them: `yam record --all`, or `YAM_MODE=record` in a Playwright test.",
     });
 
     checks.push({

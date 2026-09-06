@@ -18,7 +18,9 @@ export interface Diagnostic {
 const CATALOGUE = {
   "no-project": () => ({ message: "No Yam project here.", next: "yam init" }),
   "no-flows": () => ({ message: "The project has no flows yet.", next: "write one under flows/; `yam help flows` shows how" }),
-  "unbound-target": (phrase: string, id: string) => ({ message: `No binding for \`${phrase}\` (${id}).`, next: "yam record" }),
+  "unbound-target": (phrase: string, id: string) => ({ message: `No binding for \`${phrase}\` (${id}).`, next: "yam record --all" }),
+  "cannot-drive": () => ({ message: "Recording what you do needs a person at a terminal, driving the browser that opens.", next: "run yam record at a terminal; to bind a flow you wrote instead: yam record --flow <file>" }),
+  "cannot-observe": (adapter: string) => ({ message: `The ${adapter} adapter cannot watch what a person does, so it cannot record a flow from you.`, next: "write the flow and bind it: yam record --flow <file> (adapters that can watch: playwright)" }),
   "stale-plan": () => ({ message: "The plan is older than the flows.", next: "yam check" }),
   "no-plan": () => ({ message: "There is no plan yet.", next: "yam check" }),
   "secret-unset": (path: string, variable: string) => ({

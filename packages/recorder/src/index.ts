@@ -50,6 +50,16 @@ export {
 } from "./session.js";
 
 export { renderReport, reportJson } from "./report.js";
+export {
+  capture,
+  phraseFor,
+  inputNameFor,
+  segmentOf,
+  pathOf,
+  renderCapturedFlow,
+  type CaptureOptions,
+  type CaptureOutcome,
+} from "./capture.js";
 
 export {
   phraseFromId,

@@ -18,6 +18,9 @@
             "frames": {
               "type": "boolean"
             },
+            "observe": {
+              "type": "boolean"
+            },
             "pick": {
               "type": "boolean"
             },
@@ -50,7 +53,8 @@
             "webmcp",
             "screenshot",
             "restore",
-            "pick"
+            "pick",
+            "observe"
           ],
           "type": "object"
         },

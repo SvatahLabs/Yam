@@ -50,7 +50,8 @@ Two things are not in that file and matter as much:
 | `yam repl` | **the application, and grounding** | `--gateway none` for no grounding at all; `--gateway fake` for the committed answers |
 | `yam bindings`, `yam results` | **nothing** | Files |
 | `yam surface conform` | **the application** | |
-| **`yam record`** | **a remote model**, unless `--gateway fake` | Grounding needs a model. `--gateway fake` records from the grounding eval's committed answers, which is a fixture and says so in its provenance |
+| **`yam record`** (alone) | nothing | Recording what you do runs in your browser; the flow and the bindings are written to your project. |
+| **`yam record --flow` / `--all`** | **a remote model**, unless `--gateway fake` | Grounding needs a model. `--gateway fake` records from the grounding eval's committed answers, which is a fixture and says so in its provenance |
 | **`yam heal --run`** | **a remote model**, unless `--no-model` or `heal.useModel: false` | Relocalization is model-free; the re-grounding step is not (REQ-HEAL-1) |
 | **`yam compile --tier3`** | **a remote model** | That is what Tier 3 is |
 | `yam eval grounding` | **a remote model**, unless `--gateway fake` | |

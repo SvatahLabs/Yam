@@ -104,7 +104,7 @@ describe("yam record --gateway human (REQ-REC-12)", () => {
 
   it("under CI with no gateway named, still refuses and names fake and the credential", async () => {
     const dir = scaffold('story: One\n  Go to "/login"\n\ntest: One\n');
-    const { code, output } = await cli(["record", "."], dir);
+    const { code, output } = await cli(["record", ".", "--all"], dir);
     expect(code).toBe(EXIT.modelUnavailable);
     expect(output).toContain("--gateway fake");
   }, 60_000);

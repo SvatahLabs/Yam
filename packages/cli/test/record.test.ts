@@ -320,7 +320,7 @@ test: Impossible
     const project = scaffold({
       flows: { "one.flow": "story: One\n  Click the sign in button\n\ntest: One\n" },
     });
-    const result = await cli(["record", "."], project);
+    const result = await cli(["record", ".", "--all"], project);
     expect(result.code).toBe(EXIT.modelUnavailable);
     expect(result.output).toContain("--gateway fake");
     expect(existsSync(join(project, "record-report.json"))).toBe(false);

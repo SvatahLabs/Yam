@@ -293,7 +293,7 @@ export async function initCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
       (retired ? "  Removed flows/sign-in.flow, the example an earlier init wrote.\n" : "") +
       note +
       "  yam check     read, lint and compile the flows\n" +
-      "  yam record    bind the targets by driving the real application\n" +
+      "  yam record    record a flow from what you do in the application\n" +
       "  yam run       replay the plan\n\n" +
       "  yam           at any time: where you are, and what is next\n",
   );

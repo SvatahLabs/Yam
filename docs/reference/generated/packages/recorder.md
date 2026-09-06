@@ -13,6 +13,9 @@ Grounding, record session and report
 | Export | Kind | Signature | |
 |---|---|---|---|
 | `assertRecordable` | function | `export function assertRecordable(options:` | Throws unless recording here is allowed. Called once per session, and here. |
+| `capture` | function | `export async function capture(options: CaptureOptions): Promise<CaptureOutcome>` | Run a capture on an open session until the signal aborts or the session closes. |
+| `CaptureOptions` | interface | `export interface CaptureOptions` |  |
+| `CaptureOutcome` | interface | `export interface CaptureOutcome` |  |
 | `DEFAULT_MAX_SNAPSHOT_TOKENS` | variable | `DEFAULT_MAX_SNAPSHOT_TOKENS = 8_000` |  |
 | `DEFAULT_MIN_CONFIDENCE` | variable | `DEFAULT_MIN_CONFIDENCE = 0.5` |  |
 | `entryFor` | function | `export async function entryFor(` | A binding entry for an element a *person* chose (T5.7, REQ-ADE-4). |
@@ -33,6 +36,9 @@ Grounding, record session and report
 | `GroundingTarget` | interface | `export interface GroundingTarget` | What the recorder wants grounded: a phrase, and the id it compiled to. |
 | `GroundOptions` | interface | `export interface GroundOptions` |  |
 | `groundSiteTool` | function | `export async function groundSiteTool(` | The binding for a target the page declares as a site tool. |
+| `inputNameFor` | function | `export function inputNameFor(phrase: string): string` | An input name for a phrase: `the password field` → `password`. |
+| `pathOf` | function | `export function pathOf(url: string): string` | The path a person would write: `http://host/login?x=1` → `/login`. |
+| `phraseFor` | function | `export function phraseFor(description: ElementDescription): string` | The target phrase for an element, as a person would say it. |
 | `phraseFromId` | function | `export function phraseFromId(id: string): string` | `login.username-field` → "the username field". |
 | `PluginOptions` | interface | `export interface PluginOptions extends Omit<GroundOptions, "gateway" \| "snapshot">` | Everything both plugins need. The caller supplies the gateway and the config. |
 | `PROMPT_VERSION` | variable | `PROMPT_VERSION = "g-1"` | Bumped whenever `SYSTEM` changes. Recorded in every binding's provenance. |
@@ -46,12 +52,14 @@ Grounding, record session and report
 | `recorderRegrounder` | function | `export function recorderRegrounder(options: PluginOptions):` | The healer's `Regrounder` (LLD §10, REQ-HEAL-1's model half). |
 | `RecordReport` | interface | `export interface RecordReport` |  |
 | `RecordSessionOptions` | interface | `export interface RecordSessionOptions` |  |
+| `renderCapturedFlow` | function | `export function renderCapturedFlow(outcome: Pick<CaptureOutcome, "story" \| "steps" \| "inputs">, about: { readonly baseUrl?: string; readonly at?: Date }): strin` | The flow file for a captured story. |
 | `renderGroundingEvalMarkdown` | function | `export function renderGroundingEvalMarkdown(report: GroundingEvalReport): string` |  |
 | `renderGroundingEvalSummary` | function | `export function renderGroundingEvalSummary(report: GroundingEvalReport): string` | What `yam eval grounding` prints. |
 | `renderReport` | function | `export function renderReport(report: RecordReport): string` | What `yam record` prints when it finishes. |
 | `reportJson` | function | `export function reportJson(report: RecordReport): string` | The file written beside the bindings (REQ-REC-9). |
 | `ReviewDecision` | typealias | `export type ReviewDecision ` | What the reviewer said (REQ-ADE-4). |
 | `runGroundingEval` | function | `export async function runGroundingEval(` |  |
+| `segmentOf` | function | `export function segmentOf(url: string \| undefined): string` | The page segment of an element id, from where the element was: `/login` → `login`, `/` → `home`. |
 | `storyOrder` | function | `export function storyOrder(plan: Plan, options: RecordSessionOptions): string[]` | The order the run blocks give, narrowed by `--flow` and `--story`. |
 | `STRUCTURAL_ROLES` | variable | `STRUCTURAL_ROLES: ReadonlySet<string> = new Set([` | Roles that give an element its address rather than being the answer. |
 | `SYSTEM` | variable | `SYSTEM = `You are grounding a plain-language target phrase to one element of a user interface.` | The instruction block. Stable, cached, and versioned. |

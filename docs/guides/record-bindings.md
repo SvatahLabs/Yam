@@ -4,6 +4,11 @@ A binding is a file under `bindings/<app>/<page>/<element>.yaml` that names an
 element by a ranked bundle of candidates and a structural fingerprint. Recording
 is the only time an element is chosen; replay reads the file.
 
+> `yam record` with nothing after it does something else: it records a new flow
+> from what you do in the browser (see [your first flow](../getting-started/first-flow.md)).
+> This guide is about binding the targets of a flow that was written or drafted,
+> which is `yam record --flow <file>` or `yam record --all`.
+
 ## In a plain Playwright project
 
 ```bash
@@ -26,7 +31,7 @@ for exercising the record path headless, not a way to write selectors again.
 ## In a flow project
 
 ```bash
-yam record                               # you click: the default at a terminal with no credential
+yam record --all                         # you click: the default at a terminal with no credential
 yam record --gateway anthropic           # a model grounds each phrase
 yam record --flow flows/login.flow --story "Sign in" --rebind
 ```

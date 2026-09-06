@@ -29,6 +29,10 @@ import { canonicalJson } from "@svatah/yam-schema";
 import { GatewayUnavailable, type Gateway } from "@svatah/yam-gateway";
 import { EnvironmentRefused, record, renderReport, reportJson } from "@svatah/yam-recorder";
 import { scaffoldStories, stoppedHint } from "../scaffold.js";
+import { captureCommand } from "./capture.js";
+
+/** The options that mean "bind a written flow" rather than "record what I do" (Draft 2.23). */
+const BINDING_OPTIONS = ["flow", "all", "story", "rebind", "gateway", "force-production"] as const;
 import { createSurface } from "@svatah/yam-surface";
 import {
   boolOption,
@@ -48,6 +52,9 @@ import { report as reportDiagnostics } from "./compile.js";
 import { loadBindings, projectRunners } from "./run.js";
 
 export async function recordCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
+  // `yam record` alone is capture: a person drives, Yam writes the flow (REQ-REC-13).
+  if (!BINDING_OPTIONS.some((one) => args.options[one] !== undefined)) return await captureCommand(args, io);
+
   const root = args.command[1] ?? ".";
   const early = preflight(root, undefined, args, io);
   if (early !== undefined) return early;

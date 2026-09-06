@@ -1,9 +1,9 @@
 # Your first flow
 
-Six verbs, in order, and `yam` alone tells you which one is next.
+Five verbs, in order, and `yam` alone tells you which one is next.
 
 ```
-init  →  write a flow  →  check  →  record  →  run  →  heal
+init  →  record (or write a flow, then bind it)  →  check  →  run  →  heal
 ```
 
 ## 1. Start a project
@@ -48,13 +48,38 @@ next      yam check
           There is no plan yet.
 ```
 
-## 2. Write the flow, or let an agent draft it
+## 2. Record the flow, write it, or let an agent draft it
 
-An agent can write the first draft: point any MCP host at `yam explore` as its
+The quickest first flow is the one you do:
+
+```bash
+yam record
+```
+
+A browser opens at your application. Drive it: each click and each value you
+enter becomes a sentence of the flow, and each element you touch a binding. A
+password is never written down; the story declares a `secret` input and the
+sentence types it. Press Enter at the terminal when you are done, and the
+flow is under `flows/<story>.flow`, ready to check and run:
+
+```
+story: Sign in
+inputs: password: secret
+  Go to "/login"
+  Type "someone@example.com" into the username field
+  Type {input.password} into the password field
+  Click the sign in button
+  The URL should contain "/dashboard"
+
+test: Sign in
+```
+
+An agent can write the first draft instead: point any MCP host at `yam explore` as its
 server, let the agent drive the application saying what it is trying to do,
 and when it disconnects the exploration becomes a proposal under
 `proposals/<date>/`. `yam` then names it as the next thing to review; move its
-flow into `flows/` when it says what you meant. Or write the flow yourself:
+flow into `flows/` when it says what you meant. Or write the flow yourself,
+and bind its targets afterwards (step 4):
 
 ```
 story (tags=smoke): Sign in
@@ -82,21 +107,25 @@ yam check
 One verb reads, lints and compiles the flows and writes `.yam/plan.json`.
 The grammar compiles each sentence deterministically; a sentence it cannot
 parse is refused with a suggestion. The plan records what it was compiled from,
-so `run` and `record` notice when the flows changed and check again, saying so
-on one line.
+so `run` and `record --flow` notice when the flows changed and check again,
+saying so on one line.
 
-## 4. Record the bindings
+## 4. Bind the targets of a flow you wrote
+
+A flow you recorded is already bound; skip to step 5. A flow you wrote, or an
+agent drafted, names elements — *the username field* — that have no binding
+yet, and `yam` says so:
 
 ```bash
-yam record
+yam record --flow flows/sign-in.flow     # or --all, for every unbound target
 ```
 
-The recorder drives the plan against your application. A browser opens and,
-for each target phrase, an overlay names it and waits for your click; with a
-model credential configured a model grounds it instead and shows you its
-choice. Either way the recorder then writes `bindings/<app>/<page>/<element>.yaml` with
-its candidates and fingerprint. Nothing is written before you have seen it.
-`yam` now says `next  yam run`.
+Yam drives the flow against your application, step by step. A browser opens
+and, at each target with no binding, an overlay names it and waits for your
+click; with a model credential configured a model grounds it instead and shows
+you its choice. Either way the recorder then writes
+`bindings/<page>/<element>.yaml` with its candidates and fingerprint. Nothing
+is written before you have seen it. `yam` now says `next  yam run`.
 
 ## 5. Run
 

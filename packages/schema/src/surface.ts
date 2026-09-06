@@ -82,6 +82,9 @@ export const CAPABILITY_FLAGS = [
   "restore",
   // Draft 2.21: the adapter can overlay the application and take a person's click as an element.
   "pick",
+  // Draft 2.23: the adapter can report what a person does in the session — clicks, typing,
+  // choices, navigations — as events on elements; what `yam record` captures.
+  "observe",
 ] as const;
 export type CapabilityFlag = (typeof CAPABILITY_FLAGS)[number];
 

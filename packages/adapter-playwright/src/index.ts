@@ -47,3 +47,4 @@ export {
   type ToolCall,
 } from "./webmcp.js";
 export { PICKER_SCRIPT, PICKED_ATTRIBUTE } from "./picker.js";
+export { OBSERVER_SCRIPT, OBSERVED_ATTRIBUTE, OBSERVER_BINDING, type ScriptedAction } from "./observer.js";

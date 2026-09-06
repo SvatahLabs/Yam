@@ -76,7 +76,25 @@ export interface AgentSurface {
    * `opts.id` is the element id, so a scripted pick (`YAM_PICK`) can answer it.
    */
   pick?(phrase: string, opts?: { id?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<Ref | undefined>;
+  /**
+   * Draft 2.23 (REQ-REC-13): report what a person does in the session — each
+   * click, each value typed, each choice, each navigation — as it happens, with
+   * the element acted on as a reference. Resolves when the session closes or the
+   * signal aborts. Only adapters with the `observe` capability.
+   */
+  observe?(handler: (event: ObservedEvent) => void | Promise<void>, opts?: { signal?: AbortSignal }): Promise<void>;
 }
+
+/** One thing a person did in the driven session (Draft 2.23, REQ-REC-13). */
+export type ObservedEvent =
+  | { readonly kind: "click"; readonly ref: Ref }
+  | { readonly kind: "type"; readonly ref: Ref; readonly value: string; readonly secret: boolean }
+  | { readonly kind: "select"; readonly ref: Ref; readonly label: string }
+  | { readonly kind: "check"; readonly ref: Ref; readonly checked: boolean }
+  | { readonly kind: "press"; readonly ref: Ref; readonly key: string }
+  /** `typed` when the adapter knows the person went there directly rather than by a click. */
+  | { readonly kind: "navigate"; readonly url: string; readonly typed?: boolean }
+  | { readonly kind: "closed" };
 
 /** Every method name on `AgentSurface`, required first, then the optional ones. */
 export const SURFACE_METHODS = [
@@ -95,12 +113,14 @@ export const SURFACE_METHODS = [
   "trace",
   "request",
   "pick",
+  "observe",
 ] as const;
 export type SurfaceMethod = (typeof SURFACE_METHODS)[number];
 
-/** The methods every adapter must implement; `trace` and `request` are optional. */
+/** The methods every adapter must implement; `trace`, `request`, `pick` and `observe` are optional. */
 export const REQUIRED_SURFACE_METHODS = SURFACE_METHODS.filter(
-  (m): m is Exclude<SurfaceMethod, "trace" | "request" | "pick"> => m !== "trace" && m !== "request" && m !== "pick",
+  (m): m is Exclude<SurfaceMethod, "trace" | "request" | "pick" | "observe"> =>
+    m !== "trace" && m !== "request" && m !== "pick" && m !== "observe",
 );
 
 /** All capability flags default to false, so an adapter opts in to what it supports. */
@@ -115,6 +135,7 @@ export const NO_CAPABILITIES: Capabilities = {
   screenshot: false,
   restore: false,
   pick: false,
+  observe: false,
 };
 
 /**

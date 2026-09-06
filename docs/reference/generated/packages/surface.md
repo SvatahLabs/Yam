@@ -29,7 +29,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `Candidate` | typealias | `type Candidate = z.infer<typeof candidateSchema>;` |  |
 | `Capabilities` | typealias | `type Capabilities = z.infer<typeof capabilitiesSchema>;` |  |
 | `capabilitiesSchema` | variable | `capabilitiesSchema: z.ZodObject<` |  |
-| `CAPABILITY_FLAGS` | variable | `CAPABILITY_FLAGS: readonly ["dialogs", "frames", "windows", "upload", "drag", "trace", "webmcp", "screenshot", "restore", "pick"]` |  |
+| `CAPABILITY_FLAGS` | variable | `CAPABILITY_FLAGS: readonly ["dialogs", "frames", "windows", "upload", "drag", "trace", "webmcp", "screenshot", "restore", "pick", "observe"]` |  |
 | `CapabilityFlag` | typealias | `type CapabilityFlag = (typeof CAPABILITY_FLAGS)[number];` |  |
 | `capabilityForAction` | function | `export function capabilityForAction(action: SurfaceAction): keyof Capabilities \| undefined` | The capability an action requires, or `undefined` when every adapter must support it. |
 | `CheckError` | class | `export class CheckError extends SurfaceError` | A `check()` predicate did not hold. Maps to the `assertion` failure class. |
@@ -65,6 +65,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `NodeState` | typealias | `type NodeState = z.infer<typeof nodeStateSchema>;` |  |
 | `normalisedRoles` | function | `export function normalisedRoles(): string[]` | Every ARIA role any table maps onto, sorted. Useful for conformance assertions. |
 | `normaliseRole` | function | `export function normaliseRole(map: RoleMapName, sourceRole: string): string` | Map one source role onto the ARIA vocabulary, falling back to `generic`. |
+| `ObservedEvent` | typealias | `export type ObservedEvent ` | One thing a person did in the driven session (Draft 2.23, REQ-REC-13). |
 | `Predicate` | typealias | `type Predicate = z.infer<typeof predicateSchema>;` |  |
 | `processIdsOf` | function | `export function processIdsOf(` | The process ids of this executable, right now. |
 | `quitApplication` | function | `export async function quitApplication(` | Stop it: the graceful route, then a signal, then a harder one. |
@@ -76,7 +77,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `renderNode` | function | `export function renderNode(node: SnapshotNode, options: RenderOptions = {}): string` | Render one node, without its children. |
 | `RenderOptions` | interface | `export interface RenderOptions` |  |
 | `renderSnapshot` | function | `export function renderSnapshot(` | Render a whole snapshot. Nodes are emitted in the order the adapter produced |
-| `REQUIRED_SURFACE_METHODS` | variable | `REQUIRED_SURFACE_METHODS = SURFACE_METHODS.filter(` | The methods every adapter must implement; `trace` and `request` are optional. |
+| `REQUIRED_SURFACE_METHODS` | variable | `REQUIRED_SURFACE_METHODS = SURFACE_METHODS.filter(` | The methods every adapter must implement; `trace`, `request`, `pick` and `observe` are optional. |
 | `ROLE_MAPS` | variable | `ROLE_MAPS ` | The three published mapping tables, keyed by the adapter family they belong to. |
 | `RoleMapName` | typealias | `export type RoleMapName = keyof typeof ROLE_MAPS;` |  |
 | `Runner` | interface | `export interface Runner` | The commands this module runs. Injected, so every path above is testable. |

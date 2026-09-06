@@ -12,6 +12,7 @@
 | `dialogs` | boolean | yes |
 | `drag` | boolean | yes |
 | `frames` | boolean | yes |
+| `observe` | boolean | yes |
 | `pick` | boolean | yes |
 | `restore` | boolean | yes |
 | `screenshot` | boolean | yes |

@@ -100,6 +100,18 @@ test.describe("capabilities (LLD §2.4)", () => {
           else process.env["YAM_PICK"] = saved;
         }
       },
+      observe: async () => {
+        const origin = new URL((await surface.state()).url ?? "http://127.0.0.1").origin;
+        await surface.act("navigate", undefined, { url: `${origin}/` });
+        const seen: Array<{ kind: string }> = [];
+        const controller = new AbortController();
+        const watching = surface.observe!((event) => { seen.push(event); }, { signal: controller.signal });
+        await surface.act("click", await refByTestId(surface, "booking-link"));
+        for (let i = 0; i < 40 && !seen.some((one) => one.kind === "click"); i += 1) await new Promise((done) => setTimeout(done, 50));
+        controller.abort();
+        await watching;
+        return seen.some((one) => one.kind === "click") && seen.some((one) => one.kind === "navigate");
+      },
       dialogs: async () => {
         await surface.act("dialog", undefined, { action: "accept" });
         await surface.act("click", await refByTestId(surface, "show-alert"));

@@ -12,7 +12,7 @@ yam — describe a behaviour once, bind it to the real application, replay it wi
   yam init [dir]      start a project here
   yam explore         let an agent drive the application; its exploration becomes a proposal
   yam check           read, lint and compile the flows; writes .yam/plan.json
-  yam record          bind the targets by driving the real application
+  yam record          record what you do in the real application as a flow; --flow binds a written one
   yam run             replay the plan; the exit code is the verdict
   yam heal            repair the bindings the interface moved, from the last run
   yam ui              the terminal cockpit (--tmux for the workspace)
@@ -104,10 +104,12 @@ Exit codes: 0 ok · 2 compile errors · 3 model unavailable
 ### `yam record`
 
 ```text
-yam record [dir] [--flow <file>] [--story <name>] [--rebind] [--gateway human|anthropic|fake] [--force-production] [--json]
+yam record [dir] [--name <story>] | yam record --flow <file> | yam record --all [--story <name>] [--rebind] [--gateway human|anthropic|fake] [--force-production] [--json]
 
-Drive the plan against the real application and bind every target to an element: by your click in the browser that opens (human, the default at a terminal with no credential), or through a model gateway. Nothing is written before you have seen it.
+Alone: record a new flow from what you do. The browser opens at the application; drive it; each click and each value you enter becomes a sentence, each element you touch a binding. Enter at the terminal ends it and writes flows/<story>.flow. With --flow or --all: bind the targets of a flow somebody wrote, by driving it step by step — your click in the browser at each unbound target (human, the default at a terminal with no credential), or a model gateway.
 
+  --name <story>                  the story's name when recording what you do (asked otherwise)
+  --all                           bind every unbound target in the plan
   --flow <file>                   only this flow
   --story <name>                  only this story; repeatable
   --rebind                        record elements that already have a binding
@@ -582,7 +584,7 @@ against it, and a clear winner is proposed, never silently applied.
 
 Three ways a binding comes to exist:
 
-  yam record                 drive the plan; click each unbound element, or let a
+  yam record --all           drive the plan; click each unbound element, or let a
                              model gateway ground it; review, then it is written
   YAM_MODE=record            the same, from a plain Playwright test using bind()
   yam heal                   propose a repair for a binding that stopped resolving

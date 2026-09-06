@@ -9,7 +9,7 @@ against it, and a clear winner is proposed, never silently applied.
 
 Three ways a binding comes to exist:
 
-  yam record                 drive the plan; click each unbound element, or let a
+  yam record --all           drive the plan; click each unbound element, or let a
                              model gateway ground it; review, then it is written
   YAM_MODE=record            the same, from a plain Playwright test using bind()
   yam heal                   propose a repair for a binding that stopped resolving

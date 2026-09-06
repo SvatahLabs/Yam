@@ -104,7 +104,7 @@ describe("the reason under a failed step", () => {
   it("names record for a missing binding, heal for a binding that stopped resolving", () => {
     expect(reasonFor({ class: "locator", message: "No binding for `the username field` (login.username-field)." })).toEqual({
       message: "No binding for `the username field` (login.username-field).",
-      next: "yam record",
+      next: "yam record --all",
     });
     expect(reasonFor({ class: "locator", message: 'Could not resolve "x": 3 candidates tried, none matched exactly one element.\n  detail' }).next).toBe("yam heal");
   });

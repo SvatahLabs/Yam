@@ -90,6 +90,7 @@ export const UIA_CAPABILITIES: Capabilities = {
   trace: false,
   webmcp: false,
   pick: false,
+  observe: false,
   screenshot: true,
   restore: true,
 };

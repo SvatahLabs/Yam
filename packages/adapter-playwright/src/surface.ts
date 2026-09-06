@@ -8,7 +8,7 @@
  * `check`, and the snapshot mechanism is behind `snapshot.ts` so nothing here
  * knows whether a reference came from Playwright or from our own walker.
  */
-import { chromium, firefox, webkit } from "playwright";
+import { type Route, chromium, firefox, webkit } from "playwright";
 import type {
   Browser,
   BrowserContext,
@@ -38,7 +38,7 @@ import type {
   SurfaceKind,
 } from "@svatah/yam-schema";
 import { DEFAULT_IGNORE_ATTRIBUTES } from "@svatah/yam-schema";
-import type { AgentSurface } from "@svatah/yam-surface";
+import type { AgentSurface, ObservedEvent } from "@svatah/yam-surface";
 import {
   ActionabilityError,
   DialogError,
@@ -51,6 +51,7 @@ import {
 } from "@svatah/yam-surface";
 import { describeElement } from "./page-script.js";
 import { PICKED_ATTRIBUTE, PICKER_SCRIPT } from "./picker.js";
+import { OBSERVED_ATTRIBUTE, OBSERVER_BINDING, OBSERVER_SCRIPT, type ScriptedAction } from "./observer.js";
 import { coordsOf, locatorFor } from "./locate.js";
 import { callTool, declaredTools, declaresTool, type DeclaredTool } from "./webmcp.js";
 import { evaluatePredicate } from "./predicates.js";
@@ -138,6 +139,7 @@ export const PLAYWRIGHT_CAPABILITIES: Capabilities = {
    */
   webmcp: true,
   pick: true,
+  observe: true,
   screenshot: true,
   restore: true,
 };
@@ -183,6 +185,9 @@ export class PlaywrightSurface implements AgentSurface {
   private baseUrl: string | undefined;
   private storageStatePath: string | undefined;
   private tracing = false;
+  /** The observer's handler while `observe` runs; the binding is exposed once per context. */
+  private observer: ((event: ObservedEvent) => void | Promise<void>) | undefined;
+  private observerExposed: BrowserContext | undefined;
 
   constructor(private readonly options: PlaywrightAdapterOptions = {}) {}
 
@@ -256,6 +261,177 @@ export class PlaywrightSurface implements AgentSurface {
     } catch {
       return undefined;
     }
+  }
+
+  /**
+   * What a person does in the session, as events on elements (Draft 2.23,
+   * REQ-REC-13, LLD §2.1). The page script stamps the element and calls the
+   * exposed binding; this finds the stamp, mints a reference, removes the stamp
+   * and hands the event on. Main-frame navigations come from Playwright. The
+   * promise resolves when the last page closes or the signal aborts.
+   *
+   * `YAM_OBSERVE` — a JSON array of actions — is the scripted person: the
+   * actions are performed through Playwright, which fires the same DOM events a
+   * person's would, so the observer is exercised rather than bypassed; a
+   * `goto` is reported as a navigation the person typed.
+   */
+  async observe(
+    handler: (event: ObservedEvent) => void | Promise<void>,
+    opts: { signal?: AbortSignal } = {},
+  ): Promise<void> {
+    const context = this.context;
+    if (context === undefined) throw new SessionError("The session is not open.", { adapter: "playwright" });
+    if (this.observer !== undefined) throw new SessionError("The session is already being observed.", { adapter: "playwright" });
+    /*
+     * Handlers run as events arrive, not one after another: the recorder
+     * describes and synthesises an element while the person's next action is
+     * already happening, and a queue would leave the second element to be
+     * described on a page it is no longer on.
+     */
+    const pending = new Set<Promise<void>>();
+    const emit = (event: ObservedEvent): Promise<void> => {
+      const one: Promise<void> = Promise.resolve()
+        .then(() => handler(event))
+        .catch(() => undefined)
+        .finally(() => pending.delete(one));
+      pending.add(one);
+      return one;
+    };
+    const settled = (): Promise<unknown> => Promise.allSettled([...pending]);
+    this.observer = handler;
+    let finish: () => void = () => undefined;
+    const finished = new Promise<void>((done) => {
+      finish = done;
+    });
+    if (this.observerExposed !== context) {
+      /*
+       * The page's call arrives before the navigation the same click may
+       * cause is requested, so the observation is made pending here,
+       * synchronously, before the first await: that is what lets the hold
+       * below keep the document alive while the element is looked up and
+       * described.
+       */
+      await context.exposeBinding(OBSERVER_BINDING, async (source, payload: string) => {
+        if (this.observer === undefined) return;
+        let release: () => void = () => undefined;
+        const inFlight = new Promise<void>((done) => {
+          release = done;
+        });
+        pending.add(inFlight);
+        try {
+          let detail: { id: string; kind: string; value?: string; secret?: boolean; label?: string; checked?: boolean; key?: string };
+          try {
+            detail = JSON.parse(payload) as typeof detail;
+          } catch {
+            return;
+          }
+          const selector = `[${OBSERVED_ATTRIBUTE}="${detail.id}"]`;
+          const element = await source.page.$(selector).catch(() => null);
+          if (element === null) return;
+          let ref: Ref;
+          try {
+            ref = this.refs().mint(element as ElementHandle<Element>);
+          } catch {
+            return;
+          }
+          await element.evaluate((node, attribute) => node.removeAttribute(attribute), OBSERVED_ATTRIBUTE).catch(() => undefined);
+          // Awaited: the page's call resolves when the recorder has bound the element (the page holds its navigation on it).
+          switch (detail.kind) {
+          case "click": await emit({ kind: "click", ref }); break;
+          case "type": await emit({ kind: "type", ref, value: detail.value ?? "", secret: detail.secret === true }); break;
+          case "select": await emit({ kind: "select", ref, label: detail.label ?? "" }); break;
+          case "check": await emit({ kind: "check", ref, checked: detail.checked === true }); break;
+          case "press": await emit({ kind: "press", ref, key: detail.key ?? "Enter" }); break;
+          default: break;
+          }
+        } finally {
+          pending.delete(inFlight);
+          release();
+        }
+      });
+      await context.addInitScript(OBSERVER_SCRIPT);
+      this.observerExposed = context;
+    }
+    /*
+     * The door is held: a document navigation — a form submitted, a link
+     * followed — waits, up to three seconds, for the observations in flight to
+     * settle, because the element a person just clicked has to be described on
+     * the page they clicked it on. The old document stays until the response
+     * comes; the person sees a page that takes a moment longer to load.
+     */
+    const hold = async (route: Route): Promise<void> => {
+      const request = route.request();
+      if (request.isNavigationRequest() && request.resourceType() === "document" && request.frame().parentFrame() === null && pending.size > 0) {
+        await Promise.race([settled(), new Promise((done) => setTimeout(done, 5000))]);
+      }
+      await route.continue().catch(() => undefined);
+    };
+    await context.route(() => true, hold);
+    const watchPage = (page: Page): void => {
+      page.on("framenavigated", (frame) => {
+        if (frame === page.mainFrame() && this.observer !== undefined) emit({ kind: "navigate", url: frame.url() });
+      });
+      page.on("close", () => {
+        if (context.pages().length === 0) finish();
+      });
+    };
+    for (const page of context.pages()) {
+      await page.evaluate(OBSERVER_SCRIPT).catch(() => undefined);
+      watchPage(page);
+    }
+    context.on("page", watchPage);
+    context.on("close", () => finish());
+    const onAbort = (): void => finish();
+    opts.signal?.addEventListener("abort", onAbort, { once: true });
+
+    const scripted = process.env["YAM_OBSERVE"];
+    if (scripted !== undefined && scripted !== "") {
+      void this.performScripted(JSON.parse(scripted) as ScriptedAction[], emit).then(() => finish());
+    }
+
+    await finished;
+    opts.signal?.removeEventListener("abort", onAbort);
+    await context.unroute(() => true, hold).catch(() => undefined);
+    await settled();
+    this.observer = undefined;
+    emit({ kind: "closed" });
+    await settled();
+  }
+
+  /** The scripted person (`YAM_OBSERVE`): each action through Playwright, with a beat between. */
+  private async performScripted(actions: readonly ScriptedAction[], emit: (event: ObservedEvent) => void): Promise<void> {
+    const beat = (): Promise<void> => new Promise((done) => setTimeout(done, 150));
+    for (const one of actions) {
+      const page = this.page();
+      try {
+        switch (one.action) {
+          case "goto": {
+            const url = one.url ?? "/";
+            const absolute = /^[a-z][a-z0-9+.-]*:/i.test(url) || this.baseUrl === undefined ? url : new URL(url, this.baseUrl).toString();
+            emit({ kind: "navigate", url: absolute, typed: true });
+            await page.goto(absolute);
+            break;
+          }
+          case "click": await page.click(one.selector ?? "body"); break;
+          case "fill": await page.fill(one.selector ?? "input", one.value ?? ""); break;
+          case "select": await page.selectOption(one.selector ?? "select", { label: one.value ?? "" }); break;
+          case "check": await page.check(one.selector ?? "input"); break;
+          case "uncheck": await page.uncheck(one.selector ?? "input"); break;
+          case "press": await page.press(one.selector ?? "body", one.value ?? "Enter"); break;
+          default: break;
+        }
+      } catch {
+        // A scripted action that cannot be performed is the script's problem, not the observer's.
+      }
+      await beat();
+      // The page holds a navigating click until the observation settles; the scripted person waits for it too.
+      await page.evaluate("window.__yamObserverIdle ? window.__yamObserverIdle() : undefined").catch(() => undefined);
+      await page.waitForLoadState("load").catch(() => undefined);
+      await page.waitForLoadState("networkidle", { timeout: 3000 }).catch(() => undefined);
+      await beat();
+    }
+    await this.page().waitForLoadState("networkidle", { timeout: 3000 }).catch(() => undefined);
+    await beat();
   }
 
   async open(session: SessionInit): Promise<void> {

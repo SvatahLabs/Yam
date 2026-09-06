@@ -380,3 +380,70 @@ never a person's flow); `record` prints, under a stopped step, that a 4xx/5xx is
 a page the application does not have and that the story is `init`'s example when
 it is; the human-gateway preamble says that record performs the flow as written.
 `packages/cli/src/scaffold.ts`, `packages/cli/test/scaffold.test.ts`.
+
+## T14.11 — Record is capture (Draft 2.23)
+
+**Why.** Atul: "I have not written any flow. If I had, the command should be
+`yam record --flow <file>`. `yam record` should mean I want to create a new
+flow and I am recording it as my manual interaction." Three sessions in a row
+had ended with `yam record` running a flow he had not written.
+
+**What.** `yam record` alone opens the browser at the application and records
+what the person does — each click, value, choice, key and navigation a sentence,
+each element a binding — until Enter at the terminal or the browser closes;
+`--flow`/`--all` bind a written flow (the previous behaviour). The surface
+contract gains `observe` (eleven capability flags); the Playwright adapter's
+in-page observer holds a navigating click or a submit until the element has been
+bound, which is what keeps a sign-in button's binding from being lost to the
+page it opens. `packages/adapter-playwright/src/observer.ts`,
+`packages/recorder/src/capture.ts`, `packages/cli/src/commands/capture.ts`.
+
+**A scripted person, against the sample application** (`YAM_OBSERVE`: go to
+/login, fill the username, fill the password, click sign in):
+
+```
+$ yam record --name "Sign in"
+  Go to "/"
+  Go to "/login"
+      login.username-field: bound from what you did
+  Type "someone@example.com" into the username field
+      login.sign-in-button: bound from what you did
+  Click the sign in button
+      login.password-field: bound from what you did
+  Type {input.password} into the password field
+  The URL should contain "/dashboard"
+
+wrote flows/sign-in.flow: "Sign in", 6 steps; 3 bindings written
+
+  yam check     read, lint and compile the flow
+  yam run --input password=…    replay it with no model in the loop
+
+$ cat flows/sign-in.flow
+story: Sign in
+inputs: password: secret
+  Go to "/"
+  Go to "/login"
+  Type "someone@example.com" into the username field
+  Type {input.password} into the password field
+  Click the sign in button
+  The URL should contain "/dashboard"
+
+test: Sign in
+
+$ yam run --no-check --input password=secret-1
+  ✓ Sign in · Go to "/"
+  ✓ Sign in · Go to "/login"
+  ✓ Sign in · Type "someone@example.com" into the username field
+  ✓ Sign in · Type {input.password} into the password field
+  ✓ Sign in · Click the sign in button
+  ✓ Sign in · The URL should contain "/dashboard"
+6 passed, 0 failed, 0 skipped
+```
+
+(The lines under the sentences print when each element is bound, which is why
+the click shows before the password there; the flow has them in the order they
+were done.)
+
+**Known limits.** Web only, main frame only; a navigation a script starts
+without a click or submit relies on the adapter's request hold; the app's
+Record button still starts the binding session (`POST /record`), not capture.

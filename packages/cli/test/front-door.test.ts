@@ -69,7 +69,7 @@ describe("the next verb, in LLD §15.1's order", () => {
   });
   it("unbound targets → record, naming the first phrase", () => {
     const next = nextVerb({ ...base, unbound: [{ id: "login.username-field", phrase: "the username field" }] });
-    expect(next.verb).toBe("yam record");
+    expect(next.verb).toBe("yam record --all");
     expect(next.because).toContain("the username field");
   });
   it("a locator failure → heal", () => {
@@ -149,7 +149,7 @@ describe("`yam` with no arguments (REQ-CLI-1)", () => {
     expect(state.plan).toBe("current");
     expect(state.unbound.map((one) => one.id)).toContain("home.sign-in-button");
     const next = nextVerb(state);
-    expect(next.verb).toBe("yam record");
+    expect(next.verb).toBe("yam record --all");
 
     const { code, out } = await cli("status", dir);
     expect(code).toBe(EXIT.ok);

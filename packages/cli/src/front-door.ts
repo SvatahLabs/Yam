@@ -305,7 +305,7 @@ export function nextVerb(state: ProjectState): NextStep {
   if (state.unbound.length > 0) {
     const first = state.unbound[0]!;
     return {
-      verb: "yam record",
+      verb: "yam record --all",
       because:
         `${state.unbound.length} target${state.unbound.length === 1 ? " has" : "s have"} no binding yet, ` +
         `starting with \`${first.phrase}\`.`,

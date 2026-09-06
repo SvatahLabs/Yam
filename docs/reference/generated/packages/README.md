@@ -11,7 +11,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-adapter-ax`](adapter-ax.md) | 44 | macOS Accessibility adapter: the Yam agent surface over AXUIElement |
 | [`@svatah/yam-adapter-bidi`](adapter-bidi.md) | 40 | WebDriver BiDi adapter (independence proof) |
 | [`@svatah/yam-adapter-http`](adapter-http.md) | 14 | HTTP/API adapter |
-| [`@svatah/yam-adapter-playwright`](adapter-playwright.md) | 37 | Default web adapter: AgentSurface on Playwright |
+| [`@svatah/yam-adapter-playwright`](adapter-playwright.md) | 41 | Default web adapter: AgentSurface on Playwright |
 | [`@svatah/yam-adapter-uia`](adapter-uia.md) | 39 | Windows UI Automation adapter: the Yam agent surface over UIAutomationClient |
 | [`@svatah/yam-bindings`](bindings.md) | 53 | Bindings store, context hash, resolver, synthesis, fingerprint, relocalization |
 | [`@svatah/yam-bindings-cli`](bindings-cli.md) | 28 | The yam-bindings command line: bindings, heal, surface conform and the healing eval for module (a) |
@@ -22,7 +22,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-host-playwright`](host-playwright.md) | 22 | Playwright Test host for Yam flows: the yam fixture, generated specs and the results reporter |
 | [`@svatah/yam-migrate`](migrate.md) | 34 | v1/v2 to v3 migration and prototype database import |
 | [`@svatah/yam-playwright-test`](playwright-test.md) | 23 | The bind() fixture for an existing Playwright Test project |
-| [`@svatah/yam-recorder`](recorder.md) | 43 | Grounding, record session and report |
+| [`@svatah/yam-recorder`](recorder.md) | 51 | Grounding, record session and report |
 | [`@svatah/yam-runtime`](runtime.md) | 50 | Runner-agnostic executor core: scope, guards, checkpoints, policies, results, audit |
 | [`@svatah/yam-schema`](schema.md) | 177 | Zod definitions and generated JSON Schemas for the Yam artifact contracts |
 | [`@svatah/yam-screens`](screens.md) | 92 | The headless screen model: one set of screens, actions and keys behind the app, `yam ui`, the SDK and the CLI |
@@ -30,7 +30,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-service`](service.md) | 17 | Local HTTP and event-stream service (yam serve) |
 | [`@svatah/yam-spec`](spec.md) | 54 | Flow reader, grammar, target dictionary, signatures |
 | [`@svatah/yam-steps`](steps.md) | 30 | defineStep API and the Tier 0 matcher |
-| [`@svatah/yam-surface`](surface.md) | 99 | The published AgentSurface interface, adapter registry and wire schemas |
+| [`@svatah/yam-surface`](surface.md) | 100 | The published AgentSurface interface, adapter registry and wire schemas |
 | [`@svatah/yam-tool`](tool.md) | 17 | MCP tool server exposing stories as deterministic tools |
 | [`@svatah/yam-trajectory`](trajectory.md) | 18 | Trajectory capture and compile to proposals |
 | [`@svatah/yam-tui`](tui.md) | 34 | `yam ui` — the terminal cockpit, a second renderer of the screen model (REQ-TUI-1) |

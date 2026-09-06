@@ -612,7 +612,12 @@ The owner's decision of 2026-09-07: the command line is hard to understand and f
 **Do:** `endpoints` and `endpoint` in the config schema; `loadConfig` applies the selected endpoint and refuses an unknown one naming the known; `--endpoint` global; `yam init` interactive at a terminal and flag-driven otherwise, never pointing at the sample application, with a first story that runs anywhere; the front door's `app` line; the session topic.
 **Validate:** `init --yes` writes no reference to port 4173 and says to set the base URL; `--url` and repeated `--endpoint` write the endpoints and the project lints; a malformed `--endpoint` is refused; `loadConfig` with `YAM_ENDPOINT` applies base URL, storage state and kind and names the known endpoints for an unknown one; `yam --endpoint staging --json` reports the endpoint and the others.
 
-Phase 14 total: 11.5 ideal days.
+### T14.11 Record is capture (Draft 2.23)
+**Refs:** REQ-REC-13, LLD §2.1, §2.4, §11, §15.1 · **Est:** 2
+**Do:** the `observe` capability and method on the contract, declared false by every adapter and true by Playwright, with the document row and the session-spec proof; the in-page observer with the page-side hold and the scripted person; `capture()` in the recorder; `yam record` branches on the binding options; help, front door, catalogue, init's next steps, the guide.
+**Validate:** against the sample application a scripted person goes to /login, types a username and a password and clicks sign in: the flow has six sentences in the order they were done, the password is a `secret` input, three bindings under `bindings/login/` carry `human`/`capture`, and the flow checks and replays to /dashboard; `yam record` under CI refuses naming `--flow`; the contract tests count eleven flags; the Playwright session spec proves `observe`.
+
+Phase 14 total: 13.5 ideal days.
 
 ---
 
@@ -748,6 +753,7 @@ Phase 15 total: 11 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.23 (record is capture, owner decision of 2026-09-07): T14.11 added. Total 297.5 ideal days.
 - Draft 2.22 (endpoints, owner decision of 2026-09-07): T14.10 added. Total 295.5 ideal days.
 - Draft 2.21 (the human gateway and explore, owner decision of 2026-09-07): T14.8 and T14.9 added to Phase 14. Total 294.5 ideal days.
 - Draft 2.20 (the front door, owner decision of 2026-09-07): Phase 14 inserted before the publish — the state-and-next-verb default, `check` and plan currency, one-screen help with per-command help and topics, the diagnostics catalogue, the tmux workspace, the documentation and self checks; process and terminal becomes Phase 15 with T15.1–T15.4. Total 291 ideal days.

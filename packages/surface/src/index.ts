@@ -11,6 +11,7 @@
  * adapter implementer needs one import.
  */
 
+export type { ObservedEvent } from "./surface.js";
 export type {
   AgentSurface,
   SurfaceMethod,

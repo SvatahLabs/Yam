@@ -106,7 +106,8 @@ yam init                       # start a project here
 yam                            # where you are, and what to do next
 yam explore                    # or let an agent draft the flow; a proposal to review
 yam check                      # read, lint and compile the flows; writes .yam/plan.json
-yam record                     # bind the targets by driving the real application
+yam record                     # record a flow from what you do in the real application
+yam record --flow <file>       # or bind the targets of a flow you wrote, by driving it
 yam run                        # replay the plan; the exit code is the verdict
 yam heal                       # repair the bindings the interface moved, from the last run
 yam ui --tmux                  # the cockpit, a shell, the run's events, your editor
