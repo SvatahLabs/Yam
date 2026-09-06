@@ -52,6 +52,10 @@ jobs:
       - name: Licence check (REQ-PKG-3)
         run: pnpm check:licenses
 
+      # T13.5: the generated reference pages cannot drift from the code.
+      - name: Documentation is current
+        run: pnpm docs:check
+
       # Phase 1 adapter and host tests drive a real browser (LLD §1). Only
       # chromium is required; `--with-deps` installs the system libraries the
       # Linux runner needs.
