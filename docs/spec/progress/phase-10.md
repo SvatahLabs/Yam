@@ -13,6 +13,33 @@ its place. Nothing here reports a number nobody took.
 empty. The only change under `docs/spec/design/` is four **added** artboards
 (T10.2, below); nothing existing there is edited.
 
+## The results, stated up front
+
+- **All twelve screens of LLD §13.7 render in both renderers.** The packaged ADE
+  drives every one of them through its own controls under Playwright — 34 cases,
+  including one per screen asserting that *every* interactive control on it has
+  an accessible name and an id — and `svatah ui` draws every one of them in a
+  real pseudo-terminal against a real service, one case each.
+- **The eleven legacy screens are gone.** `apps/ade/src/renderer/screens/` and
+  `app.css` are deleted with the Legacy rail item; the desktop conformance cases
+  and the nine recorded trees are re-taken against the new structure; the
+  **id** half of §13.7's accessibility contract, which Phase 9 could not turn on
+  because those screens had named controls with no ids, is on.
+- **A run can be stopped from the screen that started it.**
+  `POST /runs/:id/stop` cancels between steps, the summary says `stopped`, and
+  `audit.jsonl` names the last step that ran. Driven end to end on the packaged
+  application.
+- **All seven Phase 9 corrections are made, each with the failure reproduced
+  first.** The fixture check no longer depends on a directory it does not own;
+  axe-core is fetched at test time and agrees with the in-house audit at zero;
+  the state carries instants and the cockpit fits the terminal; the Run screen's
+  toolbar, heading and audit line are fixed; `ax/session` exists and the gate
+  names it.
+- **What this host could not do is say whether the live macOS gate passes.** It
+  got further than Phase 9's — a window in 4972 ms and the project screen in
+  8179 ms — and then stopped producing windows at all. Recorded as K1, with
+  everything tried.
+
 ## The host, and what it could and could not do
 
 - macOS 15 (`darwin arm64`), Node v25.6.1 (the current LTS line's successor on
@@ -502,25 +529,55 @@ runtime: /opt/homebrew/bin/node (v25.6.1, from PATH)
 The three-OS matrix definition is unchanged and still asserted by
 `tools/repo-checks/test/ci.test.ts`.
 
-### Validate — the live macOS gate
+### Validate — the live macOS gate: attempted, and further than Phase 9 got
 
-**Not run here, and the reason is not the display.** `svatah surface doctor
---adapter ax` reports `ok ax/session — 9 application(s) own a window`, so this
-host could run it; what it cannot do is take a screenshot, because Screen
-Recording is a separate grant this terminal does not have (`warn
-ax/screen-recording`). The gate itself needs the Accessibility permission for the
-*bridge*, which is granted, and the bridge reads the ADE's window — the
-`pnpm ade:shoot` run above got as far as the window read and then timed out at
-10 s on a machine also running the test suite.
+**The display is unlocked and the session is usable**, which is the first thing
+`ax/session` is for and the first phase in which it can be said:
 
-The command a verifier should run, on an unlocked display with the grant, three
-times and once beside `pnpm -r test`:
+```console
+$ node packages/cli/dist/bin.js surface doctor --adapter ax
+ok    ax/accessibility       granted
+ok    ax/session             9 application(s) own a window: Notification Center, Notes, Finder, …
+warn  ax/screen-recording    refused — could not create image from rect
+```
+
+**The first attempt launched the ADE and opened the project**, which Phase 9's
+never did:
+
+```console
+$ node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md
+variant 0: the ADE's window appeared after 4972 ms
+variant 0: the project screen was open after 8179 ms (…/evals/fixtures)
+the previous launch was gone after 17033 ms
+the previous launch was gone after 15504 ms
+The ADE was launched at variant 1 but showed no window within 60000 ms.
+```
+
+That is worth stating precisely, because it is evidence about *this phase's own
+work*: the rebuilt ADE launches through LaunchServices, attaches to the
+WindowServer, opens the fixtures project without a dialog, and the gate's new
+`hasProject()` probe — which looks for `rail-flows`, T10.3's replacement for the
+deleted `screen-project` tab — saw it. Phase 9 and its verification both stopped
+at "no window within 60 s".
+
+**Every later launch produced a windowless process.** The application starts, its
+renderer runs — Playwright drives it over CDP in the same minute, 34 cases green
+— and `AXWindows` for it is empty while System Events reports the process
+visible. Tried with `open -n -F`, with a plain `open -a`, after killing every
+leftover and every `svatah serve`, and after a twenty-second pause: zero windows
+every time, on a session that `ax/session` calls usable. The preferences file
+holds nothing unusual (1280×860, no position).
+
+Nothing was written to `reports/adapter-ax.md`: a report from a run that could
+not start would be a result nobody took. The command a verifier should run, on a
+host that gives a launched application a window, three times and once beside
+`pnpm -r test`:
 
 ```console
 $ node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md
 ```
 
-It is listed under Known gaps below.
+It is K1 under Known gaps.
 
 ### The screenshots
 
@@ -634,16 +691,17 @@ and are `aria-hidden` now. LLD §3.3, §7.5.
 
 ## Known gaps
 
-**K1 — the live macOS AX gate is unrun on this host.** Not for Phase 9's reason:
-`svatah surface doctor --adapter ax` answers `ok ax/session — 9 application(s)
-own a window`, so the display is unlocked and the session is usable. What this
-terminal lacks is the **Screen Recording** grant, which is separate from
-Accessibility and is what `screencapture` needs, so the gate would run without
-screenshots; and the bridge's window read timed out at 10 s while the test suite
-was running beside it, which is exactly the load case Draft 2.10 §7.5 documents.
-The command that closes it, on a quiet machine with both grants:
+**K1 — the live macOS AX gate did not complete on this host.** Not for Phase 9's
+reason: the display is unlocked and `ax/session` says nine applications own a
+window. The gate's first attempt got the ADE's window in 4972 ms and its project
+screen in 8179 ms at variant 0 — further than Phase 9 or its verification ever
+reached — and every launch after that produced a process with no `AXWindows` at
+all, while Playwright drove the same build over CDP in the same minute. The
+transcript and everything tried are in the T10.3 section above. The command that
+closes it, on a host that gives a launched application a window:
 `node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md`,
-three times, once beside `pnpm -r test`.
+three times, once beside `pnpm -r test`. Screen Recording is a second, separate
+grant this terminal also lacks, so that host needs both.
 
 **K2 — no AX screenshot.** Same grant. `pnpm ade:shoot` takes the twelve renderer
 screenshots and says why the thirteenth is missing rather than fabricating one.
