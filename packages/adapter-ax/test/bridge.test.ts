@@ -13,7 +13,13 @@
  * permission* rather than an error.
  */
 import { describe, expect, it, vi } from "vitest";
-import { AxBridgeError, osascriptBridge, type runOsascript } from "../src/index.js";
+import {
+  AxBridgeError,
+  machineLoad,
+  osascriptBridge,
+  PERFORM_SCRIPT,
+  type runOsascript,
+} from "../src/index.js";
 
 type Run = typeof runOsascript;
 
@@ -374,5 +380,173 @@ describe("performing a command", () => {
       using: ["command down"],
     });
     expect(calls[0]!.argument).toMatchObject({ code: 36, using: ["command down"] });
+  });
+});
+
+/**
+ * P8-F1 — several processes share the target's name, and only one has a window.
+ *
+ * > When several processes share the name, the bridge addresses the one that
+ * > owns a window. (Draft 2.10, LLD §7.5)
+ *
+ * `window()` already chose that way — `frontWindowOf` walks
+ * `NSWorkspace.runningApplications` and skips anything with no `AXWindow`. The
+ * *perform* script did not: it asked System Events for
+ * `applicationProcesses.byName(…)`, which answers the first match, and for the
+ * seconds after a `pkill` the first match is the instance that is still exiting.
+ *
+ * The script is macOS-only and never runs anywhere a test does, so it is
+ * executed here against a fake System Events: three processes called "Svatah
+ * ADE", the first two with no window, the third with the one the command must
+ * reach.
+ */
+describe("the perform script chooses the process that owns a window (P8-F1)", () => {
+  /** One fake System Events process: a name, and the windows it will admit to. */
+  interface FakeProcess {
+    readonly name: string;
+    /** The window's children, or an empty list for "this instance has no window". */
+    readonly children: readonly unknown[];
+    /** A process that throws when asked for its windows, as a dying one can. */
+    readonly refuses?: boolean;
+  }
+
+  /** Run `PERFORM_SCRIPT`'s `run(argv)` against a fake `Application(name)`. */
+  function perform(
+    command: Record<string, unknown>,
+    processes: readonly FakeProcess[],
+  ): { answer: { ok: boolean; error?: string }; frontmost: readonly string[] } {
+    const frontmost: string[] = [];
+    const wrapped = processes.map((one, at) => ({
+      name: one.name,
+      windows: () => {
+        if (one.refuses === true) throw new Error("the process refuses the question");
+        return one.children.length === 0 ? [] : [{ uiElements: () => one.children }];
+      },
+      set frontmost(_value: boolean) {
+        frontmost.push(`${one.name}#${at}`);
+      },
+    }));
+    const application = (): unknown => ({
+      applicationProcesses: {
+        whose:
+          ({ name }: { name: string }) =>
+          () =>
+            wrapped.filter((one) => one.name === name),
+        byName: (name: string) => wrapped.find((one) => one.name === name),
+      },
+      keystroke: () => undefined,
+      keyCode: () => undefined,
+      click: () => undefined,
+    });
+
+    const factory = new Function("Application", `${PERFORM_SCRIPT}\nreturn run;`) as (
+      app: unknown,
+    ) => (argv: string[]) => string;
+    return {
+      answer: JSON.parse(factory(application)([JSON.stringify(command)])) as {
+        ok: boolean;
+        error?: string;
+      },
+      frontmost,
+    };
+  }
+
+  const noWindow: FakeProcess = { name: "Svatah ADE", children: [] };
+  const withWindow = (mark: { pressed: boolean }): FakeProcess => ({
+    name: "Svatah ADE",
+    children: [
+      {
+        actions: {
+          byName: () => ({
+            perform: () => {
+              mark.pressed = true;
+            },
+          }),
+        },
+      },
+    ],
+  });
+
+  it("presses the element in the instance that has a window, not the first match", () => {
+    const mark = { pressed: false };
+    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Svatah ADE" }, [
+      noWindow,
+      noWindow,
+      withWindow(mark),
+    ]);
+    expect(answer.ok).toBe(true);
+    expect(mark.pressed).toBe(true);
+  });
+
+  it("skips a process that refuses the question rather than failing on it", () => {
+    const mark = { pressed: false };
+    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Svatah ADE" }, [
+      { ...noWindow, refuses: true },
+      withWindow(mark),
+    ]);
+    expect(answer.ok).toBe(true);
+    expect(mark.pressed).toBe(true);
+  });
+
+  it("activates the windowed instance too", () => {
+    const { answer, frontmost } = perform({ kind: "activate", process: "Svatah ADE" }, [
+      noWindow,
+      withWindow({ pressed: false }),
+    ]);
+    expect(answer.ok).toBe(true);
+    expect(frontmost).toEqual(["Svatah ADE#1"]);
+  });
+
+  it("still answers `no-window` when not one of them has a window", () => {
+    const { answer } = perform({ kind: "focus", path: [0], process: "Svatah ADE" }, [
+      noWindow,
+      noWindow,
+    ]);
+    expect(answer.ok).toBe(false);
+    expect(answer.error).toBe("no-window");
+  });
+});
+
+/**
+ * P8-F2 — the cost line carries the machine, not only the bridge.
+ *
+ * > The bridge cost line says nothing about load (1.6 ms per node at load
+ * > average seven, 29.6 beside the test suite, on one machine). Record the
+ * > one-minute load average and the CPU count beside the cost.
+ */
+describe("the snapshot cost records what the machine was doing (P8-F2, LLD §7.5)", () => {
+  /** Record and field separators, as `WINDOW_SCRIPT` writes them. */
+  const RS = "\u001e";
+  const US = "\u001f";
+  /** One window record in that wire format. */
+  const window1 = (flags: string, calls: string): string =>
+    ["OK", "Svatah ADE", flags, calls, "1"].join(US) +
+    RS +
+    ["-1", "AXWindow", "AXStandardWindow", "Svatah ADE", ...new Array(14).fill(""), "AXRaise", ""].join(
+      US,
+    );
+
+  it("puts the one-minute load average and the CPU count on every read", async () => {
+    const { run } = answering(window1("", "17"));
+    const window = await osascriptBridge({ process: "Svatah ADE", run }).window({
+      process: "Svatah ADE",
+      maxNodes: 10,
+    });
+
+    expect(window.cost.loadAverage1m).toBe(machineLoad().loadAverage1m);
+    expect(window.cost.cpus).toBe(machineLoad().cpus);
+    expect(window.cost.cpus).toBeGreaterThan(0);
+  });
+
+  it("puts them in the timeout message too, which is where they are needed most", async () => {
+    // The `D` flag: the script stopped itself at the deadline and reported what
+    // it had, which is §7.5's "bridge timeout with those numbers".
+    const { run } = answering(window1("D", "9000"));
+    await expect(
+      osascriptBridge({ process: "Svatah ADE", run }).window({
+        process: "Svatah ADE",
+        maxNodes: 10,
+      }),
+    ).rejects.toThrow(/load average [\d.]+ over \d+ CPUs/);
   });
 });

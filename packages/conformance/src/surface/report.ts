@@ -29,10 +29,26 @@ function bridgeLine(cost: BridgeCost): string {
       : cost.appleEvents === undefined
         ? ""
         : `, ${cost.appleEvents} Apple events`;
+  /*
+   * The load and the CPU count (P8-F2, Draft 2.10 §7.5).
+   *
+   * Without them the sentence is honest each time and useless across runs: 1.6
+   * ms per node at load average seven and 29.6 beside a full test run are the
+   * same bridge reading the same window.
+   */
+  const machine =
+    cost.loadAverage1m === undefined
+      ? ""
+      : `, load average ${cost.loadAverage1m}` +
+        (cost.cpus === undefined ? "" : ` over ${cost.cpus} CPUs`);
+  const retried =
+    cost.retried === true
+      ? " The first read exceeded the deadline and this is the retry (LLD §7.5)."
+      : "";
   return (
     `Bridge: the largest window read was ${cost.nodes} nodes in ${cost.wallMs} ms ` +
     `(${cost.msPerNode} ms per node${events}, ${cost.invocations} process ` +
-    `invocation${cost.invocations === 1 ? "" : "s"}).`
+    `invocation${cost.invocations === 1 ? "" : "s"}${machine}).${retried}`
   );
 }
 

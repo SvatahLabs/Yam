@@ -33,6 +33,7 @@
  * than being a convenience.
  */
 import { spawn } from "node:child_process";
+import { availableParallelism, loadavg } from "node:os";
 
 /**
  * One automation element, flattened (LLD §7.5).
@@ -101,6 +102,33 @@ export interface UiaSnapshotCost {
   readonly msPerNode: number;
   /** How many PowerShell processes the read took. One, by design. */
   readonly invocations: number;
+  /**
+   * The one-minute load average when the read finished (Draft 2.10 §7.5, P8-F2).
+   *
+   * The same reason as the AX bridge's: the budget is wall-clock, and a
+   * wall-clock number with nothing beside it says as much about what else the
+   * machine was running as about the bridge. Windows has no `getloadavg`, and
+   * Node answers `[0, 0, 0]` there — which is reported as it is, a zero that
+   * means "this platform does not have the number", rather than as a quiet
+   * machine.
+   */
+  readonly loadAverage1m: number;
+  /** How many logical CPUs that load is spread over. */
+  readonly cpus: number;
+}
+
+/**
+ * What the machine was doing when a read finished (Draft 2.10 §7.5, P8-F2).
+ *
+ * `loadavg()` is `[0, 0, 0]` on Windows, which is where this bridge runs. The
+ * field is still recorded, because a report that carries the number on one
+ * platform and omits it on another is two report formats, and because a UIA
+ * bridge run through WSL or on a Windows build that grows the call would then
+ * publish it without a change here.
+ */
+function machineLoad(): { loadAverage1m: number; cpus: number } {
+  const [oneMinute = 0] = loadavg();
+  return { loadAverage1m: Math.round(oneMinute * 100) / 100, cpus: availableParallelism() };
 }
 
 export interface UiaWindow {
@@ -665,6 +693,7 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
           wallMs,
           msPerNode: nodes.length === 0 ? wallMs : Math.round((wallMs / nodes.length) * 100) / 100,
           invocations: 1,
+          ...machineLoad(),
         },
       };
     },

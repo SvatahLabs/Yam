@@ -162,6 +162,25 @@ export interface BridgeCost {
    * that describes what a read did.
    */
   readonly axCalls?: number;
+  /**
+   * The one-minute load average when the costliest read finished (P8-F2).
+   *
+   * Draft 2.10 §7.5: "The cost line therefore records the one-minute load
+   * average and the CPU count beside nodes, wall time and ms per node." The
+   * budget is wall-clock, so the same bridge reading the same window costs 1.6
+   * ms per node on a quiet machine and 29.6 beside a full test run. Optional
+   * because a browser adapter has no bridge at all, and a recorded tree has no
+   * machine to describe.
+   */
+  readonly loadAverage1m?: number;
+  /** How many logical CPUs that load is spread over. */
+  readonly cpus?: number;
+  /**
+   * True when the suite ran this variant a second time because the first read
+   * exceeded the bridge's deadline (P8-F2, Draft 2.10 §7.5: "a read that exceeds
+   * the deadline is retried once by the gate, and the report says it was").
+   */
+  readonly retried?: boolean;
 }
 
 export interface ConformanceReport {

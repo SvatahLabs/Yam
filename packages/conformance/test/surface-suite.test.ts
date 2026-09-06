@@ -239,6 +239,9 @@ describe("the bridge cost a desktop report publishes (T7.1, LLD §7.5)", () => {
     appleEvents?: number;
     axCalls?: number;
   }
+    loadAverage1m?: number;
+    cpus?: number;
+    retried?: boolean;
 
   class Measured extends BrokenAdapter {
     constructor(private readonly next: () => Cost) {

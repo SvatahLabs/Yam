@@ -393,6 +393,66 @@ const stop = () => {
 };
 process.on("exit", stop);
 
+/** The variants whose first read exceeded the deadline and were run again. */
+const retries = [];
+
+/** Run the conformance suite once against the ADE that is up, and parse it. */
+function runSuite(variant, statePath) {
+  const conform = spawnSync(
+    process.execPath,
+    [
+      cli,
+      "surface",
+      "conform",
+      "--adapter",
+      adapter,
+      "--process",
+      PROCESS_NAME,
+      "--variant",
+      String(variant),
+      "--heal-state",
+      statePath,
+      "--json",
+    ],
+    { encoding: "utf8", cwd: project, maxBuffer: 64 * 1024 * 1024 },
+  );
+  process.stderr.write(conform.stderr ?? "");
+  try {
+    return JSON.parse(conform.stdout ?? "");
+  } catch {
+    die(
+      1,
+      `The suite produced no report at variant ${variant}.\n${conform.stdout ?? ""}\n${conform.stderr ?? ""}`,
+    );
+  }
+}
+
+/**
+ * Did the bridge run out of time, rather than the adapter being wrong (P8-F2)?
+ *
+ * The bridge says so in its own words — LLD §7.5 requires a timeout after
+ * `doctor` reported `granted` to be reported as a bridge timeout with the
+ * numbers, never as a permission prompt — so this looks for that sentence and
+ * for the `no-window` a launch race leaves (P8-F1), and for nothing else. A
+ * failed assertion about a control is not retried: it would be the same failure
+ * twice and twice as slow.
+ */
+function exceededDeadline(report) {
+  const text = JSON.stringify(report ?? {});
+  return (
+    text.includes("did not finish reading the window") ||
+    text.includes("did not answer within") ||
+    text.includes("has no window. Is it running")
+  );
+}
+
+/*
+ * A leftover from an earlier gate run is the same defect as a leftover from the
+ * previous variant (P8-F1), so the first launch gets the same clean slate the
+ * other two do.
+ */
+stop();
+
 try {
   for (const variant of [0, 1, 2]) {
     const launched = await launch(variant);
@@ -414,36 +474,43 @@ try {
     }
 
     const jsonPath = join(workspace, `variant-${variant}.json`);
-    const conform = spawnSync(
-      process.execPath,
-      [
-        cli,
-        "surface",
-        "conform",
-        "--adapter",
-        adapter,
-        "--process",
-        PROCESS_NAME,
-        "--variant",
-        String(variant),
-        "--heal-state",
-        healState,
-        "--json",
-      ],
-      { encoding: "utf8", cwd: project, maxBuffer: 64 * 1024 * 1024 },
-    );
-    process.stderr.write(conform.stderr ?? "");
+    let parsed = runSuite(variant, healState);
     stop();
 
-    let parsed;
-    try {
-      parsed = JSON.parse(conform.stdout ?? "");
-    } catch {
-      die(
-        1,
-        `The suite produced no report at variant ${variant}.\n${conform.stdout ?? ""}\n${conform.stderr ?? ""}`,
+    /*
+     * One retry when the bridge ran out of time (P8-F2, Draft 2.10 §7.5).
+     *
+     * > a read that exceeds the deadline is retried once by the gate, and the
+     * > report says it was.
+     *
+     * The budget is wall-clock, so a machine that was busy for ten seconds is
+     * the difference between a conformant adapter and a failed gate — and the
+     * answer to "was the machine busy?" is to ask it again rather than to
+     * publish a failure nobody can reproduce. Exactly once: a gate that kept
+     * retrying would report the best of N reads, which is not what §7.5's
+     * budget means.
+     */
+    if (exceededDeadline(parsed)) {
+      process.stderr.write(
+        `variant ${variant}: a window read exceeded the bridge's deadline; ` +
+          "retrying this variant once (LLD §7.5, P8-F2)\n",
       );
+      const relaunched = await launch(variant);
+      running = relaunched.child;
+      if (!relaunched.timedOut) {
+        const again = runSuite(variant, healState);
+        stop();
+        parsed = { ...again, ...(again.bridge === undefined ? {} : { bridge: { ...again.bridge, retried: true } }) };
+        retries.push(variant);
+      } else {
+        process.stderr.write(
+          `variant ${variant}: the retry's launch showed no project screen; ` +
+            "the first run's report stands.\n",
+        );
+        stop();
+      }
     }
+
     writeFileSync(jsonPath, JSON.stringify(parsed, null, 2), "utf8");
     passes.push({ variant, report: parsed });
   }
@@ -485,7 +552,20 @@ try {
               ? ""
               : `, ${bridge.appleEvents} Apple events`
         }, ` +
-        `${bridge.invocations} process invocation per snapshot.`,
+        `${bridge.invocations} process invocation per snapshot, ` +
+        /*
+         * The load beside the cost (P8-F2, Draft 2.10 §7.5). Without it the
+         * number is honest and not comparable: the same read cost 1.6 ms per
+         * node at load average seven here and 29.6 beside a full test run.
+         */
+        `at **load average ${bridge.loadAverage1m ?? "unrecorded"}` +
+        `${bridge.cpus === undefined ? "" : ` over ${bridge.cpus} CPUs`}**.`,
+    "",
+    retries.length === 0
+      ? "No variant's window read exceeded the bridge's deadline, so nothing was retried."
+      : `Retried once (LLD §7.5): variant${retries.length === 1 ? "" : "s"} ` +
+        `${retries.join(", ")} — the first read exceeded the bridge's deadline and the ` +
+        "variant was run again. The numbers above are the retry's.",
     "",
     "## Healing (LLD §16)",
     "",

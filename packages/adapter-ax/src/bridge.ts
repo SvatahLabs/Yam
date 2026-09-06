@@ -60,6 +60,7 @@
  * written in and the situation CI is in.
  */
 import { spawn } from "node:child_process";
+import { availableParallelism, loadavg } from "node:os";
 
 /**
  * One accessibility element, flattened (LLD §7.5).
@@ -142,6 +143,19 @@ export interface AxSnapshotCost {
    * report that said "Apple events: 9,400" would be false.
    */
   readonly axCalls: number;
+  /**
+   * The one-minute load average when the read finished (Draft 2.10 §7.5, P8-F2).
+   *
+   * The budget is wall-clock, and wall-clock on a shared machine is a statement
+   * about the machine as much as about the bridge: the same window read here
+   * cost 1.6 ms per node at load average seven and 29.6 ms per node beside a
+   * full test run. "1.6 ms per node" alone is honest and useless. §7.5: "The
+   * cost line therefore records the one-minute load average and the CPU count
+   * beside nodes, wall time and ms per node."
+   */
+  readonly loadAverage1m: number;
+  /** How many logical CPUs that load is spread over. */
+  readonly cpus: number;
 }
 
 /** What the bridge was asked to do, and what came back. */
@@ -808,6 +822,22 @@ const WINDOW_DEADLINE_MS = 10_000;
  */
 const PROCESS_OVERHEAD_MS = 1_000;
 
+/**
+ * What the machine was doing when a read finished (Draft 2.10 §7.5, P8-F2).
+ *
+ * Read *after* the read rather than before it, because the one-minute average
+ * that matters is the one the read was competing with. `availableParallelism`
+ * rather than `cpus().length`: it is what the process is actually allowed to
+ * use, which on a container-limited CI runner is the smaller and truer number.
+ */
+export function machineLoad(): { loadAverage1m: number; cpus: number } {
+  const [oneMinute = 0] = loadavg();
+  return {
+    loadAverage1m: Math.round(oneMinute * 100) / 100,
+    cpus: availableParallelism(),
+  };
+}
+
 /** The real bridge: `osascript`, System Events, and this machine. */
 export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
   const run = options.run ?? runOsascript;
@@ -830,7 +860,8 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
       cost === undefined
         ? "no nodes came back"
         : `${cost.nodes} nodes in ${cost.wallMs} ms (${cost.msPerNode} ms per node, ` +
-          `${cost.axCalls} accessibility calls, ${cost.invocations} osascript invocation)`;
+          `${cost.axCalls} accessibility calls, ${cost.invocations} osascript invocation, ` +
+          `load average ${cost.loadAverage1m} over ${cost.cpus} CPUs)`;
     if (lastPermission === "granted") {
       return new AxBridgeError(
         `The accessibility bridge did not finish reading the window of "${processName}" within ` +
@@ -969,6 +1000,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
             : Math.round((wallMs / answer.nodes.length) * 100) / 100,
         invocations: 1,
         axCalls: answer.axCalls,
+        ...machineLoad(),
       };
 
       /*

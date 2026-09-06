@@ -6,6 +6,7 @@
  * See `README.md` for the permission this needs and how to grant it.
  */
 export {
+  machineLoad,
   osascriptBridge,
   parseWindow,
   runOsascript,
