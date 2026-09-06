@@ -26,17 +26,50 @@
  * the recording need neither, which is what keeps `@svatah/screens` a fast,
  * DOM-free package. `--check` is what a verifier runs to prove the recording is
  * still what the service says.
+ *
+ * ## Why it works on a copy (P9-F1, Draft 2.12 §13.7)
+ *
+ * > The fake service's fixtures are a recording taken against a **copy** of the
+ * > fixtures project in a temporary directory, never the committed one, so the
+ * > check does not depend on what else ran there.
+ *
+ * The first version ran `comp` inside `evals/fixtures` and recorded `GET /runs`,
+ * which answers with *every* run in that directory. The test suite leaves runs
+ * there, the client smoke leaves one, and so does anyone who runs a flow — so
+ * `--check` failed for reasons that had nothing to do with the fixtures, and
+ * passed only on a directory nobody had touched. A recording that depends on
+ * what else happened in a directory it does not own is not a recording of the
+ * project.
+ *
+ * So the project is copied to a temporary directory first — without `runs/` and
+ * without `node_modules/` — the run is made there, the service is opened there,
+ * and the copy is removed afterwards. The temporary path is normalised back to
+ * `<repo>/evals/fixtures` in the recording, because what the fixture is *about*
+ * is the committed project and not the directory this script borrowed.
  */
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp } from "sample-web";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
 const OUT = join(ROOT, "packages", "screens", "test", "fixtures");
-const PROJECT = join(ROOT, "evals", "fixtures");
+/** The committed project the recording is *about*. Never written to. */
+const SOURCE = join(ROOT, "evals", "fixtures");
+/** How the recording spells `SOURCE`, whatever directory the run happened in. */
+const AS_RECORDED = "<repo>/evals/fixtures";
 const TOKEN = "screen-fixtures";
 const RUN_ID = "comp";
 const FLOW = "flows/guards-and-compensation.flow";
@@ -56,11 +89,21 @@ const check = process.argv.includes("--check");
  * Stacks are dropped: they are the only field that names files this repository
  * will rename, and no screen shows one.
  */
-function stable(value) {
+function stable(value, workspace) {
   const seen = JSON.stringify(value, (key, one) => {
     if (key === "stack") return undefined;
     if (typeof one === "string") {
-      return one.replace(/127\.0\.0\.1:\d+/g, "127.0.0.1:PORT").split(ROOT).join("<repo>");
+      return one
+        .replace(/127\.0\.0\.1:\d+/g, "127.0.0.1:PORT")
+        /*
+         * The working copy first, then the checkout. The copy lives under
+         * `/var/folders/…` (or `/tmp`) and is a different directory on every
+         * run; the fixture is about `evals/fixtures`, so that is what it says.
+         */
+        .split(workspace)
+        .join(AS_RECORDED)
+        .split(ROOT)
+        .join("<repo>");
     }
     return one;
   });
@@ -113,7 +156,30 @@ if (!existsSync(CLI)) {
   process.exit(2);
 }
 
+/*
+ * The working copy (P9-F1, Draft 2.12 §13.7).
+ *
+ * `runs/` and `node_modules/` are left behind: the first is what made the check
+ * depend on its surroundings, and the second is a symlink farm nobody needs to
+ * copy. `.svatah/` goes too — it is a build product of `svatah compile` and the
+ * run makes its own.
+ */
 const app = await startSampleApp(0);
+/*
+ * `realpathSync`, because on macOS `mkdtemp` answers `/var/folders/…` and every
+ * program that resolves the path answers `/private/var/folders/…`. A recording
+ * normalised against only one of the two spellings keeps the other, which is an
+ * absolute path from this machine in a committed fixture.
+ */
+const workspace = realpathSync(mkdtempSync(join(tmpdir(), "svatah-screen-fixtures-")));
+const PROJECT = join(workspace, "fixtures");
+cpSync(SOURCE, PROJECT, {
+  recursive: true,
+  filter: (from) =>
+    !from.includes(`${sep}node_modules`) &&
+    !from.includes(`${sep}runs`) &&
+    !from.includes(`${sep}.svatah`),
+});
 const runsDir = join(PROJECT, "runs");
 let serve;
 try {
@@ -224,7 +290,7 @@ try {
     },
   };
 
-  const text = `${JSON.stringify(stable(fixtures), null, 2)}\n`;
+  const text = `${JSON.stringify(stable(fixtures, PROJECT), null, 2)}\n`;
   const path = join(OUT, "fixtures-project.json");
 
   if (check) {
@@ -257,4 +323,7 @@ try {
 } finally {
   serve?.kill("SIGTERM");
   await app.close();
+  // The copy is the point: nothing this script did touched `evals/fixtures`,
+  // and nothing it left behind can change what the next `--check` answers.
+  rmSync(workspace, { recursive: true, force: true });
 }
