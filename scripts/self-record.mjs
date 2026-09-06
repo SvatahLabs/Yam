@@ -29,6 +29,7 @@ import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writ
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { copyProjectParts } from "./lib/self-project.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
@@ -37,8 +38,9 @@ const bundle = join(ROOT, "apps", "ade", "out", "Svatah ADE-darwin-arm64", "Svat
 const keep = process.argv.includes("--keep");
 
 const project = mkdtempSync(join(tmpdir(), "svatah-self-record-"));
-for (const name of ["flows", "steps", "api"]) {
-  cpSync(join(source, name), join(project, name), { recursive: true });
+const skipped = copyProjectParts(source, project, ["flows", "steps", "api"]);
+if (skipped.length > 0) {
+  process.stderr.write(`the self project has no ${skipped.join(", ")}; copied without\n`);
 }
 cpSync(join(source, "data.yaml"), join(project, "data.yaml"));
 mkdirSync(join(project, "bindings"), { recursive: true });

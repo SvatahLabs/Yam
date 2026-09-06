@@ -29,6 +29,7 @@ import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } f
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { copyProjectParts } from "./lib/self-project.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
@@ -39,8 +40,9 @@ const keep = process.argv.includes("--keep");
 const scratch = mkdtempSync(join(tmpdir(), "svatah-parity-bite-"));
 const project = join(scratch, "self");
 mkdirSync(project, { recursive: true });
-for (const name of ["flows", "steps", "api", "bindings"]) {
-  cpSync(join(source, name), join(project, name), { recursive: true });
+const skipped = copyProjectParts(source, project, ["flows", "steps", "api", "bindings"]);
+if (skipped.length > 0) {
+  process.stderr.write(`the self project has no ${skipped.join(", ")}; copied without\n`);
 }
 cpSync(join(source, "data.yaml"), join(project, "data.yaml"));
 writeFileSync(
