@@ -62,6 +62,8 @@ Method: clean detached worktree of `phase-10`; the six-command contract with no 
 
 **F7 — The suite's ADE cases assume they own the machine's ADE.** They stop leftovers by path, so any other instance, a gate run or a person's, fails them. Document it in the contract and give the packaged test build its own bundle name or out directory. T11.7.
 
+**F9 — Two cockpit tests flake under the full parallel suite.** On master, two consecutive full runs each failed one different cockpit test and nothing else: `cockpit.test.tsx › runs renders without throwing` asserted while the frame still said `loading…`, and `tui-pty.test.ts › at 100 columns` timed out; each passes three times alone. Both wait a fixed time for an asynchronous load instead of polling for the state they assert. T11.7.
+
 **F8 — Spec drift absorbed (Draft 2.13).** The audit line's candidate form (D1); the Runs screen owns no action (D2); the six secondary screens in one file (D3); the Settings fixture name (D4); the collapsed inspector scrolls (D5); the fake-gateway note is not an alert (D6); crumb separators hidden from the tree (D7). K6 and K7, the read-only flow editor and the send-only API request, become T11.7's editing work, because a release cannot ship an "editor" that does not edit.
 
 ## What was confirmed beyond the report
