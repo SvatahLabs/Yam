@@ -2,7 +2,7 @@
  * T05 — Broker discovery and session lifecycle (SF-04, SF-05, SF-13, SF-15).
  */
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, rmSync, existsSync, readFileSync, statSync } from "node:fs";
+import { mkdtempSync, rmSync, existsSync, statSync } from "node:fs";
 import { tmpdir, platform } from "node:os";
 import { join } from "node:path";
 import {

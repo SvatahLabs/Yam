@@ -7,9 +7,10 @@
  * `yam_record`, `yam_heal`, `yam_bindings`, `yam_results` — require a project
  * and run the same functions the CLI runs.
  *
- * **The surface tools** — `surface_connect`, `surface_snapshot`, `surface_act`,
- * `surface_read`, `surface_check`, `surface_close`, `surface_sessions`,
- * `surface_capabilities`, `surface_describe`, `surface_screenshot` — drive a
+ * **The surface tools** — `surface_targets`, `surface_connect`, `surface_snapshot`,
+ * `surface_act`, `surface_read`, `surface_check`, `surface_close`,
+ * `surface_sessions`, `surface_capabilities`, `surface_describe`,
+ * `surface_screenshot` — drive a
  * live target through session IDs, with no project needed and intent optional.
  * Registered from the operation catalogue so one source of truth generates CLI,
  * MCP and service interfaces.
@@ -54,6 +55,7 @@ import {
   dispatchCapabilities,
   dispatchDescribe,
   dispatchScreenshot,
+  dispatchTargets,
   type DispatchContext,
 } from "@svatah/yam-surface-control";
 import { registerAllAdapters } from "../adapters.js";
@@ -532,6 +534,25 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
   );
 
   /* ── the surface tools, driven from the operation catalogue ──────────── */
+
+  const registeredAdapters = listAdapters();
+
+  server.registerTool(
+    "surface_targets",
+    {
+      title: "Discover available targets",
+      description:
+        "Discover what this machine can drive: available adapters, their readiness, and targets " +
+        "they can connect to. Call this before surface_connect to know what is possible.",
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+      inputSchema: {
+        url: z.string().optional().describe("Filter targets by URL"),
+        adapter: z.string().optional().describe("Filter by adapter name"),
+      },
+    },
+    async ({ url, adapter }) =>
+      text(await dispatchTargets(ctx, { url, adapter, registeredAdapters })),
+  );
 
   server.registerTool(
     "surface_connect",

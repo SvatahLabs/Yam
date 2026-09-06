@@ -121,7 +121,7 @@ describe("G04: adapter selection is real (SF-03, SF-04, SF-09)", () => {
     // from the request body, not just headed.
     // On baseline: Body type is { headed?: boolean } — no adapter field.
     const openRoute = source.match(
-      /["']\/surface\/:session\/open["'][\s\S]*?(?=fastify\.|\/\*\*|\n  \}\);)/,
+      /["']\/surface\/:session\/open["'][\s\S]*?(?=fastify\.|\/\*\*|\n {2}\}\);)/,
     );
     expect(openRoute).toBeTruthy();
     // After fix, the route body type should include adapter
