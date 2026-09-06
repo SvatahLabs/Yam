@@ -65,13 +65,13 @@ with no credential.
 | Command | Result on this host |
 |---|---|
 | `pnpm install --frozen-lockfile && pnpm -r build && pnpm -r typecheck && pnpm lint`, no credential, Node v25.6.1 | all exit 0 |
-| `pnpm -r test` | see the note below |
+| `pnpm -r test` | exit 0 — 3,424 vitest tests passed, 0 failed, plus the Playwright suites (34 in the packaged ADE, 13 and 9 in the adapter and host packages) |
 | `git diff master..phase-10 -- docs/spec/{requirements,hld,lld,tasks}.md` | empty |
 | `git diff master..phase-10 --name-status -- docs/spec/design` | four added artboards, nothing else |
 | `node scripts/record-screen-fixtures.mjs --check`, with three unrelated runs in `evals/fixtures/runs` | passes: 7 flows, 22 stories, 30 bindings, run `comp` exit 11 |
 | `node scripts/audit-sheet.mjs --axe "$(node scripts/fetch-axe.mjs)"` | axe-core 4.10.3: 0 violations; the audit: 0 violations, 27 distinctly named landmarks |
 | `node scripts/generate-clients.mjs --check` | 3 clients match: 37 routes, 16 event kinds |
-| `pnpm --filter @svatah/ade package && pnpm --filter @svatah/ade exec playwright test` | 34 passed |
+| `pnpm --filter @svatah/ade package && pnpm --filter @svatah/ade exec playwright test` | 34 passed, three consecutive runs |
 | `pnpm --filter @svatah/repo-checks exec vitest run test/tui-pty.test.ts` | 26 passed |
 | `pnpm --filter @svatah/adapter-ax test` / `--filter @svatah/adapter-uia test` | 91 passed, 1 skipped / 91 passed |
 | `node scripts/ade-smoke.mjs` | `smoke ok … packaged=yes runtime: /opt/homebrew/bin/node` |
