@@ -49,7 +49,7 @@ export function recordedWindow(screen: AdeScreen): AxWindow {
    * (Draft 2.8 §7.5). Filling in a plausible number here is exactly the thing
    * the Phase 6 verification caught the desktop suite doing.
    */
-  return { ...window, cost: { nodes: window.nodes.length, wallMs: 0, msPerNode: 0, invocations: 0, appleEvents: 0 } };
+  return { ...window, cost: { nodes: window.nodes.length, wallMs: 0, msPerNode: 0, invocations: 0, axCalls: 0 } };
 }
 
 export interface RecordedBridgeOptions {

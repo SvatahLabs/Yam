@@ -101,9 +101,11 @@ if (doctor.status !== 0) {
 
 /* ── 2. the ADE ───────────────────────────────────────────────────────────── */
 
+/** The macOS application bundle, which is what LaunchServices opens. */
+const bundle = join(ROOT, "apps", "ade", "out", "Svatah ADE-darwin-arm64", "Svatah ADE.app");
 const app =
   process.platform === "darwin"
-    ? join(ROOT, "apps", "ade", "out", "Svatah ADE-darwin-arm64", "Svatah ADE.app", "Contents", "MacOS", "Svatah ADE")
+    ? join(bundle, "Contents", "MacOS", "Svatah ADE")
     : join(ROOT, "apps", "ade", "out", `Svatah ADE-win32-x64`, "Svatah ADE.exe");
 
 if (!existsSync(app)) {
@@ -177,7 +179,7 @@ function hasProject() {
       "-l",
       "JavaScript",
       "-e",
-      "ObjC.import('ApplicationServices');" +
+      "ObjC.import('ApplicationServices');ObjC.import('AppKit');" +
         "function attr(e,n){const o=Ref();" +
         "if($.AXUIElementCopyAttributeValue(e,$(n),o)!==0)return undefined;return o[0];}" +
         "function run(argv){const apps=$.NSWorkspace.sharedWorkspace.runningApplications;" +
@@ -202,25 +204,57 @@ function hasProject() {
   return probe.status === 0 && (probe.stdout ?? "").trim() === "yes";
 }
 
-/** Launch the ADE at one variant and wait for its project screen; answer with the child. */
+/**
+ * The environment every launch gets.
+ *
+ * `SVATAH_ADE_PROJECT` is Draft 2.9 §13.6: "the desktop conformance gate passes
+ * the fixtures project this way, so its cases read a project screen rather than
+ * the welcome screen."
+ */
+function launchEnvironment(variant) {
+  return {
+    SVATAH_A11Y: "1",
+    ...(variant === 0 ? {} : { SVATAH_A11Y_VARIANT: String(variant) }),
+    SVATAH_CLI: cli,
+    SVATAH_ADE_SMOKE: "",
+    SVATAH_ADE_PROJECT: project,
+  };
+}
+
+/**
+ * Start the ADE so that it has a window (T8.2).
+ *
+ * On macOS through `open`, not by executing the binary. A GUI application
+ * forked from a process that is not in the user's Aqua session never attaches
+ * to the WindowServer: it runs, its renderer runs, and it has no window that
+ * either the accessibility API or System Events can see, for ever. Measured
+ * here — a direct `spawn` polled for 37 s and answered `windows=0` at every
+ * step, while the same build opened with `open -n` answered `1`. `open` hands
+ * the launch to LaunchServices, which places it in the session a person is
+ * looking at, which is the session this gate is about.
+ *
+ * `-F` so a restored window from a previous run cannot stand in for this one.
+ */
+function start(variant) {
+  const environment = launchEnvironment(variant);
+  if (process.platform !== "darwin") {
+    return spawn(app, [], { stdio: "ignore", detached: false, env: { ...process.env, ...environment } });
+  }
+  const args = ["-n", "-F"];
+  for (const [name, value] of Object.entries(environment)) args.push("--env", `${name}=${value}`);
+  args.push("-a", bundle);
+  const opened = spawnSync("open", args, { encoding: "utf8" });
+  if (opened.status !== 0) {
+    die(2, `\`open\` refused to launch ${bundle}: ${opened.stderr ?? ""}`);
+  }
+  // Nothing to hold: LaunchServices owns the process. `stop()` finds it by the
+  // executable path, which no other application on the machine shares.
+  return undefined;
+}
+
+/** Launch the ADE at one variant and wait for its project screen. */
 async function launch(variant) {
-  const child = spawn(app, [], {
-    stdio: "ignore",
-    detached: false,
-    env: {
-      ...process.env,
-      SVATAH_A11Y: "1",
-      ...(variant === 0 ? {} : { SVATAH_A11Y_VARIANT: String(variant) }),
-      SVATAH_CLI: cli,
-      SVATAH_ADE_SMOKE: "",
-      /*
-       * Draft 2.9 §13.6: "the desktop conformance gate passes the fixtures
-       * project this way, so its cases read a project screen rather than the
-       * welcome screen."
-       */
-      SVATAH_ADE_PROJECT: project,
-    },
-  });
+  const child = start(variant);
   const startedAt = Date.now();
   let windowAt;
   while (Date.now() - startedAt < WINDOW_TIMEOUT_MS) {
@@ -257,6 +291,11 @@ const stop = () => {
     // Already gone.
   }
   running = undefined;
+  if (process.platform === "darwin") {
+    // Started by LaunchServices, so there is no child to signal. The executable
+    // path is unique to this checkout's packaged build.
+    spawnSync("pkill", ["-f", app], { encoding: "utf8" });
+  }
 };
 process.on("exit", stop);
 
@@ -345,7 +384,13 @@ try {
       ? "The bridge cost was not measured on this run."
       : `Bridge (LLD §7.5): the largest window read was **${bridge.nodes} nodes in ` +
         `${bridge.wallMs} ms — ${bridge.msPerNode} ms per node**` +
-        `${bridge.appleEvents === undefined ? "" : `, ${bridge.appleEvents} Apple events`}, ` +
+        `${
+          bridge.axCalls !== undefined
+            ? `, ${bridge.axCalls} accessibility calls`
+            : bridge.appleEvents === undefined
+              ? ""
+              : `, ${bridge.appleEvents} Apple events`
+        }, ` +
         `${bridge.invocations} process invocation per snapshot.`,
     "",
     "## Healing (LLD §16)",

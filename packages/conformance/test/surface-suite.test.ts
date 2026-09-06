@@ -167,6 +167,68 @@ describe("an adapter with no faults", () => {
  * runner into both renderers, that the costliest read wins rather than the last,
  * and that a *recorded* tree is published as a recording rather than as a zero.
  */
+describe("a case with no result (Draft 2.9 §7.5, P7-F4)", () => {
+  const bare = {
+    page: "home",
+    description: "a case that observes nothing",
+  } as const;
+
+  it("reports a case that made no checks as skipped, not passed", async () => {
+    const report = await runSurfaceConformance({
+      adapter: "quiet",
+      baseUrl: "http://127.0.0.1:4173",
+      cases: [{ id: "quiet.nothing", ...bare, run: async () => undefined }],
+      openSurface: async () => new BrokenAdapter({}),
+    });
+    expect(report.cases[0]!.status).toBe("skipped");
+    expect(report.cases[0]!.skipReason).toContain("made no checks");
+    // And it does not count towards "7 of 7": a case that established nothing
+    // must not be able to make an adapter conformant.
+    expect(report.totals.passed).toBe(0);
+    expect(report.conformant).toBe(false);
+  });
+
+  it("lets a case say why it has nothing to measure here", async () => {
+    const report = await runSurfaceConformance({
+      adapter: "quiet",
+      baseUrl: "http://127.0.0.1:4173",
+      cases: [
+        {
+          id: "quiet.baseline",
+          ...bare,
+          run: async (context) => {
+            context.skip("recorded the variant-0 baseline");
+          },
+        },
+      ],
+      openSurface: async () => new BrokenAdapter({}),
+    });
+    expect(report.cases[0]!.status).toBe("skipped");
+    expect(report.cases[0]!.skipReason).toBe("recorded the variant-0 baseline");
+  });
+
+  it("still fails a case that skipped after a check went wrong", async () => {
+    // A skip must never bury a failure: the recording pass of a healing case
+    // asks for a control by its key, and a key that is not there is a result.
+    const report = await runSurfaceConformance({
+      adapter: "quiet",
+      baseUrl: "http://127.0.0.1:4173",
+      cases: [
+        {
+          id: "quiet.broken",
+          ...bare,
+          run: async (context) => {
+            context.check("the control is there", false);
+            context.skip("recorded the variant-0 baseline");
+          },
+        },
+      ],
+      openSurface: async () => new BrokenAdapter({}),
+    });
+    expect(report.cases[0]!.status).toBe("failed");
+  });
+});
+
 describe("the bridge cost a desktop report publishes (T7.1, LLD §7.5)", () => {
   /** An adapter that measures a bridge, the way `AxSurface.bridgeCost()` does. */
   interface Cost {
@@ -175,6 +237,7 @@ describe("the bridge cost a desktop report publishes (T7.1, LLD §7.5)", () => {
     msPerNode: number;
     invocations: number;
     appleEvents?: number;
+    axCalls?: number;
   }
 
   class Measured extends BrokenAdapter {
@@ -187,7 +250,7 @@ describe("the bridge cost a desktop report publishes (T7.1, LLD §7.5)", () => {
   }
 
   const withCost = async (
-    costs: ReadonlyArray<{ nodes: number; wallMs: number; msPerNode: number; invocations: number; appleEvents?: number }>,
+    costs: ReadonlyArray<Cost>,
   ): Promise<ConformanceReport> => {
     /*
      * Counted when the cost is *asked for*, not when a surface is opened: the
@@ -206,13 +269,15 @@ describe("the bridge cost a desktop report publishes (T7.1, LLD §7.5)", () => {
 
   it("publishes the three numbers §7.5 names, in both renderers", async () => {
     const report = await withCost([
-      { nodes: 488, wallMs: 5_070, msPerNode: 10.39, invocations: 1, appleEvents: 254 },
+      { nodes: 588, wallMs: 890, msPerNode: 1.51, invocations: 1, axCalls: 9_413 },
     ]);
-    expect(report.bridge).toMatchObject({ nodes: 488, wallMs: 5070, msPerNode: 10.39 });
+    expect(report.bridge).toMatchObject({ nodes: 588, wallMs: 890, msPerNode: 1.51 });
     for (const rendered of [renderReport(report), renderMarkdown(report)]) {
-      expect(rendered).toContain("488 nodes in 5070 ms");
-      expect(rendered).toContain("10.39 ms per node");
-      expect(rendered).toContain("254 Apple events");
+      expect(rendered).toContain("588 nodes in 890 ms");
+      expect(rendered).toContain("1.51 ms per node");
+      // Draft 2.9 §7.5's native helper sends no Apple events; what it makes is
+      // accessibility calls, and a report that said otherwise would be false.
+      expect(rendered).toContain("9413 accessibility calls");
       expect(rendered).toContain("1 process invocation");
     }
   });

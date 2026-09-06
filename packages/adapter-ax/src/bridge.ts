@@ -6,53 +6,50 @@
  * > keyboard events; documents the accessibility permission prompt and provides
  * > a `svatah surface doctor` check.
  *
- * ## Why `osascript`, and not a native module
+ * ## Two halves: a native helper for reading, System Events for acting
  *
- * A native N-API module would call `AXUIElementCopyAttributeValue` directly.
- * It would also need a compiler on every machine that installs this package,
- * which is what `node-gyp` means in practice — and REQ-PKG-3 keeps the
- * dependency tree permissive, not merely licensed. macOS already ships a client
- * of exactly that API: **System Events**, whose `UI elements` and
- * `attributes` are `AXUIElement` under a scripting name. Driving it through
- * `osascript -l JavaScript` needs nothing installed, needs the same
- * Accessibility permission a native module would, and reads the same tree.
+ * Draft 2.9 §7.5 permits exactly this split — "a native helper that reads
+ * `AXUIElement` directly when the process-based bridge cannot reach 10 s" — and
+ * the project screen is the measurement that forced it.
  *
- * ## The cost, and what Phase 6 got wrong about it (Draft 2.8 §7.5)
+ * **Reading** goes through `AXUIElementCopyAttributeValue` from inside an
+ * `osascript -l JavaScript` process, which reaches the accessibility API through
+ * JXA's Objective-C bridge and macOS's own BridgeSupport metadata. Nothing is
+ * installed, nothing is compiled, no `node-gyp`, no licence that is not Apple's
+ * own: it is a *native* read in the sense that matters — no Apple events — while
+ * staying a script this repository can ship as a string (REQ-PKG-3).
  *
- * Every Apple event costs about the same fixed ~16-25 ms whatever it carries,
- * so the only number that matters is **how many events a snapshot sends**. The
- * first version of this bridge walked the tree element by element and read
- * about seventeen attributes per element, one event each: measured against the
- * ADE's 35-node welcome window that is 650 ms *per node*, so the smallest
- * window the ADE has took ten seconds and the project screen would have taken
- * minutes. Every case of the live macOS gate failed on the surface's ten-second
- * deadline (Phase 6 verification, F1).
+ * **Acting** stays on System Events (`PERFORM_SCRIPT`), because `AXUIElementPerformAction`
+ * on a path is no cheaper than the Apple event and the Apple event is already
+ * tested. "The desktop bridges stay process-based unless the project screen
+ * cannot be read within 10 s that way, in which case a native helper is
+ * permitted for the window read only, with the process bridge kept for actions."
  *
- * The fix is not a native module — Draft 2.8 §7.5 permits this bridge and
- * requires **bulk reads**: one event must answer for a whole set of elements,
- * never one element's one attribute. Three System Events forms do that, and
- * they are why this script is AppleScript rather than JXA (JXA cannot ask a
- * plural specifier for `properties`; it answers `Can't get object.`):
+ * ## The cost, twice measured and twice wrong before this
  *
- * - `properties of every UI element of C` — one event, every attribute of
- *   every child of `C`: role, subrole, title, description, value, name, help,
- *   enabled, focused, selected, position, size.
- * - `value of attribute "X" of every UI element of C` — one event, one
- *   attribute across every child, for the attributes `properties` leaves out
- *   (`AXIdentifier`, `AXDOMIdentifier`, `AXPlaceholderValue`, `AXExpanded`).
- * - `name of every action of every UI element of C` — one event, the action
- *   names of every child.
+ * Phase 6 walked the tree element by element, seventeen Apple events per
+ * element: **650 ms per node**, and the ADE's smallest window took ten seconds.
  *
- * `AXChildren` read the same way says which children are containers, so the
- * walk spends no event on a leaf. The cost is therefore *per container*, not
- * per node or per attribute. Measured on this machine against the ADE's own
- * 199-node menu-bar tree: 103 events, 2.06 s, **10.4 ms per node** — against
- * 650 ms per node before. The 400-node budget of §7.5 is met with room.
+ * Phase 7 replaced that with bulk reads over System Events — `properties of
+ * every UI element of C` and one event per optional attribute — and measured
+ * **10.4 ms per node** on the ADE's 199-node menu-bar tree. That number was
+ * honest and it was about the wrong tree. On the ADE's *project screen*, which
+ * is what §7.5's budget is about, the same bridge reads **51–55 ms per node**
+ * and needs about 25 s for 488 nodes: a Chromium tree is mostly nested
+ * containers, the walk costs per container, and containers are what it is made
+ * of (Phase 7 verification, F2).
  *
- * Every snapshot is one `osascript` invocation. The script carries its own
- * deadline so that a window it cannot finish comes back as a *measured* bridge
- * timeout — nodes, milliseconds, events — rather than as a killed process with
- * nothing to say.
+ * Draft 2.9 offers `properties of every UI element of entire contents of window 1`
+ * as the whole-window form. It does not work: System Events answers `-1700`,
+ * "Can't make every UI element of entire contents…", to that and to every
+ * variant of it (`properties of entire contents`, `role of entire contents`).
+ * `entire contents` yields specifiers one at a time and nothing else, which is
+ * the per-element read again. So the section's other option is the one taken.
+ *
+ * Measured here on the packaged ADE's project screen with the fixtures project
+ * open: **587 nodes in 696 ms — 1.19 ms per node**, one `osascript` invocation,
+ * no Apple events. Forty times cheaper than the read it replaces, and inside
+ * §7.5's ten seconds with a factor of fourteen to spare.
  *
  * ## Why the bridge is an interface
  *
@@ -134,8 +131,17 @@ export interface AxSnapshotCost {
   readonly msPerNode: number;
   /** How many `osascript` processes the read took. One, by design. */
   readonly invocations: number;
-  /** How many Apple events the script sent. The number the design is about. */
-  readonly appleEvents: number;
+  /**
+   * How many accessibility API calls the read made (Draft 2.9 §7.5).
+   *
+   * Draft 2.8 counted *Apple events*, because the bridge talked to System
+   * Events and an Apple event's fixed ~20 ms was the whole cost. The window
+   * read is a native helper now — `AXUIElementCopyAttributeValue` in process —
+   * so the number that describes it is the count of AX calls, which cost about
+   * seventy microseconds each. The field is renamed rather than reused: a
+   * report that said "Apple events: 9,400" would be false.
+   */
+  readonly axCalls: number;
 }
 
 /** What the bridge was asked to do, and what came back. */
@@ -184,8 +190,19 @@ export type AxCommand =
 export interface AxBridge {
   /** Is the Accessibility permission granted to whatever is running this? */
   permission(): Promise<AxPermission>;
-  /** The accessibility tree of a process's front window. */
-  window(request: { process: string; maxNodes: number }): Promise<AxWindow>;
+  /**
+   * The accessibility tree of a process's front window.
+   *
+   * `deadlineMs` is the *caller's* deadline (Draft 2.9 §7.5, P7-F5): "the
+   * bridge honours the caller's deadline; a script deadline shorter than the
+   * caller's is a defect." Phase 7's bridge stopped at ten seconds whatever it
+   * was asked for, because the only deadline it had was its own.
+   */
+  window(request: {
+    process: string;
+    maxNodes: number;
+    deadlineMs?: number;
+  }): Promise<AxWindow>;
   /** Perform one command; throws `AxBridgeError` when macOS refuses. */
   perform(command: AxCommand): Promise<void>;
   /** A PNG of the screen (or of one rectangle), written to `path`. */
@@ -227,14 +244,14 @@ export async function runOsascript(
   language: OsascriptLanguage = "JavaScript",
 ): Promise<{ code: number | null; stdout: string; stderr: string; timedOut: boolean }> {
   /*
-   * Two languages, one runner (Draft 2.8 §7.5).
+   * Two languages, one runner.
    *
-   * The permission check and the action script stay in JXA, where JSON in and
-   * JSON out costs nothing. The window read is AppleScript because only
-   * AppleScript can ask a *plural* specifier for `properties` — JXA answers
-   * `Can't get object.` — and that one form is the whole bulk-read design.
-   * AppleScript has no JSON, so its arguments are plain `argv` strings and its
-   * answer is delimiter-separated text that `parseWindow` reads back.
+   * Every script this bridge ships is JXA now: the permission check and the
+   * action script for their JSON, and the window read because JXA is what can
+   * reach `AXUIElementCopyAttributeValue` through the Objective-C bridge
+   * (Draft 2.9 §7.5's native helper). `AppleScript` stays as a mode because the
+   * runner is the tested seam and a future script may want it; nothing in this
+   * package passes it today.
    */
   const args =
     language === "AppleScript"
@@ -298,317 +315,233 @@ const PERMISSION_SCRIPT = `function run(argv) {
 }`;
 
 /**
- * One window's accessibility tree, in one `osascript` invocation (Draft 2.8 §7.5).
+ * One window's accessibility tree, in one `osascript` invocation (Draft 2.9 §7.5).
  *
  * ## The shape of the walk
  *
- * Breadth-first over **containers**, not over nodes. For each container the
- * script sends at most six Apple events, each of which answers for *every*
- * child at once:
- *
- * | event | what it answers |
- * |---|---|
- * | `properties of every UI element of C` | role, subrole, title, description, value, name, help, enabled, focused, selected, position, size |
- * | `value of attribute "AXChildren" of every UI element of C` | which children are containers, so no event is spent on a leaf |
- * | `value of attribute "AXIdentifier" …` | `automationId`, first source |
- * | `value of attribute "AXDOMIdentifier" …` | `automationId`, second source; what Chromium publishes a DOM `id` as |
- * | `value of attribute "AXPlaceholderValue" …` | the placeholder a name falls back to |
- * | `name of every action of every UI element of C` | `AXPress` and friends, so `act` uses an accessibility action rather than a click |
- *
- * The last four run only for a container that has at least one interactive
- * child, because those attributes only matter on controls; a Chromium tree is
- * mostly nested `AXGroup`s and those cost two events, not six.
- *
- * ## Asking for an attribute a set does not all have
- *
- * A bulk read is all-or-nothing: `value of attribute "AXDOMIdentifier" of every
- * UI element of C` fails outright if one child lacks the attribute, and a
- * failed event still costs its ~20 ms. So each optional attribute keeps a
- * success and a failure count and is abandoned once it has failed eight times
- * without earning its place (`wanted`). On an Electron window
- * `AXDOMIdentifier` succeeds everywhere in the web content and `AXIdentifier`
- * gives up after eight containers; on a native window it is the other way
- * round. Nothing is read attribute-by-attribute in either case.
+ * Breadth-first over every node, carrying each node's index so the answer is a
+ * flat array with parent pointers. Sixteen `AXUIElementCopyAttributeValue`
+ * calls per node and one `AXUIElementCopyActionNames`, at roughly seventy
+ * microseconds each — the arithmetic that made a per-attribute walk unthinkable
+ * over Apple events is unremarkable over the API those events were carrying.
  *
  * ## Why it carries its own deadline
  *
  * §7.5: "A deadline exceeded after `doctor` reported `granted` is reported as a
  * bridge timeout with those numbers, never as a permission prompt." A killed
- * `osascript` has no numbers to report, so the script stops itself a second
- * before the caller would and answers with what it has: the `D` flag, the node
- * count and the event count. AppleScript's clock has one-second resolution,
- * which is why the deadline crosses the boundary in seconds.
+ * `osascript` has no numbers to report, so the script stops itself inside the
+ * caller's deadline and answers with what it has: the `D` flag, the node count
+ * and the call count.
  *
- * ## Why it is not JXA
+ * ## Finding the process
  *
- * `Application("System Events").…uiElements.properties()` — the plural read the
- * whole design rests on — answers `Error: Can't get object.` in JXA. The
- * AppleScript form works. That is the entire reason.
+ * `NSWorkspace.runningApplications`, filtered by `localizedName` and then by
+ * *having a window*. An Electron application registers several processes under
+ * one name — helpers among them — and "the first one called Svatah ADE" is
+ * sometimes a helper with no window, which read as a window that had not
+ * appeared yet. Asking for the one with a window removes a whole class of
+ * flake from the gate's launch poll.
  */
-const WINDOW_SCRIPT = `global evCount
-global idOk, idFail, domOk, domFail, phOk, phFail, expOk, expFail, actOk, actFail
+const WINDOW_SCRIPT = `ObjC.import('ApplicationServices');
+ObjC.import('AppKit');
+ObjC.import('Foundation');
+ObjC.bindFunction('AXValueGetValue', ['bool', ['void*', 'int', 'void*']]);
+ObjC.bindFunction('malloc', ['void*', ['int']]);
+ObjC.bindFunction('free', ['void', ['void*']]);
 
-on toText(v)
-	try
-		if v is missing value then return ""
-		if class of v is boolean then
-			if v then return "1"
-			return "0"
-		end if
-		if class of v is list then
-			set acc to {}
-			repeat with one in v
-				set end of acc to my toText(one)
-			end repeat
-			return my joinList(acc, ",")
-		end if
-		return v as text
-	on error
-		return ""
-	end try
-end toText
+var US = String.fromCharCode(31);
+var RS = String.fromCharCode(30);
+var calls = 0;
 
-on joinList(lst, sep)
-	set old to AppleScript's text item delimiters
-	set AppleScript's text item delimiters to sep
-	set s to lst as text
-	set AppleScript's text item delimiters to old
-	return s
-end joinList
+function attr(element, name) {
+  calls += 1;
+  var out = Ref();
+  if ($.AXUIElementCopyAttributeValue(element, $(name), out) !== 0) return undefined;
+  return out[0];
+}
 
-on clean(s)
-	if s is "" then return ""
-	set old to AppleScript's text item delimiters
-	set AppleScript's text item delimiters to (character id 31)
-	set parts to text items of s
-	set AppleScript's text item delimiters to " "
-	set s to parts as text
-	set AppleScript's text item delimiters to (character id 30)
-	set parts to text items of s
-	set AppleScript's text item delimiters to " "
-	set s to parts as text
-	set AppleScript's text item delimiters to old
-	return s
-end clean
+function clean(value) {
+  return String(value).split(US).join(' ').split(RS).join(' ');
+}
 
-on wanted(okCount, failCount)
-	if failCount < 8 then return true
-	return okCount > failCount
-end wanted
+/** An element-valued attribute as an object the API will take back. */
+function element(value) {
+  if (value === undefined) return undefined;
+  try { return ObjC.castRefToObject(value); } catch (e) { return undefined; }
+}
 
-on bulkAttr(parentEl, attrName, n)
-	set evCount to evCount + 1
-	tell application "System Events"
-		try
-			set vals to value of attribute attrName of every UI element of parentEl
-			if (count of vals) is n then return vals
-		end try
-	end tell
-	return missing value
-end bulkAttr
+function text(value) {
+  if (value === undefined) return '';
+  var unwrapped;
+  try { unwrapped = ObjC.unwrap(ObjC.castRefToObject(value)); } catch (e) { return ''; }
+  if (unwrapped === undefined || unwrapped === null) return '';
+  var kind = typeof unwrapped;
+  if (kind === 'string') return clean(unwrapped);
+  if (kind === 'number') return String(unwrapped);
+  if (kind === 'boolean') return unwrapped ? '1' : '0';
+  return '';
+}
 
-on bulkActions(parentEl, n)
-	set evCount to evCount + 1
-	tell application "System Events"
-		try
-			set vals to name of every action of every UI element of parentEl
-			if (count of vals) is n then return vals
-		end try
-	end tell
-	return missing value
-end bulkActions
+function flag(value) {
+  var one = text(value);
+  if (one === '1' || one === 'true') return '1';
+  if (one === '0' || one === 'false') return '0';
+  return '';
+}
 
-on interactive(r)
-	return r is in {"AXButton", "AXRadioButton", "AXCheckBox", "AXPopUpButton", "AXMenuButton", "AXTextField", "AXTextArea", "AXComboBox", "AXSearchField", "AXLink", "AXTab", "AXTabGroup", "AXRadioGroup", "AXSlider", "AXIncrementor", "AXStepper", "AXDisclosureTriangle", "AXCell", "AXRow", "AXMenuItem", "AXMenuBarItem", "AXCheckBoxGroup", "AXColorWell", "AXScrollBar"}
-end interactive
+function frame(element, buffer) {
+  var value = attr(element, 'AXFrame');
+  if (value === undefined) return '';
+  try {
+    if (!$.AXValueGetValue(value, 3, buffer)) return '';
+    return ObjC.unwrap($.NSData.dataWithBytesLength(buffer, 32).base64EncodedStringWithOptions(0));
+  } catch (e) {
+    return '';
+  }
+}
 
-on pick(lst, i)
-	if lst is missing value then return ""
-	try
-		return my toText(item i of lst)
-	on error
-		return ""
-	end try
-end pick
+function actions(element) {
+  calls += 1;
+  var out = Ref();
+  if ($.AXUIElementCopyActionNames(element, out) !== 0) return '';
+  try {
+    var list = ObjC.deepUnwrap(ObjC.castRefToObject(out[0]));
+    return list === undefined || list === null ? '' : clean(list.join(','));
+  } catch (e) {
+    return '';
+  }
+}
 
-on emit(parentIndex, p, extra)
-	set fields to {parentIndex as text}
-	tell application "System Events"
-		set end of fields to my clean(my toText(role of p))
-		set end of fields to my clean(my toText(subrole of p))
-		set end of fields to my clean(my toText(title of p))
-		set end of fields to my clean(my toText(description of p))
-		set end of fields to my clean(my toText(value of p))
-		set end of fields to my clean(my toText(name of p))
-		set end of fields to my clean(my toText(help of p))
-		set end of fields to my toText(enabled of p)
-		set end of fields to my toText(focused of p)
-		set end of fields to my toText(selected of p)
-		set end of fields to my toText(position of p)
-		set end of fields to my toText(size of p)
-	end tell
-	repeat with one in extra
-		set end of fields to my clean(one as text)
-	end repeat
-	return my joinList(fields, (character id 31))
-end emit
+function children(element) {
+  var value = attr(element, 'AXChildren');
+  if (value === undefined) return [];
+  try {
+    var array = ObjC.castRefToObject(value);
+    var out = [];
+    for (var i = 0; i < array.count; i++) out.push(array.objectAtIndex(i));
+    return out;
+  } catch (e) {
+    return [];
+  }
+}
 
-on run argv
-	set procName to item 1 of argv
-	set maxNodes to (item 2 of argv) as integer
-	set deadlineSeconds to (item 3 of argv) as integer
-	set us to (character id 31)
-	set rs to (character id 30)
-	set evCount to 0
-	set idOk to 0
-	set idFail to 0
-	set domOk to 0
-	set domFail to 0
-	set phOk to 0
-	set phFail to 0
-	set expOk to 0
-	set expFail to 0
-	set actOk to 0
-	set actFail to 0
-	set startedAt to (current date)
-	set deadlineHit to false
-	set truncated to false
+/**
+ * The front window of the named application, or why there is not one.
+ *
+ * The *element* comes back, not a pid to re-derive it from. An earlier version
+ * found the pid here and rebuilt the application element in \`run\`, and once in
+ * a while that second element answered \`AXWindows\` with a list whose first
+ * entry was the application itself — an \`AXChildren\` cycle that filled the
+ * budget with six thousand menu items and no window. Carrying the element the
+ * check actually looked at removes the second derivation and the class of bug
+ * with it; the role assertion below catches whatever is left.
+ */
+function frontWindowOf(name) {
+  var running = $.NSWorkspace.sharedWorkspace.runningApplications;
+  var seen = false;
+  for (var i = 0; i < running.count; i++) {
+    var one = running.objectAtIndex(i);
+    if (ObjC.unwrap(one.localizedName) !== name) continue;
+    var pid = parseInt(String(one.processIdentifier), 10);
+    if (!(pid > 0)) continue;
+    seen = true;
+    var application = $.AXUIElementCreateApplication(pid);
+    // Focused, then main, then the first of the list: what a person is looking
+    // at, what the application says it is, and what is left.
+    var candidates = [];
+    /*
+     * \`castRefToObject\`, because an element that came out of a \`Ref\` is a raw
+     * pointer and \`AXUIElementCopyAttributeValue\` refuses one as its first
+     * argument ("Ref has incompatible type"). The elements that come out of an
+     * \`NSArray\` are already objects, which is why the walk below needs no cast.
+     */
+    var focused = element(attr(application, 'AXFocusedWindow'));
+    if (focused !== undefined) candidates.push(focused);
+    var main = element(attr(application, 'AXMainWindow'));
+    if (main !== undefined) candidates.push(main);
+    var windows = attr(application, 'AXWindows');
+    if (windows !== undefined) {
+      try {
+        var array = ObjC.castRefToObject(windows);
+        for (var w = 0; w < array.count && w < 8; w++) candidates.push(array.objectAtIndex(w));
+      } catch (e) { /* fall through to the next process */ }
+    }
+    for (var c = 0; c < candidates.length; c++) {
+      // A window, and nothing that merely answered the question. An
+      // \`AXApplication\` here is the cycle above, and it is refused rather than
+      // walked.
+      if (text(attr(candidates[c], 'AXRole')) === 'AXWindow') {
+        return { window: candidates[c], found: true };
+      }
+    }
+  }
+  return { found: false, process: seen };
+}
 
-	tell application "System Events"
-		set procs to (every application process whose name is procName)
-		if (count of procs) is 0 then return "ERR" & us & "no-process"
-		set proc to item 1 of procs
-		set wins to (every window of proc)
-		if (count of wins) is 0 then return "ERR" & us & "no-window"
-		set win to item 1 of wins
-		set winTitle to ""
-		try
-			set winTitle to (value of attribute "AXTitle" of win) as text
-		end try
-		set evCount to evCount + 1
-		set rootProps to properties of win
-	end tell
+function run(argv) {
+  var request = JSON.parse(argv[0]);
+  var found = frontWindowOf(request.process);
+  if (!found.found) return 'ERR' + US + (found.process ? 'no-window' : 'no-process');
 
-	set out to {my emit(-1, rootProps, {"", "", "", "", ""})}
-	set total to 1
-	set queue to {{win, 0}}
+  var window = found.window;
+  var title = text(attr(window, 'AXTitle'));
 
-	repeat while (count of queue) > 0
-		if ((current date) - startedAt) ≥ deadlineSeconds then
-			set deadlineHit to true
-			exit repeat
-		end if
-		set job to item 1 of queue
-		if (count of queue) is 1 then
-			set queue to {}
-		else
-			set queue to items 2 thru -1 of queue
-		end if
-		set parentEl to item 1 of job
-		set parentIndex to item 2 of job
+  var buffer = $.malloc(64);
+  var startedAt = $.NSDate.date;
+  var records = [];
+  var truncated = false;
+  var deadlineHit = false;
 
-		set kidProps to {}
-		set evCount to evCount + 1
-		tell application "System Events"
-			try
-				set kidProps to properties of every UI element of parentEl
-			end try
-		end tell
-		set n to (count of kidProps)
-		if n > 0 then
-			set kidKids to my bulkAttr(parentEl, "AXChildren", n)
+  // Breadth-first, carrying each node's index so the answer is a flat array
+  // with parent pointers — the shape \`AxNode[]\` and the snapshot's depth need.
+  var queue = [{ element: window, parent: -1, depth: 0 }];
+  while (queue.length > 0) {
+    if (-startedAt.timeIntervalSinceNow * 1000 >= request.deadlineMs) { deadlineHit = true; break; }
+    if (records.length >= request.maxNodes) { truncated = true; break; }
+    var job = queue.shift();
+    var element = job.element;
+    var index = records.length;
 
-			set anyInteractive to false
-			set roles to {}
-			tell application "System Events"
-				repeat with i from 1 to n
-					set end of roles to my toText(role of (item i of kidProps))
-				end repeat
-			end tell
-			repeat with i from 1 to n
-				if my interactive(item i of roles) then set anyInteractive to true
-			end repeat
+    var fields = new Array(19);
+    fields[0] = String(job.parent);
+    fields[1] = text(attr(element, 'AXRole')) || 'AXUnknown';
+    fields[2] = text(attr(element, 'AXSubrole'));
+    fields[3] = text(attr(element, 'AXTitle'));
+    fields[4] = text(attr(element, 'AXDescription'));
+    fields[5] = text(attr(element, 'AXValue'));
+    fields[6] = '';
+    fields[7] = text(attr(element, 'AXHelp'));
+    fields[8] = flag(attr(element, 'AXEnabled'));
+    fields[9] = flag(attr(element, 'AXFocused'));
+    fields[10] = flag(attr(element, 'AXSelected'));
+    fields[11] = '';
+    fields[12] = '';
+    fields[13] = text(attr(element, 'AXIdentifier'));
+    fields[14] = text(attr(element, 'AXDOMIdentifier'));
+    fields[15] = text(attr(element, 'AXPlaceholderValue'));
+    fields[16] = flag(attr(element, 'AXExpanded'));
+    fields[17] = actions(element);
+    fields[18] = frame(element, buffer);
+    records.push(fields.join(US));
 
-			set ids to missing value
-			set domIds to missing value
-			set phs to missing value
-			set exps to missing value
-			set acts to missing value
-			if anyInteractive then
-				if my wanted(idOk, idFail) then
-					set ids to my bulkAttr(parentEl, "AXIdentifier", n)
-					if ids is missing value then
-						set idFail to idFail + 1
-					else
-						set idOk to idOk + 1
-					end if
-				end if
-				if my wanted(domOk, domFail) then
-					set domIds to my bulkAttr(parentEl, "AXDOMIdentifier", n)
-					if domIds is missing value then
-						set domFail to domFail + 1
-					else
-						set domOk to domOk + 1
-					end if
-				end if
-				if my wanted(phOk, phFail) then
-					set phs to my bulkAttr(parentEl, "AXPlaceholderValue", n)
-					if phs is missing value then
-						set phFail to phFail + 1
-					else
-						set phOk to phOk + 1
-					end if
-				end if
-				if my wanted(expOk, expFail) then
-					set exps to my bulkAttr(parentEl, "AXExpanded", n)
-					if exps is missing value then
-						set expFail to expFail + 1
-					else
-						set expOk to expOk + 1
-					end if
-				end if
-				if my wanted(actOk, actFail) then
-					set acts to my bulkActions(parentEl, n)
-					if acts is missing value then
-						set actFail to actFail + 1
-					else
-						set actOk to actOk + 1
-					end if
-				end if
-			end if
+    /*
+     * A depth cap, because \`AXChildren\` is not guaranteed acyclic. A Chromium
+     * window is about fifteen deep and a native one less; anything past sixty
+     * is a loop, and a loop that filled \`maxNodes\` would be reported as a
+     * truncated read of a window rather than as the defect it is.
+     */
+    if (job.depth >= 60) continue;
+    var kids = children(element);
+    for (var i = 0; i < kids.length; i++) {
+      queue.push({ element: kids[i], parent: index, depth: job.depth + 1 });
+    }
+  }
 
-			repeat with i from 1 to n
-				if total ≥ maxNodes then
-					set truncated to true
-					exit repeat
-				end if
-				set extra to {my pick(ids, i), my pick(domIds, i), my pick(phs, i), my pick(exps, i), my pick(acts, i)}
-				set end of out to my emit(parentIndex, item i of kidProps, extra)
-				set total to total + 1
-				set hasKids to true
-				if kidKids is not missing value then
-					set hasKids to false
-					try
-						if (count of (item i of kidKids)) > 0 then set hasKids to true
-					end try
-				end if
-				if hasKids then
-					tell application "System Events"
-						set childRef to a reference to UI element i of parentEl
-					end tell
-					set end of queue to {childRef, total - 1}
-				end if
-			end repeat
-		end if
-		if truncated then exit repeat
-	end repeat
-
-	set flags to ""
-	if truncated then set flags to flags & "T"
-	if deadlineHit then set flags to flags & "D"
-	set header to my joinList({"OK", my clean(winTitle), flags, evCount as text, (count of out) as text}, us)
-	return header & rs & my joinList(out, rs)
-end run
+  $.free(buffer);
+  var flags = (truncated ? 'T' : '') + (deadlineHit ? 'D' : '');
+  var header = ['OK', clean(title), flags, String(calls), String(records.length)].join(US);
+  return header + RS + records.join(RS);
+}
 `;
 
 /** Field order of one node record, as `WINDOW_SCRIPT` writes it. */
@@ -631,6 +564,8 @@ const enum Field {
   Placeholder = 15,
   Expanded = 16,
   Actions = 17,
+  /** `AXFrame` as base64 of four little-endian doubles: x, y, width, height. */
+  Frame = 18,
 }
 
 /** Record and field separators: ASCII 30 and 31, which no AX string carries. */
@@ -656,11 +591,11 @@ const CHECKABLE = new Set(["AXCheckBox", "AXRadioButton", "AXMenuItem", "AXToggl
 /**
  * Read `WINDOW_SCRIPT`'s answer.
  *
- * Delimiter-separated rather than JSON because AppleScript has no JSON writer
- * and hand-rolling string escaping in it is how a tree gets lost to one quote
- * mark. ASCII 30 and 31 are the separators the format was invented for, an AX
- * string never contains one, and the script replaces them with spaces if one
- * ever does.
+ * Delimiter-separated rather than JSON: a five-hundred-node tree is a megabyte
+ * of JSON through a pipe and about a fifth of that as records, and the parse is
+ * a `split` either way. ASCII 30 and 31 are the separators the format was
+ * invented for, an AX string never contains one, and the script replaces them
+ * with spaces if one ever does.
  */
 export function parseWindow(stdout: string): {
   ok: boolean;
@@ -668,7 +603,7 @@ export function parseWindow(stdout: string): {
   title: string;
   truncated: boolean;
   deadlineHit: boolean;
-  appleEvents: number;
+  axCalls: number;
   nodes: AxNode[];
 } {
   const records = stdout.split(RECORD_SEPARATOR);
@@ -680,7 +615,7 @@ export function parseWindow(stdout: string): {
       title: "",
       truncated: false,
       deadlineHit: false,
-      appleEvents: 0,
+      axCalls: 0,
       nodes: [],
     };
   }
@@ -692,6 +627,23 @@ export function parseWindow(stdout: string): {
     const role = fields[Field.Role] ?? "AXUnknown";
     const value = text(fields[Field.Value]);
     const box = ((): readonly [number, number, number, number] | undefined => {
+      /*
+       * `AXFrame` is an `AXValue` wrapping a `CGRect`, and JXA cannot take a
+       * struct out of one: every typed `Ref` the bridge accepts is refused
+       * ("Ref has no type"). So the script copies the 32 bytes into an
+       * `NSData` and sends their base64, and the four doubles are read here —
+       * which is where a wire format belongs anyway.
+       */
+      const encoded = text(fields[Field.Frame]);
+      if (encoded !== undefined) {
+        const bytes = Buffer.from(encoded, "base64");
+        if (bytes.length >= 32) {
+          const numbers = [0, 8, 16, 24].map((at) => bytes.readDoubleLE(at));
+          if (numbers.every((one) => Number.isFinite(one))) {
+            return [numbers[0]!, numbers[1]!, numbers[2]!, numbers[3]!];
+          }
+        }
+      }
       const position = pair(fields[Field.Position]);
       const size = pair(fields[Field.Size]);
       if (position === undefined || size === undefined) return undefined;
@@ -742,7 +694,7 @@ export function parseWindow(stdout: string): {
     title: header[1] ?? "",
     truncated: flags.includes("T"),
     deadlineHit: flags.includes("D"),
-    appleEvents: Number(header[3] ?? "0"),
+    axCalls: Number(header[3] ?? "0"),
     nodes,
   };
 }
@@ -815,6 +767,16 @@ const DEFAULT_TIMEOUT_MS = 20_000;
 const PERMISSION_TIMEOUT_MS = 5_000;
 /** LLD §7.5: "the surface's default deadline of 10 s". */
 const WINDOW_DEADLINE_MS = 10_000;
+/**
+ * What `osascript` costs before and after the script's own clock runs.
+ *
+ * Spawning it, loading the Objective-C bridge metadata for three frameworks,
+ * and writing a few hundred kilobytes back. The script's budget is the caller's
+ * less this, so the usual way to exceed a deadline is the script answering with
+ * the `D` flag and its numbers rather than the runner killing a process that
+ * has none.
+ */
+const PROCESS_OVERHEAD_MS = 1_000;
 
 /** The real bridge: `osascript`, System Events, and this machine. */
 export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
@@ -838,7 +800,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
       cost === undefined
         ? "no nodes came back"
         : `${cost.nodes} nodes in ${cost.wallMs} ms (${cost.msPerNode} ms per node, ` +
-          `${cost.appleEvents} Apple events, ${cost.invocations} osascript invocation)`;
+          `${cost.axCalls} accessibility calls, ${cost.invocations} osascript invocation)`;
     if (lastPermission === "granted") {
       return new AxBridgeError(
         `The accessibility bridge did not finish reading the window of "${processName}" within ` +
@@ -917,21 +879,35 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
     },
 
     async window(request): Promise<AxWindow> {
-      const deadlineMs = options.windowDeadlineMs ?? WINDOW_DEADLINE_MS;
+      /*
+       * The caller's deadline first (P7-F5, Draft 2.9 §7.5).
+       *
+       * `osascriptBridge({ timeoutMs: 180000 }).window(…)` used to stop at ten
+       * seconds: `window` read only `windowDeadlineMs`, so the caller's number
+       * reached the perform script and nothing else. The order is per-call,
+       * then the window-specific option, then the session's timeout, then
+       * §7.5's default of 10 s — every one of them a thing someone asked for,
+       * ahead of the thing nobody did.
+       */
+      const deadlineMs =
+        request.deadlineMs ?? options.windowDeadlineMs ?? options.timeoutMs ?? WINDOW_DEADLINE_MS;
       const startedAt = Date.now();
       /*
-       * The script's own budget is a second inside the caller's, so the normal
+       * The script's own budget is a little inside the caller's, so the normal
        * way to exceed it is the script answering with the `D` flag and its
        * numbers — not the runner killing a process that has nothing to say.
        * The hard kill stays as the backstop for an `osascript` that blocks
        * before it starts (an unanswered permission prompt does exactly that).
        */
-      const softSeconds = Math.max(1, Math.floor((deadlineMs - 1_000) / 1_000));
+      const scriptDeadlineMs = Math.max(
+        200,
+        Math.max(Math.round(deadlineMs * 0.4), deadlineMs - PROCESS_OVERHEAD_MS),
+      );
       const result = await run(
         WINDOW_SCRIPT,
-        [request.process, String(request.maxNodes), String(softSeconds)],
+        { process: request.process, maxNodes: request.maxNodes, deadlineMs: scriptDeadlineMs },
         deadlineMs,
-        "AppleScript",
+        "JavaScript",
       );
       const wallMs = Date.now() - startedAt;
 
@@ -962,7 +938,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
             ? wallMs
             : Math.round((wallMs / answer.nodes.length) * 100) / 100,
         invocations: 1,
-        appleEvents: answer.appleEvents,
+        axCalls: answer.axCalls,
       };
 
       /*

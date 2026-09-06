@@ -22,6 +22,9 @@
 import { boolOption, stringOption, EXIT, type CommandIo, type ExitCode, type ParsedArgs } from "@svatah/bindings-cli";
 import { describeRuntime, resolveNodeRuntime, SUPPORTED_NODE_MAJOR } from "@svatah/service/runtime";
 import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 export interface SurfaceCheck {
   readonly adapter: string;
@@ -29,6 +32,16 @@ export interface SurfaceCheck {
   readonly ok: boolean;
   /** `true` when this platform cannot run the adapter at all. */
   readonly skipped?: boolean;
+  /**
+   * `true` when failing this does not stop a run (T8.2).
+   *
+   * Screen Recording is the case it exists for: without it `screencapture`
+   * refuses and a run has no screenshots, but the accessibility tree — which is
+   * what the adapter drives — reads perfectly. Making it fatal would stop a
+   * conformance gate that would have passed; leaving it out means whoever finds
+   * an empty screenshot directory has nothing to look at.
+   */
+  readonly advisory?: boolean;
   readonly detail: string;
   /** What to do about it, written for whoever ran the command. */
   readonly fix?: string;
@@ -57,7 +70,8 @@ export async function surfaceDoctorCommand(
     io.out(JSON.stringify({ checks }, null, 2));
   } else {
     for (const check of checks) {
-      const mark = check.skipped === true ? "skip" : check.ok ? "ok  " : "FAIL";
+      const mark =
+        check.skipped === true ? "skip" : check.ok ? "ok  " : check.advisory === true ? "warn" : "FAIL";
       io.out(`${mark}  ${`${check.adapter}/${check.name}`.padEnd(22)} ${check.detail}`);
       if (!check.ok && check.skipped !== true && check.fix !== undefined) {
         for (const line of wrap(check.fix)) io.out(`      → ${line}`);
@@ -65,7 +79,9 @@ export async function surfaceDoctorCommand(
     }
   }
 
-  return checks.every((check) => check.ok || check.skipped === true) ? EXIT.ok : EXIT.failed;
+  return checks.every((check) => check.ok || check.skipped === true || check.advisory === true)
+    ? EXIT.ok
+    : EXIT.failed;
 }
 
 /**
@@ -122,7 +138,43 @@ async function axChecks(): Promise<SurfaceCheck[]> {
       detail: permission.state + (permission.detail === undefined ? "" : ` — ${permission.detail}`),
       fix: permission.advice,
     },
+    screenRecordingCheck(),
   ];
+}
+
+/**
+ * Screen Recording, which is a *different* grant from Accessibility (T8.2).
+ *
+ * LLD §7.5: "screenshots via OS APIs". On macOS that is `screencapture`, and it
+ * answers `could not create image from display` — exit 1, nothing written —
+ * when the program running Svatah has not been granted Screen Recording. The
+ * accessibility tree is unaffected, so this is advisory: a run keeps its
+ * results and loses its pictures, and this is the line that says which.
+ */
+function screenRecordingCheck(): SurfaceCheck {
+  const probe = spawnSync("screencapture", ["-x", "-R", "0,0,1,1", devNull()], {
+    encoding: "utf8",
+    timeout: 20_000,
+  });
+  const ok = probe.status === 0;
+  const detail = (probe.stderr ?? "").trim();
+  return {
+    adapter: "ax",
+    name: "screen-recording",
+    ok,
+    advisory: true,
+    detail: ok ? "granted" : `refused — ${detail === "" ? "screencapture exited non-zero" : detail}`,
+    fix:
+      "Screenshots come from `screencapture`, which needs Screen Recording — a different grant " +
+      "from Accessibility. Open System Settings → Privacy & Security → Screen & System Audio " +
+      "Recording, switch it on for the program running Svatah, and restart it. Without it the " +
+      "adapter still reads the accessibility tree; a run simply has no screenshots.",
+  };
+}
+
+/** A path `screencapture` can write to and nobody has to clean up. */
+function devNull(): string {
+  return join(tmpdir(), `svatah-screencapture-probe-${process.pid}.png`);
 }
 
 /** Windows UI Automation (REQ-ADP-6). */

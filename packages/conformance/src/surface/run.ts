@@ -150,10 +150,14 @@ async function runCase(
       };
     }
 
+    let skipped: string | undefined;
     const context: CaseContext = {
       surface,
       baseUrl: options.baseUrl,
       ...(options.healing === undefined ? {} : { healing: options.healing }),
+      skip(reason) {
+        skipped = reason;
+      },
       check(description, ok, detail) {
         checks.push({ description, ok, ...(detail ?? {}) });
       },
@@ -191,7 +195,27 @@ async function runCase(
 
     await testCase.run(context);
 
+    /*
+     * Skipped beats passed, and "no checks" is skipped (Draft 2.9 §7.5).
+     *
+     * A case that ran and observed nothing used to be reported `passed`, which
+     * counted it towards "7 of 7" while establishing nothing, and the gate's
+     * own count of a 0/0 case was the F4 the verifier could not read. Neither
+     * answer was right: the case has no result, and that is what `skipped`
+     * means everywhere else in this suite.
+     */
     const failed = checks.some((c) => !c.ok);
+    if (!failed && (skipped !== undefined || checks.length === 0)) {
+      return {
+        id: testCase.id,
+        page: testCase.page,
+        description: testCase.description,
+        status: "skipped",
+        skipReason: skipped ?? "the case made no checks on this adapter",
+        checks,
+        durationMs: Date.now() - started,
+      };
+    }
     return {
       id: testCase.id,
       page: testCase.page,

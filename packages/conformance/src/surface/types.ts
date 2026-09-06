@@ -92,6 +92,16 @@ export interface CaseContext {
   equals(description: string, actual: unknown, expected: unknown): void;
   /** Record that a call threw the error class the suite required. */
   throws(description: string, run: () => Promise<unknown>, errorName: string): Promise<void>;
+  /**
+   * Say this case has nothing to measure here, and why (Draft 2.9 §7.5).
+   *
+   * "A conformance case with no checks is reported as skipped, not failed; a
+   * healing case is run only at the variant it is about." A healing case at
+   * variant 0 does real work — it records the fingerprint the later pass
+   * relocalizes — but it establishes nothing about the adapter, and Phase 7
+   * reported it as a failed case at a variant where it could not have passed.
+   */
+  skip(reason: string): void;
 }
 
 export interface ConformanceCase {
@@ -142,8 +152,16 @@ export interface BridgeCost {
   readonly wallMs: number;
   readonly msPerNode: number;
   readonly invocations: number;
-  /** macOS only: the Apple events one snapshot sent. The number §7.5 is about. */
+  /** Windows only: the Apple-event equivalent, when a bridge counts them. */
   readonly appleEvents?: number;
+  /**
+   * macOS: the accessibility API calls one snapshot made (Draft 2.9 §7.5).
+   *
+   * The AX bridge's window read is a native helper now — `AXUIElement` in
+   * process, no Apple events — so this, and not `appleEvents`, is the number
+   * that describes what a read did.
+   */
+  readonly axCalls?: number;
 }
 
 export interface ConformanceReport {

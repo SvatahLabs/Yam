@@ -206,16 +206,54 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   {
     id: "ade.result",
     page: "Svatah ADE",
-    description: "Flow 4: the results screen lists runs, and a run opens.",
+    description: "Flow 4: the results screen says how many runs there are, and shows them.",
     async run(context) {
       const { check } = context;
       const nodes = await openScreen(context, "Results");
 
+      /*
+       * The screen's own count, and then what matches it (T8.2).
+       *
+       * The check used to be "a table, a list, or something naming a run",
+       * which the fixtures project — whose `runs/` is ignored and therefore
+       * usually absent — could not satisfy: it renders `Runs (0)` and an
+       * explanation, and the fallback compared against a lower-case "run". The
+       * failure said the adapter could not read the results screen when what
+       * it had read was an empty one.
+       *
+       * The count is the thing that is true at every project state, and it is
+       * what the two branches below are checked against, so the case still
+       * fails if the screen shows a number and nothing that goes with it.
+       */
+      const heading = nodes.find((node) => /^runs\s*\((\d+)\)$/i.test(node.name ?? ""));
+      check("the results screen says how many runs the project has", heading !== undefined, {
+        expected: 'a heading like "Runs (0)"',
+        actual: nodes.map((node) => node.name).filter((name) => name !== undefined).slice(0, 12),
+      });
+      if (heading === undefined) return;
+
+      const runs = Number(/\((\d+)\)/.exec(heading.name ?? "")?.[1] ?? "0");
+      if (runs > 0) {
+        check(
+          `the ${runs} run(s) are rendered as a table or a list`,
+          nodes.some((node) => ["table", "list", "listbox", "grid"].includes(node.role)),
+          { expected: "a table, a list, a listbox or a grid" },
+        );
+        return;
+      }
+      /*
+       * `name ?? value`, because a static text's string is its `AXValue` on
+       * macOS and its `Name` on Windows, and this case has to pass on both.
+       */
+      const text = (node: Node): string => `${node.name ?? ""} ${node.value ?? ""}`;
       check(
-        "the results screen renders a list or a table of runs",
-        nodes.some((node) => ["table", "list", "listbox", "grid"].includes(node.role)) ||
-          nodes.some((node) => node.name?.includes("run") === true),
-        { expected: "a table, a list, or something naming a run" },
+        "a project with no runs says so, and says what writes one",
+        nodes.some((node) => /no runs yet/i.test(text(node))) &&
+          nodes.some((node) => text(node).includes("svatah run")),
+        {
+          expected: 'the empty state: "No runs yet", and `svatah run` as what writes one',
+          actual: nodes.map(text).filter((one) => one.trim() !== "").slice(-14),
+        },
       );
     },
   },
@@ -291,18 +329,22 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
  * This is T6.1's "healing variant subset (renamed control, moved panel)", which
  * Phase 6 shipped without and without a deviation (Phase 6 verification, F3).
  *
- * ## Each case runs twice, at two variants
+ * ## Each case runs at two variants and is *measured* at one (Draft 2.9 §7.5)
  *
  * A healing case cannot be one pass: the binding has to exist *before* the
  * interface changes. So each case declares `variants: [0, N]` and does one of
  * two things depending on which window it is looking at.
  *
  * - At **variant 0** it finds the control by its `automationId`, fingerprints
- *   it, and remembers the fingerprint and the ground-truth key.
+ *   it, and remembers the fingerprint and the ground-truth key. It reports
+ *   `skipped`: nothing about the adapter has been established, and Phase 7
+ *   reported these as failed cases at a variant where the relocalization they
+ *   are about had not happened yet (P7-F4). A recording it could not make is
+ *   still a failed check, so a silent no-op cannot pass for a skip.
  * - At **variant N** it recalls that fingerprint, relocalizes against the
  *   changed window, and checks that what came back is the same element — by the
  *   key, never by the name or the position, either of which is the thing the
- *   variant broke.
+ *   variant broke. This is the pass the report counts.
  *
  * `scripts/desktop-conformance.mjs` is what launches the ADE three times and
  * carries the recorded state between the passes.
@@ -345,6 +387,7 @@ async function healingCase(
   variant: number,
 ): Promise<void> {
   const { check, equals } = context;
+  let baselines = 0;
   const healing: DesktopHealing | undefined = context.healing;
   if (healing === undefined) {
     check(
@@ -363,12 +406,31 @@ async function healingCase(
     const live = byKey(nodes, subject.key);
 
     if (healing.variant === 0) {
-      check(`"${subject.key}" is on the ${subject.screen} screen at variant 0`, live !== undefined, {
-        expected: `a ${subject.role} whose automationId is "${subject.key}"`,
-        actual: nodes.filter((n) => n.role === subject.role).map((n) => n.name),
-      });
-      if (live === undefined) continue;
-      equals(`"${subject.key}" is named "${subject.nameAtZero}" at variant 0`, live.name, subject.nameAtZero);
+      /*
+       * Record, and report nothing (Draft 2.9 §7.5, P7-F4).
+       *
+       * "A healing case is run only at the variant it is about." The variant-0
+       * pass is not the case: it is the *before* the case needs, and a binding
+       * that could not be recorded is a failure of the recording, not of
+       * relocalization. Phase 7 scored these as cases at variant 0 and reported
+       * them failed at a variant where the thing they measure had not happened
+       * yet. A recording that cannot be made still fails — with a check — so a
+       * silent no-op cannot masquerade as a skip.
+       */
+      if (live === undefined) {
+        check(`"${subject.key}" is on the ${subject.screen} screen at variant 0`, false, {
+          expected: `a ${subject.role} whose automationId is "${subject.key}"`,
+          actual: nodes.filter((n) => n.role === subject.role).map((n) => n.name),
+        });
+        continue;
+      }
+      if (live.name !== subject.nameAtZero) {
+        check(`"${subject.key}" is named "${subject.nameAtZero}" at variant 0`, false, {
+          expected: subject.nameAtZero,
+          actual: live.name,
+        });
+        continue;
+      }
       const fingerprint = await healing.fingerprint(context.surface, live.ref);
       const described = await context.surface.describe(live.ref);
       healing.remember(`${id}:${subject.key}`, {
@@ -376,7 +438,7 @@ async function healingCase(
         key: subject.key,
         rolePath: described.rolePath,
       });
-      check(`the binding for "${subject.key}" is recorded for the healing pass`, true);
+      baselines += 1;
       continue;
     }
 
@@ -420,6 +482,12 @@ async function healingCase(
       `the element it proposed is the one that was recorded ("${subject.key}")`,
       proposed.native?.["automationId"],
       recorded.key,
+    );
+  }
+
+  if (healing.variant === 0 && baselines === subjects.length) {
+    context.skip(
+      `recorded ${baselines} binding(s) at variant 0; this case is measured at variant ${variant}`,
     );
   }
 }

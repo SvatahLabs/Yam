@@ -117,25 +117,32 @@ describe("the permission check (REQ-ADP-7, `svatah surface doctor`)", () => {
 const RS = "\u001e";
 const US = "\u001f";
 const node = (fields: Record<number, string>): string => {
-  const row = new Array<string>(18).fill("");
+  const row = new Array<string>(19).fill("");
   for (const [at, value] of Object.entries(fields)) row[Number(at)] = value;
   return row.join(US);
 };
+
+/** `AXFrame` as the script sends it: base64 of four little-endian doubles. */
+const frame = (x: number, y: number, width: number, height: number): string => {
+  const bytes = Buffer.alloc(32);
+  [x, y, width, height].forEach((one, at) => bytes.writeDoubleLE(one, at * 8));
+  return bytes.toString("base64");
+};
 const answer = (
-  header: { title?: string; flags?: string; events?: number },
+  header: { title?: string; flags?: string; calls?: number },
   nodes: readonly string[],
 ): string =>
   [
-    ["OK", header.title ?? "", header.flags ?? "", String(header.events ?? 0), String(nodes.length)].join(US),
+    ["OK", header.title ?? "", header.flags ?? "", String(header.calls ?? 0), String(nodes.length)].join(US),
     ...nodes,
   ].join(RS);
 
 describe("reading a window", () => {
-  it("sends the process, the node budget and its own deadline, as AppleScript", async () => {
+  it("sends the process, the node budget and its own deadline, as JXA", async () => {
     const { run, calls } = answering(
-      answer({ title: "Svatah ADE", events: 40 }, [
+      answer({ title: "Svatah ADE", calls: 40 }, [
         node({ 0: "-1", 1: "AXWindow", 3: "Svatah ADE" }),
-        node({ 0: "0", 1: "AXButton", 3: "Run", 8: "1", 11: "10,20", 12: "80,24", 17: "AXPress" }),
+        node({ 0: "0", 1: "AXButton", 3: "Run", 8: "1", 17: "AXPress", 18: frame(10, 20, 80, 24) }),
       ]),
     );
     const window = await osascriptBridge({ process: "Svatah ADE", run }).window({
@@ -155,19 +162,47 @@ describe("reading a window", () => {
     });
 
     /*
-     * The script's own deadline is a second inside the caller's, so a window it
-     * cannot finish answers with numbers rather than being killed with none
-     * (Draft 2.8 §7.5). AppleScript's clock has one-second resolution, which is
-     * why it crosses the boundary in seconds.
+     * The script's own deadline is inside the caller's, so a window it cannot
+     * finish answers with numbers rather than being killed with none (§7.5).
+     * The margin is the `osascript` process itself: spawning it and loading the
+     * Objective-C bridge metadata happens before the script's clock starts.
      */
-    expect(calls[0]!.argument).toEqual(["Svatah ADE", "500", "9"]);
+    expect(calls[0]!.argument).toEqual({
+      process: "Svatah ADE",
+      maxNodes: 500,
+      deadlineMs: 9_000,
+    });
     expect(calls[0]!.timeoutMs).toBe(10_000);
-    expect(calls[0]!.language).toBe("AppleScript");
+    expect(calls[0]!.language).toBe("JavaScript");
+  });
+
+  it("honours the caller's deadline rather than its own (P7-F5, Draft 2.9 §7.5)", async () => {
+    /*
+     * `osascriptBridge({ timeoutMs: 180000 }).window(…)` stopped at ten seconds:
+     * `window` read only `windowDeadlineMs`, and the caller's number reached
+     * the perform script and nothing else.
+     */
+    const session = answering(answer({}, [node({ 0: "-1", 1: "AXWindow" })]));
+    await osascriptBridge({ process: "x", timeoutMs: 60_000, run: session.run }).window({
+      process: "x",
+      maxNodes: 10,
+    });
+    expect(session.calls[0]!.timeoutMs).toBe(60_000);
+    expect((session.calls[0]!.argument as { deadlineMs: number }).deadlineMs).toBe(59_000);
+
+    // And a per-call deadline beats the session's, because it is more specific.
+    const perCall = answering(answer({}, [node({ 0: "-1", 1: "AXWindow" })]));
+    await osascriptBridge({ process: "x", timeoutMs: 60_000, run: perCall.run }).window({
+      process: "x",
+      maxNodes: 10,
+      deadlineMs: 20_000,
+    });
+    expect(perCall.calls[0]!.timeoutMs).toBe(20_000);
   });
 
   it("publishes what the read cost, which is what the report has to say", async () => {
     const { run } = answering(
-      answer({ events: 103 }, [node({ 0: "-1", 1: "AXWindow" }), node({ 0: "0", 1: "AXGroup" })]),
+      answer({ calls: 103 }, [node({ 0: "-1", 1: "AXWindow" }), node({ 0: "0", 1: "AXGroup" })]),
     );
     const window = await osascriptBridge({ process: "Svatah ADE", run }).window({
       process: "Svatah ADE",
@@ -176,32 +211,44 @@ describe("reading a window", () => {
     // §7.5: "The desktop conformance report records nodes read, wall time, and
     // milliseconds per node."
     expect(window.cost.nodes).toBe(2);
-    expect(window.cost.appleEvents).toBe(103);
+    expect(window.cost.axCalls).toBe(103);
     // And one process per snapshot, which is the "bounded number of process
     // invocations" the section asks for.
     expect(window.cost.invocations).toBe(1);
     expect(window.cost.msPerNode).toBeCloseTo(window.cost.wallMs / 2, 1);
   });
 
-  it("reads every attribute in bulk, and never one call per attribute", async () => {
+  it("reads the window through the accessibility API, not through Apple events", async () => {
     const { run, calls } = answering(answer({}, [node({ 0: "-1", 1: "AXWindow" })]));
     await osascriptBridge({ process: "x", run }).window({ process: "x", maxNodes: 1 });
     const script = calls[0]!.script;
 
     /*
-     * The defect Phase 6 shipped, stated as a test. The old script asked each
-     * element for each attribute — seventeen Apple events per node, 650 ms per
-     * node — and could not read the ADE's smallest window inside the surface's
-     * ten-second deadline. §7.5 requires bulk reads; these three forms are them.
+     * Draft 2.9 §7.5's native helper, stated as a test. Phase 7's bulk reads
+     * over System Events measured 51–55 ms per node on the ADE's project screen
+     * — 25 s for one snapshot — because a Chromium tree is mostly containers
+     * and the walk cost one to four Apple events each. This reads
+     * `AXUIElement` directly, at about 1.5 ms per node.
      */
-    expect(script).toContain("properties of every UI element of parentEl");
-    expect(script).toContain('value of attribute attrName of every UI element of parentEl');
-    expect(script).toContain("name of every action of every UI element of parentEl");
-    // `AXChildren` in bulk says which children are containers, so the walk
-    // spends no event on a leaf.
-    expect(script).toContain('"AXChildren"');
-    // Nothing addresses one element's one attribute.
-    expect(script).not.toMatch(/attribute "AX\w+" of element/);
+    expect(script).toContain("ObjC.import('ApplicationServices')");
+    expect(script).toContain("$.AXUIElementCopyAttributeValue(element, $(name), out)");
+    expect(script).toContain("$.AXUIElementCreateApplication(pid)");
+    // No System Events anywhere in the read: that is the whole change.
+    expect(script).not.toContain("System Events");
+    expect(script).not.toContain("every UI element");
+  });
+
+  it("takes the window it verified, and refuses an element that is not one", async () => {
+    /*
+     * `AXChildren` is not guaranteed acyclic, and an application element whose
+     * children are itself and its menu bar fills the budget with menu items and
+     * no window. The role is asserted before the walk, and the walk has a depth
+     * cap for whatever the assertion does not catch.
+     */
+    const { run, calls } = answering(answer({}, [node({ 0: "-1", 1: "AXWindow" })]));
+    await osascriptBridge({ process: "x", run }).window({ process: "x", maxNodes: 1 });
+    expect(calls[0]!.script).toContain("=== 'AXWindow'");
+    expect(calls[0]!.script).toContain("job.depth >= 60");
   });
 
   it("says which application had no window, and which had no process", async () => {
@@ -236,7 +283,7 @@ describe("reading a window", () => {
       }
       return {
         code: 0,
-        stdout: answer({ flags: "D", events: 260 }, [
+        stdout: answer({ flags: "D", calls: 260 }, [
           node({ 0: "-1", 1: "AXWindow" }),
           node({ 0: "0", 1: "AXGroup" }),
         ]),
@@ -265,15 +312,27 @@ describe("reading a window", () => {
     ).rejects.toThrow(/svatah surface doctor/);
   });
 
-  it("does not lose a whole tree over one missing attribute", async () => {
-    // Asking a macOS element for an attribute it does not have *throws* rather
-    // than answering null, and a bulk read is all-or-nothing: one child without
-    // `AXDOMIdentifier` fails the read for the whole set. So each optional
-    // attribute is tried, counted, and abandoned once it has failed enough.
+  it("does not lose a node over one missing attribute", async () => {
+    // Asking a macOS element for an attribute it does not have answers a
+    // non-zero `AXError` rather than a value. Every read goes through `attr`,
+    // which turns that into `undefined` and an empty field — so an element
+    // without `AXDOMIdentifier` costs that field and nothing else. The bulk
+    // read this replaces was all-or-nothing over a whole set of children.
     const { run, calls } = answering(answer({}, []));
     await osascriptBridge({ process: "x", run }).window({ process: "x", maxNodes: 1 });
-    expect(calls[0]!.script).toContain("on wanted(okCount, failCount)");
-    expect(calls[0]!.script).toMatch(/on bulkAttr\(parentEl, attrName, n\)\s+set evCount/);
+    expect(calls[0]!.script).toContain("!== 0) return undefined");
+    expect(calls[0]!.script).toContain("AXDOMIdentifier");
+  });
+
+  it("reads AXFrame out of its base64, because JXA cannot take a struct from an AXValue", async () => {
+    const { run } = answering(
+      answer({}, [node({ 0: "-1", 1: "AXWindow", 18: frame(12.5, -3, 1280, 852) })]),
+    );
+    const window = await osascriptBridge({ process: "x", run }).window({
+      process: "x",
+      maxNodes: 1,
+    });
+    expect(window.nodes[0]!.box).toEqual([12.5, -3, 1280, 852]);
   });
 
   it("reports an answer in no known shape as such", async () => {

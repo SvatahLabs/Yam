@@ -24,7 +24,11 @@ function bridgeLine(cost: BridgeCost): string {
     );
   }
   const events =
-    cost.appleEvents === undefined ? "" : `, ${cost.appleEvents} Apple events`;
+    cost.axCalls !== undefined
+      ? `, ${cost.axCalls} accessibility calls`
+      : cost.appleEvents === undefined
+        ? ""
+        : `, ${cost.appleEvents} Apple events`;
   return (
     `Bridge: the largest window read was ${cost.nodes} nodes in ${cost.wallMs} ms ` +
     `(${cost.msPerNode} ms per node${events}, ${cost.invocations} process ` +

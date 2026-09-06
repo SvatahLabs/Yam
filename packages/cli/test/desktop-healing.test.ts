@@ -72,7 +72,7 @@ function axSurface(file: string): AgentSurface {
       return { state: "granted", advice: "granted (recorded)" };
     },
     async window() {
-      return replaying<AxWindow>(file, { invocations: 0, appleEvents: 0 });
+      return replaying<AxWindow>(file, { invocations: 0, axCalls: 0 });
     },
     async perform() {
       // A recorded tree does not change; the cases never need it to.
