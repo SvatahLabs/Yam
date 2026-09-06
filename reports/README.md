@@ -20,11 +20,15 @@ so a change to them is a diff someone sees.
 | [`adapter-ax.md`](adapter-ax.md) | macOS Accessibility conformance (REQ-ADP-7, REQ-ADE-6) | 7 of 7 plus two healing cases; the project screen inside 10 s | `node scripts/desktop-conformance.mjs --adapter ax` on macOS with Accessibility granted |
 | [`adapter-uia.md`](adapter-uia.md) | Windows UI Automation conformance (REQ-ADP-6) | 7 of 7 plus two healing cases | `node scripts/desktop-conformance.mjs --adapter uia` on Windows |
 
-The two desktop reports are the only ones here that record a **blocked** run
-rather than a measurement: neither gate has a host it can run on yet, and each
-says what it did measure, what it did not, and the exact command that closes it.
-A report that quietly omitted the distinction would be the thing Phase 6's
-verification caught (F1, F8).
+`adapter-uia.md` is the only report here that records a **blocked** run rather
+than a measurement: there is no Windows host, and it says what it did measure,
+what it did not, and the exact command that closes it. A report that quietly
+omitted the distinction would be the thing Phase 6's verification caught (F1,
+F8).
+
+`adapter-ax.md` was blocked through Phase 7 and is a live measurement as of
+Phase 8 (T8.2): conformant, against the *packaged* ADE, with the project screen
+read in under a second.
 
 `node scripts/eval-reports.mjs --out reports` regenerates all four; the suites
 that are not runnable yet write a placeholder naming the task that builds them,

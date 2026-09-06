@@ -1,10 +1,10 @@
 # Desktop conformance — `ax`
 
-Run at 2026-09-05T04:22:54.254Z on darwin arm64, Node v25.6.1.
+Run at 2026-09-05T05:39:00.671Z on darwin arm64, Node v25.6.1.
 
 **Conformant.** 9 cases passed across ADE variants 0, 1 and 2 (REQ-SURF-3, REQ-ADE-6).
 
-Bridge (LLD §7.5): the largest window read was **588 nodes in 999 ms — 1.7 ms per node**, 9413 accessibility calls, 1 process invocation per snapshot.
+Bridge (LLD §7.5): the largest window read was **588 nodes in 3556 ms — 6.05 ms per node**, 9413 accessibility calls, 1 process invocation per snapshot.
 
 ## Healing (LLD §16)
 
@@ -16,10 +16,10 @@ Bridge (LLD §7.5): the largest window read was **588 nodes in 999 ms — 1.7 ms
 ## ADE variant 0
 
 
-Run at 2026-09-05T04:21:56.225Z · 24895 ms
+Run at 2026-09-05T05:37:56.935Z · 30229 ms
 
 
-Bridge: the largest window read was 588 nodes in 999 ms (1.7 ms per node, 9413 accessibility calls, 1 process invocation).
+Bridge: the largest window read was 588 nodes in 3556 ms (6.05 ms per node, 9413 accessibility calls, 1 process invocation).
 
 **Conformant.** 7 cases passed, 2 skipped, 30 checks.
 
@@ -38,10 +38,10 @@ Bridge: the largest window read was 588 nodes in 999 ms (1.7 ms per node, 9413 a
 ## ADE variant 1
 
 
-Run at 2026-09-05T04:22:23.000Z · 15652 ms
+Run at 2026-09-05T05:38:29.056Z · 15758 ms
 
 
-Bridge: the largest window read was 588 nodes in 889 ms (1.51 ms per node, 9413 accessibility calls, 1 process invocation).
+Bridge: the largest window read was 588 nodes in 957 ms (1.63 ms per node, 9413 accessibility calls, 1 process invocation).
 
 **Conformant.** 1 cases passed, 8 skipped, 8 checks.
 
@@ -60,10 +60,10 @@ Bridge: the largest window read was 588 nodes in 889 ms (1.51 ms per node, 9413 
 ## ADE variant 2
 
 
-Run at 2026-09-05T04:22:40.598Z · 13633 ms
+Run at 2026-09-05T05:38:46.868Z · 13777 ms
 
 
-Bridge: the largest window read was 588 nodes in 883 ms (1.5 ms per node, 9413 accessibility calls, 1 process invocation).
+Bridge: the largest window read was 588 nodes in 879 ms (1.49 ms per node, 9413 accessibility calls, 1 process invocation).
 
 **Conformant.** 1 cases passed, 8 skipped, 4 checks.
 
