@@ -75,9 +75,18 @@ for (const [path, operations] of Object.entries(document.paths)) {
       params: pathParams(path),
       hasBody: operation.requestBody !== undefined,
       /** Text routes return a string; everything else returns JSON. */
+      /*
+       * Any `text/*` answer is text, not only `text/plain` — `GET /bindings/:id`
+       * answers `text/yaml`, and a client that ran `JSON.parse` over it threw on
+       * every call (T10.1). `scripts/generate-clients.mjs` reads the same rule.
+       */
       text:
-        operation.responses?.["200"]?.content?.["text/plain"] !== undefined ||
-        operations[verb]?.requestBody?.content?.["text/plain"] !== undefined,
+        Object.keys(operation.responses?.["200"]?.content ?? {}).some((one) =>
+          one.startsWith("text/"),
+        ) ||
+        Object.keys(operations[verb]?.requestBody?.content ?? {}).some((one) =>
+          one.startsWith("text/"),
+        ),
     });
   }
 }

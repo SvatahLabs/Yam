@@ -1,6 +1,6 @@
 /**
- * The ADE's shell (T9.4, REQ-ADE-11, REQ-ADE-12, LLD §13.7; the `Main`,
- * `Run` and `Palette` artboards).
+ * The ADE's shell (T9.4, T10.1, T10.2, T10.3, REQ-ADE-11, REQ-ADE-12,
+ * LLD §13.7; the `Main`, `Run` and `Palette` artboards).
  *
  * > Top bar: project crumb, command palette field, environment and service
  * > chips. Left rail: Flows, Runs, Bindings, Agents and tools; Resources: API,
@@ -8,10 +8,10 @@
  * > screen […] Right: a contextual inspector […] Status bar: context on the
  * > left, keys on the right.
  *
- * Phase 9 renders two of the twelve screens — Flows and Run (T9.4) — and the
- * other ten are reachable through the old tabs behind a **Legacy** rail item
- * until Phase 10 replaces them. That is T9.4's scope, stated as a rail item so
- * nobody has to remember it.
+ * All twelve screens of LLD §13.7 render here (T10.1, T10.2). Phase 9 had two
+ * and put the other ten behind a **Legacy** rail item; T10.3 deleted them, so
+ * this is now the whole application and there is nowhere else for a screen to
+ * be.
  *
  * ## What this file may and may not do
  *
@@ -35,23 +35,64 @@ import {
   type ScreenStateBase,
 } from "@svatah/screens";
 import { Alert, Button, CommandPalette, Kbd, RailItem, type PaletteRow } from "@svatah/ui";
-import type { FlowsState, RunState } from "@svatah/screens";
+import {
+  applyExplorerEvent,
+  applyHealEvent,
+  applyRecordEvent,
+  SCREEN_IDS,
+  type AgentsState,
+  type ApiState,
+  type BindingsState,
+  type DataState,
+  type ExplorerState,
+  type FlowsState,
+  type HealState,
+  type ImportState,
+  type RecordState,
+  type RunState,
+  type RunsState,
+  type SettingsState,
+} from "@svatah/screens";
 import type { ServiceClient } from "../client.js";
+import { a11yVariant } from "../a11y-variant.js";
 import { FlowsInspector, FlowsScreen } from "./Flows.js";
 import { RunInspector, RunScreen } from "./Run.js";
+import { RunsInspector, RunsScreen } from "./Runs.js";
+import { BindingsInspector, BindingsScreen } from "./Bindings.js";
+import { HealInspector, HealScreen } from "./Heal.js";
+import { RecordInspector, RecordScreen } from "./Record.js";
+import {
+  AgentsInspector,
+  AgentsScreen,
+  ApiInspector,
+  ApiScreen,
+  DataInspector,
+  DataScreen,
+  ExplorerInspector,
+  ExplorerScreen,
+  ImportInspector,
+  ImportScreen,
+  SettingsInspector,
+  SettingsScreen,
+} from "./Secondary.js";
 
-/** The screens Phase 9 renders. Everything else is behind the Legacy rail item. */
-export const RENDERED: readonly ScreenId[] = ["flows", "run"];
+/**
+ * Every screen renders (T10.1, T10.2, T10.3).
+ *
+ * Phase 9 rendered two and sent the rest to a Legacy rail item; the list is kept
+ * as a *constant* rather than deleted because `apps/ade/test/screen-rule.test.ts`
+ * and the desktop cases read it, and because "every screen id has a renderer" is
+ * a claim worth being able to make in one line.
+ */
+export const RENDERED: readonly ScreenId[] = SCREEN_IDS;
 
 export interface ShellProps {
   readonly client: ServiceClient;
   readonly project: string;
   readonly serviceUrl: string;
-  /** The old eleven-tab application, rendered when the Legacy rail item is on. */
-  readonly legacy: React.ReactNode;
 }
 
-type Showing = ScreenId | "legacy";
+type Showing = ScreenId;
 
 export function Shell(props: ShellProps): React.JSX.Element {
   const [showing, setShowing] = useState<Showing>("flows");
@@ -63,7 +104,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
   const [evidence, setEvidence] = useState<string | undefined>(undefined);
   const latest = useRef(0);
 
-  const screen: ScreenId = showing === "legacy" ? "flows" : showing;
+  const screen: ScreenId = showing;
 
   /* ── load ──────────────────────────────────────────────────────────────── */
 
@@ -79,7 +120,6 @@ export function Shell(props: ShellProps): React.JSX.Element {
   );
 
   useEffect(() => {
-    if (showing === "legacy") return;
     void load(showing, params);
   }, [showing, params, load]);
 
@@ -106,11 +146,22 @@ export function Shell(props: ShellProps): React.JSX.Element {
 
   useEffect(() => {
     return props.client.subscribe((event) => {
-      setState((before) =>
-        before === undefined || before.screen !== "run"
-          ? before
-          : applyEvent(before as RunState, event),
-      );
+      /*
+       * One subscription, four screens (T10.1). Which fold applies is the
+       * *state's* screen and not the event's kind: an event for a screen nobody
+       * is looking at is dropped, and a screen that is showing folds every event
+       * it understands. The model decides what each means — a renderer that had
+       * built a decision itself would be a renderer that could disagree with
+       * `svatah ui` about what the recorder chose.
+       */
+      setState((before) => {
+        if (before === undefined) return before;
+        if (before.screen === "run") return applyEvent(before as RunState, event);
+        if (before.screen === "record") return applyRecordEvent(before as RecordState, event);
+        if (before.screen === "heal") return applyHealEvent(before as HealState, event);
+        if (before.screen === "explorer") return applyExplorerEvent(before as ExplorerState, event);
+        return before;
+      });
       /*
        * When the run ends, load the screen again from the files it wrote.
        *
@@ -133,9 +184,32 @@ export function Shell(props: ShellProps): React.JSX.Element {
   /* ── the failing step's screenshot ─────────────────────────────────────── */
 
   useEffect(() => {
-    const run = state?.screen === "run" ? (state as RunState) : undefined;
-    const shot = run?.inspector?.screenshot;
-    if (run?.runId === undefined || shot === undefined) {
+    /*
+     * Two screens show a failing step's picture: the Run screen's inspector and
+     * the Runs screen's (T10.1). Same fetch, same object URL, revoked the same
+     * way — a second copy of this effect on the other screen would be a second
+     * place to forget `revokeObjectURL`.
+     */
+    const evidenceOf = ():
+      | { runId: string; screenshot: string }
+      | undefined => {
+      if (state?.screen === "run") {
+        const run = state as RunState;
+        return run.runId === undefined || run.inspector?.screenshot === undefined
+          ? undefined
+          : { runId: run.runId, screenshot: run.inspector.screenshot };
+      }
+      if (state?.screen === "runs") {
+        const runs = state as RunsState;
+        return runs.inspector?.failure?.screenshot === undefined
+          ? undefined
+          : { runId: runs.inspector.runId, screenshot: runs.inspector.failure.screenshot };
+      }
+      return undefined;
+    };
+    const run = evidenceOf();
+    const shot = run?.screenshot;
+    if (run === undefined || shot === undefined) {
       setEvidence(undefined);
       return undefined;
     }
@@ -165,7 +239,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
         const goTo = outcome.goTo;
         if (goTo !== undefined) {
           setParams({ ...params, ...outcome.params });
-          setShowing(RENDERED.includes(goTo) ? goTo : "legacy");
+          setShowing(goTo);
         } else {
           // Re-load, because the action changed something on disk.
           void load(screen, params);
@@ -234,7 +308,8 @@ export function Shell(props: ShellProps): React.JSX.Element {
       const action = actionById(id);
       if (action?.group === "Go to") {
         setPaletteOpen(false);
-        setShowing(RENDERED.includes(action.screen) ? action.screen : "legacy");
+        setParams({});
+        setShowing(action.screen);
         return;
       }
       void runAction(id);
@@ -244,6 +319,96 @@ export function Shell(props: ShellProps): React.JSX.Element {
 
   const actions = actionsForScreen(screen);
 
+  /**
+   * The twelve screens, by id (T10.1, T10.2).
+   *
+   * One table rather than a chain of ternaries: a screen added later is one
+   * entry, and `apps/ade/test/screen-rule.test.ts` can read it to assert that
+   * every id in `SCREEN_IDS` has a body. Each is handed the same five props,
+   * because a screen that needed a sixth would be a screen the shell knows
+   * something about.
+   */
+  function screenBody(): React.ReactNode {
+    if (state === undefined) return null;
+    const shared = {
+      params,
+      actions,
+      onAction: (id: string) => void runAction(id),
+      onParams: setParams,
+    } as const;
+    const evidenceProp = evidence === undefined ? {} : { evidence };
+
+    switch (state.screen) {
+      case "run":
+        return <RunScreen state={state as RunState} {...shared} {...evidenceProp} />;
+      case "runs":
+        return <RunsScreen state={state as RunsState} {...shared} {...evidenceProp} />;
+      case "bindings":
+        return <BindingsScreen state={state as BindingsState} {...shared} />;
+      case "record":
+        return <RecordScreen state={state as RecordState} {...shared} />;
+      case "heal":
+        return <HealScreen state={state as HealState} {...shared} />;
+      case "agents":
+        return <AgentsScreen state={state as AgentsState} {...shared} />;
+      case "api":
+        return <ApiScreen state={state as ApiState} {...shared} />;
+      case "data":
+        return <DataScreen state={state as DataState} {...shared} />;
+      case "explorer":
+        return <ExplorerScreen state={state as ExplorerState} {...shared} />;
+      case "import":
+        return <ImportScreen state={state as ImportState} {...shared} />;
+      case "settings":
+        return <SettingsScreen state={state as SettingsState} {...shared} />;
+      default:
+        return (
+          <FlowsScreen state={state as FlowsState} {...shared} tab={tab} onTab={setTab} />
+        );
+    }
+  }
+
+  /** The right inspector, per screen. Same table, same rule. */
+  function inspectorBody(): React.ReactNode {
+    if (state === undefined) return null;
+    const shared = {
+      params,
+      actions,
+      onAction: (id: string) => void runAction(id),
+      onParams: setParams,
+    } as const;
+    const evidenceProp = evidence === undefined ? {} : { evidence };
+
+    switch (state.screen) {
+      case "run":
+        return <RunInspector state={state as RunState} {...shared} {...evidenceProp} />;
+      case "runs":
+        return <RunsInspector state={state as RunsState} {...shared} {...evidenceProp} />;
+      case "bindings":
+        return <BindingsInspector state={state as BindingsState} {...shared} />;
+      case "record":
+        return <RecordInspector state={state as RecordState} {...shared} />;
+      case "heal":
+        return <HealInspector state={state as HealState} {...shared} />;
+      case "agents":
+        return <AgentsInspector state={state as AgentsState} {...shared} />;
+      case "api":
+        return <ApiInspector state={state as ApiState} {...shared} />;
+      case "data":
+        return <DataInspector state={state as DataState} {...shared} />;
+      case "explorer":
+        return <ExplorerInspector state={state as ExplorerState} {...shared} />;
+      case "import":
+        return <ImportInspector state={state as ImportState} {...shared} />;
+      case "settings":
+        return <SettingsInspector state={state as SettingsState} {...shared} />;
+      default:
+        return (
+          <FlowsInspector state={state as FlowsState} onAction={(id) => void runAction(id)} />
+        );
+    }
+  }
+
   return (
     <div className="sv-app sv-root">
       {/* ── top bar ───────────────────────────────────────────────────────── */}
@@ -252,10 +417,21 @@ export function Shell(props: ShellProps): React.JSX.Element {
           <span className="sv-brand-mark" aria-hidden="true" />
           Svatah
         </span>
-        <nav className="sv-crumb" aria-label="Project">
-          <span className="sv-crumb-sep">/</span>
+        <nav className="sv-crumb" id="topbar-crumb" aria-label="Project">
+          {/*
+            The separators are decoration and are hidden from the tree (T10.3).
+            A screen reader saying "slash" between the project and the screen is
+            noise, and two sibling nodes both named `/` gave two elements the
+            same `controlPath` — which the resolver drops as ambiguous, so a
+            binding on either was unresolvable (LLD §3.3, §7.5).
+          */}
+          <span className="sv-crumb-sep" aria-hidden="true">
+            /
+          </span>
           <b id="crumb-project">{props.project.split(/[\\/]/).filter(Boolean).pop() ?? props.project}</b>
-          <span className="sv-crumb-sep">/</span>
+          <span className="sv-crumb-sep" aria-hidden="true">
+            /
+          </span>
           <span id="crumb-screen">{state?.title ?? ""}</span>
         </nav>
         <span className="sv-spacer" />
@@ -273,7 +449,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
       </header>
 
       {/* ── rail ──────────────────────────────────────────────────────────── */}
-      <nav className="sv-rail" aria-label="Sections">
+      <nav className="sv-rail" id="rail" aria-label="Sections">
         {(["Project", "Resources", "Bottom"] as const).map((group) => (
           <div key={group} className={group === "Bottom" ? "sv-rail-group sv-rail-bottom" : "sv-rail-group"}>
             {group === "Bottom" ? null : <p className="sv-rail-heading">{group}</p>}
@@ -281,36 +457,29 @@ export function Shell(props: ShellProps): React.JSX.Element {
               <RailItem
                 key={one.screen}
                 id={`rail-${one.screen}`}
-                label={one.label}
+                /*
+                 * Variant 1 renames one rail item and nothing else (Draft 2.8
+                 * §16, T7.1, T10.3): the id, the position and the neighbours
+                 * stay, so a binding that matched on the *name* stops matching
+                 * and relocalization has everything except the thing it matched
+                 * on. Renaming two would make it a different test.
+                 */
+                label={a11yVariant() === 1 && one.screen === "flows" ? "Editor" : one.label}
                 active={showing === one.screen}
-                onPress={() =>
-                  setShowing(RENDERED.includes(one.screen) ? one.screen : "legacy")
-                }
+                onPress={() => {
+                  // A rail click is a fresh screen, not the last one's selection.
+                  setParams({});
+                  setShowing(one.screen);
+                }}
               />
             ))}
           </div>
         ))}
-        {/*
-          T9.4: "the other screens still reachable through the old tabs behind a
-          'Legacy' rail item until Phase 10". A rail item rather than a note in a
-          progress file, so it is obvious what is and is not rebuilt.
-        */}
-        <div className="sv-rail-group sv-rail-legacy">
-          <RailItem
-            id="rail-legacy"
-            label="Legacy"
-            active={showing === "legacy"}
-            count={11}
-            onPress={() => setShowing("legacy")}
-          />
-        </div>
       </nav>
 
       {/* ── workspace ─────────────────────────────────────────────────────── */}
-      <section className="sv-workspace" aria-label="Workspace">
-        {showing === "legacy" ? (
-          props.legacy
-        ) : state === undefined ? (
+      <section className="sv-workspace" id="workspace" aria-label="Workspace">
+        {state === undefined ? (
           <p className="sv-empty">Loading…</p>
         ) : state.error !== undefined ? (
           <Alert id="screen-error" tone="fail">
@@ -318,44 +487,14 @@ export function Shell(props: ShellProps): React.JSX.Element {
             <span className="sv-mono">{props.serviceUrl}</span>; `svatah serve --project{" "}
             {props.project}` starts one by hand.
           </Alert>
-        ) : state.screen === "run" ? (
-          <RunScreen
-            state={state as RunState}
-            params={params}
-            actions={actions}
-            onAction={(id) => void runAction(id)}
-            onParams={setParams}
-            {...(evidence === undefined ? {} : { evidence })}
-          />
         ) : (
-          <FlowsScreen
-            state={state as FlowsState}
-            params={params}
-            actions={actions}
-            onAction={(id) => void runAction(id)}
-            onParams={setParams}
-            tab={tab}
-            onTab={setTab}
-          />
+          screenBody()
         )}
       </section>
 
       {/* ── inspector ─────────────────────────────────────────────────────── */}
-      <aside className="sv-inspector" aria-label="Inspector">
-        {showing === "legacy" || state === undefined ? (
-          <p className="sv-empty">The legacy screens carry their own detail.</p>
-        ) : state.screen === "run" ? (
-          <RunInspector
-            state={state as RunState}
-            params={params}
-            actions={actions}
-            onAction={(id) => void runAction(id)}
-            onParams={setParams}
-            {...(evidence === undefined ? {} : { evidence })}
-          />
-        ) : (
-          <FlowsInspector state={state as FlowsState} onAction={(id) => void runAction(id)} />
-        )}
+      <aside className="sv-inspector" id="inspector" aria-label="Inspector">
+        {state === undefined ? <p className="sv-empty">Loading…</p> : inspectorBody()}
       </aside>
 
       {/* ── status bar ────────────────────────────────────────────────────── */}

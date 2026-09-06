@@ -365,7 +365,6 @@ test("opens into the new Flows screen, not the eleven tabs", async () => {
     "rail-data",
     "rail-import",
     "rail-settings",
-    "rail-legacy",
   ]) {
     await expect(page.locator(`#${id}`), `${id} is missing from the rail`).toBeVisible();
   }
@@ -380,7 +379,7 @@ test("opens into the new Flows screen, not the eleven tabs", async () => {
   await expect(page.locator("#flows-list")).toBeVisible();
   await expect(page.locator("#flows-tabs")).toBeVisible();
 
-  // And the eleven tabs are *not* on screen: they are behind the rail item.
+  // And the eleven tabs are not anywhere: T10.3 deleted them.
   await expect(page.locator("#screen-project")).toHaveCount(0);
 });
 
@@ -441,11 +440,13 @@ test("Record on the Flows screen starts a session with the fake gateway", async 
   });
 
   /*
-   * `record.start` goes to the `record` screen, which Phase 9 has not rebuilt —
-   * so the shell falls back to the Legacy rail item, which is exactly T9.4's
-   * scope. Back to Flows for the run.
+   * `record.start` goes to the Record review, which T10.1 built — so the shell
+   * shows it rather than falling back to anything. Back to Flows for the run.
    */
-  page = await currentPage();
+  page = await livePage();
+  await expect(page.getByRole("heading", { name: "Record review" })).toBeVisible({
+    timeout: 60_000,
+  });
   await page.locator("#rail-flows").click();
   await expect(page.getByRole("heading", { name: "Flows" })).toBeVisible();
 });
@@ -705,23 +706,219 @@ test("the command palette opens on ⌘K and lists the registry's actions", async
   await expect(palette).toBeHidden();
 });
 
-test("the Legacy rail item still reaches the eleven screens (T9.4's scope)", async () => {
-  await page.locator("#rail-legacy").click();
+/**
+ * T10.1 and T10.2's Validate — "each screen driven end to end through its own
+ * controls in the ADE under Playwright … every control named and id'd".
+ *
+ * Every one of the twelve, reached the way a person reaches it: the rail for the
+ * eight that are on it, and the palette's Go-to rows for the four that are
+ * reached from another screen. Each is then *used* — a filter cycled, a row
+ * chosen, a field typed into — and checked for an unnamed control.
+ */
+
+/** Every interactive control on screen that has no accessible name or no id. */
+async function unnamedControls(): Promise<string[]> {
+  return await page.evaluate(() => {
+    const interactive = [
+      ...document.querySelectorAll(
+        "button, a[href], input, select, textarea, [role='button'], [role='tab'], [role='combobox']",
+      ),
+    ].filter((node) => {
+      for (let one: Element | null = node; one !== null; one = one.parentElement) {
+        if (one.getAttribute("aria-hidden") === "true") return false;
+      }
+      return true;
+    });
+    const nameOf = (node: Element): string => {
+      const aria = node.getAttribute("aria-label");
+      if (aria !== null && aria.trim() !== "") return aria.trim();
+      const id = node.getAttribute("id");
+      if (id !== null) {
+        const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+        if (label !== null) return (label.textContent ?? "").trim();
+      }
+      const clone = node.cloneNode(true) as Element;
+      for (const hidden of clone.querySelectorAll("[aria-hidden='true']")) hidden.remove();
+      return (clone.textContent ?? "").replace(/\s+/g, " ").trim();
+    };
+    return interactive
+      .filter((node) => nameOf(node) === "" || (node.getAttribute("id") ?? "") === "")
+      .map((node) => node.outerHTML.slice(0, 160));
+  });
+}
+
+/** Reach a screen the way a person does: the rail, or the palette's Go-to row. */
+async function goTo(screen: string, label: string): Promise<void> {
+  page = await livePage();
+  const rail = page.locator(`#rail-${screen}`);
+  if ((await rail.count()) > 0) {
+    await rail.click();
+  } else {
+    await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
+    const palette = page.getByRole("dialog", { name: "Command palette" });
+    await expect(palette).toBeVisible();
+    await palette.getByLabel("Search or run a command").fill(`Go to ${label}`);
+    await palette.getByText(`Go to ${label}`, { exact: true }).first().click();
+    await expect(palette).toBeHidden();
+  }
+  await expect(page.getByRole("heading", { name: label, exact: false })).toBeVisible({
+    timeout: 60_000,
+  });
+}
+
+test.describe("every screen (T10.1, T10.2)", () => {
+  const SCREENS: ReadonlyArray<[string, string]> = [
+    ["flows", "Flows"],
+    ["runs", "Runs"],
+    ["bindings", "Bindings"],
+    ["agents", "Agents and tools"],
+    ["api", "API"],
+    ["data", "Data"],
+    ["import", "Import prototype database"],
+    ["settings", "Settings"],
+    ["record", "Record review"],
+    ["run", "Run"],
+    ["heal", "Heal review"],
+    ["explorer", "Surface explorer"],
+  ];
+
+  for (const [screen, label] of SCREENS) {
+    test(`${screen} opens and every control on it is named and id'd`, async () => {
+      await goTo(screen, label);
+      const unnamed = await unnamedControls();
+      expect(unnamed, `${screen}: ${unnamed.join("\n")}`).toEqual([]);
+    });
+  }
+});
+
+test("the Runs screen filters, and its inspector shows the failing step's evidence", async () => {
+  await goTo("runs", "Runs");
+  await expect(page.locator("#runs-table")).toBeVisible();
+
+  // Its own controls: the three chips the artboard shows, each a real button.
+  for (const id of ["runs-filter-behavior", "runs-filter-invoker", "runs-filter-status"]) {
+    await expect(page.locator(`#${id}`)).toBeVisible();
+  }
+  const behavior = page.locator("#runs-filter-behavior");
+  await expect(behavior).toContainText("behavior: all");
+  await behavior.click();
+  await expect(behavior).not.toContainText("behavior: all");
+  // And back, so the rest of this file sees the screen it expects.
+  await behavior.click();
+  await expect(behavior).toContainText("behavior: all");
+
+  // Choosing a run fills the inspector with what that run wrote.
+  await page.locator("#runs-table tbody tr").first().click();
+  await expect(page.locator("#inspector-run")).toBeVisible();
+  await expect(page.locator("#inspector-artifacts")).toBeVisible();
+});
+
+test("the Bindings screen shows the store and one element's resolver order", async () => {
+  await goTo("bindings", "Bindings");
+  await expect(page.locator("#bindings-table")).toBeVisible();
+  expect(await page.locator("#bindings-table tbody tr").count()).toBeGreaterThan(5);
+
+  await page.locator("#bindings-table tbody tr").first().click();
+  await expect(page.locator("#inspector-binding")).toBeVisible();
+  await expect(page.locator("#inspector-candidate-table")).toBeVisible();
+  await expect(page.locator("#inspector-fingerprint")).toBeVisible();
+
+  // Its own control: Verify, from the registry, with the key the model gives it.
+  const verify = page.locator("#action-bindings-verify");
+  await expect(verify).toBeVisible();
+  await expect(verify).toContainText("Verify");
+});
+
+test("the Heal review offers the runs worth healing", async () => {
+  await goTo("heal", "Heal review");
+  await expect(page.locator("#heal-candidates")).toBeVisible();
+  await expect(page.locator("#heal-proposals")).toBeVisible();
+  // Nothing is written until a proposal is applied, and the screen says so.
+  await expect(page.locator("#heal-proposals")).toContainText("Nothing is written");
+});
+
+test("the Record review chooses its gateway and says what a fake session is", async () => {
+  await goTo("record", "Record review");
+  const gateway = page.locator("#record-gateway");
+  await expect(gateway).toBeVisible();
+  // No credential on this service, so the screen offers what it can do.
+  await expect(page.locator("#record-fake-gateway")).toContainText("evals/grounding/cases");
+  await expect(page.locator("#record-flows")).toBeVisible();
+});
+
+test("the API screen shows a saved request and its headers", async () => {
+  await goTo("api", "API");
+  await expect(page.locator("#api-requests")).toBeVisible();
+  await expect(page.locator("#api-requests")).toContainText("active count");
+  await page.locator("#api-requests tbody tr").first().click();
+  await expect(page.locator("#api-headers")).toBeVisible();
+  await expect(page.locator("#inspector-request")).toBeVisible();
+});
+
+test("the Data screen names every secret and shows none of them", async () => {
+  await goTo("data", "Data");
+  await expect(page.locator("#data-table")).toBeVisible();
+  // The variable, never the value (REQ-NFR-6).
+  await expect(page.locator("#data-table")).toContainText("SVATAH_SAMPLE_PASSWORD");
+  await page.locator("#data-table tbody tr").first().click();
+  await expect(page.locator("#inspector-value")).toBeVisible();
+});
+
+test("the Surface explorer refuses a call with no intent", async () => {
+  await goTo("explorer", "Surface explorer");
+  // The alert is on the screen while the intent is empty (REQ-BEH-4).
+  await expect(page.locator("#explorer-intent-required")).toBeVisible();
+  await page.getByLabel("Intent").fill("look at the booking page");
+  await expect(page.locator("#explorer-intent-required")).toHaveCount(0);
+  await expect(page.locator("#explorer-adapter")).toBeVisible();
+});
+
+test("the Import screen previews into the open project and nowhere else", async () => {
+  await goTo("import", "Import prototype database");
+  await expect(page.locator("#import-source")).toBeVisible();
+  await expect(page.locator("#inspector-confinement")).toContainText("anything outside it");
+  await expect(page.locator("#inspector-cli")).toContainText("svatah migrate");
+});
+
+test("the Settings screen shows the project and never a credential", async () => {
+  await goTo("settings", "Settings");
+  await expect(page.locator("#settings-project")).toContainText("svatah-fixtures");
+  await expect(page.locator("#settings-run")).toContainText("playwright");
+  // A boolean, never the key (REQ-NFR-6, REQ-ADE-4).
+  await expect(page.locator("#settings-service")).toContainText(/available|none/);
+  await expect(page.locator("#inspector-diagnostics")).toBeVisible();
+});
+
+test("the Agents screen lists what an agent may call", async () => {
+  await goTo("agents", "Agents and tools");
+  await expect(page.locator("#agents-tools")).toBeVisible();
+  await expect(page.locator("#agents-invocations")).toBeVisible();
+  await expect(page.locator("#inspector-refused")).toBeVisible();
+});
+
+test("the legacy screens are gone (T10.3)", async () => {
+  await goTo("flows", "Flows");
+  // The eleven tabs, and the rail item that reached them.
   for (const id of [
+    "rail-legacy",
     "screen-project",
-    "screen-flows",
     "screen-plan",
-    "screen-run",
     "screen-results",
-    "screen-api",
-    "screen-data",
-    "screen-record",
-    "screen-bindings",
-    "screen-explorer",
     "screen-tools",
   ]) {
-    await expect(page.locator(`#${id}`), `${id} is not reachable behind Legacy`).toBeVisible();
+    await expect(page.locator(`#${id}`), `${id} is still in the application`).toHaveCount(0);
   }
-  await page.locator("#rail-flows").click();
-  await expect(page.getByRole("heading", { name: "Flows" })).toBeVisible();
+  // And the rail is the eight of LLD §13.7's information architecture.
+  for (const id of [
+    "rail-flows",
+    "rail-runs",
+    "rail-bindings",
+    "rail-agents",
+    "rail-api",
+    "rail-data",
+    "rail-import",
+    "rail-settings",
+  ]) {
+    await expect(page.locator(`#${id}`)).toBeVisible();
+  }
 });

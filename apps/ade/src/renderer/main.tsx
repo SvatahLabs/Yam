@@ -9,13 +9,12 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App.js";
 /*
- * The design system first, then the shell's layout, then the eleven legacy
- * screens' stylesheet — which Phase 10 deletes with them (T10.3).
+ * The design system, then this application's layout. There is no third
+ * stylesheet: T10.3 deleted `app.css` with the eleven screens it dressed.
  */
 import "@svatah/ui-tokens/tokens.css";
 import "@svatah/ui/ui.css";
 import "./shell/shell.css";
-import "./app.css";
 
 const root = document.getElementById("root");
 if (root === null) throw new Error("index.html has no #root.");

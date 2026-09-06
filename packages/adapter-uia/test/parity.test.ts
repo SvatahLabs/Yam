@@ -111,7 +111,7 @@ describe("the two desktop adapters normalise one window the same way (REQ-SURF-4
 
     it(`names the ADE's ${screen} controls identically, so one flow drives both`, () => {
       /*
-       * The assertion that matters to a flow author: "click the Start recording
+       * The assertion that matters to a flow author: "click the Stop recording
        * button" has to find the same thing on both platforms, which means the
        * pair (role, name) has to be identical for every control.
        */
@@ -205,10 +205,10 @@ describe("the two desktop adapters normalise one window the same way (REQ-SURF-4
      * has — Accessibility Inspector shows `AXButton`, Accessibility Insights
      * shows `Button`. What has to hold is that both identify the same element.
      */
-    const axButton = fromAx("record").find((node) => node.name === "Start recording")!;
-    const uiaButton = fromUia("record").find((node) => node.name === "Start recording")!;
+    const axButton = fromAx("record").find((node) => node.name === "Stop recording")!;
+    const uiaButton = fromUia("record").find((node) => node.name === "Stop recording")!;
     expect(axButton.ref).toBe(uiaButton.ref);
-    expect(axButton.controlPath).toContain("AXButton[Start recording]");
-    expect(uiaButton.controlPath).toContain("Button[Start recording]");
+    expect(axButton.controlPath).toContain("AXButton[Stop recording]");
+    expect(uiaButton.controlPath).toContain("Button[Stop recording]");
   });
 });

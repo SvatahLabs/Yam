@@ -44,7 +44,7 @@ export interface AxSnapshotNode extends SnapshotNode {
  */
 export function roleOf(
   node: Pick<AxNode, "role" | "subrole">,
-  context: { readonly insidePopUp?: boolean } = {},
+  context: { readonly insidePopUp?: boolean; readonly insideList?: boolean } = {},
 ): string {
   const bySubrole = node.subrole === undefined ? undefined : AX_SUBROLE_MAP[node.subrole];
   if (bySubrole !== undefined) return bySubrole;
@@ -66,11 +66,33 @@ export function roleOf(
   if (context.insidePopUp === true && (node.role === "AXMenuItem" || node.role === "AXStaticText")) {
     return "option";
   }
+  /*
+   * And a menu item inside a *list* is an option too (T10.3).
+   *
+   * The command palette is a `role="listbox"` of `role="option"` rows, which
+   * Chromium publishes on macOS as `AXMenuItem`s inside an `AXList` and on
+   * Windows as `ListItem`s — `option` on one platform and `menuitem` on the
+   * other. Only the menu items: a *text run* inside a list is a list's text,
+   * and promoting those made every line of the Settings screen's diagnostics an
+   * unnamed `option`.
+   */
+  if (context.insideList === true && node.role === "AXMenuItem") return "option";
   return AX_ROLE_MAP[node.role] ?? FALLBACK_ROLE;
 }
 
 /** The AX roles whose descendants are a chooser's items rather than a menu's. */
 const POP_UP_ROLES = new Set(["AXPopUpButton", "AXComboBox"]);
+
+/** And the one whose menu items are options: a listbox (T10.3, see `roleOf`). */
+const LIST_ROLES = new Set(["AXList"]);
+
+/** Whether this node is inside a list (see `roleOf`). */
+export function insideList(nodes: readonly AxNode[], index: number): boolean {
+  for (let at = nodes[index]?.parent ?? -1; at >= 0; at = nodes[at]?.parent ?? -1) {
+    if (LIST_ROLES.has(nodes[at]!.role)) return true;
+  }
+  return false;
+}
 
 /** Whether this node is inside a pop-up button's menu (see `roleOf`). */
 export function insidePopUp(nodes: readonly AxNode[], index: number): boolean {
@@ -82,6 +104,16 @@ export function insidePopUp(nodes: readonly AxNode[], index: number): boolean {
 
 /** The subroles that mean something different from their role (LLD §7.5). */
 export const AX_SUBROLE_MAP: Readonly<Record<string, string>> = {
+  /*
+   * `AXApplicationAlert` and `AXApplicationStatus` are subroles on an `AXGroup`
+   * (T10.3). Without them a `role="alert"` — which is how the ADE draws a
+   * failed record session and the explorer's missing intent — normalised to
+   * `group` on macOS and to `alert` on Windows, because UIA publishes it in
+   * `LocalizedControlType`. `packages/adapter-uia/test/parity.test.ts` is what
+   * found it, which is what that check is for.
+   */
+  AXApplicationAlert: "alert",
+  AXApplicationStatus: "status",
   AXCloseButton: "button",
   AXCollapseButton: "button",
   AXContentList: "list",
@@ -279,7 +311,14 @@ export function convertTree(nodes: readonly AxNode[], options: ConvertOptions): 
   const keep = new Set<number>();
   if (options.interactiveOnly) {
     for (let index = 0; index < nodes.length; index += 1) {
-      if (!isInteractiveRole(roleOf(nodes[index]!, { insidePopUp: insidePopUp(nodes, index) }))) {
+      if (
+        !isInteractiveRole(
+          roleOf(nodes[index]!, {
+            insidePopUp: insidePopUp(nodes, index),
+            insideList: insideList(nodes, index),
+          }),
+        )
+      ) {
         continue;
       }
       // Keep the element and every ancestor, so the structure survives.
@@ -306,7 +345,10 @@ export function convertTree(nodes: readonly AxNode[], options: ConvertOptions): 
 
     return {
       ref: refOf.get(index)!,
-      role: roleOf(node, { insidePopUp: insidePopUp(nodes, index) }),
+      role: roleOf(node, {
+        insidePopUp: insidePopUp(nodes, index),
+        insideList: insideList(nodes, index),
+      }),
       ...(name === "" ? {} : { name }),
       ...(value === undefined ? {} : { value }),
       ...(description === "" || description === name ? {} : { description }),

@@ -1,36 +1,49 @@
 /**
- * T3.7 Validate — "a review confirms no ADE-only logic", made mechanical.
+ * T3.7's Validate — "a review confirms no ADE-only logic" — made mechanical,
+ * and rewritten for the structure T10.1–T10.3 left behind.
  *
  * The screen rule is: "every screen renders a service response or a project file
  * and nothing the CLI cannot produce." A review can confirm that once. This
  * confirms it on every commit, which is the difference between a rule and a
  * remark.
  *
- * ## What it reads
+ * ## What changed, and why the check got stronger
  *
- * The renderer's sources. Every call a screen makes must be a method on the
- * generated client — which is generated from the service's own OpenAPI document,
- * so a method exists only if a route does — and every value a screen displays
- * carries the endpoint it came from (`fromEndpoint`). A screen that computed
- * something the service does not publish would have to either call something
- * that is not there, which does not compile, or display a value with no origin,
- * which this catches.
+ * Phase 3's screens each called the generated client and attributed each value
+ * to the route it came from, and this file read the sources for both. Phase 10's
+ * screens do not call anything: a screen is a function of a `ScreenState` that
+ * `@svatah/screens` loaded, and the ADE is one of its two renderers (§13.7). So
+ * the rule is now checkable in a harder form —
  *
- * The verification contract calls "a static check over the generated client
- * usage" acceptable. This is that check.
+ *   1. **no screen reaches the network at all**: no `fetch`, no `EventSource`,
+ *      no `client.` call outside the shell, which is the one file that holds a
+ *      client and hands it to the model;
+ *   2. **every screen's props are a state type from `@svatah/screens`**, so a
+ *      value it draws is one the model produced;
+ *   3. **every screen id has a body**, so a screen cannot exist in the model and
+ *      be unreachable in the application;
+ *   4. **every endpoint LLD §13.6's table names is reached** — by the model now,
+ *      which is where the reading moved to.
  */
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { SCREEN_IDS } from "@svatah/screens";
 import { ENDPOINTS } from "../src/renderer/client.generated.js";
 
 const ADE = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SCREENS = join(ADE, "src", "renderer", "screens");
+const SHELL = join(ADE, "src", "renderer", "shell");
+const MODEL = join(ADE, "..", "..", "packages", "screens", "src");
 
-const screens = readdirSync(SCREENS)
+const shell = readdirSync(SHELL)
   .filter((name) => name.endsWith(".tsx"))
-  .map((name) => ({ name, source: readFileSync(join(SCREENS, name), "utf8") }));
+  .map((name) => ({ name, source: readFileSync(join(SHELL, name), "utf8") }));
+
+/** The screens, which is everything under `shell/` but the shell and its parts. */
+const screens = shell.filter(
+  (one) => !["Shell.tsx", "parts.tsx", "Welcome.tsx"].includes(one.name),
+);
 
 /** Everything the generated client offers, plus the two hand-written additions. */
 const CALLABLE = new Set([
@@ -42,69 +55,107 @@ const CALLABLE = new Set([
   "screenshot",
 ]);
 
-describe("every screen calls only what the service publishes (T3.7)", () => {
-  it("has a screen for each name LLD §13.6 lists", () => {
-    // Seven from T3.7 (REQ-ADE-3), plus record review and bindings from T5.7
-    // (REQ-ADE-4, 5) and the surface explorer and tool panel from T5.8
-    // (REQ-ADE-8). `Bindings.tsx` carries the heal review, because a heal is a
-    // proposal *about* the store and reviewing it beside the store is what makes
-    // a before-and-after readable.
+describe("the ADE renders the model and nothing else (T3.7, T10.1, T10.2)", () => {
+  it("has a file for each screen the model has", () => {
+    /*
+     * Eleven files for twelve screens: `Secondary.tsx` carries the six of T10.2
+     * because they are one *kind* of screen — a table, an editor, an inspector —
+     * and six files with the same three shapes in them would be five chances for
+     * them to drift. What the next case checks is that every *id* has a body.
+     */
     expect(screens.map((one) => one.name).sort()).toEqual([
-      "ApiClient.tsx",
       "Bindings.tsx",
-      "Data.tsx",
-      "Explorer.tsx",
-      "FlowEditor.tsx",
-      "Plan.tsx",
-      "Project.tsx",
+      "Flows.tsx",
+      "Heal.tsx",
       "Record.tsx",
-      "Results.tsx",
       "Run.tsx",
-      "Tools.tsx",
+      "Runs.tsx",
+      "Secondary.tsx",
     ]);
   });
 
+  it("the shell has a body and an inspector for every screen id", () => {
+    const source = shell.find((one) => one.name === "Shell.tsx")!.source;
+    const body = source.slice(source.indexOf("function screenBody"));
+    const bodies = body.slice(0, body.indexOf("function inspectorBody"));
+    const inspectors = body.slice(body.indexOf("function inspectorBody"));
+
+    for (const id of SCREEN_IDS) {
+      // `flows` is the `default` arm of both, because a shell with no screen
+      // showing is a shell showing the one a project opens on.
+      if (id === "flows") continue;
+      expect(bodies, `no body for the ${id} screen`).toContain(`case "${id}":`);
+      expect(inspectors, `no inspector for the ${id} screen`).toContain(`case "${id}":`);
+    }
+    expect(bodies).toContain("<FlowsScreen");
+    expect(inspectors).toContain("<FlowsInspector");
+  });
+
   for (const screen of screens) {
-    it(`${screen.name} calls no method the generated client does not have`, () => {
-      const called = [...screen.source.matchAll(/\bclient\s*\n?\s*\.\s*(\w+)\s*\(/g)].map(
-        (match) => match[1]!,
-      );
-      expect(called.length, "a screen that calls nothing renders nothing").toBeGreaterThan(0);
-      for (const method of called) {
-        expect(CALLABLE.has(method), `${screen.name} calls client.${method}()`).toBe(true);
-      }
-    });
-
-    it(`${screen.name} says where every value it renders came from`, () => {
-      // `fromEndpoint("getProject", …)` names the route. The check is that the
-      // name is a real one — a screen cannot label its own invention with a
-      // plausible-looking string and pass.
-      const sources = [...screen.source.matchAll(/fromEndpoint\(\s*"([^"]+)"/g)].map(
-        (match) => match[1]!,
-      );
-      expect(sources.length, `${screen.name} renders nothing it attributes`).toBeGreaterThan(0);
-      for (const from of sources) {
-        expect(CALLABLE.has(from), `${screen.name} attributes a value to "${from}"`).toBe(true);
-      }
-    });
-
-    it(`${screen.name} does not fetch anything the client did not give it`, () => {
+    it(`${screen.name} reaches nothing: it draws a state`, () => {
       // A bare `fetch` in a screen is the shape of an ADE growing a private API.
       expect(screen.source).not.toMatch(/\bfetch\s*\(/);
       expect(screen.source).not.toMatch(/new\s+EventSource\b/);
       expect(screen.source).not.toMatch(/XMLHttpRequest/);
+      // And no client at all: the shell holds the one there is.
+      expect(screen.source).not.toMatch(/\bclient\s*\n?\s*\.\s*\w+\s*\(/);
+      expect(screen.source).not.toContain("ServiceClient");
+    });
+
+    it(`${screen.name} draws a state type from the model`, () => {
+      /*
+       * The imports, not the whole file: what is checked is where a screen's
+       * `…State` types *come from*, and every one of them has to come from
+       * `@svatah/screens`. A screen with a state type of its own would be a
+       * screen with a value the other renderer cannot show.
+       */
+      const imported = screen.source.slice(0, screen.source.indexOf("export function"));
+      const states = [...imported.matchAll(/\b(\w+State)\b/g)].map((one) => one[1]!);
+      expect(states.length, `${screen.name} imports no screen state`).toBeGreaterThan(0);
+      expect(imported, `${screen.name} does not import from the model`).toContain(
+        'from "@svatah/screens"',
+      );
+      // And it declares none of its own.
+      const body = screen.source.slice(screen.source.indexOf("export function"));
+      expect(body, `${screen.name} declares a state type of its own`).not.toMatch(
+        /\b(interface|type)\s+\w+State\b/,
+      );
     });
   }
+
+  it("the shell is the only file that holds a client", () => {
+    const holders = shell.filter((one) => one.source.includes("ServiceClient"));
+    expect(holders.map((one) => one.name)).toEqual(["Shell.tsx"]);
+  });
+
+  it("the legacy screens and their stylesheet are gone (T10.3)", () => {
+    const renderer = readdirSync(join(ADE, "src", "renderer"));
+    expect(renderer, "apps/ade/src/renderer/screens still exists").not.toContain("screens");
+    expect(renderer, "apps/ade/src/renderer/app.css still exists").not.toContain("app.css");
+    // The import, not the comment above it that records why there is none.
+    const main = readFileSync(join(ADE, "src", "renderer", "main.tsx"), "utf8");
+    expect(main).not.toMatch(/^import ".*app\.css";$/m);
+  });
 });
 
-describe("the endpoints the screens exercise (REQ-ADE-3)", () => {
+/**
+ * The endpoints LLD §13.6's screen table names are reached (REQ-ADE-3).
+ *
+ * By the *model* now: `@svatah/screens`'s `load()` and the action registry are
+ * the only things in this system that call the service, and the ADE and
+ * `svatah ui` both go through them. Reading the model's sources rather than the
+ * ADE's is the same check one layer down, and it covers both renderers at once.
+ */
+describe("the endpoints the screens exercise (REQ-ADE-3, LLD §13.6)", () => {
+  const model = readdirSync(MODEL, { recursive: true, encoding: "utf8" })
+    .filter((name) => name.endsWith(".ts"))
+    .map((name) => readFileSync(join(MODEL, name), "utf8"))
+    .join("\n");
+
   const called = new Set(
-    screens.flatMap((screen) =>
-      [...screen.source.matchAll(/\bclient\s*\n?\s*\.\s*(\w+)\s*\(/g)].map((match) => match[1]!),
-    ),
+    [...model.matchAll(/\bservice\s*\n?\s*\.\s*(\w+)\s*\(/g)].map((match) => match[1]!),
   );
 
-  /** LLD §13.6's screen-to-endpoint table, for the seven screens T3.7 builds. */
   const REQUIRED = [
     "getProject",
     "getFlowsByFile",
@@ -112,26 +163,28 @@ describe("the endpoints the screens exercise (REQ-ADE-3)", () => {
     "postCompile",
     "getPlan",
     "postRun",
-    "subscribe",
     "getRunsByIdAudit",
     "getRuns",
+    "getRunsById",
     "getRunsByIdResults",
+    /* T10.4 — the Run screen's Stop (Draft 2.12 §13.5). */
+    "postRunsByIdStop",
     "postApiRequest",
     "getApi",
-    "putApiByName",
     "getData",
     "putData",
     /* T5.7 — record review, the bindings browser and the heal review. */
     "postRecord",
     "postRecordByIdDecision",
+    "postRecordByIdStop",
     "postSurfaceBySessionSnapshot",
     "getBindings",
+    "getBindingsById",
     "postBindingsVerify",
     "postHeal",
     /* T5.8 — the surface explorer and the tool panel. */
     "postSurfaceBySessionOpen",
     "postSurfaceBySessionAct",
-    "postSurfaceBySessionRead",
     "postSurfaceBySessionClose",
     "postTrajectoryCompile",
     "getTools",
@@ -140,38 +193,38 @@ describe("the endpoints the screens exercise (REQ-ADE-3)", () => {
   ];
 
   for (const endpoint of REQUIRED) {
-    it(`${endpoint} is reached by a screen`, () => {
+    it(`${endpoint} is reached by a screen or an action`, () => {
       expect(called.has(endpoint)).toBe(true);
     });
   }
+
+  it("and nothing is called that the service does not publish", () => {
+    for (const method of called) {
+      expect(CALLABLE.has(method), `the model calls service.${method}()`).toBe(true);
+    }
+  });
 });
 
 describe("the Record screen's gateway choice (P5-F2, REQ-ADE-4, LLD §13.6)", () => {
   const record = screens.find((one) => one.name === "Record.tsx")!.source;
 
-  it("asks the service whether there is a credential", () => {
-    // `GET /project` reports the boolean (Draft 2.7); the screen reads it and
-    // never reaches for `process.env`, which a renderer does not have anyway.
-    expect(record).toMatch(/client\s*\n?\s*\.\s*getProject\s*\(/);
-    expect(record).toContain("gateway?.credential");
-    expect(record).not.toContain("process.env");
-    expect(record).not.toContain("ANTHROPIC_API_KEY\"");
+  it("offers the gateway on the screen, with the service's own answer", () => {
+    // The choice is the model's (`RecordState.gateways`, one entry per gateway
+    // with `available` from `GET /project`); the screen draws it as a control
+    // with a name and an id, which is what a desktop adapter binds to.
+    expect(record).toContain('id="record-gateway"');
+    expect(record).toContain('label="Gateway"');
+    expect(record).toContain("state.gateways");
   });
 
-  it("offers both gateways, labelled, and sends the choice", () => {
-    expect(record).toMatch(/aria-label="Gateway"/);
-    expect(record).toContain('value="anthropic"');
-    expect(record).toContain('value="fake"');
-    // "labelled as such" (REQ-ADE-4): the fake option says what it reads from.
+  it("says when a session is running against the committed answers", () => {
+    expect(record).toContain("record-fake-gateway");
     expect(record).toContain("evals/grounding/cases");
-    // And the choice reaches the service, which is the whole finding: the
-    // screen used to post `{ rebind: true }` and let the environment decide.
-    expect(record).toMatch(/postRecord\([^)]*gateway/s);
   });
 
   it("renders a failed session as an alert", () => {
-    expect(record).toContain('record.failed');
-    expect(record).toMatch(/role="alert"/);
+    expect(record).toContain("record-failed");
+    expect(record).toContain("<Alert");
   });
 
   it("gives advice about this window, never a command-line flag", () => {

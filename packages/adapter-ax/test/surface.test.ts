@@ -94,8 +94,10 @@ describe("snapshot (REQ-SURF-1, 4, LLD §2.2)", () => {
     const { surface } = await open();
     const snapshot = await surface.snapshot({ interactiveOnly: true });
     const names = snapshot.nodes.map((node) => node.name);
-    expect(names).toContain("Start recording");
-    expect(names).toContain("Record review");
+    // Interactive controls only, so these are buttons and a combobox — the
+    // things a flow sentence can say "Click the …" about.
+    expect(names).toContain("Stop recording");
+    expect(names).toContain("Accept");
     expect(names).toContain("Gateway");
   });
 
@@ -105,7 +107,15 @@ describe("snapshot (REQ-SURF-1, 4, LLD §2.2)", () => {
         command.kind === "action" || command.kind === "click" ? ("run" as AdeScreen) : undefined,
     });
     const before = await surface.snapshot();
-    await surface.act("click", (await surface.locate({ by: "role", role: "tab", name: "Run", score: 1 }))[0]);
+    /*
+     * The rail item, by its `automationId` (T10.3): the eleven tabs are gone,
+     * and a rail row is a `<button>` with `aria-current` because nothing
+     * navigates. The id is also what survives variant 1's rename.
+     */
+    await surface.act(
+      "click",
+      (await surface.locate({ by: "automationId", value: "rail-runs", score: 1 }))[0],
+    );
     const after = await surface.snapshot();
     expect(bridge.screen()).toBe("run");
     expect(after.hash).not.toBe(before.hash);
@@ -114,10 +124,12 @@ describe("snapshot (REQ-SURF-1, 4, LLD §2.2)", () => {
   it("scopes to a subtree when asked", async () => {
     const { surface } = await open();
     const whole = await surface.snapshot();
-    const tablist = whole.nodes.find((node) => node.role === "tablist")!;
-    const part = await surface.snapshot({ root: tablist.ref });
+    // The rail: a `navigation` landmark with eight rows under it, which is the
+    // densest subtree the ADE has that is not the whole window (T10.3).
+    const rail = whole.nodes.find((node) => node.role === "navigation")!;
+    const part = await surface.snapshot({ root: rail.ref });
     expect(part.nodes.length).toBeLessThan(whole.nodes.length);
-    expect(part.nodes[0]!.ref).toBe(tablist.ref);
+    expect(part.nodes[0]!.ref).toBe(rail.ref);
   });
 });
 
@@ -135,9 +147,14 @@ describe("locate and describe (LLD §6.3, §3.3)", () => {
 
   it("applies `nth`, which is the binding's decision and not the adapter's", async () => {
     const { surface } = await open();
-    const all = await surface.locate({ by: "name", value: "Gateway", score: 1 });
+    /*
+     * "Record review" is the crumb, the heading and the palette's Go-to row —
+     * three nodes with one name (T10.3). Which of them a binding means is the
+     * binding's `nth`, and never the adapter's preference.
+     */
+    const all = await surface.locate({ by: "name", value: "Record review", score: 1 });
     expect(all.length).toBeGreaterThan(1);
-    const one = await surface.locate({ by: "name", value: "Gateway", nth: 1, score: 1 });
+    const one = await surface.locate({ by: "name", value: "Record review", nth: 1, score: 1 });
     expect(one).toEqual([all[1]]);
   });
 
@@ -146,7 +163,7 @@ describe("locate and describe (LLD §6.3, §3.3)", () => {
     const [ref] = await surface.locate({
       by: "role",
       role: "button",
-      name: "Start recording",
+      name: "Stop recording",
       exact: true,
       score: 1,
     });
@@ -169,13 +186,13 @@ describe("locate and describe (LLD §6.3, §3.3)", () => {
 describe("act (LLD §7.5)", () => {
   it("presses through AXPress when the element declares it", async () => {
     const { surface, bridge } = await open();
-    const [ref] = await surface.locate({
-      by: "role",
-      role: "button",
-      name: "Start recording",
-      exact: true,
-      score: 1,
-    });
+    /*
+     * A rail row, not "Stop recording": that button is *disabled* on a Record
+     * screen with no session open, and an adapter is right to refuse a click on
+     * a disabled control. What this case is about is the press, so it presses
+     * something pressable.
+     */
+    const [ref] = await surface.locate({ by: "automationId", value: "rail-runs", score: 1 });
     await surface.act("click", ref);
     const pressed = bridge.commands.filter((one) => one.kind === "action");
     expect(pressed).toHaveLength(1);
@@ -219,12 +236,17 @@ describe("act (LLD §7.5)", () => {
   });
 
   it("types by setting the value, and falls back to keystrokes", async () => {
-    const { surface, bridge } = await open({ screen: "api" });
-    const [ref] = await surface.locate({ by: "automationId", value: "api-name", score: 1 });
-    await surface.act("type", ref, { value: "active count" });
+    /*
+     * The Surface explorer's intent field (T10.3): the one text field the ADE
+     * has that a person types a sentence into, and the control REQ-BEH-4's
+     * "every call records an intent" is about.
+     */
+    const { surface, bridge } = await open({ screen: "explorer" });
+    const [ref] = await surface.locate({ by: "automationId", value: "explorer-intent", score: 1 });
+    await surface.act("type", ref, { value: "look at the booking page" });
     expect(bridge.commands.map((one) => one.kind)).toContain("focus");
     expect(bridge.commands).toContainEqual(
-      expect.objectContaining({ kind: "setValue", value: "active count" }),
+      expect.objectContaining({ kind: "setValue", value: "look at the booking page" }),
     );
   });
 
@@ -259,11 +281,11 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
     const [ref] = await surface.locate({
       by: "role",
       role: "button",
-      name: "Start recording",
+      name: "Stop recording",
       exact: true,
       score: 1,
     });
-    expect(await surface.read("text", ref)).toBe("Start recording");
+    expect(await surface.read("text", ref)).toBe("Stop recording");
     expect(await surface.read("title")).toBe("Svatah ADE");
     await expect(surface.read("url")).rejects.toThrow(NavigationError);
   });

@@ -96,7 +96,17 @@ const child = spawn(
       SVATAH_CLI: cli,
       SVATAH_A11Y: "1",
       ...(variant === "0" ? {} : { SVATAH_A11Y_VARIANT: variant }),
-      SVATAH_ADE_RECORD_PROJECT: project,
+      /*
+       * The project the ADE opens on (T8.1, §13.6, T10.3).
+       *
+       * `SVATAH_ADE_PROJECT` is the variable the main process reads; the name
+       * here used to be `SVATAH_ADE_RECORD_PROJECT`, which nothing read, so
+       * every tree was recorded against an ADE with no project open. That was
+       * invisible while the Project screen was the default and drew its "Open a
+       * project…" button either way; with the rail it is not — a project-less
+       * window has no rail at all.
+       */
+      SVATAH_ADE_PROJECT: project,
     },
   },
 );
@@ -163,19 +173,43 @@ async function connect(url) {
  * `AXTitle` for a control whose name comes from its contents and `AXDescription`
  * for one named by `aria-label`, and the DOM `id` becomes `AXDOMIdentifier`.
  */
-/** The tab labels of `apps/ade/src/renderer/App.tsx`'s `SCREENS`. */
-const SCREEN_LABELS = {
-  project: "Project",
-  flows: "Flow editor",
-  plan: "Plan",
-  run: "Run",
-  results: "Results",
-  api: "API client",
-  data: "Data",
-  record: "Record review",
-  bindings: "Bindings",
-  explorer: "Surface explorer",
-  tools: "Tool panel",
+/**
+ * How each recordable screen is reached (T10.3).
+ *
+ * The eleven tabs are gone; the ADE is a rail of eight and a palette that has a
+ * `Go to` row for every screen (LLD §13.7). So a screen is either a rail item's
+ * `automationId` or a palette label — and the recorder navigates the way the
+ * conformance cases do, so a tree it records is a tree they can be run against.
+ *
+ * The names on the left are the *file* names: `ade-flows.json` and the rest are
+ * read by `packages/adapter-ax/test` and `packages/adapter-uia/test`, and
+ * renaming them would be renaming fixtures for no reason.
+ */
+const SCREENS = {
+  project: { rail: "rail-settings", label: "Settings" },
+  flows: { rail: "rail-flows", label: "Flows" },
+  runs: { rail: "rail-runs", label: "Runs" },
+  results: { rail: "rail-runs", label: "Runs" },
+  bindings: { rail: "rail-bindings", label: "Bindings" },
+  agents: { rail: "rail-agents", label: "Agents and tools" },
+  api: { rail: "rail-api", label: "API" },
+  data: { rail: "rail-data", label: "Data" },
+  import: { rail: "rail-import", label: "Import prototype database" },
+  settings: { rail: "rail-settings", label: "Settings" },
+  /*
+   * The command palette itself, open (T10.3).
+   *
+   * The conformance suite reaches four screens through it, and a recorded tree
+   * of the application *without* it can only show the button that opens one.
+   * `Palette` is one of the approved artboards, so a tree of it is a tree of a
+   * screen the design has.
+   */
+  palette: { open: true, label: "Command palette" },
+  /* The four the rail does not carry: reached through the palette. */
+  run: { palette: "run", label: "Run" },
+  record: { palette: "record", label: "Record review" },
+  heal: { palette: "heal", label: "Heal review" },
+  explorer: { palette: "explorer", label: "Surface explorer" },
 };
 
 const AX_ROLE_FOR = {
@@ -259,7 +293,10 @@ const UIA_CONTROL_TYPE_FOR = {
   link: "Hyperlink",
   list: "List",
   listbox: "List",
-  listitem: "ListItem",
+  // A plain `<li>` is an `AXGroup` on macOS, so it is a `Group` here too: this
+  // table's job is to be the *same window* in a second vocabulary, and a
+  // `ListItem` would make one element two roles (T10.3, the parity check).
+  listitem: "Group",
   main: "Group",
   menu: "Menu",
   menuitem: "MenuItem",
@@ -372,67 +409,165 @@ async function main() {
   };
 
   /*
-   * The project is put in the Recent list through the preload bridge, and then
-   * *clicked* — because the ADE's own click handler is what calls `setInfo` and
-   * renders the tabs. Calling `openProject` from here starts the service and
-   * leaves React none the wiser, which is the difference between driving the
-   * application and reaching around it.
+   * The project opens two ways, and this waits for whichever happened (T10.3).
+   *
+   * `SVATAH_ADE_PROJECT` opens one on ready (§13.6), so the shell is usually
+   * already up by the time this attaches — and then there is no Recent list to
+   * click, because the welcome screen is not showing. When the renderer came up
+   * before the main process announced the project, it *is* showing, and the
+   * Recent button is what a person would press: the ADE's own click handler is
+   * what calls `setInfo` and renders the rail, so calling `openProject` from
+   * here would start the service and leave React none the wiser.
    */
   await evaluate(
     `window.ade.preferences({ recentProjects: [${JSON.stringify(project)}] }).then(() => "ok")`,
   );
-  await evaluate(`window.location.reload()`).catch(() => undefined);
-  await new Promise((done) => setTimeout(done, 1_500));
 
   const name = project.split(/[\\/]/).pop();
-  const pressed = await evaluate(
-    `(() => {
-       const button = [...document.querySelectorAll("button")]
-         .find((one) => one.textContent.trim() === ${JSON.stringify(name)});
-       if (button === undefined) return false;
-       button.click();
-       return true;
-     })()`,
-  );
-  if (pressed !== true) throw new Error(`the ADE's Recent list has no "${name}"`);
+  const opened = await (async () => {
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      if ((await evaluate(`document.getElementById("rail-flows") !== null`)) === true) return true;
+      const pressed = await evaluate(
+        `(() => {
+           const button = [...document.querySelectorAll("button")]
+             .find((one) => one.textContent.trim() === ${JSON.stringify(name)});
+           if (button === undefined) return false;
+           button.click();
+           return true;
+         })()`,
+      );
+      if (pressed === true) continue;
+      await new Promise((done) => setTimeout(done, 500));
+    }
+    return false;
+  })();
+  if (opened !== true) {
+    const body = await evaluate(`document.body.innerText.slice(0, 400)`);
+    throw new Error(`the ADE did not open "${name}"; it shows:\n${body}`);
+  }
 
   for (let attempt = 0; attempt < 60; attempt += 1) {
-    const ready = await evaluate(`document.querySelectorAll('[role="tab"]').length`);
+    const ready = await evaluate(`document.querySelectorAll('#rail-flows').length`);
     if (Number(ready) > 0) break;
     await new Promise((done) => setTimeout(done, 500));
   }
 
-  const screen = option("screen", "project");
-  const label = SCREEN_LABELS[screen];
-  if (label === undefined) {
-    throw new Error(`unknown --screen ${screen}; one of ${Object.keys(SCREEN_LABELS).join(", ")}`);
+  const screen = option("screen", "flows");
+  const where = SCREENS[screen];
+  if (where === undefined) {
+    throw new Error(`unknown --screen ${screen}; one of ${Object.keys(SCREENS).join(", ")}`);
   }
-  if (screen !== "project") {
+
+  /*
+   * By `id` first, always. Variant 1 renames a rail item (LLD §16), and a
+   * recorder that could only find one by its text would be unable to record the
+   * very variant it exists to record.
+   */
+  const clicked =
+    where.rail !== undefined
+      ? await evaluate(
+          `(() => {
+             const item = document.getElementById(${JSON.stringify(where.rail)});
+             if (item === null) return false;
+             item.click();
+             return true;
+           })()`,
+        )
+      : await evaluate(
+          `(() => {
+             const open = document.getElementById("open-command-palette");
+             if (open === null) return false;
+             open.click();
+             return true;
+           })()`,
+        );
+  if (clicked !== true) {
+    const seen = await evaluate(
+      `JSON.stringify([...document.querySelectorAll("[id^='rail-']")].map((o) => o.id))`,
+    );
+    const body = await evaluate(`document.body.innerText.slice(0, 400)`);
+    throw new Error(`the ADE cannot reach the "${where.label}" screen; its rail is ${seen}\n${body}`);
+  }
+
+  if (where.open === true) {
+    // Just the palette: opened, and recorded as it is.
+    await new Promise((done) => setTimeout(done, 800));
+  }
+
+  if (where.palette !== undefined) {
     /*
-     * By id first, then by label. Variant 1 renames a tab (LLD §16), and a
-     * recorder that could only find a tab by its text would be unable to record
-     * the very variant it exists to record.
+     * The palette is open: choose its `Go to` row **by id**.
+     *
+     * By id and never by text: "Go to Run" is a substring of "Go to Runs", so a
+     * text search picked the wrong row and recorded the Flows screen under two
+     * names. Every palette row carries `palette-go-<screen>`, which is what a
+     * desktop binding would use too.
      */
-    const clicked = await evaluate(
+    await new Promise((done) => setTimeout(done, 500));
+    const rowId = `palette-go-${where.palette}`;
+    const chose = await evaluate(
       `(() => {
-         const tabs = [...document.querySelectorAll('[role="tab"]')];
-         const tab =
-           document.getElementById(${JSON.stringify(`screen-${screen}`)}) ??
-           tabs.find((one) => one.textContent.trim() === ${JSON.stringify(label)});
-         if (tab === undefined || tab === null) return false;
-         tab.click();
+         const row = document.getElementById(${JSON.stringify(rowId)});
+         if (row === null) return false;
+         row.click();
          return true;
        })()`,
     );
-    if (clicked !== true) {
-      const seen = await evaluate(
-        `JSON.stringify([...document.querySelectorAll('[role="tab"]')].map((o) => o.textContent.trim()))`,
+    if (chose !== true) {
+      const rows = await evaluate(
+        `JSON.stringify([...document.querySelectorAll(".sv-palette-row")].map((o) => o.id).slice(0, 40))`,
       );
-      const body = await evaluate(`document.body.innerText.slice(0, 400)`);
-      throw new Error(`the ADE has no "${label}" tab; it shows ${seen}\n${body}`);
+      throw new Error(`the palette has no "${rowId}" row; it shows ${rows}`);
     }
   }
-  await new Promise((done) => setTimeout(done, 2_000));
+  /*
+   * Wait for the *workspace* to have something in it, not for a fixed time.
+   *
+   * A screen is a `load()` over five or six endpoints — the Flows screen reads
+   * the plan, the runs, the bindings and a compile — and on a cold service that
+   * takes longer than any sleep worth writing. Two seconds produced trees of the
+   * chrome with an empty middle, which look plausible and assert nothing.
+   */
+  const settled = await (async () => {
+    // The palette is a dialog over the workspace; what says it is ready is its
+    // own rows, not the screen behind it.
+    if (where.open === true) {
+      for (let attempt = 0; attempt < 60; attempt += 1) {
+        const rows = await evaluate(`document.querySelectorAll(".sv-palette-row").length > 10`);
+        if (rows === true) return true;
+        await new Promise((done) => setTimeout(done, 500));
+      }
+      return false;
+    }
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      /*
+       * "Filled" is "not still loading", not "has no empty state": the API
+       * screen's response panel says "Press Send" until somebody does, and the
+       * Record screen says there is no session — both are what those screens
+       * look like, not what they look like before they have loaded.
+       *
+       * The inspector counts too, and `>= 3` rather than `> 3` is the line
+       * between "has not rendered" and "has rendered its own empty state",
+       * which is a section, a heading and a sentence. The Runs screen's
+       * inspector loads a second request after the table, and a tree taken
+       * before it landed is a tree the `ade.result` case cannot read.
+       */
+      const filled = await evaluate(
+        `document.querySelectorAll(".sv-workspace *").length > 30 &&
+         document.querySelectorAll(".sv-inspector *").length >= 3 &&
+         !document.body.innerText.includes("Loading…")`,
+      );
+      if (filled === true) return true;
+      await new Promise((done) => setTimeout(done, 500));
+    }
+    return false;
+  })();
+  if (settled !== true) {
+    const body = await evaluate(`document.querySelector(".sv-workspace")?.innerText.slice(0, 300)`);
+    throw new Error(`the "${where.label}" screen did not fill within 30 s; it shows:\n${body}`);
+  }
+  // And a moment more, so an animation or a late row is in the tree too.
+  await new Promise((done) => setTimeout(done, 1_000));
 
   const { nodes } = await cdp.send("Accessibility.getFullAXTree");
   const byId = new Map(nodes.map((node) => [node.nodeId, node]));

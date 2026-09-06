@@ -57,20 +57,38 @@ describe("roles are normalised to the ARIA vocabulary (REQ-SURF-4, LLD §2.2)", 
     expect(roleOf({ role: "AXSomethingNew" })).toBe("generic");
   });
 
-  it("gives the ADE's eleven screen tabs the role `tab`", () => {
-    const tabs = convert("record").filter((node) => node.role === "tab");
-    expect(tabs.map((node) => node.name)).toEqual([
-      "Project",
-      "Flow editor",
-      "Plan",
-      "Run",
-      "Results",
-      "API client",
-      "Data",
-      "Record review",
+  it("gives the ADE's rail rows the role `button` and its view tabs `tab` (T10.3)", () => {
+    /*
+     * The eleven screen tabs are gone (T10.3). The ADE is a rail of eight
+     * `<button>`s — a rail item is a button with `aria-current`, not a link,
+     * because nothing navigates — and the only real tabs left are the Flows
+     * screen's three views.
+     */
+    const rail = convert("flows").filter((node) =>
+      (node.native?.["automationId"] ?? "").startsWith("rail-"),
+    );
+    expect(rail.map((node) => node.name)).toEqual([
+      "Flows",
+      "Runs",
       "Bindings",
-      "Surface explorer",
-      "Tool panel",
+      "Agents and tools",
+      "API",
+      "Data",
+      "Import prototype database",
+      "Settings",
+    ]);
+    expect(rail.every((node) => node.role === "button")).toBe(true);
+
+    /*
+     * And the only real tabs left: the Flows screen's three views, whose first
+     * tab is named for the file it holds ("booking-compensation.flow"), so they
+     * are checked by id.
+     */
+    const tabs = convert("flows").filter((node) => node.role === "tab");
+    expect(tabs.map((node) => node.native?.["automationId"])).toEqual([
+      "editor",
+      "plan",
+      "history",
     ]);
   });
 });
@@ -136,12 +154,14 @@ describe("automationId (LLD §3.3, §7.5)", () => {
     expect(gateway?.role).toBe("combobox");
     expect(gateway?.name).toBe("Gateway");
     /*
-     * And the `<label>Gateway</label>` beside it has the same *name* and no
-     * automationId, which is why a binding for the control has to be able to
-     * say more than "the thing called Gateway".
+     * And there is exactly one node called "Gateway" now (T10.3): the `<label
+     * for>` is the control's accessible *name* rather than a second named node
+     * beside it, which is what `@svatah/ui`'s `Chooser` gives every select. A
+     * binding on the name resolves to one element, which is what the resolver's
+     * exactly-one rule wants.
      */
-    const label = convert("record").filter((node) => node.name === "Gateway");
-    expect(label.length).toBeGreaterThan(1);
+    const named = convert("record").filter((node) => node.name === "Gateway");
+    expect(named).toHaveLength(1);
   });
 
   it("is absent rather than empty when the element has no identity", () => {
@@ -208,19 +228,19 @@ describe("controlPath (LLD §3.3, §7.5)", () => {
       { parent: -1, role: "AXWindow", title: "Svatah ADE" },
       { parent: 0, role: "AXGroup" },
       { parent: 0, role: "AXGroup" },
-      { parent: 2, role: "AXButton", title: "Start recording" },
+      { parent: 2, role: "AXButton", title: "Stop recording" },
     ];
     const children = childIndex(raw);
     expect(controlPathOf(raw, 2, children, "Svatah ADE")).toBe("Window[Svatah ADE]/AXGroup[1]");
     expect(controlPathOf(raw, 3, children, "Svatah ADE")).toBe(
-      "Window[Svatah ADE]/AXGroup[1]/AXButton[Start recording]",
+      "Window[Svatah ADE]/AXGroup[1]/AXButton[Stop recording]",
     );
   });
 
-  it("identifies the ADE's Start recording button", () => {
-    const button = convert("record").find((node) => node.name === "Start recording");
+  it("identifies the ADE's Stop recording button", () => {
+    const button = convert("record").find((node) => node.name === "Stop recording");
     expect(button?.role).toBe("button");
-    expect(button?.controlPath).toContain("AXButton[Start recording]");
+    expect(button?.controlPath).toContain("AXButton[Stop recording]");
   });
 
   it("gives two different elements two different paths", () => {

@@ -123,7 +123,7 @@ export class GeneratedClient {
 
   /** `GET /bindings/{id}` — One binding */
   async getBindingsById(id: string): Promise<unknown> {
-    return await this.call("get", `/bindings/${encodeURIComponent(id)}`, { });
+    return await this.call("get", `/bindings/${encodeURIComponent(id)}`, { text: true, });
   }
 
   /** `GET /data` — Run data, with secrets redacted */
@@ -138,7 +138,7 @@ export class GeneratedClient {
 
   /** `GET /events/sse` — The event stream (server-sent events) */
   async getEventsSse(): Promise<unknown> {
-    return await this.call("get", `/events/sse`, { });
+    return await this.call("get", `/events/sse`, { text: true, });
   }
 
   /** `GET /flows/{file}` — Read a flow file */

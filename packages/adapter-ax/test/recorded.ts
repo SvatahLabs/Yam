@@ -35,7 +35,16 @@ import type {
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
 
 /** The five screens LLD §16's desktop conformance flows visit, plus Record. */
-export type AdeScreen = "project" | "flows" | "run" | "results" | "api" | "record";
+export type AdeScreen =
+  | "project"
+  | "flows"
+  | "run"
+  | "results"
+  | "api"
+  | "record"
+  | "explorer"
+  | "palette"
+  | "bindings";
 
 export const ADE_SCREENS: readonly AdeScreen[] = [
   "project",
@@ -44,6 +53,9 @@ export const ADE_SCREENS: readonly AdeScreen[] = [
   "results",
   "api",
   "record",
+  "explorer",
+  "palette",
+  "bindings",
 ];
 
 export function recordedWindow(screen: AdeScreen): AxWindow {
@@ -98,6 +110,8 @@ export interface RecordedBridge extends AxBridge {
   readonly commands: AxCommand[];
   /** Which screen the window is showing now. */
   screen(): AdeScreen;
+  /** Put the bridge on a screen, for a test that has to learn two trees. */
+  setScreen(screen: AdeScreen): void;
   /** Files `screenshot()` was asked to write. */
   readonly screenshots: string[];
 }
@@ -148,6 +162,9 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
     commands,
     screenshots,
     screen: () => screen,
+    setScreen: (one: AdeScreen) => {
+      screen = one;
+    },
     async permission(): Promise<AxPermission> {
       return options.permission ?? { state: "granted", advice: "granted (recorded)" };
     },

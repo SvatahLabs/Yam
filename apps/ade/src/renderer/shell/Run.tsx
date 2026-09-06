@@ -62,7 +62,7 @@ export function RunScreen(props: RunProps): React.JSX.Element {
       </div>
 
       <div className="sv-main">
-        <aside className="sv-list" aria-label="Stories">
+        <aside className="sv-list" id="run-stories-pane" aria-label="Stories">
           <div className="sv-totals">
             <Pill tone="pass" label={`${state.totals.passed} passed`} />
             <Pill tone="fail" label={`${state.totals.failed} failed`} />
@@ -100,7 +100,7 @@ export function RunScreen(props: RunProps): React.JSX.Element {
         </aside>
 
         <div className="sv-editor sv-split">
-          <div className="sv-steps" aria-label="Steps">
+          <div className="sv-steps" id="run-steps" aria-label="Steps">
             {state.steps.length === 0 ? (
               <p className="sv-empty">{state.subtitle}</p>
             ) : (
@@ -152,7 +152,7 @@ export function RunScreen(props: RunProps): React.JSX.Element {
               <span className="sv-spacer" />
               <span className="sv-chip">{state.audit.length} lines</span>
             </div>
-            <ol className="sv-audit" aria-label="Audit">
+            <ol className="sv-audit" id="run-audit" aria-label="Audit">
               {state.audit.length === 0 ? (
                 <li className="sv-empty">This run wrote no audit lines.</li>
               ) : (

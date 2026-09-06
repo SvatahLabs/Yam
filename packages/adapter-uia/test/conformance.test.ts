@@ -17,23 +17,28 @@
 import { describe, expect, it } from "vitest";
 import { DESKTOP_CASES, runSurfaceConformance } from "@svatah/conformance";
 import { UiaSurface } from "../src/index.js";
-import { recordedBridge, type AdeScreen } from "./recorded.js";
+import { ADE_SCREENS, recordedBridge, type AdeScreen } from "./recorded.js";
 
 describe("the desktop conformance suite against the recorded ADE (T6.1)", () => {
   it("runs every case, and every check holds", async () => {
     /*
-     * The bridge maps a select on a tab to the screen it opens, by reading the
-     * path the adapter sends against the tree it last served. That is the
-     * smallest faithful stand-in for the application: the suite clicks a tab by
-     * name, and the next snapshot is that screen.
+     * The bridge maps a select on a **rail item** to the screen it opens, by
+     * reading the path the adapter sends against the tree it last served. That
+     * is the smallest faithful stand-in for the application: the suite presses
+     * a rail row by its `automationId`, and the next snapshot is that screen
+     * (T10.3 — the eleven tabs are gone).
+     *
+     * The four screens the rail does not carry — `run`, `record`, `heal`,
+     * `explorer` — are reached through the palette's `Go to` rows, and those are
+     * mapped the same way.
      */
     const byPath = new Map<string, AdeScreen>();
     const bridge = recordedBridge({
-      screen: "project",
+      screen: "flows",
       onCommand: (command) => {
-        // A tab is selected through `SelectionItemPattern`, not invoked — see
-        // `UiaSurface.invoke`. A handler that watched only for a click would
-        // never see the ADE's screens change.
+        // A row is selected through `SelectionItemPattern` and a button is
+        // invoked — see `UiaSurface.invoke`. A handler that watched only for a
+        // click would never see the ADE's screens change.
         if (command.kind !== "pattern" && command.kind !== "click") return undefined;
         const key = "path" in command ? command.path.join(".") : "";
         return byPath.get(key);
@@ -43,34 +48,52 @@ describe("the desktop conformance suite against the recorded ADE (T6.1)", () => 
     const surface = new UiaSurface({ processName: "Svatah ADE", bridge });
     await surface.open({ kind: "desktop", processName: "Svatah ADE" } as never);
 
-    // Learn which path each tab is at, from the tree itself.
-    const tabs: Array<{ name: string; path: string }> = [];
-    for (const node of (await surface.snapshot()).nodes) {
-      if (node.role !== "tab" || node.name === undefined) continue;
-      const refs = await surface.locate({
-        by: "role",
-        role: "tab",
-        name: node.name,
-        exact: true,
-        score: 1,
-      });
-      const path = (surface as unknown as { nodes: Array<{ ref: string; path: number[] }> }).nodes
-        .find((one) => one.ref === refs[0])!
-        .path.join(".");
-      tabs.push({ name: node.name, path });
-    }
+    /** Which fixture each navigable control opens, by `automationId`. */
     const screens: Record<string, AdeScreen> = {
-      Project: "project",
-      "Flow editor": "flows",
-      Run: "run",
-      Results: "results",
-      "API client": "api",
-      "Record review": "record",
+      "rail-flows": "flows",
+      "rail-runs": "results",
+      "rail-bindings": "bindings",
+      "rail-agents": "flows",
+      "rail-api": "api",
+      "rail-data": "flows",
+      "rail-import": "flows",
+      "rail-settings": "project",
+      /*
+       * The palette is a screen of its own here: pressing the top bar's button
+       * serves the tree recorded with it open, and its `Go to` rows then serve
+       * the four screens the rail does not carry (T10.3).
+       */
+      "open-command-palette": "palette",
+      "palette-go-run": "run",
+      "palette-go-record": "record",
+      "palette-go-explorer": "explorer",
+      "palette-go-heal": "results",
     };
-    for (const tab of tabs) {
-      const target = screens[tab.name];
-      if (target !== undefined) byPath.set(tab.path, target);
+
+    /*
+     * Learn which path each of them is at, in **every** tree.
+     *
+     * A control's path is a property of the tree it is in: the rail is on every
+     * screen, at a different path on each, and the palette's rows are only in
+     * the palette's. One pass per fixture is what makes the stand-in behave like
+     * an application where the rail works wherever you are.
+     */
+    const learn = async (): Promise<void> => {
+      for (const [id, target] of Object.entries(screens)) {
+        const refs = await surface.locate({ by: "automationId", value: id, score: 1 });
+        if (refs.length !== 1) continue;
+        const path = (surface as unknown as { nodes: Array<{ ref: string; path: number[] }> }).nodes
+          .find((one) => one.ref === refs[0])!
+          .path.join(".");
+        byPath.set(path, target);
+      }
+    };
+    for (const one of ADE_SCREENS) {
+      bridge.setScreen(one);
+      await surface.snapshot();
+      await learn();
     }
+    bridge.setScreen("flows");
     await surface.close();
 
     const report = await runSurfaceConformance({
@@ -104,6 +127,7 @@ describe("the desktop conformance suite against the recorded ADE (T6.1)", () => 
       "ade.run",
       "ade.result",
       "ade.api-client",
+      "ade.inspector",
       "ade.no-navigation",
     ]);
   });

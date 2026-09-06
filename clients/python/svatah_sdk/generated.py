@@ -129,7 +129,7 @@ class GeneratedClient:
 
     def get_bindings_by_id(self, id) -> Any:
         """`GET /bindings/{id}` — One binding"""
-        return self._call("get", f"/bindings/{id}")
+        return self._call("get", f"/bindings/{id}", text=True)
 
     def get_data(self) -> Any:
         """`GET /data` — Run data, with secrets redacted"""
@@ -141,7 +141,7 @@ class GeneratedClient:
 
     def get_events_sse(self) -> Any:
         """`GET /events/sse` — The event stream (server-sent events)"""
-        return self._call("get", f"/events/sse")
+        return self._call("get", f"/events/sse", text=True)
 
     def get_flows_by_file(self, file) -> Any:
         """`GET /flows/{file}` — Read a flow file"""

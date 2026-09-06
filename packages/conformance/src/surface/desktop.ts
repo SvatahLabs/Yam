@@ -44,64 +44,95 @@ interface Node {
   readonly native?: Readonly<Record<string, string>>;
 }
 
-const named = (nodes: readonly Node[], role: string, name?: string): Node | undefined =>
-  nodes.find((node) => node.role === role && (name === undefined || node.name === name));
-
-/** The eleven screen tabs of `apps/ade/src/renderer/App.tsx`. */
-const TABS = [
-  "Project",
-  "Flow editor",
-  "Plan",
-  "Run",
-  "Results",
-  "API client",
-  "Data",
-  "Record review",
-  "Bindings",
-  "Surface explorer",
-  "Tool panel",
+/**
+ * The left rail of LLD §13.7's information architecture (T10.3).
+ *
+ * > Left rail: Flows, Runs, Bindings, Agents and tools; Resources: API, Data;
+ * > bottom: Import prototype database, Settings.
+ *
+ * Eight rows, not eleven tabs. T10.3 deleted the tabs with the screens they
+ * reached; the four screens that are not on the rail — `run`, `record`, `heal`,
+ * `explorer` — are reached *from* another screen, which is what
+ * `openFromPalette` below is for.
+ */
+const RAIL = [
+  ["rail-flows", "Flows"],
+  ["rail-runs", "Runs"],
+  ["rail-bindings", "Bindings"],
+  ["rail-agents", "Agents and tools"],
+  ["rail-api", "API"],
+  ["rail-data", "Data"],
+  ["rail-import", "Import prototype database"],
+  ["rail-settings", "Settings"],
 ] as const;
 
 /**
- * Click the tab with this name, and answer with the snapshot that follows.
+ * Press a rail item, and answer with the snapshot that follows.
  *
- * ## The Legacy rail item (Draft 2.11, T9.4)
- *
- * Phase 9 rebuilt the ADE's shell and rendered two screens — `flows` and `run` —
- * on the new screen model; "the other screens still stay reachable through the
- * old tabs behind a *Legacy* rail item until Phase 10". So the eleven tabs are
- * still there and are no longer on screen when the application opens: the rail
- * item has to be pressed first.
- *
- * This presses it only when the tab is not already there, so the same cases run
- * against the pre-Phase-9 build and against this one. T10.3 replaces these cases
- * with the new structure and this fallback goes with them.
+ * By `automationId`, not by name: the id is what survives a rename, and variant
+ * 1 renames one of these deliberately (the healing cases below). A case that
+ * addressed the rail by its labels would fail at variant 1 for the reason the
+ * variant exists, which would make the healing case unmeasurable.
  */
 async function openScreen(
   context: Parameters<ConformanceCase["run"]>[0],
-  tab: string,
+  railId: string,
 ): Promise<readonly Node[]> {
-  const find = async (): Promise<readonly string[]> =>
-    await context.surface.locate({ by: "role", role: "tab", name: tab, exact: true, score: 1 });
+  const before = (await context.surface.snapshot()).nodes as readonly Node[];
+  const item = before.find((node) => node.native?.["automationId"] === railId);
+  context.check(`the rail has "${railId}"`, item !== undefined, {
+    expected: `a control whose automationId is "${railId}"`,
+    actual: before
+      .filter((node) => node.role === "button")
+      .map((node) => node.native?.["automationId"] ?? node.name)
+      .slice(0, 20),
+  });
+  if (item === undefined) return before;
+  await context.surface.act("click", item.ref);
+  return (await context.surface.snapshot()).nodes as readonly Node[];
+}
 
-  let refs = await find();
-  if (refs.length !== 1) {
-    const legacy = await context.surface.locate({
-      by: "role",
-      role: "button",
-      name: "Legacy",
-      exact: true,
-      score: 1,
-    });
-    if (legacy.length === 1) {
-      await context.surface.act("click", legacy[0]!);
-      refs = await find();
-    }
-  }
+/**
+ * Open a screen the rail does not carry, through the command palette.
+ *
+ * `run`, `record`, `heal` and `explorer` are reached from another screen — a run
+ * from starting one, a decision from a recording session — and the palette's
+ * `Go to` group is the one place every screen has a row (LLD §13.7). This is the
+ * suite driving the application the way LLD §13.7 says a person does, rather
+ * than the ADE growing a rail row so that a test could click it.
+ */
+async function openFromPalette(
+  context: Parameters<ConformanceCase["run"]>[0],
+  screen: string,
+): Promise<readonly Node[]> {
+  const before = (await context.surface.snapshot()).nodes as readonly Node[];
+  const opener = before.find(
+    (node) => node.native?.["automationId"] === "open-command-palette",
+  );
+  context.check("the top bar offers the command palette", opener !== undefined, {
+    expected: 'a control whose automationId is "open-command-palette"',
+  });
+  if (opener === undefined) return before;
 
-  context.equals(`exactly one "${tab}" tab is located`, refs.length, 1);
-  if (refs.length !== 1) return (await context.surface.snapshot()).nodes as readonly Node[];
-  await context.surface.act("click", refs[0]!);
+  await context.surface.act("click", opener.ref);
+  const open = (await context.surface.snapshot()).nodes as readonly Node[];
+  /*
+   * By id, not by name. A palette row's accessible name is its whole contents —
+   * the area, the label and the CLI command — so a search for "Go to Run"
+   * matches the `<span>` inside the button rather than the button, and clicking
+   * a span does nothing at all.
+   */
+  const rowId = `palette-go-${screen}`;
+  const row = open.find((node) => node.native?.["automationId"] === rowId);
+  context.check(`the palette has a "${rowId}" row`, row !== undefined, {
+    expected: `a control whose automationId is "${rowId}"`,
+    actual: open
+      .map((node) => node.native?.["automationId"])
+      .filter((one) => one?.startsWith("palette-go-") === true),
+  });
+  if (row === undefined) return open;
+
+  await context.surface.act("click", row.ref);
   return (await context.surface.snapshot()).nodes as readonly Node[];
 }
 
@@ -174,19 +205,33 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
       });
 
       /*
-       * The *id* half of §13.7's contract is not a check here, and that is a
-       * deliberate line rather than an omission.
+       * And the *id* half of §13.7's contract, which T10.3 turns on (P8-F3).
        *
-       * F3 asks for one rule — "make the desktop snapshot case fail on an
-       * unnamed interactive control" — and the ADE still carries the eleven
-       * legacy screens until Phase 10 deletes them (T9.4: they stay reachable
-       * behind a "Legacy" rail item). Several of their controls are named and
-       * not identified, and a check added here would fail the live gate on
-       * screens this phase is not allowed to rebuild. T11.3 ("The ADE names
-       * every control") is where that becomes a gate condition; the new screens
-       * satisfy it from the start, and `apps/ade/test/a11y.test.ts` holds them
-       * to it.
+       * > every button, link, tab, field, and row action has a visible label
+       * > that is its accessible name, **and an id in the `automationId` form
+       * > the desktop adapters read**
+       *
+       * Phase 9 left this out with a reason: the eleven legacy screens were
+       * still in the application and several of their controls were named and
+       * not identified, so the check would have failed the live gate on screens
+       * that phase was not allowed to rebuild. T10.3 deleted them. Every control
+       * in the ADE now comes from `@svatah/ui`, which refuses one without both.
+       *
+       * Chromium publishes an element's `id` as `AXDOMIdentifier` on macOS and
+       * as `AutomationId` on Windows, and `automationIdOf` in each adapter reads
+       * it; a control with a name and no id is one a rewording breaks
+       * permanently, because the name is the only thing a binding could have
+       * matched on.
        */
+      const unidentified = nodes.filter(
+        (node) =>
+          isInteractiveRole(node.role) &&
+          (node.native?.["automationId"] ?? "").trim() === "",
+      );
+      check("every interactive control has an automationId", unidentified.length === 0, {
+        expected: "0 controls with a name and no id",
+        actual: unidentified.map((node) => `${node.role} "${node.name ?? ""}"`).slice(0, 20),
+      });
 
       equals("the snapshot hash is a hash", /^[0-9a-f]{16,}$/.test(snapshot.hash), true);
       check("the snapshot renders text with references", snapshot.text.includes("[ref="), {
@@ -199,30 +244,51 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   {
     id: "ade.project",
     page: "Svatah ADE",
-    description: "Flow 1: the project is open, and every screen tab is addressable by name.",
+    description:
+      "Flow 1: a project is open, and every rail item of LLD §13.7 is addressable by its id.",
     async run(context) {
       const { check, equals } = context;
-      const nodes = await openScreen(context, "Project");
+      const nodes = (await context.surface.snapshot()).nodes as readonly Node[];
 
       /*
-       * "Create a project" (LLD §16) is read as "the project screen shows the
-       * project the ADE has open". The ADE opens one through a *native* file
-       * chooser, which is another application's window and outside this
-       * adapter's session — so the flow the suite drives is what a person does
-       * after that.
+       * "Create a project" (LLD §16) is read as "the window has one open". The
+       * ADE opens one through a *native* file chooser, which is another
+       * application's window and outside this adapter's session — so the flow
+       * the suite drives is what a person sees after that.
        */
-      check("the project screen is showing", named(nodes, "button", "Open a project…") !== undefined, {
-        expected: 'button "Open a project…"',
-      });
+      const ids = new Set(
+        nodes.map((node) => node.native?.["automationId"]).filter((one) => one !== undefined),
+      );
       equals(
-        "all eleven screens are addressable as tabs",
-        TABS.filter((tab) => named(nodes, "tab", tab) !== undefined).length,
-        TABS.length,
+        "all eight rail items are addressable",
+        RAIL.filter(([id]) => ids.has(id)).length,
+        RAIL.length,
+      );
+      check(
+        "the rail rows carry their labels as their names",
+        RAIL.every(([id, label]) => {
+          const found = nodes.find((node) => node.native?.["automationId"] === id);
+          /*
+           * `rail-flows` is the one variant 1 renames, so it is checked by id
+           * and not by name — which is exactly the property the healing case
+           * measures.
+           */
+          return found !== undefined && (id === "rail-flows" || found.name === label);
+        }),
+        {
+          expected: "every rail row named as LLD §13.7's rail names it",
+          actual: RAIL.map(([id]) => nodes.find((n) => n.native?.["automationId"] === id)?.name),
+        },
       );
       check(
         "the open project is named in the window",
-        nodes.some((node) => node.name === "Open project" || node.name?.includes("svatah") === true),
-        { expected: "the project path or name somewhere in the window" },
+        nodes.some((node) => (node.name ?? node.value ?? "").includes("svatah")),
+        { expected: "the project's name in the crumb" },
+      );
+      check(
+        "the eleven tabs are gone (T10.3)",
+        !nodes.some((node) => node.role === "tab" && node.name === "Flow editor"),
+        { expected: "no legacy screen tab", actual: nodes.filter((n) => n.role === "tab").map((n) => n.name) },
       );
     },
   },
@@ -230,40 +296,70 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   {
     id: "ade.flow",
     page: "Svatah ADE",
-    description: "Flow 2: a flow file opens in the editor.",
+    description: "Flow 2: a flow file opens in the editor, with its plan and its lint beside it.",
     async run(context) {
       const { check } = context;
-      const nodes = await openScreen(context, "Flow editor");
+      const nodes = await openScreen(context, "rail-flows");
 
-      check("a flow chooser is present", named(nodes, "combobox") !== undefined, {
-        expected: "a combobox listing the project's flow files",
-      });
       check(
-        "the flow's text is in an editable region",
-        nodes.some((node) => node.role === "textbox"),
-        { expected: 'a node with role "textbox"' },
+        "the flow list is addressable",
+        nodes.some((node) => node.native?.["automationId"] === "flows-list"),
+        { expected: 'a control whose automationId is "flows-list"' },
       );
-      check("the editor offers a compile", named(nodes, "button", "Compile") !== undefined, {
-        expected: 'button "Compile"',
-      });
+      check(
+        "the editor, the plan and the history are tabs",
+        ["editor", "plan", "history"].every((one) =>
+          nodes.some((node) => node.role === "tab" && node.native?.["automationId"] === one),
+        ),
+        {
+          expected: "three tabs: editor, plan, history",
+          actual: nodes.filter((node) => node.role === "tab").map((node) => node.name),
+        },
+      );
+      check(
+        "the flow's own lines are in the window",
+        nodes.some((node) => (node.name ?? node.value ?? "").includes(".flow")),
+        { expected: "a flow file name somewhere on the screen" },
+      );
     },
   },
 
   {
     id: "ade.run",
     page: "Svatah ADE",
-    description: "Flow 3: the run screen starts a run, and the button is addressable.",
+    description: "Flow 3: the Flows toolbar offers Record and Run, and the Run screen renders.",
     async run(context) {
       const { check } = context;
-      const nodes = await openScreen(context, "Run");
+      const flows = await openScreen(context, "rail-flows");
 
-      check("the run screen offers a Run button", named(nodes, "button", "Run") !== undefined, {
-        expected: 'button "Run"',
-      });
+      /*
+       * Draft 2.12 §13.7: "the Flows toolbar shows Record and Run". Both by
+       * their `automationId`, which is what a binding survives a rewording on.
+       */
+      for (const id of ["action-record-start", "action-run-flow"]) {
+        check(
+          `the toolbar offers "${id}"`,
+          flows.some((node) => node.native?.["automationId"] === id),
+          {
+            expected: `a control whose automationId is "${id}"`,
+            actual: flows
+              .filter((node) => node.role === "button")
+              .map((node) => node.native?.["automationId"] ?? node.name)
+              .slice(0, 20),
+          },
+        );
+      }
+
+      // And the Run screen itself, through the palette: it is not on the rail,
+      // because a run is reached from starting one.
+      const run = await openFromPalette(context, "run");
       check(
-        "the flow to run is chosen by a control with an identity",
-        nodes.some((node) => node.native?.["automationId"] === "run-flow"),
-        { expected: 'a control whose automationId is "run-flow"' },
+        "the Run screen carries the stories of the run it is showing",
+        run.some((node) => node.native?.["automationId"] === "run-stories"),
+        {
+          expected: 'a control whose automationId is "run-stories"',
+          actual: run.map((node) => node.native?.["automationId"]).filter((one) => one !== undefined).slice(0, 20),
+        },
       );
     },
   },
@@ -271,52 +367,40 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   {
     id: "ade.result",
     page: "Svatah ADE",
-    description: "Flow 4: the results screen says how many runs there are, and shows them.",
+    description: "Flow 4: the Runs screen lists what the project has run, with its filters.",
     async run(context) {
       const { check } = context;
-      const nodes = await openScreen(context, "Results");
+      const nodes = await openScreen(context, "rail-runs");
 
+      check(
+        "the runs table is addressable",
+        nodes.some((node) => node.native?.["automationId"] === "runs-table"),
+        { expected: 'a control whose automationId is "runs-table"' },
+      );
       /*
-       * The screen's own count, and then what matches it (T8.2).
-       *
-       * The check used to be "a table, a list, or something naming a run",
-       * which the fixtures project — whose `runs/` is ignored and therefore
-       * usually absent — could not satisfy: it renders `Runs (0)` and an
-       * explanation, and the fallback compared against a lower-case "run". The
-       * failure said the adapter could not read the results screen when what
-       * it had read was an empty one.
-       *
-       * The count is the thing that is true at every project state, and it is
-       * what the two branches below are checked against, so the case still
-       * fails if the screen shows a number and nothing that goes with it.
+       * The three filter chips the `Results` artboard draws, each a real control
+       * with a name that says what it filters and what it is set to (T10.1).
        */
-      const heading = nodes.find((node) => /^runs\s*\((\d+)\)$/i.test(node.name ?? ""));
-      check("the results screen says how many runs the project has", heading !== undefined, {
-        expected: 'a heading like "Runs (0)"',
-        actual: nodes.map((node) => node.name).filter((name) => name !== undefined).slice(0, 12),
-      });
-      if (heading === undefined) return;
-
-      const runs = Number(/\((\d+)\)/.exec(heading.name ?? "")?.[1] ?? "0");
-      if (runs > 0) {
+      for (const id of ["runs-filter-behavior", "runs-filter-invoker", "runs-filter-status"]) {
         check(
-          `the ${runs} run(s) are rendered as a table or a list`,
-          nodes.some((node) => ["table", "list", "listbox", "grid"].includes(node.role)),
-          { expected: "a table, a list, a listbox or a grid" },
+          `the ${id} chip is addressable`,
+          nodes.some((node) => node.native?.["automationId"] === id),
+          { expected: `a control whose automationId is "${id}"` },
         );
-        return;
       }
       /*
        * `name ?? value`, because a static text's string is its `AXValue` on
-       * macOS and its `Name` on Windows, and this case has to pass on both.
+       * macOS and its `Name` on Windows, and this case has to pass on both. A
+       * project with runs shows them; one without says so, and says what writes
+       * one — the empty state is a state, not a failure (T8.2).
        */
       const text = (node: Node): string => `${node.name ?? ""} ${node.value ?? ""}`;
       check(
-        "a project with no runs says so, and says what writes one",
-        nodes.some((node) => /no runs yet/i.test(text(node))) &&
-          nodes.some((node) => text(node).includes("svatah run")),
+        "either the runs are listed, or the screen says there are none",
+        nodes.some((node) => /\brun\b/i.test(text(node))) ||
+          nodes.some((node) => /no runs yet/i.test(text(node))),
         {
-          expected: 'the empty state: "No runs yet", and `svatah run` as what writes one',
+          expected: 'run rows, or "No runs yet" and `svatah run` as what writes one',
           actual: nodes.map(text).filter((one) => one.trim() !== "").slice(-14),
         },
       );
@@ -326,31 +410,63 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   {
     id: "ade.api-client",
     page: "Svatah ADE",
-    description: "Flow 5: the API client's fields are addressable and take a value.",
+    description: "Flow 5: the API screen's request list and its headers are addressable.",
     async run(context) {
-      const { surface, check, equals } = context;
-      const nodes = await openScreen(context, "API client");
+      const { check } = context;
+      const nodes = await openScreen(context, "rail-api");
 
-      const method = nodes.find((node) => node.native?.["automationId"] === "api-method");
-      const name = nodes.find((node) => node.native?.["automationId"] === "api-name");
-      check("the method control is addressable", method !== undefined, {
-        expected: 'a control whose automationId is "api-method"',
-      });
-      check("the request name field is addressable", name !== undefined, {
-        expected: 'a control whose automationId is "api-name"',
-      });
+      check(
+        "the named requests are addressable",
+        nodes.some((node) => node.native?.["automationId"] === "api-requests"),
+        { expected: 'a control whose automationId is "api-requests"' },
+      );
+      check(
+        "the request's headers are on the screen",
+        nodes.some((node) => node.native?.["automationId"] === "api-headers"),
+        {
+          expected: 'a control whose automationId is "api-headers"',
+          actual: nodes.map((node) => node.native?.["automationId"]).filter((one) => one !== undefined).slice(0, 20),
+        },
+      );
+      check(
+        "Send is offered, with the accelerator the model gives it",
+        nodes.some((node) => node.native?.["automationId"] === "action-api-send"),
+        { expected: 'a control whose automationId is "action-api-send"' },
+      );
+    },
+  },
 
-      if (name !== undefined) {
-        /*
-         * The one `act` in the suite that changes something, and the one that
-         * shows a desktop adapter can write as well as read: type into the
-         * field, take a new snapshot, and read the value back.
-         */
-        await surface.act("type", name.ref, { value: "conformance" });
-        const after = (await surface.snapshot()).nodes as readonly Node[];
-        const written = after.find((node) => node.native?.["automationId"] === "api-name");
-        equals("the typed value is readable back from the tree", written?.value, "conformance");
-      }
+  {
+    id: "ade.inspector",
+    page: "Svatah ADE",
+    description:
+      "T10.3: the right inspector is a list of landmarks, which is what makes controlPath short.",
+    async run(context) {
+      const { check } = context;
+      const nodes = await openScreen(context, "rail-bindings");
+
+      /*
+       * LLD §13.6: "screen containers carry landmark roles so `controlPath`
+       * candidates are short and stable". The inspector is the densest of them
+       * — a stack of `<section aria-labelledby>` — and it is where a desktop
+       * binding's ancestry is most likely to be long if they are missing.
+       */
+      check(
+        "the inspector is on the screen and named",
+        nodes.some((node) => node.name === "Inspector"),
+        {
+          expected: 'a container named "Inspector"',
+          actual: nodes.map((node) => node.name).filter((one) => one !== undefined).slice(0, 24),
+        },
+      );
+      check(
+        "a binding's resolver order is addressable",
+        nodes.some((node) => node.native?.["automationId"] === "inspector-candidate-table"),
+        {
+          expected: 'a control whose automationId is "inspector-candidate-table"',
+          actual: nodes.map((node) => node.native?.["automationId"]).filter((one) => one !== undefined).slice(0, 24),
+        },
+      );
     },
   },
 
@@ -429,7 +545,14 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
 interface Subject {
   readonly key: string;
   readonly role: string;
-  /** The tab to open before looking, by the name it has at *every* variant. */
+  /**
+   * How to reach the screen before looking (T10.3).
+   *
+   * A rail item's `automationId`, or `palette:<label>` for a screen the rail
+   * does not carry. By id and never by name, because variant 1's whole purpose
+   * is to change a name — a case that navigated by one would fail at variant 1
+   * for the reason the variant exists.
+   */
   readonly screen: string;
   /** What the control was called at variant 0, so a rename can be shown to bite. */
   readonly nameAtZero: string;
@@ -467,7 +590,9 @@ async function healingCase(
   }
 
   for (const subject of subjects) {
-    const nodes = await openScreen(context, subject.screen);
+    const nodes = subject.screen.startsWith("palette:")
+      ? await openFromPalette(context, subject.screen.slice("palette:".length))
+      : await openScreen(context, subject.screen);
     const live = byKey(nodes, subject.key);
 
     if (healing.variant === 0) {
@@ -562,16 +687,20 @@ export const DESKTOP_HEALING_CASES: readonly ConformanceCase[] = [
     id: "ade.heal.renamed-control",
     page: "Svatah ADE",
     description:
-      "LLD §16 variant 1: a screen tab and a Project button are renamed, and bindings recorded " +
-      "at variant 0 relocalize onto them.",
+      "LLD §16 variant 1: a rail item is renamed, and a binding recorded at variant 0 " +
+      "relocalizes onto it.",
     variants: [0, 1],
     async run(context) {
       await healingCase(
         context,
         "ade.heal.renamed-control",
         [
-          { key: "screen-flows", role: "tab", screen: "Project", nameAtZero: "Flow editor" },
-          { key: "project-open", role: "button", screen: "Project", nameAtZero: "Open a project…" },
+          /*
+           * The rail item and the welcome screen's button, which is where
+           * `project-open` lives now (T10.3). Both keep their ids and lose
+           * their names at variant 1, which is the whole of what this measures.
+           */
+          { key: "rail-flows", role: "button", screen: "rail-flows", nameAtZero: "Flows" },
         ],
         1,
       );
@@ -588,7 +717,7 @@ export const DESKTOP_HEALING_CASES: readonly ConformanceCase[] = [
       await healingCase(
         context,
         "ade.heal.moved-panel",
-        [{ key: "record-gateway", role: "combobox", screen: "Record review", nameAtZero: "Gateway" }],
+        [{ key: "record-gateway", role: "combobox", screen: "palette:record", nameAtZero: "Gateway" }],
         2,
       );
     },

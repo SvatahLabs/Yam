@@ -84,9 +84,20 @@ for (const [path, operations] of Object.entries(document.paths)) {
       params: pathParams(path),
       hasBody: operation.requestBody !== undefined,
       /** Text routes send and receive a string; everything else is JSON. */
+      /*
+       * Any `text/*` answer is text, not only `text/plain`.
+       *
+       * `GET /bindings/:id` answers `text/yaml` — the file on disk — and a
+       * client that ran `JSON.parse` over it threw on every call, silently, in
+       * three languages: the ADE's Bindings inspector was empty against a real
+       * service and full against the recorded fixtures, which is the worst way
+       * for a defect to present itself (T10.1).
+       */
       text:
-        operation.responses?.["200"]?.content?.["text/plain"] !== undefined ||
-        operation.requestBody?.content?.["text/plain"] !== undefined,
+        Object.keys(operation.responses?.["200"]?.content ?? {}).some((one) =>
+          one.startsWith("text/"),
+        ) ||
+        Object.keys(operation.requestBody?.content ?? {}).some((one) => one.startsWith("text/")),
     });
   }
 }

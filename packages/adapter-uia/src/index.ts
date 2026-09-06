@@ -25,6 +25,7 @@ export {
   childIndex,
   controlPathOf,
   convertTree,
+  insideChooser,
   insideRow,
   isTextual,
   nameOf,

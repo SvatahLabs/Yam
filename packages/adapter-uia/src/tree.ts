@@ -43,7 +43,7 @@ export interface UiaSnapshotNode extends SnapshotNode {
  */
 export function roleOf(
   node: Pick<UiaNode, "controlType" | "localizedControlType">,
-  context: { readonly insideRow?: boolean } = {},
+  context: { readonly insideRow?: boolean; readonly insideChooser?: boolean } = {},
 ): string {
   const localized = (node.localizedControlType ?? "").trim().toLowerCase();
   if (localized !== "" && ARIA_ROLES.has(localized)) return localized;
@@ -63,7 +63,36 @@ export function roleOf(
    * `test/parity.test.ts` is what found both.
    */
   if (context.insideRow === true && node.controlType === "DataItem") return "cell";
+  /*
+   * A text run inside a chooser is that chooser's option (T10.3).
+   *
+   * The mirror of the AX adapter's pop-up rule: Chromium wraps a `<select>`'s
+   * option label in a text node, and macOS publishes it as `AXStaticText`
+   * inside the pop-up — which the AX adapter promotes to `option`. Windows
+   * leaves it `ControlType.Text`, so without this the same element was `option`
+   * on one platform and `text` on the other, and `selectOption` looked for two
+   * different things.
+   */
+  if (context.insideChooser === true && node.controlType === "Text") return "option";
   return UIA_ROLE_MAP[node.controlType] ?? FALLBACK_ROLE;
+}
+
+/**
+ * The control types whose descendants are a chooser's items (see `roleOf`).
+ *
+ * `ComboBox` only. A `List` is not a chooser: its text runs are its text, and
+ * promoting those made every line of the Settings screen's diagnostics an
+ * `option` (T10.3). A listbox's *rows* arrive as `ListItem`, which
+ * `UIA_ROLE_MAP` already sends to `option`.
+ */
+const CHOOSER_TYPES = new Set(["ComboBox"]);
+
+/** Whether this node is inside a chooser (see `roleOf`). */
+export function insideChooser(nodes: readonly UiaNode[], index: number): boolean {
+  for (let at = nodes[index]?.parent ?? -1; at >= 0; at = nodes[at]?.parent ?? -1) {
+    if (CHOOSER_TYPES.has(nodes[at]!.controlType)) return true;
+  }
+  return false;
 }
 
 /** Whether this node is inside a table row (see `roleOf`). */
@@ -211,7 +240,14 @@ export function convertTree(nodes: readonly UiaNode[], options: ConvertOptions):
   const keep = new Set<number>();
   if (options.interactiveOnly) {
     for (let index = 0; index < nodes.length; index += 1) {
-      if (!isInteractiveRole(roleOf(nodes[index]!, { insideRow: insideRow(nodes, index) }))) {
+      if (
+        !isInteractiveRole(
+          roleOf(nodes[index]!, {
+            insideRow: insideRow(nodes, index),
+            insideChooser: insideChooser(nodes, index),
+          }),
+        )
+      ) {
         continue;
       }
       for (let at = index; at >= 0; at = nodes[at]!.parent) keep.add(at);
@@ -237,7 +273,10 @@ export function convertTree(nodes: readonly UiaNode[], options: ConvertOptions):
 
     return {
       ref: refOf.get(index)!,
-      role: roleOf(node, { insideRow: insideRow(nodes, index) }),
+      role: roleOf(node, {
+        insideRow: insideRow(nodes, index),
+        insideChooser: insideChooser(nodes, index),
+      }),
       ...(name === "" ? {} : { name }),
       ...(value === undefined ? {} : { value }),
       ...(help === "" || help === name ? {} : { description: help }),

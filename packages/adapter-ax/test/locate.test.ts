@@ -28,7 +28,7 @@ describe("matching a candidate against the tree (LLD §6.3)", () => {
 
   it("finds an element by role and name", () => {
     const found = matchNodes(
-      { by: "role", role: "button", name: "Start recording", exact: true, score: 1 },
+      { by: "role", role: "button", name: "Stop recording", exact: true, score: 1 },
       record,
     );
     expect(found).toHaveLength(1);
@@ -36,30 +36,32 @@ describe("matching a candidate against the tree (LLD §6.3)", () => {
 
   it("matches loosely when the candidate says so", () => {
     const exact = matchNodes(
-      { by: "role", role: "button", name: "Start", exact: true, score: 1 },
+      { by: "role", role: "button", name: "Stop", exact: true, score: 1 },
       record,
     );
     expect(exact).toEqual([]);
     const loose = matchNodes(
-      { by: "role", role: "button", name: "Start", exact: false, score: 1 },
+      { by: "role", role: "button", name: "Stop", exact: false, score: 1 },
       record,
     );
-    expect(loose.map((node) => node.name)).toEqual(["Start recording"]);
+    expect(loose.map((node) => node.name)).toEqual(["Stop recording"]);
   });
 
   it("finds an element by its controlPath", () => {
-    const button = record.find((node) => node.name === "Start recording")!;
+    const button = record.find((node) => node.name === "Stop recording")!;
     const found = matchNodes({ by: "controlPath", value: button.controlPath, score: 1 }, record);
     expect(found.map((node) => node.ref)).toEqual([button.ref]);
   });
 
   it("reports every match, so the resolver's exactly-one rule is the resolver's", () => {
     /*
-     * "Gateway" is both a `<label>` and the `aria-label` of the control beside
-     * it. An adapter that quietly returned the better one would be taking a
-     * decision the binding should have recorded (LLD §6.3).
+     * "Record review" is the screen's heading *and* the palette row that goes
+     * to it *and* the crumb — three nodes with one name. An adapter that quietly
+     * returned the best of them would be taking a decision the binding should
+     * have recorded (LLD §6.3), and the resolver's exactly-one rule would never
+     * fire.
      */
-    const found = matchNodes({ by: "name", value: "Gateway", score: 1 }, record);
+    const found = matchNodes({ by: "name", value: "Record review", score: 1 }, record);
     expect(found.length).toBeGreaterThan(1);
   });
 
@@ -81,7 +83,7 @@ describe("matching a candidate against the tree (LLD §6.3)", () => {
   });
 
   it("takes the deepest element under a point, not the window", () => {
-    const button = record.find((node) => node.name === "Start recording")!;
+    const button = record.find((node) => node.name === "Stop recording")!;
     const [x, y, width, height] = button.box!;
     const found = matchNodes(
       { by: "coords", value: `${Math.round(x + width / 2)},${Math.round(y + height / 2)}`, score: 1 },

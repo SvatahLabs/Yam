@@ -85,9 +85,16 @@ describe("snapshot, locate and describe", () => {
 
   it("applies `nth`, which is the binding's decision and not the adapter's", async () => {
     const { surface } = await open();
-    const all = await surface.locate({ by: "name", value: "Gateway", score: 1 });
+    /*
+     * "Record review" is the crumb, the heading and the palette's Go-to row —
+     * three nodes with one name (T10.3). Which of them a binding means is the
+     * binding's `nth`, and never the adapter's preference.
+     */
+    const all = await surface.locate({ by: "name", value: "Record review", score: 1 });
     expect(all.length).toBeGreaterThan(1);
-    expect(await surface.locate({ by: "name", value: "Gateway", nth: 1, score: 1 })).toEqual([all[1]]);
+    expect(
+      await surface.locate({ by: "name", value: "Record review", nth: 1, score: 1 }),
+    ).toEqual([all[1]]);
   });
 
   it("refuses a reference the current snapshot does not have", async () => {
@@ -99,13 +106,12 @@ describe("snapshot, locate and describe", () => {
 describe("act through UIA patterns (LLD §7.5)", () => {
   it("invokes a button through InvokePattern", async () => {
     const { surface, bridge } = await open();
-    const [ref] = await surface.locate({
-      by: "role",
-      role: "button",
-      name: "Start recording",
-      exact: true,
-      score: 1,
-    });
+    /*
+     * A rail row, not "Stop recording": that button is *disabled* on a Record
+     * screen with no session open, and an adapter is right to refuse a click on
+     * a disabled control (the case below is about exactly that refusal).
+     */
+    const [ref] = await surface.locate({ by: "automationId", value: "rail-runs", score: 1 });
     await surface.act("click", ref!);
     expect(bridge.commands.filter((one) => one.kind === "pattern")).toEqual([
       { kind: "pattern", path: expect.any(Array), pattern: "Invoke", method: "Invoke" },
@@ -115,11 +121,12 @@ describe("act through UIA patterns (LLD §7.5)", () => {
   it("selects a tab through SelectionItemPattern, because a tab has no Invoke", async () => {
     /*
      * The reason `invoke()` tries three patterns and not one. Pressing a tab
-     * *selects* it; without `SelectionItem` a click on the ADE's screen tabs
-     * would fall through to the mouse for no reason at all.
+     * *selects* it; without `SelectionItem` a click on the Flows screen's view
+     * tabs would fall through to the mouse for no reason at all.
      */
-    const { surface, bridge } = await open();
-    const [ref] = await surface.locate({ by: "role", role: "tab", name: "Run", exact: true, score: 1 });
+    const { surface, bridge } = await open({ screen: "flows" });
+    // The Flows screen's three view tabs are the only tabs the ADE has (T10.3).
+    const [ref] = await surface.locate({ by: "automationId", value: "plan", score: 1 });
     await surface.act("click", ref!);
     expect(bridge.commands.filter((one) => one.kind === "pattern")).toEqual([
       { kind: "pattern", path: expect.any(Array), pattern: "SelectionItem", method: "Select" },
@@ -138,14 +145,23 @@ describe("act through UIA patterns (LLD §7.5)", () => {
   });
 
   it("types through ValuePattern, and reads the value back", async () => {
-    const { surface, bridge } = await open({ screen: "api" });
-    const [ref] = await surface.locate({ by: "automationId", value: "api-name", score: 1 });
-    await surface.act("type", ref!, { value: "active count" });
+    /*
+     * The Surface explorer's intent field (T10.3): the one text field the ADE
+     * has that a person types a sentence into, and the control REQ-BEH-4's
+     * "every call records an intent" is about.
+     */
+    const { surface, bridge } = await open({ screen: "explorer" });
+    const [ref] = await surface.locate({ by: "automationId", value: "explorer-intent", score: 1 });
+    await surface.act("type", ref!, { value: "look at the booking page" });
     expect(bridge.commands).toContainEqual(
-      expect.objectContaining({ pattern: "Value", method: "SetValue", argument: "active count" }),
+      expect.objectContaining({
+        pattern: "Value",
+        method: "SetValue",
+        argument: "look at the booking page",
+      }),
     );
-    const [again] = await surface.locate({ by: "automationId", value: "api-name", score: 1 });
-    expect(await surface.read("value", again!)).toBe("active count");
+    const [again] = await surface.locate({ by: "automationId", value: "explorer-intent", score: 1 });
+    expect(await surface.read("value", again!)).toBe("look at the booking page");
   });
 
   it("refuses to act on a disabled element", async () => {

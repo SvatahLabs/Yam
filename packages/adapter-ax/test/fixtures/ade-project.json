@@ -20,11 +20,12 @@
       "role": "AXWebArea",
       "description": "Svatah ADE",
       "enabled": true,
+      "focused": true,
       "box": [
         0,
         0,
         1280,
-        819
+        828
       ]
     },
     {
@@ -32,10 +33,10 @@
       "role": "AXGroup",
       "enabled": true,
       "box": [
-        0,
-        0,
-        1280,
-        819
+        8,
+        8,
+        1264,
+        828
       ],
       "domIdentifier": "root"
     },
@@ -45,40 +46,136 @@
       "subrole": "AXLandmarkBanner",
       "enabled": true,
       "box": [
-        0,
-        0,
-        1280,
-        48
+        8,
+        8,
+        1264,
+        44
       ]
     },
     {
       "parent": 3,
-      "role": "AXHeading",
-      "title": "Svatah ADE",
+      "role": "AXStaticText",
+      "title": "Svatah",
       "enabled": true,
       "box": [
-        16,
-        12,
-        1248,
-        18
+        50,
+        21,
+        42,
+        17
       ]
     },
     {
       "parent": 4,
       "role": "AXStaticText",
-      "title": "Svatah ADE",
+      "title": "Svatah",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Project",
       "enabled": true,
       "box": [
-        16,
-        12,
-        85,
-        18
+        104,
+        20,
+        121,
+        19
+      ],
+      "domIdentifier": "topbar-crumb"
+    },
+    {
+      "parent": 6,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        115,
+        20,
+        46,
+        19
+      ],
+      "domIdentifier": "crumb-project"
+    },
+    {
+      "parent": 7,
+      "role": "AXStaticText",
+      "title": "fixtures",
+      "enabled": true,
+      "box": [
+        115,
+        21,
+        46,
+        17
       ]
     },
     {
-      "parent": 5,
+      "parent": 8,
       "role": "AXStaticText",
-      "title": "Svatah ADE",
+      "title": "fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 6,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        177,
+        20,
+        48,
+        19
+      ],
+      "domIdentifier": "crumb-screen"
+    },
+    {
+      "parent": 10,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true,
+      "box": [
+        177,
+        21,
+        48,
+        17
+      ]
+    },
+    {
+      "parent": 11,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXButton",
+      "title": "Search or run a command",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        896,
+        16,
+        199,
+        28
+      ],
+      "domIdentifier": "open-command-palette"
+    },
+    {
+      "parent": 13,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true,
+      "box": [
+        907,
+        21,
+        146,
+        17
+      ]
+    },
+    {
+      "parent": 14,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
       "enabled": true
     },
     {
@@ -86,4903 +183,2301 @@
       "role": "AXGroup",
       "enabled": true,
       "box": [
-        16,
-        34,
-        1248,
-        14
-      ]
-    },
-    {
-      "parent": 7,
-      "role": "AXGroup",
-      "description": "Open project",
-      "enabled": true,
-      "box": [
-        16,
-        34,
-        652,
-        14
-      ]
-    },
-    {
-      "parent": 8,
-      "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
-      "enabled": true,
-      "box": [
-        16,
-        34,
-        652,
-        14
-      ]
-    },
-    {
-      "parent": 9,
-      "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
-      "enabled": true
-    },
-    {
-      "parent": 7,
-      "role": "AXStaticText",
-      "title": "·",
-      "enabled": true,
-      "box": [
-        668,
-        34,
-        10,
-        14
-      ]
-    },
-    {
-      "parent": 11,
-      "role": "AXStaticText",
-      "title": "·",
-      "enabled": true
-    },
-    {
-      "parent": 7,
-      "role": "AXGroup",
-      "description": "Service URL",
-      "enabled": true,
-      "box": [
-        678,
-        34,
-        121,
-        14
-      ]
-    },
-    {
-      "parent": 13,
-      "role": "AXStaticText",
-      "title": "http://127.0.0.1:57767",
-      "enabled": true,
-      "box": [
-        678,
-        34,
-        121,
-        14
-      ]
-    },
-    {
-      "parent": 14,
-      "role": "AXStaticText",
-      "title": "http://127.0.0.1:57767",
-      "enabled": true
-    },
-    {
-      "parent": 2,
-      "role": "AXTabGroup",
-      "description": "Screens",
-      "enabled": true,
-      "box": [
-        0,
-        48,
-        1280,
-        37
-      ]
+        1106,
+        19,
+        154,
+        22
+      ],
+      "domIdentifier": "service-chip"
     },
     {
       "parent": 16,
-      "role": "AXRadioButton",
-      "subrole": "AXTabButton",
-      "title": "Project",
+      "role": "AXStaticText",
+      "title": "service",
       "enabled": true,
-      "selected": true,
-      "actions": [
-        "AXPress"
-      ],
       "box": [
-        16,
-        56,
-        65,
-        28
-      ],
-      "domIdentifier": "screen-project"
+        1128,
+        22,
+        38,
+        15
+      ]
     },
     {
       "parent": 17,
       "role": "AXStaticText",
-      "title": "Project",
-      "enabled": true,
-      "box": [
-        27,
-        63,
-        43,
-        15
-      ]
-    },
-    {
-      "parent": 18,
-      "role": "AXStaticText",
-      "title": "Project",
+      "title": "service",
       "enabled": true
     },
     {
       "parent": 16,
-      "role": "AXRadioButton",
-      "subrole": "AXTabButton",
-      "title": "Flow editor",
+      "role": "AXStaticText",
+      "title": "127.0.0.1:57371",
       "enabled": true,
-      "selected": false,
-      "actions": [
-        "AXPress"
-      ],
       "box": [
+        1166,
+        22,
         85,
-        56,
-        89,
-        28
-      ],
-      "domIdentifier": "screen-flows"
-    },
-    {
-      "parent": 20,
-      "role": "AXStaticText",
-      "title": "Flow editor",
-      "enabled": true,
-      "box": [
-        96,
-        63,
-        67,
         15
       ]
     },
     {
-      "parent": 21,
+      "parent": 19,
       "role": "AXStaticText",
-      "title": "Flow editor",
-      "enabled": true
-    },
-    {
-      "parent": 16,
-      "role": "AXRadioButton",
-      "subrole": "AXTabButton",
-      "title": "Plan",
-      "enabled": true,
-      "selected": false,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        178,
-        56,
-        48,
-        28
-      ],
-      "domIdentifier": "screen-plan"
-    },
-    {
-      "parent": 23,
-      "role": "AXStaticText",
-      "title": "Plan",
-      "enabled": true,
-      "box": [
-        189,
-        63,
-        26,
-        15
-      ]
-    },
-    {
-      "parent": 24,
-      "role": "AXStaticText",
-      "title": "Plan",
-      "enabled": true
-    },
-    {
-      "parent": 16,
-      "role": "AXRadioButton",
-      "subrole": "AXTabButton",
-      "title": "Run",
-      "enabled": true,
-      "selected": false,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        230,
-        56,
-        45,
-        28
-      ],
-      "domIdentifier": "screen-run"
-    },
-    {
-      "parent": 26,
-      "role": "AXStaticText",
-      "title": "Run",
-      "enabled": true,
-      "box": [
-        241,
-        63,
-        23,
-        15
-      ]
-    },
-    {
-      "parent": 27,
-      "role": "AXStaticText",
-      "title": "Run",
-      "enabled": true
-    },
-    {
-      "parent": 16,
-      "role": "AXRadioButton",
-      "subrole": "AXTabButton",
-      "title": "Results",
-      "enabled": true,
-      "selected": false,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        279,
-        56,
-        66,
-        28
-      ],
-      "domIdentifier": "screen-results"
-    },
-    {
-      "parent": 29,
-      "role": "AXStaticText",
-      "title": "Results",
-      "enabled": true,
-      "box": [
-        290,
-        63,
-        44,
-        15
-      ]
-    },
-    {
-      "parent": 30,
-      "role": "AXStaticText",
-      "title": "Results",
-      "enabled": true
-    },
-    {
-      "parent": 16,
-      "role": "AXRadioButton",
-      "subrole": "AXTabButton",
-      "title": "API client",
-      "enabled": true,
-      "selected": false,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        350,
-        56,
-        79,
-        28
-      ],
-      "domIdentifier": "screen-api"
-    },
-    {
-      "parent": 32,
-      "role": "AXStaticText",
-      "title": "API client",
-      "enabled": true,
-      "box": [
-        361,
-        63,
-        57,
-        15
-      ]
-    },
-    {
-      "parent": 33,
-      "role": "AXStaticText",
-      "title": "API client",
-      "enabled": true
-    },
-    {
-      "parent": 16,
-      "role": "AXRadioButton",
-      "subrole": "AXTabButton",
-      "title": "Data",
-      "enabled": true,
-      "selected": false,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        432,
-        56,
-        50,
-        28
-      ],
-      "domIdentifier": "screen-data"
-    },
-    {
-      "parent": 35,
-      "role": "AXStaticText",
-      "title": "Data",
-      "enabled": true,
-      "box": [
-        443,
-        63,
-        28,
-        15
-      ]
-    },
-    {
-      "parent": 36,
-      "role": "AXStaticText",
-      "title": "Data",
-      "enabled": true
-    },
-    {
-      "parent": 16,
-      "role": "AXRadioButton",
-      "subrole": "AXTabButton",
-      "title": "Record review",
-      "enabled": true,
-      "selected": false,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        487,
-        56,
-        108,
-        28
-      ],
-      "domIdentifier": "screen-record"
-    },
-    {
-      "parent": 38,
-      "role": "AXStaticText",
-      "title": "Record review",
-      "enabled": true,
-      "box": [
-        498,
-        63,
-        86,
-        15
-      ]
-    },
-    {
-      "parent": 39,
-      "role": "AXStaticText",
-      "title": "Record review",
-      "enabled": true
-    },
-    {
-      "parent": 16,
-      "role": "AXRadioButton",
-      "subrole": "AXTabButton",
-      "title": "Bindings",
-      "enabled": true,
-      "selected": false,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        599,
-        56,
-        74,
-        28
-      ],
-      "domIdentifier": "screen-bindings"
-    },
-    {
-      "parent": 41,
-      "role": "AXStaticText",
-      "title": "Bindings",
-      "enabled": true,
-      "box": [
-        610,
-        63,
-        52,
-        15
-      ]
-    },
-    {
-      "parent": 42,
-      "role": "AXStaticText",
-      "title": "Bindings",
-      "enabled": true
-    },
-    {
-      "parent": 16,
-      "role": "AXRadioButton",
-      "subrole": "AXTabButton",
-      "title": "Surface explorer",
-      "enabled": true,
-      "selected": false,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        677,
-        56,
-        122,
-        28
-      ],
-      "domIdentifier": "screen-explorer"
-    },
-    {
-      "parent": 44,
-      "role": "AXStaticText",
-      "title": "Surface explorer",
-      "enabled": true,
-      "box": [
-        688,
-        63,
-        100,
-        15
-      ]
-    },
-    {
-      "parent": 45,
-      "role": "AXStaticText",
-      "title": "Surface explorer",
-      "enabled": true
-    },
-    {
-      "parent": 16,
-      "role": "AXRadioButton",
-      "subrole": "AXTabButton",
-      "title": "Tool panel",
-      "enabled": true,
-      "selected": false,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        803,
-        56,
-        84,
-        28
-      ],
-      "domIdentifier": "screen-tools"
-    },
-    {
-      "parent": 47,
-      "role": "AXStaticText",
-      "title": "Tool panel",
-      "enabled": true,
-      "box": [
-        814,
-        63,
-        62,
-        15
-      ]
-    },
-    {
-      "parent": 48,
-      "role": "AXStaticText",
-      "title": "Tool panel",
+      "title": "127.0.0.1:57371",
       "enabled": true
     },
     {
       "parent": 2,
       "role": "AXGroup",
-      "subrole": "AXLandmarkMain",
+      "subrole": "AXLandmarkNavigation",
+      "description": "Sections",
       "enabled": true,
       "box": [
-        0,
-        85,
-        1280,
-        735
-      ]
+        8,
+        52,
+        220,
+        756
+      ],
+      "domIdentifier": "rail"
     },
     {
-      "parent": 50,
+      "parent": 21,
       "role": "AXGroup",
-      "subrole": "AXLandmarkRegion",
-      "description": "Project",
       "enabled": true,
       "box": [
         16,
-        97,
-        1248,
-        1058
+        62,
+        203,
+        29
       ]
     },
     {
-      "parent": 51,
+      "parent": 22,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true,
+      "box": [
+        24,
+        73,
+        50,
+        14
+      ]
+    },
+    {
+      "parent": 23,
+      "role": "AXStaticText",
+      "title": "PROJECT",
+      "enabled": true
+    },
+    {
+      "parent": 21,
       "role": "AXButton",
-      "title": "Open a project…",
+      "title": "Flows",
       "enabled": true,
       "actions": [
         "AXPress"
       ],
       "box": [
         16,
-        97,
-        122,
-        27
+        91,
+        203,
+        31
       ],
-      "domIdentifier": "project-open"
+      "domIdentifier": "rail-flows"
+    },
+    {
+      "parent": 25,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        24,
+        98,
+        34,
+        17
+      ]
+    },
+    {
+      "parent": 26,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Runs",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        122,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-runs"
+    },
+    {
+      "parent": 28,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true,
+      "box": [
+        24,
+        129,
+        29,
+        17
+      ]
+    },
+    {
+      "parent": 29,
+      "role": "AXStaticText",
+      "title": "Runs",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Bindings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        153,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-bindings"
+    },
+    {
+      "parent": 31,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true,
+      "box": [
+        24,
+        159,
+        50,
+        17
+      ]
+    },
+    {
+      "parent": 32,
+      "role": "AXStaticText",
+      "title": "Bindings",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Agents and tools",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        184,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-agents"
+    },
+    {
+      "parent": 34,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true,
+      "box": [
+        24,
+        190,
+        97,
+        17
+      ]
+    },
+    {
+      "parent": 35,
+      "role": "AXStaticText",
+      "title": "Agents and tools",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        16,
+        217,
+        203,
+        29
+      ]
+    },
+    {
+      "parent": 37,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true,
+      "box": [
+        24,
+        227,
+        66,
+        14
+      ]
+    },
+    {
+      "parent": 38,
+      "role": "AXStaticText",
+      "title": "RESOURCES",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "API",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        246,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-api"
+    },
+    {
+      "parent": 40,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true,
+      "box": [
+        24,
+        252,
+        21,
+        17
+      ]
+    },
+    {
+      "parent": 41,
+      "role": "AXStaticText",
+      "title": "API",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Data",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        277,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-data"
+    },
+    {
+      "parent": 43,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true,
+      "box": [
+        24,
+        283,
+        27,
+        17
+      ]
+    },
+    {
+      "parent": 44,
+      "role": "AXStaticText",
+      "title": "Data",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Import prototype database",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        736,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-import"
+    },
+    {
+      "parent": 46,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true,
+      "box": [
+        24,
+        743,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 47,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true
+    },
+    {
+      "parent": 21,
+      "role": "AXButton",
+      "title": "Settings",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        16,
+        767,
+        203,
+        31
+      ],
+      "domIdentifier": "rail-settings"
+    },
+    {
+      "parent": 49,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true,
+      "box": [
+        24,
+        774,
+        48,
+        17
+      ]
+    },
+    {
+      "parent": 50,
+      "role": "AXStaticText",
+      "title": "Settings",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "Workspace",
+      "enabled": true,
+      "box": [
+        228,
+        52,
+        684,
+        756
+      ],
+      "domIdentifier": "workspace"
     },
     {
       "parent": 52,
-      "role": "AXStaticText",
-      "title": "Open a project…",
+      "role": "AXHeading",
+      "title": "Settings",
       "enabled": true,
       "box": [
-        27,
-        103,
-        100,
-        15
+        244,
+        62,
+        53,
+        20
       ]
     },
     {
       "parent": 53,
       "role": "AXStaticText",
-      "title": "Open a project…",
-      "enabled": true
-    },
-    {
-      "parent": 51,
-      "role": "AXButton",
-      "title": "Import prototype database…",
-      "help": "Read a Svatah ADE prototype's electron-db directory into the open project",
+      "title": "Settings",
       "enabled": true,
-      "actions": [
-        "AXPress"
-      ],
       "box": [
-        146,
-        97,
-        194,
-        27
+        244,
+        62,
+        53,
+        19
       ]
     },
     {
-      "parent": 55,
+      "parent": 54,
       "role": "AXStaticText",
-      "title": "Import prototype database…",
+      "title": "Settings",
+      "enabled": true
+    },
+    {
+      "parent": 52,
+      "role": "AXStaticText",
+      "title": "svatah-fixtures · test · playwright",
       "enabled": true,
       "box": [
-        157,
-        103,
-        172,
-        15
+        305,
+        64,
+        177,
+        16
       ]
     },
     {
       "parent": 56,
       "role": "AXStaticText",
-      "title": "Import prototype database…",
+      "title": "svatah-fixtures · test · playwright",
       "enabled": true
     },
     {
-      "parent": 51,
-      "role": "AXStaticText",
-      "title": "Recent:",
+      "parent": 52,
+      "role": "AXTable",
+      "description": "PROJECT",
       "enabled": true,
       "box": [
-        348,
-        105,
-        43,
-        14
-      ]
+        228,
+        93,
+        684,
+        237
+      ],
+      "domIdentifier": "settings-project"
     },
     {
       "parent": 58,
-      "role": "AXStaticText",
-      "title": "Recent:",
-      "enabled": true
-    },
-    {
-      "parent": 51,
-      "role": "AXButton",
-      "title": "fixtures",
-      "enabled": true,
-      "actions": [
-        "AXPress"
-      ],
-      "box": [
-        399,
-        97,
-        67,
-        27
-      ]
-    },
-    {
-      "parent": 60,
-      "role": "AXStaticText",
-      "title": "fixtures",
-      "enabled": true,
-      "box": [
-        410,
-        103,
-        45,
-        15
-      ]
-    },
-    {
-      "parent": 61,
-      "role": "AXStaticText",
-      "title": "fixtures",
-      "enabled": true
-    },
-    {
-      "parent": 51,
-      "role": "AXHeading",
-      "title": "svatah-fixtures",
-      "enabled": true,
-      "box": [
-        16,
-        132,
-        1248,
-        17
-      ]
-    },
-    {
-      "parent": 63,
-      "role": "AXStaticText",
-      "title": "svatah-fixtures",
-      "enabled": true,
-      "box": [
-        16,
-        132,
-        106,
-        17
-      ]
-    },
-    {
-      "parent": 64,
-      "role": "AXStaticText",
-      "title": "svatah-fixtures",
-      "enabled": true
-    },
-    {
-      "parent": 51,
-      "role": "AXGroup",
-      "enabled": true,
-      "box": [
-        16,
-        156,
-        1248,
-        14
-      ]
-    },
-    {
-      "parent": 66,
-      "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
-      "enabled": true,
-      "box": [
-        16,
-        156,
-        652,
-        14
-      ]
-    },
-    {
-      "parent": 67,
-      "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
-      "enabled": true
-    },
-    {
-      "parent": 66,
-      "role": "AXStaticText",
-      "title": "· environment",
-      "enabled": true,
-      "box": [
-        668,
-        156,
-        84,
-        14
-      ]
-    },
-    {
-      "parent": 69,
-      "role": "AXStaticText",
-      "title": "· environment",
-      "enabled": true
-    },
-    {
-      "parent": 66,
-      "role": "AXStaticText",
-      "title": "test",
-      "enabled": true,
-      "box": [
-        752,
-        156,
-        22,
-        14
-      ]
-    },
-    {
-      "parent": 71,
-      "role": "AXStaticText",
-      "title": "test",
-      "enabled": true
-    },
-    {
-      "parent": 66,
-      "role": "AXStaticText",
-      "title": "· adapter",
-      "enabled": true,
-      "box": [
-        774,
-        156,
-        54,
-        14
-      ]
-    },
-    {
-      "parent": 73,
-      "role": "AXStaticText",
-      "title": "· adapter",
-      "enabled": true
-    },
-    {
-      "parent": 66,
-      "role": "AXStaticText",
-      "enabled": true,
-      "box": [
-        828,
-        156,
-        3,
-        14
-      ]
-    },
-    {
-      "parent": 75,
-      "role": "AXStaticText",
-      "enabled": true
-    },
-    {
-      "parent": 66,
-      "role": "AXStaticText",
-      "title": "playwright",
-      "enabled": true,
-      "box": [
-        831,
-        156,
-        59,
-        14
-      ]
-    },
-    {
-      "parent": 77,
-      "role": "AXStaticText",
-      "title": "playwright",
-      "enabled": true
-    },
-    {
-      "parent": 66,
-      "role": "AXStaticText",
-      "title": "· http://127.0.0.1:4173",
-      "enabled": true,
-      "box": [
-        890,
-        156,
-        123,
-        14
-      ]
-    },
-    {
-      "parent": 79,
-      "role": "AXStaticText",
-      "title": "· http://127.0.0.1:4173",
-      "enabled": true
-    },
-    {
-      "parent": 51,
-      "role": "AXHeading",
-      "title": "Diagnostics",
-      "enabled": true,
-      "box": [
-        16,
-        186,
-        1248,
-        15
-      ]
-    },
-    {
-      "parent": 81,
-      "role": "AXStaticText",
-      "title": "Diagnostics",
-      "enabled": true,
-      "box": [
-        16,
-        186,
-        76,
-        15
-      ]
-    },
-    {
-      "parent": 82,
-      "role": "AXStaticText",
-      "title": "Diagnostics",
-      "enabled": true
-    },
-    {
-      "parent": 51,
-      "role": "AXTable",
-      "enabled": true,
-      "box": [
-        16,
-        207,
-        1248,
-        92
-      ]
-    },
-    {
-      "parent": 84,
       "role": "AXUnknown",
       "enabled": true,
       "box": [
-        16,
-        207,
-        1248,
-        23
+        228,
+        93,
+        684,
+        21
       ]
     },
     {
-      "parent": 85,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        207,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 86,
-      "role": "AXCell",
-      "title": "Severity",
-      "enabled": true,
-      "box": [
-        16,
-        207,
-        87,
-        23
-      ]
-    },
-    {
-      "parent": 87,
+      "parent": 59,
       "role": "AXStaticText",
-      "title": "Severity",
+      "title": "PROJECT",
       "enabled": true,
       "box": [
-        24,
-        211,
-        47,
-        14
-      ]
-    },
-    {
-      "parent": 88,
-      "role": "AXStaticText",
-      "title": "Severity",
-      "enabled": true
-    },
-    {
-      "parent": 86,
-      "role": "AXCell",
-      "title": "Code",
-      "enabled": true,
-      "box": [
-        103,
-        207,
-        174,
-        23
-      ]
-    },
-    {
-      "parent": 90,
-      "role": "AXStaticText",
-      "title": "Code",
-      "enabled": true,
-      "box": [
-        111,
-        211,
-        30,
-        14
-      ]
-    },
-    {
-      "parent": 91,
-      "role": "AXStaticText",
-      "title": "Code",
-      "enabled": true
-    },
-    {
-      "parent": 86,
-      "role": "AXCell",
-      "title": "Message",
-      "enabled": true,
-      "box": [
-        277,
-        207,
-        987,
-        23
-      ]
-    },
-    {
-      "parent": 93,
-      "role": "AXStaticText",
-      "title": "Message",
-      "enabled": true,
-      "box": [
-        285,
-        211,
+        240,
+        94,
         52,
         14
       ]
     },
     {
-      "parent": 94,
+      "parent": 60,
       "role": "AXStaticText",
-      "title": "Message",
+      "title": "PROJECT",
       "enabled": true
     },
     {
-      "parent": 84,
+      "parent": 58,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        684,
+        32
+      ]
+    },
+    {
+      "parent": 62,
       "role": "AXRow",
       "enabled": true,
       "box": [
-        16,
+        228,
+        114,
+        684,
+        32
+      ]
+    },
+    {
+      "parent": 63,
+      "role": "AXCell",
+      "title": "SETTING",
+      "enabled": true,
+      "box": [
+        228,
+        114,
+        93,
+        32
+      ]
+    },
+    {
+      "parent": 64,
+      "role": "AXStaticText",
+      "title": "SETTING",
+      "enabled": true,
+      "box": [
+        240,
+        123,
+        48,
+        14
+      ]
+    },
+    {
+      "parent": 65,
+      "role": "AXStaticText",
+      "title": "SETTING",
+      "enabled": true
+    },
+    {
+      "parent": 63,
+      "role": "AXCell",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        321,
+        114,
+        591,
+        32
+      ]
+    },
+    {
+      "parent": 67,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        333,
+        123,
+        35,
+        14
+      ]
+    },
+    {
+      "parent": 68,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true
+    },
+    {
+      "parent": 58,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        146,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 70,
+      "role": "AXCell",
+      "title": "Name",
+      "enabled": true,
+      "box": [
+        228,
+        146,
+        93,
+        33
+      ]
+    },
+    {
+      "parent": 71,
+      "role": "AXStaticText",
+      "title": "Name",
+      "enabled": true,
+      "box": [
+        240,
+        154,
+        32,
+        16
+      ]
+    },
+    {
+      "parent": 72,
+      "role": "AXStaticText",
+      "title": "Name",
+      "enabled": true
+    },
+    {
+      "parent": 70,
+      "role": "AXCell",
+      "title": "svatah-fixtures",
+      "enabled": true,
+      "box": [
+        321,
+        146,
+        591,
+        33
+      ]
+    },
+    {
+      "parent": 74,
+      "role": "AXStaticText",
+      "title": "svatah-fixtures",
+      "enabled": true,
+      "box": [
+        333,
+        154,
+        113,
+        17
+      ]
+    },
+    {
+      "parent": 75,
+      "role": "AXStaticText",
+      "title": "svatah-fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 58,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        179,
+        684,
+        51
+      ]
+    },
+    {
+      "parent": 77,
+      "role": "AXCell",
+      "title": "Directory",
+      "enabled": true,
+      "box": [
+        228,
+        179,
+        93,
+        51
+      ]
+    },
+    {
+      "parent": 78,
+      "role": "AXStaticText",
+      "title": "Directory",
+      "enabled": true,
+      "box": [
+        240,
+        196,
+        49,
+        16
+      ]
+    },
+    {
+      "parent": 79,
+      "role": "AXStaticText",
+      "title": "Directory",
+      "enabled": true
+    },
+    {
+      "parent": 77,
+      "role": "AXCell",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "enabled": true,
+      "box": [
+        321,
+        179,
+        591,
+        51
+      ]
+    },
+    {
+      "parent": 81,
+      "role": "AXStaticText",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "enabled": true,
+      "box": [
+        333,
+        187,
+        480,
+        35
+      ]
+    },
+    {
+      "parent": 82,
+      "role": "AXStaticText",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-",
+      "enabled": true
+    },
+    {
+      "parent": 82,
+      "role": "AXStaticText",
+      "title": "cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 58,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
         230,
-        1248,
-        23
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 85,
+      "role": "AXCell",
+      "title": "Environment",
+      "enabled": true,
+      "box": [
+        228,
+        230,
+        93,
+        33
+      ]
+    },
+    {
+      "parent": 86,
+      "role": "AXStaticText",
+      "title": "Environment",
+      "enabled": true,
+      "box": [
+        240,
+        239,
+        69,
+        16
+      ]
+    },
+    {
+      "parent": 87,
+      "role": "AXStaticText",
+      "title": "Environment",
+      "enabled": true
+    },
+    {
+      "parent": 85,
+      "role": "AXCell",
+      "title": "test",
+      "enabled": true,
+      "box": [
+        321,
+        230,
+        591,
+        33
+      ]
+    },
+    {
+      "parent": 89,
+      "role": "AXStaticText",
+      "title": "test",
+      "enabled": true,
+      "box": [
+        333,
+        238,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 90,
+      "role": "AXStaticText",
+      "title": "test",
+      "enabled": true
+    },
+    {
+      "parent": 58,
+      "role": "AXRow",
+      "enabled": true,
+      "box": [
+        228,
+        263,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 92,
+      "role": "AXCell",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        228,
+        263,
+        93,
+        33
+      ]
+    },
+    {
+      "parent": 93,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true,
+      "box": [
+        240,
+        272,
+        32,
+        16
+      ]
+    },
+    {
+      "parent": 94,
+      "role": "AXStaticText",
+      "title": "Flows",
+      "enabled": true
+    },
+    {
+      "parent": 92,
+      "role": "AXCell",
+      "title": "flows",
+      "enabled": true,
+      "box": [
+        321,
+        263,
+        591,
+        33
       ]
     },
     {
       "parent": 96,
-      "role": "AXCell",
-      "title": "warning",
+      "role": "AXStaticText",
+      "title": "flows",
       "enabled": true,
       "box": [
-        16,
-        230,
-        87,
-        23
+        333,
+        271,
+        38,
+        17
       ]
     },
     {
       "parent": 97,
       "role": "AXStaticText",
-      "title": "warning",
-      "enabled": true,
-      "box": [
-        24,
-        234,
-        45,
-        14
-      ]
-    },
-    {
-      "parent": 98,
-      "role": "AXStaticText",
-      "title": "warning",
+      "title": "flows",
       "enabled": true
     },
     {
-      "parent": 96,
-      "role": "AXCell",
-      "title": "W_SECRET_UNSET",
+      "parent": 58,
+      "role": "AXRow",
       "enabled": true,
       "box": [
-        103,
-        230,
-        174,
-        23
+        228,
+        297,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 99,
+      "role": "AXCell",
+      "title": "Bindings",
+      "enabled": true,
+      "box": [
+        228,
+        297,
+        93,
+        33
       ]
     },
     {
       "parent": 100,
       "role": "AXStaticText",
-      "title": "W_SECRET_UNSET",
+      "title": "Bindings",
       "enabled": true,
       "box": [
-        111,
-        234,
-        110,
-        14
+        240,
+        305,
+        47,
+        16
       ]
     },
     {
       "parent": 101,
       "role": "AXStaticText",
-      "title": "W_SECRET_UNSET",
+      "title": "Bindings",
       "enabled": true
     },
     {
-      "parent": 96,
+      "parent": 99,
       "role": "AXCell",
-      "title": "user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+      "title": "bindings",
       "enabled": true,
       "box": [
-        277,
-        230,
-        987,
-        23
+        321,
+        297,
+        591,
+        33
       ]
     },
     {
       "parent": 103,
       "role": "AXStaticText",
-      "title": "user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+      "title": "bindings",
       "enabled": true,
       "box": [
-        285,
-        234,
-        685,
-        14
+        333,
+        305,
+        60,
+        17
       ]
     },
     {
       "parent": 104,
       "role": "AXStaticText",
-      "title": "user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+      "title": "bindings",
       "enabled": true
     },
     {
-      "parent": 84,
-      "role": "AXRow",
+      "parent": 52,
+      "role": "AXTable",
+      "description": "RUN",
       "enabled": true,
       "box": [
-        16,
-        253,
-        1248,
-        23
-      ]
+        228,
+        330,
+        684,
+        219
+      ],
+      "domIdentifier": "settings-run"
     },
     {
       "parent": 106,
-      "role": "AXCell",
-      "title": "warning",
+      "role": "AXUnknown",
       "enabled": true,
       "box": [
-        16,
-        253,
-        87,
-        23
+        228,
+        330,
+        684,
+        21
       ]
     },
     {
       "parent": 107,
       "role": "AXStaticText",
-      "title": "warning",
+      "title": "RUN",
       "enabled": true,
       "box": [
+        240,
+        331,
         24,
-        257,
-        45,
         14
       ]
     },
     {
       "parent": 108,
       "role": "AXStaticText",
-      "title": "warning",
+      "title": "RUN",
       "enabled": true
     },
     {
       "parent": 106,
-      "role": "AXCell",
-      "title": "W_SECRET_UNSET",
+      "role": "AXUnknown",
       "enabled": true,
       "box": [
-        103,
-        253,
-        174,
-        23
+        228,
+        351,
+        684,
+        32
       ]
     },
     {
       "parent": 110,
-      "role": "AXStaticText",
-      "title": "W_SECRET_UNSET",
+      "role": "AXRow",
       "enabled": true,
       "box": [
-        111,
-        257,
-        110,
-        14
+        228,
+        351,
+        684,
+        32
       ]
     },
     {
       "parent": 111,
-      "role": "AXStaticText",
-      "title": "W_SECRET_UNSET",
-      "enabled": true
-    },
-    {
-      "parent": 106,
       "role": "AXCell",
-      "title": "card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
+      "title": "SETTING",
       "enabled": true,
       "box": [
-        277,
-        253,
-        987,
-        23
+        228,
+        351,
+        201,
+        32
+      ]
+    },
+    {
+      "parent": 112,
+      "role": "AXStaticText",
+      "title": "SETTING",
+      "enabled": true,
+      "box": [
+        240,
+        360,
+        48,
+        14
       ]
     },
     {
       "parent": 113,
       "role": "AXStaticText",
-      "title": "card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
-      "enabled": true,
-      "box": [
-        285,
-        257,
-        697,
-        14
-      ]
-    },
-    {
-      "parent": 114,
-      "role": "AXStaticText",
-      "title": "card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
+      "title": "SETTING",
       "enabled": true
     },
     {
-      "parent": 84,
-      "role": "AXRow",
+      "parent": 111,
+      "role": "AXCell",
+      "title": "VALUE",
       "enabled": true,
       "box": [
-        16,
-        276,
-        1248,
-        23
+        429,
+        351,
+        483,
+        32
+      ]
+    },
+    {
+      "parent": 115,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        441,
+        360,
+        35,
+        14
       ]
     },
     {
       "parent": 116,
-      "role": "AXCell",
-      "title": "warning",
-      "enabled": true,
-      "box": [
-        16,
-        276,
-        87,
-        23
-      ]
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true
     },
     {
-      "parent": 117,
-      "role": "AXStaticText",
-      "title": "warning",
+      "parent": 106,
+      "role": "AXRow",
       "enabled": true,
       "box": [
-        24,
-        280,
-        45,
-        14
+        228,
+        383,
+        684,
+        33
       ]
     },
     {
       "parent": 118,
-      "role": "AXStaticText",
-      "title": "warning",
-      "enabled": true
-    },
-    {
-      "parent": 116,
       "role": "AXCell",
-      "title": "W_SECRET_UNSET",
+      "title": "Adapter",
       "enabled": true,
       "box": [
-        103,
-        276,
-        174,
-        23
+        228,
+        383,
+        201,
+        33
+      ]
+    },
+    {
+      "parent": 119,
+      "role": "AXStaticText",
+      "title": "Adapter",
+      "enabled": true,
+      "box": [
+        240,
+        391,
+        43,
+        16
       ]
     },
     {
       "parent": 120,
       "role": "AXStaticText",
-      "title": "W_SECRET_UNSET",
-      "enabled": true,
-      "box": [
-        111,
-        280,
-        110,
-        14
-      ]
-    },
-    {
-      "parent": 121,
-      "role": "AXStaticText",
-      "title": "W_SECRET_UNSET",
+      "title": "Adapter",
       "enabled": true
     },
     {
-      "parent": 116,
+      "parent": 118,
       "role": "AXCell",
-      "title": "card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
+      "title": "playwright",
       "enabled": true,
       "box": [
-        277,
-        276,
-        987,
-        23
+        429,
+        383,
+        483,
+        33
+      ]
+    },
+    {
+      "parent": 122,
+      "role": "AXStaticText",
+      "title": "playwright",
+      "enabled": true,
+      "box": [
+        441,
+        391,
+        75,
+        17
       ]
     },
     {
       "parent": 123,
       "role": "AXStaticText",
-      "title": "card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
-      "enabled": true,
-      "box": [
-        285,
-        280,
-        647,
-        14
-      ]
-    },
-    {
-      "parent": 124,
-      "role": "AXStaticText",
-      "title": "card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
+      "title": "playwright",
       "enabled": true
     },
     {
-      "parent": 51,
-      "role": "AXHeading",
-      "title": "Stories (22)",
+      "parent": 106,
+      "role": "AXRow",
       "enabled": true,
       "box": [
-        16,
-        315,
-        1248,
-        15
+        228,
+        416,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 125,
+      "role": "AXCell",
+      "title": "Base URL",
+      "enabled": true,
+      "box": [
+        228,
+        416,
+        201,
+        33
       ]
     },
     {
       "parent": 126,
       "role": "AXStaticText",
-      "title": "Stories (",
+      "title": "Base URL",
       "enabled": true,
       "box": [
-        16,
-        315,
-        55,
-        15
+        240,
+        425,
+        51,
+        16
       ]
     },
     {
       "parent": 127,
       "role": "AXStaticText",
-      "title": "Stories (",
+      "title": "Base URL",
       "enabled": true
     },
     {
-      "parent": 126,
-      "role": "AXStaticText",
-      "title": "22",
+      "parent": 125,
+      "role": "AXCell",
+      "title": "http://127.0.0.1:4173",
       "enabled": true,
       "box": [
-        71,
-        315,
-        17,
-        15
+        429,
+        416,
+        483,
+        33
       ]
     },
     {
       "parent": 129,
       "role": "AXStaticText",
-      "title": "22",
-      "enabled": true
-    },
-    {
-      "parent": 126,
-      "role": "AXStaticText",
-      "title": ")",
+      "title": "http://127.0.0.1:4173",
       "enabled": true,
       "box": [
-        88,
-        315,
-        6,
-        15
+        441,
+        424,
+        158,
+        17
       ]
     },
     {
-      "parent": 131,
+      "parent": 130,
       "role": "AXStaticText",
-      "title": ")",
+      "title": "http://127.0.0.1:4173",
       "enabled": true
     },
     {
-      "parent": 51,
-      "role": "AXTable",
+      "parent": 106,
+      "role": "AXRow",
       "enabled": true,
       "box": [
-        16,
-        336,
-        1248,
-        529
+        228,
+        449,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 132,
+      "role": "AXCell",
+      "title": "Workers",
+      "enabled": true,
+      "box": [
+        228,
+        449,
+        201,
+        33
       ]
     },
     {
       "parent": 133,
-      "role": "AXUnknown",
+      "role": "AXStaticText",
+      "title": "Workers",
       "enabled": true,
       "box": [
-        16,
-        336,
-        1248,
-        23
+        240,
+        458,
+        45,
+        16
       ]
     },
     {
       "parent": 134,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        336,
-        1248,
-        23
-      ]
+      "role": "AXStaticText",
+      "title": "Workers",
+      "enabled": true
     },
     {
-      "parent": 135,
+      "parent": 132,
       "role": "AXCell",
-      "title": "Name",
+      "title": "1",
       "enabled": true,
       "box": [
-        16,
-        336,
-        432,
-        23
+        429,
+        449,
+        483,
+        33
       ]
     },
     {
       "parent": 136,
       "role": "AXStaticText",
-      "title": "Name",
+      "title": "1",
       "enabled": true,
       "box": [
-        24,
-        340,
-        33,
-        14
+        441,
+        457,
+        8,
+        17
       ]
     },
     {
       "parent": 137,
       "role": "AXStaticText",
-      "title": "Name",
+      "title": "1",
       "enabled": true
     },
     {
-      "parent": 135,
-      "role": "AXCell",
-      "title": "File",
+      "parent": 106,
+      "role": "AXRow",
       "enabled": true,
       "box": [
-        448,
-        336,
-        390,
-        23
+        228,
+        483,
+        684,
+        33
       ]
     },
     {
       "parent": 139,
-      "role": "AXStaticText",
-      "title": "File",
+      "role": "AXCell",
+      "title": "Headless",
       "enabled": true,
       "box": [
-        456,
-        340,
-        20,
-        14
+        228,
+        483,
+        201,
+        33
       ]
     },
     {
       "parent": 140,
       "role": "AXStaticText",
-      "title": "File",
-      "enabled": true
-    },
-    {
-      "parent": 135,
-      "role": "AXCell",
-      "title": "Steps",
+      "title": "Headless",
       "enabled": true,
       "box": [
-        837,
-        336,
-        84,
-        23
+        240,
+        491,
+        50,
+        16
       ]
     },
     {
-      "parent": 142,
+      "parent": 141,
       "role": "AXStaticText",
-      "title": "Steps",
+      "title": "Headless",
+      "enabled": true
+    },
+    {
+      "parent": 139,
+      "role": "AXCell",
+      "title": "true",
       "enabled": true,
       "box": [
-        845,
-        340,
-        33,
-        14
+        429,
+        483,
+        483,
+        33
       ]
     },
     {
       "parent": 143,
       "role": "AXStaticText",
-      "title": "Steps",
-      "enabled": true
-    },
-    {
-      "parent": 135,
-      "role": "AXCell",
-      "title": "Inputs",
+      "title": "true",
       "enabled": true,
       "box": [
-        921,
-        336,
-        343,
-        23
+        441,
+        491,
+        30,
+        17
       ]
     },
     {
-      "parent": 145,
+      "parent": 144,
       "role": "AXStaticText",
-      "title": "Inputs",
+      "title": "true",
+      "enabled": true
+    },
+    {
+      "parent": 106,
+      "role": "AXRow",
       "enabled": true,
       "box": [
-        929,
-        340,
-        36,
-        14
+        228,
+        516,
+        684,
+        33
       ]
     },
     {
       "parent": 146,
-      "role": "AXStaticText",
-      "title": "Inputs",
-      "enabled": true
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
+      "role": "AXCell",
+      "title": "Output",
       "enabled": true,
       "box": [
-        16,
-        359,
-        1248,
-        23
+        228,
+        516,
+        201,
+        33
+      ]
+    },
+    {
+      "parent": 147,
+      "role": "AXStaticText",
+      "title": "Output",
+      "enabled": true,
+      "box": [
+        240,
+        524,
+        38,
+        16
       ]
     },
     {
       "parent": 148,
-      "role": "AXCell",
-      "title": "book a slot",
-      "enabled": true,
-      "box": [
-        16,
-        359,
-        432,
-        23
-      ]
+      "role": "AXStaticText",
+      "title": "Output",
+      "enabled": true
     },
     {
-      "parent": 149,
-      "role": "AXStaticText",
-      "title": "book a slot",
+      "parent": 146,
+      "role": "AXCell",
+      "title": "runs",
       "enabled": true,
       "box": [
-        24,
-        363,
-        62,
-        14
+        429,
+        516,
+        483,
+        33
       ]
     },
     {
       "parent": 150,
       "role": "AXStaticText",
-      "title": "book a slot",
+      "title": "runs",
+      "enabled": true,
+      "box": [
+        441,
+        524,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 151,
+      "role": "AXStaticText",
+      "title": "runs",
       "enabled": true
     },
     {
-      "parent": 148,
-      "role": "AXCell",
-      "title": "flows/booking-compensation.flow",
+      "parent": 52,
+      "role": "AXTable",
+      "description": "SERVICE",
       "enabled": true,
       "box": [
-        448,
-        359,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 152,
-      "role": "AXStaticText",
-      "title": "flows/booking-compensation.flow",
-      "enabled": true,
-      "box": [
-        456,
-        363,
-        191,
-        14
-      ]
+        228,
+        549,
+        684,
+        120
+      ],
+      "domIdentifier": "settings-service"
     },
     {
       "parent": 153,
-      "role": "AXStaticText",
-      "title": "flows/booking-compensation.flow",
-      "enabled": true
-    },
-    {
-      "parent": 148,
-      "role": "AXCell",
-      "title": "6",
+      "role": "AXUnknown",
       "enabled": true,
       "box": [
-        837,
-        359,
-        84,
-        23
+        228,
+        549,
+        684,
+        21
+      ]
+    },
+    {
+      "parent": 154,
+      "role": "AXStaticText",
+      "title": "SERVICE",
+      "enabled": true,
+      "box": [
+        240,
+        550,
+        49,
+        14
       ]
     },
     {
       "parent": 155,
       "role": "AXStaticText",
-      "title": "6",
-      "enabled": true,
-      "box": [
-        845,
-        363,
-        8,
-        14
-      ]
-    },
-    {
-      "parent": 156,
-      "role": "AXStaticText",
-      "title": "6",
+      "title": "SERVICE",
       "enabled": true
     },
     {
-      "parent": 148,
-      "role": "AXCell",
+      "parent": 153,
+      "role": "AXUnknown",
       "enabled": true,
       "box": [
-        921,
-        359,
-        343,
-        23
+        228,
+        570,
+        684,
+        32
       ]
     },
     {
-      "parent": 133,
+      "parent": 157,
       "role": "AXRow",
       "enabled": true,
       "box": [
-        16,
-        382,
-        1248,
-        23
+        228,
+        570,
+        684,
+        32
+      ]
+    },
+    {
+      "parent": 158,
+      "role": "AXCell",
+      "title": "SETTING",
+      "enabled": true,
+      "box": [
+        228,
+        570,
+        332,
+        32
       ]
     },
     {
       "parent": 159,
-      "role": "AXCell",
-      "title": "pay for the slot",
+      "role": "AXStaticText",
+      "title": "SETTING",
       "enabled": true,
       "box": [
-        16,
-        382,
-        432,
-        23
+        240,
+        579,
+        48,
+        14
       ]
     },
     {
       "parent": 160,
       "role": "AXStaticText",
-      "title": "pay for the slot",
-      "enabled": true,
-      "box": [
-        24,
-        386,
-        85,
-        14
-      ]
-    },
-    {
-      "parent": 161,
-      "role": "AXStaticText",
-      "title": "pay for the slot",
+      "title": "SETTING",
       "enabled": true
     },
     {
-      "parent": 159,
+      "parent": 158,
       "role": "AXCell",
-      "title": "flows/booking-compensation.flow",
+      "title": "VALUE",
       "enabled": true,
       "box": [
-        448,
-        382,
-        390,
-        23
+        560,
+        570,
+        352,
+        32
+      ]
+    },
+    {
+      "parent": 162,
+      "role": "AXStaticText",
+      "title": "VALUE",
+      "enabled": true,
+      "box": [
+        572,
+        579,
+        35,
+        14
       ]
     },
     {
       "parent": 163,
       "role": "AXStaticText",
-      "title": "flows/booking-compensation.flow",
-      "enabled": true,
-      "box": [
-        456,
-        386,
-        191,
-        14
-      ]
-    },
-    {
-      "parent": 164,
-      "role": "AXStaticText",
-      "title": "flows/booking-compensation.flow",
+      "title": "VALUE",
       "enabled": true
     },
     {
-      "parent": 159,
-      "role": "AXCell",
-      "title": "7",
+      "parent": 153,
+      "role": "AXRow",
       "enabled": true,
       "box": [
-        837,
-        382,
-        84,
-        23
+        228,
+        602,
+        684,
+        33
+      ]
+    },
+    {
+      "parent": 165,
+      "role": "AXCell",
+      "title": "Model credential",
+      "enabled": true,
+      "box": [
+        228,
+        602,
+        332,
+        33
       ]
     },
     {
       "parent": 166,
       "role": "AXStaticText",
-      "title": "7",
+      "title": "Model credential",
       "enabled": true,
       "box": [
-        845,
-        386,
-        7,
-        14
+        240,
+        611,
+        90,
+        16
       ]
     },
     {
       "parent": 167,
       "role": "AXStaticText",
-      "title": "7",
+      "title": "Model credential",
       "enabled": true
     },
     {
-      "parent": 159,
+      "parent": 165,
       "role": "AXCell",
+      "title": "none",
       "enabled": true,
       "box": [
-        921,
-        382,
-        343,
-        23
+        560,
+        602,
+        352,
+        33
       ]
     },
     {
-      "parent": 133,
-      "role": "AXRow",
+      "parent": 169,
+      "role": "AXStaticText",
+      "title": "none",
       "enabled": true,
       "box": [
-        16,
-        405,
-        1248,
-        23
+        572,
+        610,
+        30,
+        17
       ]
     },
     {
       "parent": 170,
-      "role": "AXCell",
-      "title": "cancel booking",
-      "enabled": true,
-      "box": [
-        16,
-        405,
-        432,
-        23
-      ]
+      "role": "AXStaticText",
+      "title": "none",
+      "enabled": true
     },
     {
-      "parent": 171,
-      "role": "AXStaticText",
-      "title": "cancel booking",
+      "parent": 153,
+      "role": "AXRow",
       "enabled": true,
       "box": [
-        24,
-        409,
-        86,
-        14
+        228,
+        635,
+        684,
+        33
       ]
     },
     {
       "parent": 172,
-      "role": "AXStaticText",
-      "title": "cancel booking",
-      "enabled": true
-    },
-    {
-      "parent": 170,
       "role": "AXCell",
-      "title": "flows/booking-compensation.flow",
+      "title": "Custom steps",
       "enabled": true,
       "box": [
-        448,
-        405,
-        390,
-        23
+        228,
+        635,
+        332,
+        33
+      ]
+    },
+    {
+      "parent": 173,
+      "role": "AXStaticText",
+      "title": "Custom steps",
+      "enabled": true,
+      "box": [
+        240,
+        644,
+        74,
+        16
       ]
     },
     {
       "parent": 174,
       "role": "AXStaticText",
-      "title": "flows/booking-compensation.flow",
-      "enabled": true,
-      "box": [
-        456,
-        409,
-        191,
-        14
-      ]
-    },
-    {
-      "parent": 175,
-      "role": "AXStaticText",
-      "title": "flows/booking-compensation.flow",
+      "title": "Custom steps",
       "enabled": true
     },
     {
-      "parent": 170,
+      "parent": 172,
       "role": "AXCell",
-      "title": "2",
+      "title": "0 definitions",
       "enabled": true,
       "box": [
-        837,
-        405,
-        84,
-        23
+        560,
+        635,
+        352,
+        33
+      ]
+    },
+    {
+      "parent": 176,
+      "role": "AXStaticText",
+      "title": "0 definitions",
+      "enabled": true,
+      "box": [
+        572,
+        643,
+        98,
+        17
       ]
     },
     {
       "parent": 177,
       "role": "AXStaticText",
-      "title": "2",
-      "enabled": true,
-      "box": [
-        845,
-        409,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 178,
-      "role": "AXStaticText",
-      "title": "2",
+      "title": "0 definitions",
       "enabled": true
     },
     {
-      "parent": 170,
-      "role": "AXCell",
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkComplementary",
+      "description": "Inspector",
       "enabled": true,
       "box": [
-        921,
-        405,
-        343,
-        23
-      ]
+        912,
+        52,
+        360,
+        756
+      ],
+      "domIdentifier": "inspector"
     },
     {
-      "parent": 133,
-      "role": "AXRow",
+      "parent": 179,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "DIAGNOSTICS",
       "enabled": true,
       "box": [
-        16,
-        428,
-        1248,
-        23
-      ]
+        913,
+        52,
+        359,
+        347
+      ],
+      "domIdentifier": "inspector-diagnostics"
+    },
+    {
+      "parent": 180,
+      "role": "AXHeading",
+      "title": "DIAGNOSTICS",
+      "enabled": true,
+      "box": [
+        913,
+        58,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-diagnostics-heading"
     },
     {
       "parent": 181,
-      "role": "AXCell",
-      "title": "Book a slot",
+      "role": "AXStaticText",
+      "title": "DIAGNOSTICS",
       "enabled": true,
       "box": [
-        16,
-        428,
-        432,
-        23
+        929,
+        73,
+        80,
+        14
       ]
     },
     {
       "parent": 182,
       "role": "AXStaticText",
-      "title": "Book a slot",
-      "enabled": true,
-      "box": [
-        24,
-        432,
-        63,
-        14
-      ]
-    },
-    {
-      "parent": 183,
-      "role": "AXStaticText",
-      "title": "Book a slot",
+      "title": "DIAGNOSTICS",
       "enabled": true
     },
     {
-      "parent": 181,
-      "role": "AXCell",
-      "title": "flows/booking-workflow.flow",
+      "parent": 180,
+      "role": "AXGroup",
       "enabled": true,
       "box": [
-        448,
-        428,
-        390,
-        23
+        929,
+        99,
+        327,
+        93
+      ]
+    },
+    {
+      "parent": 184,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        942,
+        111,
+        60,
+        18
       ]
     },
     {
       "parent": 185,
       "role": "AXStaticText",
-      "title": "flows/booking-workflow.flow",
+      "title": "warning",
       "enabled": true,
       "box": [
-        456,
-        432,
-        161,
-        14
+        949,
+        112,
+        46,
+        15
       ]
     },
     {
       "parent": 186,
       "role": "AXStaticText",
-      "title": "flows/booking-workflow.flow",
+      "title": "warning",
       "enabled": true
     },
     {
-      "parent": 181,
-      "role": "AXCell",
-      "title": "7",
+      "parent": 184,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
       "enabled": true,
       "box": [
-        837,
-        428,
-        84,
-        23
+        1005,
+        111,
+        105,
+        17
       ]
     },
     {
       "parent": 188,
       "role": "AXStaticText",
-      "title": "7",
-      "enabled": true,
-      "box": [
-        845,
-        432,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 189,
-      "role": "AXStaticText",
-      "title": "7",
+      "title": "W_SECRET_UNSET",
       "enabled": true
     },
     {
-      "parent": 181,
-      "role": "AXCell",
-      "title": "location: string, date: string =",
+      "parent": 184,
+      "role": "AXStaticText",
       "enabled": true,
       "box": [
-        921,
-        428,
-        343,
-        23
+        1110,
+        111,
+        3,
+        16
       ]
     },
     {
-      "parent": 191,
+      "parent": 190,
       "role": "AXStaticText",
-      "title": "location: string, date: string =",
+      "enabled": true
+    },
+    {
+      "parent": 184,
+      "role": "AXStaticText",
+      "title": "data.yaml · line 0 · user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
       "enabled": true,
       "box": [
-        929,
-        432,
-        167,
-        14
+        942,
+        111,
+        296,
+        69
       ]
     },
     {
       "parent": 192,
       "role": "AXStaticText",
-      "title": "location: string, date: string =",
+      "title": "data.yaml · line 0 ·",
       "enabled": true
     },
     {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        451,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 194,
-      "role": "AXCell",
-      "title": "Pay for a slot",
-      "enabled": true,
-      "box": [
-        16,
-        451,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 195,
+      "parent": 192,
       "role": "AXStaticText",
-      "title": "Pay for a slot",
-      "enabled": true,
-      "box": [
-        24,
-        455,
-        74,
-        14
-      ]
-    },
-    {
-      "parent": 196,
-      "role": "AXStaticText",
-      "title": "Pay for a slot",
+      "title": "user.password reads ${SVATAH_SAMPLE_PASSWORD},",
       "enabled": true
     },
     {
-      "parent": 194,
-      "role": "AXCell",
-      "title": "flows/booking-workflow.flow",
+      "parent": 192,
+      "role": "AXStaticText",
+      "title": "which is not set. Compiling does not need the value;",
+      "enabled": true
+    },
+    {
+      "parent": 192,
+      "role": "AXStaticText",
+      "title": "running will.",
+      "enabled": true
+    },
+    {
+      "parent": 180,
+      "role": "AXGroup",
       "enabled": true,
       "box": [
-        448,
-        451,
-        390,
-        23
+        929,
+        198,
+        327,
+        93
+      ]
+    },
+    {
+      "parent": 197,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        942,
+        209,
+        60,
+        18
       ]
     },
     {
       "parent": 198,
       "role": "AXStaticText",
-      "title": "flows/booking-workflow.flow",
+      "title": "warning",
       "enabled": true,
       "box": [
-        456,
-        455,
-        161,
-        14
+        949,
+        211,
+        46,
+        15
       ]
     },
     {
       "parent": 199,
       "role": "AXStaticText",
-      "title": "flows/booking-workflow.flow",
+      "title": "warning",
       "enabled": true
     },
     {
-      "parent": 194,
-      "role": "AXCell",
-      "title": "4",
+      "parent": 197,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
       "enabled": true,
       "box": [
-        837,
-        451,
-        84,
-        23
+        1005,
+        209,
+        105,
+        17
       ]
     },
     {
       "parent": 201,
       "role": "AXStaticText",
-      "title": "4",
-      "enabled": true,
-      "box": [
-        845,
-        455,
-        8,
-        14
-      ]
-    },
-    {
-      "parent": 202,
-      "role": "AXStaticText",
-      "title": "4",
+      "title": "W_SECRET_UNSET",
       "enabled": true
     },
     {
-      "parent": 194,
-      "role": "AXCell",
-      "title": "card: secret",
+      "parent": 197,
+      "role": "AXStaticText",
       "enabled": true,
       "box": [
-        921,
-        451,
-        343,
-        23
+        1110,
+        210,
+        3,
+        16
       ]
     },
     {
-      "parent": 204,
+      "parent": 203,
       "role": "AXStaticText",
-      "title": "card: secret",
+      "enabled": true
+    },
+    {
+      "parent": 197,
+      "role": "AXStaticText",
+      "title": "data.yaml · line 0 · card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
       "enabled": true,
       "box": [
-        929,
-        455,
-        68,
-        14
+        942,
+        210,
+        294,
+        69
       ]
     },
     {
       "parent": 205,
       "role": "AXStaticText",
-      "title": "card: secret",
+      "title": "data.yaml · line 0 ·",
       "enabled": true
     },
     {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        474,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 207,
-      "role": "AXCell",
-      "title": "start zoomcar booking",
-      "enabled": true,
-      "box": [
-        16,
-        474,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 208,
+      "parent": 205,
       "role": "AXStaticText",
-      "title": "start zoomcar booking",
-      "enabled": true,
-      "box": [
-        24,
-        478,
-        127,
-        14
-      ]
-    },
-    {
-      "parent": 209,
-      "role": "AXStaticText",
-      "title": "start zoomcar booking",
+      "title": "card.number reads",
       "enabled": true
     },
     {
-      "parent": 207,
-      "role": "AXCell",
-      "title": "flows/execution.flow",
+      "parent": 205,
+      "role": "AXStaticText",
+      "title": "${SVATAH_SAMPLE_CARD_NUMBER}, which is not set.",
+      "enabled": true
+    },
+    {
+      "parent": 205,
+      "role": "AXStaticText",
+      "title": "Compiling does not need the value; running will.",
+      "enabled": true
+    },
+    {
+      "parent": 180,
+      "role": "AXGroup",
       "enabled": true,
       "box": [
-        448,
-        474,
-        390,
-        23
+        929,
+        297,
+        327,
+        93
+      ]
+    },
+    {
+      "parent": 210,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        942,
+        308,
+        60,
+        18
       ]
     },
     {
       "parent": 211,
       "role": "AXStaticText",
-      "title": "flows/execution.flow",
+      "title": "warning",
       "enabled": true,
       "box": [
-        456,
-        478,
-        115,
-        14
+        949,
+        310,
+        46,
+        15
       ]
     },
     {
       "parent": 212,
       "role": "AXStaticText",
-      "title": "flows/execution.flow",
+      "title": "warning",
       "enabled": true
     },
     {
-      "parent": 207,
-      "role": "AXCell",
-      "title": "1",
+      "parent": 210,
+      "role": "AXStaticText",
+      "title": "W_SECRET_UNSET",
       "enabled": true,
       "box": [
-        837,
-        474,
-        84,
-        23
+        1005,
+        308,
+        105,
+        17
       ]
     },
     {
       "parent": 214,
       "role": "AXStaticText",
-      "title": "1",
-      "enabled": true,
-      "box": [
-        845,
-        478,
-        6,
-        14
-      ]
-    },
-    {
-      "parent": 215,
-      "role": "AXStaticText",
-      "title": "1",
+      "title": "W_SECRET_UNSET",
       "enabled": true
     },
     {
-      "parent": 207,
-      "role": "AXCell",
+      "parent": 210,
+      "role": "AXStaticText",
       "enabled": true,
       "box": [
-        921,
-        474,
-        343,
-        23
+        1110,
+        309,
+        3,
+        16
       ]
     },
     {
-      "parent": 133,
-      "role": "AXRow",
+      "parent": 216,
+      "role": "AXStaticText",
+      "enabled": true
+    },
+    {
+      "parent": 210,
+      "role": "AXStaticText",
+      "title": "data.yaml · line 0 · card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
       "enabled": true,
       "box": [
-        16,
-        497,
-        1248,
-        23
+        942,
+        309,
+        292,
+        69
       ]
     },
     {
       "parent": 218,
-      "role": "AXCell",
-      "title": "perform search",
-      "enabled": true,
-      "box": [
-        16,
-        497,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 219,
       "role": "AXStaticText",
-      "title": "perform search",
-      "enabled": true,
-      "box": [
-        24,
-        501,
-        87,
-        14
-      ]
-    },
-    {
-      "parent": 220,
-      "role": "AXStaticText",
-      "title": "perform search",
+      "title": "data.yaml · line 0 ·",
       "enabled": true
     },
     {
       "parent": 218,
-      "role": "AXCell",
-      "title": "flows/execution.flow",
-      "enabled": true,
-      "box": [
-        448,
-        497,
-        390,
-        23
-      ]
+      "role": "AXStaticText",
+      "title": "card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which",
+      "enabled": true
     },
     {
-      "parent": 222,
+      "parent": 218,
       "role": "AXStaticText",
-      "title": "flows/execution.flow",
+      "title": "is not set. Compiling does not need the value; running",
+      "enabled": true
+    },
+    {
+      "parent": 218,
+      "role": "AXStaticText",
+      "title": "will.",
+      "enabled": true
+    },
+    {
+      "parent": 179,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkRegion",
+      "description": "WHERE THIS CAME FROM",
       "enabled": true,
       "box": [
-        456,
-        501,
-        115,
-        14
-      ]
+        913,
+        399,
+        359,
+        69
+      ],
+      "domIdentifier": "inspector-sources"
     },
     {
       "parent": 223,
-      "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true
-    },
-    {
-      "parent": 218,
-      "role": "AXCell",
-      "title": "5",
+      "role": "AXHeading",
+      "title": "WHERE THIS CAME FROM",
       "enabled": true,
       "box": [
-        837,
-        497,
-        84,
-        23
+        913,
+        405,
+        359,
+        35
+      ],
+      "domIdentifier": "inspector-sources-heading"
+    },
+    {
+      "parent": 224,
+      "role": "AXStaticText",
+      "title": "WHERE THIS CAME FROM",
+      "enabled": true,
+      "box": [
+        929,
+        420,
+        143,
+        14
       ]
     },
     {
       "parent": 225,
       "role": "AXStaticText",
-      "title": "5",
-      "enabled": true,
-      "box": [
-        845,
-        501,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 226,
-      "role": "AXStaticText",
-      "title": "5",
+      "title": "WHERE THIS CAME FROM",
       "enabled": true
     },
     {
-      "parent": 218,
-      "role": "AXCell",
+      "parent": 223,
+      "role": "AXUnknown",
       "enabled": true,
       "box": [
-        921,
-        497,
-        343,
-        23
+        913,
+        440,
+        359,
+        17
       ]
     },
     {
-      "parent": 133,
-      "role": "AXRow",
+      "parent": 227,
+      "role": "AXUnknown",
+      "title": "#1",
       "enabled": true,
       "box": [
+        929,
+        440,
+        110,
+        17
+      ]
+    },
+    {
+      "parent": 228,
+      "role": "AXStaticText",
+      "title": "#1",
+      "enabled": true,
+      "box": [
+        929,
+        441,
         16,
-        520,
-        1248,
-        23
+        16
       ]
     },
     {
       "parent": 229,
-      "role": "AXCell",
-      "title": "select date and time",
-      "enabled": true,
-      "box": [
-        16,
-        520,
-        432,
-        23
-      ]
+      "role": "AXStaticText",
+      "title": "#1",
+      "enabled": true
     },
     {
-      "parent": 230,
-      "role": "AXStaticText",
-      "title": "select date and time",
+      "parent": 227,
+      "role": "AXUnknown",
       "enabled": true,
       "box": [
-        24,
-        524,
-        115,
-        14
+        1049,
+        440,
+        207,
+        17
       ]
     },
     {
       "parent": 231,
       "role": "AXStaticText",
-      "title": "select date and time",
-      "enabled": true
-    },
-    {
-      "parent": 229,
-      "role": "AXCell",
-      "title": "flows/execution.flow",
+      "title": "GET /project",
       "enabled": true,
       "box": [
-        448,
-        520,
-        390,
-        23
+        1049,
+        441,
+        67,
+        16
       ]
     },
     {
-      "parent": 233,
+      "parent": 232,
       "role": "AXStaticText",
-      "title": "flows/execution.flow",
+      "title": "GET /project",
+      "enabled": true
+    },
+    {
+      "parent": 2,
+      "role": "AXGroup",
+      "subrole": "AXLandmarkContentInfo",
       "enabled": true,
       "box": [
-        456,
-        524,
-        115,
-        14
+        8,
+        808,
+        1264,
+        28
       ]
     },
     {
       "parent": 234,
-      "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true
-    },
-    {
-      "parent": 229,
-      "role": "AXCell",
-      "title": "7",
+      "role": "AXGroup",
       "enabled": true,
       "box": [
-        837,
-        520,
-        84,
-        23
+        24,
+        814,
+        630,
+        17
+      ],
+      "domIdentifier": "status-context"
+    },
+    {
+      "parent": 235,
+      "role": "AXStaticText",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "enabled": true,
+      "box": [
+        24,
+        815,
+        630,
+        15
       ]
     },
     {
       "parent": 236,
       "role": "AXStaticText",
-      "title": "7",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "enabled": true
+    },
+    {
+      "parent": 234,
+      "role": "AXStaticText",
+      "title": "⌘K",
       "enabled": true,
       "box": [
-        845,
-        524,
-        7,
+        1117,
+        816,
+        13,
         14
       ]
     },
     {
-      "parent": 237,
+      "parent": 238,
       "role": "AXStaticText",
-      "title": "7",
+      "title": "⌘K",
       "enabled": true
     },
     {
-      "parent": 229,
-      "role": "AXCell",
+      "parent": 234,
+      "role": "AXStaticText",
+      "title": "commands",
       "enabled": true,
       "box": [
-        921,
-        520,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        543,
-        1248,
-        23
+        1136,
+        815,
+        60,
+        15
       ]
     },
     {
       "parent": 240,
-      "role": "AXCell",
-      "title": "select car and login",
-      "enabled": true,
-      "box": [
-        16,
-        543,
-        432,
-        23
-      ]
+      "role": "AXStaticText",
+      "title": "commands",
+      "enabled": true
     },
     {
-      "parent": 241,
+      "parent": 234,
       "role": "AXStaticText",
-      "title": "select car and login",
+      "title": "?",
       "enabled": true,
       "box": [
-        24,
-        547,
-        111,
+        1218,
+        816,
+        6,
         14
       ]
     },
     {
       "parent": 242,
       "role": "AXStaticText",
-      "title": "select car and login",
+      "title": "?",
       "enabled": true
     },
     {
-      "parent": 240,
-      "role": "AXCell",
-      "title": "flows/execution.flow",
+      "parent": 234,
+      "role": "AXStaticText",
+      "title": "keys",
       "enabled": true,
       "box": [
-        448,
-        543,
-        390,
-        23
+        1230,
+        815,
+        26,
+        15
       ]
     },
     {
       "parent": 244,
       "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true,
-      "box": [
-        456,
-        547,
-        115,
-        14
-      ]
-    },
-    {
-      "parent": 245,
-      "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true
-    },
-    {
-      "parent": 240,
-      "role": "AXCell",
-      "title": "5",
-      "enabled": true,
-      "box": [
-        837,
-        543,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 247,
-      "role": "AXStaticText",
-      "title": "5",
-      "enabled": true,
-      "box": [
-        845,
-        547,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 248,
-      "role": "AXStaticText",
-      "title": "5",
-      "enabled": true
-    },
-    {
-      "parent": 240,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        543,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        566,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 251,
-      "role": "AXCell",
-      "title": "checkout the selected car",
-      "enabled": true,
-      "box": [
-        16,
-        566,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 252,
-      "role": "AXStaticText",
-      "title": "checkout the selected car",
-      "enabled": true,
-      "box": [
-        24,
-        570,
-        147,
-        14
-      ]
-    },
-    {
-      "parent": 253,
-      "role": "AXStaticText",
-      "title": "checkout the selected car",
-      "enabled": true
-    },
-    {
-      "parent": 251,
-      "role": "AXCell",
-      "title": "flows/execution.flow",
-      "enabled": true,
-      "box": [
-        448,
-        566,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 255,
-      "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true,
-      "box": [
-        456,
-        570,
-        115,
-        14
-      ]
-    },
-    {
-      "parent": 256,
-      "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true
-    },
-    {
-      "parent": 251,
-      "role": "AXCell",
-      "title": "2",
-      "enabled": true,
-      "box": [
-        837,
-        566,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 258,
-      "role": "AXStaticText",
-      "title": "2",
-      "enabled": true,
-      "box": [
-        845,
-        570,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 259,
-      "role": "AXStaticText",
-      "title": "2",
-      "enabled": true
-    },
-    {
-      "parent": 251,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        566,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        589,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 262,
-      "role": "AXCell",
-      "title": "initiate payment",
-      "enabled": true,
-      "box": [
-        16,
-        589,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 263,
-      "role": "AXStaticText",
-      "title": "initiate payment",
-      "enabled": true,
-      "box": [
-        24,
-        593,
-        90,
-        14
-      ]
-    },
-    {
-      "parent": 264,
-      "role": "AXStaticText",
-      "title": "initiate payment",
-      "enabled": true
-    },
-    {
-      "parent": 262,
-      "role": "AXCell",
-      "title": "flows/execution.flow",
-      "enabled": true,
-      "box": [
-        448,
-        589,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 266,
-      "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true,
-      "box": [
-        456,
-        593,
-        115,
-        14
-      ]
-    },
-    {
-      "parent": 267,
-      "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true
-    },
-    {
-      "parent": 262,
-      "role": "AXCell",
-      "title": "9",
-      "enabled": true,
-      "box": [
-        837,
-        589,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 269,
-      "role": "AXStaticText",
-      "title": "9",
-      "enabled": true,
-      "box": [
-        845,
-        593,
-        8,
-        14
-      ]
-    },
-    {
-      "parent": 270,
-      "role": "AXStaticText",
-      "title": "9",
-      "enabled": true
-    },
-    {
-      "parent": 262,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        589,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        612,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 273,
-      "role": "AXCell",
-      "title": "logout",
-      "enabled": true,
-      "box": [
-        16,
-        612,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 274,
-      "role": "AXStaticText",
-      "title": "logout",
-      "enabled": true,
-      "box": [
-        24,
-        616,
-        36,
-        14
-      ]
-    },
-    {
-      "parent": 275,
-      "role": "AXStaticText",
-      "title": "logout",
-      "enabled": true
-    },
-    {
-      "parent": 273,
-      "role": "AXCell",
-      "title": "flows/execution.flow",
-      "enabled": true,
-      "box": [
-        448,
-        612,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 277,
-      "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true,
-      "box": [
-        456,
-        616,
-        115,
-        14
-      ]
-    },
-    {
-      "parent": 278,
-      "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true
-    },
-    {
-      "parent": 273,
-      "role": "AXCell",
-      "title": "2",
-      "enabled": true,
-      "box": [
-        837,
-        612,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 280,
-      "role": "AXStaticText",
-      "title": "2",
-      "enabled": true,
-      "box": [
-        845,
-        616,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 281,
-      "role": "AXStaticText",
-      "title": "2",
-      "enabled": true
-    },
-    {
-      "parent": 273,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        612,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        635,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 284,
-      "role": "AXCell",
-      "title": "I want to see guards decide",
-      "enabled": true,
-      "box": [
-        16,
-        635,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 285,
-      "role": "AXStaticText",
-      "title": "I want to see guards decide",
-      "enabled": true,
-      "box": [
-        24,
-        639,
-        156,
-        14
-      ]
-    },
-    {
-      "parent": 286,
-      "role": "AXStaticText",
-      "title": "I want to see guards decide",
-      "enabled": true
-    },
-    {
-      "parent": 284,
-      "role": "AXCell",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true,
-      "box": [
-        448,
-        635,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 288,
-      "role": "AXStaticText",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true,
-      "box": [
-        456,
-        639,
-        211,
-        14
-      ]
-    },
-    {
-      "parent": 289,
-      "role": "AXStaticText",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true
-    },
-    {
-      "parent": 284,
-      "role": "AXCell",
-      "title": "7",
-      "enabled": true,
-      "box": [
-        837,
-        635,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 291,
-      "role": "AXStaticText",
-      "title": "7",
-      "enabled": true,
-      "box": [
-        845,
-        639,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 292,
-      "role": "AXStaticText",
-      "title": "7",
-      "enabled": true
-    },
-    {
-      "parent": 284,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        635,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        658,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 295,
-      "role": "AXCell",
-      "title": "I want to book and then fail",
-      "enabled": true,
-      "box": [
-        16,
-        658,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 296,
-      "role": "AXStaticText",
-      "title": "I want to book and then fail",
-      "enabled": true,
-      "box": [
-        24,
-        662,
-        153,
-        14
-      ]
-    },
-    {
-      "parent": 297,
-      "role": "AXStaticText",
-      "title": "I want to book and then fail",
-      "enabled": true
-    },
-    {
-      "parent": 295,
-      "role": "AXCell",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true,
-      "box": [
-        448,
-        658,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 299,
-      "role": "AXStaticText",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true,
-      "box": [
-        456,
-        662,
-        211,
-        14
-      ]
-    },
-    {
-      "parent": 300,
-      "role": "AXStaticText",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true
-    },
-    {
-      "parent": 295,
-      "role": "AXCell",
-      "title": "5",
-      "enabled": true,
-      "box": [
-        837,
-        658,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 302,
-      "role": "AXStaticText",
-      "title": "5",
-      "enabled": true,
-      "box": [
-        845,
-        662,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 303,
-      "role": "AXStaticText",
-      "title": "5",
-      "enabled": true
-    },
-    {
-      "parent": 295,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        658,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        681,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 306,
-      "role": "AXCell",
-      "title": "cancel a booking",
-      "enabled": true,
-      "box": [
-        16,
-        681,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 307,
-      "role": "AXStaticText",
-      "title": "cancel a booking",
-      "enabled": true,
-      "box": [
-        24,
-        685,
-        96,
-        14
-      ]
-    },
-    {
-      "parent": 308,
-      "role": "AXStaticText",
-      "title": "cancel a booking",
-      "enabled": true
-    },
-    {
-      "parent": 306,
-      "role": "AXCell",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true,
-      "box": [
-        448,
-        681,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 310,
-      "role": "AXStaticText",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true,
-      "box": [
-        456,
-        685,
-        211,
-        14
-      ]
-    },
-    {
-      "parent": 311,
-      "role": "AXStaticText",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true
-    },
-    {
-      "parent": 306,
-      "role": "AXCell",
-      "title": "2",
-      "enabled": true,
-      "box": [
-        837,
-        681,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 313,
-      "role": "AXStaticText",
-      "title": "2",
-      "enabled": true,
-      "box": [
-        845,
-        685,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 314,
-      "role": "AXStaticText",
-      "title": "2",
-      "enabled": true
-    },
-    {
-      "parent": 306,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        681,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        704,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 317,
-      "role": "AXCell",
-      "title": "Login with natural language format",
-      "enabled": true,
-      "box": [
-        16,
-        704,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 318,
-      "role": "AXStaticText",
-      "title": "Login with natural language format",
-      "enabled": true,
-      "box": [
-        24,
-        708,
-        196,
-        14
-      ]
-    },
-    {
-      "parent": 319,
-      "role": "AXStaticText",
-      "title": "Login with natural language format",
-      "enabled": true
-    },
-    {
-      "parent": 317,
-      "role": "AXCell",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true,
-      "box": [
-        448,
-        704,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 321,
-      "role": "AXStaticText",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true,
-      "box": [
-        456,
-        708,
-        192,
-        14
-      ]
-    },
-    {
-      "parent": 322,
-      "role": "AXStaticText",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true
-    },
-    {
-      "parent": 317,
-      "role": "AXCell",
-      "title": "5",
-      "enabled": true,
-      "box": [
-        837,
-        704,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 324,
-      "role": "AXStaticText",
-      "title": "5",
-      "enabled": true,
-      "box": [
-        845,
-        708,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 325,
-      "role": "AXStaticText",
-      "title": "5",
-      "enabled": true
-    },
-    {
-      "parent": 317,
-      "role": "AXCell",
-      "title": "email: string =, password: secret",
-      "enabled": true,
-      "box": [
-        921,
-        704,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 327,
-      "role": "AXStaticText",
-      "title": "email: string =, password: secret",
-      "enabled": true,
-      "box": [
-        929,
-        708,
-        184,
-        14
-      ]
-    },
-    {
-      "parent": 328,
-      "role": "AXStaticText",
-      "title": "email: string =, password: secret",
-      "enabled": true
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        727,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 330,
-      "role": "AXCell",
-      "title": "Logout with natural language format",
-      "enabled": true,
-      "box": [
-        16,
-        727,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 331,
-      "role": "AXStaticText",
-      "title": "Logout with natural language format",
-      "enabled": true,
-      "box": [
-        24,
-        731,
-        205,
-        14
-      ]
-    },
-    {
-      "parent": 332,
-      "role": "AXStaticText",
-      "title": "Logout with natural language format",
-      "enabled": true
-    },
-    {
-      "parent": 330,
-      "role": "AXCell",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true,
-      "box": [
-        448,
-        727,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 334,
-      "role": "AXStaticText",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true,
-      "box": [
-        456,
-        731,
-        192,
-        14
-      ]
-    },
-    {
-      "parent": 335,
-      "role": "AXStaticText",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true
-    },
-    {
-      "parent": 330,
-      "role": "AXCell",
-      "title": "2",
-      "enabled": true,
-      "box": [
-        837,
-        727,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 337,
-      "role": "AXStaticText",
-      "title": "2",
-      "enabled": true,
-      "box": [
-        845,
-        731,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 338,
-      "role": "AXStaticText",
-      "title": "2",
-      "enabled": true
-    },
-    {
-      "parent": 330,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        727,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        750,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 341,
-      "role": "AXCell",
-      "title": "Validate text with natural language format",
-      "enabled": true,
-      "box": [
-        16,
-        750,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 342,
-      "role": "AXStaticText",
-      "title": "Validate text with natural language format",
-      "enabled": true,
-      "box": [
-        24,
-        754,
-        236,
-        14
-      ]
-    },
-    {
-      "parent": 343,
-      "role": "AXStaticText",
-      "title": "Validate text with natural language format",
-      "enabled": true
-    },
-    {
-      "parent": 341,
-      "role": "AXCell",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true,
-      "box": [
-        448,
-        750,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 345,
-      "role": "AXStaticText",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true,
-      "box": [
-        456,
-        754,
-        192,
-        14
-      ]
-    },
-    {
-      "parent": 346,
-      "role": "AXStaticText",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true
-    },
-    {
-      "parent": 341,
-      "role": "AXCell",
-      "title": "5",
-      "enabled": true,
-      "box": [
-        837,
-        750,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 348,
-      "role": "AXStaticText",
-      "title": "5",
-      "enabled": true,
-      "box": [
-        845,
-        754,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 349,
-      "role": "AXStaticText",
-      "title": "5",
-      "enabled": true
-    },
-    {
-      "parent": 341,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        750,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        773,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 352,
-      "role": "AXCell",
-      "title": "I want to validate login",
-      "enabled": true,
-      "box": [
-        16,
-        773,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 353,
-      "role": "AXStaticText",
-      "title": "I want to validate login",
-      "enabled": true,
-      "box": [
-        24,
-        777,
-        127,
-        14
-      ]
-    },
-    {
-      "parent": 354,
-      "role": "AXStaticText",
-      "title": "I want to validate login",
-      "enabled": true
-    },
-    {
-      "parent": 352,
-      "role": "AXCell",
-      "title": "flows/simple.flow",
-      "enabled": true,
-      "box": [
-        448,
-        773,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 356,
-      "role": "AXStaticText",
-      "title": "flows/simple.flow",
-      "enabled": true,
-      "box": [
-        456,
-        777,
-        97,
-        14
-      ]
-    },
-    {
-      "parent": 357,
-      "role": "AXStaticText",
-      "title": "flows/simple.flow",
-      "enabled": true
-    },
-    {
-      "parent": 352,
-      "role": "AXCell",
-      "title": "7",
-      "enabled": true,
-      "box": [
-        837,
-        773,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 359,
-      "role": "AXStaticText",
-      "title": "7",
-      "enabled": true,
-      "box": [
-        845,
-        777,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 360,
-      "role": "AXStaticText",
-      "title": "7",
-      "enabled": true
-    },
-    {
-      "parent": 352,
-      "role": "AXCell",
-      "title": "email: string, password: secret",
-      "enabled": true,
-      "box": [
-        921,
-        773,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 362,
-      "role": "AXStaticText",
-      "title": "email: string, password: secret",
-      "enabled": true,
-      "box": [
-        929,
-        777,
-        173,
-        14
-      ]
-    },
-    {
-      "parent": 363,
-      "role": "AXStaticText",
-      "title": "email: string, password: secret",
-      "enabled": true
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        796,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 365,
-      "role": "AXCell",
-      "title": "I want to validate logout",
-      "enabled": true,
-      "box": [
-        16,
-        796,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 366,
-      "role": "AXStaticText",
-      "title": "I want to validate logout",
-      "enabled": true,
-      "box": [
-        24,
-        800,
-        135,
-        14
-      ]
-    },
-    {
-      "parent": 367,
-      "role": "AXStaticText",
-      "title": "I want to validate logout",
-      "enabled": true
-    },
-    {
-      "parent": 365,
-      "role": "AXCell",
-      "title": "flows/simple.flow",
-      "enabled": true,
-      "box": [
-        448,
-        796,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 369,
-      "role": "AXStaticText",
-      "title": "flows/simple.flow",
-      "enabled": true,
-      "box": [
-        456,
-        800,
-        97,
-        14
-      ]
-    },
-    {
-      "parent": 370,
-      "role": "AXStaticText",
-      "title": "flows/simple.flow",
-      "enabled": true
-    },
-    {
-      "parent": 365,
-      "role": "AXCell",
-      "title": "1",
-      "enabled": true,
-      "box": [
-        837,
-        796,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 372,
-      "role": "AXStaticText",
-      "title": "1",
-      "enabled": true,
-      "box": [
-        845,
-        800,
-        6,
-        14
-      ]
-    },
-    {
-      "parent": 373,
-      "role": "AXStaticText",
-      "title": "1",
-      "enabled": true
-    },
-    {
-      "parent": 365,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        796,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        819,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 376,
-      "role": "AXCell",
-      "title": "I want to validate text",
-      "enabled": true,
-      "box": [
-        16,
-        819,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 377,
-      "role": "AXStaticText",
-      "title": "I want to validate text",
-      "enabled": true,
-      "box": [
-        24,
-        823,
-        121,
-        14
-      ]
-    },
-    {
-      "parent": 378,
-      "role": "AXStaticText",
-      "title": "I want to validate text",
-      "enabled": true
-    },
-    {
-      "parent": 376,
-      "role": "AXCell",
-      "title": "flows/simple.flow",
-      "enabled": true,
-      "box": [
-        448,
-        819,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 380,
-      "role": "AXStaticText",
-      "title": "flows/simple.flow",
-      "enabled": true,
-      "box": [
-        456,
-        823,
-        97,
-        14
-      ]
-    },
-    {
-      "parent": 381,
-      "role": "AXStaticText",
-      "title": "flows/simple.flow",
-      "enabled": true
-    },
-    {
-      "parent": 376,
-      "role": "AXCell",
-      "title": "5",
-      "enabled": true,
-      "box": [
-        837,
-        819,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 383,
-      "role": "AXStaticText",
-      "title": "5",
-      "enabled": true,
-      "box": [
-        845,
-        823,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 384,
-      "role": "AXStaticText",
-      "title": "5",
-      "enabled": true
-    },
-    {
-      "parent": 376,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        819,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 133,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        842,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 387,
-      "role": "AXCell",
-      "title": "Validate Text",
-      "enabled": true,
-      "box": [
-        16,
-        842,
-        432,
-        23
-      ]
-    },
-    {
-      "parent": 388,
-      "role": "AXStaticText",
-      "title": "Validate Text",
-      "enabled": true,
-      "box": [
-        24,
-        846,
-        72,
-        14
-      ]
-    },
-    {
-      "parent": 389,
-      "role": "AXStaticText",
-      "title": "Validate Text",
-      "enabled": true
-    },
-    {
-      "parent": 387,
-      "role": "AXCell",
-      "title": "flows/svatah.flow",
-      "enabled": true,
-      "box": [
-        448,
-        842,
-        390,
-        23
-      ]
-    },
-    {
-      "parent": 391,
-      "role": "AXStaticText",
-      "title": "flows/svatah.flow",
-      "enabled": true,
-      "box": [
-        456,
-        846,
-        97,
-        14
-      ]
-    },
-    {
-      "parent": 392,
-      "role": "AXStaticText",
-      "title": "flows/svatah.flow",
-      "enabled": true
-    },
-    {
-      "parent": 387,
-      "role": "AXCell",
-      "title": "16",
-      "enabled": true,
-      "box": [
-        837,
-        842,
-        84,
-        23
-      ]
-    },
-    {
-      "parent": 394,
-      "role": "AXStaticText",
-      "title": "16",
-      "enabled": true,
-      "box": [
-        845,
-        846,
-        13,
-        14
-      ]
-    },
-    {
-      "parent": 395,
-      "role": "AXStaticText",
-      "title": "16",
-      "enabled": true
-    },
-    {
-      "parent": 387,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        921,
-        842,
-        343,
-        23
-      ]
-    },
-    {
-      "parent": 51,
-      "role": "AXHeading",
-      "title": "Run blocks",
-      "enabled": true,
-      "box": [
-        16,
-        881,
-        1248,
-        15
-      ]
-    },
-    {
-      "parent": 398,
-      "role": "AXStaticText",
-      "title": "Run blocks",
-      "enabled": true,
-      "box": [
-        16,
-        881,
-        71,
-        15
-      ]
-    },
-    {
-      "parent": 399,
-      "role": "AXStaticText",
-      "title": "Run blocks",
-      "enabled": true
-    },
-    {
-      "parent": 51,
-      "role": "AXTable",
-      "enabled": true,
-      "box": [
-        16,
-        902,
-        1248,
-        184
-      ]
-    },
-    {
-      "parent": 401,
-      "role": "AXUnknown",
-      "enabled": true,
-      "box": [
-        16,
-        902,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 402,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        902,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 403,
-      "role": "AXCell",
-      "title": "Flow",
-      "enabled": true,
-      "box": [
-        16,
-        902,
-        267,
-        23
-      ]
-    },
-    {
-      "parent": 404,
-      "role": "AXStaticText",
-      "title": "Flow",
-      "enabled": true,
-      "box": [
-        24,
-        906,
-        27,
-        14
-      ]
-    },
-    {
-      "parent": 405,
-      "role": "AXStaticText",
-      "title": "Flow",
-      "enabled": true
-    },
-    {
-      "parent": 403,
-      "role": "AXCell",
-      "title": "Runs, in order",
-      "enabled": true,
-      "box": [
-        283,
-        902,
-        981,
-        23
-      ]
-    },
-    {
-      "parent": 407,
-      "role": "AXStaticText",
-      "title": "Runs, in order",
-      "enabled": true,
-      "box": [
-        291,
-        906,
-        81,
-        14
-      ]
-    },
-    {
-      "parent": 408,
-      "role": "AXStaticText",
-      "title": "Runs, in order",
-      "enabled": true
-    },
-    {
-      "parent": 401,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        925,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 410,
-      "role": "AXCell",
-      "title": "flows/booking-compensation.flow",
-      "enabled": true,
-      "box": [
-        16,
-        925,
-        267,
-        23
-      ]
-    },
-    {
-      "parent": 411,
-      "role": "AXStaticText",
-      "title": "flows/booking-compensation.flow",
-      "enabled": true,
-      "box": [
-        24,
-        929,
-        191,
-        14
-      ]
-    },
-    {
-      "parent": 412,
-      "role": "AXStaticText",
-      "title": "flows/booking-compensation.flow",
-      "enabled": true
-    },
-    {
-      "parent": 410,
-      "role": "AXCell",
-      "title": "book and pay",
-      "enabled": true,
-      "box": [
-        283,
-        925,
-        981,
-        23
-      ]
-    },
-    {
-      "parent": 414,
-      "role": "AXStaticText",
-      "title": "book and pay",
-      "enabled": true,
-      "box": [
-        291,
-        929,
-        76,
-        14
-      ]
-    },
-    {
-      "parent": 415,
-      "role": "AXStaticText",
-      "title": "book and pay",
-      "enabled": true
-    },
-    {
-      "parent": 401,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        948,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 417,
-      "role": "AXCell",
-      "title": "flows/booking-workflow.flow",
-      "enabled": true,
-      "box": [
-        16,
-        948,
-        267,
-        23
-      ]
-    },
-    {
-      "parent": 418,
-      "role": "AXStaticText",
-      "title": "flows/booking-workflow.flow",
-      "enabled": true,
-      "box": [
-        24,
-        952,
-        161,
-        14
-      ]
-    },
-    {
-      "parent": 419,
-      "role": "AXStaticText",
-      "title": "flows/booking-workflow.flow",
-      "enabled": true
-    },
-    {
-      "parent": 417,
-      "role": "AXCell",
-      "enabled": true,
-      "box": [
-        283,
-        948,
-        981,
-        23
-      ]
-    },
-    {
-      "parent": 401,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        971,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 422,
-      "role": "AXCell",
-      "title": "flows/execution.flow",
-      "enabled": true,
-      "box": [
-        16,
-        971,
-        267,
-        23
-      ]
-    },
-    {
-      "parent": 423,
-      "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true,
-      "box": [
-        24,
-        975,
-        115,
-        14
-      ]
-    },
-    {
-      "parent": 424,
-      "role": "AXStaticText",
-      "title": "flows/execution.flow",
-      "enabled": true
-    },
-    {
-      "parent": 422,
-      "role": "AXCell",
-      "title": "start zoomcar booking → perform search → select date and time → select car and login → checkout the selected car → initiate payment → logout",
-      "enabled": true,
-      "box": [
-        283,
-        971,
-        981,
-        23
-      ]
-    },
-    {
-      "parent": 426,
-      "role": "AXStaticText",
-      "title": "start zoomcar booking → perform search → select date and time → select car and login → checkout the selected car → initiate payment → logout",
-      "enabled": true,
-      "box": [
-        291,
-        975,
-        818,
-        14
-      ]
-    },
-    {
-      "parent": 427,
-      "role": "AXStaticText",
-      "title": "start zoomcar booking → perform search → select date and time → select car and login → checkout the selected car → initiate payment → logout",
-      "enabled": true
-    },
-    {
-      "parent": 401,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        994,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 429,
-      "role": "AXCell",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true,
-      "box": [
-        16,
-        994,
-        267,
-        23
-      ]
-    },
-    {
-      "parent": 430,
-      "role": "AXStaticText",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true,
-      "box": [
-        24,
-        998,
-        211,
-        14
-      ]
-    },
-    {
-      "parent": 431,
-      "role": "AXStaticText",
-      "title": "flows/guards-and-compensation.flow",
-      "enabled": true
-    },
-    {
-      "parent": 429,
-      "role": "AXCell",
-      "title": "I want to see guards decide",
-      "enabled": true,
-      "box": [
-        283,
-        994,
-        981,
-        23
-      ]
-    },
-    {
-      "parent": 433,
-      "role": "AXStaticText",
-      "title": "I want to see guards decide",
-      "enabled": true,
-      "box": [
-        291,
-        998,
-        156,
-        14
-      ]
-    },
-    {
-      "parent": 434,
-      "role": "AXStaticText",
-      "title": "I want to see guards decide",
-      "enabled": true
-    },
-    {
-      "parent": 401,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        1017,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 436,
-      "role": "AXCell",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true,
-      "box": [
-        16,
-        1017,
-        267,
-        23
-      ]
-    },
-    {
-      "parent": 437,
-      "role": "AXStaticText",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true,
-      "box": [
-        24,
-        1021,
-        192,
-        14
-      ]
-    },
-    {
-      "parent": 438,
-      "role": "AXStaticText",
-      "title": "flows/natural_language_login.flow",
-      "enabled": true
-    },
-    {
-      "parent": 436,
-      "role": "AXCell",
-      "title": "Login stories",
-      "enabled": true,
-      "box": [
-        283,
-        1017,
-        981,
-        23
-      ]
-    },
-    {
-      "parent": 440,
-      "role": "AXStaticText",
-      "title": "Login stories",
-      "enabled": true,
-      "box": [
-        291,
-        1021,
-        73,
-        14
-      ]
-    },
-    {
-      "parent": 441,
-      "role": "AXStaticText",
-      "title": "Login stories",
-      "enabled": true
-    },
-    {
-      "parent": 401,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        1040,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 443,
-      "role": "AXCell",
-      "title": "flows/simple.flow",
-      "enabled": true,
-      "box": [
-        16,
-        1040,
-        267,
-        23
-      ]
-    },
-    {
-      "parent": 444,
-      "role": "AXStaticText",
-      "title": "flows/simple.flow",
-      "enabled": true,
-      "box": [
-        24,
-        1044,
-        97,
-        14
-      ]
-    },
-    {
-      "parent": 445,
-      "role": "AXStaticText",
-      "title": "flows/simple.flow",
-      "enabled": true
-    },
-    {
-      "parent": 443,
-      "role": "AXCell",
-      "title": "I want to validate stories",
-      "enabled": true,
-      "box": [
-        283,
-        1040,
-        981,
-        23
-      ]
-    },
-    {
-      "parent": 447,
-      "role": "AXStaticText",
-      "title": "I want to validate stories",
-      "enabled": true,
-      "box": [
-        291,
-        1044,
-        137,
-        14
-      ]
-    },
-    {
-      "parent": 448,
-      "role": "AXStaticText",
-      "title": "I want to validate stories",
-      "enabled": true
-    },
-    {
-      "parent": 401,
-      "role": "AXRow",
-      "enabled": true,
-      "box": [
-        16,
-        1063,
-        1248,
-        23
-      ]
-    },
-    {
-      "parent": 450,
-      "role": "AXCell",
-      "title": "flows/svatah.flow",
-      "enabled": true,
-      "box": [
-        16,
-        1063,
-        267,
-        23
-      ]
-    },
-    {
-      "parent": 451,
-      "role": "AXStaticText",
-      "title": "flows/svatah.flow",
-      "enabled": true,
-      "box": [
-        24,
-        1067,
-        97,
-        14
-      ]
-    },
-    {
-      "parent": 452,
-      "role": "AXStaticText",
-      "title": "flows/svatah.flow",
-      "enabled": true
-    },
-    {
-      "parent": 450,
-      "role": "AXCell",
-      "title": "Validate Text",
-      "enabled": true,
-      "box": [
-        283,
-        1063,
-        981,
-        23
-      ]
-    },
-    {
-      "parent": 454,
-      "role": "AXStaticText",
-      "title": "Validate Text",
-      "enabled": true,
-      "box": [
-        291,
-        1067,
-        72,
-        14
-      ]
-    },
-    {
-      "parent": 455,
-      "role": "AXStaticText",
-      "title": "Validate Text",
-      "enabled": true
-    },
-    {
-      "parent": 51,
-      "role": "AXHeading",
-      "title": "Also in this project",
-      "enabled": true,
-      "box": [
-        16,
-        1102,
-        1248,
-        15
-      ]
-    },
-    {
-      "parent": 457,
-      "role": "AXStaticText",
-      "title": "Also in this project",
-      "enabled": true,
-      "box": [
-        16,
-        1102,
-        120,
-        15
-      ]
-    },
-    {
-      "parent": 458,
-      "role": "AXStaticText",
-      "title": "Also in this project",
-      "enabled": true
-    },
-    {
-      "parent": 51,
-      "role": "AXGroup",
-      "enabled": true,
-      "box": [
-        16,
-        1123,
-        1248,
-        14
-      ]
-    },
-    {
-      "parent": 460,
-      "role": "AXStaticText",
-      "title": "7",
-      "enabled": true,
-      "box": [
-        16,
-        1123,
-        7,
-        14
-      ]
-    },
-    {
-      "parent": 461,
-      "role": "AXStaticText",
-      "title": "7",
-      "enabled": true
-    },
-    {
-      "parent": 460,
-      "role": "AXStaticText",
-      "title": "flow file(s) ·",
-      "enabled": true,
-      "box": [
-        23,
-        1123,
-        73,
-        14
-      ]
-    },
-    {
-      "parent": 463,
-      "role": "AXStaticText",
-      "title": "flow file(s) ·",
-      "enabled": true
-    },
-    {
-      "parent": 460,
-      "role": "AXStaticText",
-      "title": "3",
-      "enabled": true,
-      "box": [
-        96,
-        1123,
-        8,
-        14
-      ]
-    },
-    {
-      "parent": 465,
-      "role": "AXStaticText",
-      "title": "3",
-      "enabled": true
-    },
-    {
-      "parent": 460,
-      "role": "AXStaticText",
-      "enabled": true,
-      "box": [
-        104,
-        1123,
-        3,
-        14
-      ]
-    },
-    {
-      "parent": 467,
-      "role": "AXStaticText",
-      "enabled": true
-    },
-    {
-      "parent": 460,
-      "role": "AXStaticText",
-      "title": "composition(s) ·",
-      "enabled": true,
-      "box": [
-        107,
-        1123,
-        95,
-        14
-      ]
-    },
-    {
-      "parent": 469,
-      "role": "AXStaticText",
-      "title": "composition(s) ·",
-      "enabled": true
-    },
-    {
-      "parent": 460,
-      "role": "AXStaticText",
-      "title": "1",
-      "enabled": true,
-      "box": [
-        202,
-        1123,
-        6,
-        14
-      ]
-    },
-    {
-      "parent": 471,
-      "role": "AXStaticText",
-      "title": "1",
-      "enabled": true
-    },
-    {
-      "parent": 460,
-      "role": "AXStaticText",
-      "title": "named API request(s) ·",
-      "enabled": true,
-      "box": [
-        208,
-        1123,
-        133,
-        14
-      ]
-    },
-    {
-      "parent": 473,
-      "role": "AXStaticText",
-      "title": "named API request(s) ·",
-      "enabled": true
-    },
-    {
-      "parent": 460,
-      "role": "AXStaticText",
-      "enabled": true,
-      "box": [
-        340,
-        1123,
-        3,
-        14
-      ]
-    },
-    {
-      "parent": 475,
-      "role": "AXStaticText",
-      "enabled": true
-    },
-    {
-      "parent": 460,
-      "role": "AXStaticText",
-      "title": "0",
-      "enabled": true,
-      "box": [
-        344,
-        1123,
-        8,
-        14
-      ]
-    },
-    {
-      "parent": 477,
-      "role": "AXStaticText",
-      "title": "0",
-      "enabled": true
-    },
-    {
-      "parent": 460,
-      "role": "AXStaticText",
-      "title": "custom step(s)",
-      "enabled": true,
-      "box": [
-        351,
-        1123,
-        89,
-        14
-      ]
-    },
-    {
-      "parent": 479,
-      "role": "AXStaticText",
-      "title": "custom step(s)",
-      "enabled": true
-    },
-    {
-      "parent": 51,
-      "role": "AXGroup",
-      "enabled": true,
-      "box": [
-        16,
-        1141,
-        1248,
-        13
-      ]
-    },
-    {
-      "parent": 481,
-      "role": "AXStaticText",
-      "title": "Rendered from",
-      "enabled": true,
-      "box": [
-        16,
-        1141,
-        81,
-        13
-      ]
-    },
-    {
-      "parent": 482,
-      "role": "AXStaticText",
-      "title": "Rendered from",
-      "enabled": true
-    },
-    {
-      "parent": 481,
-      "role": "AXStaticText",
-      "title": "getProject",
-      "enabled": true,
-      "box": [
-        97,
-        1141,
-        54,
-        13
-      ]
-    },
-    {
-      "parent": 484,
-      "role": "AXStaticText",
-      "title": "getProject",
-      "enabled": true
-    },
-    {
-      "parent": 481,
-      "role": "AXStaticText",
-      "title": ".",
-      "enabled": true,
-      "box": [
-        151,
-        1141,
-        3,
-        13
-      ]
-    },
-    {
-      "parent": 486,
-      "role": "AXStaticText",
-      "title": ".",
+      "title": "keys",
       "enabled": true
     }
   ]

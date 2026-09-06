@@ -553,6 +553,7 @@
     "/bindings/{id}": {
       "get": {
         "summary": "One binding",
+        "description": "The YAML file on disk, byte for byte — the same bytes `svatah bindings show` prints and a reviewer reads in a pull request. A `GET /bindings/:id.json` would be a second representation of the store, and the moment one exists someone has to keep the two in step (LLD §6.1, §13.5).",
         "security": [
           {
             "bearerAuth": []
@@ -570,11 +571,21 @@
         ],
         "responses": {
           "200": {
-            "description": "BindingFile",
+            "description": "The binding file, as YAML",
+            "content": {
+              "text/yaml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No binding by that id",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://svatah.dev/schema/bindings.file.schema.json"
+                  "type": "object"
                 }
               }
             }

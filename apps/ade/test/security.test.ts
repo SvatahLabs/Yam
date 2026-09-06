@@ -12,7 +12,7 @@
  * and that is Electron's contract rather than this project's.
  */
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -76,20 +76,27 @@ describe("the renderer is a browser and nothing more (REQ-ADE-2)", () => {
 });
 
 describe("no renderer source reaches for Node (REQ-ADE-2)", () => {
+  /*
+   * Every renderer source there is, listed by reading the directory rather than
+   * by hand (T10.3).
+   *
+   * Phase 3 wrote the list out; Phase 10 deleted eleven of the files on it and
+   * added eleven others, and a hand-kept list is a list that goes quietly out of
+   * date in exactly the direction that matters — a new screen nobody added to
+   * it is a new screen nothing checks.
+   */
   const rendererFiles = [
-    ["src", "renderer", "main.tsx"],
-    ["src", "renderer", "App.tsx"],
-    ["src", "renderer", "client.ts"],
-    ["src", "renderer", "client.generated.ts"],
-    ["src", "renderer", "bridge.ts"],
-    ["src", "renderer", "screens", "Project.tsx"],
-    ["src", "renderer", "screens", "FlowEditor.tsx"],
-    ["src", "renderer", "screens", "Plan.tsx"],
-    ["src", "renderer", "screens", "Run.tsx"],
-    ["src", "renderer", "screens", "Results.tsx"],
-    ["src", "renderer", "screens", "ApiClient.tsx"],
-    ["src", "renderer", "screens", "Data.tsx"],
+    ...readdirSync(join(ADE, "src", "renderer"))
+      .filter((name) => name.endsWith(".ts") || name.endsWith(".tsx"))
+      .map((name) => ["src", "renderer", name]),
+    ...readdirSync(join(ADE, "src", "renderer", "shell"))
+      .filter((name) => name.endsWith(".ts") || name.endsWith(".tsx"))
+      .map((name) => ["src", "renderer", "shell", name]),
   ];
+
+  it("found the renderer's sources", () => {
+    expect(rendererFiles.length).toBeGreaterThan(10);
+  });
 
   for (const parts of rendererFiles) {
     it(`${parts.slice(2).join("/")} imports no node: module, no electron, no fs`, () => {

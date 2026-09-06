@@ -22,11 +22,12 @@
       "className": "Chrome_RenderWidgetHostHWND",
       "name": "Svatah ADE",
       "isEnabled": true,
+      "hasKeyboardFocus": true,
       "box": [
         0,
         0,
         1280,
-        819
+        828
       ]
     },
     {
@@ -35,200 +36,199 @@
       "className": "Chrome_RenderWidgetHostHWND",
       "isEnabled": true,
       "box": [
-        0,
-        0,
-        1280,
-        819
-      ],
-      "automationId": "root"
+        8,
+        8,
+        1264,
+        828
+      ]
     },
     {
       "parent": 2,
       "controlType": "Group",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "banner",
       "isEnabled": true,
       "box": [
-        0,
-        0,
-        1280,
-        48
-      ]
+        8,
+        8,
+        1264,
+        828
+      ],
+      "automationId": "root"
     },
     {
       "parent": 3,
-      "controlType": "Text",
+      "controlType": "Group",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "heading",
-      "name": "Svatah ADE",
+      "localizedControlType": "banner",
       "isEnabled": true,
       "box": [
-        16,
-        12,
-        1248,
-        18
+        8,
+        8,
+        1264,
+        44
       ]
     },
     {
       "parent": 4,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah ADE",
+      "name": "Svatah",
       "isEnabled": true,
       "box": [
-        16,
-        12,
-        85,
-        18
+        50,
+        21,
+        42,
+        17
       ]
     },
     {
       "parent": 5,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah ADE",
+      "name": "Svatah",
       "isEnabled": true
     },
     {
-      "parent": 3,
+      "parent": 4,
       "controlType": "Group",
       "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "navigation",
+      "name": "Project",
       "isEnabled": true,
       "box": [
-        16,
-        34,
-        1248,
-        14
-      ]
+        104,
+        20,
+        156,
+        19
+      ],
+      "automationId": "topbar-crumb"
     },
     {
       "parent": 7,
       "controlType": "Group",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Open project",
       "isEnabled": true,
       "box": [
-        16,
-        34,
-        652,
-        14
-      ]
+        115,
+        20,
+        46,
+        19
+      ],
+      "automationId": "crumb-project"
     },
     {
       "parent": 8,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
+      "name": "fixtures",
       "isEnabled": true,
       "box": [
-        16,
-        34,
-        652,
-        14
+        115,
+        21,
+        46,
+        17
       ]
     },
     {
       "parent": 9,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_011eRnLZDDKnna1ncCJdniXz/evals/fixtures",
-      "isEnabled": true
-    },
-    {
-      "parent": 7,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "·",
-      "isEnabled": true,
-      "box": [
-        668,
-        34,
-        10,
-        14
-      ]
-    },
-    {
-      "parent": 11,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "·",
+      "name": "fixtures",
       "isEnabled": true
     },
     {
       "parent": 7,
       "controlType": "Group",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Service URL",
       "isEnabled": true,
       "box": [
-        678,
-        34,
-        120,
-        14
+        177,
+        20,
+        83,
+        19
+      ],
+      "automationId": "crumb-screen"
+    },
+    {
+      "parent": 11,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Record review",
+      "isEnabled": true,
+      "box": [
+        177,
+        21,
+        83,
+        17
       ]
     },
     {
-      "parent": 13,
+      "parent": 12,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "http://127.0.0.1:57481",
+      "name": "Record review",
+      "isEnabled": true
+    },
+    {
+      "parent": 4,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Search or run a command",
       "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
       "box": [
-        678,
-        34,
-        120,
-        14
-      ]
+        896,
+        16,
+        199,
+        28
+      ],
+      "automationId": "open-command-palette"
     },
     {
       "parent": 14,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "http://127.0.0.1:57481",
-      "isEnabled": true
-    },
-    {
-      "parent": 2,
-      "controlType": "Tab",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Screens",
+      "name": "Search or run a command",
       "isEnabled": true,
       "box": [
-        0,
-        48,
-        1280,
-        37
+        907,
+        21,
+        146,
+        17
       ]
     },
     {
-      "parent": 16,
-      "controlType": "TabItem",
+      "parent": 15,
+      "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "tab",
-      "name": "Project",
+      "name": "Search or run a command",
+      "isEnabled": true
+    },
+    {
+      "parent": 4,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
       "isEnabled": true,
-      "isSelected": false,
-      "patterns": [
-        "SelectionItem"
-      ],
       "box": [
-        16,
-        56,
-        65,
-        28
+        1106,
+        19,
+        154,
+        22
       ],
-      "automationId": "screen-project"
+      "automationId": "service-chip"
     },
     {
       "parent": 17,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Project",
+      "name": "service",
       "isEnabled": true,
       "box": [
-        27,
-        63,
-        43,
+        1128,
+        22,
+        38,
         15
       ]
     },
@@ -236,473 +236,1133 @@
       "parent": 18,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Project",
+      "name": "service",
       "isEnabled": true
     },
     {
-      "parent": 16,
-      "controlType": "TabItem",
+      "parent": 17,
+      "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "tab",
-      "name": "Flow editor",
+      "name": "127.0.0.1:57371",
       "isEnabled": true,
-      "isSelected": false,
-      "patterns": [
-        "SelectionItem"
-      ],
       "box": [
+        1166,
+        22,
         85,
-        56,
-        89,
-        28
-      ],
-      "automationId": "screen-flows"
+        15
+      ]
     },
     {
       "parent": 20,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Flow editor",
-      "isEnabled": true,
-      "box": [
-        96,
-        63,
-        67,
-        15
-      ]
-    },
-    {
-      "parent": 21,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Flow editor",
+      "name": "127.0.0.1:57371",
       "isEnabled": true
     },
     {
-      "parent": 16,
-      "controlType": "TabItem",
+      "parent": 3,
+      "controlType": "Group",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "tab",
-      "name": "Plan",
+      "localizedControlType": "navigation",
+      "name": "Sections",
       "isEnabled": true,
-      "isSelected": false,
-      "patterns": [
-        "SelectionItem"
-      ],
       "box": [
-        178,
-        56,
-        48,
-        28
+        8,
+        52,
+        220,
+        756
       ],
-      "automationId": "screen-plan"
+      "automationId": "rail"
+    },
+    {
+      "parent": 22,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        16,
+        62,
+        203,
+        29
+      ]
     },
     {
       "parent": 23,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Plan",
+      "name": "PROJECT",
       "isEnabled": true,
       "box": [
-        189,
-        63,
-        26,
-        15
+        24,
+        73,
+        50,
+        14
       ]
     },
     {
       "parent": 24,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Plan",
+      "name": "PROJECT",
       "isEnabled": true
     },
     {
-      "parent": 16,
-      "controlType": "TabItem",
+      "parent": 22,
+      "controlType": "Button",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "tab",
-      "name": "Run",
+      "name": "Flows",
       "isEnabled": true,
-      "isSelected": false,
       "patterns": [
-        "SelectionItem"
+        "Invoke"
       ],
       "box": [
-        230,
-        56,
-        45,
-        28
+        16,
+        91,
+        203,
+        31
       ],
-      "automationId": "screen-run"
+      "automationId": "rail-flows"
     },
     {
       "parent": 26,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Run",
+      "name": "Flows",
       "isEnabled": true,
       "box": [
-        241,
-        63,
-        23,
-        15
+        24,
+        98,
+        34,
+        17
       ]
     },
     {
       "parent": 27,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Run",
+      "name": "Flows",
       "isEnabled": true
     },
     {
-      "parent": 16,
-      "controlType": "TabItem",
+      "parent": 22,
+      "controlType": "Button",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "tab",
-      "name": "Results",
+      "name": "Runs",
       "isEnabled": true,
-      "isSelected": false,
       "patterns": [
-        "SelectionItem"
+        "Invoke"
       ],
       "box": [
-        279,
-        56,
-        66,
-        28
+        16,
+        122,
+        203,
+        31
       ],
-      "automationId": "screen-results"
+      "automationId": "rail-runs"
     },
     {
       "parent": 29,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Results",
+      "name": "Runs",
       "isEnabled": true,
       "box": [
-        290,
-        63,
-        44,
-        15
+        24,
+        129,
+        29,
+        17
       ]
     },
     {
       "parent": 30,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Results",
+      "name": "Runs",
       "isEnabled": true
     },
     {
-      "parent": 16,
-      "controlType": "TabItem",
+      "parent": 22,
+      "controlType": "Button",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "tab",
-      "name": "API client",
+      "name": "Bindings",
       "isEnabled": true,
-      "isSelected": false,
       "patterns": [
-        "SelectionItem"
+        "Invoke"
       ],
       "box": [
-        350,
-        56,
-        79,
-        28
+        16,
+        153,
+        203,
+        31
       ],
-      "automationId": "screen-api"
+      "automationId": "rail-bindings"
     },
     {
       "parent": 32,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "API client",
+      "name": "Bindings",
       "isEnabled": true,
       "box": [
-        361,
-        63,
-        57,
-        15
+        24,
+        159,
+        50,
+        17
       ]
     },
     {
       "parent": 33,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "API client",
+      "name": "Bindings",
       "isEnabled": true
     },
     {
-      "parent": 16,
-      "controlType": "TabItem",
+      "parent": 22,
+      "controlType": "Button",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "tab",
-      "name": "Data",
+      "name": "Agents and tools",
       "isEnabled": true,
-      "isSelected": false,
       "patterns": [
-        "SelectionItem"
+        "Invoke"
       ],
       "box": [
-        432,
-        56,
-        50,
-        28
+        16,
+        184,
+        203,
+        31
       ],
-      "automationId": "screen-data"
+      "automationId": "rail-agents"
     },
     {
       "parent": 35,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Data",
+      "name": "Agents and tools",
       "isEnabled": true,
       "box": [
-        443,
-        63,
-        28,
-        15
+        24,
+        190,
+        97,
+        17
       ]
     },
     {
       "parent": 36,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Data",
+      "name": "Agents and tools",
       "isEnabled": true
     },
     {
-      "parent": 16,
-      "controlType": "TabItem",
+      "parent": 22,
+      "controlType": "Group",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "tab",
-      "name": "Record review",
       "isEnabled": true,
-      "isSelected": true,
-      "patterns": [
-        "SelectionItem"
-      ],
       "box": [
-        487,
-        56,
-        108,
-        28
-      ],
-      "automationId": "screen-record"
+        16,
+        217,
+        203,
+        29
+      ]
     },
     {
       "parent": 38,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Record review",
+      "name": "RESOURCES",
       "isEnabled": true,
       "box": [
-        498,
-        63,
-        86,
-        15
+        24,
+        227,
+        66,
+        14
       ]
     },
     {
       "parent": 39,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Record review",
+      "name": "RESOURCES",
       "isEnabled": true
     },
     {
-      "parent": 16,
-      "controlType": "TabItem",
+      "parent": 22,
+      "controlType": "Button",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "tab",
-      "name": "Bindings",
+      "name": "API",
       "isEnabled": true,
-      "isSelected": false,
       "patterns": [
-        "SelectionItem"
+        "Invoke"
       ],
       "box": [
-        599,
-        56,
-        74,
-        28
+        16,
+        246,
+        203,
+        31
       ],
-      "automationId": "screen-bindings"
+      "automationId": "rail-api"
     },
     {
       "parent": 41,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Bindings",
+      "name": "API",
       "isEnabled": true,
       "box": [
-        610,
-        63,
-        52,
-        15
+        24,
+        252,
+        21,
+        17
       ]
     },
     {
       "parent": 42,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Bindings",
+      "name": "API",
       "isEnabled": true
     },
     {
-      "parent": 16,
-      "controlType": "TabItem",
+      "parent": 22,
+      "controlType": "Button",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "tab",
-      "name": "Surface explorer",
+      "name": "Data",
       "isEnabled": true,
-      "isSelected": false,
       "patterns": [
-        "SelectionItem"
+        "Invoke"
       ],
       "box": [
-        677,
-        56,
-        122,
-        28
+        16,
+        277,
+        203,
+        31
       ],
-      "automationId": "screen-explorer"
+      "automationId": "rail-data"
     },
     {
       "parent": 44,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Surface explorer",
+      "name": "Data",
       "isEnabled": true,
       "box": [
-        688,
-        63,
-        100,
-        15
+        24,
+        283,
+        27,
+        17
       ]
     },
     {
       "parent": 45,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Surface explorer",
+      "name": "Data",
       "isEnabled": true
     },
     {
-      "parent": 16,
-      "controlType": "TabItem",
+      "parent": 22,
+      "controlType": "Button",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "tab",
-      "name": "Tool panel",
+      "name": "Import prototype database",
       "isEnabled": true,
-      "isSelected": false,
       "patterns": [
-        "SelectionItem"
+        "Invoke"
       ],
       "box": [
-        803,
-        56,
-        84,
-        28
+        16,
+        736,
+        203,
+        31
       ],
-      "automationId": "screen-tools"
+      "automationId": "rail-import"
     },
     {
       "parent": 47,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Tool panel",
+      "name": "Import prototype database",
       "isEnabled": true,
       "box": [
-        814,
-        63,
-        62,
-        15
+        24,
+        743,
+        158,
+        17
       ]
     },
     {
       "parent": 48,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Tool panel",
+      "name": "Import prototype database",
       "isEnabled": true
     },
     {
-      "parent": 2,
-      "controlType": "Group",
+      "parent": 22,
+      "controlType": "Button",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "main",
+      "name": "Settings",
       "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
       "box": [
-        0,
-        85,
-        1280,
-        735
-      ]
+        16,
+        767,
+        203,
+        31
+      ],
+      "automationId": "rail-settings"
     },
     {
       "parent": 50,
-      "controlType": "Group",
+      "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "localizedControlType": "region",
-      "name": "Record review",
+      "name": "Settings",
       "isEnabled": true,
       "box": [
-        16,
-        97,
-        1248,
-        108
+        24,
+        774,
+        48,
+        17
       ]
     },
     {
       "parent": 51,
-      "controlType": "Group",
+      "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Session settings",
-      "isEnabled": true,
-      "box": [
-        16,
-        97,
-        1248,
-        33
-      ]
+      "name": "Settings",
+      "isEnabled": true
     },
     {
-      "parent": 52,
-      "controlType": "Custom",
+      "parent": 3,
+      "controlType": "Group",
       "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "region",
+      "name": "Workspace",
       "isEnabled": true,
       "box": [
-        16,
-        104,
-        63,
-        19
-      ]
+        228,
+        52,
+        684,
+        756
+      ],
+      "automationId": "workspace"
     },
     {
       "parent": 53,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Gateway",
+      "localizedControlType": "heading",
+      "name": "Record review",
       "isEnabled": true,
       "box": [
-        16,
-        104,
-        63,
-        19
+        244,
+        62,
+        58,
+        20
       ]
     },
     {
       "parent": 54,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Gateway",
+      "name": "Record review",
+      "isEnabled": true,
+      "box": [
+        244,
+        62,
+        50,
+        19
+      ]
+    },
+    {
+      "parent": 55,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Record review",
       "isEnabled": true
     },
     {
-      "parent": 52,
+      "parent": 55,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Recor",
+      "isEnabled": true
+    },
+    {
+      "parent": 55,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "No session · would record booking-compensation.flow",
+      "isEnabled": true,
+      "box": [
+        310,
+        64,
+        181,
+        16
+      ]
+    },
+    {
+      "parent": 59,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "No session · would record booking-compensation.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 59,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "No session · would record booki",
+      "isEnabled": true
+    },
+    {
+      "parent": 59,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "…",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Accept",
+      "isEnabled": false,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        508,
+        58,
+        86,
+        28
+      ],
+      "automationId": "action-record-accept"
+    },
+    {
+      "parent": 63,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Accept",
+      "isEnabled": true,
+      "box": [
+        519,
+        63,
+        40,
+        17
+      ]
+    },
+    {
+      "parent": 64,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Accept",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Re-pick",
+      "isEnabled": false,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        602,
+        58,
+        90,
+        28
+      ],
+      "automationId": "action-record-repick"
+    },
+    {
+      "parent": 66,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Re-pick",
+      "isEnabled": true,
+      "box": [
+        613,
+        63,
+        44,
+        17
+      ]
+    },
+    {
+      "parent": 67,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Re-pick",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Reject",
+      "isEnabled": false,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        700,
+        58,
+        82,
+        28
+      ],
+      "automationId": "action-record-reject"
+    },
+    {
+      "parent": 69,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Reject",
+      "isEnabled": true,
+      "box": [
+        711,
+        63,
+        36,
+        17
+      ]
+    },
+    {
+      "parent": 70,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Reject",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Button",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Stop recording",
+      "isEnabled": false,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        790,
+        58,
+        106,
+        28
+      ],
+      "automationId": "action-record-stop"
+    },
+    {
+      "parent": 72,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Stop recording",
+      "isEnabled": true,
+      "box": [
+        801,
+        63,
+        84,
+        17
+      ]
+    },
+    {
+      "parent": 73,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Stop recording",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "complementary",
+      "name": "Flows",
+      "isEnabled": true,
+      "box": [
+        228,
+        93,
+        301,
+        715
+      ],
+      "automationId": "record-flows-pane"
+    },
+    {
+      "parent": 75,
+      "controlType": "Table",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOWS TO RECORD",
+      "isEnabled": true,
+      "patterns": [
+        "Scroll"
+      ],
+      "box": [
+        228,
+        93,
+        300,
+        280
+      ],
+      "automationId": "record-flows"
+    },
+    {
+      "parent": 76,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        93,
+        300,
+        21
+      ]
+    },
+    {
+      "parent": 77,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOWS TO RECORD",
+      "isEnabled": true,
+      "box": [
+        240,
+        94,
+        107,
+        14
+      ]
+    },
+    {
+      "parent": 78,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOWS TO RECORD",
+      "isEnabled": true
+    },
+    {
+      "parent": 76,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        114,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 80,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        114,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 81,
+      "controlType": "HeaderItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOW",
+      "isEnabled": true,
+      "box": [
+        228,
+        114,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 82,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOW",
+      "isEnabled": true,
+      "box": [
+        240,
+        123,
+        31,
+        14
+      ]
+    },
+    {
+      "parent": 83,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "FLOW",
+      "isEnabled": true
+    },
+    {
+      "parent": 76,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        146,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 85,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-compensation.flow",
+      "isEnabled": true,
+      "box": [
+        228,
+        146,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 86,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-compensation.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        154,
+        150,
+        16
+      ]
+    },
+    {
+      "parent": 87,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-compensation.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 76,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        178,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 89,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-workflow.flow",
+      "isEnabled": true,
+      "box": [
+        228,
+        178,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 90,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-workflow.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        186,
+        123,
+        16
+      ]
+    },
+    {
+      "parent": 91,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "booking-workflow.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 76,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        211,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 93,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "execution.flow",
+      "isEnabled": true,
+      "box": [
+        228,
+        211,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 94,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "execution.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        219,
+        79,
+        16
+      ]
+    },
+    {
+      "parent": 95,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "execution.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 76,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        243,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 97,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "guards-and-compensation.flow",
+      "isEnabled": true,
+      "box": [
+        228,
+        243,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 98,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "guards-and-compensation.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        251,
+        169,
+        16
+      ]
+    },
+    {
+      "parent": 99,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "guards-and-compensation.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 76,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        276,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 101,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "natural_language_login.flow",
+      "isEnabled": true,
+      "box": [
+        228,
+        276,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 102,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "natural_language_login.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        284,
+        152,
+        16
+      ]
+    },
+    {
+      "parent": 103,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "natural_language_login.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 76,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        308,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 105,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "simple.flow",
+      "isEnabled": true,
+      "box": [
+        228,
+        308,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 106,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "simple.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        316,
+        62,
+        16
+      ]
+    },
+    {
+      "parent": 107,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "simple.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 76,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        228,
+        340,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 109,
+      "controlType": "DataItem",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "svatah.flow",
+      "isEnabled": true,
+      "box": [
+        228,
+        340,
+        300,
+        32
+      ]
+    },
+    {
+      "parent": 110,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "svatah.flow",
+      "isEnabled": true,
+      "box": [
+        240,
+        348,
+        61,
+        16
+      ]
+    },
+    {
+      "parent": 111,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "svatah.flow",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "The session",
+      "isEnabled": true,
+      "box": [
+        529,
+        93,
+        383,
+        495
+      ],
+      "automationId": "record-session"
+    },
+    {
+      "parent": 113,
+      "controlType": "Custom",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        545,
+        102,
+        343,
+        15
+      ]
+    },
+    {
+      "parent": 114,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "GATEWAY",
+      "isEnabled": true,
+      "box": [
+        545,
+        103,
+        55,
+        14
+      ]
+    },
+    {
+      "parent": 115,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "GATEWAY",
+      "isEnabled": true
+    },
+    {
+      "parent": 113,
       "controlType": "ComboBox",
       "className": "Chrome_RenderWidgetHostHWND",
       "name": "Gateway",
@@ -714,298 +1374,535 @@
         "ExpandCollapse"
       ],
       "box": [
-        87,
-        97,
-        1111,
-        33
+        545,
+        120,
+        343,
+        28
       ],
       "automationId": "record-gateway"
     },
     {
-      "parent": 56,
-      "controlType": "Custom",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "isEnabled": true
-    },
-    {
-      "parent": 57,
-      "controlType": "ListItem",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "anthropic — no credential on this service",
-      "isEnabled": false,
-      "patterns": [
-        "SelectionItem"
-      ]
-    },
-    {
-      "parent": 57,
-      "controlType": "ListItem",
+      "parent": 117,
+      "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
       "name": "fake — committed answers from evals/grounding/cases",
       "isEnabled": true,
-      "isSelected": true,
-      "patterns": [
-        "SelectionItem"
+      "box": [
+        554,
+        126,
+        309,
+        17
       ]
     },
     {
-      "parent": 52,
+      "parent": 118,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "No session.",
+      "name": "fake — committed answers from evals/grounding/cases",
+      "isEnabled": true
+    },
+    {
+      "parent": 113,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
       "isEnabled": true,
       "box": [
-        1206,
-        101,
-        46,
+        545,
+        163,
+        351,
+        76
+      ],
+      "automationId": "record-fake-gateway"
+    },
+    {
+      "parent": 120,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        558,
+        174,
+        93,
+        18
+      ]
+    },
+    {
+      "parent": 121,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "fake gateway",
+      "isEnabled": true,
+      "box": [
+        565,
+        176,
+        79,
+        15
+      ]
+    },
+    {
+      "parent": 122,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "fake gateway",
+      "isEnabled": true
+    },
+    {
+      "parent": 120,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "The groundings come from the committed answers under",
+      "isEnabled": true,
+      "box": [
+        558,
+        175,
+        322,
+        34
+      ]
+    },
+    {
+      "parent": 124,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "The groundings come from the committed",
+      "isEnabled": true
+    },
+    {
+      "parent": 124,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "answers under",
+      "isEnabled": true
+    },
+    {
+      "parent": 120,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "evals/grounding/cases",
+      "isEnabled": true,
+      "box": [
+        640,
+        193,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 127,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "evals/grounding/cases",
+      "isEnabled": true
+    },
+    {
+      "parent": 120,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": ", not from a model. Nothing is sent anywhere and nothing is charged.",
+      "isEnabled": true,
+      "box": [
+        558,
+        193,
+        304,
+        34
+      ]
+    },
+    {
+      "parent": 129,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": ", not from a",
+      "isEnabled": true
+    },
+    {
+      "parent": 129,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "model. Nothing is sent anywhere and nothing is charged.",
+      "isEnabled": true
+    },
+    {
+      "parent": 113,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        251,
+        383,
+        84
+      ]
+    },
+    {
+      "parent": 132,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "No session. Press Record on the Flows screen, or choose a flow here and press Record.",
+      "isEnabled": true,
+      "box": [
+        545,
+        276,
+        327,
+        35
+      ]
+    },
+    {
+      "parent": 133,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "No session. Press Record on the Flows screen, or choose a",
+      "isEnabled": true
+    },
+    {
+      "parent": 133,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "flow here and press Record.",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "DECISIONS",
+      "isEnabled": true,
+      "box": [
+        545,
+        601,
+        64,
+        15
+      ]
+    },
+    {
+      "parent": 136,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "DECISIONS",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true,
+      "box": [
+        827,
+        601,
+        7,
+        15
+      ]
+    },
+    {
+      "parent": 138,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "0",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "SETTLED",
+      "isEnabled": true,
+      "box": [
+        834,
+        601,
+        53,
+        15
+      ]
+    },
+    {
+      "parent": 140,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "SETTLED",
+      "isEnabled": true
+    },
+    {
+      "parent": 53,
+      "controlType": "List",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Decisions",
+      "isEnabled": true,
+      "patterns": [
+        "Scroll"
+      ],
+      "box": [
+        529,
+        628,
+        383,
+        28
+      ],
+      "automationId": "record-decisions"
+    },
+    {
+      "parent": 142,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        529,
+        632,
+        383,
+        20
+      ]
+    },
+    {
+      "parent": 143,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Nothing has been decided yet.",
+      "isEnabled": true,
+      "box": [
+        545,
+        634,
+        218,
+        17
+      ]
+    },
+    {
+      "parent": 144,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "Nothing has been decided yet.",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "complementary",
+      "name": "Inspector",
+      "isEnabled": true,
+      "box": [
+        912,
+        52,
+        360,
+        756
+      ],
+      "automationId": "inspector"
+    },
+    {
+      "parent": 146,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "region",
+      "name": "INSPECTOR",
+      "isEnabled": true,
+      "box": [
+        913,
+        52,
+        359,
+        179
+      ],
+      "automationId": "inspector-empty"
+    },
+    {
+      "parent": 147,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "heading",
+      "name": "INSPECTOR",
+      "isEnabled": true,
+      "box": [
+        913,
+        58,
+        359,
+        35
+      ],
+      "automationId": "inspector-empty-heading"
+    },
+    {
+      "parent": 148,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "INSPECTOR",
+      "isEnabled": true,
+      "box": [
+        929,
+        73,
+        66,
+        14
+      ]
+    },
+    {
+      "parent": 149,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "INSPECTOR",
+      "isEnabled": true
+    },
+    {
+      "parent": 147,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "isEnabled": true,
+      "box": [
+        913,
+        106,
+        359,
+        102
+      ]
+    },
+    {
+      "parent": 151,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "A grounding shows the candidate bundle and the fingerprint before the binding is written. Accept, re-pick, or reject.",
+      "isEnabled": true,
+      "box": [
+        929,
+        130,
+        314,
+        53
+      ]
+    },
+    {
+      "parent": 152,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "A grounding shows the candidate bundle and the",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "fingerprint before the binding is written. Accept, re-pick,",
+      "isEnabled": true
+    },
+    {
+      "parent": 152,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "or reject.",
+      "isEnabled": true
+    },
+    {
+      "parent": 3,
+      "controlType": "Group",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "localizedControlType": "contentinfo",
+      "isEnabled": true,
+      "box": [
+        8,
+        808,
+        1264,
         28
       ]
     },
     {
-      "parent": 60,
-      "controlType": "Text",
+      "parent": 156,
+      "controlType": "Group",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "No",
-      "isEnabled": true
-    },
-    {
-      "parent": 60,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "session.",
-      "isEnabled": true
-    },
-    {
-      "parent": 51,
-      "controlType": "Button",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Start recording",
       "isEnabled": true,
-      "patterns": [
-        "Invoke"
+      "box": [
+        24,
+        814,
+        180,
+        17
       ],
-      "box": [
-        16,
-        138,
-        113,
-        27
-      ]
+      "automationId": "status-context"
     },
     {
-      "parent": 63,
+      "parent": 157,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Start recording",
+      "name": "no model credential on this service",
       "isEnabled": true,
       "box": [
-        27,
-        144,
-        91,
+        24,
+        815,
+        180,
         15
       ]
     },
     {
-      "parent": 64,
+      "parent": 158,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Start recording",
+      "name": "no model credential on this service",
       "isEnabled": true
     },
     {
-      "parent": 51,
-      "controlType": "Group",
+      "parent": 156,
+      "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Gateway notice",
+      "name": "⌘K",
       "isEnabled": true,
       "box": [
-        16,
-        173,
-        1248,
+        1117,
+        816,
+        13,
+        14
+      ]
+    },
+    {
+      "parent": 160,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "⌘K",
+      "isEnabled": true
+    },
+    {
+      "parent": 156,
+      "controlType": "Text",
+      "className": "Chrome_RenderWidgetHostHWND",
+      "name": "commands",
+      "isEnabled": true,
+      "box": [
+        1136,
+        815,
+        60,
         15
       ]
     },
     {
-      "parent": 66,
+      "parent": 162,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "The fake gateway answers from",
-      "isEnabled": true,
-      "box": [
-        16,
-        173,
-        182,
-        14
-      ]
-    },
-    {
-      "parent": 67,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "The fake gateway answers from",
+      "name": "commands",
       "isEnabled": true
     },
     {
-      "parent": 66,
-      "controlType": "Group",
+      "parent": 156,
+      "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
+      "name": "?",
       "isEnabled": true,
       "box": [
-        198,
-        173,
-        152,
-        14
-      ]
-    },
-    {
-      "parent": 69,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "evals/grounding/cases",
-      "isEnabled": true,
-      "box": [
-        198,
-        173,
-        152,
-        14
-      ]
-    },
-    {
-      "parent": 70,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "evals/grounding/cases",
-      "isEnabled": true
-    },
-    {
-      "parent": 66,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": ". Nothing recorded in this session measures a model, and its provenance says so.",
-      "isEnabled": true,
-      "box": [
-        350,
-        173,
-        459,
-        14
-      ]
-    },
-    {
-      "parent": 72,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": ". Nothing recorded in this session measures a model, and its provenance says so.",
-      "isEnabled": true
-    },
-    {
-      "parent": 51,
-      "controlType": "Group",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "isEnabled": true,
-      "box": [
-        16,
-        191,
-        1248,
-        13
-      ]
-    },
-    {
-      "parent": 74,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Rendered from",
-      "isEnabled": true,
-      "box": [
-        16,
-        191,
-        81,
-        13
-      ]
-    },
-    {
-      "parent": 75,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Rendered from",
-      "isEnabled": true
-    },
-    {
-      "parent": 74,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "subscribe",
-      "isEnabled": true,
-      "box": [
-        97,
-        191,
-        51,
-        13
-      ]
-    },
-    {
-      "parent": 77,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "subscribe",
-      "isEnabled": true
-    },
-    {
-      "parent": 74,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": ",",
-      "isEnabled": true,
-      "box": [
-        148,
-        191,
+        1218,
+        816,
         6,
-        13
+        14
       ]
     },
     {
-      "parent": 79,
+      "parent": 164,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": ",",
+      "name": "?",
       "isEnabled": true
     },
     {
-      "parent": 74,
+      "parent": 156,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "getProject",
+      "name": "keys",
       "isEnabled": true,
       "box": [
-        155,
-        191,
-        54,
-        13
+        1230,
+        815,
+        26,
+        15
       ]
     },
     {
-      "parent": 81,
+      "parent": 166,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "getProject",
-      "isEnabled": true
-    },
-    {
-      "parent": 74,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "and postRecord. Bindings are written only after a decision.",
-      "isEnabled": true,
-      "box": [
-        209,
-        191,
-        310,
-        13
-      ]
-    },
-    {
-      "parent": 83,
-      "controlType": "Text",
-      "className": "Chrome_RenderWidgetHostHWND",
-      "name": "and postRecord. Bindings are written only after a decision.",
+      "name": "keys",
       "isEnabled": true
     }
   ]

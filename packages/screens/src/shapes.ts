@@ -205,6 +205,16 @@ export interface BindingFileResponse {
 export interface DataResponse {
   values?: Record<string, unknown>;
   secrets?: string[];
+  /**
+   * Where each secret is read from, and whether this service can read it
+   * (T10.2, LLD §13.5).
+   *
+   * The *name* of an environment variable is what `data.yaml` says on its face,
+   * so a screen may show it; `set` is a boolean the service computed, exactly as
+   * `GET /project`'s `gateway.credential` is. The value never leaves the service
+   * (REQ-NFR-6).
+   */
+  secretSources?: Record<string, { reads?: string; set?: boolean }>;
 }
 
 /**

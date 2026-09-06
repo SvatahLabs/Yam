@@ -50,7 +50,8 @@ import {
   serviceVerifyBindings,
 } from "@svatah/cli";
 import { ServiceClient, type StreamedEvent } from "../src/renderer/client.js";
-import { adviseOnFailure } from "../src/renderer/screens/Record.js";
+import { adviseOnFailure } from "../src/renderer/shell/Record.js";
+import type { RecordState } from "@svatah/screens";
 
 const ADE = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT = join(ADE, "..", "..");
@@ -340,29 +341,38 @@ describe("the Record screen chooses the gateway (P5-F2, REQ-ADE-4, LLD §13.5, �
     }
   }, 240_000);
 
-  it("the default the screen would pick follows the service, both ways", () => {
+  it("the default the screen would pick follows the service, both ways", async () => {
     /*
-     * The screen's rule, stated where a test can read it: `anthropic` when the
-     * service reports a credential, `fake` when it does not (REQ-ADE-4). The
-     * screen computes it in one line from `GET /project`; what matters is that
-     * a machine with no key never defaults to the gateway it cannot reach.
+     * The rule, and where it now lives (T10.1): `anthropic` when the service
+     * reports a credential, `fake` when it does not (REQ-ADE-4). Phase 3's
+     * screen computed it and this test read the screen's source; the *model*
+     * computes it now, so this drives the model — which is a better check,
+     * because both renderers get the same answer from it.
      */
-    const defaultFor = (credential: boolean): string => (credential ? "anthropic" : "fake");
-    expect(defaultFor(false)).toBe("fake");
-    expect(defaultFor(true)).toBe("anthropic");
+    const { fakeService, screenById } = await import("@svatah/screens");
+    const load = async (credential: boolean): Promise<RecordState> =>
+      (await screenById("record").load(
+        fakeService({ project: { gateway: { credential }, flows: [] } }),
+        {},
+      )) as unknown as RecordState;
 
-    const source = readFileSync(
-      join(ADE, "src", "renderer", "screens", "Record.tsx"),
-      "utf8",
-    );
-    // The screen asks the service, and sends what it chose.
-    expect(source).toMatch(/getProject\(\)/);
-    expect(source).toMatch(/gateway\?\.credential === true/);
-    expect(source).toMatch(/postRecord\(\{\s*rebind: true,\s*gateway: chosen\s*\}\)/);
-    // Both options are labelled for what they are.
-    expect(source).toContain('value="anthropic"');
-    expect(source).toContain('value="fake"');
-    expect(source).toContain("evals/grounding/cases");
+    const withKey = await load(true);
+    const without = await load(false);
+
+    expect(withKey.gateway).toBe("anthropic");
+    expect(without.gateway).toBe("fake");
+
+    // And a machine with no key is *told* it has none, rather than being
+    // offered a gateway that fails on submit.
+    const offered = without.gateways;
+    expect(offered.map((one) => one.id)).toEqual(["anthropic", "fake"]);
+    expect(offered.find((one) => one.id === "anthropic")!.available).toBe(false);
+    expect(offered.find((one) => one.id === "fake")!.label).toContain("evals/grounding/cases");
+
+    // The screen draws that choice as a control the desktop adapters can find.
+    const source = readFileSync(join(ADE, "src", "renderer", "shell", "Record.tsx"), "utf8");
+    expect(source).toContain('id="record-gateway"');
+    expect(source).toContain("state.gateways");
   });
 
   it("a session started the way the screen now starts one records with the fake gateway", async () => {

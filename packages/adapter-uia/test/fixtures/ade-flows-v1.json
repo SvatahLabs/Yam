@@ -298,7 +298,7 @@
       "parent": 21,
       "controlType": "Button",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Flows",
+      "name": "Editor",
       "isEnabled": true,
       "patterns": [
         "Invoke"
@@ -315,12 +315,12 @@
       "parent": 25,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Flows",
+      "name": "Editor",
       "isEnabled": true,
       "box": [
         24,
         98,
-        34,
+        35,
         17
       ]
     },
@@ -328,7 +328,7 @@
       "parent": 26,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Flows",
+      "name": "Editor",
       "isEnabled": true
     },
     {
@@ -1229,7 +1229,7 @@
       "parent": 104,
       "controlType": "DataItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "guards-and-compensation.flow 3 stories · I want to book and then fail#5 locator · run 11 s ago",
+      "name": "guards-and-compensation.flow 3 stories · I want to book and then fail#5 locator · run 57 s ago",
       "isEnabled": true,
       "box": [
         228,
@@ -1262,7 +1262,7 @@
       "parent": 105,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "3 stories · I want to book and then fail#5 locator · run 11 s ago",
+      "name": "3 stories · I want to book and then fail#5 locator · run 57 s ago",
       "isEnabled": true,
       "box": [
         240,
@@ -1282,7 +1282,7 @@
       "parent": 108,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "fail#5 locator · run 11 s ago",
+      "name": "fail#5 locator · run 57 s ago",
       "isEnabled": true
     },
     {

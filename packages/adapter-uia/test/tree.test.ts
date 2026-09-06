@@ -69,19 +69,33 @@ describe("control types are normalised to the ARIA vocabulary (REQ-SURF-4)", () 
     expect(roleOf({ controlType: "SomethingNew" })).toBe("generic");
   });
 
-  it("gives the ADE's eleven screen tabs the role `tab`", () => {
-    expect(record.filter((node) => node.role === "tab").map((node) => node.name)).toEqual([
-      "Project",
-      "Flow editor",
-      "Plan",
-      "Run",
-      "Results",
-      "API client",
-      "Data",
-      "Record review",
+  it("gives the ADE's rail rows the role `button` and its view tabs `tab` (T10.3)", () => {
+    /*
+     * The eleven screen tabs are gone (T10.3). The ADE is a rail of eight
+     * `<button>`s — a rail item is a button with `aria-current`, not a link,
+     * because nothing navigates — and the only real tabs left are the Flows
+     * screen's three views.
+     */
+    const rail = convert("flows").filter((node) =>
+      (node.native?.["automationId"] ?? "").startsWith("rail-"),
+    );
+    expect(rail.map((node) => node.name)).toEqual([
+      "Flows",
+      "Runs",
       "Bindings",
-      "Surface explorer",
-      "Tool panel",
+      "Agents and tools",
+      "API",
+      "Data",
+      "Import prototype database",
+      "Settings",
+    ]);
+    expect(rail.every((node) => node.role === "button")).toBe(true);
+
+    const tabs = convert("flows").filter((node) => node.role === "tab");
+    expect(tabs.map((node) => node.native?.["automationId"])).toEqual([
+      "editor",
+      "plan",
+      "history",
     ]);
   });
 });
@@ -165,8 +179,8 @@ describe("controlPath (LLD §3.3, §7.5)", () => {
      * show `Button`, not `button`.
      */
     expect(record[0]!.controlPath).toBe("Window[Svatah ADE]");
-    const button = record.find((node) => node.name === "Start recording");
-    expect(button?.controlPath).toContain("Button[Start recording]");
+    const button = record.find((node) => node.name === "Stop recording");
+    expect(button?.controlPath).toContain("Button[Stop recording]");
   });
 
   it("addresses a named element by name and an anonymous one by index", () => {
@@ -174,12 +188,12 @@ describe("controlPath (LLD §3.3, §7.5)", () => {
       { parent: -1, controlType: "Window", name: "Svatah ADE" },
       { parent: 0, controlType: "Group" },
       { parent: 0, controlType: "Group" },
-      { parent: 2, controlType: "Button", name: "Start recording" },
+      { parent: 2, controlType: "Button", name: "Stop recording" },
     ];
     const children = childIndex(raw);
     expect(controlPathOf(raw, 2, children, "Svatah ADE")).toBe("Window[Svatah ADE]/Group[1]");
     expect(controlPathOf(raw, 3, children, "Svatah ADE")).toBe(
-      "Window[Svatah ADE]/Group[1]/Button[Start recording]",
+      "Window[Svatah ADE]/Group[1]/Button[Stop recording]",
     );
   });
 
@@ -193,7 +207,7 @@ describe("matching and synthesis (LLD §6.3, REQ-REC-3)", () => {
   it("finds an element by its automationId, and by role and name", () => {
     expect(matchNodes({ by: "automationId", value: "record-gateway", score: 1 }, record)).toHaveLength(1);
     expect(
-      matchNodes({ by: "role", role: "button", name: "Start recording", exact: true, score: 1 }, record),
+      matchNodes({ by: "role", role: "button", name: "Stop recording", exact: true, score: 1 }, record),
     ).toHaveLength(1);
   });
 

@@ -162,7 +162,7 @@ public class GeneratedClient {
 
   /** {@code GET /bindings/{id}} — One binding */
   public String getBindingsById(String id) {
-    return call("get", "/bindings/" + segment(id), null, "application/json");
+    return call("get", "/bindings/" + segment(id), null, "text/plain");
   }
 
   /** {@code GET /data} — Run data, with secrets redacted */
@@ -177,7 +177,7 @@ public class GeneratedClient {
 
   /** {@code GET /events/sse} — The event stream (server-sent events) */
   public String getEventsSse() {
-    return call("get", "/events/sse", null, "application/json");
+    return call("get", "/events/sse", null, "text/plain");
   }
 
   /** {@code GET /flows/{file}} — Read a flow file */

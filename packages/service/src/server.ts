@@ -389,9 +389,37 @@ export async function createService(options: ServeOptions): Promise<RunningServi
         }),
       );
 
+    /*
+     * Where each secret is read from, and whether this service can read it
+     * (T10.2, the `Data` artboard).
+     *
+     * The *name* of an environment variable is not a secret — it is what
+     * `data.yaml` says on its face, and the screen has to show it or a reader
+     * cannot tell a declared secret from a missing one. What never leaves is the
+     * value: `set` is a boolean, computed here, exactly as `GET /project`'s
+     * `gateway.credential` is (REQ-NFR-6, REQ-ADE-4).
+     *
+     * Read from the *raw* file rather than from the loaded project, because the
+     * loaded one has every indirection already resolved — which is the thing
+     * this must not look at.
+     */
+    const onDisk = rawData(loaded);
+    const sources: Record<string, { reads?: string; set: boolean }> = {};
+    for (const path of loaded.project.data.secrets) {
+      const raw = readPath(onDisk, path);
+      const reads = typeof raw === "string" ? /^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$/.exec(raw)?.[1] : undefined;
+      sources[path] = {
+        ...(reads === undefined ? {} : { reads }),
+        // A literal secret in the file is "set" by being there; an indirection
+        // is set when the environment has it.
+        set: reads === undefined ? raw !== undefined : process.env[reads] !== undefined,
+      };
+    }
+
     return {
       values: redact(loaded.project.data.values as Record<string, unknown>),
       secrets: [...loaded.project.data.secrets],
+      secretSources: sources,
     };
   });
 
@@ -1026,6 +1054,33 @@ export function keepRedacted(
 
 /** What `GET /data` puts where a resolved secret was. */
 export const REDACTED = "«redacted»";
+
+/**
+ * `data.yaml` as it is written, not as the project loaded it (T10.2).
+ *
+ * The loaded project has every `${ENV}` indirection resolved, which is the one
+ * thing the Data screen must not be shown. `PUT /data` reads the raw file for
+ * exactly the same reason; this is the read half of it.
+ */
+function rawData(loaded: ProjectHandle): Record<string, unknown> {
+  const file = join(
+    loaded.root,
+    String((loaded.config as { data?: { file?: string } }).data?.file ?? "data.yaml"),
+  );
+  if (!existsSync(file)) return {};
+  const parsed = (parseYaml(readFileSync(file, "utf8")) as unknown) ?? {};
+  return typeof parsed === "object" && parsed !== null ? (parsed as Record<string, unknown>) : {};
+}
+
+/** `user.password` → the value at that dotted path, or `undefined`. */
+function readPath(tree: Record<string, unknown>, path: string): unknown {
+  let at: unknown = tree;
+  for (const key of path.split(".")) {
+    if (typeof at !== "object" || at === null) return undefined;
+    at = (at as Record<string, unknown>)[key];
+  }
+  return at;
+}
 
 /* ── run inputs ───────────────────────────────────────────────────────────── */
 

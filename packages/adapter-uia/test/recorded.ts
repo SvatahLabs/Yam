@@ -29,7 +29,16 @@ import type { UiaAvailability, UiaBridge, UiaCommand, UiaNode, UiaWindow } from 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
 
 /** The five screens LLD §16's desktop conformance flows visit, plus Record. */
-export type AdeScreen = "project" | "flows" | "run" | "results" | "api" | "record";
+export type AdeScreen =
+  | "project"
+  | "flows"
+  | "run"
+  | "results"
+  | "api"
+  | "record"
+  | "explorer"
+  | "palette"
+  | "bindings";
 
 export const ADE_SCREENS: readonly AdeScreen[] = [
   "project",
@@ -38,6 +47,9 @@ export const ADE_SCREENS: readonly AdeScreen[] = [
   "results",
   "api",
   "record",
+  "explorer",
+  "palette",
+  "bindings",
 ];
 
 export function recordedWindow(screen: AdeScreen): UiaWindow {
@@ -86,6 +98,8 @@ export interface RecordedBridge extends UiaBridge {
   readonly commands: UiaCommand[];
   /** Which screen the window is showing now. */
   screen(): AdeScreen;
+  /** Put the bridge on a screen, for a test that has to learn two trees. */
+  setScreen(screen: AdeScreen): void;
   /** Files `screenshot()` was asked to write. */
   readonly screenshots: string[];
 }
@@ -136,6 +150,9 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
     commands,
     screenshots,
     screen: () => screen,
+    setScreen: (one: AdeScreen) => {
+      screen = one;
+    },
     async availability(): Promise<UiaAvailability> {
       return options.availability ?? { state: "available", advice: "available (recorded)" };
     },

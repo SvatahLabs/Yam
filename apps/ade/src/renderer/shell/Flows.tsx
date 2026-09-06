@@ -60,7 +60,7 @@ export function FlowsScreen(props: FlowsProps): React.JSX.Element {
       </div>
 
       <div className="sv-main">
-        <aside className="sv-list" aria-label="Flow files">
+        <aside className="sv-list" id="flows-files-pane" aria-label="Flow files">
           <Table<FlowsState["files"][number]>
             id="flows-list"
             label="Flow files"
@@ -129,7 +129,7 @@ export function FlowsScreen(props: FlowsProps): React.JSX.Element {
               label={`${state.lint.filter((one) => one.severity === "warning").length} warnings`}
             />
           </div>
-          <ul className="sv-lint" aria-label="Lint diagnostics">
+          <ul className="sv-lint" id="flows-lint" aria-label="Lint diagnostics">
             {state.lint.length === 0 ? (
               <li className="sv-empty">Nothing to report.</li>
             ) : (
@@ -164,7 +164,7 @@ function Editor({
   readonly onSelect: (line: number) => void;
 }): React.JSX.Element {
   return (
-    <div className="sv-code" aria-label="Flow editor">
+    <div className="sv-code" id="flows-editor" aria-label="Flow editor">
       {state.lines.map((line) => (
         <button
           key={line.line}

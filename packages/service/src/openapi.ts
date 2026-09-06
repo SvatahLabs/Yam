@@ -222,7 +222,23 @@ export function openApiDocument(version: string): Record<string, unknown> {
         get: { summary: "The bindings store", security: bearer, responses: { 200: { description: "BindingFile[]", ...json({ type: "array" }) } } },
       },
       "/bindings/{id}": {
-        get: { summary: "One binding", security: bearer, parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "BindingFile", ...json(ref("bindings.file")) } } },
+        get: {
+          summary: "One binding",
+          description:
+            "The YAML file on disk, byte for byte — the same bytes `svatah bindings show` " +
+            "prints and a reviewer reads in a pull request. A `GET /bindings/:id.json` would " +
+            "be a second representation of the store, and the moment one exists someone has " +
+            "to keep the two in step (LLD §6.1, §13.5).",
+          security: bearer,
+          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+          responses: {
+            200: {
+              description: "The binding file, as YAML",
+              content: { "text/yaml": { schema: { type: "string" } } },
+            },
+            404: { description: "No binding by that id", ...json({ type: "object" }) },
+          },
+        },
       },
       "/data": {
         put: {

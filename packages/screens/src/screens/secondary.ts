@@ -273,9 +273,6 @@ export interface DataState extends ScreenStateBase {
   readonly unset: number;
 }
 
-/** `"${SVATAH_SAMPLE_PASSWORD}"` → `SVATAH_SAMPLE_PASSWORD`. */
-const indirection = (value: string): string | undefined =>
-  /^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$/.exec(value)?.[1];
 
 const dataScreen: Screen<DataState> = {
   id: "data",
@@ -294,23 +291,25 @@ const dataScreen: Screen<DataState> = {
           walk(value as Record<string, unknown>, path);
           continue;
         }
-        const text = String(value);
-        const reads = indirection(text);
         const secret = secrets.has(path);
+        /*
+         * A secret's *value* is never shown and never stored (REQ-NFR-6): the
+         * service redacts it on read, so what arrives is `«redacted»` and there
+         * is nothing here to leak. What the screen shows instead is the *name*
+         * of the variable it is read from and whether the service could read it
+         * — both of which the service computed and sent as `secretSources`,
+         * because the loaded project has every indirection already resolved and
+         * a screen that inferred the name from a redacted value would be a
+         * screen guessing.
+         */
+        const source = data.secretSources?.[path];
         rows.push({
           path,
-          value: text,
+          value: String(value),
           secret,
-          ...(reads === undefined ? {} : { reads }),
-          /*
-           * A secret's *value* is never shown and never stored (REQ-NFR-6).
-           * What the screen can say is whether the variable it names is one
-           * this service could read — which is what the service's own
-           * redaction already tells us: an unresolved `${NAME}` came back
-           * verbatim, a resolved one came back `«redacted»`.
-           */
+          ...(source?.reads === undefined ? {} : { reads: source.reads }),
           kind: secret
-            ? text.includes("redacted")
+            ? source?.set === true
               ? { tone: "pass", label: "secret · set" }
               : { tone: "abort", label: "secret · unset" }
             : { tone: "neutral", label: "string" },

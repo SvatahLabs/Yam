@@ -1,0 +1,2517 @@
+{
+  "process": "Svatah ADE",
+  "title": "Svatah ADE",
+  "truncated": false,
+  "nodes": [
+    {
+      "parent": -1,
+      "role": "AXWindow",
+      "subrole": "AXStandardWindow",
+      "title": "Svatah ADE",
+      "box": [
+        0,
+        0,
+        1280,
+        860
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXWebArea",
+      "description": "Svatah ADE",
+      "enabled": true,
+      "focused": true,
+      "box": [
+        0,
+        0,
+        1280,
+        828
+      ]
+    },
+    {
+      "parent": 1,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        0,
+        0,
+        1280,
+        836
+      ]
+    },
+    {
+      "parent": 2,
+      "role": "AXUnknown",
+      "description": "Command palette",
+      "enabled": true,
+      "box": [
+        319,
+        120,
+        642,
+        478
+      ],
+      "domIdentifier": "command-palette"
+    },
+    {
+      "parent": 3,
+      "role": "AXHeading",
+      "title": "Command palette",
+      "enabled": true,
+      "box": [
+        319,
+        120,
+        1,
+        1
+      ],
+      "domIdentifier": "radix-_r_1_"
+    },
+    {
+      "parent": 4,
+      "role": "AXStaticText",
+      "title": "Command palette",
+      "enabled": true,
+      "box": [
+        319,
+        120,
+        183,
+        28
+      ]
+    },
+    {
+      "parent": 5,
+      "role": "AXStaticText",
+      "title": "Command palette",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXUnknown",
+      "enabled": true,
+      "box": [
+        333,
+        142,
+        1,
+        1
+      ]
+    },
+    {
+      "parent": 7,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true,
+      "box": [
+        333,
+        142,
+        144,
+        16
+      ]
+    },
+    {
+      "parent": 8,
+      "role": "AXStaticText",
+      "title": "Search or run a command",
+      "enabled": true
+    },
+    {
+      "parent": 3,
+      "role": "AXTextField",
+      "description": "Search or run a command",
+      "enabled": true,
+      "focused": true,
+      "actions": [
+        "AXConfirm",
+        "AXSetValue"
+      ],
+      "box": [
+        352,
+        134,
+        553,
+        18
+      ],
+      "domIdentifier": "command-palette-query"
+    },
+    {
+      "parent": 10,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        354,
+        135,
+        549,
+        16
+      ]
+    },
+    {
+      "parent": 3,
+      "role": "AXList",
+      "description": "Commands",
+      "enabled": true,
+      "box": [
+        320,
+        165,
+        640,
+        432
+      ]
+    },
+    {
+      "parent": 12,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        320,
+        171,
+        640,
+        22
+      ]
+    },
+    {
+      "parent": 13,
+      "role": "AXStaticText",
+      "title": "ACTIONS",
+      "enabled": true,
+      "box": [
+        334,
+        179,
+        51,
+        12
+      ]
+    },
+    {
+      "parent": 14,
+      "role": "AXStaticText",
+      "title": "ACTIONS",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "flows Compile svatah compile",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        193,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-flows-compile"
+    },
+    {
+      "parent": 16,
+      "role": "AXStaticText",
+      "title": "flows",
+      "enabled": true,
+      "box": [
+        334,
+        200,
+        38,
+        17
+      ]
+    },
+    {
+      "parent": 17,
+      "role": "AXStaticText",
+      "title": "flows",
+      "enabled": true
+    },
+    {
+      "parent": 16,
+      "role": "AXStaticText",
+      "title": "Compile",
+      "enabled": true,
+      "box": [
+        408,
+        201,
+        43,
+        15
+      ]
+    },
+    {
+      "parent": 19,
+      "role": "AXStaticText",
+      "title": "Compile",
+      "enabled": true
+    },
+    {
+      "parent": 16,
+      "role": "AXStaticText",
+      "title": "svatah compile",
+      "enabled": true,
+      "box": [
+        841,
+        200,
+        105,
+        17
+      ]
+    },
+    {
+      "parent": 21,
+      "role": "AXStaticText",
+      "title": "svatah compile",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "flows Save flow",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        224,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-flows-save"
+    },
+    {
+      "parent": 23,
+      "role": "AXStaticText",
+      "title": "flows",
+      "enabled": true,
+      "box": [
+        334,
+        232,
+        38,
+        17
+      ]
+    },
+    {
+      "parent": 24,
+      "role": "AXStaticText",
+      "title": "flows",
+      "enabled": true
+    },
+    {
+      "parent": 23,
+      "role": "AXStaticText",
+      "title": "Save flow",
+      "enabled": true,
+      "box": [
+        408,
+        233,
+        50,
+        15
+      ]
+    },
+    {
+      "parent": 26,
+      "role": "AXStaticText",
+      "title": "Save flow",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "run Run svatah run --flow <file>",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        257,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-run-flow"
+    },
+    {
+      "parent": 28,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true,
+      "box": [
+        334,
+        265,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 29,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true
+    },
+    {
+      "parent": 28,
+      "role": "AXStaticText",
+      "title": "Run",
+      "enabled": true,
+      "box": [
+        408,
+        266,
+        21,
+        15
+      ]
+    },
+    {
+      "parent": 31,
+      "role": "AXStaticText",
+      "title": "Run",
+      "enabled": true
+    },
+    {
+      "parent": 28,
+      "role": "AXStaticText",
+      "title": "svatah run --flow <file>",
+      "enabled": true,
+      "box": [
+        731,
+        265,
+        180,
+        17
+      ]
+    },
+    {
+      "parent": 33,
+      "role": "AXStaticText",
+      "title": "svatah run --flow <file>",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "run Run story svatah run --story <name>",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        290,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-run-story"
+    },
+    {
+      "parent": 35,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true,
+      "box": [
+        334,
+        297,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 36,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true
+    },
+    {
+      "parent": 35,
+      "role": "AXStaticText",
+      "title": "Run story",
+      "enabled": true,
+      "box": [
+        408,
+        298,
+        49,
+        15
+      ]
+    },
+    {
+      "parent": 38,
+      "role": "AXStaticText",
+      "title": "Run story",
+      "enabled": true
+    },
+    {
+      "parent": 35,
+      "role": "AXStaticText",
+      "title": "svatah run --story <name>",
+      "enabled": true,
+      "box": [
+        759,
+        297,
+        188,
+        17
+      ]
+    },
+    {
+      "parent": 40,
+      "role": "AXStaticText",
+      "title": "svatah run --story <name>",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "run Run again svatah run --flow <file>",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        320,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-run-again"
+    },
+    {
+      "parent": 42,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true,
+      "box": [
+        334,
+        328,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 43,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true
+    },
+    {
+      "parent": 42,
+      "role": "AXStaticText",
+      "title": "Run again",
+      "enabled": true,
+      "box": [
+        408,
+        329,
+        51,
+        15
+      ]
+    },
+    {
+      "parent": 45,
+      "role": "AXStaticText",
+      "title": "Run again",
+      "enabled": true
+    },
+    {
+      "parent": 42,
+      "role": "AXStaticText",
+      "title": "svatah run --flow <file>",
+      "enabled": true,
+      "box": [
+        731,
+        328,
+        180,
+        17
+      ]
+    },
+    {
+      "parent": 47,
+      "role": "AXStaticText",
+      "title": "svatah run --flow <file>",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "run Resume from step svatah run --resume <runId> --from <stepId>",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        353,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-run-resume"
+    },
+    {
+      "parent": 49,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true,
+      "box": [
+        334,
+        360,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 50,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true
+    },
+    {
+      "parent": 49,
+      "role": "AXStaticText",
+      "title": "Resume from step",
+      "enabled": true,
+      "box": [
+        408,
+        361,
+        91,
+        15
+      ]
+    },
+    {
+      "parent": 52,
+      "role": "AXStaticText",
+      "title": "Resume from step",
+      "enabled": true
+    },
+    {
+      "parent": 49,
+      "role": "AXStaticText",
+      "title": "svatah run --resume <runId> --from <stepId>",
+      "enabled": true,
+      "box": [
+        624,
+        360,
+        323,
+        17
+      ]
+    },
+    {
+      "parent": 54,
+      "role": "AXStaticText",
+      "title": "svatah run --resume <runId> --from <stepId>",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "record Record svatah record --flow <file>",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        384,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-record-start"
+    },
+    {
+      "parent": 56,
+      "role": "AXStaticText",
+      "title": "record",
+      "enabled": true,
+      "box": [
+        334,
+        392,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 57,
+      "role": "AXStaticText",
+      "title": "record",
+      "enabled": true
+    },
+    {
+      "parent": 56,
+      "role": "AXStaticText",
+      "title": "Record",
+      "enabled": true,
+      "box": [
+        408,
+        393,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 59,
+      "role": "AXStaticText",
+      "title": "Record",
+      "enabled": true
+    },
+    {
+      "parent": 56,
+      "role": "AXStaticText",
+      "title": "svatah record --flow <file>",
+      "enabled": true,
+      "box": [
+        715,
+        392,
+        203,
+        17
+      ]
+    },
+    {
+      "parent": 61,
+      "role": "AXStaticText",
+      "title": "svatah record --flow <file>",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "record Accept",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        417,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-record-accept"
+    },
+    {
+      "parent": 63,
+      "role": "AXStaticText",
+      "title": "record",
+      "enabled": true,
+      "box": [
+        334,
+        425,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 64,
+      "role": "AXStaticText",
+      "title": "record",
+      "enabled": true
+    },
+    {
+      "parent": 63,
+      "role": "AXStaticText",
+      "title": "Accept",
+      "enabled": true,
+      "box": [
+        408,
+        426,
+        36,
+        15
+      ]
+    },
+    {
+      "parent": 66,
+      "role": "AXStaticText",
+      "title": "Accept",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "record Re-pick",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        450,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-record-repick"
+    },
+    {
+      "parent": 68,
+      "role": "AXStaticText",
+      "title": "record",
+      "enabled": true,
+      "box": [
+        334,
+        458,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 69,
+      "role": "AXStaticText",
+      "title": "record",
+      "enabled": true
+    },
+    {
+      "parent": 68,
+      "role": "AXStaticText",
+      "title": "Re-pick",
+      "enabled": true,
+      "box": [
+        408,
+        459,
+        40,
+        15
+      ]
+    },
+    {
+      "parent": 71,
+      "role": "AXStaticText",
+      "title": "Re-pick",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "record Reject",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        483,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-record-reject"
+    },
+    {
+      "parent": 73,
+      "role": "AXStaticText",
+      "title": "record",
+      "enabled": true,
+      "box": [
+        334,
+        491,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 74,
+      "role": "AXStaticText",
+      "title": "record",
+      "enabled": true
+    },
+    {
+      "parent": 73,
+      "role": "AXStaticText",
+      "title": "Reject",
+      "enabled": true,
+      "box": [
+        408,
+        492,
+        32,
+        15
+      ]
+    },
+    {
+      "parent": 76,
+      "role": "AXStaticText",
+      "title": "Reject",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "record Stop recording",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        516,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-record-stop"
+    },
+    {
+      "parent": 78,
+      "role": "AXStaticText",
+      "title": "record",
+      "enabled": true,
+      "box": [
+        334,
+        523,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 79,
+      "role": "AXStaticText",
+      "title": "record",
+      "enabled": true
+    },
+    {
+      "parent": 78,
+      "role": "AXStaticText",
+      "title": "Stop recording",
+      "enabled": true,
+      "box": [
+        408,
+        524,
+        74,
+        15
+      ]
+    },
+    {
+      "parent": 81,
+      "role": "AXStaticText",
+      "title": "Stop recording",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "run Stop",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        546,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-run-stop"
+    },
+    {
+      "parent": 83,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true,
+      "box": [
+        334,
+        554,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 84,
+      "role": "AXStaticText",
+      "title": "run",
+      "enabled": true
+    },
+    {
+      "parent": 83,
+      "role": "AXStaticText",
+      "title": "Stop",
+      "enabled": true,
+      "box": [
+        408,
+        555,
+        23,
+        15
+      ]
+    },
+    {
+      "parent": 86,
+      "role": "AXStaticText",
+      "title": "Stop",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "heal Heal svatah heal --run <id>",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        579,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-heal-run"
+    },
+    {
+      "parent": 88,
+      "role": "AXStaticText",
+      "title": "heal",
+      "enabled": true,
+      "box": [
+        334,
+        587,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 89,
+      "role": "AXStaticText",
+      "title": "heal",
+      "enabled": true
+    },
+    {
+      "parent": 88,
+      "role": "AXStaticText",
+      "title": "Heal",
+      "enabled": true,
+      "box": [
+        408,
+        588,
+        24,
+        15
+      ]
+    },
+    {
+      "parent": 91,
+      "role": "AXStaticText",
+      "title": "Heal",
+      "enabled": true
+    },
+    {
+      "parent": 88,
+      "role": "AXStaticText",
+      "title": "svatah heal --run <id>",
+      "enabled": true,
+      "box": [
+        753,
+        587,
+        165,
+        17
+      ]
+    },
+    {
+      "parent": 93,
+      "role": "AXStaticText",
+      "title": "svatah heal --run <id>",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "heal Heal from bind failures svatah heal --from-bind-failures",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        612,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-heal-bind-failures"
+    },
+    {
+      "parent": 95,
+      "role": "AXStaticText",
+      "title": "heal",
+      "enabled": true,
+      "box": [
+        334,
+        619,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 96,
+      "role": "AXStaticText",
+      "title": "heal",
+      "enabled": true
+    },
+    {
+      "parent": 95,
+      "role": "AXStaticText",
+      "title": "Heal from bind failures",
+      "enabled": true,
+      "box": [
+        408,
+        620,
+        117,
+        15
+      ]
+    },
+    {
+      "parent": 98,
+      "role": "AXStaticText",
+      "title": "Heal from bind failures",
+      "enabled": true
+    },
+    {
+      "parent": 95,
+      "role": "AXStaticText",
+      "title": "svatah heal --from-bind-failures",
+      "enabled": true,
+      "box": [
+        706,
+        619,
+        240,
+        17
+      ]
+    },
+    {
+      "parent": 100,
+      "role": "AXStaticText",
+      "title": "svatah heal --from-bind-failures",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "heal Apply proposal",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        643,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-heal-apply"
+    },
+    {
+      "parent": 102,
+      "role": "AXStaticText",
+      "title": "heal",
+      "enabled": true,
+      "box": [
+        334,
+        650,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 103,
+      "role": "AXStaticText",
+      "title": "heal",
+      "enabled": true
+    },
+    {
+      "parent": 102,
+      "role": "AXStaticText",
+      "title": "Apply proposal",
+      "enabled": true,
+      "box": [
+        408,
+        651,
+        77,
+        15
+      ]
+    },
+    {
+      "parent": 105,
+      "role": "AXStaticText",
+      "title": "Apply proposal",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "bindings Verify all bindings svatah bindings verify",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        673,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-bindings-verify"
+    },
+    {
+      "parent": 107,
+      "role": "AXStaticText",
+      "title": "bindings",
+      "enabled": true,
+      "box": [
+        334,
+        681,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 108,
+      "role": "AXStaticText",
+      "title": "bindings",
+      "enabled": true
+    },
+    {
+      "parent": 107,
+      "role": "AXStaticText",
+      "title": "Verify all bindings",
+      "enabled": true,
+      "box": [
+        408,
+        682,
+        93,
+        15
+      ]
+    },
+    {
+      "parent": 110,
+      "role": "AXStaticText",
+      "title": "Verify all bindings",
+      "enabled": true
+    },
+    {
+      "parent": 107,
+      "role": "AXStaticText",
+      "title": "svatah bindings verify",
+      "enabled": true,
+      "box": [
+        753,
+        681,
+        165,
+        17
+      ]
+    },
+    {
+      "parent": 112,
+      "role": "AXStaticText",
+      "title": "svatah bindings verify",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "bindings Prune unused bindings svatah bindings prune",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        706,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-bindings-prune"
+    },
+    {
+      "parent": 114,
+      "role": "AXStaticText",
+      "title": "bindings",
+      "enabled": true,
+      "box": [
+        334,
+        713,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 115,
+      "role": "AXStaticText",
+      "title": "bindings",
+      "enabled": true
+    },
+    {
+      "parent": 114,
+      "role": "AXStaticText",
+      "title": "Prune unused bindings",
+      "enabled": true,
+      "box": [
+        408,
+        714,
+        114,
+        15
+      ]
+    },
+    {
+      "parent": 117,
+      "role": "AXStaticText",
+      "title": "Prune unused bindings",
+      "enabled": true
+    },
+    {
+      "parent": 114,
+      "role": "AXStaticText",
+      "title": "svatah bindings prune",
+      "enabled": true,
+      "box": [
+        789,
+        713,
+        158,
+        17
+      ]
+    },
+    {
+      "parent": 119,
+      "role": "AXStaticText",
+      "title": "svatah bindings prune",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "api Send request",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        737,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-api-send"
+    },
+    {
+      "parent": 121,
+      "role": "AXStaticText",
+      "title": "api",
+      "enabled": true,
+      "box": [
+        334,
+        745,
+        23,
+        17
+      ]
+    },
+    {
+      "parent": 122,
+      "role": "AXStaticText",
+      "title": "api",
+      "enabled": true
+    },
+    {
+      "parent": 121,
+      "role": "AXStaticText",
+      "title": "Send request",
+      "enabled": true,
+      "box": [
+        408,
+        746,
+        65,
+        15
+      ]
+    },
+    {
+      "parent": 124,
+      "role": "AXStaticText",
+      "title": "Send request",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "data Save data",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        770,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-data-save"
+    },
+    {
+      "parent": 126,
+      "role": "AXStaticText",
+      "title": "data",
+      "enabled": true,
+      "box": [
+        334,
+        777,
+        30,
+        17
+      ]
+    },
+    {
+      "parent": 127,
+      "role": "AXStaticText",
+      "title": "data",
+      "enabled": true
+    },
+    {
+      "parent": 126,
+      "role": "AXStaticText",
+      "title": "Save data",
+      "enabled": true,
+      "box": [
+        408,
+        778,
+        48,
+        15
+      ]
+    },
+    {
+      "parent": 129,
+      "role": "AXStaticText",
+      "title": "Save data",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "agents Start the tool server svatah tool serve",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        800,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-agents-serve"
+    },
+    {
+      "parent": 131,
+      "role": "AXStaticText",
+      "title": "agents",
+      "enabled": true,
+      "box": [
+        334,
+        807,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 132,
+      "role": "AXStaticText",
+      "title": "agents",
+      "enabled": true
+    },
+    {
+      "parent": 131,
+      "role": "AXStaticText",
+      "title": "Start the tool server",
+      "enabled": true,
+      "box": [
+        408,
+        808,
+        99,
+        15
+      ]
+    },
+    {
+      "parent": 134,
+      "role": "AXStaticText",
+      "title": "Start the tool server",
+      "enabled": true
+    },
+    {
+      "parent": 131,
+      "role": "AXStaticText",
+      "title": "svatah tool serve",
+      "enabled": true,
+      "box": [
+        819,
+        807,
+        128,
+        17
+      ]
+    },
+    {
+      "parent": 136,
+      "role": "AXStaticText",
+      "title": "svatah tool serve",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "explorer Open a session svatah surface snapshot",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        831,
+        640,
+        33
+      ],
+      "domIdentifier": "palette-explorer-open"
+    },
+    {
+      "parent": 138,
+      "role": "AXStaticText",
+      "title": "explorer",
+      "enabled": true,
+      "box": [
+        334,
+        839,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 139,
+      "role": "AXStaticText",
+      "title": "explorer",
+      "enabled": true
+    },
+    {
+      "parent": 138,
+      "role": "AXStaticText",
+      "title": "Open a session",
+      "enabled": true,
+      "box": [
+        408,
+        840,
+        75,
+        15
+      ]
+    },
+    {
+      "parent": 141,
+      "role": "AXStaticText",
+      "title": "Open a session",
+      "enabled": true
+    },
+    {
+      "parent": 138,
+      "role": "AXStaticText",
+      "title": "svatah surface snapshot",
+      "enabled": true,
+      "box": [
+        745,
+        839,
+        173,
+        17
+      ]
+    },
+    {
+      "parent": 143,
+      "role": "AXStaticText",
+      "title": "svatah surface snapshot",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "explorer Close the session",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        864,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-explorer-close"
+    },
+    {
+      "parent": 145,
+      "role": "AXStaticText",
+      "title": "explorer",
+      "enabled": true,
+      "box": [
+        334,
+        871,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 146,
+      "role": "AXStaticText",
+      "title": "explorer",
+      "enabled": true
+    },
+    {
+      "parent": 145,
+      "role": "AXStaticText",
+      "title": "Close the session",
+      "enabled": true,
+      "box": [
+        408,
+        872,
+        86,
+        15
+      ]
+    },
+    {
+      "parent": 148,
+      "role": "AXStaticText",
+      "title": "Close the session",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "explorer Act on the element svatah surface act",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        894,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-explorer-act"
+    },
+    {
+      "parent": 150,
+      "role": "AXStaticText",
+      "title": "explorer",
+      "enabled": true,
+      "box": [
+        334,
+        901,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 151,
+      "role": "AXStaticText",
+      "title": "explorer",
+      "enabled": true
+    },
+    {
+      "parent": 150,
+      "role": "AXStaticText",
+      "title": "Act on the element",
+      "enabled": true,
+      "box": [
+        408,
+        902,
+        95,
+        15
+      ]
+    },
+    {
+      "parent": 153,
+      "role": "AXStaticText",
+      "title": "Act on the element",
+      "enabled": true
+    },
+    {
+      "parent": 150,
+      "role": "AXStaticText",
+      "title": "svatah surface act",
+      "enabled": true,
+      "box": [
+        811,
+        901,
+        135,
+        17
+      ]
+    },
+    {
+      "parent": 155,
+      "role": "AXStaticText",
+      "title": "svatah surface act",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "explorer Snapshot the session svatah surface snapshot",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        925,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-explorer-snapshot"
+    },
+    {
+      "parent": 157,
+      "role": "AXStaticText",
+      "title": "explorer",
+      "enabled": true,
+      "box": [
+        334,
+        932,
+        60,
+        17
+      ]
+    },
+    {
+      "parent": 158,
+      "role": "AXStaticText",
+      "title": "explorer",
+      "enabled": true
+    },
+    {
+      "parent": 157,
+      "role": "AXStaticText",
+      "title": "Snapshot the session",
+      "enabled": true,
+      "box": [
+        408,
+        933,
+        103,
+        15
+      ]
+    },
+    {
+      "parent": 160,
+      "role": "AXStaticText",
+      "title": "Snapshot the session",
+      "enabled": true
+    },
+    {
+      "parent": 157,
+      "role": "AXStaticText",
+      "title": "svatah surface snapshot",
+      "enabled": true,
+      "box": [
+        774,
+        932,
+        173,
+        17
+      ]
+    },
+    {
+      "parent": 162,
+      "role": "AXStaticText",
+      "title": "svatah surface snapshot",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "import Import prototype database svatah migrate <dest> --from-ade <electron-db dir>",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        955,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-import-prototype"
+    },
+    {
+      "parent": 164,
+      "role": "AXStaticText",
+      "title": "import",
+      "enabled": true,
+      "box": [
+        334,
+        962,
+        45,
+        17
+      ]
+    },
+    {
+      "parent": 165,
+      "role": "AXStaticText",
+      "title": "import",
+      "enabled": true
+    },
+    {
+      "parent": 164,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true,
+      "box": [
+        408,
+        963,
+        131,
+        15
+      ]
+    },
+    {
+      "parent": 167,
+      "role": "AXStaticText",
+      "title": "Import prototype database",
+      "enabled": true
+    },
+    {
+      "parent": 164,
+      "role": "AXStaticText",
+      "title": "svatah migrate <dest> --from-ade <electron-db dir>",
+      "enabled": true,
+      "box": [
+        571,
+        962,
+        375,
+        17
+      ]
+    },
+    {
+      "parent": 169,
+      "role": "AXStaticText",
+      "title": "svatah migrate <dest> --from-ade <electron-db dir>",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "trajectory Compile a trajectory svatah trajectory compile <trajectory.jsonl>",
+      "enabled": false,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        986,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-trajectory-compile"
+    },
+    {
+      "parent": 171,
+      "role": "AXStaticText",
+      "title": "trajectory",
+      "enabled": true,
+      "box": [
+        334,
+        993,
+        75,
+        17
+      ]
+    },
+    {
+      "parent": 172,
+      "role": "AXStaticText",
+      "title": "trajectory",
+      "enabled": true
+    },
+    {
+      "parent": 171,
+      "role": "AXStaticText",
+      "title": "Compile a trajectory",
+      "enabled": true,
+      "box": [
+        408,
+        994,
+        103,
+        15
+      ]
+    },
+    {
+      "parent": 174,
+      "role": "AXStaticText",
+      "title": "Compile a trajectory",
+      "enabled": true
+    },
+    {
+      "parent": 171,
+      "role": "AXStaticText",
+      "title": "svatah trajectory compile <trajectory.jsonl>",
+      "enabled": true,
+      "box": [
+        616,
+        993,
+        330,
+        17
+      ]
+    },
+    {
+      "parent": 176,
+      "role": "AXStaticText",
+      "title": "svatah trajectory compile <trajectory.jsonl>",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXGroup",
+      "enabled": true,
+      "box": [
+        320,
+        1016,
+        640,
+        22
+      ]
+    },
+    {
+      "parent": 178,
+      "role": "AXStaticText",
+      "title": "GO TO",
+      "enabled": true,
+      "box": [
+        334,
+        1024,
+        36,
+        12
+      ]
+    },
+    {
+      "parent": 179,
+      "role": "AXStaticText",
+      "title": "GO TO",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to Flows",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1038,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-flows"
+    },
+    {
+      "parent": 181,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1045,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 182,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 181,
+      "role": "AXStaticText",
+      "title": "Go to Flows",
+      "enabled": true,
+      "box": [
+        408,
+        1046,
+        62,
+        15
+      ]
+    },
+    {
+      "parent": 184,
+      "role": "AXStaticText",
+      "title": "Go to Flows",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to Record review",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1069,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-record"
+    },
+    {
+      "parent": 186,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1076,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 187,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 186,
+      "role": "AXStaticText",
+      "title": "Go to Record review",
+      "enabled": true,
+      "box": [
+        408,
+        1077,
+        104,
+        15
+      ]
+    },
+    {
+      "parent": 189,
+      "role": "AXStaticText",
+      "title": "Go to Record review",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to Runs",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1099,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-runs"
+    },
+    {
+      "parent": 191,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1106,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 192,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 191,
+      "role": "AXStaticText",
+      "title": "Go to Runs",
+      "enabled": true,
+      "box": [
+        408,
+        1107,
+        57,
+        15
+      ]
+    },
+    {
+      "parent": 194,
+      "role": "AXStaticText",
+      "title": "Go to Runs",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to Run",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1130,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-run"
+    },
+    {
+      "parent": 196,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1137,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 197,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 196,
+      "role": "AXStaticText",
+      "title": "Go to Run",
+      "enabled": true,
+      "box": [
+        408,
+        1138,
+        52,
+        15
+      ]
+    },
+    {
+      "parent": 199,
+      "role": "AXStaticText",
+      "title": "Go to Run",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to Heal review",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1160,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-heal"
+    },
+    {
+      "parent": 201,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1167,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 202,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 201,
+      "role": "AXStaticText",
+      "title": "Go to Heal review",
+      "enabled": true,
+      "box": [
+        408,
+        1168,
+        92,
+        15
+      ]
+    },
+    {
+      "parent": 204,
+      "role": "AXStaticText",
+      "title": "Go to Heal review",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to Bindings",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1191,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-bindings"
+    },
+    {
+      "parent": 206,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1198,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 207,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 206,
+      "role": "AXStaticText",
+      "title": "Go to Bindings",
+      "enabled": true,
+      "box": [
+        408,
+        1199,
+        76,
+        15
+      ]
+    },
+    {
+      "parent": 209,
+      "role": "AXStaticText",
+      "title": "Go to Bindings",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to Agents and tools",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1221,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-agents"
+    },
+    {
+      "parent": 211,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1228,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 212,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 211,
+      "role": "AXStaticText",
+      "title": "Go to Agents and tools",
+      "enabled": true,
+      "box": [
+        408,
+        1229,
+        115,
+        15
+      ]
+    },
+    {
+      "parent": 214,
+      "role": "AXStaticText",
+      "title": "Go to Agents and tools",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to API",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1252,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-api"
+    },
+    {
+      "parent": 216,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1259,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 217,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 216,
+      "role": "AXStaticText",
+      "title": "Go to API",
+      "enabled": true,
+      "box": [
+        408,
+        1260,
+        51,
+        15
+      ]
+    },
+    {
+      "parent": 219,
+      "role": "AXStaticText",
+      "title": "Go to API",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to Data",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1282,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-data"
+    },
+    {
+      "parent": 221,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1289,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 222,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 221,
+      "role": "AXStaticText",
+      "title": "Go to Data",
+      "enabled": true,
+      "box": [
+        408,
+        1290,
+        55,
+        15
+      ]
+    },
+    {
+      "parent": 224,
+      "role": "AXStaticText",
+      "title": "Go to Data",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to Surface explorer",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1313,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-explorer"
+    },
+    {
+      "parent": 226,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1320,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 227,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 226,
+      "role": "AXStaticText",
+      "title": "Go to Surface explorer",
+      "enabled": true,
+      "box": [
+        408,
+        1321,
+        115,
+        15
+      ]
+    },
+    {
+      "parent": 229,
+      "role": "AXStaticText",
+      "title": "Go to Surface explorer",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to Import prototype database",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1343,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-import"
+    },
+    {
+      "parent": 231,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1350,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 232,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 231,
+      "role": "AXStaticText",
+      "title": "Go to Import prototype database",
+      "enabled": true,
+      "box": [
+        408,
+        1351,
+        162,
+        15
+      ]
+    },
+    {
+      "parent": 234,
+      "role": "AXStaticText",
+      "title": "Go to Import prototype database",
+      "enabled": true
+    },
+    {
+      "parent": 12,
+      "role": "AXMenuItem",
+      "title": "go Go to Settings",
+      "enabled": true,
+      "selected": false,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        320,
+        1374,
+        640,
+        31
+      ],
+      "domIdentifier": "palette-go-settings"
+    },
+    {
+      "parent": 236,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true,
+      "box": [
+        334,
+        1381,
+        15,
+        17
+      ]
+    },
+    {
+      "parent": 237,
+      "role": "AXStaticText",
+      "title": "go",
+      "enabled": true
+    },
+    {
+      "parent": 236,
+      "role": "AXStaticText",
+      "title": "Go to Settings",
+      "enabled": true,
+      "box": [
+        408,
+        1382,
+        72,
+        15
+      ]
+    },
+    {
+      "parent": 239,
+      "role": "AXStaticText",
+      "title": "Go to Settings",
+      "enabled": true
+    }
+  ]
+}
