@@ -1,0 +1,32 @@
+{
+  "auditedAt": "2026-09-08T04:01:33.676493+00:00",
+  "commit": "a7557ae3f22a3bc2d7510c22184b485436ed88a9",
+  "node": "v25.6.1",
+  "mode": "Existing built renderer in headless Chromium, preload bridge supplied by harness, real Yam service, UI operations through Yam MCP; screenshots through Yam Playwright adapter. Native desktop was not validated.",
+  "files": {
+    "packages/cli/dist/bin.js": {
+      "sha256": "280a493949abd400b7e8a3546b1eee30035765b28b0f1cbc7337d0a649562823",
+      "modifiedAt": "2026-09-08T02:35:26.907397+00:00"
+    },
+    "packages/cli/src/commands/mcp.ts": {
+      "sha256": "742bb8213ef32552b08743b9e863f2147f2465ffa16134843be6269e69247c6a",
+      "modifiedAt": "2026-09-08T00:44:30.124186+00:00"
+    },
+    "packages/cli/src/service-api.ts": {
+      "sha256": "e5edd504321c04b77fa9f6310278d55adbd104ad9c334c55d81ef4c023739825",
+      "modifiedAt": "2026-09-07T23:05:48.633515+00:00"
+    },
+    "packages/service/src/server.ts": {
+      "sha256": "9b2a66b09eb3dba4d5502f2b58b31fea71beea81de6a58074aee2d4f00fc6b2f",
+      "modifiedAt": "2026-09-07T23:05:48.638996+00:00"
+    },
+    "apps/desktop/src/renderer/shell/Secondary.tsx": {
+      "sha256": "9c3e7e13140172384003c9bee785e41a8c45d6758037032a5ae391c4f48ef7d9",
+      "modifiedAt": "2026-09-07T09:35:01.307430+00:00"
+    },
+    "apps/desktop/.vite/renderer/main_window/index.html": {
+      "sha256": "bc24c0dd83bdd2fbe1e2ebd17992233a88a753338cd79531389ab94553e59a09",
+      "modifiedAt": "2026-09-07T23:06:29.750241+00:00"
+    }
+  }
+}

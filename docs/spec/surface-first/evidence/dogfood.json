@@ -1,0 +1,707 @@
+[
+  {
+    "label": "--help",
+    "data": {
+      "exit": 0,
+      "stdout": "yam — describe a behaviour once, bind it to the real application, replay it without a model\n\n  yam init [dir]      start a project here\n  yam explore         let an agent drive the application; its exploration becomes a proposal\n  yam check           read, lint and compile the flows; writes .yam/plan.json\n  yam record          record what you do in the real application as a flow; --flow binds a written one\n  yam run             replay the plan; the exit code is the verdict\n  yam heal            repair the bindings the interface moved, from the last run\n  yam ui              the terminal cockpit (--tmux for the workspace)\n  yam serve           the local service, for Yam.app and other clients\n\n  yam <command> --help   options and exit codes of one command\n  yam help <topic>       flows · bindings · exit-codes · session · adapters · agents\n\nMore, one level down: yam bindings · workflow · tool · mcp · eval · surface · migrate · repl · trajectory · host\n\n",
+      "stderr": ""
+    }
+  },
+  {
+    "label": "surface snapshot --json",
+    "data": {
+      "exit": 64,
+      "stdout": "",
+      "stderr": "Unknown \"surface\" subcommand \"snapshot\". Phase 1 implements `surface conform`.\n"
+    }
+  },
+  {
+    "label": "surface act --json",
+    "data": {
+      "exit": 64,
+      "stdout": "",
+      "stderr": "Unknown \"surface\" subcommand \"act\". Phase 1 implements `surface conform`.\n"
+    }
+  },
+  {
+    "label": "MCP tools/list",
+    "data": {
+      "tools": [
+        {
+          "name": "yam_compile",
+          "title": "Compile the project",
+          "description": "Compile every flow into a plan, reporting the diagnostics `yam compile` reports. The same function the command line runs, so an agent and a person get the same plan.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "write": {
+                "type": "boolean",
+                "description": "Write .yam/plan.json as well as returning it. Default false."
+              }
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "yam_lint",
+          "title": "Lint the project",
+          "description": "Everything `yam lint` reports: ambiguous targets, model-compiled steps, low confidence, unused captures, long sleeps, side-effecting steps exposed as tools.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "yam_run",
+          "title": "Replay the project",
+          "description": "Replay the plan against the application, deterministically and with no model in the loop. Returns the run's summary and every step's status.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "flows": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Flow files to run; all of them by default."
+              },
+              "stories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Stories to run; all of them by default."
+              },
+              "inputs": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Story inputs, by name."
+              }
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "yam_record",
+          "title": "Bind the targets of a flow",
+          "description": "Drive a flow that already exists against the application and bind every target that has no binding yet, through a model gateway. Each step is performed and its expectation verified before the binding is kept, so a binding that is written is one that worked (REQ-REC-5).\n\nThis is `yam record --flow <file>`. It is not the other recording: `yam record` alone means a person driving the browser while Yam writes the flow, and there is nobody at this session to drive.\n\nWrites to the bindings store. If a step fails the session stops and says where, and only what a passing step proved is written.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "flows": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Flow files whose targets to bind; all of them by default."
+              },
+              "stories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Stories to record; all of them by default."
+              },
+              "rebind": {
+                "type": "boolean",
+                "description": "Record elements that already have a binding. Default false."
+              },
+              "gateway": {
+                "type": "string",
+                "enum": [
+                  "anthropic",
+                  "fake"
+                ],
+                "description": "Which gateway grounds each target: `anthropic` needs a credential in the environment; `fake` answers from evals/grounding/cases and is a fixture, not a model. Defaults to whichever is available."
+              },
+              "inputs": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Story inputs, by name."
+              }
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "yam_heal",
+          "title": "Repair the bindings a run could not resolve",
+          "description": "Take a run that failed to find elements, relocalize each binding against its recorded fingerprint, and report what could be repaired and how confidently. Model-free by default: relocalization compares what the page says now with what it said when the binding was recorded.\n\nProposes; it does not write. Pass `apply: true` to write the repairs to the store — and a repair is applied only after the story it came from replayed green (REQ-HEAL-3).",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "runId": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The run under runs/ to heal, as `yam_run` returned it."
+              },
+              "apply": {
+                "type": "boolean",
+                "description": "Write the repairs to the bindings store. Default false: propose only."
+              },
+              "useModel": {
+                "type": "boolean",
+                "description": "Let a model re-ground what relocalization could not place. Default false, which is the project's own default and needs no credential."
+              },
+              "inputs": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Story inputs, for the replay that verifies a repair."
+              }
+            },
+            "required": [
+              "runId"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "yam_bindings",
+          "title": "Read the bindings store",
+          "description": "Every element the project has recorded, with the phrases that name it.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "One element id; all of them by default."
+              }
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "yam_results",
+          "title": "Read a run's results",
+          "description": "The summary and step results of a run under `runs/`.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "runId": {
+                "type": "string",
+                "description": "A run id; the most recent by default."
+              }
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "surface_snapshot",
+          "title": "The page, as a semantic tree",
+          "description": "A snapshot with stable references: roles, names, states, one `[ref=…]` per element. This is what you address elements by — never a CSS selector, which the surface does not expose.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "intent": {
+                "type": "string",
+                "minLength": 1,
+                "description": "What you are trying to do, in the words you would use to describe the step to a person: \"sign in as the enterprise user\", not \"click r14\". Required: it is the sentence this call compiles into when the trajectory becomes a flow."
+              },
+              "interactiveOnly": {
+                "type": "boolean",
+                "description": "Only elements worth acting on. Smaller, and usually what you want."
+              },
+              "maxNodes": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "intent"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "surface_act",
+          "title": "Act on the page",
+          "description": "Perform one action, addressed by a reference from `surface_snapshot`. Navigation and scrolling take no reference; everything else does.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "intent": {
+                "type": "string",
+                "minLength": 1,
+                "description": "What you are trying to do, in the words you would use to describe the step to a person: \"sign in as the enterprise user\", not \"click r14\". Required: it is the sentence this call compiles into when the trajectory becomes a flow."
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "navigate",
+                  "back",
+                  "forward",
+                  "refresh",
+                  "click",
+                  "doubleClick",
+                  "rightClick",
+                  "hover",
+                  "hoverAndClick",
+                  "pressAndHold",
+                  "release",
+                  "dragTo",
+                  "type",
+                  "clear",
+                  "press",
+                  "keyDown",
+                  "keyUp",
+                  "submit",
+                  "upload",
+                  "selectOption",
+                  "deselectOption",
+                  "deselectAll",
+                  "setChecked",
+                  "scrollIntoView",
+                  "scrollToTop",
+                  "scrollToBottom",
+                  "sleep",
+                  "waitFor",
+                  "switchWindow",
+                  "closeOtherWindows",
+                  "switchFrame",
+                  "resizeWindow",
+                  "quit",
+                  "dialog",
+                  "read",
+                  "evaluate",
+                  "screenshot",
+                  "invoke"
+                ],
+                "description": "The action to perform."
+              },
+              "ref": {
+                "type": "string",
+                "description": "The `[ref=…]` from the most recent snapshot."
+              },
+              "args": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                },
+                "description": "Arguments: {\"url\": \"/login\"}, {\"value\": \"hello\"}, {\"key\": \"Enter\"}."
+              },
+              "ref2": {
+                "type": "string",
+                "description": "The second element, for dragTo."
+              }
+            },
+            "required": [
+              "intent",
+              "action"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "surface_read",
+          "title": "Read from the page",
+          "description": "The text, value, an attribute, the title or the URL.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "intent": {
+                "type": "string",
+                "minLength": 1,
+                "description": "What you are trying to do, in the words you would use to describe the step to a person: \"sign in as the enterprise user\", not \"click r14\". Required: it is the sentence this call compiles into when the trajectory becomes a flow."
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "text",
+                  "value",
+                  "attribute",
+                  "title",
+                  "url",
+                  "result"
+                ]
+              },
+              "ref": {
+                "type": "string",
+                "description": "Required for everything but title and url."
+              },
+              "name": {
+                "type": "string",
+                "description": "The attribute name, for kind \"attribute\"."
+              }
+            },
+            "required": [
+              "intent",
+              "kind"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "surface_check",
+          "title": "Check a predicate",
+          "description": "Ask whether something is true, without asserting it: visible, enabled, checked, the text, the URL. Returns what it saw as well as whether it held.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "intent": {
+                "type": "string",
+                "minLength": 1,
+                "description": "What you are trying to do, in the words you would use to describe the step to a person: \"sign in as the enterprise user\", not \"click r14\". Required: it is the sentence this call compiles into when the trajectory becomes a flow."
+              },
+              "predicate": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "The predicate, e.g. {\"kind\":\"visible\"} or {\"kind\":\"textContains\",\"value\":{\"kind\":\"literal\",\"value\":\"Welcome\"}}."
+              },
+              "subject": {
+                "type": "string",
+                "enum": [
+                  "ref",
+                  "page",
+                  "dialog"
+                ],
+                "default": "ref"
+              },
+              "ref": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "intent",
+              "predicate"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "surface_trajectory",
+          "title": "The trajectory so far",
+          "description": "Where the trajectory of this session is being written, and how many calls it holds. The file compiles into a story draft, a plan fragment and bindings (REQ-BEH-4).",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_snapshot {\"intent\":\"inspect Yam landing\",\"maxNodes\":200}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"hash\": \"872824b592cb54d88ec0f876d2b23568ae4583e1b963801c9096c3717a9cb517\",\n  \"nodes\": 200,\n  \"text\": \"- generic [ref=e3]\\n  - banner [ref=e4]\\n    - generic [ref=e5]\\n    - navigation \\\"Project\\\" [ref=e7]\\n      - generic [ref=e8]\\n      - generic [ref=e9]\\n      - generic [ref=e10]\\n      - generic [ref=e11]\\n    - button \\\"Search or run a command\\\" [ref=e12]\\n      - generic [ref=e14]\\n    - generic [ref=e15]\\n  - navigation \\\"Sections\\\" [ref=e17]\\n    - generic [ref=e18]\\n      - paragraph [ref=e19]\\n      - button \\\"Flows\\\" [ref=e20]\\n      - button \\\"Runs\\\" [ref=e22]\\n      - button \\\"Bindings\\\" [ref=e24]\\n      - button \\\"Agents and tools\\\" [ref=e26]\\n    - generic [ref=e28]\\n      - paragraph [ref=e29]\\n      - button \\\"API\\\" [ref=e30]\\n      - button \\\"Data\\\" [ref=e32]\\n    - generic [ref=e34]\\n      - button \\\"Import prototype database\\\" [ref=e35]\\n      - button \\\"Settings\\\" [ref=e37]\\n  - region \\\"Workspace\\\" [ref=e39]\\n    - generic [ref=e40]\\n      - heading \\\"Flows\\\" [ref=e41]\\n      - generic [ref=e42]\\n      - button \\\"Save flow\\\" [ref=e43]\\n        - generic [ref=e45]\\n      - button \\\"Run\\\" [ref=e46]\\n        - generic [ref=e48]\\n      - button \\\"Record\\\" [ref=e49]\\n        - generic [ref=e51]\\n      - button \\\"Bind targets\\\" [ref=e52]\\n        - generic [ref=e54]\\n    - generic [ref=e55]\\n      - complementary \\\"Flow files\\\" [ref=e56]\\n        - table [ref=e57]\\n          - caption [ref=e58]\\n          - rowgroup [ref=e59]\\n            - row [ref=e60]\\n              - columnheader \\\"flow\\\" [ref=e61]\\n              - columnheader \\\"last run\\\" [ref=e62]\\n          - rowgroup [ref=e63]\\n            - row [selected] [ref=e64]\\n              - cell \\\"booking-compensation.flow 3 stories\\\" [ref=e65]\\n                - generic [ref=e66]\\n                  - generic [ref=e67]\\n                  - generic [ref=e68]\\n              - cell \\\"not run\\\" [ref=e69]\\n            - row [ref=e71]\\n              - cell \\\"booking-workflow.flow 2 stories\\\" [ref=e72]\\n                - generic [ref=e73]\\n                  - generic [ref=e74]\\n                  - generic [ref=e75]\\n              - cell \\\"not run\\\" [ref=e76]\\n            - row [ref=e78]\\n              - cell \\\"execution.flow 7 stories\\\" [ref=e79]\\n                - generic [ref=e80]\\n                  - generic [ref=e81]\\n                  - generic [ref=e82]\\n              - cell \\\"not run\\\" [ref=e83]\\n            - row [ref=e85]\\n              - cell \\\"guards-and-compensation.flow 3 stories\\\" [ref=e86]\\n                - generic [ref=e87]\\n                  - generic [ref=e88]\\n                  - generic [ref=e89]\\n              - cell \\\"not run\\\" [ref=e90]\\n            - row [ref=e92]\\n              - cell \\\"natural_language_login.flow 3 stories\\\" [ref=e93]\\n                - generic [ref=e94]\\n                  - generic [ref=e95]\\n                  - generic [ref=e96]\\n              - cell \\\"not run\\\" [ref=e97]\\n            - row [ref=e99]\\n              - cell \\\"simple.flow 3 stories\\\" [ref=e100]\\n                - generic [ref=e101]\\n                  - generic [ref=e102]\\n                  - generic [ref=e103]\\n              - cell \\\"not run\\\" [ref=e104]\\n            - row [ref=e106]\\n              - cell \\\"svatah.flow 1 story\\\" [ref=e107]\\n                - generic [ref=e108]\\n                  - generic [ref=e109]\\n                  - generic [ref=e110]\\n              - cell \\\"not run\\\" [ref=e111]\\n      - generic [ref=e113]\\n        - generic [ref=e114]\\n          - tablist \\\"Flow views\\\" [ref=e115]\\n            - tab \\\"booking-compensation.flow\\\" [selected] [ref=e116]\\n            - tab \\\"Plan\\\" [ref=e117]\\n            - tab \\\"History\\\" [ref=e118]\\n          - tabpanel [ref=e119]\\n            - generic [ref=e120]\\n              - generic [ref=e121]\\n              - button \\\"Edit\\\" [ref=e122]\\n            - generic \\\"Flow editor\\\" [ref=e124]\\n              - button \\\"1 // The compensation showcase for REQ-AUTO-4.\\\" [ref=e125]\\n                - generic [ref=e126]\\n                - generic [ref=e127]\\n              - button \\\"2 //\\\" [ref=e128]\\n                - generic [ref=e129]\\n                - generic [ref=e130]\\n                - generic [ref=e132]\\n                - generic [ref=e133]\\n                - generic [ref=e135]\\n                - generic [ref=e136]\\n              - button \\\"5 // It reuses execution.flow's scenario names and steps so the two read together,\\\" [ref=e137]\\n                - generic [ref=e138]\\n                - generic [ref=e139]\\n              - button \\\"6 // and adds the one scenario the original never had — \\\\\\\"cancel booking\\\\\\\" — as the\\\" [ref=e140]\\n                - generic [ref=e141]\\n                - generic [ref=e142]\\n              - button \\\"7 // compensating story.\\\" [ref=e143]\\n                - generic [ref=e144]\\n                - generic [ref=e145]\\n              - button \\\"8 //\\\" [ref=e146]\\n                - generic [ref=e147]\\n                - generic [ref=e148]\\n              - button \\\"9 // The first migration of execution.flow folded this into that file, which cost it\\\" [ref=e149]\\n                - generic [ref=e150]\\n                - generic [ref=e151]\\n              - button \\\"10 // three of its original scenario names and added a scenario the original did not\\\" [ref=e152]\\n                - generic [ref=e153]\\n                - generic [ref=e154]\\n              - button \\\"11 // contain. Keeping the showcase here leaves execution.flow a faithful migration\\\" [ref=e155]\\n                - generic [ref=e156]\\n                - generic [ref=e157]\\n              - button \\\"12 // (P0-F2).\\\" [ref=e158]\\n                - generic [ref=e159]\\n                - generic [ref=e160]\\n              - button \\\"13\\\" [ref=e161]\\n                - generic [ref=e165]\\n                - generic [ref=e166]\\n              - button \\\"15 Click the Book a slot link tier 1 · bound\\\" [ref=e167]\\n                - generic [ref=e168]\\n                - generic [ref=e169]\\n                - generic [ref=e170]\\n              - button \\\"16 Click the location field tier 1 · bound\\\" [ref=e171]\\n                - generic [ref=e172]\\n                - generic [ref=e173]\\n                - generic [ref=e174]\\n              - button \\\"17 Type \\\\\\\"indra\\\\\\\" into the location field tier 1 · bound\\\" [ref=e175]\\n                - generic [ref=e176]\\n                - generic [ref=e177]\\n                - generic [ref=e178]\\n              - button \\\"18 Click the Indiranagar suggestion tier 1 · bound\\\" [ref=e179]\\n                - generic [ref=e180]\\n                - generic [ref=e181]\\n                - generic [ref=e182]\\n              - button \\\"19 Click the next button tier 1 · bound\\\" [ref=e183]\\n                - generic [ref=e184]\\n                - generic [ref=e185]\\n                - generic [ref=e186]\\n              - button \\\"20 Click the Book now button tier 1 · bound\\\" [ref=e187]\\n                - generic [ref=e188]\\n                - generic [ref=e189]\\n                - generic [ref=e190]\\n              - button \\\"21\\\" [ref=e191]\\n                - generic [ref=e195]\\n                - generic [ref=e196]\\n              - button \\\"23 Click the booking result tier 1 · bound\\\" [ref=e197]\\n                - generic [ref=e198]\\n                - generic [ref=e199]\\n                - generic [ref=e200]\\n              - button \\\"24 Click the Checkout link tier 1 · bound\\\" [ref=e201]\\n                - generic [ref=e202]\\n                - generic [ref=e203]\\n                - generic [ref=e204]\\n                - generic [ref=e206]\\n                - generic [ref=e207]\\n                - generic [ref=e208]\\n              - button \\\"26 Select \\\\\\\"08\\\\\\\" in the expiry month select tier 1 · bound\\\" [ref=e209]\\n                - generic [ref=e210]\\n                - generic [ref=e211]\\n                - generic [ref=e212]\\n              - button \\\"27 Select \\\\\\\"2027\\\\\\\" in the expiry year select tier 1 · bound\\\" [ref=e213]\\n                - generic [ref=e214]\\n                - generic [ref=e215]\\n                - generic [ref=e216]\\n                - generic [ref=e218]\\n                - generic [ref=e219]\\n                - generic [ref=e220]\\n              - button \\\"29 Click the pay button tier 1 · bound\\\" [ref=e221]\\n                - generic [ref=e222]\\n                - generic [ref=e223]\\n                - generic [ref=e224]\\n              - button \\\"30\\\" [ref=e225]\\n              - button \\\"31 // The compensating story. It runs with the failing flow's scope and then the\\\" [ref=e228]\\n                - generic [ref=e229]\\n                - generic [ref=e230]\\n              - button \\\"32 // flow stops (LLD §8.3), so a booking created before the failure is not left\\\" [ref=e231]\\n                - generic [ref=e232]\\n                - generic [ref=e233]\\n              - button \\\"33 // behind.\\\" [ref=e234]\\n                - generic [ref=e235]\\n                - generic [ref=e236]\\n                - generic [ref=e238]\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_snapshot {}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "MCP error -32602: Input validation error: Invalid arguments for tool surface_snapshot: Required at intent"
+        }
+      ],
+      "isError": true
+    }
+  },
+  {
+    "label": "surface_read {\"intent\":\"read Yam title\",\"kind\":\"title\"}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Yam"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_act {\"intent\":\"open Yam command palette\",\"action\":\"click\",\"ref\":\"e12\"}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"ok\": true,\n  \"ref\": \"e12\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_snapshot {\"intent\":\"find surface explorer in navigation\",\"maxNodes\":200}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"hash\": \"5ceffb92d29d7c90f19b5efe2ae09d8a7d214f5804c7a17c035401d79dca0a9c\",\n  \"nodes\": 126,\n  \"text\": \"  - dialog [ref=e295]\\n    - heading \\\"Command palette\\\" [ref=e296]\\n    - generic [ref=e297]\\n      - generic [ref=e298]\\n      - generic [ref=e299]\\n      - textbox \\\"Search or run a command\\\" [focused] [ref=e300]\\n      - generic [ref=e301]\\n    - listbox \\\"Commands\\\" [ref=e302]\\n      - group [ref=e303]\\n        - paragraph [ref=e304]\\n        - option \\\"Compile\\\" [ref=e305]\\n          - generic [ref=e306]\\n          - generic [ref=e308]\\n        - option \\\"Save flow\\\" [ref=e309]\\n          - generic [ref=e310]\\n          - generic [ref=e312]\\n        - option \\\"Run\\\" [ref=e313]\\n          - generic [ref=e314]\\n          - generic [ref=e316]\\n          - generic [ref=e317]\\n        - option \\\"Run story\\\" [ref=e318]\\n          - generic [ref=e319]\\n          - generic [ref=e321]\\n        - option \\\"Run again\\\" [ref=e322]\\n          - generic [ref=e323]\\n          - generic [ref=e325]\\n          - generic [ref=e326]\\n        - option \\\"Resume from step\\\" [disabled] [ref=e327]\\n          - generic [ref=e328]\\n          - generic [ref=e330]\\n        - option \\\"Record\\\" [ref=e331]\\n          - generic [ref=e332]\\n          - generic [ref=e334]\\n          - generic [ref=e335]\\n        - option \\\"Stop recording\\\" [disabled] [ref=e336]\\n          - generic [ref=e337]\\n          - generic [ref=e339]\\n        - option \\\"Bind targets\\\" [ref=e340]\\n          - generic [ref=e341]\\n          - generic [ref=e343]\\n          - generic [ref=e344]\\n        - option \\\"Accept\\\" [disabled] [ref=e345]\\n          - generic [ref=e346]\\n          - generic [ref=e348]\\n        - option \\\"Re-pick\\\" [disabled] [ref=e349]\\n          - generic [ref=e350]\\n          - generic [ref=e352]\\n        - option \\\"Reject\\\" [disabled] [ref=e353]\\n          - generic [ref=e354]\\n          - generic [ref=e356]\\n        - option \\\"Stop recording\\\" [disabled] [ref=e357]\\n          - generic [ref=e358]\\n        - option \\\"Stop\\\" [disabled] [ref=e360]\\n          - generic [ref=e361]\\n          - generic [ref=e363]\\n        - option \\\"Heal\\\" [ref=e364]\\n          - generic [ref=e365]\\n          - generic [ref=e367]\\n          - generic [ref=e368]\\n        - option \\\"Heal from bind failures\\\" [ref=e369]\\n          - generic [ref=e370]\\n          - generic [ref=e372]\\n        - option \\\"Apply proposal\\\" [disabled] [ref=e373]\\n          - generic [ref=e374]\\n        - option \\\"Verify all bindings\\\" [ref=e376]\\n          - generic [ref=e377]\\n          - generic [ref=e379]\\n          - generic [ref=e380]\\n        - option \\\"Prune unused bindings\\\" [disabled] [ref=e381]\\n          - generic [ref=e382]\\n          - generic [ref=e384]\\n        - option \\\"Send request\\\" [ref=e385]\\n          - generic [ref=e386]\\n          - generic [ref=e388]\\n        - option \\\"Save request\\\" [disabled] [ref=e389]\\n          - generic [ref=e390]\\n          - generic [ref=e392]\\n        - option \\\"Save data\\\" [ref=e393]\\n          - generic [ref=e394]\\n        - option \\\"Start the tool server\\\" [disabled] [ref=e396]\\n          - generic [ref=e397]\\n          - generic [ref=e399]\\n        - option \\\"Open a session\\\" [ref=e400]\\n          - generic [ref=e401]\\n          - generic [ref=e403]\\n          - generic [ref=e404]\\n        - option \\\"Close the session\\\" [disabled] [ref=e405]\\n          - generic [ref=e406]\\n        - option \\\"Act on the element\\\" [disabled] [ref=e408]\\n          - generic [ref=e409]\\n          - generic [ref=e411]\\n        - option \\\"Snapshot the session\\\" [disabled] [ref=e412]\\n          - generic [ref=e413]\\n          - generic [ref=e415]\\n        - option \\\"Import the database\\\" [ref=e416]\\n          - generic [ref=e417]\\n          - generic [ref=e419]\\n        - option \\\"Compile a trajectory\\\" [disabled] [ref=e420]\\n          - generic [ref=e421]\\n          - generic [ref=e423]\\n      - group [ref=e424]\\n        - paragraph [ref=e425]\\n        - option \\\"Go to Flows\\\" [ref=e426]\\n          - generic [ref=e427]\\n        - option \\\"Go to Record review\\\" [ref=e429]\\n          - generic [ref=e430]\\n        - option \\\"Go to Runs\\\" [ref=e432]\\n          - generic [ref=e433]\\n        - option \\\"Go to Run\\\" [ref=e435]\\n          - generic [ref=e436]\\n        - option \\\"Go to Heal review\\\" [ref=e438]\\n          - generic [ref=e439]\\n        - option \\\"Go to Bindings\\\" [ref=e441]\\n          - generic [ref=e442]\\n        - option \\\"Go to Agents and tools\\\" [ref=e444]\\n          - generic [ref=e445]\\n        - option \\\"Go to API\\\" [ref=e447]\\n          - generic [ref=e448]\\n        - option \\\"Go to Data\\\" [ref=e450]\\n          - generic [ref=e451]\\n        - option \\\"Go to Surface explorer\\\" [ref=e453]\\n          - generic [ref=e454]\\n        - option \\\"Go to Import prototype database\\\" [ref=e456]\\n          - generic [ref=e457]\\n        - option \\\"Go to Settings\\\" [ref=e459]\\n          - generic [ref=e460]\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_act {\"intent\":\"open Yam surface explorer\",\"action\":\"click\",\"ref\":\"e453\"}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"ok\": true,\n  \"ref\": \"e453\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_snapshot {\"intent\":\"inspect direct surface control form\",\"maxNodes\":200}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"hash\": \"02ac907e9878e2554555629efdef8add59c717eb4ff553ec43dc3a096a8ef02a\",\n  \"nodes\": 200,\n  \"text\": \"- generic [ref=e3]\\n  - banner [ref=e4]\\n    - generic [ref=e5]\\n    - navigation \\\"Project\\\" [ref=e7]\\n      - generic [ref=e8]\\n      - generic [ref=e9]\\n      - generic [ref=e10]\\n      - generic [ref=e11]\\n    - button \\\"Search or run a command\\\" [ref=e12]\\n      - generic [ref=e14]\\n    - generic [ref=e15]\\n  - navigation \\\"Sections\\\" [ref=e17]\\n    - generic [ref=e18]\\n      - paragraph [ref=e19]\\n      - button \\\"Flows\\\" [ref=e20]\\n      - button \\\"Runs\\\" [ref=e22]\\n      - button \\\"Bindings\\\" [ref=e24]\\n      - button \\\"Agents and tools\\\" [ref=e26]\\n    - generic [ref=e28]\\n      - paragraph [ref=e29]\\n      - button \\\"API\\\" [ref=e30]\\n      - button \\\"Data\\\" [ref=e32]\\n    - generic [ref=e34]\\n      - button \\\"Import prototype database\\\" [ref=e35]\\n      - button \\\"Settings\\\" [ref=e37]\\n  - region \\\"Workspace\\\" [ref=e39]\\n    - generic [ref=e40]\\n      - heading \\\"Flows\\\" [ref=e41]\\n      - generic [ref=e42]\\n    - generic [ref=e55]\\n      - complementary \\\"Flow files\\\" [ref=e56]\\n        - table [ref=e57]\\n          - caption [ref=e58]\\n          - rowgroup [ref=e59]\\n            - row [ref=e60]\\n              - columnheader \\\"flow\\\" [ref=e61]\\n              - columnheader \\\"last run\\\" [ref=e62]\\n          - rowgroup [ref=e63]\\n            - row [selected] [ref=e64]\\n              - cell \\\"booking-compensation.flow 3 stories\\\" [ref=e65]\\n                - generic [ref=e66]\\n                  - generic [ref=e67]\\n                  - generic [ref=e68]\\n              - cell \\\"not run\\\" [ref=e69]\\n            - row [ref=e71]\\n              - cell \\\"booking-workflow.flow 2 stories\\\" [ref=e72]\\n                - generic [ref=e73]\\n                  - generic [ref=e74]\\n                  - generic [ref=e75]\\n              - cell \\\"not run\\\" [ref=e76]\\n            - row [ref=e78]\\n              - cell \\\"execution.flow 7 stories\\\" [ref=e79]\\n                - generic [ref=e80]\\n                  - generic [ref=e81]\\n                  - generic [ref=e82]\\n              - cell \\\"not run\\\" [ref=e83]\\n            - row [ref=e85]\\n              - cell \\\"guards-and-compensation.flow 3 stories\\\" [ref=e86]\\n                - generic [ref=e87]\\n                  - generic [ref=e88]\\n                  - generic [ref=e89]\\n              - cell \\\"not run\\\" [ref=e90]\\n            - row [ref=e92]\\n              - cell \\\"natural_language_login.flow 3 stories\\\" [ref=e93]\\n                - generic [ref=e94]\\n                  - generic [ref=e95]\\n                  - generic [ref=e96]\\n              - cell \\\"not run\\\" [ref=e97]\\n            - row [ref=e99]\\n              - cell \\\"simple.flow 3 stories\\\" [ref=e100]\\n                - generic [ref=e101]\\n                  - generic [ref=e102]\\n                  - generic [ref=e103]\\n              - cell \\\"not run\\\" [ref=e104]\\n            - row [ref=e106]\\n              - cell \\\"svatah.flow 1 story\\\" [ref=e107]\\n                - generic [ref=e108]\\n                  - generic [ref=e109]\\n                  - generic [ref=e110]\\n              - cell \\\"not run\\\" [ref=e111]\\n      - generic [ref=e113]\\n        - generic [ref=e114]\\n          - tablist \\\"Flow views\\\" [ref=e115]\\n            - tab \\\"booking-compensation.flow\\\" [selected] [ref=e116]\\n            - tab \\\"Plan\\\" [ref=e117]\\n            - tab \\\"History\\\" [ref=e118]\\n          - tabpanel [ref=e119]\\n            - generic [ref=e120]\\n              - generic [ref=e121]\\n              - button \\\"Edit\\\" [ref=e122]\\n            - generic \\\"Flow editor\\\" [ref=e124]\\n              - button \\\"1 // The compensation showcase for REQ-AUTO-4.\\\" [ref=e125]\\n                - generic [ref=e126]\\n                - generic [ref=e127]\\n              - button \\\"2 //\\\" [ref=e128]\\n                - generic [ref=e129]\\n                - generic [ref=e130]\\n                - generic [ref=e132]\\n                - generic [ref=e133]\\n                - generic [ref=e135]\\n                - generic [ref=e136]\\n              - button \\\"5 // It reuses execution.flow's scenario names and steps so the two read together,\\\" [ref=e137]\\n                - generic [ref=e138]\\n                - generic [ref=e139]\\n              - button \\\"6 // and adds the one scenario the original never had — \\\\\\\"cancel booking\\\\\\\" — as the\\\" [ref=e140]\\n                - generic [ref=e141]\\n                - generic [ref=e142]\\n              - button \\\"7 // compensating story.\\\" [ref=e143]\\n                - generic [ref=e144]\\n                - generic [ref=e145]\\n              - button \\\"8 //\\\" [ref=e146]\\n                - generic [ref=e147]\\n                - generic [ref=e148]\\n              - button \\\"9 // The first migration of execution.flow folded this into that file, which cost it\\\" [ref=e149]\\n                - generic [ref=e150]\\n                - generic [ref=e151]\\n              - button \\\"10 // three of its original scenario names and added a scenario the original did not\\\" [ref=e152]\\n                - generic [ref=e153]\\n                - generic [ref=e154]\\n              - button \\\"11 // contain. Keeping the showcase here leaves execution.flow a faithful migration\\\" [ref=e155]\\n                - generic [ref=e156]\\n                - generic [ref=e157]\\n              - button \\\"12 // (P0-F2).\\\" [ref=e158]\\n                - generic [ref=e159]\\n                - generic [ref=e160]\\n              - button \\\"13\\\" [ref=e161]\\n                - generic [ref=e165]\\n                - generic [ref=e166]\\n              - button \\\"15 Click the Book a slot link tier 1 · bound\\\" [ref=e167]\\n                - generic [ref=e168]\\n                - generic [ref=e169]\\n                - generic [ref=e170]\\n              - button \\\"16 Click the location field tier 1 · bound\\\" [ref=e171]\\n                - generic [ref=e172]\\n                - generic [ref=e173]\\n                - generic [ref=e174]\\n              - button \\\"17 Type \\\\\\\"indra\\\\\\\" into the location field tier 1 · bound\\\" [ref=e175]\\n                - generic [ref=e176]\\n                - generic [ref=e177]\\n                - generic [ref=e178]\\n              - button \\\"18 Click the Indiranagar suggestion tier 1 · bound\\\" [ref=e179]\\n                - generic [ref=e180]\\n                - generic [ref=e181]\\n                - generic [ref=e182]\\n              - button \\\"19 Click the next button tier 1 · bound\\\" [ref=e183]\\n                - generic [ref=e184]\\n                - generic [ref=e185]\\n                - generic [ref=e186]\\n              - button \\\"20 Click the Book now button tier 1 · bound\\\" [ref=e187]\\n                - generic [ref=e188]\\n                - generic [ref=e189]\\n                - generic [ref=e190]\\n              - button \\\"21\\\" [ref=e191]\\n                - generic [ref=e195]\\n                - generic [ref=e196]\\n              - button \\\"23 Click the booking result tier 1 · bound\\\" [ref=e197]\\n                - generic [ref=e198]\\n                - generic [ref=e199]\\n                - generic [ref=e200]\\n              - button \\\"24 Click the Checkout link tier 1 · bound\\\" [ref=e201]\\n                - generic [ref=e202]\\n                - generic [ref=e203]\\n                - generic [ref=e204]\\n                - generic [ref=e206]\\n                - generic [ref=e207]\\n                - generic [ref=e208]\\n              - button \\\"26 Select \\\\\\\"08\\\\\\\" in the expiry month select tier 1 · bound\\\" [ref=e209]\\n                - generic [ref=e210]\\n                - generic [ref=e211]\\n                - generic [ref=e212]\\n              - button \\\"27 Select \\\\\\\"2027\\\\\\\" in the expiry year select tier 1 · bound\\\" [ref=e213]\\n                - generic [ref=e214]\\n                - generic [ref=e215]\\n                - generic [ref=e216]\\n                - generic [ref=e218]\\n                - generic [ref=e219]\\n                - generic [ref=e220]\\n              - button \\\"29 Click the pay button tier 1 · bound\\\" [ref=e221]\\n                - generic [ref=e222]\\n                - generic [ref=e223]\\n                - generic [ref=e224]\\n              - button \\\"30\\\" [ref=e225]\\n              - button \\\"31 // The compensating story. It runs with the failing flow's scope and then the\\\" [ref=e228]\\n                - generic [ref=e229]\\n                - generic [ref=e230]\\n              - button \\\"32 // flow stops (LLD §8.3), so a booking created before the failure is not left\\\" [ref=e231]\\n                - generic [ref=e232]\\n                - generic [ref=e233]\\n              - button \\\"33 // behind.\\\" [ref=e234]\\n                - generic [ref=e235]\\n                - generic [ref=e236]\\n                - generic [ref=e238]\\n                - generic [ref=e239]\\n              - button \\\"35 Click the Bookings link tier 1 · bound\\\" [ref=e240]\\n                - generic [ref=e241]\\n                - generic [ref=e242]\\n                - generic [ref=e243]\\n              - button \\\"36 Click the cancel booking button tier 1 · bound\\\" [ref=e244]\\n                - generic [ref=e245]\\n                - generic [ref=e246]\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_snapshot {\"intent\":\"inspect direct surface control form\",\"maxNodes\":200}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"hash\": \"e3f379e33e6883c801002257b6bd6fed2ad0474ae57e8e7ac98128ba017b564a\",\n  \"nodes\": 87,\n  \"text\": \"- generic [ref=e3]\\n  - banner [ref=e4]\\n    - generic [ref=e5]\\n    - navigation \\\"Project\\\" [ref=e7]\\n      - generic [ref=e8]\\n      - generic [ref=e9]\\n      - generic [ref=e10]\\n      - generic [ref=e11]\\n    - button \\\"Search or run a command\\\" [ref=e12]\\n      - generic [ref=e14]\\n    - generic [ref=e15]\\n  - navigation \\\"Sections\\\" [ref=e17]\\n    - generic [ref=e18]\\n      - paragraph [ref=e19]\\n      - button \\\"Flows\\\" [ref=e20]\\n      - button \\\"Runs\\\" [ref=e22]\\n      - button \\\"Bindings\\\" [ref=e24]\\n      - button \\\"Agents and tools\\\" [ref=e26]\\n    - generic [ref=e28]\\n      - paragraph [ref=e29]\\n      - button \\\"API\\\" [ref=e30]\\n      - button \\\"Data\\\" [ref=e32]\\n    - generic [ref=e34]\\n      - button \\\"Import prototype database\\\" [ref=e35]\\n      - button \\\"Settings\\\" [ref=e37]\\n  - region \\\"Workspace\\\" [ref=e39]\\n    - generic [ref=e462]\\n      - heading \\\"Surface explorer\\\" [ref=e463]\\n      - generic [ref=e464]\\n      - generic [ref=e465]\\n        - generic [ref=e466]\\n        - combobox \\\"Adapter\\\" [ref=e467]\\n          - generic [ref=e468]\\n      - button \\\"Open a session\\\" [ref=e469]\\n        - generic [ref=e471]\\n      - button \\\"Close the session\\\" [disabled] [ref=e472]\\n      - button \\\"Act on the element\\\" [disabled] [ref=e474]\\n      - button \\\"Snapshot the session\\\" [disabled] [ref=e476]\\n      - generic [ref=e478]\\n    - generic [ref=e479]\\n      - complementary \\\"Snapshot\\\" [ref=e480]\\n        - paragraph [ref=e481]\\n      - generic [ref=e482]\\n        - generic [ref=e484]\\n          - generic [ref=e485]\\n          - textbox \\\"Intent\\\" [ref=e486]\\n        - alert [ref=e487]\\n          - generic [ref=e488]\\n          - generic [ref=e489]\\n        - table [ref=e490]\\n          - caption [ref=e491]\\n          - rowgroup [ref=e492]\\n            - row [ref=e493]\\n              - columnheader \\\"#\\\" [ref=e494]\\n              - columnheader \\\"call\\\" [ref=e495]\\n              - columnheader \\\"intent\\\" [ref=e496]\\n              - columnheader \\\"outcome\\\" [ref=e497]\\n              - columnheader \\\"time\\\" [ref=e498]\\n          - rowgroup [ref=e499]\\n            - row [ref=e500]\\n              - cell \\\"No call yet. Each one is written to trajectory.jsonl with its intent.\\\" [ref=e501]\\n  - complementary \\\"Inspector\\\" [ref=e286]\\n    - region [ref=e502]\\n      - heading \\\"Session\\\" [ref=e503]\\n      - generic [ref=e504]\\n        - generic [ref=e505]\\n          - term [ref=e506]\\n          - definition [ref=e507]\\n        - generic [ref=e508]\\n          - term [ref=e509]\\n          - definition [ref=e510]\\n        - generic [ref=e511]\\n          - term [ref=e512]\\n          - definition [ref=e513]\\n        - generic [ref=e514]\\n          - term [ref=e515]\\n          - definition [ref=e516]\\n        - generic [ref=e517]\\n          - term [ref=e518]\\n          - definition [ref=e519]\\n    - region [ref=e520]\\n      - heading \\\"Compile to proposal\\\" [ref=e521]\\n      - paragraph [ref=e522]\\n  - contentinfo [ref=e290]\\n    - generic [ref=e291]\\n    - generic [ref=e292]\\n    - generic [ref=e293]\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_act {\"intent\":\"try direct action in Yam\",\"action\":\"click\",\"ref\":\"e469\"}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"ok\": true,\n  \"ref\": \"e469\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_snapshot {\"intent\":\"inspect opened explorer\",\"maxNodes\":200}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"hash\": \"e3f379e33e6883c801002257b6bd6fed2ad0474ae57e8e7ac98128ba017b564a\",\n  \"nodes\": 87,\n  \"text\": \"- generic [ref=e3]\\n  - banner [ref=e4]\\n    - generic [ref=e5]\\n    - navigation \\\"Project\\\" [ref=e7]\\n      - generic [ref=e8]\\n      - generic [ref=e9]\\n      - generic [ref=e10]\\n      - generic [ref=e11]\\n    - button \\\"Search or run a command\\\" [ref=e12]\\n      - generic [ref=e14]\\n    - generic [ref=e15]\\n  - navigation \\\"Sections\\\" [ref=e17]\\n    - generic [ref=e18]\\n      - paragraph [ref=e19]\\n      - button \\\"Flows\\\" [ref=e20]\\n      - button \\\"Runs\\\" [ref=e22]\\n      - button \\\"Bindings\\\" [ref=e24]\\n      - button \\\"Agents and tools\\\" [ref=e26]\\n    - generic [ref=e28]\\n      - paragraph [ref=e29]\\n      - button \\\"API\\\" [ref=e30]\\n      - button \\\"Data\\\" [ref=e32]\\n    - generic [ref=e34]\\n      - button \\\"Import prototype database\\\" [ref=e35]\\n      - button \\\"Settings\\\" [ref=e37]\\n  - region \\\"Workspace\\\" [ref=e39]\\n    - generic [ref=e462]\\n      - heading \\\"Surface explorer\\\" [ref=e463]\\n      - generic [ref=e464]\\n      - generic [ref=e465]\\n        - generic [ref=e466]\\n        - combobox \\\"Adapter\\\" [ref=e467]\\n          - generic [ref=e468]\\n      - button \\\"Open a session\\\" [ref=e469]\\n        - generic [ref=e471]\\n      - button \\\"Close the session\\\" [disabled] [ref=e472]\\n      - button \\\"Act on the element\\\" [disabled] [ref=e474]\\n      - button \\\"Snapshot the session\\\" [disabled] [ref=e476]\\n      - generic [ref=e478]\\n    - generic [ref=e479]\\n      - complementary \\\"Snapshot\\\" [ref=e480]\\n        - paragraph [ref=e481]\\n      - generic [ref=e482]\\n        - generic [ref=e484]\\n          - generic [ref=e485]\\n          - textbox \\\"Intent\\\" [ref=e486]\\n        - alert [ref=e487]\\n          - generic [ref=e488]\\n          - generic [ref=e489]\\n        - table [ref=e490]\\n          - caption [ref=e491]\\n          - rowgroup [ref=e492]\\n            - row [ref=e493]\\n              - columnheader \\\"#\\\" [ref=e494]\\n              - columnheader \\\"call\\\" [ref=e495]\\n              - columnheader \\\"intent\\\" [ref=e496]\\n              - columnheader \\\"outcome\\\" [ref=e497]\\n              - columnheader \\\"time\\\" [ref=e498]\\n          - rowgroup [ref=e499]\\n            - row [ref=e500]\\n              - cell \\\"No call yet. Each one is written to trajectory.jsonl with its intent.\\\" [ref=e501]\\n  - complementary \\\"Inspector\\\" [ref=e286]\\n    - region [ref=e502]\\n      - heading \\\"Session\\\" [ref=e503]\\n      - generic [ref=e504]\\n        - generic [ref=e505]\\n          - term [ref=e506]\\n          - definition [ref=e507]\\n        - generic [ref=e508]\\n          - term [ref=e509]\\n          - definition [ref=e510]\\n        - generic [ref=e511]\\n          - term [ref=e512]\\n          - definition [ref=e513]\\n        - generic [ref=e514]\\n          - term [ref=e515]\\n          - definition [ref=e516]\\n        - generic [ref=e517]\\n          - term [ref=e518]\\n          - definition [ref=e519]\\n    - region [ref=e520]\\n      - heading \\\"Compile to proposal\\\" [ref=e521]\\n      - paragraph [ref=e522]\\n  - contentinfo [ref=e290]\\n    - generic [ref=e291]\\n    - generic [ref=e292]\\n    - generic [ref=e293]\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_snapshot {\"intent\":\"inspect opened explorer\",\"maxNodes\":200}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"hash\": \"e3f379e33e6883c801002257b6bd6fed2ad0474ae57e8e7ac98128ba017b564a\",\n  \"nodes\": 87,\n  \"text\": \"- generic [ref=e3]\\n  - banner [ref=e4]\\n    - generic [ref=e5]\\n    - navigation \\\"Project\\\" [ref=e7]\\n      - generic [ref=e8]\\n      - generic [ref=e9]\\n      - generic [ref=e10]\\n      - generic [ref=e11]\\n    - button \\\"Search or run a command\\\" [ref=e12]\\n      - generic [ref=e14]\\n    - generic [ref=e15]\\n  - navigation \\\"Sections\\\" [ref=e17]\\n    - generic [ref=e18]\\n      - paragraph [ref=e19]\\n      - button \\\"Flows\\\" [ref=e20]\\n      - button \\\"Runs\\\" [ref=e22]\\n      - button \\\"Bindings\\\" [ref=e24]\\n      - button \\\"Agents and tools\\\" [ref=e26]\\n    - generic [ref=e28]\\n      - paragraph [ref=e29]\\n      - button \\\"API\\\" [ref=e30]\\n      - button \\\"Data\\\" [ref=e32]\\n    - generic [ref=e34]\\n      - button \\\"Import prototype database\\\" [ref=e35]\\n      - button \\\"Settings\\\" [ref=e37]\\n  - region \\\"Workspace\\\" [ref=e39]\\n    - generic [ref=e462]\\n      - heading \\\"Surface explorer\\\" [ref=e463]\\n      - generic [ref=e464]\\n      - generic [ref=e465]\\n        - generic [ref=e466]\\n        - combobox \\\"Adapter\\\" [ref=e467]\\n          - generic [ref=e468]\\n      - button \\\"Open a session\\\" [ref=e469]\\n        - generic [ref=e471]\\n      - button \\\"Close the session\\\" [disabled] [ref=e472]\\n      - button \\\"Act on the element\\\" [disabled] [ref=e474]\\n      - button \\\"Snapshot the session\\\" [disabled] [ref=e476]\\n      - generic [ref=e478]\\n    - generic [ref=e479]\\n      - complementary \\\"Snapshot\\\" [ref=e480]\\n        - paragraph [ref=e481]\\n      - generic [ref=e482]\\n        - generic [ref=e484]\\n          - generic [ref=e485]\\n          - textbox \\\"Intent\\\" [ref=e486]\\n        - alert [ref=e487]\\n          - generic [ref=e488]\\n          - generic [ref=e489]\\n        - table [ref=e490]\\n          - caption [ref=e491]\\n          - rowgroup [ref=e492]\\n            - row [ref=e493]\\n              - columnheader \\\"#\\\" [ref=e494]\\n              - columnheader \\\"call\\\" [ref=e495]\\n              - columnheader \\\"intent\\\" [ref=e496]\\n              - columnheader \\\"outcome\\\" [ref=e497]\\n              - columnheader \\\"time\\\" [ref=e498]\\n          - rowgroup [ref=e499]\\n            - row [ref=e500]\\n              - cell \\\"No call yet. Each one is written to trajectory.jsonl with its intent.\\\" [ref=e501]\\n  - complementary \\\"Inspector\\\" [ref=e286]\\n    - region [ref=e502]\\n      - heading \\\"Session\\\" [ref=e503]\\n      - generic [ref=e504]\\n        - generic [ref=e505]\\n          - term [ref=e506]\\n          - definition [ref=e507]\\n        - generic [ref=e508]\\n          - term [ref=e509]\\n          - definition [ref=e510]\\n        - generic [ref=e511]\\n          - term [ref=e512]\\n          - definition [ref=e513]\\n        - generic [ref=e514]\\n          - term [ref=e515]\\n          - definition [ref=e516]\\n        - generic [ref=e517]\\n          - term [ref=e518]\\n          - definition [ref=e519]\\n    - region [ref=e520]\\n      - heading \\\"Compile to proposal\\\" [ref=e521]\\n      - paragraph [ref=e522]\\n  - contentinfo [ref=e290]\\n    - generic [ref=e291]\\n    - generic [ref=e292]\\n    - generic [ref=e293]\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_snapshot {\"intent\":\"inspect opened explorer\",\"maxNodes\":200}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"hash\": \"e3f379e33e6883c801002257b6bd6fed2ad0474ae57e8e7ac98128ba017b564a\",\n  \"nodes\": 87,\n  \"text\": \"- generic [ref=e3]\\n  - banner [ref=e4]\\n    - generic [ref=e5]\\n    - navigation \\\"Project\\\" [ref=e7]\\n      - generic [ref=e8]\\n      - generic [ref=e9]\\n      - generic [ref=e10]\\n      - generic [ref=e11]\\n    - button \\\"Search or run a command\\\" [ref=e12]\\n      - generic [ref=e14]\\n    - generic [ref=e15]\\n  - navigation \\\"Sections\\\" [ref=e17]\\n    - generic [ref=e18]\\n      - paragraph [ref=e19]\\n      - button \\\"Flows\\\" [ref=e20]\\n      - button \\\"Runs\\\" [ref=e22]\\n      - button \\\"Bindings\\\" [ref=e24]\\n      - button \\\"Agents and tools\\\" [ref=e26]\\n    - generic [ref=e28]\\n      - paragraph [ref=e29]\\n      - button \\\"API\\\" [ref=e30]\\n      - button \\\"Data\\\" [ref=e32]\\n    - generic [ref=e34]\\n      - button \\\"Import prototype database\\\" [ref=e35]\\n      - button \\\"Settings\\\" [ref=e37]\\n  - region \\\"Workspace\\\" [ref=e39]\\n    - generic [ref=e462]\\n      - heading \\\"Surface explorer\\\" [ref=e463]\\n      - generic [ref=e464]\\n      - generic [ref=e465]\\n        - generic [ref=e466]\\n        - combobox \\\"Adapter\\\" [ref=e467]\\n          - generic [ref=e468]\\n      - button \\\"Open a session\\\" [ref=e469]\\n        - generic [ref=e471]\\n      - button \\\"Close the session\\\" [disabled] [ref=e472]\\n      - button \\\"Act on the element\\\" [disabled] [ref=e474]\\n      - button \\\"Snapshot the session\\\" [disabled] [ref=e476]\\n      - generic [ref=e478]\\n    - generic [ref=e479]\\n      - complementary \\\"Snapshot\\\" [ref=e480]\\n        - paragraph [ref=e481]\\n      - generic [ref=e482]\\n        - generic [ref=e484]\\n          - generic [ref=e485]\\n          - textbox \\\"Intent\\\" [ref=e486]\\n        - alert [ref=e487]\\n          - generic [ref=e488]\\n          - generic [ref=e489]\\n        - table [ref=e490]\\n          - caption [ref=e491]\\n          - rowgroup [ref=e492]\\n            - row [ref=e493]\\n              - columnheader \\\"#\\\" [ref=e494]\\n              - columnheader \\\"call\\\" [ref=e495]\\n              - columnheader \\\"intent\\\" [ref=e496]\\n              - columnheader \\\"outcome\\\" [ref=e497]\\n              - columnheader \\\"time\\\" [ref=e498]\\n          - rowgroup [ref=e499]\\n            - row [ref=e500]\\n              - cell \\\"No call yet. Each one is written to trajectory.jsonl with its intent.\\\" [ref=e501]\\n  - complementary \\\"Inspector\\\" [ref=e286]\\n    - region [ref=e502]\\n      - heading \\\"Session\\\" [ref=e503]\\n      - generic [ref=e504]\\n        - generic [ref=e505]\\n          - term [ref=e506]\\n          - definition [ref=e507]\\n        - generic [ref=e508]\\n          - term [ref=e509]\\n          - definition [ref=e510]\\n        - generic [ref=e511]\\n          - term [ref=e512]\\n          - definition [ref=e513]\\n        - generic [ref=e514]\\n          - term [ref=e515]\\n          - definition [ref=e516]\\n        - generic [ref=e517]\\n          - term [ref=e518]\\n          - definition [ref=e519]\\n    - region [ref=e520]\\n      - heading \\\"Compile to proposal\\\" [ref=e521]\\n      - paragraph [ref=e522]\\n  - contentinfo [ref=e290]\\n    - generic [ref=e291]\\n    - generic [ref=e292]\\n    - generic [ref=e293]\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_snapshot {\"intent\":\"inspect opened explorer\",\"maxNodes\":200}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"hash\": \"e93ec5269c3382dfea5d1cd1bbbf0bef4eaab12728c0e155011de87563913d23\",\n  \"nodes\": 87,\n  \"text\": \"- generic [ref=e3]\\n  - banner [ref=e4]\\n    - generic [ref=e5]\\n    - navigation \\\"Project\\\" [ref=e7]\\n      - generic [ref=e8]\\n      - generic [ref=e9]\\n      - generic [ref=e10]\\n      - generic [ref=e11]\\n    - button \\\"Search or run a command\\\" [ref=e12]\\n      - generic [ref=e14]\\n    - generic [ref=e15]\\n  - navigation \\\"Sections\\\" [ref=e17]\\n    - generic [ref=e18]\\n      - paragraph [ref=e19]\\n      - button \\\"Flows\\\" [ref=e20]\\n      - button \\\"Runs\\\" [ref=e22]\\n      - button \\\"Bindings\\\" [ref=e24]\\n      - button \\\"Agents and tools\\\" [ref=e26]\\n    - generic [ref=e28]\\n      - paragraph [ref=e29]\\n      - button \\\"API\\\" [ref=e30]\\n      - button \\\"Data\\\" [ref=e32]\\n    - generic [ref=e34]\\n      - button \\\"Import prototype database\\\" [ref=e35]\\n      - button \\\"Settings\\\" [ref=e37]\\n  - region \\\"Workspace\\\" [ref=e39]\\n    - generic [ref=e462]\\n      - heading \\\"Surface explorer\\\" [ref=e463]\\n      - generic [ref=e464]\\n      - generic [ref=e465]\\n        - generic [ref=e466]\\n        - combobox \\\"Adapter\\\" [ref=e467]\\n          - generic [ref=e468]\\n      - button \\\"Open a session\\\" [disabled] [ref=e469]\\n        - generic [ref=e471]\\n      - button \\\"Close the session\\\" [ref=e472]\\n      - button \\\"Act on the element\\\" [ref=e474]\\n      - button \\\"Snapshot the session\\\" [ref=e476]\\n      - generic [ref=e478]\\n    - generic [ref=e479]\\n      - complementary \\\"Snapshot\\\" [ref=e480]\\n        - paragraph [ref=e481]\\n      - generic [ref=e482]\\n        - generic [ref=e484]\\n          - generic [ref=e485]\\n          - textbox \\\"Intent\\\" [ref=e486]\\n        - alert [ref=e487]\\n          - generic [ref=e488]\\n          - generic [ref=e489]\\n        - table [ref=e490]\\n          - caption [ref=e491]\\n          - rowgroup [ref=e492]\\n            - row [ref=e493]\\n              - columnheader \\\"#\\\" [ref=e494]\\n              - columnheader \\\"call\\\" [ref=e495]\\n              - columnheader \\\"intent\\\" [ref=e496]\\n              - columnheader \\\"outcome\\\" [ref=e497]\\n              - columnheader \\\"time\\\" [ref=e498]\\n          - rowgroup [ref=e499]\\n            - row [ref=e500]\\n              - cell \\\"No call yet. Each one is written to trajectory.jsonl with its intent.\\\" [ref=e501]\\n  - complementary \\\"Inspector\\\" [ref=e286]\\n    - region [ref=e502]\\n      - heading \\\"Session\\\" [ref=e503]\\n      - generic [ref=e504]\\n        - generic [ref=e505]\\n          - term [ref=e506]\\n          - definition [ref=e507]\\n        - generic [ref=e508]\\n          - term [ref=e509]\\n          - definition [ref=e510]\\n        - generic [ref=e511]\\n          - term [ref=e512]\\n          - definition [ref=e513]\\n        - generic [ref=e514]\\n          - term [ref=e515]\\n          - definition [ref=e516]\\n        - generic [ref=e517]\\n          - term [ref=e518]\\n          - definition [ref=e519]\\n    - region [ref=e520]\\n      - heading \\\"Compile to proposal\\\" [ref=e521]\\n      - paragraph [ref=e522]\\n  - contentinfo [ref=e290]\\n    - generic [ref=e291]\\n    - generic [ref=e292]\\n    - generic [ref=e293]\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_act {\"intent\":\"provide exploration intent\",\"action\":\"type\",\"ref\":\"e486\",\"args\":{\"value\":\"Click the audit button\"}}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"ok\": true,\n  \"ref\": \"e486\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_snapshot {\"intent\":\"inspect action controls after intent\",\"maxNodes\":200}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"hash\": \"7435ff2e9aa2f92d7c48ae394a6fba701c5349098979a0751370586f8bfbeadd\",\n  \"nodes\": 87,\n  \"text\": \"- generic [ref=e3]\\n  - banner [ref=e4]\\n    - generic [ref=e5]\\n    - navigation \\\"Project\\\" [ref=e7]\\n      - generic [ref=e8]\\n      - generic [ref=e9]\\n      - generic [ref=e10]\\n      - generic [ref=e11]\\n    - button \\\"Search or run a command\\\" [ref=e12]\\n      - generic [ref=e14]\\n    - generic [ref=e15]\\n  - navigation \\\"Sections\\\" [ref=e17]\\n    - generic [ref=e18]\\n      - paragraph [ref=e19]\\n      - button \\\"Flows\\\" [ref=e20]\\n      - button \\\"Runs\\\" [ref=e22]\\n      - button \\\"Bindings\\\" [ref=e24]\\n      - button \\\"Agents and tools\\\" [ref=e26]\\n    - generic [ref=e28]\\n      - paragraph [ref=e29]\\n      - button \\\"API\\\" [ref=e30]\\n      - button \\\"Data\\\" [ref=e32]\\n    - generic [ref=e34]\\n      - button \\\"Import prototype database\\\" [ref=e35]\\n      - button \\\"Settings\\\" [ref=e37]\\n  - region \\\"Workspace\\\" [ref=e39]\\n    - generic [ref=e462]\\n      - heading \\\"Surface explorer\\\" [ref=e463]\\n      - generic [ref=e464]\\n      - generic [ref=e465]\\n        - generic [ref=e466]\\n        - combobox \\\"Adapter\\\" [ref=e467]\\n          - generic [ref=e468]\\n      - button \\\"Open a session\\\" [disabled] [ref=e469]\\n        - generic [ref=e471]\\n      - button \\\"Close the session\\\" [ref=e472]\\n      - button \\\"Act on the element\\\" [ref=e474]\\n      - button \\\"Snapshot the session\\\" [ref=e476]\\n      - generic [ref=e478]\\n    - generic [ref=e479]\\n      - complementary \\\"Snapshot\\\" [ref=e480]\\n        - paragraph [ref=e481]\\n      - generic [ref=e482]\\n        - generic [ref=e484]\\n          - generic [ref=e485]\\n          - textbox \\\"Intent\\\" [focused] [ref=e486]\\n        - alert [ref=e487]\\n          - generic [ref=e488]\\n          - generic [ref=e489]\\n        - table [ref=e490]\\n          - caption [ref=e491]\\n          - rowgroup [ref=e492]\\n            - row [ref=e493]\\n              - columnheader \\\"#\\\" [ref=e494]\\n              - columnheader \\\"call\\\" [ref=e495]\\n              - columnheader \\\"intent\\\" [ref=e496]\\n              - columnheader \\\"outcome\\\" [ref=e497]\\n              - columnheader \\\"time\\\" [ref=e498]\\n          - rowgroup [ref=e499]\\n            - row [ref=e500]\\n              - cell \\\"No call yet. Each one is written to trajectory.jsonl with its intent.\\\" [ref=e501]\\n  - complementary \\\"Inspector\\\" [ref=e286]\\n    - region [ref=e502]\\n      - heading \\\"Session\\\" [ref=e503]\\n      - generic [ref=e504]\\n        - generic [ref=e505]\\n          - term [ref=e506]\\n          - definition [ref=e507]\\n        - generic [ref=e508]\\n          - term [ref=e509]\\n          - definition [ref=e510]\\n        - generic [ref=e511]\\n          - term [ref=e512]\\n          - definition [ref=e513]\\n        - generic [ref=e514]\\n          - term [ref=e515]\\n          - definition [ref=e516]\\n        - generic [ref=e517]\\n          - term [ref=e518]\\n          - definition [ref=e519]\\n    - region [ref=e520]\\n      - heading \\\"Compile to proposal\\\" [ref=e521]\\n      - paragraph [ref=e522]\\n  - contentinfo [ref=e290]\\n    - generic [ref=e291]\\n    - generic [ref=e292]\\n    - generic [ref=e293]\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_act {\"intent\":\"try Yam action button\",\"action\":\"click\",\"ref\":\"e474\"}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"ok\": true,\n  \"ref\": \"e474\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_read {\"intent\":\"read Explorer feedback\",\"kind\":\"text\",\"ref\":\"e3\"}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Yam/project/Surface explorerSearch or run a command⌘Kservice 127.0.0.1:60875/serviceProjectFlowsRunsBindingsAgents and toolsResourcesAPIDataImport prototype databaseSettingsSurface explorerplaywright · http://127.0.0.1:60875/target · session ex-mts54146Adapterplaywright▾Open a sessionOClose the sessionAct on the elementSnapshot the sessionCompile a trajectory⌘K +1Take a snapshot to see what is on the screen.IntentTrajectory#callintentoutcometimeNo call yet. Each one is written to trajectory.jsonl with its intent.SessionAdapterplaywrightBase URLhttp://127.0.0.1:60875/targetSessionex-mts54146Trajectory—Calls0Compile to proposalWrites a story draft, a plan and a seed bindings store under proposals/, every binding marked unverified. It writes nowhere else, and it keeps the calls that failed: a trajectory is an account of what an agent did, and dropping the mistakes would make the proposal a story of a session that never happened.Choose an action.⌘K commands? keys"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_snapshot {\"intent\":\"read action failure\",\"maxNodes\":200}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"hash\": \"d92a59c1e02de22b39b604a3090eafa74efffef8aec7589065bd8f8940698fb1\",\n  \"nodes\": 84,\n  \"text\": \"- generic [ref=e3]\\n  - banner [ref=e4]\\n    - generic [ref=e5]\\n    - navigation \\\"Project\\\" [ref=e7]\\n      - generic [ref=e8]\\n      - generic [ref=e9]\\n      - generic [ref=e10]\\n      - generic [ref=e11]\\n    - button \\\"Search or run a command\\\" [ref=e12]\\n      - generic [ref=e14]\\n    - generic [ref=e15]\\n  - navigation \\\"Sections\\\" [ref=e17]\\n    - generic [ref=e18]\\n      - paragraph [ref=e19]\\n      - button \\\"Flows\\\" [ref=e20]\\n      - button \\\"Runs\\\" [ref=e22]\\n      - button \\\"Bindings\\\" [ref=e24]\\n      - button \\\"Agents and tools\\\" [ref=e26]\\n    - generic [ref=e28]\\n      - paragraph [ref=e29]\\n      - button \\\"API\\\" [ref=e30]\\n      - button \\\"Data\\\" [ref=e32]\\n    - generic [ref=e34]\\n      - button \\\"Import prototype database\\\" [ref=e35]\\n      - button \\\"Settings\\\" [ref=e37]\\n  - region \\\"Workspace\\\" [ref=e39]\\n    - generic [ref=e462]\\n      - heading \\\"Surface explorer\\\" [ref=e463]\\n      - generic [ref=e464]\\n      - generic [ref=e465]\\n        - generic [ref=e466]\\n        - combobox \\\"Adapter\\\" [ref=e467]\\n          - generic [ref=e468]\\n      - button \\\"Open a session\\\" [disabled] [ref=e469]\\n        - generic [ref=e471]\\n      - button \\\"Close the session\\\" [ref=e472]\\n      - button \\\"Act on the element\\\" [ref=e474]\\n      - button \\\"Snapshot the session\\\" [ref=e476]\\n      - generic [ref=e478]\\n    - generic [ref=e479]\\n      - complementary \\\"Snapshot\\\" [ref=e480]\\n        - paragraph [ref=e481]\\n      - generic [ref=e482]\\n        - generic [ref=e484]\\n          - generic [ref=e485]\\n          - textbox \\\"Intent\\\" [ref=e486]\\n        - table [ref=e490]\\n          - caption [ref=e491]\\n          - rowgroup [ref=e492]\\n            - row [ref=e493]\\n              - columnheader \\\"#\\\" [ref=e494]\\n              - columnheader \\\"call\\\" [ref=e495]\\n              - columnheader \\\"intent\\\" [ref=e496]\\n              - columnheader \\\"outcome\\\" [ref=e497]\\n              - columnheader \\\"time\\\" [ref=e498]\\n          - rowgroup [ref=e499]\\n            - row [ref=e500]\\n              - cell \\\"No call yet. Each one is written to trajectory.jsonl with its intent.\\\" [ref=e501]\\n  - complementary \\\"Inspector\\\" [ref=e286]\\n    - region [ref=e502]\\n      - heading \\\"Session\\\" [ref=e503]\\n      - generic [ref=e504]\\n        - generic [ref=e505]\\n          - term [ref=e506]\\n          - definition [ref=e507]\\n        - generic [ref=e508]\\n          - term [ref=e509]\\n          - definition [ref=e510]\\n        - generic [ref=e511]\\n          - term [ref=e512]\\n          - definition [ref=e513]\\n        - generic [ref=e514]\\n          - term [ref=e515]\\n          - definition [ref=e516]\\n        - generic [ref=e517]\\n          - term [ref=e518]\\n          - definition [ref=e519]\\n    - region [ref=e520]\\n      - heading \\\"Compile to proposal\\\" [ref=e521]\\n      - paragraph [ref=e522]\\n  - contentinfo [ref=e290]\\n    - generic [ref=e291]\\n    - generic [ref=e292]\\n    - generic [ref=e293]\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_check {\"intent\":\"verify missing action feedback\",\"predicate\":{\"kind\":\"textContains\",\"value\":{\"kind\":\"literal\",\"value\":\"Choose an action.\"}},\"subject\":\"ref\",\"ref\":\"e3\"}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"ok\": true,\n  \"actual\": \"Yam/project/Surface explorerSearch or run a command⌘Kservice 127.0.0.1:60875/serviceProjectFlowsRunsBindingsAgents and toolsResourcesAPIDataImport prototype databaseSettingsSurface explorerplaywright · http://127.0.0.1:60875/target · session ex-mts54146Adapterplaywright▾Open a sessionOClose the sessionAct on the elementSnapshot the sessionCompile a trajectory⌘K +1Take a snapshot to see what is on the screen.IntentTrajectory#callintentoutcometimeNo call yet. Each one is written to trajectory.jsonl with its intent.SessionAdapterplaywrightBase URLhttp://127.0.0.1:60875/targetSessionex-mts54146Trajectory—Calls0Compile to proposalWrites a story draft, a plan and a seed bindings store under proposals/, every binding marked unverified. It writes nowhere else, and it keeps the calls that failed: a trajectory is an account of what an agent did, and dropping the mistakes would make the proposal a story of a session that never happened.Choose an action.⌘K commands? keys\",\n  \"expected\": \"Choose an action.\"\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "surface_trajectory {}",
+    "data": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"path\": \"/Users/atul/Workspace/Svatah/automator/docs/spec/surface-first/evidence/trajectory.jsonl\",\n  \"calls\": 18\n}"
+        }
+      ]
+    }
+  },
+  {
+    "label": "HTTP /surface/probe/open",
+    "data": {
+      "status": 200,
+      "body": {
+        "sessionId": "probe",
+        "trajectory": "/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-mission-pfooP7/project/runs/probe/trajectory.jsonl"
+      }
+    }
+  },
+  {
+    "label": "HTTP /surface/probe/snapshot",
+    "data": {
+      "status": 500,
+      "body": {
+        "statusCode": 500,
+        "error": "Internal Server Error",
+        "message": "[\n  {\n    \"code\": \"too_small\",\n    \"minimum\": 1,\n    \"type\": \"string\",\n    \"inclusive\": true,\n    \"exact\": false,\n    \"message\": \"String must contain at least 1 character(s)\",\n    \"path\": [\n      \"intent\"\n    ]\n  }\n]"
+      }
+    }
+  },
+  {
+    "label": "HTTP /surface/probe/read",
+    "data": {
+      "status": 400,
+      "body": {
+        "error": "missing-intent",
+        "message": "Every surface call needs an `intent`: what you are trying to do, in the words you would use to describe the step to a person. It is the sentence this call compiles into (LLD §13.4)."
+      }
+    }
+  },
+  {
+    "label": "HTTP /surface/probe/close",
+    "data": {
+      "status": 202,
+      "body": {
+        "ok": true
+      }
+    }
+  }
+]

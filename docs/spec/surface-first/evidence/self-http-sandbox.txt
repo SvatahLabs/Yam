@@ -1,0 +1,19 @@
+the service exited with 1 before it was ready:
+node:net:1994
+      const error = new UVExceptionWithHostPort(rval, 'listen', address, port);
+                    ^
+
+Error: listen EPERM: operation not permitted 127.0.0.1
+    at Server.setupListenHandle [as _listen2] (node:net:1994:21)
+    at listenInCluster (node:net:2073:12)
+    at node:net:2282:7
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EPERM',
+  errno: -1,
+  syscall: 'listen',
+  address: '127.0.0.1'
+}
+
+Node.js v25.6.1
+
+the HTTP side of the self suite exited 2

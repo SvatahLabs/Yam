@@ -63,6 +63,7 @@ Generated from the code by `pnpm docs`, and checked in CI so they cannot drift:
 
 ## Project
 
+- [Surface-first mission proposal](spec/surface-first/README.md), with Yam-on-Yam gap analysis, requirements, design and implementation tasks
 - [Changelog](../CHANGELOG.md) · [Versioning](project/versioning.md)
 - [Reports](project/reports.md), the published numbers and how to regenerate them
 - [Continuous integration](ci.md)

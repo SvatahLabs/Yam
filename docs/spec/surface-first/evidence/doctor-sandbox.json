@@ -1,0 +1,48 @@
+{
+  "checks": [
+    {
+      "adapter": "-",
+      "name": "platform",
+      "ok": true,
+      "detail": "darwin arm64, Node v25.6.1"
+    },
+    {
+      "adapter": "app",
+      "name": "node-runtime",
+      "ok": true,
+      "detail": "runtime: /opt/homebrew/bin/node (v25.6.1, from PATH)",
+      "fix": "The app spawns `yam serve` with a resolved Node, never with its own binary. Install Node 22 LTS or newer so that `node` is on PATH, or set YAM_NODE to the interpreter to use. Looked in: the YAM_NODE environment variable (not set); a `node` on PATH (/opt/homebrew/bin)."
+    },
+    {
+      "adapter": "ax",
+      "name": "accessibility",
+      "ok": false,
+      "detail": "prompt-pending — execution error: Error: Error: Application can't be found. (-2700)",
+      "fix": "The Accessibility permission has not been granted to the program running Yam. Open System Settings → Privacy & Security → Accessibility, add the terminal (or the test runner) you are running from, and switch it on. macOS asks once and remembers the answer per program, so a permission granted to Terminal does not carry to iTerm, to VS Code, or to a CI agent."
+    },
+    {
+      "adapter": "ax",
+      "name": "session",
+      "ok": false,
+      "advisory": true,
+      "state": "no-session",
+      "detail": "no process in this login session owns a window (0 asked)",
+      "fix": "Nothing launched here will get a window, so the desktop conformance gate cannot read one and will exit 2. Unlock the display — or log in at the console rather than over SSH — and run it again."
+    },
+    {
+      "adapter": "ax",
+      "name": "screen-recording",
+      "ok": false,
+      "advisory": true,
+      "detail": "refused — rect (0.0, 0.0, 1.0, 1.0) does not intersect any displays",
+      "fix": "Screenshots come from `screencapture`, which needs Screen Recording — a different grant from Accessibility. Open System Settings → Privacy & Security → Screen & System Audio Recording, switch it on for the program running Yam, and restart it. Without it the adapter still reads the accessibility tree; a run simply has no screenshots."
+    },
+    {
+      "adapter": "uia",
+      "name": "platform",
+      "ok": false,
+      "skipped": true,
+      "detail": "not Windows"
+    }
+  ]
+}
