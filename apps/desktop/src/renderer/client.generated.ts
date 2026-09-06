@@ -39,6 +39,8 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "getTools", verb: "get", path: "/tools", summary: "The tools this project exposes, and every invocation served" },
   { id: "postApiRequest", verb: "post", path: "/api/request", summary: "Execute one API request ad hoc" },
   { id: "postBindingsVerify", verb: "post", path: "/bindings/verify", summary: "Dry-resolve the store, or one binding" },
+  { id: "postCapture", verb: "post", path: "/capture", summary: "Record a flow from what a person does; sentences arrive on the stream" },
+  { id: "postCaptureByIdStop", verb: "post", path: "/capture/{id}/stop", summary: "End a capture, writing the flow and its bindings" },
   { id: "postCompile", verb: "post", path: "/compile", summary: "Compile and lint" },
   { id: "postHeal", verb: "post", path: "/heal", summary: "Heal a run; proposals arrive on the stream" },
   { id: "postMigrate", verb: "post", path: "/migrate", summary: "Import a Yam prototype's electron-db directory into this project" },
@@ -190,6 +192,16 @@ export class GeneratedServiceClient {
   /** `POST /bindings/verify` — Dry-resolve the store, or one binding */
   async postBindingsVerify(body?: unknown): Promise<unknown> {
     return await this.call("post", `/bindings/verify`, { body, });
+  }
+
+  /** `POST /capture` — Record a flow from what a person does; sentences arrive on the stream */
+  async postCapture(body?: unknown): Promise<unknown> {
+    return await this.call("post", `/capture`, { body, });
+  }
+
+  /** `POST /capture/{id}/stop` — End a capture, writing the flow and its bindings */
+  async postCaptureByIdStop(id: string): Promise<unknown> {
+    return await this.call("post", `/capture/${encodeURIComponent(id)}/stop`, { });
   }
 
   /** `POST /compile` — Compile and lint */

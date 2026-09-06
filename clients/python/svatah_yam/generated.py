@@ -40,6 +40,8 @@ ENDPOINTS = [
     {"id": "getTools", "verb": "get", "path": "/tools"},
     {"id": "postApiRequest", "verb": "post", "path": "/api/request"},
     {"id": "postBindingsVerify", "verb": "post", "path": "/bindings/verify"},
+    {"id": "postCapture", "verb": "post", "path": "/capture"},
+    {"id": "postCaptureByIdStop", "verb": "post", "path": "/capture/{id}/stop"},
     {"id": "postCompile", "verb": "post", "path": "/compile"},
     {"id": "postHeal", "verb": "post", "path": "/heal"},
     {"id": "postMigrate", "verb": "post", "path": "/migrate"},
@@ -60,7 +62,7 @@ ENDPOINTS = [
     {"id": "putFlowsByFile", "verb": "put", "path": "/flows/{file}"},
 ]
 
-EVENT_KINDS = ["step.result", "run.summary", "run.started", "run.failed", "record.started", "record.step", "record.decision", "record.candidates", "record.decision.expired", "record.finished", "record.failed", "heal.proposal", "heal.finished", "heal.failed", "tool.invocation", "log"]
+EVENT_KINDS = ["step.result", "run.summary", "run.started", "run.failed", "record.started", "record.step", "record.decision", "record.candidates", "record.decision.expired", "record.finished", "record.failed", "capture.started", "capture.step", "capture.finished", "capture.failed", "heal.proposal", "heal.finished", "heal.failed", "tool.invocation", "log"]
 
 
 class ServiceError(RuntimeError):
@@ -194,6 +196,14 @@ class GeneratedClient:
     def post_bindings_verify(self, body: Any = None) -> Any:
         """`POST /bindings/verify` — Dry-resolve the store, or one binding"""
         return self._call("post", f"/bindings/verify", body=body)
+
+    def post_capture(self, body: Any = None) -> Any:
+        """`POST /capture` — Record a flow from what a person does; sentences arrive on the stream"""
+        return self._call("post", f"/capture", body=body)
+
+    def post_capture_by_id_stop(self, id) -> Any:
+        """`POST /capture/{id}/stop` — End a capture, writing the flow and its bindings"""
+        return self._call("post", f"/capture/{id}/stop")
 
     def post_compile(self) -> Any:
         """`POST /compile` — Compile and lint"""

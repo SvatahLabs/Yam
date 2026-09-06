@@ -447,3 +447,25 @@ were done.)
 **Known limits.** Web only, main frame only; a navigation a script starts
 without a click or submit relies on the adapter's request hold; the app's
 Record button still starts the binding session (`POST /record`), not capture.
+
+**Yam.app, the same day.** Atul: "make the change in Yam.app." The app's Record
+button started a binding session, which is the thing he had just said Record
+should not mean. Now:
+
+- `POST /capture` and `POST /capture/{id}/stop` on the service, four
+  `capture.*` events, and `ServiceApi.capture` running through the same
+  `captureIntoProject` the command line uses — so the app and `yam record`
+  write the same flow (`packages/service/src/server.ts`,
+  `packages/cli/src/service-api.ts`, `packages/cli/src/commands/capture.ts`).
+- Capture shares the one session slot with `POST /record`: both open the
+  project's browser, so either refuses with 409 while the other is open.
+- **Record** (`capture.start`, key R) and **Bind targets** (`record.start`,
+  key B) are different actions in the registry, the palette fixture and both
+  renderers. The Record screen lists the sentences as they are written, drops
+  the gateway chooser while capturing (nothing is grounded by a model), and
+  says where the flow went; the cockpit shows the same rows.
+
+Verified end to end against the sample application through a real `yam serve`:
+`POST /capture` → five `capture.step` sentences → `capture.finished` with
+`flows/sign-in.flow` and two bindings under `bindings/login/`. The service
+suite covers the stream, the shared session, a failure and a 501 build.

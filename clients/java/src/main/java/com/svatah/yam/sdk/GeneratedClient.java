@@ -46,6 +46,8 @@ public class GeneratedClient {
       "GET /tools",
       "POST /api/request",
       "POST /bindings/verify",
+      "POST /capture",
+      "POST /capture/{id}/stop",
       "POST /compile",
       "POST /heal",
       "POST /migrate",
@@ -79,6 +81,10 @@ public class GeneratedClient {
       "record.decision.expired",
       "record.finished",
       "record.failed",
+      "capture.started",
+      "capture.step",
+      "capture.finished",
+      "capture.failed",
       "heal.proposal",
       "heal.finished",
       "heal.failed",
@@ -243,6 +249,16 @@ public class GeneratedClient {
   /** {@code POST /bindings/verify} — Dry-resolve the store, or one binding */
   public String postBindingsVerify(String body) {
     return call("post", "/bindings/verify", body, "application/json");
+  }
+
+  /** {@code POST /capture} — Record a flow from what a person does; sentences arrive on the stream */
+  public String postCapture(String body) {
+    return call("post", "/capture", body, "application/json");
+  }
+
+  /** {@code POST /capture/{id}/stop} — End a capture, writing the flow and its bindings */
+  public String postCaptureByIdStop(String id) {
+    return call("post", "/capture/" + segment(id) + "/stop", null, "application/json");
   }
 
   /** {@code POST /compile} — Compile and lint */

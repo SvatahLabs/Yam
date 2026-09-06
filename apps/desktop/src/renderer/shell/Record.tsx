@@ -2,10 +2,17 @@
  * The app's Record review (T10.1, REQ-ADE-4, LLD §13.7; the `RecordReview`
  * artboard).
  *
- * A recording session streams a grounding decision per target *before* the
- * binding is written, and this is where it is reviewed: the snapshot excerpt the
- * model was shown with the line it chose, the candidate bundle, the fingerprint
- * and the provenance, and Accept, Re-pick or Reject.
+ * Two sessions land here, because they are one thing — a browser is open and
+ * something is being written — and differ in who decides.
+ *
+ * **Record** (Draft 2.23, REQ-REC-13): a person drives the application and each
+ * thing they do becomes a sentence of the flow. The screen shows the sentences
+ * as they are written, and Stop ends the session and writes the flow.
+ *
+ * **Bind targets** (REQ-ADE-4): a flow that already exists is driven, and each
+ * grounding is reviewed *before* the binding is written — the snapshot excerpt
+ * the model was shown with the line it chose, the candidate bundle, the
+ * fingerprint and the provenance, and Accept, Re-pick or Reject.
  *
  * Two things the artboard is specific about, both from Draft 2.7:
  *
@@ -101,10 +108,14 @@ export function RecordScreen(props: RecordProps): React.JSX.Element {
         state={state}
         actions={props.actions}
         onAction={props.onAction}
-        primary="record.accept"
-        danger="record.reject"
+        primary={state.capturing ? "capture.stop" : "record.accept"}
+        danger={state.capturing ? undefined : "record.reject"}
       >
-        {inWorkspace ? null : gateway}
+        {/*
+          A capture has no gateway to choose: nothing is grounded by a model,
+          because the person is pointing at the element by using it.
+        */}
+        {inWorkspace || state.capturing ? null : gateway}
       </Toolbar>
 
       <div className="sv-main">
@@ -172,10 +183,53 @@ export function RecordScreen(props: RecordProps): React.JSX.Element {
               </Alert>
             )}
 
-            {decision === undefined ? (
+            {/*
+              The sentences a capture is writing (Draft 2.23). They arrive one
+              at a time, each when its element has been bound, so this list is
+              the flow being written rather than a log of it.
+            */}
+            {state.capturing || state.sentences.length > 0 ? (
+              <div id="record-sentences" aria-label="The flow being written">
+                <div className="sv-panel-head">
+                  <span>{state.captured === undefined ? "Recording what you do" : "Recorded"}</span>
+                  <span className="sv-spacer" />
+                  <span className="sv-chip">
+                    {state.sentences.length} sentence{state.sentences.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+                {state.sentences.length === 0 ? (
+                  <p className="sv-empty">
+                    Drive the application in the browser that opened. Each click and each value
+                    you enter becomes a sentence here. Press Stop when you are done.
+                  </p>
+                ) : (
+                  <ol className="sv-audit">
+                    {state.sentences.map((sentence, at) => (
+                      <li key={at}>
+                        <span className="sv-mono">{sentence}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+                {state.captured === undefined ? null : (
+                  <p id="record-captured" className="sv-card">
+                    <Pill tone="pass" label="written" />{" "}
+                    <span className="sv-mono">{state.captured.file}</span> — “{state.captured.story}
+                    ”, {state.captured.steps} step{state.captured.steps === 1 ? "" : "s"},{" "}
+                    {state.captured.bound} binding{state.captured.bound === 1 ? "" : "s"}.{" "}
+                    {state.captured.unbound.length === 0
+                      ? "Check it, then run it."
+                      : `${state.captured.unbound.join(", ")} could not be bound; use Bind targets for those.`}
+                  </p>
+                )}
+              </div>
+            ) : null}
+
+            {state.capturing || state.sentences.length > 0 ? null : decision === undefined ? (
               <p className="sv-empty">
                 {state.sessionId === undefined
-                  ? "No session. Press Record on the Flows screen, or choose a flow here and press Record."
+                  ? "No session. Press Record on the Flows screen to record a flow from what you do, " +
+                    "or choose a flow there and press Bind targets."
                   : "The session is running. A grounding appears here when the recorder needs a decision."}
               </p>
             ) : (
@@ -249,8 +303,11 @@ export function RecordInspector(props: RecordProps): React.JSX.Element {
   if (decision === undefined) {
     return (
       <EmptyInspector id="inspector-empty" title="Inspector">
-        A grounding shows the candidate bundle and the fingerprint before the
-        binding is written. Accept, re-pick, or reject.
+        {props.state.capturing
+          ? "Each element you use is bound as you use it, from what the page says about " +
+            "it — a test id, a role and name, the text. The sentences are on the left."
+          : "A grounding shows the candidate bundle and the fingerprint before the " +
+            "binding is written. Accept, re-pick, or reject."}
       </EmptyInspector>
     );
   }

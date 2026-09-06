@@ -143,6 +143,11 @@ export function fakeService(responses: FakeResponses = {}): FakeService {
       record("postRecord", body);
       return { sessionId: "rec-1" };
     },
+    async postCapture(body) {
+      record("postCapture", body);
+      return { sessionId: "cap-1" };
+    },
+    postCaptureByIdStop: (id, body) => wrote("postCaptureByIdStop", id, body),
     postRecordByIdDecision: (id, body) => wrote("postRecordByIdDecision", id, body),
     postRecordByIdStop: (id, body) => wrote("postRecordByIdStop", id, body),
     postRunsByIdStop: (id, body) => wrote("postRunsByIdStop", id, body),

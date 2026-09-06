@@ -60,11 +60,26 @@
       "cli": "yam run --resume <runId> --from <stepId>"
     },
     {
-      "id": "record.start",
+      "id": "capture.start",
       "label": "Record",
       "group": "Actions",
       "screen": "flows",
       "key": "R",
+      "cli": "yam record"
+    },
+    {
+      "id": "capture.stop",
+      "label": "Stop recording",
+      "group": "Actions",
+      "screen": "record",
+      "key": "S"
+    },
+    {
+      "id": "record.start",
+      "label": "Bind targets",
+      "group": "Actions",
+      "screen": "flows",
+      "key": "B",
       "cli": "yam record --flow <file>"
     },
     {

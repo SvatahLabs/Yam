@@ -27,10 +27,12 @@ import {
   runScreen,
   screenById,
   applyEvent,
+  applyRecordEvent,
   type FakeResponses,
   type FlowsState,
   type ScreenId,
   type RunState,
+  type RecordState,
 } from "../src/index.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -606,5 +608,96 @@ describe("a screen with a list opens on its first row (P10-F2)", () => {
     expect(withRows, "no list screen has a row, so the default is untested").toBeGreaterThanOrEqual(
       3,
     );
+  });
+});
+
+describe("a capture happening (REQ-REC-13, Draft 2.23)", () => {
+  /**
+   * `yam record` and the app's Record button are one thing: a person drives and
+   * the flow is written from what they did. The screen shows the sentences as
+   * they arrive, and says where the flow went when the session ends.
+   */
+  const capture = async (): Promise<RecordState> =>
+    (await screenById("record")!.load(service(), { sessionId: "cap-1", capturing: true })) as RecordState;
+
+  it("starts empty, collects the sentences, and reports what was written", async () => {
+    let state = await capture();
+    expect(state.capturing).toBe(true);
+    expect(state.sentences).toEqual([]);
+    expect(state.subtitle).toContain("recording what you do");
+
+    for (const sentence of ['Go to "/login"', "Type {input.password} into the password field", "Click the sign in button"]) {
+      state = applyRecordEvent(state, { kind: "capture.step", sessionId: "cap-1", sentence });
+    }
+    expect(state.sentences).toEqual([
+      'Go to "/login"',
+      "Type {input.password} into the password field",
+      "Click the sign in button",
+    ]);
+    // No grounding is waiting: nobody is being asked to decide anything.
+    expect(state.decision).toBeUndefined();
+
+    state = applyRecordEvent(state, {
+      kind: "capture.finished",
+      sessionId: "cap-1",
+      captured: {
+        file: "flows/sign-in.flow",
+        story: "Sign in",
+        steps: ['Go to "/login"', "Type {input.password} into the password field", "Click the sign in button"],
+        bound: ["login.password-field", "login.sign-in-button"],
+        unbound: [],
+      },
+    });
+    expect(state.capturing).toBe(false);
+    expect(state.captured).toEqual({
+      file: "flows/sign-in.flow",
+      story: "Sign in",
+      steps: 3,
+      bound: 2,
+      unbound: [],
+    });
+  });
+
+  it("names what could not be bound, and turns a failure into advice for the screen", async () => {
+    let state = applyRecordEvent(await capture(), {
+      kind: "capture.finished",
+      sessionId: "cap-1",
+      captured: { file: "flows/x.flow", story: "X", steps: [], bound: [], unbound: ["the mystery widget"] },
+    });
+    expect(state.captured?.unbound).toEqual(["the mystery widget"]);
+
+    state = applyRecordEvent(state, {
+      kind: "capture.failed",
+      sessionId: "cap-1",
+      message: "The playwright adapter cannot watch what a person does.",
+    });
+    expect(state.capturing).toBe(false);
+    expect(state.failure?.message).toMatch(/cannot watch/);
+    // Advice for whoever is looking at the window, never a CLI flag (REQ-ADE-4).
+    expect(state.failure?.advice).not.toMatch(/--/);
+    expect(state.failure?.advice).toMatch(/press Record again/);
+  });
+
+  it("offers Record and Bind targets as different actions, on different keys", () => {
+    const record = ACTIONS.find((one) => one.id === "capture.start")!;
+    const bind = ACTIONS.find((one) => one.id === "record.start")!;
+    expect(record.label).toBe("Record");
+    expect(record.cli).toBe("yam record");
+    expect(record.key).toBe("R");
+    expect(bind.label).toBe("Bind targets");
+    expect(bind.cli).toBe("yam record --flow <file>");
+    expect(bind.key).toBe("B");
+    expect(ACTIONS.find((one) => one.id === "capture.stop")!.screen).toBe("record");
+  });
+
+  it("starts a capture through the service and lands on the Record screen", async () => {
+    const fake = service();
+    const outcome = await ACTIONS.find((one) => one.id === "capture.start")!.run(fake, { name: "Sign in" });
+    expect(outcome.ok).toBe(true);
+    expect(outcome.goTo).toBe("record");
+    expect(outcome.params).toEqual({ sessionId: "cap-1", capturing: true });
+
+    const stop = await ACTIONS.find((one) => one.id === "capture.stop")!.run(fake, { sessionId: "cap-1" });
+    expect(stop.ok).toBe(true);
   });
 });

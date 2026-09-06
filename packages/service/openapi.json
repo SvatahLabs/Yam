@@ -918,6 +918,111 @@
         }
       }
     },
+    "/capture": {
+      "post": {
+        "summary": "Record a flow from what a person does; sentences arrive on the stream",
+        "description": "The browser opens at the application and the person drives it. Each click, value entered, choice, key and navigation becomes a sentence of the flow language, emitted as `capture.step`, and each element touched becomes a binding (REQ-REC-13, Draft 2.23).\n\nThis is the other half of recording. `POST /record` drives a flow somebody wrote and binds its targets; this one writes the flow.\n\nThe flow file and the bindings are written when the session **ends**, so POST /capture/{id}/stop is how one finishes — a capture nobody stopped has written nothing. The result arrives as `capture.finished`.\n\nOne session at a time, shared with `POST /record`: both open the project's browser, and this answers **409** while either is open.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The story's name."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The session id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A recording session is already open. Stop it before starting another.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "This build cannot record a flow",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/capture/{id}/stop": {
+      "post": {
+        "summary": "End a capture, writing the flow and its bindings",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Stopping; `capture.finished` follows",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/record/{id}/decision": {
       "post": {
         "summary": "Accept, re-pick or reject the grounding a session is waiting on",
@@ -1589,7 +1694,7 @@
     "/events": {
       "get": {
         "summary": "The event stream (WebSocket)",
-        "description": "Every message is a JSON object with a `kind`. The kinds are: `step.result`, `run.summary`, `run.started`, `run.failed`, `record.started`, `record.step`, `record.decision`, `record.candidates`, `record.decision.expired`, `record.finished`, `record.failed`, `heal.proposal`, `heal.finished`, `heal.failed`, `tool.invocation`, `log`. Their shapes are `@svatah/yam-service`'s `ServiceEvent` union (LLD §13.5).",
+        "description": "Every message is a JSON object with a `kind`. The kinds are: `step.result`, `run.summary`, `run.started`, `run.failed`, `record.started`, `record.step`, `record.decision`, `record.candidates`, `record.decision.expired`, `record.finished`, `record.failed`, `capture.started`, `capture.step`, `capture.finished`, `capture.failed`, `heal.proposal`, `heal.finished`, `heal.failed`, `tool.invocation`, `log`. Their shapes are `@svatah/yam-service`'s `ServiceEvent` union (LLD §13.5).",
         "security": [
           {
             "bearerAuth": []
@@ -1605,7 +1710,7 @@
     "/events/sse": {
       "get": {
         "summary": "The event stream (server-sent events)",
-        "description": "Every message is a JSON object with a `kind`. The kinds are: `step.result`, `run.summary`, `run.started`, `run.failed`, `record.started`, `record.step`, `record.decision`, `record.candidates`, `record.decision.expired`, `record.finished`, `record.failed`, `heal.proposal`, `heal.finished`, `heal.failed`, `tool.invocation`, `log`. Their shapes are `@svatah/yam-service`'s `ServiceEvent` union (LLD §13.5).",
+        "description": "Every message is a JSON object with a `kind`. The kinds are: `step.result`, `run.summary`, `run.started`, `run.failed`, `record.started`, `record.step`, `record.decision`, `record.candidates`, `record.decision.expired`, `record.finished`, `record.failed`, `capture.started`, `capture.step`, `capture.finished`, `capture.failed`, `heal.proposal`, `heal.finished`, `heal.failed`, `tool.invocation`, `log`. Their shapes are `@svatah/yam-service`'s `ServiceEvent` union (LLD §13.5).",
         "security": [
           {
             "bearerAuth": []

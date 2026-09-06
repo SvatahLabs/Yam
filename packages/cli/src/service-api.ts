@@ -66,6 +66,50 @@ async function open(
   return { surface, config };
 }
 
+/* ── capture: a flow from what a person does (REQ-REC-13, Draft 2.23) ─────── */
+
+/**
+ * The service's `POST /capture`, through the same `captureIntoProject` the
+ * command line uses (LLD §13.5).
+ *
+ * Headed always: a person cannot drive a browser they cannot see, and this
+ * session exists to be driven. An adapter that cannot watch a person is
+ * refused here rather than reported as an empty flow.
+ */
+export async function serviceCapture(
+  loaded: Loaded,
+  options: {
+    name?: string;
+    onStep?: (sentence: string) => void;
+    log?: (message: string) => void;
+    signal?: AbortSignal;
+  },
+): Promise<unknown> {
+  const { captureIntoProject } = await import("./commands/capture.js");
+  const store = loadBindings(loaded);
+  const { surface, config } = await open(loaded, { headed: true });
+  try {
+    if (surface.observe === undefined || surface.capabilities().observe !== true) {
+      throw new Error(
+        `The ${config.adapter} adapter cannot watch what a person does, so it cannot record a ` +
+          "flow from you. Write the flow and bind its targets instead.",
+      );
+    }
+    return await captureIntoProject({
+      loaded,
+      store,
+      surface,
+      config,
+      name: options.name ?? `Recorded ${new Date().toISOString().slice(0, 16).replace("T", " ")}`,
+      ...(options.signal === undefined ? {} : { signal: options.signal }),
+      ...(options.onStep === undefined ? {} : { onStep: options.onStep }),
+      ...(options.log === undefined ? {} : { log: options.log }),
+    });
+  } finally {
+    await surface.close().catch(() => undefined);
+  }
+}
+
 /* ── record with review (REQ-ADE-4) ───────────────────────────────────────── */
 
 export async function serviceRecord(

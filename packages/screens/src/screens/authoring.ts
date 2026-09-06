@@ -534,6 +534,25 @@ export interface RecordState extends ScreenStateBase {
   readonly decisions: ReadonlyArray<{ target: string; outcome: Pill; by?: string }>;
   /** The steps the session has performed, as `record.step` reports them. */
   readonly steps: ReadonlyArray<{ text: string; status: Pill }>;
+  /**
+   * Whether this session is a capture — a person driving, a flow being written
+   * — rather than a flow being bound (REQ-REC-13, Draft 2.23).
+   *
+   * The two are one screen because they are one session: a browser is open and
+   * something is being written. What differs is who decides, so the screen asks
+   * for a decision in one and shows the sentences in the other.
+   */
+  readonly capturing: boolean;
+  /** The sentences a capture has written, in order (`capture.step`). */
+  readonly sentences: readonly string[];
+  /** Where a finished capture put the flow, and what it bound. */
+  readonly captured?: {
+    readonly file: string;
+    readonly story: string;
+    readonly steps: number;
+    readonly bound: number;
+    readonly unbound: readonly string[];
+  };
   /** A session that ended badly: the alert the artboard shows (Draft 2.7). */
   readonly failure?: { message: string; advice: string };
 }
@@ -572,6 +591,7 @@ const recordScreen: Screen<RecordState> = {
     { action: "record.repick", key: "P", terminal: "p", description: "Re-pick in the session" },
     { action: "record.reject", key: "X", terminal: "x", description: "Reject the grounding" },
     { action: "record.stop", key: "Q", terminal: "q", description: "Stop the session" },
+    { action: "capture.stop", key: "S", terminal: "s", description: "Stop recording and write the flow" },
   ],
   async load(service, params: ScreenParams = {}): Promise<RecordState> {
     const sources = new Sources();
@@ -584,8 +604,10 @@ const recordScreen: Screen<RecordState> = {
         "record",
         "Record review",
         params.sessionId === undefined
-          ? dotted("No session", file === undefined ? undefined : `would record ${file.split("/").pop()}`)
-          : `session ${params.sessionId}`,
+          ? dotted("No session", file === undefined ? undefined : `would bind ${file.split("/").pop()}`)
+          : params.capturing === true
+            ? `recording what you do · session ${params.sessionId}`
+            : `session ${params.sessionId}`,
         credential ? "a model credential is available" : "no model credential on this service",
       ),
       screen: "record",
@@ -623,6 +645,8 @@ const recordScreen: Screen<RecordState> = {
       ...(file === undefined ? {} : { file }),
       decisions: [],
       steps: [],
+      capturing: params.capturing === true,
+      sentences: [],
     };
   },
 };
@@ -705,6 +729,54 @@ export function applyRecordEvent(state: RecordState, event: ServiceEventLike): R
             ],
           }),
       decision: undefined,
+    };
+  }
+
+  /* ── capture: a person driving, a flow being written (Draft 2.23) ──────── */
+
+  if (event.kind === "capture.started") {
+    return {
+      ...state,
+      capturing: true,
+      sentences: [],
+      captured: undefined,
+      failure: undefined,
+      ...(typeof event["sessionId"] === "string" ? { sessionId: event["sessionId"] } : {}),
+    };
+  }
+
+  if (event.kind === "capture.step") {
+    return { ...state, capturing: true, sentences: [...state.sentences, String(event["sentence"] ?? "")] };
+  }
+
+  if (event.kind === "capture.finished") {
+    const captured = (event["captured"] ?? {}) as Record<string, unknown>;
+    const steps = captured["steps"];
+    const unbound = captured["unbound"];
+    return {
+      ...state,
+      capturing: false,
+      sentences: Array.isArray(steps) ? steps.map((one) => String(one)) : state.sentences,
+      captured: {
+        file: String(captured["file"] ?? ""),
+        story: String(captured["story"] ?? ""),
+        steps: Array.isArray(steps) ? steps.length : state.sentences.length,
+        bound: Array.isArray(captured["bound"]) ? captured["bound"].length : 0,
+        unbound: Array.isArray(unbound) ? unbound.map((one) => String(one)) : [],
+      },
+    };
+  }
+
+  if (event.kind === "capture.failed") {
+    return {
+      ...state,
+      capturing: false,
+      failure: {
+        message: String(event["message"] ?? "The recording stopped."),
+        advice:
+          "Nothing was written. Check that the application is running at the project's " +
+          "base URL, then press Record again.",
+      },
     };
   }
 

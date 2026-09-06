@@ -64,6 +64,10 @@ export interface ScreenService {
   postBindingsVerify(body?: unknown): Promise<unknown>;
   /** `POST /record` */
   postRecord(body?: unknown): Promise<unknown>;
+  /** `POST /capture` — record a flow from what a person does (Draft 2.23). */
+  postCapture(body?: unknown): Promise<unknown>;
+  /** `POST /capture/{id}/stop` — end a capture, writing the flow. */
+  postCaptureByIdStop(id: string, body?: unknown): Promise<unknown>;
   /** `POST /record/{id}/decision` */
   postRecordByIdDecision(id: string, body?: unknown): Promise<unknown>;
   /** `POST /record/{id}/stop` */

@@ -145,6 +145,28 @@ export interface ServiceApi {
     },
   ): Promise<unknown>;
 
+  /**
+   * Record a flow from what a person does (LLD §13.5's `POST /capture`, Draft 2.23).
+   *
+   * The other recording — `record` above — drives a flow somebody wrote and
+   * binds its targets. This one writes the flow: the browser opens at the
+   * application, the person drives, each sentence is reported through `onStep`
+   * as it is written, and `signal` ends the session. The flow file and the
+   * bindings are written when it ends, which is why `POST /capture/{id}/stop`
+   * is the *only* way it finishes — a capture nobody stopped has written
+   * nothing.
+   */
+  capture?(
+    loaded: ProjectHandle,
+    options: {
+      /** The story's name; the service names it for the client that did not. */
+      name?: string;
+      onStep?: (sentence: string) => void;
+      log?: (message: string) => void;
+      signal?: AbortSignal;
+    },
+  ): Promise<unknown>;
+
   /** Dry-resolve every binding, or one (LLD §13.5's `POST /bindings/verify`). */
   verifyBindings?(
     loaded: ProjectHandle,

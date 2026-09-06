@@ -28,6 +28,8 @@ OpenAPI 3.1.0, service version 0.1.0. The document itself is `openApiDocument()`
 | `PUT` | `/api/{name}` | Save a named request under api/<name>.yaml |
 | `GET` | `/api` | Named API requests |
 | `POST` | `/record` | Start a recording session; decisions arrive on the stream |
+| `POST` | `/capture` | Record a flow from what a person does; sentences arrive on the stream |
+| `POST` | `/capture/{id}/stop` | End a capture, writing the flow and its bindings |
 | `POST` | `/record/{id}/decision` | Accept, re-pick or reject the grounding a session is waiting on |
 | `POST` | `/record/{id}/stop` | Stop a recording session |
 | `POST` | `/migrate` | Import a Yam prototype's electron-db directory into this project |

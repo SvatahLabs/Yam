@@ -61,6 +61,8 @@ export interface ScreenParams {
   readonly bindingId?: string;
   /** `record`: the open session. */
   readonly sessionId?: string;
+  /** `record`: whether that session is a capture rather than a binding run (Draft 2.23). */
+  readonly capturing?: boolean;
   /** Which row the inspector is describing, when a screen has rows. */
   readonly selected?: string;
 

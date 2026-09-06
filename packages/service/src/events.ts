@@ -60,6 +60,13 @@ export type ServiceEvent =
     }
   | { readonly kind: "record.finished"; readonly sessionId: string; readonly report: unknown }
   | { readonly kind: "record.failed"; readonly sessionId: string; readonly message: string }
+  /* ── capture: the flow a person records by doing it (T14.12, REQ-REC-13) ─ */
+  | { readonly kind: "capture.started"; readonly sessionId: string }
+  /** One sentence, as the recorder writes it. */
+  | { readonly kind: "capture.step"; readonly sessionId: string; readonly sentence: string }
+  /** The flow file, the story, its sentences and what was bound. */
+  | { readonly kind: "capture.finished"; readonly sessionId: string; readonly captured: unknown }
+  | { readonly kind: "capture.failed"; readonly sessionId: string; readonly message: string }
   /* ── heal review (T5.7, REQ-ADE-5) ─────────────────────────────────────── */
   | { readonly kind: "heal.proposal"; readonly healId: string; readonly proposal: unknown }
   | { readonly kind: "heal.finished"; readonly healId: string; readonly report: unknown }
@@ -80,6 +87,10 @@ export const SERVICE_EVENT_KINDS = [
   "record.decision.expired",
   "record.finished",
   "record.failed",
+  "capture.started",
+  "capture.step",
+  "capture.finished",
+  "capture.failed",
   "heal.proposal",
   "heal.finished",
   "heal.failed",

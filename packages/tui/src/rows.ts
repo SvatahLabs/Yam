@@ -508,12 +508,39 @@ function record(state: RecordState): PaneModel {
       title:
         state.sessionId === undefined
           ? "Record review · no session"
-          : `Session ${state.sessionId}`,
+          : state.capturing
+            ? `Recording what you do · ${state.sessionId}`
+            : `Session ${state.sessionId}`,
       empty:
         state.sessionId === undefined
-          ? "press R on the Flows screen to start one"
-          : "waiting for the first grounding",
+          ? "press R on the Flows screen to record what you do, B to bind a flow"
+          : state.capturing
+            ? "drive the application; each thing you do becomes a sentence"
+            : "waiting for the first grounding",
       lines: [
+        /*
+         * The sentences a capture is writing (Draft 2.23). The cockpit shows
+         * the same session the app does, so it shows them here too.
+         */
+        ...(state.sentences.length === 0
+          ? []
+          : [
+              heading(state.captured === undefined ? "the flow so far" : "the flow"),
+              ...state.sentences.map((sentence, at) => ({
+                key: `sentence-${at}`,
+                cells: [dim(String(at + 1), { width: 3 }), text(sentence, { grow: true })],
+              })),
+            ]),
+        ...(state.captured === undefined
+          ? []
+          : [
+              kv("wrote", state.captured.file),
+              kv("story", state.captured.story),
+              kv("bound", String(state.captured.bound)),
+              ...(state.captured.unbound.length === 0
+                ? []
+                : [kv("not bound", state.captured.unbound.join(", "))]),
+            ]),
         ...(decision === undefined
           ? []
           : [

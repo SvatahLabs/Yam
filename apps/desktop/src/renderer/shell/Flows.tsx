@@ -93,7 +93,7 @@ export function FlowsScreen(props: FlowsProps): React.JSX.Element {
       <Toolbar
         state={state}
         actions={props.actions.filter((one) =>
-          ["flows.save", "record.start", "heal.run", "run.flow"].includes(one.id),
+          ["flows.save", "capture.start", "record.start", "heal.run", "run.flow"].includes(one.id),
         )}
         onAction={(id, args) => (id === "flows.save" ? save() : props.onAction(id, args))}
         primary="run.flow"
@@ -472,7 +472,7 @@ export function FlowsInspector({
           label="Open binding"
           onPress={() => onAction("go.bindings")}
         />
-        <Button id="inspector-record-step" label="Re-record step" onPress={() => onAction("record.start")} />
+        <Button id="inspector-record-step" label="Re-bind step" onPress={() => onAction("record.start")} />
       </div>
     </>
   );

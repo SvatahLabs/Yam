@@ -23,6 +23,7 @@ import {
   serviceMigrateFromPrototype,
   serviceOpenSurfaceSession,
   serviceRecord,
+  serviceCapture,
   serviceToolsFor,
   serviceVerifyBindings,
 } from "../service-api.js";
@@ -99,6 +100,7 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
       // Draft 2.21: whether a person at this machine can click in a headed browser.
       hasDisplay: () => personCanPick(process.env, true),
       record: serviceRecord,
+      capture: serviceCapture,
       verifyBindings: serviceVerifyBindings,
       heal: serviceHeal,
       openSurfaceSession: serviceOpenSurfaceSession,

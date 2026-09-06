@@ -176,12 +176,55 @@ const ACTIONS_ONLY: readonly Action[] = [
       return ok(`Resumed ${args.runId} from ${from}.`, { value, goTo: "run" });
     },
   },
+  /**
+   * Record a flow by doing it (REQ-REC-13, Draft 2.23).
+   *
+   * This is what "Record" means, here as at the command line: the browser opens
+   * at the application, the person drives, and the flow is written from what
+   * they did. Binding the targets of a flow that already exists is the *other*
+   * action below, and it says so.
+   */
   {
-    id: "record.start",
+    id: "capture.start",
     label: "Record",
     group: "Actions",
     screen: "flows",
     key: "R",
+    cli: "yam record",
+    availableWhen: loaded,
+    async run(service, args): Promise<ActionOutcome> {
+      const value = await service.postCapture({
+        ...(typeof args["name"] === "string" ? { name: args["name"] } : {}),
+      });
+      const sessionId = (value as { sessionId?: unknown }).sessionId;
+      return ok("Recording what you do. Drive the application, then press Stop.", {
+        value,
+        goTo: "record",
+        ...(typeof sessionId === "string" ? { params: { sessionId, capturing: true } } : {}),
+      });
+    },
+  },
+  {
+    id: "capture.stop",
+    label: "Stop recording",
+    group: "Actions",
+    screen: "record",
+    key: "S",
+    // No `cli`: at a terminal a capture ends with Enter, which is not a command.
+    availableWhen: has("sessionId"),
+    async run(service, args): Promise<ActionOutcome> {
+      if (typeof args.sessionId !== "string") return refused("No recording session is open.");
+      // The flow is written on the way out, so this is how a capture finishes.
+      const value = await service.postCaptureByIdStop(args.sessionId);
+      return ok("Stopping; the flow and its bindings are being written.", { value });
+    },
+  },
+  {
+    id: "record.start",
+    label: "Bind targets",
+    group: "Actions",
+    screen: "flows",
+    key: "B",
     cli: "yam record --flow <file>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {

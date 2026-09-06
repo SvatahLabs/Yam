@@ -739,6 +739,67 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     },
   );
 
+  /* ── capture: a flow from what a person does (T14.12, REQ-REC-13) ───────── */
+
+  /**
+   * Start a capture (Draft 2.23's `POST /capture`).
+   *
+   * It shares `recording` with the review sessions on purpose: both open the
+   * project's browser, and two of them at once would be two hands on the same
+   * application. So a capture refuses while a record session is open and the
+   * other way round, with the same 409.
+   */
+  fastify.post<{ Body?: { name?: string } }>("/capture", async (request, reply) => {
+    if (api.capture === undefined) {
+      return reply.code(501).send({ error: "not-available", message: "This build cannot record a flow." });
+    }
+    if (recording.size > 0) {
+      return reply.code(409).send({
+        error: "already-recording",
+        message: "A recording session is already open. Stop it before starting another.",
+      });
+    }
+
+    const sessionId = api.newRunId();
+    const abort = new AbortController();
+    recording.set(sessionId, { abort });
+
+    void (async () => {
+      try {
+        events.emit({ kind: "capture.started", sessionId });
+        const captured = await api.capture!(await load(), {
+          ...(request.body?.name === undefined ? {} : { name: request.body.name }),
+          signal: abort.signal,
+          onStep: (sentence) => events.emit({ kind: "capture.step", sessionId, sentence }),
+          log: (message) =>
+            events.emit({ kind: "log", at: new Date().toISOString(), level: "info", message }),
+        });
+        events.emit({ kind: "capture.finished", sessionId, captured });
+      } catch (error) {
+        events.emit({
+          kind: "capture.failed",
+          sessionId,
+          message: error instanceof Error ? error.message : String(error),
+        });
+      } finally {
+        recording.delete(sessionId);
+      }
+    })();
+
+    return reply.code(202).send({ sessionId });
+  });
+
+  /**
+   * Stop a capture, which is how one finishes: the flow and the bindings are
+   * written on the way out.
+   */
+  fastify.post<{ Params: { id: string } }>("/capture/:id/stop", async (request, reply) => {
+    const session = recording.get(request.params.id);
+    if (session === undefined) return reply.code(404).send({ error: "no-session" });
+    session.abort.abort();
+    return reply.code(202).send({ ok: true });
+  });
+
   fastify.post<{ Params: { id: string } }>("/record/:id/stop", async (request, reply) => {
     const session = recording.get(request.params.id);
     if (session === undefined) {

@@ -350,6 +350,49 @@ export function openApiDocument(version: string): Record<string, unknown> {
           },
         },
       },
+      "/capture": {
+        post: {
+          summary: "Record a flow from what a person does; sentences arrive on the stream",
+          description:
+            "The browser opens at the application and the person drives it. Each click, " +
+            "value entered, choice, key and navigation becomes a sentence of the flow " +
+            "language, emitted as `capture.step`, and each element touched becomes a " +
+            "binding (REQ-REC-13, Draft 2.23).\n\n" +
+            "This is the other half of recording. `POST /record` drives a flow somebody " +
+            "wrote and binds its targets; this one writes the flow.\n\n" +
+            "The flow file and the bindings are written when the session **ends**, so " +
+            "POST /capture/{id}/stop is how one finishes — a capture nobody stopped has " +
+            "written nothing. The result arrives as `capture.finished`.\n\n" +
+            "One session at a time, shared with `POST /record`: both open the project's " +
+            "browser, and this answers **409** while either is open.",
+          security: bearer,
+          requestBody: json({
+            type: "object",
+            properties: {
+              name: { type: "string", description: "The story's name." },
+            },
+          }),
+          responses: {
+            202: { description: "The session id", ...json({ type: "object", properties: { sessionId: { type: "string" } } }) },
+            409: {
+              description: "A recording session is already open. Stop it before starting another.",
+              ...json({ type: "object" }),
+            },
+            501: { description: "This build cannot record a flow", ...json({ type: "object" }) },
+          },
+        },
+      },
+      "/capture/{id}/stop": {
+        post: {
+          summary: "End a capture, writing the flow and its bindings",
+          security: bearer,
+          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+          responses: {
+            202: { description: "Stopping; `capture.finished` follows", ...json({ type: "object" }) },
+            404: { description: "No such session", ...json({ type: "object" }) },
+          },
+        },
+      },
       "/record/{id}/decision": {
         post: {
           summary: "Accept, re-pick or reject the grounding a session is waiting on",
