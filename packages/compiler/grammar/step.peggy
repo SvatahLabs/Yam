@@ -110,106 +110,106 @@ Sentence
 /* ── 1. navigate ──────────────────────────────────────────────────────────── */
 
 Navigate
-  = ("open"i / "navigate to"i / "navigates to"i / "go to"i / "opens"i) __ ("the"i __)? url:Value (__ "home page"i)? {
+  = ("navigates to"i / "navigate to"i / "go to"i / "opens"i / "open"i) __ ("the"i __)? url:Value (__ "home page"i)? {
       return step({ action: "navigate", args: { url } });
     }
 
 /* ── 2. history ───────────────────────────────────────────────────────────── */
 
 History
-  = ("go back"i / "click the back button"i / "clicks on the back button"i) { return step({ action: "back" }); }
-  / ("go forward"i / "click the forward button"i / "clicks on the forward button"i) { return step({ action: "forward" }); }
+  = ("clicks on the back button"i / "click the back button"i / "go back"i) { return step({ action: "back" }); }
+  / ("clicks on the forward button"i / "click the forward button"i / "go forward"i) { return step({ action: "forward" }); }
   / ("refresh"i / "reload"i) __ "the page"i { return step({ action: "refresh" }); }
 
 /* ── 3. click ─────────────────────────────────────────────────────────────── */
 
 Click
-  = ("click"i / "clicks"i) (__ "on"i)? __ t:Rest {
+  = ("clicks"i / "click"i) (__ "on"i)? __ t:Rest {
       return step({ action: "click", target: target(t) });
     }
 
 /* ── 4. double and right click ────────────────────────────────────────────── */
 
 DoubleClick
-  = ("double-click"i / "double click"i / "double clicks"i) (__ "on"i)? __ t:Rest {
+  = ("double clicks"i / "double-click"i / "double click"i) (__ "on"i)? __ t:Rest {
       return step({ action: "doubleClick", target: target(t) });
     }
 
 RightClick
-  = ("right-click"i / "right click"i / "context-click"i / "context click"i / "context clicks"i) (__ "on"i)? __ t:Rest {
+  = ("context clicks"i / "context-click"i / "context click"i / "right-click"i / "right click"i) (__ "on"i)? __ t:Rest {
       return step({ action: "rightClick", target: target(t) });
     }
 
 /* ── 5, 6. hover ──────────────────────────────────────────────────────────── */
 
 HoverAndClick
-  = ("hover over"i / "move to"i / "moves to"i / "move over"i / "moves over"i) __ t:UntilAndClickIt __ "and click it"i {
+  = ("hover over"i / "moves over"i / "move over"i / "moves to"i / "move to"i) __ t:UntilAndClickIt __ "and click it"i {
       return step({ action: "hoverAndClick", target: target(t) });
     }
 
 Hover
-  = ("hover over"i / "hover on"i / "move to"i / "moves to"i / "move over"i / "moves over"i) __ t:Rest {
+  = ("hover over"i / "moves over"i / "move over"i / "hover on"i / "moves to"i / "move to"i) __ t:Rest {
       return step({ action: "hover", target: target(t) });
     }
 
 /* ── 7. press and hold, release ───────────────────────────────────────────── */
 
 PressAndHold
-  = ("press and hold"i / "click and hold"i / "clicks and holds"i) (__ "on"i)? __ t:Rest {
+  = ("clicks and holds"i / "press and hold"i / "click and hold"i) (__ "on"i)? __ t:Rest {
       return step({ action: "pressAndHold", target: target(t) });
     }
 
 Release
-  = ("release the mouse over"i / "release the mouse on"i / "release"i / "releases"i) __ t:Rest {
+  = ("release the mouse over"i / "release the mouse on"i / "releases"i / "release"i) __ t:Rest {
       return step({ action: "release", target: target(t) });
     }
 
 /* ── 8. drag ──────────────────────────────────────────────────────────────── */
 
 Drag
-  = ("drag"i / "drags"i) __ a:UntilOnto __ ("onto"i / "on to"i / "to"i) __ b:Rest {
+  = ("drags"i / "drag"i) __ a:UntilOnto __ ("on to"i / "onto"i / "to"i) __ b:Rest {
       return step({ action: "dragTo", target: target(a), target2: target(b) });
     }
 
 /* ── 9. type ──────────────────────────────────────────────────────────────── */
 
 Type
-  = ("type"i / "types"i / "enter"i / "enters"i) __ v:Value __ ("into"i / "in"i) __ t:Rest {
+  = ("enters"i / "types"i / "enter"i / "type"i) __ v:Value __ ("into"i / "in"i) __ t:Rest {
       return step({ action: "type", target: target(t), args: { value: v } });
     }
 
 /* ── 10. clear ────────────────────────────────────────────────────────────── */
 
 Clear
-  = ("clear"i / "clears"i) __ t:Rest { return step({ action: "clear", target: target(t) }); }
+  = ("clears"i / "clear"i) __ t:Rest { return step({ action: "clear", target: target(t) }); }
 
 /* ── 11, 12. keys ─────────────────────────────────────────────────────────── */
 
 Press
-  = ("press"i / "presses"i) __ k:Value __ ("in"i / "on"i) __ t:Rest {
+  = ("presses"i / "press"i) __ k:Value __ ("in"i / "on"i) __ t:Rest {
       return step({ action: "press", target: target(t), args: { key: k } });
     }
-  / ("press"i / "presses"i) __ k:Value {
+  / ("presses"i / "press"i) __ k:Value {
       return step({ action: "press", args: { key: k } });
     }
 
 KeyHold
-  = ("hold down"i / "holds down"i) __ ("the"i __)? k:Value (__ "key"i)? {
+  = ("holds down"i / "hold down"i) __ ("the"i __)? k:Value (__ "key"i)? {
       return step({ action: "keyDown", args: { key: k } });
     }
-  / ("let go of"i / "lets go of"i / "release the"i) __ ("the"i __)? k:Value (__ "key"i)? {
+  / ("release the"i / "lets go of"i / "let go of"i) __ ("the"i __)? k:Value (__ "key"i)? {
       return step({ action: "keyUp", args: { key: k } });
     }
 
 /* ── 13. submit ───────────────────────────────────────────────────────────── */
 
 Submit
-  = ("submit"i / "submits"i) __ t:Rest { return step({ action: "submit", target: target(t) }); }
+  = ("submits"i / "submit"i) __ t:Rest { return step({ action: "submit", target: target(t) }); }
 
 /* ── 14. upload ───────────────────────────────────────────────────────────── */
 
 Upload
-  = ("upload"i / "uploads"i / "attach"i / "attaches"i) __ v:Value __ ("to"i / "into"i) __ t:Rest {
+  = ("attaches"i / "uploads"i / "upload"i / "attach"i) __ v:Value __ ("into"i / "to"i) __ t:Rest {
       return step({ action: "upload", target: target(t), args: { path: v } });
     }
 
@@ -219,30 +219,30 @@ Select
   = "select the option with value"i __ v:Value __ "in"i __ t:Rest {
       return step({ action: "selectOption", target: target(t), args: { value: v } });
     }
-  / ("select"i / "selects"i) __ "option"i __ n:Integer __ "in"i __ t:Rest {
+  / ("selects"i / "select"i) __ "option"i __ n:Integer __ "in"i __ t:Rest {
       return step({ action: "selectOption", target: target(t), args: { index: n } });
     }
-  / ("select"i / "selects"i) __ v:Value __ ("in"i / "from"i) __ t:Rest {
+  / ("selects"i / "select"i) __ v:Value __ ("from"i / "in"i) __ t:Rest {
       return step({ action: "selectOption", target: target(t), args: { label: v } });
     }
 
 Deselect
-  = ("deselect"i / "deselects"i) __ "option"i __ n:Integer __ "in"i __ t:Rest {
+  = ("deselects"i / "deselect"i) __ "option"i __ n:Integer __ "in"i __ t:Rest {
       return step({ action: "deselectOption", target: target(t), args: { index: n } });
     }
-  / ("deselect"i / "deselects"i) __ v:Value __ ("in"i / "from"i) __ t:Rest {
+  / ("deselects"i / "deselect"i) __ v:Value __ ("from"i / "in"i) __ t:Rest {
       return step({ action: "deselectOption", target: target(t), args: { label: v } });
     }
 
 DeselectAll
-  = ("deselect everything"i / "deselect all"i / "remove all selections"i) __ "in"i __ t:Rest {
+  = ("remove all selections"i / "deselect everything"i / "deselect all"i) __ "in"i __ t:Rest {
       return step({ action: "deselectAll", target: target(t) });
     }
 
 /* ── 17. checkboxes ───────────────────────────────────────────────────────── */
 
 SetChecked
-  = ("uncheck"i / "unchecks"i / "untick"i / "unticks"i) __ t:Rest {
+  = ("unchecks"i / "uncheck"i / "unticks"i / "untick"i) __ t:Rest {
       return step({ action: "setChecked", target: target(t), args: { checked: false } });
     }
   /*
@@ -253,31 +253,31 @@ SetChecked
    * them apart, which is why LLD §4.2 writes the alias as `Check that` and why
    * `AssertVerb` requires the `that` for this verb alone.
    */
-  / ("check"i / "checks"i / "tick"i / "ticks"i) __ !("that"i !NameChar) t:Rest {
+  / ("checks"i / "check"i / "ticks"i / "tick"i) __ !("that"i !NameChar) t:Rest {
       return step({ action: "setChecked", target: target(t), args: { checked: true } });
     }
 
 /* ── 18. scrolling ────────────────────────────────────────────────────────── */
 
 Scroll
-  = ("scroll"i / "scrolls"i) __ "to the top"i (__ "of the page"i)? { return step({ action: "scrollToTop" }); }
-  / ("scroll"i / "scrolls"i) __ "to the bottom"i (__ "of the page"i)? { return step({ action: "scrollToBottom" }); }
-  / ("scroll"i / "scrolls"i) __ t:UntilIntoView __ "into view"i {
+  = ("scrolls"i / "scroll"i) __ "to the top"i (__ "of the page"i)? { return step({ action: "scrollToTop" }); }
+  / ("scrolls"i / "scroll"i) __ "to the bottom"i (__ "of the page"i)? { return step({ action: "scrollToBottom" }); }
+  / ("scrolls"i / "scroll"i) __ t:UntilIntoView __ "into view"i {
       return step({ action: "scrollIntoView", target: target(t) });
     }
-  / ("scroll"i / "scrolls"i) __ "to"i __ t:Rest {
+  / ("scrolls"i / "scroll"i) __ "to"i __ t:Rest {
       return step({ action: "scrollIntoView", target: target(t) });
     }
 
 /* ── 19. waiting ──────────────────────────────────────────────────────────── */
 
 Sleep
-  = ("wait"i / "waits"i / "sleep"i / "sleeps"i) __ n:Number __ ("seconds"i / "second"i / "s"i) {
+  = ("sleeps"i / "waits"i / "sleep"i / "wait"i) __ n:Number __ ("seconds"i / "second"i / "s"i) {
       return step({ action: "sleep", args: { seconds: n } });
     }
 
 WaitFor
-  = ("wait for"i / "waits for"i) __ t:UntilToBe __ "to be"i __ p:StateWord {
+  = ("waits for"i / "wait for"i) __ t:UntilToBe __ "to be"i __ p:StateWord {
       return step({
         action: "waitFor",
         target: target(t),
@@ -305,7 +305,7 @@ WaitFor
  * URL, headers and method live in the project rather than in the sentence.
  */
 WaitForApi
-  = ("wait for"i / "waits for"i) __ "the"i __ name:QuotedText __ "api"i __ "to answer"i __
+  = ("waits for"i / "wait for"i) __ "the"i __ name:QuotedText __ "api"i __ "to answer"i __
     path:QuotedText __ "to"i __ p:ApiPredicate {
       return step({
         action: "waitFor",
@@ -324,22 +324,22 @@ WaitForApi
  * onto that one.
  */
 ApiPredicate
-  = ("be"i / "equal"i / "equals"i / "say"i / "says"i / "read"i / "reads"i) __ v:Value {
+  = ("equals"i / "equal"i / "reads"i / "says"i / "read"i / "say"i / "be"i) __ v:Value {
       return { kind: "text", value: v };
     }
-  / ("contain"i / "contains"i) __ v:Value { return { kind: "textContains", value: v }; }
-  / ("match"i / "matches"i) __ v:Value { return { kind: "textContains", value: v }; }
+  / ("contains"i / "contain"i) __ v:Value { return { kind: "textContains", value: v }; }
+  / ("matches"i / "match"i) __ v:Value { return { kind: "textContains", value: v }; }
 
 /* ── 20. windows and frames ───────────────────────────────────────────────── */
 
 Windows
-  = ("switch to"i / "switches to"i) __ "the new"i __ ("tab"i / "window"i) {
+  = ("switches to"i / "switch to"i) __ "the new"i __ ("window"i / "tab"i) {
       return step({ action: "switchWindow", args: { which: { literal: "new" } } });
     }
-  / ("switch back to"i / "switches back to"i / "switch to"i / "switches to"i) __ "the main"i __ ("tab"i / "window"i) {
+  / ("switches back to"i / "switch back to"i / "switches to"i / "switch to"i) __ "the main"i __ ("window"i / "tab"i) {
       return step({ action: "switchWindow", args: { which: { literal: "main" } } });
     }
-  / ("close the other"i / "closes the other"i) __ ("tabs"i / "windows"i) {
+  / ("closes the other"i / "close the other"i) __ ("windows"i / "tabs"i) {
       return step({ action: "closeOtherWindows" });
     }
 
@@ -358,7 +358,7 @@ Windows
  * value somebody typed.
  */
 ResizeWindow
-  = ("resize"i / "resizes"i / "set"i / "sets"i) __ "the window"i __ ("to"i / "size to"i) __
+  = ("resizes"i / "resize"i / "sets"i / "set"i) __ "the window"i __ ("size to"i / "to"i) __
     w:Number __ ("by"i / "x"i) __ h:Number {
       return step({ action: "resizeWindow", args: { width: w, height: h } });
     }
@@ -390,41 +390,41 @@ Quit
    * `Quits the application` and `Exit the application` fell through to a model
    * tier until this order was fixed.
    */
-  = ("quits"i / "quit"i / "closes"i / "close"i / "exits"i / "exit"i) __ "the"i __
+  = ("closes"i / "quits"i / "close"i / "exits"i / "quit"i / "exit"i) __ "the"i __
     ("application"i / "app"i) {
       return step({ action: "quit" });
     }
 
 Frames
-  = ("switch back to"i / "switches back to"i) __ "the main page"i {
+  = ("switches back to"i / "switch back to"i) __ "the main page"i {
       return step({ action: "switchFrame", args: { which: { literal: "main" } } });
     }
-  / ("switch to"i / "switches to"i) __ "the"i __ name:QuotedText __ "frame"i {
+  / ("switches to"i / "switch to"i) __ "the"i __ name:QuotedText __ "frame"i {
       return step({ action: "switchFrame", target: target(`the ${name} frame`, "frame") });
     }
 
 /* ── 21. dialogs ──────────────────────────────────────────────────────────── */
 
 Dialog
-  = ("accept"i / "accepts"i) __ "the dialog"i __ ("and check it said"i / "and validate"i) __ v:Value {
+  = ("accepts"i / "accept"i) __ "the dialog"i __ ("and check it said"i / "and validate"i) __ v:Value {
       return step({
         action: "dialog",
         args: { action: { literal: "accept" } },
         expect: { subject: "dialog", predicate: { kind: "text", value: v } },
       });
     }
-  / ("dismiss"i / "dismisses"i / "reject"i / "rejects"i) __ "the dialog"i __ ("and check it said"i / "and validate"i) __ v:Value {
+  / ("dismisses"i / "dismiss"i / "rejects"i / "reject"i) __ "the dialog"i __ ("and check it said"i / "and validate"i) __ v:Value {
       return step({
         action: "dialog",
         args: { action: { literal: "dismiss" } },
         expect: { subject: "dialog", predicate: { kind: "text", value: v } },
       });
     }
-  / ("answer"i / "answers"i) __ "the dialog with"i __ v:Value {
+  / ("answers"i / "answer"i) __ "the dialog with"i __ v:Value {
       return step({ action: "dialog", args: { action: { literal: "accept" }, text: v } });
     }
-  / ("accept"i / "accepts"i) __ "the dialog"i { return step({ action: "dialog", args: { action: { literal: "accept" } } }); }
-  / ("dismiss"i / "dismisses"i / "reject"i / "rejects"i) __ "the dialog"i { return step({ action: "dialog", args: { action: { literal: "dismiss" } } }); }
+  / ("accepts"i / "accept"i) __ "the dialog"i { return step({ action: "dialog", args: { action: { literal: "accept" } } }); }
+  / ("dismisses"i / "dismiss"i / "rejects"i / "reject"i) __ "the dialog"i { return step({ action: "dialog", args: { action: { literal: "dismiss" } } }); }
 
 /* ── 22. read and capture ─────────────────────────────────────────────────── */
 
@@ -442,7 +442,7 @@ Read
         capture: { name: n, from: "attribute", attribute: a },
       });
     }
-  / Remember __ "the"i __ kind:("text"i / "value"i) __ "of"i __ t:UntilAs __ "as"i __ n:Name {
+  / Remember __ "the"i __ kind:("value"i / "text"i) __ "of"i __ t:UntilAs __ "as"i __ n:Name {
       return step({
         action: "read",
         target: target(t),
@@ -450,7 +450,7 @@ Read
       });
     }
 
-Remember = ("remember"i / "remembers"i / "save"i / "saves"i)
+Remember = ("remembers"i / "remember"i / "saves"i / "save"i)
 
 /* ── 23, 24. expectations ─────────────────────────────────────────────────── */
 
@@ -577,11 +577,11 @@ SetNoun
   / ("items"i / "item"i)           !NameChar { return "item"; }
   / ("tabs"i / "tab"i)             !NameChar { return "tab"; }
   / ("checkboxes"i / "checkbox"i)  !NameChar { return "checkbox"; }
-  / ("text"i / "texts"i)           !NameChar { return "text"; }
+  / ("texts"i / "text"i)           !NameChar { return "text"; }
   / ("elements"i / "element"i)     !NameChar { return "element"; }
 
 /** `Expect [that] …`, which is followed by an infinitive. */
-ExpectVerb = ("expect"i / "expects"i) (__ "that"i !NameChar)?
+ExpectVerb = ("expects"i / "expect"i) (__ "that"i !NameChar)?
 
 /**
  * `Verify [that] …` and its synonyms, which are followed by a third person.
@@ -595,22 +595,21 @@ ExpectVerb = ("expect"i / "expects"i) (__ "that"i !NameChar)?
  * alternative fails, exactly as it did before this rule existed.
  */
 AssertVerb
-  = ("verify"i / "verifies"i / "assert"i / "asserts"i / "ensure"i / "ensures"i
-    / "make sure"i / "makes sure"i / "confirm"i / "confirms"i) (__ "that"i !NameChar)?
+  = ("makes sure"i / "make sure"i / "verifies"i / "confirms"i / "asserts"i / "ensures"i / "confirm"i / "verify"i / "assert"i / "ensure"i) (__ "that"i !NameChar)?
   /*
    * `Check` needs its `that`, because `Check the remember me box` is pattern 17
    * and has been since Draft 1. LLD §4.2 spells the alias `Check that` for
    * exactly this reason.
    */
-  / ("check"i / "checks"i) __ "that"i !NameChar
+  / ("checks"i / "check"i) __ "that"i !NameChar
 
 TitlePredicateIs
   = ("contains"i / "contain"i) __ v:Value { return { kind: "titleContains", value: v }; }
-  / ("is"i / "says"i / "reads"i / "equals"i) __ v:Value { return { kind: "title", value: v }; }
+  / ("equals"i / "reads"i / "says"i / "is"i) __ v:Value { return { kind: "title", value: v }; }
 
 UrlPredicateIs
   = ("contains"i / "contain"i) __ v:Value { return { kind: "urlContains", value: v }; }
-  / ("is"i / "says"i / "equals"i) __ v:Value { return { kind: "url", value: v }; }
+  / ("equals"i / "says"i / "is"i) __ v:Value { return { kind: "url", value: v }; }
 
 /**
  * The third-person mirror of `TargetPredicate`, in the same order.
@@ -620,7 +619,7 @@ UrlPredicateIs
  * tag and a tag as a state.
  */
 TargetPredicateIs
-  = ("says"i / "reads"i) __ v:Value { return { kind: "text", value: v }; }
+  = ("reads"i / "says"i) __ v:Value { return { kind: "text", value: v }; }
   / ("contains"i / "contain"i) __ v:Value { return { kind: "textContains", value: v }; }
   / "has the value"i __ v:Value { return { kind: "value", value: v }; }
   / "has the"i __ a:QuotedText __ "attribute"i __ v:Value { return { kind: "attribute", name: a, value: v }; }
@@ -635,16 +634,16 @@ TargetPredicateIs
   / "is"i __ p:StateWord { return p; }
 
 TitlePredicate
-  = ("contain"i / "contains"i) __ v:Value { return { kind: "titleContains", value: v }; }
-  / ("be"i / "say"i / "says"i) __ v:Value { return { kind: "title", value: v }; }
+  = ("contains"i / "contain"i) __ v:Value { return { kind: "titleContains", value: v }; }
+  / ("says"i / "say"i / "be"i) __ v:Value { return { kind: "title", value: v }; }
 
 UrlPredicate
-  = ("contain"i / "contains"i) __ v:Value { return { kind: "urlContains", value: v }; }
-  / ("be"i / "say"i / "says"i) __ v:Value { return { kind: "url", value: v }; }
+  = ("contains"i / "contain"i) __ v:Value { return { kind: "urlContains", value: v }; }
+  / ("says"i / "say"i / "be"i) __ v:Value { return { kind: "url", value: v }; }
 
 TargetPredicate
-  = ("say"i / "says"i / "read"i / "reads"i) __ v:Value { return { kind: "text", value: v }; }
-  / ("contain"i / "contains"i) __ v:Value { return { kind: "textContains", value: v }; }
+  = ("reads"i / "says"i / "read"i / "say"i) __ v:Value { return { kind: "text", value: v }; }
+  / ("contains"i / "contain"i) __ v:Value { return { kind: "textContains", value: v }; }
   /*
    * "have an id", "have a name" — a property that is there rather than one that
    * equals something (pattern 32, T12.7).
@@ -685,62 +684,62 @@ StateWord
 /* ── 25. scripts and screenshots ──────────────────────────────────────────── */
 
 Evaluate
-  = ("run"i / "runs"i / "execute"i / "executes"i) __ "the script"i __ v:Value __ "and remember the result as"i __ n:Name {
+  = ("executes"i / "execute"i / "runs"i / "run"i) __ "the script"i __ v:Value __ "and remember the result as"i __ n:Name {
       return step({ action: "evaluate", args: { script: v }, capture: { name: n, from: "result" } });
     }
-  / ("run"i / "runs"i / "execute"i / "executes"i) __ "the script"i __ v:Value {
+  / ("executes"i / "execute"i / "runs"i / "run"i) __ "the script"i __ v:Value {
       return step({ action: "evaluate", args: { script: v } });
     }
 
 Screenshot
-  = ("take"i / "takes"i) __ "a screenshot named"i __ v:Value {
+  = ("takes"i / "take"i) __ "a screenshot named"i __ v:Value {
       return step({ action: "screenshot", args: { name: v } });
     }
-  / ("take"i / "takes"i) __ "a screenshot of"i __ t:Rest {
+  / ("takes"i / "take"i) __ "a screenshot of"i __ t:Rest {
       return step({ action: "screenshot", target: target(t) });
     }
-  / ("take"i / "takes"i) __ "a screenshot"i { return step({ action: "screenshot" }); }
+  / ("takes"i / "take"i) __ "a screenshot"i { return step({ action: "screenshot" }); }
 
 /* ── 26. API ──────────────────────────────────────────────────────────────── */
 
 Api
-  = ("call"i / "calls"i / "invoke"i / "invokes"i / "hit"i / "hits"i) __ "the"i __ name:QuotedText __ "api"i __ "and remember the response as"i __ n:Name {
+  = ("invokes"i / "invoke"i / "calls"i / "call"i / "hits"i / "hit"i) __ "the"i __ name:QuotedText __ "api"i __ "and remember the response as"i __ n:Name {
       return step({
         action: "api",
         args: { request: { literal: name } },
         capture: { name: n, from: "response" },
       });
     }
-  / ("call"i / "calls"i / "invoke"i / "invokes"i / "hit"i / "hits"i) __ "the"i __ name:QuotedText __ "api"i __ "and remember"i __ path:QuotedText __ "as"i __ n:Name {
+  / ("invokes"i / "invoke"i / "calls"i / "call"i / "hits"i / "hit"i) __ "the"i __ name:QuotedText __ "api"i __ "and remember"i __ path:QuotedText __ "as"i __ n:Name {
       return step({
         action: "api",
         args: { request: { literal: name } },
         capture: { name: n, from: "response", jsonPath: path },
       });
     }
-  / ("call"i / "calls"i / "invoke"i / "invokes"i / "hit"i / "hits"i) __ "the"i __ name:QuotedText __ "api"i __ "with the session cookies"i {
+  / ("invokes"i / "invoke"i / "calls"i / "call"i / "hits"i / "hit"i) __ "the"i __ name:QuotedText __ "api"i __ "with the session cookies"i {
       return step({ action: "api", args: { request: { literal: name }, withSessionCookies: true } });
     }
-  / ("call"i / "calls"i / "invoke"i / "invokes"i / "hit"i / "hits"i) __ "the"i __ name:QuotedText __ "api"i __ "without cookies"i {
+  / ("invokes"i / "invoke"i / "calls"i / "call"i / "hits"i / "hit"i) __ "the"i __ name:QuotedText __ "api"i __ "without cookies"i {
       return step({ action: "api", args: { request: { literal: name }, withSessionCookies: false } });
     }
-  / ("call"i / "calls"i / "invoke"i / "invokes"i / "hit"i / "hits"i) __ "the"i __ name:QuotedText __ "api"i {
+  / ("invokes"i / "invoke"i / "calls"i / "call"i / "hits"i / "hit"i) __ "the"i __ name:QuotedText __ "api"i {
       return step({ action: "api", args: { request: { literal: name } } });
     }
 
 /* ── 27. invoke another story ─────────────────────────────────────────────── */
 
 Invoke
-  = ("run"i / "runs"i) __ "the"i __ name:QuotedText __ "story"i __ "with"i __ inputs:InputList __ "and remember"i __ out:Name __ "as"i __ n:Name {
+  = ("runs"i / "run"i) __ "the"i __ name:QuotedText __ "story"i __ "with"i __ inputs:InputList __ "and remember"i __ out:Name __ "as"i __ n:Name {
       return step({ action: "invoke", invoke: { story: name, inputs }, capture: { name: n, from: "output" } });
     }
-  / ("run"i / "runs"i) __ "the"i __ name:QuotedText __ "story"i __ "with"i __ inputs:InputList {
+  / ("runs"i / "run"i) __ "the"i __ name:QuotedText __ "story"i __ "with"i __ inputs:InputList {
       return step({ action: "invoke", invoke: { story: name, inputs } });
     }
-  / ("run"i / "runs"i) __ "the"i __ name:QuotedText __ "story"i __ "and remember"i __ out:Name __ "as"i __ n:Name {
+  / ("runs"i / "run"i) __ "the"i __ name:QuotedText __ "story"i __ "and remember"i __ out:Name __ "as"i __ n:Name {
       return step({ action: "invoke", invoke: { story: name, inputs: {} }, capture: { name: n, from: "output" } });
     }
-  / ("run"i / "runs"i) __ "the"i __ name:QuotedText __ "story"i {
+  / ("runs"i / "run"i) __ "the"i __ name:QuotedText __ "story"i {
       return step({ action: "invoke", invoke: { story: name, inputs: {} } });
     }
 
@@ -757,10 +756,10 @@ InputPair
 /* ── 30. site tools (WebMCP, P2) ──────────────────────────────────────────── */
 
 SiteTool
-  = ("use"i / "uses"i) __ "the"i __ name:QuotedText __ "site tool"i __ "with"i __ args:InputList {
+  = ("uses"i / "use"i) __ "the"i __ name:QuotedText __ "site tool"i __ "with"i __ args:InputList {
       return step({ action: "click", target: target(`the ${name} site tool`), args });
     }
-  / ("use"i / "uses"i) __ "the"i __ name:QuotedText __ "site tool"i {
+  / ("uses"i / "use"i) __ "the"i __ name:QuotedText __ "site tool"i {
       return step({ action: "click", target: target(`the ${name} site tool`) });
     }
 
@@ -794,11 +793,11 @@ GuardBody
 
 UrlGuard
   = ("contains"i / "contain"i) __ v:Value { return { kind: "urlContains", value: v }; }
-  / ("is"i / "equals"i) __ v:Value { return { kind: "url", value: v }; }
+  / ("equals"i / "is"i) __ v:Value { return { kind: "url", value: v }; }
 
 TitleGuard
   = ("contains"i / "contain"i) __ v:Value { return { kind: "titleContains", value: v }; }
-  / ("is"i / "equals"i) __ v:Value { return { kind: "title", value: v }; }
+  / ("equals"i / "is"i) __ v:Value { return { kind: "title", value: v }; }
 
 ExprOp
   = "is greater than"i { return "gt"; }
@@ -909,7 +908,7 @@ Rest = chars:$(.+) { return chars; }
  * hand-rolling a parser.
  */
 UntilAndClickIt = chars:$((!(__ "and click it"i !NameChar) .)+) { return chars; }
-UntilOnto       = chars:$((!(__ ("onto"i / "on to"i / "to"i) !NameChar) .)+) { return chars; }
+UntilOnto       = chars:$((!(__ ("on to"i / "onto"i / "to"i) !NameChar) .)+) { return chars; }
 UntilIntoView   = chars:$((!(__ "into view"i !NameChar) .)+) { return chars; }
 UntilToBe       = chars:$((!(__ "to be"i !NameChar) .)+) { return chars; }
 UntilAs         = chars:$((!(__ "as"i !NameChar) .)+) { return chars; }
@@ -925,8 +924,7 @@ UntilTo         = chars:$((!(__ "to"i !NameChar) .)+) { return chars; }
  * conjugated forms is what buys that, and costs nothing, because after
  * `Verify the …` the predicate is third person anyway.
  */
-UntilIsVerb     = chars:$((!(__ ("is"i / "says"i / "reads"i / "contains"i / "has"i
-                             / "supports"i / "occupies"i / "does"i) !NameChar) .)+) { return chars; }
+UntilIsVerb     = chars:$((!(__ ("contains"i / "supports"i / "occupies"i / "reads"i / "says"i / "does"i / "has"i / "is"i) !NameChar) .)+) { return chars; }
 
 NameChar = [A-Za-z0-9_-]
 

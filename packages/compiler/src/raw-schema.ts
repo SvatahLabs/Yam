@@ -169,7 +169,7 @@ export const modelStepSchema = z
     capture: z
       .object({
         name: z.string().min(1),
-        from: z.enum(["text", "value", "attribute", "title", "result", "response", "output"]),
+        from: z.enum(["text", "value", "attribute", "title", "url", "result", "response", "output"]),
         attribute: z.string().optional(),
         jsonPath: z.string().optional(),
       })

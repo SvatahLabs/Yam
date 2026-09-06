@@ -287,7 +287,20 @@ export type Expectation = z.infer<typeof expectationSchema>;
 export const captureSchema = z
   .object({
     name: z.string().min(1),
-    from: z.enum(["text", "value", "attribute", "title", "result", "response", "output"]),
+    /*
+     * `url` is here and is not in LLD §3.2's list (T12.2 — a Deviation).
+     *
+     * The grammar has emitted it since pattern 22 was written — `Remember the
+     * page url as landingUrl` is the sentence, and `read(kind: "url")` is in
+     * §2.1's surface interface — but §3.2's `capture.from` enumeration omits
+     * it. Nothing caught the mismatch because the golden set had no entry for
+     * that sentence: a plan carrying one is a plan that fails
+     * `ir.schema.json`, which a foreign runtime validates before it executes
+     * (REQ-STD-3). Adding the value the language already produces is the
+     * smaller of the two corrections; the other would be to remove a sentence
+     * the flow language documents.
+     */
+    from: z.enum(["text", "value", "attribute", "title", "url", "result", "response", "output"]),
     attribute: z.string().min(1).optional(),
     jsonPath: z.string().min(1).optional(),
   })

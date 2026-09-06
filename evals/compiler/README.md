@@ -28,8 +28,8 @@ look like* rather than one a model produced.
 
 ## What the set covers
 
-- All 30 sentence patterns, each with at least two entries.
-- All 39 `Action` values. `custom` appears only at tier 0, because no grammar can
+- All 33 sentence patterns, each with at least two entries.
+- All 41 `Action` values. `custom` appears only at tier 0, because no grammar can
   produce it (LLD §5).
 - Every predicate kind and every kind of value reference, including a secret.
 
@@ -79,10 +79,25 @@ for setting up the local model Tier 2 uses.
 
 ### Corpus size
 
-REQ-COMP-9 asks for at least 300 pairs before release. The set holds 222: 181
-tier 1 (T0.6 required 120), 3 tier 0, and 38 tier 2. Growing it to 300 is release
-work, not phase work, and is recorded as a known gap in
-`docs/spec/progress/phase-5.md`.
+REQ-COMP-9 asks for at least 300 pairs before release. The set holds **303**: 250
+tier 1 (T0.6 required 120), 3 tier 0, and 50 tier 2 (T12.2).
+
+The last fifty-eight came from two places and neither is an accident of
+convenience. Forty-nine are tier 1 sentences the grammar had always accepted and
+the set had never asked it — the third-person forms above all, which the synonym
+vocabulary has listed since Draft 1 and which the set covered *zero* of. Twelve
+are tier 2 paraphrases promoted out of `refused.jsonl`, each read by a person
+before it moved, and each **deleted from the corpus in the same commit**: a
+sentence in both files would be a test set that shares a line with its training
+set, which is the mistake T8.4 was written to prevent
+(`tools/repo-checks/test/refused-corpus.test.ts` fails on any overlap).
+
+Two candidates were read and **not** promoted. "Make sure the remember me box is
+ticked" and "Confirm with the submit button" both open with a verb the grammar
+lists as an assertion (`AssertVerb`), so the sentence genuinely reads two ways;
+an ambiguous answer in the *test* set would bake a contested reading into a
+published number. They stay in the corpus, where an ambiguous sentence is a
+useful thing to have.
 
 ## History
 

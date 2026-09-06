@@ -1,10 +1,10 @@
 # Compiler eval
 
-Run at 2026-09-04T22:17:53.750Z.
+Run at 2026-09-06T21:10:26.636Z.
 
 Model-tier answers came from `ollama:qwen2.5:3b`.
 
-**Overall exact match: 97.7%** (217 of 222).
+**Overall exact match: 98.0%** (297 of 303).
 
 Tiers covered: `tier0`, `tier1`, `tier2`. Tier 3 needs a credential.
 
@@ -13,8 +13,8 @@ Tiers covered: `tier0`, `tier1`, `tier2`. Tier 3 needs a credential.
 | Tier | Cases | Exact match | Threshold |
 |---|---|---|---|
 | `tier0` | 3 | 3 (100.0%) | — |
-| `tier1` | 181 | 181 (100.0%) | 100% |
-| `tier2` | 38 | 33 (86.8%) | 80% |
+| `tier1` | 250 | 250 (100.0%) | 100% |
+| `tier2` | 50 | 44 (88.0%) | 80% |
 
 ## Method
 
@@ -93,32 +93,6 @@ different on every run by construction.
 
 ```
 
-### `g-185` (tier 2)
-
-> Switch to the second tab
-
-```diff
-- {
-  "action": "switchWindow",
-  "args": {
-    "index": 1
-  },
-  "tier": 2
-}
-
-+ {
-  "action": "switchWindow",
-  "args": {
-    "which": {
-      "kind": "literal",
-      "value": "main"
-    }
-  },
-  "tier": 2
-}
-
-```
-
 ### `g-190` (tier 2)
 
 > The address bar should end up at "/dashboard"
@@ -179,6 +153,70 @@ different on every run by construction.
 
 + {
   "action": "screenshot",
+  "tier": 2
+}
+
+```
+
+### `g-301` (tier 2)
+
+> Save a screenshot under "checkout"
+
+```diff
+- {
+  "action": "screenshot",
+  "args": {
+    "name": {
+      "kind": "literal",
+      "value": "checkout"
+    }
+  },
+  "tier": 2
+}
+
++ {
+  "action": "screenshot",
+  "capture": {
+    "from": "result",
+    "name": "checkout"
+  },
+  "tier": 2
+}
+
+```
+
+### `g-303` (tier 2)
+
+> Fire the "active count" API and keep the response as activeCount
+
+```diff
+- {
+  "action": "api",
+  "args": {
+    "name": {
+      "kind": "literal",
+      "value": "active count"
+    }
+  },
+  "capture": {
+    "from": "response",
+    "name": "activeCount"
+  },
+  "tier": 2
+}
+
++ {
+  "action": "api",
+  "args": {
+    "request": {
+      "kind": "literal",
+      "value": "active count"
+    }
+  },
+  "capture": {
+    "from": "response",
+    "name": "activeCount"
+  },
   "tier": 2
 }
 
