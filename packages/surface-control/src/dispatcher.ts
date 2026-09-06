@@ -5,9 +5,11 @@ import { makeRequestId, successEnvelope, failedEnvelope, refusedEnvelope } from 
 import type { SessionStore } from "./sessions.js";
 import type { ErrorCode } from "./catalogue.js";
 import { discoverTargets, discoverAdapters, checkAdapterReadiness } from "./discovery.js";
+import type { ReferenceStore } from "./references.js";
 
 export interface DispatchContext {
   sessions: SessionStore;
+  references?: ReferenceStore;
 }
 
 export async function dispatchTargets(
@@ -114,7 +116,33 @@ export async function dispatchSnapshot(
       interactiveOnly: input.interactiveOnly,
     });
     const elapsed = Date.now() - start;
-    return successEnvelope(requestId, input.session, snap, elapsed);
+
+    let snapshotId: string | undefined;
+    let truncated = false;
+    let generation: number | undefined;
+    if (ctx.references) {
+      const refs = (snap.nodes as Array<{ ref: string }>).map((n) => n.ref);
+      let url: string | undefined;
+      try {
+        url = (await entry.surface.read("url")) as string | undefined;
+      } catch { /* adapters that lack url reading */ }
+      const record = ctx.references.recordSnapshot(input.session, refs, {
+        url,
+        truncated: input.maxNodes !== undefined && snap.nodes.length >= input.maxNodes,
+        totalNodes: snap.nodes.length,
+        returnedNodes: snap.nodes.length,
+      });
+      snapshotId = record.snapshotId;
+      truncated = record.truncated;
+      generation = record.generation;
+    }
+
+    return successEnvelope(requestId, input.session, {
+      ...snap,
+      ...(snapshotId ? { snapshotId } : {}),
+      ...(generation !== undefined ? { generation } : {}),
+      truncated,
+    }, elapsed);
   } catch (err) {
     return handleError(requestId, input.session, err, Date.now() - start);
   }
@@ -128,6 +156,7 @@ export async function dispatchAct(
     ref?: string;
     args?: ActArgs;
     ref2?: string;
+    snapshot?: string;
   },
 ): Promise<Record<string, unknown>> {
   const requestId = makeRequestId();
@@ -136,6 +165,14 @@ export async function dispatchAct(
   if (!entry) {
     return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
   }
+
+  if (ctx.references && input.ref) {
+    const check = ctx.references.validateRef(input.session, input.ref, input.snapshot);
+    if (!check.valid) {
+      return refusedEnvelope(requestId, input.session, check.code as ErrorCode, check.message);
+    }
+  }
+
   try {
     const result = await entry.surface.act(
       input.action as Parameters<AgentSurface["act"]>[0],
@@ -144,6 +181,12 @@ export async function dispatchAct(
       input.ref2 as Ref | undefined,
     );
     const elapsed = Date.now() - start;
+
+    const navigating = input.action === "navigate" || input.action === "goBack" || input.action === "goForward";
+    if (navigating && ctx.references) {
+      ctx.references.incrementGeneration(input.session);
+    }
+
     return successEnvelope(requestId, input.session, result, elapsed);
   } catch (err) {
     return handleError(requestId, input.session, err, Date.now() - start);
@@ -244,10 +287,12 @@ export async function dispatchClose(
   try {
     await entry.surface.close();
     ctx.sessions.remove(input.session);
+    ctx.references?.invalidateSession(input.session);
     const elapsed = Date.now() - start;
     return successEnvelope(requestId, input.session, { closed: true }, elapsed);
   } catch (err) {
     ctx.sessions.remove(input.session);
+    ctx.references?.invalidateSession(input.session);
     return handleError(requestId, input.session, err, Date.now() - start);
   }
 }
@@ -278,13 +323,19 @@ export async function dispatchCapabilities(
 
 export async function dispatchDescribe(
   ctx: DispatchContext,
-  input: { session: string; ref: string },
+  input: { session: string; ref: string; snapshot?: string },
 ): Promise<Record<string, unknown>> {
   const requestId = makeRequestId();
   const start = Date.now();
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
     return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+  }
+  if (ctx.references) {
+    const check = ctx.references.validateRef(input.session, input.ref, input.snapshot);
+    if (!check.valid) {
+      return refusedEnvelope(requestId, input.session, check.code as ErrorCode, check.message);
+    }
   }
   try {
     const desc = await entry.surface.describe(input.ref as Ref);

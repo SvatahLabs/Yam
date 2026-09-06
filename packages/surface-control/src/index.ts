@@ -78,6 +78,13 @@ export {
 } from "./discovery.js";
 
 export {
+  createReferenceStore,
+  type ReferenceStore,
+  type SnapshotRecord,
+  type RefScope,
+} from "./references.js";
+
+export {
   dispatchTargets,
   dispatchConnect,
   dispatchSnapshot,
