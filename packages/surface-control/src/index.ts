@@ -95,6 +95,23 @@ export {
 } from "./coordination.js";
 
 export {
+  createEventStore,
+  type EventStore,
+  type SessionEvent,
+  type EventKind,
+} from "./events.js";
+
+export {
+  createRedactionPolicy,
+  addSecretPattern,
+  addSecretLiteral,
+  redactString,
+  redactObject,
+  hasSecret,
+  type RedactionPolicy,
+} from "./redaction.js";
+
+export {
   dispatchTargets,
   dispatchConnect,
   dispatchSnapshot,

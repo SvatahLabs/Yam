@@ -8,11 +8,21 @@ import { discoverTargets, discoverAdapters, checkAdapterReadiness } from "./disc
 import type { ReferenceStore } from "./references.js";
 import type { CoordinationStore } from "./coordination.js";
 import { hashInput } from "./coordination.js";
+import type { EventStore } from "./events.js";
+import type { RedactionPolicy } from "./redaction.js";
+import { redactObject } from "./redaction.js";
 
 export interface DispatchContext {
   sessions: SessionStore;
   references?: ReferenceStore;
   coordination?: CoordinationStore;
+  events?: EventStore;
+  redaction?: RedactionPolicy;
+}
+
+function maybeRedact(ctx: DispatchContext, result: Record<string, unknown>): Record<string, unknown> {
+  if (!ctx.redaction) return result;
+  return redactObject(ctx.redaction, result) as Record<string, unknown>;
 }
 
 export async function dispatchTargets(
@@ -85,12 +95,19 @@ export async function dispatchConnect(
 
     const caps = surface.capabilities();
     const elapsed = Date.now() - start;
-    return successEnvelope(requestId, sessionId, {
+    ctx.events?.emit({
+      sessionId,
+      kind: "session.created",
+      operationName: "connect",
+      data: { adapter: adapterName, url: input.url },
+    });
+    const envelope = successEnvelope(requestId, sessionId, {
       sessionId,
       adapter: adapterName,
       kind: surface.kind,
       capabilities: caps,
     }, elapsed);
+    return maybeRedact(ctx, envelope);
   } catch (err) {
     const elapsed = Date.now() - start;
     return handleError(requestId, undefined, err, elapsed);
@@ -140,12 +157,13 @@ export async function dispatchSnapshot(
       generation = record.generation;
     }
 
-    return successEnvelope(requestId, input.session, {
+    const envelope = successEnvelope(requestId, input.session, {
       ...snap,
       ...(snapshotId ? { snapshotId } : {}),
       ...(generation !== undefined ? { generation } : {}),
       truncated,
     }, elapsed);
+    return maybeRedact(ctx, envelope);
   } catch (err) {
     return handleError(requestId, input.session, err, Date.now() - start);
   }
@@ -175,6 +193,12 @@ export async function dispatchAct(
   if (ctx.references && input.ref) {
     const check = ctx.references.validateRef(input.session, input.ref, input.snapshot);
     if (!check.valid) {
+      ctx.events?.emit({
+        sessionId: input.session,
+        kind: "operation.refused",
+        operationName: input.action,
+        data: { code: check.code, ref: input.ref },
+      });
       return refusedEnvelope(requestId, input.session, check.code as ErrorCode, check.message);
     }
   }
@@ -189,6 +213,12 @@ export async function dispatchAct(
       return idemCheck.result as Record<string, unknown>;
     }
     if (idemCheck.status === "conflict") {
+      ctx.events?.emit({
+        sessionId: input.session,
+        kind: "operation.refused",
+        operationName: input.action,
+        data: { code: "INVALID_ARGUMENT", idempotencyKey: input.idempotencyKey },
+      });
       return refusedEnvelope(requestId, input.session, "INVALID_ARGUMENT", idemCheck.message);
     }
   }
@@ -202,17 +232,36 @@ export async function dispatchAct(
       input.deadlineMs,
     );
     if (!leaseResult.acquired) {
+      ctx.events?.emit({
+        sessionId: input.session,
+        kind: "lease.refused",
+        operationName: input.action,
+        data: { holder: leaseResult.holder, operationId: leaseResult.operationId },
+      });
       return refusedEnvelope(requestId, input.session, "CONTROL_BUSY", `Target is held by "${leaseResult.holder}" (operation ${leaseResult.operationId}). Wait or request handoff.`, {
         holder: leaseResult.holder,
         operationId: leaseResult.operationId,
       });
     }
+    ctx.events?.emit({
+      sessionId: input.session,
+      kind: "lease.acquired",
+      operationName: input.action,
+      data: { holder: input.holder ?? requestId, targetKey },
+    });
   }
 
   let opRecord: ReturnType<CoordinationStore["recordDispatch"]> | undefined;
   if (ctx.coordination) {
     opRecord = ctx.coordination.recordDispatch(input.session, input.action);
   }
+
+  ctx.events?.emit({
+    sessionId: input.session,
+    kind: "operation.dispatched",
+    operationName: input.action,
+    data: { ref: input.ref, action: input.action },
+  });
 
   try {
     const result = await entry.surface.act(
@@ -243,12 +292,24 @@ export async function dispatchAct(
         "succeeded",
       );
     }
-    return envelope;
+    ctx.events?.emit({
+      sessionId: input.session,
+      kind: "operation.succeeded",
+      operationName: input.action,
+      data: { ref: input.ref },
+    });
+    return maybeRedact(ctx, envelope);
   } catch (err) {
     if (ctx.coordination) {
       ctx.coordination.releaseLease(targetKey, "failed");
       if (opRecord) ctx.coordination.completeOperation(opRecord.operationId, "failed");
     }
+    ctx.events?.emit({
+      sessionId: input.session,
+      kind: "operation.failed",
+      operationName: input.action,
+      data: { ref: input.ref, error: err instanceof Error ? err.message : String(err) },
+    });
     return handleError(requestId, input.session, err, Date.now() - start);
   }
 }

@@ -39,6 +39,8 @@ import type { AdapterFactoryFn } from "./adapter-factory.js";
 import { createSessionStore } from "./sessions.js";
 import { createReferenceStore } from "./references.js";
 import { createCoordinationStore } from "./coordination.js";
+import { createEventStore } from "./events.js";
+import { createRedactionPolicy, type RedactionPolicy } from "./redaction.js";
 import { failedEnvelope, makeRequestId } from "./envelope.js";
 
 /** One operation, by the name the catalogue gives it. */
@@ -112,7 +114,9 @@ export async function startBroker(options: BrokerOptions): Promise<RunningBroker
   const sessions = createSessionStore();
   const references = createReferenceStore();
   const coordination = createCoordinationStore();
-  const context: DispatchContext = { sessions, references, coordination };
+  const events = createEventStore();
+  const redaction: RedactionPolicy = createRedactionPolicy();
+  const context: DispatchContext = { sessions, references, coordination, events, redaction };
   const withAdapterInfo = (args: Record<string, unknown>): Record<string, unknown> => ({
     ...args,
     adapterFactory: options.factory,
