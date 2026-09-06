@@ -214,7 +214,7 @@ Constraints stated by the owner:
 | REQ-STD-3 | A foreign runtime (first: Java on Playwright for Java) executes `plan.json` and bindings without the TypeScript compiler and passes the runtime conformance suite; its `results.jsonl` and `summary.json` validate against the published schemas, and the suite checks that before it compares (Draft 2.8). | P2 | T |
 | REQ-STD-4 | Provenance is mandatory on every model-produced artifact; schema validation rejects artifacts without it. | P0 | T |
 
-### 3.12 Desktop client and local service (`REQ-app`)
+### 3.12 Desktop client and local service (`REQ-ADE`)
 
 | ID | Requirement | Pri | Ver |
 |---|---|---|---|
@@ -232,12 +232,29 @@ Constraints stated by the owner:
 | REQ-ADE-12 | The app is built on a design system (`@svatah/yam-ui-tokens`, `@svatah/yam-ui` on Radix primitives): dark-first with a light theme, one accent, status colours never without a word or glyph, and every interactive control carrying a visible label that is its accessible name and a stable id (Draft 2.11). | P1 | T, R |
 | REQ-ADE-13 | Every screen's state is available as JSON through the service and the SDK; nothing exists only in a UI, so an agent can use the same screens through the service or through the accessibility adapters (Draft 2.11). | P1 | T |
 | REQ-TUI-1 | `yam ui` is a full authoring cockpit in the terminal: a standalone Ink application over the local service rendering the same screen model as the app, with numbered panes, the same actions and keys, the same command palette, and a `--json` mode that streams screen state and audit lines for agents; no tmux dependency (Draft 2.11). | P1 | T, D |
+| REQ-TUI-2 | `yam ui --tmux` (alias `yam workspace`) opens a tmux session named for the project with the cockpit, a shell in the project directory, the live audit tail of the current run, and, when `$EDITOR` is set, the editor on the flow the cockpit has open; the four panes share one service through `YAM_SERVICE_URL` and `YAM_SERVICE_TOKEN` so nothing is spawned twice; without tmux the cockpit opens alone and says so; the same session is the process adapter's first target (Draft 2.20). | P0 | T, D |
 | REQ-SDK-1 | `@svatah/yam-sdk` is a typed TypeScript client generated from the service's OpenAPI description, with typed event subscription and the screen model's actions runnable out of process; drift between the description and the client fails the build (Draft 2.11). | P1 | T |
 | REQ-SDK-2 | Python and Java clients are generated from the same description, published with the release, and versioned with it (Draft 2.11). | P1 | T, R |
 | REQ-SELF-1 | Yam verifies itself: `evals/self` holds prose flows that drive the sample application, the packaged app through the desktop adapters, the local service through the HTTP adapter, and the cockpit through its JSON mode; a phase is not accepted until the suite is green (Draft 2.14). | P1 | T, E |
 | REQ-SELF-2 | Every self check has an independent external implementation; `yam eval self` runs both sides and publishes agreement, coverage per side, and every disagreement and one-sided check; the gate requires 100 percent agreement on the checks both sides reach, and one-sided checks are published as Yam's own shortcomings (Draft 2.14). | P1 | E, R |
 | REQ-SELF-3 | Three oracles stay external by design: the healing eval's ground-truth keys, axe-core on the component sheet, and the renderer-versus-adapter tree agreement (Draft 2.14). | P1 | T, R |
 | REQ-SELF-4 | The catalogue schema, the source runners, the comparison, and the report are a published package, `@svatah/yam-verify`, and `yam eval self --catalogue <file>` runs any project's catalogue, so a third party gates its own application two-sidedly with the same rules (Draft 2.16). | P1 | T, R |
+
+### 3.13 The command line's front door (`REQ-CLI`)
+
+The command line is the product's front door, and a newcomer judges the product by it (owner decision of 2026-09-07, Draft 2.20). These requirements are about arrangement and guidance; they add no capability and change no artifact.
+
+| ID | Requirement | Priority | Verification |
+|---|---|---|---|
+| REQ-CLI-1 | `yam` with no arguments inside a project prints the project's state (flows and stories, targets unbound, whether the plan is current, the last run and its verdict) and the one next verb, and exits 0; outside a project it says how to start one. Usage is printed only by `yam help` and `--help`. | P0 | T, D |
+| REQ-CLI-2 | The journey is the interface: `init`, `check`, `record`, `run`, `heal`, `ui` and `serve` are the top level, in that order, and the top-level help is one screen that lists them with one line each and names the noun groups (`bindings`, `workflow`, `tool`, `mcp`, `eval`, `surface`, `migrate`, `repl`, `trajectory`, `host`) under which every other command lives. Nothing is removed; everything else is one level down. | P0 | T, R |
+| REQ-CLI-3 | `yam check` reads, lints and compiles in one verb and writes the plan; `lint` and `compile` remain as aliases of its halves. `run`, `record` and `heal` check first when the plan is stale against the flows, data or config, and say so on one line. | P0 | T |
+| REQ-CLI-4 | `yam <command> --help` prints that command's synopsis, its options with one line each, its exit codes, and nothing else, and exits 0; `yam <noun>` with no verb lists the noun's verbs. | P0 | T |
+| REQ-CLI-5 | Every failure a newcomer can reach names the verb that resolves it, on the terminal and in `--json`: no project here, no flows, a target with no binding, a stale plan, a secret not set, a browser not installed, an adapter's host not ready, a run that cannot resume. The catalogue of these diagnostics is a table in the LLD and a test asserts each is produced. | P0 | T |
+| REQ-CLI-6 | `yam heal` with no arguments heals the last run of this project; `.yam/last-run` names it and `run` writes it. `yam run` prints the failing step's reason under the `✗` line, not only in the run directory. | P0 | T |
+| REQ-CLI-7 | The session context (`--base-url`, `--storage-state`, `--input`, `--headed`, `--out`, `--run-id`) is one group, documented once under `yam help session` with the precedence config, then environment, then flag; the top-level help does not restate it per command. | P0 | T, R |
+| REQ-CLI-8 | `yam help <topic>` exists for `flows`, `bindings`, `exit-codes`, `session`, `adapters` and `agents`; the exit-code table is in the product, and every code the executor can return is in it. | P0 | T, R |
+| REQ-CLI-9 | No internal vocabulary reaches a person: "module (a)", "module (b)", "LLD §", "REQ-", "Draft", "T\d+.\d+" and "P\d+-F\d+" never appear in help, in a diagnostic, or in `init`'s output; a test greps the CLI's user-facing strings. | P0 | T |
 
 ## 4. Non-functional requirements
 
@@ -291,6 +308,7 @@ Each requirement is referenced by at least one HLD section, one LLD section, and
 - Draft 2.14 (Yam verifies Yam): `REQ-SELF-1..3` added; Phase 11 becomes corrections plus the self-verification suite and parity gate; the release moves to Phase 12.
 - Draft 2.15 (after Phase 11 verification): no requirement text changes; T12.7 added to close the one-sided list's language gaps and the verification's three findings before the release.
 - Draft 2.16 (process and terminal): `REQ-ADP-10` and `REQ-SELF-4` added; Phase 13 added after the release.
+- Draft 2.20 (the front door, owner decision of 2026-09-07): `REQ-CLI-1..9` and `REQ-TUI-2` added at P0 — the command line's default is the project's state and the next verb, the journey `init → check → record → run → heal` is the top level, per-command help, next-step diagnostics, the session context documented once, help topics, no internal vocabulary, and the tmux workspace; Phase 14 inserted for it before the publish, process and terminal renumbered to Phase 15.
 - Draft 2.19 (the desktop client is Yam, owner decision of 2026-09-06): the Electron client is no longer called the ADE; it is **Yam** — `Yam.app`, bundle id `com.svatah.yam`, package `@svatah/yam-desktop` under `apps/desktop` — and prose says "the app". The `REQ-ADE-*` ids keep their letters, as §0 requires; the prototype-database import is `--from-prototype`. No requirement text changes.
 - Draft 2.18 (Yam, owner decisions of 2026-09-06): no requirement text changes; the product is named Yam under the Svatah brand and the `@svatah` scope, the frozen Java project leaves the repository, and the repository moves to `github.com/SvatahLabs/yam`; Phase 13 inserted for that work, process and terminal renumbered to Phase 14.
 - Draft 2.17 (after Phase 12 verification): no requirement text changes; T13.2 extended with the sentences that close the last non-oracle one-sided checks; 0.1.0 accepted for the owner's validation.

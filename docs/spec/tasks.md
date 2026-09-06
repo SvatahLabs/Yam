@@ -556,36 +556,74 @@ The owner's decisions of 2026-09-06: Svatah is the brand and the organisation, a
 
 ### T13.6 0.1.0 published as Yam and verified from the registry (owner)
 **Refs:** REQ-PKG-1, 2, 4 · **Est:** 0.5 (plus the owner's action)
-**Do:** T12.5 under the new names: the owner dispatches `release.yml` with `publish`; the tag `v0.1.0` at the published commit; `pnpm quick-start:registry`; the GitHub release carries the reports and the app installers.
+**Do:** After Phase 14 (Draft 2.20: the front door ships in 0.1.0). T12.5 under the new names: the owner dispatches `release.yml` with `publish`; the tag `v0.1.0` at the published commit; `pnpm quick-start:registry`; the GitHub release carries the reports and the app installers.
 **Validate:** The registry quick start green by name, with no overrides, on Node 22 and the current release; the tag exists at the published commit and nowhere else.
 
 Phase 13 total: 8.5 ideal days.
 
 ---
 
-## Phase 14 — Process and terminal (Draft 2.16, renumbered in 2.18)
+## Phase 14 — The front door (Draft 2.20)
 
-### T14.1 The process adapter
+The owner's decision of 2026-09-07: the command line is hard to understand and follows no sequence, and the experience must not need expertise. This phase changes no artifact and no package boundary. It arranges the same functions around the journey `init → check → record → run → heal`, makes the default invocation say where the project is and what to do next, gives every command its own help, names the next verb in every failure, and adds the tmux workspace. It runs **before T13.6's publish**, because the front door is what a newcomer judges the release by. LLD §15.1 is the design.
+
+### T14.1 `yam` says where you are and what is next
+**Refs:** REQ-CLI-1, LLD §15.1 · **Est:** 1.5
+**Do:** `projectState(dir)`: the project, the flows and stories, the unbound targets by the dictionary's lookup, the plan's currency by input hash, the last run from `.yam/last-run`; `nextVerb(state)` in the order §15.1 lists; `yam` with no arguments prints the four state lines and the verb, exit 0; `yam --json` prints the state with `next`; outside a project, the one-line "No Yam project here" with `yam init`. `run` writes `.yam/last-run` on start.
+**Validate:** A test per state in §15.1's order, each asserting the verb; `yam` in an empty directory exits 0 and names `init`; `yam` in `evals/fixtures` names `run` when green and `record` after a binding is removed; `--json` round-trips the state.
+
+### T14.2 `check`, and the plan's currency
+**Refs:** REQ-CLI-3, REQ-CLI-6, LLD §15.1 · **Est:** 1
+**Do:** `yam check` = lint then compile with one report and the input hash recorded in the plan; `lint` and `compile` stay as aliases; `run`, `record` and `heal` check when the plan is stale or missing and print the one line; `--no-check`; `yam heal` with no arguments reads `.yam/last-run`; the `run` report prints the failing step's reason under its `✗` line.
+**Validate:** Editing a flow and running `yam run` prints "plan was stale; checked" and runs the new plan; `--no-check` on a stale plan is the stale-plan diagnostic; `yam heal` after a failed run needs no id and says which run; the reason line appears under `✗` in the fixture run and matches the results file's failure class.
+
+### T14.3 Help: one screen, one command, one topic
+**Refs:** REQ-CLI-2, REQ-CLI-4, REQ-CLI-7, REQ-CLI-8, REQ-CLI-9, LLD §15.1 · **Est:** 1.5
+**Do:** The top-level help text of §15.1, verbatim; `yam <command> --help` per command with synopsis, options, exit codes and the session reference; `yam <noun>` lists its verbs; `yam help <topic>` for the six topics, shipped as markdown in `dist/help/`, the exit-code table generated from the `EXIT` constant; the session context written once; usage-and-64 only for an unknown command; `init`'s next steps become `check`, `record`, `run`, and "Initialised ." says the directory's name.
+**Validate:** A test compares `yam help` to the text in §15.1; every command in the old usage has a `--help` that exits 0 and mentions no other command's options; every executor exit code appears in `yam help exit-codes` (test against `EXIT`); the repo check for internal vocabulary passes over `yam help`, every `--help`, `init` and the diagnostics catalogue, and fails when "module (b)" is put back.
+
+### T14.4 The diagnostics that name the next verb
+**Refs:** REQ-CLI-5, LLD §15.1 · **Est:** 1
+**Do:** Every row of §15.1's catalogue: detected where it arises, one sentence, the verb, the `{ code, message, next }` in `--json`; the unbound-target diagnostic at `run` names the phrase and the element id.
+**Validate:** A test per row produces it from a real condition (an empty directory, an emptied `flows/`, a removed binding, a stale plan with `--no-check`, an unset secret, a missing browser simulated by `PLAYWRIGHT_BROWSERS_PATH`, the doctor's refusal on a fake bridge, a moved plan on resume, a non-idempotent story against a production config) and asserts the sentence and the verb; `yam run` in a fresh `yam init` project prints "No binding for …" and `yam record` on the terminal.
+
+### T14.5 The tmux workspace
+**Refs:** REQ-TUI-2, LLD §15.1, §13.7 · **Est:** 1.5
+**Do:** `yam ui --tmux` and `yam workspace`: the service started or attached, its address in the session environment, the session `yam-<project>` with the four panes of §15.1, attach; a second invocation attaches; without tmux the cockpit alone and the one line; `yam runs tail` (the audit lines of the current run over the event stream, which the bottom-right pane runs); the cockpit's status line with project, run and service address.
+**Validate:** With tmux on `PATH`, the session exists with four panes whose commands are the four of §15.1 (`tmux list-panes -F` in a test), one `yam serve` process for all of them, and `yam ui --tmux` again attaches rather than starting a second; without tmux (`PATH` without it in the test) the cockpit starts and the line is printed; `yam runs tail` prints the audit lines of a run started from another pane; `pnpm ui:capture` still writes the two committed captures unchanged.
+
+### T14.6 The front door in the documentation and the self suite
+**Refs:** REQ-CLI-1..9, REQ-SELF-1, REQ-PKG-2 · **Est:** 0.5
+**Do:** `docs/getting-started/first-flow.md` and the README's flow section rewritten around the six verbs and `yam`'s state line; `docs/reference/generated/cli.md` becomes the top-level help plus every command's `--help`, generated; the self suite gains checks for `yam` with no arguments, `yam check` and `yam help exit-codes` through the command source, two-sided.
+**Validate:** `pnpm docs:check` clean; the quick start's commands are the six verbs; `yam eval self` green with the three new checks two-sided; the ten-minute quick start still under budget.
+
+Phase 14 total: 7 ideal days.
+
+---
+
+## Phase 15 — Process and terminal (Draft 2.16, renumbered in 2.20)
+
+### T15.1 The process adapter
 **Refs:** REQ-ADP-10, REQ-SURF-3, LLD §2.4 · **Est:** 4
 **Do:** `adapter-process`: a session over a pseudo-terminal library under a permissive licence with a pipe fallback; snapshot of the screen as rows, the process state, and files under a root; `type`, `press`, `run`, `signal`; `screen`, `stdout`, `stderr`, `exit`, `file` reads; text, pattern, exit-code, and file predicates; the surface conformance suite gains a `process` case list against a small sample program in `apps/sample-cli`.
-**Validate:** The process suite passes; a secret handed as an input never appears in a snapshot, a read, or a report; a read outside the root is refused; the cockpit is driven in a real pseudo-terminal through the adapter at 100 and 160 columns.
+**Validate:** The process suite passes; the tmux workspace of REQ-TUI-2 is driven through the adapter as its first case; a secret handed as an input never appears in a snapshot, a read, or a report; a read outside the root is refused; the cockpit is driven in a real pseudo-terminal through the adapter at 100 and 160 columns.
 
-### T14.2 Patterns 34 to 38
+### T15.2 Patterns 34 to 38
 **Refs:** REQ-LANG-12, LLD §4.2 · **Est:** 2
 **Do:** The five process sentences and the pattern 19 form in the grammar, the IR, the reference with two examples each, and golden entries; the recorder binds `t<n>` and `f<path>` references without a model. Draft 2.17: also `Exactly one …` and `… should be unique` (pattern 32), the two-element form of pattern 24, the capture comparison of pattern 22, and `app.attach.serviceLock` with `{app.serviceUrl}` and `{app.serviceToken}`; and the app's Playwright cases refuse to start while another instance of the test bundle is running.
 **Validate:** Tier 1 golden at 100 percent; a flow that runs `yam ui --json`, waits for the screen, and checks the exit code, green. Draft 2.17: the four run-inside-a-run checks, the count check, the geometry check, and the label-comparison check each two-sided.
 
-### T14.3 The six checks move to Yam's side
+### T15.3 The six checks move to Yam's side
 **Refs:** REQ-SELF-1, 2, LLD §13.9 · **Est:** 2
 **Do:** The generated-client smoke, the artboard audit, the desktop gate script, the import's filesystem assertion, and the two cockpit checks become process flows in `evals/self`; their external sides stay.
 **Validate:** `yam eval self` at 100 percent with Yam reaching 45 of 48; the three remaining one-sided checks are the REQ-SELF-3 oracles and nothing else.
 
-### T14.4 The verification library
+### T15.4 The verification library
 **Refs:** REQ-SELF-4, LLD §13.9 · **Est:** 3
 **Do:** `@svatah/yam-verify`: the catalogue schema as JSON Schema, the source runners, the comparison, the report; `yam eval self --catalogue <file>` for any project; a README quick start that gates a stranger's Playwright project against its own flows in under ten minutes; packed with the release.
 **Validate:** The quick start scripted against the tarball in an empty project; the repository's own gate runs through the package with the same numbers.
 
-Phase 14 total: 11 ideal days.
+Phase 15 total: 11 ideal days.
 
 
 ---
@@ -695,6 +733,7 @@ Phase 14 total: 11 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.20 (the front door, owner decision of 2026-09-07): Phase 14 inserted before the publish — the state-and-next-verb default, `check` and plan currency, one-screen help with per-command help and topics, the diagnostics catalogue, the tmux workspace, the documentation and self checks; process and terminal becomes Phase 15 with T15.1–T15.4. Total 291 ideal days.
 - Draft 2.19 (the desktop client is Yam): no new tasks; the rename of the client from "the ADE" to Yam is recorded under Phase 13's T13.3.
 - Draft 2.18 (Yam, owner decisions of 2026-09-06): Phase 13 inserted — the organisation and accounts, the clean repository without `legacy/`, the rename to Yam under the `@svatah` scope, the readiness corrections, the documentation set, and the publish under the new names; process and terminal becomes Phase 14 with T14.1–T14.4. Total 284 ideal days.
 - Draft 2.17 (after Phase 12 verification): T13.2 extended with the last non-oracle sentences and the service lock; estimate unchanged at the phase level, 275.5 ideal days.

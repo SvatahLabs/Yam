@@ -617,6 +617,71 @@ Base URL and storage state precedence (Draft 2.5), applied identically by every 
 | `migrate <src> <dest>` | `--keep-original` | 0 / 8 unmapped |
 | `repl`, `eval`, `init`, `doctor` | | |
 
+### 15.1 The front door (Draft 2.20)
+
+The functions behind every verb are unchanged; this section is how they are arranged and what they say. It is implemented in `cli` (the default, `check`, help, diagnostics) and `tui` (the workspace).
+
+**The project state.** `projectState(dir)` reads what exists and derives five facts, each cheap enough to compute on every invocation:
+
+| Fact | Derived from |
+|---|---|
+| `project` | `yam.config.yaml` found by walking up from `dir`; absent means "no project here" |
+| `flows` | the reader over `flows/`: file count, story count, read errors |
+| `unbound` | target phrases in the flows whose element id has no binding in the store, by the dictionary's own lookup (§4.3) |
+| `plan` | `current` when `.yam/plan.json` exists and its recorded input hash equals the hash of the flows, `data.yaml`, `api/` and the config; else `stale` or `missing` |
+| `lastRun` | `.yam/last-run` (the run id `run` writes on start, and `heal` reads) resolved to its `summary.json`: verdict, when, how many steps |
+
+**The next verb** is a pure function of the state, in this order: no project → `init`; read errors → `check`; no flows → "write a flow" with the reference's link; plan missing or stale → `check`; unbound targets → `record`; last run failed with a locator failure → `heal`; last run failed otherwise → `run` with the failing step named; no run yet → `run`; else "green; `yam run` to replay". `yam` prints the state in four lines and the verb on the fifth; `yam --json` prints the state object with `next`. Exit 0 in every case: reporting a state is not a failure.
+
+**The top-level help** is this text, and a test compares it verbatim:
+
+```
+yam — describe a behaviour once, bind it to the real application, replay it without a model
+
+  yam init [dir]      start a project here
+  yam check           read, lint and compile the flows; writes .yam/plan.json
+  yam record          bind the targets by driving the real application
+  yam run             replay the plan; the exit code is the verdict
+  yam heal            repair the bindings the interface moved, from the last run
+  yam ui              the terminal cockpit (--tmux for the workspace)
+  yam serve           the local service, for Yam.app and other clients
+
+  yam <command> --help   options and exit codes of one command
+  yam help <topic>       flows · bindings · exit-codes · session · adapters · agents
+
+More, one level down: yam bindings · workflow · tool · mcp · eval · surface · migrate · repl · trajectory · host
+```
+
+**Per-command help** (`yam <command> --help`, exit 0): a one-line synopsis, the command's own options with one line each and the session group referred to as "session options: see `yam help session`", and the command's exit codes. `yam <noun>` alone lists that noun's verbs the same way. The usage-and-exit-64 path remains only for a command that does not exist, and it prints the top-level help.
+
+**`check`.** `yam check` is `lint` then `compile` with one report: errors, warnings, then the plan line ("plan written: 22 steps, tier 1 22, tier 2 0"). It records the input hash in the plan. `run`, `record` and `heal` call the same function when `plan` is `stale` or `missing` and print one line, "plan was stale; checked", before proceeding; `--no-check` skips it for the person who knows.
+
+**The diagnostics catalogue.** Each row is a condition the CLI detects, the sentence it prints, and the verb it names. A test produces every row.
+
+| Condition | Says | Names |
+|---|---|---|
+| no `yam.config.yaml` up the tree | "No Yam project here." | `yam init` |
+| `flows/` empty | "The project has no flows yet." | the flow language reference |
+| a target with no binding, at run | "No binding for `the username field` (login.username-field)." | `yam record` |
+| the plan is stale and `--no-check` | "The plan is older than the flows." | `yam check` |
+| a `secret` read from an unset variable, at run | "`user.password` reads `$YAM_INPUT_PASSWORD`, which is not set." | `export YAM_INPUT_PASSWORD=…` |
+| Playwright's browser missing | "No Chromium for Playwright." | `npx playwright install chromium` |
+| the desktop adapter's host not ready | the doctor's own line | `yam surface doctor --adapter ax` |
+| `--resume` with a moved plan or store | "The plan or the bindings changed since the checkpoint." | `yam run` without `--resume` |
+| a story not idempotent against production | "`Book a slot` is not marked idempotent and this is production." | `--allow-side-effects`, or `idempotent` in the flow |
+
+Every row appears in `--json` as `{ code, message, next }`. The `run` report prints the reason under the `✗` line, indented, in the same words.
+
+**`heal` on the last run.** `.yam/last-run` holds the run id; `yam heal` with no `--run` and no `--from-bind-failures` reads it and says which run it is healing. A missing file is a diagnostic naming `yam run`.
+
+**The session context** is one option group with one precedence: the config's `app`, then `YAM_BASE_URL`, `YAM_STORAGE_STATE` and `YAM_INPUT_<NAME>`, then the flag (the Draft 2.5 rule, unchanged). `yam help session` is the one place it is written; per-command help refers to it.
+
+**Help topics** are markdown files shipped in `cli`'s `dist/help/` and printed through a plain renderer: `flows` (the six block kinds and ten example sentences), `bindings` (what a binding file is and the three modes), `exit-codes` (the executor's full table, generated from the `EXIT` constant so it cannot drift), `session`, `adapters` (the names `yam.config.yaml` accepts and what each needs on the host), `agents` (`tool serve`, `mcp`, the audit line).
+
+**No internal vocabulary.** The user-facing strings of `cli` are what `yam help`, every `--help`, `init` and the diagnostics catalogue print; a repo check runs them and asserts none contains `module (a)`, `module (b)`, `LLD §`, `REQ-`, `Draft`, `T\d+\.\d+` or `P\d+-F\d+`. Source comments are not user-facing and keep their references.
+
+**The tmux workspace** (`yam ui --tmux`, alias `yam workspace`). If `tmux` is on `PATH`: start or attach the service (`yam serve --port 0`, handshake read), export `YAM_SERVICE_URL` and `YAM_SERVICE_TOKEN` into the session's environment, then `tmux new-session -d -s yam-<project>` with the cockpit in the left pane (`yam ui`), a shell in the project directory top right, `yam runs tail` bottom right (the audit lines of the current run as they arrive, over the event stream), and, when `$EDITOR` is set, the editor on the cockpit's open flow in a fourth pane; then `tmux attach`. Detaching leaves the service running until the last pane exits; `yam ui --tmux` again attaches. Without `tmux`: the cockpit alone, and one line saying the workspace needs tmux. The cockpit's status line shows the project, the run and the service address so the panes read as one. The layout is a small script in `tui`, run through `tmux`'s command line and nothing else, so Phase 15's process adapter can drive the same session as its first target.
+
 MCP server (`yam mcp`): operation tools (`compile`, `lint`, `record`, `run`, `heal`, `bindings`, `results`, `workflow`) plus raw surface tools (`surface_snapshot`, `surface_act`, `surface_read`, `surface_check`, each with a required `intent` parameter for trajectory capture).
 
 ---
@@ -640,6 +705,7 @@ MCP server (`yam mcp`): operation tools (`compile`, `lint`, `record`, `run`, `he
 ## 17. Changes from Draft 1
 
 - Draft 2.7 (after Phase 5 verification): `Step.guard.target` (§3.2); compensating-story steps keep their own statuses (§8.3); `yam trajectory compile` in the command table (§15); the trajectory line shape and the proposal context hash (§13.4); `POST /record` gateway, 409, and decision deadline (§13.5); the app Record screen chooses the gateway and renders failures (§13.6).
+- Draft 2.20 (the front door): §15.1 — the project state and the next verb, the one-screen help, per-command help, `check` and plan staleness, the diagnostics catalogue, `heal` on the last run, the session context group, the help topics, the no-internal-vocabulary check, and the tmux workspace; Phase 15's process adapter takes the workspace as its first target.
 - Draft 2.19 (the desktop client is Yam): the client of §13.6 is `apps/desktop`, product name `Yam`, bundle id `com.svatah.yam`; the desktop adapters address the process `Yam` (§7.5); `YAM_APP_*` replaces `YAM_ADE_*`; `yam migrate --from-prototype` (§13.5, §15).
 - Draft 2.18 (Yam): the umbrella package `@svatah/yam` carries the `yam` bin (§15); every other package is `@svatah/yam-<name>` and the import boundaries of §1 hold under the new names; project files are `yam.config.yaml` and `.yam/`, the environment prefix is `YAM_`, the schema `$id`s are under `https://yam.svatah.com/schema/` (§3); `legacy/` leaves and the migrate inputs are `evals/migrate/source/` (§16); Phase 13's packages of Draft 2.16 are now Phase 14's.
 - Draft 2.17 (after Phase 12 verification): `capture.from` gains `url`, pattern 32's IR is the `set` subject, the set and resolver-failure rules (§3.2); the remaining one-sided sentences and `app.attach.serviceLock` (§4.2, Phase 13); the HTTP adapter registered as a surface (§2.4); Phase 13's packages marked planned in HLD §12 until they exist.

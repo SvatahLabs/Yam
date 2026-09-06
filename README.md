@@ -139,7 +139,10 @@ Automation gate has never run for want of a host; the macOS Accessibility gate
 is green by hand and needs a self-hosted runner in CI
 ([`docs/ci.md`](docs/ci.md)); the Tier 2 fine-tune missed its target and is
 withdrawn; nineteen checks of the self-verification suite are still one-sided.
-Next is Phase 14, the process adapter and the verification library.
+Next is Phase 14, the front door: `yam` that says where you are and what
+is next, `check`, one-screen help, diagnostics that name the next verb, and
+the tmux workspace; then Phase 15, the process adapter and the verification
+library.
 
 ### The packages
 
