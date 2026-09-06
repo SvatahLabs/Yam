@@ -7,7 +7,7 @@ Paste the block below into a new Claude Code session opened at the repository ro
 ## Prompt
 
 ```
-You are continuing the Svatah implementation. Phases 0 through 11 are merged on master. The spec on master is Draft 2.14 or later; do not edit the four spec documents. You will apply the corrections the Phase 12 verification lists, then implement Phase 12.
+You are continuing the Svatah implementation. Phases 0 through 11 are merged on master. The spec on master is Draft 2.15; do not edit the four spec documents. You will apply the corrections the Phase 12 verification lists, then implement Phase 12.
 
 Read, in this order, and treat them as the source of truth:
 - docs/spec/requirements.md
@@ -25,7 +25,7 @@ DRAFT 2.10 AMENDMENTS (already on master, for reference; hold the code to them):
 
 PHASE 11 CORRECTIONS (before any Phase 12 task): apply every finding docs/spec/progress/phase-12-verification.md lists under "Findings", in order, each as its own commit, and add a "Post-verification corrections" section to docs/spec/progress/phase-12.md. The verification contract is now `svatah eval self` (LLD §13.9): every correction lands with a self check, and the gate must be at 100 percent agreement before T12.1 starts.
 
-PHASE 12 SCOPE: tasks T12.1 through T12.6 in docs/spec/tasks.md, in order; T12.4 and T12.5 each contain an owner's action you prepare and do not perform; T12.6 only if a Windows host is available. Nothing beyond Phase 12.
+PHASE 12 SCOPE: T12.7 first, then tasks T12.1 through T12.6 in docs/spec/tasks.md, in order; T12.4 and T12.5 each contain an owner's action you prepare and do not perform; T12.6 only if a Windows host is available. Nothing beyond Phase 12.
 
 Environment and fallbacks (state which applied in the progress file):
 - This host is macOS with the Accessibility permission granted to the terminal that runs Svatah. The Screen Recording grant depends on the terminal: the verifier's had it, yours may not; `svatah surface doctor` says which, and a screenshot you cannot take is recorded with the doctor line, not fabricated.
@@ -53,7 +53,7 @@ Evidence you must leave (the verification contract):
 - The live report's snapshot case asserting zero unnamed controls and the results case reading one real run.
 - docs/ci.md, and the registry quick-start script's tarball-mode output.
 
-When finished, print a summary table of the corrections and T12.1..T12.6 with status and commit hash, then stop.
+When finished, print a summary table of F1..F4 and T12.1..T12.7 with status and commit hash, then stop.
 ```
 
 ---

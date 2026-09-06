@@ -285,6 +285,9 @@ Each requirement is referenced by at least one HLD section, one LLD section, and
 - Draft 2.10 (after Phase 8 verification): no requirement text changes. `REQ-ADP-7`'s budget is met live (589 nodes in about 1 s on a quiet machine) and the cost line gains load average and CPU count (LLD §7.5); `REQ-COMP-9`'s 300-entry golden set is the one P0 item still short (222) and is Phase 9's T9.2. Phase 9 (release 0.1.0 and the open P0 items) added to the delivery plan.
 - Draft 2.11 (builder surfaces, after the owner's design review of 2026-09-05): `REQ-ADE-10..13`, `REQ-TUI-1`, `REQ-SDK-1..2` added; Phase 9 (builder surfaces foundation) and Phase 10 (builder surfaces complete) inserted; the release phase becomes Phase 11.
 - Draft 2.12 (after Phase 9 verification): no requirement text changes; T10.4 added for the verification's corrections and the run-stop route.
+- Draft 2.13 (after Phase 10 verification): no requirement text changes; T11.7 added for the verification's corrections, the windowless-launch diagnosis, and the editing work a release needs.
+- Draft 2.14 (Svatah verifies Svatah): `REQ-SELF-1..3` added; Phase 11 becomes corrections plus the self-verification suite and parity gate; the release moves to Phase 12.
+- Draft 2.15 (after Phase 11 verification): no requirement text changes; T12.7 added to close the one-sided list's language gaps and the verification's three findings before the release.
 - Draft 2.4 (after Phase 2 verification): `REQ-LANG-10` states the run-block semantics inherited from the legacy parser.
 - Draft 2.3 (after Phase 1 verification): `REQ-HEAL-5` defines recovery against the ground-truth element and the denominator.
 - Draft 2.1: `REQ-ADE-1..9` added for the local service and a new Svatah ADE Electron client designed to the vision, with the prototype as the blueprint of jobs only; the ADE is the desktop conformance target for `REQ-ADP-6/7`; constraint 7 added.
