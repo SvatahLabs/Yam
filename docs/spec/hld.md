@@ -275,7 +275,7 @@ Step IR (abridged; full in LLD §3):
 ## 12. Repository layout
 
 ```
-svatah/
+yam/                      github.com/SvatahLabs/yam (Draft 2.18)
   packages/
     schema/               Zod + generated JSON Schemas: ir, plan, bindings, results, audit, checkpoint, config, surface
     surface/              AgentSurface interface, adapter registry, reference scheme, capabilities
@@ -285,7 +285,7 @@ svatah/
     adapter-appium/       mobile adapter (P1)
     adapter-uia/          Windows UI Automation (P2)
     adapter-ax/           macOS Accessibility (P2)
-    adapter-process/      command in a pseudo-terminal, streams, exit code, files under a root (Draft 2.16, planned: Phase 13)
+    adapter-process/      command in a pseudo-terminal, streams, exit code, files under a root (Draft 2.16, planned: Phase 14)
     bindings/             store, resolver, synthesis, fingerprint, relocalization   ← module (a) core
     healer/               failure selection, repair, verify, diff                    ← module (a)
     playwright-test/      bind() fixture for plain Playwright tests                   ← module (a)
@@ -304,7 +304,7 @@ svatah/
     ui/                   React components on Radix primitives, the component sheet (Draft 2.11)
     tui/                  svatah ui, the Ink terminal cockpit (Draft 2.11, REQ-TUI-1)
     sdk/                  typed client generated from the OpenAPI description (Draft 2.11, LLD §13.8)
-    verify/               catalogue schema, source runners, comparison, report — the parity gate as a package (Draft 2.16, planned: Phase 13)
+    verify/               catalogue schema, source runners, comparison, report — the parity gate as a package (Draft 2.16, planned: Phase 14)
     trajectory/           trajectory capture and compile (P2)
     cli/                  svatah CLI + MCP server (operations + raw surface)
     service/              local HTTP + event-stream service (svatah serve) for the ADE and other clients
@@ -318,10 +318,10 @@ svatah/
   evals/
     compiler/  grounding/  healing/  conformance/
   docs/spec/              this document set
-  legacy/                 frozen Java project until the Java conformance runtime exists
+  evals/migrate/source/   the four legacy sample flows, the locator file and ActionSynonyms.java, kept as the migrate inputs (Draft 2.18; `legacy/` itself is gone)
 ```
 
-Published npm modules (Draft 2.3; no aggregate packages, each package publishes individually): module (a) = `@svatah/schema`, `@svatah/surface`, `@svatah/adapter-playwright`, `@svatah/bindings`, `@svatah/healer`, `@svatah/playwright-test`, `@svatah/bindings-cli`, `@svatah/conformance`; module (b) = `@svatah/spec`, `@svatah/steps`, `@svatah/compiler`, `@svatah/gateway`, `@svatah/recorder`, `@svatah/runtime`, `@svatah/host-playwright`, `@svatah/workflow`, `@svatah/tool`, `@svatah/trajectory`, `@svatah/service`, `@svatah/migrate`, `@svatah/cli`; module (c) = the schema and conformance packages consumed by foreign runtimes. `runtime` stays in module (b); module (a) reaches replay only through the healer's `Replayer` plugin (LLD §10). Other adapters are separate packages.
+Published npm modules (Draft 2.3; no aggregate packages, each package publishes individually). Draft 2.18: the scope is the organisation, so the product name is the prefix — `@svatah/cli` publishes as `@svatah/yam` and every other package below as `@svatah/yam-<name>`; the names in this paragraph are the directory names. Module groups: module (a) = `@svatah/schema`, `@svatah/surface`, `@svatah/adapter-playwright`, `@svatah/bindings`, `@svatah/healer`, `@svatah/playwright-test`, `@svatah/bindings-cli`, `@svatah/conformance`; module (b) = `@svatah/spec`, `@svatah/steps`, `@svatah/compiler`, `@svatah/gateway`, `@svatah/recorder`, `@svatah/runtime`, `@svatah/host-playwright`, `@svatah/workflow`, `@svatah/tool`, `@svatah/trajectory`, `@svatah/service`, `@svatah/migrate`, `@svatah/cli`; module (c) = the schema and conformance packages consumed by foreign runtimes. `runtime` stays in module (b); module (a) reaches replay only through the healer's `Replayer` plugin (LLD §10). Other adapters are separate packages.
 
 ## 13. Delivery phases
 

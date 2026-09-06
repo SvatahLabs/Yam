@@ -525,29 +525,67 @@ Phase 12 total: 15 ideal days.
 
 ---
 
-## Phase 13 — Process and terminal (Draft 2.16)
+## Phase 13 — Yam: the name, the clean repository, the documentation (Draft 2.18)
 
-### T13.1 The process adapter
+The owner's decisions of 2026-09-06: Svatah is the brand and the organisation, and this product is **Yam**. The npm scope stays `@svatah`; the product name goes into the umbrella package, the bin, the config file, the environment, the schema identifiers and the prose. The repository moves to `github.com/SvatahLabs/yam` without the frozen Java project. This phase runs before T12.5's publish, because package names and schema `$id`s are the public contract and a rename after 0.1.0 would deprecate thirty packages.
+
+### T13.1 The organisation and the accounts (owner)
+**Refs:** REQ-PKG-1, REQ-NFR-6 · **Est:** 0.5 (the owner's action)
+**Do:** Create the GitHub organisation `SvatahLabs` and the empty repository `SvatahLabs/yam`; verify the `svatah.com` domain on the organisation and require two-factor authentication; create the npm organisation `svatah` and configure trusted publishing (OIDC) for `release.yml` so no long-lived token exists; reserve `svatah-yam` on PyPI; point `yam.svatah.com` at the documentation.
+**Validate:** The repository exists; `npm org ls svatah` lists the owner; the release workflow's publish step has an OIDC trust and no `NPM_TOKEN` secret is required; the domain badge is visible on the organisation.
+
+### T13.2 The clean repository
+**Refs:** REQ-NFR-8, HLD §12 · **Est:** 1
+**Do:** Move the four legacy sample flows, the locator file and `ActionSynonyms.java` to `evals/migrate/source/` as committed inputs; delete `legacy/`; repoint the migrate script, the ADE fixture builder, the layout, golden and vocabulary checks, the CLI import test and the screens fixture; remove `bitbucket-pipelines.yml` and its twin-file test — GitHub Actions is the only CI; export the history to the new repository with `git filter-repo` dropping `legacy/` so the driver binaries leave and the phase records stay.
+**Validate:** No file under `legacy/`; `node scripts/migrate-legacy.mjs --check` green from the moved inputs; every repo check green; the largest tracked blob in the new repository under 2 MB; `git log` intact from Phase 0.
+
+### T13.3 The rename
+**Refs:** REQ-PKG-1, REQ-STD-1, LLD §1, §15, HLD §12 · **Est:** 2
+**Do:** `@svatah/cli` becomes `@svatah/yam` with the bin `yam`; every other package becomes `@svatah/yam-<name>`; `svatah-bindings` becomes `yam-bindings`; `yam.config.yaml`, `.yam/`, `~/.yam-node`, `YAM_*`; the ADE is `Yam ADE` with the bundle id `com.svatah.yam.ade`; the Java packages are `com.svatah.yam`, the Python client `svatah_yam` (`svatah-yam` on PyPI); the schema `$id`s live under `https://yam.svatah.com/schema/`; every manifest gains `repository`, `homepage` and `bugs` pointing at `SvatahLabs/yam`; `Svatah` stays wherever it names the brand, the organisation or the copyright; the progress records and prompts of Phases 0 to 12 keep their text as history.
+**Validate:** A repo check enumerates every allowed form of the old name (the scope, the domain, the organisation, the copyright, the historical records) and fails on any other; the six-command contract green; the generated schemas regenerated and their drift test clean; the Java runtime and both generated clients build; the release dry run's thirty tarballs carry the new names and no `workspace:*`.
+
+### T13.4 The readiness corrections
+**Refs:** REQ-PKG-1, 2, 4 · **Est:** 0.5
+**Do:** The changelog and the release workflow say thirty packages, read from the release set rather than written by hand; the README's status and package tables describe the product that ships; `provenance` on, with trusted publishing; the publish script's manual-trigger guard is a GitHub `workflow_dispatch` and nothing else.
+**Validate:** A repo check counts the publishable set and asserts the documents' number equals it; `node scripts/publish.mjs` dry run green; `pnpm quick-start:packed` green.
+
+### T13.5 The documentation set
+**Refs:** REQ-PKG-2, REQ-STD-1, 2, REQ-LANG-12, REQ-SURF-1 · **Est:** 4
+**Do:** `docs/` reorganised by kind, in markdown: *getting started* (the Playwright quick start, the first flow, one plan run three ways); *guides*, one task each (record, heal, write a flow, run in CI, run from cron, expose a tool over MCP, add an adapter and pass conformance, write a foreign runtime, use the ADE); *concepts* (the three layers, the surface contract, determinism and provenance, bindings and fingerprints, the compiler tiers, privacy mode), reshaped from the specification; *reference* — one page per package from a shared template, the API of every package generated from its shipped declarations, the CLI from its own help, the flow language, the JSON Schemas rendered, the HTTP service from its OpenAPI description; *project* (changelog, versioning, reports, contributing, security). Generated pages come from `pnpm docs` and have a drift check.
+**Validate:** Every published package has a reference page that names its exports (test); `pnpm docs --check` clean in CI; no dead relative link anywhere under `docs/` (test); every command a guide shows is one `scripts/examples-check.mjs` or the docs check runs.
+
+### T13.6 0.1.0 published as Yam and verified from the registry (owner)
+**Refs:** REQ-PKG-1, 2, 4 · **Est:** 0.5 (plus the owner's action)
+**Do:** T12.5 under the new names: the owner dispatches `release.yml` with `publish`; the tag `v0.1.0` at the published commit; `pnpm quick-start:registry`; the GitHub release carries the reports and the ADE installers.
+**Validate:** The registry quick start green by name, with no overrides, on Node 22 and the current release; the tag exists at the published commit and nowhere else.
+
+Phase 13 total: 8.5 ideal days.
+
+---
+
+## Phase 14 — Process and terminal (Draft 2.16, renumbered in 2.18)
+
+### T14.1 The process adapter
 **Refs:** REQ-ADP-10, REQ-SURF-3, LLD §2.4 · **Est:** 4
 **Do:** `adapter-process`: a session over a pseudo-terminal library under a permissive licence with a pipe fallback; snapshot of the screen as rows, the process state, and files under a root; `type`, `press`, `run`, `signal`; `screen`, `stdout`, `stderr`, `exit`, `file` reads; text, pattern, exit-code, and file predicates; the surface conformance suite gains a `process` case list against a small sample program in `apps/sample-cli`.
 **Validate:** The process suite passes; a secret handed as an input never appears in a snapshot, a read, or a report; a read outside the root is refused; the cockpit is driven in a real pseudo-terminal through the adapter at 100 and 160 columns.
 
-### T13.2 Patterns 34 to 38
+### T14.2 Patterns 34 to 38
 **Refs:** REQ-LANG-12, LLD §4.2 · **Est:** 2
 **Do:** The five process sentences and the pattern 19 form in the grammar, the IR, the reference with two examples each, and golden entries; the recorder binds `t<n>` and `f<path>` references without a model. Draft 2.17: also `Exactly one …` and `… should be unique` (pattern 32), the two-element form of pattern 24, the capture comparison of pattern 22, and `app.attach.serviceLock` with `{app.serviceUrl}` and `{app.serviceToken}`; and the ADE's Playwright cases refuse to start while another instance of the test bundle is running.
 **Validate:** Tier 1 golden at 100 percent; a flow that runs `svatah ui --json`, waits for the screen, and checks the exit code, green. Draft 2.17: the four run-inside-a-run checks, the count check, the geometry check, and the label-comparison check each two-sided.
 
-### T13.3 The six checks move to Svatah's side
+### T14.3 The six checks move to Svatah's side
 **Refs:** REQ-SELF-1, 2, LLD §13.9 · **Est:** 2
 **Do:** The generated-client smoke, the artboard audit, the desktop gate script, the import's filesystem assertion, and the two cockpit checks become process flows in `evals/self`; their external sides stay.
 **Validate:** `svatah eval self` at 100 percent with Svatah reaching 45 of 48; the three remaining one-sided checks are the REQ-SELF-3 oracles and nothing else.
 
-### T13.4 The verification library
+### T14.4 The verification library
 **Refs:** REQ-SELF-4, LLD §13.9 · **Est:** 3
 **Do:** `@svatah/verify`: the catalogue schema as JSON Schema, the source runners, the comparison, the report; `svatah eval self --catalogue <file>` for any project; a README quick start that gates a stranger's Playwright project against its own flows in under ten minutes; packed with the release.
 **Validate:** The quick start scripted against the tarball in an empty project; the repository's own gate runs through the package with the same numbers.
 
-Phase 13 total: 11 ideal days.
+Phase 14 total: 11 ideal days.
 
 
 ---
@@ -657,6 +695,7 @@ Phase 13 total: 11 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.18 (Yam, owner decisions of 2026-09-06): Phase 13 inserted — the organisation and accounts, the clean repository without `legacy/`, the rename to Yam under the `@svatah` scope, the readiness corrections, the documentation set, and the publish under the new names; process and terminal becomes Phase 14 with T14.1–T14.4. Total 284 ideal days.
 - Draft 2.17 (after Phase 12 verification): T13.2 extended with the last non-oracle sentences and the service lock; estimate unchanged at the phase level, 275.5 ideal days.
 - Draft 2.16 (process and terminal): Phase 13 added — the process adapter, patterns 34–38, the six checks moved, the verification library. Total 275.5 ideal days.
 - Draft 2.15 (after Phase 11 verification): T12.7 added — the one-sided list closed by patterns 32 and 33 and three extensions, the HTTP and SDK self flows, and the three findings. Total 264.5 ideal days.
