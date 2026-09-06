@@ -2,8 +2,16 @@
   "name": "yam",
   "version": "0.1.0",
   "private": true,
-  "description": "Yam \u2014 a deterministic automation runtime with a standard agent surface",
+  "description": "Yam — a deterministic automation runtime with a standard agent surface",
   "license": "Apache-2.0",
+  "homepage": "https://yam.svatah.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SvatahLabs/yam.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SvatahLabs/yam/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=22.0.0"

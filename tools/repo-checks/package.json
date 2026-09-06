@@ -4,6 +4,15 @@
   "private": true,
   "description": "Workspace-level checks that span package directories: import boundaries, licences, eval and documentation coverage",
   "license": "Apache-2.0",
+  "homepage": "https://yam.svatah.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SvatahLabs/yam.git",
+    "directory": "tools/repo-checks"
+  },
+  "bugs": {
+    "url": "https://github.com/SvatahLabs/yam/issues"
+  },
   "type": "module",
   "scripts": {
     "build": "echo \"@svatah/yam-repo-checks has nothing to build\"",

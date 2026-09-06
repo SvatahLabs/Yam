@@ -2,8 +2,8 @@
  * Which packages a release is made of (T7.6, T8.5).
  *
  * Extracted so that `scripts/publish.mjs` can ask the question without *running*
- * `scripts/release-dry-run.mjs`: importing that module packs twenty-six
- * tarballs as a side effect, so a publish script that imported it printed the
+ * `scripts/release-dry-run.mjs`: importing that module packs every
+ * tarball as a side effect, so a publish script that imported it printed the
  * pack's output before its own and could never be read as a dry run of one
  * thing (T8.5). A module that only answers questions has no side effect to
  * inherit.

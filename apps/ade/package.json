@@ -4,6 +4,15 @@
   "version": "0.1.0",
   "description": "The Yam Automation Development Environment: the reference client for the local service",
   "license": "Apache-2.0",
+  "homepage": "https://yam.svatah.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SvatahLabs/yam.git",
+    "directory": "apps/ade"
+  },
+  "bugs": {
+    "url": "https://github.com/SvatahLabs/yam/issues"
+  },
   "private": true,
   "main": ".vite/build/main.js",
   "engines": {

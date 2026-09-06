@@ -7,10 +7,15 @@ It follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ## [0.1.0] — 2026-09-06 (ready to publish; the tag is the owner's)
 
-The first release. **Nothing is published to a registry until the owner triggers
-the pipeline** (T8.5): `node scripts/publish.mjs` prints the twenty-six exact
-`npm publish` commands and stops unless `--publish`, a manual trigger and
-`NPM_TOKEN` all hold. Everything it would publish exists and has been driven:
+The first release, and the first under the name **Yam** (Draft 2.18): the
+product was renamed before anything was published, so no package has ever
+existed under another name. Svatah is the brand and the npm organisation; every
+package is `@svatah/yam` or `@svatah/yam-<name>`. **Nothing is published to a registry until the owner triggers
+the pipeline** (T8.5): `node scripts/publish.mjs` prints the 30 exact
+`npm publish` commands, one per package of the release set in
+`scripts/lib/release-packages.mjs`, and stops unless `--publish`, a GitHub
+`workflow_dispatch` and a publish identity (trusted publishing, or `NPM_TOKEN`)
+all hold. Everything it would publish exists and has been driven:
 `pnpm release:dry-run` packs the tarballs, and `pnpm quick-start:packed`
 installs the module (a) four into an empty Playwright project outside this
 workspace and records, runs and heals there.
@@ -24,7 +29,7 @@ fails there and nowhere else. Until then it says the packages are not published,
 runs the tarball quick start instead, and says which mode it took.
 
 The **git tag `v0.1.0` is not created here**. A tag is a claim that a version
-exists somewhere, and until the owner triggers `custom: publish` it does not.
+exists somewhere, and until the owner dispatches the release workflow with `publish` it does not.
 
 **What is measured**, and where the number is:
 
@@ -45,7 +50,7 @@ declarations and its README and nothing else.
 | Set | Packages |
 |---|---|
 | Module (a) — the adoption wedge (REQ-PKG-1) | `@svatah/yam-bindings`, `@svatah/yam-healer`, `@svatah/yam-playwright-test`, `@svatah/yam-bindings-cli`, and their dependencies `@svatah/yam-schema`, `@svatah/yam-surface`, `@svatah/yam-adapter-playwright`, `@svatah/yam-conformance` |
-| The command line — module (b) | `@svatah/yam` (published as `yam`) and its twenty-five workspace dependencies |
+| The command line — module (b) | `@svatah/yam`, whose bin is `yam`, and its workspace dependencies |
 | The published contract (REQ-STD-1, 2) | `@svatah/yam-schema`, with the generated JSON Schemas under `json/` and the runtime conformance fixture under `conformance/` |
 
 `yam` and `@svatah/yam-ade` are the two things a person runs; every other package

@@ -1,6 +1,7 @@
 # Yam
 
-A **deterministic automation runtime with a standard agent surface**. Describe a
+Yam, from [Svatah Labs](https://github.com/SvatahLabs), is a **deterministic
+automation runtime with a standard agent surface**. Describe a
 behaviour once in plain language, compile it into a typed plan with element
 bindings by driving the real platform, then replay that plan deterministically —
 no model in the loop — on any platform an adapter exists for.
@@ -116,23 +117,36 @@ Every sentence pattern and IR action is in
 
 ## Status
 
-Phase 2 (module (b): the flow reader, the Tier 0 and Tier 1 compilers, the
-executor, both hosts, migration, the CLI and the local service). See
-[`docs/spec/progress/phase-2.md`](docs/spec/progress/phase-2.md) for what is
-built and how each item was verified, and
-[`phase-1.md`](docs/spec/progress/phase-1.md) and
-[`phase-0.md`](docs/spec/progress/phase-0.md) for what came before.
+**0.1.0 is a release candidate.** Twelve phases built it and the Phase 12
+verification accepted it at 9.3 of 10
+([`docs/spec/progress/phase-12-verification.md`](docs/spec/progress/phase-12-verification.md));
+every phase's record and verification are under
+[`docs/spec/progress/`](docs/spec/progress/). Phase 13 named the product Yam,
+removed the frozen Java project and moved the repository to GitHub before
+anything was published, so no package has ever existed under another name.
 
-Not built yet, and honest about it: `yam record`, the model gateway and the
-Tier 2 and Tier 3 compilers, the workflow and tool runners, and every adapter
-except Playwright and HTTP. Those packages exist as skeletons so the layout and
-the import boundaries are enforced from the start; they are Phases 3 and 4.
+What ships: module (a) for plain Playwright projects; the flow language and the
+compiler with three tiers; the runtime with policies, guards, compensation,
+checkpoints, resume and a redacted audit log; the three behaviors; the agent
+surface over six adapters (Playwright, WebDriver BiDi, HTTP, Appium, Windows UI
+Automation, macOS Accessibility) with a conformance suite; the recorder with
+model grounding; the ADE, an Electron application over the local service with
+installers for three operating systems; a Java conformance runtime; and Python
+and Java clients generated from the service's description.
+
+Known gaps, recorded rather than hidden (`CHANGELOG.md`): the Windows UI
+Automation gate has never run for want of a host; the macOS Accessibility gate
+is green by hand and needs a self-hosted runner in CI
+([`docs/ci.md`](docs/ci.md)); the Tier 2 fine-tune missed its target and is
+withdrawn; nineteen checks of the self-verification suite are still one-sided.
+Next is Phase 14, the process adapter and the verification library.
 
 ### The packages
 
-Module (a) is these eight, published together at 0.1.0. None of them resolves a
-module (b) package — the flow language, the compiler, the executor, the recorder
-or the model gateway — and a dependency-tree test holds that.
+Every package is `@svatah/yam` or `@svatah/yam-<name>`, versioned together.
+Module (a) is these eight. None of them resolves a module (b) package — the flow
+language, the compiler, the executor, the recorder or the model gateway — and a
+dependency-tree test holds that.
 
 | Package | What it is |
 |---|---|
@@ -145,6 +159,22 @@ or the model gateway — and a dependency-tree test holds that.
 | [`@svatah/yam-conformance`](packages/conformance) | The suite an adapter must pass to be conformant |
 | [`@svatah/yam-bindings-cli`](packages/bindings-cli) | `yam-bindings`: inspect, verify and heal the store from a terminal |
 
+Module (b) is the command line and everything under it:
+
+| Package | What it is |
+|---|---|
+| [`@svatah/yam`](packages/cli) | The `yam` CLI and MCP server. **The one dependency for the whole runtime.** |
+| [`@svatah/yam-spec`](packages/spec), [`-steps`](packages/steps), [`-compiler`](packages/compiler) | The flow reader and grammar, Tier 0 typed steps, the tiered compiler and lint |
+| [`@svatah/yam-runtime`](packages/runtime), [`-host-playwright`](packages/host-playwright) | The executor, and the Playwright Test host |
+| [`@svatah/yam-workflow`](packages/workflow), [`-tool`](packages/tool), [`-trajectory`](packages/trajectory) | The workflow and tool behaviors, and trajectory capture |
+| [`@svatah/yam-gateway`](packages/gateway), [`-recorder`](packages/recorder) | The model gateway and the recorder |
+| [`@svatah/yam-adapter-http`](packages/adapter-http), [`-adapter-bidi`](packages/adapter-bidi), [`-adapter-appium`](packages/adapter-appium), [`-adapter-uia`](packages/adapter-uia), [`-adapter-ax`](packages/adapter-ax) | The other adapters |
+| [`@svatah/yam-service`](packages/service), [`-sdk`](packages/sdk), [`-screens`](packages/screens), [`-ui`](packages/ui), [`-ui-tokens`](packages/ui-tokens), [`-tui`](packages/tui) | The local service, its typed client, the screen model and its two renderers |
+| [`@svatah/yam-migrate`](packages/migrate) | v1 and v2 flows, and prototype databases, to v3 |
+
+Not published: [`@svatah/yam-ade`](apps/ade), whose installers are attached to
+the release; `sample-web`; and `@svatah/yam-repo-checks`.
+
 ## Repository layout
 
 ```
@@ -155,6 +185,9 @@ examples/     plain-playwright (the ten-minute quick start), plus ci, cron and
 evals/        compiler, grounding, healing and conformance suites
 reports/      the published eval results (REQ-PKG-4)
 docs/         the specification, the agent surface contract, the flow language
+clients/      the Python and Java clients generated from the service description
+runtimes/     the Java conformance runtime (REQ-STD-3)
+tools/        repo-checks, the tests about the repository itself
 ```
 
 ## Working on it
@@ -215,12 +248,6 @@ entry, a `dist` nobody built, a `workspace:*` that escaped into a tarball.
 
 `.github/workflows/release.yml` contains no
 publish. See [CHANGELOG.md](CHANGELOG.md).
-
-The frozen Java project builds on its own:
-
-```bash
-cd legacy && ./gradlew compileJava
-```
 
 ## Documentation
 

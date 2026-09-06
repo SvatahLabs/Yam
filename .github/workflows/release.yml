@@ -33,7 +33,7 @@ on:
         required: false
       publish:
         description: >-
-          Publish the 26 packages to npm. Leave unchecked for a dry run that
+          Publish the 30 packages of the release set to npm. Leave unchecked for a dry run that
           prints the exact commands and contacts no registry (T8.5).
         type: boolean
         default: false
@@ -213,6 +213,12 @@ jobs:
     needs: [tarballs, eval-reports, ade-installers]
     runs-on: ubuntu-latest
     environment: release
+    # Trusted publishing (T13.1): the job's OIDC token is the publish identity,
+    # so no long-lived token has to exist. `NPM_TOKEN` below is the fallback for
+    # an organisation that has not configured it yet, and may be unset.
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -226,6 +232,10 @@ jobs:
 
       - name: Install
         run: pnpm install --frozen-lockfile
+
+      # Trusted publishing needs npm 11.5.1 or newer; Node 22 ships an older one.
+      - name: npm that can publish with an OIDC identity
+        run: npm install -g npm@^11.5.1 && npm --version
 
       - name: Build
         run: pnpm -r build
@@ -241,12 +251,13 @@ jobs:
       - name: The quick start, from the tarballs
         run: pnpm quick-start:packed --reuse
 
-      # Always. Prints the twenty-six exact `npm publish` commands and stops.
+      # Always. Prints the 30 exact `npm publish` commands and stops.
       - name: What publishing would run
         run: node scripts/publish.mjs
 
-      # Only on a manual dispatch that asked for it, and only with the secret.
-      # `scripts/publish.mjs` checks both again itself.
+      # Only on a manual dispatch that asked for it, and only with an identity:
+      # the job's OIDC token, or the secret as the fallback. `scripts/publish.mjs`
+      # checks all of it again itself.
       - name: Publish
         if: github.event_name == 'workflow_dispatch' && inputs.publish
         run: node scripts/publish.mjs --publish

@@ -31,10 +31,14 @@
  *    is the only CI). A push to a branch must never publish, and
  *    the guard is here rather than only in the YAML so that a copied step cannot
  *    lose it.
- * 3. **`NPM_TOKEN` is set.** Supplied as a pipeline secret. It is read, used as
- *    an environment variable for the child process, and never written to a file,
- *    a log, or `.npmrc` — nothing in this repository has ever contained a
- *    credential and this is not where that changes (REQ-NFR-6).
+ * 3. **A publish identity.** Either the workflow's OIDC identity — npm's trusted
+ *    publishing, which GitHub exposes as `ACTIONS_ID_TOKEN_REQUEST_URL` when the
+ *    job has `id-token: write` (Draft 2.18, T13.1) — or, as the fallback, an
+ *    `NPM_TOKEN` supplied as a secret. A token is read, used as an environment
+ *    variable for the child process, and never written to a file, a log, or
+ *    `.npmrc` — nothing in this repository has ever contained a credential and
+ *    this is not where that changes (REQ-NFR-6). Provenance is attached when the
+ *    identity is the workflow's, because then there is something to attest.
  *
  * A missing guard is an exit code and a sentence about which one, not a warning
  * followed by a publish.
@@ -112,6 +116,9 @@ const commands = publishable.map((name) => ({
 
 const manualTrigger = process.env["GITHUB_EVENT_NAME"] === "workflow_dispatch";
 const hasToken = (process.env["NPM_TOKEN"] ?? "") !== "";
+const hasOidc =
+  process.env["GITHUB_ACTIONS"] === "true" && (process.env["ACTIONS_ID_TOKEN_REQUEST_URL"] ?? "") !== "";
+const hasIdentity = hasToken || hasOidc;
 
 const refusals = [];
 if (!wantsPublish) refusals.push("`--publish` was not passed (this is a dry run)");
@@ -120,7 +127,9 @@ if (!manualTrigger) {
     "there is no manual trigger: this is not a GitHub `workflow_dispatch`",
   );
 }
-if (!hasToken) refusals.push("NPM_TOKEN is not set");
+if (!hasIdentity) {
+  refusals.push("there is no publish identity: neither trusted publishing (id-token) nor NPM_TOKEN");
+}
 
 if (asJson) {
   process.stdout.write(
@@ -164,17 +173,19 @@ process.stderr.write(`publishing ${commands.length} package(s) at ${released}…
 for (const one of commands) {
   const result = spawnSync(
     "npm",
-    ["publish", tarballFor(one.name), "--access", "public"],
+    ["publish", tarballFor(one.name), "--access", "public", ...(hasOidc ? ["--provenance"] : [])],
     {
       cwd: ROOT,
       stdio: "inherit",
       env: {
         ...process.env,
-        // The token reaches npm as an environment variable and nothing else.
-        // No `.npmrc` is written, so nothing can be left behind on the runner.
-        NPM_CONFIG_PROVENANCE: "false",
+        // A token, when that is the identity, reaches npm as an environment
+        // variable and nothing else. No `.npmrc` is written, so nothing can be
+        // left behind on the runner. Under trusted publishing npm mints its own
+        // short-lived credential from the job's OIDC token.
+        NPM_CONFIG_PROVENANCE: hasOidc ? "true" : "false",
         npm_config__auth: undefined,
-        NODE_AUTH_TOKEN: process.env["NPM_TOKEN"],
+        NODE_AUTH_TOKEN: hasOidc ? undefined : process.env["NPM_TOKEN"],
       },
     },
   );

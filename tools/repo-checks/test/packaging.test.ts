@@ -359,6 +359,8 @@ describe("publishing 0.1.0 (T8.5, REQ-PKG-1, 2, 3, 4)", () => {
     // Draft 2.18: GitHub Actions is the only CI, so the dispatch is the only trigger.
     expect(publish).not.toContain('BITBUCKET');
     expect(publish).toContain('process.env["NPM_TOKEN"]');
+    // Draft 2.18: trusted publishing is the identity, the token the fallback.
+    expect(publish).toContain('process.env["ACTIONS_ID_TOKEN_REQUEST_URL"]');
   });
 
   it("never writes the token anywhere", () => {
@@ -381,6 +383,8 @@ describe("publishing 0.1.0 (T8.5, REQ-PKG-1, 2, 3, 4)", () => {
     expect(release).toContain("node scripts/publish.mjs");
     expect(release).toContain("workflow_dispatch' && inputs.publish");
     expect(release).toContain("NPM_TOKEN: ${{ secrets.NPM_TOKEN }}");
+    // T13.1: the job can mint an OIDC token, which is what trusted publishing signs with.
+    expect(release).toContain("id-token: write");
   });
 
   it("has a changelog entry saying what is in, what is measured, and what is withdrawn", () => {
