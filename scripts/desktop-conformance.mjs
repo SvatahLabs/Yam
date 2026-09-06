@@ -621,11 +621,42 @@ function exceededDeadline(report) {
 }
 
 /*
+ * The application the fixtures project drives (T12.3, K6).
+ *
+ * `ade.result` presses Run on the Flows screen so that the branch of the case
+ * which reads a table of runs is the branch the live gate takes, and the
+ * fixtures flow drives `apps/sample-web` at the base URL its config names. The
+ * gate starts one; if the port is taken — by a person's own `pnpm sample-web`,
+ * most likely — that is fine and the existing one serves.
+ *
+ * The run's *verdict* is not what the case asserts, so a sample application
+ * that refuses to start is not a reason to refuse to run the gate: the Runs
+ * screen fills either way, and the case says so.
+ */
+let sampleWeb;
+function startSampleWeb() {
+  const cli = join(ROOT, "apps", "sample-web", "dist", "cli.js");
+  if (!existsSync(cli)) {
+    process.stderr.write(`no ${cli}; run \`pnpm -r build\` first. Running without it.\n`);
+    return undefined;
+  }
+  const child = spawn(process.execPath, [cli], {
+    cwd: ROOT,
+    stdio: ["ignore", "pipe", "pipe"],
+    env: { ...process.env, PORT: "4173" },
+  });
+  child.stdout.on("data", (chunk) => process.stderr.write(`sample-web: ${String(chunk)}`));
+  child.stderr.on("data", (chunk) => process.stderr.write(`sample-web: ${String(chunk)}`));
+  return child;
+}
+
+/*
  * A leftover from an earlier gate run is the same defect as a leftover from the
  * previous variant (P8-F1), so the first launch gets the same clean slate the
  * other two do.
  */
 stop();
+sampleWeb = startSampleWeb();
 
 try {
   for (const variant of [0, 1, 2]) {
@@ -794,6 +825,7 @@ try {
   process.exit(conformant ? 0 : 1);
 } finally {
   stop();
+  sampleWeb?.kill("SIGTERM");
   if (process.env["SVATAH_KEEP_WORKSPACE"] !== "1") {
     rmSync(workspace, { recursive: true, force: true });
   } else {

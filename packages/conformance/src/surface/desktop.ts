@@ -41,6 +41,8 @@ interface Node {
   readonly value?: string;
   readonly states: readonly string[];
   readonly box?: readonly number[];
+  /** The node above this one, so a case can ask what is *inside* an element (T12.3). */
+  readonly parent?: string;
   readonly native?: Readonly<Record<string, string>>;
 }
 
@@ -176,6 +178,110 @@ async function openFromPalette(
 
   await context.surface.act("click", row.ref);
   return await settled(context, screen);
+}
+
+/**
+ * Everything under `root`, by reference chain (T12.3).
+ *
+ * By `parent`, not by `depth` and position: a snapshot is a flat list with a
+ * depth per node (LLD §2.2) and it is **not** in tree order — the desktop
+ * adapters walk breadth-first, so every node at depth 12 precedes every node at
+ * depth 13. A "contents are the deeper nodes that follow it" reading is wrong on
+ * that shape, and wrong quietly: it returns an empty subtree and the case says
+ * the row is blank. `parent` is what the adapters' own `snapshot({ root })` uses
+ * and is what tree structure means here.
+ */
+function inside(nodes: readonly Node[], root: Node): Node[] {
+  const kept = new Set<string>([root.ref]);
+  const out: Node[] = [];
+  for (const node of nodes) {
+    if (node.ref === root.ref) continue;
+    if (node.parent !== undefined && kept.has(node.parent)) {
+      kept.add(node.ref);
+      out.push(node);
+    }
+  }
+  return out;
+}
+
+/** Everything `node` and its descendants say. */
+function subtreeText(nodes: readonly Node[], node: Node): string {
+  return [node, ...inside(nodes, node)]
+    .map((one) => `${one.name ?? ""} ${one.value ?? ""}`)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Press Run on the Flows screen and wait for the Run screen (T12.3, K6).
+ *
+ * The gesture a person makes, so that the branch of `ade.result` that reads a
+ * table with rows in it is the branch the live gate takes. It is best effort in
+ * one direction only: a Run button that is not there, or a Run screen that
+ * never arrives, is *checked* — the point is a run — but the run's own verdict
+ * is not, because the flow drives `apps/sample-web` and a red run fills the
+ * Runs screen exactly as a green one does.
+ */
+async function startARun(context: Parameters<ConformanceCase["run"]>[0]): Promise<void> {
+  let flows = await openScreen(context, "rail-flows");
+
+  /*
+   * One flow, chosen first — the same thing the ADE's own Playwright case does,
+   * and for the same reason.
+   *
+   * Run with nothing selected runs *every* flow the project has, and two of the
+   * fixtures' stories take a typed input with no default. The service answers
+   * that honestly and the status bar says so:
+   *
+   *   /run answered 400: {"error":"missing-inputs","missing":[…]}
+   *
+   * which is correct behaviour and not a run. `guards-and-compensation.flow`
+   * needs nothing, so it is the one this presses Run on.
+   */
+  const WANTED = "guards-and-compensation.flow";
+  /*
+   * By what the row *says*, not by its own name: a table row's accessible name
+   * is empty on macOS and the file name is on a cell inside it. Reading the
+   * subtree is what a person does when they look at a row.
+   */
+  const row = flows.find(
+    (node) => node.role === "row" && subtreeText(flows, node).includes(WANTED),
+  );
+  context.check(`the flow list offers ${WANTED}`, row !== undefined, {
+    expected: `a row whose cells say ${WANTED}`,
+    actual: flows
+      .filter((node) => node.role === "row")
+      .map((node) => subtreeText(flows, node).slice(0, 60))
+      .slice(0, 12),
+  });
+  if (row === undefined) return;
+  await context.surface.act("click", row.ref);
+  flows = await settled(context, "rail-flows");
+
+  const run = flows.find((node) => node.native?.["automationId"] === "action-run-flow");
+  context.check("the Flows screen has a Run button", run !== undefined, {
+    expected: 'a control whose automationId is "action-run-flow"',
+    actual: flows.map((node) => node.native?.["automationId"]).filter(Boolean).slice(0, 20),
+  });
+  if (run === undefined) return;
+
+  await context.surface.act("click", run.ref);
+
+  /*
+   * Polled until the Run screen's steps pane is there, not slept (LLD §16's
+   * timing rule): a run is a compile, a browser launch and a story, and how
+   * long that takes is a property of the machine.
+   */
+  const deadline = Date.now() + 180_000;
+  let arrived = false;
+  while (!arrived && Date.now() < deadline) {
+    const now = (await context.surface.snapshot()).nodes as readonly Node[];
+    arrived = now.some((node) => node.native?.["automationId"] === "run-steps");
+  }
+  context.check("pressing Run opened the Run screen", arrived, {
+    expected: 'a control whose automationId is "run-steps", within 180 s',
+  });
 }
 
 export const DESKTOP_CASES: readonly ConformanceCase[] = [
@@ -438,9 +544,30 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
   {
     id: "ade.result",
     page: "Svatah ADE",
-    description: "Flow 4: the Runs screen lists what the project has run, with its filters.",
+    description:
+      "Flow 4: the gate makes a run through the Run screen, then the Runs screen lists it.",
     async run(context) {
       const { check } = context;
+
+      /*
+       * A run is *made* before the table is read (T12.3, K6).
+       *
+       * Until Draft 2.15 this case accepted "either the runs are listed, or the
+       * screen says there are none", and on a clean checkout it always took the
+       * second branch: `evals/fixtures/runs` is ignored by git. So the branch
+       * that matters — a table with rows in it, each with a status — was never
+       * exercised by the live gate, and a Runs screen that had stopped
+       * rendering rows would have passed.
+       *
+       * So the gate presses Run on the Flows screen, the way a person does, and
+       * waits for the Run screen to arrive. The run's own *verdict* is not
+       * asserted and must not be: the fixtures flow drives `apps/sample-web`,
+       * which the gate starts but a host may still refuse a port to, and a red
+       * run fills this screen exactly as a green one does. What is asserted is
+       * that a row appeared and that it says what happened.
+       */
+      await startARun(context);
+
       const nodes = await openScreen(context, "rail-runs");
 
       check(
@@ -465,16 +592,31 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
        * project with runs shows them; one without says so, and says what writes
        * one — the empty state is a state, not a failure (T8.2).
        */
-      const text = (node: Node): string => `${node.name ?? ""} ${node.value ?? ""}`;
-      check(
-        "either the runs are listed, or the screen says there are none",
-        nodes.some((node) => /\brun\b/i.test(text(node))) ||
-          nodes.some((node) => /no runs yet/i.test(text(node))),
-        {
-          expected: 'run rows, or "No runs yet" and `svatah run` as what writes one',
-          actual: nodes.map(text).filter((one) => one.trim() !== "").slice(-14),
-        },
-      );
+      const table = nodes.find((node) => node.native?.["automationId"] === "runs-table");
+      const contents = table === undefined ? [] : inside(nodes, table);
+
+      /*
+       * A table with a run in it, and the run says what happened to it
+       * (T12.3's Validate).
+       *
+       * A *row* that carries a status, rather than "the table's text contains
+       * one somewhere": a header cell says `STATUS` and would satisfy the
+       * looser reading on a table with no runs at all, which is the branch this
+       * case exists to stop taking. The vocabulary is `results.schema.json`'s
+       * and any of it will do — whether that run passed is the sample
+       * application's business, not this suite's.
+       */
+      const STATUS = /\b(passed|failed|healed|aborted|stopped|running)\b/i;
+      const runs = contents
+        .filter((node) => node.role === "row")
+        .filter((node) => STATUS.test(subtreeText(nodes, node)));
+      check("the runs table lists at least one run, and it says what happened", runs.length > 0, {
+        expected: "a row whose cells carry a status from the results schema",
+        actual: contents
+          .filter((node) => node.role === "row")
+          .map((node) => subtreeText(nodes, node).slice(0, 80))
+          .slice(0, 8),
+      });
     },
   },
 

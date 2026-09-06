@@ -64,6 +64,15 @@ describe("the desktop conformance suite against the recorded ADE (T6.1)", () => 
        * the four screens the rail does not carry (T10.3).
        */
       "open-command-palette": "palette",
+      /*
+       * Pressing Run on the Flows screen serves the Run screen (T12.3).
+       *
+       * `ade.result` makes a run before it reads the table, because the branch
+       * that reads rows was never exercised otherwise. The stand-in has to
+       * behave like the application here too, or the case would wait three
+       * minutes for a screen a recording will never change to.
+       */
+      "action-run-flow": "run",
       "palette-go-run": "run",
       "palette-go-record": "record",
       "palette-go-explorer": "explorer",

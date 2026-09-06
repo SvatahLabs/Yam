@@ -168,7 +168,21 @@ describe("the desktop gate waits for the previous launch to go (P8-F1, LLD §7.5
   });
 
   it("clears leftovers before the first variant too", () => {
-    expect(source).toMatch(/stop\(\);\n\ntry \{\n {2}for \(const variant of \[0, 1, 2\]\)/);
+    /*
+     * The intent, not the adjacency: `stop()` runs before the variant loop and
+     * nothing launches an ADE between the two. Asserted as a *window* of source
+     * rather than as two lines touching, because T12.3 put the sample
+     * application's start-up in that window — it is not an ADE and it is not a
+     * leftover, and a check that read the two lines as one string would have
+     * failed for a reason it is not about.
+     */
+    const from = source.lastIndexOf("\nstop();\n");
+    const to = source.indexOf("for (const variant of [0, 1, 2])");
+    expect(from, "the gate does not call stop() before the loop").toBeGreaterThan(0);
+    expect(to, "the gate has no variant loop").toBeGreaterThan(from);
+    const between = source.slice(from, to);
+    expect(between, "something launches an ADE between the clean slate and the first variant")
+      .not.toMatch(/\blaunch\(|\brunSuite\(/);
   });
 });
 

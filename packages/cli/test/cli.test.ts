@@ -116,11 +116,17 @@ describe("the command table (LLD §15)", () => {
     await main(["surface", "conform", "--adapter", "atspi"], io);
     const { listAdapters } = await import("@svatah/surface");
     /*
-     * The HTTP adapter is deliberately absent: it is reached through the
-     * executor's injected API runner rather than by name (LLD §8), so it has
-     * no registration and `--adapter http` is not a thing to type.
+     * The HTTP adapter is here too, since T12.7.
+     *
+     * It is still reached through the executor's injected API runner for an
+     * `api` step (LLD §8), and that has not changed. What changed is that a
+     * *project* may name it: `evals/self/http` is `adapter: http`, and a flow
+     * whose every step is `Call the "…" API` or `Wait for the "…" API to answer
+     * …` opens a session on it. `createSurface` has taken `http` since LLD §2.4
+     * was written; nothing registered one, so `adapter: http` answered "No
+     * adapter registered under \"http\"" — which reads like a missing install.
      */
-    expect(listAdapters().sort()).toEqual(["appium", "ax", "bidi", "playwright", "uia"]);
+    expect(listAdapters().sort()).toEqual(["appium", "ax", "bidi", "http", "playwright", "uia"]);
   });
 
   it("fails a desktop adapter on the wrong host with the host's reason, not `no such adapter`", async () => {
