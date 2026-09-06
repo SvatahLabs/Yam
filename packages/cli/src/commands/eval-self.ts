@@ -32,7 +32,8 @@
  * drives, and they are what keeps the gate from grading its own homework.
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
 import { boolOption, stringOption, EXIT, type CommandIo, type ExitCode, type ParsedArgs } from "@svatah/bindings-cli";
@@ -529,6 +530,26 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
   }
 
   const catalogue = parseYaml(readFileSync(cataloguePath, "utf8")) as Catalogue;
+  /*
+   * Where the reports go (P11-F3).
+   *
+   *   svatah eval self                 # a temporary directory, and it says where
+   *   svatah eval self --update        # the committed set under reports/
+   *   svatah eval self --report <path> # this report there; the sources' still outside
+   *
+   * Two of the gate's sources write a *committed* report as a side effect of
+   * answering: the healing eval writes `reports/eval-healing.md` and the
+   * desktop gate writes `reports/adapter-ax.md`. So a clean checkout was dirty
+   * after running the contract's own gate, and a verifier reading `git status`
+   * had to work out whether two modified files were a change or an echo (the
+   * Phase 11 verification, F3). This is the rule `ade:shoot` already follows:
+   * committed artefacts are refreshed when somebody asks for that, and a run
+   * that only wants an answer leaves the tree alone.
+   */
+  const update = boolOption(args, "update");
+  const reportsDir = update
+    ? join(root, "reports")
+    : mkdtempSync(join(tmpdir(), "svatah-self-parity-"));
   const only = stringOption(args, "only");
   const side = stringOption(args, "side");
   const checks = catalogue.checks.filter((one) => only === undefined || one.id === only);
@@ -556,7 +577,7 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
   }
 
   const answers = new Map<string, SourceAnswers>();
-  const sources = sourcesFor(catalogue);
+  const sources = sourcesFor(catalogue, reportsDir);
   for (const name of [...wanted].sort()) {
     /*
      * `svatah:<project>` is a `svatah` run of a project the catalogue named;
@@ -633,9 +654,7 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
   const disagreements = compared.filter((one) => one.outcome === "disagree");
   const agreement = both.length === 0 ? 1 : (both.length - disagreements.length) / both.length;
 
-  const reportPath = resolve(
-    stringOption(args, "report") ?? join(root, "reports", "self-parity.md"),
-  );
+  const reportPath = resolve(stringOption(args, "report") ?? join(reportsDir, "self-parity.md"));
   const report = renderReport({ catalogue, compared, answers, agreement, side });
   mkdirSync(dirname(reportPath), { recursive: true });
   writeFileSync(reportPath, report, "utf8");
@@ -658,7 +677,13 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
     );
   }
 
-  io.err(`\nwrote ${reportPath}\n`);
+  io.err(
+    `\nwrote ${reportPath}\n` +
+      (update
+        ? ""
+        : `the sources' own reports are under ${reportsDir} ` +
+          "(pass --update to refresh the committed set)\n"),
+  );
   io.out(
     disagreements.length === 0
       ? `self parity: ${Math.round(agreement * 100)}% agreement over ${both.length} check(s) ` +
@@ -672,7 +697,7 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
 
 /* ── where the sources come from ──────────────────────────────────────────── */
 
-function sourcesFor(catalogue: Catalogue): Record<string, SourceSpec> {
+function sourcesFor(catalogue: Catalogue, reportsDir: string): Record<string, SourceSpec> {
   const projects = new Set<string>();
   for (const check of catalogue.checks) {
     if (check.svatah?.source === "svatah" || check.svatah?.source === "svatah-cdp") {
@@ -717,7 +742,7 @@ function sourcesFor(catalogue: Catalogue): Record<string, SourceSpec> {
     "healing-eval": commandSource(
       "healing",
       "node",
-      [join("scripts", "eval-healing.mjs"), "--report", join("reports", "eval-healing.md")],
+      [join("scripts", "eval-healing.mjs"), "--report", join(reportsDir, "eval-healing.md")],
       "the healing eval against its ground-truth keys",
     ),
     /** The renderer-versus-adapter tree agreement — external by design. */
@@ -731,7 +756,13 @@ function sourcesFor(catalogue: Catalogue): Record<string, SourceSpec> {
     "desktop-gate": commandSource(
       "gate",
       "node",
-      [join("scripts", "desktop-conformance.mjs"), "--adapter", "ax"],
+      [
+        join("scripts", "desktop-conformance.mjs"),
+        "--adapter",
+        "ax",
+        "--report",
+        join(reportsDir, "adapter-ax.md"),
+      ],
       "the live macOS desktop conformance gate",
     ),
     /** The artboards, read as designs. */

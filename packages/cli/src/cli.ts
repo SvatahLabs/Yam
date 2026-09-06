@@ -78,7 +78,8 @@ Bindings and healing (module a):
                         [--limit <n>] [--report <path.md>] [--json]
   svatah eval finetune corpus [--json]
   svatah eval finetune export [--out <path.jsonl>] [--json]
-  svatah eval self [--report <path.md>] [--only <check-id>] [--side svatah|external]
+  svatah eval self [--update] [--report <path.md>] [--only <check-id>]
+                   [--side svatah|external]
   svatah eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
                        [--only tier1,tier2] [--report <path.md>] [--json]
 

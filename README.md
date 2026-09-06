@@ -246,7 +246,7 @@ that report lists as one-sided (REQ-SELF-2, LLD §13.9).
 pnpm install --frozen-lockfile && pnpm browsers && pnpm -r build \
   && pnpm -r typecheck && pnpm -r test && pnpm lint     # the tree, on two Node LTSes
 pnpm --filter @svatah/ade package                        # the conformance target
-node packages/cli/dist/bin.js eval self --report reports/self-parity.md
+node packages/cli/dist/bin.js eval self --update    # or `pnpm self`
 ```
 
 `svatah eval self` runs **both sides of every check** in
@@ -261,6 +261,12 @@ What the report also publishes, and what a reader should look at first, is the
 **one-sided list**: every check only one side can reach, each naming the adapter
 or the sentence Svatah lacks. That list is Svatah's own shortcomings, and it is
 expected to shrink phase by phase.
+
+Without `--update` the gate writes every report — its own and the two its
+sources produce — to a temporary directory and says where, so a checkout is as
+clean after the contract's own gate as it was before it. `--update` refreshes
+the committed `reports/self-parity.md`, `reports/adapter-ax.md` and
+`reports/eval-healing.md`, which is what a phase's record wants.
 
 Three oracles stay external on purpose (REQ-SELF-3) and the report says so: the
 healing eval's ground-truth keys, axe-core on the component sheet, and the
