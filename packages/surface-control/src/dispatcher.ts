@@ -6,10 +6,13 @@ import type { SessionStore } from "./sessions.js";
 import type { ErrorCode } from "./catalogue.js";
 import { discoverTargets, discoverAdapters, checkAdapterReadiness } from "./discovery.js";
 import type { ReferenceStore } from "./references.js";
+import type { CoordinationStore } from "./coordination.js";
+import { hashInput } from "./coordination.js";
 
 export interface DispatchContext {
   sessions: SessionStore;
   references?: ReferenceStore;
+  coordination?: CoordinationStore;
 }
 
 export async function dispatchTargets(
@@ -157,6 +160,9 @@ export async function dispatchAct(
     args?: ActArgs;
     ref2?: string;
     snapshot?: string;
+    idempotencyKey?: string;
+    holder?: string;
+    deadlineMs?: number;
   },
 ): Promise<Record<string, unknown>> {
   const requestId = makeRequestId();
@@ -173,6 +179,41 @@ export async function dispatchAct(
     }
   }
 
+  if (ctx.coordination && input.idempotencyKey) {
+    const idemCheck = ctx.coordination.checkIdempotency(
+      input.idempotencyKey,
+      input.action,
+      hashInput({ session: input.session, action: input.action, ref: input.ref, args: input.args }),
+    );
+    if (idemCheck.status === "duplicate") {
+      return idemCheck.result as Record<string, unknown>;
+    }
+    if (idemCheck.status === "conflict") {
+      return refusedEnvelope(requestId, input.session, "INVALID_ARGUMENT", idemCheck.message);
+    }
+  }
+
+  const targetKey = `${input.session}:target`;
+  if (ctx.coordination) {
+    const leaseResult = ctx.coordination.acquireLease(
+      input.session,
+      targetKey,
+      input.holder ?? requestId,
+      input.deadlineMs,
+    );
+    if (!leaseResult.acquired) {
+      return refusedEnvelope(requestId, input.session, "CONTROL_BUSY", `Target is held by "${leaseResult.holder}" (operation ${leaseResult.operationId}). Wait or request handoff.`, {
+        holder: leaseResult.holder,
+        operationId: leaseResult.operationId,
+      });
+    }
+  }
+
+  let opRecord: ReturnType<CoordinationStore["recordDispatch"]> | undefined;
+  if (ctx.coordination) {
+    opRecord = ctx.coordination.recordDispatch(input.session, input.action);
+  }
+
   try {
     const result = await entry.surface.act(
       input.action as Parameters<AgentSurface["act"]>[0],
@@ -187,8 +228,27 @@ export async function dispatchAct(
       ctx.references.incrementGeneration(input.session);
     }
 
-    return successEnvelope(requestId, input.session, result, elapsed);
+    if (ctx.coordination) {
+      ctx.coordination.releaseLease(targetKey, "succeeded");
+      if (opRecord) ctx.coordination.completeOperation(opRecord.operationId, "succeeded");
+    }
+
+    const envelope = successEnvelope(requestId, input.session, result, elapsed);
+    if (ctx.coordination && input.idempotencyKey) {
+      ctx.coordination.recordIdempotency(
+        input.idempotencyKey,
+        input.action,
+        hashInput({ session: input.session, action: input.action, ref: input.ref, args: input.args }),
+        envelope,
+        "succeeded",
+      );
+    }
+    return envelope;
   } catch (err) {
+    if (ctx.coordination) {
+      ctx.coordination.releaseLease(targetKey, "failed");
+      if (opRecord) ctx.coordination.completeOperation(opRecord.operationId, "failed");
+    }
     return handleError(requestId, input.session, err, Date.now() - start);
   }
 }

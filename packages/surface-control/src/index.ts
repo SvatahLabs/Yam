@@ -85,6 +85,16 @@ export {
 } from "./references.js";
 
 export {
+  createCoordinationStore,
+  hashInput,
+  type CoordinationStore,
+  type Lease,
+  type IdempotencyRecord,
+  type OperationRecord,
+  type OperationOutcome,
+} from "./coordination.js";
+
+export {
   dispatchTargets,
   dispatchConnect,
   dispatchSnapshot,

@@ -228,7 +228,10 @@ function operationFor(
           action: stringOption(args, "action") ?? "",
           ref: stringOption(args, "ref"),
           ref2: stringOption(args, "ref2"),
+          snapshot: stringOption(args, "snapshot"),
           args: inputFor(args),
+          idempotencyKey: stringOption(args, "idempotency-key"),
+          holder: stringOption(args, "holder"),
         }),
       };
 

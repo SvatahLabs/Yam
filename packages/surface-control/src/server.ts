@@ -38,6 +38,7 @@ import {
 import type { AdapterFactoryFn } from "./adapter-factory.js";
 import { createSessionStore } from "./sessions.js";
 import { createReferenceStore } from "./references.js";
+import { createCoordinationStore } from "./coordination.js";
 import { failedEnvelope, makeRequestId } from "./envelope.js";
 
 /** One operation, by the name the catalogue gives it. */
@@ -110,7 +111,8 @@ async function readBody(request: NodeJS.ReadableStream, limit = 4_000_000): Prom
 export async function startBroker(options: BrokerOptions): Promise<RunningBroker> {
   const sessions = createSessionStore();
   const references = createReferenceStore();
-  const context: DispatchContext = { sessions, references };
+  const coordination = createCoordinationStore();
+  const context: DispatchContext = { sessions, references, coordination };
   const withAdapterInfo = (args: Record<string, unknown>): Record<string, unknown> => ({
     ...args,
     adapterFactory: options.factory,
