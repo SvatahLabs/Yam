@@ -236,3 +236,33 @@ cd legacy && ./gradlew compileJava
 ## Licence
 
 Apache-2.0. See [LICENSE](LICENSE).
+
+## The verification contract (from Phase 11 on)
+
+A phase's evidence is **`svatah eval self` green with its report**, plus whatever
+that report lists as one-sided (REQ-SELF-2, LLD §13.9).
+
+```
+pnpm install --frozen-lockfile && pnpm browsers && pnpm -r build \
+  && pnpm -r typecheck && pnpm -r test && pnpm lint     # the tree, on two Node LTSes
+pnpm --filter @svatah/ade package                        # the conformance target
+node packages/cli/dist/bin.js eval self --report reports/self-parity.md
+```
+
+`svatah eval self` runs **both sides of every check** in
+`evals/self/checks.yaml` and compares their verdicts: Svatah's own flows through
+the desktop, web, HTTP and SDK adapters on one side; the Playwright cases, the
+pseudo-terminal captures, the generated clients' smoke and the scripts on the
+other. It **passes only at 100 percent agreement** over the checks both sides
+reach — a disagreement means one oracle is wrong, and the report names both
+pieces of evidence.
+
+What the report also publishes, and what a reader should look at first, is the
+**one-sided list**: every check only one side can reach, each naming the adapter
+or the sentence Svatah lacks. That list is Svatah's own shortcomings, and it is
+expected to shrink phase by phase.
+
+Three oracles stay external on purpose (REQ-SELF-3) and the report says so: the
+healing eval's ground-truth keys, axe-core on the component sheet, and the
+renderer-versus-adapter tree agreement. They sit below the surface Svatah
+drives, and they are what keeps the gate from grading its own homework.

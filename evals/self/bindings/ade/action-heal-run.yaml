@@ -1,0 +1,46 @@
+# Seeded from an `automationId`, with no model and no recording (LLD §13.9).
+#
+# Written by `node scripts/seed-self-bindings.mjs` from
+# `evals/grounding/desktop-cases.jsonl`, which `pnpm grounding:desktop-cases`
+# reads out of the real ADE. The ADE's controls all carry an id a rewording
+# cannot break — LLD §13.7's accessibility contract requires one on every
+# button, link, tab, field and row action — so a self-suite binding needs no
+# grounding: the id *is* the answer.
+#
+# The fingerprint carries the role and the id and nothing invented: no box
+# nobody measured, no neighbours nobody read. `verified: false` says the same
+# thing in one word, and `svatah bindings verify` is what turns it true against
+# a running ADE.
+schemaVersion: "1.0.0"
+id: "ade.action-heal-run"
+phrases:
+  - "the Heal run 00mtpgsixplgmb6g button"
+entries:
+  - candidates:
+      - by: "automationId"
+        value: "action-heal-run"
+        score: 0.99
+    context:
+      platform: "desktop"
+      pattern: "Svatah ADE"
+      hash: "91553627e09601e1d1eaa4e4c829e2e4da2a9d2c114d74242f880c8f2f24d310"
+    fingerprint:
+      tag: "AXButton"
+      attrs:
+        automationId: "action-heal-run"
+      text: "Heal run 00mtpgsixplgmb6g"
+      neighbours:
+        before: []
+        after: []
+      rolePath: []
+      box: [0, 0, 0, 0]
+      index: 0
+    provenance:
+      at: "2026-09-06T00:00:00.000Z"
+      model: "none"
+      promptVersion: "seeded"
+      tokensIn: 0
+      tokensOut: 0
+      costUsd: 0
+    recordedAt: "2026-09-06T00:00:00.000Z"
+    verified: false

@@ -507,7 +507,17 @@ const ACTIONS_ONLY: readonly Action[] = [
   },
   {
     id: "import.prototype",
-    label: "Import prototype database",
+    /*
+     * "Import the database", not "Import prototype database" (T11.4).
+     *
+     * The rail's row is called "Import prototype database" — it is a
+     * *destination* — and this button did the same, so two controls on one
+     * screen had one accessible name and any sentence naming it was ambiguous
+     * (`W_AMBIGUOUS_TARGET`). The self suite found it, which is what a suite
+     * that drives the application by the words on it is for. A rail row says
+     * where you are going; a button says what it does.
+     */
+    label: "Import the database",
     group: "Actions",
     screen: "import",
     cli: "svatah migrate <dest> --from-ade <electron-db dir>",

@@ -78,6 +78,7 @@ Bindings and healing (module a):
                         [--limit <n>] [--report <path.md>] [--json]
   svatah eval finetune corpus [--json]
   svatah eval finetune export [--out <path.jsonl>] [--json]
+  svatah eval self [--report <path.md>] [--only <check-id>] [--side svatah|external]
   svatah eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
                        [--only tier1,tier2] [--report <path.md>] [--json]
 
@@ -275,6 +276,18 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
    */
   if (command === "eval" && args.command[1] === "compiler") {
     return await (await import("./commands/eval-compiler.js")).compilerEvalCommand(args, io);
+  }
+
+  /*
+   * `eval self` is the parity gate (T11.5, REQ-SELF-2, LLD §13.9, §15).
+   *
+   * Module (b)'s, and not because of a dependency: it *spawns* every other
+   * source — `svatah run`, a Playwright suite, a vitest file, a script — and
+   * compares their verdicts. It needs nothing from an adapter, which is why it
+   * sits above them all.
+   */
+  if (command === "eval" && args.command[1] === "self") {
+    return await (await import("./commands/eval-self.js")).evalSelfCommand(args, io);
   }
 
   /*

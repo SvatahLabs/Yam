@@ -194,7 +194,7 @@
     },
     {
       "id": "import.prototype",
-      "label": "Import prototype database",
+      "label": "Import the database",
       "group": "Actions",
       "screen": "import",
       "cli": "svatah migrate <dest> --from-ade <electron-db dir>"

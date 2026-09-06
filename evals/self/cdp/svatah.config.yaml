@@ -36,7 +36,7 @@ flows:
   # by design (pattern 31, REQ-SURF-5). The parity report lists that step as
   # one-sided; running it here would be asking this adapter to do the one thing
   # it is documented as refusing.
-  include: ["ade-screen.flow"]
+  include: ["02-ade-screen.flow"]
 steps: { dir: ../steps }
 bindings:
   dir: bindings

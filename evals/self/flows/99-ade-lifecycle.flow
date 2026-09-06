@@ -17,6 +17,14 @@
 # adapters run. They are written twice rather than composed because a `compose:`
 # would put the quit into the shared run block too, and the whole distinction
 # here is which steps a web adapter can be asked to do.
+#
+# ## The number in the file name
+#
+# `svatah run` executes a project's `test:` blocks in file order, and one
+# session serves the whole run — so a flow that ends with `Quit the app` has to
+# be the last one, or every flow after it drives an application that is not
+# there. `99-` says that out loud; `01-` and `02-` say the rest may run in any
+# order.
 
 story: the ADE opens a project, shows its flows, and quits
   The first recent project should be visible

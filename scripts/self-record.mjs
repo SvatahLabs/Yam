@@ -92,9 +92,9 @@ const run = (what, extra) => {
 };
 
 stop();
-const recorded = run("record", ["--gateway", "fake", "--flow", "flows/ade-screen.flow"]);
+const recorded = run("record", ["--gateway", "fake", "--flow", "flows/02-ade-screen.flow"]);
 stop();
-const replayed = run("run", ["--host", "none", "--flow", "flows/ade-screen.flow"]);
+const replayed = run("run", ["--host", "none", "--flow", "flows/02-ade-screen.flow"]);
 stop();
 
 const written = readdirSync(join(project, "bindings"), { recursive: true }).filter((one) =>

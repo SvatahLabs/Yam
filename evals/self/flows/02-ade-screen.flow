@@ -11,6 +11,14 @@
 # `Quit the app` is a desktop step and a web adapter refuses it (pattern 31), so
 # a flow with it in cannot be the one both sides run. `ade-lifecycle.flow` is
 # the whole journey, and the parity report lists its last step as one-sided.
+#
+# ## The number in the file name
+#
+# `svatah run` executes a project's `test:` blocks in file order, and one
+# session serves the whole run — so a flow that ends with `Quit the app` has to
+# be the last one, or every flow after it drives an application that is not
+# there. `99-` says that out loud; `01-` and `02-` say the rest may run in any
+# order.
 
 story: the ADE opens a project and shows its flows
   The first recent project should be visible

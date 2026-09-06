@@ -11,8 +11,8 @@
 {"id":"d-011","window":"Svatah ADE","phrase":"the Save flow button","expect":"present","element":"action-flows-save","role":"button","name":"Save flow","screen":"flows"}
 {"id":"d-012","window":"Svatah ADE","phrase":"the Apply proposal button","expect":"present","element":"action-heal-apply","role":"button","name":"Apply proposal","screen":"heal"}
 {"id":"d-013","window":"Svatah ADE","phrase":"the Heal from bind failures button","expect":"present","element":"action-heal-bind-failures","role":"button","name":"Heal from bind failures","screen":"heal"}
-{"id":"d-014","window":"Svatah ADE","phrase":"the Heal button","expect":"present","element":"action-heal-run","role":"button","name":"Heal","screen":"run"}
-{"id":"d-015","window":"Svatah ADE","phrase":"the Import prototype database button","expect":"present","element":"action-import-prototype","role":"button","name":"Import prototype database","screen":"rail-import"}
+{"id":"d-014","window":"Svatah ADE","phrase":"the Heal run 00mtpgsixplgmb6g button","expect":"present","element":"action-heal-run","role":"button","name":"Heal run 00mtpgsixplgmb6g","screen":"run"}
+{"id":"d-015","window":"Svatah ADE","phrase":"the Import the database button","expect":"present","element":"action-import-prototype","role":"button","name":"Import the database","screen":"rail-import"}
 {"id":"d-016","window":"Svatah ADE","phrase":"the Accept button","expect":"present","element":"action-record-accept","role":"button","name":"Accept","screen":"record"}
 {"id":"d-017","window":"Svatah ADE","phrase":"the Reject button","expect":"present","element":"action-record-reject","role":"button","name":"Reject","screen":"record"}
 {"id":"d-018","window":"Svatah ADE","phrase":"the Re-pick button","expect":"present","element":"action-record-repick","role":"button","name":"Re-pick","screen":"record"}
@@ -65,7 +65,7 @@
 {"id":"d-065","window":"Svatah ADE","phrase":"the Not imported heading","expect":"present","element":"inspector-not-imported-heading","role":"heading","name":"Not imported","screen":"rail-import"}
 {"id":"d-066","window":"Svatah ADE","phrase":"the Refused heading","expect":"present","element":"inspector-refused-heading","role":"heading","name":"Refused","screen":"rail-agents"}
 {"id":"d-067","window":"Svatah ADE","phrase":"the active count heading","expect":"present","element":"inspector-request-heading","role":"heading","name":"active count","screen":"rail-api"}
-{"id":"d-068","window":"Svatah ADE","phrase":"the Run 00mtpfo96oykzw0y heading","expect":"present","element":"inspector-run-heading","role":"heading","name":"Run 00mtpfo96oykzw0y","screen":"rail-runs"}
+{"id":"d-068","window":"Svatah ADE","phrase":"the Run 00mtpgsixplgmb6g heading","expect":"present","element":"inspector-run-heading","role":"heading","name":"Run 00mtpgsixplgmb6g","screen":"rail-runs"}
 {"id":"d-069","window":"Svatah ADE","phrase":"the Session heading","expect":"present","element":"inspector-session-heading","role":"heading","name":"Session","screen":"explorer"}
 {"id":"d-070","window":"Svatah ADE","phrase":"the Where this came from heading","expect":"present","element":"inspector-sources-heading","role":"heading","name":"Where this came from","screen":"rail-settings"}
 {"id":"d-071","window":"Svatah ADE","phrase":"the user.email heading","expect":"present","element":"inspector-value-heading","role":"heading","name":"user.email","screen":"rail-data"}
@@ -83,8 +83,11 @@
 {"id":"d-083","window":"Svatah ADE","phrase":"the Settings button","expect":"present","element":"rail-settings","role":"button","name":"Settings","screen":"flows"}
 {"id":"d-084","window":"Svatah ADE","phrase":"the Gateway select","expect":"present","element":"record-gateway","role":"combobox","name":"Gateway","screen":"record"}
 {"id":"d-085","window":"Svatah ADE","phrase":"the Gateway dropdown","expect":"present","element":"record-gateway","role":"combobox","name":"Gateway","screen":"record"}
-{"id":"d-086","window":"Svatah ADE","phrase":"the behavior: all button","expect":"present","element":"runs-filter-behavior","role":"button","name":"behavior: all","screen":"rail-runs"}
-{"id":"d-087","window":"Svatah ADE","phrase":"the invoker: all button","expect":"present","element":"runs-filter-invoker","role":"button","name":"invoker: all","screen":"rail-runs"}
-{"id":"d-088","window":"Svatah ADE","phrase":"the status: all button","expect":"present","element":"runs-filter-status","role":"button","name":"status: all","screen":"rail-runs"}
-{"id":"d-089","window":"Svatah ADE","phrase":"the Flows heading","expect":"present","element":"toolbar-title","role":"heading","name":"Flows","screen":"flows"}
-{"id":"d-090","window":"Svatah ADE","phrase":"the Frobnicate button","expect":"absent"}
+{"id":"d-086","window":"Svatah ADE","phrase":"the ✓ Click the Book a slot link testid #0 233 ms button","expect":"present","element":"run-step-book-a-slot-1","role":"button","name":"✓ Click the Book a slot link testid #0 233 ms","screen":"run"}
+{"id":"d-087","window":"Svatah ADE","phrase":"the ✓ Click the next button testid #0 28 ms button","expect":"present","element":"run-step-book-a-slot-4","role":"button","name":"✓ Click the next button testid #0 28 ms","screen":"run"}
+{"id":"d-088","window":"Svatah ADE","phrase":"the ✓ Click the Book now button testid #0 127 ms button","expect":"present","element":"run-step-book-a-slot-5","role":"button","name":"✓ Click the Book now button testid #0 127 ms","screen":"run"}
+{"id":"d-089","window":"Svatah ADE","phrase":"the behavior: all button","expect":"present","element":"runs-filter-behavior","role":"button","name":"behavior: all","screen":"rail-runs"}
+{"id":"d-090","window":"Svatah ADE","phrase":"the invoker: all button","expect":"present","element":"runs-filter-invoker","role":"button","name":"invoker: all","screen":"rail-runs"}
+{"id":"d-091","window":"Svatah ADE","phrase":"the status: all button","expect":"present","element":"runs-filter-status","role":"button","name":"status: all","screen":"rail-runs"}
+{"id":"d-092","window":"Svatah ADE","phrase":"the Flows heading","expect":"present","element":"toolbar-title","role":"heading","name":"Flows","screen":"flows"}
+{"id":"d-093","window":"Svatah ADE","phrase":"the Frobnicate button","expect":"absent"}
