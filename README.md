@@ -232,6 +232,8 @@ cd legacy && ./gradlew compileJava
 - [Examples](examples/) — the same plan from CI, from cron, and from an MCP client.
 - [The local model (Tier 2)](docs/local-model.md) · [Privacy mode](docs/privacy.md) ·
   [MCP](docs/mcp.md) · [REPL](docs/repl.md).
+- [Continuous integration](docs/ci.md) — what runs today, and the twenty minutes
+  that turn the two desktop gates and the installer matrix green.
 
 ## Licence
 
