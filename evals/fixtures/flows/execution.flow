@@ -1,4 +1,4 @@
-// Hand-migrated from legacy/src/test/resources/sample/execution.flow (v2) to v3.
+// Hand-migrated from evals/migrate/source/sample/execution.flow (v2) to v3.
 //
 // Every scenario name is the original's, verbatim, and there is exactly one step
 // per original step, in the original order (REQ-LANG-11). The original drove a

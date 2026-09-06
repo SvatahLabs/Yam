@@ -155,7 +155,6 @@ examples/     plain-playwright (the ten-minute quick start), plus ci, cron and
 evals/        compiler, grounding, healing and conformance suites
 reports/      the published eval results (REQ-PKG-4)
 docs/         the specification, the agent surface contract, the flow language
-legacy/       the frozen Java project, kept until the Java conformance runtime exists
 ```
 
 ## Working on it
@@ -214,7 +213,7 @@ has never seen this repository can install four packages and be running. A
 workspace hides exactly the failures that matter to that — a missing `files`
 entry, a `dist` nobody built, a `workspace:*` that escaped into a tarball.
 
-Neither `.github/workflows/release.yml` nor `bitbucket-pipelines.yml` contains a
+`.github/workflows/release.yml` contains no
 publish. See [CHANGELOG.md](CHANGELOG.md).
 
 The frozen Java project builds on its own:

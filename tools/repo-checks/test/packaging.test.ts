@@ -322,7 +322,7 @@ describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
      * would have none of the three guards — `--publish`, a manual trigger, and
      * `NPM_TOKEN` — and a copied step would carry that loss silently.
      */
-    for (const file of [".github/workflows/release.yml", "bitbucket-pipelines.yml"]) {
+    for (const file of [".github/workflows/release.yml", ".github/workflows/ci.yml"]) {
       const text = readFileSync(fromRoot(file), "utf8");
       expect(text, `${file} publishes without going through scripts/publish.mjs`).not.toMatch(
         /^\s*-?\s*(run:\s*)?(pnpm|npm) publish/m,
@@ -335,9 +335,6 @@ describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
     expect(release).toContain("pnpm --filter @svatah/ade make");
     expect(release).toContain("files: reports/*.md");
 
-    const bitbucket = readFileSync(fromRoot("bitbucket-pipelines.yml"), "utf8");
-    expect(bitbucket).toContain("pnpm release:dry-run");
-    expect(bitbucket).toContain("pnpm quick-start:packed");
   });
 });
 
@@ -360,7 +357,8 @@ describe("publishing 0.1.0 (T8.5, REQ-PKG-1, 2, 3, 4)", () => {
     // account allows it.
     expect(publish).toContain('args.includes("--publish")');
     expect(publish).toContain('process.env["GITHUB_EVENT_NAME"] === "workflow_dispatch"');
-    expect(publish).toContain('process.env["BITBUCKET_PIPELINE_UUID"]');
+    // Draft 2.18: GitHub Actions is the only CI, so the dispatch is the only trigger.
+    expect(publish).not.toContain('BITBUCKET');
     expect(publish).toContain('process.env["NPM_TOKEN"]');
   });
 
@@ -379,12 +377,7 @@ describe("publishing 0.1.0 (T8.5, REQ-PKG-1, 2, 3, 4)", () => {
     expect(publish).toContain("pnpm release:dry-run");
   });
 
-  it("is wired into both definitions, behind a manual trigger", () => {
-    const bitbucket = readFileSync(fromRoot("bitbucket-pipelines.yml"), "utf8");
-    expect(bitbucket).toMatch(/^\s{4}publish:$/m);
-    expect(bitbucket).toContain("node scripts/publish.mjs");
-    expect(bitbucket).toContain("SVATAH_PUBLISH_TRIGGER");
-
+  it("is wired into the release workflow, behind a manual trigger", () => {
     const release = readFileSync(fromRoot(".github/workflows/release.yml"), "utf8");
     expect(release).toContain("node scripts/publish.mjs");
     expect(release).toContain("workflow_dispatch' && inputs.publish");

@@ -16,7 +16,7 @@
  *   from: nothing else would tell you that a locator row's keys are
  *   `"locator identifier"` and `"locator details"`, with spaces.
  * * The **flows and locators** are the real legacy files from
- *   `legacy/src/test/resources`, HTML-escaped the way the prototype's
+ *   `evals/migrate/source`, HTML-escaped the way the prototype's
  *   contenteditable editor stored them (`newproject.js` strips the tags on the
  *   way in and leaves the entities).
  *
@@ -41,14 +41,14 @@ const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").repla
 const FLOWS = ["simple", "svatah", "natural_language_login", "execution"];
 const flows = FLOWS.map((name) => ({
   flowFile: escape(
-    readFileSync(join(ROOT, "legacy/src/test/resources/sample", `${name}.flow`), "utf8"),
+    readFileSync(join(ROOT, "evals/migrate/source/sample", `${name}.flow`), "utf8"),
   ),
   flowFileName: `${name}.flow`,
   projectName: "Zoomcar regression",
 }));
 
 /** `.locator` lines → the JSON array the prototype kept in `project.locatorFile`. */
-const locators = readFileSync(join(ROOT, "legacy/src/test/resources/locator/svatah.locator"), "utf8")
+const locators = readFileSync(join(ROOT, "evals/migrate/source/locator/svatah.locator"), "utf8")
   .split("\n")
   .filter((line) => line.trim() !== "" && !line.trim().startsWith("#") && line.includes("="))
   .map((line) => {

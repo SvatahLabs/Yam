@@ -500,17 +500,3 @@ jobs:
           path: reports/runtime-java.md
           if-no-files-found: ignore
 
-  legacy-java:
-    name: legacy Java project compiles
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: compileJava
-        working-directory: legacy
-        run: ./gradlew --no-daemon compileJava

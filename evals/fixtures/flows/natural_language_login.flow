@@ -1,4 +1,4 @@
-// Hand-migrated from legacy/src/test/resources/sample/natural_language_login.flow
+// Hand-migrated from evals/migrate/source/sample/natural_language_login.flow
 // to v3. The original was already prose; the migration removes the trailing
 // `with xpath:…` / `with id:…` locator suffixes (REQ-LANG-4) and turns the
 // "Verify … appears" sentences into expectations.

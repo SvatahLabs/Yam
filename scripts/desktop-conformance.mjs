@@ -102,7 +102,7 @@ if (HOST_FOR[adapter] !== undefined && HOST_FOR[adapter] !== process.platform) {
     `The "${adapter}" adapter runs on ${HOST_FOR[adapter]} and this host is ${process.platform}, ` +
       "so the conformance suite was not run and nothing was written to " +
       `${report}.\nRun this on a ${HOST_FOR[adapter]} host, or attach one as a runner ` +
-      "(`bitbucket-pipelines.yml`, the `desktop-gates` pipeline).",
+      "(`.github/workflows/ci.yml`, the `desktop-conformance` job on a self-hosted runner).",
   );
 }
 

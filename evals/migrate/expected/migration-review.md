@@ -1,6 +1,6 @@
 # Migration review
 
-`svatah migrate legacy/src/test/resources evals/migrate/expected`
+`svatah migrate evals/migrate/source evals/migrate/expected`
 
 Story names and step order are preserved exactly, so the old file and the new one
 read side by side. What follows is everything the migration had to guess at.

@@ -18,7 +18,7 @@
  *   `variable name`) come from. Nothing else would tell you those keys have
  *   spaces in them.
  * * The flows and locators are the *real* legacy files from
- *   `legacy/src/test/resources`, HTML-escaped the way the prototype's
+ *   `evals/migrate/source`, HTML-escaped the way the prototype's
  *   contenteditable editor stored them.
  *
  * So what is synthetic is the packaging, and the packaging is exactly what the
@@ -38,7 +38,7 @@ import type { Plan } from "@svatah/schema";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
 const DATABASE = join(ROOT, "evals", "migrate", "ade-db");
-const LEGACY = join(ROOT, "legacy", "src", "test", "resources", "sample");
+const LEGACY = join(ROOT, "evals", "migrate", "source", "sample");
 
 const projects: string[] = [];
 

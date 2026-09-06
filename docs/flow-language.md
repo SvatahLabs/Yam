@@ -2190,7 +2190,7 @@ run time — `migrate` is the only path.
 ### Action mapping
 
 The Java action names on the left are the vocabulary in
-`legacy/src/main/java/com/svatah/automator/mappers/SeleniumActionMapper.java`;
+`evals/migrate/source/java/SeleniumActionMapper.java`;
 the synonyms each one accepted are in `ActionSynonyms.java` and are carried into
 Tier 1 as the sentence forms above (REQ-COMP-2).
 
@@ -2263,7 +2263,7 @@ Tier 1 as the sentence forms above (REQ-COMP-2).
 
 The four flows the frozen Java project shipped are migrated by hand in
 [`evals/fixtures/flows/`](../evals/fixtures/flows/), with the originals under
-`legacy/src/test/resources/sample/`. They are the compatibility baseline
+`evals/migrate/source/sample/`. They are the compatibility baseline
 REQ-NFR-8 names.
 
 Before (v1):

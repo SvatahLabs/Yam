@@ -8,10 +8,10 @@ from the originals.
 
 | v3 fixture | Original |
 |---|---|
-| [`flows/simple.flow`](flows/simple.flow) | `legacy/src/test/resources/sample/simple.flow` |
-| [`flows/svatah.flow`](flows/svatah.flow) | `legacy/src/test/resources/sample/svatah.flow` |
-| [`flows/execution.flow`](flows/execution.flow) | `legacy/src/test/resources/sample/execution.flow` |
-| [`flows/natural_language_login.flow`](flows/natural_language_login.flow) | `legacy/src/test/resources/sample/natural_language_login.flow` |
+| [`flows/simple.flow`](flows/simple.flow) | `evals/migrate/source/sample/simple.flow` |
+| [`flows/svatah.flow`](flows/svatah.flow) | `evals/migrate/source/sample/svatah.flow` |
+| [`flows/execution.flow`](flows/execution.flow) | `evals/migrate/source/sample/execution.flow` |
+| [`flows/natural_language_login.flow`](flows/natural_language_login.flow) | `evals/migrate/source/sample/natural_language_login.flow` |
 | [`flows/booking-compensation.flow`](flows/booking-compensation.flow) | *(none — see below)* |
 
 Every story and scenario name and every step is preserved in order. What changed
@@ -40,7 +40,7 @@ migration and gives the abort policy a fixture of its own.
 
 The name-preservation check does not read a list written here or in the test. It
 parses the block headers out of the originals under
-`legacy/src/test/resources/sample/` and requires each name to appear in the
+`evals/migrate/source/sample/` and requires each name to appear in the
 migrated file, so renaming a scenario cannot pass by also editing the
 expectation.
 

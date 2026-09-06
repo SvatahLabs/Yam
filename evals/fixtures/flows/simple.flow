@@ -1,4 +1,4 @@
-// Hand-migrated from legacy/src/test/resources/sample/simple.flow (v1) to v3.
+// Hand-migrated from evals/migrate/source/sample/simple.flow (v1) to v3.
 // Story names and step order are preserved exactly (REQ-LANG-11); the sigils
 // (+action+, ~locator~, *data*) and the inline locators are gone, and the
 // literals moved to data.yaml.

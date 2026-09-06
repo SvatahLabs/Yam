@@ -118,7 +118,8 @@ describe("repository layout (HLD §12)", () => {
       "evals/healing",
       "evals/conformance",
       "docs/spec",
-      "legacy",
+      // Draft 2.18: the migrate inputs that used to live in the frozen Java project.
+      "evals/migrate/source",
     ]) {
       expect(isDir(fromRoot(dir)), `${dir} is missing`).toBe(true);
     }
@@ -126,8 +127,7 @@ describe("repository layout (HLD §12)", () => {
 
   it("the Java conformance runtime lives under runtimes/java (T6.4, REQ-STD-3)", () => {
     /*
-     * Not under `packages/`, which is the pnpm workspace, and not under
-     * `legacy/`, which is the *frozen* Selenium project. It is a live
+     * Not under `packages/`, which is the pnpm workspace. It is a live
      * deliverable that must build with `./gradlew` and depend on nothing in the
      * workspace — which is the whole claim of REQ-STD-3, and would stop being
      * checkable the moment it could reach a `@svatah/*` package.
@@ -147,25 +147,20 @@ describe("repository layout (HLD §12)", () => {
     expect(gradle).toMatch(/JavaLanguageVersion\.of\(17\)/);
   });
 
-  it("the frozen Java project lives under legacy/ and nowhere else", () => {
-    expect(existsSync(fromRoot("legacy", "build.gradle"))).toBe(true);
-    expect(existsSync(fromRoot("legacy", "src", "main", "java"))).toBe(true);
+  it("the frozen Java project is gone, and its migrate inputs are kept (Draft 2.18)", () => {
+    expect(existsSync(fromRoot("legacy"))).toBe(false);
     expect(existsSync(fromRoot("build.gradle"))).toBe(false);
     expect(existsSync(fromRoot("src"))).toBe(false);
-  });
-
-  it("the abandoned parser experiments are frozen outside the Java source set", () => {
-    const experiments = fromRoot("legacy", "experiments");
-    expect(isDir(experiments)).toBe(true);
-    expect(existsSync(join(experiments, "PARSER_IMPROVEMENTS.md"))).toBe(true);
-    // They must not be compiled: legacy/build.gradle uses the default source set only.
-    expect(existsSync(fromRoot("legacy", "src", "main", "java", "com", "svatah", "automator", "parser", "StepParser.java"))).toBe(false);
-  });
-
-  it("legacy/build.gradle declares no CoreNLP, ONNX Runtime or Guava dependency", () => {
-    const gradle = readFileSync(fromRoot("legacy", "build.gradle"), "utf8");
-    expect(gradle).not.toMatch(/stanford-corenlp/);
-    expect(gradle).not.toMatch(/onnxruntime/);
-    expect(gradle).not.toMatch(/com\.google\.guava/);
+    for (const kept of [
+      "sample/simple.flow",
+      "sample/svatah.flow",
+      "sample/execution.flow",
+      "sample/natural_language_login.flow",
+      "locator/svatah.locator",
+      "java/ActionSynonyms.java",
+      "java/SeleniumActionMapper.java",
+    ]) {
+      expect(existsSync(fromRoot("evals", "migrate", "source", kept)), `${kept} is missing`).toBe(true);
+    }
   });
 });

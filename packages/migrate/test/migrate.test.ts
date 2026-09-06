@@ -32,10 +32,7 @@ const LEGACY = join(
   "..",
   "..",
   "..",
-  "legacy",
-  "src",
-  "test",
-  "resources",
+  "evals", "migrate", "source",
 );
 
 describe("reading a v2 line (REQ-LANG-11)", () => {

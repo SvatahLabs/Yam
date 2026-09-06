@@ -27,8 +27,8 @@
  *
  * 1. **`--publish` was passed.** A default that published would be a script that
  *    publishes when somebody runs it to see what it does.
- * 2. **A manual trigger.** `BITBUCKET_PIPELINE_UUID` with a `custom:` pipeline,
- *    or a GitHub `workflow_dispatch`. A push to a branch must never publish, and
+ * 2. **A manual trigger.** A GitHub `workflow_dispatch` (Draft 2.18: GitHub Actions
+ *    is the only CI). A push to a branch must never publish, and
  *    the guard is here rather than only in the YAML so that a copied step cannot
  *    lose it.
  * 3. **`NPM_TOKEN` is set.** Supplied as a pipeline secret. It is read, used as
@@ -110,18 +110,14 @@ const commands = publishable.map((name) => ({
 
 /* ── the three guards ─────────────────────────────────────────────────────── */
 
-const manualTrigger =
-  process.env["GITHUB_EVENT_NAME"] === "workflow_dispatch" ||
-  (process.env["BITBUCKET_PIPELINE_UUID"] !== undefined &&
-    process.env["SVATAH_PUBLISH_TRIGGER"] === "manual");
+const manualTrigger = process.env["GITHUB_EVENT_NAME"] === "workflow_dispatch";
 const hasToken = (process.env["NPM_TOKEN"] ?? "") !== "";
 
 const refusals = [];
 if (!wantsPublish) refusals.push("`--publish` was not passed (this is a dry run)");
 if (!manualTrigger) {
   refusals.push(
-    "there is no manual trigger: a GitHub `workflow_dispatch`, or Bitbucket's " +
-      "`custom: publish` pipeline with SVATAH_PUBLISH_TRIGGER=manual",
+    "there is no manual trigger: this is not a GitHub `workflow_dispatch`",
   );
 }
 if (!hasToken) refusals.push("NPM_TOKEN is not set");

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Regenerates `evals/migrate/expected/` from the frozen legacy project.
+ * Regenerates `evals/migrate/expected/` from the legacy sample inputs kept under
+ * `evals/migrate/source/` (Draft 2.18: the frozen Java project itself is gone).
  *
  *   node scripts/migrate-legacy.mjs [--check]
  *
@@ -15,7 +16,7 @@ import { fileURLToPath } from "node:url";
 import { migrate, renderReviewReport } from "@svatah/migrate";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-export const SOURCE = "legacy/src/test/resources";
+export const SOURCE = "evals/migrate/source";
 export const EXPECTED = "evals/migrate/expected";
 
 /** A fixed timestamp: the output is compared byte for byte. */

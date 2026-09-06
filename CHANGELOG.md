@@ -153,4 +153,4 @@ Recorded rather than closed, with the command that closes each in
   `svatah surface doctor` reports it as an advisory check.
 - Nothing is published to a registry until the owner triggers the pipeline.
 
-[0.1.0]: https://bitbucket.org/svatah/automator/src/master/
+[0.1.0]: https://github.com/SvatahLabs/yam/releases/tag/v0.1.0

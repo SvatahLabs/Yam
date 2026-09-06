@@ -139,7 +139,7 @@ describe("svatah lint and compile (REQ-COMP-7, 8)", () => {
 describe("svatah migrate (REQ-LANG-11, LLD §15)", () => {
   it("converts the frozen legacy project and writes a review", async () => {
     const dir = mkdtempSync(join(tmpdir(), "svatah-migrated-"));
-    const { code } = await cli("migrate", join(ROOT, "legacy", "src", "test", "resources"), dir);
+    const { code } = await cli("migrate", join(ROOT, "evals", "migrate", "source"), dir);
     expect(code).toBe(EXIT.ok);
     expect(existsSync(join(dir, "flows", "simple.flow"))).toBe(true);
     expect(existsSync(join(dir, "migration-review.md"))).toBe(true);

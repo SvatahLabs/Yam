@@ -1,6 +1,6 @@
 # `evals/migrate`
 
-The committed output of `svatah migrate legacy/src/test/resources <dest>`.
+The committed output of `svatah migrate evals/migrate/source <dest>`.
 
 ## Why this exists rather than a comparison with `evals/fixtures/flows`
 
@@ -44,7 +44,7 @@ its shape nor its content was invented:
   `"locator details"` — with spaces — and that they hold a JSON string inside a
   column.
 * The **flows and locators** are the real legacy files from
-  `legacy/src/test/resources`, HTML-escaped the way the prototype's
+  `evals/migrate/source`, HTML-escaped the way the prototype's
   contenteditable editor stored them.
 
 So what is synthetic is the packaging, and the packaging is exactly what the

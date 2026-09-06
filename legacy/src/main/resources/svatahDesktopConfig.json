@@ -1,9 +1,0 @@
-{
-  "buildType" : "Desktop",
-  "browser" : "chrome",
-  "capabilities" : {
-    "selenium.hub.address" : "http://localhost:4444/wd/hub/",
-    "screenWidth" : "480",
-    "screenHeight" : "640"
-  }
-}

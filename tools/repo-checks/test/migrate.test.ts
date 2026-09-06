@@ -88,7 +88,7 @@ describe("names and step counts match the originals (REQ-LANG-11)", () => {
   /** Story headers and their step counts, read from a v1/v2 file. */
   function legacyStories(name: string): Array<{ name: string; steps: number }> {
     const text = readFileSync(
-      fromRoot("legacy", "src", "test", "resources", "sample", `${name}.flow`),
+      fromRoot("evals", "migrate", "source", "sample", `${name}.flow`),
       "utf8",
     );
     const out: Array<{ name: string; steps: number }> = [];

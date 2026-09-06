@@ -312,13 +312,13 @@ describe("evals/fixtures/flows (REQ-NFR-8)", () => {
     "%s preserves every story and scenario name of the original",
     (fixture, original) => {
       const legacy = readFileSync(
-        fromRoot("legacy", "src", "test", "resources", "sample", original),
+        fromRoot("evals", "migrate", "source", "sample", original),
         "utf8",
       );
       const expected = legacyBlockNames(legacy);
       expect(
         expected.length,
-        `no block headers were parsed out of legacy/.../${original}`,
+        `no block headers were parsed out of evals/migrate/source/sample/${original}`,
       ).toBeGreaterThan(0);
 
       const flow = readFileSync(fromRoot("evals", "fixtures", "flows", fixture), "utf8");
@@ -333,7 +333,7 @@ describe("evals/fixtures/flows (REQ-NFR-8)", () => {
     // `//` lines are comments. The migration must be one v3 sentence per such
     // line, in the same order and under the same scenario (P0-F2).
     const legacy = readFileSync(
-      fromRoot("legacy", "src", "test", "resources", "sample", "execution.flow"),
+      fromRoot("evals", "migrate", "source", "sample", "execution.flow"),
       "utf8",
     );
     const v3 = readFileSync(fromRoot("evals", "fixtures", "flows", "execution.flow"), "utf8");

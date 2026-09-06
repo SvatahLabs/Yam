@@ -7,7 +7,8 @@
  * The first of those is checked against `ActionSynonyms.java` itself rather than
  * against a copied list. A port that is verified against a transcription of what
  * was ported verifies the transcription; reading the original is the only way the
- * check means anything, and it is why the Java project is kept in `legacy/`.
+ * check means anything, and it is why the file is kept, verbatim, under
+ * `evals/migrate/source/java/` after the Java project itself left (Draft 2.18).
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
@@ -23,7 +24,7 @@ const ROOT = join(HERE, "..", "..", "..");
 /* ── the legacy source, read and parsed ───────────────────────────────────── */
 
 const JAVA = readFileSync(
-  join(ROOT, "legacy", "src", "main", "java", "com", "svatah", "automator", "mappers", "ActionSynonyms.java"),
+  join(ROOT, "evals", "migrate", "source", "java", "ActionSynonyms.java"),
   "utf8",
 );
 
