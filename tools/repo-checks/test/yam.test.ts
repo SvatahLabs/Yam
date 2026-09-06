@@ -28,6 +28,7 @@ const ALLOWED: ReadonlyArray<[RegExp, string]> = [
 
 /** Files the check does not read: history, generated locks, binaries. */
 const SKIPPED = (file: string): boolean =>
+  file === "tools/repo-checks/test/yam.test.ts" || // this file names the forms it allows
   file === "pnpm-lock.yaml" ||
   file === "LICENSE" ||
   file.startsWith("docs/spec/progress/") ||
