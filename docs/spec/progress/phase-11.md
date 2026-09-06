@@ -545,7 +545,7 @@ without being allowed to see the id.
 
 # T11.4, T11.5 — the self suite and the parity gate
 
-**Status: complete.** Commit `0a9d891`.
+**Status: complete.** Commits `0a9d891`, `ffefb8e`, `100a003`.
 
 `evals/self` is a Svatah project whose flows drive the packaged ADE through the
 accessibility tree; `evals/self/cdp` is the same flows through the DOM over CDP.
@@ -675,6 +675,8 @@ written, and each of them is now a sentence somebody could implement from.
 ---
 
 # T11.6 — the contract
+
+**Status: complete.** Commits `3d79a0e`, `100a003`.
 
 `docs/spec/progress/phase-11.md` is this file. The parity report is embedded
 below, and the one-sided list is read as Svatah's shortcomings with what each
