@@ -34,12 +34,15 @@ is empty.
   demonstrated rather than asserted**: the perform script's process choice is
   *executed* against a fake System Events, and the desktop snapshot case is shown
   failing on three unnamed buttons and passing on a named window.
-- **Two things this phase could not do, and says so.** `axe-core` is MPL-2.0 and
-  REQ-PKG-3 admits MIT, Apache-2.0 and BSD, so the component sheet's
+- **Three things this phase could not do, and says so.** `axe-core` is MPL-2.0
+  and REQ-PKG-3 admits MIT, Apache-2.0 and BSD, so the component sheet's
   accessibility run is an audit of our own with an `--axe <path>` hook for a
-  verifier who has a copy (D1). And the AX *screenshot* needs the Screen
-  Recording grant, which this terminal does not have — `svatah surface doctor`
-  says so and nothing was fabricated (K1).
+  verifier who has a copy (D1). The AX *screenshot* needs the Screen Recording
+  grant, which this terminal does not have — `svatah surface doctor` says so and
+  nothing was fabricated (K1). And **the live macOS gate could not run here**:
+  no application launched from this shell gets an accessibility-visible window,
+  TextEdit included, so the gate correctly reports a launch failure with exit 2
+  and the three runs with load figures are a verifier's to take (K9).
 
 ---
 
@@ -59,7 +62,7 @@ From this worktree of `phase-9`, with `ANTHROPIC_API_KEY` and
 | `pnpm browsers` | exit 0 (chromium, firefox) |
 | `pnpm -r build` | exit 0; 31 packages and two apps |
 | `pnpm -r typecheck` | exit 0 |
-| `pnpm -r test` | see the table below |
+| `pnpm -r test` | 2,314 tests passed across 30 packages and two apps; see below |
 | `pnpm lint` | exit 0 |
 | `node scripts/check-licenses.mjs` | OK — 1,050 packages, 17 distinct licences, none copyleft |
 | `git diff master..phase-9 -- docs/spec/{requirements,hld,lld,tasks}.md docs/spec/design` | empty |
@@ -70,6 +73,27 @@ has one Node, and the second leg of the contract is a verifier's to run
 phase uses an API newer than Node 22 — the two new runtime calls are
 `os.loadavg` and `os.availableParallelism`, both present since 18 and 19 — and
 the `engines` field of every new package is `>=22.0.0`.
+
+Per package, from the run whose log is quoted below:
+
+| Package | Tests | Package | Tests |
+|---|---|---|---|
+| `packages/compiler` | 269 | `packages/adapter-appium` | 95 |
+| `packages/cli` | 259 | `packages/adapter-ax` | 87 |
+| `packages/spec` | 205 | `packages/adapter-uia` | 82 |
+| `apps/sample-web` | 206 | `packages/adapter-http` | 69 |
+| `packages/schema` | 142 | `packages/adapter-bidi` | 52 |
+| `packages/surface` | 133 | `packages/service` | 49 |
+| `packages/bindings` | 132 | `packages/ui` | 43 |
+| `apps/ade` | 127 (+8 Playwright) | `packages/bindings-cli` | 35 |
+| `packages/runtime` | 53 | `packages/migrate` | 32 |
+| `tools/repo-checks` | 1,030 | `packages/gateway` | 31 |
+| `packages/recorder` | 29 | `packages/steps` | 29 |
+| `packages/trajectory` | 28 | **`packages/screens`** | **27** |
+| `packages/conformance` | 24 | `packages/healer` | 24 |
+| **`packages/tui`** | **15** | `packages/tool` | 14 |
+| **`packages/ui-tokens`** | **11** | `packages/workflow` | 6 |
+| **`packages/sdk`** | **6** | | |
 
 ### One test failed on the first full run and passes on its own
 
@@ -157,7 +181,74 @@ $ pnpm --filter @svatah/conformance exec vitest run -t "P8-F2"
  ✓ leaves the load out rather than printing a zero when it was not recorded
 ```
 
-The live gate's own figures are in the section below.
+### The live macOS gate: attempted, and blocked by this host
+
+The Accessibility permission **is** granted here — `svatah surface doctor
+--adapter ax` says `ok ax/accessibility granted` — so the gate was run:
+
+```console
+$ node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md
+ok    -/platform             darwin arm64, Node v25.6.1
+ok    ade/node-runtime       runtime: /opt/homebrew/bin/node (v25.6.1, from PATH)
+ok    ax/accessibility       granted
+warn  ax/screen-recording    refused — could not create image from rect
+the previous launch was gone after 337 ms
+the previous launch was gone after 5471 ms
+The ADE was launched at variant 0 but showed no window within 60000 ms. That is a
+launch failure, not an adapter failure, and it is reported as one so the report is
+not a list of cases that never had anything to read.
+Nothing was written to reports/adapter-ax.md.
+$ echo $?
+2
+```
+
+Two things in that transcript are P8-F1 working: "the previous launch was gone
+after 337 ms" is the teardown poll, and the gate reported a **launch** failure
+with exit 2 rather than seven failing cases.
+
+**No application launched from this shell gets an accessibility-visible window,
+and it is not the ADE.** The same is true of TextEdit:
+
+```console
+$ open -n -a TextEdit && sleep 5
+$ osascript -e 'tell application "System Events" to tell process "TextEdit" to count windows'
+0
+$ # and through the raw AX API, the same way the bridge asks:
+["windows=1"," w0 role=AXApplication"]
+```
+
+`AXWindows[0]` answers with role `AXApplication` rather than `AXWindow` — the
+placeholder an application has when it owns no on-screen window. The ADE behaves
+identically:
+
+```console
+$ # the packaged ADE, launched through LaunchServices exactly as the gate does
+["pid=92285 focusedRole=AXApplication mainRole=AXApplication",
+ "windows=1",
+ "  w0 role=AXApplication title=Svatah ADE"]
+```
+
+The bridge refuses that element by design — Draft 2.9 §7.5's "an `AXApplication`
+here is the cycle, and it is refused rather than walked" — so it answers
+`no-window`, which is the honest answer for a window that does not exist.
+
+The renderer *is* running: `chromium.connectOverCDP` drives it, which is how
+`apps/ade/test/shell.spec.ts` gets 8 of 8 against the packaged application on
+this same host. What is missing is a WindowServer window, which is the Phase 8
+finding (`open -n` through LaunchServices) recurring in an environment where
+LaunchServices has no session to place the application in.
+
+So: **the three consecutive gate runs with load figures are not in this record.**
+The command a verifier runs on a macOS host with an interactive login and the
+Accessibility grant is
+
+```
+node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md
+```
+
+three times, once beside `pnpm -r test`. What P8-F1 and P8-F2 changed is
+demonstrated by the tests above and by the transcript here; what they were
+*measured against* is the verifier's to take. Recorded as **K9**.
 
 ### P8-F3 — name the window's own buttons, and fail on an unnamed control
 
@@ -593,3 +684,15 @@ contract's second leg is a verifier's: `pnpm -r typecheck && pnpm -r test` with
 untouched by this phase, and Phase 11's T11.2.
 
 **K8 — the Windows UIA gate is unrun.** Inherited; Phase 11's T11.6.
+
+**K9 — the live macOS AX gate could not run on this host, and the reason is the
+host.** The Accessibility permission is granted and the gate reports exit 2, a
+*launch* failure: no application launched from this shell gets an
+accessibility-visible window. TextEdit behaves identically —
+`AXWindows[0].role` is `AXApplication`, the placeholder an application has when
+it owns no on-screen window — so it is not the ADE and not the bridge, which
+refuses that element by design (§7.5). The transcript and the control experiment
+are in the P8-F2 section above. The command that closes it, on a macOS host with
+an interactive login and the grant:
+`node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md`,
+three times, once beside `pnpm -r test`.
