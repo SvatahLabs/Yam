@@ -911,6 +911,30 @@ export class PlaywrightSurface implements AgentSurface {
           await space.reset();
           return { ok: true };
         }
+        /**
+         * `Resize the window to <w> by <h>` (pattern 33, T12.7).
+         *
+         * The *viewport*, which is a browser page's window: the parity gate
+         * runs the same sentences through the accessibility tree and through
+         * the DOM over CDP, so a sentence that resizes a window on one side has
+         * to resize the same thing on the other or the two are not comparing
+         * one application.
+         */
+        case "resizeWindow": {
+          const width = Number(args["width"]);
+          const height = Number(args["height"]);
+          if (!Number.isFinite(width) || !Number.isFinite(height)) {
+            throw new ScriptError(
+              `"resizeWindow" needs a width and a height; it was given ` +
+                `${JSON.stringify(args["width"])} by ${JSON.stringify(args["height"])}.`,
+              { adapter: "playwright" },
+            );
+          }
+          await page.setViewportSize({ width, height });
+          await space.reset();
+          return { ok: true };
+        }
+
         case "switchFrame": {
           const wanted = args["name"] ?? args["url"] ?? args["index"];
           if (wanted === undefined || String(wanted) === "main" || String(wanted) === "") {

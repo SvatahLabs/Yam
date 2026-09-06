@@ -250,8 +250,25 @@ export function lowerStep(
       ? {}
       : {
           expect: {
-            subject: raw.expect.subject as "target" | "page" | "dialog" | "scope",
+            subject: raw.expect.subject as NonNullable<Step["expect"]>["subject"],
             predicate: lowerPredicate(raw.expect.predicate, secrets),
+            /*
+             * Pattern 32's quantifier and noun (T12.7, LLD §13.9 Draft 2.15).
+             *
+             * Carried straight through: the grammar already normalised the
+             * noun to the singular and the quantifier to `every` or `no`, and
+             * the *scope* of the set is `step.target`, which the lines above
+             * resolved through the dictionary like any other target. Nothing
+             * about a set is a project question.
+             */
+            ...(raw.expect.set === undefined
+              ? {}
+              : {
+                  set: {
+                    quantifier: raw.expect.set.quantifier as "every" | "no",
+                    of: raw.expect.set.of,
+                  },
+                }),
           },
         }),
     ...(raw.capture === undefined

@@ -42,6 +42,7 @@
                 "switchWindow",
                 "closeOtherWindows",
                 "switchFrame",
+                "resizeWindow",
                 "quit",
                 "dialog",
                 "read",

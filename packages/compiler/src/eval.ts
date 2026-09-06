@@ -46,8 +46,9 @@ export const goldenEntrySchema = z
      * paraphrase — a sentence the grammar deliberately refuses, which is what
      * gives a model tier anything to do.
      */
-    // 31 since T11.2 added `Quit the app` (LLD §13.9).
-    pattern: z.number().int().min(0).max(31),
+    // 31 since T11.2 added `Quit the app`; 33 since T12.7 added an assertion
+    // over a set and a window resize (LLD §13.9 Draft 2.15).
+    pattern: z.number().int().min(0).max(33),
     /**
      * What `origin.rule` should say: the grammar rule, the custom step's id, or
      * — for a model tier, which has no rule — the action it produced.

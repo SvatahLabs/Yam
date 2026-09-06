@@ -66,6 +66,16 @@ export const configSchema = z
             env: z.record(z.string(), z.string()).optional(),
             /** How long to wait for a window before the session fails. */
             timeoutMs: z.number().int().positive().optional(),
+            /**
+             * The window's size when the session opens (pattern 33, T12.7).
+             *
+             * `[width, height]` in points, applied once the window exists. The
+             * ADE remembers its own size between runs, so a suite that measures
+             * a toolbar at 1440 points was measuring whatever width the last
+             * person left it at; naming the size is what makes those checks
+             * reproducible on somebody else's machine (LLD §13.9 Draft 2.15).
+             */
+            size: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
           })
           .strict()
           .optional(),

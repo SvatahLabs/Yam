@@ -49,6 +49,13 @@ export interface LaunchConfig {
   readonly env?: Readonly<Record<string, string>>;
   /** How long to wait for a window. Default 60 s, as LLD §15's gate does. */
   readonly timeoutMs?: number;
+  /**
+   * The window's size once it exists, `[width, height]` (pattern 33, T12.7).
+   *
+   * The adapter applies it through the same route `Resize the window to …`
+   * uses, so an initial size and a mid-flow resize are one mechanism.
+   */
+  readonly size?: readonly [number, number];
 }
 
 /** How to stop it (`config.app.quit`). */

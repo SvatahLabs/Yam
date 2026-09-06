@@ -162,6 +162,8 @@ export type UiaCommand =
   | { readonly kind: "focus"; readonly path: readonly number[] }
   | { readonly kind: "keys"; readonly text: string }
   | { readonly kind: "click"; readonly at: readonly [number, number] }
+  /** Give the main window a size (pattern 33, T12.7), through `MoveWindow`. */
+  | { readonly kind: "setSize"; readonly size: readonly [number, number] }
   | { readonly kind: "activate" };
 
 export interface UiaBridge {
@@ -506,6 +508,18 @@ if ($cmd.kind -eq "activate") {
   [void][System.Windows.Forms.SendKeys]::Flush()
   $win = [System.Windows.Automation.AutomationElement]::FromHandle($handle)
   try { $win.SetFocus() } catch { }
+  ConvertTo-Json -Compress @{ ok = $true }
+  exit 0
+}
+if ($cmd.kind -eq "setSize") {
+  # "Resize the window to <w> by <h>" (pattern 33, T12.7). UIA's TransformPattern
+  # is optional and Chromium's top-level window does not publish it, so the
+  # window is moved through the same Win32 call a person's drag ends up in. The
+  # position is left where it is: SWP_NOMOVE.
+  Add-Type -MemberDefinition @"
+[DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr a, int X, int Y, int cx, int cy, uint f);
+"@ -Name Window -Namespace Svatah
+  [void][Svatah.Window]::SetWindowPos($handle, [IntPtr]::Zero, 0, 0, $cmd.size[0], $cmd.size[1], 0x0006)
   ConvertTo-Json -Compress @{ ok = $true }
   exit 0
 }

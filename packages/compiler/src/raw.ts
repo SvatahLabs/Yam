@@ -40,7 +40,12 @@ export interface RawStep {
   readonly target?: RawTarget;
   readonly target2?: RawTarget;
   readonly args?: Readonly<Record<string, RawValue | number | boolean>>;
-  readonly expect?: { readonly subject: string; readonly predicate: RawPredicate };
+  readonly expect?: {
+    readonly subject: string;
+    readonly predicate: RawPredicate;
+    /** Pattern 32's quantifier and noun, when the subject is a set (T12.7). */
+    readonly set?: { readonly quantifier: string; readonly of: string };
+  };
   readonly guard?: {
     readonly subject: string;
     readonly predicate: RawPredicate;

@@ -9,7 +9,7 @@
  * Refs: REQ-ADP-1, REQ-RUN-10, LLD §7.1.
  */
 import { SURFACE_ACTIONS, type SurfaceAction } from "@svatah/schema";
-import { LocateError, SessionError } from "@svatah/surface";
+import { LocateError, ScriptError, SessionError } from "@svatah/surface";
 import { expect, MECHANISMS, refByTestId, test } from "./fixtures.js";
 
 /**
@@ -257,6 +257,34 @@ for (const mechanism of MECHANISMS) {
       await expect(surface.act("switchWindow", undefined, { index: 1 })).rejects.toBeInstanceOf(
         SessionError,
       );
+    });
+
+    /*
+     * `Resize the window to <w> by <h>` (pattern 33, T12.7, LLD §13.9).
+     *
+     * Three of the parity gate's one-sided checks were toolbar rules measured
+     * at several widths, and the reason Svatah could not reach them was that a
+     * flow could not change the width. Asserted through the page's own view of
+     * itself rather than through what was asked for: a viewport that the
+     * browser rounded or refused is a resize that did not happen.
+     */
+    test("[resizeWindow] resizeWindow gives the page a viewport", async ({ openSurface }) => {
+      const surface = await openSurface(mechanism, "/widgets");
+
+      await surface.act("resizeWindow", undefined, { width: 1100, height: 800 });
+      expect(
+        await surface.act("evaluate", undefined, { expression: "window.innerWidth" }),
+      ).toEqual(expect.objectContaining({ value: 1100 }));
+
+      await surface.act("resizeWindow", undefined, { width: 640, height: 480 });
+      expect(
+        await surface.act("evaluate", undefined, { expression: "window.innerWidth" }),
+      ).toEqual(expect.objectContaining({ value: 640 }));
+
+      // A size that is not a size is a script error, not a silent no-op.
+      await expect(
+        surface.act("resizeWindow", undefined, { width: "wide", height: 480 }),
+      ).rejects.toBeInstanceOf(ScriptError);
     });
 
     test("[switchFrame] switchFrame enters an iframe and returns to the main frame", async ({ openSurface }) => {

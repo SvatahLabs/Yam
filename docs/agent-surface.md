@@ -78,7 +78,7 @@ failure halfway through a flow (LLD §2.4).
 |---|---|---|
 | `dialogs` | Native dialogs can be observed and answered. | `dialog` |
 | `frames` | The session has addressable frames. | `switchFrame` |
-| `windows` | The session can have more than one window or page. | `switchWindow`, `closeOtherWindows` |
+| `windows` | The session can have more than one window or page. | `switchWindow`, `closeOtherWindows`, `resizeWindow` |
 | `upload` | Files can be attached to a file control. | `upload` |
 | `drag` | One element can be dragged onto another. | `dragTo` |
 | `trace` | `trace()` is implemented. | — |
@@ -315,7 +315,7 @@ actions such as `dragTo`.
 | Selection | `selectOption`, `deselectOption`, `deselectAll`, `setChecked` |
 | Scrolling | `scrollIntoView`, `scrollToTop`, `scrollToBottom` |
 | Waiting | `sleep`, `waitFor` |
-| Windows and frames | `switchWindow`, `closeOtherWindows`, `switchFrame` |
+| Windows and frames | `switchWindow`, `closeOtherWindows`, `switchFrame`, `resizeWindow` |
 | Application lifecycle | `quit` |
 | Dialogs | `dialog` |
 | Reading and diagnostics | `read`, `evaluate`, `screenshot` |

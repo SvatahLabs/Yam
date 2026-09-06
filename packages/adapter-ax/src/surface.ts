@@ -243,6 +243,23 @@ export class AxSurface implements AgentSurface {
 
     // Bring the window forward, so the tree is the one a person would see.
     await this.bridge.perform({ kind: "activate" }).catch(() => undefined);
+
+    /*
+     * `app.launch.size`, applied to whatever window is now in front (T12.7).
+     *
+     * Applied on every open, not only after a launch: a session that attached
+     * to an application somebody left running is reading a window whose size is
+     * whatever that person left it at, and a suite that measures a toolbar at
+     * 1440 points would then be measuring their preference. Best effort, and
+     * deliberately so — an application whose window refuses a size is not a
+     * session that failed to open.
+     */
+    const size = launch?.size;
+    if (size !== undefined) {
+      await this.bridge
+        .perform({ kind: "setSize", size: [size[0], size[1]] })
+        .catch(() => undefined);
+    }
     await this.refresh();
   }
 
@@ -542,6 +559,30 @@ export class AxSurface implements AgentSurface {
         // produced, and what a quit produced is how it went.
         const outcome = await this.quitTheApplication();
         return { ok: true, value: outcome };
+      }
+
+      /**
+       * `Resize the window to <w> by <h>` (pattern 33, T12.7, LLD §13.9).
+       *
+       * Through the window's `AXSize`, which is the same route `app.launch.size`
+       * takes when the session opens — one mechanism, so an initial size and a
+       * mid-flow resize cannot disagree. The tree is re-read afterwards because
+       * a resize is a relayout: every box in the snapshot has moved, and the
+       * toolbar rules these sentences exist for are about boxes.
+       */
+      case "resizeWindow": {
+        const width = Number(args["width"]);
+        const height = Number(args["height"]);
+        if (!Number.isFinite(width) || !Number.isFinite(height)) {
+          throw new ScriptError(
+            `"resizeWindow" needs a width and a height; it was given ` +
+              `${JSON.stringify(args["width"])} by ${JSON.stringify(args["height"])}.`,
+            { adapter: "ax" },
+          );
+        }
+        await bridge.perform({ kind: "setSize", size: [width, height] });
+        await this.refresh();
+        return { ok: true };
       }
 
       case "click":

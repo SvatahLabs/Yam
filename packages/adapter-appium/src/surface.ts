@@ -596,7 +596,14 @@ export class AppiumSurface implements AgentSurface {
       case "upload":
       case "switchWindow":
       case "closeOtherWindows":
+      case "resizeWindow":
       case "dialog":
+        /*
+         * `resizeWindow` is here for the same reason the other four are: a
+         * phone's screen is the size it is, so pattern 33 has nothing to
+         * resize, and the capability descriptor says so rather than the
+         * adapter pretending (LLD §2.4).
+         */
         throw new ScriptError(
           `The Appium adapter does not implement "${action}": ` +
             "a phone has no windows, no file picker and no native <select> " +

@@ -641,9 +641,19 @@ export function projectRunners(
       withSessionCookies,
       scope: { read: (reference) => readReference(scope, reference) },
     });
-    return step.capture?.jsonPath === undefined
+    /*
+     * The path a capture names, or the one a `Wait for … to answer` names
+     * (pattern 19 extended, T12.7).
+     *
+     * `Call the "x" API and remember "$.id" as id` carries it on the capture;
+     * `Wait for the "x" API to answer "$.status" to be "passed"` has no capture
+     * at all and carries it as an argument. One reader for both, because the
+     * question — which value out of the response — is the same one.
+     */
+    const jsonPath = step.capture?.jsonPath ?? literalArg(step.args?.["jsonPath"]);
+    return jsonPath === undefined
       ? (response.json ?? response.body)
-      : http.captureFromLast(step.capture.jsonPath);
+      : http.captureFromLast(jsonPath);
   };
 
   const custom: CustomStepRunner = async (step, ctx) => {

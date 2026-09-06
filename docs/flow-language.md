@@ -570,6 +570,21 @@ Type {data.user.password} into the password field
 }
 ```
 
+**A multi-line value** (T12.7, LLD §13.9 Draft 2.15). A step is one line — the
+file grammar says so — so a value with a newline in it is written with an
+escape:
+
+```
+Type "story: smoke\nOpen \"/login\"\n" into the flow editor
+```
+
+Four escapes and no more: `\n`, `\t`, `\"` and `\\`. Anything else after a
+backslash stays exactly as it was written, so a Windows path in a value does not
+silently lose its separators. Until Draft 2.15 there was only `\"`, and "a flow
+is edited and saved through the ADE" was a check only the external oracle could
+reach: typing a whole file into a text area is a multi-line value and nothing
+else.
+
 ### Pattern 10 — Clear
 
 **IR:** clear
@@ -988,6 +1003,54 @@ Wait for the username field to be present
   "action": "sleep",
   "args": {
     "seconds": 8
+  }
+}
+```
+
+**Waiting for a service's answer** (T12.7, LLD §13.9 Draft 2.15).
+
+**Form:** `Wait for the "<request name>" API to answer "<json path>" to <predicate>`
+
+```
+Wait for the "run status" API to answer "$.status" to be "passed"
+Wait for the "run status" API to answer "$.steps.length" to be "6"
+Wait for the "run status" API to answer "$.summary" to contain "passed"
+```
+
+The request is a named one from `api/`, exactly as pattern 26's is, so the URL,
+headers and method live in the project rather than in the sentence. The step
+polls it every half second until the value at the path satisfies the predicate,
+or its own timeout runs out; a request that throws is not a failure yet, because
+a service that has not finished starting answers with a connection refused.
+
+This is the sentence four one-sided checks were waiting for: a button in the ADE
+starts a **second** Svatah run, and until Draft 2.15 a flow had no way to wait
+for a run other than its own and read its result.
+
+`Wait for the "run status" API to answer "$.status" to be "passed"` compiles to:
+
+```json
+{
+  "action": "waitFor",
+  "args": {
+    "jsonPath": {
+      "kind": "literal",
+      "value": "$.status"
+    },
+    "request": {
+      "kind": "literal",
+      "value": "run status"
+    }
+  },
+  "expect": {
+    "subject": "api",
+    "predicate": {
+      "kind": "text",
+      "value": {
+        "kind": "literal",
+        "value": "passed"
+      }
+    }
   }
 }
 ```
@@ -1801,6 +1864,172 @@ no-op would let a desktop flow "pass" against a browser it never quit.
 
 ---
 
+### Pattern 32 — An assertion over a set (T12.7, LLD §13.9 Draft 2.15)
+
+**IR:** expect (with `expect.subject: "set"`)
+
+**Form:** `Every|No <noun> on this screen should <predicate>` ·
+`Every|No <noun> of|in the <target> should <predicate>`
+
+```
+Every button on this screen should have an id
+Every control on this screen should have a name
+No text on this screen should contain {data.card.number}
+Every row of the headers table should be visible
+No control in the settings pane should contain "sk-"
+```
+
+Patterns 23 and 24 ask about **one** element. This asks about all of them, or
+about none of them, and it is the sentence a third of the parity gate's
+one-sided list was waiting for: "every interactive control is named and id'd",
+"no secret is anywhere on this screen", "the rows of the headers table are…"
+were each recorded as *the language asserts about one element, not about a set*
+(LLD §13.9).
+
+**The scope is the step's own target.** `of the headers table` and `in the
+settings pane` name an element the dictionary resolves and the resolver resolves,
+exactly like the target of a click; `on this screen` names none, and none means
+the whole window.
+
+**The nouns are a closed list**, because the executor maps each onto snapshot
+roles and a noun it could not map would be a step that asserted about nothing —
+and passed:
+
+| Noun | What it is |
+|---|---|
+| `control` | every interactive role: button, link, textbox, checkbox, radio, combobox, listbox, menu item, tab, switch, slider, spin button, option |
+| `button`, `link`, `tab`, `checkbox` | that role |
+| `field` | textbox, search box, combobox, spin button, slider |
+| `row`, `cell`, `heading`, `item` | that role and its siblings (`cell` includes column and row headers) |
+| `text` | every node that puts words on the screen |
+| `element` | every node in the snapshot |
+
+**There is no `Some`.** An existential over a set is what `The x should be
+visible` already says about one element, and a quantifier nobody needs is one
+every adapter has to carry for ever.
+
+**An empty set fails, whichever quantifier it is.** "Every button has an id" over
+a screen with no buttons is vacuously true and means nothing; so is "no control
+shows a secret" over a screen that has not loaded. A green step that asked about
+nothing is the one outcome this pattern must not have, because it looks exactly
+like a working one.
+
+Two predicates exist only here, because a set is the only place the question
+comes up: `have an id` and `have a name` ask whether the property is there at
+all, rather than what it equals. `have no id` and `have no name` are their
+mirrors.
+
+`Every button on this screen should have an id` compiles to:
+
+```json
+{
+  "action": "expect",
+  "expect": {
+    "subject": "set",
+    "predicate": {
+      "kind": "attribute",
+      "name": "id",
+      "value": {
+        "kind": "literal",
+        "value": ""
+      },
+      "negate": true
+    },
+    "set": {
+      "quantifier": "every",
+      "of": "button"
+    }
+  }
+}
+```
+
+`No text on this screen should contain "sk-live"` compiles to:
+
+```json
+{
+  "action": "expect",
+  "expect": {
+    "subject": "set",
+    "predicate": {
+      "kind": "textContains",
+      "value": {
+        "kind": "literal",
+        "value": "sk-live"
+      }
+    },
+    "set": {
+      "quantifier": "no",
+      "of": "text"
+    }
+  }
+}
+```
+
+---
+
+### Pattern 33 — Resize the window (T12.7, LLD §13.9 Draft 2.15)
+
+**IR:** resizeWindow
+
+**Form:** `Resize the window to <width> by <height>`
+
+```
+Resize the window to 1440 by 900
+Resize the window to 1100 by 900
+Set the window to 640 by 480
+```
+
+The numbers are bare, not quoted: they are a size, the same way pattern 24's
+`should be 800 by 600` is one, and quoting them would make a size read like a
+value somebody typed.
+
+A desktop adapter performs it through the window's own size attribute — `AXSize`
+on macOS, `SetWindowPos` on Windows — and a web adapter through the page's
+viewport, so the same sentence resizes the same thing whichever oracle is
+driving. An adapter with no window (`http`, `appium`) refuses it at the start of
+the run rather than halfway through, because it needs the `windows` capability.
+
+**`app.launch.size` is the initial size.** The ADE remembers its own window size
+between runs, so a suite that measures a toolbar at 1440 points was measuring
+whatever width the last person left it at:
+
+```yaml
+app:
+  launch:
+    bundle: "…/Svatah ADE.app"
+    size: [1440, 900]
+```
+
+Three of the parity gate's one-sided checks were toolbar rules measured at
+several widths, and what stopped Svatah reaching them was exactly this: a flow
+could not change the width.
+
+`Resize the window to 1440 by 900` compiles to:
+
+```json
+{
+  "action": "resizeWindow",
+  "args": {
+    "width": 1440,
+    "height": 900
+  }
+}
+```
+
+`Set the window to 640 by 480` compiles to:
+
+```json
+{
+  "action": "resizeWindow",
+  "args": {
+    "width": 640,
+    "height": 480
+  }
+}
+```
+
+---
+
 ## 6. Custom typed steps (Tier 0) — REQ-LANG-15, REQ-LANG-16
 
 The prose model needs an escape hatch for logic. A `steps/` directory of
@@ -1898,10 +2127,10 @@ schema is [`packages/schema/json/ir.schema.json`](../packages/schema/json/ir.sch
 | Selection | `selectOption`, `deselectOption`, `deselectAll`, `setChecked` | 15–17 |
 | Scrolling | `scrollIntoView`, `scrollToTop`, `scrollToBottom` | 18 |
 | Waiting | `sleep`, `waitFor` | 19 |
-| Windows and frames | `switchWindow`, `closeOtherWindows`, `switchFrame` | 20 |
+| Windows and frames | `switchWindow`, `closeOtherWindows`, `switchFrame`, `resizeWindow` | 20, 33 |
 | Application lifecycle | `quit` | 31 |
 | Dialogs | `dialog` | 21 |
-| Reading and diagnostics | `read`, `expect`, `evaluate`, `screenshot` | 22–25 |
+| Reading and diagnostics | `read`, `expect`, `evaluate`, `screenshot` | 22–25, 32 |
 | Services | `api` | 26 |
 | Composition | `invoke` | 27 |
 | Escape hatch | `custom` | §6 |
@@ -1922,6 +2151,11 @@ guards, which is why one collapse buys two features.
 
 Any predicate may carry `negate: true`, which is what *should not be*, *to not
 be* and *is not* compile to.
+
+An expectation names what it is **about** in `expect.subject`: `target` (one
+element), `page` (the title or URL), `dialog`, `scope` (a captured value, in a
+guard), `set` (pattern 32, with `expect.set` carrying the quantifier and the
+noun), and `api` (pattern 19's `Wait for … to answer`).
 
 ---
 

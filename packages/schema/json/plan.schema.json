@@ -241,6 +241,7 @@
                         "switchWindow",
                         "closeOtherWindows",
                         "switchFrame",
+                        "resizeWindow",
                         "quit",
                         "dialog",
                         "read",
@@ -435,6 +436,27 @@
                         "predicate": {
                           "$ref": "#/definitions/plan/properties/stories/items/properties/steps/items/properties/guard/properties/predicate"
                         },
+                        "set": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "of": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "quantifier": {
+                              "enum": [
+                                "every",
+                                "no"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "quantifier",
+                            "of"
+                          ],
+                          "type": "object"
+                        },
                         "subject": {
                           "$ref": "#/definitions/plan/properties/stories/items/properties/steps/items/properties/guard/properties/subject"
                         }
@@ -607,7 +629,9 @@
                             "target",
                             "page",
                             "dialog",
-                            "scope"
+                            "scope",
+                            "set",
+                            "api"
                           ],
                           "type": "string"
                         },

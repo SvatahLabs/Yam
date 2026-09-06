@@ -120,7 +120,8 @@ describe("evals/compiler/golden.jsonl (REQ-COMP-9)", () => {
 
   it("covers every pattern in docs/flow-language.md", () => {
     const covered = new Set(entries.map((e) => e.pattern));
-    for (let pattern = 1; pattern <= 30; pattern += 1) {
+    // 33 since T12.7 gave the language an assertion over a set and a resize.
+    for (let pattern = 1; pattern <= 33; pattern += 1) {
       expect(covered, `no golden entry for pattern ${pattern}`).toContain(pattern);
     }
   });
@@ -128,7 +129,7 @@ describe("evals/compiler/golden.jsonl (REQ-COMP-9)", () => {
   it("gives every pattern at least two examples (REQ-LANG-12)", () => {
     const counts = new Map<number, number>();
     for (const entry of entries) counts.set(entry.pattern, (counts.get(entry.pattern) ?? 0) + 1);
-    for (let pattern = 1; pattern <= 30; pattern += 1) {
+    for (let pattern = 1; pattern <= 33; pattern += 1) {
       expect(counts.get(pattern) ?? 0, `pattern ${pattern} has fewer than two examples`).toBeGreaterThanOrEqual(2);
     }
   });
@@ -186,15 +187,16 @@ describe("docs/flow-language.md (REQ-LANG-12)", () => {
     expect(doc).toContain(`\`${kind}\``);
   });
 
-  it("documents patterns 1 through 31, each with at least two examples", () => {
-    // 31 since T11.2 gave the language `Quit the app`.
-    for (let pattern = 1; pattern <= 31; pattern += 1) {
+  it("documents patterns 1 through 33, each with at least two examples", () => {
+    // 31 since T11.2 gave the language `Quit the app`; 33 since T12.7 gave it an
+    // assertion over a set (32) and a window resize (33).
+    for (let pattern = 1; pattern <= 33; pattern += 1) {
       expect(doc, `no section for pattern ${pattern}`).toMatch(
         new RegExp(`^### Pattern ${pattern} — `, "m"),
       );
     }
     const sections = doc.split(/^### Pattern /m).slice(1);
-    expect(sections).toHaveLength(31);
+    expect(sections).toHaveLength(33);
     for (const section of sections) {
       const heading = section.split("\n")[0] ?? "";
       // Two "compiles to:" blocks per pattern is the two-examples requirement.

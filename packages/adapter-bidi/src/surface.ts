@@ -639,6 +639,29 @@ export class BidiSurface implements AgentSurface {
         return { ok: true };
       }
 
+      /**
+       * `Resize the window to <w> by <h>` (pattern 33, T12.7).
+       *
+       * `browsingContext.setViewport` is the specified way to do it, and the
+       * reason this adapter has a row at all is REQ-ADP-4: BiDi exists here to
+       * prove the surface boundary, so a sentence the surface has must reach
+       * the same place through it as through Playwright, or the boundary is
+       * only as wide as one implementation.
+       */
+      case "resizeWindow": {
+        const width = Number(args["width"]);
+        const height = Number(args["height"]);
+        if (!Number.isFinite(width) || !Number.isFinite(height)) {
+          throw new ScriptError(
+            `"resizeWindow" needs a width and a height; it was given ` +
+              `${JSON.stringify(args["width"])} by ${JSON.stringify(args["height"])}.`,
+            { adapter: "bidi" },
+          );
+        }
+        await session.setViewport(width, height);
+        return { ok: true };
+      }
+
       case "invoke":
         throw new ScriptError(
           '"invoke" calls another story and is the executor\'s, not an adapter\'s (LLD §8.2).',

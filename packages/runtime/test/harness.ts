@@ -25,6 +25,7 @@ import {
   type Ref,
   type SessionState,
   type Snapshot,
+  type SnapshotNode,
   type Step,
   type Story,
   type SurfaceAction,
@@ -46,6 +47,20 @@ export interface StubOptions {
   /** What `read` answers, by reference. */
   readonly reads?: Readonly<Record<string, unknown>>;
   readonly defaultRead?: unknown;
+  /**
+   * The nodes `snapshot()` answers with (pattern 32, T12.7).
+   *
+   * A set assertion is read from one snapshot and never through `check`, so a
+   * stub with no nodes is a stub that can only show the empty-set failure. Keyed
+   * by the root reference when a sentence scoped the set to an element — `""`
+   * is the whole window.
+   */
+  readonly nodes?: Readonly<Record<string, readonly SnapshotNode[]>>;
+}
+
+/** One snapshot node, with the fields a set assertion reads. */
+export function node(parts: Partial<SnapshotNode> & { ref: string; role: string }): SnapshotNode {
+  return { states: [], depth: 1, ...parts };
 }
 
 export interface Call {
@@ -75,8 +90,10 @@ export class StubSurface implements AgentSurface {
   async close(): Promise<void> {
     this.calls.push({ method: "close" });
   }
-  async snapshot(): Promise<Snapshot> {
-    return buildSnapshot("r0", [], structuralHash([]));
+  async snapshot(options?: { root?: Ref }): Promise<Snapshot> {
+    this.calls.push({ method: "snapshot", ...(options?.root === undefined ? {} : { ref: options.root }) });
+    const nodes = this.options.nodes?.[options?.root ?? ""] ?? [];
+    return buildSnapshot("r0", [...nodes], structuralHash([...nodes]));
   }
   async act(action: SurfaceAction, ref?: Ref, args?: unknown): Promise<ActResult> {
     this.calls.push({ method: "act", action, ...(ref === undefined ? {} : { ref }), args });

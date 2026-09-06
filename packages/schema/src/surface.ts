@@ -119,6 +119,8 @@ export const sessionInitSchema = z
         args: z.array(z.string()).optional(),
         env: z.record(z.string(), z.string()).optional(),
         timeoutMs: z.number().int().positive().optional(),
+        /** The window's size once it exists, `[width, height]` (pattern 33, T12.7). */
+        size: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
       })
       .strict()
       .optional(),

@@ -241,6 +241,16 @@ export type AxCommand =
   | { readonly kind: "keystroke"; readonly text: string; readonly using?: readonly string[] }
   | { readonly kind: "keycode"; readonly code: number; readonly using?: readonly string[] }
   | { readonly kind: "click"; readonly at: readonly [number, number] }
+  /**
+   * Give the front window a size (pattern 33, T12.7, LLD §13.9 Draft 2.15).
+   *
+   * > performed through the window's size attribute.
+   *
+   * `AXSize` on the window element, which is what a person's drag of a corner
+   * ends up doing. It is not a `path` command: the window *is* the target, and
+   * a path would address something inside it.
+   */
+  | { readonly kind: "setSize"; readonly size: readonly [number, number] }
   | { readonly kind: "activate" };
 
 /**
@@ -998,6 +1008,16 @@ function run(argv) {
   }
   if (command.kind === "click") {
     se.click({ at: command.at });
+    return JSON.stringify({ ok: true });
+  }
+  if (command.kind === "setSize") {
+    const window = processWithWindow(se, command.process).windows()[0];
+    if (window === undefined) return JSON.stringify({ ok: false, error: "no-window" });
+    try {
+      window.attributes.byName("AXSize").value = command.size;
+    } catch (e) {
+      return JSON.stringify({ ok: false, error: String(e) });
+    }
     return JSON.stringify({ ok: true });
   }
 

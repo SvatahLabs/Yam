@@ -47,6 +47,21 @@
               "minLength": 1,
               "type": "string"
             },
+            "size": {
+              "items": [
+                {
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
             "timeoutMs": {
               "exclusiveMinimum": 0,
               "type": "integer"

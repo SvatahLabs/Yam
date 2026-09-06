@@ -602,6 +602,28 @@ export class UiaSurface implements AgentSurface {
         return { ok: true };
       }
 
+      /**
+       * `Resize the window to <w> by <h>` (pattern 33, T12.7, LLD §13.9).
+       *
+       * Through the main window's size, which is what the toolbar rules these
+       * sentences exist for are measured against. The tree is re-read: a resize
+       * is a relayout, and every box in the snapshot has moved.
+       */
+      case "resizeWindow": {
+        const width = Number(args["width"]);
+        const height = Number(args["height"]);
+        if (!Number.isFinite(width) || !Number.isFinite(height)) {
+          throw new ScriptError(
+            `"resizeWindow" needs a width and a height; it was given ` +
+              `${JSON.stringify(args["width"])} by ${JSON.stringify(args["height"])}.`,
+            { adapter: "uia" },
+          );
+        }
+        await bridge.perform({ kind: "setSize", size: [width, height] });
+        await this.refresh();
+        return { ok: true };
+      }
+
       case "sleep": {
         const ms = Number(args["ms"] ?? 0);
         await new Promise((done) => setTimeout(done, Number.isFinite(ms) ? ms : 0));

@@ -88,13 +88,17 @@ Sentence
   / Select
   / SetChecked
   / Scroll
+  / WaitForApi      // before WaitFor: "Wait for the "x" API to answer …"
   / WaitFor
   / Sleep
   / Frames
+  / ResizeWindow    // before Windows: both start with a window noun
   / Windows
   / Quit
   / Dialog
   / Read
+  / SetExpectation   // before Expectation: "Every button … should be visible"
+                     // would otherwise read "Every button …" as a target phrase
   / Expectation
   / Evaluate
   / Screenshot
@@ -281,6 +285,51 @@ WaitFor
       });
     }
 
+/*
+ * Pattern 19, extended to a service's answer (T12.7, LLD §13.9 Draft 2.15).
+ *
+ *   Wait for the "run status" API to answer "status" to be "passed"
+ *   Wait for the "run status" API to answer "steps.0.status" to contain "pass"
+ *
+ * > pattern 19 extended to `Wait for the "<name>" API to answer <json-path>
+ * > <predicate>` over a service response.
+ *
+ * Four of the parity gate's one-sided checks were the same shape: a button in
+ * the ADE starts a *second* Svatah run and the flow has no way to wait for it
+ * and read its result. A run is a thing the local service answers about, so
+ * what was missing was not a new kind of waiting but a subject: this polls the
+ * named request until the value at the JSON path satisfies the predicate, or
+ * the step's timeout runs out.
+ *
+ * The request is a named one from `api/`, exactly as pattern 26's is, so the
+ * URL, headers and method live in the project rather than in the sentence.
+ */
+WaitForApi
+  = ("wait for"i / "waits for"i) __ "the"i __ name:QuotedText __ "api"i __ "to answer"i __
+    path:QuotedText __ "to"i __ p:ApiPredicate {
+      return step({
+        action: "waitFor",
+        args: { request: { literal: name }, jsonPath: { literal: path } },
+        expect: { subject: "api", predicate: p },
+      });
+    }
+
+/*
+ * What a service's answer is compared with.
+ *
+ * `TargetPredicate`'s vocabulary is an element's — visible, enabled, checked —
+ * and none of it means anything about a JSON value. These two do: the value at
+ * the path *is* something, or *contains* it. `be` reads naturally here and does
+ * not there, which is why this is its own rule rather than an alternative bolted
+ * onto that one.
+ */
+ApiPredicate
+  = ("be"i / "equal"i / "equals"i / "say"i / "says"i / "read"i / "reads"i) __ v:Value {
+      return { kind: "text", value: v };
+    }
+  / ("contain"i / "contains"i) __ v:Value { return { kind: "textContains", value: v }; }
+  / ("match"i / "matches"i) __ v:Value { return { kind: "textContains", value: v }; }
+
 /* ── 20. windows and frames ───────────────────────────────────────────────── */
 
 Windows
@@ -292,6 +341,26 @@ Windows
     }
   / ("close the other"i / "closes the other"i) __ ("tabs"i / "windows"i) {
       return step({ action: "closeOtherWindows" });
+    }
+
+/* ── 33. resizing the window (T12.7, LLD §13.9 Draft 2.15) ────────────────── */
+
+/*
+ * "Resize the window to 1100 by 900."
+ *
+ * > pattern 33, `Resize the window to <w> by <h>` with `app.launch.size` as the
+ * > initial size, performed through the window's size attribute.
+ *
+ * Three one-sided checks were toolbar rules measured at several widths, and
+ * what stopped Svatah reaching them was that a flow could not change the width.
+ * The numbers are bare, not quoted: they are a size, the same way pattern 24's
+ * `should be 800 by 600` is one, and quoting them would make a size read like a
+ * value somebody typed.
+ */
+ResizeWindow
+  = ("resize"i / "resizes"i / "set"i / "sets"i) __ "the window"i __ ("to"i / "size to"i) __
+    w:Number __ ("by"i / "x"i) __ h:Number {
+      return step({ action: "resizeWindow", args: { width: w, height: h } });
     }
 
 /* ── 31. quitting the application (T11.2, LLD §13.9) ──────────────────────── */
@@ -421,9 +490,95 @@ Expectation
   / AssertVerb __ t:UntilIsVerb __ p:TargetPredicateIs {
       return step({ action: "expect", target: target(t), expect: { subject: "target", predicate: p } });
     }
-  / t:UntilShould __ "should"i __ p:TargetPredicate {
+  /*
+   * A target phrase never begins with a quantifier (pattern 32, T12.7).
+   *
+   * Without this, `Every widget on this screen should have an id` — a noun the
+   * set rule does not have — falls through to here and compiles into an
+   * assertion about an *element* called "Every widget on this screen", which
+   * fails at run time with a locator error naming a phrase nobody wrote. The
+   * noun list is closed so that a typo is a compile error; this is what makes
+   * it one.
+   */
+  / !(Quantifier __) t:UntilShould __ "should"i __ p:TargetPredicate {
       return step({ action: "expect", target: target(t), expect: { subject: "target", predicate: p } });
     }
+
+/* ── 32. an assertion over a set (T12.7, LLD §13.9 Draft 2.15) ────────────── */
+
+/*
+ * A quantifier, a noun, a scope, and a predicate.
+ *
+ *   Every button on this screen should have an id
+ *   No text on this screen should contain {data.card.number}
+ *   Every row of the headers table should be visible
+ *   No control in the settings pane should say "sk-"
+ *
+ * > pattern 32, an assertion over a set with a quantifier and a scope.
+ *
+ * This is the sentence a third of the parity gate's one-sided list was waiting
+ * for. Patterns 23 and 24 assert about *one* element; nineteen of the checks
+ * assert about all the rows of a table, all the controls on a screen, or that
+ * no text anywhere is a secret — and every one of them recorded "the language
+ * asserts about one element, not about a set" as a shortcoming (LLD §13.9).
+ *
+ * The **scope** is the step's own target, which is what makes this one pattern
+ * rather than two: `of the headers table` and `in the settings pane` carry a
+ * phrase the dictionary resolves and the resolver resolves, exactly like the
+ * target of a click. `on this screen` carries none, and none means the window.
+ *
+ * There is no `Some …`: an existential over a set is what `The x should be
+ * visible` already says about one element.
+ */
+SetExpectation
+  = q:Quantifier __ noun:SetNoun __ ("of"i / "in"i / "on"i) __ !ThisScreen t:UntilShould __
+    "should"i __ p:TargetPredicate {
+      return step({
+        action: "expect",
+        target: target(t),
+        expect: { subject: "set", predicate: p, set: { quantifier: q, of: noun } },
+      });
+    }
+  / q:Quantifier __ noun:SetNoun (__ ("of"i / "in"i / "on"i) __ ThisScreen)? __
+    "should"i __ p:TargetPredicate {
+      return step({
+        action: "expect",
+        expect: { subject: "set", predicate: p, set: { quantifier: q, of: noun } },
+      });
+    }
+
+/** The window, said the way a person says it. */
+ThisScreen
+  = ("this"i / "the"i) __ ("screen"i / "window"i / "page"i) !NameChar
+
+Quantifier
+  = "every"i !NameChar { return "every"; }
+  / "each"i  !NameChar { return "every"; }
+  / "all"i   !NameChar { return "every"; }
+  / "no"i    !NameChar { return "no"; }
+  / "none of the"i     { return "no"; }
+
+/*
+ * The nouns a set is made of, normalised to the singular.
+ *
+ * They are a closed list rather than any word, because the executor maps each
+ * onto snapshot roles and a noun it cannot map is a step that would quietly
+ * assert about nothing — which passes. A sentence that names a noun not here is
+ * `E_NO_MATCH` and says so at compile time, where a typo belongs.
+ */
+SetNoun
+  = ("controls"i / "control"i)     !NameChar { return "control"; }
+  / ("buttons"i / "button"i)       !NameChar { return "button"; }
+  / ("links"i / "link"i)           !NameChar { return "link"; }
+  / ("fields"i / "field"i)         !NameChar { return "field"; }
+  / ("rows"i / "row"i)             !NameChar { return "row"; }
+  / ("cells"i / "cell"i)           !NameChar { return "cell"; }
+  / ("headings"i / "heading"i)     !NameChar { return "heading"; }
+  / ("items"i / "item"i)           !NameChar { return "item"; }
+  / ("tabs"i / "tab"i)             !NameChar { return "tab"; }
+  / ("checkboxes"i / "checkbox"i)  !NameChar { return "checkbox"; }
+  / ("text"i / "texts"i)           !NameChar { return "text"; }
+  / ("elements"i / "element"i)     !NameChar { return "element"; }
 
 /** `Expect [that] …`, which is followed by an infinitive. */
 ExpectVerb = ("expect"i / "expects"i) (__ "that"i !NameChar)?
@@ -490,6 +645,20 @@ UrlPredicate
 TargetPredicate
   = ("say"i / "says"i / "read"i / "reads"i) __ v:Value { return { kind: "text", value: v }; }
   / ("contain"i / "contains"i) __ v:Value { return { kind: "textContains", value: v }; }
+  /*
+   * "have an id", "have a name" — a property that is there rather than one that
+   * equals something (pattern 32, T12.7).
+   *
+   * "Every interactive control on the Flows screen is named and id'd" is a
+   * Playwright case and was a one-sided check for exactly this: the language
+   * could ask what an attribute *equals*, and the question is whether there is
+   * one at all. `negate` on an empty value is that question, in the predicate
+   * the IR already has: the attribute is not the empty string.
+   */
+  / "have an id"i !NameChar { return { kind: "attribute", name: "id", value: { literal: "" }, negate: true }; }
+  / "have a name"i !NameChar { return { kind: "attribute", name: "name", value: { literal: "" }, negate: true }; }
+  / "have no id"i !NameChar { return { kind: "attribute", name: "id", value: { literal: "" } }; }
+  / "have no name"i !NameChar { return { kind: "attribute", name: "name", value: { literal: "" } }; }
   / "have the value"i __ v:Value { return { kind: "value", value: v }; }
   / "have the"i __ a:QuotedText __ "attribute"i __ v:Value { return { kind: "attribute", name: a, value: v }; }
   / "have the"i __ a:QuotedText __ "style"i __ v:Value { return { kind: "css", name: a, value: v }; }
@@ -665,9 +834,30 @@ QuotedString
       return { template: parts };
     }
 
+/*
+ * A quoted literal's parts, with the escapes a multi-line value needs (T12.7).
+ *
+ * > `Type` accepts a multi-line value.
+ *
+ * A flow's step is one line — the file grammar says so (LLD §4.1) — so a value
+ * with a newline in it has to be written with an escape, and until Draft 2.15
+ * `\n` in a quoted string was a backslash followed by an `n`. "A flow is edited
+ * and saved through the ADE" was a one-sided check because of it: typing a
+ * whole flow file into a text area is a multi-line value and nothing else.
+ *
+ * Four escapes and no more: `\n`, `\t`, `\"` and `\\`. Anything else after a
+ * backslash stays as it was written, so a Windows path in a value does not
+ * silently lose its separators.
+ */
 QuotedPart
   = r:Reference { return r; }
-  / chars:$(!('"' / "{") .)+ { return { literal: chars.replace(/\\"/g, '"') }; }
+  / chars:$(("\\" .) / (!('"' / "{" / "\\") .))+ {
+      return {
+        literal: chars.replace(/\\([\s\S])/g, (whole, one) =>
+          one === "n" ? "\n" : one === "t" ? "\t" : one === '"' ? '"' : one === "\\" ? "\\" : whole,
+        ),
+      };
+    }
 
 /** The bare text of a quoted string, for names that are not values. */
 QuotedText

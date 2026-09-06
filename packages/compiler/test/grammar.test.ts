@@ -364,3 +364,116 @@ describe("assertion aliases lower to the canonical IR (P4-F4, LLD §4.2)", () =>
     expect(parseSentence("Confirm the alert", { file: "a", line: 1 }).raw).toBeUndefined();
   });
 });
+
+/* ── patterns 32 and 33, and the three extensions (T12.7) ─────────────────── */
+
+/** The raw step one sentence parses to, or `undefined` when nothing matched. */
+const raw = (text: string) => parseSentence(text, where).raw;
+
+describe("an assertion over a set (pattern 32, T12.7, LLD §13.9 Draft 2.15)", () => {
+  it("reads the quantifier, the noun and the predicate", () => {
+    expect(raw("Every button on this screen should have an id")).toEqual({
+      action: "expect",
+      expect: {
+        subject: "set",
+        predicate: { kind: "attribute", name: "id", value: { literal: "" }, negate: true },
+        set: { quantifier: "every", of: "button" },
+      },
+    });
+  });
+
+  it("carries the scope as the step's own target, so the resolver resolves it", () => {
+    const step = raw("Every row of the headers table should be visible");
+    expect(step?.target).toEqual({ phrase: "the headers table" });
+    expect(step?.expect?.set).toEqual({ quantifier: "every", of: "row" });
+  });
+
+  it("takes `on this screen` as no target at all — the whole window", () => {
+    expect(raw("No text on this screen should contain \"sk-\"")?.target).toBeUndefined();
+    expect(raw("No text on the window should contain \"sk-\"")?.target).toBeUndefined();
+  });
+
+  it("normalises `each` and `all` to `every`, and the noun to the singular", () => {
+    for (const text of [
+      "Each control on this screen should have a name",
+      "All controls on this screen should have a name",
+      "Every control on this screen should have a name",
+    ]) {
+      expect(raw(text)?.expect?.set, text).toEqual({ quantifier: "every", of: "control" });
+    }
+  });
+
+  it("refuses a noun the executor could not map, rather than asserting about nothing", () => {
+    /*
+     * A set the executor cannot build is a step that quietly asserts about an
+     * empty set — and passes. The noun list is closed for exactly that reason,
+     * and a sentence outside it is `E_NO_MATCH` at compile time, where a typo
+     * belongs.
+     */
+    expect(raw("Every widget on this screen should have an id")).toBeUndefined();
+  });
+
+  it("leaves an ordinary one-element assertion alone", () => {
+    // "Every" is not a word that starts a target phrase, but "No" could begin
+    // one — and pattern 32 must not swallow a sentence about one element.
+    const one = raw("The sign in button should be visible");
+    expect(one?.expect?.subject).toBe("target");
+    expect(one?.expect?.set).toBeUndefined();
+  });
+});
+
+describe("resizing the window (pattern 33, T12.7)", () => {
+  it("reads a bare size, the way pattern 24's `should be 800 by 600` does", () => {
+    expect(raw("Resize the window to 1440 by 900")).toEqual({
+      action: "resizeWindow",
+      args: { width: 1440, height: 900 },
+    });
+    expect(raw("Set the window to 640 by 480")).toEqual({
+      action: "resizeWindow",
+      args: { width: 640, height: 480 },
+    });
+  });
+
+  it("does not shadow pattern 20's window sentences", () => {
+    expect(raw("Switch to the new window")?.action).toBe("switchWindow");
+    expect(raw("Close the other windows")?.action).toBe("closeOtherWindows");
+  });
+});
+
+describe("waiting on a service's answer (pattern 19 extended, T12.7)", () => {
+  it("names the request, the path and the predicate", () => {
+    expect(raw('Wait for the "run status" API to answer "$.status" to be "passed"')).toEqual({
+      action: "waitFor",
+      args: { request: { literal: "run status" }, jsonPath: { literal: "$.status" } },
+      expect: { subject: "api", predicate: { kind: "text", value: { literal: "passed" } } },
+    });
+  });
+
+  it("leaves `Wait for the <target> to be <state>` as the adapter's wait", () => {
+    const step = raw("Wait for the dashboard link to be visible");
+    expect(step?.expect?.subject).toBe("target");
+    expect(step?.target).toEqual({ phrase: "the dashboard link" });
+  });
+});
+
+describe("a multi-line value (pattern 9 extended, T12.7)", () => {
+  it("reads `\\n`, `\\t`, `\\\"` and `\\\\` and nothing else", () => {
+    const value = (text: string) =>
+      (raw(text)?.args?.["value"] as { literal?: string } | undefined)?.literal;
+    expect(value('Type "one\\ntwo" into the flow editor')).toBe("one\ntwo");
+    expect(value('Type "one\\ttwo" into the flow editor')).toBe("one\ttwo");
+    expect(value('Type "say \\"hi\\"" into the flow editor')).toBe('say "hi"');
+    expect(value('Type "a\\\\b" into the flow editor')).toBe("a\\b");
+  });
+
+  it("leaves an unknown escape exactly as it was written", () => {
+    /*
+     * A Windows path in a value must not silently lose its separators: `\\d` is
+     * a backslash and a `d`, not an escape this grammar invented a meaning for.
+     */
+    const value = (raw('Type "C:\\docs\\report" into the path field')?.args?.["value"] as {
+      literal?: string;
+    }).literal;
+    expect(value).toBe("C:\\docs\\report");
+  });
+});

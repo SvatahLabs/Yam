@@ -46,6 +46,19 @@ export const ACTIONS = [
   "switchFrame",
 
   /**
+   * Give the window a size (pattern 33, T12.7, LLD §13.9 Draft 2.15).
+   *
+   * > pattern 33, `Resize the window to <w> by <h>` with `app.launch.size` as
+   * > the initial size, performed through the window's size attribute.
+   *
+   * Three of the parity gate's one-sided checks were toolbar rules measured at
+   * several window widths, and the reason Svatah could not reach them was this
+   * one missing action: `app.launch` named no size and no sentence changed one.
+   * An adapter that has no window — HTTP — refuses it, as it refuses `click`.
+   */
+  "resizeWindow",
+
+  /**
    * End the session by quitting the application (pattern 31, LLD §13.9).
    *
    * > the language gains `Quit the app` (pattern 31, `action: "quit"`), which
@@ -195,8 +208,40 @@ export const PREDICATE_KINDS = [
 
 /* ── Step (LLD §3.2) ──────────────────────────────────────────────────────── */
 
-export const predicateSubjectSchema = z.enum(["target", "page", "dialog", "scope"]);
+/**
+ * What a predicate is asked about (LLD §3.2; `set` and `api` from Draft 2.15).
+ *
+ * `set` is pattern 32: the question is about *every* member of a set of
+ * elements, or about *none* of them, rather than about one. `api` is pattern
+ * 19's extension: the question is about a service's answer at a JSON path,
+ * polled until it holds. Both were added because the parity gate's one-sided
+ * list said, in nineteen different places, that the language could only ask
+ * about one element and only about the screen in front of it (LLD §13.9).
+ */
+export const predicateSubjectSchema = z.enum(["target", "page", "dialog", "scope", "set", "api"]);
 export type PredicateSubject = z.infer<typeof predicateSubjectSchema>;
+
+/**
+ * The set a `subject: "set"` expectation is about (pattern 32).
+ *
+ * `quantifier` is the word the sentence starts with — `Every` or `No` — and
+ * `of` is the noun it quantifies, which the executor maps onto snapshot roles
+ * (`button`, `row`, `control`, `text`, …). The *scope* is the step's own
+ * `target`: `Every row of the headers table` carries the table as `target` and
+ * `Every button on this screen` carries none, which is the whole window.
+ *
+ * There is no `some`: an existential over a set is what `should be visible`
+ * about one element already says, and a quantifier nobody needs is a quantifier
+ * that has to be implemented in every adapter for ever.
+ */
+export const setSpecSchema = z
+  .object({
+    quantifier: z.enum(["every", "no"]),
+    /** The noun, normalised to singular and lower case by the grammar. */
+    of: z.string().min(1),
+  })
+  .strict();
+export type SetSpec = z.infer<typeof setSpecSchema>;
 
 export const guardSchema = z
   .object({
@@ -224,8 +269,19 @@ export const guardSchema = z
 export type Guard = z.infer<typeof guardSchema>;
 
 export const expectationSchema = z
-  .object({ subject: predicateSubjectSchema, predicate: predicateSchema })
-  .strict();
+  .object({
+    subject: predicateSubjectSchema,
+    predicate: predicateSchema,
+    /** Present exactly when `subject` is `"set"` (pattern 32). */
+    set: setSpecSchema.optional(),
+  })
+  .strict()
+  .refine((one) => (one.subject === "set") === (one.set !== undefined), {
+    message:
+      'An expectation about a set carries `set`, and only one about a set does: ' +
+      "`subject: \"set\"` without it has no quantifier and no noun, and `set` " +
+      "beside another subject is a set nobody asked about.",
+  });
 export type Expectation = z.infer<typeof expectationSchema>;
 
 export const captureSchema = z

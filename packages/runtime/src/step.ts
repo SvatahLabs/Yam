@@ -28,7 +28,7 @@ import type {
   StepResult,
   TargetRef,
 } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+import type { AgentSurface, SnapshotNode } from "@svatah/surface";
 import { CheckError } from "@svatah/surface";
 import { GuardError, candidatesTried, classify, messageOf, stackOf } from "./failure.js";
 import { DataError, type Scope } from "./scope.js";
@@ -275,6 +275,54 @@ async function perform(
       return capture(step, result.outputs, scope);
     }
 
+    /*
+     * `Wait for the "<name>" API to answer <path> <predicate>` (pattern 19
+     * extended, T12.7, LLD §13.9 Draft 2.15).
+     *
+     * Every other `waitFor` is the adapter's: it is waiting for an element on
+     * the screen in front of it. This one is not — it polls a service until it
+     * answers something, which is what four of the parity gate's one-sided
+     * checks needed: the ADE's Run button starts a *second* Svatah run, and a
+     * flow could not wait for it or read its result.
+     *
+     * The poll is the step's own timeout, half a second apart. A request that
+     * throws is not a failure yet — a service that has not finished starting
+     * answers with a connection refused, and giving up on the first one would
+     * make this a race rather than a wait.
+     */
+    case "waitFor": {
+      if (step.expect?.subject !== "api") {
+        await surface.act(step.action as never, ref, args as never, ref2);
+        return undefined;
+      }
+      if (context.api === undefined) {
+        throw new DataError(
+          "This step waits on an API and no HTTP adapter is wired in. " +
+            "`svatah run` registers one; a foreign runtime has to supply its own.",
+        );
+      }
+      const deadline = Date.now() + step.timeoutMs;
+      const wanted = resolvePredicateValue(step.expect.predicate, scope);
+      let last: unknown;
+      let why = "";
+      for (;;) {
+        try {
+          last = await context.api(step, { scope, args });
+          if (matchesValue(wanted, last)) return undefined;
+          why = `it answered ${JSON.stringify(last) ?? "nothing"}`;
+        } catch (error) {
+          why = `the request failed: ${messageOf(error)}`;
+        }
+        if (Date.now() >= deadline) {
+          throw new CheckError(
+            `Waited ${step.timeoutMs} ms for the API to answer ` +
+              `${describePredicate(wanted)} and ${why}.`,
+          );
+        }
+        await new Promise((done) => setTimeout(done, 500));
+      }
+    }
+
     case "screenshot": {
       const path = context.screenshotPath?.(step);
       if (path !== undefined) await surface.screenshot(path, ref === undefined ? [] : [ref]);
@@ -313,7 +361,7 @@ function capture(
  * wrong.
  */
 async function evaluate(
-  subject: "target" | "page" | "dialog" | "scope",
+  subject: NonNullable<Step["expect"]>["subject"],
   predicate: Predicate,
   step: Step,
   context: StepContext,
@@ -321,6 +369,13 @@ async function evaluate(
   about: { target?: TargetRef } = {},
 ): Promise<boolean> {
   if (subject === "scope") return evaluateExpression(predicate, context.scope);
+  if (subject === "set") return await evaluateSet(predicate, step, context);
+  if (subject === "api") {
+    // `waitFor` polls the API itself, above; nothing else asks about one.
+    throw new DataError(
+      `"${step.text}" asks about an API answer outside a \`Wait for … to answer\` step.`,
+    );
+  }
 
   const element = about.target ?? step.target;
   const ref =
@@ -335,6 +390,219 @@ async function evaluate(
     ref,
   );
   return result.ok;
+}
+
+/* ── pattern 32: an assertion over a set (T12.7, LLD §13.9 Draft 2.15) ────── */
+
+/**
+ * Which snapshot roles each noun of pattern 32 is made of.
+ *
+ * A closed map, and the grammar's noun list is its keys, so a sentence cannot
+ * name a set the executor would silently find nothing in. `text` and `element`
+ * are the two that are not a role list: `text` is every node that puts words on
+ * the screen, which is what "No text on this screen should contain a secret"
+ * means, and `element` is the whole tree.
+ */
+const SET_ROLES: Readonly<Record<string, readonly string[]>> = {
+  control: [
+    "button", "link", "textbox", "searchbox", "checkbox", "radio", "combobox",
+    "listbox", "menuitem", "menuitemcheckbox", "menuitemradio", "tab", "switch",
+    "slider", "spinbutton", "option",
+  ],
+  button: ["button"],
+  link: ["link"],
+  field: ["textbox", "searchbox", "combobox", "spinbutton", "slider"],
+  row: ["row"],
+  cell: ["cell", "gridcell", "columnheader", "rowheader"],
+  heading: ["heading"],
+  item: ["listitem", "menuitem", "option", "treeitem"],
+  tab: ["tab"],
+  checkbox: ["checkbox", "switch", "menuitemcheckbox"],
+  text: [],
+  element: [],
+};
+
+/** Is this node a member of the set the sentence named? */
+function inSet(node: SnapshotNode, of: string): boolean {
+  if (of === "element") return true;
+  if (of === "text") return textOf(node) !== "";
+  return (SET_ROLES[of] ?? []).includes(node.role);
+}
+
+/** The words a node puts on the screen: its name, and the value it shows. */
+function textOf(node: SnapshotNode): string {
+  return [node.name ?? "", node.value ?? ""].join(" ").trim();
+}
+
+/**
+ * How a node describes itself for an `attribute` predicate on a set.
+ *
+ * `id` and `name` are the two the sentences need — "every button has an id",
+ * "every control has a name" — and neither is an HTML attribute here: they are
+ * the snapshot's own fields, which is the *only* thing that makes this question
+ * askable of a UIA tree and an AX tree and a DOM alike (LLD §2.2). Anything
+ * else falls through to the adapter's `native` extras, where a `data-testid` or
+ * an `AXIdentifier` lives.
+ */
+function attributeOf(node: SnapshotNode, name: string): string | undefined {
+  if (name === "name") return node.name;
+  if (name === "role") return node.role;
+  if (name === "value") return node.value;
+  if (name === "id") return node.native?.["automationId"] ?? node.native?.["id"];
+  return node.native?.[name];
+}
+
+/**
+ * Evaluate one predicate against one snapshot node, with no surface call.
+ *
+ * A set of two hundred controls asked through `surface.check` is two hundred
+ * round trips to an accessibility API that costs milliseconds a node (LLD
+ * §7.5); the snapshot the question is about already carries every fact these
+ * predicates need. That is why the noun list is closed and the predicate list
+ * is: a predicate that needs the live element — `css`, geometry against a
+ * viewport — is refused here rather than answered approximately.
+ */
+function holdsForNode(predicate: Predicate, node: SnapshotNode): boolean {
+  const one = predicate as {
+    kind: string;
+    negate?: boolean;
+    name?: string;
+    numbers?: number[];
+    value?: { value?: unknown };
+  };
+  const wanted = String(one.value?.value ?? "");
+  const box = node.box;
+  let held: boolean;
+
+  switch (one.kind) {
+    case "visible":
+      held = !node.states.includes("hidden");
+      break;
+    case "hidden":
+      held = node.states.includes("hidden");
+      break;
+    case "enabled":
+      held = !node.states.includes("disabled");
+      break;
+    case "disabled":
+      held = node.states.includes("disabled");
+      break;
+    case "checked":
+      held = node.states.includes("checked");
+      break;
+    case "unchecked":
+      held = node.states.includes("unchecked") || !node.states.includes("checked");
+      break;
+    case "selected":
+      held = node.states.includes("selected");
+      break;
+    case "present":
+      held = true;
+      break;
+    case "absent":
+      held = false;
+      break;
+    case "text":
+      held = textOf(node) === wanted;
+      break;
+    case "textContains":
+      held = textOf(node).includes(wanted);
+      break;
+    case "value":
+      held = (node.value ?? "") === wanted;
+      break;
+    case "tag":
+      held = node.role === wanted;
+      break;
+    case "attribute":
+      held = (attributeOf(node, one.name ?? "") ?? "") === wanted;
+      break;
+    case "size":
+      held = box !== undefined && box[2] === one.numbers?.[0] && box[3] === one.numbers?.[1];
+      break;
+    case "location":
+      held = box !== undefined && box[0] === one.numbers?.[0] && box[1] === one.numbers?.[1];
+      break;
+    default:
+      throw new DataError(
+        `"${one.kind}" is not a question that can be asked of every member of a set. ` +
+          "A set is read from one snapshot, and this predicate needs the live element.",
+      );
+  }
+  return one.negate === true ? !held : held;
+}
+
+/** How a member is named in a failure, so a reader can find it on the screen. */
+function describeNode(node: SnapshotNode): string {
+  const name = node.name ?? "";
+  return `${node.role}${name === "" ? "" : ` "${name.slice(0, 40)}"`} (${node.ref})`;
+}
+
+/**
+ * `Every <noun> … should <predicate>` and its `No` mirror (pattern 32).
+ *
+ * The scope is the step's own target — `Every row of the headers table` — or the
+ * whole window when the sentence said `on this screen`.
+ *
+ * **An empty set fails, whichever quantifier it is.** "Every button has an id"
+ * over a screen with no buttons is vacuously true and means nothing; so is "no
+ * control shows a secret" over a screen that has not loaded. A green step that
+ * asked about nothing is the one outcome this pattern must not have, because it
+ * is indistinguishable from a working one until somebody reads the tree.
+ */
+async function evaluateSet(
+  predicate: Predicate,
+  step: Step,
+  context: StepContext,
+): Promise<boolean> {
+  const spec = step.expect?.set;
+  if (spec === undefined) {
+    throw new DataError(`"${step.text}" is a set assertion with no quantifier.`);
+  }
+  const root =
+    step.target === undefined
+      ? undefined
+      : (await resolveTarget(context, step.target, context.surface)).ref;
+  const snapshot = await context.surface.snapshot(root === undefined ? {} : { root });
+
+  const members = snapshot.nodes.filter((node) => inSet(node, spec.of));
+  const where = step.target === undefined ? "on this screen" : `in "${step.target.phrase}"`;
+  if (members.length === 0) {
+    throw new CheckError(
+      `No ${spec.of} was found ${where}, and an assertion about every member of an ` +
+        "empty set is not one anybody asked. The snapshot had " +
+        `${snapshot.nodes.length} node(s).`,
+    );
+  }
+
+  const wanted = resolvePredicateValue(predicate, context.scope);
+  const offenders = members.filter((node) =>
+    spec.quantifier === "every" ? !holdsForNode(wanted, node) : holdsForNode(wanted, node),
+  );
+  if (offenders.length === 0) return true;
+
+  throw new CheckError(
+    `${offenders.length} of ${members.length} ${spec.of}(s) ${where} ` +
+      `${spec.quantifier === "every" ? "did not" : "did"} ${describePredicate(wanted)}: ` +
+      offenders.slice(0, 5).map(describeNode).join(", ") +
+      (offenders.length > 5 ? `, and ${offenders.length - 5} more` : ""),
+  );
+}
+
+/**
+ * Does a service's answer satisfy the predicate (pattern 19 extended)?
+ *
+ * The answer is JSON and the predicate's vocabulary is text, so both sides are
+ * compared as the strings a person would read: `42` answers `to be "42"`, and a
+ * `null` answers nothing.
+ */
+function matchesValue(predicate: Predicate, value: unknown): boolean {
+  const one = predicate as { kind: string; negate?: boolean; value?: { value?: unknown } };
+  const wanted = String(one.value?.value ?? "");
+  const said = value === null || value === undefined ? "" : typeof value === "object" ? JSON.stringify(value) : String(value);
+  const held =
+    one.kind === "textContains" ? said.includes(wanted) : said === wanted;
+  return one.negate === true ? !held : held;
 }
 
 /** A predicate's `value` with the scope applied, so `{enterprise}` compares. */

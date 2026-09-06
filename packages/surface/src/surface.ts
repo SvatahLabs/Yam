@@ -120,6 +120,14 @@ const ACTION_CAPABILITY: Partial<Record<SurfaceAction, keyof Capabilities>> = {
   switchFrame: "frames",
   switchWindow: "windows",
   closeOtherWindows: "windows",
+  /*
+   * `Resize the window to <w> by <h>` (pattern 33, T12.7).
+   *
+   * The `windows` capability, because a surface with no window has nothing to
+   * resize: the HTTP adapter declares neither and refuses both at start rather
+   * than halfway through a flow.
+   */
+  resizeWindow: "windows",
   upload: "upload",
   dragTo: "drag",
   screenshot: "screenshot",

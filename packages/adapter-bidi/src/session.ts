@@ -494,6 +494,20 @@ export class BidiSession {
     return fromRemoteValue(result.result) as T;
   }
 
+  /**
+   * Give the top-level context a viewport (pattern 33, T12.7).
+   *
+   * `browsingContext.setViewport` on the *top-level* context, because a frame
+   * has no viewport of its own: the session's active context may be a frame,
+   * and asking a frame to resize is a protocol error rather than a no-op.
+   */
+  async setViewport(width: number, height: number): Promise<void> {
+    await this.client.call("browsingContext.setViewport", {
+      context: this.window(),
+      viewport: { width, height },
+    });
+  }
+
   /** Evaluate an expression and get its value as plain JSON. */
   async evaluate(expression: string, options: EvaluateOptions = {}): Promise<unknown> {
     const result = (await this.client.call("script.evaluate", {
