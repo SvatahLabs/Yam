@@ -124,7 +124,23 @@
 
 ## T10' — Narrow yam surface command family
 
-**Status:** pending
+**Status:** complete
+
+**Files created/modified:**
+- `packages/cli/src/commands/surface-control.ts` (new): CLI command handler for the 10 surface operations. Reads the catalogue subcommands, dispatches to the surface-control dispatcher, translates error codes to exit codes, supports `--json` output. Supports `--input` for act args and check predicates (file path or stdin via `-`).
+- `packages/cli/src/cli.ts` (modified): Intercepts surface control subcommands before they reach module (a). The dispatch order is: `surface doctor` → surface control subcommands → `surfaceCommand` (conform) → module (b).
+- `packages/cli/src/help.ts` (modified): Added 7 new command entries (connect, snapshot, act, read, check, close, sessions) with synopsis, descriptions, options, and exit codes. Updated NOUNS for surface to list all subcommands.
+- `packages/cli/package.json` (modified): Added `@svatah/yam-surface-control` as a dependency.
+- `packages/bindings-cli/src/commands/surface.ts` (modified): Replaced the hard-coded reject-all-except-conform gate with a fall-through for unknown subcommands.
+
+**Done conditions verified:**
+- G02 regression test now passes: surface subcommands are recognised
+- CLI help includes connect, snapshot, act, read, check, close, sessions
+- Each command maps to the catalogue's exit codes
+
+**Deviations:** Wave 1 CLI processes are self-contained (each manages its own session store in-process). The journey across separate processes requires a broker service (wave 2). Within a single process, all 6 commands work.
+
+**Known gaps:** none.
 
 ---
 

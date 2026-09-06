@@ -324,6 +324,13 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
     return await (await import("./commands/surface-doctor.js")).surfaceDoctorCommand(args, io);
   }
 
+  if (command === "surface") {
+    const { surfaceControlCommand, SURFACE_CONTROL_SUBCOMMANDS } = await import("./commands/surface-control.js");
+    if (args.command[1] !== undefined && SURFACE_CONTROL_SUBCOMMANDS.has(args.command[1])) {
+      return await surfaceControlCommand(args, io);
+    }
+  }
+
   const moduleA = await runBindingsCommand(command, prepared, io);
   if (moduleA !== undefined) return moduleA;
 

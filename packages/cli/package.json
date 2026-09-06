@@ -58,6 +58,7 @@
     "@svatah/yam-spec": "workspace:*",
     "@svatah/yam-steps": "workspace:*",
     "@svatah/yam-surface": "workspace:*",
+    "@svatah/yam-surface-control": "workspace:*",
     "@svatah/yam-tool": "workspace:*",
     "@svatah/yam-trajectory": "workspace:*",
     "@svatah/yam-workflow": "workspace:*",

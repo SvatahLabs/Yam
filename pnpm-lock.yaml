@@ -575,6 +575,9 @@ importers:
       '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
+      '@svatah/yam-surface-control':
+        specifier: workspace:*
+        version: link:../surface-control
       '@svatah/yam-tool':
         specifier: workspace:*
         version: link:../tool

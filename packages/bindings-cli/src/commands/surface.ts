@@ -93,14 +93,12 @@ function desktopHealing(variant: number, statePath: string): DesktopHealing {
 
 export async function surfaceCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const sub = args.command[1];
-  if (sub !== "conform") {
-    io.err(
-      `Unknown "surface" subcommand ${sub === undefined ? "(none given)" : `"${sub}"`}. ` +
-        "Phase 1 implements `surface conform`.",
-    );
+  if (sub === "conform") return await conform(args, io);
+  if (sub === undefined) {
+    io.err("yam surface needs a subcommand: connect, snapshot, act, read, check, close, sessions, conform, doctor.");
     return EXIT.usage;
   }
-  return await conform(args, io);
+  return undefined as unknown as ExitCode;
 }
 
 async function conform(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {

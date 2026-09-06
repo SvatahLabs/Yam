@@ -96,7 +96,7 @@ export function createSessionStore(): SessionStore {
       for (const [id, entry] of sessions) {
         if (entry.ttlMs === undefined) continue;
         const lastMs = new Date(entry.lastActivity).getTime();
-        if (now - lastMs > entry.ttlMs) {
+        if (now - lastMs >= entry.ttlMs) {
           expired.push(id);
           sessions.delete(id);
           if (entry.mode === "launch") {
