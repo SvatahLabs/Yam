@@ -20,7 +20,7 @@ import { formatDiagnostic, type Diagnostic } from "@svatah/yam-spec";
 import { boolOption, stringOption, type ParsedArgs } from "@svatah/yam-bindings-cli";
 import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import { compileProjectWithTiers, loadProject, type LoadedProject } from "../project.js";
-import { writePlanInputs } from "../front-door.js";
+import { preflight, writePlanInputs } from "../front-door.js";
 import { isDigestMismatch, registerModelTiers } from "../tiers/register.js";
 import type { CommandIo } from "@svatah/yam-bindings-cli";
 
@@ -105,7 +105,11 @@ async function compileWithTiers(
 
 export async function compileCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const root = args.command[1] ?? ".";
+  const early = preflight(root, undefined, args, io);
+  if (early !== undefined) return early;
   const loaded = await loadProject(root);
+  const nothing = preflight(root, loaded, args, io);
+  if (nothing !== undefined) return nothing;
   const attempt = await compileWithTiers(loaded, args, io);
   if ("refused" in attempt) {
     io.err(attempt.refused);

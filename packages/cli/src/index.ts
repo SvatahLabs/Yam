@@ -128,3 +128,4 @@ export { evalSelfCommand, vitestCaseNames } from "./commands/eval-self.js";
 
 /** Help, for the documentation generator and the vocabulary check (T14.3). */
 export { COMMANDS, EXIT_MEANINGS, NOUNS, TOP_LEVEL, TOPICS, helpFor, topic, userFacingHelpText } from "./help.js";
+export { DIAGNOSTICS, diagnostic, type Diagnostic as FrontDoorDiagnostic, type DiagnosticCode } from "./diagnostics.js";

@@ -14,6 +14,7 @@ import { boolOption, CONFIG_FILES, EXIT, type CommandIo, type ExitCode, type Par
 import { readBindingIndex } from "@svatah/yam-bindings";
 import type { Plan, Summary } from "@svatah/yam-schema";
 import { loadProject, type LoadedProject } from "./project.js";
+import { diagnostic, say, secretVariable } from "./diagnostics.js";
 
 /** The project directory: the nearest ancestor of `dir` with a config file, or undefined. */
 export function findProjectRoot(dir: string): string | undefined {
@@ -390,18 +391,49 @@ export function reasonFor(failure: { readonly class: string; readonly message: s
   const message = failure.message.split("\n")[0] ?? failure.message;
   switch (failure.class) {
     case "locator":
-      return message.startsWith("No binding for")
-        ? { message, next: "yam record" }
-        : { message, next: "yam heal" };
-    case "data":
-      return /reads \$\{?YAM_INPUT_[A-Z0-9_]+\}?, which is not set/.test(message)
-        ? { message, next: "export the variable the message names, then yam run" }
-        : { message };
+      return message.startsWith("No binding for") ? { message, next: diagnostic("unbound-target", "", "").next } : { message, next: "yam heal" };
+    case "data": {
+      const secret = secretVariable(message);
+      return secret === undefined ? { message } : diagnostic("secret-unset", secret.path, secret.variable);
+    }
     case "infrastructure":
-      return /browser|chromium|executable doesn't exist|playwright install/i.test(message)
-        ? { message, next: "npx playwright install chromium" }
-        : { message };
+      if (/executable doesn't exist|browser.*not (found|installed)|playwright install/i.test(message)) {
+        const which = /firefox/i.test(message) ? "Firefox" : /webkit/i.test(message) ? "WebKit" : "Chromium";
+        return { message, next: diagnostic("no-browser", which).next };
+      }
+      if (/accessibility|screen-recording|ax\/|uia\/|is locked|no window|not granted/i.test(message)) {
+        return { message, next: diagnostic("host-not-ready", message, /uia/i.test(message) ? "uia" : "ax").next };
+      }
+      return { message };
     default:
       return { message };
+  }
+}
+
+/**
+ * What `check`, `record` and `run` say before they start when there is nothing
+ * to start on (REQ-CLI-5): no project, or a project with no flows. Returns the
+ * exit code to use, or undefined when the command may go on.
+ */
+export function preflight(dir: string, loaded: LoadedProject | undefined, args: ParsedArgs, io: CommandIo): ExitCode | undefined {
+  const root = findProjectRoot(dir);
+  const flowsDir = join(resolve(dir), loaded?.config.flows.dir ?? "flows");
+  if (root === undefined && !existsSync(flowsDir)) {
+    say(io, args, diagnostic("no-project"));
+    return EXIT.usage;
+  }
+  if (loaded !== undefined && loaded.project.stories.size === 0 && loaded.diagnostics.every((d) => d.severity !== "error")) {
+    say(io, args, diagnostic("no-flows"));
+    return EXIT.compileErrors;
+  }
+  return undefined;
+}
+
+/** The secrets the data file reads from variables that are not set, said once at the start of a run. */
+export function warnUnsetSecrets(loaded: LoadedProject, args: ParsedArgs, io: CommandIo): void {
+  for (const one of loaded.diagnostics) {
+    if (one.code !== "W_SECRET_UNSET") continue;
+    const secret = secretVariable(one.message);
+    if (secret !== undefined) say(io, args, diagnostic("secret-unset", secret.path, secret.variable));
   }
 }

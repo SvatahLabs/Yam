@@ -57,13 +57,19 @@ import { registerAllAdapters } from "../adapters.js";
 import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import { ConfigError } from "../config-error.js";
 import { compileProject, loadProject } from "../project.js";
-import { noteCheck, planStaleness, reasonFor, writeLastRun, writePlanInputs } from "../front-door.js";
+import { noteCheck, planStaleness, preflight, reasonFor, warnUnsetSecrets, writeLastRun, writePlanInputs } from "../front-door.js";
+import { diagnostic, say } from "../diagnostics.js";
 import { report } from "./compile.js";
 import type { CommandIo } from "@svatah/yam-bindings-cli";
 
 export async function runCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const root = args.command[1] ?? ".";
+  const early = preflight(root, undefined, args, io);
+  if (early !== undefined) return early;
   const loaded = await loadProject(root);
+  const nothing = preflight(root, loaded, args, io);
+  if (nothing !== undefined) return nothing;
+  warnUnsetSecrets(loaded, args, io);
 
   /*
    * The plan is compiled from the flows on every run (REQ-CLI-3); when it was
@@ -75,11 +81,7 @@ export async function runCommand(args: ParsedArgs, io: CommandIo): Promise<ExitC
   if (boolOption(args, "no-check")) {
     const staleness = planStaleness(loaded);
     if (staleness !== "current") {
-      io.err(
-        staleness === "missing"
-          ? "There is no plan yet. Run `yam check` to write one."
-          : "The plan is older than the flows. Run `yam check` to rewrite it, or drop --no-check.",
-      );
+      say(io, args, diagnostic(staleness === "missing" ? "no-plan" : "stale-plan"));
       return EXIT.compileErrors;
     }
     compiled = {
@@ -230,7 +232,8 @@ async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCo
      * send someone to look at the wrong thing.
      */
     if (error instanceof ResumeMismatchError) {
-      io.err(error.message);
+      say(io, args, diagnostic("cannot-resume"));
+      io.err(`  ${error.message.split("\n")[0]}`);
       return EXIT.hashMismatch;
     }
     if (error instanceof ResumeUnavailableError) {

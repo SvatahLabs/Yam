@@ -56,7 +56,7 @@ export function checkEnvironment(
 
   throw new EnvironmentRefusal(
     `"${story.name}" is not marked \`idempotent\` and this project's environment is ` +
-      "`production`, so running it as a workflow is refused (REQ-AUTO-7). Running it would " +
+      "`production`, so running it as a workflow is refused. Running it would " +
       "have whatever effect it has on the real application, and there is no undo. Either mark " +
       `the story \`story (idempotent=true): ${story.name}\` if running it twice is the same as ` +
       "running it once, or pass --allow-side-effects to say you meant it.",

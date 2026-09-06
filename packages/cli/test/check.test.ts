@@ -109,7 +109,7 @@ describe("the reason under a failed step", () => {
     expect(reasonFor({ class: "locator", message: 'Could not resolve "x": 3 candidates tried, none matched exactly one element.\n  detail' }).next).toBe("yam heal");
   });
   it("names the variable for an unset secret, the browser install for a missing browser, nothing for an assertion", () => {
-    expect(reasonFor({ class: "data", message: "user.password reads ${YAM_INPUT_PASSWORD}, which is not set." }).next).toContain("yam run");
+    expect(reasonFor({ class: "data", message: "user.password reads ${YAM_INPUT_PASSWORD}, which is not set." }).next).toContain("export YAM_INPUT_PASSWORD=");
     expect(reasonFor({ class: "infrastructure", message: "browserType.launch: Executable doesn't exist at /x/chromium" }).next).toBe("npx playwright install chromium");
     expect(reasonFor({ class: "assertion", message: "expected visible" }).next).toBeUndefined();
   });

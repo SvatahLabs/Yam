@@ -29,6 +29,7 @@ import { EnvironmentRefusal, UnknownStory } from "@svatah/yam-workflow";
 import { ResumeMismatchError, ResumeUnavailableError } from "@svatah/yam-runtime";
 import type { StepResult } from "@svatah/yam-schema";
 import { compileProject, loadProject } from "../project.js";
+import { diagnostic, say } from "../diagnostics.js";
 import { report } from "./compile.js";
 import { runProject } from "./run.js";
 
@@ -137,7 +138,7 @@ export async function workflowCommand(args: ParsedArgs, io: CommandIo): Promise<
     if (error instanceof EnvironmentRefusal) {
       // Exit 10, "refused (environment)" (LLD §15). Distinct from a failure:
       // nothing ran, and nothing about the application is being reported.
-      io.err(error.message);
+      say(io, args, diagnostic("not-idempotent", error.story));
       return EXIT.refused;
     }
     if (error instanceof ResumeMismatchError) {
