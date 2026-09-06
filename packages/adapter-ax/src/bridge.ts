@@ -720,6 +720,22 @@ export function parseWindow(stdout: string): {
  * the window down — rather than by a handle, because AppleScript object
  * specifiers do not survive between `osascript` processes. The path is what the
  * snapshot's walk already produced, so it costs nothing to carry.
+ *
+ * Exported so `processWithWindow` can be *executed* in a test with a fake
+ * System Events rather than read as a string (P8-F1). A macOS-only script that
+ * only ever runs on a machine with a granted permission is otherwise tested
+ * nowhere.
+ */
+export const PERFORM_SCRIPT = `/**
+ * The application process that owns a window, when several share the name
+ * (Draft 2.10 §7.5, P8-F1).
+ *
+ * applicationProcesses.byName answers the *first* process with that name, and
+ * an Electron application registers several — helpers among them, and, for the
+ * few seconds after a pkill, the instance that is still exiting. Both have no
+ * window, so the first match was sometimes the one this script drove, and every
+ * command against it answered no-window. The window is the thing that makes a
+ * process the right one, so it is what the choice is made on.
  */
 function processWithWindow(se, name) {
   var matches = se.applicationProcesses.whose({ name: name })();
@@ -748,22 +764,6 @@ function run(argv) {
     return JSON.stringify({ ok: true });
   }
   if (command.kind === "keycode") {
- *
- * Exported so `processWithWindow` can be *executed* in a test with a fake
- * System Events rather than read as a string (P8-F1). A macOS-only script that
- * only ever runs on a machine with a granted permission is otherwise tested
- * nowhere.
- */
-export const PERFORM_SCRIPT = `/**
- * The application process that owns a window, when several share the name
- * (Draft 2.10 §7.5, P8-F1).
- *
- * applicationProcesses.byName answers the *first* process with that name, and
- * an Electron application registers several — helpers among them, and, for the
- * few seconds after a pkill, the instance that is still exiting. Both have no
- * window, so the first match was sometimes the one this script drove, and every
- * command against it answered no-window. The window is the thing that makes a
- * process the right one, so it is what the choice is made on.
     se.keyCode(command.code, command.using === undefined ? {} : { using: command.using });
     return JSON.stringify({ ok: true });
   }
