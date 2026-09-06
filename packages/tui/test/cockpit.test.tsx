@@ -17,10 +17,12 @@ import { afterEach, describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { render } from "ink-testing-library";
+import { EventEmitter } from "node:events";
+import { render } from "ink";
 import { ACTIONS, fakeService, type FakeResponses } from "@svatah/screens";
 import { App } from "../src/app.js";
 import type { UiState } from "../src/model.js";
+import { INSPECTOR_MIN_COLUMNS, layoutFor } from "../src/layout.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURES = JSON.parse(
@@ -32,10 +34,94 @@ const FIXTURES = JSON.parse(
 
 const CONNECTION = { url: "http://127.0.0.1:55702", project: "svatah-fixtures" };
 
-/** Render the cockpit and wait for its first load to land. */
-async function cockpit(screen: "flows" | "run", params: Record<string, string> = {}) {
-  const instance = render(
+/**
+ * A terminal wide enough for four panes (T10.4, P9-F4).
+ *
+ * 160×40 is the width the `TUI` artboard is drawn at and the wide capture
+ * `pnpm ui:capture` takes.
+ */
+const WIDE = { columns: 160, rows: 40 };
+/** And one that is not: below `INSPECTOR_MIN_COLUMNS`, so three panes. */
+const NARROW = { columns: 100, rows: 30 };
+
+/**
+ * A fake terminal of a given size (T10.4, P9-F4).
+ *
+ * `ink-testing-library` hard-codes `columns` at 100 and has no `rows`, so a test
+ * of "the panes are sized to the terminal" could not state a terminal to be
+ * sized to. This is the same handful of lines with the size as an argument, fed
+ * to Ink's own `render` — which means the cockpit reads its width through
+ * `useStdout()`, exactly as it does in a real one, with no test-only prop on
+ * `App`.
+ */
+class FakeStdout extends EventEmitter {
+  readonly frames: string[] = [];
+  constructor(
+    readonly columns: number,
+    readonly rows: number,
+  ) {
+    super();
+  }
+  write = (frame: string): void => {
+    this.frames.push(frame);
+  };
+  lastFrame = (): string => this.frames[this.frames.length - 1] ?? "";
+}
+
+/**
+ * A terminal's input side. `read()` hands back exactly one write, which is what
+ * Ink's `useInput` pulls when it hears `readable`.
+ */
+class FakeStdin extends EventEmitter {
+  isTTY = true;
+  private data: string | null = null;
+  setEncoding(): void {}
+  setRawMode(): void {}
+  resume(): void {}
+  pause(): void {}
+  ref(): void {}
+  unref(): void {}
+  read = (): string | null => {
+    const { data } = this;
+    this.data = null;
+    return data;
+  };
+  write = (data: string): void => {
+    this.data = data;
+    this.emit("readable");
+    this.emit("data", data);
+  };
+}
+
+/** Mount `<App>` in a terminal of `size`, with `lastFrame()` and `stdin`. */
+function renderApp(
+  element: React.JSX.Element,
+  size: { columns: number; rows: number } = WIDE,
+): { lastFrame: () => string; stdin: FakeStdin; unmount: () => void } {
+  const stdout = new FakeStdout(size.columns, size.rows);
+  const stdin = new FakeStdin();
+  const instance = render(element, {
+    stdout: stdout as unknown as NodeJS.WriteStream,
+    stdin: stdin as unknown as NodeJS.ReadStream,
+    // `debug` writes every frame rather than only the last on exit, which is
+    // what `lastFrame()` reads; the other two are what a test wants of a
+    // cockpit that owns the terminal in production.
+    debug: true,
+    exitOnCtrlC: false,
+    patchConsole: false,
+  });
+  return { lastFrame: stdout.lastFrame, stdin, unmount: instance.unmount };
+}
+
+/** Render the cockpit into a terminal of `size` and wait for its first load. */
+async function cockpit(
+  screen: "flows" | "run",
+  params: Record<string, string> = {},
+  size: { columns: number; rows: number } = WIDE,
+) {
+  const instance = renderApp(
     <App service={fakeService(FIXTURES)} connection={CONNECTION} screen={screen} params={params} />,
+    size,
   );
   await settle();
   return instance;
@@ -72,7 +158,7 @@ const track = <T extends { unmount: () => void }>(one: T): T => {
 };
 
 describe("the four panes (the `TUI` artboard)", () => {
-  it("draws all four, numbered", async () => {
+  it("draws all four, numbered, on a terminal with room for them", async () => {
     const { lastFrame } = track(await cockpit("run", { runId: "comp" }));
     const frame = lastFrame() ?? "";
     for (const [number, title] of [
@@ -82,6 +168,24 @@ describe("the four panes (the `TUI` artboard)", () => {
       ["4", "Audit"],
     ] as const) {
       expect(frame, `pane ${number} (${title}) is missing`).toContain(title);
+    }
+  });
+
+  it("says what size it drew itself at (T10.4)", async () => {
+    const { lastFrame } = track(await cockpit("run", { runId: "comp" }));
+    // "a capture records the size it was taken at" (Draft 2.12 §13.7).
+    expect(lastFrame() ?? "").toContain("160×40");
+  });
+
+  it("no pane is wider than the terminal, at either size (P9-F4)", async () => {
+    for (const size of [WIDE, NARROW]) {
+      const { lastFrame } = track(await cockpit("run", { runId: "comp" }, size));
+      const lines = (lastFrame() ?? "").split("\n");
+      const widest = Math.max(...lines.map((one) => one.length));
+      expect(
+        widest,
+        `a line of ${widest} characters on a ${size.columns}-column terminal:\n${lastFrame()}`,
+      ).toBeLessThanOrEqual(size.columns);
     }
   });
 
@@ -145,7 +249,7 @@ describe("the keys (LLD §13.7's conventional keys)", () => {
   it("`1`–`4` move the focus, and `Tab` cycles it", async () => {
     const seen: UiState[] = [];
     const instance = track(
-      render(
+      renderApp(
         <App
           service={fakeService(FIXTURES)}
           connection={CONNECTION}
@@ -177,7 +281,7 @@ describe("the keys (LLD §13.7's conventional keys)", () => {
   it("`j` and `k` move the cursor within the focused pane", async () => {
     const seen: UiState[] = [];
     const instance = track(
-      render(
+      renderApp(
         <App
           service={fakeService(FIXTURES)}
           connection={CONNECTION}
@@ -205,7 +309,7 @@ describe("the keys (LLD §13.7's conventional keys)", () => {
   it("moves the cursor only in the pane that has focus", async () => {
     const seen: UiState[] = [];
     const instance = track(
-      render(
+      renderApp(
         <App
           service={fakeService(FIXTURES)}
           connection={CONNECTION}
@@ -293,10 +397,81 @@ describe("the cockpit renders the model and adds nothing (LLD §13.7)", () => {
 
   it("draws a screen whose load failed as the model's error, not a crash", async () => {
     const instance = track(
-      render(<App service={fakeService({})} connection={CONNECTION} screen="flows" />),
+      renderApp(<App service={fakeService({})} connection={CONNECTION} screen="flows" />),
     );
     await settle();
     // The title and subtitle are still the model's; the error is a value.
     expect(instance.lastFrame()).toContain("Flows");
+  });
+});
+
+/**
+ * The cockpit fits the terminal, and collapses rather than clips (T10.4, P9-F4).
+ *
+ * Draft 2.12 §13.7: "The cockpit sizes its panes to the terminal and collapses
+ * the inspector below 120 columns rather than clipping it; a capture records the
+ * size it was taken at."
+ *
+ * The Phase 9 capture showed the inspector cut in half at the captured width,
+ * because the three columns were fixed at 34, "grow", and 40 — 74 columns of
+ * furniture before a character of content. These are the two widths that matter:
+ * one with room for four panes, one without.
+ */
+describe("the panes are sized to the terminal (T10.4, P9-F4)", () => {
+  it("draws three panes at 100 columns, and says the inspector is collapsed", async () => {
+    const { lastFrame } = track(await cockpit("run", { runId: "comp" }, NARROW));
+    const frame = lastFrame() ?? "";
+
+    // The three that are drawn.
+    expect(frame).toContain("Stories");
+    expect(frame).toContain("Run comp");
+    expect(frame).toContain("Audit");
+    // The one that is not, and the reason, in words.
+    expect(frame).not.toContain("candidates tried");
+    expect(frame).toContain("inspector collapsed at 100 cols");
+    // And the size, so the capture is self-describing.
+    expect(frame).toContain("100×30");
+  });
+
+  it("opens the collapsed inspector full width when pane 3 is focused", async () => {
+    const { lastFrame, stdin } = track(await cockpit("run", { runId: "comp" }, NARROW));
+    stdin.write("3");
+    await settle();
+    const frame = lastFrame() ?? "";
+    expect(frame).toContain("candidates tried");
+    // Still inside the terminal: collapsed means below, not clipped beside.
+    const widest = Math.max(...frame.split("\n").map((one) => one.length));
+    expect(widest).toBeLessThanOrEqual(NARROW.columns);
+  });
+
+  it("the widths follow the terminal rather than being constants", () => {
+    const narrow = layoutFor(100, 30);
+    const wide = layoutFor(200, 60);
+    expect(narrow.inspectorCollapsed).toBe(true);
+    expect(narrow.inspector).toBeUndefined();
+    expect(narrow.tree + narrow.main).toBe(100);
+
+    expect(wide.inspectorCollapsed).toBe(false);
+    expect(wide.tree + wide.main + wide.inspector!).toBe(200);
+    expect(wide.tree).toBeGreaterThan(narrow.tree - 1);
+    // A taller terminal draws more rows, which is the other half of "sized".
+    expect(wide.listRows).toBeGreaterThan(narrow.listRows);
+  });
+
+  it("120 columns is the line the spec draws", () => {
+    expect(INSPECTOR_MIN_COLUMNS).toBe(120);
+    expect(layoutFor(119, 40).inspectorCollapsed).toBe(true);
+    expect(layoutFor(120, 40).inspectorCollapsed).toBe(false);
+  });
+
+  it("never asks for a negative width, however small the terminal", () => {
+    for (const columns of [1, 20, 40, 61, 80, 100, 121, 400]) {
+      const layout = layoutFor(columns, 10);
+      expect(layout.tree).toBeGreaterThan(0);
+      expect(layout.main).toBeGreaterThan(0);
+      expect(layout.listRows).toBeGreaterThan(0);
+      expect(layout.auditRows).toBeGreaterThan(0);
+      expect(layout.tree + layout.main + (layout.inspector ?? 0)).toBe(layout.columns);
+    }
   });
 });

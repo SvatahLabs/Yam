@@ -30,7 +30,7 @@ export type { ScreenService, ServiceEventLike, ServiceConnectionInfo } from "./s
 
 export { ACTIONS, actionById, actionsForScreen } from "./registry.js";
 
-export { flowsScreen, ago } from "./screens/flows.js";
+export { flowsScreen } from "./screens/flows.js";
 export type { FlowsState, FlowRow, FlowLine, StepInspector } from "./screens/flows.js";
 
 export { runScreen, applyEvent, runStateFrom, stamp, policyText } from "./screens/run.js";
@@ -56,6 +56,7 @@ export { fakeService, FakeNotFound } from "./fake.js";
 export type { FakeResponses, FakeService, FakeCall } from "./fake.js";
 
 export { Sources, dotted, plural } from "./load.js";
+export { ago } from "./format.js";
 export { parseBinding } from "./bindings.js";
 
 export type * from "./shapes.js";

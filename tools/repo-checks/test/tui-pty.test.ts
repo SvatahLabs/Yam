@@ -168,7 +168,11 @@ afterAll(async () => {
  * can only be left by pressing a key cannot be captured by anything that is not
  * a person, and REQ-ADE-13's point is that an agent gets what a person gets.
  */
-function inPty(args: string[], captureMs = 3_000): string {
+function inPty(
+  args: string[],
+  captureMs = 3_000,
+  size: { columns: number; rows: number } = { columns: 160, rows: 48 },
+): string {
   const command = [
     process.execPath,
     CLI,
@@ -185,21 +189,40 @@ function inPty(args: string[], captureMs = 3_000): string {
     .map((one) => `'${one.replace(/'/g, "'\\''")}'`)
     .join(" ");
 
-  const result = spawnSync("script", ["-q", "/dev/null", "/bin/sh", "-c", command], {
-    encoding: "utf8",
-    cwd: REPO_ROOT,
-    // Never a pipe: `script` calls `tcgetattr` on its own stdin and refuses one.
-    stdio: ["ignore", "pipe", "pipe"],
-    timeout: captureMs + 30_000,
-    env: {
-      ...process.env,
-      COLUMNS: "200",
-      LINES: "60",
-      FORCE_COLOR: "1",
-      TERM: "xterm-256color",
+  const result = spawnSync(
+    "script",
+    [
+      "-q",
+      "/dev/null",
+      "/bin/sh",
+      "-c",
+      /*
+       * `stty` first (T10.4, P9-F4).
+       *
+       * A `script` spawned with no controlling terminal allocates a pty of
+       * `0×0`, so `process.stdout.columns` inside it is 0 and `COLUMNS` in the
+       * environment is not what a terminal-aware program reads. Setting the
+       * pty's size is what makes "captured at 100 columns" a statement about
+       * the terminal rather than about an environment variable.
+       */
+      `stty cols ${size.columns} rows ${size.rows}; ${command}`,
+    ],
+    {
+      encoding: "utf8",
+      cwd: REPO_ROOT,
+      // Never a pipe: `script` calls `tcgetattr` on its own stdin and refuses one.
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: captureMs + 30_000,
+      env: {
+        ...process.env,
+        COLUMNS: String(size.columns),
+        LINES: String(size.rows),
+        FORCE_COLOR: "1",
+        TERM: "xterm-256color",
+      },
+      maxBuffer: 32 * 1024 * 1024,
     },
-    maxBuffer: 32 * 1024 * 1024,
-  });
+  );
   return `${result.stdout ?? ""}${result.stderr ?? ""}`;
 }
 
@@ -260,6 +283,53 @@ describe.runIf(hasScript)("`svatah ui` draws in a pseudo-terminal (T9.4)", () =>
     expect(captured).toContain("guards-and-compensation.flow");
     expect(captured).toContain("simple.flow");
   }, 60_000);
+
+  /*
+   * T10.4 Validate: "a 100-column capture shows three panes and says its size."
+   *
+   * The Phase 9 capture had the inspector clipped at the captured width, with
+   * nothing in the file to say what that width had been. Draft 2.12 §13.7 says
+   * the cockpit sizes its panes to the terminal, collapses the inspector below
+   * 120 columns rather than clipping it, and that a capture records its size.
+   */
+  it("at 100 columns: three whole panes, no clipped fourth, and the size (T10.4)", () => {
+    const captured = plain(
+      inPty(["--screen", "run", "--run", RUN_ID], 3_000, { columns: 100, rows: 30 }),
+    );
+
+    // It says how big it was.
+    expect(captured, "the capture does not record the size it was taken at").toContain("100×30");
+    // Three panes, whole.
+    expect(captured).toContain("Stories");
+    expect(captured).toContain(`Run ${RUN_ID}`);
+    expect(captured).toContain("Audit");
+    // The fourth is collapsed rather than cut in half, and it says so.
+    expect(captured).toContain("inspector collapsed at 100 cols");
+    expect(captured).not.toContain("candidates tried");
+
+    /*
+     * And nothing was drawn past the right edge, which is the defect itself.
+     * The pane borders are the check: a box that ran off the terminal is a line
+     * longer than the terminal is wide.
+     */
+    const widest = Math.max(
+      ...captured
+        .split("\n")
+        .map((one) => one.replace(/\r/g, "").trimEnd().length),
+    );
+    expect(widest, `a line of ${widest} characters on a 100-column terminal`).toBeLessThanOrEqual(
+      100,
+    );
+  }, 60_000);
+
+  it("at 160 columns: four panes, and that size", () => {
+    const captured = plain(
+      inPty(["--screen", "run", "--run", RUN_ID], 3_000, { columns: 160, rows: 40 }),
+    );
+    expect(captured).toContain("160×40");
+    expect(captured).toContain("candidates tried");
+    expect(captured).not.toContain("inspector collapsed");
+  }, 60_000);
 });
 
 describe("`svatah ui --json` is the model's state (T9.4, REQ-ADE-13)", () => {
@@ -302,6 +372,54 @@ describe("`svatah ui --json` is the model's state (T9.4, REQ-ADE-13)", () => {
 
     expect(printed["state"]).toEqual(JSON.parse(JSON.stringify(state)));
   }, 120_000);
+
+  /*
+   * T10.4 Validate: "the `--json` equality test runs ten times without a diff."
+   *
+   * P9-F4: the Flows state used to carry `"run 20 s ago"` as text, so two loads
+   * a second apart were unequal for a project nothing had happened to, and this
+   * comparison flaked on Node 22 with `"run 19 s ago"`. The model carries the
+   * timestamp now and the renderers format it, which makes the state a value —
+   * and a value can be compared ten times.
+   */
+  it("prints the same Flows state ten times running (T10.4, P9-F4)", async () => {
+    const file = "flows/guards-and-compensation.flow";
+    const { screenById } = await import("@svatah/screens");
+    const { SvatahClient } = await import("@svatah/sdk");
+    const client = new SvatahClient(connection);
+
+    const first = JSON.stringify(json(["--screen", "flows", "--flow", file]));
+    for (let round = 1; round <= 10; round += 1) {
+      const printed = json(["--screen", "flows", "--flow", file]);
+      expect(JSON.stringify(printed), `round ${round} differs from round 1`).toBe(first);
+      /*
+       * And against the model loaded in *this* process at this instant — the
+       * comparison that actually flaked, because the two evaluations are a
+       * second or so apart.
+       */
+      const state = await screenById("flows").load(client, { file });
+      expect(printed["state"], `round ${round} differs from the model`).toEqual(
+        JSON.parse(JSON.stringify(state)),
+      );
+    }
+  }, 300_000);
+
+  it("carries the last run as a timestamp, not as words (P9-F4)", () => {
+    const printed = json([
+      "--screen",
+      "flows",
+      "--flow",
+      "flows/guards-and-compensation.flow",
+    ]);
+    const files = (printed["state"] as { files: Array<Record<string, unknown>> }).files;
+    const ran = files.filter((one) => one["lastRunAt"] !== undefined);
+    expect(ran.length, "no flow in the fixtures project has a last run").toBeGreaterThan(0);
+    for (const one of ran) {
+      expect(String(one["lastRunAt"])).toMatch(/^\d{4}-\d\d-\d\dT/);
+    }
+    // And nowhere in the state does the word "ago" appear: that is a renderer's.
+    expect(JSON.stringify(printed["state"])).not.toContain(" ago");
+  }, 60_000);
 
   it("draws nothing at all: the output is one JSON document", () => {
     const result = spawnSync(

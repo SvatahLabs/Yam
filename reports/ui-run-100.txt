@@ -1,0 +1,23 @@
+^Dloading…
+svatah ui 100×30 · inspector collapsed at 100 cols (120 to sit beside); 3 opens it  /var/folders/x5…
+┌───────────────────────┐┌─────────────────────────────────────────────────────────────────────────┐
+│ 1 Stories             ││ 2 Run comp · aborted                                                    │
+│ I want t… ✗ failed    ││ ✓  1 Click the Book a slot link                      testid #0   107 ms │
+│ cancel a… ✓ passed    ││ ✓  2 Type "Indiranagar" into the location field      testid #0   29 ms  │
+└───────────────────────┘│ ✓  3 Click the Book now button                       testid #0   25 ms  │
+                         │ ✓  4 Remember the text of the booking reference as … = BK-10428  4 ms   │
+                         │ ✗  5 Click the pay button                                        74 ms  │
+                         │ ✓  1 Click the cancel booking button                 testid #0   39 ms  │
+                         │ ✓  2 The booking reference should say {I want to bo… testid #0   4 ms   │
+                         │ Could not resolve "checkout.pay-button" (the pay button): 5 candidates… │
+                         │ flow aborted · exit 11                                                  │
+                         └─────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4 Audit · follow                                                                                 │
+│ 00.748 surface state · ok · 0 ms                                                                 │
+│ 00.749 surface locate · ok · 1 ms                                                                │
+│ 00.750 surface check · ref · ok · 1 ms                                                           │
+│ 00.750 output                                                                                    │
+│ ─ svatah ui --json streams these same lines to stdout for an agent ─                             │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+^K commands   1-4 pane   Tab next   j k move   Enter open   h heal  q quit

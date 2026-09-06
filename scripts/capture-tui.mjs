@@ -14,6 +14,19 @@
  * of the product rather than of a pipe: Ink asks stdout whether it is a terminal
  * and draws nothing when it is not. `--capture <ms>` is what gives the terminal
  * back afterwards.
+ *
+ * ## Two sizes, and each capture says which it is (T10.4, P9-F4)
+ *
+ * Draft 2.12 §13.7: "The cockpit sizes its panes to the terminal and collapses
+ * the inspector below 120 columns rather than clipping it; a capture records the
+ * size it was taken at." The Phase 9 capture was taken at whatever width the
+ * pseudo-terminal happened to be and showed the inspector cut in half, with
+ * nothing in the file to say how wide it had been.
+ *
+ * So every screen is captured twice — 160×40, where four panes fit, and 100×30,
+ * where three do — and the size is set on the pseudo-terminal with `stty` rather
+ * than hoped for. `script` with no controlling terminal makes a pty whose size is
+ * `0×0`, which is how the first version ended up guessing.
  */
 import { spawn, spawnSync } from "node:child_process";
 import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
@@ -121,8 +134,8 @@ try {
 
   mkdirSync(OUT, { recursive: true });
 
-  /** One capture, inside a pseudo-terminal, with the ANSI taken out. */
-  const capture = (args, file) => {
+  /** One capture, inside a pseudo-terminal of a stated size, with the ANSI out. */
+  const capture = (args, file, columns, rows) => {
     const command = [
       process.execPath,
       CLI,
@@ -139,15 +152,36 @@ try {
       .map((one) => `'${one.replace(/'/g, "'\\''")}'`)
       .join(" ");
 
-    const result = spawnSync("script", ["-q", "/dev/null", "/bin/sh", "-c", command], {
-      encoding: "utf8",
-      cwd: ROOT,
-      // Never a pipe: `script` calls `tcgetattr` on its own stdin and refuses one.
-      stdio: ["ignore", "pipe", "pipe"],
-      timeout: 60_000,
-      env: { ...process.env, COLUMNS: "180", LINES: "56", FORCE_COLOR: "1", TERM: "xterm-256color" },
-      maxBuffer: 32 * 1024 * 1024,
-    });
+    const result = spawnSync(
+      "script",
+      [
+        "-q",
+        "/dev/null",
+        "/bin/sh",
+        "-c",
+        /*
+         * `stty` first. A `script` launched with no controlling terminal gets a
+         * pty of `0×0`, so the cockpit would fall back to its default and the
+         * capture would not be of the size this asked for (T10.4).
+         */
+        `stty cols ${columns} rows ${rows}; ${command}`,
+      ],
+      {
+        encoding: "utf8",
+        cwd: ROOT,
+        // Never a pipe: `script` calls `tcgetattr` on its own stdin and refuses one.
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: 60_000,
+        env: {
+          ...process.env,
+          COLUMNS: String(columns),
+          LINES: String(rows),
+          FORCE_COLOR: "1",
+          TERM: "xterm-256color",
+        },
+        maxBuffer: 32 * 1024 * 1024,
+      },
+    );
 
     const raw = `${result.stdout ?? ""}${result.stderr ?? ""}`;
     /*
@@ -168,11 +202,23 @@ try {
       .trim();
 
     writeFileSync(join(OUT, file), `${plain}\n`, "utf8");
-    process.stdout.write(`wrote ${join(OUT, file)} (${plain.split("\n").length} lines)\n`);
+    process.stdout.write(
+      `wrote ${join(OUT, file)} at ${columns}×${rows} (${plain.split("\n").length} lines)\n`,
+    );
   };
 
-  capture(["--screen", "flows", "--flow", "flows/guards-and-compensation.flow"], "ui-flows.txt");
-  capture(["--screen", "run", "--run", RUN_ID], "ui-run.txt");
+  /*
+   * Wide, then narrow. The cockpit prints its own size in the header, so each
+   * file says what it was taken at without this script annotating it — which is
+   * what T10.4 asks for, and what makes a capture a thing that can be read a
+   * month later.
+   */
+  const flows = ["--screen", "flows", "--flow", "flows/guards-and-compensation.flow"];
+  const run = ["--screen", "run", "--run", RUN_ID];
+  capture(flows, "ui-flows.txt", 160, 40);
+  capture(run, "ui-run.txt", 160, 40);
+  capture(flows, "ui-flows-100.txt", 100, 30);
+  capture(run, "ui-run-100.txt", 100, 30);
 } finally {
   serve?.kill("SIGTERM");
   await app.close();

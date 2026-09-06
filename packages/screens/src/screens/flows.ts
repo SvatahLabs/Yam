@@ -44,8 +44,23 @@ export interface FlowRow {
   readonly name: string;
   readonly stories: number;
   readonly status: Pill;
-  /** The two grey lines under the name: "3 stories", "run 4 min ago". */
+  /**
+   * The grey lines under the name: "3 stories", and the failing step when there
+   * is one. The mockup shows "run 4 min ago" beside them, and that is the
+   * *renderer's* line — see `lastRunAt`.
+   */
   readonly meta: readonly string[];
+  /**
+   * When the last run of this flow ended, as the summary wrote it (P9-F4).
+   *
+   * A timestamp, never "4 min ago" (Draft 2.12 §13.7: "State carries
+   * timestamps, never a relative time as text"). The state of a project that
+   * nothing has happened to must be the same value a second later, or
+   * `svatah ui --json` is not the model's state and two loads cannot be
+   * compared. Both renderers call `ago()` from `@svatah/screens` on this, so
+   * they still print the same words.
+   */
+  readonly lastRunAt?: string;
   readonly selected: boolean;
 }
 
@@ -127,20 +142,6 @@ const STATUS_PILL: Readonly<Record<string, Pill>> = {
 
 const NOT_RUN: Pill = { tone: "neutral", label: "not run" };
 
-/** "22 min ago", from an ISO timestamp. Whole units, as the mockup writes them. */
-export function ago(at: string | undefined, now: number): string | undefined {
-  if (at === undefined) return undefined;
-  const then = Date.parse(at);
-  if (!Number.isFinite(then)) return undefined;
-  const seconds = Math.max(0, Math.round((now - then) / 1000));
-  if (seconds < 60) return `run ${seconds} s ago`;
-  const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `run ${minutes} min ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 48) return `run ${hours} h ago`;
-  return `run ${Math.round(hours / 24)} d ago`;
-}
-
 /**
  * Which line of the flow file a step is on, and what kind of line it is.
  *
@@ -219,8 +220,6 @@ export const flowsScreen: Screen<FlowsState> = {
         .map((story) => story.name ?? "")
         .filter((name) => name !== "");
 
-    const now = Date.now();
-
     /*
      * Which flow a run belongs to, when the run does not say.
      *
@@ -289,8 +288,8 @@ export const flowsScreen: Screen<FlowsState> = {
           ...(failing === undefined
             ? []
             : [`${failing.story ?? ""}#${(failing.stepId ?? "").split("#")[1] ?? ""} ${failing.failure?.class ?? ""}`.trim()]),
-          ...(ago(summary?.endedAt, now) === undefined ? [] : [ago(summary?.endedAt, now)!]),
         ],
+        ...(summary?.endedAt === undefined ? {} : { lastRunAt: summary.endedAt }),
         selected: one === file,
       };
     });

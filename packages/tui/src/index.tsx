@@ -20,9 +20,20 @@ import { App } from "./app.js";
 import { asJson, loadUi } from "./model.js";
 
 export { App } from "./app.js";
-export { PANES, asJson, loadUi, focusPane, moveCursor, nextPane } from "./model.js";
+export { PANES, asJson, loadUi, focusPane, moveCursor, nextPane, resize } from "./model.js";
 export type { Pane, UiState } from "./model.js";
-export { AuditPane, InspectorPane, MainPane, TreePane, treeRows, mainRows, rowsIn } from "./panes.js";
+export {
+  AuditPane,
+  InspectorPane,
+  MainPane,
+  TreePane,
+  treeRows,
+  mainRows,
+  rowsIn,
+  window as listWindow,
+} from "./panes.js";
+export { layoutFor, sizeOf, INSPECTOR_MIN_COLUMNS } from "./layout.js";
+export type { Layout } from "./layout.js";
 
 export interface UiOptions {
   readonly service: ScreenService;

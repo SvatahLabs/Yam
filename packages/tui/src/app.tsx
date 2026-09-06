@@ -12,7 +12,7 @@
  * the same registry the ADE's palette shows. This file is the *terminal* half
  * and nothing else: panes, keys, and a palette drawn with Ink.
  */
-import { Box, Text, useApp, useInput } from "ink";
+import { Box, Text, useApp, useInput, useStdout } from "ink";
 import { useCallback, useEffect, useState } from "react";
 import {
   ACTIONS,
@@ -32,9 +32,11 @@ import {
   loadUi,
   moveCursor,
   nextPane,
+  resize,
   type Pane,
   type UiState,
 } from "./model.js";
+import { INSPECTOR_MIN_COLUMNS, sizeOf } from "./layout.js";
 
 export interface AppProps {
   readonly service: ScreenService;
@@ -63,8 +65,26 @@ function paletteRows(ui: UiState): Array<{ id: string; label: string; area: stri
 
 export function App(props: AppProps): React.JSX.Element {
   const { exit } = useApp();
+  const { stdout } = useStdout();
   const [ui, setUi] = useState<UiState | undefined>(undefined);
   const [busy, setBusy] = useState(false);
+
+  /**
+   * The terminal, as it is now (T10.4, P9-F4).
+   *
+   * The caller's size when it gave one, then the stream's, then `COLUMNS` and
+   * `LINES` — which is what `script(1)` sets for a captured run — then a
+   * conservative default. A cockpit that guessed 200 columns on an 80-column
+   * terminal is how the Phase 9 capture came out with half an inspector.
+   */
+  const measure = useCallback((): { columns: number; rows: number } => {
+    const columns = stdout?.columns ?? Number(process.env["COLUMNS"] ?? "0");
+    const rows = stdout?.rows ?? Number(process.env["LINES"] ?? "0");
+    return {
+      columns: Number.isFinite(columns) && columns > 0 ? columns : 100,
+      rows: Number.isFinite(rows) && rows > 0 ? rows : 30,
+    };
+  }, [stdout]);
 
   useEffect(() => {
     void loadUi(
@@ -72,8 +92,22 @@ export function App(props: AppProps): React.JSX.Element {
       props.screen ?? "flows",
       props.params ?? {},
       props.connection,
+      measure(),
     ).then(setUi);
-  }, [props.service, props.screen, props.params, props.connection]);
+  }, [props.service, props.screen, props.params, props.connection, measure]);
+
+  /* The panes follow the terminal when someone drags its corner. */
+  useEffect(() => {
+    if (stdout === undefined) return undefined;
+    const onResize = (): void => {
+      const size = measure();
+      setUi((before) => (before === undefined ? before : resize(before, size.columns, size.rows)));
+    };
+    stdout.on("resize", onResize);
+    return () => {
+      stdout.off("resize", onResize);
+    };
+  }, [measure, stdout]);
 
   useEffect(() => {
     if (ui !== undefined) props.onState?.(ui);
@@ -168,7 +202,23 @@ export function App(props: AppProps): React.JSX.Element {
     /* ── panes: `1`–`4` and `Tab` ────────────────────────────────────────── */
     const number = Number(input);
     if (Number.isInteger(number) && number >= 1 && number <= PANES.length) {
-      setUi(focusPane(ui, PANES[number - 1] as Pane));
+      const pane = PANES[number - 1] as Pane;
+      /*
+       * Pane 3 on a narrow terminal (T10.4, P9-F4). The inspector is collapsed
+       * out of the row of columns rather than clipped, and focusing it draws it
+       * full width under the main pane — so nothing is unreachable at 100
+       * columns, and nothing is half off the screen either.
+       */
+      setUi({
+        ...focusPane(ui, pane),
+        ...(pane === "inspector" && ui.layout.inspectorCollapsed
+          ? {
+              message:
+                `The inspector is drawn below the main pane: this terminal is ` +
+                `${ui.layout.columns} columns and three panes need ${INSPECTOR_MIN_COLUMNS}.`,
+            }
+          : {}),
+      });
       return;
     }
     if (key.tab) {
@@ -235,29 +285,60 @@ export function App(props: AppProps): React.JSX.Element {
   const actions = actionsForScreen(ui.screen);
 
   return (
-    <Box flexDirection="column">
-      {/* the header: project, service, and what the screen is about */}
-      <Box>
-        <Text color="magenta">svatah ui</Text>
-        <Text color="gray">
-          {"  "}
-          {ui.connection.project} {"  "}
-          {ui.connection.url} {"  "}
-          {ui.state.title} · {ui.state.subtitle}
-        </Text>
+    <Box flexDirection="column" width={ui.layout.columns}>
+      {/*
+        The header: what this is, how big the terminal is, and what the screen is
+        about (T10.4: "a capture records the size it was taken at").
+        `100×40` sits immediately after the name rather than at the end of the
+        line, because a title long enough to fill an eighty-column terminal
+        would otherwise push the one fact a capture cannot be read without off
+        the right-hand edge.
+      */}
+      <Box width={ui.layout.columns}>
+        {/*
+          `flexShrink={0}`: Ink shrinks a row's children to fit, and a header
+          whose first words are "svatah ui 160×40" must not become "svatah 160×4"
+          on a busy line. What may be cut is the subtitle, which pane 2 repeats.
+        */}
+        <Box flexShrink={0}>
+          <Text color="magenta">svatah ui</Text>
+          <Text color="white"> {sizeOf(ui.layout)}</Text>
+          {ui.layout.inspectorCollapsed ? (
+            <Text color="gray">
+              {" "}
+              · inspector collapsed at {ui.layout.columns} cols ({INSPECTOR_MIN_COLUMNS} to sit
+              beside); 3 opens it
+            </Text>
+          ) : null}
+        </Box>
+        <Box flexShrink={1} overflow="hidden">
+          <Text color="gray" wrap="truncate-end">
+            {"  "}
+            {ui.connection.project} {"  "}
+            {ui.connection.url} {"  "}
+            {ui.state.title} · {ui.state.subtitle}
+          </Text>
+        </Box>
       </Box>
 
-      <Box>
-        <Box width={34} flexDirection="column">
+      <Box width={ui.layout.columns}>
+        <Box width={ui.layout.tree} flexShrink={0} flexDirection="column">
           <TreePane ui={ui} />
         </Box>
-        <Box flexGrow={1} flexDirection="column">
+        <Box width={ui.layout.main} flexShrink={0} flexDirection="column">
           <MainPane ui={ui} />
         </Box>
-        <Box width={40} flexDirection="column">
-          <InspectorPane ui={ui} />
-        </Box>
+        {ui.layout.inspector === undefined ? null : (
+          <Box width={ui.layout.inspector} flexShrink={0} flexDirection="column">
+            <InspectorPane ui={ui} />
+          </Box>
+        )}
       </Box>
+
+      {/* Collapsed, and asked for: full width, under the main pane. */}
+      {ui.layout.inspectorCollapsed && ui.focus === "inspector" ? (
+        <InspectorPane ui={ui} />
+      ) : null}
 
       <AuditPane ui={ui} />
 

@@ -20,6 +20,7 @@ import {
   ACTIONS,
   RAIL,
   SCREENS,
+  ago,
   SCREEN_IDS,
   fakeService,
   flowsScreen,
@@ -131,6 +132,14 @@ describe("the Flows screen against the fixtures project (the `Main` artboard)", 
     const guards = state.files.find((one) => one.name === "guards-and-compensation.flow")!;
     expect(guards.status.label).toBe("aborted");
     expect(guards.meta.join(" ")).toContain("locator");
+    /*
+     * And the last run as an *instant* (P9-F4, Draft 2.12 §13.7). "run 4 min
+     * ago" is the renderer's; a state that carried it would be a different
+     * value every second, which is what made `svatah ui --json` unequal to a
+     * second load of the same screen.
+     */
+    expect(guards.lastRunAt).toMatch(/^\d{4}-\d\d-\d\dT/);
+    expect(guards.meta.join(" ")).not.toContain("ago");
   });
 
   it("opens the flow the mockup opens, with its gutter and its lint", async () => {
@@ -392,5 +401,57 @@ describe("a screen whose service is down (LLD §13.7)", () => {
     // A renderer draws the alert; it does not catch.
     expect(state.screen).toBe("flows");
     expect(state.title).toBe("Flows");
+  });
+});
+
+/**
+ * The state is a value: two loads of an unchanged project are equal (T10.4,
+ * P9-F4, Draft 2.12 §13.7).
+ *
+ * > State carries **timestamps**, never a relative time as text; "20 s ago" is
+ * > the renderer's, so two loads of one state are equal.
+ *
+ * The unit-level half of `tui-pty.test.ts`'s ten-round comparison: no service,
+ * no terminal, and a clock that is deliberately moved between the loads.
+ */
+describe("a screen's state does not change when nothing does (T10.4, P9-F4)", () => {
+  it("two loads a simulated minute apart are the same object", async () => {
+    const service = fakeService(FIXTURES);
+    const first = await screenById("flows").load(service, {
+      file: "flows/guards-and-compensation.flow",
+    });
+    const before = Date.now;
+    try {
+      // A minute later, which is enough to move every "N s ago" and most
+      // "N min ago" — the exact thing that flaked on Node 22.
+      Date.now = () => before() + 60_000;
+      const second = await screenById("flows").load(service, {
+        file: "flows/guards-and-compensation.flow",
+      });
+      expect(second).toEqual(first);
+    } finally {
+      Date.now = before;
+    }
+  });
+
+  it("no screen's state carries the word \"ago\"", async () => {
+    const service = fakeService(FIXTURES);
+    for (const screen of SCREENS) {
+      const state = await screen.load(service, {});
+      expect(
+        JSON.stringify(state),
+        `the ${screen.id} screen's state carries a relative time as text`,
+      ).not.toContain(" ago");
+    }
+  });
+
+  it("`ago` turns an instant into the mockup's words", () => {
+    const now = Date.parse("2026-09-05T12:00:00.000Z");
+    expect(ago("2026-09-05T11:59:40.000Z", now)).toBe("run 20 s ago");
+    expect(ago("2026-09-05T11:38:00.000Z", now)).toBe("run 22 min ago");
+    expect(ago("2026-09-05T09:00:00.000Z", now)).toBe("run 3 h ago");
+    expect(ago("2026-09-01T12:00:00.000Z", now)).toBe("run 4 d ago");
+    expect(ago(undefined, now)).toBeUndefined();
+    expect(ago("not a date", now)).toBeUndefined();
   });
 });

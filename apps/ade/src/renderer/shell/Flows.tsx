@@ -18,6 +18,7 @@ import {
   Table,
   TabStrip,
 } from "@svatah/ui";
+import { ago } from "@svatah/screens";
 import type { Action, FlowsState, ScreenParams } from "@svatah/screens";
 
 export interface FlowsProps {
@@ -72,10 +73,21 @@ export function FlowsScreen(props: FlowsProps): React.JSX.Element {
               {
                 key: "name",
                 header: "flow",
+                /*
+                 * The relative time is the *renderer's* (P9-F4, Draft 2.12
+                 * §13.7). The model carries `lastRunAt`, an instant, so two
+                 * loads of an unchanged project are the same value; "run 4 min
+                 * ago" is computed here from the same `ago()` `svatah ui` uses,
+                 * so the two renderers still say the same words.
+                 */
                 cell: (row) => (
                   <span className="sv-flow-row">
                     <span className="sv-flow-name">{row.name}</span>
-                    <span className="sv-flow-meta">{row.meta.join(" · ")}</span>
+                    <span className="sv-flow-meta">
+                      {[...row.meta, ago(row.lastRunAt, Date.now())]
+                        .filter((one) => one !== undefined)
+                        .join(" · ")}
+                    </span>
                   </span>
                 ),
               },
@@ -231,7 +243,14 @@ function History({ state }: { readonly state: FlowsState }): React.JSX.Element {
           header: "last run",
           cell: (row) => <Pill tone={row.status.tone} label={row.status.label} />,
         },
-        { key: "meta", header: "detail", cell: (row) => row.meta.join(" · ") },
+        {
+          key: "meta",
+          header: "detail",
+          cell: (row) =>
+            [...row.meta, ago(row.lastRunAt, Date.now())]
+              .filter((one) => one !== undefined)
+              .join(" · "),
+        },
       ]}
     />
   );

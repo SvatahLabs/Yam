@@ -13,6 +13,7 @@
  */
 import { screenById, type ScreenId, type ScreenParams, type ScreenStateBase } from "@svatah/screens";
 import type { ScreenService } from "@svatah/screens";
+import { layoutFor, type Layout } from "./layout.js";
 
 /** The four numbered panes of the `TUI` artboard. */
 export const PANES = ["tree", "main", "inspector", "audit"] as const;
@@ -31,6 +32,14 @@ export interface UiState {
   readonly message?: string;
   /** The project and service, for the header. */
   readonly connection: { readonly url: string; readonly project: string };
+  /**
+   * The terminal's size and the widths that follow from it (T10.4, P9-F4).
+   *
+   * A renderer's concern and nothing the model knows about, which is why it is
+   * here and not in `state` — and why `asJson` leaves it out: `--json` prints
+   * the model's state, and a terminal's width is not part of it.
+   */
+  readonly layout: Layout;
 }
 
 /** Load a screen and build the state around it. */
@@ -39,6 +48,7 @@ export async function loadUi(
   screen: ScreenId,
   params: ScreenParams,
   connection: UiState["connection"],
+  size: { columns: number; rows: number } = { columns: 100, rows: 30 },
 ): Promise<UiState> {
   const state = await screenById(screen).load(service, params);
   return {
@@ -50,7 +60,13 @@ export async function loadUi(
     paletteOpen: false,
     paletteQuery: "",
     connection,
+    layout: layoutFor(size.columns, size.rows),
   };
+}
+
+/** The terminal was resized: the panes follow it (T10.4). */
+export function resize(ui: UiState, columns: number, rows: number): UiState {
+  return { ...ui, layout: layoutFor(columns, rows) };
 }
 
 /** `1`–`4` and `Tab`: which pane the keys go to (LLD §13.7). */
