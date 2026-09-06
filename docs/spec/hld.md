@@ -303,13 +303,13 @@ svatah/
     ui/                   React components on Radix primitives, the component sheet (Draft 2.11)
     tui/                  svatah ui, the Ink terminal cockpit (Draft 2.11, REQ-TUI-1)
     sdk/                  typed client generated from the OpenAPI description (Draft 2.11, LLD §13.8)
-  clients/
-    python/, java/        clients generated from the same description (Draft 2.11)
     trajectory/           trajectory capture and compile (P2)
     cli/                  svatah CLI + MCP server (operations + raw surface)
     service/              local HTTP + event-stream service (svatah serve) for the ADE and other clients
     migrate/              v1/v2 → v3, plus prototype database import (P2)
     conformance/          surface and runtime conformance suites
+  clients/
+    python/, java/        clients generated from the same description (Draft 2.11)
   apps/
     sample-web/           sample web app with variants
     ade/                  the new Svatah ADE (Electron), developed in-repo until its first release, then split to the svatahADE repository (ADR-17); also the desktop conformance target
