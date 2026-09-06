@@ -11,6 +11,7 @@
  * `DataState`, `ExplorerState`, `ImportState`, `SettingsState`). What this file
  * decides is where each goes on a page.
  */
+import { useEffect, useState } from "react";
 import { Alert, Button, Chooser, Field, InspectorSection, KeyValues, Pill, Table } from "@svatah/ui";
 import type {
   Action,
@@ -29,7 +30,17 @@ export interface ScreenProps<S> {
   readonly state: S;
   readonly params: ScreenParams;
   readonly actions: readonly Action[];
-  readonly onAction: (id: string) => void;
+  /**
+   * Run an action, with what this screen knows that the parameters do not (K6,
+   * K7, T11.1).
+   *
+   * `flows.save` needs the text in the editor and `api.save` needs the request
+   * in the form, and neither is a *screen parameter*: a parameter is what a
+   * screen re-loads with, and a draft is what has not been saved yet. So a
+   * screen may hand its action the argument only it has, and everything else
+   * still comes from the parameters (LLD §13.7's one action registry).
+   */
+  readonly onAction: (id: string, args?: Readonly<Record<string, unknown>>) => void;
   readonly onParams: (params: ScreenParams) => void;
 }
 
@@ -152,14 +163,46 @@ export function AgentsInspector(props: ScreenProps<AgentsState>): React.JSX.Elem
 
 export function ApiScreen(props: ScreenProps<ApiState>): React.JSX.Element {
   const { state } = props;
-  const request = state.request;
+  const saved = state.request;
+
+  /*
+   * The draft: the request as the form has it, before it is on disk (K7).
+   *
+   * The Phase 10 verification's K7 — the API screen could *send* a saved
+   * request and not change one, so the only way to fix a header was a text
+   * editor outside the ADE, and "a release cannot ship an 'editor' that does
+   * not edit". Like the flow editor's draft this is the window's, not a screen
+   * parameter: a parameter is what the screen re-loads with.
+   */
+  const [draft, setDraft] = useState<ApiState["request"] | undefined>(undefined);
+  const chosen = state.selected;
+  useEffect(() => setDraft(undefined), [chosen]);
+
+  const request = draft ?? saved;
+  const dirty =
+    draft !== undefined && JSON.stringify(draft) !== JSON.stringify(saved);
+  const edit = (change: Partial<NonNullable<ApiState["request"]>>): void => {
+    if (request === undefined) return;
+    setDraft({ ...request, ...change });
+  };
+
   return (
     <>
       <Toolbar
         state={state}
         actions={props.actions}
-        onAction={props.onAction}
+        onAction={(id, args) =>
+          props.onAction(
+            id,
+            // Both `api.send` and `api.save` act on what is *in the form*, not
+            // on what was last read from disk — which is the whole of K7.
+            id === "api.send" || id === "api.save"
+              ? { ...args, request: request as unknown as Record<string, unknown> }
+              : args,
+          )
+        }
         primary="api.send"
+        {...(dirty ? { beside: <Pill tone="abort" label="unsaved" /> } : {})}
       />
       <div className="sv-main">
         <aside className="sv-list" id="api-requests-pane" aria-label="Named requests">
@@ -198,25 +241,76 @@ export function ApiScreen(props: ScreenProps<ApiState>): React.JSX.Element {
             ) : (
               <>
                 <div className="sv-panel-head">
-                  <span>{request.method}</span>
-                  <span className="sv-mono">{request.url}</span>
+                  <Chooser
+                    id="api-method"
+                    label="Method"
+                    value={request.method}
+                    options={["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"].map((one) => ({
+                      value: one,
+                      label: one,
+                    }))}
+                    onChange={(method) => edit({ method })}
+                  />
+                  <Field
+                    id="api-url"
+                    label="URL"
+                    value={request.url}
+                    onChange={(url) => edit({ url })}
+                  />
                   <span className="sv-spacer" />
                   <Counts items={request.file === undefined ? [] : [request.file]} />
                 </div>
-                <Table<{ key: string; value: string }>
-                  id="api-headers"
-                  label="Headers"
-                  rows={[...request.headers]}
-                  rowKey={(row) => row.key}
-                  empty="This request sends no header of its own."
-                  columns={[
-                    { key: "key", header: "header", monospace: true, cell: (row) => row.key },
-                    { key: "value", header: "value", monospace: true, cell: (row) => row.value },
-                  ]}
+                {/*
+                  The headers, editable (K7). A blank last row is how one is
+                  added, and blanking a name is how one is removed — the same
+                  two gestures a person expects, with no button that only exists
+                  to say "add".
+                */}
+                <div className="sv-headers" id="api-headers" aria-label="Headers">
+                  {[...request.headers, { key: "", value: "" }].map((row, at) => (
+                    <div className="sv-header-row" key={`header-${at}`}>
+                      <Field
+                        id={`api-header-key-${at}`}
+                        label={at === 0 ? "Header" : `Header ${at + 1}`}
+                        hideLabel
+                        value={row.key}
+                        placeholder="header"
+                        onChange={(key) =>
+                          edit({
+                            headers: [...request.headers, { key: "", value: "" }]
+                              .map((one, index) => (index === at ? { ...one, key } : one))
+                              .filter((one) => one.key.trim() !== ""),
+                          })
+                        }
+                      />
+                      <Field
+                        id={`api-header-value-${at}`}
+                        label={at === 0 ? "Value" : `Value ${at + 1}`}
+                        hideLabel
+                        value={row.value}
+                        placeholder="value"
+                        onChange={(value) =>
+                          edit({
+                            headers: [...request.headers, { key: "", value: "" }]
+                              .map((one, index) => (index === at ? { ...one, value } : one))
+                              .filter((one) => one.key.trim() !== ""),
+                          })
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="sv-panel-head">
+                  <span>Request body</span>
+                </div>
+                <textarea
+                  id="api-body"
+                  className="sv-code sv-code-edit"
+                  aria-label="Request body"
+                  spellCheck={false}
+                  value={request.body ?? ""}
+                  onChange={(event) => edit({ body: event.target.value })}
                 />
-                {request.body === undefined ? null : (
-                  <Code label="Request body" lines={request.body.split("\n")} />
-                )}
               </>
             )}
           </div>

@@ -252,12 +252,20 @@ export function Shell(props: ShellProps): React.JSX.Element {
   /* ── actions ───────────────────────────────────────────────────────────── */
 
   const runAction = useCallback(
-    async (id: string): Promise<void> => {
+    async (id: string, extra: Readonly<Record<string, unknown>> = {}): Promise<void> => {
       const action = actionById(id);
       if (action === undefined || state === undefined) return;
       setPaletteOpen(false);
       try {
-        const outcome = await action.run(props.client, { ...params });
+        /*
+         * The screen's own argument, over the parameters (K6, K7).
+         *
+         * `flows.save` needs the text in the editor; `api.save` needs the
+         * request in the form. Neither is a screen parameter — a parameter is
+         * what a screen re-loads with — so the screen passes it here and every
+         * other action is unaffected.
+         */
+        const outcome = await action.run(props.client, { ...params, ...extra });
         setMessage(outcome.message);
         const goTo = outcome.goTo;
         if (goTo !== undefined) {
@@ -356,7 +364,8 @@ export function Shell(props: ShellProps): React.JSX.Element {
     const shared = {
       params,
       actions,
-      onAction: (id: string) => void runAction(id),
+      onAction: (id: string, args?: Readonly<Record<string, unknown>>) =>
+        void runAction(id, args),
       onParams: setParams,
     } as const;
     const evidenceProp = evidence === undefined ? {} : { evidence };
@@ -397,7 +406,8 @@ export function Shell(props: ShellProps): React.JSX.Element {
     const shared = {
       params,
       actions,
-      onAction: (id: string) => void runAction(id),
+      onAction: (id: string, args?: Readonly<Record<string, unknown>>) =>
+        void runAction(id, args),
       onParams: setParams,
     } as const;
     const evidenceProp = evidence === undefined ? {} : { evidence };

@@ -14,7 +14,8 @@
  * available; both are run here, and both are reported.
  */
 import { afterEach, describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { EventEmitter } from "node:events";
@@ -654,4 +655,119 @@ describe("all twelve screens draw in the cockpit (T10.1, T10.2)", () => {
     );
     expect(chosen).toBe("yes");
   });
+});
+
+/**
+ * `e` opens the flow in `$EDITOR`, and what comes back is saved (K6, T11.1).
+ *
+ * The ADE's answer to "the editor edits" is a text area and a Save button; a
+ * terminal's is the editor a person already has. Both run the *same*
+ * `flows.save` action against the same `PUT /flows/:file`, which is what makes
+ * this one feature with two renderings rather than two features.
+ *
+ * `$EDITOR` here is a Node one-liner that appends a line, because what is being
+ * checked is the round trip — the file's text out, the edited text in, the
+ * action called with it — and not anybody's editor.
+ */
+describe("`e` edits the open flow through $EDITOR (K6)", () => {
+  const withEditor = async (
+    script: string,
+    run: () => Promise<void>,
+  ): Promise<void> => {
+    const before = process.env["EDITOR"];
+    const visual = process.env["VISUAL"];
+    const directory = mkdtempSync(join(tmpdir(), "svatah-editor-"));
+    const editor = join(directory, "editor.sh");
+    writeFileSync(
+      editor,
+      `#!/bin/sh\nexec "${process.execPath}" -e '${script}' "$1"\n`,
+      { mode: 0o755 },
+    );
+    process.env["EDITOR"] = editor;
+    delete process.env["VISUAL"];
+    try {
+      await run();
+    } finally {
+      if (before === undefined) delete process.env["EDITOR"];
+      else process.env["EDITOR"] = before;
+      if (visual !== undefined) process.env["VISUAL"] = visual;
+      rmSync(directory, { recursive: true, force: true });
+    }
+  };
+
+  it("hands the file's text to the editor and saves what comes back", async () => {
+    const service = fakeService(FIXTURES);
+    const wrote: Array<{ file: string; text: string }> = [];
+    const recording = {
+      ...service,
+      putFlowsByFile: async (file: string, body?: unknown) => {
+        wrote.push({ file, text: String(body) });
+        return { ok: true, file };
+      },
+    };
+
+    const seen: UiState[] = [];
+    const instance = track(
+      renderApp(
+        <App
+          service={recording}
+          connection={CONNECTION}
+          screen="flows"
+          onState={(one) => seen.push(one)}
+        />,
+      ),
+    );
+    const first = await until(() => seen.at(-1), "the first load");
+    const text = (first.state as { text?: string }).text ?? "";
+    expect(text, "the Flows state carries no text for an editor to open").not.toBe("");
+
+    await withEditor(
+      'require("fs").appendFileSync(process.argv[1], "\\n  Frobnicate the widget\\n")',
+      async () => {
+        instance.stdin.write("e");
+        await until(() => (wrote.length > 0 ? "yes" : undefined), "the save");
+      },
+    );
+
+    expect(wrote).toHaveLength(1);
+    // The *name*, not the project-relative path: `/flows/:file` is rooted at
+    // the flows directory and joins what it is given to it (K6).
+    expect(wrote[0]!.file).not.toContain("/");
+    expect(wrote[0]!.text.startsWith(text)).toBe(true);
+    expect(wrote[0]!.text).toContain("Frobnicate the widget");
+  }, 60_000);
+
+  it("saves nothing when the editor changed nothing", async () => {
+    const service = fakeService(FIXTURES);
+    const wrote: unknown[] = [];
+    const recording = { ...service, putFlowsByFile: async (...args: unknown[]) => {
+      wrote.push(args);
+      return { ok: true };
+    } };
+
+    const seen: UiState[] = [];
+    const instance = track(
+      renderApp(
+        <App
+          service={recording as typeof service}
+          connection={CONNECTION}
+          screen="flows"
+          onState={(one) => seen.push(one)}
+        />,
+      ),
+    );
+    await until(() => seen.at(-1), "the first load");
+
+    await withEditor('void process.argv[1]', async () => {
+      instance.stdin.write("e");
+      const said = await until(
+        () => (seen.at(-1)?.message?.includes("unchanged") === true ? "yes" : undefined),
+        "the cockpit to say the file is unchanged",
+      );
+      expect(said).toBe("yes");
+    });
+    // An editor opened and closed is not an edit; a `PUT` for it would put a new
+    // mtime on a file nobody touched.
+    expect(wrote).toEqual([]);
+  }, 60_000);
 });

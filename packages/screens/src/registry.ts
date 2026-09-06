@@ -88,7 +88,18 @@ const ACTIONS_ONLY: readonly Action[] = [
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.file !== "string") return refused("No flow file is open.");
       if (typeof args["text"] !== "string") return refused("Nothing to save.");
-      const value = await service.putFlowsByFile(args.file, args["text"]);
+      /*
+       * The *name*, not the project-relative path (K6, T11.1).
+       *
+       * `/flows/:file` is rooted at the project's flows directory and joins
+       * what it is given to it, so `flows/simple.flow` asked for
+       * `flows/flows/simple.flow` — and the generated client encodes the
+       * separator, so the route did not even match. `load()` has always sent
+       * the basename to `GET`; this is the same unit, which is why the read
+       * worked and the write did not.
+       */
+      const name = args.file.split("/").pop() ?? args.file;
+      const value = await service.putFlowsByFile(name, args["text"]);
       return ok(`Saved ${args.file}.`, { value });
     },
   },
@@ -348,6 +359,37 @@ const ACTIONS_ONLY: readonly Action[] = [
       if (request === undefined) return refused("Nothing to send.");
       const value = await service.postApiRequest(request);
       return ok("Sent the request.", { value });
+    },
+  },
+  {
+    id: "api.save",
+    label: "Save request",
+    group: "Actions",
+    screen: "api",
+    key: "⌘S",
+    /*
+     * `PUT /api/:name` writes `api/<name>.yaml`, which is the file the CLI's
+     * `api` step reads (K7, T11.1). The Phase 10 verification: "a release
+     * cannot ship an 'editor' that does not edit" — the API screen could send a
+     * saved request and not change one, so the only way to fix a header was a
+     * text editor outside the ADE.
+     */
+    availableWhen: has("request"),
+    async run(service, args): Promise<ActionOutcome> {
+      const request = args["request"];
+      if (typeof request !== "object" || request === null) return refused("Nothing to save.");
+      const name = (request as { name?: unknown }).name;
+      if (typeof name !== "string" || name === "") {
+        return refused("A saved request needs a name.");
+      }
+      /*
+       * The name is the file, not part of the file. `api/<name>.yaml` is keyed
+       * by it, so writing it into the body as well would make a rename look
+       * like it had half happened.
+       */
+      const { name: _dropped, ...body } = request as Record<string, unknown>;
+      const value = await service.putApiByName(name, body);
+      return ok(`Saved ${name}.`, { value });
     },
   },
   {

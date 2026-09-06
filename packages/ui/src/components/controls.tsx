@@ -85,6 +85,17 @@ export interface FieldProps extends Named {
   readonly disabled?: boolean;
   readonly onChange?: (value: string) => void;
   readonly onSubmit?: () => void;
+  /**
+   * Draw the label to a screen reader only, not on the screen (K7).
+   *
+   * For a *row* of fields under one heading — the API screen's headers, where
+   * the columns are labelled once and printing "Header 4" above the fourth row
+   * would be noise. The name is still there and is still the visible column
+   * heading's word, so the accessibility contract of LLD §13.7 holds: every
+   * field has a name a flow sentence can address. A field with no label at all
+   * would fail the desktop snapshot case, and rightly.
+   */
+  readonly hideLabel?: boolean;
 }
 
 /**
@@ -99,7 +110,12 @@ export function Field(props: FieldProps): React.JSX.Element {
   const label = requireNamed("Field", props);
   return (
     <div className="sv-field">
-      <label className="sv-field-label" htmlFor={props.id}>
+      <label
+        className={
+          props.hideLabel === true ? "sv-field-label sv-visually-hidden" : "sv-field-label"
+        }
+        htmlFor={props.id}
+      >
         {label}
       </label>
       <input

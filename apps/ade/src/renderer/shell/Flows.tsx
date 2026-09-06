@@ -18,6 +18,7 @@ import {
   Table,
   TabStrip,
 } from "@svatah/ui";
+import { useEffect, useState } from "react";
 import { ago } from "@svatah/screens";
 import type { Action, FlowsState, ScreenParams } from "@svatah/screens";
 
@@ -25,7 +26,17 @@ export interface FlowsProps {
   readonly state: FlowsState;
   readonly params: ScreenParams;
   readonly actions: readonly Action[];
-  readonly onAction: (id: string) => void;
+  /**
+   * Run an action, with what this screen knows that the parameters do not (K6,
+   * K7, T11.1).
+   *
+   * `flows.save` needs the text in the editor and `api.save` needs the request
+   * in the form, and neither is a *screen parameter*: a parameter is what a
+   * screen re-loads with, and a draft is what has not been saved yet. So a
+   * screen may hand its action the argument only it has, and everything else
+   * still comes from the parameters (LLD §13.7's one action registry).
+   */
+  readonly onAction: (id: string, args?: Readonly<Record<string, unknown>>) => void;
   readonly onParams: (params: ScreenParams) => void;
   readonly tab: "editor" | "plan" | "history";
   readonly onTab: (tab: "editor" | "plan" | "history") => void;
@@ -40,6 +51,45 @@ const rowId = (prefix: string, value: string): string =>
 export function FlowsScreen(props: FlowsProps): React.JSX.Element {
   const { state } = props;
 
+  /*
+   * The draft: what is in the editor but not yet on disk (K6, T11.1).
+   *
+   * Not a screen parameter. A parameter is what the screen *re-loads* with, and
+   * re-loading with a draft would make every keystroke a request; what is
+   * unsaved belongs to the window it is unsaved in. `undefined` means "nothing
+   * has been typed", which is what makes Save unavailable rather than a Save
+   * that writes the file back exactly as it was.
+   */
+  const [draft, setDraft] = useState<string | undefined>(undefined);
+  const file = state.file;
+  // A different file is a different draft. Editing `a.flow`, opening `b.flow`
+  // and pressing Save must not write `a.flow`'s text into `b.flow`.
+  useEffect(() => setDraft(undefined), [file]);
+
+  const dirty = draft !== undefined && draft !== state.text;
+  const save = (): void => {
+    if (draft === undefined) return;
+    props.onAction("flows.save", { text: draft });
+    setDraft(undefined);
+  };
+
+  /*
+   * ⌘S / Ctrl-S, which is what a person's hands do (K6).
+   *
+   * The Shell's own accelerators refuse to fire while a `<textarea>` has focus
+   * — that is the difference between an accelerator and a lost keystroke — and
+   * Save is the one action that has to work from inside the editor.
+   */
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent): void => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "s") return;
+      event.preventDefault();
+      save();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   return (
     <>
       {/* The shared `Toolbar`, so the title floor and the shedding of
@@ -47,10 +97,11 @@ export function FlowsScreen(props: FlowsProps): React.JSX.Element {
       <Toolbar
         state={state}
         actions={props.actions.filter((one) =>
-          ["record.start", "heal.run", "run.flow"].includes(one.id),
+          ["flows.save", "record.start", "heal.run", "run.flow"].includes(one.id),
         )}
-        onAction={props.onAction}
+        onAction={(id, args) => (id === "flows.save" ? save() : props.onAction(id, args))}
         primary="run.flow"
+        {...(dirty ? { beside: <Pill tone="abort" label="unsaved" /> } : {})}
       />
 
       <div className="sv-main">
@@ -103,8 +154,17 @@ export function FlowsScreen(props: FlowsProps): React.JSX.Element {
             tabs={[
               {
                 id: "editor",
-                label: state.file?.split("/").pop() ?? "Editor",
-                content: <Editor state={state} onSelect={(line) => props.onParams({ ...props.params, selected: `line:${line}` })} />,
+                label: `${state.file?.split("/").pop() ?? "Editor"}${dirty ? " •" : ""}`,
+                content: (
+                  <Editor
+                    state={state}
+                    draft={draft}
+                    onEdit={setDraft}
+                    onSelect={(line) =>
+                      props.onParams({ ...props.params, selected: `line:${line}` })
+                    }
+                  />
+                ),
               },
               { id: "plan", label: "Plan", content: <Plan state={state} /> },
               { id: "history", label: "History", content: <History state={state} /> },
@@ -143,14 +203,72 @@ export function FlowsScreen(props: FlowsProps): React.JSX.Element {
 }
 
 /**
- * The editor: every line of the file, with the gutter the last run wrote.
+ * The editor: every line of the file, with the gutter the last run wrote — and
+ * a way to change it (K6, T11.1).
  *
- * A read-only view in Phase 9. `PUT /flows/:file` and the `flows.save` action
- * exist in the model; wiring a text editor to them is T10.1's, and a half-built
- * one that silently dropped a keystroke would be worse than a view that says it
- * is a view.
+ * Phase 9 and Phase 10 shipped this read-only, with a reason: `PUT /flows/:file`
+ * and the `flows.save` action existed in the model, and a half-built editor that
+ * silently dropped a keystroke would be worse than a view that says it is a
+ * view. The Phase 10 verification's K6 makes the other half of that a release
+ * blocker — "a release cannot ship an 'editor' that does not edit" — so here it
+ * is.
+ *
+ * ## Two views of one file, and why they are not one view
+ *
+ * A prose flow's value in the ADE is the *annotation*: the gutter glyph from the
+ * last run, the lint warning on the line, the plan's note. None of that survives
+ * a `<textarea>`, and a per-line contenteditable is a text editor nobody asked
+ * this project to write.
+ *
+ * So: **Read** is the annotated view, and it is what opens. **Edit** is a
+ * textarea holding exactly the text `GET /flows/:file` answered. Saving writes
+ * it back and the screen re-loads, which re-lints — and the lint pane below is
+ * the answer. The one thing that would be wrong is an editor whose text was
+ * *derived* from the annotated lines: a round trip through them loses a trailing
+ * newline the first time anybody saves.
  */
 function Editor({
+  state,
+  draft,
+  onEdit,
+  onSelect,
+}: {
+  readonly state: FlowsState;
+  readonly draft?: string;
+  readonly onEdit: (text: string) => void;
+  readonly onSelect: (line: number) => void;
+}): React.JSX.Element {
+  const editing = draft !== undefined;
+  return (
+    <>
+      <div className="sv-panel-head">
+        <span>{editing ? "Editing" : "Read"}</span>
+        <span className="sv-spacer" />
+        <Button
+          id="flows-edit"
+          label={editing ? "Stop editing" : "Edit"}
+          variant="ghost"
+          onPress={() => onEdit(editing ? (undefined as unknown as string) : state.text)}
+        />
+      </div>
+      {editing ? (
+        <textarea
+          id="flows-editor-text"
+          className="sv-code sv-code-edit"
+          aria-label="Flow text"
+          spellCheck={false}
+          value={draft}
+          onChange={(event) => onEdit(event.target.value)}
+        />
+      ) : (
+        <ReadOnlyEditor state={state} onSelect={onSelect} />
+      )}
+    </>
+  );
+}
+
+/** The annotated view: every line, with what the plan and the last run say. */
+function ReadOnlyEditor({
   state,
   onSelect,
 }: {
@@ -256,7 +374,17 @@ export function FlowsInspector({
   onAction,
 }: {
   readonly state: FlowsState;
-  readonly onAction: (id: string) => void;
+  /**
+   * Run an action, with what this screen knows that the parameters do not (K6,
+   * K7, T11.1).
+   *
+   * `flows.save` needs the text in the editor and `api.save` needs the request
+   * in the form, and neither is a *screen parameter*: a parameter is what a
+   * screen re-loads with, and a draft is what has not been saved yet. So a
+   * screen may hand its action the argument only it has, and everything else
+   * still comes from the parameters (LLD §13.7's one action registry).
+   */
+  readonly onAction: (id: string, args?: Readonly<Record<string, unknown>>) => void;
 }): React.JSX.Element {
   const inspector = state.inspector;
   if (inspector === undefined) {

@@ -27,6 +27,19 @@
  * That distinction is the whole reason this script exists rather than a
  * hand-written fixture. `docs/spec/progress/phase-6.md` states the live gates
  * that remain, and the commands that close them.
+ *
+ * ## The two screens that need a run (T11.1)
+ *
+ * `--screen results` and `--screen run` are *about* a run, and
+ * `evals/fixtures/runs/` is ignored by git and empty in a fresh checkout. So
+ * those two are recorded with one seeded and it is taken out again — the
+ * committed project must not keep it (Draft 2.12 §13.7, P9-F5, and
+ * `tools/repo-checks/test/screen-fixtures.test.ts` fails when it does):
+ *
+ *   node scripts/seed-fixture-run.mjs
+ *   node scripts/record-desktop-tree.mjs --shape both --screen results
+ *   node scripts/record-desktop-tree.mjs --shape both --screen run
+ *   node scripts/seed-fixture-run.mjs --remove
  */
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";

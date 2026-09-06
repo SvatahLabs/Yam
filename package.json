@@ -35,6 +35,7 @@
     "examples": "node scripts/examples-check.mjs",
     "conform:desktop": "node scripts/desktop-conformance.mjs",
     "record:desktop-trees": "node scripts/record-desktop-tree.mjs",
+    "fixture:run": "node scripts/seed-fixture-run.mjs",
     "conform:runtime": "node scripts/runtime-conformance.mjs",
     "fixture:ade-db": "node scripts/build-ade-fixture.mjs",
     "finetune:export": "node packages/cli/dist/bin.js eval finetune export",

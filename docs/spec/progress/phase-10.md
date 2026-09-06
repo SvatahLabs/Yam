@@ -788,3 +788,39 @@ Phase 11.
 artboard draws the URL as text and the method as a pill; `POST /api/request`
 takes an ad-hoc request and the model's `api.send` passes one. Editing a request
 in place needs `PUT /api/:name` wired to a form, which is Phase 11's.
+
+---
+
+## Post-verification corrections (Phase 11, T11.1)
+
+The Phase 10 verification (`phase-10-verification.md`) accepted this phase at
+8.3 / 10 with nine findings. They are fixed on `phase-11`; what follows is where
+each one went, so a reader of *this* file is not left with a list of open
+defects that are closed elsewhere. The evidence is in
+`docs/spec/progress/phase-11.md`.
+
+| Finding | Where it went | Commit |
+|---|---|---|
+| **F1** the packaged ADE runs without a window | The window was made every time. The display was locked, and macOS hides every application's windows from an accessibility client in that state — TextEdit and Notes included. `ax/session` reads `CGSSessionScreenIsLocked` now, the ADE logs its window lifecycle under `SVATAH_ADE_DEBUG=1`, and the gate stops it through a graceful quit route. | `P10-F1` |
+| **F2** three live failures | Window chrome is exempt from the id rule; the palette no longer changes the accessibility tree's shape when it is first opened, which is what stopped `rail-flows` relocalizing; every list screen already opened on its first row and now says so in a test. The live gate is conformant. | `P10-F2` |
+| **F3** the Record toolbar | The title keeps twelve characters, the bar sheds secondary actions into the palette before it gives way, a field in a toolbar is one row, and `availableWhen` is rendered — everywhere, because Flows and Run use the shared toolbar now instead of their own. | `P10-F3` |
+| **F4** the artboards | The Explorer toolbar does not wrap and the Data inspector says `set` alone with a "Read by" list that fits. `pnpm artboards` renders every artboard and measures it, and found three more of the same overflow on artboards approved earlier. | `P10-F4` |
+| **F5** a slow probe misattributed | `ax/session` answers a *state* — `usable`, `locked`, `no-session`, `unknown` — and the gate may name a cause for the middle two only. | `P10-F1` |
+| **F6** `ade:shoot` rewrites the tree | It writes to a temporary directory and says where; `--update` refreshes the committed set. | `P10-F6` |
+| **F7** the suite owns the machine's ADE | `node scripts/package-ade.mjs --test` builds `Svatah ADE Test` into `apps/ade/out-test` with its own bundle id. The suite passes with a product-build ADE open throughout. | `P10-F6, P10-F7` |
+| **F8** spec drift absorbed | Nothing to do: Draft 2.13 recorded it and Draft 2.14 is on `master`. |  |
+| **F9** the cockpit draws past the right edge | The width budget covers every cell, `test/layout.test.ts` states the invariant over ten thousand generated lines, and the flaky screen test polls. | `P10-F9` |
+
+And the two known gaps a release could not ship with:
+
+**K6 — the flow editor edits now.** Read is the annotated view; Edit is a text
+area holding exactly what `GET /flows/:file` answered; Save writes it through
+`PUT /flows/:file` and the screen re-loads, which re-lints. In `svatah ui`, `e`
+opens the file in `$EDITOR` and saves what comes back through the same action.
+
+**K7 — the API screen edits a saved request.** Method, URL, headers and body are
+a form; `api.save` writes `api/<name>.yaml` through `PUT /api/:name`, which is
+the file an `api` step reads.
+
+The other five known gaps stand as written, and `docs/spec/progress/phase-11.md`
+says which of them Phase 11 closed.

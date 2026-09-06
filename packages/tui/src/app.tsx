@@ -13,6 +13,10 @@
  * and nothing else: panes, keys, and a palette drawn with Ink.
  */
 import { Box, Text, useApp, useInput, useStdout } from "ink";
+import { spawn } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import { useCallback, useEffect, useState } from "react";
 import {
   ACTIONS,
@@ -137,6 +141,59 @@ export function App(props: AppProps): React.JSX.Element {
     },
     [props.service],
   );
+
+  /**
+   * Open the flow in `$EDITOR`, and save what comes back (K6, T11.1).
+   *
+   * Ink owns the terminal, so it is *unmounted* for the duration: an editor
+   * drawing into a screen another program is also drawing into is a screen
+   * neither of them owns. `clear()` and a fresh render afterwards put the
+   * cockpit back.
+   *
+   * Nothing is saved when the text comes back unchanged — an editor opened and
+   * closed is not an edit, and a `PUT` for it would put a new mtime on a file
+   * nobody touched.
+   */
+  const editOpenFlow = useCallback(async (): Promise<void> => {
+    if (ui === undefined) return;
+    const file = ui.params["file"] ?? (ui.state as { file?: string }).file;
+    const before = (ui.state as { text?: string }).text;
+    if (typeof file !== "string" || typeof before !== "string") {
+      setUi((one) => (one === undefined ? one : { ...one, message: "No flow file is open." }));
+      return;
+    }
+
+    const editor = process.env["VISUAL"] ?? process.env["EDITOR"] ?? "vi";
+    const scratch = join(mkdtempSync(join(tmpdir(), "svatah-ui-")), file.split("/").pop() ?? "flow");
+    writeFileSync(scratch, before, "utf8");
+
+    setBusy(true);
+    try {
+      const code = await new Promise<number>((done) => {
+        const child = spawn(editor, [scratch], { stdio: "inherit", shell: false });
+        child.on("error", () => done(-1));
+        child.on("exit", (status) => done(status ?? -1));
+      });
+      if (code !== 0) {
+        setUi((one) =>
+          one === undefined ? one : { ...one, message: `${editor} exited with ${code}.` },
+        );
+        return;
+      }
+      const after = readFileSync(scratch, "utf8");
+      if (after === before) {
+        setUi((one) => (one === undefined ? one : { ...one, message: `${file} is unchanged.` }));
+        return;
+      }
+      const action = actionById("flows.save");
+      if (action === undefined) return;
+      const outcome = await action.run(props.service, { ...ui.params, file, text: after });
+      await reload(ui.screen, ui.params, outcome.message);
+    } finally {
+      setBusy(false);
+      rmSync(dirname(scratch), { recursive: true, force: true });
+    }
+  }, [props.service, reload, ui]);
 
   /** Run one action by id, then show the screen it points at. */
   const run = useCallback(
@@ -283,7 +340,20 @@ export function App(props: AppProps): React.JSX.Element {
     const binding = screenById(ui.screen).keys.find(
       (one) => (one.terminal ?? one.key.toLowerCase()) === input,
     );
-    if (binding !== undefined) void run(binding.action);
+    if (binding === undefined) return;
+    /*
+     * `flows.save` in a terminal means "open this in my editor" (K6, T11.1).
+     *
+     * The action is the same one the ADE's Save button runs and it writes
+     * through the same `PUT /flows/:file`; what differs is where the text comes
+     * from. A cockpit that built a modal text editor inside Ink would be a
+     * worse `vi` that nobody asked this project to write.
+     */
+    if (binding.action === "flows.save") {
+      void editOpenFlow();
+      return;
+    }
+    void run(binding.action);
   });
 
   if (ui === undefined) {

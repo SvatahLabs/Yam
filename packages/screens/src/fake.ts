@@ -151,6 +151,7 @@ export function fakeService(responses: FakeResponses = {}): FakeService {
       return { healId: "heal-3" };
     },
     postApiRequest: (body) => wrote("postApiRequest", body),
+    putApiByName: (name, body) => wrote("putApiByName", name, body),
     putData: (body) => wrote("putData", body),
     postMigrate: (body) => wrote("postMigrate", body),
     postTrajectoryCompile: (body) => wrote("postTrajectoryCompile", body),

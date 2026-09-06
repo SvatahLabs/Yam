@@ -119,6 +119,17 @@ export interface FlowsState extends ScreenStateBase {
   /** The open file, project-relative (`flows/…`), when one is open. */
   readonly file?: string;
   readonly lines: readonly FlowLine[];
+  /**
+   * The open file's text, exactly as `GET /flows/:file` answered (K6, T11.1).
+   *
+   * `lines` is the *annotated* view — the gutter, the note, the lint warning —
+   * and it is what a reader reads. This is what an editor edits, and what
+   * `flows.save` sends back to `PUT /flows/:file`. Keeping the two apart is what
+   * lets the ADE draw the annotations beside a `<textarea>` without either of
+   * them being derived from the other and drifting: a round trip through
+   * `lines` would lose a trailing newline the first time somebody saved.
+   */
+  readonly text: string;
   readonly lint: readonly Diagnostic[];
   readonly planHash?: string;
   readonly bindingsHash?: string;
@@ -445,6 +456,7 @@ export const flowsScreen: Screen<FlowsState> = {
       files,
       ...(file === undefined ? {} : { file }),
       lines,
+      text,
       lint: diagnostics,
       ...(compiled.plan?.hash === undefined ? {} : { planHash: compiled.plan.hash }),
       ...(inspector === undefined ? {} : { inspector }),
@@ -460,7 +472,18 @@ function FLOW_KEYS(): readonly Binding[] {
     { action: "run.flow", key: "⌘↵", terminal: "r", description: "Run the selected flow" },
     { action: "record.start", key: "R", terminal: "R", description: "Record the selected flow" },
     { action: "heal.run", key: "H", terminal: "h", description: "Heal the last run" },
-    { action: "flows.save", key: "⌘S", terminal: "^s", description: "Save the open flow" },
+    /*
+     * `e` in the terminal, `⌘S` in the ADE (K6, T11.1).
+     *
+     * The two renderers edit a file the way their own medium does. The ADE has
+     * a text area and a Save button; a terminal has `$EDITOR`, and a cockpit
+     * that built its own modal editor inside Ink would be a worse `vi` nobody
+     * asked for. `svatah ui` opens the file in the editor a person already has,
+     * and saves what comes back through the same `flows.save` action and the
+     * same `PUT /flows/:file` — which is what makes it one action rather than
+     * two features.
+     */
+    { action: "flows.save", key: "⌘S", terminal: "e", description: "Edit the open flow" },
     { action: "flows.compile", key: "⌘B", terminal: "c", description: "Compile and lint" },
   ];
 }

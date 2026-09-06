@@ -1249,3 +1249,131 @@ test("a toolbar that runs out of room sheds into the palette, and says so (P10-F
   }
   await page.keyboard.press("Escape");
 });
+
+/**
+ * K6 — the flow editor edits and saves, and the save is re-linted (T11.1).
+ *
+ * The Phase 10 verification: "a release cannot ship an 'editor' that does not
+ * edit." Phase 9 and Phase 10 shipped this read-only with a reason, and the
+ * reason has run out.
+ *
+ * Driven through the screen's own controls on the packaged application, against
+ * a real service and a real project: Edit, type, Save, and then the *lint pane*
+ * — which is the point of "with lint on save". A flow with a line the compiler
+ * refuses has to come back with a diagnostic on that line, not with a silent
+ * write; and undoing it has to make the diagnostic go away.
+ */
+test("a flow is edited and saved through the ADE, and re-linted (K6)", async () => {
+  page = await livePage();
+
+  /*
+   * The row whose *name* is exactly `simple.flow`, and then a wait for the
+   * editor to be showing it.
+   *
+   * `getByText("simple.flow")` matches a row whose secondary line mentions it,
+   * and clicking a row is a request the screen answers with a load — so a test
+   * that typed into the editor straight afterwards could type into the file it
+   * had just navigated away from.
+   */
+  const open = async (name: string): Promise<void> => {
+    await page.locator("#rail-flows").click();
+    await page
+      .locator("#flows-list .sv-flow-name")
+      .filter({ hasText: new RegExp(`^${name}$`) })
+      .first()
+      .click();
+    await expect(page.locator("#flows-tabs")).toContainText(name, { timeout: 60_000 });
+  };
+
+  await open("simple.flow");
+  await expect(page.locator("#flows-editor")).toBeVisible({ timeout: 60_000 });
+
+  // Read is what opens: the annotated view, with the gutter and the notes.
+  await expect(page.locator("#flows-editor-text")).toHaveCount(0);
+  await page.locator("#flows-edit").click();
+  const editor = page.locator("#flows-editor-text");
+  await expect(editor).toBeVisible();
+
+  const before = await editor.inputValue();
+  expect(before, "the editor opened on an empty file").not.toBe("");
+  // The text is the *file*, not a round trip through the annotated lines: a
+  // line count that disagrees would be an editor that silently reformats.
+  const lines = await page.locator("#flows-editor .sv-code-line").count();
+  expect(before.split("\n").length).toBeGreaterThanOrEqual(lines - 1);
+
+  /*
+   * A step no compiler can bind, appended to the first story. The lint pane has
+   * to say so, on that line, after the save — which is the difference between
+   * "the file was written" and "the project was re-read".
+   */
+  const broken = `${before.trimEnd()}\n  Frobnicate the widget\n`;
+  await editor.fill(broken);
+  await expect(page.locator(".sv-toolbar").getByText("unsaved")).toBeVisible();
+
+  await page.locator("#action-flows-save").click();
+  await expect(page.locator("#status-context")).toContainText(/Saved/, { timeout: 60_000 });
+
+  // Re-linted: the diagnostic is in the pane, and it is about the new line.
+  await expect
+    .poll(async () => await page.locator("#flows-lint li").allTextContents(), { timeout: 60_000 })
+    .toEqual(expect.arrayContaining([expect.stringContaining("Frobnicate")]));
+
+  // On disk, which is what `PUT /flows/:file` is for: re-opened from the
+  // service, the file has the line.
+  await page.locator("#rail-runs").click();
+  await open("simple.flow");
+  await page.locator("#flows-edit").click();
+  await expect(page.locator("#flows-editor-text")).toHaveValue(broken);
+
+  // And put back, so the fixtures project this suite copied is as it was.
+  await page.locator("#flows-editor-text").fill(before);
+  await page.locator("#action-flows-save").click();
+  await expect(page.locator("#status-context")).toContainText(/Saved/, { timeout: 60_000 });
+  await expect
+    .poll(async () => await page.locator("#flows-lint li").allTextContents(), { timeout: 60_000 })
+    .not.toEqual(expect.arrayContaining([expect.stringContaining("Frobnicate")]));
+});
+
+/**
+ * K7 — the API screen edits a saved request and saves it (T11.1).
+ *
+ * Same finding, other screen: the API client could *send* a saved request and
+ * not change one, so the only way to fix a header was a text editor outside the
+ * ADE. `PUT /api/:name` writes `api/<name>.yaml`, which is the file an `api`
+ * step reads — so what is edited here is what a run will send.
+ */
+test("a saved API request is edited and saved through the ADE (K7)", async () => {
+  page = await livePage();
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
+  await page.locator("#palette-go-api").click();
+  await expect(page.locator("#api-requests")).toBeVisible({ timeout: 60_000 });
+
+  const first = page.locator("#api-requests tbody tr").first();
+  await first.click();
+  await expect(page.locator("#api-url")).toBeVisible();
+
+  const url = await page.locator("#api-url").inputValue();
+  expect(url, "the API screen opened on a request with no URL").not.toBe("");
+
+  // A header the request did not have: the blank last row is how one is added.
+  const rows = await page.locator("#api-headers .sv-header-row").count();
+  await page.locator(`#api-header-key-${rows - 1}`).fill("X-Svatah-Test");
+  await page.locator(`#api-header-value-${rows - 1}`).fill("k7");
+  await expect(page.locator(".sv-toolbar").getByText("unsaved")).toBeVisible();
+
+  await page.locator("#action-api-save").click();
+  await expect(page.locator("#status-context")).toContainText(/Saved/, { timeout: 60_000 });
+
+  // Re-read from the service: it is on disk, in `api/<name>.yaml`.
+  await page.locator("#rail-flows").click();
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
+  await page.locator("#palette-go-api").click();
+  await page.locator("#api-requests tbody tr").first().click();
+  await expect
+    .poll(
+      async () =>
+        await page.locator("#api-headers .sv-header-row input[value='X-Svatah-Test']").count(),
+      { timeout: 60_000 },
+    )
+    .toBe(1);
+});

@@ -36,7 +36,17 @@ export interface ToolbarProps {
   readonly state: ScreenStateBase;
   /** The screen's own actions, already filtered and in the order it wants them. */
   readonly actions: readonly Action[];
-  readonly onAction: (id: string) => void;
+  /**
+   * Run an action, with what this screen knows that the parameters do not (K6,
+   * K7, T11.1).
+   *
+   * `flows.save` needs the text in the editor and `api.save` needs the request
+   * in the form, and neither is a *screen parameter*: a parameter is what a
+   * screen re-loads with, and a draft is what has not been saved yet. So a
+   * screen may hand its action the argument only it has, and everything else
+   * still comes from the parameters (LLD §13.7's one action registry).
+   */
+  readonly onAction: (id: string, args?: Readonly<Record<string, unknown>>) => void;
   /** The action drawn as the primary one, when the screen has a primary. */
   readonly primary?: string;
   /** The action drawn as dangerous, when it is live. */

@@ -17,7 +17,17 @@ export interface RunsProps {
   readonly state: RunsState;
   readonly params: ScreenParams;
   readonly actions: readonly Action[];
-  readonly onAction: (id: string) => void;
+  /**
+   * Run an action, with what this screen knows that the parameters do not (K6,
+   * K7, T11.1).
+   *
+   * `flows.save` needs the text in the editor and `api.save` needs the request
+   * in the form, and neither is a *screen parameter*: a parameter is what a
+   * screen re-loads with, and a draft is what has not been saved yet. So a
+   * screen may hand its action the argument only it has, and everything else
+   * still comes from the parameters (LLD §13.7's one action registry).
+   */
+  readonly onAction: (id: string, args?: Readonly<Record<string, unknown>>) => void;
   readonly onParams: (params: ScreenParams) => void;
   /** The failing step's screenshot, as an object URL, when it has one. */
   readonly evidence?: string;

@@ -658,3 +658,46 @@
 .sv-welcome-log summary {
   cursor: default;
 }
+
+/*
+ * The flow editor's text view (K6, T11.1).
+ *
+ * The same monospace, the same line height and the same background as the
+ * annotated view above it, so switching between Read and Edit is the same file
+ * rather than two different-looking things. `resize: none` because the pane is
+ * sized by the layout: a textarea a person could drag out of its panel is the
+ * toolbar defect of P10-F3 in another place.
+ */
+.sv-code-edit {
+  display: block;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  border: 0;
+  outline: 0;
+  resize: none;
+  padding: 8px 12px;
+  background: var(--bg1);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 20px;
+  tab-size: 2;
+}
+
+.sv-code-edit:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/*
+ * The API screen's headers, editable (K7, T11.1).
+ *
+ * A row per header, the name and the value side by side, and a blank last row
+ * that is how one is added. `1fr 2fr` because a value is longer than a name and
+ * a `Content-Type` that wrapped would be a header nobody could read.
+ */
+.sv-headers { padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+.sv-header-row { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; }
+.sv-header-row .sv-field { min-width: 0; }
+.sv-header-row .sv-input { min-width: 0; width: 100%; }

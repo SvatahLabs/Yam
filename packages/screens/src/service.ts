@@ -74,6 +74,8 @@ export interface ScreenService {
   getApi(): Promise<unknown>;
   /** `POST /api/request` */
   postApiRequest(body?: unknown): Promise<unknown>;
+  /** `PUT /api/{name}` — save a named request back to `api/<name>.yaml` (K7). */
+  putApiByName(name: string, body?: unknown): Promise<unknown>;
   /** `GET /data` */
   getData(): Promise<unknown>;
   /** `PUT /data` */

@@ -27,14 +27,14 @@
       "label": "Save flow",
       "group": "Actions",
       "screen": "flows",
-      "key": "\u2318S"
+      "key": "⌘S"
     },
     {
       "id": "run.flow",
       "label": "Run",
       "group": "Actions",
       "screen": "flows",
-      "key": "\u2318\u21b5",
+      "key": "⌘↵",
       "cli": "svatah run --flow <file>"
     },
     {
@@ -49,7 +49,7 @@
       "label": "Run again",
       "group": "Actions",
       "screen": "run",
-      "key": "\u2318\u21b5",
+      "key": "⌘↵",
       "cli": "svatah run --flow <file>"
     },
     {
@@ -142,7 +142,14 @@
       "label": "Send request",
       "group": "Actions",
       "screen": "api",
-      "key": "\u2318\u21b5"
+      "key": "⌘↵"
+    },
+    {
+      "id": "api.save",
+      "label": "Save request",
+      "group": "Actions",
+      "screen": "api",
+      "key": "⌘S"
     },
     {
       "id": "data.save",
