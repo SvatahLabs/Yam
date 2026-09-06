@@ -20,11 +20,12 @@
       "role": "AXWebArea",
       "description": "Svatah ADE",
       "enabled": true,
+      "focused": true,
       "box": [
         0,
         0,
         1280,
-        821
+        828
       ]
     },
     {
@@ -35,7 +36,7 @@
         8,
         8,
         1264,
-        821
+        828
       ]
     },
     {
@@ -46,7 +47,7 @@
         8,
         8,
         1264,
-        821
+        828
       ],
       "domIdentifier": "root"
     },
@@ -221,7 +222,7 @@
     {
       "parent": 17,
       "role": "AXStaticText",
-      "title": "127.0.0.1:57371",
+      "title": "127.0.0.1:62171",
       "enabled": true,
       "box": [
         1166,
@@ -233,7 +234,7 @@
     {
       "parent": 20,
       "role": "AXStaticText",
-      "title": "127.0.0.1:57371",
+      "title": "127.0.0.1:62171",
       "enabled": true
     },
     {
@@ -246,7 +247,7 @@
         8,
         52,
         220,
-        749
+        756
       ],
       "domIdentifier": "rail"
     },
@@ -522,7 +523,7 @@
       ],
       "box": [
         16,
-        729,
+        736,
         203,
         31
       ],
@@ -535,7 +536,7 @@
       "enabled": true,
       "box": [
         24,
-        736,
+        743,
         158,
         17
       ]
@@ -556,7 +557,7 @@
       ],
       "box": [
         16,
-        760,
+        767,
         203,
         31
       ],
@@ -569,7 +570,7 @@
       "enabled": true,
       "box": [
         24,
-        767,
+        774,
         48,
         17
       ]
@@ -590,7 +591,7 @@
         228,
         52,
         684,
-        749
+        756
       ],
       "domIdentifier": "workspace"
     },
@@ -884,7 +885,7 @@
         228,
         93,
         301,
-        708
+        715
       ],
       "domIdentifier": "record-flows-pane"
     },
@@ -1278,7 +1279,7 @@
         529,
         93,
         383,
-        488
+        495
       ],
       "domIdentifier": "record-session"
     },
@@ -1431,7 +1432,7 @@
       "enabled": true,
       "box": [
         545,
-        594,
+        601,
         64,
         15
       ]
@@ -1449,7 +1450,7 @@
       "enabled": true,
       "box": [
         827,
-        594,
+        601,
         7,
         15
       ]
@@ -1467,7 +1468,7 @@
       "enabled": true,
       "box": [
         834,
-        594,
+        601,
         53,
         15
       ]
@@ -1485,7 +1486,7 @@
       "enabled": true,
       "box": [
         529,
-        621,
+        628,
         383,
         28
       ],
@@ -1497,7 +1498,7 @@
       "enabled": true,
       "box": [
         529,
-        625,
+        632,
         383,
         20
       ]
@@ -1509,7 +1510,7 @@
       "enabled": true,
       "box": [
         545,
-        627,
+        634,
         218,
         17
       ]
@@ -1530,7 +1531,7 @@
         912,
         52,
         360,
-        749
+        756
       ],
       "domIdentifier": "inspector"
     },
@@ -1627,7 +1628,7 @@
       "enabled": true,
       "box": [
         8,
-        801,
+        808,
         1264,
         28
       ]
@@ -1638,7 +1639,7 @@
       "enabled": true,
       "box": [
         24,
-        807,
+        814,
         180,
         17
       ],
@@ -1651,7 +1652,7 @@
       "enabled": true,
       "box": [
         24,
-        808,
+        815,
         180,
         15
       ]
@@ -1669,7 +1670,7 @@
       "enabled": true,
       "box": [
         1117,
-        809,
+        816,
         13,
         14
       ]
@@ -1687,7 +1688,7 @@
       "enabled": true,
       "box": [
         1136,
-        808,
+        815,
         60,
         15
       ]
@@ -1705,7 +1706,7 @@
       "enabled": true,
       "box": [
         1218,
-        809,
+        816,
         6,
         14
       ]
@@ -1723,7 +1724,7 @@
       "enabled": true,
       "box": [
         1230,
-        808,
+        815,
         26,
         15
       ]
@@ -1733,6 +1734,51 @@
       "role": "AXStaticText",
       "title": "keys",
       "enabled": true
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXCloseButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        8,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXMinimizeButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        28,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXZoomButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        48,
+        8,
+        14,
+        14
+      ]
     }
   ]
 }

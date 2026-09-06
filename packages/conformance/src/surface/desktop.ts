@@ -31,7 +31,7 @@
  * both is the evidence for that requirement; a case that had to ask about
  * `AXButton` would be evidence against it.
  */
-import { isInteractiveRole } from "@svatah/surface";
+import { isInteractiveRole, isWindowChrome } from "@svatah/surface";
 import type { CaseContext, ConformanceCase, DesktopHealing } from "./types.js";
 
 interface Node {
@@ -223,14 +223,43 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
        * permanently, because the name is the only thing a binding could have
        * matched on.
        */
+      /*
+       * Standard window chrome is exempt (P10-F2).
+       *
+       * The window's close, minimise and zoom buttons are the *window
+       * manager's*, not the application's: macOS creates them, names them by
+       * subrole (P8-F3's table), and gives an application no way to put an
+       * `AXIdentifier` or a DOM `id` on them. Without this the rule fails on
+       * every macOS window that has ever existed, which is a rule about the
+       * platform rather than about the ADE — and a live gate that can never go
+       * green teaches a reader to ignore it.
+       *
+       * The exemption is a closed list of controls the platform owns
+       * (`isWindowChrome`), read from the adapter's `native` bag. Not a name
+       * pattern: a button the *application* labelled "Close" is the
+       * application's, and it still has to carry an id.
+       */
       const unidentified = nodes.filter(
         (node) =>
           isInteractiveRole(node.role) &&
+          !isWindowChrome(node) &&
           (node.native?.["automationId"] ?? "").trim() === "",
       );
       check("every interactive control has an automationId", unidentified.length === 0, {
-        expected: "0 controls with a name and no id",
+        expected: "0 controls with a name and no id, window chrome aside",
         actual: unidentified.map((node) => `${node.role} "${node.name ?? ""}"`).slice(0, 20),
+      });
+
+      /*
+       * And the exemption is *used*, not merely available: a window without its
+       * own three buttons in the snapshot is a snapshot that stopped reading
+       * the window frame, which is how a tree read could silently shrink and
+       * still pass everything above.
+       */
+      const chrome = nodes.filter((node) => isWindowChrome(node));
+      check("the window's own controls are in the snapshot", chrome.length >= 3, {
+        expected: ">= 3 window-chrome controls (close, minimise, zoom)",
+        actual: chrome.map((node) => `${node.role} "${node.name ?? ""}"`).slice(0, 8),
       });
 
       equals("the snapshot hash is a hash", /^[0-9a-f]{16,}$/.test(snapshot.hash), true);
@@ -591,20 +620,43 @@ async function healingCase(
 
   for (const subject of subjects) {
     /*
-     * Look before navigating (T10.3).
+     * The subject's own screen, at every variant, always (P10-F2).
      *
-     * The control may already be on the window the gate launched — a rail item
-     * is on every screen — and a case that navigated first would press a rail
-     * row or open the palette for no reason, and would fail outright where the
-     * window is all there is (`packages/cli/test/desktop-healing.test.ts`
-     * replays one recorded tree per pass). So: snapshot, and go somewhere only
-     * if the subject is not here.
+     * T10.3 had this look first and navigate only if the subject was not on the
+     * window, because a rail item is on every screen and pressing a rail row
+     * for nothing is waste. It cost the live gate its healing case. The
+     * variant-0 pass runs after `ade.inspector`, which leaves the ADE on the
+     * Bindings screen, and the variant-1 pass runs alone on the Flows screen —
+     * so the fingerprint was recorded through one ancestry
+     * (`…/document/group/group/navigation/button`) and matched against another
+     * (`…/document/group/navigation/button`), and `rolePathSim` fell below 1
+     * for a reason that has nothing to do with the rename the case measures.
+     *
+     * With `text` at 0 by construction — the variant renames the control — the
+     * most a proposal can score is 0.75 against a threshold of 0.72, so a
+     * quarter of a point of role-path similarity is the whole margin. A
+     * measurement whose before and after are taken on different screens is not
+     * measuring the variant.
+     *
+     * The cost is one rail click per pass, which is a no-op when the screen is
+     * already open and a no-op again in `packages/cli/test/desktop-healing.test.ts`,
+     * where one recorded tree answers every read.
+     *
+     * A **palette** route is still taken only when the subject is not already
+     * here, and that is not a compromise: opening the palette is a modal
+     * detour, and the fixtures the replay test serves are single screens with
+     * no palette in them at all. The screen a palette subject lives on is
+     * reached the same way at both variants either way, because the subject is
+     * on exactly one screen and the pass has to go there to find it.
      */
-    const here = (await context.surface.snapshot()).nodes as readonly Node[];
+    const viaPalette = subject.screen.startsWith("palette:");
+    const here = viaPalette
+      ? ((await context.surface.snapshot()).nodes as readonly Node[])
+      : undefined;
     const nodes =
-      byKey(here, subject.key) !== undefined
+      here !== undefined && byKey(here, subject.key) !== undefined
         ? here
-        : subject.screen.startsWith("palette:")
+        : viaPalette
           ? await openFromPalette(context, subject.screen.slice("palette:".length))
           : await openScreen(context, subject.screen);
     const live = byKey(nodes, subject.key);

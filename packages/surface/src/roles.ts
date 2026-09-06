@@ -203,3 +203,57 @@ export const INTERACTIVE_ROLES: ReadonlySet<string> = new Set([
 export function isInteractiveRole(role: string): boolean {
   return INTERACTIVE_ROLES.has(role);
 }
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Window chrome (P10-F2, LLD §7.5, §13.7)
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * The window's own buttons — close, minimise, zoom, full screen, collapse.
+ *
+ * They are interactive controls with accessible names, and they belong to the
+ * *window manager*, not to the application: an application cannot give them an
+ * `automationId` on any platform, because it does not create them. macOS names
+ * them by subrole (`AXCloseButton`, and P8-F3's table), and Windows gives them
+ * the fixed automation ids below.
+ *
+ * P10-F2: the desktop snapshot case's id rule fails on all three on every macOS
+ * window in existence, which would make "every interactive control has an
+ * automationId" a rule no application could ever satisfy. So the rule exempts
+ * them — and only them: the exemption is a closed list of things the platform
+ * owns, not a name pattern an application could accidentally fall into.
+ */
+export const AX_WINDOW_CHROME_SUBROLES: ReadonlySet<string> = new Set([
+  "AXCloseButton",
+  "AXMinimizeButton",
+  "AXZoomButton",
+  "AXFullScreenButton",
+  "AXCollapseButton",
+]);
+
+/** What Windows calls the same three, as `AutomationId`s. */
+export const UIA_WINDOW_CHROME_IDS: ReadonlySet<string> = new Set([
+  "Close",
+  "Minimize",
+  "Maximize",
+  "Restore",
+  "SystemMenuBar",
+]);
+
+/**
+ * Is this snapshot node one of the window manager's own controls?
+ *
+ * Reads the adapter's `native` bag rather than the node's name, because a name
+ * is the application's to choose and a subrole or a system automation id is
+ * not: a button an application labelled "Close" is the application's, and this
+ * must not excuse it from carrying an id.
+ */
+export function isWindowChrome(node: {
+  readonly native?: Readonly<Record<string, string>> | undefined;
+}): boolean {
+  const native = node.native ?? {};
+  const subrole = native["axSubrole"];
+  if (subrole !== undefined && AX_WINDOW_CHROME_SUBROLES.has(subrole)) return true;
+  const id = native["automationId"];
+  return id !== undefined && UIA_WINDOW_CHROME_IDS.has(id);
+}

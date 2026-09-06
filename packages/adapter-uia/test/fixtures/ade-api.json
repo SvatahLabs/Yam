@@ -231,7 +231,7 @@
       "parent": 16,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "127.0.0.1:57371",
+      "name": "127.0.0.1:62171",
       "isEnabled": true,
       "box": [
         1166,
@@ -244,7 +244,7 @@
       "parent": 19,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "127.0.0.1:57371",
+      "name": "127.0.0.1:62171",
       "isEnabled": true
     },
     {
@@ -1946,6 +1946,57 @@
       "className": "Chrome_RenderWidgetHostHWND",
       "name": "keys",
       "isEnabled": true
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Close",
+      "automationId": "Close",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1180,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Minimize",
+      "automationId": "Minimize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1204,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Maximize",
+      "automationId": "Maximize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1228,
+        4,
+        20,
+        20
+      ]
     }
   ]
 }

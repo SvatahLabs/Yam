@@ -25,7 +25,7 @@
         0,
         0,
         1280,
-        828
+        821
       ]
     },
     {
@@ -36,7 +36,7 @@
         8,
         8,
         1264,
-        828
+        821
       ],
       "domIdentifier": "root"
     },
@@ -211,7 +211,7 @@
     {
       "parent": 16,
       "role": "AXStaticText",
-      "title": "127.0.0.1:57371",
+      "title": "127.0.0.1:62031",
       "enabled": true,
       "box": [
         1166,
@@ -223,7 +223,7 @@
     {
       "parent": 19,
       "role": "AXStaticText",
-      "title": "127.0.0.1:57371",
+      "title": "127.0.0.1:62031",
       "enabled": true
     },
     {
@@ -236,7 +236,7 @@
         8,
         52,
         220,
-        756
+        749
       ],
       "domIdentifier": "rail"
     },
@@ -512,7 +512,7 @@
       ],
       "box": [
         16,
-        736,
+        729,
         203,
         31
       ],
@@ -525,7 +525,7 @@
       "enabled": true,
       "box": [
         24,
-        743,
+        736,
         158,
         17
       ]
@@ -546,7 +546,7 @@
       ],
       "box": [
         16,
-        767,
+        760,
         203,
         31
       ],
@@ -559,7 +559,7 @@
       "enabled": true,
       "box": [
         24,
-        774,
+        767,
         48,
         17
       ]
@@ -580,7 +580,7 @@
         228,
         52,
         684,
-        756
+        749
       ],
       "domIdentifier": "workspace"
     },
@@ -871,7 +871,7 @@
     {
       "parent": 77,
       "role": "AXCell",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "enabled": true,
       "box": [
         321,
@@ -883,7 +883,7 @@
     {
       "parent": 81,
       "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "enabled": true,
       "box": [
         333,
@@ -901,7 +901,7 @@
     {
       "parent": 82,
       "role": "AXStaticText",
-      "title": "cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "title": "cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "enabled": true
     },
     {
@@ -1872,7 +1872,7 @@
         912,
         52,
         360,
-        756
+        749
       ],
       "domIdentifier": "inspector"
     },
@@ -2373,7 +2373,7 @@
       "enabled": true,
       "box": [
         8,
-        808,
+        801,
         1264,
         28
       ]
@@ -2384,8 +2384,8 @@
       "enabled": true,
       "box": [
         24,
-        814,
-        630,
+        807,
+        604,
         17
       ],
       "domIdentifier": "status-context"
@@ -2393,19 +2393,19 @@
     {
       "parent": 235,
       "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "enabled": true,
       "box": [
         24,
-        815,
-        630,
+        808,
+        604,
         15
       ]
     },
     {
       "parent": 236,
       "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "enabled": true
     },
     {
@@ -2415,7 +2415,7 @@
       "enabled": true,
       "box": [
         1117,
-        816,
+        809,
         13,
         14
       ]
@@ -2433,7 +2433,7 @@
       "enabled": true,
       "box": [
         1136,
-        815,
+        808,
         60,
         15
       ]
@@ -2451,7 +2451,7 @@
       "enabled": true,
       "box": [
         1218,
-        816,
+        809,
         6,
         14
       ]
@@ -2469,7 +2469,7 @@
       "enabled": true,
       "box": [
         1230,
-        815,
+        808,
         26,
         15
       ]
@@ -2479,6 +2479,51 @@
       "role": "AXStaticText",
       "title": "keys",
       "enabled": true
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXCloseButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        8,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXMinimizeButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        28,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXZoomButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        48,
+        8,
+        14,
+        14
+      ]
     }
   ]
 }

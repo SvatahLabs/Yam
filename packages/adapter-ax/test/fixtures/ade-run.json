@@ -222,7 +222,7 @@
     {
       "parent": 17,
       "role": "AXStaticText",
-      "title": "127.0.0.1:57371",
+      "title": "127.0.0.1:62171",
       "enabled": true,
       "box": [
         1166,
@@ -234,7 +234,7 @@
     {
       "parent": 20,
       "role": "AXStaticText",
-      "title": "127.0.0.1:57371",
+      "title": "127.0.0.1:62171",
       "enabled": true
     },
     {
@@ -676,7 +676,7 @@
     {
       "parent": 53,
       "role": "AXStaticText",
-      "title": "test behavior · invoker user via cli · 0.73 s",
+      "title": "test behavior · invoker user via cli · 0.88 s",
       "enabled": true,
       "box": [
         354,
@@ -688,7 +688,7 @@
     {
       "parent": 63,
       "role": "AXStaticText",
-      "title": "test behavior · invoker user via cli · 0.73 s",
+      "title": "test behavior · invoker user via cli · 0.88 s",
       "enabled": true
     },
     {
@@ -1237,7 +1237,7 @@
     {
       "parent": 118,
       "role": "AXButton",
-      "title": "✓ Click the Book a slot link testid #0 66 ms",
+      "title": "✓ Click the Book a slot link testid #0 84 ms",
       "enabled": true,
       "actions": [
         "AXPress"
@@ -1319,7 +1319,7 @@
     {
       "parent": 119,
       "role": "AXStaticText",
-      "title": "66 ms",
+      "title": "84 ms",
       "enabled": true,
       "box": [
         863,
@@ -1331,13 +1331,13 @@
     {
       "parent": 127,
       "role": "AXStaticText",
-      "title": "66 ms",
+      "title": "84 ms",
       "enabled": true
     },
     {
       "parent": 118,
       "role": "AXButton",
-      "title": "✓ Type \"Indiranagar\" into the location field testid #0 56 ms",
+      "title": "✓ Type \"Indiranagar\" into the location field testid #0 58 ms",
       "enabled": true,
       "actions": [
         "AXPress"
@@ -1431,7 +1431,7 @@
     {
       "parent": 129,
       "role": "AXStaticText",
-      "title": "56 ms",
+      "title": "58 ms",
       "enabled": true,
       "box": [
         863,
@@ -1443,13 +1443,13 @@
     {
       "parent": 139,
       "role": "AXStaticText",
-      "title": "56 ms",
+      "title": "58 ms",
       "enabled": true
     },
     {
       "parent": 118,
       "role": "AXButton",
-      "title": "✓ Click the Book now button testid #0 34 ms",
+      "title": "✓ Click the Book now button testid #0 45 ms",
       "enabled": true,
       "actions": [
         "AXPress"
@@ -1531,7 +1531,7 @@
     {
       "parent": 141,
       "role": "AXStaticText",
-      "title": "34 ms",
+      "title": "45 ms",
       "enabled": true,
       "box": [
         863,
@@ -1543,13 +1543,13 @@
     {
       "parent": 149,
       "role": "AXStaticText",
-      "title": "34 ms",
+      "title": "45 ms",
       "enabled": true
     },
     {
       "parent": 118,
       "role": "AXButton",
-      "title": "✓ Remember the text of the booking reference as reference = BK-10428 4 ms",
+      "title": "✓ Remember the text of the booking reference as reference = BK-10428 9 ms",
       "enabled": true,
       "actions": [
         "AXPress"
@@ -1643,7 +1643,7 @@
     {
       "parent": 151,
       "role": "AXStaticText",
-      "title": "4 ms",
+      "title": "9 ms",
       "enabled": true,
       "box": [
         870,
@@ -1655,13 +1655,13 @@
     {
       "parent": 161,
       "role": "AXStaticText",
-      "title": "4 ms",
+      "title": "9 ms",
       "enabled": true
     },
     {
       "parent": 118,
       "role": "AXButton",
-      "title": "✗ Click the pay button locator 58 ms",
+      "title": "✗ Click the pay button locator 110 ms",
       "enabled": true,
       "actions": [
         "AXPress"
@@ -1728,7 +1728,7 @@
       "title": "locator",
       "enabled": true,
       "box": [
-        800,
+        793,
         217,
         46,
         15
@@ -1743,19 +1743,19 @@
     {
       "parent": 163,
       "role": "AXStaticText",
-      "title": "58 ms",
+      "title": "110 ms",
       "enabled": true,
       "box": [
-        863,
+        856,
         217,
-        33,
+        40,
         15
       ]
     },
     {
       "parent": 171,
       "role": "AXStaticText",
-      "title": "58 ms",
+      "title": "110 ms",
       "enabled": true
     },
     {
@@ -1833,7 +1833,7 @@
     {
       "parent": 118,
       "role": "AXButton",
-      "title": "✓ Click the cancel booking button testid #0 37 ms",
+      "title": "✓ Click the cancel booking button testid #0 44 ms",
       "enabled": true,
       "actions": [
         "AXPress"
@@ -1927,7 +1927,7 @@
     {
       "parent": 183,
       "role": "AXStaticText",
-      "title": "37 ms",
+      "title": "44 ms",
       "enabled": true,
       "box": [
         863,
@@ -1939,13 +1939,13 @@
     {
       "parent": 193,
       "role": "AXStaticText",
-      "title": "37 ms",
+      "title": "44 ms",
       "enabled": true
     },
     {
       "parent": 118,
       "role": "AXButton",
-      "title": "✓ The booking reference should say {I want to book and then fail.reference} testid #0 6 ms",
+      "title": "✓ The booking reference should say {I want to book and then fail.reference} testid #0 11 ms",
       "enabled": true,
       "actions": [
         "AXPress"
@@ -1996,7 +1996,7 @@
       "box": [
         571,
         362,
-        216,
+        209,
         16
       ]
     },
@@ -2024,7 +2024,7 @@
       "title": "testid #0",
       "enabled": true,
       "box": [
-        800,
+        794,
         362,
         59,
         15
@@ -2039,19 +2039,19 @@
     {
       "parent": 195,
       "role": "AXStaticText",
-      "title": "6 ms",
+      "title": "11 ms",
       "enabled": true,
       "box": [
-        870,
+        863,
         362,
-        26,
+        33,
         15
       ]
     },
     {
       "parent": 205,
       "role": "AXStaticText",
-      "title": "6 ms",
+      "title": "11 ms",
       "enabled": true
     },
     {
@@ -2236,7 +2236,7 @@
     {
       "parent": 225,
       "role": "AXStaticText",
-      "title": "00.000",
+      "title": "00.001",
       "enabled": true,
       "box": [
         545,
@@ -2248,7 +2248,7 @@
     {
       "parent": 226,
       "role": "AXStaticText",
-      "title": "00.000",
+      "title": "00.001",
       "enabled": true
     },
     {
@@ -2301,7 +2301,7 @@
     {
       "parent": 232,
       "role": "AXStaticText",
-      "title": "00.424",
+      "title": "00.470",
       "enabled": true,
       "box": [
         545,
@@ -2313,7 +2313,7 @@
     {
       "parent": 233,
       "role": "AXStaticText",
-      "title": "00.424",
+      "title": "00.470",
       "enabled": true
     },
     {
@@ -2366,7 +2366,7 @@
     {
       "parent": 239,
       "role": "AXStaticText",
-      "title": "00.426",
+      "title": "00.473",
       "enabled": true,
       "box": [
         545,
@@ -2378,7 +2378,7 @@
     {
       "parent": 240,
       "role": "AXStaticText",
-      "title": "00.426",
+      "title": "00.473",
       "enabled": true
     },
     {
@@ -2402,7 +2402,7 @@
     {
       "parent": 239,
       "role": "AXStaticText",
-      "title": "ok · 2 ms",
+      "title": "ok · 3 ms",
       "enabled": true,
       "box": [
         685,
@@ -2414,7 +2414,7 @@
     {
       "parent": 244,
       "role": "AXStaticText",
-      "title": "ok · 2 ms",
+      "title": "ok · 3 ms",
       "enabled": true
     },
     {
@@ -2431,7 +2431,7 @@
     {
       "parent": 246,
       "role": "AXStaticText",
-      "title": "00.438",
+      "title": "00.494",
       "enabled": true,
       "box": [
         545,
@@ -2443,7 +2443,7 @@
     {
       "parent": 247,
       "role": "AXStaticText",
-      "title": "00.438",
+      "title": "00.494",
       "enabled": true
     },
     {
@@ -2467,7 +2467,7 @@
     {
       "parent": 246,
       "role": "AXStaticText",
-      "title": "nav.book-a-slot-link · testid \"booking-link\" · matched 1 · ok · 11 ms",
+      "title": "nav.book-a-slot-link · testid \"booking-link\" · matched 1 · ok · 21 ms",
       "enabled": true,
       "box": [
         685,
@@ -2479,7 +2479,7 @@
     {
       "parent": 251,
       "role": "AXStaticText",
-      "title": "nav.book-a-slot-link · testid \"booking-link\" · matched 1 · ok · 11 ms",
+      "title": "nav.book-a-slot-link · testid \"booking-link\" · matched 1 · ok · 21 ms",
       "enabled": true
     },
     {
@@ -2496,7 +2496,7 @@
     {
       "parent": 253,
       "role": "AXStaticText",
-      "title": "00.491",
+      "title": "00.554",
       "enabled": true,
       "box": [
         545,
@@ -2508,7 +2508,7 @@
     {
       "parent": 254,
       "role": "AXStaticText",
-      "title": "00.491",
+      "title": "00.554",
       "enabled": true
     },
     {
@@ -2532,7 +2532,7 @@
     {
       "parent": 253,
       "role": "AXStaticText",
-      "title": "click · h0 · ok · 53 ms",
+      "title": "click · h0 · ok · 60 ms",
       "enabled": true,
       "box": [
         685,
@@ -2544,7 +2544,7 @@
     {
       "parent": 258,
       "role": "AXStaticText",
-      "title": "click · h0 · ok · 53 ms",
+      "title": "click · h0 · ok · 60 ms",
       "enabled": true
     },
     {
@@ -2561,7 +2561,7 @@
     {
       "parent": 260,
       "role": "AXStaticText",
-      "title": "00.522",
+      "title": "00.574",
       "enabled": true,
       "box": [
         545,
@@ -2573,7 +2573,7 @@
     {
       "parent": 261,
       "role": "AXStaticText",
-      "title": "00.522",
+      "title": "00.574",
       "enabled": true
     },
     {
@@ -2597,7 +2597,7 @@
     {
       "parent": 260,
       "role": "AXStaticText",
-      "title": "ok · 30 ms",
+      "title": "ok · 19 ms",
       "enabled": true,
       "box": [
         685,
@@ -2609,7 +2609,7 @@
     {
       "parent": 265,
       "role": "AXStaticText",
-      "title": "ok · 30 ms",
+      "title": "ok · 19 ms",
       "enabled": true
     },
     {
@@ -2626,7 +2626,7 @@
     {
       "parent": 267,
       "role": "AXStaticText",
-      "title": "00.535",
+      "title": "00.595",
       "enabled": true,
       "box": [
         545,
@@ -2638,7 +2638,7 @@
     {
       "parent": 268,
       "role": "AXStaticText",
-      "title": "00.535",
+      "title": "00.595",
       "enabled": true
     },
     {
@@ -2662,7 +2662,7 @@
     {
       "parent": 267,
       "role": "AXStaticText",
-      "title": "booking.location-field · testid \"location\" · matched 1 · ok · 12 ms",
+      "title": "booking.location-field · testid \"location\" · matched 1 · ok · 20 ms",
       "enabled": true,
       "box": [
         685,
@@ -2674,7 +2674,7 @@
     {
       "parent": 272,
       "role": "AXStaticText",
-      "title": "booking.location-field · testid \"location\" · matched 1 · ok · 12 ms",
+      "title": "booking.location-field · testid \"location\" · matched 1 · ok · 20 ms",
       "enabled": true
     },
     {
@@ -2691,7 +2691,7 @@
     {
       "parent": 274,
       "role": "AXStaticText",
-      "title": "00.548",
+      "title": "00.612",
       "enabled": true,
       "box": [
         545,
@@ -2703,7 +2703,7 @@
     {
       "parent": 275,
       "role": "AXStaticText",
-      "title": "00.548",
+      "title": "00.612",
       "enabled": true
     },
     {
@@ -2727,7 +2727,7 @@
     {
       "parent": 274,
       "role": "AXStaticText",
-      "title": "type · h0 · value \"Indiranagar\" · ok · 14 ms",
+      "title": "type · h0 · value \"Indiranagar\" · ok · 17 ms",
       "enabled": true,
       "box": [
         685,
@@ -2739,7 +2739,7 @@
     {
       "parent": 279,
       "role": "AXStaticText",
-      "title": "type · h0 · value \"Indiranagar\" · ok · 14 ms",
+      "title": "type · h0 · value \"Indiranagar\" · ok · 17 ms",
       "enabled": true
     },
     {
@@ -2756,7 +2756,7 @@
     {
       "parent": 281,
       "role": "AXStaticText",
-      "title": "00.550",
+      "title": "00.614",
       "enabled": true,
       "box": [
         545,
@@ -2768,7 +2768,7 @@
     {
       "parent": 282,
       "role": "AXStaticText",
-      "title": "00.550",
+      "title": "00.614",
       "enabled": true
     },
     {
@@ -2821,7 +2821,7 @@
     {
       "parent": 288,
       "role": "AXStaticText",
-      "title": "00.553",
+      "title": "00.618",
       "enabled": true,
       "box": [
         545,
@@ -2833,7 +2833,7 @@
     {
       "parent": 289,
       "role": "AXStaticText",
-      "title": "00.553",
+      "title": "00.618",
       "enabled": true
     },
     {
@@ -2857,7 +2857,7 @@
     {
       "parent": 288,
       "role": "AXStaticText",
-      "title": "booking.book-now-button · testid \"book-now\" · matched 1 · ok · 2 ms",
+      "title": "booking.book-now-button · testid \"book-now\" · matched 1 · ok · 3 ms",
       "enabled": true,
       "box": [
         685,
@@ -2869,7 +2869,7 @@
     {
       "parent": 293,
       "role": "AXStaticText",
-      "title": "booking.book-now-button · testid \"book-now\" · matched 1 · ok · 2 ms",
+      "title": "booking.book-now-button · testid \"book-now\" · matched 1 · ok · 3 ms",
       "enabled": true
     },
     {
@@ -2886,7 +2886,7 @@
     {
       "parent": 295,
       "role": "AXStaticText",
-      "title": "00.583",
+      "title": "00.658",
       "enabled": true,
       "box": [
         545,
@@ -2898,7 +2898,7 @@
     {
       "parent": 296,
       "role": "AXStaticText",
-      "title": "00.583",
+      "title": "00.658",
       "enabled": true
     },
     {
@@ -2922,7 +2922,7 @@
     {
       "parent": 295,
       "role": "AXStaticText",
-      "title": "click · h1 · ok · 31 ms",
+      "title": "click · h1 · ok · 40 ms",
       "enabled": true,
       "box": [
         685,
@@ -2934,7 +2934,7 @@
     {
       "parent": 300,
       "role": "AXStaticText",
-      "title": "click · h1 · ok · 31 ms",
+      "title": "click · h1 · ok · 40 ms",
       "enabled": true
     },
     {
@@ -2951,7 +2951,7 @@
     {
       "parent": 302,
       "role": "AXStaticText",
-      "title": "00.584",
+      "title": "00.659",
       "enabled": true,
       "box": [
         545,
@@ -2963,7 +2963,7 @@
     {
       "parent": 303,
       "role": "AXStaticText",
-      "title": "00.584",
+      "title": "00.659",
       "enabled": true
     },
     {
@@ -2987,7 +2987,7 @@
     {
       "parent": 302,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 1 ms",
       "enabled": true,
       "box": [
         685,
@@ -2999,7 +2999,7 @@
     {
       "parent": 307,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 1 ms",
       "enabled": true
     },
     {
@@ -3016,7 +3016,7 @@
     {
       "parent": 309,
       "role": "AXStaticText",
-      "title": "00.585",
+      "title": "00.663",
       "enabled": true,
       "box": [
         545,
@@ -3028,7 +3028,7 @@
     {
       "parent": 310,
       "role": "AXStaticText",
-      "title": "00.585",
+      "title": "00.663",
       "enabled": true
     },
     {
@@ -3052,7 +3052,7 @@
     {
       "parent": 309,
       "role": "AXStaticText",
-      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 2 ms",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 4 ms",
       "enabled": true,
       "box": [
         685,
@@ -3064,7 +3064,7 @@
     {
       "parent": 314,
       "role": "AXStaticText",
-      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 2 ms",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 4 ms",
       "enabled": true
     },
     {
@@ -3081,7 +3081,7 @@
     {
       "parent": 316,
       "role": "AXStaticText",
-      "title": "00.587",
+      "title": "00.666",
       "enabled": true,
       "box": [
         545,
@@ -3093,7 +3093,7 @@
     {
       "parent": 317,
       "role": "AXStaticText",
-      "title": "00.587",
+      "title": "00.666",
       "enabled": true
     },
     {
@@ -3117,7 +3117,7 @@
     {
       "parent": 316,
       "role": "AXStaticText",
-      "title": "h2 · ok · 2 ms",
+      "title": "h2 · ok · 4 ms",
       "enabled": true,
       "box": [
         685,
@@ -3129,7 +3129,7 @@
     {
       "parent": 321,
       "role": "AXStaticText",
-      "title": "h2 · ok · 2 ms",
+      "title": "h2 · ok · 4 ms",
       "enabled": true
     },
     {
@@ -3146,7 +3146,7 @@
     {
       "parent": 323,
       "role": "AXStaticText",
-      "title": "00.588",
+      "title": "00.721",
       "enabled": true,
       "box": [
         545,
@@ -3158,7 +3158,7 @@
     {
       "parent": 324,
       "role": "AXStaticText",
-      "title": "00.588",
+      "title": "00.721",
       "enabled": true
     },
     {
@@ -3182,19 +3182,19 @@
     {
       "parent": 323,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 54 ms",
       "enabled": true,
       "box": [
         685,
         915,
-        62,
+        69,
         15
       ]
     },
     {
       "parent": 328,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 54 ms",
       "enabled": true
     },
     {
@@ -3211,7 +3211,7 @@
     {
       "parent": 330,
       "role": "AXStaticText",
-      "title": "00.588",
+      "title": "00.723",
       "enabled": true,
       "box": [
         545,
@@ -3223,7 +3223,7 @@
     {
       "parent": 331,
       "role": "AXStaticText",
-      "title": "00.588",
+      "title": "00.723",
       "enabled": true
     },
     {
@@ -3247,7 +3247,7 @@
     {
       "parent": 330,
       "role": "AXStaticText",
-      "title": "checkout.pay-button · testid \"pay\" · matched nothing · ok · 1 ms",
+      "title": "checkout.pay-button · testid \"pay\" · matched nothing · ok · 2 ms",
       "enabled": true,
       "box": [
         685,
@@ -3259,7 +3259,7 @@
     {
       "parent": 335,
       "role": "AXStaticText",
-      "title": "checkout.pay-button · testid \"pay\" · matched nothing · ok · 1 ms",
+      "title": "checkout.pay-button · testid \"pay\" · matched nothing · ok · 2 ms",
       "enabled": true
     },
     {
@@ -3276,7 +3276,7 @@
     {
       "parent": 337,
       "role": "AXStaticText",
-      "title": "00.590",
+      "title": "00.727",
       "enabled": true,
       "box": [
         545,
@@ -3288,7 +3288,7 @@
     {
       "parent": 338,
       "role": "AXStaticText",
-      "title": "00.590",
+      "title": "00.727",
       "enabled": true
     },
     {
@@ -3312,7 +3312,7 @@
     {
       "parent": 337,
       "role": "AXStaticText",
-      "title": "checkout.pay-button · role button \"Pay\" · matched nothing · ok · 2 ms",
+      "title": "checkout.pay-button · role button \"Pay\" · matched nothing · ok · 4 ms",
       "enabled": true,
       "box": [
         685,
@@ -3324,7 +3324,7 @@
     {
       "parent": 342,
       "role": "AXStaticText",
-      "title": "checkout.pay-button · role button \"Pay\" · matched nothing · ok · 2 ms",
+      "title": "checkout.pay-button · role button \"Pay\" · matched nothing · ok · 4 ms",
       "enabled": true
     },
     {
@@ -3341,7 +3341,7 @@
     {
       "parent": 344,
       "role": "AXStaticText",
-      "title": "00.592",
+      "title": "00.729",
       "enabled": true,
       "box": [
         545,
@@ -3353,7 +3353,7 @@
     {
       "parent": 345,
       "role": "AXStaticText",
-      "title": "00.592",
+      "title": "00.729",
       "enabled": true
     },
     {
@@ -3377,7 +3377,7 @@
     {
       "parent": 344,
       "role": "AXStaticText",
-      "title": "checkout.pay-button · text \"Pay\" · matched nothing · ok · 1 ms",
+      "title": "checkout.pay-button · text \"Pay\" · matched nothing · ok · 2 ms",
       "enabled": true,
       "box": [
         685,
@@ -3389,7 +3389,7 @@
     {
       "parent": 349,
       "role": "AXStaticText",
-      "title": "checkout.pay-button · text \"Pay\" · matched nothing · ok · 1 ms",
+      "title": "checkout.pay-button · text \"Pay\" · matched nothing · ok · 2 ms",
       "enabled": true
     },
     {
@@ -3406,7 +3406,7 @@
     {
       "parent": 351,
       "role": "AXStaticText",
-      "title": "00.592",
+      "title": "00.730",
       "enabled": true,
       "box": [
         545,
@@ -3418,7 +3418,7 @@
     {
       "parent": 352,
       "role": "AXStaticText",
-      "title": "00.592",
+      "title": "00.730",
       "enabled": true
     },
     {
@@ -3471,7 +3471,7 @@
     {
       "parent": 358,
       "role": "AXStaticText",
-      "title": "00.594",
+      "title": "00.734",
       "enabled": true,
       "box": [
         545,
@@ -3483,7 +3483,7 @@
     {
       "parent": 359,
       "role": "AXStaticText",
-      "title": "00.594",
+      "title": "00.734",
       "enabled": true
     },
     {
@@ -3507,7 +3507,7 @@
     {
       "parent": 358,
       "role": "AXStaticText",
-      "title": "checkout.pay-button · xpath \"//*[@data-testid='pay']\" · matched nothing · ok · 2 ms",
+      "title": "checkout.pay-button · xpath \"//*[@data-testid='pay']\" · matched nothing · ok · 3 ms",
       "enabled": true,
       "box": [
         685,
@@ -3519,7 +3519,7 @@
     {
       "parent": 363,
       "role": "AXStaticText",
-      "title": "checkout.pay-button · xpath \"//*[@data-testid='pay']\" · matched nothing · ok · 2 ms",
+      "title": "checkout.pay-button · xpath \"//*[@data-testid='pay']\" · matched nothing · ok · 3 ms",
       "enabled": true
     },
     {
@@ -3536,7 +3536,7 @@
     {
       "parent": 365,
       "role": "AXStaticText",
-      "title": "00.594",
+      "title": "00.737",
       "enabled": true,
       "box": [
         545,
@@ -3548,7 +3548,7 @@
     {
       "parent": 366,
       "role": "AXStaticText",
-      "title": "00.594",
+      "title": "00.737",
       "enabled": true
     },
     {
@@ -3572,7 +3572,7 @@
     {
       "parent": 365,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 3 ms",
       "enabled": true,
       "box": [
         685,
@@ -3584,7 +3584,7 @@
     {
       "parent": 370,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 3 ms",
       "enabled": true
     },
     {
@@ -3601,7 +3601,7 @@
     {
       "parent": 372,
       "role": "AXStaticText",
-      "title": "00.644",
+      "title": "00.776",
       "enabled": true,
       "box": [
         545,
@@ -3613,7 +3613,7 @@
     {
       "parent": 373,
       "role": "AXStaticText",
-      "title": "00.644",
+      "title": "00.776",
       "enabled": true
     },
     {
@@ -3637,7 +3637,7 @@
     {
       "parent": 372,
       "role": "AXStaticText",
-      "title": "ok · 50 ms",
+      "title": "ok · 38 ms",
       "enabled": true,
       "box": [
         685,
@@ -3649,7 +3649,7 @@
     {
       "parent": 377,
       "role": "AXStaticText",
-      "title": "ok · 50 ms",
+      "title": "ok · 38 ms",
       "enabled": true
     },
     {
@@ -3666,7 +3666,7 @@
     {
       "parent": 379,
       "role": "AXStaticText",
-      "title": "00.644",
+      "title": "00.777",
       "enabled": true,
       "box": [
         545,
@@ -3678,7 +3678,7 @@
     {
       "parent": 380,
       "role": "AXStaticText",
-      "title": "00.644",
+      "title": "00.777",
       "enabled": true
     },
     {
@@ -3702,7 +3702,7 @@
     {
       "parent": 379,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 1 ms",
       "enabled": true,
       "box": [
         685,
@@ -3714,7 +3714,7 @@
     {
       "parent": 384,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 1 ms",
       "enabled": true
     },
     {
@@ -3731,7 +3731,7 @@
     {
       "parent": 386,
       "role": "AXStaticText",
-      "title": "00.645",
+      "title": "00.777",
       "enabled": true,
       "box": [
         545,
@@ -3743,7 +3743,7 @@
     {
       "parent": 387,
       "role": "AXStaticText",
-      "title": "00.645",
+      "title": "00.777",
       "enabled": true
     },
     {
@@ -3796,7 +3796,7 @@
     {
       "parent": 393,
       "role": "AXStaticText",
-      "title": "00.645",
+      "title": "00.778",
       "enabled": true,
       "box": [
         545,
@@ -3808,7 +3808,7 @@
     {
       "parent": 394,
       "role": "AXStaticText",
-      "title": "00.645",
+      "title": "00.778",
       "enabled": true
     },
     {
@@ -3861,7 +3861,7 @@
     {
       "parent": 400,
       "role": "AXStaticText",
-      "title": "00.645",
+      "title": "00.779",
       "enabled": true,
       "box": [
         545,
@@ -3873,7 +3873,7 @@
     {
       "parent": 401,
       "role": "AXStaticText",
-      "title": "00.645",
+      "title": "00.779",
       "enabled": true
     },
     {
@@ -3897,7 +3897,7 @@
     {
       "parent": 400,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 1 ms",
       "enabled": true,
       "box": [
         685,
@@ -3909,7 +3909,7 @@
     {
       "parent": 405,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 1 ms",
       "enabled": true
     },
     {
@@ -3926,7 +3926,7 @@
     {
       "parent": 407,
       "role": "AXStaticText",
-      "title": "00.647",
+      "title": "00.783",
       "enabled": true,
       "box": [
         545,
@@ -3938,7 +3938,7 @@
     {
       "parent": 408,
       "role": "AXStaticText",
-      "title": "00.647",
+      "title": "00.783",
       "enabled": true
     },
     {
@@ -3962,7 +3962,7 @@
     {
       "parent": 407,
       "role": "AXStaticText",
-      "title": "booking.cancel-booking-button · testid \"cancel-booking\" · matched 1 · ok · 2 ms",
+      "title": "booking.cancel-booking-button · testid \"cancel-booking\" · matched 1 · ok · 4 ms",
       "enabled": true,
       "box": [
         685,
@@ -3974,7 +3974,7 @@
     {
       "parent": 412,
       "role": "AXStaticText",
-      "title": "booking.cancel-booking-button · testid \"cancel-booking\" · matched 1 · ok · 2 ms",
+      "title": "booking.cancel-booking-button · testid \"cancel-booking\" · matched 1 · ok · 4 ms",
       "enabled": true
     },
     {
@@ -3991,7 +3991,7 @@
     {
       "parent": 414,
       "role": "AXStaticText",
-      "title": "00.682",
+      "title": "00.822",
       "enabled": true,
       "box": [
         545,
@@ -4003,7 +4003,7 @@
     {
       "parent": 415,
       "role": "AXStaticText",
-      "title": "00.682",
+      "title": "00.822",
       "enabled": true
     },
     {
@@ -4027,7 +4027,7 @@
     {
       "parent": 414,
       "role": "AXStaticText",
-      "title": "click · h3 · ok · 35 ms",
+      "title": "click · h3 · ok · 39 ms",
       "enabled": true,
       "box": [
         685,
@@ -4039,7 +4039,7 @@
     {
       "parent": 419,
       "role": "AXStaticText",
-      "title": "click · h3 · ok · 35 ms",
+      "title": "click · h3 · ok · 39 ms",
       "enabled": true
     },
     {
@@ -4056,7 +4056,7 @@
     {
       "parent": 421,
       "role": "AXStaticText",
-      "title": "00.683",
+      "title": "00.823",
       "enabled": true,
       "box": [
         545,
@@ -4068,7 +4068,7 @@
     {
       "parent": 422,
       "role": "AXStaticText",
-      "title": "00.683",
+      "title": "00.823",
       "enabled": true
     },
     {
@@ -4092,7 +4092,7 @@
     {
       "parent": 421,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 1 ms",
       "enabled": true,
       "box": [
         685,
@@ -4104,7 +4104,7 @@
     {
       "parent": 426,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 1 ms",
       "enabled": true
     },
     {
@@ -4121,7 +4121,7 @@
     {
       "parent": 428,
       "role": "AXStaticText",
-      "title": "00.685",
+      "title": "00.826",
       "enabled": true,
       "box": [
         545,
@@ -4133,7 +4133,7 @@
     {
       "parent": 429,
       "role": "AXStaticText",
-      "title": "00.685",
+      "title": "00.826",
       "enabled": true
     },
     {
@@ -4157,7 +4157,7 @@
     {
       "parent": 428,
       "role": "AXStaticText",
-      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 2 ms",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 3 ms",
       "enabled": true,
       "box": [
         685,
@@ -4169,7 +4169,7 @@
     {
       "parent": 433,
       "role": "AXStaticText",
-      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 2 ms",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 3 ms",
       "enabled": true
     },
     {
@@ -4186,7 +4186,7 @@
     {
       "parent": 435,
       "role": "AXStaticText",
-      "title": "00.685",
+      "title": "00.827",
       "enabled": true,
       "box": [
         545,
@@ -4198,7 +4198,7 @@
     {
       "parent": 436,
       "role": "AXStaticText",
-      "title": "00.685",
+      "title": "00.827",
       "enabled": true
     },
     {
@@ -4222,7 +4222,7 @@
     {
       "parent": 435,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 1 ms",
       "enabled": true,
       "box": [
         685,
@@ -4234,7 +4234,7 @@
     {
       "parent": 440,
       "role": "AXStaticText",
-      "title": "ok · 0 ms",
+      "title": "ok · 1 ms",
       "enabled": true
     },
     {
@@ -4251,7 +4251,7 @@
     {
       "parent": 442,
       "role": "AXStaticText",
-      "title": "00.687",
+      "title": "00.830",
       "enabled": true,
       "box": [
         545,
@@ -4263,7 +4263,7 @@
     {
       "parent": 443,
       "role": "AXStaticText",
-      "title": "00.687",
+      "title": "00.830",
       "enabled": true
     },
     {
@@ -4287,7 +4287,7 @@
     {
       "parent": 442,
       "role": "AXStaticText",
-      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 2 ms",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 3 ms",
       "enabled": true,
       "box": [
         685,
@@ -4299,7 +4299,7 @@
     {
       "parent": 447,
       "role": "AXStaticText",
-      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 2 ms",
+      "title": "booking.booking-reference · testid \"booking-reference\" · matched 1 · ok · 3 ms",
       "enabled": true
     },
     {
@@ -4316,7 +4316,7 @@
     {
       "parent": 449,
       "role": "AXStaticText",
-      "title": "00.688",
+      "title": "00.833",
       "enabled": true,
       "box": [
         545,
@@ -4328,7 +4328,7 @@
     {
       "parent": 450,
       "role": "AXStaticText",
-      "title": "00.688",
+      "title": "00.833",
       "enabled": true
     },
     {
@@ -4352,7 +4352,7 @@
     {
       "parent": 449,
       "role": "AXStaticText",
-      "title": "ref · ok · 1 ms",
+      "title": "ref · ok · 2 ms",
       "enabled": true,
       "box": [
         685,
@@ -4364,7 +4364,7 @@
     {
       "parent": 454,
       "role": "AXStaticText",
-      "title": "ref · ok · 1 ms",
+      "title": "ref · ok · 2 ms",
       "enabled": true
     },
     {
@@ -4381,7 +4381,7 @@
     {
       "parent": 456,
       "role": "AXStaticText",
-      "title": "00.688",
+      "title": "00.833",
       "enabled": true,
       "box": [
         545,
@@ -4393,7 +4393,7 @@
     {
       "parent": 457,
       "role": "AXStaticText",
-      "title": "00.688",
+      "title": "00.833",
       "enabled": true
     },
     {
@@ -5676,7 +5676,7 @@
     {
       "parent": 583,
       "role": "AXStaticText",
-      "title": "comp · 7 steps · 0.73 s",
+      "title": "comp · 7 steps · 0.88 s",
       "enabled": true,
       "box": [
         24,
@@ -5688,7 +5688,7 @@
     {
       "parent": 584,
       "role": "AXStaticText",
-      "title": "comp · 7 steps · 0.73 s",
+      "title": "comp · 7 steps · 0.88 s",
       "enabled": true
     },
     {
@@ -5762,6 +5762,51 @@
       "role": "AXStaticText",
       "title": "keys",
       "enabled": true
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXCloseButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        8,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXMinimizeButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        28,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXZoomButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        48,
+        8,
+        14,
+        14
+      ]
     }
   ]
 }

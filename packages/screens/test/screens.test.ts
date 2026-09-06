@@ -502,3 +502,108 @@ describe("a screen's state does not change when nothing does (T10.4, P9-F4)", ()
     expect(ago("not a date", now)).toBeUndefined();
   });
 });
+
+/**
+ * A screen with a list opens on its first row (P10-F2, LLD §13.7's artboards).
+ *
+ * The Phase 10 live gate found the Bindings screen's inspector empty, because
+ * nothing was chosen and the inspector is a view of a choice: `ade.inspector`
+ * looked for `inspector-candidate-table` on a screen that had drawn a list and
+ * an empty panel. The artboards draw the first row selected, and both renderers
+ * take the selection from a *screen parameter* (§13.7) — so "select the first
+ * one" belongs to the model, where the ADE and the cockpit get it for free, and
+ * not to either renderer.
+ *
+ * Stated once here for every screen that has a list, so a screen added later
+ * with a list and no default fails rather than being noticed on a live gate.
+ */
+describe("a screen with a list opens on its first row (P10-F2)", () => {
+  const listScreens: ReadonlyArray<{
+    screen: ScreenId;
+    param: string;
+    /** How to read the chosen row's id back out of the loaded state. */
+    chosen: (state: Record<string, unknown>) => unknown;
+    /** The list the choice is made from, so an empty one is not a failure. */
+    rows: (state: Record<string, unknown>) => readonly unknown[];
+  }> = [
+    {
+      screen: "bindings",
+      param: "bindingId",
+      chosen: (s) => s["bindingId"],
+      rows: (s) => (s["rows"] ?? []) as readonly unknown[],
+    },
+    {
+      screen: "runs",
+      param: "runId",
+      chosen: (s) => s["runId"],
+      rows: (s) => (s["rows"] ?? []) as readonly unknown[],
+    },
+    {
+      screen: "agents",
+      param: "selected",
+      chosen: (s) => s["selected"],
+      rows: (s) => (s["tools"] ?? []) as readonly unknown[],
+    },
+    {
+      screen: "api",
+      param: "selected",
+      chosen: (s) => s["selected"],
+      rows: (s) => (s["requests"] ?? []) as readonly unknown[],
+    },
+    {
+      screen: "data",
+      param: "selected",
+      chosen: (s) => s["selected"],
+      rows: (s) => (s["rows"] ?? []) as readonly unknown[],
+    },
+  ];
+
+  for (const one of listScreens) {
+    it(`${one.screen} chooses a row with no parameter at all`, async () => {
+      const state = (await screenById(one.screen).load(service(), {})) as unknown as Record<
+        string,
+        unknown
+      >;
+      if (one.rows(state).length === 0) {
+        // Nothing to choose is not the defect: an inspector over an empty list
+        // is an empty inspector on purpose. What must not happen is a list with
+        // rows and nothing chosen.
+        expect(one.chosen(state)).toBeUndefined();
+        return;
+      }
+      expect(
+        one.chosen(state),
+        `${one.screen} loaded with rows and nothing chosen, so its inspector is empty`,
+      ).toBeDefined();
+    });
+
+    it(`${one.screen} still honours a row the caller asked for`, async () => {
+      const first = (await screenById(one.screen).load(service(), {})) as unknown as Record<
+        string,
+        unknown
+      >;
+      const chosen = one.chosen(first);
+      if (chosen === undefined) return;
+      // The default must be a *default*, not an override: loading with the same
+      // id explicitly has to reach the same state.
+      const again = (await screenById(one.screen).load(service(), {
+        [one.param]: String(chosen),
+      })) as unknown as Record<string, unknown>;
+      expect(one.chosen(again)).toEqual(chosen);
+    });
+  }
+
+  it("is not vacuous: most of those screens do have rows in the fixtures", async () => {
+    let withRows = 0;
+    for (const one of listScreens) {
+      const state = (await screenById(one.screen).load(service(), {})) as unknown as Record<
+        string,
+        unknown
+      >;
+      if (one.rows(state).length > 0) withRows += 1;
+    }
+    expect(withRows, "no list screen has a row, so the default is untested").toBeGreaterThanOrEqual(
+      3,
+    );
+  });
+});

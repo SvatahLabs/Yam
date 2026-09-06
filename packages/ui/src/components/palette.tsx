@@ -16,8 +16,42 @@
  * simple and collectively a week of bugs.
  */
 import * as Dialog from "@radix-ui/react-dialog";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Kbd } from "./controls.js";
+
+/** The id of the element every dialog in the ADE is portalled into. */
+export const PORTAL_HOST_ID = "sv-portal-host";
+
+/**
+ * A container the palette is always portalled into, open or closed (P10-F2).
+ *
+ * Radix's `Portal` mounts its own `<div>` into `<body>` when a dialog opens and
+ * leaves it there when it closes, so `<body>` has one element child before the
+ * palette has ever been opened and two afterwards. Chromium's accessibility
+ * tree reflects that: an extra generic container appears above the application,
+ * *permanently*, the first time anybody presses `⌘K`.
+ *
+ * That is not cosmetic. `controlPath` and `rolePath` are the desktop
+ * candidates (LLD §7.5), and both are derived from that ancestry — so every
+ * desktop binding in a session silently changed shape the moment a person
+ * opened the palette. The live gate found it as a healing case that would not
+ * relocalize: the fingerprint was recorded through
+ * `document/group/group/navigation/button` and matched against
+ * `document/group/navigation/button`, and with the name deliberately changed by
+ * the variant there was no similarity left to spare.
+ *
+ * A host that is created once, at module scope, and never removed makes the
+ * tree the same shape whatever anyone has pressed.
+ */
+function portalHost(): HTMLElement | undefined {
+  if (typeof document === "undefined") return undefined;
+  const existing = document.getElementById(PORTAL_HOST_ID);
+  if (existing !== null) return existing;
+  const host = document.createElement("div");
+  host.id = PORTAL_HOST_ID;
+  document.body.appendChild(host);
+  return host;
+}
 
 /** One row of the palette, as the ADE and `svatah ui` both build it. */
 export interface PaletteRow {
@@ -56,6 +90,16 @@ export function CommandPalette(props: PaletteProps): React.JSX.Element {
   const [query, setQuery] = useState("");
   const id = props.id ?? "command-palette";
 
+  /*
+   * The host exists from the first render, not from the first open — which is
+   * the whole point: a tree whose shape changes when a dialog is first opened
+   * is a tree every recorded `controlPath` disagrees with afterwards.
+   */
+  const [host, setHost] = useState<HTMLElement | undefined>(() => portalHost());
+  useEffect(() => {
+    setHost((one) => one ?? portalHost());
+  }, []);
+
   const groups = useMemo(() => {
     const shown = props.rows.filter((row) => matches(row, query));
     const order = ["Actions", "Go to"];
@@ -80,7 +124,7 @@ export function CommandPalette(props: PaletteProps): React.JSX.Element {
         }
       }}
     >
-      <Dialog.Portal>
+      <Dialog.Portal {...(host === undefined ? {} : { container: host })}>
         <Dialog.Overlay className="sv-palette-overlay" />
         <Dialog.Content className="sv-palette" id={id} aria-describedby={undefined}>
           {/*

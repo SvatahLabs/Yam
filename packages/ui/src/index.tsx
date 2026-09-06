@@ -44,7 +44,7 @@ export type {
   TabsProps,
 } from "./components/display.js";
 
-export { CommandPalette } from "./components/palette.js";
+export { CommandPalette, PORTAL_HOST_ID } from "./components/palette.js";
 export type { PaletteProps, PaletteRow } from "./components/palette.js";
 
 export { ComponentSheet } from "./sheet.js";

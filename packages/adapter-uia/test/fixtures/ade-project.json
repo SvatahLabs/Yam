@@ -27,7 +27,7 @@
         0,
         0,
         1280,
-        828
+        821
       ]
     },
     {
@@ -39,7 +39,7 @@
         8,
         8,
         1264,
-        828
+        821
       ],
       "automationId": "root"
     },
@@ -231,7 +231,7 @@
       "parent": 16,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "127.0.0.1:57371",
+      "name": "127.0.0.1:62031",
       "isEnabled": true,
       "box": [
         1166,
@@ -244,7 +244,7 @@
       "parent": 19,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "127.0.0.1:57371",
+      "name": "127.0.0.1:62031",
       "isEnabled": true
     },
     {
@@ -258,7 +258,7 @@
         8,
         52,
         220,
-        756
+        749
       ],
       "automationId": "rail"
     },
@@ -559,7 +559,7 @@
       ],
       "box": [
         16,
-        736,
+        729,
         203,
         31
       ],
@@ -573,7 +573,7 @@
       "isEnabled": true,
       "box": [
         24,
-        743,
+        736,
         158,
         17
       ]
@@ -596,7 +596,7 @@
       ],
       "box": [
         16,
-        767,
+        760,
         203,
         31
       ],
@@ -610,7 +610,7 @@
       "isEnabled": true,
       "box": [
         24,
-        774,
+        767,
         48,
         17
       ]
@@ -633,7 +633,7 @@
         228,
         52,
         684,
-        756
+        749
       ],
       "automationId": "workspace"
     },
@@ -957,7 +957,7 @@
       "parent": 77,
       "controlType": "DataItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "isEnabled": true,
       "box": [
         321,
@@ -970,7 +970,7 @@
       "parent": 81,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "isEnabled": true,
       "box": [
         333,
@@ -990,7 +990,7 @@
       "parent": 82,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "name": "cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "isEnabled": true
     },
     {
@@ -2062,7 +2062,7 @@
         912,
         52,
         360,
-        756
+        749
       ],
       "automationId": "inspector"
     },
@@ -2620,7 +2620,7 @@
       "isEnabled": true,
       "box": [
         8,
-        808,
+        801,
         1264,
         28
       ]
@@ -2632,8 +2632,8 @@
       "isEnabled": true,
       "box": [
         24,
-        814,
-        630,
+        807,
+        604,
         17
       ],
       "automationId": "status-context"
@@ -2642,12 +2642,12 @@
       "parent": 235,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "isEnabled": true,
       "box": [
         24,
-        815,
-        630,
+        808,
+        604,
         15
       ]
     },
@@ -2655,7 +2655,7 @@
       "parent": 236,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01QPBmyTPW7RFeVNzGZTWX83/evals/fixtures",
+      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "isEnabled": true
     },
     {
@@ -2666,7 +2666,7 @@
       "isEnabled": true,
       "box": [
         1117,
-        816,
+        809,
         13,
         14
       ]
@@ -2686,7 +2686,7 @@
       "isEnabled": true,
       "box": [
         1136,
-        815,
+        808,
         60,
         15
       ]
@@ -2706,7 +2706,7 @@
       "isEnabled": true,
       "box": [
         1218,
-        816,
+        809,
         6,
         14
       ]
@@ -2726,7 +2726,7 @@
       "isEnabled": true,
       "box": [
         1230,
-        815,
+        808,
         26,
         15
       ]
@@ -2737,6 +2737,57 @@
       "className": "Chrome_RenderWidgetHostHWND",
       "name": "keys",
       "isEnabled": true
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Close",
+      "automationId": "Close",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1180,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Minimize",
+      "automationId": "Minimize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1204,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Maximize",
+      "automationId": "Maximize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1228,
+        4,
+        20,
+        20
+      ]
     }
   ]
 }

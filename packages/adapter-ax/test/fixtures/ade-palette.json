@@ -2512,6 +2512,51 @@
       "role": "AXStaticText",
       "title": "Go to Settings",
       "enabled": true
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXCloseButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        8,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXMinimizeButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        28,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXZoomButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        48,
+        8,
+        14,
+        14
+      ]
     }
   ]
 }

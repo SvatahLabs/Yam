@@ -46,6 +46,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { convertTree as convertAx, type AxNode } from "@svatah/adapter-ax";
 import { convertTree as convertUia } from "../src/index.js";
+import { isWindowChrome } from "@svatah/surface";
 import { ADE_SCREENS, recordedWindow, type AdeScreen } from "./recorded.js";
 
 const AX_FIXTURES = join(
@@ -97,6 +98,24 @@ const fromUia = (screen: AdeScreen, interactiveOnly = false): Node[] => {
 /** The three documented role disagreements, as `macOS → Windows`. */
 const KNOWN_ROLE_DIFFERENCES = new Set(["cell → columnheader"]);
 
+/**
+ * The window manager's own buttons are compared on role, not on name (P10-F2).
+ *
+ * Close, minimise and zoom are not the application's controls: macOS creates
+ * them and names them by subrole ("close", "minimise", "zoom", P8-F3's table),
+ * Windows creates them and names them "Close", "Minimize", "Maximize". Both are
+ * right, in the words their own platform uses, and no amount of normalisation
+ * makes "minimise" and "Minimize" the same string.
+ *
+ * That costs a flow nothing, which is the test for whether this exclusion is
+ * honest: the claim these cases establish is "one flow drives the ADE on both
+ * platforms", and a flow names the *application's* controls. Their roles,
+ * references, depths, parents and states are still compared, so a tree that
+ * stopped reading the window frame on one platform still fails.
+ */
+const isChrome = (node: { native?: Readonly<Record<string, string>> }): boolean =>
+  isWindowChrome(node);
+
 describe("the two desktop adapters normalise one window the same way (REQ-SURF-4)", () => {
   for (const screen of ADE_SCREENS) {
     it(`gives the ADE's ${screen} screen the same tree shape and the same references`, () => {
@@ -115,7 +134,8 @@ describe("the two desktop adapters normalise one window the same way (REQ-SURF-4
        * button" has to find the same thing on both platforms, which means the
        * pair (role, name) has to be identical for every control.
        */
-      const control = (node: Node): string => `${node.role} "${node.name ?? ""}"`;
+      const control = (node: Node): string =>
+        isChrome(node) ? `${node.role} <window chrome>` : `${node.role} "${node.name ?? ""}"`;
       expect(fromUia(screen, true).map(control)).toEqual(fromAx(screen, true).map(control));
     });
 
@@ -123,10 +143,17 @@ describe("the two desktop adapters normalise one window the same way (REQ-SURF-4
       const ax = fromAx(screen);
       const uia = fromUia(screen);
       for (let at = 0; at < ax.length; at += 1) {
-        expect(uia[at]!.name, `${screen} ${ax[at]!.ref} name`).toEqual(ax[at]!.name);
+        if (!isChrome(ax[at]!)) {
+          expect(uia[at]!.name, `${screen} ${ax[at]!.ref} name`).toEqual(ax[at]!.name);
+        }
         expect(uia[at]!.value, `${screen} ${ax[at]!.ref} value`).toEqual(ax[at]!.value);
         expect(uia[at]!.states, `${screen} ${ax[at]!.ref} states`).toEqual(ax[at]!.states);
       }
+
+      // And both platforms *have* the window's three buttons, which is the half
+      // of the comparison the name exclusion must not quietly drop.
+      expect(ax.filter(isChrome), `${screen} macOS window chrome`).toHaveLength(3);
+      expect(uia.filter(isChrome), `${screen} Windows window chrome`).toHaveLength(3);
     });
   }
 
@@ -166,6 +193,13 @@ describe("the two desktop adapters normalise one window the same way (REQ-SURF-4
       const uia = fromUia(screen);
       let shared = 0;
       for (let at = 0; at < ax.length; at += 1) {
+        /*
+         * The window manager's buttons are its own on both platforms (P10-F2):
+         * Windows gives them the fixed `AutomationId`s `Close`, `Minimize` and
+         * `Maximize`, macOS gives them a subrole and no identifier at all.
+         * Neither is a control a binding is ever recorded against.
+         */
+        if (isChrome(uia[at]!) || isChrome(ax[at]!)) continue;
         const windows = uia[at]!.native?.["automationId"];
         if (windows === undefined) continue;
         shared += 1;

@@ -231,7 +231,7 @@
       "parent": 16,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "127.0.0.1:57371",
+      "name": "127.0.0.1:62171",
       "isEnabled": true,
       "box": [
         1166,
@@ -244,7 +244,7 @@
       "parent": 19,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "127.0.0.1:57371",
+      "name": "127.0.0.1:62171",
       "isEnabled": true
     },
     {
@@ -1384,7 +1384,7 @@
       "parent": 98,
       "controlType": "DataItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "0.73 s",
+      "name": "0.88 s",
       "isEnabled": true,
       "box": [
         789,
@@ -1397,7 +1397,7 @@
       "parent": 120,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "0.73 s",
+      "name": "0.88 s",
       "isEnabled": true,
       "box": [
         808,
@@ -1410,7 +1410,7 @@
       "parent": 121,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "0.73",
+      "name": "0.88",
       "isEnabled": true
     },
     {
@@ -1424,7 +1424,7 @@
       "parent": 98,
       "controlType": "DataItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "22 s ago",
+      "name": "11 s ago",
       "isEnabled": true,
       "box": [
         849,
@@ -1437,7 +1437,7 @@
       "parent": 124,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "22 s ago",
+      "name": "11 s ago",
       "isEnabled": true,
       "box": [
         861,
@@ -1450,7 +1450,7 @@
       "parent": 125,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "22 s",
+      "name": "11 s",
       "isEnabled": true
     },
     {
@@ -1781,7 +1781,7 @@
       "parent": 155,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "0.73 s",
+      "name": "0.88 s",
       "isEnabled": true,
       "box": [
         1049,
@@ -1794,7 +1794,7 @@
       "parent": 156,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "0.73 s",
+      "name": "0.88 s",
       "isEnabled": true
     },
     {
@@ -2589,6 +2589,57 @@
       "className": "Chrome_RenderWidgetHostHWND",
       "name": "keys",
       "isEnabled": true
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Close",
+      "automationId": "Close",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1180,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Minimize",
+      "automationId": "Minimize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1204,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Maximize",
+      "automationId": "Maximize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1228,
+        4,
+        20,
+        20
+      ]
     }
   ]
 }

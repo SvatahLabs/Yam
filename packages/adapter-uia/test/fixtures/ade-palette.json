@@ -2756,6 +2756,57 @@
       "className": "Chrome_RenderWidgetHostHWND",
       "name": "Go to Settings",
       "isEnabled": true
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Close",
+      "automationId": "Close",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1180,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Minimize",
+      "automationId": "Minimize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1204,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Maximize",
+      "automationId": "Maximize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1228,
+        4,
+        20,
+        20
+      ]
     }
   ]
 }

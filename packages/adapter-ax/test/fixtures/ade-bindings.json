@@ -20,6 +20,7 @@
       "role": "AXWebArea",
       "description": "Svatah ADE",
       "enabled": true,
+      "focused": true,
       "box": [
         0,
         0,
@@ -210,7 +211,7 @@
     {
       "parent": 16,
       "role": "AXStaticText",
-      "title": "127.0.0.1:57371",
+      "title": "127.0.0.1:62171",
       "enabled": true,
       "box": [
         1166,
@@ -222,7 +223,7 @@
     {
       "parent": 19,
       "role": "AXStaticText",
-      "title": "127.0.0.1:57371",
+      "title": "127.0.0.1:62171",
       "enabled": true
     },
     {
@@ -9439,6 +9440,51 @@
       "role": "AXStaticText",
       "title": "keys",
       "enabled": true
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXCloseButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        8,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXMinimizeButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        28,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXZoomButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        48,
+        8,
+        14,
+        14
+      ]
     }
   ]
 }

@@ -76,6 +76,7 @@ function axSurface(file: string): AgentSurface {
     async session() {
       return {
         usable: true,
+        state: "usable",
         owners: ["Svatah ADE"],
         detail: "1 application(s) own a window: Svatah ADE",
         advice: "recorded",

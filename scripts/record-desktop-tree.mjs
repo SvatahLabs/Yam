@@ -741,6 +741,55 @@ function writeShape(shape, { nodes, byId, geometry, title, screen }) {
   const window = [root, ...flat.map((node) => ({ ...node, parent: node.parent + 1 }))];
   window[1].parent = 0;
 
+  /*
+   * The window's own three buttons (P10-F2, P8-F3).
+   *
+   * Close, minimise and zoom belong to the window manager, and CDP describes
+   * the *page*, so they are not in the tree this reads — exactly as the window
+   * above them is not. Synthesising them alongside the window is the same
+   * fidelity decision: a real `AXUIElement` walk of the ADE returns them, the
+   * desktop snapshot case checks that a snapshot has them (a tree that stopped
+   * reading the window frame is a tree that silently shrank), and a fixture
+   * without them is a fixture that cannot answer the question.
+   *
+   * They carry no id and no title on either platform: macOS names them by
+   * subrole and Windows by a fixed `AutomationId`, which is what
+   * `isWindowChrome` reads and what exempts them from the id rule.
+   *
+   * Appended rather than inserted, so every index in the tree above is the
+   * index it was: a fixture whose nodes moved is a fixture every recorded
+   * `rolePath` and `controlPath` has to be re-derived against.
+   */
+  const chrome =
+    shape === "uia"
+      ? [
+          ["Close", "Close"],
+          ["Minimize", "Minimize"],
+          ["Maximize", "Maximize"],
+        ].map(([id, name], at) => ({
+          parent: 0,
+          controlType: "Button",
+          name,
+          automationId: id,
+          className: "Chrome_WidgetWin_1",
+          isEnabled: true,
+          patterns: ["Invoke"],
+          box: [1180 + at * 24, 4, 20, 20],
+        }))
+      : [
+          ["AXCloseButton"],
+          ["AXMinimizeButton"],
+          ["AXZoomButton"],
+        ].map(([subrole], at) => ({
+          parent: 0,
+          role: "AXButton",
+          subrole,
+          enabled: true,
+          actions: ["AXPress"],
+          box: [8 + at * 20, 8, 14, 14],
+        }));
+  window.push(...chrome);
+
   const out = resolve(ROOT, outOption ?? `packages/adapter-${shape}/test/fixtures`);
   mkdirSync(out, { recursive: true });
   const file = join(out, `ade-${screen}${variant === "0" ? "" : `-v${variant}`}.json`);

@@ -211,7 +211,7 @@
     {
       "parent": 16,
       "role": "AXStaticText",
-      "title": "127.0.0.1:57371",
+      "title": "127.0.0.1:62171",
       "enabled": true,
       "box": [
         1166,
@@ -223,7 +223,7 @@
     {
       "parent": 19,
       "role": "AXStaticText",
-      "title": "127.0.0.1:57371",
+      "title": "127.0.0.1:62171",
       "enabled": true
     },
     {
@@ -1259,7 +1259,7 @@
     {
       "parent": 98,
       "role": "AXCell",
-      "title": "0.73 s",
+      "title": "0.88 s",
       "enabled": true,
       "box": [
         789,
@@ -1271,7 +1271,7 @@
     {
       "parent": 120,
       "role": "AXStaticText",
-      "title": "0.73 s",
+      "title": "0.88 s",
       "enabled": true,
       "box": [
         808,
@@ -1283,7 +1283,7 @@
     {
       "parent": 121,
       "role": "AXStaticText",
-      "title": "0.73",
+      "title": "0.88",
       "enabled": true
     },
     {
@@ -1295,7 +1295,7 @@
     {
       "parent": 98,
       "role": "AXCell",
-      "title": "22 s ago",
+      "title": "11 s ago",
       "enabled": true,
       "box": [
         849,
@@ -1307,7 +1307,7 @@
     {
       "parent": 124,
       "role": "AXStaticText",
-      "title": "22 s ago",
+      "title": "11 s ago",
       "enabled": true,
       "box": [
         861,
@@ -1319,7 +1319,7 @@
     {
       "parent": 125,
       "role": "AXStaticText",
-      "title": "22 s",
+      "title": "11 s",
       "enabled": true
     },
     {
@@ -1619,7 +1619,7 @@
     {
       "parent": 155,
       "role": "AXStaticText",
-      "title": "0.73 s",
+      "title": "0.88 s",
       "enabled": true,
       "box": [
         1049,
@@ -1631,7 +1631,7 @@
     {
       "parent": 156,
       "role": "AXStaticText",
-      "title": "0.73 s",
+      "title": "0.88 s",
       "enabled": true
     },
     {
@@ -2350,6 +2350,51 @@
       "role": "AXStaticText",
       "title": "keys",
       "enabled": true
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXCloseButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        8,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXMinimizeButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        28,
+        8,
+        14,
+        14
+      ]
+    },
+    {
+      "parent": 0,
+      "role": "AXButton",
+      "subrole": "AXZoomButton",
+      "enabled": true,
+      "actions": [
+        "AXPress"
+      ],
+      "box": [
+        48,
+        8,
+        14,
+        14
+      ]
     }
   ]
 }

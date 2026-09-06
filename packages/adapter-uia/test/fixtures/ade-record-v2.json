@@ -22,11 +22,12 @@
       "className": "Chrome_RenderWidgetHostHWND",
       "name": "Svatah ADE",
       "isEnabled": true,
+      "hasKeyboardFocus": true,
       "box": [
         0,
         0,
         1280,
-        821
+        828
       ]
     },
     {
@@ -38,7 +39,7 @@
         8,
         8,
         1264,
-        821
+        828
       ]
     },
     {
@@ -50,7 +51,7 @@
         8,
         8,
         1264,
-        821
+        828
       ],
       "automationId": "root"
     },
@@ -242,7 +243,7 @@
       "parent": 17,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "127.0.0.1:57371",
+      "name": "127.0.0.1:62171",
       "isEnabled": true,
       "box": [
         1166,
@@ -255,7 +256,7 @@
       "parent": 20,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "127.0.0.1:57371",
+      "name": "127.0.0.1:62171",
       "isEnabled": true
     },
     {
@@ -269,7 +270,7 @@
         8,
         52,
         220,
-        749
+        756
       ],
       "automationId": "rail"
     },
@@ -570,7 +571,7 @@
       ],
       "box": [
         16,
-        729,
+        736,
         203,
         31
       ],
@@ -584,7 +585,7 @@
       "isEnabled": true,
       "box": [
         24,
-        736,
+        743,
         158,
         17
       ]
@@ -607,7 +608,7 @@
       ],
       "box": [
         16,
-        760,
+        767,
         203,
         31
       ],
@@ -621,7 +622,7 @@
       "isEnabled": true,
       "box": [
         24,
-        767,
+        774,
         48,
         17
       ]
@@ -644,7 +645,7 @@
         228,
         52,
         684,
-        749
+        756
       ],
       "automationId": "workspace"
     },
@@ -889,7 +890,7 @@
         228,
         93,
         301,
-        708
+        715
       ],
       "automationId": "record-flows-pane"
     },
@@ -1324,7 +1325,7 @@
         529,
         93,
         383,
-        488
+        495
       ],
       "automationId": "record-session"
     },
@@ -1566,7 +1567,7 @@
       "isEnabled": true,
       "box": [
         545,
-        594,
+        601,
         64,
         15
       ]
@@ -1586,7 +1587,7 @@
       "isEnabled": true,
       "box": [
         827,
-        594,
+        601,
         7,
         15
       ]
@@ -1606,7 +1607,7 @@
       "isEnabled": true,
       "box": [
         834,
-        594,
+        601,
         53,
         15
       ]
@@ -1629,7 +1630,7 @@
       ],
       "box": [
         529,
-        621,
+        628,
         383,
         28
       ],
@@ -1642,7 +1643,7 @@
       "isEnabled": true,
       "box": [
         529,
-        625,
+        632,
         383,
         20
       ]
@@ -1655,7 +1656,7 @@
       "isEnabled": true,
       "box": [
         545,
-        627,
+        634,
         218,
         17
       ]
@@ -1678,7 +1679,7 @@
         912,
         52,
         360,
-        749
+        756
       ],
       "automationId": "inspector"
     },
@@ -1786,7 +1787,7 @@
       "isEnabled": true,
       "box": [
         8,
-        801,
+        808,
         1264,
         28
       ]
@@ -1798,7 +1799,7 @@
       "isEnabled": true,
       "box": [
         24,
-        807,
+        814,
         180,
         17
       ],
@@ -1812,7 +1813,7 @@
       "isEnabled": true,
       "box": [
         24,
-        808,
+        815,
         180,
         15
       ]
@@ -1832,7 +1833,7 @@
       "isEnabled": true,
       "box": [
         1117,
-        809,
+        816,
         13,
         14
       ]
@@ -1852,7 +1853,7 @@
       "isEnabled": true,
       "box": [
         1136,
-        808,
+        815,
         60,
         15
       ]
@@ -1872,7 +1873,7 @@
       "isEnabled": true,
       "box": [
         1218,
-        809,
+        816,
         6,
         14
       ]
@@ -1892,7 +1893,7 @@
       "isEnabled": true,
       "box": [
         1230,
-        808,
+        815,
         26,
         15
       ]
@@ -1903,6 +1904,57 @@
       "className": "Chrome_RenderWidgetHostHWND",
       "name": "keys",
       "isEnabled": true
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Close",
+      "automationId": "Close",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1180,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Minimize",
+      "automationId": "Minimize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1204,
+        4,
+        20,
+        20
+      ]
+    },
+    {
+      "parent": 0,
+      "controlType": "Button",
+      "name": "Maximize",
+      "automationId": "Maximize",
+      "className": "Chrome_WidgetWin_1",
+      "isEnabled": true,
+      "patterns": [
+        "Invoke"
+      ],
+      "box": [
+        1228,
+        4,
+        20,
+        20
+      ]
     }
   ]
 }
