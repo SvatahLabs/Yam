@@ -84,7 +84,41 @@ export interface StoryContext extends Omit<StepContext, "scope"> {
     story(name: string, detail?: unknown): void;
     outputs(name: string, outputs: Readonly<Record<string, unknown>>): void;
     policy(name: string, stepId: string, detail: unknown): void;
+    dialog(
+      name: string,
+      stepId: string,
+      answered: { type: string; message: string; armed: boolean; answer: "accept" | "dismiss" },
+    ): void;
   };
+}
+
+/**
+ * The dialogs an adapter answered since the last step, when it keeps a log.
+ *
+ * Duck-typed, like the conformance suite's `bridgeCost()`: `AgentSurface`
+ * (LLD §2) has no dialog-event channel, and widening the published surface for
+ * an audit line would be widening a standard for a diagnostic. An adapter that
+ * does not keep one simply produces no lines.
+ */
+function drainDialogs(
+  context: StoryContext,
+): ReadonlyArray<{ type: string; message: string; armed: boolean; answer: "accept" | "dismiss" }> {
+  const log = (
+    context.surface as unknown as {
+      dialogLog?: () => ReadonlyArray<{
+        type: string;
+        message: string;
+        armed: boolean;
+        answer: "accept" | "dismiss";
+      }>;
+    }
+  ).dialogLog;
+  if (typeof log !== "function") return [];
+  try {
+    return log.call(context.surface);
+  } catch {
+    return [];
+  }
 }
 
 export async function runStory(
@@ -178,6 +212,17 @@ export async function runStory(
     const startedAt = new Date();
     const outcome = await runStep(step, context);
     const endedAt = new Date();
+
+    /*
+     * Dialogs the adapter answered while this step ran (Draft 2.9 §3.2, T8.3).
+     *
+     * Drained here rather than written by the adapter, because the adapter has
+     * no run id, no story and no step — and a dialog answered by default is
+     * only legible if it can be attributed to the step that opened one.
+     */
+    for (const answered of drainDialogs(context)) {
+      context.audit?.dialog(story.name, step.id, answered);
+    }
 
     const result: StepResult = {
       runId: context.runId,

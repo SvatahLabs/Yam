@@ -83,7 +83,7 @@ const binding = (id: string, phrase: string, testId: string, tag: string): strin
   );
 
 /** A project with one flow: answer the confirm one way, then the other. */
-function scaffold(): string {
+function scaffold(flow?: readonly string[]): string {
   const dir = mkdtempSync(join(tmpdir(), "svatah-dialog-"));
   projects.push(dir);
   mkdirSync(join(dir, "flows"), { recursive: true });
@@ -106,23 +106,37 @@ function scaffold(): string {
   );
   writeFileSync(
     join(dir, "flows", "dialogs.flow"),
-    [
-      "story: Answer the dialog both ways",
-      '  Go to "/widgets"',
-      "  Dismiss the dialog",
-      "  Click the show confirm button",
-      '  The confirm result should say "dismissed"',
-      "  Accept the dialog",
-      "  Click the show confirm button",
-      '  The confirm result should say "confirmed"',
-      "",
-      "test: Answer the dialog both ways",
-      "",
-    ].join("\n"),
+    (
+      flow ?? [
+        "story: Answer the dialog both ways",
+        '  Go to "/widgets"',
+        "  Dismiss the dialog",
+        "  Click the show confirm button",
+        '  The confirm result should say "dismissed"',
+        "  Accept the dialog",
+        "  Click the show confirm button",
+        '  The confirm result should say "confirmed"',
+        "",
+        "test: Answer the dialog both ways",
+        "",
+      ]
+    ).join("\n"),
     "utf8",
   );
   return dir;
 }
+
+interface AuditLine {
+  kind: string;
+  armed?: boolean;
+  answer?: string;
+  detail?: { type?: string; message?: string };
+}
+
+const audit = (project: string, runId: string): AuditLine[] => {
+  const text = readFileSync(join(project, "runs", runId, "audit.jsonl"), "utf8").trim();
+  return text === "" ? [] : text.split("\n").map((line) => JSON.parse(line) as AuditLine);
+};
 
 function cli(args: readonly string[], cwd: string): Promise<{ code: number; output: string }> {
   return new Promise((done) => {
@@ -168,6 +182,56 @@ describe("pattern 21 against /widgets, end to end (T7.3, LLD §3.2)", () => {
     expect(said("confirmed")?.status).toBe("passed");
     expect(steps.every((one) => one.status === "passed")).toBe(true);
     expect(run.code).toBe(0);
+  }, 180_000);
+
+  /**
+   * T8.3's Validate item, in one test: "a flow with the click before the dialog
+   * step lints with `W_DIALOG_UNARMED` and its run's audit shows the unarmed
+   * default".
+   *
+   * The two halves belong together. The lint says the flow is wrong; the audit
+   * says what the run actually did about it. Either alone leaves the other
+   * unproven — Phase 6 fixed the adapter and Phase 7 fixed the order, and the
+   * flow in the reference still quietly accepted every dialog (P7-F3).
+   */
+  it("lints the click-then-dialog order and records the default it took", async () => {
+    const dir = scaffold([
+      "story: Cancelling asks first",
+      '  Go to "/widgets"',
+      "  Click the show confirm button",
+      "  Dismiss the dialog",
+      "",
+      "test: Cancelling asks first",
+      "",
+    ]);
+
+    const linted = await cli(["lint", "--json"], dir);
+    const diagnostics = (JSON.parse(linted.output) as { diagnostics: Array<{ code: string }> })
+      .diagnostics;
+    expect(diagnostics.map((one) => one.code)).toContain("W_DIALOG_UNARMED");
+    expect(diagnostics.map((one) => one.code)).toContain("W_DIALOG_NEVER_OPENED");
+
+    await cli(["run", "--host", "none", "--run-id", "unarmed"], dir);
+
+    /*
+     * The page is the witness again: `confirm()` was answered before the
+     * `dialog` step was reached, and the audit line is the only record that the
+     * answer was a default rather than a decision.
+     */
+    const dialogs = audit(dir, "unarmed").filter((one) => one.kind === "dialog");
+    expect(dialogs).toHaveLength(1);
+    expect(dialogs[0]).toMatchObject({ kind: "dialog", armed: false, answer: "accept" });
+    expect(dialogs[0]!.detail?.message).toBe("Are you sure?");
+  }, 180_000);
+
+  it("records an armed answer as armed, so the line is an account and not an alarm", async () => {
+    const dir = scaffold();
+    await cli(["run", "--host", "none", "--run-id", "armed"], dir);
+    const dialogs = audit(dir, "armed").filter((one) => one.kind === "dialog");
+    expect(dialogs.map((one) => [one.armed, one.answer])).toEqual([
+      [true, "dismiss"],
+      [true, "accept"],
+    ]);
   }, 180_000);
 
   it("refuses a dialog step with no action rather than accepting one", async () => {

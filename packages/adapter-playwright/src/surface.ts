@@ -132,6 +132,21 @@ export class PlaywrightSurface implements AgentSurface {
   private readonly dialogs: Array<{ type: string; message: string }> = [];
   /** How the next dialog is answered; set by `act("dialog", …)`. */
   private dialogPolicy: { accept: boolean; promptText?: string } | undefined;
+  /**
+   * Dialogs answered since the executor last asked (Draft 2.9 LLD §3.2, T8.3).
+   *
+   * A dialog is answered inside a Playwright event handler, outside any surface
+   * call, so the audit proxy that wraps this object never sees one. The
+   * executor drains this after each step and writes a `kind: "dialog"` line —
+   * which is how "the default is never silent" is made true for the case that
+   * caused it, a `dialog` step written *after* the click it meant to answer.
+   */
+  private readonly answered: Array<{
+    type: string;
+    message: string;
+    armed: boolean;
+    answer: "accept" | "dismiss";
+  }> = [];
   private baseUrl: string | undefined;
   private storageStatePath: string | undefined;
   private tracing = false;
@@ -293,14 +308,37 @@ export class PlaywrightSurface implements AgentSurface {
    */
   private async handleDialog(dialog: Dialog): Promise<void> {
     this.dialogs.push({ type: dialog.type(), message: dialog.message() });
+    const armed = this.dialogPolicy !== undefined;
     const policy = this.dialogPolicy ?? { accept: true };
     this.dialogPolicy = undefined;
+    this.answered.push({
+      type: dialog.type(),
+      message: dialog.message(),
+      armed,
+      answer: policy.accept ? "accept" : "dismiss",
+    });
     try {
       if (policy.accept) await dialog.accept(policy.promptText);
       else await dialog.dismiss();
     } catch {
       // The page navigated away before the dialog could be answered.
     }
+  }
+
+  /**
+   * The dialogs answered since this was last called, and forget them.
+   *
+   * Duck-typed rather than part of `AgentSurface`, the way `bridgeCost()` is:
+   * the published surface (LLD §2) has no dialog-event channel and adding one
+   * for an audit line would widen the standard for a diagnostic.
+   */
+  dialogLog(): ReadonlyArray<{
+    type: string;
+    message: string;
+    armed: boolean;
+    answer: "accept" | "dismiss";
+  }> {
+    return this.answered.splice(0, this.answered.length);
   }
 
   private page(): Page {

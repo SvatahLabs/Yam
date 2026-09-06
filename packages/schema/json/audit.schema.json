@@ -6,6 +6,16 @@
     "audit": {
       "additionalProperties": false,
       "properties": {
+        "answer": {
+          "enum": [
+            "accept",
+            "dismiss"
+          ],
+          "type": "string"
+        },
+        "armed": {
+          "type": "boolean"
+        },
         "at": {
           "format": "date-time",
           "type": "string"
@@ -47,7 +57,8 @@
             "surface",
             "input",
             "output",
-            "policy"
+            "policy",
+            "dialog"
           ],
           "type": "string"
         },

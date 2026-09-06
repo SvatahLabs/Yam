@@ -1039,6 +1039,67 @@ Switch to the "Embedded widget" frame
 
 **Form:** `Accept the dialog` · `Dismiss the dialog` · `Answer the dialog with "<text>"` · `Accept the dialog and check it said "<text>"`
 
+#### A dialog step arms the *next* dialog
+
+This is the one pattern whose meaning depends on where you put it, so it is
+worth being exact.
+
+A native dialog — `alert`, `confirm`, `prompt` — stops the page until something
+answers it. There is no moment after the click at which a step could run and
+find the dialog waiting: by the time the click returns, the dialog has been
+answered. So a `dialog` step does not *answer* a dialog. It **arms the answer
+for the next one the page opens**, and it is written **before** the step that
+opens one:
+
+```
+story: Cancelling asks first
+  Go to "/widgets"
+  Dismiss the dialog
+  Click the show confirm button
+  The confirm result should say "dismissed"
+```
+
+Read it as "the next dialog is to be dismissed; now click the button". One
+`dialog` step arms exactly one dialog, so answering two means arming twice:
+
+```
+story: Answer the dialog both ways
+  Go to "/widgets"
+  Dismiss the dialog
+  Click the show confirm button
+  The confirm result should say "dismissed"
+  Accept the dialog
+  Click the show confirm button
+  The confirm result should say "confirmed"
+```
+
+Written the other way round the `dialog` step does nothing at all, because the
+dialog it was meant to answer is already gone:
+
+```
+// Wrong. The dialog is accepted by the default before this step is reached,
+// and the page says "confirmed".
+story: Cancelling asks first
+  Go to "/widgets"
+  Click the show confirm button
+  Dismiss the dialog
+  The confirm result should say "dismissed"
+```
+
+`svatah lint` reports that flow twice: **`W_DIALOG_UNARMED`** on the click,
+which would take the default, and **`W_DIALOG_NEVER_OPENED`** on the `dialog`
+step, which arms an answer no later step can collect.
+A dialog answered with nothing armed is not silent either: the run's
+`audit.jsonl` carries a line of its own —
+
+```json
+{ "kind": "dialog", "armed": false, "answer": "accept", "detail": { "type": "confirm", "message": "Are you sure?" } }
+```
+
+— so a flow that passed for the wrong reason can be found afterwards.
+
+#### The four forms
+
 ```
 Accept the dialog
 Dismiss the dialog
@@ -1073,6 +1134,11 @@ Accept the dialog and check it said "Are you sure?"
   }
 }
 ```
+
+`Answer the dialog with "Atul"` adds the text a `prompt` receives; `Accept the
+dialog and check it said "Are you sure?"` adds an `expect` on the dialog's
+message, which is checked *after* the dialog has been answered — the message is
+kept for exactly that.
 
 ### Pattern 22 — Read and capture
 
@@ -1954,6 +2020,8 @@ outputs: enterprise: string
 | `W_SIDE_EFFECT_TOOL` | A story with side effects is exposed as a tool but is not marked `idempotent`. |
 | `W_SECRET_UNSET` | A `${ENV}` indirection names a variable that is not set. Compiling does not need the value; running does. |
 | `W_BINDING_NO_PHRASES` | A binding file declares no phrases, so no sentence can name the element. It is still addressable by id from `bind()`. |
+| `W_DIALOG_UNARMED` | A step that can open a dialog runs with no armed answer, in a story that answers dialogs elsewhere. The dialog would be accepted by default ([pattern 21](#pattern-21--dialogs)). |
+| `W_DIALOG_NEVER_OPENED` | A `dialog` step arms an answer no later step can collect — usually one written *after* the click it was meant to answer. |
 
 Errors, which fail the compile:
 

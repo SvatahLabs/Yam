@@ -58,6 +58,15 @@ export const WARNING_CODES = [
   // does — but no sentence can name it, so a flow project almost always meant
   // to record one.
   "W_BINDING_NO_PHRASES",
+  /*
+   * Draft 2.9, LLD §3.2 and §4.2: a `dialog` step *arms* the answer for the
+   * next dialog the page opens, so it is written **before** the step that opens
+   * one. Written after, it does nothing and the dialog was already accepted by
+   * default — the order-dependence that made `Click the Show confirm button`
+   * then `Dismiss the dialog` leave the page saying `confirmed` (P7-F3).
+   */
+  "W_DIALOG_UNARMED",
+  "W_DIALOG_NEVER_OPENED",
 ] as const;
 export type WarningCode = (typeof WARNING_CODES)[number];
 

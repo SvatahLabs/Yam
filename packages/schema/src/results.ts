@@ -161,7 +161,21 @@ export type Summary = z.infer<typeof summarySchema>;
 
 /* ── Audit (LLD §3.4, REQ-AUTO-6) ─────────────────────────────────────────── */
 
-export const AUDIT_KINDS = ["run", "story", "surface", "input", "output", "policy"] as const;
+export const AUDIT_KINDS = [
+  "run",
+  "story",
+  "surface",
+  "input",
+  "output",
+  "policy",
+  /*
+   * Draft 2.9 LLD §3.2: "a dialog answered with no armed policy writes an audit
+   * line `kind:"dialog", armed:false, answer:"accept"` so the default is never
+   * silent." A dialog is answered by the adapter's own event handler, outside
+   * any surface call, so nothing else in this file would ever mention it.
+   */
+  "dialog",
+] as const;
 export const auditKindSchema = z.enum(AUDIT_KINDS);
 export type AuditKind = z.infer<typeof auditKindSchema>;
 
@@ -185,6 +199,10 @@ export const auditLineSchema = z
       .strict()
       .optional(),
     outcome: z.enum(["ok", "error"]).optional(),
+    /** `kind: "dialog"`: whether a `dialog` step had armed this answer. */
+    armed: z.boolean().optional(),
+    /** `kind: "dialog"`: what the dialog was answered with. */
+    answer: z.enum(["accept", "dismiss"]).optional(),
     error: z.string().optional(),
     durationMs: z.number().nonnegative().optional(),
     /** Redacted detail: run-level inputs, collected outputs, the policy applied. */

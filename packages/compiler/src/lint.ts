@@ -87,6 +87,8 @@ export function lintPlan(plan: Plan, options: LintOptions = {}): Diagnostic[] {
       }
     }
 
+    out.push(...dialogWarnings(story, file));
+
     if (exposed.has(story.name) && story.meta.idempotent !== true) {
       const offending = story.steps.filter((step) => step.sideEffect === true);
       if (offending.length > 0) {
@@ -101,6 +103,106 @@ export function lintPlan(plan: Plan, options: LintOptions = {}): Diagnostic[] {
         );
       }
     }
+  }
+
+  return out;
+}
+
+/**
+ * Actions that can put a native dialog in front of the page.
+ *
+ * `alert`, `confirm` and `prompt` are called from a handler, and these are the
+ * four ways a flow reaches one: the three the sample application uses, and
+ * `navigate`, which fires `beforeunload`.
+ */
+const OPENS_A_DIALOG = new Set(["click", "doubleClick", "rightClick", "press", "submit", "navigate"]);
+
+/**
+ * Whether this `navigate` can open a dialog.
+ *
+ * §3.2 lists `navigate` among the openers, and it is one: leaving a page fires
+ * `beforeunload`, which can put a dialog up. But the *first* navigation of a
+ * story cannot — there is no page to leave — and almost every story starts with
+ * one. Counting it would warn on `Go to "/widgets"` in the reference's own
+ * examples, which is the opposite of what this warning is for.
+ */
+function leavesAPage(story: Story, index: number): boolean {
+  return story.steps.slice(0, index).some((step) => step.action === "navigate");
+}
+
+/**
+ * The two dialog warnings (Draft 2.9 LLD §3.2, §4.2, T8.3).
+ *
+ * A `dialog` step does not *answer* a dialog; it **arms** the answer for the
+ * next one the page opens. Written after the click that opens one, it does
+ * nothing at all — the dialog has already been accepted by the default — and
+ * nothing said so: `Click the Show confirm button` followed by `Dismiss the
+ * dialog` left the sample page saying `confirmed`, twice through verification
+ * (Phase 6 F4, Phase 7 F3).
+ *
+ * ## Why the arming is counted rather than merely looked for
+ *
+ * One `dialog` step arms exactly one dialog. A story that arms once and clicks
+ * twice answers the first dialog and defaults the second, which is the same
+ * defect one step later, so the walk keeps a count: a `dialog` step adds one, a
+ * step that can open a dialog spends one, and a step that opens one with
+ * nothing left to spend is the warning.
+ *
+ * ## Why only stories that mention dialogs
+ *
+ * Every `click` in every flow can open a dialog in principle, and warning about
+ * all of them would be a warning nobody reads. A story with a `dialog` step in
+ * it is a story whose author is thinking about dialogs, and that is where the
+ * ordering mistake is worth pointing at.
+ */
+function dialogWarnings(story: Story, file: string): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  const dialogSteps = story.steps.filter((step) => step.action === "dialog");
+  if (dialogSteps.length === 0) return out;
+
+  let armed = 0;
+  for (const [index, step] of story.steps.entries()) {
+    if (step.action === "dialog") {
+      armed += 1;
+      continue;
+    }
+    if (!OPENS_A_DIALOG.has(step.action)) continue;
+    if (step.action === "navigate" && !leavesAPage(story, index)) continue;
+    if (armed > 0) {
+      armed -= 1;
+      continue;
+    }
+    out.push(
+      diagnostic(
+        "W_DIALOG_UNARMED",
+        `"${step.text}" can open a dialog and no \`dialog\` step has armed an answer for it, ` +
+          "so it would be accepted by default. A `dialog` step arms the *next* dialog: write it " +
+          "before the step that opens one (`docs/flow-language.md` pattern 21).",
+        { file, line: step.line },
+      ),
+    );
+  }
+
+  /*
+   * And the mirror image: an armed answer no step ever collects. Usually the
+   * same mistake seen from the other end — the `dialog` step written last —
+   * and always a step that does nothing.
+   */
+  const opens = (step: Step, index: number): boolean =>
+    OPENS_A_DIALOG.has(step.action) &&
+    (step.action !== "navigate" || leavesAPage(story, index));
+  const lastOpener = story.steps.reduce((at, step, index) => (opens(step, index) ? index : at), -1);
+  for (const [index, step] of story.steps.entries()) {
+    if (step.action !== "dialog" || index < lastOpener) continue;
+    out.push(
+      diagnostic(
+        "W_DIALOG_NEVER_OPENED",
+        `"${step.text}" arms an answer for the next dialog, and no later step in "${story.name}" ` +
+          "can open one. A `dialog` step written after the click it was meant to answer does " +
+          "nothing (`docs/flow-language.md` pattern 21).",
+        { file, line: step.line },
+      ),
+    );
   }
 
   return out;

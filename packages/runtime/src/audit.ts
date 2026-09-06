@@ -37,6 +37,18 @@ export interface AuditContext {
   readonly enabled: boolean;
 }
 
+/**
+ * Methods an adapter exposes that are *about* itself rather than calls on the
+ * platform, and which the proxy must therefore leave alone.
+ *
+ * The trap turns every function into an async one that writes a line. That is
+ * right for `act`, `read`, `snapshot` and the rest, and wrong for an accessor:
+ * `dialogLog()` returns an array the caller iterates, and wrapped it returned a
+ * Promise — "not a function or its return value is not iterable", from every
+ * run, the moment the executor started draining it (T8.3).
+ */
+const NOT_A_SURFACE_CALL = new Set(["capabilities", "bridgeCost", "dialogLog", "browser"]);
+
 export class Auditor {
   private seq = 0;
 
@@ -81,6 +93,29 @@ export class Auditor {
   }
 
   /**
+   * One dialog the adapter answered (Draft 2.9 LLD §3.2, T8.3).
+   *
+   * "A dialog answered with no armed policy writes an audit line
+   * `kind:"dialog", armed:false, answer:"accept"` so the default is never
+   * silent." The line exists for the unarmed case and is written for both,
+   * because a log that only records the mistake cannot be read as an account of
+   * what happened.
+   */
+  dialog(
+    story: string,
+    stepId: string,
+    answered: { type: string; message: string; armed: boolean; answer: "accept" | "dismiss" },
+  ): void {
+    this.record("dialog", {
+      story,
+      stepId,
+      armed: answered.armed,
+      answer: answered.answer,
+      detail: { type: answered.type, message: answered.message },
+    });
+  }
+
+  /**
    * Wrap a surface so every call writes a line.
    *
    * A `Proxy` rather than a hand-written wrapper: `AgentSurface` has fourteen
@@ -98,7 +133,7 @@ export class Auditor {
       get(target, property, receiver) {
         const value = Reflect.get(target, property, receiver) as unknown;
         if (typeof value !== "function" || typeof property !== "string") return value;
-        if (property === "capabilities") return value.bind(target);
+        if (NOT_A_SURFACE_CALL.has(property)) return value.bind(target);
 
         return async function audited(...args: unknown[]): Promise<unknown> {
           const started = performance.now();
