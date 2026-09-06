@@ -590,9 +590,23 @@ async function healingCase(
   }
 
   for (const subject of subjects) {
-    const nodes = subject.screen.startsWith("palette:")
-      ? await openFromPalette(context, subject.screen.slice("palette:".length))
-      : await openScreen(context, subject.screen);
+    /*
+     * Look before navigating (T10.3).
+     *
+     * The control may already be on the window the gate launched — a rail item
+     * is on every screen — and a case that navigated first would press a rail
+     * row or open the palette for no reason, and would fail outright where the
+     * window is all there is (`packages/cli/test/desktop-healing.test.ts`
+     * replays one recorded tree per pass). So: snapshot, and go somewhere only
+     * if the subject is not here.
+     */
+    const here = (await context.surface.snapshot()).nodes as readonly Node[];
+    const nodes =
+      byKey(here, subject.key) !== undefined
+        ? here
+        : subject.screen.startsWith("palette:")
+          ? await openFromPalette(context, subject.screen.slice("palette:".length))
+          : await openScreen(context, subject.screen);
     const live = byKey(nodes, subject.key);
 
     if (healing.variant === 0) {
@@ -627,6 +641,9 @@ async function healingCase(
         fingerprint,
         key: subject.key,
         rolePath: described.rolePath,
+        ...(typeof described.native?.["controlPath"] === "string"
+          ? { controlPath: described.native["controlPath"] }
+          : {}),
       });
       baselines += 1;
       continue;
@@ -648,10 +665,19 @@ async function healingCase(
      * the interface fails here rather than passing everywhere.
      */
     const renamed = live !== undefined && live.name !== subject.nameAtZero;
+    /*
+     * "Moved" is a change to where the control is *addressed from* — its
+     * `controlPath`, which is the desktop candidate kind (LLD §7.5) — or to its
+     * ancestor roles. The role path alone is too coarse for the ADE T10.3 left:
+     * the toolbar and the session panel are both groups inside the workspace,
+     * so a control moved between them kept an identical `rolePath` and the case
+     * reported that nothing had changed when the whole tree around it had.
+     */
+    const described = live === undefined ? undefined : await context.surface.describe(live.ref);
     const moved =
-      live !== undefined &&
-      JSON.stringify((await context.surface.describe(live.ref)).rolePath) !==
-        JSON.stringify(recorded.rolePath);
+      described !== undefined &&
+      (JSON.stringify(described.rolePath) !== JSON.stringify(recorded.rolePath) ||
+        described.native?.["controlPath"] !== recorded.controlPath);
     check(`variant ${variant} changed "${subject.key}"`, renamed || moved, {
       expected: "a different name, or a different place in the tree",
       actual: { name: live?.name, renamed, moved },

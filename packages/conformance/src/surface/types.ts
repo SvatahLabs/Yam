@@ -44,6 +44,15 @@ export interface RecordedElement {
   readonly key: string;
   /** The roles from the root down, so a moved control can be shown to have moved. */
   readonly rolePath: readonly string[];
+  /**
+   * And the path it was addressed by (LLD §7.5's `controlPath` candidate).
+   *
+   * The role path alone is too coarse for the ADE T10.3 left: the toolbar and
+   * the session panel are both groups inside the workspace, so a control moved
+   * between them has an identical `rolePath` and a different `controlPath` —
+   * and it is the `controlPath` a desktop binding would have matched on.
+   */
+  readonly controlPath?: string;
 }
 
 /** What model-free relocalization answered (LLD §6.4). */

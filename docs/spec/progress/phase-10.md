@@ -56,6 +56,39 @@ empty. The only change under `docs/spec/design/` is four **added** artboards
   accessibility tree is unaffected (T8.2's decision, unchanged).
 - No model credential. Every recording in this phase uses `--gateway fake`.
 
+## The verification contract
+
+Everything below is runnable from a clean checkout with
+`pnpm install --frozen-lockfile && pnpm browsers && pnpm -r build && pnpm -r typecheck && pnpm -r test && pnpm lint`,
+with no credential.
+
+| Command | Result on this host |
+|---|---|
+| `pnpm install --frozen-lockfile && pnpm -r build && pnpm -r typecheck && pnpm lint`, no credential, Node v25.6.1 | all exit 0 |
+| `pnpm -r test` | see the note below |
+| `git diff master..phase-10 -- docs/spec/{requirements,hld,lld,tasks}.md` | empty |
+| `git diff master..phase-10 --name-status -- docs/spec/design` | four added artboards, nothing else |
+| `node scripts/record-screen-fixtures.mjs --check`, with three unrelated runs in `evals/fixtures/runs` | passes: 7 flows, 22 stories, 30 bindings, run `comp` exit 11 |
+| `node scripts/audit-sheet.mjs --axe "$(node scripts/fetch-axe.mjs)"` | axe-core 4.10.3: 0 violations; the audit: 0 violations, 27 distinctly named landmarks |
+| `node scripts/generate-clients.mjs --check` | 3 clients match: 37 routes, 16 event kinds |
+| `pnpm --filter @svatah/ade package && pnpm --filter @svatah/ade exec playwright test` | 34 passed |
+| `pnpm --filter @svatah/repo-checks exec vitest run test/tui-pty.test.ts` | 26 passed |
+| `pnpm --filter @svatah/adapter-ax test` / `--filter @svatah/adapter-uia test` | 91 passed, 1 skipped / 91 passed |
+| `node scripts/ade-smoke.mjs` | `smoke ok … packaged=yes runtime: /opt/homebrew/bin/node` |
+| `node packages/cli/dist/bin.js surface doctor --adapter ax` | `ok ax/session — 9 application(s) own a window` |
+| `node scripts/desktop-conformance.mjs --adapter ax` | exit 2; see T10.3 and K1 |
+| `pnpm ade:shoot` | twelve screenshots; no AX screenshot (Screen Recording not granted) |
+| `pnpm ui:capture` | four captures: 160×40 and 100×30, each screen |
+
+**One flake, and what it was.** `packages/adapter-bidi/test/surface.test.ts ›
+returns tag, attributes, text, neighbours, role path, box and index` failed once
+with `TimeoutError: The BiDi command session.new did not answer in time`, on a
+run made while the desktop gate and the screenshot script were driving Electron
+on the same machine. It passes alone (`pnpm --filter @svatah/adapter-bidi test`:
+52 passed) and it passes in a suite run with nothing else going. It is a
+wall-clock race on a busy host — Firefox's remote agent not answering
+`session.new` — and it is recorded rather than dismissed.
+
 ## The Phase 9 corrections (P9-F1..F7, together T10.4's first half)
 
 ### P9-F1 — the screen fixtures are recorded on a copy of the project

@@ -177,19 +177,18 @@ for (const [adapter, open] of [
     it("records at variant 0 and relocalizes the renamed tab and button at variant 1", async () => {
       const state: Record<string, RecordedElement> = {};
 
-      const recorded = await pass(adapter, open, "ade-project", 0, CASES.renamed, state);
+      const recorded = await pass(adapter, open, "ade-flows", 0, CASES.renamed, state);
       expect(failures(recorded), JSON.stringify(failures(recorded), null, 2)).toEqual([]);
       /*
-       * Two bindings: the screen tab §16 renames, and the Project button it
-       * renames. Both are recorded by the ground-truth key that survives the
-       * rename, and neither fingerprint can see that key.
+       * One binding now (T10.3): the **rail item** §16's variant 1 renames. It
+       * was a screen tab and a Project screen button, and T10.3 deleted both
+       * with the eleven screens they belonged to. It is recorded by the
+       * ground-truth key that survives the rename, and the fingerprint cannot
+       * see that key.
        */
-      expect(Object.keys(state).sort()).toEqual([
-        "ade.heal.renamed-control:project-open",
-        "ade.heal.renamed-control:screen-flows",
-      ]);
+      expect(Object.keys(state).sort()).toEqual(["ade.heal.renamed-control:rail-flows"]);
 
-      const healed = await pass(adapter, open, "ade-project-v1", 1, CASES.renamed, state);
+      const healed = await pass(adapter, open, "ade-flows-v1", 1, CASES.renamed, state);
       expect(failures(healed), JSON.stringify(failures(healed), null, 2)).toEqual([]);
       expect(healed.conformant).toBe(true);
     }, 120_000);
@@ -218,7 +217,7 @@ for (const [adapter, open] of [
         cases: CASES.renamed,
         variant: 1,
         openSurface: async () => {
-          const surface = open(join(fixtures(adapter), "ade-project-v1.json"));
+          const surface = open(join(fixtures(adapter), "ade-flows-v1.json"));
           await surface.open({ kind: "desktop", processName: "Svatah ADE" } as never);
           return surface;
         },

@@ -60,10 +60,15 @@ export function RecordScreen(props: RecordProps): React.JSX.Element {
    * > variant 2 moves the Record screen's gateway control into a different
    * > panel
    *
-   * Its id and its name are unchanged; only where it sits is. A binding
-   * recorded at variant 0 therefore keeps everything a fingerprint is made of
-   * except its ancestor role path and its neighbours, which is the half of
-   * relocalization variant 1 does not exercise.
+   * Out of the toolbar and into the session panel's head. Its id and its name
+   * are unchanged; what changes is where it is addressed from — its
+   * `controlPath`, its neighbours, its sibling index and its box — which is the
+   * half of relocalization variant 1's rename does not exercise.
+   *
+   * Deliberately *not* into the inspector, which is a different landmark: that
+   * changes the ancestor role path as well, and measured here it left the
+   * relocalizer with nothing to work from (`not-found`). A variant that no
+   * model-free repair can survive measures the variant rather than the healer.
    */
   const inWorkspace = a11yVariant() === 2;
   const gateway = (
@@ -205,6 +210,7 @@ export function RecordScreen(props: RecordProps): React.JSX.Element {
 /** The right inspector: what the model chose, and everything behind it. */
 export function RecordInspector(props: RecordProps): React.JSX.Element {
   const decision = props.state.decision;
+
   if (decision === undefined) {
     return (
       <EmptyInspector id="inspector-empty" title="Inspector">
