@@ -15,12 +15,14 @@ The yam CLI and MCP server
 | `bindingsCommand` | function | `declare function bindingsCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode>;` |  |
 | `boolOption` | function | `declare function boolOption(args: ParsedArgs, name: string, fallback?: boolean): boolean;` | A boolean option: present as a bare flag, or `--name true\|false`. |
 | `CommandIo` | interface | `interface CommandIo` |  |
+| `COMMANDS` | variable | `COMMANDS: readonly CommandHelp[] = [` | Every command, with its own help. Order is the order `yam help` lists them, then the nouns. |
 | `compileProject` | function | `export function compileProject(` | Compile a loaded project with the grammar alone. Offline, always. |
 | `CONFIG_FILES` | variable | `CONFIG_FILES: string[]` |  |
 | `defaultCasesPath` | function | `export function defaultCasesPath(): string` | Where the cases live, relative to the repository this package is built in. |
 | `evalCommand` | function | `declare function evalCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode>;` |  |
 | `evalSelfCommand` | function | `export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode>` |  |
 | `EXIT` | variable | `EXIT:` | The exit codes of LLD §15. |
+| `EXIT_MEANINGS` | variable | `EXIT_MEANINGS: ReadonlyArray<readonly [number, string, string]> = [` | What each exit code means, in the words `yam help exit-codes` prints. |
 | `ExitCode` | typealias | `type ExitCode = (typeof EXIT)[keyof typeof EXIT];` |  |
 | `GroundingAnswer` | interface | `export interface GroundingAnswer` |  |
 | `groundingAnswers` | function | `export function groundingAnswers(path?: string): GroundingAnswers` |  |
@@ -29,6 +31,7 @@ The yam CLI and MCP server
 | `groundingEvalCommand` | function | `export async function groundingEvalCommand(` |  |
 | `hasModelGrounding` | function | `declare function hasBindGrounder(): boolean;` | Whether anything but the picker-only default is registered. |
 | `healCommand` | function | `declare function healCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode>;` |  |
+| `helpFor` | function | `export function helpFor(words: readonly string[]): string \| undefined` | Help for one command, or for a noun alone; undefined when neither matches. |
 | `installModelGrounding` | function | `export function installModelGrounding(options: ModelGroundingOptions = {}): boolean` | Register the recorder's grounder for `bind()`'s record mode. |
 | `loadBindings` | function | `export function loadBindings(` | The bindings store, or a `ConfigError` naming the file (P2-F2). |
 | `loadConfig` | function | `declare function loadConfig(root: string):` | The config a project declares, or the defaults. |
@@ -37,6 +40,7 @@ The yam CLI and MCP server
 | `main` | function | `export async function main(argv: readonly string[], io: CommandIo): Promise<ExitCode>` |  |
 | `ModelGroundingOptions` | interface | `export interface ModelGroundingOptions` |  |
 | `newRunId` | function | `declare function newRunId(now?: Date, random?: () => number): string;` | A lexicographically sortable id, which is what a run directory wants. |
+| `NOUNS` | variable | `NOUNS: ReadonlyArray<readonly [string, string]> = [` | The nouns, and the verbs under each, for `yam <noun>` alone. |
 | `numberOption` | function | `declare function numberOption(args: ParsedArgs, name: string): number \| undefined;` | A numeric option, or `undefined` when absent or unparseable. |
 | `parseArgs` | function | `declare function parseArgs(argv: readonly string[]): ParsedArgs;` |  |
 | `ParsedArgs` | interface | `interface ParsedArgs` | A small argument reader for the CLI (LLD §15). |
@@ -62,5 +66,9 @@ The yam CLI and MCP server
 | `surfaceCommand` | function | `declare function surfaceCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode>;` |  |
 | `TIER2_PROMPT_VERSION` | variable | `TIER2_PROMPT_VERSION = "c2-1"` | The prompt this tier is versioned by, in provenance (REQ-AGT-3). |
 | `TIER2_SYSTEM_PROMPT` | variable | `TIER2_SYSTEM_PROMPT = `You translate one sentence from a browser automation script into a JSON step.` | The instruction block. Stable, so the gateway's cache key is stable. |
+| `TOP_LEVEL` | variable | `TOP_LEVEL = `yam — describe a behaviour once, bind it to the real application, replay it without a model` | The top-level help, verbatim from the design; a test compares it. |
+| `topic` | function | `export function topic(name: string): string \| undefined` | `yam help <topic>`, or undefined for a topic that does not exist. |
+| `TOPICS` | variable | `TOPICS = ["flows", "bindings", "exit-codes", "session", "adapters", "agents"] as const` |  |
 | `uninstallModelGrounding` | function | `export function uninstallModelGrounding(): void` | Put module (a)'s picker-only default back. |
+| `userFacingHelpText` | function | `export function userFacingHelpText(): string` | Every string a person can read from the help, for the vocabulary check (REQ-CLI-9). |
 | `vitestCaseNames` | function | `export function vitestCaseNames(one:` | Every name a catalogue may call one vitest case by (P11-F2). |

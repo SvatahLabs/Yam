@@ -5,68 +5,18 @@
 The text below is `yam --help`, verbatim. Every command that takes `--json` prints one JSON document and nothing else on stdout.
 
 ```text
-yam — a deterministic automation runtime with a standard agent surface
+yam — describe a behaviour once, bind it to the real application, replay it without a model
 
-Flows (module b):
+  yam init [dir]      start a project here
+  yam check           read, lint and compile the flows; writes .yam/plan.json
+  yam record          bind the targets by driving the real application
+  yam run             replay the plan; the exit code is the verdict
+  yam heal            repair the bindings the interface moved, from the last run
+  yam ui              the terminal cockpit (--tmux for the workspace)
+  yam serve           the local service, for Yam.app and other clients
 
-  yam init [dir] [--force]
-  yam lint [dir] [--json]
-  yam compile [dir] [--stable] [--out .yam/plan.json] [--json]
-                 [--tier2] [--tier3] [--allow-model-drift]
-  yam record [dir] [--flow <file>] [--story <name>] [--rebind] [--headed]
-                [--base-url <url>] [--storage-state <path.json>]
-                [--gateway anthropic|fake] [--input k=v] [--force-production] [--json]
-  yam run [dir] [--host playwright|none] [--flow <file>] [--story <name>]
-             [--base-url <url>] [--storage-state <path.json>] [--input k=v]
-             [--resume <runId> --from <stepId>]
-             [--workers <n>] [--headed] [--out runs] [--run-id <id>] [--json]
-  yam host generate [dir] [--out .yam/specs]
-  yam migrate <src> <dest> [--keep-original] [--json]
-  yam migrate <dest> --from-prototype <electron-db dir> [--project <name>]
-  yam doctor [dir] [--json]
-  yam serve [dir] [--port 0] [--token <t>]
-  yam ui [dir] [--screen flows|run] [--flow <file>] [--run <id>] [--story <name>]
-            [--url <url>] [--token <t>] [--json] [--capture <ms>]
-  yam repl [dir] [--adapter <name>] [--base-url <url>] [--headless]
-              [--gateway anthropic|fake|none] [--tier2] [--tier3]
-              [--out <flows>] [--name <flow name>] [--json]
-  yam workflow run <story> [dir] [--input k=v] [--allow-side-effects]
-                              [--base-url <url>] [--storage-state <path.json>]
-                              [--headed] [--resume <runId> --from <stepId>]
-                              [--out runs] [--run-id <id>] [--json]
-  yam tool serve [dir] [--expose "Story one,Story two"] [--stdio]
-                    [--base-url <url>] [--storage-state <path.json>]
-                    [--headed] [--allow-side-effects] [--out runs] [--json]
-  yam mcp [dir] [--trajectory <path.jsonl>] [--session <id>]
-  yam trajectory compile <trajectory.jsonl> [dir] [--name "Story name"]
-                            [--out proposals] [--app proposed] [--json]
+  yam <command> --help   options and exit codes of one command
+  yam help <topic>       flows · bindings · exit-codes · session · adapters · agents
 
-Bindings and healing (module a):
-
-  yam surface conform --adapter <name> [--base-url <url>] [--headed] [--only <ids>]
-                         [--report <path.md>] [--json]
-  yam bindings list [--dir <bindings>] [--json]
-  yam bindings show <id> [--dir <bindings>] [--json]
-  yam bindings verify [--adapter <name>] [--base-url <url>] [--id <id>] [--json]
-  yam bindings prune [--used-in <dirs>] [--apply] [--json]
-  yam heal --from-bind-failures | --run <id> [--project <dir>]
-              [--dir <bindings>] [--out <.yam>] [--runs <runs>]
-              [--base-url <url>] [--storage-state <path.json>]
-              [--input k=v] [--apply] [--no-model] [--headed] [--json]
-  yam eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
-  yam surface doctor [--adapter ax|uia] [--json]
-  yam eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
-                        [--limit <n>] [--report <path.md>] [--json]
-  yam eval finetune corpus [--json]
-  yam eval finetune export [--out <path.jsonl>] [--json]
-  yam eval self [--update] [--report <path.md>] [--only <check-id>]
-                   [--side yam|external]
-  yam eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
-                       [--only tier1,tier2] [--report <path.md>] [--json]
-
-Every command that opens a session takes its base URL and storage state from
-the --base-url / --storage-state flag, then YAM_BASE_URL /
-YAM_STORAGE_STATE, then config.app, in that order (LLD §15).
-
-Exit codes are the table in LLD §15.
+More, one level down: yam bindings · workflow · tool · mcp · eval · surface · migrate · repl · trajectory · host
 ```

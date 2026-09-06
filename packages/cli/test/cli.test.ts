@@ -77,7 +77,7 @@ describe("the command table (LLD §15)", () => {
     // any of them later would be lying.
     const io = capture();
     await main(["help"], io);
-    for (const command of ["yam repl", "yam workflow run", "yam tool serve"]) {
+    for (const command of ["repl", "workflow", "tool"]) {
       expect(io.stdout.join("\n")).toContain(command);
     }
   });

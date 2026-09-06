@@ -24,73 +24,6 @@ import { ConfigError } from "./config-error.js";
 /** Commands LLD §15 lists that are not built yet, and what builds them. */
 const LATER: Record<string, string> = {};
 
-const USAGE = `yam — a deterministic automation runtime with a standard agent surface
-
-Flows (module b):
-
-  yam                (no arguments: where you are, and what is next)
-  yam init [dir] [--force]
-  yam check [dir] [--json]         lint and compile in one verb
-  yam lint [dir] [--json]
-  yam compile [dir] [--stable] [--out .yam/plan.json] [--json]
-                 [--tier2] [--tier3] [--allow-model-drift]
-  yam record [dir] [--flow <file>] [--story <name>] [--rebind] [--headed]
-                [--base-url <url>] [--storage-state <path.json>]
-                [--gateway anthropic|fake] [--input k=v] [--force-production] [--json]
-  yam run [dir] [--host playwright|none] [--no-check] [--flow <file>] [--story <name>]
-             [--base-url <url>] [--storage-state <path.json>] [--input k=v]
-             [--resume <runId> --from <stepId>]
-             [--workers <n>] [--headed] [--out runs] [--run-id <id>] [--json]
-  yam host generate [dir] [--out .yam/specs]
-  yam migrate <src> <dest> [--keep-original] [--json]
-  yam migrate <dest> --from-prototype <electron-db dir> [--project <name>]
-  yam doctor [dir] [--json]
-  yam serve [dir] [--port 0] [--token <t>]
-  yam ui [dir] [--screen flows|run] [--flow <file>] [--run <id>] [--story <name>]
-            [--url <url>] [--token <t>] [--json] [--capture <ms>]
-  yam repl [dir] [--adapter <name>] [--base-url <url>] [--headless]
-              [--gateway anthropic|fake|none] [--tier2] [--tier3]
-              [--out <flows>] [--name <flow name>] [--json]
-  yam workflow run <story> [dir] [--input k=v] [--allow-side-effects]
-                              [--base-url <url>] [--storage-state <path.json>]
-                              [--headed] [--resume <runId> --from <stepId>]
-                              [--out runs] [--run-id <id>] [--json]
-  yam tool serve [dir] [--expose "Story one,Story two"] [--stdio]
-                    [--base-url <url>] [--storage-state <path.json>]
-                    [--headed] [--allow-side-effects] [--out runs] [--json]
-  yam mcp [dir] [--trajectory <path.jsonl>] [--session <id>]
-  yam trajectory compile <trajectory.jsonl> [dir] [--name "Story name"]
-                            [--out proposals] [--app proposed] [--json]
-
-Bindings and healing (module a):
-
-  yam surface conform --adapter <name> [--base-url <url>] [--headed] [--only <ids>]
-                         [--report <path.md>] [--json]
-  yam bindings list [--dir <bindings>] [--json]
-  yam bindings show <id> [--dir <bindings>] [--json]
-  yam bindings verify [--adapter <name>] [--base-url <url>] [--id <id>] [--json]
-  yam bindings prune [--used-in <dirs>] [--apply] [--json]
-  yam heal [--run <id> | --from-bind-failures] [--project <dir>]     (no --run: the last run)
-              [--dir <bindings>] [--out <.yam>] [--runs <runs>]
-              [--base-url <url>] [--storage-state <path.json>]
-              [--input k=v] [--apply] [--no-model] [--headed] [--json]
-  yam eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
-  yam surface doctor [--adapter ax|uia] [--json]
-  yam eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
-                        [--limit <n>] [--report <path.md>] [--json]
-  yam eval finetune corpus [--json]
-  yam eval finetune export [--out <path.jsonl>] [--json]
-  yam eval self [--update] [--report <path.md>] [--only <check-id>]
-                   [--side yam|external]
-  yam eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
-                       [--only tier1,tier2] [--report <path.md>] [--json]
-
-Every command that opens a session takes its base URL and storage state from
-the --base-url / --storage-state flag, then YAM_BASE_URL /
-YAM_STORAGE_STATE, then config.app, in that order (LLD §15).
-
-Exit codes are the table in LLD §15.
-`;
 
 /**
  * Register the recorder as the healer's `Regrounder` (T3.3, LLD §10).
@@ -249,12 +182,36 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
    * The front door (T14.1, REQ-CLI-1): `yam` alone says where you are and what
    * to do next, and exits 0. Usage is what `yam help` and `--help` print.
    */
+  if (args.options["help"] !== undefined) {
+    const { TOP_LEVEL, helpFor } = await import("./help.js");
+    io.out(helpFor(args.command) ?? TOP_LEVEL);
+    return EXIT.ok;
+  }
   if (command === undefined || command === "status") {
     return await (await import("./front-door.js")).statusCommand(args, io);
   }
-  if (command === "help" || args.options["help"] !== undefined) {
-    io.out(USAGE);
+  /*
+   * Help (T14.3): one screen for `yam help`, one topic for `yam help <topic>`,
+   * one command for `yam <command> --help`, and a noun's verbs for `yam <noun>`.
+   */
+  if (command === "help") {
+    const { TOP_LEVEL, topic } = await import("./help.js");
+    const name = args.command[1];
+    if (name === undefined) {
+      io.out(TOP_LEVEL);
+      return EXIT.ok;
+    }
+    const page = topic(name);
+    if (page === undefined) {
+      io.err(`No help topic "${name}". The topics: flows · bindings · exit-codes · session · adapters · agents`);
+      return EXIT.usage;
+    }
+    io.out(page);
     return EXIT.ok;
+  }
+  if (args.command.length === 1 && (await import("./help.js")).NOUNS.some(([noun]) => noun === command)) {
+    io.err((await import("./help.js")).helpFor([command]) ?? "");
+    return EXIT.usage;
   }
 
   /*
@@ -418,8 +375,8 @@ async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Pro
       const task = LATER[command];
       io.err(
         task === undefined
-          ? `Unknown command "${command}".\n\n${USAGE}`
-          : `\`yam ${command}\` is not built yet; it arrives with ${task} (see docs/spec/tasks.md).`,
+          ? `Unknown command "${command}".\n\n${(await import("./help.js")).TOP_LEVEL}`
+          : `\`yam ${command}\` is not built yet; it arrives with ${task}.`,
       );
       return EXIT.usage;
     }

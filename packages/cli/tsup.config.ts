@@ -9,5 +9,7 @@ import base from "../../tsup.config.js";
 export default defineConfig({
   ...(base as Record<string, unknown>),
   entry: ["src/index.ts", "src/bin.ts"],
+  // The help topics, as markdown, beside the code that prints them (T14.3).
+  publicDir: "public",
   banner: { js: "" },
 });

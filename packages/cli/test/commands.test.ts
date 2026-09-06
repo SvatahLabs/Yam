@@ -38,11 +38,11 @@ function project(files: Record<string, string>): string {
 }
 
 describe("help and unknown commands", () => {
-  it("lists both halves of the command line", async () => {
+  it("lists the journey's verbs and names where the rest lives (Draft 2.20)", async () => {
     const { out } = await cli("help");
-    expect(out).toContain("yam compile");
+    expect(out).toContain("yam check");
     expect(out).toContain("yam run");
-    expect(out).toContain("yam bindings list");
+    expect(out).toContain("yam bindings");
   });
 
   it("names the subcommand a built command wants", async () => {

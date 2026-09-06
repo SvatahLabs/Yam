@@ -152,11 +152,13 @@ export async function initCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
     writeFileSync(join(root, name), contents, "utf8");
   }
 
+  const where = root === "." ? "this directory" : root;
   io.err(
-    `Initialised ${root}.\n\n` +
-      "  yam lint      check the flow reads and compiles\n" +
-      "  yam compile   write .yam/plan.json\n" +
-      "  yam run       replay it\n",
+    `Initialised ${where}.\n\n` +
+      "  yam check     read, lint and compile the flows\n" +
+      "  yam record    bind the targets by driving the real application\n" +
+      "  yam run       replay the plan\n\n" +
+      "  yam           at any time: where you are, and what is next\n",
   );
   return EXIT.ok;
 }

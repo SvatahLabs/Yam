@@ -6,7 +6,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 
 | Package | Exports | What it is |
 |---|---|---|
-| [`@svatah/yam`](cli.md) | 52 | The yam CLI and MCP server |
+| [`@svatah/yam`](cli.md) | 60 | The yam CLI and MCP server |
 | [`@svatah/yam-adapter-appium`](adapter-appium.md) | 43 | Appium adapter: Android Chrome and native |
 | [`@svatah/yam-adapter-ax`](adapter-ax.md) | 44 | macOS Accessibility adapter: the Yam agent surface over AXUIElement |
 | [`@svatah/yam-adapter-bidi`](adapter-bidi.md) | 40 | WebDriver BiDi adapter (independence proof) |

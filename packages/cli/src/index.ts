@@ -125,3 +125,6 @@ export { TIER2_PROMPT_VERSION, TIER2_SYSTEM_PROMPT } from "./tiers/tier2.js";
  * which is precisely what the Phase 11 verification found.
  */
 export { evalSelfCommand, vitestCaseNames } from "./commands/eval-self.js";
+
+/** Help, for the documentation generator and the vocabulary check (T14.3). */
+export { COMMANDS, EXIT_MEANINGS, NOUNS, TOP_LEVEL, TOPICS, helpFor, topic, userFacingHelpText } from "./help.js";
