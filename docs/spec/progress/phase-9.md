@@ -58,11 +58,12 @@ From this worktree of `phase-9`, with `ANTHROPIC_API_KEY` and
 
 | Command | Result |
 |---|---|
+| the whole chain, in one shell, with no credential | **exit 0** |
 | `pnpm install --frozen-lockfile` | exit 0 |
 | `pnpm browsers` | exit 0 (chromium, firefox) |
 | `pnpm -r build` | exit 0; 31 packages and two apps |
 | `pnpm -r typecheck` | exit 0 |
-| `pnpm -r test` | 2,314 tests passed across 30 packages and two apps; see below |
+| `pnpm -r test` | **3,344 passed, 0 failed** across 30 packages and two apps, plus the ADE's 8 Playwright cases against the packaged application; see below |
 | `pnpm lint` | exit 0 |
 | `node scripts/check-licenses.mjs` | OK — 1,050 packages, 17 distinct licences, none copyleft |
 | `git diff master..phase-9 -- docs/spec/{requirements,hld,lld,tasks}.md docs/spec/design` | empty |
@@ -74,7 +75,7 @@ phase uses an API newer than Node 22 — the two new runtime calls are
 `os.loadavg` and `os.availableParallelism`, both present since 18 and 19 — and
 the `engines` field of every new package is `>=22.0.0`.
 
-Per package, from the run whose log is quoted below:
+Per package:
 
 | Package | Tests | Package | Tests |
 |---|---|---|---|
@@ -85,7 +86,7 @@ Per package, from the run whose log is quoted below:
 | `packages/schema` | 142 | `packages/adapter-bidi` | 52 |
 | `packages/surface` | 133 | `packages/service` | 49 |
 | `packages/bindings` | 132 | `packages/ui` | 43 |
-| `apps/ade` | 127 (+8 Playwright) | `packages/bindings-cli` | 35 |
+| `apps/ade` | 127 + 8 Playwright | `packages/bindings-cli` | 35 |
 | `packages/runtime` | 53 | `packages/migrate` | 32 |
 | `tools/repo-checks` | 1,030 | `packages/gateway` | 31 |
 | `packages/recorder` | 29 | `packages/steps` | 29 |
@@ -95,12 +96,12 @@ Per package, from the run whose log is quoted below:
 | **`packages/ui-tokens`** | **11** | `packages/workflow` | 6 |
 | **`packages/sdk`** | **6** | | |
 
-### One test failed on the first full run and passes on its own
+### One test failed on an earlier run, and it is worth recording
 
 `packages/cli/test/bidi-independence.test.ts`, `home.snapshot: the surface
-opens`. It is the Firefox-over-BiDi leg, and it failed once during a
-`pnpm -r test` that had eight vitest processes and 3,344 s of test time in
-flight; run alone it passes in 69 s:
+opens`. It is the Firefox-over-BiDi leg, and it failed once on a `pnpm -r test`
+that had eight vitest processes and 3,344 s of test time in flight. Alone it
+passes in 69 s, and it passed in the contract run above:
 
 ```console
 $ pnpm --filter @svatah/cli exec vitest run test/bidi-independence.test.ts
@@ -108,8 +109,14 @@ $ pnpm --filter @svatah/cli exec vitest run test/bidi-independence.test.ts
 ```
 
 This phase touched nothing under `packages/adapter-bidi`. It is the same
-load-sensitivity P8-F2 is about, in a different suite, and it is reported here
-rather than re-run until it was green.
+load-sensitivity P8-F2 is about, in a different suite, and it is recorded here
+rather than left out because the next run was green.
+
+Two flakes of the same kind were found and *fixed* rather than recorded:
+`packages/tui/test/cockpit.test.tsx` slept fifty milliseconds for a promise and
+now polls for the state it is waiting on, and `tools/repo-checks` runs one file
+at a time — two of its checks write to the repository to show a rule biting, and
+a file beside one of them can read a tree that is briefly wrong.
 
 ---
 
