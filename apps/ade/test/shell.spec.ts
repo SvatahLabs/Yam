@@ -177,28 +177,44 @@ test.skip(
  * `apps/ade/out` path means a Svatah ADE somebody has open from elsewhere is
  * left alone.
  */
-function stopLeftovers(): void {
+async function stopLeftovers(): Promise<void> {
   if (executable === undefined || process.platform === "win32") return;
-  const listed = spawnSync("pgrep", ["-f", executable], { encoding: "utf8" });
-  const pids = (listed.stdout ?? "")
-    .split("\n")
-    .map((one) => Number(one.trim()))
-    .filter((pid) => Number.isInteger(pid) && pid > 0 && pid !== process.pid);
-  for (const pid of pids) {
-    try {
-      process.kill(pid, "SIGKILL");
-    } catch {
-      // It went on its own between the list and the signal, which is the
-      // outcome this wanted.
+  const living = (): number[] => {
+    const listed = spawnSync("pgrep", ["-f", executable], { encoding: "utf8" });
+    return (listed.stdout ?? "")
+      .split("\n")
+      .map((one) => Number(one.trim()))
+      .filter((pid) => Number.isInteger(pid) && pid > 0 && pid !== process.pid);
+  };
+
+  /*
+   * Kill, then *wait for them to be gone*.
+   *
+   * A signal is a request. An Electron main mid-shutdown still holds
+   * `DEBUG_PORT`, and the next launch then fails to bind it while
+   * `connectOverCDP` cheerfully attaches to the dying one — a test against code
+   * that is on its way out. The desktop gate learned the same thing (P8-F1).
+   */
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const pids = living();
+    if (pids.length === 0) return;
+    for (const pid of pids) {
+      try {
+        process.kill(pid, "SIGKILL");
+      } catch {
+        // It went between the list and the signal, which is the outcome wanted.
+      }
     }
+    await new Promise((done) => setTimeout(done, 250));
   }
+  throw new Error(`an ADE from a previous run would not go: ${living().join(", ")}`);
 }
 
 test.beforeAll(async () => {
   if (executable === undefined) return;
   if (!existsSync(CLI)) throw new Error("Run `pnpm -r build` first.");
 
-  stopLeftovers();
+  await stopLeftovers();
   app = await startSampleWeb();
 
   /*
@@ -297,7 +313,7 @@ test.afterAll(async () => {
   ade?.kill("SIGTERM");
   // SIGTERM asks; this checks. An Electron main that is mid-quit outlives the
   // signal, and the next run of this file is what pays for it.
-  stopLeftovers();
+  await stopLeftovers();
   app?.child.kill("SIGTERM");
   if (project !== undefined) rmSync(project, { recursive: true, force: true });
 });
@@ -823,15 +839,33 @@ test("the Runs screen filters, and its inspector shows the failing step's eviden
    */
   const behavior = page.locator("#runs-filter-behavior");
   await expect(behavior).toContainText("behavior: all");
-  const next = (await behavior.getAttribute("title")) ?? "";
+
+  /*
+   * One click, and the chip reads what its title said it would.
+   *
+   * The title names the *next* value, which is what makes this checkable
+   * whatever the project holds: a project with one behaviour has one choice and
+   * cycling is a no-op, and the assertion is still exact.
+   */
+  const nextOf = async (): Promise<string> =>
+    /next: (.+)\)$/.exec((await behavior.getAttribute("title")) ?? "")?.[1] ?? "all";
+
+  const after = await nextOf();
   await behavior.click();
-  await expect(behavior).toContainText(
-    `behavior: ${/next: (.+)\)$/.exec(next)?.[1] ?? "all"}`,
-  );
-  // And back to `all`, so the rest of this file sees the screen it expects.
-  while (!((await behavior.textContent()) ?? "").includes("behavior: all")) {
+  await expect(behavior).toContainText(`behavior: ${after}`);
+
+  /*
+   * And back to `all`, so the rest of this file sees the screen it expects.
+   * Bounded: an unbounded loop that re-read the label between clicks raced the
+   * re-render and cycled for ever.
+   */
+  for (let press = 0; press < 6; press += 1) {
+    if (((await behavior.textContent()) ?? "").includes("behavior: all")) break;
+    const target = await nextOf();
     await behavior.click();
+    await expect(behavior).toContainText(`behavior: ${target}`);
   }
+  await expect(behavior).toContainText("behavior: all");
 
   // Choosing a run fills the inspector with what that run wrote.
   await page.locator("#runs-table tbody tr").first().click();
