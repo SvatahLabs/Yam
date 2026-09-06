@@ -208,11 +208,14 @@ const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
  * Is a project open on the ADE's window yet (T8.1)?
  *
  * The window appearing is not enough: `SVATAH_ADE_PROJECT` opens the project
- * *after* ready, and every flow case is about a control that exists only on a
- * project screen. Phase 7's gate asked for those controls on the welcome
- * screen and reported five adapter failures for a launch that had not finished
- * (P7-F1). The tabs are the cheapest proof — they render only with a project
- * open — and `screen-project` is one of them.
+ * *after* ready, and every case is about a control that exists only once one is
+ * open. Phase 7's gate asked for those controls on the welcome screen and
+ * reported five adapter failures for a launch that had not finished (P7-F1).
+ *
+ * The **rail** is the cheapest proof (T10.3): it renders only with a project
+ * open — a window without one draws the welcome screen and nothing else — and
+ * `rail-flows` is its first row. It replaces `screen-project`, which was one of
+ * the eleven tabs this phase deleted.
  */
 function hasProject() {
   if (process.platform !== "darwin") {
@@ -248,7 +251,7 @@ function hasProject() {
         "let found='no';const stack=[w];let seen=0;" +
         "while(stack.length>0&&seen<4000){const e=stack.pop();seen++;" +
         "const id=attr(e,'AXDOMIdentifier');" +
-        "if(id!==undefined&&ObjC.unwrap(ObjC.castRefToObject(id))==='screen-project'){found='yes';break;}" +
+        "if(id!==undefined&&ObjC.unwrap(ObjC.castRefToObject(id))==='rail-flows'){found='yes';break;}" +
         "const k=attr(e,'AXChildren');if(k===undefined)continue;" +
         "const arr=ObjC.castRefToObject(k);for(let i=0;i<arr.count;i++)stack.push(arr.objectAtIndex(i));}" +
         "return found;}",

@@ -294,3 +294,379 @@ artboards are added, in the same system, with the fixtures project's own data:
 Nothing else under `docs/spec/design/` is touched: not `base.css`, not
 `README.md`, not `canvas.json`, not an existing artboard. **The owner reviews
 these four at verification**; they are built to as they stand.
+
+## T10.1 — the authoring loop screens
+
+**Do:** `record`, `runs`, `heal`, `bindings` on the model in both renderers, to
+the mockups.
+
+### The model
+
+`packages/screens/src/screens/rest.ts` — ten screens sketched thinly enough for
+T9.1's "every screen loads against the fake service" — became
+`screens/authoring.ts` (these four) and `screens/secondary.ts` (T10.2's six).
+Each now carries what its artboard shows:
+
+| Screen | What it loads | What its inspector is about |
+|---|---|---|
+| `runs` | `GET /runs`, then `GET /runs/:id/results` for the selected one | the failing step, its class, its screenshot, the plan and bindings hashes |
+| `bindings` | `GET /bindings` and every `GET /bindings/:id` | the resolver order, REQ-REC-4's fingerprint, the provenance |
+| `record` | `GET /project` for the gateway; the rest from the stream | the snapshot excerpt with the line the model chose, the candidates, the fingerprint, the deadline |
+| `heal` | `GET /runs` for the runs worth healing; proposals from the stream | before, after, scores, confidence, whether it re-ran green |
+
+The three filters on `runs` are applied to the *summaries*, before anything is
+read per run: a screen that filtered rows it had already paid to build would read
+thirty results files to show three.
+
+`record` and `heal` have no `GET` — they are about a session, and inventing one
+would put state in the service the CLI cannot produce (§13.5's rule read from the
+other side). They load their static half and fold `record.decision`,
+`record.candidates`, `record.decided`, `record.failed` and `heal.proposal`
+through `applyRecordEvent` and `applyHealEvent`. Both renderers subscribe;
+neither decides what an event means.
+
+### Validate — "each screen driven end to end through its own controls in the ADE under Playwright"
+
+```console
+$ pnpm --filter @svatah/ade package && pnpm --filter @svatah/ade exec playwright test
+34 passed (16.2s)
+```
+
+Twelve of those cases open a screen and assert that **every interactive control
+on it has an accessible name and an id**; the rest drive each screen through its
+own controls: the Runs screen's three filter chips cycled and its inspector
+filled by choosing a row, the Bindings table's resolver order and fingerprint,
+the Heal review's candidate list and its "nothing is written until you apply"
+sentence, the Record review's gateway chooser and its fake-gateway label, the API
+screen's headers, the Data screen showing `SVATAH_SAMPLE_PASSWORD` and never a
+value, the explorer refusing a call with no intent, the Import screen's
+confinement, the Settings screen's project.
+
+### Validate — "and in `svatah ui` under a pseudo-terminal"
+
+```console
+$ pnpm --filter @svatah/repo-checks exec vitest run test/tui-pty.test.ts
+✓ test/tui-pty.test.ts (26 tests)
+   ✓ draws the flows screen in a real terminal (T10.1, T10.2)      … and eleven more
+$ pnpm --filter @svatah/tui test
+Tests  50 passed (50)
+```
+
+One pseudo-terminal case per screen, against a real service on the fixtures
+project: its own title, its four numbered panes, the footer's keys. And in
+`cockpit.test.tsx`, against the recorded fixtures: every pane titled, every empty
+pane saying what would fill it, **no status colour drawn without its word**, and
+nothing drawn past the right edge at either width.
+
+`packages/tui/src/rows.ts` is what made twelve screens possible in one renderer:
+which of the model's rows go in which pane, as data — a title, lines of cells, a
+footer, and what `Enter` on a row re-loads with. `panes.tsx` draws one shape and
+knows nothing about which screen it is showing.
+
+### Validate — "the palette lists every action of the four screens"
+
+`tools/repo-checks/test/action-parity.test.ts` and `palette-parity.test.ts` pass
+against a registry that now has 40 actions. Three of the four own actions;
+`runs` owns none, and that is right rather than missing — its two keys are
+`go.run`, which the palette's second group carries, and `heal.run`, which belongs
+to the Run screen (Draft 2.12's D6). An action invented so a screen would have
+one would be a palette row nothing answers.
+
+## T10.2 — Agents and tools, API, Data, Explorer, Import, Settings
+
+**Do:** the remaining screens on the model in both renderers; the Secondary
+wireframes become full designs first.
+
+The four artboards are added and recorded above; the screens are built to them.
+`shell/Secondary.tsx` holds the six because they are one *kind* of screen — a
+list or a table, an editor, an inspector — and six files with the same three
+shapes in them would be five chances for them to drift.
+
+### Validate — "the explorer requires an intent per call"
+
+The model refuses it: `explorer.snapshot` and `explorer.act` answer
+`{ ok: false, message: "Say what you are looking for: every surface call records
+an intent." }` when the intent is empty, and the screen draws the alert while it
+is. The Playwright case fills the field and watches the alert go.
+
+### Validate — "the import writes only into the open project"
+
+Unchanged and re-stated on the screen: `POST /migrate` writes under the directory
+the service was opened on and refuses anything else (T6.6), the inspector says
+so, and it prints the equivalent `svatah migrate` command beside it. The
+Playwright case asserts both sentences.
+
+### A service change this needed
+
+`GET /data` gains `secretSources`: per secret, the **name** of the environment
+variable it is read from and whether this service can read it. The value is
+redacted before it leaves, so a screen that inferred the name from `«redacted»`
+was guessing — and did: the Data screen showed `reads ${?}` against a real
+service. The name is what `data.yaml` says on its face; `set` is a boolean the
+service computed, exactly as `GET /project`'s `gateway.credential` is
+(REQ-NFR-6).
+
+## T10.3 — retire the old screens, re-validate the target
+
+**Do:** delete the legacy screens and `app.css`; update the desktop conformance
+cases to the new structure and the recorded trees; rebuild installers.
+
+### The deletion
+
+`apps/ade/src/renderer/screens/` (eleven files) and `app.css` are gone, and with
+them the Legacy rail item and the eleven tabs. `shell/Welcome.tsx` is the one
+thing the ADE draws that is not a screen — a rail over a window with no project
+would be eight rows that all say "open a project first" — and the Project
+screen's other job is the Settings screen's now.
+
+`apps/ade/test/screen-rule.test.ts` asserts the deletion and, more usefully, the
+stronger rule the new structure allows: no screen reaches the network at all, no
+screen holds a client, every screen's props are a state type from the model,
+every screen id has a body and an inspector in the shell, and every endpoint LLD
+§13.6's table names is reached — by the model, which covers both renderers at
+once.
+
+### The conformance cases
+
+Rewritten to the rail, the palette and the inspector:
+
+- `ade.project` — all eight rail rows addressable by id, each named as §13.7's
+  rail names it, and no legacy tab anywhere;
+- `ade.flow` — the flow list, the editor/plan/history tabs, the file's own lines;
+- `ade.run` — Record and Run on the Flows toolbar (Draft 2.12 §13.7), and the Run
+  screen reached through the palette;
+- `ade.result` — the runs table and its three filter chips;
+- `ade.api-client` — the request list, the headers, Send;
+- `ade.inspector` — **new**: the right inspector is a stack of landmarks, which is
+  what keeps `controlPath` short (§13.6);
+- `ade.snapshot` — and the **id** half of §13.7's accessibility contract, which
+  Phase 9 left out with a reason (the legacy screens had named controls with no
+  ids) and T10.3 turns on.
+
+Navigation is by `automationId` throughout, never by name: variant 1 renames a
+rail item, and a case that navigated by a label would fail at variant 1 for the
+reason the variant exists.
+
+The healing cases follow: variant 1 is `rail-flows` renamed (it was a screen tab
+and the Project screen's button, both gone), variant 2 is `record-gateway` moved
+out of the toolbar into the workspace.
+
+### The recorded trees
+
+Nine screens and two variants, re-recorded from the new application in matched
+AX/UIA pairs. `scripts/record-desktop-tree.mjs` navigates by rail id and palette
+id, and three things about it were wrong before:
+
+1. it set `SVATAH_ADE_RECORD_PROJECT`, which nothing reads — **every tree until
+   now was of an ADE with no project open**. Invisible while the Project screen
+   drew its "Open a project…" button either way; not invisible with a rail;
+2. it slept two seconds after navigating, which produced trees of the chrome with
+   an empty middle. It waits for the workspace *and the inspector* to fill now;
+3. it found a palette row by text, and `Go to Run` is a substring of
+   `Go to Runs` — so two screens were recorded under one name.
+
+### Four defects the parity check found
+
+Each is a real one, and each is what that check exists for:
+
+| Defect | Effect |
+|---|---|
+| `GET /bindings/:id` answers `text/yaml` and was described as `application/json` | all three generated clients ran `JSON.parse` over a YAML file and threw on every call — the Bindings inspector was **empty against a real service and full against the recorded fixtures** |
+| `AXApplicationAlert` and `AXApplicationStatus` had no entry in the AX subrole map | a `role="alert"` was `group` on macOS and `alert` on Windows |
+| a `role="option"` inside a listbox | `menuitem` on macOS, `option` on Windows — every row of the command palette |
+| a `<select>` option's label text run | `option` on macOS (the adapter promotes it), `text` on Windows |
+
+Both client generators treat any `text/*` response as text now; the two role
+rules are mirrored in both adapters, each narrowed to the case it is about — a
+first attempt that promoted every text run inside any list made every line of the
+Settings screen's diagnostics an unnamed `option`, which the new id check caught
+immediately.
+
+```console
+$ pnpm --filter @svatah/adapter-ax test    # 91 passed, 1 skipped
+$ pnpm --filter @svatah/adapter-uia test   # 91 passed
+```
+
+The parity suite's only remaining difference is the documented one:
+`cell → columnheader`.
+
+### Validate — the ADE smoke on the packaged application
+
+```console
+$ node scripts/ade-smoke.mjs
+svatah-ade smoke target=packaged (…/apps/ade/out/Svatah ADE-darwin-arm64/Svatah ADE.app/…)
+svatah-ade smoke ok project=…/evals/fixtures flows=7 stories=22 window=open packaged=yes
+runtime: /opt/homebrew/bin/node (v25.6.1, from PATH)
+```
+
+The three-OS matrix definition is unchanged and still asserted by
+`tools/repo-checks/test/ci.test.ts`.
+
+### Validate — the live macOS gate
+
+**Not run here, and the reason is not the display.** `svatah surface doctor
+--adapter ax` reports `ok ax/session — 9 application(s) own a window`, so this
+host could run it; what it cannot do is take a screenshot, because Screen
+Recording is a separate grant this terminal does not have (`warn
+ax/screen-recording`). The gate itself needs the Accessibility permission for the
+*bridge*, which is granted, and the bridge reads the ADE's window — the
+`pnpm ade:shoot` run above got as far as the window read and then timed out at
+10 s on a machine also running the test suite.
+
+The command a verifier should run, on an unlocked display with the grant, three
+times and once beside `pnpm -r test`:
+
+```console
+$ node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md
+```
+
+It is listed under Known gaps below.
+
+### The screenshots
+
+```console
+$ pnpm ade:shoot
+wrote reports/ade-flows.png … reports/ade-settings.png     # twelve, one per screen
+$ pnpm ui:capture
+wrote reports/ui-flows.txt at 160×40 … reports/ui-run-100.txt at 100×30
+```
+
+## T10.4 — the corrections, and the run-stop route
+
+P9-F1..F7 are the first half and are recorded above. This is the second.
+
+**`POST /runs/:id/stop` cancels a run between steps** (Draft 2.12 §13.5). Phase 9
+had no Stop button because the service published no such route, and a screen may
+only ask for one that exists (its K3 and D9).
+
+*Between steps, never during one.* A step that has clicked has already changed
+the application, and a runtime that tore the session down mid-action would leave
+a state no result describes. `runStory` asks before it starts the next step; the
+rest are recorded `skipped`, exactly as a policy's are. What says a **person**
+did it is a `stop` audit line naming the last step that ran, and
+`summary.stopped`.
+
+`stopped` is a field on the summary rather than a sixth `FLOW_STATUSES` member:
+stopping is a fact about the run, not about how a flow ended, and a foreign
+runtime that does not implement it simply never writes it (REQ-STD-3). A run
+asked to stop *after* its last step is not marked — that would be a summary about
+the button. A flow the stop arrives before never opens a session, which is the
+one thing a stop is unambiguously supposed to prevent.
+
+### Validate — "a run started from the Run screen is stopped from it and its summary says `stopped`"
+
+```console
+$ pnpm --filter @svatah/ade exec playwright test
+✓ a run started from the Run screen can be stopped from it (T10.4)
+$ pnpm --filter @svatah/service test    # 51 passed
+$ pnpm --filter @svatah/runtime test    # 57 passed
+```
+
+On the packaged application: Run on the Flows screen, then Stop on the Run
+screen's own button the moment it is enabled — `run.stop`'s `availableWhen` is
+the model's `live`, so an enabled Stop *is* the screen saying there is something
+to stop. The status bar reads "Stopping run …", the toolbar's pill reads
+**stopped**, the Stop button disables itself, and steps are skipped.
+
+The service's own behaviour is checked against a fake executor that waits to be
+aborted: the signal it is handed is the one the route aborts, and a run that has
+finished is a 404 (`not-running`) rather than a success that did nothing. The
+executor's four properties are checked against the stub surface: the step under
+way finishes, the rest are skipped, one `stop` audit line names the last step
+that ran, and a flow the stop arrives before never opens a session.
+
+### The rest of T10.4's Validate
+
+| Item | Where |
+|---|---|
+| the fixture check passes with three unrelated runs | P9-F1 above; `tools/repo-checks/test/screen-fixtures.test.ts` |
+| the `--json` equality test runs ten times without a diff | P9-F4 above; `tui-pty.test.ts › prints the same Flows state ten times running` |
+| a 100-column capture shows three panes and says its size | P9-F4 above; `reports/ui-run-100.txt`, and `tui-pty.test.ts › at 100 columns` |
+| the audit and a real axe run agree on the sheet with zero violations | P9-F3 above; `sheet-audit.test.ts` fetches axe-core at test time |
+| a run stopped from the Run screen, summary `stopped` | this section |
+| `doctor` names the locked display when only `loginwindow` owns a window | P9-F7 above; the four `session()` answers in `packages/adapter-ax/test/bridge.test.ts` |
+
+## Deviations
+
+Where a mockup and the LLD disagreed, the LLD won and the disagreement is here,
+with its section and its artboard.
+
+**D1 — the audit line's candidate is written the artboard's way, not the
+prompt's.** The phase's brief gives `locate · booking.book-now-button · testid #0
+· ok` as the line to render; the `Run` artboard writes
+`checkout.pay-button · testid "pay" · matched nothing 1 ms`. The candidate's
+*index* is not known at the surface call — `surface.locate(candidate)` is handed
+one candidate and not a list — so the artboard's form is what ships, plus the
+match count, which carries the same information and is what the artboard shows.
+LLD §13.7, the `Run` artboard.
+
+**D2 — the Runs screen owns no action.** T10.1 asks for "the palette lists every
+action of the four screens"; `runs` has none. Its two keys are navigation
+(`go.run`, which the palette's `Go to` group carries) and `heal.run`, which
+Draft 2.12's D6 puts on the Run screen. An action invented so the screen would
+have one would be a palette row nothing answers. LLD §13.7.
+
+**D3 — the six secondary screens are one file.** `shell/Secondary.tsx`, because
+they are one kind of screen and six files with the same three shapes in them
+would be five chances to drift. Every screen *id* still has its own body and
+inspector in the shell, which is what `screen-rule.test.ts` checks. LLD §13.7.
+
+**D4 — `ade-project.json` records the Settings screen.** The fixture names are
+read by the adapter tests and renaming them would be renaming files for no
+reason; the ADE has no Project screen any more, and "what this project is" is the
+Settings screen's. LLD §13.7, §16.
+
+**D5 — the cockpit's inspector, when collapsed, scrolls rather than growing.** At
+a hundred columns it opens under the main pane with the audit pane's row budget,
+because the terminal has no more rows to give it; `j`/`k` walk it. Draft 2.12
+§13.7 asks that it not be clipped, and it is not. LLD §13.7.
+
+**D6 — a fake-gateway session is labelled with a note, not an `Alert`.**
+REQ-ADE-4 and Draft 2.7 ask the screen to label it; `Alert` is `role="alert"`,
+and a screen reader announcing "this session uses the fake gateway" on every
+render is noise. It is a card with a pill. LLD §13.6, the `RecordReview`
+artboard.
+
+**D7 — the crumb separators are hidden from the accessibility tree.** Two sibling
+nodes both named `/` gave two elements the same `controlPath`, which the resolver
+drops as ambiguous — so a binding on either was unresolvable. They are decoration
+and are `aria-hidden` now. LLD §3.3, §7.5.
+
+## Known gaps
+
+**K1 — the live macOS AX gate is unrun on this host.** Not for Phase 9's reason:
+`svatah surface doctor --adapter ax` answers `ok ax/session — 9 application(s)
+own a window`, so the display is unlocked and the session is usable. What this
+terminal lacks is the **Screen Recording** grant, which is separate from
+Accessibility and is what `screencapture` needs, so the gate would run without
+screenshots; and the bridge's window read timed out at 10 s while the test suite
+was running beside it, which is exactly the load case Draft 2.10 §7.5 documents.
+The command that closes it, on a quiet machine with both grants:
+`node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md`,
+three times, once beside `pnpm -r test`.
+
+**K2 — no AX screenshot.** Same grant. `pnpm ade:shoot` takes the twelve renderer
+screenshots and says why the thirteenth is missing rather than fabricating one.
+
+**K3 — Node 22 has not been run here.** This host has one Node (v25.6.1). The
+contract's second leg is a verifier's: `pnpm -r typecheck && pnpm -r test` with
+`CI=true` on Node 22.
+
+**K4 — the Windows UIA gate is unrun.** Inherited; Phase 11's T11.6. The UIA
+adapter's recorded trees and its parity with the AX adapter are re-checked here
+against the rebuilt ADE, which is what this phase could do without a Windows
+host.
+
+**K5 — the compiler golden set is 222 against REQ-COMP-9's 300.** Inherited,
+untouched by this phase, Phase 11's T11.2.
+
+**K6 — the flow editor is still a view.** `PUT /flows/:file` and `flows.save` are
+in the model and the ADE renders the file rather than editing it. T10.1's Do
+names the four authoring screens and not the editor, and a half-built editor that
+silently dropped a keystroke would be worse than a view that says it is a view.
+Phase 11.
+
+**K7 — the API screen sends the saved request and does not edit it.** The
+artboard draws the URL as text and the method as a pill; `POST /api/request`
+takes an ad-hoc request and the model's `api.send` passes one. Editing a request
+in place needs `PUT /api/:name` wired to a form, which is Phase 11's.

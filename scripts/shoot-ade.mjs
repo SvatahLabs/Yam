@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
- * Screenshot the packaged ADE's two rebuilt screens (T9.4, T9.5).
+ * Screenshot every screen of the packaged ADE (T9.4, T9.5, T10.1, T10.2).
  *
  *   pnpm ade:shoot
  *
- * T9.5 asks for "screenshots of both renderers for the two screens, the ADE's
- * taken through the AX adapter". This takes both:
+ * T10.1 and T10.2 ask for "screenshots of both renderers per screen"; T9.5 asks
+ * for the ADE's to be taken through the AX adapter. This takes both:
  *
- *   * `reports/ade-flows.png` and `reports/ade-run.png` — the renderer's own
- *     pixels, through the DevTools protocol. Always available.
+ *   * `reports/ade-<screen>.png`, one per screen of LLD §13.7 — the renderer's
+ *     own pixels, through the DevTools protocol. Always available.
  *   * `reports/ade-flows-ax.png` — the *window*, through
  *     `@svatah/adapter-ax`'s `screenshot()`, which is `screencapture` scoped to
  *     the window's box. Needs macOS and the Screen Recording grant; when the
@@ -148,28 +148,87 @@ try {
   const page = context.pages()[0] ?? (await context.waitForEvent("page"));
   await page.locator("#rail-flows").waitFor({ timeout: 120_000 });
 
-  /* Flows, with a flow and a step chosen so the inspector has a subject. */
-  await page.locator("#flows-list").getByText("guards-and-compensation.flow").click();
-  await page.locator(".sv-code-line").nth(44).click().catch(() => undefined);
-  await sleep(500);
-  await page.screenshot({ path: join(OUT, "ade-flows.png") });
-  process.stdout.write(`wrote ${join(OUT, "ade-flows.png")}\n`);
-
-  /* Run, opened on `comp` through the palette's Go to row. */
-  await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
-  const palette = page.getByRole("dialog", { name: "Command palette" });
-  await palette.getByLabel("Search or run a command").fill("Go to Run");
-  await palette.getByText("Go to Run", { exact: true }).click();
-  await sleep(1_000);
-  /*
-   * The failing step, not the first: the artboard's inspector is about the step
-   * that could not resolve, which is the one a person opens the screen for.
+  /**
+   * Reach a screen the way a person does: the rail, or the palette's `Go to`
+   * row for the four the rail does not carry (T10.1, T10.2).
+   *
+   * By id, always. A palette row's accessible name is its whole contents, and
+   * "Go to Run" is a substring of "Go to Runs" — a text search picked the wrong
+   * row and screenshotted the wrong screen.
    */
-  const failing = page.locator(".sv-step", { has: page.locator(".sv-tone-fail") }).first();
-  await failing.click().catch(() => undefined);
-  await sleep(500);
-  await page.screenshot({ path: join(OUT, "ade-run.png") });
-  process.stdout.write(`wrote ${join(OUT, "ade-run.png")}\n`);
+  const goTo = async (screen) => {
+    const rail = page.locator(`#rail-${screen}`);
+    if ((await rail.count()) > 0) {
+      await rail.click();
+    } else {
+      await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
+      const palette = page.getByRole("dialog", { name: "Command palette" });
+      await palette.waitFor({ timeout: 30_000 });
+      await page.locator(`#palette-go-${screen}`).click();
+    }
+    await sleep(900);
+  };
+
+  /**
+   * Every screen, with something chosen on it so the inspector has a subject.
+   *
+   * An empty inspector is a true picture of a screen nobody has touched, and a
+   * useless one to compare with an artboard — every artboard is drawn with a
+   * row selected, because that is the state a person is in when they are
+   * looking at one.
+   */
+  const SHOTS = [
+    ["flows", async () => {
+      await page.locator("#flows-list").getByText("guards-and-compensation.flow").click();
+      await page.locator(".sv-code-line").nth(44).click().catch(() => undefined);
+    }],
+    ["runs", async () => {
+      await page.locator("#runs-table tbody tr").first().click().catch(() => undefined);
+    }],
+    ["run", async () => {
+      /*
+       * The failing step, not the first: the artboard's inspector is about the
+       * step that could not resolve, which is the one a person opens the screen
+       * for.
+       */
+      const failing = page.locator(".sv-step", { has: page.locator(".sv-tone-fail") }).first();
+      await failing.click().catch(() => undefined);
+    }],
+    ["bindings", async () => {
+      await page
+        .locator("#bindings-table tbody tr")
+        .filter({ hasText: "checkout.pay-button" })
+        .first()
+        .click()
+        .catch(() => undefined);
+    }],
+    ["record", async () => undefined],
+    ["heal", async () => undefined],
+    ["agents", async () => undefined],
+    ["api", async () => {
+      await page.locator("#api-requests tbody tr").first().click().catch(() => undefined);
+    }],
+    ["data", async () => {
+      await page
+        .locator("#data-table tbody tr")
+        .filter({ hasText: "user.password" })
+        .first()
+        .click()
+        .catch(() => undefined);
+    }],
+    ["explorer", async () => undefined],
+    ["import", async () => undefined],
+    ["settings", async () => undefined],
+  ];
+
+  for (const [screen, prepare] of SHOTS) {
+    await goTo(screen);
+    await prepare();
+    await sleep(600);
+    const path = join(OUT, `ade-${screen}.png`);
+    await page.screenshot({ path });
+    process.stdout.write(`wrote ${path}\n`);
+  }
 
   await page.locator("#rail-flows").click();
   await sleep(500);
