@@ -272,10 +272,28 @@
 
 /* ── table ────────────────────────────────────────────────────────────────── */
 
+/*
+ * A table fits its column, and a long cell truncates (P10-F4).
+ *
+ * `width: 100%` on a table whose content is wider is a request, not a
+ * constraint: the browser grows the table anyway, and inside a fixed-width
+ * inspector that means rows running past the edge. Measured on the artboards at
+ * 12, 26 and 50 pixels, always the same candidate table with a CSS selector or
+ * an XPath in one cell. `table-layout: fixed` makes the width the constraint it
+ * looks like, and the cells say what does not fit with an ellipsis instead of
+ * pushing the panel open.
+ */
 .sv-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 12px;
+}
+
+.sv-table td,
+.sv-table th {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sv-table-caption {

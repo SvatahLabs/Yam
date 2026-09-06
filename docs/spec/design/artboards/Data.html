@@ -34,14 +34,19 @@
 </section>
 <aside class="inspector" aria-label="Inspector">
   <h2 class="mono">user.password</h2>
-  <div class="kv"><span class="k">Kind</span><span class="v">secret (REQ-LANG-9)</span><span class="k">Reads</span><span class="v mono">${SVATAH_SAMPLE_PASSWORD}</span><span class="k">On this machine</span><span class="v">set · 14 characters</span><span class="k">Written to</span><span class="v">nothing</span></div>
+  <div class="kv"><span class="k">Kind</span><span class="v">secret (REQ-LANG-9)</span><span class="k">Reads</span><span class="v mono">${SVATAH_SAMPLE_PASSWORD}</span><span class="k">On this machine</span><span class="v">set</span><span class="k">Written to</span><span class="v">nothing</span></div>
   <div class="card"><p>The value is never shown, never saved to <span class="mono">data.yaml</span>, and never reaches a prompt, the audit, a result, a trace or a screenshot (REQ-NFR-6). What is edited here is the <i>name</i> of the variable it is read from.</p></div>
   <h3>Read by</h3>
-  <table class="table"><tr><th>story</th><th>step</th></tr>
-    <tr><td>I want to validate login</td><td class="mono">#3 Type {data.user.password} into the password field</td></tr>
-    <tr><td>Sign in and book</td><td class="mono">#2 Type {data.user.password} into the password field</td></tr>
-    <tr><td>Log in as the test user</td><td class="mono">#4 Type {data.user.password} into the password field</td></tr>
-  </table>
+  <!--
+    P10-F4: the two-column table ran past the inspector's edge, because a step's
+    sentence is longer than a 340px column and a table cell does not truncate.
+    One row per step, the story above the sentence, and the sentence truncates.
+  -->
+  <div class="readby">
+    <div class="row"><span class="who">I want to validate login</span><span class="what mono">#3 Type {data.user.password} into the password field</span></div>
+    <div class="row"><span class="who">Sign in and book</span><span class="what mono">#2 Type {data.user.password} into the password field</span></div>
+    <div class="row"><span class="who">Log in as the test user</span><span class="what mono">#4 Type {data.user.password} into the password field</span></div>
+  </div>
   <div class="card"><p>Renaming this key breaks those three steps. The rename offers to rewrite them; a step it cannot rewrite is listed rather than changed.</p></div>
   <div style="display:flex;gap:8px;padding:14px 16px"><button class="btn">Rename key</button><button class="btn">Open data.yaml</button></div>
 </aside>

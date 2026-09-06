@@ -48,6 +48,7 @@
     "sheet:audit": "node scripts/audit-sheet.mjs",
     "fixtures:screens": "node scripts/record-screen-fixtures.mjs",
     "sheet:shoot": "node scripts/shoot-sheet.mjs",
+    "artboards": "node scripts/audit-artboards.mjs",
     "ade:shoot": "node scripts/shoot-ade.mjs",
     "ade:shoot:update": "node scripts/shoot-ade.mjs --update",
     "ui:capture": "node scripts/capture-tui.mjs"
