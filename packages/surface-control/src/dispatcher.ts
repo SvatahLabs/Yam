@@ -1,12 +1,32 @@
 import type { AgentSurface } from "@svatah/yam-surface";
 import type { ReadKind, CheckSubject, Ref, ActArgs } from "@svatah/yam-schema";
 import { SurfaceError } from "@svatah/yam-surface";
-import { makeRequestId, successEnvelope, failedEnvelope } from "./envelope.js";
+import { makeRequestId, successEnvelope, failedEnvelope, refusedEnvelope } from "./envelope.js";
 import type { SessionStore } from "./sessions.js";
 import type { ErrorCode } from "./catalogue.js";
+import { discoverTargets, discoverAdapters, checkAdapterReadiness } from "./discovery.js";
 
 export interface DispatchContext {
   sessions: SessionStore;
+}
+
+export async function dispatchTargets(
+  _ctx: DispatchContext,
+  input: {
+    url?: string;
+    adapter?: string;
+    registeredAdapters: string[];
+  },
+): Promise<Record<string, unknown>> {
+  const requestId = makeRequestId();
+  const start = Date.now();
+  const targets = discoverTargets(input.registeredAdapters, {
+    url: input.url,
+    adapter: input.adapter,
+  });
+  const adapters = discoverAdapters(input.registeredAdapters);
+  const elapsed = Date.now() - start;
+  return successEnvelope(requestId, undefined, { targets, adapters }, elapsed);
 }
 
 export async function dispatchConnect(
@@ -16,12 +36,29 @@ export async function dispatchConnect(
     adapter?: string;
     headed?: boolean;
     adapterFactory: (name: string, options?: { headed?: boolean }) => Promise<AgentSurface>;
+    registeredAdapters?: string[];
   },
 ): Promise<Record<string, unknown>> {
   const requestId = makeRequestId();
   const start = Date.now();
   try {
     const adapterName = input.adapter ?? "playwright";
+    if (input.registeredAdapters) {
+      const readiness = checkAdapterReadiness(adapterName, input.registeredAdapters);
+      if (!readiness.available) {
+        return refusedEnvelope(
+          requestId,
+          undefined,
+          readiness.registered ? "ADAPTER_UNAVAILABLE" : "ADAPTER_NOT_REGISTERED",
+          readiness.reason ?? `Adapter "${adapterName}" is not available.`,
+          {
+            adapter: adapterName,
+            prerequisites: readiness.prerequisites,
+            platform: readiness.platform,
+          },
+        );
+      }
+    }
     const surface = await input.adapterFactory(adapterName, { headed: input.headed });
     const sessionId = ctx.sessions.create(surface, adapterName);
 

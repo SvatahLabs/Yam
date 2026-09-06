@@ -32,6 +32,7 @@ import {
   dispatchScreenshot,
   dispatchSessions,
   dispatchSnapshot,
+  dispatchTargets,
   type DispatchContext,
 } from "./dispatcher.js";
 import type { AdapterFactoryFn } from "./adapter-factory.js";
@@ -40,6 +41,7 @@ import { failedEnvelope, makeRequestId } from "./envelope.js";
 
 /** One operation, by the name the catalogue gives it. */
 export type BrokerOperation =
+  | "targets"
   | "connect"
   | "snapshot"
   | "act"
@@ -54,6 +56,7 @@ export type BrokerOperation =
 export interface BrokerOptions {
   readonly token: string;
   readonly factory: AdapterFactoryFn;
+  readonly registeredAdapters: string[];
   /** Exit when nothing has been asked for this long. Zero keeps it running. */
   readonly idleMs?: number;
   /** Called when the idle timer fires, so the caller can clean its descriptor up. */
@@ -69,17 +72,15 @@ export interface RunningBroker {
 }
 
 /** Every operation, by name, so adding one to the catalogue is one line here. */
-const DISPATCH: Record<
-  BrokerOperation,
-  (context: DispatchContext, args: Record<string, unknown>) => Promise<unknown>
-> = {
+type DispatchFn = (context: DispatchContext, args: Record<string, unknown>) => Promise<unknown>;
+const DISPATCH: Record<BrokerOperation, DispatchFn> = {
+  targets: (context, args) => dispatchTargets(context, args as never),
   connect: (context, args) => dispatchConnect(context, args as never),
   snapshot: (context, args) => dispatchSnapshot(context, args as never),
   act: (context, args) => dispatchAct(context, args as never),
   read: (context, args) => dispatchRead(context, args as never),
   check: (context, args) => dispatchCheck(context, args as never),
   close: (context, args) => dispatchClose(context, args as never),
-  // `sessions` asks the store, not a session: it takes no arguments.
   sessions: (context) => dispatchSessions(context),
   capabilities: (context, args) => dispatchCapabilities(context, args as never),
   describe: (context, args) => dispatchDescribe(context, args as never),
@@ -108,11 +109,10 @@ async function readBody(request: NodeJS.ReadableStream, limit = 4_000_000): Prom
 export async function startBroker(options: BrokerOptions): Promise<RunningBroker> {
   const sessions = createSessionStore();
   const context: DispatchContext = { sessions };
-  // `connect` is the only operation that makes a surface, and it takes the
-  // factory in its input; everything after it addresses a session by id.
-  const withFactory = (args: Record<string, unknown>): Record<string, unknown> => ({
+  const withAdapterInfo = (args: Record<string, unknown>): Record<string, unknown> => ({
     ...args,
     adapterFactory: options.factory,
+    registeredAdapters: options.registeredAdapters,
   });
 
   let idle: ReturnType<typeof setTimeout> | undefined;
@@ -164,7 +164,8 @@ export async function startBroker(options: BrokerOptions): Promise<RunningBroker
           return;
         }
         const args = body.args ?? {};
-        send(200, await run(context, operation === "connect" ? withFactory(args) : args));
+        const needsAdapterInfo = operation === "connect" || operation === "targets";
+        send(200, await run(context, needsAdapterInfo ? withAdapterInfo(args) : args));
       } catch (error) {
         /*
          * The envelope even here, and an honest code. A body that would not

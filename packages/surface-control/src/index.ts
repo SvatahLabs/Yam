@@ -9,6 +9,8 @@ export {
   operationByMcpTool,
   operationByServicePath,
   resultEnvelopeSchema,
+  targetsInputSchema,
+  targetsOutputSchema,
   connectInputSchema,
   connectOutputSchema,
   snapshotInputSchema,
@@ -68,6 +70,15 @@ export {
 } from "./adapter-factory.js";
 
 export {
+  discoverTargets,
+  discoverAdapters,
+  checkAdapterReadiness,
+  type DiscoveredTarget,
+  type AdapterReadiness,
+} from "./discovery.js";
+
+export {
+  dispatchTargets,
   dispatchConnect,
   dispatchSnapshot,
   dispatchAct,

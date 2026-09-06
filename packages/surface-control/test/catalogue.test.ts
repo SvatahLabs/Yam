@@ -12,8 +12,8 @@ import {
 } from "../src/catalogue.js";
 
 describe("OPERATIONS catalogue", () => {
-  it("has exactly 10 operations", () => {
-    expect(OPERATIONS).toHaveLength(10);
+  it("has exactly 11 operations", () => {
+    expect(OPERATIONS).toHaveLength(11);
   });
 
   it("every operation has unique name, subcommand, toolName, and service path", () => {

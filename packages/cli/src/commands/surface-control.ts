@@ -49,7 +49,6 @@ import { createSurface, listAdapters } from "@svatah/yam-surface";
 import { registerAllAdapters } from "../adapters.js";
 import { yamBin } from "./ui.js";
 
-/** How long a broker with nothing to do waits before it exits. */
 const IDLE_MS = 15 * 60 * 1000;
 
 export const SURFACE_CONTROL_SUBCOMMANDS = new Set([
@@ -57,9 +56,12 @@ export const SURFACE_CONTROL_SUBCOMMANDS = new Set([
   "broker",
 ]);
 
-function factory(): ReturnType<typeof createAdapterFactory> {
+function factory(): { adapterFactory: ReturnType<typeof createAdapterFactory>; registeredAdapters: string[] } {
   registerAllAdapters();
-  return createAdapterFactory(async (_name, config) => await createSurface(config), listAdapters);
+  return {
+    adapterFactory: createAdapterFactory(async (_name, config) => await createSurface(config), listAdapters),
+    registeredAdapters: listAdapters(),
+  };
 }
 
 export async function surfaceControlCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
@@ -138,9 +140,11 @@ async function runBroker(io: CommandIo): Promise<ExitCode> {
     return EXIT.ok;
   }
   const token = generateToken();
+  const { adapterFactory, registeredAdapters } = factory();
   const broker = await startBroker({
     token,
-    factory: factory(),
+    factory: adapterFactory,
+    registeredAdapters,
     idleMs: IDLE_MS,
     onIdle: () => {
       /*
@@ -185,6 +189,15 @@ function operationFor(
     Object.fromEntries(Object.entries(record).filter(([, value]) => value !== undefined));
 
   switch (sub) {
+    case "targets":
+      return {
+        operation: "targets",
+        args: defined({
+          url: stringOption(args, "url"),
+          adapter: stringOption(args, "adapter"),
+        }),
+      };
+
     case "connect":
       return {
         operation: "connect",

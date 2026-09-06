@@ -103,6 +103,38 @@ export interface CliFlag {
   description: string;
 }
 
+const targetsInputSchema = z.object({
+  url: z.string().optional(),
+  adapter: z.string().optional(),
+});
+
+const targetsOutputSchema = resultEnvelopeSchema.extend({
+  result: z.object({
+    targets: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        kind: z.enum(["browser", "http", "native", "process"]),
+        adapter: z.string(),
+        url: z.string().optional(),
+        application: z.string().optional(),
+        ready: z.boolean(),
+        reason: z.string().optional(),
+      }),
+    ),
+    adapters: z.array(
+      z.object({
+        adapter: z.string(),
+        registered: z.boolean(),
+        available: z.boolean(),
+        platform: z.array(z.string()),
+        reason: z.string().optional(),
+        prerequisites: z.array(z.string()).optional(),
+      }),
+    ),
+  }),
+});
+
 const connectInputSchema = z.object({
   url: z.string().url().optional(),
   adapter: z.string().optional(),
@@ -250,6 +282,29 @@ const screenshotOutputSchema = resultEnvelopeSchema.extend({
 });
 
 export const OPERATIONS: readonly OperationDescriptor[] = [
+  {
+    name: "targets",
+    description: "Discover available targets and adapter readiness on this machine",
+    mutation: false,
+    requiresSession: false,
+    cli: {
+      subcommand: "targets",
+      flags: [
+        { name: "url", type: "string", required: false, description: "Filter targets that can drive this URL" },
+        { name: "adapter", type: "string", required: false, description: "Filter to a specific adapter" },
+      ],
+      exitCodes: [
+        { code: CLI_EXIT_CODES.OK, meaning: "Targets listed" },
+      ],
+    },
+    mcp: {
+      toolName: "surface_targets",
+      annotations: { title: "Discover available targets", readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    },
+    service: { method: "GET", path: "/targets" },
+    inputSchema: targetsInputSchema,
+    outputSchema: targetsOutputSchema,
+  },
   {
     name: "connect",
     description: "Connect to a target and open a surface session",
@@ -534,6 +589,8 @@ export const SURFACE_CLI_SUBCOMMANDS = OPERATIONS.map((op) => op.cli.subcommand)
 
 export {
   resultEnvelopeSchema,
+  targetsInputSchema,
+  targetsOutputSchema,
   connectInputSchema,
   connectOutputSchema,
   snapshotInputSchema,
