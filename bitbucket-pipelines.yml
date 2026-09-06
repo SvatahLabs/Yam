@@ -183,6 +183,46 @@ definitions:
           - release/*.tgz
           - reports/*.md
 
+    # T8.5: the publish, and the dry run that proves it without a token.
+    #
+    # One step, two modes. `scripts/publish.mjs` refuses unless all three of
+    # `--publish`, a manual trigger and `NPM_TOKEN` hold, so the *same* step is
+    # a safe rehearsal on any branch and the real thing only from the
+    # `custom: publish` pipeline with the secret set. Splitting them into two
+    # steps would mean the one that publishes had never been run.
+    - step: &publish
+        name: publish 0.1.0 — dry run unless triggered with a token (T8.5)
+        caches:
+          - pnpm
+        script:
+          - corepack enable
+          - corepack prepare --activate
+          - pnpm install --frozen-lockfile
+          - pnpm -r build
+          - pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium firefox
+          # Everything the release candidate does, first: a publish of tarballs
+          # that were not packed, quick-started and licence-checked in this same
+          # job would be a publish of something nobody checked.
+          - pnpm release:dry-run
+          - pnpm quick-start:packed --reuse
+          - node scripts/eval-reports.mjs --out reports
+          # Prints the twenty-six exact `npm publish` commands. With no token and
+          # no `SVATAH_PUBLISH_TRIGGER`, it prints them and stops, exit 0.
+          - node scripts/publish.mjs
+          # And the real thing. `SVATAH_PUBLISH_TRIGGER` and `NPM_TOKEN` are
+          # supplied as *secured* pipeline variables by whoever triggers the
+          # `publish` pipeline; on any other pipeline this exits 1 without
+          # contacting a registry, which is what makes the line safe to leave in.
+          - |
+            if [ -n "$SVATAH_PUBLISH_TRIGGER" ] && [ -n "$NPM_TOKEN" ]; then
+              node scripts/publish.mjs --publish
+            else
+              echo "publish: not triggered — the dry run above is the whole of this job."
+            fi
+        artifacts:
+          - release/*.tgz
+          - reports/*.md
+
     - step: &legacy-java
         name: legacy Java project compiles
         image: eclipse-temurin:17-jdk
@@ -227,3 +267,10 @@ pipelines:
     # the same blocked leg as `desktop-gates`.
     release:
       - step: *release-candidate
+    # T8.5. The owner triggers this from the Bitbucket UI with `NPM_TOKEN` and
+    # `SVATAH_PUBLISH_TRIGGER=manual` as secured variables; without them the same
+    # step is a dry run that prints the commands and publishes nothing. The ADE
+    # installers are attached by `.github/workflows/release.yml`, which is where
+    # the macOS and Windows runners are.
+    publish:
+      - step: *publish

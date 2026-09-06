@@ -34,9 +34,12 @@
  * own — and being installable from the tarballs alone is the thing being tested.
  */
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
+import { mkdirSync, rmSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { SETS, closureOf, workspacePackages } from "./lib/release-packages.mjs";
+
+export { SETS, closureOf };
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -47,42 +50,11 @@ const option = (name, fallback) => {
 const out = resolve(ROOT, option("out", "release"));
 const asJson = args.includes("--json");
 
-/** The three sets of T7.6, by the package each one starts from. */
-export const SETS = {
-  "module-a": ["@svatah/bindings", "@svatah/healer", "@svatah/playwright-test", "@svatah/bindings-cli"],
-  cli: ["@svatah/cli"],
-  schema: ["@svatah/schema"],
-};
-
-/** Every workspace package, by name, with its directory and manifest. */
-function workspacePackages() {
-  const byName = new Map();
-  for (const dir of readdirSync(join(ROOT, "packages"))) {
-    const manifestPath = join(ROOT, "packages", dir, "package.json");
-    if (!existsSync(manifestPath)) continue;
-    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-    byName.set(manifest.name, { dir: join(ROOT, "packages", dir), manifest });
-  }
-  return byName;
-}
-
-/** A set's packages plus everything they depend on, in this workspace. */
-export function closureOf(roots, byName) {
-  const seen = new Set();
-  const stack = [...roots];
-  while (stack.length > 0) {
-    const name = stack.pop();
-    if (seen.has(name)) continue;
-    const entry = byName.get(name);
-    if (entry === undefined) continue;
-    seen.add(name);
-    for (const dependency of Object.keys(entry.manifest.dependencies ?? {})) {
-      if (byName.has(dependency)) stack.push(dependency);
-    }
-  }
-  return [...seen].sort();
-}
-
+/*
+ * The set definitions and the dependency closure live in `scripts/lib` so that
+ * `scripts/publish.mjs` can ask which packages a release is made of without
+ * importing this file and packing twenty-six tarballs as a side effect (T8.5).
+ */
 const byName = workspacePackages();
 
 /* ── 1. pack ──────────────────────────────────────────────────────────────── */

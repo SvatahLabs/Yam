@@ -29,7 +29,7 @@
  * the application finds its own bundled CLI and resolves its own Node.
  */
 import { spawn } from "node:child_process";
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -43,23 +43,44 @@ if (!existsSync(cli)) {
   process.exit(1);
 }
 
-/** The packaged application for this host, when `electron-forge package` made one. */
+/**
+ * The packaged application for this host, when `electron-forge package` made one.
+ *
+ * The Linux and Windows executables are *found* rather than named: Forge derives
+ * the file name from the packager configuration, and a guess that was wrong would
+ * silently fall back to the unpackaged build — which is the failure mode T8.1
+ * exists to remove. The macOS bundle has a fixed layout and is named.
+ */
 function packagedApp() {
   const out = join(ADE, "out");
   if (!existsSync(out)) return undefined;
-  const candidates =
-    process.platform === "darwin"
-      ? readdirSync(out)
-          .filter((one) => one.startsWith("Svatah ADE-darwin-"))
-          .map((one) => join(out, one, "Svatah ADE.app", "Contents", "MacOS", "Svatah ADE"))
-      : process.platform === "win32"
-        ? readdirSync(out)
-            .filter((one) => one.startsWith("Svatah ADE-win32-"))
-            .map((one) => join(out, one, "Svatah ADE.exe"))
-        : readdirSync(out)
-            .filter((one) => one.startsWith("Svatah ADE-linux-"))
-            .map((one) => join(out, one, "svatah-ade"));
-  return candidates.find((one) => existsSync(one));
+  const prefix = `Svatah ADE-${process.platform}-`;
+  for (const dir of readdirSync(out).filter((one) => one.startsWith(prefix))) {
+    const platformDir = join(out, dir);
+    if (process.platform === "darwin") {
+      const app = readdirSync(platformDir).find((one) => one.endsWith(".app"));
+      if (app === undefined) continue;
+      const binary = join(platformDir, app, "Contents", "MacOS", app.replace(/\.app$/, ""));
+      if (existsSync(binary)) return binary;
+      continue;
+    }
+    const entries = readdirSync(platformDir, { withFileTypes: true }).filter((one) => one.isFile());
+    const binary =
+      process.platform === "win32"
+        ? entries.find((one) => one.name.toLowerCase().endsWith(".exe"))
+        : entries.find((one) => !one.name.includes(".") && isExecutable(join(platformDir, one.name)));
+    if (binary !== undefined) return join(platformDir, binary.name);
+  }
+  return undefined;
+}
+
+/** Whether a file has an execute bit, which is what marks the Linux binary. */
+function isExecutable(path) {
+  try {
+    return (statSync(path).mode & 0o111) !== 0;
+  } catch {
+    return false;
+  }
 }
 
 const packaged = packagedApp();

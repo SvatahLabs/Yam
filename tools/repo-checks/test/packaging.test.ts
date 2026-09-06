@@ -306,12 +306,19 @@ describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
     expect(manifest.scripts["generate"]).toContain("copy-conformance-fixture.mjs");
   });
 
-  it("stops at the artifact step in both release definitions", () => {
+  it("never publishes from a definition rather than through the guarded script (T8.5)", () => {
+    /*
+     * Until T8.5 this asserted that no publish existed anywhere. It exists now,
+     * and the property that replaces "there is none" is "there is exactly one,
+     * and it is `scripts/publish.mjs`". A bare `npm publish` in a YAML step
+     * would have none of the three guards — `--publish`, a manual trigger, and
+     * `NPM_TOKEN` — and a copied step would carry that loss silently.
+     */
     for (const file of [".github/workflows/release.yml", "bitbucket-pipelines.yml"]) {
       const text = readFileSync(fromRoot(file), "utf8");
-      // Not one publish, anywhere. Adding one is a decision somebody makes on
-      // purpose, not something that arrives with a copied step.
-      expect(text, `${file} publishes to a registry`).not.toMatch(/^\s*-?\s*(run:\s*)?(pnpm|npm) publish/m);
+      expect(text, `${file} publishes without going through scripts/publish.mjs`).not.toMatch(
+        /^\s*-?\s*(run:\s*)?(pnpm|npm) publish/m,
+      );
     }
     const release = readFileSync(fromRoot(".github/workflows/release.yml"), "utf8");
     expect(release).toContain("pnpm release:dry-run");
@@ -323,5 +330,66 @@ describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
     const bitbucket = readFileSync(fromRoot("bitbucket-pipelines.yml"), "utf8");
     expect(bitbucket).toContain("pnpm release:dry-run");
     expect(bitbucket).toContain("pnpm quick-start:packed");
+  });
+});
+
+/*
+ * ────────────────────────────────────────────────────────────────────────────
+ * T8.5 — the publish, and the dry run that proves it without a token
+ * ────────────────────────────────────────────────────────────────────────────
+ *
+ * "The implementer prepares and dry-runs it; the owner triggers it." What can be
+ * checked from here is that both halves exist and that the guarded half cannot
+ * fire by accident. `node scripts/publish.mjs` checks the rest by doing it —
+ * printing twenty-six commands and publishing nothing.
+ */
+describe("publishing 0.1.0 (T8.5, REQ-PKG-1, 2, 3, 4)", () => {
+  const publish = readFileSync(fromRoot("scripts/publish.mjs"), "utf8");
+
+  it("is a dry run unless all three guards hold", () => {
+    // Not one of the three may be inferred from another: `--publish` says the
+    // caller meant it, the trigger says a human asked, and the token says the
+    // account allows it.
+    expect(publish).toContain('args.includes("--publish")');
+    expect(publish).toContain('process.env["GITHUB_EVENT_NAME"] === "workflow_dispatch"');
+    expect(publish).toContain('process.env["BITBUCKET_PIPELINE_UUID"]');
+    expect(publish).toContain('process.env["NPM_TOKEN"]');
+  });
+
+  it("never writes the token anywhere", () => {
+    /*
+     * REQ-NFR-6. The token reaches `npm` as an environment variable on one
+     * child process; nothing in this repository has ever held a credential and
+     * a `.npmrc` written on a runner is a credential left behind on it.
+     */
+    expect(publish).not.toMatch(/writeFileSync\([^)]*npmrc/i);
+    expect(publish).not.toMatch(/_authToken/);
+  });
+
+  it("publishes the tarballs that were packed, never a directory", () => {
+    expect(publish).toContain("tarballFor(one.name)");
+    expect(publish).toContain("pnpm release:dry-run");
+  });
+
+  it("is wired into both definitions, behind a manual trigger", () => {
+    const bitbucket = readFileSync(fromRoot("bitbucket-pipelines.yml"), "utf8");
+    expect(bitbucket).toMatch(/^\s{4}publish:$/m);
+    expect(bitbucket).toContain("node scripts/publish.mjs");
+    expect(bitbucket).toContain("SVATAH_PUBLISH_TRIGGER");
+
+    const release = readFileSync(fromRoot(".github/workflows/release.yml"), "utf8");
+    expect(release).toContain("node scripts/publish.mjs");
+    expect(release).toContain("workflow_dispatch' && inputs.publish");
+    expect(release).toContain("NPM_TOKEN: ${{ secrets.NPM_TOKEN }}");
+  });
+
+  it("has a changelog entry saying what is in, what is measured, and what is withdrawn", () => {
+    const changelog = readFileSync(fromRoot("CHANGELOG.md"), "utf8");
+    expect(changelog).toContain("## [0.1.0]");
+    expect(changelog).toContain("### Withdrawn from 0.1.0");
+    expect(changelog).toContain("### Known gaps");
+    // The measurement, by its number, so the entry cannot become a summary that
+    // says "improved" about something that did not.
+    expect(changelog).toContain("86.8 % → 13.2 %");
   });
 });

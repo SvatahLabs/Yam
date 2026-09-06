@@ -31,6 +31,12 @@ on:
       tag:
         description: "Tag to build the reports for"
         required: false
+      publish:
+        description: >-
+          Publish the 26 packages to npm. Leave unchecked for a dry run that
+          prints the exact commands and contacts no registry (T8.5).
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -188,3 +194,67 @@ jobs:
         with:
           files: apps/ade/out/make/**/*
           fail_on_unmatched_files: false
+
+  # T8.5: publish 0.1.0 — or say exactly what publishing would do.
+  #
+  # The dry run is the default and runs on every dispatch and every tag, because
+  # a publish step nobody can run until the day it matters is a publish step
+  # nobody has tested. `scripts/publish.mjs` refuses unless *all three* of
+  # `--publish`, a `workflow_dispatch`, and `NPM_TOKEN` hold, so this job is the
+  # rehearsal and the performance in one place and the guards do not live only
+  # in this file.
+  #
+  # It needs the tarballs the `tarballs` job packed and quick-started, so it
+  # waits for them and packs again in its own workspace: the artefact published
+  # is the artefact that was checked, and both are produced by the same script
+  # from the same commit.
+  publish:
+    name: publish to npm (dry run unless asked)
+    needs: [tarballs, eval-reports, ade-installers]
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm -r build
+
+      - name: Install browsers
+        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+
+      - name: Pack (no publish)
+        run: pnpm release:dry-run
+
+      # The same tarballs, installed into an empty project and driven, before
+      # anything is published from them (REQ-PKG-2).
+      - name: The quick start, from the tarballs
+        run: pnpm quick-start:packed --reuse
+
+      # Always. Prints the twenty-six exact `npm publish` commands and stops.
+      - name: What publishing would run
+        run: node scripts/publish.mjs
+
+      # Only on a manual dispatch that asked for it, and only with the secret.
+      # `scripts/publish.mjs` checks both again itself.
+      - name: Publish
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        run: node scripts/publish.mjs --publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # The installers and the reports are attached by the jobs that produce
+      # them — `ade-installers` on its three-OS matrix, `eval-reports` and
+      # `tarballs` on theirs — and this job waits for all three. Attaching them
+      # again here would upload the same files twice from a job that does not
+      # have them.

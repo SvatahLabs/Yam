@@ -41,7 +41,9 @@
     "finetune:train": "node scripts/finetune-tier2.mjs",
     "finetune:eval": "node scripts/finetune-eval.mjs",
     "release:dry-run": "node scripts/release-dry-run.mjs",
-    "quick-start:packed": "node scripts/quick-start-packed.mjs"
+    "quick-start:packed": "node scripts/quick-start-packed.mjs",
+    "release:publish": "node scripts/publish.mjs",
+    "ade:smoke": "node scripts/ade-smoke.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

@@ -114,9 +114,14 @@ describe("CI mirrors (P0-F5)", () => {
     ]);
     const script = githubCommands("ade-installers").join("\n");
     expect(script).toContain("pnpm --filter @svatah/ade make");
-    // And it launches the thing it just built: an installer that packages a
-    // broken app is an installer nobody wants (T3.6's Validate item).
-    expect(script).toContain("pnpm --filter @svatah/ade smoke");
+    /*
+     * And it launches the thing it just built (T3.6's Validate item), against
+     * the *packaged* application (T8.1's). `pnpm ade:smoke` picks the packaged
+     * app when `apps/ade/out/` holds one, which `make` has just filled — and
+     * the filtered `@svatah/ade smoke` it replaces always launched the
+     * development Electron, which cannot fail the way the product failed.
+     */
+    expect(script).toContain("pnpm ade:smoke");
     expect(script).toContain("xvfb-run");
   });
 
@@ -303,8 +308,14 @@ describe("CI mirrors (P0-F5)", () => {
     /*
      * `desktop-gates` needs a self-hosted runner (D1); `release` is the half of
      * `.github/workflows/release.yml` that can run on the remote this
-     * repository has, and stops at the artifact step (T7.6).
+     * repository has, and stops at the artifact step (T7.6); `publish` is the
+     * one the owner triggers with a token, and a dry run that prints the
+     * commands on every other trigger (T8.5).
      */
-    expect(Object.keys(bitbucket.pipelines.custom!).sort()).toEqual(["desktop-gates", "release"]);
+    expect(Object.keys(bitbucket.pipelines.custom!).sort()).toEqual([
+      "desktop-gates",
+      "publish",
+      "release",
+    ]);
   });
 });

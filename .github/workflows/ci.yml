@@ -281,13 +281,20 @@ jobs:
       # T3.6's Validate item: the app opens a fixture project and shows
       # `GET /project` data, and quitting stops the service. Linux runners have
       # no display, so Electron gets a virtual one.
-      - name: Smoke (Linux)
+      #
+      # T8.1: `make` has run, so `apps/ade/out/` holds a packaged application and
+      # this runs against *that* — with no `SVATAH_CLI`, so the app has to find
+      # its own bundled CLI and resolve its own Node. Phase 7's smoke check
+      # always launched the development Electron, which has the `RunAsNode` fuse
+      # on and a CLI in the workspace, and so could not fail the way the product
+      # failed. The line it prints says which target it used.
+      - name: Smoke against the packaged app (Linux)
         if: runner.os == 'Linux'
-        run: xvfb-run --auto-servernum pnpm --filter @svatah/ade smoke
+        run: xvfb-run --auto-servernum pnpm ade:smoke
 
-      - name: Smoke
+      - name: Smoke against the packaged app
         if: runner.os != 'Linux'
-        run: pnpm --filter @svatah/ade smoke
+        run: pnpm ade:smoke
 
       - uses: actions/upload-artifact@v4
         with:

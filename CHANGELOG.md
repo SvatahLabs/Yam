@@ -5,14 +5,25 @@ whole workspace's changelog and every package version below is the same number.
 It follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] — unreleased (release candidate)
+## [0.1.0] — unreleased (ready to publish)
 
-The first release candidate. **Nothing is published to a registry**: T7.6's
-release candidate is packed tarballs, a release workflow that stops at the
-artifact step, and a quick start that runs from the tarballs. `pnpm
-release:dry-run` produces them; `pnpm quick-start:packed` installs the module
-(a) four into an empty Playwright project outside this workspace and records,
-runs and heals there.
+The first release. **Nothing is published to a registry until the owner triggers
+the pipeline** (T8.5): `node scripts/publish.mjs` prints the twenty-six exact
+`npm publish` commands and stops unless `--publish`, a manual trigger and
+`NPM_TOKEN` all hold. Everything it would publish exists and has been driven:
+`pnpm release:dry-run` packs the tarballs, and `pnpm quick-start:packed`
+installs the module (a) four into an empty Playwright project outside this
+workspace and records, runs and heals there.
+
+**What is measured**, and where the number is:
+
+| | |
+|---|---|
+| Compiler, exact match | 97.7 % overall; tier 1 100 %, tier 2 86.8 % (`reports/eval-compiler.md`) |
+| macOS Accessibility conformance | conformant — 7 of 7 flow cases and both healing cases, live against the packaged ADE; the project screen reads in 914 ms (`reports/adapter-ax.md`) |
+| Java runtime conformance | artifacts valid, zero mismatches (`reports/runtime-java.md`) |
+| Healing, grounding, adapter conformance | `reports/eval-healing.md`, `reports/eval-grounding.md`, `reports/eval-conformance.md` |
+| Tier 2 fine-tune | **not met**, and withdrawn — see below (`reports/eval-finetune.md`) |
 
 ### Published packages
 
