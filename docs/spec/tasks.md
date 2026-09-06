@@ -446,44 +446,77 @@ Phase 10 total: 15 ideal days.
 
 ---
 
-## Phase 11 — Release 0.1.0 and the open P0 items (Draft 2.10, renumbered in 2.11)
+## Phase 11 — Corrections, and Svatah verifies Svatah (Draft 2.14)
 
-### T11.1 The desktop gate, race-free and load-aware
-**Refs:** REQ-ADP-7, REQ-SURF-3, LLD §7.5, §14 · **Est:** 1.5
-**Do:** The gate waits until no process of the previous launch remains before launching the next variant; the bridge addresses the process that owns a window when several share the name; the cost line records the one-minute load average and the CPU count; a read that exceeds the deadline is retried once and the report says so; the CI desktop legs run nothing else on their runner.
-**Validate:** Three consecutive gate runs on macOS, one started with `pnpm -r test` running in parallel, all conformant or failing only with a retried, recorded deadline; a test that fakes two same-named processes and shows the one with a window is chosen; the report's bridge line carries the load figures.
+The owner's decision of 2026-09-05: verification, validation, and the ADE's own testing are driven by Svatah itself, with the verifier's external tools kept as the second side of a parity gate. Corrections first, because the windowless launch blocks every desktop flow.
 
-### T11.2 The compiler golden set at 300
-**Refs:** REQ-COMP-9, LLD §16 · **Est:** 2.5
-**Do:** Extend `evals/compiler/golden.jsonl` to at least 300 entries across every pattern and tier, drawing Tier 2 entries from `refused.jsonl` only where a reviewer has fixed the answer and moving them out of the corpus so the test set and the training set stay disjoint; regenerate `reports/eval-compiler.md`.
-**Validate:** 300 or more entries; Tier 1 exact match 100 percent; end-to-end at least 95 percent with the pinned Tier 2 model; the corpus test still reports zero overlap with the golden set.
-
-### T11.3 The ADE names every control, and the gate makes a run before it reads results
-**Refs:** REQ-ADE-6, LLD §13.6, §16 · **Est:** 1.5
-**Do:** Name the three unnamed buttons on the Project screen and any other interactive control the desktop snapshot case finds without a name; make the snapshot case fail on an unnamed interactive control; before `ade.result`, the gate runs one story against `apps/sample-web` through the Run screen so the results table branch is exercised (K6).
-**Validate:** The live report's `ade.snapshot` asserts zero unnamed controls; `ade.result` reads a table with one run and its status; both green live.
-
-### T11.4 The three-OS matrix observed
-**Refs:** REQ-ADE-6, REQ-PKG-1, REQ-STD-2 · **Est:** 1 (plus the owner's action)
-**Do:** Write `docs/ci.md` with the exact steps to attach a self-hosted macOS and Windows runner to the Bitbucket workspace, or to mirror the repository to GitHub where the matrix already exists; the owner chooses and attaches. Once a runner exists, run `custom: desktop-gates` and the `ade-installers` matrix and record the results.
-**Validate:** The document, and either the observed pipeline runs with their reports, or the exact blocked step and what the owner has to do.
-
-### T11.5 0.1.0 published and verified from the registry
-**Refs:** REQ-PKG-1, 2, 4 · **Est:** 1.5 (plus the owner's action)
-**Do:** The owner triggers `custom: publish` with the token. Add `scripts/quick-start-registry.mjs`, which installs the four module (a) packages by version from the registry into an empty Playwright project and runs the quick start; add a `CHANGELOG.md` release date and the git tag `v0.1.0`.
-**Validate:** The registry quick start passes on Node 22 and the current LTS after the publish; until the owner publishes, the script runs in tarball mode and says so, and the tag is not created.
-
-### T11.6 The Windows UIA gate (carried)
-**Refs:** REQ-ADP-6, LLD §7.5 · **Est:** 2 (needs a Windows host)
-**Do and Validate:** as T8.6. The Phase 8 corrections (gate race, load line, unnamed buttons) are applied in Phase 9, so T11.1 and T11.3 inherit them and re-verify.
-
-### T11.7 The Phase 10 verification's corrections, the windowless launch, and the editing a release needs
+### T11.1 The Phase 10 verification's corrections, the windowless launch, and the editing a release needs
 **Refs:** REQ-ADE-6, REQ-ADE-10..13, LLD §13.6, §13.7, §7.5, §16 · **Est:** 5
 **Do:** Diagnose and fix the windowless packaged launch (F1) with the debug log and the graceful quit route of Draft 2.13; exempt standard window chrome from the id rule, select the first row by default, re-record the variant-1 fixture against the live app and make `rail-flows` relocalize live (F2); the Record screen's toolbar to the title budget, one-line select, and `availableWhen` on its buttons (F3); the Explorer toolbar and the Data inspector per F4, then build the four secondary screens to the corrected artboards; a timed-out session probe is "could not tell" (F5); `ade:shoot` writes outside the tree unless `--update` (F6); the test build's own bundle name (F7); the flow editor edits and saves with lint on save, and the API screen edits a saved request (K6, K7).
 **Validate:** The live macOS gate 7 of 7 plus both healing cases on three consecutive runs with the project screen's cost on the bridge line, the ADE launched and stopped by the gate ten times in a row with a window every time; the Record screen's toolbar case under Playwright at 1440 and 1100 px; a flow edited, saved, and re-linted through the ADE and through `svatah ui`; a request edited and saved; the suite green while a person's ADE is open.
 
-Phase 11 total: 15 ideal days.
 
+### T11.2 Launch, quit, and attach
+**Refs:** REQ-SELF-1, REQ-ADP-1, REQ-ADP-7, LLD §13.9, §4.2, §7.1, §7.5 · **Est:** 3
+**Do:** Desktop adapters take `app.launch` and `app.quit` in configuration and open a session by launching when no process of that name owns a window; the language gains `Quit the app` (pattern 31) with a golden entry and a run against the packaged ADE; the Playwright adapter attaches to an existing Chromium through `SVATAH_CDP_URL` or `app.attach.cdpUrl`, tested against recorded exchanges and live against the packaged ADE's renderer.
+**Validate:** A flow that launches the ADE, opens the fixtures project through its Recent list, reads the Flows toolbar, and quits, green through the AX adapter three times running; the same flow through the Playwright adapter attached over CDP; the ADE launched and quit ten times without a leftover process.
+
+### T11.3 Desktop grounding
+**Refs:** REQ-REC-1, REQ-ADP-7, LLD §13.9, §7.5 · **Est:** 2
+**Do:** The recorder grounds a desktop snapshot the way it grounds a web one; the fake gateway gains a desktop case set recorded from the ADE; `svatah record` on a desktop project writes bindings with `automationId` and `controlPath` candidates and a fingerprint.
+**Validate:** `svatah record --gateway fake` on a self flow against the ADE writes every binding; the same flow replays; a variant-1 rename relocalizes live.
+
+### T11.4 The self-verification suite
+**Refs:** REQ-SELF-1, LLD §13.9 · **Est:** 5
+**Do:** `evals/self` as a Svatah project: flows covering every ADE screen's Validate items of Phases 9 and 10 through the AX adapter, the service's endpoints through the HTTP adapter with JSON-path expectations, the sample application's behaviours (compensation, guards, dialogs, WebMCP, resume, workflow, tool) through the Playwright adapter, and the cockpit through `svatah ui --json` and the SDK; `evals/self/checks.yaml` naming every check's `svatah` story and its `external` implementation.
+**Validate:** `svatah run evals/self` green on this host; every Playwright case of `apps/ade/test/shell.spec.ts` has a self story with the same check id; every check has both implementations or names why one is unreachable.
+
+### T11.5 The parity gate
+**Refs:** REQ-SELF-2, REQ-SELF-3, LLD §13.9, §15 · **Est:** 3
+**Do:** `svatah eval self` runs both sides of every check, compares verdicts, and writes `reports/self-parity.md` with agreement, coverage per side, wall time per side, disagreements, and one-sided checks; exit 1 on any disagreement; the tree-agreement oracle over CDP versus the AX snapshot; the three external oracles named in the report as kept by design.
+**Validate:** The gate at 100 percent agreement on this host with the one-sided list published; a deliberately wrong flow expectation makes it fail with both pieces of evidence; the README's contract names the gate.
+
+### T11.6 Progress and the contract
+**Refs:** LLD §13.9 · **Est:** 0.5
+**Do:** `docs/spec/progress/phase-11.md` with the gate's report embedded, the one-sided list read as Svatah's shortcomings, and what each will take.
+**Validate:** The report and the list are in the file; the verifier can reproduce every number from `svatah eval self`.
+
+Phase 11 total: 18.5 ideal days.
+
+---
+
+## Phase 12 — Release 0.1.0 and the open P0 items (Draft 2.10, renumbered in 2.14)
+
+### T12.1 The desktop gate, race-free and load-aware
+**Refs:** REQ-ADP-7, REQ-SURF-3, LLD §7.5, §14 · **Est:** 1.5
+**Do:** The gate waits until no process of the previous launch remains before launching the next variant; the bridge addresses the process that owns a window when several share the name; the cost line records the one-minute load average and the CPU count; a read that exceeds the deadline is retried once and the report says so; the CI desktop legs run nothing else on their runner.
+**Validate:** Three consecutive gate runs on macOS, one started with `pnpm -r test` running in parallel, all conformant or failing only with a retried, recorded deadline; a test that fakes two same-named processes and shows the one with a window is chosen; the report's bridge line carries the load figures.
+
+### T12.2 The compiler golden set at 300
+**Refs:** REQ-COMP-9, LLD §16 · **Est:** 2.5
+**Do:** Extend `evals/compiler/golden.jsonl` to at least 300 entries across every pattern and tier, drawing Tier 2 entries from `refused.jsonl` only where a reviewer has fixed the answer and moving them out of the corpus so the test set and the training set stay disjoint; regenerate `reports/eval-compiler.md`.
+**Validate:** 300 or more entries; Tier 1 exact match 100 percent; end-to-end at least 95 percent with the pinned Tier 2 model; the corpus test still reports zero overlap with the golden set.
+
+### T12.3 The ADE names every control, and the gate makes a run before it reads results
+**Refs:** REQ-ADE-6, LLD §13.6, §16 · **Est:** 1.5
+**Do:** Name the three unnamed buttons on the Project screen and any other interactive control the desktop snapshot case finds without a name; make the snapshot case fail on an unnamed interactive control; before `ade.result`, the gate runs one story against `apps/sample-web` through the Run screen so the results table branch is exercised (K6).
+**Validate:** The live report's `ade.snapshot` asserts zero unnamed controls; `ade.result` reads a table with one run and its status; both green live.
+
+### T12.4 The three-OS matrix observed
+**Refs:** REQ-ADE-6, REQ-PKG-1, REQ-STD-2 · **Est:** 1 (plus the owner's action)
+**Do:** Write `docs/ci.md` with the exact steps to attach a self-hosted macOS and Windows runner to the Bitbucket workspace, or to mirror the repository to GitHub where the matrix already exists; the owner chooses and attaches. Once a runner exists, run `custom: desktop-gates` and the `ade-installers` matrix and record the results.
+**Validate:** The document, and either the observed pipeline runs with their reports, or the exact blocked step and what the owner has to do.
+
+### T12.5 0.1.0 published and verified from the registry
+**Refs:** REQ-PKG-1, 2, 4 · **Est:** 1.5 (plus the owner's action)
+**Do:** The owner triggers `custom: publish` with the token. Add `scripts/quick-start-registry.mjs`, which installs the four module (a) packages by version from the registry into an empty Playwright project and runs the quick start; add a `CHANGELOG.md` release date and the git tag `v0.1.0`.
+**Validate:** The registry quick start passes on Node 22 and the current LTS after the publish; until the owner publishes, the script runs in tarball mode and says so, and the tag is not created.
+
+### T12.6 The Windows UIA gate (carried)
+**Refs:** REQ-ADP-6, LLD §7.5 · **Est:** 2 (needs a Windows host)
+**Do and Validate:** as T8.6. The Phase 8 corrections (gate race, load line, unnamed buttons) are applied in Phase 9, so T12.1 and T12.3 inherit them and re-verify.
+
+Phase 12 total: 10 ideal days.
 
 ---
 
@@ -592,6 +625,7 @@ Phase 11 total: 15 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.14 (Svatah verifies Svatah): Phase 11 is now the corrections (T11.1) plus launch/quit/attach (T11.2), desktop grounding (T11.3), the self suite (T11.4), the parity gate (T11.5), and the record (T11.6); the release becomes Phase 12 with T12.1–T12.6. Total 259.5 ideal days.
 - Draft 2.13 (after Phase 10 verification): T11.7 added — the windowless launch, the live-gate findings, the Record toolbar, the corrected artboards, editing for flows and API requests. Total 246 ideal days.
 - Draft 2.12 (after Phase 9 verification): T10.4 added for the verification's corrections and the run-stop route. Total 241 ideal days.
 - Draft 2.11 (builder surfaces, after the owner's design review): Phase 9 (foundation: screen model, design system, SDK, two screens in both renderers) and Phase 10 (every screen, retire the old ones) inserted; the release phase and its tasks renumbered 11 and T11.x. Total 239 ideal days.

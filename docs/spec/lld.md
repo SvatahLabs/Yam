@@ -567,6 +567,17 @@ The ADE and the terminal cockpit `svatah ui` are two renderers of one headless *
 - Generated clients for Python (`svatah-sdk` on PyPI) and Java (`dev.svatah:svatah-sdk`) from the same description, with the event stream, published from the same pipeline as the tarballs and versioned with them. They are conformance artifacts of REQ-STD-1's message schemas as much as clients.
 - Auth is the bearer token the service prints; the SDK reads `SVATAH_SERVICE_URL` and `SVATAH_SERVICE_TOKEN` or a lock file, and never a model credential.
 
+### 13.9 Svatah verifies Svatah: the self-verification suite and the parity gate (Draft 2.14)
+
+Everything above the surface is verified by Svatah's own flows, and the tools a verifier used until now become the second side of a parity gate rather than the only oracle.
+
+- **`evals/self/`** is a Svatah project: flows over the Playwright adapter against `apps/sample-web`, over the AX and UIA adapters against the packaged ADE, over the HTTP adapter against the local service, and over the SDK against `svatah ui --json`. Its bindings for the ADE are seeded from `automationId`s with no model and no recording, and its data holds no secret that is not `${ENV}`.
+- **The check catalogue** `evals/self/checks.yaml` lists every check with an id, a sentence, and two implementations: `svatah` names a story in the self project; `external` names the independent implementation (a Playwright case over CDP, an osascript probe, a generated-client smoke, a pseudo-terminal capture). Each side answers `pass`, `fail`, or `unreachable` with evidence; `unreachable` says why (no adapter, no grant, no host).
+- **`svatah eval self [--report reports/self-parity.md]`** runs both sides of every check and compares verdicts per check: agreement (both pass or both fail the same way), disagreement (one passes, the other fails), one-sided (one side unreachable). The report publishes agreement over the checks both sides reach, each side's coverage, wall time per side, and every disagreement and one-sided check by id. **The gate passes only at 100 percent agreement**; a disagreement means one oracle is wrong and is a finding that names both pieces of evidence. One-sided checks are the surfaced shortcomings: every one names the adapter or step Svatah lacks, and the list is expected to shrink phase by phase.
+- **What stays external on purpose**: the ground-truth keys of the healing eval, axe-core on the component sheet, and the tree-agreement oracle, which reads the ADE's renderer tree over CDP and compares roles, names, and ids with the AX or UIA snapshot of the same screen. Those three sit below the surface and are what keeps the gate from grading its own homework.
+- **Language and adapters gain what the self suite needs.** Desktop adapters take `app.launch` (the executable or bundle, arguments, environment) and `app.quit` (a graceful route, then a signal) in configuration; the session opens by launching when no process of that name owns a window and closes by quitting; the language gains `Quit the app` (pattern 31, `action: "quit"`), which ends the session through the graceful route and fails if the process survives it. The Playwright adapter attaches to an existing Chromium when `SVATAH_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi adapter attaches, so a flow can drive the ADE's renderer. The recorder grounds desktop trees through the same `snapshot()` and the fake gateway gains a desktop case set. Screenshots on macOS remain subject to the Screen Recording grant and are reported as `unreachable` without it, never as a failure.
+- **The verification contract changes.** From Phase 11 on, a phase's evidence is `svatah eval self` green with its report, plus whatever the report lists as one-sided. The adversarial verifier runs the same command, reads the disagreements and the one-sided list, and probes only what neither side reaches.
+
 ## 14. Conformance suites (package `conformance`)
 
 - Surface suite: for each sample app page, a script of surface calls with expected snapshot invariants (roles present, names, states), expected `act` effects (URL change, value change, dialog appears), and error types. Runs against any adapter via `svatah surface conform --adapter <name>`.
@@ -594,6 +605,7 @@ Base URL and storage state precedence (Draft 2.5), applied identically by every 
 | `scripts/desktop-conformance.mjs --adapter ax\|uia` | `--report` (resolved against the current directory), `--project` | 0 conformant / 1 not / 2 host not ready; polls for the ADE window up to 60 s (Draft 2.8) |
 | `host generate` | `--out` | 0 |
 | `trajectory compile <trajectory.jsonl> [dir]` | `--name`, `--out`, `--app` | 0; writes only under `proposals/` (Draft 2.7) |
+| `eval self` | `--report`, `--only <check-id>`, `--side svatah|external` | 0 at 100 percent agreement / 1 on any disagreement; writes `reports/self-parity.md` (Draft 2.14) |
 | `migrate <src> <dest>` | `--keep-original` | 0 / 8 unmapped |
 | `repl`, `eval`, `init`, `doctor` | | |
 

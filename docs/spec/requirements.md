@@ -233,6 +233,9 @@ Constraints stated by the owner:
 | REQ-TUI-1 | `svatah ui` is a full authoring cockpit in the terminal: a standalone Ink application over the local service rendering the same screen model as the ADE, with numbered panes, the same actions and keys, the same command palette, and a `--json` mode that streams screen state and audit lines for agents; no tmux dependency (Draft 2.11). | P1 | T, D |
 | REQ-SDK-1 | `@svatah/sdk` is a typed TypeScript client generated from the service's OpenAPI description, with typed event subscription and the screen model's actions runnable out of process; drift between the description and the client fails the build (Draft 2.11). | P1 | T |
 | REQ-SDK-2 | Python and Java clients are generated from the same description, published with the release, and versioned with it (Draft 2.11). | P1 | T, R |
+| REQ-SELF-1 | Svatah verifies itself: `evals/self` holds prose flows that drive the sample application, the packaged ADE through the desktop adapters, the local service through the HTTP adapter, and the cockpit through its JSON mode; a phase is not accepted until the suite is green (Draft 2.14). | P1 | T, E |
+| REQ-SELF-2 | Every self check has an independent external implementation; `svatah eval self` runs both sides and publishes agreement, coverage per side, and every disagreement and one-sided check; the gate requires 100 percent agreement on the checks both sides reach, and one-sided checks are published as Svatah's own shortcomings (Draft 2.14). | P1 | E, R |
+| REQ-SELF-3 | Three oracles stay external by design: the healing eval's ground-truth keys, axe-core on the component sheet, and the renderer-versus-adapter tree agreement (Draft 2.14). | P1 | T, R |
 
 ## 4. Non-functional requirements
 
