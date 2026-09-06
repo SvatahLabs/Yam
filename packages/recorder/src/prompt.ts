@@ -98,6 +98,15 @@ export interface GroundingQuestionParts {
   readonly elementId?: string;
   /** The page or window the session is on. */
   readonly url?: string;
+  /**
+   * The window this desktop session is in, where a web one has a `url`
+   * (T11.3, LLD §3.3, §13.9).
+   *
+   * A separate field rather than a `url` holding a title, because they read
+   * differently to a model and are matched differently by the fake gateway's
+   * cases: a page is a path that can be generalised, a window is a name.
+   */
+  readonly window?: string;
   /** The rendered snapshot, already pruned. */
   readonly snapshot: string;
   /** Set when a screenshot accompanies the question (REQ-REC-2's fallback). */
@@ -119,6 +128,7 @@ export function question(parts: GroundingQuestionParts): string {
   if (parts.sentence !== undefined) lines.push(`Step: ${parts.sentence}`);
   if (parts.elementId !== undefined) lines.push(`Element id: ${parts.elementId}`);
   if (parts.url !== undefined) lines.push(`Page: ${parts.url}`);
+  if (parts.window !== undefined) lines.push(`Window: ${parts.window}`);
   if (parts.withScreenshot === true) {
     lines.push(
       "A screenshot of the page is attached, because the snapshot alone did not settle it.",

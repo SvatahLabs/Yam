@@ -57,3 +57,35 @@ A run against `--gateway fake` answers from these cases and therefore measures
 the harness — that every page opens, every phrase is grounded and every answer is
 checked against the ground-truth key — and nothing at all about a model. Only a
 run against a real gateway is REQ-REC-10's number.
+
+## The desktop set (T11.3, LLD §13.9)
+
+`desktop-cases.jsonl` is the same idea for the ADE, and `pnpm
+grounding:desktop-cases` rebuilds it from a real read of the real application:
+launch the packaged ADE, record the welcome screen, open the fixtures project
+through its own Recent button, walk the rail's eight screens and the palette's
+four, and turn every control with a name and an id into a case.
+
+Two things differ from the web set, and both follow from what a desktop
+application is.
+
+**The key is the window title**, not a URL path. LLD §3.3 has always said a
+binding's context pattern is "a URL *or window-title* pattern"; a window has no
+segments to generalise. So a case carries `window` where a web case carries
+`page`, and the grounding question says `Window: Svatah ADE` where a web one
+says `Page: …`.
+
+**The ground truth is the `automationId`.** `apps/sample-web` stamps
+`data-svatah-eval` on every element for the web eval; the ADE needs no such
+stamp, because LLD §13.7's accessibility contract already requires an id on
+every button, link, tab, field and row action and the desktop snapshot case
+fails a live gate when one is missing.
+
+`desktop-answers.jsonl` is the desktop twin of `fixture-answers.jsonl`: the
+phrases `evals/self`'s flows use that a *generated* case cannot cover. The
+generated phrase comes from a control's accessible name — "the fixtures button"
+for the Recent list's first entry, whose name is a directory on one machine, and
+"the Flows heading" for a toolbar title named after whichever screen is open. A
+flow says "the first recent project" and "the toolbar title", which are what the
+control *is* rather than what it happens to say. Nothing scores these; the
+recorder reads them so a self flow can be recorded with no credential.

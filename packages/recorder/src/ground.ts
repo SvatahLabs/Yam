@@ -165,6 +165,64 @@ export function assertRecordable(options: {
 export const DEFAULT_MAX_SNAPSHOT_TOKENS = 8_000;
 export const DEFAULT_MIN_CONFIDENCE = 0.5;
 
+/**
+ * Where the session is, in whichever of the two ways it can say (T11.3).
+ *
+ * > The recorder grounds a desktop snapshot the way it grounds a web one.
+ *
+ * A web session is at a URL; a desktop session is in a window with a title, and
+ * LLD §3.3 has always said a binding's context pattern is "a URL **or
+ * window-title** pattern". The recorder only ever read `url`, so every desktop
+ * binding it wrote was keyed on `/` and every desktop grounding question was
+ * asked without saying which screen it was about — which is the difference
+ * between a fixture that can answer and one that cannot.
+ *
+ * `kind` decides, not the presence of a field: a web session with no URL yet is
+ * still a web session, and calling its window title a page would be a fiction.
+ */
+async function whereItIs(
+  surface: AgentSurface,
+): Promise<{ where: string | undefined; desktop: boolean }> {
+  const state = await surface.state().catch(() => undefined);
+  const desktop = surface.kind === "desktop";
+  return { where: desktop ? state?.windowTitle : state?.url, desktop };
+}
+
+/**
+ * The snapshot to ground against, once the screen has stopped arriving (T11.3).
+ *
+ * A desktop snapshot is a *moment*. A web page's is too, but Playwright's
+ * locators wait and a DOM update is a few milliseconds; a desktop application
+ * answers a click by doing work — the ADE starts a `svatah serve` — and a
+ * recorder that grounded the next step against the tree as it was the instant
+ * after the click was asking the model about a screen that had not arrived.
+ * Measured: "the Flows rail item" grounded `not-found` against a 303-token
+ * welcome screen, on an application that had the rail a second later.
+ *
+ * "Stopped arriving" is *the tree stopped changing*: two reads with the same
+ * shape. It needs no knowledge of which screen is coming, which is what keeps
+ * it here rather than in a table of per-application waits. A web surface is
+ * read once, as before.
+ */
+/** How long a desktop screen is given to arrive before it is read again. */
+const RETRY_SETTLE_MS = 1_000;
+
+async function settledSnapshot(
+  surface: AgentSurface,
+  desktop: boolean,
+): Promise<Awaited<ReturnType<AgentSurface["snapshot"]>>> {
+  let snapshot = await surface.snapshot();
+  if (!desktop) return snapshot;
+  let before = snapshot.hash;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const again = await surface.snapshot();
+    if (again.hash === before) return again;
+    snapshot = again;
+    before = again.hash;
+  }
+  return snapshot;
+}
+
 export async function ground(
   target: GroundingTarget,
   surface: AgentSurface,
@@ -172,8 +230,8 @@ export async function ground(
 ): Promise<GroundingResult> {
   assertRecordable(options);
 
-  const snapshot = options.snapshot ?? (await surface.snapshot());
-  const url = (await surface.state().catch(() => undefined))?.url;
+  const { where: url, desktop } = await whereItIs(surface);
+  const snapshot = options.snapshot ?? (await settledSnapshot(surface, desktop));
 
   const pruned = prune(snapshot, {
     maxTokens: options.maxSnapshotTokens ?? DEFAULT_MAX_SNAPSHOT_TOKENS,
@@ -185,10 +243,12 @@ export async function ground(
     snapshotTokens: pruned.tokensEstimate,
     pruned: pruned.pruned,
   };
+  /** The snapshot the accepted answer was about; see the desktop retry below. */
+  let snapshotUsed = snapshot;
 
   let answer: Awaited<ReturnType<typeof askModel>>;
   try {
-    answer = await askModel(target, pruned.text, url, options, false, pruned.pruned);
+    answer = await askModel(target, pruned.text, url, options, false, pruned.pruned, undefined, desktop);
   } catch (error) {
     if (error instanceof GatewayRefusal) {
       return {
@@ -202,6 +262,48 @@ export async function ground(
       };
     }
     throw error;
+  }
+
+  /*
+   * A desktop screen that was still arriving (T11.3).
+   *
+   * The tree can be *stable and wrong*: after a click that starts a service the
+   * previous screen sits there unchanged for a second or two, so "two identical
+   * reads" is satisfied by the screen the click was meant to replace. Measured:
+   * "the Flows rail item" grounded `not-found` against a 303-token welcome
+   * screen on an application that had the rail a second later.
+   *
+   * So a `not-found` on a desktop surface is asked *once* more, against the
+   * screen as it is after a pause — and only when the tree has actually
+   * changed, so a phrase that really is not there costs one extra read and not
+   * one extra model call. A web surface never takes this path: its locators
+   * wait, and its `not-found` means what it says.
+   */
+  if (answer.value.ref === null && desktop && options.snapshot === undefined) {
+    await new Promise((done) => setTimeout(done, RETRY_SETTLE_MS));
+    const again = await settledSnapshot(surface, true);
+    if (again.hash !== snapshot.hash) {
+      const prunedAgain = prune(again, {
+        maxTokens: options.maxSnapshotTokens ?? DEFAULT_MAX_SNAPSHOT_TOKENS,
+      });
+      try {
+        answer = await askModel(
+          target,
+          prunedAgain.text,
+          url,
+          options,
+          false,
+          prunedAgain.pruned,
+          undefined,
+          true,
+        );
+        base.snapshotTokens = prunedAgain.tokensEstimate;
+        base.pruned = prunedAgain.pruned;
+        snapshotUsed = again;
+      } catch (error) {
+        if (!(error instanceof GatewayRefusal)) throw error;
+      }
+    }
   }
 
   let usedVision = false;
@@ -226,7 +328,7 @@ export async function ground(
     const image = await options.readScreenshot(path);
     usedVision = true;
     try {
-      answer = await askModel(target, pruned.text, url, options, true, pruned.pruned, image);
+      answer = await askModel(target, pruned.text, url, options, true, pruned.pruned, image, desktop);
     } catch (error) {
       if (error instanceof GatewayRefusal) {
         return {
@@ -353,11 +455,16 @@ export async function ground(
     };
   }
 
-  const { hash } = contextHash(snapshot, ref);
+  // The snapshot the accepted answer was about, which on a desktop retry is
+  // the second one (T11.3): a context hash of the screen the model was *not*
+  // shown would be a hash of somewhere else.
+  const { hash } = contextHash(snapshotUsed, ref);
 
   const entry: BindingEntry = {
     context: {
-      pattern: contextPattern(url ?? "/", {
+      // A desktop pattern is the window title, not a path (LLD §3.3, T11.3): a
+      // window has no segments to generalise and `/` is not where it is.
+      pattern: desktop ? (url ?? "*") : contextPattern(url ?? "/", {
         ...(options.matchHost === undefined ? {} : { matchHost: options.matchHost }),
       }),
       hash,
@@ -420,11 +527,11 @@ export async function entryFor(
   const description = await surface.describe(ref);
   const snapshot = await surface.snapshot();
   const { hash } = contextHash(snapshot, ref);
-  const url = (await surface.state().catch(() => undefined))?.url;
+  const { where: url, desktop } = await whereItIs(surface);
 
   return {
     context: {
-      pattern: contextPattern(url ?? "/", {
+      pattern: desktop ? (url ?? "*") : contextPattern(url ?? "/", {
         ...(options.matchHost === undefined ? {} : { matchHost: options.matchHost }),
       }),
       hash,
@@ -457,6 +564,8 @@ async function askModel(
   withScreenshot: boolean,
   pruned: boolean,
   image?: GatewayImage,
+  /** A desktop session says which *window* it is in, not which page (T11.3). */
+  desktop = false,
 ): Promise<{
   value: { ref: string | null; why: string; confidence: number };
   provenance: Provenance;
@@ -469,7 +578,7 @@ async function askModel(
       phrase: target.phrase,
       ...(target.sentence === undefined ? {} : { sentence: target.sentence }),
       elementId: target.id,
-      ...(url === undefined ? {} : { url }),
+      ...(url === undefined ? {} : desktop ? { window: url } : { url }),
       snapshot,
       ...(withScreenshot ? { withScreenshot: true } : {}),
       ...(pruned ? { pruned: true } : {}),

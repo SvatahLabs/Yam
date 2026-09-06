@@ -61,6 +61,10 @@ const CAPABILITIES: Capabilities = {
 export interface RecordedSurfaceOptions {
   /** Turn off screenshots, to exercise the vision fallback's capability check. */
   readonly screenshot?: boolean;
+  /** `desktop` replays the same page as a window with a title (T11.3). */
+  readonly kind?: "web" | "desktop";
+  /** The window title a desktop session reports; default "Svatah ADE". */
+  readonly windowTitle?: string;
   /** Called instead of writing a file. */
   readonly onScreenshot?: (path: string) => void;
 }
@@ -74,13 +78,21 @@ export interface SurfaceCalls {
 }
 
 export class RecordedSurface implements AgentSurface {
-  readonly kind = "web" as const;
+  /**
+   * `desktop` for the T11.3 cases, which are about the one thing the recorder
+   * does differently there: a window title where a page has a URL (LLD §3.3).
+   * Everything else about a recorded page replays the same either way, which is
+   * the point — the recorder has one grounding path, not two.
+   */
+  readonly kind: "web" | "desktop";
   readonly calls: SurfaceCalls = { snapshots: 0, describes: [], locates: [], screenshots: [] };
 
   constructor(
     private readonly page: RecordedPage,
     private readonly options: RecordedSurfaceOptions = {},
-  ) {}
+  ) {
+    this.kind = options.kind ?? "web";
+  }
 
   capabilities(): Capabilities {
     return { ...CAPABILITIES, screenshot: this.options.screenshot ?? true };
@@ -117,7 +129,10 @@ export class RecordedSurface implements AgentSurface {
   }
 
   async state(): Promise<SessionState> {
-    return { kind: "web", url: `http://sample.test${this.page.url}` };
+    // A desktop session says which *window* it is in; a web one, which page.
+    return this.kind === "desktop"
+      ? { kind: "desktop", windowTitle: this.options.windowTitle ?? "Svatah ADE", windowIndex: 0 }
+      : { kind: "web", url: `http://sample.test${this.page.url}` };
   }
 
   async restore(): Promise<void> {}

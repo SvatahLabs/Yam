@@ -528,3 +528,46 @@ describe("prompt g-1 (Draft 1 §9.2)", () => {
     expect(SYSTEM).toContain("[ref=");
   });
 });
+
+/**
+ * Grounding a desktop snapshot the way a web one is grounded (T11.3, LLD §13.9).
+ *
+ * Two things differ and nothing else does: the question says which **window**
+ * it is about rather than which page, and the binding's context pattern is that
+ * window's title rather than a URL path. LLD §3.3 has always said a pattern is
+ * "a URL *or window-title* pattern"; the recorder only ever read `url`, so
+ * every desktop binding it wrote was keyed on `/` and every desktop grounding
+ * question was asked without saying which screen it was about.
+ */
+describe("a desktop session grounds by window (T11.3)", () => {
+  const ade = () =>
+    new RecordedSurface(recordedPage("/login"), { kind: "desktop", windowTitle: "Svatah ADE" });
+
+  it("asks about the window, not the page", async () => {
+    const { gateway, questions } = reads(() => null);
+    await ground({ id: "sign-in", phrase: "the Sign in button" }, ade(), options(gateway));
+    expect(questions[0]).toContain("Window: Svatah ADE");
+    expect(questions[0]).not.toContain("Page:");
+  });
+
+  it("still says `Page:` for a web session, and never both", async () => {
+    const { gateway, questions } = reads(() => null);
+    await ground({ id: "sign-in", phrase: "the Sign in button" }, login(), options(gateway));
+    expect(questions[0]).toContain("Page: http://sample.test/login");
+    expect(questions[0]).not.toContain("Window:");
+  });
+
+  it("keys the binding on the window title, not on `/`", async () => {
+    const surface = ade();
+    const first = (await surface.snapshot()).nodes.find((one) => one.role === "button");
+    const { entry, decision } = await ground(
+      { id: "sign-in", phrase: "the Sign in button" },
+      surface,
+      options(chooses(first?.ref ?? "r1")),
+    );
+    expect(decision.outcome, JSON.stringify(decision)).toBe("grounded");
+    expect(entry?.context.platform).toBe("desktop");
+    // A desktop pattern has no segments to generalise; `/` is not where it is.
+    expect(entry?.context.pattern).toBe("Svatah ADE");
+  });
+});

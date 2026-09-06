@@ -157,6 +157,26 @@ export function candidatesFor(
     }
   }
 
+  /*
+   * 1b. A desktop `automationId` (T11.3, LLD §6.2, §7.5, REQ-REC-3).
+   *
+   * REQ-REC-3 asks for "a ranked list **per adapter kind**", and this list had
+   * only the web's kinds — so a desktop recording came out with `role` and
+   * `text` and nothing that survives a rewording, which is the one thing a
+   * desktop binding has that a web one often does not. `AXDOMIdentifier` on
+   * macOS, `AutomationId` on Windows; LLD §13.7's accessibility contract
+   * requires one on every control of the ADE, and the desktop snapshot case
+   * fails a live gate when one is missing.
+   *
+   * Ranked just under a test id and above a role-and-name, for the same reason
+   * a test id outranks one: changing it is a deliberate act, and a name is
+   * rewritten every time somebody improves the wording.
+   */
+  const automationId = native["automationId"];
+  if (automationId !== undefined && automationId !== "" && !looksGenerated(automationId)) {
+    out.push({ by: "automationId", value: automationId, score: 0.96 });
+  }
+
   /* 2. An id, unless the framework made it up. */
   const id = attrs["id"];
   if (id !== undefined && id !== "" && !looksGenerated(id) && native["idIsGenerated"] !== "true") {
@@ -216,6 +236,20 @@ export function candidatesFor(
   const xpath = native["xpath"];
   if (xpath !== undefined && xpath !== "") {
     out.push({ by: "xpath", value: xpath, score: positional(xpath) ? 0.45 : 0.6 });
+  }
+
+  /*
+   * 11. The desktop's own path (T11.3, LLD §7.5).
+   *
+   * `Window[Svatah ADE]/AXGroup[0]/…/AXButton[Flows]` — the accessibility
+   * ancestry, which is what a desktop adapter can address an element by when
+   * nothing else identifies it. Scored where a CSS path is, and for the same
+   * reason: it is a route rather than an identity, and a panel inserted above
+   * the element invalidates it.
+   */
+  const controlPath = native["controlPath"];
+  if (controlPath !== undefined && controlPath !== "") {
+    out.push({ by: "controlPath", value: controlPath, score: positional(controlPath) ? 0.45 : 0.55 });
   }
 
   return dedupe(out).sort((a, b) => b.score - a.score);

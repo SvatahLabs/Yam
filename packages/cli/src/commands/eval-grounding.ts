@@ -74,7 +74,19 @@ export async function groundingEvalCommand(
   const json = boolOption(args, "json");
   const reportPath = stringOption(args, "report");
 
-  const all = readCases(casesPath);
+  /*
+   * The web cases only (T11.3).
+   *
+   * `readCases` reads the file it is given; the desktop set
+   * (`desktop-cases.jsonl`) is keyed on a window title rather than a page and
+   * is driven by launching an application, not by navigating to a URL. This
+   * eval opens `apps/sample-web` at `${baseUrl}${page}`, so a case with no page
+   * is a case it has nowhere to take. `svatah eval self` is where the desktop
+   * cases are measured (T11.5).
+   */
+  const all = readCases(casesPath).filter(
+    (one): one is typeof one & { page: string } => typeof one.page === "string",
+  );
   if (all.length === 0) {
     io.err(
       `No cases in ${casesPath ?? "evals/grounding/cases.jsonl"}. ` +

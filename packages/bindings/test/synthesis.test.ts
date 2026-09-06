@@ -348,3 +348,70 @@ describe("ignoreAttributes (LLD §3.5)", () => {
     expect(Object.keys(fingerprintOf(shouty).attrs)).not.toContain("DATA-SVATAH-EVAL");
   });
 });
+
+/**
+ * The desktop candidate kinds (T11.3, LLD §6.2, §7.5, REQ-REC-3).
+ *
+ * REQ-REC-3 asks for "a ranked list **per adapter kind**", and this list had
+ * only the web's: a recording against the ADE came out with `role` and `text`
+ * and nothing that survives a rewording — which is the one thing a desktop
+ * binding usually *does* have, because LLD §13.7's accessibility contract
+ * requires an id on every control and the live gate fails when one is missing.
+ */
+describe("desktop candidates (T11.3)", () => {
+  const desktop = (native: Record<string, string>): ElementDescription =>
+    ({
+      ref: "r1",
+      role: "button",
+      name: "Flows",
+      tag: "AXButton",
+      attrs: {},
+      text: "Flows",
+      neighbours: { before: [], after: [] },
+      rolePath: ["window", "navigation", "button"],
+      box: [16, 156, 203, 32],
+      index: 1,
+      states: [],
+      native,
+    }) as unknown as ElementDescription;
+
+  it("proposes the automationId, above role and name", () => {
+    const candidates = candidatesFor(
+      desktop({ automationId: "rail-flows", axRole: "AXButton" }),
+    );
+    const kinds = candidates.map((one) => one.by);
+    expect(kinds).toContain("automationId");
+    // Above `role`, for the same reason a test id is: changing an id is a
+    // deliberate act and a name is rewritten every time the wording improves.
+    expect(kinds.indexOf("automationId")).toBeLessThan(kinds.indexOf("role"));
+    expect(candidates.find((one) => one.by === "automationId")?.value).toBe("rail-flows");
+  });
+
+  it("proposes the controlPath, and ranks it last of the locators", () => {
+    const candidates = candidatesFor(
+      desktop({
+        automationId: "rail-flows",
+        controlPath: "Window[Svatah ADE]/AXGroup[0]/AXButton[Flows]",
+      }),
+    );
+    const kinds = candidates.map((one) => one.by);
+    expect(kinds).toContain("controlPath");
+    // A route, not an identity: a panel inserted above the element breaks it.
+    expect(kinds.indexOf("controlPath")).toBeGreaterThan(kinds.indexOf("automationId"));
+    expect(kinds.indexOf("controlPath")).toBeGreaterThan(kinds.indexOf("role"));
+  });
+
+  it("refuses an automationId a framework made up", () => {
+    const candidates = candidatesFor(desktop({ automationId: "radix-:r3h:" }));
+    expect(candidates.map((one) => one.by)).not.toContain("automationId");
+  });
+
+  it("proposes neither when the element has neither", () => {
+    const candidates = candidatesFor(desktop({ axRole: "AXButton" }));
+    const kinds = candidates.map((one) => one.by);
+    expect(kinds).not.toContain("automationId");
+    expect(kinds).not.toContain("controlPath");
+    // And it still has something to offer, which is the point of a bundle.
+    expect(kinds).toContain("role");
+  });
+});

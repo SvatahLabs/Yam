@@ -28,7 +28,18 @@ import { fileURLToPath } from "node:url";
 
 export interface GroundingCase {
   readonly id: string;
-  readonly page: string;
+  /** The page a web case is said on. Absent for a desktop one. */
+  readonly page?: string;
+  /**
+   * The window a desktop case is said in (T11.3, LLD §3.3, §13.9).
+   *
+   * A desktop snapshot is grounded the way a web one is, and what says *which
+   * screen* is the window title rather than a URL. `scripts/desktop-grounding-cases.mjs`
+   * records them from the real ADE.
+   */
+  readonly window?: string;
+  /** Which ADE screen a desktop case was recorded on. For a reader, not a key. */
+  readonly screen?: string;
   readonly variant?: number;
   readonly phrase: string;
   readonly expect: "present" | "absent";
@@ -77,18 +88,47 @@ export function groundingAnswers(path?: string): GroundingAnswers {
    * REQ-REC-10's denominator for ever; recording does, because the fixtures
    * cannot be recorded without a credential otherwise.
    */
-  const cases = [...readCases(path), ...readCases(unscoredPath(path))];
+  const cases = [
+    ...readCases(path),
+    ...readCases(unscoredPath(path)),
+    /*
+     * The desktop set, recorded from the ADE (T11.3), and the phrases the self
+     * flows use that a *generated* case cannot cover.
+     *
+     * The generated phrase for a control comes from its accessible name — "the
+     * fixtures button" for the Recent list's first entry, whose name is a
+     * directory on one machine, and "the Flows heading" for a toolbar title
+     * that is named after whichever screen is open. A flow says "the first
+     * recent project" and "the toolbar title", which are what the control *is*
+     * rather than what it happens to say. `desktop-answers.jsonl` is those, the
+     * same way `fixture-answers.jsonl` is the web's.
+     */
+    ...readCases(desktopPath(path)),
+    ...readCases(desktopAnswersPath(path)),
+  ];
 
-  /** page + phrase → the case. Variant cases are keyed on the page too. */
+  /** page-or-window + phrase → the case. Variant cases are keyed on it too. */
   const byKey = new Map<string, GroundingCase>();
-  for (const one of cases) byKey.set(`${one.page}|${one.phrase.toLowerCase()}`, one);
+  for (const one of cases) {
+    byKey.set(`${one.window ?? one.page}|${one.phrase.toLowerCase()}`, one);
+  }
 
   return {
     size: cases.length,
     cases,
     answer(question: string): GroundingAnswer | undefined {
       const phrase = /^Phrase: (.+)$/m.exec(question)?.[1]?.trim();
-      const page = pagePathOf(/^Page: (.+)$/m.exec(question)?.[1]?.trim());
+      /*
+       * `Page:` for a web session, `Window:` for a desktop one (T11.3).
+       *
+       * A desktop snapshot is grounded the way a web one is, and the thing that
+       * says *which screen* is the window title rather than a URL. A window
+       * title is a name and not a path, so it is matched as it is — there is
+       * nothing in "Svatah ADE" to generalise.
+       */
+      const url = /^Page: (.+)$/m.exec(question)?.[1]?.trim();
+      const window = /^Window: (.+)$/m.exec(question)?.[1]?.trim();
+      const page = url === undefined ? window : pagePathOf(url);
       if (phrase === undefined || page === undefined) return undefined;
 
       const found = byKey.get(`${page}|${phrase.toLowerCase()}`);
@@ -115,6 +155,18 @@ export function groundingAnswers(path?: string): GroundingAnswers {
 function unscoredPath(casesPath: string | undefined): string {
   const base = casesPath ?? defaultCasesPath();
   return join(dirname(base), "fixture-answers.jsonl");
+}
+
+/** `…/cases.jsonl` → `…/desktop-cases.jsonl` (T11.3). */
+function desktopPath(casesPath: string | undefined): string {
+  const base = casesPath ?? defaultCasesPath();
+  return join(dirname(base), "desktop-cases.jsonl");
+}
+
+/** `…/cases.jsonl` → `…/desktop-answers.jsonl` (T11.3). */
+function desktopAnswersPath(casesPath: string | undefined): string {
+  const base = casesPath ?? defaultCasesPath();
+  return join(dirname(base), "desktop-answers.jsonl");
 }
 
 /** `http://127.0.0.1:53321/login?x=1` → `/login`. Ports and queries move. */
