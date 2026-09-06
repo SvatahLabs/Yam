@@ -337,9 +337,12 @@ export default tseslint.config(
         fetch: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
-        // The renderer is a browser (T3.6); these are its, not Node's.
+        // The renderer is a browser (T3.6); these are its, not Node's. The
+        // scripts that *drive* a browser carry expressions evaluated inside one
+        // (`page.evaluate`, `Runtime.evaluate`), so they are read here too.
         document: "readonly",
         window: "readonly",
+        getComputedStyle: "readonly",
         Response: "readonly",
         Blob: "readonly",
         AbortController: "readonly",
