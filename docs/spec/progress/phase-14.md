@@ -2,7 +2,7 @@
 
 Implementer: this session · Branch `phase-14` from `yam-bootstrap` at `8c97dff` · Host: macOS 15 (Darwin 25.3.0), arm64, Node v25.6.1, pnpm 10.30.2, tmux 3.7c
 
-Spec: Draft 2.20, unchanged on this branch: `git diff 8c97dff..phase-14 -- docs/spec/{requirements,hld,lld,tasks}.md` is **empty**.
+Spec: Draft 2.20 at the branch point, and Draft 2.21 (the human gateway and the agent's explore, owner decision of 2026-09-07) written on this branch as its own commit (`2e40e44`) before T14.8 and T14.9; the four documents were not edited by any task commit.
 
 ## Environment, and which fallback applied
 
@@ -18,10 +18,10 @@ Spec: Draft 2.20, unchanged on this branch: `git diff 8c97dff..phase-14 -- docs/
 | Command | Result |
 |---|---|
 | `pnpm install --frozen-lockfile && pnpm -r build && pnpm -r typecheck && pnpm lint`, Node v25.6.1 | all exit 0 |
-| `pnpm -r test`, Node v25.6.1, `CI=true` | 36 packages, **3,778 passed, 0 failed**; the run's first pass had three red repository checks, two of them this phase's own to correct (the action-parity check still read the usage block `cli.ts` no longer has, and the name check met `svatah.fl…`, the fixture flow's name truncated in a re-recorded 100-column capture) and one, `tui-pty`'s Flows screen, that failed beside the full suite and passed alone — Phase 12's K7 again |
+| `pnpm -r test`, Node v25.6.1, `CI=true` | after T14.9: 36 packages, **3,793 passed, 0 failed** once the screen fixtures were re-recorded for the service's new `gateway.display` field (the one red row of that run); after T14.6: 3,778 passed, with the three repository checks corrected in the record's commit |
 | `pnpm docs:check` | 67 pages current |
 | `pnpm quick-start` | 5.9 s of the ten-minute budget |
-| `yam eval self --only <each of the three front-door checks>` | 100 percent agreement, 0 one-sided, each |
+| `yam eval self --only <each of the four front-door checks>` | 100 percent agreement, 0 one-sided, each |
 | `node scripts/front-door-self.mjs status\|check\|help` | exit 0, each |
 
 ## The newcomer's session
@@ -210,6 +210,22 @@ The resolver's message for a target with no entry was `Could not resolve "id" (p
 
 **Validate:** `pnpm docs:check` clean; the quick start at 5.9 s; `yam eval self --only <id>` at 100 percent for each of the three; `tools/repo-checks/test/self-catalogue.test.ts` green.
 
+## T14.8 The human gateway (Draft 2.21)
+
+**Status: done.** Commit `6787e59`.
+
+`pick?` on the surface and the `pick` capability, in the schema's flag list and every adapter's descriptor (`true` for Playwright, `false` for the five others); the in-page picker moved beside the Playwright adapter and re-exported, so module (a)'s `bind()` and the recorder share one overlay; `PlaywrightSurface.pick(phrase, { id })` runs the overlay, locates the stamped element, mints its reference and clears the stamp, and answers from `YAM_PICK` without a person when that is set. The recorder's per-target step takes the `human` path before `ground()`: `pick`, then `entryFor(surface, ref, { promptVersion: "pick" })`, provenance `human`; a refused adapter or an Escape stops the session with a sentence. `gatewayForRecording` knows `human`, and the default is `anthropic` with a credential, else `human` for a person at a terminal with a display and no `CI`, else the refusal as before. The service reports `gateway.display`, the screen model offers `human` first, and the app's chooser types it. Two catalogue rows: no display, and an adapter that cannot take a click.
+
+**Validate:** `packages/cli/test/record-human.test.ts` — a scripted click binds the login page's submit button with provenance `human`/`pick` and the binding verifies; an element that is not there reads as an Escape, stops the session and writes nothing; the HTTP adapter is refused with its row; `personCanPick` is false under CI, without a terminal, and on Linux without a display; under CI with no gateway named the recorder still refuses and names `fake` and the credential. `packages/adapter-playwright/test/session.spec.ts` proves the `pick` claim beside the others; `packages/surface/test` holds the reference document and the method lists to the new method; `apps/desktop/test/review.test.ts` sees `human` offered and unavailable without a display. The record guide and the getting-started page now say what the code does.
+
+## T14.9 `yam explore`, and the proposal on the front door (Draft 2.21)
+
+**Status: done.** Commit `e92064e`.
+
+`packages/cli/src/commands/explore.ts`: the MCP server `yam mcp` builds, served over stdio with the trajectory under `.yam/explore/<id>/`; on disconnect the trajectory is compiled and written under `proposals/<date>/`, the review notes and the directory printed; an empty exploration writes nothing and says so; `--trajectory <path.jsonl>` compiles an existing one. `projectState` gains `proposals`, `nextVerb` names the newest right after the read-error rule, and `yam` prints a `proposals` line. `explore` is in the top-level help and the `agents` topic. The self suite gains `front-door.an-exploration-becomes-a-proposal`: Yam's side drives the built `yam explore` through an MCP client against the sample application; the external side is `packages/cli/test/explore.test.ts`.
+
+**Validate:** the explore test drives a two-call exploration in process and finds the proposal with the story name and the intents, nothing under `flows/`, and `yam` naming `review proposals/<date>`; an empty exploration writes nothing; `--trajectory` compiles a recorded trajectory into a proposal elsewhere; a missing trajectory is refused. `yam eval self --only front-door.an-exploration-becomes-a-proposal` at 100 percent. `yam help` still matches LLD §15.1, and the vocabulary check passes with the new entries.
+
 ## After the tasks: what the session found
 
 Playing the newcomer's session by hand found two things the tests had not, fixed in `767dbae`, and a third fixed with the record:
@@ -231,4 +247,8 @@ Playing the newcomer's session by hand found two things the tests had not, fixed
 
 **K2 — the desktop rows were not produced live.** The doctor's refusal and the missing-browser launch failure are produced from their own messages, not from a host without the grant or a machine without Chromium.
 
-**K3 — the record's transcript is the fake gateway's.** With a credential the recorder grounds through a model and the same session reads the same, except the gateway line.
+**K3 — the record's transcript is the fake gateway's.** With a credential the recorder grounds through a model; with neither, at a terminal, the human gateway of T14.8 now opens the browser for a click, and the session reads the same except for the gateway line and the overlay.
+
+**K4 — the human gateway's click is proven by a scripted pick.** `YAM_PICK` answers the overlay in every test; a person's real click in the headed browser was exercised by hand on this host and is not in the suite, which cannot click.
+
+**K5 — the desktop adapters cannot take a click yet.** `pick` is `false` on the UI Automation and Accessibility adapters; a person recording against a desktop application still needs a model gateway, and the catalogue row says so.
