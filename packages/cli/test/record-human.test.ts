@@ -24,7 +24,7 @@ const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 let app: SampleServer;
 
 beforeAll(async () => {
-  app = await startSampleApp({ port: 0 });
+  app = await startSampleApp(0);
 });
 afterAll(async () => {
   await app?.close();

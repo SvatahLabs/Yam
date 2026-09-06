@@ -339,6 +339,8 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
 
 async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   switch (command) {
+    case "explore":
+      return await (await import("./commands/explore.js")).exploreCommand(args, io);
     case "check":
       return await (await import("./commands/compile.js")).checkCommand(args, io);
     case "compile":

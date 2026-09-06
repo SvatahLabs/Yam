@@ -772,9 +772,10 @@ function sourcesFor(catalogue: Catalogue, reportsDir: string): Record<string, So
     "front-door-status": commandSource("status", "node", [join("scripts", "front-door-self.mjs"), "status"], "`yam` with no arguments, on a fresh project"),
     "front-door-check": commandSource("check", "node", [join("scripts", "front-door-self.mjs"), "check"], "`yam check`, and the plan it writes"),
     "front-door-help": commandSource("help", "node", [join("scripts", "front-door-self.mjs"), "help"], "`yam help exit-codes` and the top-level help"),
+    "front-door-explore": commandSource("explore", "node", [join("scripts", "front-door-self.mjs"), "explore"], "an exploration through `yam explore` becomes a proposal"),
     "cli-vitest": vitestSource(
       "packages/cli",
-      ["test/front-door.test.ts", "test/check.test.ts", "test/help.test.ts"],
+      ["test/front-door.test.ts", "test/check.test.ts", "test/help.test.ts", "test/explore.test.ts"],
       "the command line's own front-door cases",
     ),
     artboards: commandSource(

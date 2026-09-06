@@ -70,7 +70,46 @@ switch (which) {
     process.stdout.write("help exit-codes carries every code; the top-level help is the design's\n");
     break;
   }
+  case "explore": {
+    // Resolved from the CLI package, which depends on both; the repository root does not.
+    const { createRequire } = await import("node:module");
+    const { pathToFileURL } = await import("node:url");
+    const need = createRequire(join(ROOT, "packages", "cli", "package.json"));
+    const load = async (id) => import(pathToFileURL(need.resolve(id)).href);
+    const { Client } = await load("@modelcontextprotocol/sdk/client/index.js");
+    const { StdioClientTransport } = await load("@modelcontextprotocol/sdk/client/stdio.js");
+    const { startSampleApp } = await import(pathToFileURL(join(ROOT, "apps", "sample-web", "dist", "index.js")).href);
+    const app = await startSampleApp({ port: 0 });
+    try {
+      const { readFileSync, writeFileSync } = await import("node:fs");
+      writeFileSync(join(dir, "yam.config.yaml"), readFileSync(join(dir, "yam.config.yaml"), "utf8").replace(/baseUrl: ".*"/, `baseUrl: "${app.origin}"`), "utf8");
+      const transport = new StdioClientTransport({ command: process.execPath, args: [BIN, "explore", dir, "--name", "Explored sign in"], cwd: dir, env: { ...process.env, CI: "true" } });
+      const client = new Client({ name: "front-door-self", version: "0" });
+      await client.connect(transport);
+      const snap = await client.callTool({ name: "surface_snapshot", arguments: { intent: "see what is on the home page", interactiveOnly: true } });
+      const text = snap.content.find((one) => one.type === "text")?.text ?? "";
+      const ref = /link "Sign in"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(JSON.parse(text).text ?? text)?.[1];
+      if (ref === undefined) fail("no sign-in link in the snapshot");
+      await client.callTool({ name: "surface_act", arguments: { intent: "go to the sign-in page", action: "click", ref } });
+      await client.close();
+      await new Promise((done) => setTimeout(done, 1500));
+      const proposals = join(dir, "proposals");
+      if (!existsSync(proposals)) fail("no proposals directory after the exploration");
+      const { readdirSync } = await import("node:fs");
+      const days = readdirSync(proposals);
+      if (days.length === 0) fail("proposals/ is empty");
+      const flow = readdirSync(join(proposals, days[0])).find((f) => f.endsWith(".flow"));
+      if (flow === undefined) fail("the proposal has no flow");
+      const status = yam(["--json"], dir);
+      const state = JSON.parse(status.stdout);
+      if (!String(state.next?.verb ?? "").startsWith("review proposals/")) fail(`yam names ${state.next?.verb}, not the proposal`);
+      process.stdout.write(`an exploration became ${join("proposals", days[0], flow)}, and yam names it next\n`);
+    } finally {
+      await app.close();
+    }
+    break;
+  }
   default:
-    fail("usage: node scripts/front-door-self.mjs status | check | help");
+    fail("usage: node scripts/front-door-self.mjs status | check | help | explore");
 }
 rmSync(dir, { recursive: true, force: true });

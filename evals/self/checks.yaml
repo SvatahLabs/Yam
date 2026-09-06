@@ -449,3 +449,11 @@ checks:
     external:
       source: "cli-vitest"
       name: "help topics (REQ-CLI-8) > the exit-code table carries every code the executor and the commands can return"
+  - id: "front-door.an-exploration-becomes-a-proposal"
+    says: "An agent's exploration through `yam explore` is compiled into a proposal under proposals/ when the agent disconnects, and `yam` names it as the next thing to review."
+    yam:
+      source: "front-door-explore"
+      name: "explore"
+    external:
+      source: "cli-vitest"
+      name: "yam explore (REQ-AGT-5) > an exploration over the MCP surface becomes a proposal the front door names"

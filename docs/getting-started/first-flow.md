@@ -29,7 +29,13 @@ next      yam check
           There is no plan yet.
 ```
 
-## 2. Write the flow
+## 2. Write the flow, or let an agent draft it
+
+An agent can write the first draft: point any MCP host at `yam explore` as its
+server, let the agent drive the application saying what it is trying to do,
+and when it disconnects the exploration becomes a proposal under
+`proposals/<date>/`. `yam` then names it as the next thing to review; move its
+flow into `flows/` when it says what you meant. Or write the flow yourself:
 
 ```
 story (tags=smoke): Sign in

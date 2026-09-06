@@ -104,6 +104,7 @@ Six verbs, in order, and `yam` alone says which one is next:
 ```bash
 yam init                       # start a project here
 yam                            # where you are, and what to do next
+yam explore                    # or let an agent draft the flow; a proposal to review
 yam check                      # read, lint and compile the flows; writes .yam/plan.json
 yam record                     # bind the targets by driving the real application
 yam run                        # replay the plan; the exit code is the verdict

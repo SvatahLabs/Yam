@@ -129,8 +129,21 @@ export interface ProjectState {
   /** Element ids the plan targets that have no binding in the store. */
   readonly unbound: ReadonlyArray<{ readonly id: string; readonly phrase: string }>;
   readonly lastRun?: LastRunState;
+  /** Proposals waiting under `proposals/`, newest first (T14.9, REQ-CLI-10). */
+  readonly proposals: readonly string[];
   /** Why the project could not be read, when it could not. */
   readonly problem?: string;
+}
+
+/** The proposal directories under `proposals/` that hold a flow, newest first. */
+export function proposalsWaiting(root: string): string[] {
+  const dir = join(root, "proposals");
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && readdirSync(join(dir, entry.name)).some((file) => file.endsWith(".flow")))
+    .map((entry) => entry.name)
+    .sort()
+    .reverse();
 }
 
 function verdictOf(summary: Summary): LastRunState["verdict"] {
@@ -196,7 +209,7 @@ function lastRunState(root: string): LastRunState | undefined {
 export async function projectState(dir: string): Promise<ProjectState> {
   const root = findProjectRoot(dir);
   if (root === undefined) {
-    return { flows: { files: 0, stories: 0, errors: 0 }, plan: "missing", unbound: [] };
+    return { flows: { files: 0, stories: 0, errors: 0 }, plan: "missing", unbound: [], proposals: [] };
   }
   let loaded: LoadedProject;
   try {
@@ -207,6 +220,7 @@ export async function projectState(dir: string): Promise<ProjectState> {
       flows: { files: 0, stories: 0, errors: 1 },
       plan: "missing",
       unbound: [],
+      proposals: proposalsWaiting(root),
       problem: error instanceof Error ? error.message : String(error),
     };
   }
@@ -248,6 +262,7 @@ export async function projectState(dir: string): Promise<ProjectState> {
     flows,
     plan,
     unbound,
+    proposals: proposalsWaiting(root),
     ...(lastRunState(root) === undefined ? {} : { lastRun: lastRunState(root)! }),
   };
 }
@@ -263,6 +278,12 @@ export function nextVerb(state: ProjectState): NextStep {
   if (state.project === undefined) return { verb: "yam init", because: "No Yam project here." };
   if (state.problem !== undefined || state.flows.errors > 0) {
     return { verb: "yam check", because: "The project does not read cleanly." };
+  }
+  if (state.proposals.length > 0) {
+    return {
+      verb: `review proposals/${state.proposals[0]}`,
+      because: "An exploration is waiting: read its flow, move it into flows/ when it says what you meant, then `yam check`.",
+    };
   }
   if (state.flows.stories === 0) {
     return { verb: "write a flow", because: "The project has no flows yet. See `yam help flows`." };
@@ -334,6 +355,9 @@ export async function statusCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
           ? ", every target bound"
           : ""),
   );
+  if (state.proposals.length > 0) {
+    lines.push(`proposals ${state.proposals.length} waiting (proposals/${state.proposals[0]})`);
+  }
   const run = state.lastRun;
   lines.push(
     run === undefined

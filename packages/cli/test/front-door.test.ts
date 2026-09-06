@@ -45,15 +45,20 @@ const base: ProjectState = {
   flows: { files: 1, stories: 1, errors: 0 },
   plan: "current",
   unbound: [],
+  proposals: [],
 };
 
 describe("the next verb, in LLD §15.1's order", () => {
   it("no project → init", () => {
-    expect(nextVerb({ flows: { files: 0, stories: 0, errors: 0 }, plan: "missing", unbound: [] }).verb).toBe("yam init");
+    expect(nextVerb({ flows: { files: 0, stories: 0, errors: 0 }, plan: "missing", unbound: [], proposals: [] }).verb).toBe("yam init");
   });
   it("read errors → check", () => {
     expect(nextVerb({ ...base, flows: { files: 1, stories: 1, errors: 2 } }).verb).toBe("yam check");
     expect(nextVerb({ ...base, problem: "bad yaml" }).verb).toBe("yam check");
+  });
+  it("a proposal waiting → review it, before the plan is looked at", () => {
+    const next = nextVerb({ ...base, plan: "missing", proposals: ["2026-09-07T10-00-00"] });
+    expect(next.verb).toBe("review proposals/2026-09-07T10-00-00");
   });
   it("no flows → write a flow", () => {
     expect(nextVerb({ ...base, flows: { files: 0, stories: 0, errors: 0 } }).verb).toBe("write a flow");
