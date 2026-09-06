@@ -114,3 +114,14 @@ export {
  * the kind of thing nobody notices for a month.
  */
 export { TIER2_PROMPT_VERSION, TIER2_SYSTEM_PROMPT } from "./tiers/tier2.js";
+
+/**
+ * `svatah eval self` — the two-sided parity gate, and the one rule about names
+ * that a repository check needs too (T11.5, P11-F2).
+ *
+ * `vitestCaseNames` is how a vitest case is addressed by a catalogue; the check
+ * that asserts the catalogue's names against their sources imports it rather
+ * than restating it, because a naming rule written twice is one that drifts —
+ * which is precisely what the Phase 11 verification found.
+ */
+export { evalSelfCommand, vitestCaseNames } from "./commands/eval-self.js";

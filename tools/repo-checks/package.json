@@ -16,16 +16,17 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@svatah/cli": "workspace:*",
     "@svatah/compiler": "workspace:*",
-    "@svatah/screens": "workspace:*",
     "@svatah/migrate": "workspace:*",
+    "@svatah/screens": "workspace:*",
+    "@svatah/sdk": "workspace:*",
     "@svatah/spec": "workspace:*",
+    "@svatah/ui-tokens": "workspace:*",
     "@types/node": "catalog:",
     "eslint": "catalog:",
-    "typescript": "catalog:",
-    "vitest": "catalog:",
-    "@svatah/sdk": "workspace:*",
     "sample-web": "workspace:*",
-    "@svatah/ui-tokens": "workspace:*"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

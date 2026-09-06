@@ -386,7 +386,42 @@ function walkPlaywright(node: unknown, into: Map<string, SideResult>): void {
   }
 }
 
-/** Vitest's JSON reporter, mapped full test name → verdict. */
+/**
+ * Every name a catalogue may call one vitest case by (P11-F2).
+ *
+ * The catalogue writes a nested case the way a reader writes one — its
+ * ancestors and its own title, joined by `>`:
+ *
+ *   `svatah ui` draws in a pseudo-terminal (T9.4) > opens on the `comp` run …
+ *
+ * Vitest's JSON reporter does *not*: `fullName` is those same parts joined by a
+ * space, and the gate matched on that string alone. Two checks therefore found
+ * nothing, and the report called them "neither side could look" — a shortcoming
+ * of Svatah's, when the external side had run and passed (the Phase 11
+ * verification, F2). LLD §13.9: "the catalogue names an external case by its
+ * ancestor titles and its title, and the runner matches on those rather than on
+ * a joined string."
+ *
+ * So the parts are what is matched, and this builds every spelling of them a
+ * catalogue might reasonably use: the `>` form, the reporter's own `fullName`,
+ * and the bare title for a case with no ancestors. `vitestCaseNames` is exported
+ * because the catalogue test asserts the catalogue's names against exactly
+ * these — a rule written twice is a rule that drifts.
+ */
+export function vitestCaseNames(one: {
+  ancestorTitles?: readonly string[];
+  fullName?: string;
+  title?: string;
+}): string[] {
+  const parts = [...(one.ancestorTitles ?? []), one.title ?? ""].filter((part) => part !== "");
+  const names = new Set<string>();
+  if (parts.length > 0) names.add(parts.join(" > "));
+  if (one.fullName !== undefined && one.fullName !== "") names.add(one.fullName);
+  if (one.title !== undefined && one.title !== "") names.add(one.title);
+  return [...names];
+}
+
+/** Vitest's JSON reporter, mapped case name → verdict. */
 function vitestSource(packageDir: string, files: readonly string[], what: string): SourceSpec {
   return {
     what,
@@ -395,7 +430,7 @@ function vitestSource(packageDir: string, files: readonly string[], what: string
       io.err(`  running ${what}…`);
       const ran = shell("npx", ["vitest", "run", ...files, "--reporter=json"], { cwd });
       const byName = new Map<string, SideResult>();
-      let report: { testResults?: Array<{ assertionResults?: Array<{ fullName?: string; title?: string; status?: string; failureMessages?: string[] }> }> };
+      let report: { testResults?: Array<{ assertionResults?: Array<{ ancestorTitles?: string[]; fullName?: string; title?: string; status?: string; failureMessages?: string[] }> }> };
       try {
         report = JSON.parse(ran.stdout.slice(ran.stdout.indexOf("{"))) as typeof report;
       } catch {
@@ -410,17 +445,15 @@ function vitestSource(packageDir: string, files: readonly string[], what: string
       }
       for (const file of report.testResults ?? []) {
         for (const one of file.assertionResults ?? []) {
-          const name = one.fullName ?? one.title ?? "";
-          if (name === "") continue;
+          const names = vitestCaseNames(one);
+          if (names.length === 0) continue;
           const result =
             one.status === "passed"
               ? ok("the case passed")
               : one.status === "skipped" || one.status === "pending"
                 ? { verdict: "unreachable" as const, evidence: "the case was skipped" }
                 : no((one.failureMessages?.[0] ?? "failed").split("\n")[0]!.slice(0, 300));
-          byName.set(name, result);
-          // Also by its own title, so a catalogue may name either.
-          if (one.title !== undefined) byName.set(one.title, result);
+          for (const name of names) byName.set(name, result);
         }
       }
       return { byName, wallMs: ran.wallMs, command: ran.line };

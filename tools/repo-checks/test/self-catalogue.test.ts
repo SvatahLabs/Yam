@@ -18,6 +18,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { parse as parseYaml } from "yaml";
+import { vitestCaseNames } from "@svatah/cli";
 import { fromRoot } from "../src/repo.js";
 
 interface Side {
@@ -177,5 +178,106 @@ describe("the catalogue and the suites agree (T11.4)", () => {
     );
     const unknown = [...used].filter((one) => !known.has(one as string));
     expect(unknown, `the catalogue names sources the gate has not: ${unknown.join(", ")}`).toEqual([]);
+  });
+});
+
+/* ── every external name is one its source reports (P11-F2) ───────────────── */
+
+/**
+ * The nested case names one vitest file reports, read from its source.
+ *
+ * The Phase 11 verification found two checks the gate said "neither side could
+ * look" about, when the external side had run and passed: the catalogue named
+ * them `describe > it` and the gate matched on vitest's `fullName`, which joins
+ * the same parts with a space. The runner matches on the parts now
+ * (`vitestCaseNames`), and this is the half that says so in a second rather
+ * than in the eight minutes the gate takes — a renamed `it` is a one-sided row
+ * in a published report otherwise, and reads as a shortcoming of Svatah's.
+ *
+ * Read from the source rather than by running it, because running
+ * `tui-pty.test.ts` spawns pseudo-terminals. A `describe` block opens at column
+ * zero and its `it`s are indented, which is what `prettier` guarantees here.
+ */
+function vitestTitles(file: string): string[] {
+  const source = readFileSync(fromRoot(file), "utf8");
+  const out: string[] = [];
+  let ancestor: string | undefined;
+  for (const line of source.split("\n")) {
+    const block = /^describe(?:\.\w+\([^)]*\))?\(\s*(["'`])((?:[^\\]|\\.)*?)\1/.exec(line);
+    if (block !== null) {
+      ancestor = block[2];
+      continue;
+    }
+    const test = /^\s+it(?:\.\w+\([^)]*\))?\(\s*(["'`])((?:[^\\]|\\.)*?)\1/.exec(line);
+    if (test !== null) {
+      out.push(...vitestCaseNames({ ancestorTitles: ancestor === undefined ? [] : [ancestor], title: test[2]! }));
+    }
+  }
+  return out;
+}
+
+/** The story names one `.flow` file declares, which is what a `svatah` side names. */
+function storyNames(file: string): string[] {
+  const source = readFileSync(fromRoot(file), "utf8");
+  const out: string[] = [];
+  for (const match of source.matchAll(/^\s*(?:story|scenario)\s*(?:\([^)]*\))?\s*:\s*(.+)$/gm)) {
+    out.push(match[1]!.trim());
+  }
+  return out;
+}
+
+/** The single name each `commandSource` in the gate answers to. */
+function commandSourceNames(): Map<string, string> {
+  const gate = readFileSync(fromRoot("packages/cli/src/commands/eval-self.ts"), "utf8");
+  const out = new Map<string, string>();
+  for (const match of gate.matchAll(
+    /^\s{4}"?([a-z-]+)"?:\s*commandSource\(\s*\n\s*"([^"]+)"/gm,
+  )) {
+    out.set(match[1]!, match[2]!);
+  }
+  return out;
+}
+
+describe("every external name is one its source reports (P11-F2)", () => {
+  it("names two pseudo-terminal cases the cockpit's spec actually has", () => {
+    const titles = new Set(vitestTitles("tools/repo-checks/test/tui-pty.test.ts"));
+    const named = checks
+      .filter((one) => one.external?.source === "tui-pty")
+      .map((one) => one.external!.name!);
+    expect(named.length, "the two cockpit checks are gone from the catalogue").toBe(2);
+    const invented = named.filter((one) => !titles.has(one));
+    expect(
+      invented,
+      "the catalogue names cockpit cases `tui-pty.test.ts` does not have — " +
+        `it reports:\n  ${[...titles].filter((one) => one.includes(" > ")).join("\n  ")}`,
+    ).toEqual([]);
+  });
+
+  it("names a story the self project has, on every `svatah` side", () => {
+    const stories = new Set([
+      ...storyNames("evals/self/flows/01-ade-screens.flow"),
+      ...storyNames("evals/self/flows/02-ade-screen.flow"),
+      ...storyNames("evals/self/flows/99-ade-lifecycle.flow"),
+    ]);
+    const invented = checks
+      .filter((one) => one.svatah?.source !== undefined)
+      .map((one) => one.svatah!.name!)
+      .filter((one) => !stories.has(one));
+    expect(invented, `the catalogue names stories the self flows do not have: ${invented.join("; ")}`)
+      .toEqual([]);
+  });
+
+  it("names each command source by the one name that source answers to", () => {
+    const byName = commandSourceNames();
+    expect(byName.size, "no command sources found in the gate").toBeGreaterThan(3);
+    const wrong: string[] = [];
+    for (const one of checks) {
+      for (const side of [one.svatah, one.external]) {
+        const expected = side?.source === undefined ? undefined : byName.get(side.source);
+        if (expected === undefined) continue;
+        if (side!.name !== expected) wrong.push(`${one.id}: "${side!.name}" ≠ "${expected}"`);
+      }
+    }
+    expect(wrong, "a command source named by something it does not answer to").toEqual([]);
   });
 });
