@@ -205,8 +205,26 @@ export interface AxPermission {
  * the live measurement twice.
  */
 export interface AxSession {
-  /** False when nothing but `loginwindow` (or nothing at all) owns a window. */
+  /** False when no application in this session can be read through the AX API. */
   readonly usable: boolean;
+  /**
+   * Which of the four answers this is (Draft 2.13 §7.5, P10-F1, P10-F5).
+   *
+   * `usable` alone conflates two things a reader needs apart, and Phase 10 was
+   * lost between them: a gate that could not run because the display is locked,
+   * and a gate that could not run because the *check itself* did not answer.
+   * F5: "a session probe that did not answer in time is `could not tell`, never
+   * a cause."
+   *
+   * - `usable` — an application in this session owns a real window and the
+   *   accessibility API hands it over.
+   * - `locked` — the screen is locked. macOS keeps every application's windows
+   *   and refuses them all to an accessibility client, so a desktop gate here
+   *   reads "no window" for an application whose window is on screen.
+   * - `no-session` — nothing owns a window: no WindowServer, or an SSH login.
+   * - `unknown` — the probe did not answer. Not a cause; a missing answer.
+   */
+  readonly state: "usable" | "locked" | "no-session" | "unknown";
   /** The processes that own at least one on-screen window, by name. */
   readonly owners: readonly string[];
   /** One sentence for `svatah surface doctor` and for the gate's exit message. */
@@ -381,10 +399,95 @@ const PERMISSION_SCRIPT = `function run(argv) {
  */
 const SESSION_SCRIPT = `ObjC.import('ApplicationServices');
 ObjC.import('AppKit');
+ObjC.import('CoreGraphics');
+ObjC.bindFunction('CGSessionCopyCurrentDictionary', ['id', []]);
+
+/**
+ * Is the screen locked (Draft 2.13 §7.5, P10-F1)?
+ *
+ * The window-owner count below cannot tell: macOS keeps every application's
+ * windows while the screen is locked and simply refuses them to an
+ * accessibility client, so a locked machine looks exactly like a busy one that
+ * is running a dozen applications. \`CGSessionCopyCurrentDictionary\` is the
+ * question actually being asked — \`CGSSessionScreenIsLocked\`, and
+ * \`kCGSSessionOnConsoleKey\` for a login that is not at the console at all.
+ */
+function sessionState() {
+  try {
+    var dictionary = $.CGSessionCopyCurrentDictionary();
+    if (dictionary === undefined || dictionary.isNil()) return { known: false };
+    var plain = ObjC.deepUnwrap(dictionary);
+    return {
+      known: true,
+      locked: plain.CGSSessionScreenIsLocked === true || plain.CGSSessionScreenIsLocked === 1,
+      onConsole: plain.kCGSSessionOnConsoleKey === true || plain.kCGSSessionOnConsoleKey === 1
+    };
+  } catch (e) {
+    return { known: false };
+  }
+}
+
+function attribute(element, name) {
+  var out = Ref();
+  if ($.AXUIElementCopyAttributeValue(element, $(name), out) !== 0) return undefined;
+  return out[0];
+}
+
+/**
+ * Does this application own a window the accessibility API will hand over?
+ *
+ * The role is the test, not the count (P10-F1). A locked screen answers
+ * \`AXWindows\` with a one-element list whose element is *the application
+ * itself* — the same cycle LLD §7.5's front-window search already refuses — so
+ * a count of one meant "owns a window" for every application on a machine
+ * nobody could read a window on. Measured on this defect: TextEdit, Notes,
+ * System Settings and the ADE all answered one; none of them answered
+ * \`AXWindow\`.
+ */
+function ownsRealWindow(pid) {
+  var application = $.AXUIElementCreateApplication(pid);
+  var windows = attribute(application, 'AXWindows');
+  if (windows === undefined) return false;
+  var list;
+  try { list = ObjC.castRefToObject(windows); } catch (e) { return false; }
+  for (var w = 0; w < list.count && w < 8; w++) {
+    var role = attribute(list.objectAtIndex(w), 'AXRole');
+    if (role === undefined) continue;
+    try {
+      if (ObjC.unwrap(ObjC.castRefToObject(role)) === 'AXWindow') return true;
+    } catch (e) {
+      // Not a role this client can read; not a window it can drive either.
+    }
+  }
+  return false;
+}
 
 function run(argv) {
+  /*
+   * The lock first, and then nothing else (Draft 2.13 §7.5, P10-F1).
+   *
+   * Not only because it is the authoritative answer: on a locked screen every
+   * \`AXUIElementCopyAttributeValue\` in the scan below is answered by a
+   * WindowServer that has nothing to hand over, and the scan took longer than
+   * this check's five-second budget — so the one host that most needs a real
+   * answer was the one that got "could not tell".
+   */
+  var session = sessionState();
+  if (session.known === true && session.locked === true) {
+    return JSON.stringify({
+      ok: true,
+      asked: 0,
+      owners: [],
+      claimed: [],
+      lockKnown: true,
+      locked: true,
+      onConsole: session.onConsole === true
+    });
+  }
+
   var running = $.NSWorkspace.sharedWorkspace.runningApplications;
   var owners = [];
+  var claimed = [];
   var asked = 0;
   for (var i = 0; i < running.count; i++) {
     var one = running.objectAtIndex(i);
@@ -400,9 +503,20 @@ function run(argv) {
     if ($.AXUIElementCopyAttributeValue(application, $('AXWindows'), out) !== 0) continue;
     var count = 0;
     try { count = ObjC.castRefToObject(out[0]).count; } catch (e) { count = 0; }
-    if (count > 0) owners.push(String(ObjC.unwrap(one.localizedName)));
+    if (count === 0) continue;
+    var name = String(ObjC.unwrap(one.localizedName));
+    claimed.push(name);
+    if (ownsRealWindow(pid)) owners.push(name);
   }
-  return JSON.stringify({ ok: true, asked: asked, owners: owners });
+  return JSON.stringify({
+    ok: true,
+    asked: asked,
+    owners: owners,
+    claimed: claimed,
+    lockKnown: session.known === true,
+    locked: false,
+    onConsole: session.onConsole === true
+  });
 }`;
 
 /**
@@ -886,6 +1000,19 @@ export interface OsascriptBridgeOptions {
 
 const DEFAULT_TIMEOUT_MS = 20_000;
 const PERMISSION_TIMEOUT_MS = 5_000;
+/**
+ * The session check's own budget (Draft 2.13 §7.5, P10-F5).
+ *
+ * It is not the permission check's. The permission check asks one question and
+ * five seconds is generous for it; the session check reads every regular
+ * application's window list and one role per window, which on a machine with a
+ * dozen applications open and a *usable* display is real work — measured at
+ * around six seconds here, so the five it inherited turned "the display is
+ * fine" into "could not tell" exactly when the answer was most useful. Fifteen
+ * seconds is long enough to be an answer and short enough that a `doctor` still
+ * comes back while a person is looking at it.
+ */
+const SESSION_TIMEOUT_MS = 15_000;
 /** LLD §7.5: "the surface's default deadline of 10 s". */
 const WINDOW_DEADLINE_MS = 10_000;
 /**
@@ -1036,41 +1163,121 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
       if (process.platform !== "darwin") {
         return {
           usable: false,
+          state: "no-session",
           owners: [],
           detail: "not macOS",
           advice: "The login-session check is about macOS's WindowServer.",
         };
       }
-      let answer: { ok?: boolean; asked?: number; owners?: string[] };
+      let answer: {
+        ok?: boolean;
+        asked?: number;
+        owners?: string[];
+        claimed?: string[];
+        lockKnown?: boolean;
+        locked?: boolean;
+        onConsole?: boolean;
+      };
       try {
-        answer = (await call(SESSION_SCRIPT, {}, PERMISSION_TIMEOUT_MS)) as typeof answer;
+        answer = (await call(SESSION_SCRIPT, {}, SESSION_TIMEOUT_MS)) as typeof answer;
       } catch (error) {
+        /*
+         * A probe that did not answer is "could not tell" (P10-F5).
+         *
+         * Under load the five-second budget here expired and the gate printed
+         * "this login session cannot show one" beside a doctor line naming nine
+         * applications that did. The state says `unknown` and nothing that
+         * reads it may turn that into a cause.
+         */
         return {
           usable: false,
+          state: "unknown",
           owners: [],
           detail: `could not tell — ${error instanceof AxBridgeError ? error.message : String(error)}`,
           advice:
             "The session check needs the same Accessibility permission the adapter does; run " +
-            "`svatah surface doctor --adapter ax` and grant it.",
+            "`svatah surface doctor --adapter ax` and grant it. Until it answers, this says " +
+            "nothing about the display either way.",
         };
       }
-      const owners = answer.owners ?? [];
-      const others = owners.filter((one) => one !== LOGIN_WINDOW);
-      if (others.length > 0) {
+
+      const raw = answer.owners ?? [];
+      const owners = raw.filter((one) => one !== LOGIN_WINDOW);
+      const claimed = (answer.claimed ?? []).filter((one) => one !== LOGIN_WINDOW);
+
+      /*
+       * The lock first (Draft 2.13 §7.5, P10-F1).
+       *
+       * It is the authoritative answer and it is the one Phase 10 did not have.
+       * A locked screen keeps every application's windows and refuses them all
+       * to an accessibility client, so the owner count says "eleven
+       * applications own a window" on a machine where nothing can be read —
+       * which is how a launch that had worked was reported as an ADE with no
+       * window, four times, over two sessions.
+       */
+      if (answer.lockKnown === true && answer.locked === true) {
+        return {
+          usable: false,
+          state: "locked",
+          owners,
+          detail:
+            "the screen is locked (CGSSessionScreenIsLocked) — macOS keeps every application's " +
+            "windows and shows none of them to an accessibility client",
+          advice:
+            "Unlock the display and run this again. Nothing launched here will be readable " +
+            "until you do: the window is created and on screen, and the accessibility API " +
+            "answers every application's window list with the application itself.",
+        };
+      }
+
+      if (owners.length > 0) {
         return {
           usable: true,
+          state: "usable",
           owners,
-          detail: `${others.length} application(s) own a window: ${others.slice(0, 6).join(", ")}`,
+          detail: `${owners.length} application(s) own a window: ${owners.slice(0, 6).join(", ")}`,
           advice: "This session has a WindowServer and applications can show windows.",
         };
       }
+
+      if (raw.includes(LOGIN_WINDOW)) {
+        return {
+          usable: false,
+          state: "locked",
+          owners,
+          detail: `only ${LOGIN_WINDOW} owns a window — the display is locked`,
+          advice:
+            "Nothing launched here will get a window, so the desktop conformance gate cannot " +
+            "read one and will exit 2. Unlock the display and run it again.",
+        };
+      }
+
+      /*
+       * Windows are claimed and not one of them answers `AXWindow`. That is
+       * what a locked display looks like from the accessibility API — but the
+       * session dictionary could not be read, so this says the shape it saw
+       * rather than naming a cause (P10-F5).
+       */
+      if (claimed.length > 0) {
+        return {
+          usable: false,
+          state: "unknown",
+          owners,
+          detail:
+            `${claimed.length} application(s) claim a window and none of them answers ` +
+            "`AXWindow` — which is what a locked display looks like from the accessibility " +
+            "API, and what a withdrawn Accessibility grant looks like too",
+          advice:
+            "Unlock the display, or check that the program running Svatah still has the " +
+            "Accessibility permission: `svatah surface doctor --adapter ax`.",
+        };
+      }
+
       return {
         usable: false,
+        state: "no-session",
         owners,
-        detail:
-          owners.includes(LOGIN_WINDOW)
-            ? `only ${LOGIN_WINDOW} owns a window — the display is locked`
-            : `no process in this login session owns a window (${answer.asked ?? 0} asked)`,
+        detail: `no process in this login session owns a window (${answer.asked ?? 0} asked)`,
         advice:
           "Nothing launched here will get a window, so the desktop conformance gate cannot " +
           "read one and will exit 2. Unlock the display — or log in at the console rather than " +

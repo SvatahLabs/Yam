@@ -562,18 +562,31 @@ describe("the snapshot cost records what the machine was doing (P8-F2, LLD §7.5
  *
  * The Phase 9 live gate exited 2 on a locked display for both the implementer
  * and the verifier, reporting "showed no window within 60000 ms" — which is
- * true, and points at the ADE. These are the four answers this check has to be
- * able to give, driven through the same fake `run` the rest of this file uses.
+ * true, and points at the ADE.
+ *
+ * Draft 2.13 (P10-F1, P10-F5) makes the answer a *state* rather than a boolean,
+ * because Phase 10 was lost between two of them. The owner count cannot see a
+ * locked screen: macOS keeps every application's windows while the screen is
+ * locked and refuses them all to an accessibility client, answering `AXWindows`
+ * with a one-element list holding the *application* — so eleven applications
+ * "owned a window" on a machine where nothing could be read, and four launches
+ * of an ADE whose window was on screen were reported as an ADE with no window.
+ * `CGSSessionScreenIsLocked` is the question that was actually being asked.
+ *
+ * And a probe that did not answer is `unknown`, never a cause (P10-F5).
  */
-describe("the login-session check (P9-F7, Draft 2.12 §7.5)", () => {
+describe("the login-session check (P9-F7, Draft 2.12 §7.5, Draft 2.13)", () => {
   const macOnly = process.platform === "darwin";
 
   it.runIf(macOnly)("names what owns a window when something does", async () => {
     const { run, calls } = answering(
-      '{"ok":true,"asked":12,"owners":["loginwindow","Svatah ADE","Finder"]}',
+      '{"ok":true,"asked":12,"owners":["loginwindow","Svatah ADE","Finder"],' +
+        '"claimed":["loginwindow","Svatah ADE","Finder"],"lockKnown":true,"locked":false,' +
+        '"onConsole":true}',
     );
     const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
     expect(session.usable).toBe(true);
+    expect(session.state).toBe("usable");
     expect(session.owners).toContain("Svatah ADE");
     expect(session.detail).toContain("Svatah ADE");
 
@@ -583,21 +596,74 @@ describe("the login-session check (P9-F7, Draft 2.12 §7.5)", () => {
     expect(calls[0]!.script).toContain("AXUIElementCreateApplication");
     expect(calls[0]!.script).toContain("AXWindows");
     expect(calls[0]!.script).toContain("runningApplications");
+    // And it asks the session dictionary, which is the only thing that can see
+    // a lock (P10-F1).
+    expect(calls[0]!.script).toContain("CGSessionCopyCurrentDictionary");
+    expect(calls[0]!.script).toContain("CGSSessionScreenIsLocked");
+    // The role is the test for "owns a window", not the count (P10-F1).
+    expect(calls[0]!.script).toContain("'AXWindow'");
+  });
+
+  /**
+   * The finding itself (P10-F1).
+   *
+   * Eleven applications claim a window, the accessibility API hands none of
+   * them over, and the session dictionary says why. Before Draft 2.13 this
+   * answered `usable: true` — because the claim was the test — and the gate
+   * then blamed the ADE for having no window.
+   */
+  it.runIf(macOnly)("says the screen is locked, whatever the owner count claims", async () => {
+    const { run } = answering(
+      '{"ok":true,"asked":14,"owners":[],' +
+        '"claimed":["Notes","Finder","TextEdit","Svatah ADE","System Settings","Passwords",' +
+        '"Keychain Access","ChatGPT","Claude","Screen Sharing","loginwindow"],' +
+        '"lockKnown":true,"locked":true,"onConsole":true}',
+    );
+    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    expect(session.usable).toBe(false);
+    expect(session.state).toBe("locked");
+    expect(session.detail).toContain("the screen is locked");
+    expect(session.detail).toContain("CGSSessionScreenIsLocked");
+    expect(session.detail).toContain("shows none of them");
+    expect(session.advice).toContain("Unlock the display");
   });
 
   it.runIf(macOnly)("says the display is locked when only loginwindow owns one", async () => {
-    const { run } = answering('{"ok":true,"asked":9,"owners":["loginwindow"]}');
+    const { run } = answering(
+      '{"ok":true,"asked":9,"owners":["loginwindow"],"claimed":["loginwindow"],' +
+        '"lockKnown":false,"locked":false}',
+    );
     const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
     expect(session.usable).toBe(false);
+    expect(session.state).toBe("locked");
     expect(session.detail).toContain("loginwindow");
     expect(session.detail).toContain("the display is locked");
     expect(session.advice).toContain("exit 2");
   });
 
-  it.runIf(macOnly)("says so when nothing at all owns a window", async () => {
-    const { run } = answering('{"ok":true,"asked":4,"owners":[]}');
+  /**
+   * Windows are claimed, none can be read, and the session dictionary could not
+   * be asked. That shape has two causes — a locked screen and a withdrawn
+   * grant — so it names neither (P10-F5).
+   */
+  it.runIf(macOnly)("will not guess when it cannot read the session dictionary", async () => {
+    const { run } = answering(
+      '{"ok":true,"asked":14,"owners":[],"claimed":["Finder","Svatah ADE"],"lockKnown":false}',
+    );
     const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
     expect(session.usable).toBe(false);
+    expect(session.state).toBe("unknown");
+    expect(session.detail).toContain("what a locked display looks like");
+    expect(session.detail).toContain("withdrawn Accessibility grant");
+  });
+
+  it.runIf(macOnly)("says so when nothing at all owns a window", async () => {
+    const { run } = answering(
+      '{"ok":true,"asked":4,"owners":[],"claimed":[],"lockKnown":true,"locked":false}',
+    );
+    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    expect(session.usable).toBe(false);
+    expect(session.state).toBe("no-session");
     expect(session.detail).toContain("no process in this login session owns a window");
   });
 
@@ -610,10 +676,21 @@ describe("the login-session check (P9-F7, Draft 2.12 §7.5)", () => {
     });
     const session = await osascriptBridge({ process: "Svatah ADE", run: refused }).session();
     expect(session.usable).toBe(false);
+    // Not a cause (P10-F5): the gate may not print this as a reason.
+    expect(session.state).toBe("unknown");
     expect(session.detail).toContain("could not tell");
     // The check exists to explain an exit code; one that threw would replace an
     // unexplained failure with another.
     expect(session.advice).toContain("surface doctor");
+  });
+
+  it.runIf(macOnly)("calls a timed-out probe `unknown`, never a locked display (P10-F5)", async () => {
+    const slow: Run = async () => ({ code: null, stdout: "", stderr: "", timedOut: true });
+    const session = await osascriptBridge({ process: "Svatah ADE", run: slow }).session();
+    expect(session.state).toBe("unknown");
+    expect(session.detail).toContain("could not tell");
+    expect(session.detail).not.toContain("locked");
+    expect(session.advice).toContain("says nothing about the display either way");
   });
 
   it.runIf(!macOnly)("says it is a macOS question on any other host", async () => {

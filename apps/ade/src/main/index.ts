@@ -36,6 +36,7 @@ import {
   writePreferences,
   type Preferences,
 } from "./preferences.js";
+import { openDebugLog, type DebugLog } from "./debug.js";
 import { startOrAdopt, type RunningService, type ServiceConnection } from "./service.js";
 import {
   describeRuntime,
@@ -53,6 +54,13 @@ let service: RunningService | undefined;
 let preferences: Preferences = DEFAULT_PREFERENCES;
 /** The runtime the last `openProject` chose, for the smoke check's line. */
 let runtime_: NodeRuntime | undefined;
+/**
+ * The window-lifecycle log (Draft 2.13 §13.6, P10-F1).
+ *
+ * Off until `whenReady` has a user-data directory to put it in, and off
+ * entirely without `SVATAH_ADE_DEBUG=1`.
+ */
+let debug: DebugLog = Object.assign((): void => undefined, { enabled: false as const });
 
 /**
  * Where `svatah` is.
@@ -96,7 +104,30 @@ function nodeRuntime(cli: string): NodeRuntime {
   return resolution.runtime;
 }
 
+/**
+ * The `openProject` that has not finished yet (P10-F1).
+ *
+ * A quit while a project is opening used to leave the `svatah serve` behind:
+ * `before-quit` looked at `service`, which is only assigned once the handshake
+ * has come back, saw `undefined`, and let the application go. The desktop gate
+ * quits the ADE as soon as its window is up — about a second after ready, and
+ * two seconds before the service is listening — so that was one orphaned
+ * service per launch, each holding the project's `runs/` directory.
+ */
+let opening: Promise<unknown> | undefined;
+
 async function openProject(directory: string): Promise<ServiceConnection> {
+  const attempt = openProjectNow(directory);
+  opening = attempt;
+  try {
+    return await attempt;
+  } finally {
+    if (opening === attempt) opening = undefined;
+  }
+}
+
+async function openProjectNow(directory: string): Promise<ServiceConnection> {
+  debug("project.opening", { directory, replacing: service !== undefined });
   await closeProject();
 
   const cli = cliPath();
@@ -113,6 +144,12 @@ async function openProject(directory: string): Promise<ServiceConnection> {
   });
 
   service = started;
+  debug("project.opened", {
+    directory,
+    adopted: started.connection.adopted,
+    // Never the URL: it is the token's other half (REQ-NFR-6).
+    port: new URL(started.connection.url).port,
+  });
   preferences = withRecentProject(preferences, resolve(directory));
   writePreferences(preferencesPath(app.getPath("userData")), preferences);
 
@@ -122,10 +159,20 @@ async function openProject(directory: string): Promise<ServiceConnection> {
 async function closeProject(): Promise<void> {
   const current = service;
   service = undefined;
-  await current?.stop();
+  if (current === undefined) return;
+  debug("project.closing", { port: new URL(current.connection.url).port });
+  await current.stop();
+  debug("project.closed");
 }
 
 function createWindow(): void {
+  debug("window.creating", {
+    width: preferences.window.width,
+    height: preferences.window.height,
+    packaged: app.isPackaged,
+    a11y: process.env["SVATAH_A11Y"] ?? "",
+    variant: process.env["SVATAH_A11Y_VARIANT"] ?? "0",
+  });
   window_ = new BrowserWindow({
     width: preferences.window.width,
     height: preferences.window.height,
@@ -164,6 +211,46 @@ function createWindow(): void {
     if (width === undefined || height === undefined) return;
     preferences = { ...preferences, window: { width, height } };
   });
+
+  /*
+   * What the window did, in the application's own words (Draft 2.13 §13.6,
+   * P10-F1).
+   *
+   * The finding this answers was "the packaged ADE runs without a window", and
+   * every probe that produced it was outside the application — a System Events
+   * count, an `AXWindows` read. Neither can tell "Electron never made a window"
+   * apart from "Electron made one and this host will not show it to an
+   * accessibility client", and those two send a reader to opposite ends of the
+   * system. From here on the application says which it was.
+   */
+  const say = (event: string, extra: Record<string, unknown> = {}): void => {
+    const target = window_;
+    debug(event, {
+      ...(target === undefined || target.isDestroyed()
+        ? { window: "gone" }
+        : {
+            id: target.id,
+            visible: target.isVisible(),
+            minimized: target.isMinimized(),
+            bounds: target.getBounds(),
+          }),
+      ...extra,
+    });
+  };
+
+  window_.once("ready-to-show", () => say("window.ready-to-show"));
+  window_.on("show", () => say("window.show"));
+  window_.on("hide", () => say("window.hide"));
+  window_.on("focus", () => say("window.focus"));
+  window_.on("closed", () => debug("window.closed"));
+  window_.webContents.on("did-finish-load", () => say("renderer.did-finish-load"));
+  window_.webContents.on("did-fail-load", (_event, code, description, url) =>
+    say("renderer.did-fail-load", { code, description, url }),
+  );
+  window_.webContents.on("render-process-gone", (_event, details) =>
+    say("renderer.gone", { reason: details.reason, exitCode: details.exitCode }),
+  );
+  window_.on("unresponsive", () => say("window.unresponsive"));
 
   /*
    * `SVATAH_A11Y_VARIANT=1|2` (Draft 2.8 LLD §16, T7.1).
@@ -264,12 +351,21 @@ async function smoke(project: string): Promise<void> {
 /* ── lifecycle ────────────────────────────────────────────────────────────── */
 
 void app.whenReady().then(() => {
+  debug = openDebugLog(app.getPath("userData"));
+  debug("app.ready", {
+    packaged: app.isPackaged,
+    version: process.versions["electron"] ?? "",
+    userData: app.getPath("userData"),
+    execPath: process.execPath,
+  });
+
   preferences = readPreferences(preferencesPath(app.getPath("userData")));
 
   // REQ-ADE-6: the ADE is the desktop conformance target, and an Electron app
   // has to be told to publish its accessibility tree before UIA or AX can see it.
   if (process.env["SVATAH_A11Y"] === "1" || !app.isPackaged) {
     app.setAccessibilitySupportEnabled(true);
+    debug("app.accessibility-enabled");
   }
 
   createWindow();
@@ -327,17 +423,83 @@ void app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
+  debug("app.window-all-closed");
   // Quitting stops the service (T3.6: "killing the app stops the service").
   if (process.platform !== "darwin") app.quit();
 });
 
+/* ── the graceful quit route (Draft 2.13 §13.6, §13.9, P10-F1) ───────────── */
+
+/**
+ * How long the ADE spends putting the project down before it goes anyway.
+ *
+ * `before-quit` refuses the quit, stops the service and quits again. A service
+ * that will not stop used to make that a quit that never happened: the
+ * application stayed up, the caller escalated to a signal, and the point of a
+ * graceful route — that the service is stopped and the preferences are written —
+ * was lost exactly when it mattered.
+ */
+const QUIT_GRACE_MS = 8_000;
+
+let quitting = false;
+
 app.on("before-quit", (event) => {
-  if (service === undefined) return;
+  debug("app.before-quit", {
+    service: service !== undefined,
+    opening: opening !== undefined,
+    quitting,
+  });
+  if ((service === undefined && opening === undefined) || quitting) return;
+  quitting = true;
   event.preventDefault();
-  void closeProject().then(() => {
+
+  const finish = (why: string): void => {
+    debug("app.quit-finishing", { why });
     writePreferences(preferencesPath(app.getPath("userData")), preferences);
     app.quit();
-  });
+  };
+
+  const timer = setTimeout(() => finish("grace-expired"), QUIT_GRACE_MS);
+  timer.unref?.();
+  /*
+   * A project that is still opening is waited for and then closed. Not
+   * abandoned: the service it is starting has no lock file yet, so nothing
+   * that came afterwards could have found it to stop it.
+   */
+  void Promise.resolve(opening)
+    .catch(() => undefined)
+    .then(() => closeProject())
+    .then(
+      () => {
+        clearTimeout(timer);
+        finish("service-stopped");
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        debug("app.quit-service-error", { error: String(error) });
+        finish("service-error");
+      },
+    );
 });
+
+app.on("will-quit", () => debug("app.will-quit"));
+
+/**
+ * A signal is a quit request, not a kill (Draft 2.13 §13.9's `app.quit`:
+ * "a graceful route, then a signal").
+ *
+ * Node's default `SIGTERM` handling ends the process where it stands, so
+ * `before-quit` never ran, the preferences were never written, and the
+ * `svatah serve` the ADE had spawned was left with no parent to stop it — a
+ * `pkill` of the ADE left a service holding a project's `runs/` directory. The
+ * signal runs the same route the menu's Quit does; a caller that means "die
+ * now" still has `SIGKILL`, which nothing can catch and nothing should.
+ */
+for (const signal of ["SIGTERM", "SIGINT", "SIGHUP"] as const) {
+  process.on(signal, () => {
+    debug("app.signal", { signal });
+    app.quit();
+  });
+}
 
 export { cliPath, openProject, closeProject };

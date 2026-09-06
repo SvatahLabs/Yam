@@ -75,7 +75,21 @@ export async function createService(options: ServeOptions): Promise<RunningServi
   const token = options.token ?? randomBytes(24).toString("base64url");
   const events = new EventBus();
 
-  const fastify = Fastify({ logger: options.logger ?? false });
+  const fastify = Fastify({
+    logger: options.logger ?? false,
+    /*
+     * A close is a close (P10-F1).
+     *
+     * `/events` is a server-sent-event stream and the ADE holds one open for as
+     * long as a project is open, so `fastify.close()` waited for a response
+     * that is never going to end: every ADE quit took the five seconds its
+     * child-stop escalation allows before the `SIGKILL`, and a `svatah serve`
+     * stopped from a terminal took the same. The streams are ended by the
+     * shutdown hook below; this is what stops an idle keep-alive socket from
+     * holding the listener open after them.
+     */
+    forceCloseConnections: true,
+  });
   await fastify.register(websocket);
 
   /* ── the token, on every route but the two a client needs before it has one ── */
@@ -960,11 +974,33 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     return { tools, invocations };
   });
 
+  /**
+   * The event streams this service has open, so a close can end them (P10-F1).
+   *
+   * `/events/sse` hijacks the socket and never ends its response, which is
+   * exactly right for a stream and exactly wrong for `fastify.close()`: it
+   * waited for a body that was never going to finish, so stopping the service
+   * took the five seconds the ADE's child-stop allows before its `SIGKILL` —
+   * on every quit, and after a `Ctrl-C` in a terminal too.
+   */
+  const openStreams = new Set<() => void>();
+
+  fastify.addHook("onClose", async () => {
+    for (const end of [...openStreams]) end();
+    openStreams.clear();
+  });
+
   fastify.get("/events", { websocket: true }, (socket) => {
     const unsubscribe = events.subscribe((event: ServiceEvent) => {
       socket.send(JSON.stringify(event));
     });
-    socket.on("close", unsubscribe);
+    const end = (): void => {
+      openStreams.delete(end);
+      unsubscribe();
+      socket.close();
+    };
+    openStreams.add(end);
+    socket.on("close", end);
   });
 
   fastify.get("/events/sse", (request, reply) => {
@@ -987,10 +1023,13 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     const unsubscribe = events.subscribe((event) => {
       reply.raw.write(`event: ${event.kind}\ndata: ${JSON.stringify(event)}\n\n`);
     });
-    request.raw.on("close", () => {
+    const end = (): void => {
+      openStreams.delete(end);
       unsubscribe();
       reply.raw.end();
-    });
+    };
+    openStreams.add(end);
+    request.raw.on("close", end);
   });
 
   await fastify.listen({ host: "127.0.0.1", port: options.port ?? 0 });

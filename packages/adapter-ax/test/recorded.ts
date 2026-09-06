@@ -177,6 +177,7 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
       return (
         options.session ?? {
           usable: true,
+          state: "usable",
           owners: ["Svatah ADE"],
           detail: "1 application(s) own a window: Svatah ADE",
           advice: "This session has a WindowServer and applications can show windows.",

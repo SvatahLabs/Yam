@@ -59,6 +59,8 @@ const report = resolve(option("report", join(ROOT, "reports", `adapter-${adapter
 const project = option("project", join(ROOT, "evals", "fixtures"));
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 const PROCESS_NAME = "Svatah ADE";
+/** What LaunchServices calls this build; the graceful quit route addresses it. */
+const BUNDLE_ID = process.env["SVATAH_ADE_BUNDLE_ID"] ?? "com.electron.svatah-ade";
 /** LLD §15: "polls for the ADE window up to 60 s". */
 const WINDOW_TIMEOUT_MS = Number(option("window-timeout-ms", "60000"));
 
@@ -136,7 +138,7 @@ if (doctor.status !== 0) {
  * did not answer. A gate that guessed "locked" would replace one wrong
  * explanation with another.
  */
-function lockedDisplay() {
+function sessionCheck() {
   if (adapter !== "ax") return undefined;
   const asked = spawnSync(
     process.execPath,
@@ -145,13 +147,29 @@ function lockedDisplay() {
   );
   try {
     const parsed = JSON.parse(asked.stdout ?? "{}");
-    const session = (parsed.checks ?? []).find(
-      (one) => one.adapter === "ax" && one.name === "session",
-    );
-    return session === undefined || session.ok === true ? undefined : session;
+    return (parsed.checks ?? []).find((one) => one.adapter === "ax" && one.name === "session");
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Why there was no window — but only when this can actually say (P10-F5).
+ *
+ * > a session probe that did not answer in time is "could not tell", never a
+ * > cause.
+ *
+ * The Phase 10 gate printed "this login session cannot show one" beside a
+ * doctor line naming nine applications that did, because the probe had timed
+ * out at five seconds under load and `ok: false` was read as "locked". A cause
+ * is named for `locked` and `no-session` and for nothing else; `unknown` is
+ * reported as an unanswered probe, which sends a reader to run the probe again
+ * rather than to unlock a display that was never locked.
+ */
+function lockedDisplay() {
+  const session = sessionCheck();
+  if (session === undefined) return undefined;
+  return session.state === "locked" || session.state === "no-session" ? session : undefined;
 }
 
 /* ── 2. the ADE ───────────────────────────────────────────────────────────── */
@@ -173,6 +191,33 @@ if (!existsSync(app)) {
 }
 
 /**
+ * "Does this application own a window an accessibility client can read?"
+ *
+ * One JXA expression, no System Events and no Apple events: `NSWorkspace` for
+ * the processes with that name, `AXUIElementCopyAttributeValue` for their
+ * window lists, and `AXRole === 'AXWindow'` for the answer. An application
+ * whose list holds *itself* — which is what macOS returns while the screen is
+ * locked — answers `no`, and `lockedDisplay()` is then what says why.
+ */
+const REAL_WINDOW_SCRIPT = [
+  "ObjC.import('ApplicationServices');ObjC.import('AppKit');",
+  "function attr(e,n){var o=Ref();",
+  "if($.AXUIElementCopyAttributeValue(e,$(n),o)!==0)return undefined;return o[0];}",
+  "function run(argv){",
+  "var apps=$.NSWorkspace.sharedWorkspace.runningApplications;",
+  "for(var i=0;i<apps.count;i++){var a=apps.objectAtIndex(i);",
+  "if(ObjC.unwrap(a.localizedName)!==argv[0])continue;",
+  "var pid=parseInt(String(a.processIdentifier),10);if(!(pid>0))continue;",
+  "var el=$.AXUIElementCreateApplication(pid);var w=attr(el,'AXWindows');",
+  "if(w===undefined)continue;var list;",
+  "try{list=ObjC.castRefToObject(w);}catch(e){continue;}",
+  "for(var k=0;k<list.count&&k<8;k++){var r=attr(list.objectAtIndex(k),'AXRole');",
+  "if(r===undefined)continue;",
+  "try{if(ObjC.unwrap(ObjC.castRefToObject(r))==='AXWindow')return 'yes';}catch(e){}}}",
+  "return 'no';}",
+].join("");
+
+/**
  * Does the application have a window yet?
  *
  * Asked of the OS rather than of Svatah, and deliberately not through the
@@ -182,12 +227,22 @@ if (!existsSync(app)) {
  */
 function hasWindow() {
   if (process.platform === "darwin") {
+    /*
+     * The accessibility API directly, not System Events (P10-F1).
+     *
+     * `count windows` over an Apple event asks System Events to do the same
+     * accessibility read this does, one process away, under a second
+     * permission — and it answers `0` for *every* application on a host where
+     * the read is refused, which is indistinguishable from "the ADE has no
+     * window yet". The role is the test, because a locked screen answers
+     * `AXWindows` with a one-element list holding the application itself.
+     */
     const probe = spawnSync(
       "osascript",
-      ["-e", `tell application "System Events" to tell process "${PROCESS_NAME}" to count windows`],
-      { encoding: "utf8", timeout: 10_000 },
+      ["-l", "JavaScript", "-e", REAL_WINDOW_SCRIPT, PROCESS_NAME],
+      { encoding: "utf8", timeout: 15_000 },
     );
-    return probe.status === 0 && Number((probe.stdout ?? "0").trim()) > 0;
+    return probe.status === 0 && (probe.stdout ?? "").trim() === "yes";
   }
   const probe = spawnSync(
     "powershell.exe",
@@ -240,15 +295,25 @@ function hasProject() {
       "ObjC.import('ApplicationServices');ObjC.import('AppKit');" +
         "function attr(e,n){const o=Ref();" +
         "if($.AXUIElementCopyAttributeValue(e,$(n),o)!==0)return undefined;return o[0];}" +
+        "function role(e){const r=attr(e,'AXRole');if(r===undefined)return '';" +
+        "try{return ObjC.unwrap(ObjC.castRefToObject(r));}catch(x){return '';}}" +
+        /*
+         * The window is the one whose role is `AXWindow` (P10-F1). Taking
+         * `AXWindows[0]` walked the *application* element on a locked screen —
+         * six thousand menu items, no `rail-flows`, and a report that said the
+         * project had not opened.
+         */
         "function run(argv){const apps=$.NSWorkspace.sharedWorkspace.runningApplications;" +
-        "let pid=-1;for(let i=0;i<apps.count;i++){const a=apps.objectAtIndex(i);" +
-        "if(ObjC.unwrap(a.localizedName)===argv[0]&&a.processIdentifier>0){" +
+        "let win=undefined;for(let i=0;i<apps.count&&win===undefined;i++){" +
+        "const a=apps.objectAtIndex(i);" +
+        "if(ObjC.unwrap(a.localizedName)!==argv[0]||!(a.processIdentifier>0))continue;" +
         "const el=$.AXUIElementCreateApplication(a.processIdentifier);" +
         "const w=attr(el,'AXWindows');if(w===undefined)continue;" +
-        "if(ObjC.castRefToObject(w).count>0){pid=a.processIdentifier;break;}}}" +
-        "if(pid<0)return 'no';const el=$.AXUIElementCreateApplication(pid);" +
-        "const w=ObjC.castRefToObject(attr(el,'AXWindows')).objectAtIndex(0);" +
-        "let found='no';const stack=[w];let seen=0;" +
+        "let list;try{list=ObjC.castRefToObject(w);}catch(x){continue;}" +
+        "for(let k=0;k<list.count&&k<8;k++){const c=list.objectAtIndex(k);" +
+        "if(role(c)==='AXWindow'){win=c;break;}}}" +
+        "if(win===undefined)return 'no';" +
+        "let found='no';const stack=[win];let seen=0;" +
         "while(stack.length>0&&seen<4000){const e=stack.pop();seen++;" +
         "const id=attr(e,'AXDOMIdentifier');" +
         "if(id!==undefined&&ObjC.unwrap(ObjC.castRefToObject(id))==='rail-flows'){found='yes';break;}" +
@@ -276,7 +341,48 @@ function launchEnvironment(variant) {
     SVATAH_CLI: cli,
     SVATAH_ADE_SMOKE: "",
     SVATAH_ADE_PROJECT: project,
+    /*
+     * The window-lifecycle log (Draft 2.13 §13.6, P10-F1).
+     *
+     * Always on for a gate launch. The gate is the one caller that regularly
+     * has to tell "Electron never made a window" apart from "Electron made one
+     * and this host will not show it", and the log is the only thing that can:
+     * every probe the gate has is outside the application.
+     */
+    SVATAH_ADE_DEBUG: "1",
   };
+}
+
+/**
+ * The ADE's graceful quit route on this platform (Draft 2.13 §13.6, §13.9).
+ *
+ * > the gate stops an instance through a graceful quit route before it signals
+ *
+ * On macOS an Apple-event `quit`, which Electron delivers as `before-quit`, so
+ * the ADE stops the `svatah serve` it spawned and writes its preferences. On
+ * Windows, `CloseMainWindow`. Both are best-effort and neither is waited on
+ * here: `stop()` polls for the process to be gone and escalates on its own
+ * clock, which is what makes the route an *addition* to the signal rather than
+ * a new way for teardown to hang.
+ */
+function requestQuit() {
+  if (process.platform === "darwin") {
+    return spawnSync(
+      "osascript",
+      ["-e", `tell application id "${BUNDLE_ID}" to quit`],
+      { encoding: "utf8", timeout: 10_000 },
+    );
+  }
+  return spawnSync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-Command",
+      `Get-Process -Name '${PROCESS_NAME}' -ErrorAction SilentlyContinue | ` +
+        "ForEach-Object { $_.CloseMainWindow() | Out-Null }",
+    ],
+    { encoding: "utf8", timeout: 20_000 },
+  );
 }
 
 /**
@@ -375,6 +481,8 @@ function processIds() {
 
 /** How long `stop()` waits for the previous launch to finish exiting. */
 const TEARDOWN_TIMEOUT_MS = Number(option("teardown-timeout-ms", "30000"));
+/** How long the graceful quit route is given before a signal (Draft 2.13). */
+const GRACEFUL_QUIT_MS = Number(option("graceful-quit-ms", "10000"));
 
 /**
  * Stop the ADE, and do not come back until it is gone (P8-F1, Draft 2.10 §7.5).
@@ -399,20 +507,49 @@ const stop = () => {
     // Already gone.
   }
   running = undefined;
+
+  /*
+   * The graceful route first (Draft 2.13 §13.6, P10-F1).
+   *
+   * A `pkill` is a `SIGTERM`, and Node's default handling of one ends the main
+   * process where it stands: `before-quit` never ran, so the `svatah serve` the
+   * ADE had spawned was left with no parent to stop it and went on holding the
+   * project's `runs/` directory for the next variant. The ADE runs its own quit
+   * on a signal now, and this asks it to quit before sending one at all.
+   */
+  const startedAt = Date.now();
+  if (processIds().length > 0) requestQuit();
+
+  let remaining = processIds();
+  const graceUntil = Date.now() + GRACEFUL_QUIT_MS;
+  while (remaining.length > 0 && Date.now() < graceUntil) {
+    spawnSync(process.execPath, ["-e", "setTimeout(() => {}, 250)"], { encoding: "utf8" });
+    remaining = processIds();
+  }
+  if (remaining.length === 0) {
+    process.stderr.write(
+      `the previous launch quit gracefully after ${Date.now() - startedAt} ms\n`,
+    );
+    return;
+  }
+
   if (process.platform === "darwin") {
     // Started by LaunchServices, so there is no child to signal. The executable
     // path is unique to this checkout's packaged build.
     spawnSync("pkill", ["-f", app], { encoding: "utf8" });
   }
 
-  const startedAt = Date.now();
-  let remaining = processIds();
+  // The signal's own clock: the graceful route's ten seconds are not the
+  // signal's thirty, and folding them together escalated to SIGKILL five
+  // seconds after SIGTERM was sent.
+  const signalledAt = Date.now();
+  remaining = processIds();
   let escalated = false;
-  while (remaining.length > 0 && Date.now() - startedAt < TEARDOWN_TIMEOUT_MS) {
+  while (remaining.length > 0 && Date.now() - signalledAt < TEARDOWN_TIMEOUT_MS) {
     // 250 ms, spent in another process rather than in a busy loop.
     spawnSync(process.execPath, ["-e", "setTimeout(() => {}, 250)"], { encoding: "utf8" });
     remaining = processIds();
-    if (!escalated && remaining.length > 0 && Date.now() - startedAt > TEARDOWN_TIMEOUT_MS / 2) {
+    if (!escalated && remaining.length > 0 && Date.now() - signalledAt > TEARDOWN_TIMEOUT_MS / 2) {
       escalated = true;
       if (process.platform === "darwin") spawnSync("pkill", ["-9", "-f", app], { encoding: "utf8" });
       else for (const pid of remaining) spawnSync("taskkill", ["/PID", String(pid), "/F"]);

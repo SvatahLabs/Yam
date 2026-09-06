@@ -166,6 +166,21 @@ export async function startOrAdopt(options: StartOptions): Promise<RunningServic
     },
   });
 
+  /*
+   * A service whose parent died is a service nobody will stop — and it is
+   * *most* likely to happen before the handshake, not after (P10-F1).
+   *
+   * The ADE launched by the desktop gate is quit as soon as its window is up,
+   * which can be a second after `app.ready` and two seconds before
+   * `svatah serve` finishes starting. Registering this after `await` left the
+   * half-started service with no parent and no lock file to find it by: one
+   * orphan per launch loop, holding the fixtures project's `runs/` directory.
+   */
+  process.once("exit", () => {
+    rmSync(lockPath, { force: true });
+    child.kill("SIGTERM");
+  });
+
   const handshake = await waitForHandshake(child, options);
   writeLock(lockPath, { ...handshake, project: resolve(options.project), pid: child.pid ?? -1 });
 
@@ -176,12 +191,6 @@ export async function startOrAdopt(options: StartOptions): Promise<RunningServic
     rmSync(lockPath, { force: true });
     await stopChild(child);
   };
-
-  // A service whose parent died is a service nobody will stop.
-  process.once("exit", () => {
-    rmSync(lockPath, { force: true });
-    child.kill("SIGTERM");
-  });
 
   return {
     connection: { ...handshake, project: options.project, adopted: false },

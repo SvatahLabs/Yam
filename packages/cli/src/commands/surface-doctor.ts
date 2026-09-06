@@ -45,6 +45,15 @@ export interface SurfaceCheck {
   readonly detail: string;
   /** What to do about it, written for whoever ran the command. */
   readonly fix?: string;
+  /**
+   * A machine-readable answer for the checks that have more than two (P10-F5).
+   *
+   * `ax/session` is the one: `usable`, `locked`, `no-session` and `unknown` are
+   * four different things and `ok: false` is the same word for the last three.
+   * The desktop gate reads this to decide whether it may name a cause at all —
+   * "the probe did not answer" is not one.
+   */
+  readonly state?: string;
 }
 
 export async function surfaceDoctorCommand(
@@ -160,6 +169,7 @@ async function axChecks(): Promise<SurfaceCheck[]> {
       name: "session",
       ok: session.usable,
       advisory: true,
+      state: session.state,
       detail: session.detail,
       fix: session.advice,
     },
