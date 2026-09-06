@@ -623,3 +623,65 @@ empty `runs/`.** `ade.result` checks the screen's own count and what goes with
 it, which is true at every state, but the branch that asserts a table of runs
 has not been exercised: closing that needs the gate to make a real run against
 `apps/sample-web` first.
+
+---
+
+## Post-verification corrections (P8-F1..F4, done on branch `phase-9`)
+
+The adversarial verification of this phase
+(`docs/spec/progress/phase-8-verification.md`, 8.9/10, accepted with
+corrections) is recorded here so the Phase 8 record is complete. The work
+itself is on `phase-9`, and the commands that demonstrate each correction are
+in `docs/spec/progress/phase-9.md`.
+
+### What the verifier found that this file did not say
+
+- **The packaged ADE was opened by hand and it worked.** Launched through
+  LaunchServices with no environment at all, the Recent-list button pressed
+  through the adapter's own `AXPress`, the project screen showed its tabs. With
+  `PATH` emptied the smoke check printed the three-place alert and opened
+  nothing.
+- **The screenshot this file could not take, was taken (K1 is closed).** The
+  verifier's terminal has the Screen Recording grant; `bridge.screenshot()`
+  against the packaged ADE's project screen wrote a 537,293-byte image showing
+  the fixtures project, its eleven tabs, three diagnostics and twenty-two
+  stories. K1 above stands as the record of what *this* host could not do; it is
+  no longer an open gap for the project.
+- **The macOS gate is green live, and load-sensitive (K7 confirmed).** Three
+  runs on the verifier's machine: two at load average about seven passed 9 cases
+  across the three variants, with the project screen read at 589 nodes in
+  0.95–1.03 s (1.6–1.7 ms per node); one, started while the test suite was still
+  unwinding at load average eleven to sixteen, failed both healing cases at
+  variant 1 with `no-window`. That failure is not the load alone — it is F1
+  below.
+
+### The four corrections
+
+**P8-F1 — the gate can address a still-exiting ADE.** Between variants the gate
+stopped the ADE with `pkill -f <app>` and launched the next with `open -n`, and
+the perform script addressed the process by name. `pkill` returns when the
+signal is delivered, not when the process is gone, so
+`applicationProcesses.byName("Svatah ADE")` could answer the dying instance,
+which owns no window. Draft 2.10 §7.5: the gate waits until no process of the
+previous launch remains, and the bridge addresses the one that owns a window.
+
+**P8-F2 — the cost line said nothing about load.** 1.6 ms per node at load
+average seven and 29.6 ms per node beside a full test run are the same bridge
+reading the same window; each number is honest and neither is comparable.
+Draft 2.10 §7.5: the cost line records the one-minute load average and the CPU
+count, and a read that exceeds the deadline is retried once by the gate, which
+says so in the report.
+
+**P8-F3 — three unnamed buttons on the ADE's Project screen.** The bridge listed
+three `AXButton` nodes with no title before "Open a project…". They are named
+now, the desktop suite's snapshot case fails on an unnamed interactive control,
+and the screens Phase 9 builds satisfy the rule from the start.
+
+**P8-F4 — this section.** The Phase 8 record now carries the verifier's results
+and the four corrections rather than ending at the gaps this session knew about.
+
+### Not corrections, carried forward
+
+- **F5 — the compiler golden set is 222 against REQ-COMP-9's 300.** K5 above;
+  inherited, and Phase 11's T11.2.
+- **The Windows UIA gate is still unrun.** K2 above; Phase 11's T11.6.
