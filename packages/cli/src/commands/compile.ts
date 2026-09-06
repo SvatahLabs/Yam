@@ -20,6 +20,7 @@ import { formatDiagnostic, type Diagnostic } from "@svatah/yam-spec";
 import { boolOption, stringOption, type ParsedArgs } from "@svatah/yam-bindings-cli";
 import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import { compileProjectWithTiers, loadProject, type LoadedProject } from "../project.js";
+import { writePlanInputs } from "../front-door.js";
 import { isDigestMismatch, registerModelTiers } from "../tiers/register.js";
 import type { CommandIo } from "@svatah/yam-bindings-cli";
 
@@ -113,7 +114,9 @@ export async function compileCommand(args: ParsedArgs, io: CommandIo): Promise<E
   const compiled = attempt.result;
   const diagnostics = [...loaded.diagnostics, ...compiled.diagnostics];
 
-  const out = stringOption(args, "out") ?? join(loaded.config.run.outputDir, "..", ".yam", "plan.json");
+  // Under the project, not under the working directory: a plan written beside
+  // wherever `yam compile <dir>` was typed is a plan nothing else can find (T14.1).
+  const out = stringOption(args, "out") ?? join(loaded.root, ".yam", "plan.json");
   const errors = diagnostics.filter((d) => d.severity === "error");
 
   if (boolOption(args, "json")) {
@@ -135,6 +138,7 @@ export async function compileCommand(args: ParsedArgs, io: CommandIo): Promise<E
 
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, renderPlan(compiled.plan), "utf8");
+  writePlanInputs(loaded);
   if (!boolOption(args, "json")) {
     io.err(
       `wrote ${out} — ${compiled.plan.stories.length} stories, ` +

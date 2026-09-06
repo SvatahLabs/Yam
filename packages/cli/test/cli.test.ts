@@ -38,10 +38,15 @@ describe("argument parsing", () => {
 });
 
 describe("the command table (LLD §15)", () => {
-  it("prints usage and exits 64 when given nothing", async () => {
+  it("says where you are and exits 0 when given nothing (REQ-CLI-1, Draft 2.20)", async () => {
+    // Outside a project (this package has no yam.config.yaml above it) the
+    // answer is how to start one; usage is what `help` prints.
     const io = capture();
-    expect(await main([], io)).toBe(EXIT.usage);
-    expect(io.stdout.join("\n")).toContain("yam surface conform");
+    expect(await main([], io)).toBe(EXIT.ok);
+    const text = io.stdout.join("\n");
+    expect(text).toContain("No Yam project here.");
+    expect(text).toContain("yam init");
+    expect(text).not.toContain("yam surface conform");
   });
 
   it("prints usage and exits 0 for `help`", async () => {

@@ -243,9 +243,16 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
   const args: ParsedArgs = parseArgs(argv);
   const command = args.command[0];
 
-  if (command === undefined || command === "help" || args.options["help"] !== undefined) {
+  /*
+   * The front door (T14.1, REQ-CLI-1): `yam` alone says where you are and what
+   * to do next, and exits 0. Usage is what `yam help` and `--help` print.
+   */
+  if (command === undefined || command === "status") {
+    return await (await import("./front-door.js")).statusCommand(args, io);
+  }
+  if (command === "help" || args.options["help"] !== undefined) {
     io.out(USAGE);
-    return command === undefined ? EXIT.usage : EXIT.ok;
+    return EXIT.ok;
   }
 
   /*

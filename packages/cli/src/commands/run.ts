@@ -56,6 +56,7 @@ import { registerAllAdapters } from "../adapters.js";
 import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import { ConfigError } from "../config-error.js";
 import { compileProject, loadProject } from "../project.js";
+import { writeLastRun, writePlanInputs } from "../front-door.js";
 import { report } from "./compile.js";
 import type { CommandIo } from "@svatah/yam-bindings-cli";
 
@@ -95,6 +96,9 @@ export async function runCommand(args: ParsedArgs, io: CommandIo): Promise<ExitC
   const planPath = resolve(root, ".yam", "plan.json");
   mkdirSync(resolve(root, ".yam"), { recursive: true });
   writeFileSync(planPath, `${canonicalJson(compiled.plan)}\n`, "utf8");
+  writePlanInputs(loaded);
+  // So `yam heal` and `yam` can find this run without an id (REQ-CLI-6).
+  writeLastRun(loaded.root, { runId, directory: join(outputDir, runId) });
 
   if (host === "playwright") {
     return await runUnderPlaywright(
