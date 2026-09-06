@@ -226,10 +226,35 @@ function inPty(
   return `${result.stdout ?? ""}${result.stderr ?? ""}`;
 }
 
+/**
+ * A backspace erases the character before it, so a capture read as text has to
+ * honour it (P11).
+ *
+ * The pty echoes the EOF it is handed as the two characters `^D` and the
+ * terminal then writes two backspaces to take them back — so a capture that
+ * kept the backspaces as characters kept the `^D` too. It lands before the
+ * first frame on an idle machine and *inside* one on a loaded machine, which is
+ * how a correctly truncated hundred-column header was once measured at a
+ * hundred and two.
+ */
+const backspaced = (text: string): string => {
+  const out: string[] = [];
+  for (const character of text) {
+    // A backspace at the left margin does nothing in a terminal, and must not
+    // eat the newline before it here either.
+    if (character === "\b") {
+      if (out.length > 0 && out[out.length - 1] !== "\n") out.pop();
+    } else out.push(character);
+  }
+  return out.join("");
+};
+
 /** ANSI out, so an assertion is about words rather than about colour codes. */
 const plain = (text: string): string =>
-  // eslint-disable-next-line no-control-regex
-  text.replace(/\u001b\[[0-9;?]*[A-Za-z]/g, "").replace(/\u001b[()][A-Z0-9]/g, "");
+  backspaced(
+    // eslint-disable-next-line no-control-regex
+    text.replace(/\u001b\[[0-9;?]*[A-Za-z]/g, "").replace(/\u001b[()][A-Z0-9]/g, ""),
+  );
 
 describe.runIf(hasScript)("`svatah ui` draws in a pseudo-terminal (T9.4)", () => {
   it("opens on the `comp` run and draws its four panes", () => {
@@ -312,14 +337,16 @@ describe.runIf(hasScript)("`svatah ui` draws in a pseudo-terminal (T9.4)", () =>
      * The pane borders are the check: a box that ran off the terminal is a line
      * longer than the terminal is wide.
      */
-    const widest = Math.max(
-      ...captured
-        .split("\n")
-        .map((one) => one.replace(/\r/g, "").trimEnd().length),
-    );
-    expect(widest, `a line of ${widest} characters on a 100-column terminal`).toBeLessThanOrEqual(
-      100,
-    );
+    const lines = captured.split("\n").map((one) => one.replace(/\r/g, "").trimEnd());
+    const widest = Math.max(...lines.map((one) => one.length));
+    // A failure has to say *which* line ran over, or the next reader measures
+    // it again from nothing: this one ran over once under a loaded `pnpm -r
+    // test` and the number alone said nothing about where it came from.
+    const over = lines.filter((one) => one.length > 100).map((one) => `${one.length}: ${one}`);
+    expect(
+      widest,
+      `a line of ${widest} characters on a 100-column terminal:\n${over.join("\n")}`,
+    ).toBeLessThanOrEqual(100);
   }, 60_000);
 
   /*

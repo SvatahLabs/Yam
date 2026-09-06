@@ -186,14 +186,15 @@ describe("docs/flow-language.md (REQ-LANG-12)", () => {
     expect(doc).toContain(`\`${kind}\``);
   });
 
-  it("documents patterns 1 through 30, each with at least two examples", () => {
-    for (let pattern = 1; pattern <= 30; pattern += 1) {
+  it("documents patterns 1 through 31, each with at least two examples", () => {
+    // 31 since T11.2 gave the language `Quit the app`.
+    for (let pattern = 1; pattern <= 31; pattern += 1) {
       expect(doc, `no section for pattern ${pattern}`).toMatch(
         new RegExp(`^### Pattern ${pattern} — `, "m"),
       );
     }
     const sections = doc.split(/^### Pattern /m).slice(1);
-    expect(sections).toHaveLength(30);
+    expect(sections).toHaveLength(31);
     for (const section of sections) {
       const heading = section.split("\n")[0] ?? "";
       // Two "compiles to:" blocks per pattern is the two-examples requirement.

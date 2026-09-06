@@ -1,27 +1,28 @@
-^Dloading…
-svatah ui 100×30 · inspector collapsed at 100 cols (120 to sit beside); 3 opens it  /var/folders/x5…
+loading…
+svatah ui 100×30  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-capture-2LBoaA   http:…
 ┌───────────────────────┐┌─────────────────────────────────────────────────────────────────────────┐
 │ 1 Flows               ││ 2 flows/guards-and-compensation.flow                                    │
-│ booking-… · not run   ││   1   // Guards and compensation, end to end (T5.4, REQ-LANG-14, REQ…   │
-│ booking-… · not run   ││   2   //                                                                │
-│ executio… · not run   ││   3   // `booking-compensation.flow` beside this one is the *policy*…   │
-│ guards-a… ! aborted   ││   4   // faithful sibling of `execution.flow`. This file is the one …   │
-│ natural_… · not run   ││   5   // the two guarantees T5.4 is about, on the smallest thing tha…   │
-│ simple.f… · not run   ││   6   //                                                                │
-│ svatah.f… · not run   ││   7   //   * a guard whose predicate is false never performs its ste…   │
+│ booking-c… not run    ││   1   // Guards and compensation, end to end (T5.4, REQ-LANG-14, REQ-A… │
+│ booking-w… not run    ││   2   //                                                                │
+│ execution… not run    ││   3   // `booking-compensation.flow` beside this one is the *policy* s… │
+│ aborted    run 14 s…  ││   4   // faithful sibling of `execution.flow`. This file is the one th… │
+│ natural_l… not run    ││   5   // the two guarantees T5.4 is about, on the smallest thing that … │
+│ simple.fl… not run    ││   6   //                                                                │
+│ svatah.fl… not run    ││   7   //   * a guard whose predicate is false never performs its step,… │
 └───────────────────────┘│   8   //     log has no surface call for it (REQ-AUTO-1);               │
-                         │   9   //   * a failing story runs its compensating story with the fa…   │
-                         │  10   //     scope, and the run ends `aborted` with the policy recor…   │
+                         │   9   //   * a failing story runs its compensating story with the fail… │
+                         │  10   //     scope, and the run ends `aborted` with the policy recorde… │
                          │  11                                                                     │
-                         │  12   // ── guards ─────────────────────────────────────────────────…   │
+                         │  12   // ── guards ───────────────────────────────────────────────────… │
                          │  13   //                                                                │
-                         │  14   // Three guards, one of each subject the IR has: the page, the…   │
-                         │  15   // step's own element. The two that are false must leave no tr…   │
+                         │  14   // Three guards, one of each subject the IR has: the page, the s… │
                          │ lint: 3 — W_SECRET_UNSET user.password reads ${SVATAH_SAMPLE_PASSWORD}… │
                          └─────────────────────────────────────────────────────────────────────────┘
+ inspector collapsed at 100 cols (120 to sit beside) · press 3 to open it below
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ 4 Audit · follow                                                                                 │
-│ no audit lines on this screen                                                                    │
-│ ─ svatah ui --json streams these same lines to stdout for an agent ─                             │
+│ 4 Lint                                                                                           │
+│ 0     W_SECRET_UNSET         user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. C… │
+│ 0     W_SECRET_UNSET         card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. … │
+│ 0     W_SECRET_UNSET         card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compil… │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
-^K commands   1-4 pane   Tab next   j k move   Enter open   r record  q quit
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r record  q quit

@@ -48,6 +48,7 @@ import {
   buildSnapshot,
   executableOf,
   launchApplication,
+  locateDeadline,
   LocateError,
   NavigationError,
   quitApplication,
@@ -322,14 +323,18 @@ export class UiaSurface implements AgentSurface {
 
   async locate(candidate: Candidate): Promise<Ref[]> {
     /*
-     * Re-read until it is there, or the candidate timeout passes (T11.2).
+     * Re-read until it is there, or until just short of the candidate timeout
+     * (T11.2).
      *
      * The same reasoning as the AX adapter's: a web adapter's locator retries
      * inside Playwright, and a desktop snapshot is a moment. A click is a
      * request the application answers, and the next `locate` is expected to
-     * find something that was not there when the click was sent.
+     * find something that was not there when the click was sent. Short of the
+     * timeout rather than up to it, because the resolver races the same budget
+     * and a tie makes it publish "candidate timed out" where the truth is
+     * "matched nothing" (`locateDeadline`).
      */
-    const deadline = Date.now() + (this.options.candidateTimeoutMs ?? 0);
+    const deadline = locateDeadline(this.options.candidateTimeoutMs);
     for (;;) {
       await this.refresh();
       const found = matchNodes(candidate, this.nodes);

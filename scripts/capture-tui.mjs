@@ -134,6 +134,25 @@ try {
 
   mkdirSync(OUT, { recursive: true });
 
+  /**
+   * A backspace erases the character before it, so a capture read as text has to
+   * honour it (P11). The pty echoes the EOF it is handed as the two characters
+   * `^D` and the terminal writes two backspaces to take them back; a capture
+   * that kept the backspaces as characters kept the `^D` too — at the head of
+   * every one of these files, and, on a loaded machine, in the middle of a
+   * frame, where it made a hundred-column line a hundred-and-two-column one.
+   */
+  const backspaced = (text) => {
+    const out = [];
+    for (const character of text) {
+      // A backspace at the left margin does nothing in a terminal.
+      if (character === "\b") {
+        if (out.length > 0 && out[out.length - 1] !== "\n") out.pop();
+      } else out.push(character);
+    }
+    return out.join("");
+  };
+
   /** One capture, inside a pseudo-terminal of a stated size, with the ANSI out. */
   const capture = (args, file, columns, rows) => {
     const command = [
@@ -192,11 +211,13 @@ try {
      */
     const frames = raw.split("[1;1H");
     const last = frames[frames.length - 1] ?? raw;
-    const plain = last
-      // eslint-disable-next-line no-control-regex
-      .replace(/\[[0-9;?]*[A-Za-z]/g, "")
-      // eslint-disable-next-line no-control-regex
-      .replace(/[()][A-Z0-9]/g, "")
+    const plain = backspaced(
+      last
+        // eslint-disable-next-line no-control-regex
+        .replace(/\[[0-9;?]*[A-Za-z]/g, "")
+        // eslint-disable-next-line no-control-regex
+        .replace(/[()][A-Z0-9]/g, "")
+    )
       .replace(/\r/g, "")
       .replace(/\n{3,}/g, "\n\n")
       .trim();

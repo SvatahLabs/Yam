@@ -1,37 +1,34 @@
-^Dloading…
-svatah ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-capture-EImOlc   http://127.0.0.1:61628   Flows · 7 files · 22 stories · 30 bindin…
+loading…
+svatah ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-capture-2LBoaA   http://127.0.0.1:61768   Flows · 7 files · 22 stories · 30 bindin…
 ┌────────────────────────────────┐┌──────────────────────────────────────────────────────────────────────────────┐┌────────────────────────────────────────────┐
 │ 1 Flows                        ││ 2 flows/guards-and-compensation.flow                                         ││ 3 Inspect                                  │
-│ booking-compensat… · not run   ││   1   // Guards and compensation, end to end (T5.4, REQ-LAN…                 ││ no step selected                           │
-│ booking-workflow.… · not run   ││   2   //                                                                     │└────────────────────────────────────────────┘
-│ execution.flow     · not run   ││   3   // `booking-compensation.flow` beside this one is the…                 │
-│ guards-and-compen… ! aborted   ││   4   // faithful sibling of `execution.flow`. This file is…                 │
-│ natural_language_… · not run   ││   5   // the two guarantees T5.4 is about, on the smallest …                 │
-│ simple.flow        · not run   ││   6   //                                                                     │
-│ svatah.flow        · not run   ││   7   //   * a guard whose predicate is false never perform…                 │
+│ booking-compensati… not run    ││   1   // Guards and compensation, end to end (T5.4, REQ-LANG-14, REQ-AUTO-1… ││ no step selected                           │
+│ booking-workflow.f… not run    ││   2   //                                                                     │└────────────────────────────────────────────┘
+│ execution.flow      not run    ││   3   // `booking-compensation.flow` beside this one is the *policy* showca… │
+│ guards… aborted    run 4 s ago ││   4   // faithful sibling of `execution.flow`. This file is the one that de… │
+│ natural_language_l… not run    ││   5   // the two guarantees T5.4 is about, on the smallest thing that can s… │
+│ simple.flow         not run    ││   6   //                                                                     │
+│ svatah.flow         not run    ││   7   //   * a guard whose predicate is false never performs its step, and … │
 └────────────────────────────────┘│   8   //     log has no surface call for it (REQ-AUTO-1);                    │
-                                  │   9   //   * a failing story runs its compensating story wi…                 │
-                                  │  10   //     scope, and the run ends `aborted` with the pol…                 │
+                                  │   9   //   * a failing story runs its compensating story with the failing s… │
+                                  │  10   //     scope, and the run ends `aborted` with the policy recorded (RE… │
                                   │  11                                                                          │
-                                  │  12   // ── guards ────────────────────────────────────────…                 │
+                                  │  12   // ── guards ────────────────────────────────────────────────────────… │
                                   │  13   //                                                                     │
-                                  │  14   // Three guards, one of each subject the IR has: the …                 │
-                                  │  15   // step's own element. The two that are false must le…                 │
+                                  │  14   // Three guards, one of each subject the IR has: the page, the scope,… │
+                                  │  15   // step's own element. The two that are false must leave no trace on … │
                                   │  16   // application at all.                                                 │
                                   │  17                                                                          │
                                   │  18   story: I want to see guards decide                                     │
-                                  │  19     Click the Book a slot link                           tier 1 · bound  │
-                                  │                                                                              │
-                                  │  20     Remember the text of the booking status as status    tier 1 · bound  │
-                                  │                                                                              │
+                                  │  19     Click the Book a slot link                          tier 1 · bound   │
+                                  │  20     Remember the text of the booking status as status   tier 1 · bound   │
                                   │  21     // True: the page is the booking page.                               │
-                                  │  22     Only if the URL contains "/booking", Type "Indirana… tier 1 · bound  │
-                                  │                                                                              │
                                   │ lint: 3 — W_SECRET_UNSET user.password reads ${SVATAH_SAMPLE_PASSWORD}, whi… │
                                   └──────────────────────────────────────────────────────────────────────────────┘
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ 4 Audit · follow                                                                                                                                             │
-│ no audit lines on this screen                                                                                                                                │
-│ ─ svatah ui --json streams these same lines to stdout for an agent ─                                                                                         │
+│ 4 Lint                                                                                                                                                       │
+│ 0     W_SECRET_UNSET         user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.               │
+│ 0     W_SECRET_UNSET         card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.              │
+│ 0     W_SECRET_UNSET         card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.                    │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-^K commands   1-4 pane   Tab next   j k move   Enter open   r record  q quit
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r record  q quit

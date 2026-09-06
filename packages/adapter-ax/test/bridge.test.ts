@@ -143,6 +143,81 @@ const answer = (
     ...nodes,
   ].join(RS);
 
+/*
+ * P11 — two oracles for one question, and only a no from both is a cause.
+ *
+ * The action path asks System Events, which answers under its own permission
+ * and its own load; the read path goes at the accessibility API directly. A
+ * click against a window the API had read one step earlier came back
+ * `no-window` beside a running eval, and the parity gate published it as a
+ * disagreement with an external oracle that had just passed the same case. So
+ * when System Events says there is no window, the API is asked, and the action
+ * is re-sent while the API says otherwise.
+ */
+describe("an action System Events refused for no window (P11)", () => {
+  /** A fake `osascript` that answers per script: perform, then window. */
+  const oracles = (
+    performs: readonly string[],
+    windowStdout: string,
+  ): { run: Run; sent: () => readonly string[] } => {
+    const sent: string[] = [];
+    let at = 0;
+    const run: Run = async (script, argument, _timeoutMs, _language) => {
+      if (script.includes("processWithWindow")) {
+        const kind = (argument as { kind?: string }).kind ?? "?";
+        sent.push(kind);
+        if (kind === "activate") return { code: 0, stdout: '{"ok":true}', stderr: "", timedOut: false };
+        const stdout = performs[Math.min(at, performs.length - 1)]!;
+        at += 1;
+        return { code: 0, stdout, stderr: "", timedOut: false };
+      }
+      return { code: 0, stdout: windowStdout, stderr: "", timedOut: false };
+    };
+    return { run, sent: () => sent };
+  };
+
+  const aWindow = (): string =>
+    answer({ title: "Svatah ADE" }, [node({ 0: "-1", 1: "AXWindow", 3: "Svatah ADE" })]);
+
+  it("shows the application and sends it again, while the API can see the window", async () => {
+    const { run, sent } = oracles(['{"ok":false,"error":"no-window"}', '{"ok":true}'], aWindow());
+    await osascriptBridge({ process: "Svatah ADE", run }).perform({
+      kind: "action",
+      path: [0],
+      action: "AXPress",
+    });
+    // The action, then the activate that un-hides a hidden application, then
+    // the action again — which is what a hidden window needs and what a busy
+    // System Events needs too.
+    expect(sent()).toEqual(["action", "activate", "action"]);
+  });
+
+  it("is a cause when both oracles say there is no window", async () => {
+    const { run } = oracles(['{"ok":false,"error":"no-window"}'], "ERR\u001fno-window");
+    await expect(
+      osascriptBridge({ process: "Svatah ADE", run }).perform({
+        kind: "action",
+        path: [0],
+        action: "AXPress",
+      }),
+    ).rejects.toThrow(/no window for "Svatah ADE"/);
+  });
+
+  it("does not ask the API at all when the action worked", async () => {
+    let windowReads = 0;
+    const run: Run = async (script) => {
+      if (!script.includes("processWithWindow")) windowReads += 1;
+      return { code: 0, stdout: '{"ok":true}', stderr: "", timedOut: false };
+    };
+    await osascriptBridge({ process: "Svatah ADE", run }).perform({
+      kind: "action",
+      path: [0],
+      action: "AXPress",
+    });
+    expect(windowReads).toBe(0);
+  });
+});
+
 describe("reading a window", () => {
   it("sends the process, the node budget and its own deadline, as JXA", async () => {
     const { run, calls } = answering(
@@ -408,6 +483,11 @@ describe("the perform script chooses the process that owns a window (P8-F1)", ()
     readonly children: readonly unknown[];
     /** A process that throws when asked for its windows, as a dying one can. */
     readonly refuses?: boolean;
+    /**
+     * How many times this process answers "no windows" before it answers with
+     * the one it has had all along — System Events under load (P11).
+     */
+    readonly emptyFirst?: number;
   }
 
   /** Run `PERFORM_SCRIPT`'s `run(argv)` against a fake `Application(name)`. */
@@ -416,10 +496,14 @@ describe("the perform script chooses the process that owns a window (P8-F1)", ()
     processes: readonly FakeProcess[],
   ): { answer: { ok: boolean; error?: string }; frontmost: readonly string[] } {
     const frontmost: string[] = [];
+    const asked = new Map<number, number>();
     const wrapped = processes.map((one, at) => ({
       name: one.name,
       windows: () => {
         if (one.refuses === true) throw new Error("the process refuses the question");
+        const before = asked.get(at) ?? 0;
+        asked.set(at, before + 1);
+        if (before < (one.emptyFirst ?? 0)) return [];
         return one.children.length === 0 ? [] : [{ uiElements: () => one.children }];
       },
       set frontmost(_value: boolean) {
@@ -495,6 +579,34 @@ describe("the perform script chooses the process that owns a window (P8-F1)", ()
     ]);
     expect(answer.ok).toBe(true);
     expect(frontmost).toEqual(["Svatah ADE#1"]);
+  });
+
+  /*
+   * P11 — a click against a window the ADE's own log showed open answered
+   * `no-window` once in roughly fifty, and the parity gate published that as a
+   * disagreement with an external oracle that had just passed the same case.
+   * System Events answers under its own permission and its own load, and a busy
+   * answer is an empty list rather than an error. An application does not lose
+   * its window between two reads a fifth of a second apart, so the script asks
+   * again — and only a run of empty answers is a cause.
+   */
+  it("asks again when System Events answers an empty list, and finds the window", () => {
+    const mark = { pressed: false };
+    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Svatah ADE" }, [
+      { ...withWindow(mark), emptyFirst: 3 },
+    ]);
+    expect(answer.ok).toBe(true);
+    expect(mark.pressed).toBe(true);
+  });
+
+  it("gives up after ten empty answers, so a gone application is still a cause", () => {
+    const mark = { pressed: false };
+    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Svatah ADE" }, [
+      { ...withWindow(mark), emptyFirst: 500 },
+    ]);
+    expect(answer.ok).toBe(false);
+    expect(answer.error).toBe("no-window");
+    expect(mark.pressed).toBe(false);
   });
 
   it("still answers `no-window` when not one of them has a window", () => {

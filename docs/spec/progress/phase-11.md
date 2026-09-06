@@ -34,10 +34,13 @@ the canvas build expand the same sidebar and top bar.
   written and verified, every one resolved by `automationId`, the flow replayed
   green, and a binding recorded at variant 0 relocalized at variant 1 onto the
   element with the recorded id.
-- **`svatah eval self` runs both sides of 48 checks and compares them**, and the
-  report's one-sided list — thirty-seven of them — is the deliverable this phase
-  is proudest of: every one names the sentence the flow language does not have
-  or the surface Svatah cannot open.
+- **`svatah eval self` runs both sides of 48 checks and compares them**, and it
+  is at **100 percent agreement** over the ten both sides reached — the eighth
+  run of it, with every one of the seven before named in this file and each one
+  either a defect fixed at the source or a host condition published as one. The one-sided
+  list — thirty-six of them — is the deliverable this phase is proudest of:
+  every one names the sentence the flow language does not have or the surface
+  Svatah cannot open.
 - **What this host could not do at first was see any window at all.** The
   display was locked for the first four hours of the phase; the owner unlocked
   it, and everything desktop in this file was measured after that. The locked
@@ -583,6 +586,54 @@ that is its accessible name" and the visible label is the transformed one.
   whole run, so a `Quit the app` in the middle leaves every flow after it driving
   something that is not there. The self flows are numbered and each says why.
 
+### And one the suite found in Svatah's own adapter
+
+**A click answered `no-window` against a window that was open.** The second full
+gate run disagreed on one check —
+`ade.bindings-opens-and-every-control-on-it-is-named-and-id-d`, Svatah `fail`
+against the Playwright case's `pass` — and a disagreement means one oracle is
+wrong. This time it was Svatah's:
+
+```
+"text": "Click the Bindings rail item",
+"matched": { "ref": "r28", "candidateIndex": 0, "by": "automationId" },
+"failure": { "message": "The accessibility action failed: no-window." }
+```
+
+The element was *found* a moment earlier, by `automationId`, and the ADE's own
+log has the window open across the whole step — `window.ready-to-show` at
+08:21:44 and no `window.closed` until 08:22:12, three quarters of a second
+*after* the failure. `pmset -g log` shows the display awake throughout, so this
+was not F1's locked screen coming back.
+
+The read path goes at the accessibility API directly; the **action** path still
+asks System Events, under its own permission and its own load, and a busy answer
+there is an empty window list rather than an error — the very shape F1 caught in
+`hasWindow()`. `processWithWindow` believed it the first time. It asks ten times
+over two seconds now, and only a run of empty answers is reported as a cause;
+when it is, the message names the two things it can be and the command that says
+which:
+
+```
+The action found no window for "Svatah ADE": System Events answered an empty
+list 10 times over 2 s. Either the application has gone, or nothing on this
+display can be read — `svatah surface doctor --adapter ax` says which.
+```
+
+Two cases in `packages/adapter-ax/test/bridge.test.ts` execute `PERFORM_SCRIPT`
+against a fake System Events that answers empty three times and then truthfully
+(the click lands) and one that never answers (`no-window` is still a cause). The
+run after the fix is the 100 percent one embedded below.
+
+This is the parity gate paying for itself on its second run: an external oracle
+that had just passed the same case is what turned a one-in-fifty flake into a
+located defect instead of a re-run.
+
+It was not the whole story. Two runs later the same message came back with the
+retry in place, and that time the ADE's own log said what had happened — the
+window had been **hidden**. "What running the gate eight times found", below,
+carries the rest, and the fix there is the one that closed it.
+
 ### Validate
 
 | Item | Command | Answer |
@@ -590,9 +641,30 @@ that is its accessible name" and the visible label is the transformed one.
 | `svatah run evals/self` green | `node packages/cli/dist/bin.js run evals/self --host none` | **31 passed, 0 failed, 0 skipped** |
 | Every Playwright case has a check with the same id | `pnpm --filter @svatah/repo-checks exec vitest run test/self-catalogue.test.ts` | 7 passed |
 | Every check has both sides or says why | the same file's third and fourth cases | 7 passed |
-| The gate, at 100 percent | `node packages/cli/dist/bin.js eval self --report reports/self-parity.md` | see below |
+| The gate, at 100 percent | `node packages/cli/dist/bin.js eval self --report reports/self-parity.md` | **100% agreement over 10 check(s) both sides reached; 36 one-sided**, exit 0 |
 | A wrong expectation makes it fail | `pnpm self:bite` | `the gate bit: a wrong expectation is a disagreement, with both sides' evidence` |
 | The README names the gate | `README.md` § "The verification contract" | in |
+
+### The gate bites
+
+A gate that answers "100 percent" to a suite with a broken side is a gate nobody
+should trust, so `pnpm self:bite` breaks one on purpose: a *copy* of
+`evals/self` — never the committed project — with the Flows toolbar's title
+expected to be `"Frobnicate"`, and the Playwright side untouched. The gate exits
+1 and publishes both verdicts with the evidence each side gave:
+
+```
+**Not conformant.** 1 disagreement(s) over the 1 check(s) both sides reached.
+A disagreement means one oracle is wrong.
+
+| Check | Svatah says | External says |
+|---|---|---|
+| `ade.opens-into-the-new-flows-screen-not-the-eleven-tabs` | fail: a step: Expected
+  textContains "Frobnicate" of "the toolbar title", and it was not so. | pass: the case passed |
+```
+
+and the script exits 0 for the opposite reason to everything else here — it
+passes when the gate *failed*.
 
 `tools/repo-checks/test/self-catalogue.test.ts` holds the catalogue to its own
 rules in a second rather than in the gate's minutes — and the case that matters
@@ -612,15 +684,165 @@ would take.
 
 # The parity report
 
-<!-- REPORT -->
+`reports/self-parity.md`, verbatim, from
+`node packages/cli/dist/bin.js eval self --report reports/self-parity.md`
+(exit 0). Every number below is reproducible by re-running that command; the
+per-source table at the end gives the command each side ran and what it cost.
+
+Run at 2026-09-06T10:27:33.851Z on darwin arm64, Node v25.6.1.
+
+**100 percent agreement** over the 10 check(s) both sides reached. The gate passes only at 100 percent (REQ-SELF-2).
+
+| | Svatah | External |
+|---|---|---|
+| Checks reached | 11 of 48 | 45 of 48 |
+| Wall time | 61.0 s | 449.1 s |
+
+### Disagreements
+
+None. Every check both sides reached, they answered the same way.
+
+### One-sided checks — Svatah's own shortcomings
+
+Every one names the adapter or the step Svatah lacks, and the list is
+expected to shrink phase by phase (LLD §13.9). A row whose reason is the
+*host* — a locked display, a refused permission — is not a shortcoming of
+either side: it is what this machine could not be asked, said in the
+doctor's own words rather than guessed at (P10-F1, P10-F5).
+
+| Check | Reached by | Why the other side does not |
+|---|---|---|
+| `ade.launch-open-read-quit` | Svatah | no Playwright case launches or quits the application: `_electron.launch` cannot open a packaged build with the `RunAsNode` fuse off (T8.1), so the ADE's own suite attaches to a build somebody else started. Launching and quitting is what T11.2 gave Svatah and the external side does not have. |
+| `gate.desktop-conformance` | external | the gate *is* Svatah's surface conformance suite, driven by a script that launches three ADE variants and carries recorded fingerprints between them. A flow cannot relaunch its own application at a different variant mid-run: `app.launch` opens the session, and there is no sentence for a second one. |
+| `clients.generated-smoke` | external | an HTTP flow could call the service's routes, and it would be testing the *service* rather than the clients. What the smoke checks is that three generated clients agree, which is a comparison between programs and not something a flow observes. |
+| `design.artboards-fit` | external | the artboards are HTML files rendered headless, not an application with a window; there is nothing for a desktop adapter to attach to and no service for an HTTP one. A `web` flow could open them, and it would still need geometry assertions over sets (see the toolbar checks). |
+| `oracle.axe-sheet` | external | external by design (REQ-SELF-3). |
+| `oracle.healing-ground-truth` | external | external by design (REQ-SELF-3). |
+| `oracle.tree-agreement` | external | external by design (REQ-SELF-3). |
+| `ade.every-interactive-control-on-the-flows-screen-is-named-and-i` | external | a snapshot *invariant* — "every control has an id" — and the flow language has no sentence for one. The desktop conformance case `ade.snapshot` is where it lives; a `check` step over the whole snapshot is what Svatah would need. |
+| `ade.record-on-the-flows-screen-starts-a-session-with-the-fake-ga` | external | the Record button starts a recording session, and a recording session is what a Svatah *run* is not: `svatah record` and `svatah run` are different commands, and a flow cannot ask for one from inside the other. |
+| `ade.run-on-the-flows-screen-starts-a-run-and-opens-the-run-scree` | external | pressing Run starts a Svatah run from inside a Svatah run. Nothing stops the click; what is missing is a way to wait for a *second* run to finish and read its result, which is a `waitFor` over a service response the language has no sentence for. |
+| `ade.the-run-screen-shows-the-run-s-steps-audit-and-inspector` | external | needs a run to read, and starting one means starting a Svatah run from inside a Svatah run: the click works, and what is missing is a sentence that waits for a *second* run to finish and reads its result. The screen itself is reachable and every control on it is bound. |
+| `ade.the-run-toolbar-keeps-its-buttons-on-one-line-however-long-t` | external | a *geometry* assertion — box heights and right edges across the toolbar's children. `Expect … to have size/location` exists for one element (pattern 24); comparing two elements' boxes does not. |
+| `ade.the-inspector-says-each-of-its-headings-once` | external | counts repeated text across a panel. The language asserts about one element, not about a set. |
+| `ade.the-audit-pane-renders-the-call-detail-the-model-carries` | external | reads a list of rows and asserts a shape over all of them. The same missing sentence as above: an assertion over a set. |
+| `ade.run-again-is-a-button-on-the-run-screen-and-it-starts-anothe` | external | the button is bound and clickable; what cannot be asserted is that a second run started, because a flow has no sentence that waits for a run other than its own and reads its result. |
+| `ade.a-run-started-from-the-run-screen-can-be-stopped-from-it-t10` | external | needs a run in flight to stop, which means starting a Svatah run from inside a Svatah run — and no sentence waits for a second run or reads its state while it is going. |
+| `ade.the-command-palette-opens-on-k-and-lists-the-registry-s-acti` | external | ⌘K is a keystroke to the *application*, and `Press` targets an element (pattern 11). A chord sent to the window with no target is a sentence the language does not have. The palette's own button is bound and its rows are reachable. |
+| `ade.record-opens-and-every-control-on-it-is-named-and-id-d` | external | the Record screen is reached through the command palette, and choosing a palette row needs the palette open — see ⌘K above. Its controls are bound and the desktop gate drives them. |
+| `ade.run-opens-and-every-control-on-it-is-named-and-id-d` | external | Reached through the command palette, which opens on a ⌘K sent to the *window*: `Press` targets an element (pattern 11), and a chord with no target is a sentence the language does not have. Every control on the screen is bound and the desktop gate drives them. |
+| `ade.heal-opens-and-every-control-on-it-is-named-and-id-d` | external | Reached through the command palette, which opens on a ⌘K sent to the *window*: `Press` targets an element (pattern 11), and a chord with no target is a sentence the language does not have. Every control on the screen is bound and the desktop gate drives them. |
+| `ade.explorer-opens-and-every-control-on-it-is-named-and-id-d` | external | Reached through the command palette, which opens on a ⌘K sent to the *window*: `Press` targets an element (pattern 11), and a chord with no target is a sentence the language does not have. Every control on the screen is bound and the desktop gate drives them. |
+| `ade.the-runs-screen-filters-and-its-inspector-shows-the-failing-` | external | the filters are chips that cycle a value on each press, and asserting the *cycle* needs reading a control's own label back and comparing it with the previous one — a captured value compared with a later one, which `Remember … as` can hold but no sentence can compare. |
+| `ade.the-bindings-screen-shows-the-store-and-one-element-s-resolv` | external | asserts over the rows of a table, which is an assertion over a set. |
+| `ade.the-heal-review-offers-the-runs-worth-healing` | external | asserts over the rows of a list — that the runs offered are the ones worth healing. The language asserts about one element (patterns 23 and 24); an assertion over a set is the sentence it lacks. |
+| `ade.the-record-review-chooses-its-gateway-and-says-what-a-fake-s` | external | the Record screen is reached through the command palette, which opens on a ⌘K sent to the *window*: `Press` targets an element (pattern 11), and a chord with no target is a sentence the language does not have. Every control on the screen is bound and the desktop gate drives them. |
+| `ade.the-api-screen-shows-a-saved-request-and-its-headers` | external | asserts over the rows of the headers table; an assertion over a set. |
+| `ade.the-data-screen-names-every-secret-and-shows-none-of-them` | external | asserts that a value is *absent* from the whole screen — "no secret is anywhere" — which is a negative over a set rather than over one element. |
+| `ade.the-surface-explorer-refuses-a-call-with-no-intent` | external | the Surface explorer is reached through the command palette, which opens on a ⌘K sent to the *window*: `Press` targets an element (pattern 11), and a chord with no target is a sentence the language does not have. Every control on the screen is bound and the desktop gate drives them. |
+| `ade.the-import-screen-previews-into-the-open-project-and-nowhere` | external | asserts about the *filesystem* after a preview, which is outside any surface: no adapter reads a directory. |
+| `ade.the-settings-screen-shows-the-project-and-never-a-credential` | external | asserts that a credential is *absent* from the whole screen, which is a negative over a set rather than about one element — the sentence the language lacks (patterns 23 and 24 assert about one target). |
+| `ade.the-agents-screen-lists-what-an-agent-may-call` | external | asserts over the rows of a list — every tool an agent may call. The language asserts about one element (patterns 23 and 24); an assertion over a set is the sentence it lacks. |
+| `ade.the-legacy-screens-are-gone-t10-3` | external | asserts that eleven ids are *absent*, which the language can say one at a time and not as a set — and a check that eleven things are missing is not a thing a flow is for. |
+| `ade.the-record-screen-s-toolbar-keeps-its-title-its-select-and-a` | external | a geometry assertion at two window widths, and Svatah cannot resize a desktop window: `app.launch` has no size and no `resize` action exists. |
+| `ade.a-toolbar-that-runs-out-of-room-sheds-into-the-palette-and-s` | external | the same missing thing, seven times over: it sweeps seven window widths, and Svatah cannot resize a desktop window — `app.launch` names no size and there is no `resize` action. |
+| `ade.a-flow-is-edited-and-saved-through-the-ade-and-re-linted-k6` | external | typing a whole file into a text area needs `Type` to accept a multi-line value; the language's `Type "…"` takes one line. |
+| `ade.a-saved-api-request-is-edited-and-saved-through-the-ade-k7` | external | adds a header by filling the blank last row of a table, and addressing "the last row" of a growing list is a positional target the language has no sentence for. |
+
+### Neither side could look
+
+| Check | Svatah | External |
+|---|---|---|
+| `cockpit.pseudo-terminal` | driving a terminal needs a pseudo-terminal adapter, and Svatah has none: the surface kinds are `web`, `desktop`, `mobile` and `http` (LLD §2.4). `script(1)` and `ink-testing-library` are the external side. | "`svatah ui` draws in a pseudo-terminal (T9.4) > opens on the `comp` run and draws its four panes" is not in what `npx vitest run test/tui-pty.test.ts --reporter=json` reported — the catalogue names something the source does not have |
+| `cockpit.json-is-the-model` | the same missing adapter: a flow cannot run a command and read its stdout. `svatah ui --json` is the SDK's own answer and comparing it with the model is a program, not a flow. | "`svatah ui --json` is the model's state (T9.4, REQ-ADE-13) > prints the same Flows state ten times running (T10.4, P9-F4)" is not in what `npx vitest run test/tui-pty.test.ts --reporter=json` reported — the catalogue names something the source does not have |
+
+### Kept external by design (REQ-SELF-3)
+
+Three oracles sit *below* the surface Svatah drives, and they are what keeps
+this gate from grading its own homework.
+
+| Oracle | Why it stays external |
+|---|---|
+| `oracle.axe-sheet` | REQ-SELF-3. axe-core is a second implementation of the accessibility rules Svatah's own audit implements; checking one with the other is the point, and checking either with Svatah would be checking a thing with itself. |
+| `oracle.healing-ground-truth` | REQ-SELF-3. The ground-truth key is stamped on the sample application *outside* the surface and `bindings.ignoreAttributes` removes it from synthesis, fingerprints and `native` — so nothing Svatah can see may know the answer. A self flow that could read it would be the eval finding the answer in the answer key. |
+| `oracle.tree-agreement` | REQ-SELF-3. This is the check that the *adapter's picture of a window is the window*: its two sides are the DOM Chromium renders and the accessibility tree macOS publishes from it, and Svatah is in neither. Every other check goes through something Svatah wrote. |
+
+### Every check
+
+| Check | Svatah | External | What it says |
+|---|---|---|---|
+| `ade.launch-open-read-quit` | pass | unreachable | Svatah launches the packaged ADE, opens the fixtures project through its Recent list, reads the Flows toolbar, and quits it. |
+| `ade.screen-through-two-adapters` | pass | pass | The same flow drives the ADE's Flows screen through the accessibility tree and through the DOM over CDP. |
+| `gate.desktop-conformance` | unreachable | pass | The live macOS desktop conformance gate is conformant at ADE variants 0, 1 and 2. |
+| `cockpit.pseudo-terminal` | unreachable | unreachable | `svatah ui` draws its panes in a real pseudo-terminal and its `--json` equals the model's state. |
+| `cockpit.json-is-the-model` | unreachable | unreachable | `svatah ui --json` prints exactly what the screen model loads, ten times without a diff. |
+| `clients.generated-smoke` | unreachable | pass | The generated Python and Java clients drive the local service and agree with the TypeScript SDK. |
+| `design.artboards-fit` | unreachable | pass | Every artboard fits its own frame: one-row toolbars, a twelve-character title, an inspector that contains its contents. |
+| `oracle.axe-sheet` | unreachable | pass | axe-core and the in-house audit both report zero violations on the component sheet. |
+| `oracle.healing-ground-truth` | unreachable | pass | The healing eval recovers a degraded binding onto the element the ground-truth key names. |
+| `oracle.tree-agreement` | unreachable | pass | The ADE's renderer tree over CDP and its accessibility snapshot agree about every identified control's role and name. |
+| `ade.opens-into-the-new-flows-screen-not-the-eleven-tabs` | pass | pass | opens into the new Flows screen, not the eleven tabs |
+| `ade.every-interactive-control-on-the-flows-screen-is-named-and-i` | unreachable | pass | every interactive control on the Flows screen is named and id'd (P8-F3) |
+| `ade.record-on-the-flows-screen-starts-a-session-with-the-fake-ga` | unreachable | pass | Record on the Flows screen starts a session with the fake gateway |
+| `ade.run-on-the-flows-screen-starts-a-run-and-opens-the-run-scree` | unreachable | pass | Run on the Flows screen starts a run and opens the Run screen |
+| `ade.the-run-screen-shows-the-run-s-steps-audit-and-inspector` | unreachable | pass | the Run screen shows the run's steps, audit and inspector |
+| `ade.the-run-toolbar-keeps-its-buttons-on-one-line-however-long-t` | unreachable | pass | the Run toolbar keeps its buttons on one line, however long the title |
+| `ade.the-inspector-says-each-of-its-headings-once` | unreachable | pass | the inspector says each of its headings once |
+| `ade.the-audit-pane-renders-the-call-detail-the-model-carries` | unreachable | pass | the audit pane renders the call detail the model carries |
+| `ade.run-again-is-a-button-on-the-run-screen-and-it-starts-anothe` | unreachable | pass | Run again is a button on the Run screen, and it starts another run |
+| `ade.a-run-started-from-the-run-screen-can-be-stopped-from-it-t10` | unreachable | pass | a run started from the Run screen can be stopped from it (T10.4) |
+| `ade.the-command-palette-opens-on-k-and-lists-the-registry-s-acti` | unreachable | pass | the command palette opens on ⌘K and lists the registry's actions |
+| `ade.flows-opens-and-every-control-on-it-is-named-and-id-d` | pass | pass | flows opens and every control on it is named and id'd |
+| `ade.runs-opens-and-every-control-on-it-is-named-and-id-d` | pass | pass | runs opens and every control on it is named and id'd |
+| `ade.bindings-opens-and-every-control-on-it-is-named-and-id-d` | pass | pass | bindings opens and every control on it is named and id'd |
+| `ade.agents-opens-and-every-control-on-it-is-named-and-id-d` | pass | pass | agents opens and every control on it is named and id'd |
+| `ade.api-opens-and-every-control-on-it-is-named-and-id-d` | pass | pass | api opens and every control on it is named and id'd |
+| `ade.data-opens-and-every-control-on-it-is-named-and-id-d` | pass | pass | data opens and every control on it is named and id'd |
+| `ade.import-opens-and-every-control-on-it-is-named-and-id-d` | pass | pass | import opens and every control on it is named and id'd |
+| `ade.settings-opens-and-every-control-on-it-is-named-and-id-d` | pass | pass | settings opens and every control on it is named and id'd |
+| `ade.record-opens-and-every-control-on-it-is-named-and-id-d` | unreachable | pass | record opens and every control on it is named and id'd |
+| `ade.run-opens-and-every-control-on-it-is-named-and-id-d` | unreachable | pass | run opens and every control on it is named and id'd |
+| `ade.heal-opens-and-every-control-on-it-is-named-and-id-d` | unreachable | pass | heal opens and every control on it is named and id'd |
+| `ade.explorer-opens-and-every-control-on-it-is-named-and-id-d` | unreachable | pass | explorer opens and every control on it is named and id'd |
+| `ade.the-runs-screen-filters-and-its-inspector-shows-the-failing-` | unreachable | pass | the Runs screen filters, and its inspector shows the failing step's evidence |
+| `ade.the-bindings-screen-shows-the-store-and-one-element-s-resolv` | unreachable | pass | the Bindings screen shows the store and one element's resolver order |
+| `ade.the-heal-review-offers-the-runs-worth-healing` | unreachable | pass | the Heal review offers the runs worth healing |
+| `ade.the-record-review-chooses-its-gateway-and-says-what-a-fake-s` | unreachable | pass | the Record review chooses its gateway and says what a fake session is |
+| `ade.the-api-screen-shows-a-saved-request-and-its-headers` | unreachable | pass | the API screen shows a saved request and its headers |
+| `ade.the-data-screen-names-every-secret-and-shows-none-of-them` | unreachable | pass | the Data screen names every secret and shows none of them |
+| `ade.the-surface-explorer-refuses-a-call-with-no-intent` | unreachable | pass | the Surface explorer refuses a call with no intent |
+| `ade.the-import-screen-previews-into-the-open-project-and-nowhere` | unreachable | pass | the Import screen previews into the open project and nowhere else |
+| `ade.the-settings-screen-shows-the-project-and-never-a-credential` | unreachable | pass | the Settings screen shows the project and never a credential |
+| `ade.the-agents-screen-lists-what-an-agent-may-call` | unreachable | pass | the Agents screen lists what an agent may call |
+| `ade.the-legacy-screens-are-gone-t10-3` | unreachable | pass | the legacy screens are gone (T10.3) |
+| `ade.the-record-screen-s-toolbar-keeps-its-title-its-select-and-a` | unreachable | pass | the Record screen's toolbar keeps its title, its select and availableWhen (P10-F3) |
+| `ade.a-toolbar-that-runs-out-of-room-sheds-into-the-palette-and-s` | unreachable | pass | a toolbar that runs out of room sheds into the palette, and says so (P10-F3) |
+| `ade.a-flow-is-edited-and-saved-through-the-ade-and-re-linted-k6` | unreachable | pass | a flow is edited and saved through the ADE, and re-linted (K6) |
+| `ade.a-saved-api-request-is-edited-and-saved-through-the-ade-k7` | unreachable | pass | a saved API request is edited and saved through the ADE (K7) |
+
+### The sources, and what each cost
+
+| Source | Command | Wall | Answered about |
+|---|---|---|---|
+| `ade-playwright` | `npx playwright test --reporter=json` | 17.0 s | 38 name(s) |
+| `artboards` | `node scripts/audit-artboards.mjs` | 0.7 s | 1 name(s) |
+| `axe-sheet` | `node scripts/audit-sheet.mjs` | 0.7 s | 1 name(s) |
+| `client-smoke` | `node scripts/smoke-clients.mjs` | 24.2 s | 1 name(s) |
+| `desktop-gate` | `node scripts/desktop-conformance.mjs --adapter ax` | 84.9 s | 1 name(s) |
+| `healing-eval` | `node scripts/eval-healing.mjs --report reports/eval-healing.md` | 228.3 s | 1 name(s) |
+| `svatah` | `node packages/cli/dist/bin.js run evals/self --host none` | 58.9 s | 10 name(s) |
+| `svatah-cdp` | `node packages/cli/dist/bin.js run evals/self/cdp --host none` | 2.1 s | 1 name(s) |
+| `tree-agreement` | `node scripts/tree-agreement.mjs` | 5.1 s | 1 name(s) |
+| `tui-pty` | `npx vitest run test/tui-pty.test.ts --reporter=json` | 88.1 s | 52 name(s) |
 
 ---
 
 # The one-sided list, read as shortcomings
 
-Thirty-seven of the forty-eight checks have only one side, and three of those
-are external **by design** (REQ-SELF-3). The remaining thirty-four are Svatah's
-own, and they are three gaps said in many places.
+Thirty-six of the forty-eight checks have only one side. Three of those are
+external **by design** (REQ-SELF-3) and one is the *external* side's shortcoming
+rather than Svatah's (§5 below); two more are reached by neither. The remaining
+thirty-two are Svatah's own, and they are three gaps said in many places.
 
 ## 1. An assertion over a set
 
@@ -688,6 +910,174 @@ something its external oracle cannot.
 
 ---
 
+# The contract, run
+
+Every command below was run on this tree, in this order, from the repository
+root, with no credential in the environment.
+
+| Command | Answer |
+|---|---|
+| `pnpm install --frozen-lockfile` | exit 0, `Done in 862ms`, the lockfile unchanged |
+| `pnpm browsers` | exit 0 — Chromium and Firefox already installed |
+| `pnpm -r build` | exit 0 |
+| `pnpm -r typecheck` | exit 0 |
+| `CI=true pnpm -r test` | **exit 0** — 3,524 vitest cases and 510 Playwright cases, no failures, the 100-column cockpit case among them |
+| `pnpm lint` | exit 0 |
+
+`CI=true` because that is what a verifier's machine sets, and because the two
+things this phase had to fix in the suite only appear when every package's tests
+run at once (below).
+
+Node 22 is **K3**: this host has one Node (v25.6.1), so the second leg of the
+contract is a verifier's.
+
+# What the contract run found
+
+The six commands were run end to end on a tree with every one of this phase's
+changes in it, and it took four attempts to get them green. Each failure was a
+defect this phase had introduced, and each is fixed at the source rather than in
+the assertion.
+
+**The grammar reference documented thirty-one patterns and its check counted
+thirty.** `tools/repo-checks/test/golden.test.ts` pins REQ-LANG-12 — every
+pattern documented, with at least two examples — and T11.2's `Quit the app` is
+pattern 31. The check now counts 31, and the section shows a second example
+(`Close the app`), which is what it was short of.
+
+```
+$ pnpm --filter @svatah/repo-checks exec vitest run test/golden.test.ts
+Tests  359 passed (359)
+```
+
+**A retrying `locate` turned "matched nothing" into "candidate timed out".**
+The screen-fixture check caught it: the recorded failure of a deliberately
+failing step had changed from
+
+```
+testid "pay" — matched nothing (N ms)
+```
+
+to `testid "pay" — error: candidate timed out after 2000 ms`. Two clocks bound
+the same question — the resolver races each candidate against
+`config.run.candidateTimeoutMs` so one bad candidate cannot hold up a step, and
+T11.2 made the adapters retry a locate that found nothing — and given the *same*
+budget the resolver's clock wins. So an element that was genuinely absent was
+published as a timeout: a "could not tell" reported as a cause, which is exactly
+what P10-F5 says never to do, and this time Svatah did it to itself.
+
+`packages/surface/src/locate.ts` is the one place that decides now:
+`locateDeadline(candidateTimeoutMs)` keeps a 250 ms margin for the adapter's
+answer to travel back, and all three adapters use it. The fixture matches again
+without being re-recorded, which is the proof that the honest message is back:
+
+```
+$ node scripts/record-screen-fixtures.mjs --check
+packages/screens/test/fixtures/fixtures-project.json matches the service:
+7 flow(s), 22 stories, 30 bindings, run comp exit 11
+```
+
+**A hundred-column capture measured a hundred and two.** The cockpit's
+100-column pseudo-terminal case failed under a loaded `pnpm -r test` and passed
+on its own, twice each way. The assertion said only "a line of 104 characters";
+it names the line now, and the line was
+
+```
+^Dsvatah ui 100×30  /var/folders/…/svatah-tui-pty-ffjKpX   http://1…
+```
+
+— the header, correctly truncated to exactly 100, with the pty's echo of the EOF
+it is handed in front of it. The terminal writes two backspaces to take that
+echo back, and the capture kept the backspaces as *characters*: on an idle
+machine the echo lands before the first frame (every committed
+`reports/ui-*.txt` began `^D`), and on a loaded one it lands inside a frame.
+A capture read as text has to honour a backspace, so both the test's `plain()`
+and `scripts/capture-tui.mjs` do. The four captures are re-recorded and no
+longer start with an echo; the cockpit itself never drew past the edge, which is
+what P10-F9 fixed and what `packages/tui/test/layout.test.ts` proves without a
+terminal at all.
+
+**Two of the ADE's Playwright cases waited for a click the application had
+answered and moved on from.** Both only under the parallel suite — 38 passed in
+15.9 s on their own, and the same two failed after 1.6 minutes with every other
+package's tests running:
+
+- `goTo` clicked the Flows rail and waited sixty seconds while the toolbar title
+  moved between *two different run ids*. A run started by an earlier case was
+  still in flight, and a run that finishes opens the Run screen — so the rail
+  click was answered and then navigated away from.
+- The Runs screen's case clicked the first row of the table and found no
+  inspector. The table re-reads the project, so a run finishing while the case
+  is in it replaces the row under the pointer.
+
+Both are the same shape as the defect T11.2 fixed in the adapters, in the
+*external* oracle this time: **a click is a request**. Both helpers click again
+until the thing they asked for is there, bounded — 60 s and 30 s — so a genuine
+failure still fails. This is the external side being made as patient as Svatah's
+side, which is what a gate comparing the two depends on.
+
+---
+
+# What running the gate eight times found
+
+The gate was run end to end eight times while this phase was finished, and every
+run that was not conformant was a defect or a host condition **named**, never
+re-run and hoped away. A gate whose failures are shrugged at is not a gate.
+
+| Run | Answer | What it was |
+|---|---|---|
+| 07:56 | 1 disagreement | the CDP side attached to the port written in its config rather than the one the gate started an ADE on |
+| 08:09 | **100%**, 10 of 10 | — |
+| 08:24 | 1 disagreement | System Events answered "no windows" for a window the ADE's log shows open |
+| 08:37 | **100%**, 10 of 10 | — |
+| 09:46 | 3 disagreements | the display had gone to sleep and locked (`pmset -g log`: off 02:27, on 02:44) |
+| 09:55 | 1 disagreement | the ADE's window was **hidden**, and a hidden window is not one System Events will act on |
+| 10:12 | 1 disagreement | a locate that ran out of patience on a loaded machine |
+| 10:32 | **100%**, 10 of 10, exit 0 | the run embedded above |
+
+**The locked display is published as `unreachable` now, not as a failure.** A
+locked screen makes every desktop step fail, and the gate recorded that as
+`fail` and printed a disagreement against an external oracle that had just
+passed — naming a cause where the honest answer is "could not tell". A step
+whose failure carries one of the host's own sentences
+(`CGSSessionScreenIsLocked`, `no login session`, `ax/accessibility`) is
+`unreachable` with that sentence as the reason, and the one-sided table says so
+in the doctor's words. That is P10-F5's rule, applied to the gate itself.
+
+**A hidden window is shown before the action is re-sent.** The 09:55 run is the
+one this phase is most pleased to have caught, because the ADE's own log
+answered it:
+
+```
+09:53:48.123 window.hide  id=1 visible=true …
+09:53:50.034 window.show  id=1 …
+09:53:50.889 window.hide  id=1 …
+        ← 09:53:52.243 "Click the Flows rail item" starts
+        ← 09:53:55.416 The action found no window for "Svatah ADE"
+```
+
+The two oracles were answering different questions. A **hidden** application
+keeps its windows in `AXWindows` — the assertion one step earlier read the tree
+and passed — and System Events' `windows()` is empty, because a hidden window is
+not one a person could click. Neither was lying. So the bridge asks both: when
+System Events says no window and the accessibility API says there is one, the
+application is *activated*, which is what un-hides it, and the action is
+re-sent — for up to ten seconds, and never at all when the action worked.
+Three cases in `bridge.test.ts` pin it, including the one that proves the API is
+not asked when nothing went wrong. What *hid* the ADE is not established; the
+log says only that macOS did, twice, while this host was also being reached over
+Screen Sharing.
+
+**And the self project waits as long as a loaded machine needs.** `svatah eval
+self` runs `evals/self` after the healing eval — four minutes of Chromium — and
+a desktop locate is a fresh read of a thousand-node tree each time round. At
+five seconds a candidate, a screen that opened a moment later than usual failed
+the step after the click; on its own, three runs in a row passed. `evals/self`
+asks for fifteen seconds a candidate and forty-five a step now. This is the
+*project's* configuration and not the product's default (LLD §4.2 is untouched):
+a suite that runs beside four other oracles is entitled to a suite's patience.
+
+---
+
 # Deviations
 
 **D1 — `rolePathSimilarity` ignores anonymous containers (LLD §6.4, §16).**
@@ -711,7 +1101,17 @@ reading the same `flows/` and `steps/`.
 session serves a whole `svatah run`, so a flow ending in `Quit the app` has to be
 the last; the number says so where a reader will see it.
 
-**D4 — the HTTP and SDK sides of the self suite are catalogued, not written.**
+**D4 — the self suite needs one entry in the ADE's Recent list.** The flows open
+the fixtures project "through its Recent list" (T11.2's Validate), and that list
+is `<userData>/preferences.json`, which the ADE writes when somebody opens a
+project — so on a machine where nobody has, the first sentence of every self
+flow has nothing to click. `node scripts/seed-ade-recents.mjs` writes that one
+entry, in the shape the ADE's own `withRecentProject` writes, and `pnpm self`
+runs it first. The alternative was `SVATAH_ADE_PROJECT`, which opens a project
+*for* the ADE on ready — and then the welcome screen never appears and the flow
+is not about the Recent list at all.
+
+**D5 — the HTTP and SDK sides of the self suite are catalogued, not written.**
 §13.9 asks for flows "over the HTTP adapter against the local service, and over
 the SDK against `svatah ui --json`". The catalogue has the checks and names what
 each side would be; the HTTP flows are not written and the SDK side is
@@ -719,7 +1119,7 @@ each side would be; the HTTP flows are not written and the SDK side is
 below rather than half-written: a flow that asserted nothing would make the
 gate's coverage number a lie.
 
-**D5 — the `Toolbar` sheds the primary action too, when it must.** Draft 2.13
+**D6 — the `Toolbar` sheds the primary action too, when it must.** Draft 2.13
 says the toolbar "sheds secondary controls into the palette before" the title's
 floor. On a bar narrow enough that the floor would still be broken, the primary
 and the dangerous action are shed as well — secondary first, always. The
@@ -729,7 +1129,7 @@ alternative is breaking the rule the correction is about.
 
 # Known gaps
 
-**K1 — the HTTP and SDK sides of the self suite are not written.** See D4. The
+**K1 — the HTTP and SDK sides of the self suite are not written.** See D5. The
 checks are in the catalogue and the gate reports them `unreachable` with the
 reason; writing them is a morning's work and the shape is
 `evals/self/http/svatah.config.yaml` with `adapter: http` and JSON-path

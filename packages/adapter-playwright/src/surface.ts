@@ -42,6 +42,7 @@ import type { AgentSurface } from "@svatah/surface";
 import {
   ActionabilityError,
   DialogError,
+  locateDeadline,
   LocateError,
   NavigationError,
   ScriptError,
@@ -200,12 +201,23 @@ export class PlaywrightSurface implements AgentSurface {
      * Flag or configuration, then the environment (LLD §15, Draft 2.5's
      * precedence for every session-opening command).
      */
-    const cdpUrl =
-      session.attach?.cdpUrl ??
-      this.options.cdpUrl ??
-      (process.env["SVATAH_CDP_URL"] === undefined || process.env["SVATAH_CDP_URL"] === ""
+    const fromEnvironment =
+      process.env["SVATAH_CDP_URL"] === undefined || process.env["SVATAH_CDP_URL"] === ""
         ? undefined
-        : process.env["SVATAH_CDP_URL"]);
+        : process.env["SVATAH_CDP_URL"];
+    /*
+     * The session's own, then the environment, then the configuration — LLD
+     * §15's precedence for every session-opening command, and the order matters
+     * (T11.5).
+     *
+     * The configuration was first, so `evals/self/cdp`'s written-down port beat
+     * the one `svatah eval self` had actually started an ADE on, and the
+     * attaching side of the parity gate reported "could not attach to
+     * 127.0.0.1:9464" — a port nothing was listening on, named in a file. A
+     * port in a configuration is a *default* for somebody with no better idea;
+     * an environment variable is somebody who does.
+     */
+    const cdpUrl = session.attach?.cdpUrl ?? fromEnvironment ?? this.options.cdpUrl;
 
     if (this.options.page !== undefined) {
       this.context = this.options.page.context();
@@ -552,13 +564,16 @@ export class PlaywrightSurface implements AgentSurface {
      * and against the ADE's renderer it lost about a third of the time, where
      * clicking a project starts a service.
      *
-     * So a locate that finds nothing is retried until the candidate timeout,
-     * exactly as the desktop adapters' now is. One that finds something answers
-     * at once, so only the case that was going to fail pays for it — and the
-     * two sides of the parity gate behave the same, which is the thing a gate
-     * comparing them depends on.
+     * So a locate that finds nothing is retried until just short of the
+     * candidate timeout, exactly as the desktop adapters' now is — short of it,
+     * because the resolver races the same budget and a tie makes it publish
+     * "candidate timed out" where the truth is "matched nothing"
+     * (`locateDeadline`). One that finds something answers at once, so only the
+     * case that was going to fail pays for it — and the two sides of the parity
+     * gate behave the same, which is the thing a gate comparing them depends
+     * on.
      */
-    const deadline = Date.now() + (this.options.candidateTimeoutMs ?? 0);
+    const deadline = locateDeadline(this.options.candidateTimeoutMs);
     for (;;) {
       const all = await locator.all();
       if (all.length > 0 || Date.now() >= deadline) {

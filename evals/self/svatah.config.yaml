@@ -54,11 +54,21 @@ bindings:
 data: { file: data.yaml }
 api: { dir: api }
 
+# The timeouts are a loaded machine's, not an idle one's.
+#
+# `svatah eval self` runs this project *after* the healing eval — four minutes of
+# Chromium — and beside whatever else the machine is doing, and a desktop
+# adapter's locate is a fresh accessibility read of a thousand-node tree each
+# time round. At five seconds a candidate, a click that the ADE answered a
+# moment later than usual failed the step after it; measured on this host under
+# the gate, and never on its own. Fifteen seconds is the same waiting a person
+# does before deciding a screen did not open. Nothing here changes the product's
+# defaults (`config.run` in LLD §4.2) — it is this project's own patience.
 run:
   workers: 1
   headless: true
-  stepTimeoutMs: 20000
-  candidateTimeoutMs: 5000
+  stepTimeoutMs: 45000
+  candidateTimeoutMs: 15000
   screenshots: onFailure
   trace: false
   outputDir: runs

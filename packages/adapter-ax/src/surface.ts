@@ -53,6 +53,7 @@ import {
   buildSnapshot,
   executableOf,
   launchApplication,
+  locateDeadline,
   LocateError,
   NavigationError,
   quitApplication,
@@ -410,11 +411,14 @@ export class AxSurface implements AgentSurface {
      * read, which is intermittently, which is the worst way to fail. Measured:
      * one run in three on this host.
      *
-     * So a locate that finds nothing is re-read until it does or the candidate
-     * timeout passes. A locate that finds *something* returns at once, so
-     * nothing pays for this but the case that was going to fail anyway.
+     * So a locate that finds nothing is re-read until it does, or until just
+     * short of the candidate timeout — short of it, because the resolver races
+     * the same budget and a tie makes it publish "candidate timed out" where
+     * the truth is "matched nothing" (`locateDeadline`). A locate that finds
+     * *something* returns at once, so nothing pays for this but the case that
+     * was going to fail anyway.
      */
-    const deadline = Date.now() + (this.options.candidateTimeoutMs ?? 0);
+    const deadline = locateDeadline(this.options.candidateTimeoutMs);
     for (;;) {
       await this.refresh();
       const found = matchNodes(candidate, this.nodes);

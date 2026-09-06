@@ -1,28 +1,30 @@
-^Dloading…
-svatah ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-capture-EImOlc   http://127.0.0.1:61628   Run comp · test behavior · invoker user …
+loading…
+svatah ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-capture-2LBoaA   http://127.0.0.1:61768   Run comp · test behavior · invoker user …
 ┌────────────────────────────────┐┌──────────────────────────────────────────────────────────────────────────────┐┌────────────────────────────────────────────┐
 │ 1 Stories                      ││ 2 Run comp · aborted                                                         ││ 3 Step 5 · Click the pay button            │
-│ I want to book an… ✗ failed    ││ ✓  1 Click the Book a slot link                           testid #0   107 ms ││ failure   locator                          │
-│ cancel a booking   ✓ passed    ││ ✓  2 Type "Indiranagar" into the location field           testid #0   29 ms  ││ session   /booking · window 0              │
-└────────────────────────────────┘│ ✓  3 Click the Book now button                            testid #0   25 ms  ││ policy    compensate: cancel a booking     │
-                                  │ ✓  4 Remember the text of the booking reference as refer… = BK-10428  4 ms   ││ candidates tried                           │
-                                  │ ✗  5 Click the pay button                                             74 ms  ││   testid  pay                  0           │
-                                  │ ✓  1 Click the cancel booking button                      testid #0   39 ms  ││   role    button · "Pay"       0           │
-                                  │ ✓  2 The booking reference should say {I want to book an… testid #0   4 ms   ││   text    Pay                  0           │
-                                  │ Could not resolve "checkout.pay-button" (the pay button): 5 candidates trie… ││   css     [data-testid="pay"]  0           │
-                                  │ flow aborted · exit 11                                                       ││   xpath   //*[@data-testid='p… 0           │
-                                  │                                                                              ││ screenshot                                 │
-                                  │                                                                              ││ I-want-to-book-and-then-fail-5.png         │
-                                  └──────────────────────────────────────────────────────────────────────────────┘└────────────────────────────────────────────┘
+│ I want to book and… failed     ││ ✓  1 Click the Book a slot link                        testid #0    104 ms   ││ failure       locator                      │
+│ cancel a booking    passed     ││ ✓  2 Type "Indiranagar" into the location field        testid #0    38 ms    ││ session       /booking · window 0          │
+└────────────────────────────────┘│ ✓  3 Click the Book now button                         testid #0    46 ms    ││ window        Booking · Svatah Sample      │
+                                  │ ✓  4 Remember the text of the booking reference as re… = BK-10428   54 ms    ││ dialog        none                         │
+                                  │ ✗  5 Click the pay button                                           9123 ms  ││ policy        compensate: cancel a booking │
+                                  │ ✓  1 Click the cancel booking button                   testid #0    36 ms    ││ CANDIDATES TRIED                           │
+                                  │ ✓  2 The booking reference should say {I want to book… testid #0    9 ms     ││ testid   pay                           0   │
+                                  │ flow aborted · exit 11                                                       ││ role     button · "Pay"                0   │
+                                  └──────────────────────────────────────────────────────────────────────────────┘│ text     Pay                           0   │
+                                                                                                                  │ css      [data-testid="pay"]           0   │
+                                                                                                                  │ xpath    //*[@data-testid='pay']       0   │
+                                                                                                                  │ screenshot    I-want-to-book-and-then-fai… │
+                                                                                                                  │ WHAT TO DO                                 │
+                                                                                                                  │ Could not resolve "checkout.pay-button" (… │
+                                                                                                                  └────────────────────────────────────────────┘
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ 4 Audit · follow                                                                                                                                             │
-│ 00.746 surface act · click · h3 · ok · 36 ms                                                                                                                 │
-│ 00.746 surface state · ok · 0 ms                                                                                                                             │
-│ 00.747 surface locate · ok · 1 ms                                                                                                                            │
-│ 00.748 surface state · ok · 0 ms                                                                                                                             │
-│ 00.749 surface locate · ok · 1 ms                                                                                                                            │
-│ 00.750 surface check · ref · ok · 1 ms                                                                                                                       │
-│ 00.750 output                                                                                                                                                │
-│ ─ svatah ui --json streams these same lines to stdout for an agent ─                                                                                         │
+│ 4 Audit                                                                                                                                                      │
+│ 00.001 run        invoker kind user id local via cli · inputs                                                                                                │
+│ 00.395 story      inputs                                                                                                                                     │
+│ 00.405 state      ok · 7 ms                                                                                                                                  │
+│ 00.428 locate     nav.book-a-slot-link · testid "booking-link" · matched 1 · ok · 22 ms                                                                      │
+│ 00.499 act        click · h0 · ok · 71 ms                                                                                                                    │
+│ 00.503 state      ok · 3 ms                                                                                                                                  │
+│ svatah ui --json streams these same lines to stdout for an agent                                                                                             │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-^K commands   1-4 pane   Tab next   j k move   Enter open   h heal  q quit
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  s stop  h heal  q quit

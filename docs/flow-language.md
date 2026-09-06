@@ -1791,6 +1791,14 @@ no-op would let a desktop flow "pass" against a browser it never quit.
 }
 ```
 
+`Close the app` compiles to:
+
+```json
+{
+  "action": "quit"
+}
+```
+
 ---
 
 ## 6. Custom typed steps (Tier 0) — REQ-LANG-15, REQ-LANG-16

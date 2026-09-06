@@ -47,8 +47,9 @@ api: { dir: ../api }
 run:
   workers: 1
   headless: true
-  stepTimeoutMs: 20000
-  candidateTimeoutMs: 5000
+  # The desktop half's patience, for the same reason (see ../svatah.config.yaml).
+  stepTimeoutMs: 45000
+  candidateTimeoutMs: 15000
   screenshots: onFailure
   trace: false
   outputDir: runs

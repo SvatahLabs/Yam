@@ -835,8 +835,25 @@ async function goTo(screen: string, label: string): Promise<void> {
    * The *workspace's* title, not any heading with that name: the Runs screen's
    * inspector has an `<h3>Run 00mt…</h3>` in it, and a role query happily
    * matches that while the workspace is still showing something else.
+   *
+   * And the click is *repeated* until the title is the one asked for (P11). A
+   * run started by an earlier case can still be in flight, and a run that
+   * finishes opens the Run screen — so a single click on the rail is a request
+   * the application may answer and then navigate away from. Under a loaded
+   * `pnpm -r test` this waited sixty seconds while the title moved between two
+   * run ids and never became "Flows". Clicking again is what a person does.
    */
-  await expect(page.locator(".sv-toolbar-title")).toContainText(label, { timeout: 60_000 });
+  const title = page.locator(".sv-toolbar-title");
+  const deadline = Date.now() + 60_000;
+  for (;;) {
+    try {
+      await expect(title).toContainText(label, { timeout: 5_000 });
+      return;
+    } catch (error) {
+      if (Date.now() >= deadline) throw error;
+      if ((await rail.count()) > 0) await rail.click();
+    }
+  }
 }
 
 test.describe("every screen (T10.1, T10.2)", () => {
@@ -908,9 +925,24 @@ test("the Runs screen filters, and its inspector shows the failing step's eviden
   }
   await expect(behavior).toContainText("behavior: all");
 
-  // Choosing a run fills the inspector with what that run wrote.
-  await page.locator("#runs-table tbody tr").first().click();
-  await expect(page.locator("#inspector-run")).toBeVisible();
+  /*
+   * Choosing a run fills the inspector with what that run wrote — and the click
+   * is repeated until it does (P11). The table re-reads the project, so a run
+   * finishing while this case is in it replaces the row under the pointer, and
+   * a click that landed on a row that is no longer there selects nothing. Under
+   * a loaded `pnpm -r test` that is what happened.
+   */
+  const inspector = page.locator("#inspector-run");
+  const untilSelected = Date.now() + 30_000;
+  for (;;) {
+    await page.locator("#runs-table tbody tr").first().click();
+    try {
+      await expect(inspector).toBeVisible({ timeout: 5_000 });
+      break;
+    } catch (error) {
+      if (Date.now() >= untilSelected) throw error;
+    }
+  }
   await expect(page.locator("#inspector-artifacts")).toBeVisible();
 });
 

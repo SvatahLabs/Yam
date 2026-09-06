@@ -905,6 +905,22 @@ export function parseWindow(stdout: string): {
 }
 
 /**
+ * How many times the action script asks System Events for the window before an
+ * empty answer is a cause, and how long it waits between two asks. Two seconds
+ * in the worst case, and nothing at all when the first answer is the truth.
+ */
+export const PERFORM_WINDOW_TRIES = 10;
+export const PERFORM_WINDOW_PAUSE_S = 0.2;
+
+/**
+ * How long the bridge keeps re-sending an action that System Events refused for
+ * "no window" *while the accessibility API can see one*, and how long it waits
+ * between two tries. Nothing is spent unless the two oracles disagree.
+ */
+export const PERFORM_ADJUDICATION_MS = 10_000;
+export const PERFORM_ADJUDICATION_PAUSE_MS = 500;
+
+/**
  * One command.
  *
  * An element is addressed by its **path** — the child index at each level from
@@ -929,17 +945,39 @@ export const PERFORM_SCRIPT = `/**
  * process the right one, so it is what the choice is made on.
  */
 function processWithWindow(se, name) {
-  var matches = se.applicationProcesses.whose({ name: name })();
-  for (var i = 0; i < matches.length; i++) {
-    try {
-      if (matches[i].windows().length > 0) return matches[i];
-    } catch (e) {
-      // A process that refuses the question is not the one with a window.
+  var matches = [];
+  // System Events answers this under *its* accessibility permission and its own
+  // load, and a busy answer is an empty list rather than an error: a click
+  // against a window the ADE's own log shows open answered no-window once in
+  // roughly fifty (P11). An application does not lose its window between two
+  // reads a fifth of a second apart, so an empty answer is asked again before
+  // it is believed — and only a run of them is reported as a cause.
+  for (var attempt = 0; attempt < ${PERFORM_WINDOW_TRIES}; attempt++) {
+    if (attempt > 0) pause(${PERFORM_WINDOW_PAUSE_S});
+    matches = se.applicationProcesses.whose({ name: name })();
+    for (var i = 0; i < matches.length; i++) {
+      try {
+        if (matches[i].windows().length > 0) return matches[i];
+      } catch (e) {
+        // A process that refuses the question is not the one with a window.
+      }
     }
   }
-  // None has one: hand back the first so the caller reports "no-window" rather
-  // than an index error, which says something different.
+  // None has one, ${PERFORM_WINDOW_TRIES} times over: hand back the first so the
+  // caller reports "no-window" rather than an index error, which says something
+  // different.
   return matches.length > 0 ? matches[0] : se.applicationProcesses.byName(name);
+}
+
+/**
+ * Wait, where there is something to wait with. JXA carries Foundation on the
+ * dollar object; the unit test that *executes* this function carries a fake
+ * System Events and nothing else, and has nothing to wait for.
+ */
+function pause(seconds) {
+  if (typeof $ !== 'undefined' && $.NSThread !== undefined) {
+    $.NSThread.sleepForTimeInterval(seconds);
+  }
 }
 
 function run(argv) {
@@ -1110,7 +1148,21 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
     }
   };
 
-  return {
+  /**
+   * Does the accessibility API — not System Events — see a window for this
+   * application right now? One node is enough: `window()` throws when there is
+   * none, and answers when there is.
+   */
+  const apiSeesAWindow = async (): Promise<boolean> => {
+    try {
+      await bridge.window({ process: options.process, maxNodes: 1, deadlineMs: 8000 });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const bridge: AxBridge = {
     async permission(): Promise<AxPermission> {
       if (process.platform !== "darwin") {
         lastPermission = "unsupported";
@@ -1367,13 +1419,54 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
     },
 
     async perform(command): Promise<void> {
-      const answer = (await call(
-        PERFORM_SCRIPT,
-        { ...command, process: options.process },
-        timeoutMs,
-      )) as { ok: boolean; error?: string };
+      const once = async (): Promise<{ ok: boolean; error?: string }> =>
+        (await call(PERFORM_SCRIPT, { ...command, process: options.process }, timeoutMs)) as {
+          ok: boolean;
+          error?: string;
+        };
+
+      let answer = await once();
+
+      /*
+       * System Events said there is no window. The accessibility API decides
+       * whether that is true, and a hidden application is shown (P11).
+       *
+       * The *read* path goes at `AXUIElement` directly and the action path asks
+       * System Events, and the two do not answer the same question. A **hidden**
+       * application keeps its windows in `AXWindows` — a read of the tree
+       * succeeds — and `System Events`' `windows()` is empty, because a hidden
+       * window is not one a user could click. Measured: the ADE's own log has
+       * `window.hide` 4.1 s before a click that came back `no-window`, and
+       * `window.show` between the two, with the assertion one step earlier
+       * passing off the very tree the click could not reach.
+       *
+       * So the two oracles are asked in turn: while the API can see a window,
+       * the application is *activated* — which is what un-hides it — and the
+       * action re-sent. Only a no from both, for ten seconds, is a cause. It
+       * costs nothing when the action worked, which is almost always.
+       */
+      if (!answer.ok && answer.error === "no-window") {
+        const until = Date.now() + PERFORM_ADJUDICATION_MS;
+        while (!answer.ok && answer.error === "no-window" && Date.now() < until) {
+          if (!(await apiSeesAWindow())) break;
+          await call(PERFORM_SCRIPT, { kind: "activate", process: options.process }, timeoutMs);
+          await new Promise((done) => setTimeout(done, PERFORM_ADJUDICATION_PAUSE_MS));
+          answer = await once();
+        }
+      }
+
       if (!answer.ok) {
-        throw new AxBridgeError(`The accessibility action failed: ${answer.error ?? "unknown"}.`);
+        throw new AxBridgeError(
+          answer.error === "no-window"
+            ? `The action found no window for "${options.process}": System Events answered an ` +
+              `empty list ${PERFORM_WINDOW_TRIES} times over ` +
+              `${Math.round(PERFORM_WINDOW_TRIES * PERFORM_WINDOW_PAUSE_S)} s, and the ` +
+              "accessibility API agreed for another " +
+              `${Math.round(PERFORM_ADJUDICATION_MS / 1000)} s. Either the application has ` +
+              "gone, or nothing has a window on this display — " +
+              "`svatah surface doctor --adapter ax` says which."
+            : `The accessibility action failed: ${answer.error ?? "unknown"}.`,
+        );
       }
     },
 
@@ -1399,6 +1492,8 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
       });
     },
   };
+
+  return bridge;
 }
 
 const PROMPT_ADVICE =

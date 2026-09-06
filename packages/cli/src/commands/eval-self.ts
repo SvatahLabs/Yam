@@ -99,6 +99,29 @@ interface RunContext {
 
 const ok = (evidence: string): SideResult => ({ verdict: "pass", evidence });
 const no = (evidence: string): SideResult => ({ verdict: "fail", evidence });
+const cannot = (evidence: string): SideResult => ({ verdict: "unreachable", evidence });
+
+/**
+ * The failures that are the *host's*, not the check's (P10-F1, P10-F5).
+ *
+ * A locked display makes macOS answer `AXWindows` with the application element
+ * for every application on the machine, so every desktop step fails — and a
+ * gate that recorded that as `fail` would publish a disagreement with an
+ * external oracle that had just passed, and name a cause where the honest
+ * answer is "could not tell". These are the sentences the adapter and
+ * `surface doctor` already write when the host is what stopped them; a step
+ * that carries one is `unreachable`, with the doctor's own line as the reason.
+ */
+const HOST_STOPPED_IT: readonly string[] = [
+  "CGSSessionScreenIsLocked",
+  "no login session",
+  "ax/accessibility",
+];
+
+/** The marker in a failure message, when the host is what stopped the step. */
+function hostStoppedIt(message: string): string | undefined {
+  return HOST_STOPPED_IT.find((marker) => message.includes(marker));
+}
 
 /** Run a command, and say how long it took. */
 function shell(
@@ -118,8 +141,20 @@ function shell(
     stdout: ran.stdout ?? "",
     stderr: ran.stderr ?? "",
     wallMs: Date.now() - startedAt,
-    line: `${command} ${args.join(" ")}`,
+    line: [command, ...args].map((word) => readable(word, options.cwd)).join(" "),
   };
+}
+
+/**
+ * The command as a verifier would type it: this host's Node is `node`, and a
+ * path inside the checkout is written relative to it. The report is a document
+ * somebody re-runs, so an absolute path from the machine that wrote it is a
+ * command nobody else can run.
+ */
+function readable(word: string, cwd: string): string {
+  if (word === process.execPath) return "node";
+  const root = cwd.endsWith("/") ? cwd : `${cwd}/`;
+  return word.startsWith(root) ? word.slice(root.length) : word;
 }
 
 /**
@@ -209,15 +244,12 @@ function svatahSource(project: string, options: { attach?: boolean } = {}): Sour
         if (story === "") continue;
         const already = byName.get(story);
         if (step.status === "failed" || step.status === "aborted") {
-          if (already?.verdict !== "fail") {
-            byName.set(
-              story,
-              no(
-                `${step.step?.text ?? "a step"}: ${step.failure?.message ?? "failed"}`
-                  .split("\n")[0]!
-                  .slice(0, 300),
-              ),
-            );
+          if (already?.verdict !== "fail" && already?.verdict !== "unreachable") {
+            const message = step.failure?.message ?? "failed";
+            const evidence = `${step.step?.text ?? "a step"}: ${message}`
+              .split("\n")[0]!
+              .slice(0, 300);
+            byName.set(story, hostStoppedIt(message) === undefined ? no(evidence) : cannot(evidence));
           }
           continue;
         }
@@ -271,11 +303,21 @@ function startAdeWithDebugging(
   stop();
   const port = 9400 + Math.floor(Math.random() * 90);
   const open = ["-n", "-F"];
+  /*
+   * The *same* environment the accessibility side's `app.launch` gives it, and
+   * `SVATAH_ADE_PROJECT` is deliberately not in it (T11.5).
+   *
+   * That variable opens a project *for* the ADE on ready, so the welcome screen
+   * never appears — and the self flows open the fixtures project through the
+   * Recent list, which is the gesture T11.2's Validate names. Two sides looking
+   * at applications that started differently is the one thing a parity gate
+   * must not do. `node scripts/seed-ade-recents.mjs` is what puts the project
+   * in that list.
+   */
   for (const [name, value] of Object.entries({
     SVATAH_A11Y: "1",
     SVATAH_ADE_DEBUG: "1",
     SVATAH_CLI: join(root, "packages", "cli", "dist", "bin.js"),
-    SVATAH_ADE_PROJECT: join(root, "evals", "fixtures"),
   })) {
     open.push("--env", `${name}=${value}`);
   }
@@ -746,7 +788,10 @@ function renderReport(input: {
     "## One-sided checks — Svatah's own shortcomings",
     "",
     "Every one names the adapter or the step Svatah lacks, and the list is",
-    "expected to shrink phase by phase (LLD §13.9).",
+    "expected to shrink phase by phase (LLD §13.9). A row whose reason is the",
+    "*host* — a locked display, a refused permission — is not a shortcoming of",
+    "either side: it is what this machine could not be asked, said in the",
+    "doctor's own words rather than guessed at (P10-F1, P10-F5).",
     "",
     oneSided.length === 0
       ? "None: both sides reach every check."
