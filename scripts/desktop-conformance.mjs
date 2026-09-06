@@ -120,6 +120,40 @@ if (doctor.status !== 0) {
   );
 }
 
+/**
+ * Does anything in this login session own a window (Draft 2.12 §7.5, P9-F7)?
+ *
+ * > when only `loginwindow` does, the display is locked or the session has no
+ * > WindowServer, and the gate names that as the cause of its exit 2 rather than
+ * > a launch failure.
+ *
+ * Asked again at the moment of a launch failure rather than only at the start,
+ * because a display can lock while a gate is running — which is exactly how it
+ * would happen to someone who started the gate and walked away, and is what
+ * happened to both the Phase 9 implementer and its verifier.
+ *
+ * `undefined` when there is nothing to say: another adapter, or a `doctor` that
+ * did not answer. A gate that guessed "locked" would replace one wrong
+ * explanation with another.
+ */
+function lockedDisplay() {
+  if (adapter !== "ax") return undefined;
+  const asked = spawnSync(
+    process.execPath,
+    [cli, "surface", "doctor", "--adapter", adapter, "--json"],
+    { encoding: "utf8" },
+  );
+  try {
+    const parsed = JSON.parse(asked.stdout ?? "{}");
+    const session = (parsed.checks ?? []).find(
+      (one) => one.adapter === "ax" && one.name === "session",
+    );
+    return session === undefined || session.ok === true ? undefined : session;
+  } catch {
+    return undefined;
+  }
+}
+
 /* ── 2. the ADE ───────────────────────────────────────────────────────────── */
 
 /** The macOS application bundle, which is what LaunchServices opens. */
@@ -459,17 +493,34 @@ try {
     running = launched.child;
     if (launched.timedOut) {
       stop();
+      /*
+       * Why there was no window (Draft 2.12 §7.5, P9-F7).
+       *
+       * On a locked display nothing an application does will produce one, so
+       * "showed no window within 60000 ms" is true and useless: it sends the
+       * reader to look at the ADE. When the session check says the display is
+       * locked, that is the cause and it is what this says.
+       */
+      const locked = lockedDisplay();
       die(
         2,
-        `The ADE was launched at variant ${variant} but ` +
-          (launched.windowAt === undefined
-            ? `showed no window within ${WINDOW_TIMEOUT_MS} ms`
-            : `showed no open project within ${WINDOW_TIMEOUT_MS} ms ` +
-              `(its window appeared after ${launched.windowAt} ms; SVATAH_ADE_PROJECT=${project})`) +
-          ". That is a launch failure, not an adapter failure, and it is " +
-          "reported as one so the report is not a list of cases that never had anything to read.\n" +
-          `Nothing was written to ${report}.\n` +
-          `\`svatah surface doctor --adapter ${adapter}\` said:\n${doctorOutput}`,
+        locked === undefined
+          ? `The ADE was launched at variant ${variant} but ` +
+              (launched.windowAt === undefined
+                ? `showed no window within ${WINDOW_TIMEOUT_MS} ms`
+                : `showed no open project within ${WINDOW_TIMEOUT_MS} ms ` +
+                  `(its window appeared after ${launched.windowAt} ms; SVATAH_ADE_PROJECT=${project})`) +
+              ". That is a launch failure, not an adapter failure, and it is " +
+              "reported as one so the report is not a list of cases that never had anything to " +
+              `read.\nNothing was written to ${report}.\n` +
+              `\`svatah surface doctor --adapter ${adapter}\` said:\n${doctorOutput}`
+          : `The ADE showed no window at variant ${variant} because this login session cannot ` +
+              `show one: ${locked.detail}.\n` +
+              "That is the cause, not a launch failure and not an adapter failure — nothing " +
+              "launched here would get a window.\n" +
+              `${locked.fix ?? ""}\n` +
+              `Nothing was written to ${report}.\n` +
+              `\`svatah surface doctor --adapter ${adapter}\` said:\n${doctorOutput}`,
       );
     }
 

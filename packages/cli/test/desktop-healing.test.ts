@@ -71,6 +71,16 @@ function axSurface(file: string): AgentSurface {
     async permission() {
       return { state: "granted", advice: "granted (recorded)" };
     },
+    // These cases replay a recorded tree; the login session behind them is one
+    // in which the ADE had a window, because that is where the trees came from.
+    async session() {
+      return {
+        usable: true,
+        owners: ["Svatah ADE"],
+        detail: "1 application(s) own a window: Svatah ADE",
+        advice: "recorded",
+      };
+    },
     async window() {
       return replaying<AxWindow>(file, { invocations: 0, axCalls: 0 });
     },

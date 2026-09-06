@@ -550,3 +550,76 @@ describe("the snapshot cost records what the machine was doing (P8-F2, LLD §7.5
     ).rejects.toThrow(/load average [\d.]+ over \d+ CPUs/);
   });
 });
+
+/**
+ * The login-session check (T10.4, P9-F7, Draft 2.12 §7.5).
+ *
+ * > `svatah surface doctor --adapter ax` also reports `ax/session`: whether any
+ * > process in the login session owns an on-screen window; when only
+ * > `loginwindow` does, the display is locked or the session has no
+ * > WindowServer, and the gate names that as the cause of its exit 2 rather than
+ * > a launch failure.
+ *
+ * The Phase 9 live gate exited 2 on a locked display for both the implementer
+ * and the verifier, reporting "showed no window within 60000 ms" — which is
+ * true, and points at the ADE. These are the four answers this check has to be
+ * able to give, driven through the same fake `run` the rest of this file uses.
+ */
+describe("the login-session check (P9-F7, Draft 2.12 §7.5)", () => {
+  const macOnly = process.platform === "darwin";
+
+  it.runIf(macOnly)("names what owns a window when something does", async () => {
+    const { run, calls } = answering(
+      '{"ok":true,"asked":12,"owners":["loginwindow","Svatah ADE","Finder"]}',
+    );
+    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    expect(session.usable).toBe(true);
+    expect(session.owners).toContain("Svatah ADE");
+    expect(session.detail).toContain("Svatah ADE");
+
+    // It reads AXWindows per application, in one invocation, like the window
+    // read — never one osascript per process.
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.script).toContain("AXUIElementCreateApplication");
+    expect(calls[0]!.script).toContain("AXWindows");
+    expect(calls[0]!.script).toContain("runningApplications");
+  });
+
+  it.runIf(macOnly)("says the display is locked when only loginwindow owns one", async () => {
+    const { run } = answering('{"ok":true,"asked":9,"owners":["loginwindow"]}');
+    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    expect(session.usable).toBe(false);
+    expect(session.detail).toContain("loginwindow");
+    expect(session.detail).toContain("the display is locked");
+    expect(session.advice).toContain("exit 2");
+  });
+
+  it.runIf(macOnly)("says so when nothing at all owns a window", async () => {
+    const { run } = answering('{"ok":true,"asked":4,"owners":[]}');
+    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    expect(session.usable).toBe(false);
+    expect(session.detail).toContain("no process in this login session owns a window");
+  });
+
+  it.runIf(macOnly)("answers \"could not tell\" rather than throwing, when osascript refuses", async () => {
+    const refused: Run = async () => ({
+      code: 1,
+      stdout: "",
+      stderr: "execution error: Not authorised (-1743)",
+      timedOut: false,
+    });
+    const session = await osascriptBridge({ process: "Svatah ADE", run: refused }).session();
+    expect(session.usable).toBe(false);
+    expect(session.detail).toContain("could not tell");
+    // The check exists to explain an exit code; one that threw would replace an
+    // unexplained failure with another.
+    expect(session.advice).toContain("surface doctor");
+  });
+
+  it.runIf(!macOnly)("says it is a macOS question on any other host", async () => {
+    const { run } = answering("{}");
+    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    expect(session.usable).toBe(false);
+    expect(session.detail).toBe("not macOS");
+  });
+});

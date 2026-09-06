@@ -50,6 +50,28 @@ is checked before the first snapshot on purpose: a session that opened and then
 failed on its first `locate` would report a `locator` failure for an element
 that was there all along.
 
+### `ax/session`: is anyone at this machine? (Draft 2.12 §7.5)
+
+`doctor` also reports whether any process in the login session owns an on-screen
+window:
+
+```
+ok    ax/session   9 application(s) own a window: Finder, Svatah ADE, …
+warn  ax/session   only loginwindow owns a window — the display is locked
+```
+
+The permission can be granted and the adapter perfectly ready and *nothing will
+get a window*, because the display is locked, the machine is at the login
+screen, or the session has no WindowServer at all — an SSH login, a headless
+runner. `loginwindow` is the process that owns the screen in all three cases.
+
+It is **advisory**: nothing is misconfigured, so `doctor`'s exit code does not
+change. What it changes is what `scripts/desktop-conformance.mjs` can do — the
+gate polls sixty seconds for the ADE's window and then exits 2, and on a locked
+display it now says *that* is why rather than reporting a launch failure. Both
+the Phase 9 implementation and its verification lost the live measurement to
+this and had only "showed no window within 60000 ms" to go on.
+
 ## What it is built on, and why
 
 `AXUIElement` through **System Events** and `osascript`, not through a native

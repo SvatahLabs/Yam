@@ -23,7 +23,14 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { AxBridge, AxCommand, AxNode, AxPermission, AxWindow } from "../src/index.js";
+import type {
+  AxBridge,
+  AxCommand,
+  AxNode,
+  AxPermission,
+  AxSession,
+  AxWindow,
+} from "../src/index.js";
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
 
@@ -73,6 +80,8 @@ export interface RecordedBridgeOptions {
   /** The screen the window starts on. */
   readonly screen?: AdeScreen;
   readonly permission?: AxPermission;
+  /** What `session()` answers; the default is a session with a window on it. */
+  readonly session?: AxSession;
   /**
    * What a command does to the window.
    *
@@ -141,6 +150,21 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
     screen: () => screen,
     async permission(): Promise<AxPermission> {
       return options.permission ?? { state: "granted", advice: "granted (recorded)" };
+    },
+    /*
+     * A recorded session is a usable one: these fixtures are of an ADE with a
+     * window on screen (Draft 2.12 §7.5). `options.session` overrides it, which
+     * is how a test can be about a locked display.
+     */
+    async session(): Promise<AxSession> {
+      return (
+        options.session ?? {
+          usable: true,
+          owners: ["Svatah ADE"],
+          detail: "1 application(s) own a window: Svatah ADE",
+          advice: "This session has a WindowServer and applications can show windows.",
+        }
+      );
     },
     async window({ maxNodes }): Promise<AxWindow> {
       const window = recordedWindow(screen);

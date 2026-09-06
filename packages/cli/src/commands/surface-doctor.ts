@@ -129,7 +129,24 @@ async function axChecks(): Promise<SurfaceCheck[]> {
   }
 
   const { osascriptBridge } = await import("@svatah/adapter-ax");
-  const permission = await osascriptBridge({ process: "System Events" }).permission();
+  const bridge = osascriptBridge({ process: "System Events" });
+  const permission = await bridge.permission();
+  /*
+   * The login session (Draft 2.12 §7.5, P9-F7).
+   *
+   * > `svatah surface doctor --adapter ax` also reports `ax/session`: whether
+   * > any process in the login session owns an on-screen window; when only
+   * > `loginwindow` does, the display is locked or the session has no
+   * > WindowServer, and the gate names that as the cause of its exit 2 rather
+   * > than a launch failure.
+   *
+   * Advisory, like Screen Recording (LLD §15's severities: `warn`, exit
+   * unchanged). A locked display is not a *setting that is wrong* — nothing has
+   * to be granted or installed — it is a machine nobody is sitting at, and the
+   * adapter itself is perfectly ready. What it changes is what the desktop gate
+   * can do, and `scripts/desktop-conformance.mjs` is what reads this line.
+   */
+  const session = await bridge.session();
   return [
     {
       adapter: "ax",
@@ -137,6 +154,14 @@ async function axChecks(): Promise<SurfaceCheck[]> {
       ok: permission.state === "granted",
       detail: permission.state + (permission.detail === undefined ? "" : ` — ${permission.detail}`),
       fix: permission.advice,
+    },
+    {
+      adapter: "ax",
+      name: "session",
+      ok: session.usable,
+      advisory: true,
+      detail: session.detail,
+      fix: session.advice,
     },
     screenRecordingCheck(),
   ];

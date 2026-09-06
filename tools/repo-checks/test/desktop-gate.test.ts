@@ -163,3 +163,81 @@ describe("the gate records the load and retries once (P8-F2, LLD §7.5)", () => 
     expect(source).toContain("the first read exceeded the bridge's deadline and the ");
   });
 });
+
+/**
+ * P9-F7 — a locked display is named as the cause of exit 2 (T10.4).
+ *
+ * The Phase 9 live gate could not run for either the implementer or the
+ * verifier: both had a locked display, and both got "showed no window within
+ * 60000 ms" — true, and useless, because it sends a reader to look at the ADE
+ * when nothing launched on that machine would get a window.
+ *
+ * Draft 2.12 §7.5 adds `ax/session` to `svatah surface doctor` and asks the gate
+ * to name it. The gate itself needs a packaged ADE and a granted permission, so
+ * what is checked here is that the source has the branch and the doctor has the
+ * check — the same bargain the poll above is tested under, and for the same
+ * reason.
+ */
+describe("a locked display is the cause the gate names (P9-F7, Draft 2.12 §7.5)", () => {
+  const gate = readFileSync(SCRIPT, "utf8");
+
+  it("asks the doctor about the session when a launch shows no window", () => {
+    expect(gate).toContain("function lockedDisplay()");
+    expect(gate).toContain('one.name === "session"');
+    // Asked again at the moment of failure: a display can lock mid-gate.
+    expect(gate).toMatch(/const locked = lockedDisplay\(\);/);
+  });
+
+  it("says the session cannot show a window, rather than blaming the launch", () => {
+    expect(gate).toContain("because this login session cannot ");
+    expect(gate).toContain("launched here would get a window");
+    // And it still exits 2 and writes no report, as it did before.
+    expect(gate).toMatch(/die\(\s*\n?\s*2,\s*\n?\s*locked === undefined/);
+    expect(gate).toContain("Nothing was written to ${report}");
+  });
+
+  it("only ever says it about the macOS adapter", () => {
+    expect(gate).toContain('if (adapter !== "ax") return undefined;');
+  });
+});
+
+/**
+ * `svatah surface doctor --adapter ax` reports `ax/session` (P9-F7).
+ *
+ * Run for real: the check needs macOS and the Accessibility permission, and on
+ * any other host `doctor` answers `skip ax/platform` — which this asserts
+ * instead, so the case says something everywhere rather than skipping in
+ * silence.
+ */
+describe("`surface doctor --adapter ax` reports the login session (P9-F7)", () => {
+  const doctor = (): { checks: Array<Record<string, unknown>> } =>
+    JSON.parse(
+      execFileSync(
+        process.execPath,
+        [fromRoot("packages/cli/dist/bin.js"), "surface", "doctor", "--adapter", "ax", "--json"],
+        { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 },
+      ),
+    ) as { checks: Array<Record<string, unknown>> };
+
+  it("carries an ax/session check on macOS, and says why not elsewhere", () => {
+    const checks = doctor().checks;
+    const session = checks.find((one) => one["adapter"] === "ax" && one["name"] === "session");
+
+    if (process.platform !== "darwin") {
+      const platform = checks.find((one) => one["adapter"] === "ax" && one["name"] === "platform");
+      expect(platform?.["skipped"], "a non-macOS host should skip the ax checks").toBe(true);
+      expect(session).toBeUndefined();
+      return;
+    }
+
+    expect(session, JSON.stringify(checks, null, 2)).toBeDefined();
+    // Advisory: a locked display is not a setting that is wrong, and `doctor`'s
+    // exit code is about whether the host is *configured* for the adapter
+    // (LLD §15's severities).
+    expect(session!["advisory"]).toBe(true);
+    expect(typeof session!["detail"]).toBe("string");
+    expect(String(session!["detail"]).length).toBeGreaterThan(0);
+    // Either it names what owns a window, or it says the display is locked.
+    expect(String(session!["detail"])).toMatch(/own a window|locked|no process|could not tell/);
+  }, 120_000);
+});

@@ -6,6 +6,7 @@
  * See `README.md` for the permission this needs and how to grant it.
  */
 export {
+  LOGIN_WINDOW,
   machineLoad,
   osascriptBridge,
   parseWindow,
@@ -17,6 +18,7 @@ export {
   type AxNode,
   type AxPermission,
   type AxPermissionState,
+  type AxSession,
   type AxSnapshotCost,
   type AxWindow,
   type OsascriptLanguage,

@@ -188,6 +188,33 @@ export interface AxPermission {
   readonly detail?: string;
 }
 
+/**
+ * Whether anything in this login session owns a window (Draft 2.12 §7.5, P9-F7).
+ *
+ * > `svatah surface doctor --adapter ax` also reports `ax/session`: whether any
+ * > process in the login session owns an on-screen window; when only
+ * > `loginwindow` does, the display is locked or the session has no
+ * > WindowServer, and the gate names that as the cause of its exit 2 rather than
+ * > a launch failure.
+ *
+ * The desktop gate launches the ADE and polls for its window for sixty seconds.
+ * On a locked display no application gets one — `loginwindow` owns the screen —
+ * so the gate reported "showed no window within 60000 ms" and a reader had to
+ * guess whether the ADE was broken or the machine was asleep. It happened to
+ * both the Phase 9 implementer and its verifier, on different hosts, and cost
+ * the live measurement twice.
+ */
+export interface AxSession {
+  /** False when nothing but `loginwindow` (or nothing at all) owns a window. */
+  readonly usable: boolean;
+  /** The processes that own at least one on-screen window, by name. */
+  readonly owners: readonly string[];
+  /** One sentence for `svatah surface doctor` and for the gate's exit message. */
+  readonly detail: string;
+  /** What to do about it. */
+  readonly advice: string;
+}
+
 /** An action the bridge performs on one element, addressed by its path. */
 export type AxCommand =
   | { readonly kind: "action"; readonly path: readonly number[]; readonly action: string }
@@ -204,6 +231,15 @@ export type AxCommand =
 export interface AxBridge {
   /** Is the Accessibility permission granted to whatever is running this? */
   permission(): Promise<AxPermission>;
+  /**
+   * Does anything in this login session own an on-screen window
+   * (Draft 2.12 §7.5, P9-F7)?
+   *
+   * Separate from `permission()` because the two fail for different reasons and
+   * want different sentences: a refused permission is a setting, a locked
+   * display is a machine nobody is sitting at.
+   */
+  session(): Promise<AxSession>;
   /**
    * The accessibility tree of a process's front window.
    *
@@ -326,6 +362,47 @@ const PERMISSION_SCRIPT = `function run(argv) {
   // 0 either way — so a UI-element read is what the check turns on.
   const elements = se.applicationProcesses.byName("Finder").uiElements().length;
   return JSON.stringify({ ok: true, processes: procs, windows: windows, elements: elements });
+}`;
+
+/**
+ * Which processes in this login session own an on-screen window
+ * (Draft 2.12 §7.5, P9-F7).
+ *
+ * `NSWorkspace.runningApplications` and one `AXWindows` read each, in one
+ * `osascript` invocation — the same shape as the window read, for the same
+ * reason. Only applications with a regular or accessory activation policy are
+ * asked: a background agent has no user interface and answering "no window" for
+ * it says nothing.
+ *
+ * `loginwindow` is the one that matters. It owns the screen when the display is
+ * locked, at the login screen, and when a session has no WindowServer at all
+ * (a headless CI runner, an SSH session) — so "the only owner is `loginwindow`"
+ * is the same answer to all three, and the same answer the gate needs.
+ */
+const SESSION_SCRIPT = `ObjC.import('ApplicationServices');
+ObjC.import('AppKit');
+
+function run(argv) {
+  var running = $.NSWorkspace.sharedWorkspace.runningApplications;
+  var owners = [];
+  var asked = 0;
+  for (var i = 0; i < running.count; i++) {
+    var one = running.objectAtIndex(i);
+    // 0 regular (a Dock icon), 1 accessory (a menu-bar item that may have a
+    // window). 2 is prohibited: no user interface at all.
+    var policy = parseInt(String(one.activationPolicy), 10);
+    if (policy !== 0 && policy !== 1) continue;
+    var pid = parseInt(String(one.processIdentifier), 10);
+    if (!(pid > 0)) continue;
+    asked += 1;
+    var application = $.AXUIElementCreateApplication(pid);
+    var out = Ref();
+    if ($.AXUIElementCopyAttributeValue(application, $('AXWindows'), out) !== 0) continue;
+    var count = 0;
+    try { count = ObjC.castRefToObject(out[0]).count; } catch (e) { count = 0; }
+    if (count > 0) owners.push(String(ObjC.unwrap(one.localizedName)));
+  }
+  return JSON.stringify({ ok: true, asked: asked, owners: owners });
 }`;
 
 /**
@@ -823,6 +900,15 @@ const WINDOW_DEADLINE_MS = 10_000;
 const PROCESS_OVERHEAD_MS = 1_000;
 
 /**
+ * The process that owns the screen when nobody is at it.
+ *
+ * macOS's `loginwindow` draws the login screen and the lock screen, so it is
+ * the one thing that owns a window on a machine no application can show one on
+ * (Draft 2.12 §7.5).
+ */
+export const LOGIN_WINDOW = "loginwindow";
+
+/**
  * What the machine was doing when a read finished (Draft 2.10 §7.5, P8-F2).
  *
  * Read *after* the read rather than before it, because the one-minute average
@@ -936,6 +1022,59 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
         state: lastPermission,
         advice: denied ? DENIED_ADVICE : PROMPT_ADVICE,
         ...(detail === "" ? {} : { detail }),
+      };
+    },
+
+    /**
+     * Does anything own a window (Draft 2.12 §7.5, P9-F7)?
+     *
+     * Never throws: this check exists to explain an exit code, and a check that
+     * threw would replace one unexplained failure with another. A refusal is
+     * reported as "could not tell", not as "locked".
+     */
+    async session(): Promise<AxSession> {
+      if (process.platform !== "darwin") {
+        return {
+          usable: false,
+          owners: [],
+          detail: "not macOS",
+          advice: "The login-session check is about macOS's WindowServer.",
+        };
+      }
+      let answer: { ok?: boolean; asked?: number; owners?: string[] };
+      try {
+        answer = (await call(SESSION_SCRIPT, {}, PERMISSION_TIMEOUT_MS)) as typeof answer;
+      } catch (error) {
+        return {
+          usable: false,
+          owners: [],
+          detail: `could not tell — ${error instanceof AxBridgeError ? error.message : String(error)}`,
+          advice:
+            "The session check needs the same Accessibility permission the adapter does; run " +
+            "`svatah surface doctor --adapter ax` and grant it.",
+        };
+      }
+      const owners = answer.owners ?? [];
+      const others = owners.filter((one) => one !== LOGIN_WINDOW);
+      if (others.length > 0) {
+        return {
+          usable: true,
+          owners,
+          detail: `${others.length} application(s) own a window: ${others.slice(0, 6).join(", ")}`,
+          advice: "This session has a WindowServer and applications can show windows.",
+        };
+      }
+      return {
+        usable: false,
+        owners,
+        detail:
+          owners.includes(LOGIN_WINDOW)
+            ? `only ${LOGIN_WINDOW} owns a window — the display is locked`
+            : `no process in this login session owns a window (${answer.asked ?? 0} asked)`,
+        advice:
+          "Nothing launched here will get a window, so the desktop conformance gate cannot " +
+          "read one and will exit 2. Unlock the display — or log in at the console rather than " +
+          "over SSH — and run it again.",
       };
     },
 
