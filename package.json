@@ -43,7 +43,11 @@
     "release:dry-run": "node scripts/release-dry-run.mjs",
     "quick-start:packed": "node scripts/quick-start-packed.mjs",
     "release:publish": "node scripts/publish.mjs",
-    "ade:smoke": "node scripts/ade-smoke.mjs"
+    "ade:smoke": "node scripts/ade-smoke.mjs",
+    "sheet": "pnpm --filter @svatah/ui sheet",
+    "sheet:audit": "node scripts/audit-sheet.mjs",
+    "fixtures:screens": "node scripts/record-screen-fixtures.mjs",
+    "sheet:shoot": "node scripts/shoot-sheet.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
@@ -66,6 +70,10 @@
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
     "vitest": "catalog:",
-    "yaml": "catalog:"
+    "yaml": "catalog:",
+    "@svatah/screens": "workspace:*",
+    "@svatah/ui": "workspace:*",
+    "@svatah/ui-tokens": "workspace:*",
+    "jsdom": "^30.0.1"
   }
 }

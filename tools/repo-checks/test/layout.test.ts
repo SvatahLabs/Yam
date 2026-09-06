@@ -40,13 +40,45 @@ function hldPackages(): string[] {
 
 const isDir = (p: string) => existsSync(p) && statSync(p).isDirectory();
 
+/**
+ * The packages Draft 2.11 requires and HLD §12's layout block does not list.
+ *
+ * Draft 2.11 adds the builder surfaces — `@svatah/screens` (LLD §13.7),
+ * `@svatah/ui-tokens` and `@svatah/ui` (§13.7's design system), `@svatah/sdk`
+ * (§13.8) and `@svatah/tui` (REQ-TUI-1) — and states each of them by name in
+ * the LLD and in `tasks.md`'s Phase 9. It does not extend §12's layout block,
+ * which was last touched in Draft 2.3.
+ *
+ * Phase 9's working rule is "where a mockup and the LLD disagree, the LLD wins";
+ * the same reading applies to the HLD, whose §13 *does* list Phase 9 and every
+ * requirement id these packages exist for. So the five are named here, each
+ * with the section that requires it, and the check still fails on a sixth
+ * package nobody wrote down. The drift is recorded under Deviations in
+ * `docs/spec/progress/phase-9.md`.
+ */
+const DRAFT_2_11_PACKAGES: ReadonlyArray<{ name: string; because: string }> = [
+  { name: "screens", because: "LLD §13.7, REQ-ADE-10: the headless screen model" },
+  { name: "ui-tokens", because: "LLD §13.7, REQ-ADE-12: the design tokens, both themes" },
+  { name: "ui", because: "LLD §13.7, REQ-ADE-12: the React components on Radix primitives" },
+  { name: "sdk", because: "LLD §13.8, REQ-SDK-1: the generated TypeScript client" },
+  { name: "tui", because: "LLD §13.7, REQ-TUI-1: `svatah ui`, the terminal cockpit" },
+];
+
 describe("repository layout (HLD §12)", () => {
-  const expected = hldPackages();
+  const fromHld = hldPackages();
+  const expected = [...fromHld, ...DRAFT_2_11_PACKAGES.map((one) => one.name)];
 
   it("HLD §12 lists the expected number of packages", () => {
     // 24 through Draft 2.2; Draft 2.3 splits `playwright-test` into the module
     // (a) `bind()` package, `bindings-cli`, and the module (b) `host-playwright`.
-    expect(expected.length).toBe(26);
+    expect(fromHld.length).toBe(26);
+  });
+
+  it("names every Draft 2.11 package the LLD requires, with the section", () => {
+    for (const one of DRAFT_2_11_PACKAGES) {
+      expect(one.because, one.name).toMatch(/LLD §13\.[78]/);
+      expect(fromHld, `${one.name} is in HLD §12 now; drop it from the list`).not.toContain(one.name);
+    }
   });
 
   it.each(expected)("packages/%s exists and is a buildable workspace package", (name) => {

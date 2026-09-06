@@ -1,0 +1,619 @@
+/*
+ * `@svatah/ui`'s stylesheet (T9.2, REQ-ADE-12, LLD §13.7).
+ *
+ * Every rule below reads a token from `@svatah/ui-tokens` and never a colour.
+ * That is what makes T9.2's "the two themes differ only in tokens" true rather
+ * than aspirational: no rule here selects on a theme, and
+ * `packages/ui/test/theme.test.ts` fails if one starts to.
+ *
+ * The measurements are the `Tokens` artboard's: 13 px text, 28 px controls,
+ * 4 px radii, 7 px row padding. Density is the default; the inspector is the
+ * only place that breathes.
+ */
+
+.sv-root,
+[data-theme] {
+  color: var(--fg);
+  background: var(--bg0);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sv-mono {
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+
+/*
+ * Visible to an accessibility tree and not to an eye.
+ *
+ * Not `display: none` and not `visibility: hidden`: both remove the element
+ * from the accessibility tree, which is the opposite of what this is for. The
+ * clip-rect form is what a screen reader and the desktop adapters still read.
+ */
+.sv-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── focus ────────────────────────────────────────────────────────────────── */
+
+/*
+ * One focus ring, in the accent, on everything.
+ *
+ * `:focus-visible` rather than `:focus`, so a mouse click does not draw it and a
+ * Tab key does. Never `outline: none` without a replacement: a keyboard user who
+ * cannot see where they are is a keyboard user who cannot use the application.
+ */
+.sv-btn:focus-visible,
+.sv-input:focus-visible,
+.sv-select:focus-visible,
+.sv-rail-item:focus-visible,
+.sv-tab:focus-visible,
+.sv-palette-input:focus-visible,
+.sv-palette-row:focus-visible,
+.sv-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ── buttons ──────────────────────────────────────────────────────────────── */
+
+.sv-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--control-h);
+  padding: 0 10px;
+  border-radius: var(--r);
+  border: 1px solid var(--line2);
+  background: var(--bg2);
+  color: var(--fg);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: default;
+}
+
+.sv-btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.sv-btn-danger {
+  color: var(--fail);
+  border-color: var(--fail);
+}
+
+.sv-btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--fg2);
+}
+
+.sv-btn:disabled {
+  opacity: 0.5;
+}
+
+.sv-btn-icon {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+}
+
+.sv-kbd {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--fg2);
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 5px;
+  line-height: 16px;
+}
+
+.sv-btn-primary .sv-kbd {
+  background: var(--accent-soft);
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
+}
+
+/* ── fields ───────────────────────────────────────────────────────────────── */
+
+.sv-field {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sv-field-label {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  font-weight: 600;
+}
+
+.sv-input,
+.sv-select {
+  height: var(--control-h);
+  min-width: 200px;
+  border: 1px solid var(--line2);
+  border-radius: var(--r);
+  background: var(--bg1);
+  color: var(--fg);
+  font: inherit;
+  font-size: 12.5px;
+  padding: 0 8px;
+}
+
+.sv-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sv-select-arrow {
+  color: var(--muted);
+}
+
+.sv-select-menu {
+  background: var(--bg1);
+  border: 1px solid var(--line2);
+  border-radius: var(--r);
+  padding: 4px 0;
+  font-size: 12.5px;
+  color: var(--fg);
+}
+
+.sv-select-item {
+  padding: 5px 10px;
+}
+
+.sv-select-item[data-highlighted] {
+  background: var(--bg3);
+  outline: none;
+}
+
+.sv-select-item[data-disabled] {
+  color: var(--dim);
+}
+
+/* ── status ───────────────────────────────────────────────────────────────── */
+
+.sv-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--mono);
+}
+
+.sv-tone-pass {
+  background: var(--pass-soft);
+  color: var(--pass);
+}
+.sv-tone-fail {
+  background: var(--fail-soft);
+  color: var(--fail);
+}
+.sv-tone-skip {
+  background: var(--skip-soft);
+  color: var(--skip);
+}
+.sv-tone-healed {
+  background: var(--healed-soft);
+  color: var(--healed);
+}
+.sv-tone-abort {
+  background: var(--abort-soft);
+  color: var(--abort);
+}
+.sv-tone-info {
+  background: var(--info-soft);
+  color: var(--info);
+}
+.sv-tone-neutral {
+  background: var(--bg3);
+  color: var(--fg2);
+}
+
+.sv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line2);
+  color: var(--fg2);
+  font-size: 11px;
+}
+
+/* ── table ────────────────────────────────────────────────────────────────── */
+
+.sv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.sv-table-caption {
+  text-align: left;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 0 12px 6px;
+  font-weight: 600;
+}
+
+.sv-table th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--dim);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sv-table td {
+  padding: var(--row-pad) 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.sv-table .sv-num {
+  text-align: right;
+  font-family: var(--mono);
+}
+
+.sv-row-selected td {
+  background: var(--bg2);
+}
+
+.sv-empty {
+  color: var(--muted);
+  padding: 24px 16px;
+  font-size: 12.5px;
+}
+
+/* ── rail ─────────────────────────────────────────────────────────────────── */
+
+.sv-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--fg2);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: default;
+}
+
+.sv-rail-active {
+  background: var(--bg3);
+  color: var(--fg);
+}
+
+.sv-rail-count {
+  margin-left: auto;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.sv-rail-active .sv-rail-count {
+  color: var(--fg2);
+}
+
+/* ── tabs ─────────────────────────────────────────────────────────────────── */
+
+.sv-tab-list {
+  display: flex;
+  gap: 2px;
+  padding: 8px 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.sv-tab {
+  padding: 6px 10px;
+  border-radius: var(--r) var(--r) 0 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12.5px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: transparent;
+  cursor: default;
+}
+
+.sv-tab[data-state="active"] {
+  color: var(--fg);
+  background: var(--bg1);
+  border-color: var(--line);
+  margin-bottom: -1px;
+}
+
+.sv-tab-panel {
+  padding: 10px 12px;
+}
+
+/* ── inspector ────────────────────────────────────────────────────────────── */
+
+.sv-inspector-section {
+  padding: 6px 0 10px;
+}
+
+.sv-inspector-heading {
+  margin: 0;
+  padding: 14px 16px 6px;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  font-weight: 600;
+}
+
+.sv-kv {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 4px 10px;
+  padding: 0 16px;
+  font-size: 12px;
+  margin: 0;
+}
+
+.sv-kv-row {
+  display: contents;
+}
+
+.sv-kv-key {
+  color: var(--muted);
+}
+
+.sv-kv-value {
+  color: var(--fg);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── alert ────────────────────────────────────────────────────────────────── */
+
+.sv-alert {
+  margin: 12px 16px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line2);
+  border-radius: var(--r2);
+  color: var(--fg);
+  font-size: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.sv-alert.sv-tone-fail {
+  border-color: var(--fail);
+  background: var(--fail-soft);
+  color: var(--fg);
+}
+
+.sv-alert.sv-tone-abort {
+  border-color: var(--abort);
+  background: var(--abort-soft);
+  color: var(--fg);
+}
+
+.sv-alert-glyph {
+  font-family: var(--mono);
+}
+
+/* ── palette ──────────────────────────────────────────────────────────────── */
+
+.sv-palette-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+}
+
+.sv-palette {
+  position: fixed;
+  left: 50%;
+  top: 120px;
+  transform: translateX(-50%);
+  width: 640px;
+  background: var(--bg1);
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.sv-palette-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.sv-palette-icon {
+  color: var(--muted);
+}
+
+.sv-palette-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  font: inherit;
+  outline: none;
+}
+
+.sv-palette-rows {
+  padding: 6px 0;
+  font-size: 12.5px;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.sv-palette-group {
+  padding: 8px 14px 2px;
+  margin: 0;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.sv-palette-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 14px;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: default;
+}
+
+.sv-palette-row:hover:not(:disabled) {
+  background: var(--bg3);
+}
+
+.sv-palette-row:disabled {
+  color: var(--dim);
+}
+
+.sv-palette-area {
+  color: var(--dim);
+  width: 64px;
+  flex: none;
+}
+
+.sv-palette-label {
+  flex: 1;
+}
+
+.sv-palette-detail {
+  color: var(--muted);
+}
+
+.sv-palette-cli {
+  color: var(--dim);
+}
+
+/* ── the component sheet ──────────────────────────────────────────────────── */
+
+.sv-sheet {
+  padding: 24px 32px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.sv-sheet h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.sv-sheet-intro {
+  color: var(--muted);
+  margin: 0 0 20px;
+  max-width: 720px;
+}
+
+.sv-sheet-half {
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  padding: 8px 8px 16px;
+  margin-bottom: 24px;
+  background: var(--bg0);
+  color: var(--fg);
+}
+
+.sv-sheet-heading {
+  margin: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sv-sheet-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  padding: 4px 16px 8px;
+}
+
+.sv-sheet-rail {
+  width: var(--rail-w);
+  padding: 6px;
+  margin: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r2);
+  background: var(--bg1);
+}
+
+.sv-sheet-type,
+.sv-sheet-swatches {
+  list-style: none;
+  margin: 0;
+  padding: 0 16px;
+}
+
+.sv-sheet-type li {
+  padding: 3px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.sv-sheet-swatches {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px 12px;
+}
+
+.sv-sheet-swatches li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.sv-sheet-swatch {
+  width: 28px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid var(--line2);
+  display: inline-block;
+  flex: none;
+}
