@@ -31,7 +31,27 @@
 
 ## T02 — Freeze the v1 surface operation catalogue
 
-**Status:** pending
+**Status:** complete
+
+**Package:** `packages/surface-control/` (`@svatah/yam-surface-control`)
+
+**Files created:**
+- `src/catalogue.ts`: 10 operations (connect, snapshot, act, read, check, close, sessions, capabilities, describe, screenshot). Each descriptor carries CLI flags/exit codes, MCP tool name/annotations, and service method/path. Typed Zod input/output schemas per operation. Lookup functions: `operationByName`, `operationByCliSubcommand`, `operationByMcpTool`, `operationByServicePath`. Exports `SURFACE_TOOL_NAMES`, `SURFACE_CLI_SUBCOMMANDS`, `ERROR_CODES` (15 codes), `CLI_EXIT_CODES`.
+- `src/envelope.ts`: `makeRequestId()`, `successEnvelope()`, `failedEnvelope()`, `refusedEnvelope()` — build typed `ResultEnvelope` with `{schemaVersion, requestId, sessionId?, status, result?, error?, timing?}`.
+- `src/sessions.ts`: `createSessionStore()` → `SessionStore` with `create/get/list/remove/closeAll`. Session IDs: `s_<12-hex>`.
+- `src/dispatcher.ts`: 10 dispatch functions wrapping `AgentSurface` calls with envelopes and error mapping. `DispatchContext` holds the `SessionStore`. `headed` passed to adapter factory (not `SessionInit`).
+- `src/index.ts`: Re-exports all public API.
+- `test/catalogue.test.ts`: 17 tests — uniqueness, one-source-propagation, lookup, schema validation.
+- `test/sessions.test.ts`: 6 tests — create, get, list, remove, closeAll.
+- `test/envelope.test.ts`: 6 tests — makeRequestId, success/failed/refused builders.
+
+**Design decision:** One `OPERATIONS` array is the single source of truth. CLI, MCP, and service definitions are derived from each descriptor — changing one entry propagates to all three interfaces.
+
+**Import boundaries enforced:** `surface-control` depends only on `@svatah/yam-schema` and `@svatah/yam-surface`. No imports from compiler, recorder, gateway, or service.
+
+**Deviations:** none.
+
+**Known gaps:** none.
 
 ---
 
