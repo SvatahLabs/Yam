@@ -56,12 +56,15 @@ const SESSION = `Session options — the same on every command that opens a sess
   --headed                    show the browser
   --out <dir>                 where runs are written (default: runs/)
   --run-id <id>               name the run yourself
+  --endpoint <name>           one of the config's endpoints: its base URL, storage
+                              state and environment kind replace app: and environment:
 
 Where each value comes from, first match wins:
 
   1. the flag on the command line
   2. the environment: YAM_BASE_URL, YAM_STORAGE_STATE, YAM_INPUT_<NAME>
-  3. the project's yam.config.yaml, under app:
+  3. the project's yam.config.yaml, under app: — or under endpoints:<name>
+     when --endpoint or YAM_ENDPOINT names one
 
 A secret input belongs in the environment (YAM_INPUT_PASSWORD=…), never on
 the command line, where it would be visible in the process list. It reaches
@@ -83,7 +86,7 @@ const json: readonly [string, string] = ["--json", "one JSON document on stdout,
 
 /** Every command, with its own help. Order is the order `yam help` lists them, then the nouns. */
 export const COMMANDS: readonly CommandHelp[] = [
-  { name: "init", synopsis: "yam init [dir] [--force]", description: "Start a project: yam.config.yaml, flows/ with an example, data.yaml, and the directories the other verbs use.", options: [["--force", "write into a directory that already has a project"]], exits: [EXIT.ok, EXIT.usage] },
+  { name: "init", synopsis: "yam init [dir] [--name <project>] [--adapter <name>] [--url <local base URL>] [--endpoint name=url[@kind]]... [--yes] [--force]", description: "Start a project. At a terminal it asks: the project's name, the adapter, where the application runs locally, and any remote endpoints (staging, production) with their kind. With --url or --yes it takes the flags and asks nothing. It writes yam.config.yaml, flows/ with a first story that works against any application, data.yaml, and the directories the other verbs use.", options: [["--name <project>", "the project's name (default: the directory's)"], ["--adapter <name>", "playwright, bidi, http, appium, uia or ax (default: playwright)"], ["--url <base URL>", "where the application runs locally"], ["--endpoint name=url[@kind]", "a remote endpoint; kind is test, staging or production; repeatable"], ["--yes", "ask nothing; take the flags and the defaults"], ["--force", "write into a directory that already has a project"]], exits: [EXIT.ok, EXIT.usage] },
   { name: "explore", synopsis: "yam explore [dir] [--name <story>] [--trajectory <path.jsonl>]", description: "Let an agent write the first draft. Serves the MCP surface for one exploration of the application and, when the agent disconnects, compiles what it did into a proposal under proposals/<date>/ for you to review. --trajectory compiles one yam mcp or the app's Explorer wrote.", options: [["--name <story>", "the proposed story's name"], ["--trajectory <path.jsonl>", "compile an existing trajectory instead of serving a session"], json], exits: [EXIT.ok, EXIT.usage, EXIT.failed] },
   { name: "check", synopsis: "yam check [dir] [--tier2] [--tier3] [--allow-model-drift] [--json]", description: "Read, lint and compile the flows in one verb, and write .yam/plan.json. lint and compile are its two halves, kept as commands of their own.", options: [["--tier2", "let the local model compile sentences the grammar refuses"], ["--tier3", "let the frontier model compile what the local model cannot"], ["--allow-model-drift", "compile even though the pinned model digest changed"], json], exits: [EXIT.ok, EXIT.compileErrors, EXIT.modelUnavailable] },
   { name: "lint", synopsis: "yam lint [dir] [--json]", description: "Read the flows and report errors and warnings without writing a plan.", options: [json], exits: [EXIT.ok, EXIT.compileErrors] },

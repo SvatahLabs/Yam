@@ -38,7 +38,7 @@ The yam CLI and MCP server
 | `helpFor` | function | `export function helpFor(words: readonly string[]): string \| undefined` | Help for one command, or for a noun alone; undefined when neither matches. |
 | `installModelGrounding` | function | `export function installModelGrounding(options: ModelGroundingOptions = {}): boolean` | Register the recorder's grounder for `bind()`'s record mode. |
 | `loadBindings` | function | `export function loadBindings(` | The bindings store, or a `ConfigError` naming the file (P2-F2). |
-| `loadConfig` | function | `declare function loadConfig(root: string):` | The config a project declares, or the defaults. |
+| `loadConfig` | function | `declare function loadConfig(root: string, env?: NodeJS.ProcessEnv):` | The config with the selected endpoint applied (Draft 2.22, REQ-CLI-11). |
 | `LoadedProject` | interface | `export interface LoadedProject` |  |
 | `loadProject` | function | `export async function loadProject(root: string): Promise<LoadedProject>` |  |
 | `main` | function | `export async function main(argv: readonly string[], io: CommandIo): Promise<ExitCode>` |  |

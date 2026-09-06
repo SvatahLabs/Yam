@@ -70,7 +70,7 @@ describe("yam init (REQ-AGT-1)", () => {
     const dir = mkdtempSync(join(tmpdir(), "yam-init-"));
     expect((await cli("init", dir)).code).toBe(EXIT.ok);
 
-    for (const file of ["yam.config.yaml", "flows/sign-in.flow", "data.yaml", ".gitignore"]) {
+    for (const file of ["yam.config.yaml", "flows/front-page.flow", "data.yaml", ".gitignore"]) {
       expect(existsSync(join(dir, file)), file).toBe(true);
     }
     // The example flow it writes has to be a flow that compiles, or `init`

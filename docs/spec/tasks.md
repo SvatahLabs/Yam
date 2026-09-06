@@ -607,7 +607,12 @@ The owner's decision of 2026-09-07: the command line is hard to understand and f
 **Do:** `yam explore [dir] [--name <story>] [--trajectory <path.jsonl>]`: the MCP server as `yam mcp` runs it, the trajectory under `.yam/explore/<id>/`, the compile on disconnect, the proposal named; `projectState` gains `proposals`, `nextVerb` names the newest before it looks at the plan; `explore` in the help text, the topic `agents`, the getting-started page and the README; the self suite gains a two-sided check that an exploration through the MCP client example becomes a proposal.
 **Validate:** The MCP client example under `examples/mcp-agent/` pointed at `yam explore` produces `proposals/<date>/<name>.flow` with the intents as sentences and `verified: false` bindings, and `yam` then says `next  review proposals/<date>`; an empty exploration writes nothing and says so; `--trajectory` compiles a trajectory `yam mcp` wrote; `yam help` matches LLD §15.1 with the new line; the vocabulary check still passes.
 
-Phase 14 total: 10.5 ideal days.
+### T14.10 Endpoints, and an `init` that configures the project (Draft 2.22)
+**Refs:** REQ-CLI-11, LLD §3.5, §15, §15.1 · **Est:** 1
+**Do:** `endpoints` and `endpoint` in the config schema; `loadConfig` applies the selected endpoint and refuses an unknown one naming the known; `--endpoint` global; `yam init` interactive at a terminal and flag-driven otherwise, never pointing at the sample application, with a first story that runs anywhere; the front door's `app` line; the session topic.
+**Validate:** `init --yes` writes no reference to port 4173 and says to set the base URL; `--url` and repeated `--endpoint` write the endpoints and the project lints; a malformed `--endpoint` is refused; `loadConfig` with `YAM_ENDPOINT` applies base URL, storage state and kind and names the known endpoints for an unknown one; `yam --endpoint staging --json` reports the endpoint and the others.
+
+Phase 14 total: 11.5 ideal days.
 
 ---
 
@@ -743,6 +748,7 @@ Phase 15 total: 11 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.22 (endpoints, owner decision of 2026-09-07): T14.10 added. Total 295.5 ideal days.
 - Draft 2.21 (the human gateway and explore, owner decision of 2026-09-07): T14.8 and T14.9 added to Phase 14. Total 294.5 ideal days.
 - Draft 2.20 (the front door, owner decision of 2026-09-07): Phase 14 inserted before the publish — the state-and-next-verb default, `check` and plan currency, one-screen help with per-command help and topics, the diagnostics catalogue, the tmux workspace, the documentation and self checks; process and terminal becomes Phase 15 with T15.1–T15.4. Total 291 ideal days.
 - Draft 2.19 (the desktop client is Yam): no new tasks; the rename of the client from "the ADE" to Yam is recorded under Phase 13's T13.3.

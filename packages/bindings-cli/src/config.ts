@@ -91,7 +91,7 @@ function rooted(config: Config, root: string): Config {
 }
 
 /** The config a project declares, or the defaults. */
-export function loadConfig(root: string): { config: Config; file?: string } {
+function loadConfigAsWritten(root: string): { config: Config; file?: string } {
   for (const name of CONFIG_FILES) {
     const path = join(root, name);
     if (!existsSync(path)) continue;
@@ -136,4 +136,43 @@ export function appConfig(root: string): Config["app"] {
   } catch {
     return {};
   }
+}
+
+/** Which endpoint is selected: `YAM_ENDPOINT`, else the config's default. */
+export const ENDPOINT_ENV = "YAM_ENDPOINT";
+
+/**
+ * The config with the selected endpoint applied (Draft 2.22, REQ-CLI-11).
+ *
+ * An endpoint is a base URL, an optional storage state and an environment
+ * kind under one name. Applying it here, where every command and both
+ * executables read the config, is what makes `--endpoint staging` mean the
+ * same thing to `run`, `record`, the policy and the app.
+ */
+export function loadConfig(root: string, env: NodeJS.ProcessEnv = process.env): { config: Config; file?: string } {
+  const loaded = loadConfigAsWritten(root);
+  const wanted = (env[ENDPOINT_ENV] ?? "").trim() || loaded.config.endpoint;
+  if (wanted === undefined) return loaded;
+  const endpoints = loaded.config.endpoints ?? {};
+  const chosen = endpoints[wanted];
+  if (chosen === undefined) {
+    const known = Object.keys(endpoints);
+    throw new ConfigError(
+      `No endpoint named "${wanted}"${known.length === 0 ? "; the config declares none under endpoints:" : `; the config declares ${known.map((one) => `"${one}"`).join(", ")}`}.`,
+      loaded.file ?? "yam.config.yaml",
+    );
+  }
+  return {
+    ...loaded,
+    config: {
+      ...loaded.config,
+      endpoint: wanted,
+      environment: chosen.environment ?? loaded.config.environment,
+      app: {
+        ...loaded.config.app,
+        baseUrl: chosen.baseUrl,
+        ...(chosen.storageState === undefined ? {} : { storageState: chosen.storageState }),
+      },
+    },
+  };
 }

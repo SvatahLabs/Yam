@@ -128,7 +128,7 @@ describe("no internal vocabulary reaches a person (REQ-CLI-9)", () => {
     process.chdir(dir);
     try {
       const { err } = await cli("init");
-      expect(err).toContain("Initialised this directory.");
+      expect(err).toContain("Initialised this directory as");
     } finally {
       process.chdir(cwd);
     }

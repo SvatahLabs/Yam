@@ -259,3 +259,115 @@ Both fixed in the commit that carries this section, and both are the kind a scri
 **K4 — the human gateway's click is proven by a real click in the adapter's suite** (the overlay waiting, then a Playwright click on the element) **and by a scripted pick everywhere else.** A person's own click was exercised by the owner, which is what found the invocation defect above.
 
 **K5 — the desktop adapters cannot take a click yet.** `pick` is `false` on the UI Automation and Accessibility adapters; a person recording against a desktop application still needs a model gateway, and the catalogue row says so.
+
+
+## T14.10 — Endpoints, and an `init` that configures the project (Draft 2.22)
+
+**Why.** Atul ran `yam init` in his own project, then `yam record`, and watched
+the recorder drive Yam's sample application: `init` had written
+`baseUrl: "http://localhost:4173"` and a sign-in story written for that sample,
+and nothing had asked which application the project was for. A project is
+configured, not assumed (REQ-CLI-11).
+
+**What.**
+
+- The config carries `endpoints`, a named map of `{ baseUrl, storageState?,
+  environment? }`, and `endpoint`, the default name (`packages/schema/src/config.ts`).
+- `loadConfig` applies the selected endpoint — `YAM_ENDPOINT`, else the config's
+  default — to `app.baseUrl`, `app.storageState` and `environment` before any
+  command sees the config, so `run`, `record`, `repl`, `serve`, the app and the
+  policy all follow one choice; an unknown name is refused naming the known ones
+  (`packages/bindings-cli/src/config.ts`).
+- `--endpoint <name>` on every command sets `YAM_ENDPOINT` before dispatch
+  (`packages/cli/src/cli.ts`); `yam help session` documents it.
+- `yam init` asks a person at a terminal for the project's name, the adapter,
+  where the application runs locally, and any remote endpoints with their kind;
+  with `--url`, `--yes`, or no terminal it takes `--name`, `--adapter`,
+  `--url` and repeated `--endpoint name=url[@kind]` and asks nothing. Without a
+  URL it writes `http://localhost:3000` with a comment saying to set it, and
+  says so. The first story is `Go to "/"` and a URL check, which passes against
+  any application; the sign-in story is there as a comment
+  (`packages/cli/src/commands/init.ts`).
+- The front door prints an `app` line: the base URL, the kind, the endpoint in
+  use and the others (`packages/cli/src/front-door.ts`).
+- The screen-fixture recorder sets `CI` for the service it records so
+  `gateway.display` is the same on every host; the fixture had recorded a desk's
+  answer and failed the check everywhere else (`scripts/record-screen-fixtures.mjs`).
+
+**Validate.** `packages/cli/test/init-endpoints.test.ts`: `init --yes` writes no
+reference to port 4173 and says to set the base URL; `--url` and two
+`--endpoint` flags write the endpoints and the project lints; a malformed
+`--endpoint` is refused with exit 64; `loadConfig` with `YAM_ENDPOINT` applies
+base URL, storage state and kind, and names the known endpoints for an unknown
+one; `yam --endpoint staging --json` reports the endpoint and the others. The
+schema, bindings-cli, cli and repo-check suites pass; `pnpm docs --check` is
+current.
+
+**A session.**
+
+```
+$ yam init --url http://localhost:3000 --endpoint staging=https://staging.example.com@staging --endpoint production=https://example.com@production
+Initialised this directory as "planner".
+  Application: http://localhost:3000; endpoints: staging, production (--endpoint <name>)
+
+  yam check     read, lint and compile the flows
+  yam record    bind the targets by driving the real application
+  yam run       replay the plan
+
+  yam           at any time: where you are, and what is next
+
+(exit 0)
+
+$ cat yam.config.yaml (head)
+# Yam project configuration.
+schemaVersion: "1.0.0"
+project: "planner"
+environment: test
+adapter: playwright
+
+# The application under test. `app` is the local endpoint; every other
+# endpoint is named under `endpoints` and selected with
+# `yam <command> --endpoint <name>` or YAM_ENDPOINT=<name>.
+app:
+  baseUrl: "http://localhost:3000"
+endpoints:
+  staging: { baseUrl: "https://staging.example.com", environment: staging }
+  production: { baseUrl: "https://example.com", environment: production }
+
+flows: { dir: flows }
+
+$ yam
+planner · /home/me/planner
+flows     1 file, 1 story
+app       http://localhost:3000 · test (also: staging, production)
+plan      missing
+last run  none yet
+
+next      yam check
+          There is no plan yet.
+(exit 0)
+
+$ yam --endpoint staging
+planner · /home/me/planner
+flows     1 file, 1 story
+app       https://staging.example.com · staging · endpoint staging (also: production)
+plan      missing
+last run  none yet
+
+next      yam check
+          There is no plan yet.
+(exit 0)
+
+$ yam check
+data.yaml: warning W_SECRET_UNSET: user.password reads ${YAM_PASSWORD}, which is not set. Compiling does not need the value; running will.
+
+plan written: 2 steps, tier 0 0, tier 1 2, tier 2 0, tier 3 0 → /home/me/planner/.yam/plan.json
+(exit 0)
+
+$ yam record --endpoint production --gateway fake
+The project's environment is "production", and recording performs every step it records against the real application. Pass --force-production to record here anyway (REQ-AUTO-7).
+
+$ yam run --endpoint qa
+No endpoint named "qa"; the config declares "staging", "production".
+(exit 64)
+```

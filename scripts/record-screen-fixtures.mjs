@@ -220,7 +220,13 @@ try {
     const child = spawn(
       process.execPath,
       [CLI, "serve", PROJECT, "--port", "0", "--token", TOKEN],
-      { cwd: ROOT, env: { ...process.env, YAM_BASE_URL: app.origin } },
+      /*
+       * `CI` is set so the service answers `gateway.display: false` wherever the
+       * recording is taken: whether a person can click is a fact about the host,
+       * not about the project, and a fixture that recorded a desk's answer failed
+       * the check on every host without one (Draft 2.22).
+       */
+      { cwd: ROOT, env: { ...process.env, YAM_BASE_URL: app.origin, CI: "1" } },
     );
     serve = child;
     let buffer = "";

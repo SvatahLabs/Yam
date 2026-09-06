@@ -178,6 +178,11 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
   const args: ParsedArgs = parseArgs(argv);
   const command = args.command[0];
 
+  // `--endpoint <name>` on any command selects one of the config's endpoints
+  // (Draft 2.22); the config loader reads it from the environment, so every
+  // package that reads the config sees the same choice.
+  if (typeof args.options["endpoint"] === "string") process.env["YAM_ENDPOINT"] = args.options["endpoint"];
+
   /*
    * The front door (T14.1, REQ-CLI-1): `yam` alone says where you are and what
    * to do next, and exits 0. Usage is what `yam help` and `--help` print.

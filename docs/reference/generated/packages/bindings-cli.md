@@ -19,12 +19,13 @@ The yam-bindings command line: bindings, heal, surface conform and the healing e
 | `CommandIo` | interface | `export interface CommandIo` |  |
 | `CONFIG_FILES` | variable | `CONFIG_FILES = ["yam.config.yaml", "yam.config.yml", "yam.config.json"]` |  |
 | `ConfigError` | class | `export class ConfigError extends Error` | A project config that will not load (LLD §3.5, §15). |
+| `ENDPOINT_ENV` | variable | `ENDPOINT_ENV = "YAM_ENDPOINT"` | Which endpoint is selected: `YAM_ENDPOINT`, else the config's default. |
 | `evalCommand` | function | `export async function evalCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode>` |  |
 | `EXIT` | variable | `EXIT ` | The exit codes of LLD §15. |
 | `ExitCode` | typealias | `export type ExitCode = (typeof EXIT)[keyof typeof EXIT];` |  |
 | `healCommand` | function | `export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode>` |  |
 | `inputOptions` | function | `export function inputOptions(` | `--input k=v`, repeated, beneath `YAM_INPUT_<NAME>` (LLD §10, §15). |
-| `loadConfig` | function | `export function loadConfig(root: string): { config: Config; file?: string }` | The config a project declares, or the defaults. |
+| `loadConfig` | function | `export function loadConfig(root: string, env: NodeJS.ProcessEnv = process.env): { config: Config; file?: string }` | The config with the selected endpoint applied (Draft 2.22, REQ-CLI-11). |
 | `main` | function | `export async function main(argv: readonly string[], io: CommandIo): Promise<ExitCode>` |  |
 | `numberOption` | function | `export function numberOption(args: ParsedArgs, name: string): number \| undefined` | A numeric option, or `undefined` when absent or unparseable. |
 | `parseArgs` | function | `export function parseArgs(argv: readonly string[]): ParsedArgs` |  |

@@ -131,6 +131,8 @@ export interface ProjectState {
   readonly lastRun?: LastRunState;
   /** Proposals waiting under `proposals/`, newest first (T14.9, REQ-CLI-10). */
   readonly proposals: readonly string[];
+  /** The application the project points at, and the endpoint that says so (Draft 2.22). */
+  readonly endpoint?: { readonly name?: string; readonly baseUrl?: string; readonly environment: string; readonly others: readonly string[] };
   /** Why the project could not be read, when it could not. */
   readonly problem?: string;
 }
@@ -263,6 +265,12 @@ export async function projectState(dir: string): Promise<ProjectState> {
     plan,
     unbound,
     proposals: proposalsWaiting(root),
+    endpoint: {
+      ...(loaded.config.endpoint === undefined ? {} : { name: loaded.config.endpoint }),
+      ...(loaded.config.app.baseUrl === undefined ? {} : { baseUrl: loaded.config.app.baseUrl }),
+      environment: loaded.config.environment,
+      others: Object.keys(loaded.config.endpoints ?? {}).filter((one) => one !== loaded.config.endpoint),
+    },
     ...(lastRunState(root) === undefined ? {} : { lastRun: lastRunState(root)! }),
   };
 }
@@ -345,6 +353,13 @@ export async function statusCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
       `flows     ${state.flows.files} file${state.flows.files === 1 ? "" : "s"}, ` +
         `${state.flows.stories} stor${state.flows.stories === 1 ? "y" : "ies"}` +
         (state.flows.errors === 0 ? "" : `, ${state.flows.errors} error${state.flows.errors === 1 ? "" : "s"}`),
+    );
+  }
+  if (state.endpoint !== undefined) {
+    lines.push(
+      `app       ${state.endpoint.baseUrl ?? "(no base URL)"} · ${state.endpoint.environment}` +
+        (state.endpoint.name === undefined ? "" : ` · endpoint ${state.endpoint.name}`) +
+        (state.endpoint.others.length === 0 ? "" : ` (also: ${state.endpoint.others.join(", ")})`),
     );
   }
   lines.push(

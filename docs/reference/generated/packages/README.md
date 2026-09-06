@@ -14,7 +14,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-adapter-playwright`](adapter-playwright.md) | 37 | Default web adapter: AgentSurface on Playwright |
 | [`@svatah/yam-adapter-uia`](adapter-uia.md) | 39 | Windows UI Automation adapter: the Yam agent surface over UIAutomationClient |
 | [`@svatah/yam-bindings`](bindings.md) | 53 | Bindings store, context hash, resolver, synthesis, fingerprint, relocalization |
-| [`@svatah/yam-bindings-cli`](bindings-cli.md) | 27 | The yam-bindings command line: bindings, heal, surface conform and the healing eval for module (a) |
+| [`@svatah/yam-bindings-cli`](bindings-cli.md) | 28 | The yam-bindings command line: bindings, heal, surface conform and the healing eval for module (a) |
 | [`@svatah/yam-compiler`](compiler.md) | 51 | Compiler tiers, validation, lint and plan writer |
 | [`@svatah/yam-conformance`](conformance.md) | 16 | Surface and runtime conformance suites |
 | [`@svatah/yam-gateway`](gateway.md) | 44 | Model gateway: local and frontier backends, caching, redaction, provenance |

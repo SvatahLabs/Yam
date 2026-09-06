@@ -28,6 +28,28 @@ export const configSchema = z
 
     /** `production` refuses recording and requires idempotence or an override (REQ-AUTO-7). */
     environment: environmentSchema,
+    /**
+     * The endpoints a project can be run against (Draft 2.22, REQ-CLI-11): a
+     * local one and any number of remote ones, each with its own base URL,
+     * optional storage state and environment kind. `--endpoint <name>` or
+     * `YAM_ENDPOINT` selects one; the selection is applied to `app.baseUrl`,
+     * `app.storageState` and `environment` when the config is read, so every
+     * command and the policy see the endpoint as the project. `endpoint` names
+     * the default; without it, `app` and `environment` as written apply.
+     */
+    endpoints: z
+      .record(
+        z.string().min(1),
+        z
+          .object({
+            baseUrl: z.string().min(1),
+            storageState: z.string().min(1).optional(),
+            environment: environmentSchema.optional(),
+          })
+          .strict(),
+      )
+      .optional(),
+    endpoint: z.string().min(1).optional(),
     allowSideEffects: z.boolean().optional(),
 
     adapter: adapterNameSchema,

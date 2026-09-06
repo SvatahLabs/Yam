@@ -15,13 +15,32 @@ cd my-project
 yam
 ```
 
-`yam init` writes `yam.config.yaml`, a `flows/` directory with one example and a
-`data.yaml`. `yam` with nothing after it prints where you are and what to do
-next, and it does so at every step from here on:
+`yam init` asks four things: the project's name, the adapter that drives the
+application, where the application runs locally, and whether it runs anywhere
+else. The last one is the project's **endpoints**: a local one, and any number
+of remote ones, each with a base URL and a kind (`test`, `staging` or
+`production`). Then it writes `yam.config.yaml`, a `flows/` directory with
+one story that works against any application, and a `data.yaml`.
+
+From a script, the same answers are flags, and nothing is asked:
+
+```bash
+yam init my-project --url http://localhost:3000 \
+  --endpoint staging=https://staging.example.com@staging \
+  --endpoint production=https://example.com@production
+```
+
+Every command then runs against the local endpoint until `--endpoint <name>`
+(or `YAM_ENDPOINT=<name>`) picks another: its base URL, storage state and kind
+replace `app:` and `environment:` for that command, and the policy sees the
+kind — a `production` endpoint refuses to record. `yam` with nothing after it
+prints where you are, which endpoint you are pointed at, and what to do next,
+and it does so at every step from here on:
 
 ```
 my-project · /home/me/my-project
 flows     1 file, 1 story
+app       http://localhost:3000 · test (also: staging, production)
 plan      missing
 last run  none yet
 

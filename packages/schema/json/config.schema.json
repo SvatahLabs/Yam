@@ -239,6 +239,36 @@
           ],
           "type": "object"
         },
+        "endpoint": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "endpoints": {
+          "additionalProperties": {
+            "additionalProperties": false,
+            "properties": {
+              "baseUrl": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "environment": {
+                "$ref": "#/definitions/config/properties/environment"
+              },
+              "storageState": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "baseUrl"
+            ],
+            "type": "object"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        },
         "environment": {
           "enum": [
             "test",

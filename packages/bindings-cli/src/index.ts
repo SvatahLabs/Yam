@@ -24,7 +24,7 @@ export {
   type ParsedArgs,
 } from "./args.js";
 export { EXIT, type ExitCode } from "./exit-codes.js";
-export { ConfigError, CONFIG_FILES, appConfig, loadConfig } from "./config.js";
+export { ConfigError, CONFIG_FILES, ENDPOINT_ENV, appConfig, loadConfig } from "./config.js";
 export {
   BASE_URL_ENV,
   STORAGE_STATE_ENV,

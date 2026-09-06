@@ -16,6 +16,8 @@
 | `bindings` | object | yes |
 | `compile` | object | yes |
 | `data` | object | yes |
+| `endpoint` | string |  |
+| `endpoints` | object |  |
 | `environment` | `"test"` \| `"staging"` \| `"production"` | yes |
 | `flows` | object | yes |
 | `heal` | object | yes |
