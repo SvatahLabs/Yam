@@ -1,0 +1,23 @@
+<div class="app" style="position:relative">
+@@TOPBAR(Flows)
+@@SIDEBAR(flows)
+<section class="workspace"><div class="toolbar"><h1>Flows</h1><span class="sub">7 files · 22 stories</span></div><div class="main"><aside class="list" aria-label="Flow files"><div class="filter">Filter flows…</div><div class="row"><span class="name">simple.flow</span><span class="pill pass">passed</span></div><div class="row active"><span class="name">guards-and-compensation.flow</span><span class="pill abort">aborted</span></div><div class="row"><span class="name">execution.flow</span><span class="pill fail">failed</span></div></aside><div class="editor"></div></div></section>
+<aside class="inspector" aria-label="Inspector"></aside>
+@@STATUS(<span>guards-and-compensation.flow</span>)
+<div style="position:absolute;inset:0;background:rgba(10,12,16,0.62)"></div>
+<div role="dialog" aria-label="Command palette" style="position:absolute;left:400px;top:120px;width:640px;background:var(--bg1);border:1px solid var(--line2);border-radius:8px;box-shadow:0 24px 64px rgba(0,0,0,0.5);overflow:hidden">
+  <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px"><svg viewBox="0 0 16 16" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:1.6"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><input aria-label="Command" value="run" style="flex:1;background:transparent;border:none;color:var(--fg);font:inherit;outline:none"><kbd>Esc</kbd></div>
+  <div style="padding:6px 0;font-size:12.5px">
+    <div style="padding:6px 14px 2px;font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">Actions</div>
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 14px;background:var(--bg3)"><span class="mono" style="color:var(--dim);width:64px">run</span><span><b style="font-weight:500">Run</b> guards-and-compensation.flow</span><span style="flex:1"></span><kbd>⌘↵</kbd></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 14px"><span class="mono" style="color:var(--dim);width:64px">run</span><span>Run story <span class="mono">I want to see guards decide</span></span><span style="flex:1"></span></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 14px"><span class="mono" style="color:var(--dim);width:64px">run</span><span>Run as workflow · <span class="mono">Book a slot</span> with inputs…</span><span style="flex:1"></span></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 14px"><span class="mono" style="color:var(--dim);width:64px">run</span><span>Resume <span class="mono">comp</span> from step 5</span><span style="flex:1"></span></div>
+    <div style="padding:8px 14px 2px;font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">Go to</div>
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 14px"><span class="mono" style="color:var(--dim);width:64px">runs</span><span>Run <span class="mono">comp</span> · aborted 4 min ago</span><span style="flex:1"></span></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 14px"><span class="mono" style="color:var(--dim);width:64px">runs</span><span>Run <span class="mono">tool-7c1</span> · agent verifier-agent</span><span style="flex:1"></span></div>
+    <div style="padding:8px 14px 2px;font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">Same list, same names, everywhere</div>
+    <div style="padding:6px 14px 10px;color:var(--muted)">Every entry here is an action the SDK exposes, the TUI palette lists, and the CLI has a command for. <span class="mono">svatah run --flow flows/guards-and-compensation.flow</span></div>
+  </div>
+</div>
+</div>

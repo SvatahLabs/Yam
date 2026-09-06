@@ -1,0 +1,65 @@
+<div style="width:1440px;height:1000px;background:var(--bg0);padding:28px 32px;display:grid;grid-template-columns:1fr 1fr;gap:24px 40px;overflow:hidden">
+<style>
+.sw { display:grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap:8px; }
+.sw div { height:56px; border-radius:6px; border:1px solid var(--line); padding:6px 8px; font-size:10.5px; font-family:var(--mono); display:flex; flex-direction:column; justify-content:flex-end; }
+.h { font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--dim); margin:0 0 10px; }
+.light { background:#f7f8fa; color:#171b21; border:1px solid #d8dde5; border-radius:8px; padding:14px; }
+.light .sw div { border-color:#d8dde5; }
+.type div { display:flex; align-items:baseline; gap:16px; padding:4px 0; border-bottom:1px solid var(--line); }
+.type span:last-child { color:var(--dim); font-family:var(--mono); font-size:11px; margin-left:auto; }
+.comp { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.field { height:28px; border:1px solid var(--line2); border-radius:4px; background:var(--bg1); padding:0 8px; display:flex; align-items:center; gap:8px; min-width:200px; color:var(--fg2); }
+.field.focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+.rule { font-size:12px; color:var(--fg2); line-height:1.5; }
+.rule b { color:var(--fg); font-weight:500; }
+</style>
+<div style="grid-column:1 / -1"><div style="font-size:20px;font-weight:600">Svatah design system · v1</div><div style="color:var(--muted);margin-top:2px">Dark-first with a light theme. IBM Plex Sans for UI, IBM Plex Mono for anything the runtime wrote. Radix primitives beneath every control; our tokens on top. One lavender accent for chrome and focus; five status colours (amber is abort, warn, and unverified) that never appear without a word or a glyph beside them.</div></div>
+<div>
+  <p class="h">Dark · surfaces and text</p>
+  <div class="sw">
+    <div style="background:#0f1216">bg0<br>#0f1216</div><div style="background:#151a20">bg1<br>#151a20</div><div style="background:#1b2128">bg2<br>#1b2128</div><div style="background:#222a33">bg3<br>#222a33</div><div style="background:#262e37">line<br>#262e37</div><div style="background:#313a45">line2<br>#313a45</div>
+    <div style="background:#e3e8ee;color:#0f1216">fg<br>#e3e8ee</div><div style="background:#b4bdc8;color:#0f1216">fg2<br>#b4bdc8</div><div style="background:#8b96a5;color:#0f1216">muted<br>#8b96a5</div><div style="background:#5f6a78;color:#0f1216">dim<br>#5f6a78</div><div style="background:#b8a1ff;color:#1c1533">accent<br>#b8a1ff</div><div style="background:rgba(184,161,255,0.16);color:#b8a1ff">accent-soft</div>
+  </div>
+  <p class="h" style="margin-top:18px">Status · the only colours that mean something</p>
+  <div class="sw" style="grid-template-columns:repeat(6,minmax(0,1fr))">
+    <div style="background:#4fc48a;color:#0f1216">pass</div><div style="background:#ee6a5f;color:#0f1216">fail</div><div style="background:#8b96a5;color:#0f1216">skip</div><div style="background:#56c5d0;color:#0f1216">healed</div><div style="background:#e5b04c;color:#0f1216">abort · warn · unverified</div><div style="background:#6ea8fe;color:#0f1216">running · info</div>
+  </div>
+  <p class="h" style="margin-top:18px">Light</p>
+  <div class="light">
+    <div class="sw">
+      <div style="background:#ffffff">bg0<br>#ffffff</div><div style="background:#f7f8fa">bg1<br>#f7f8fa</div><div style="background:#eef1f5">bg2<br>#eef1f5</div><div style="background:#e4e8ee">bg3<br>#e4e8ee</div><div style="background:#d8dde5">line<br>#d8dde5</div><div style="background:#c5ccd6">line2<br>#c5ccd6</div>
+      <div style="background:#171b21;color:#fff">fg<br>#171b21</div><div style="background:#3c4553;color:#fff">fg2<br>#3c4553</div><div style="background:#5b6472;color:#fff">muted<br>#5b6472</div><div style="background:#8b96a5;color:#fff">dim<br>#8b96a5</div><div style="background:#6b4fd8;color:#fff">accent<br>#6b4fd8</div><div style="background:rgba(107,79,216,0.12);color:#4b34a8">accent-soft</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;font-size:11px;font-family:var(--mono)"><span style="color:#1f7a45">● pass #1f7a45</span><span style="color:#b3261e">● fail #b3261e</span><span style="color:#5b6472">● skip</span><span style="color:#0f7f8a">● healed #0f7f8a</span><span style="color:#8a5f10">● abort #8a5f10</span><span style="color:#2f5bd7">● running #2f5bd7</span></div>
+  </div>
+</div>
+<div>
+  <p class="h">Type · IBM Plex Sans 400/500/600 · IBM Plex Mono 400/500</p>
+  <div class="type">
+    <div><span style="font-size:20px;font-weight:600">Screen title</span><span>20 / 600</span></div>
+    <div><span style="font-size:18px;font-weight:600">Subject · the Book a slot link</span><span>18 / 600</span></div>
+    <div><span style="font-size:14px;font-weight:600">Toolbar title</span><span>14 / 600</span></div>
+    <div><span style="font-size:13px">Body and table text</span><span>13 / 400</span></div>
+    <div><span style="font-size:12.5px" class="mono">Click the Book a slot link · steps, audit, code</span><span>mono 12.5 / 400</span></div>
+    <div><span style="font-size:12px;color:var(--muted)">Secondary and meta</span><span>12 / 400 muted</span></div>
+    <div><span style="font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">Section label</span><span>10.5 / 600 caps</span></div>
+  </div>
+  <p class="h" style="margin-top:18px">Controls · 28 px high, 4 px radius, 1 px lines</p>
+  <div class="comp">
+    <button class="btn primary">Run <kbd>⌘↵</kbd></button><button class="btn">Record <kbd>R</kbd></button><button class="btn danger">Reject <kbd>X</kbd></button><button class="btn ghost">Open folder</button>
+    <div class="field focus"><span>fake — committed answers from evals/grounding/cases</span><span style="margin-left:auto">▾</span></div>
+    <div class="field" style="min-width:160px;color:var(--dim)">Filter flows…</div>
+  </div>
+  <div class="comp" style="margin-top:10px">
+    <span class="pill pass">passed</span><span class="pill fail">failed</span><span class="pill skip">skipped</span><span class="pill healed">healed</span><span class="pill abort">aborted</span><span class="pill info">running</span><span class="pill neutral">not run</span>
+    <span class="chip"><span class="dot pass"></span>service 127.0.0.1:55702</span><span class="chip">page: all</span><kbd>⌘K</kbd><kbd>Esc</kbd>
+  </div>
+  <div style="display:grid;grid-template-columns:220px 1fr;gap:12px;margin-top:12px">
+    <div class="sidebar" style="border:1px solid var(--line);border-radius:6px;padding:6px"><div class="nav"><span>Flows</span><span class="count">7</span></div><div class="nav active"><span>Runs</span><span class="count">12</span></div><div class="nav"><span>Bindings</span><span class="count">41</span></div></div>
+    <div><table class="table"><tr><th>element</th><th>state</th><th style="text-align:right">score</th></tr><tr class="sel"><td class="mono">nav.book-a-slot-link</td><td><span class="pill pass">verified</span></td><td class="num">0.98</td></tr><tr><td class="mono">checkout.pay-button</td><td><span class="pill warn">unverified</span></td><td class="num">—</td></tr></table>
+    <div class="alert" style="margin:10px 0 0"><svg viewBox="0 0 16 16"><path d="M8 2l6.5 11.5h-13z"/><path d="M8 6.5v3M8 12v.5"/></svg><span>The Svatah ADE could not find a Node 22 or newer to run <span class="mono">svatah serve</span>. It looked in three places: SVATAH_NODE, PATH, resources/svatah/node.</span></div></div>
+  </div>
+  <p class="h" style="margin-top:18px">Rules the adapters depend on</p>
+  <div class="rule"><b>Every interactive control has an accessible name and a stable id</b> (the desktop adapters bind by them; the snapshot case fails on an unnamed control). <b>Colour never carries meaning alone</b>: every status has a word or a glyph beside it. <b>Density is the default</b>: 13 px text, 28 px controls, 7 px row padding; the inspector is the only place that breathes. <b>Monospace is for what the runtime wrote</b>, sans for what we wrote. <b>The same action has the same name</b> in the palette, the TUI, the SDK, and the CLI.</div>
+</div>
+</div>

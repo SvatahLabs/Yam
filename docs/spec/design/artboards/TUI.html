@@ -1,0 +1,84 @@
+<div style="width:1180px;height:720px;background:#0b0e12;padding:18px;font-family:var(--mono);font-size:12.5px;line-height:18px;color:#d6dde6">
+<style>
+.t { display:grid; grid-template-columns: 300px minmax(0,1fr) 300px; grid-template-rows: 20px minmax(0,1fr) 190px 20px; gap: 0; height: 684px; }
+.t .hdr { grid-column: 1 / -1; display:flex; gap:16px; color:#8b96a5; }
+.t .hdr b { color:#b8a1ff; font-weight:500; }
+.p { border:1px solid #2a323c; margin:2px; padding:4px 0; overflow:hidden; position:relative; }
+.p.focus { border-color:#b8a1ff; }
+.p .ttl { position:absolute; top:-9px; left:8px; background:#0b0e12; padding:0 6px; color:#8b96a5; font-size:11px; }
+.p .ttl b { color:#b8a1ff; font-weight:500; }
+.r { padding:0 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.r.cur { background:#1c2229; color:#fff; }
+.g { color:#4fc48a; } .b { color:#ee6a5f; } .y { color:#e5b04c; } .c { color:#56c5d0; } .m { color:#8b96a5; } .d { color:#5f6a78; } .bl { color:#6ea8fe; }
+.foot { grid-column: 1 / -1; display:flex; gap:14px; color:#8b96a5; padding:0 4px; }
+.foot b { color:#d6dde6; font-weight:500; background:#1c2229; padding:0 4px; border-radius:2px; }
+.pal { position:absolute; left:340px; top:150px; width:500px; background:#151a20; border:1px solid #b8a1ff; padding:4px 0; box-shadow:0 12px 40px rgba(0,0,0,0.6); }
+</style>
+<div class="t">
+  <div class="hdr"><b>svatah ui</b><span>svatah-fixtures</span><span>service 127.0.0.1:55702</span><span>test · playwright</span><span style="flex:1"></span><span>run <b>comp</b> aborted · 6 passed 1 failed</span></div>
+  <div class="p"><div class="ttl"><b>1</b> Flows</div>
+    <div class="r m">▾ flows/</div>
+    <div class="r">  simple.flow                <span class="g">✓ passed</span></div>
+    <div class="r">  booking-workflow.flow      <span class="g">✓ passed</span></div>
+    <div class="r cur">▾ guards-and-compensation  <span class="y">! aborted</span></div>
+    <div class="r">    I want to see guards decide</div>
+    <div class="r y">    I want to book and then fail</div>
+    <div class="r">    cancel a booking</div>
+    <div class="r">  booking-compensation.flow  <span class="d">· not run</span></div>
+    <div class="r">  execution.flow             <span class="b">✗ failed</span></div>
+    <div class="r">  natural_language_login     <span class="b">✗ failed</span></div>
+    <div class="r">  svatah.flow                <span class="d">· not run</span></div>
+    <div class="r m" style="margin-top:8px">▾ bindings/  41 · <span class="y">4 unverified</span></div>
+    <div class="r m">▾ runs/      12</div>
+    <div class="r m">▾ tools      2 exposed · <span class="g">serving</span></div>
+  </div>
+  <div class="p focus"><div class="ttl"><b>2</b> Run comp · I want to book and then fail</div>
+    <div class="r"><span class="g">✓</span> 1  Click the Book a slot link                          <span class="d">testid#0   41ms</span></div>
+    <div class="r"><span class="g">✓</span> 2  Type "Indiranagar" into the location field          <span class="d">testid#0   63ms</span></div>
+    <div class="r"><span class="g">✓</span> 3  Click the Book now button                           <span class="d">testid#0   58ms</span></div>
+    <div class="r"><span class="g">✓</span> 4  Remember the text of the booking reference as ref…  <span class="d">= BK-4471  12ms</span></div>
+    <div class="r cur"><span class="b">✗</span> 5  Click the pay button                                <span class="b">locator    69ms</span></div>
+    <div class="r d">     Could not resolve checkout.pay-button (the pay button): 5 candidates tried,</div>
+    <div class="r d">     none matched exactly one element.  <span class="y">policy → compensate: cancel a booking</span></div>
+    <div class="r m" style="margin-top:6px">cancel a booking · compensating with scope {reference: BK-4471}</div>
+    <div class="r"><span class="g">✓</span> 1  Click the cancel booking button                     <span class="d">testid#0   47ms</span></div>
+    <div class="r"><span class="g">✓</span> 2  The booking reference should say {…reference}       <span class="d">= BK-4471  15ms</span></div>
+    <div class="r y" style="margin-top:6px">flow aborted · exit 11</div>
+    <div class="r m" style="margin-top:10px">r rerun   R resume from 5   h heal   e open in $EDITOR   s screenshot   y copy step</div>
+  </div>
+  <div class="p"><div class="ttl"><b>3</b> Inspect · step 5</div>
+    <div class="r m">failure   <span class="b">locator</span></div>
+    <div class="r m">session   /booking · window 0</div>
+    <div class="r m">policy    compensate: cancel a booking</div>
+    <div class="r m" style="margin-top:6px">candidates tried</div>
+    <div class="r">  testid  pay                  <span class="b">0</span></div>
+    <div class="r">  role    button "Pay"         <span class="b">0</span></div>
+    <div class="r">  text    Pay                  <span class="b">0</span></div>
+    <div class="r">  css     [data-testid="pay"]  <span class="b">0</span></div>
+    <div class="r">  xpath   //*[@data-testid…]   <span class="b">0</span></div>
+    <div class="r m" style="margin-top:6px">binding   checkout.pay-button</div>
+    <div class="r y">          unverified · seed migrate</div>
+    <div class="r m" style="margin-top:6px">screenshot</div>
+    <div class="r d">  runs/comp/screenshots/…-5.png</div>
+  </div>
+  <div class="p" style="grid-column:1 / -1"><div class="ttl"><b>4</b> Audit · follow</div>
+    <div class="r"><span class="d">08.451</span> <span class="m">locate </span> checkout.pay-button · testid "pay" · <span class="b">matched nothing</span> 1 ms</div>
+    <div class="r"><span class="d">08.455</span> <span class="m">locate </span> role button "Pay" · <span class="b">matched nothing</span> 3 ms</div>
+    <div class="r"><span class="d">08.520</span> <span class="m">step   </span> <span class="b">failed</span> · class locator · screenshot I-want-to-book-and-then-fail-5.png</div>
+    <div class="r"><span class="d">08.521</span> <span class="m">policy </span> <span class="y">compensate "cancel a booking" with scope {reference: BK-4471}</span></div>
+    <div class="r"><span class="d">08.539</span> <span class="m">act    </span> click booking.cancel-booking-button h5 · <span class="g">ok</span></div>
+    <div class="r"><span class="d">08.571</span> <span class="m">check  </span> text "BK-4471" of booking.booking-reference · <span class="g">ok</span></div>
+    <div class="r"><span class="d">08.594</span> <span class="m">run    </span> <span class="y">aborted · exit 11</span></div>
+    <div class="r d">─ svatah ui --json streams these same lines to stdout for an agent ─</div>
+  </div>
+  <div class="foot"><span><b>^K</b> commands</span><span><b>1-4</b> pane</span><span><b>Tab</b> next</span><span><b>j k</b> move</span><span><b>Enter</b> open</span><span><b>r</b> run</span><span><b>h</b> heal</span><span><b>?</b> keys</span><span style="flex:1"></span><span>recording off · gateway none</span></div>
+  <div class="pal">
+    <div class="r" style="border-bottom:1px solid #2a323c;padding-bottom:4px;margin-bottom:4px"><span style="color:#b8a1ff">›</span> heal<span style="border-left:1px solid #fff;margin-left:1px"></span></div>
+    <div class="r cur">heal      Heal run comp                        <span class="d">svatah heal --run comp</span></div>
+    <div class="r">heal      Heal from bind failures              <span class="d">--from-bind-failures</span></div>
+    <div class="r">heal      Review proposals · heal-3            <span class="d">1 pending</span></div>
+    <div class="r">bindings  Verify all bindings                  <span class="d">svatah bindings verify</span></div>
+    <div class="r d">same list as the ADE's ⌘K and the SDK's actions</div>
+  </div>
+</div>
+</div>

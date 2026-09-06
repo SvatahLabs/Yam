@@ -1,0 +1,33 @@
+<div style="width:1440px;height:900px;background:var(--bg0);padding:24px 32px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:16px 24px;overflow:hidden">
+<style>
+.q { border:1px solid var(--line); border-radius:8px; background:var(--bg1); display:flex; flex-direction:column; overflow:hidden; }
+.q .t { display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line); font-weight:600; }
+.q .t span:last-child { margin-left:auto; color:var(--dim); font-weight:400; font-size:11.5px; }
+.q .b { padding:12px 14px; font-size:12px; color:var(--fg2); flex:1; }
+.wire { border:1px dashed var(--line2); border-radius:4px; padding:8px 10px; margin:0 0 8px; color:var(--muted); font-size:11.5px; }
+</style>
+<div style="grid-column:1 / -1"><div style="font-size:20px;font-weight:600">Secondary screens · same sidebar, same inspector, lower fidelity for now</div><div style="color:var(--muted);margin-top:2px">These four keep their current jobs and inherit the system above. Sketched at wireframe level so you can object to the structure before the pixels.</div></div>
+<div class="q"><div class="t">API client<span>GET/PUT /api/:name · POST /api/request</span></div><div class="b">
+  <div class="wire">List of saved requests (api/*.yaml) with method pill and name · selected one opens in the centre</div>
+  <div class="wire">Request editor: method · URL with {data.baseUrl} · headers table · body (JSON / form) · auth · "share session cookies" toggle</div>
+  <div class="wire">Send <kbd>⌘↵</kbd> → response pane: status pill, time, headers, body with JSON-path picker that writes <span class="mono">Remember … as name</span> into the flow</div>
+  <div class="wire">Inspector: history of sends for this request, each with status and size · "Use in flow" writes a <span class="mono">Call the "…" API</span> step</div>
+</div></div>
+<div class="q"><div class="t">Data<span>GET/PUT /data · data.yaml</span></div><div class="b">
+  <div class="wire">Tree of data.yaml: user.email, user.password (secret, ${SVATAH_SAMPLE_PASSWORD}), card.number (secret), baseUrl…</div>
+  <div class="wire">Secrets show as "reads ${ENV}" with a set / unset pill (W_SECRET_UNSET from the Project diagnostics lands here) — values are never shown or stored</div>
+  <div class="wire">Edit in place with YAML validation · every flow reference to a key is listed beside it (rename shows what breaks)</div>
+  <div class="wire">Inspector: where this key is read, by story and step</div>
+</div></div>
+<div class="q"><div class="t">Surface explorer<span>POST /surface/:session/* · writes trajectory.jsonl</span></div><div class="b">
+  <div class="wire">Open a session (adapter picker: playwright · bidi · ax · uia · http) → live snapshot tree with refs, filterable by role and name</div>
+  <div class="wire">Every call needs an <b>intent</b> (a sentence) before act / read / check — the intent is what trajectory compile turns into a step</div>
+  <div class="wire">Right: the call log as trajectory lines · "Compile to proposal" produces proposals/&lt;name&gt;.flow with unverified bindings</div>
+  <div class="wire">Desktop sessions: the same tree from the AX or UIA adapter; the ADE itself is a valid target for the conformance flows</div>
+</div></div>
+<div class="q"><div class="t">Import prototype database<span>POST /migrate · into the open project only</span></div><div class="b">
+  <div class="wire">Pick the electron-db directory → preview: project "Zoomcar regression", 4 flows, 9 locators, data.yaml, 3 API requests; results and images listed as "not imported"</div>
+  <div class="wire">Import → migration-review.md rendered as a checklist (40 notes) with each note linking to the flow line it is about</div>
+  <div class="wire">After import: the Flows screen with every migrated binding marked <span class="pill warn" style="height:16px">unverified</span> and one Record button to verify them all</div>
+</div></div>
+</div>

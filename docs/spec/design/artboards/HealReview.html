@@ -1,0 +1,65 @@
+<div class="app">
+@@TOPBAR(Bindings / Heal)
+@@SIDEBAR(bindings)
+<section class="workspace">
+  <div class="toolbar"><h1>Heal review</h1><span class="sub">run heal-3 · model-free · 1 proposal, 0 unrepaired</span><div class="spacer"></div>
+    <button class="btn">Reject all</button>
+    <button class="btn primary">Apply 1 accepted <kbd>⌘↵</kbd></button>
+  </div>
+  <div class="main">
+    <aside class="list" aria-label="Proposals">
+      <div class="row active"><span class="name mono">app.schedule-build-link</span><span class="pill healed">relocalized 0.91</span><span class="meta"><span>the Schedule build link</span><span>relocalized</span></span></div>
+      <div class="group" style="padding-top:16px"><span>Repaired earlier in this run</span></div>
+      <div class="row" style="opacity:0.7"><span class="name mono">login.username-field</span><span class="pill pass">applied</span><span class="meta"><span>the username field</span><span>1.00</span></span></div>
+      <div style="flex:1"></div>
+      <div class="card" style="margin:0 12px 12px"><p style="color:var(--muted)">Replay</p><p>Restored the recorded page behind the login with inputs <span class="mono">email</span>, <span class="mono">password</span>; values never written.</p></div>
+    </aside>
+    <div class="editor">
+      <div style="padding:16px 20px 0">
+        <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">Proposal</div>
+        <div style="font-size:18px;font-weight:600;margin-top:4px">the Schedule build link <span class="mono" style="font-weight:400;font-size:13px;color:var(--muted)">app.schedule-build-link</span></div>
+        <div style="color:var(--muted);margin-top:2px">simple.flow · I want to validate login · step 6 · <span class="mono">/dashboard</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr;gap:8px 0;padding:12px 20px 0">
+        <div>
+          <div class="panel-h" style="border-top:none;padding-left:0;background:transparent">Before · every candidate failed</div>
+          <div class="diff" style="margin:8px 0 0"><div class="d del">- testid "schedule-build"            matched 0</div><div class="d del">- role link "Schedule build"         matched 0</div><div class="d del">- text "Schedule build"              matched 0</div><div class="d del">- css [data-testid="schedule-build"] matched 0</div><div class="d del">- xpath //*[@data-testid='schedule-build'] matched 0</div></div>
+        </div>
+        <div>
+          <div class="panel-h" style="border-top:none;padding-left:0;background:transparent">After · re-synthesised from the relocalized element</div>
+          <div class="diff" style="margin:8px 0 0"><div class="d add">+ testid "schedule-a-build"          matches 1</div><div class="d add">+ role link "Schedule a build"       matches 1</div><div class="d add">+ text "Schedule a build"            matches 1</div><div class="d add">+ css [data-testid="schedule-a-build"] matches 1</div><div class="d add">+ xpath //*[@data-testid='schedule-a-build'] matches 1</div></div>
+        </div>
+      </div>
+      <div class="panel-h" style="margin-top:14px">Relocalization · score 0.91 against threshold 0.72, runner-up 0.31 (margin 0.10 required)</div>
+      <div style="padding:6px 4px">
+        <div class="score"><span class="k">tag · 0.30</span><div class="bar"><span style="width:100%"></span></div><span class="v">1.00</span></div>
+        <div class="score"><span class="k">attrs · 0.25</span><div class="bar"><span style="width:72%"></span></div><span class="v">0.72</span></div>
+        <div class="score"><span class="k">name · 0.20</span><div class="bar"><span style="width:86%"></span></div><span class="v">0.86</span></div>
+        <div class="score"><span class="k">neighbours · 0.15</span><div class="bar"><span style="width:100%"></span></div><span class="v">1.00</span></div>
+        <div class="score"><span class="k">box · 0.10</span><div class="bar"><span style="width:94%"></span></div><span class="v">0.94</span></div>
+      </div>
+      <div style="display:flex;gap:8px;padding:14px 20px;border-top:1px solid var(--line);margin-top:auto;align-items:center">
+        <button class="btn primary">Accept <kbd>A</kbd></button>
+        <button class="btn">Show element</button>
+        <button class="btn danger">Reject <kbd>X</kbd></button>
+        <span style="flex:1"></span><span style="color:var(--muted);font-size:12px">Applying writes a diff to the bindings store and records the run as healed.</span>
+      </div>
+    </div>
+  </div>
+</section>
+<aside class="inspector" aria-label="Inspector">
+  <h2>Ground truth</h2>
+  <div class="kv"><span class="k">Verified by</span><span class="v">re-synthesis, unique match</span><span class="k">Outcome</span><span class="v"><span class="pill healed">recovered</span></span><span class="k">Model</span><span class="v">none · relocalize only</span></div>
+  <h3>Fingerprint · recorded vs found</h3>
+  <table class="table"><tr><th></th><th>recorded</th><th>found</th></tr>
+    <tr><td class="mono">tag</td><td class="mono">a</td><td class="mono">a</td></tr>
+    <tr><td class="mono">name</td><td>Schedule build</td><td>Schedule a build</td></tr>
+    <tr><td class="mono">landmark</td><td>main</td><td>main</td></tr>
+    <tr><td class="mono">after</td><td>Docs</td><td>Docs</td></tr>
+    <tr><td class="mono">box</td><td class="mono">220,180 · 120×20</td><td class="mono">220,196 · 132×20</td></tr>
+  </table>
+  <h3>History</h3>
+  <div class="kv"><span class="k">Recorded</span><span class="v">2026-09-03 · fake:grounding-cases</span><span class="k">Last matched</span><span class="v">testid #0 · heal-2</span><span class="k">Healed before</span><span class="v">never</span></div>
+</aside>
+@@STATUS(<span>heal-3 · 1 proposal</span><span><kbd>A</kbd>accept · <kbd>X</kbd>reject · <kbd>⌘↵</kbd>apply</span>)
+</div>

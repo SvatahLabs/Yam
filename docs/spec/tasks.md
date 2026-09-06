@@ -387,38 +387,92 @@ Phase 8 total: 13.5 ideal days.
 
 ---
 
-## Phase 9 — Release 0.1.0 and the open P0 items (Draft 2.10)
+## Phase 9 — Builder surfaces, foundation (Draft 2.11)
 
-### T9.1 The desktop gate, race-free and load-aware
+The owner reviewed and approved the mockups under `docs/spec/design/` on 2026-09-05. This phase builds the foundations both renderers stand on and proves them with two screens end to end. Nothing in the old ADE is deleted until Phase 10 replaces it.
+
+### T9.1 The screen model and the action registry
+**Refs:** REQ-ADE-10, REQ-ADE-13, LLD §13.7 · **Est:** 4
+**Do:** `@svatah/screens`: the `Screen`, `State`, `Action`, `Binding` types; the twelve screen ids; `load()` for every screen from the service and files; the action registry with `id`, `label`, `run`, `availableWhen`, `cli`; a fake-service harness for tests. A repository check reads the registry, the CLI's command table, and the palette fixture and fails when an action's id, label, or CLI command differs between them.
+**Validate:** Every screen loads against the fake service in tests with the state the mockup shows for the fixtures project; the parity check passes and a deliberately renamed action makes it fail; `svatah ui --json` (T9.4) prints exactly the model's state.
+
+### T9.2 The design system
+**Refs:** REQ-ADE-12, LLD §13.7 · **Est:** 3
+**Do:** `@svatah/ui-tokens` (CSS variables for both themes from `docs/spec/design/base.css`, the type ramp, the status set) and `@svatah/ui` (React components on Radix primitives: button, field, select, pill, chip, table, tabs, rail item, inspector sections, alert, palette, kbd), every component requiring a visible label and an id; a component sheet page rendering all of them in both themes that the accessibility adapters can read.
+**Validate:** The sheet passes an axe-core run with zero violations; every interactive component throws in development without a label and an id; the two themes differ only in tokens; the licence check stays permissive.
+
+### T9.3 The SDK and the generated clients
+**Refs:** REQ-SDK-1, REQ-SDK-2, LLD §13.8 · **Est:** 3
+**Do:** `@svatah/sdk` generated from `packages/service/openapi.json` at build time (client, typed events over SSE and WebSocket, `actions` from `@svatah/screens`); Python and Java clients generated from the same description into `clients/python` and `clients/java` with their build files; a drift check that regenerates and diffs.
+**Validate:** The SDK drives a fake-gateway record session end to end in a test (start, decision, accept, stop) and subscribes to its events; the Python and Java clients each run one smoke script against a live service (`GET /project`, `POST /run`, events) in CI; regenerating from a changed description fails the drift check.
+
+### T9.4 The two renderers, two screens each
+**Refs:** REQ-ADE-11, REQ-TUI-1, REQ-ADE-6, LLD §13.6, §13.7 · **Est:** 5
+**Do:** The ADE shell rebuilt as top bar, rail, workspace, inspector, status bar, and palette on `@svatah/ui`, rendering `flows` (list, editor with lint, plan inspector) and `run` (live steps, audit, evidence) from the model; the other screens still reachable through the old tabs behind a "Legacy" rail item until Phase 10. `svatah ui` (`@svatah/tui`, Ink) rendering the same two screens with four panes, keys, and the palette; `--json`. Both open or adopt the service the same way. Apply the Phase 8 corrections to the desktop gate first (P8-F1..F3).
+**Validate:** The packaged ADE opens the fixtures project into the new Flows screen, and the desktop suite's snapshot case finds every control on it named and id'd; a record and a run driven through the new Run screen's buttons under Playwright; `svatah ui` runs `comp` in a pseudo-terminal test and its `--json` output equals the model's state; the same action ids appear in both palettes.
+
+### T9.5 Progress and the design record
+**Refs:** LLD §13.7 · **Est:** 0.5
+**Do:** `docs/spec/progress/phase-9.md`; where a mockup and the LLD disagreed, the deviation and the choice; screenshots of both renderers for the two screens, the ADE's taken through the AX adapter.
+**Validate:** The two screenshots exist and match the mockups' structure; every deviation names its section.
+
+Phase 9 total: 15.5 ideal days.
+
+---
+
+## Phase 10 — Builder surfaces, complete (Draft 2.11)
+
+### T10.1 The authoring loop screens
+**Refs:** REQ-ADE-10..13, REQ-TUI-1, LLD §13.7 · **Est:** 6
+**Do:** `record` (session, decisions, re-pick through the snapshot, deadline), `runs` (list, filters, evidence inspector), `heal` (proposals, before and after, scores, apply), `bindings` (table, resolver order, verify, prune) on the model in both renderers, to the mockups.
+**Validate:** Each screen driven end to end through its own controls in the ADE under Playwright and in `svatah ui` under a pseudo-terminal, against the fixtures project with the fake gateway; every control named and id'd; the palette lists every action of the four screens.
+
+### T10.2 Agents and tools, API, Data, Explorer, Import, Settings
+**Refs:** REQ-ADE-10..13, REQ-TUI-1, LLD §13.7 · **Est:** 5
+**Do:** The remaining screens on the model in both renderers; the Secondary wireframes become full designs first, added to `docs/spec/design/` for the owner's review before they are built.
+**Validate:** As T10.1; the explorer requires an intent per call and writes `trajectory.jsonl`; the import writes only into the open project.
+
+### T10.3 Retire the old screens, re-validate the target
+**Refs:** REQ-ADE-6, REQ-ADP-7, LLD §7.5, §16 · **Est:** 2
+**Do:** Delete the legacy screens and `app.css`; update the desktop conformance cases to the new structure (rail items, inspector, palette) and the recorded trees; rebuild installers.
+**Validate:** The macOS gate green live against the rebuilt packaged ADE, 7 of 7 plus healing; the snapshot case asserts zero unnamed controls; the ADE smoke passes on the three-OS matrix definition.
+
+Phase 10 total: 13 ideal days.
+
+---
+
+## Phase 11 — Release 0.1.0 and the open P0 items (Draft 2.10, renumbered in 2.11)
+
+### T11.1 The desktop gate, race-free and load-aware
 **Refs:** REQ-ADP-7, REQ-SURF-3, LLD §7.5, §14 · **Est:** 1.5
 **Do:** The gate waits until no process of the previous launch remains before launching the next variant; the bridge addresses the process that owns a window when several share the name; the cost line records the one-minute load average and the CPU count; a read that exceeds the deadline is retried once and the report says so; the CI desktop legs run nothing else on their runner.
 **Validate:** Three consecutive gate runs on macOS, one started with `pnpm -r test` running in parallel, all conformant or failing only with a retried, recorded deadline; a test that fakes two same-named processes and shows the one with a window is chosen; the report's bridge line carries the load figures.
 
-### T9.2 The compiler golden set at 300
+### T11.2 The compiler golden set at 300
 **Refs:** REQ-COMP-9, LLD §16 · **Est:** 2.5
 **Do:** Extend `evals/compiler/golden.jsonl` to at least 300 entries across every pattern and tier, drawing Tier 2 entries from `refused.jsonl` only where a reviewer has fixed the answer and moving them out of the corpus so the test set and the training set stay disjoint; regenerate `reports/eval-compiler.md`.
 **Validate:** 300 or more entries; Tier 1 exact match 100 percent; end-to-end at least 95 percent with the pinned Tier 2 model; the corpus test still reports zero overlap with the golden set.
 
-### T9.3 The ADE names every control, and the gate makes a run before it reads results
+### T11.3 The ADE names every control, and the gate makes a run before it reads results
 **Refs:** REQ-ADE-6, LLD §13.6, §16 · **Est:** 1.5
 **Do:** Name the three unnamed buttons on the Project screen and any other interactive control the desktop snapshot case finds without a name; make the snapshot case fail on an unnamed interactive control; before `ade.result`, the gate runs one story against `apps/sample-web` through the Run screen so the results table branch is exercised (K6).
 **Validate:** The live report's `ade.snapshot` asserts zero unnamed controls; `ade.result` reads a table with one run and its status; both green live.
 
-### T9.4 The three-OS matrix observed
+### T11.4 The three-OS matrix observed
 **Refs:** REQ-ADE-6, REQ-PKG-1, REQ-STD-2 · **Est:** 1 (plus the owner's action)
 **Do:** Write `docs/ci.md` with the exact steps to attach a self-hosted macOS and Windows runner to the Bitbucket workspace, or to mirror the repository to GitHub where the matrix already exists; the owner chooses and attaches. Once a runner exists, run `custom: desktop-gates` and the `ade-installers` matrix and record the results.
 **Validate:** The document, and either the observed pipeline runs with their reports, or the exact blocked step and what the owner has to do.
 
-### T9.5 0.1.0 published and verified from the registry
+### T11.5 0.1.0 published and verified from the registry
 **Refs:** REQ-PKG-1, 2, 4 · **Est:** 1.5 (plus the owner's action)
 **Do:** The owner triggers `custom: publish` with the token. Add `scripts/quick-start-registry.mjs`, which installs the four module (a) packages by version from the registry into an empty Playwright project and runs the quick start; add a `CHANGELOG.md` release date and the git tag `v0.1.0`.
 **Validate:** The registry quick start passes on Node 22 and the current LTS after the publish; until the owner publishes, the script runs in tarball mode and says so, and the tag is not created.
 
-### T9.6 The Windows UIA gate (carried)
+### T11.6 The Windows UIA gate (carried)
 **Refs:** REQ-ADP-6, LLD §7.5 · **Est:** 2 (needs a Windows host)
-**Do and Validate:** as T8.6.
+**Do and Validate:** as T8.6. The Phase 8 corrections (gate race, load line, unnamed buttons) are applied in Phase 9, so T11.1 and T11.3 inherit them and re-verify.
 
-Phase 9 total: 10 ideal days.
+Phase 11 total: 10 ideal days.
 
 ---
 
@@ -527,6 +581,7 @@ Phase 9 total: 10 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.11 (builder surfaces, after the owner's design review): Phase 9 (foundation: screen model, design system, SDK, two screens in both renderers) and Phase 10 (every screen, retire the old ones) inserted; the release phase and its tasks renumbered 11 and T11.x. Total 239 ideal days.
 - Draft 2.10 (after Phase 8 verification): Phase 9 added — T9.1 the desktop gate race-free and load-aware, T9.2 the golden set at 300, T9.3 named controls and a real run before results, T9.4 the three-OS matrix observed, T9.5 0.1.0 published by the owner and verified from the registry, T9.6 the Windows gate carried. Total 210.5 ideal days.
 - Draft 2.9 (after Phase 7 verification): Phase 8 added — T8.1 the packaged ADE opens a project, T8.2 the AX bridge within budget and the macOS gate green, T8.3 dialog arming documented, linted, audited, T8.4 the fine-tune withdrawn and its corpus, T8.5 publish 0.1.0 by a manual token-gated step, T8.6 the Windows gate carried. Total 200.5 ideal days.
 - Draft 2.8 (after Phase 6 verification): Phase 7 added — T7.1 AX live gate and desktop healing cases, T7.2 UIA live gate and the pipeline, T7.3 dialog IR and type check, T7.4 Java artifacts in the published schemas, T7.5 the fine-tune measured, T7.6 release candidate 0.1.0. Total 187 ideal days.

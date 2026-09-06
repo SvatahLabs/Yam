@@ -1,0 +1,68 @@
+<div class="app">
+@@TOPBAR(Flows)
+@@SIDEBAR(flows)
+<section class="workspace">
+  <div class="toolbar"><h1>Flows</h1><span class="sub">7 files · 22 stories · 41 bindings, 4 unverified</span><div class="spacer"></div>
+    <button class="btn" aria-label="Record"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="4"/></svg>Record <kbd>R</kbd></button>
+    <button class="btn" aria-label="Heal"><svg viewBox="0 0 16 16"><path d="M3 9l3 3 7-7"/></svg>Heal <kbd>H</kbd></button>
+    <button class="btn primary" aria-label="Run"><svg viewBox="0 0 16 16"><path d="M5 3l8 5-8 5z"/></svg>Run <kbd>⌘↵</kbd></button>
+  </div>
+  <div class="main">
+    <aside class="list" aria-label="Flow files">
+      <div class="filter">Filter flows…</div>
+      <div class="row"><span class="name">simple.flow</span><span class="pill pass">passed</span><span class="meta"><span>3 stories</span><span>run 22 min ago</span></span></div>
+      <div class="row"><span class="name">booking-workflow.flow</span><span class="pill pass">passed</span><span class="meta"><span>2 stories · signatures</span><span>workflow</span></span></div>
+      <div class="row active"><span class="name">guards-and-compensation.flow</span><span class="pill abort">aborted</span><span class="meta"><span>3 stories</span><span>run 4 min ago</span></span></div>
+      <div class="row"><span class="name">booking-compensation.flow</span><span class="pill neutral">not run</span><span class="meta"><span>3 stories</span><span>2 unverified bindings</span></span></div>
+      <div class="row"><span class="name">execution.flow</span><span class="pill fail">failed</span><span class="meta"><span>7 stories</span><span>perform search#4 timeout</span></span></div>
+      <div class="row"><span class="name">natural_language_login.flow</span><span class="pill fail">failed</span><span class="meta"><span>3 stories</span><span>schedule-heading unresolved</span></span></div>
+      <div class="row"><span class="name">svatah.flow</span><span class="pill neutral">not run</span><span class="meta"><span>1 story</span><span>migrated</span></span></div>
+    </aside>
+    <div class="editor">
+      <div class="tabs"><span class="tab active">guards-and-compensation.flow</span><span class="tab">Plan</span><span class="tab">History</span></div>
+      <div class="code" aria-label="Flow editor">
+        <div class="ln"><span class="n">17</span><span class="g"></span><span><span class="head">story: I want to see guards decide</span></span><span></span></div>
+        <div class="ln"><span class="n">18</span><span class="g pass">✓</span><span>&nbsp;&nbsp;Click <span class="ref">the Book a slot link</span></span><span class="d" style="color:var(--dim);font-size:11px">tier 1 · bound</span></div>
+        <div class="ln"><span class="n">19</span><span class="g pass">✓</span><span>&nbsp;&nbsp;Remember the text of <span class="ref">the booking status</span> as status</span><span></span></div>
+        <div class="ln"><span class="n">20</span><span class="g"></span><span class="cmt">&nbsp;&nbsp;// True: the page is the booking page.</span><span></span></div>
+        <div class="ln"><span class="n">21</span><span class="g pass">✓</span><span>&nbsp;&nbsp;<span class="kw">Only if</span> the URL contains <span class="str">"/booking"</span>, Type <span class="str">"Indiranagar"</span> into <span class="ref">the location field</span></span><span></span></div>
+        <div class="ln cur"><span class="n">22</span><span class="g skip">–</span><span>&nbsp;&nbsp;<span class="kw">Only if</span> {status} is <span class="str">"Cancelled"</span>, Click <span class="ref">the cancel booking button</span></span><span class="d" style="color:var(--dim);font-size:11px">skipped last run</span></div>
+        <div class="ln"><span class="n">23</span><span class="g skip">–</span><span>&nbsp;&nbsp;<span class="kw">Unless</span> {status} is <span class="str">"Confirmed"</span>, Click <span class="ref">the cancel booking button</span></span><span></span></div>
+        <div class="ln"><span class="n">24</span><span class="g pass">✓</span><span>&nbsp;&nbsp;<span class="kw">Only if</span> <span class="ref">the Book now button</span> is visible, Click <span class="ref">the Book now button</span></span><span></span></div>
+        <div class="ln"><span class="n">25</span><span class="g pass">✓</span><span>&nbsp;&nbsp;<span class="ref">The booking result</span> should say <span class="str">"Slot booked."</span></span><span></span></div>
+        <div class="ln"><span class="n">26</span><span class="g"></span><span></span><span></span></div>
+        <div class="ln"><span class="n">27</span><span class="g"></span><span><span class="head">scenario (onFailure=compensate:cancel a booking): I want to book and then fail</span></span><span></span></div>
+        <div class="ln"><span class="n">28</span><span class="g pass">✓</span><span>&nbsp;&nbsp;Click <span class="ref">the Book a slot link</span></span><span></span></div>
+        <div class="ln"><span class="n">29</span><span class="g pass">✓</span><span>&nbsp;&nbsp;Type <span class="str">"Indiranagar"</span> into <span class="ref">the location field</span></span><span></span></div>
+        <div class="ln"><span class="n">30</span><span class="g pass">✓</span><span>&nbsp;&nbsp;Click <span class="ref">the Book now button</span></span><span></span></div>
+        <div class="ln"><span class="n">31</span><span class="g pass">✓</span><span>&nbsp;&nbsp;Remember the text of <span class="ref">the booking reference</span> as reference</span><span></span></div>
+        <div class="ln"><span class="n">32</span><span class="g fail">✗</span><span>&nbsp;&nbsp;Click <span class="ref">the pay button</span></span><span class="warn">unverified binding · failed last run</span></div>
+        <div class="ln"><span class="n">33</span><span class="g"></span><span></span><span></span></div>
+        <div class="ln"><span class="n">34</span><span class="g"></span><span><span class="head">scenario (idempotent=true): cancel a booking</span></span><span></span></div>
+        <div class="ln"><span class="n">35</span><span class="g pass">✓</span><span>&nbsp;&nbsp;Click <span class="ref">the cancel booking button</span></span><span></span></div>
+        <div class="ln"><span class="n">36</span><span class="g pass">✓</span><span>&nbsp;&nbsp;<span class="ref">The booking reference</span> should say {I want to book and then fail.reference}</span><span></span></div>
+        <div class="ln"><span class="n">37</span><span class="g"></span><span></span><span></span></div>
+        <div class="ln"><span class="n">38</span><span class="g"></span><span><span class="head">test: I want to see guards decide</span></span><span></span></div>
+      </div>
+      <div class="panel-h">Lint<span class="spacer"></span><span class="pill pass">0 errors</span><span class="pill warn">1 warning</span></div>
+      <div class="audit" style="padding:6px 0 8px"><div class="l" style="grid-template-columns:44px 170px minmax(0,1fr)"><span class="ts">32</span><span class="pol">W_BINDING_UNVERIFIED</span><span>"the pay button" is bound to checkout.pay-button, which no recording has verified. Record the story or run a dry resolve.</span></div></div>
+    </div>
+  </div>
+</section>
+<aside class="inspector" aria-label="Inspector">
+  <h2>Step 22 · Click the cancel booking button</h2>
+  <div class="kv"><span class="k">Compiles at</span><span class="v">Tier 1 · grammar, pattern 28</span><span class="k">Target</span><span class="v mono">booking.cancel-booking-button</span><span class="k">Binding</span><span class="v"><span class="pill pass">verified</span> 5 candidates</span><span class="k">Guard</span><span class="v">onlyIf · scope · {status} = "Cancelled"</span><span class="k">Last run</span><span class="v">skipped, guard false (status was Confirmed)</span></div>
+  <h3>Candidates</h3>
+  <table class="table"><tr><th>by</th><th>value</th><th style="text-align:right">score</th></tr>
+    <tr><td class="mono">testid</td><td class="mono">cancel-booking</td><td class="num">0.98</td></tr>
+    <tr><td class="mono">role</td><td class="mono">button "Cancel booking"</td><td class="num">0.92</td></tr>
+    <tr><td class="mono">text</td><td class="mono">Cancel booking</td><td class="num">0.75</td></tr>
+    <tr><td class="mono">css</td><td class="mono">[data-testid="cancel-booking"]</td><td class="num">0.68</td></tr>
+    <tr><td class="mono">xpath</td><td class="mono">//*[@data-testid='cancel-booking']</td><td class="num">0.60</td></tr>
+  </table>
+  <h3>Provenance</h3>
+  <div class="kv"><span class="k">Grounded by</span><span class="v mono">fake:grounding-cases · prompt g-1</span><span class="k">Recorded</span><span class="v">2026-09-04 · 0 tokens · $0.0000</span><span class="k">Context</span><span class="v mono">/booking · a60918dc…</span></div>
+  <div style="display:flex;gap:8px;padding:14px 16px"><button class="btn" aria-label="Open binding">Open binding</button><button class="btn" aria-label="Re-record step">Re-record step</button></div>
+</aside>
+@@STATUS(<span>guards-and-compensation.flow · line 22</span><span>plan a60918dc · bindings aa7c8799</span>)
+</div>

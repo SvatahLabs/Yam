@@ -1,0 +1,36 @@
+<div class="app">
+@@TOPBAR(Runs)
+@@SIDEBAR(runs)
+<section class="workspace">
+  <div class="toolbar"><h1>Runs</h1><span class="sub">12 runs · last 24 hours</span><div class="spacer"></div>
+    <span class="chip">behavior: all</span><span class="chip">invoker: all</span><span class="chip">status: all</span>
+    <button class="btn ghost">Open runs folder</button>
+  </div>
+  <div class="main" style="flex-direction:column">
+    <table class="table" aria-label="Runs">
+      <tr><th>run</th><th>flow / story</th><th>behavior</th><th>invoker</th><th>status</th><th>pass · fail · skip</th><th>time</th><th>when</th></tr>
+      <tr class="sel"><td class="mono">comp</td><td>guards-and-compensation.flow · I want to book and then fail</td><td>test</td><td>user · cli</td><td><span class="pill abort">aborted</span></td><td class="mono">6 · 1 · 0</td><td class="mono">0.74 s</td><td>4 min ago</td></tr>
+      <tr><td class="mono">vg</td><td>verifier-guard.flow</td><td>test</td><td>user · cli</td><td><span class="pill pass">passed</span></td><td class="mono">3 · 0 · 2</td><td class="mono">0.62 s</td><td>9 min ago</td></tr>
+      <tr><td class="mono">armed</td><td>dialog-armed.flow</td><td>test</td><td>user · cli</td><td><span class="pill pass">passed</span></td><td class="mono">3 · 0 · 0</td><td class="mono">0.41 s</td><td>14 min ago</td></tr>
+      <tr><td class="mono">bug</td><td>dialog-bug.flow</td><td>test</td><td>user · cli</td><td><span class="pill fail">failed</span></td><td class="mono">2 · 1 · 0</td><td class="mono">0.39 s</td><td>15 min ago</td></tr>
+      <tr><td class="mono">wf-9a2</td><td>booking-workflow.flow · Book a slot</td><td>workflow</td><td>user · cli</td><td><span class="pill pass">passed</span></td><td class="mono">7 · 0 · 0</td><td class="mono">1.10 s</td><td>22 min ago</td></tr>
+      <tr><td class="mono">tool-7c1</td><td>booking-workflow.flow · Book a slot</td><td>tool</td><td>agent verifier-agent · mcp</td><td><span class="pill pass">passed</span></td><td class="mono">7 · 0 · 0</td><td class="mono">1.06 s</td><td>31 min ago</td></tr>
+      <tr><td class="mono">heal-3</td><td>simple.flow · I want to validate login</td><td>test</td><td>user · cli</td><td><span class="pill healed">healed</span></td><td class="mono">7 · 0 · 0</td><td class="mono">1.92 s</td><td>1 h ago</td></tr>
+      <tr><td class="mono">conformance</td><td>4 flows · java runtime</td><td>test</td><td>runtime java</td><td><span class="pill fail">failed</span></td><td class="mono">21 · 4 · 15</td><td class="mono">14.0 s</td><td>2 h ago</td></tr>
+      <tr><td class="mono">resume-5</td><td>simple.flow · resumed from step 5</td><td>test</td><td>user · cli</td><td><span class="pill pass">passed</span></td><td class="mono">3 · 0 · 0</td><td class="mono">0.35 s</td><td>3 h ago</td></tr>
+    </table>
+    <div class="empty" style="padding-top:10px">Runs live in <span class="mono">runs/</span> beside the project and are never imported into the ADE.</div>
+  </div>
+</section>
+<aside class="inspector" aria-label="Inspector">
+  <h2>comp · aborted</h2>
+  <div class="kv"><span class="k">Flow</span><span class="v">guards-and-compensation.flow</span><span class="k">Behavior</span><span class="v">test</span><span class="k">Invoker</span><span class="v">user local via cli</span><span class="k">Plan</span><span class="v mono">a60918dc…</span><span class="k">Bindings</span><span class="v mono">aa7c8799…</span><span class="k">Exit</span><span class="v mono">11</span></div>
+  <h3>Evidence</h3>
+  <div class="thumb" aria-label="Failure screenshot"><div class="win"><i class="short"></i><i></i><i></i><i class="btn"></i></div></div>
+  <div class="kv" style="margin-top:8px"><span class="k">Failed step</span><span class="v">5 · Click the pay button</span><span class="k">Class</span><span class="v"><span class="pill fail">locator</span></span><span class="k">Policy</span><span class="v">compensate · cancel a booking · passed</span></div>
+  <h3>Files</h3>
+  <div class="kv"><span class="k mono">results.jsonl</span><span class="v">7 lines</span><span class="k mono">summary.json</span><span class="v">valid · schema 1.0.0</span><span class="k mono">audit.jsonl</span><span class="v">23 lines</span><span class="k mono">screenshots/</span><span class="v">1 file</span></div>
+  <div style="display:flex;gap:8px;padding:14px 16px"><button class="btn primary">Open run <kbd>↵</kbd></button><button class="btn">Heal run comp <kbd>H</kbd></button><button class="btn">Compare with previous</button></div>
+</aside>
+@@STATUS(<span>12 runs</span><span>sorted by time</span>)
+</div>

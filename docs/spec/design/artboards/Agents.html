@@ -1,0 +1,46 @@
+<div class="app">
+@@TOPBAR(Agents and tools)
+@@SIDEBAR(agents)
+<section class="workspace">
+  <div class="toolbar"><h1>Agents and tools</h1><span class="chip"><span class="dot pass"></span>tool server running · stdio · 2 tools</span><span class="chip">production refuses non-idempotent</span><div class="spacer"></div>
+    <button class="btn">Copy MCP config</button>
+    <button class="btn danger">Stop tool server</button>
+  </div>
+  <div class="main" style="flex-direction:column;overflow:hidden">
+    <div class="panel-h" style="border-top:none">Exposed tools · from story signatures</div>
+    <table class="table" aria-label="Tools">
+      <tr><th>tool</th><th>story</th><th>inputs</th><th>outputs</th><th>idempotent</th><th>calls</th></tr>
+      <tr><td class="mono">book_a_slot</td><td>Book a slot · booking-workflow.flow</td><td class="mono">location: string, date: string (has default)</td><td class="mono">reference: string</td><td><span class="pill neutral">no</span></td><td class="num" style="text-align:left">3</td></tr>
+      <tr><td class="mono">cancel_booking</td><td>cancel booking · booking-compensation.flow</td><td class="mono">reference: string</td><td class="mono">—</td><td><span class="pill neutral">yes</span></td><td class="num" style="text-align:left">1</td></tr>
+    </table>
+    <div class="panel-h">Invocations · from audit.jsonl</div>
+    <table class="table" aria-label="Invocations">
+      <tr><th>when</th><th>invoker</th><th>tool</th><th>inputs</th><th>run</th><th>outcome</th></tr>
+      <tr class="sel"><td>31 min ago</td><td class="mono">agent verifier-agent · mcp</td><td class="mono">book_a_slot</td><td class="mono">location=Indiranagar, date=2026-09-06</td><td class="mono">tool-7c1</td><td><span class="pill pass">passed</span> reference BK-4471</td></tr>
+      <tr><td>52 min ago</td><td class="mono">agent verifier-agent · mcp</td><td class="mono">book_a_slot</td><td class="mono">location=Koramangala, date=—</td><td class="mono">tool-5f0</td><td><span class="pill pass">passed</span></td></tr>
+      <tr><td>1 h ago</td><td class="mono">agent claude-desktop · mcp</td><td class="mono">book_a_slot</td><td class="mono">location=Indiranagar</td><td class="mono">—</td><td><span class="pill fail">refused</span> production, not idempotent</td></tr>
+      <tr><td>1 h ago</td><td class="mono">agent claude-desktop · mcp</td><td class="mono">cancel_booking</td><td class="mono">reference=BK-4470</td><td class="mono">tool-3b2</td><td><span class="pill pass">passed</span></td></tr>
+    </table>
+    <div class="panel-h">Trajectories · raw surface sessions an agent explored</div>
+    <table class="table" aria-label="Trajectories">
+      <tr><th>session</th><th>agent</th><th>calls</th><th>intent summary</th><th>proposal</th></tr>
+      <tr><td class="mono">traj-0912</td><td class="mono">verifier-agent</td><td class="num" style="text-align:left">6</td><td>sign in with the sample credentials and reach the dashboard</td><td><span class="pill neutral">compiled 5 of 5</span> proposals/sign-in.flow</td></tr>
+      <tr><td class="mono">traj-0913</td><td class="mono">claude-desktop</td><td class="num" style="text-align:left">14</td><td>find the schedule page and read the next build time</td><td><button class="btn" style="height:24px">Compile trajectory</button></td></tr>
+    </table>
+  </div>
+</section>
+<aside class="inspector" aria-label="Inspector">
+  <h2>tool-7c1 · book_a_slot</h2>
+  <div class="kv"><span class="k">Invoker</span><span class="v">agent verifier-agent via mcp</span><span class="k">Behavior</span><span class="v">tool</span><span class="k">Inputs</span><span class="v">location, date (names only in summary)</span><span class="k">Outputs</span><span class="v mono">reference = BK-4471</span><span class="k">Model calls</span><span class="v">0 · replay is model-free</span><span class="k">Network</span><span class="v">model endpoint blocked during run</span></div>
+  <h3>Audit · run line</h3>
+  <div class="snap" style="margin:8px 16px 0">{"kind":"run","runId":"tool-7c1",
+ "behavior":"tool",
+ "invoker":{"kind":"agent",
+   "id":"verifier-agent","via":"mcp"},
+ "inputs":["location","date"]}</div>
+  <h3>Machine-readable</h3>
+  <div class="card"><p>Everything on this screen is <span class="mono">GET /tools</span>, <span class="mono">GET /runs</span> and <span class="mono">GET /runs/:id/audit</span>. An agent reads the same JSON the screen renders; nothing here exists only in the UI.</p></div>
+  <div style="display:flex;gap:8px;padding:14px 16px"><button class="btn primary">Open run</button><button class="btn">Copy as JSON</button></div>
+</aside>
+@@STATUS(<span>tool serve · stdio · audit 23 lines</span><span>trajectory.jsonl · 2 sessions</span>)
+</div>

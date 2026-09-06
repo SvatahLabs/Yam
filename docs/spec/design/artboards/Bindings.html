@@ -1,0 +1,45 @@
+<div class="app">
+@@TOPBAR(Bindings)
+@@SIDEBAR(bindings)
+<section class="workspace">
+  <div class="toolbar"><h1>Bindings</h1><span class="sub">41 elements · 4 unverified · 1 healed this week</span><div class="spacer"></div>
+    <span class="chip">page: all</span><span class="chip">state: all</span>
+    <button class="btn">Verify all <kbd>V</kbd></button>
+    <button class="btn">Prune unused</button>
+  </div>
+  <div class="main" style="flex-direction:column">
+    <table class="table" aria-label="Bindings">
+      <tr><th>element</th><th>phrase</th><th>page</th><th>matched by</th><th>state</th><th>provenance</th></tr>
+      <tr><td class="mono">nav.book-a-slot-link</td><td>the Book a slot link</td><td class="mono">/</td><td class="mono">testid #0</td><td><span class="pill pass">verified</span></td><td class="mono">fake:grounding-cases</td></tr>
+      <tr><td class="mono">booking.location-field</td><td>the location field</td><td class="mono">/booking</td><td class="mono">testid #0</td><td><span class="pill pass">verified</span></td><td class="mono">fake:grounding-cases</td></tr>
+      <tr class="sel"><td class="mono">booking.book-the-slot-button</td><td>the Book the slot button</td><td class="mono">/site-tools</td><td class="mono">webmcp #0</td><td><span class="pill pass">verified</span></td><td class="mono">webmcp:declaration</td></tr>
+      <tr><td class="mono">booking.cancel-booking-button</td><td>the cancel booking button</td><td class="mono">/booking</td><td class="mono">testid #0</td><td><span class="pill pass">verified</span></td><td class="mono">fake:grounding-cases</td></tr>
+      <tr><td class="mono">checkout.pay-button</td><td>the pay button</td><td class="mono">/checkout</td><td class="mono">—</td><td><span class="pill warn">unverified</span></td><td class="mono">seed · migrate</td></tr>
+      <tr><td class="mono">app.schedule-build-link</td><td>the Schedule build link</td><td class="mono">/dashboard</td><td class="mono">testid #0</td><td><span class="pill healed">healed</span></td><td class="mono">heal-3 · relocalize</td></tr>
+      <tr><td class="mono">login.username-field</td><td>the username field</td><td class="mono">/login</td><td class="mono">testid #0</td><td><span class="pill pass">verified</span></td><td class="mono">fake:grounding-cases</td></tr>
+      <tr><td class="mono">login.password-field</td><td>the password field</td><td class="mono">/login</td><td class="mono">testid #0</td><td><span class="pill pass">verified</span></td><td class="mono">fake:grounding-cases</td></tr>
+      <tr><td class="mono">login.sign-in-button</td><td>the sign in button</td><td class="mono">/login</td><td class="mono">role #1</td><td><span class="pill pass">verified</span></td><td class="mono">fake:grounding-cases</td></tr>
+      <tr><td class="mono">schedule.schedule-heading</td><td>the schedule heading</td><td class="mono">/schedule</td><td class="mono">—</td><td><span class="pill fail">no match</span></td><td class="mono">seed · migrate</td></tr>
+      <tr><td class="mono">widgets.show-confirm-button</td><td>the Show confirm button</td><td class="mono">/widgets</td><td class="mono">testid #0</td><td><span class="pill pass">verified</span></td><td class="mono">fake:grounding-cases</td></tr>
+    </table>
+  </div>
+</section>
+<aside class="inspector" aria-label="Inspector">
+  <h2 class="mono">booking.book-the-slot-button</h2>
+  <div class="kv"><span class="k">Phrases</span><span class="v">the Book the slot button</span><span class="k">Context</span><span class="v mono">/site-tools · fc2efac8…</span><span class="k">Platform</span><span class="v">web</span></div>
+  <h3>Candidates · resolver order</h3>
+  <table class="table"><tr><th>#</th><th>by</th><th>value</th><th style="text-align:right">score</th></tr>
+    <tr style="background:var(--accent-soft)"><td class="mono">0</td><td class="mono">webmcp</td><td class="mono">tool book-the-slot</td><td class="num">—</td></tr>
+    <tr><td class="mono">1</td><td class="mono">testid</td><td class="mono">book-the-slot</td><td class="num">0.98</td></tr>
+    <tr><td class="mono">2</td><td class="mono">role</td><td class="mono">button "Book the slot"</td><td class="num">0.92</td></tr>
+    <tr><td class="mono">3</td><td class="mono">text</td><td class="mono">Book the slot</td><td class="num">0.75</td></tr>
+    <tr><td class="mono">4</td><td class="mono">css</td><td class="mono">[data-testid="book-the-slot"]</td><td class="num">0.68</td></tr>
+    <tr><td class="mono">5</td><td class="mono">xpath</td><td class="mono">//*[@data-testid='book-the-slot']</td><td class="num">0.60</td></tr>
+  </table>
+  <div class="card"><p>The site declares this control as a tool. The resolver calls the tool while it is declared and falls through to the locators, in this order, when it is not. Replays with <span class="mono">?webmcp=off</span> matched <span class="mono">testid #1</span> with the file unchanged.</p></div>
+  <h3>Fingerprint</h3>
+  <div class="kv"><span class="k">Tag</span><span class="v mono">button</span><span class="k">Attrs</span><span class="v mono">data-testid=book-the-slot</span><span class="k">Neighbours</span><span class="v">tool location field · site tools result</span></div>
+  <div style="display:flex;gap:8px;padding:14px 16px"><button class="btn">Verify</button><button class="btn">Show element</button><button class="btn">Open YAML</button></div>
+</aside>
+@@STATUS(<span>bindings/booking/book-the-slot-button.yaml</span><span>store hash aa7c8799</span>)
+</div>

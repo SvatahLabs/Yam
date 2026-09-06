@@ -1,0 +1,68 @@
+<div class="app">
+@@TOPBAR(Flows / Record)
+@@SIDEBAR(flows)
+<section class="workspace">
+  <div class="toolbar"><h1>Recording · book a slot</h1><span class="chip"><span class="dot" style="background:var(--abort)"></span>fake gateway · committed answers from evals/grounding/cases</span><div class="spacer"></div>
+    <span class="sub mono">session 00mtn8ggt9mnwuug</span>
+    <button class="btn danger" aria-label="Stop recording">Stop <kbd>Esc</kbd></button>
+  </div>
+  <div class="main">
+    <aside class="list" aria-label="Recording progress">
+      <div class="group"><b>book a slot</b><span>1 of 6 steps</span></div>
+      <div class="step sel"><span class="st run">●</span><span class="t">Click the Book a slot link</span><span class="d">deciding</span><span></span></div>
+      <div class="step"><span class="st pend">·</span><span class="t">Click the location field</span><span class="d">pending</span><span></span></div>
+      <div class="step"><span class="st pend">·</span><span class="t">Type "indra" into the location field</span><span class="d"></span><span></span></div>
+      <div class="step"><span class="st pend">·</span><span class="t">Click the Indiranagar option</span><span class="d"></span><span></span></div>
+      <div class="step"><span class="st pend">·</span><span class="t">Click the Book now button</span><span class="d"></span><span></span></div>
+      <div class="step"><span class="st pend">·</span><span class="t">The booking result should say "Slot booked."</span><span class="d"></span><span></span></div>
+      <div class="group"><b>pay for the slot</b><span>7 steps · waiting</span></div>
+      <div class="group"><b>cancel booking</b><span>2 steps · waiting</span></div>
+      <div style="flex:1"></div>
+      <div class="card" style="margin:0 12px 12px"><p style="color:var(--muted)">Decision deadline</p><div class="bar"><span style="width:82%;background:var(--accent)"></span></div><p class="mono" style="margin:6px 0 0;color:var(--fg2)">8:12 of 10:00 left · then rejected</p></div>
+    </aside>
+    <div class="editor">
+      <div style="padding:16px 20px 0">
+        <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">Grounding decision · step 1 of 6</div>
+        <div style="font-size:18px;font-weight:600;margin-top:4px">the Book a slot link <span class="mono" style="font-weight:400;font-size:13px;color:var(--muted)">nav.book-a-slot-link</span></div>
+        <div style="color:var(--muted);margin-top:2px">book a slot · Click the Book a slot link · <span class="mono">http://127.0.0.1:4173/</span></div>
+        <div class="card" style="margin:14px 0 0;display:flex;gap:12px;align-items:center;background:var(--bg1)"><span class="pill pass">chose r4</span><span>grounded at <b class="mono">1.00</b></span><span style="color:var(--muted)">g-004: the link named "Book a slot"</span><span class="spacer" style="flex:1"></span><span class="pill neutral">93 snapshot tokens</span></div>
+      </div>
+      <div class="panel-h" style="margin-top:14px">Snapshot excerpt<span class="spacer"></span><span style="text-transform:none;letter-spacing:0;color:var(--muted)">click a reference to re-pick</span></div>
+      <div class="snap" style="margin:8px 20px 0;flex:1">- navigation "Main" [ref=r0]
+  - link "Svatah Sample" [ref=r1]
+  - button "Toggle navigation" [collapsed] [ref=r2]
+  - link "Dashboard" [ref=r3]
+  <span class="hit">- link "Book a slot" [ref=r4]</span>
+  - link "Widgets" [ref=r5]
+  - link "Docs" [ref=r6]
+- main [ref=r7]
+  - heading "Deterministic automation, once described" [ref=r8]
+  - link "Sign in" [ref=r9]
+  - link "Read the docs" [ref=r10]</div>
+      <div style="display:flex;gap:8px;padding:14px 20px;border-top:1px solid var(--line);margin-top:12px;align-items:center">
+        <button class="btn primary" aria-label="Accept">Accept <kbd>A</kbd></button>
+        <button class="btn" aria-label="Re-pick">Re-pick <kbd>P</kbd></button>
+        <button class="btn danger" aria-label="Reject">Reject <kbd>X</kbd></button>
+        <span style="flex:1"></span>
+        <span style="color:var(--muted);font-size:12px">Bindings are written only after a decision.</span>
+      </div>
+    </div>
+  </div>
+</section>
+<aside class="inspector" aria-label="Inspector">
+  <h2>Candidates the recorder will write</h2>
+  <table class="table"><tr><th>by</th><th>value</th><th style="text-align:right">score</th></tr>
+    <tr><td class="mono">testid</td><td class="mono">booking-link</td><td class="num">0.98</td></tr>
+    <tr><td class="mono">role</td><td class="mono">link "Book a slot"</td><td class="num">0.92</td></tr>
+    <tr><td class="mono">text</td><td class="mono">Book a slot</td><td class="num">0.75</td></tr>
+    <tr><td class="mono">css</td><td class="mono">[data-testid="booking-link"]</td><td class="num">0.68</td></tr>
+    <tr><td class="mono">xpath</td><td class="mono">//*[@data-testid='booking-link']</td><td class="num">0.60</td></tr>
+  </table>
+  <h3>Fingerprint</h3>
+  <div class="kv"><span class="k">Tag</span><span class="v mono">a</span><span class="k">Name</span><span class="v">Book a slot</span><span class="k">Landmark</span><span class="v">navigation "Main"</span><span class="k">Neighbours</span><span class="v">Dashboard · Widgets</span><span class="k">Box</span><span class="v mono">312, 14 · 88 × 20</span></div>
+  <h3>Provenance</h3>
+  <div class="kv"><span class="k">Gateway</span><span class="v mono">fake:grounding-cases</span><span class="k">Prompt</span><span class="v mono">g-1</span><span class="k">Tokens</span><span class="v">0 in · 0 out · $0.0000</span><span class="k">Vision</span><span class="v">not used</span></div>
+  <div class="alert warn" style="margin-top:16px"><svg viewBox="0 0 16 16"><path d="M8 2l6.5 11.5h-13z"/><path d="M8 6.5v3M8 12v.5"/></svg><span>This session's decisions were supplied, not inferred. Nothing recorded here measures a model.</span></div>
+</aside>
+@@STATUS(<span>recording · 1 decided · 0 rejected</span><span><kbd>J</kbd><kbd>K</kbd>move · <kbd>A</kbd>accept · <kbd>P</kbd>re-pick · <kbd>X</kbd>reject</span>)
+</div>
