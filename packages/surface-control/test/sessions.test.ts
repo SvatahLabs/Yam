@@ -45,6 +45,7 @@ describe("SessionStore", () => {
     expect(entry!.surface).toBe(surface);
     expect(entry!.adapter).toBe("playwright");
     expect(entry!.status).toBe("ready");
+    expect(entry!.mode).toBe("launch");
   });
 
   it("get returns undefined for unknown id", () => {
@@ -70,7 +71,7 @@ describe("SessionStore", () => {
     expect(store.list()).toHaveLength(0);
   });
 
-  it("closeAll closes all surfaces and clears the store", async () => {
+  it("closeAll closes launched surfaces and clears the store", async () => {
     const store = createSessionStore();
     const s1 = stubSurface();
     const s2 = stubSurface();
@@ -80,5 +81,54 @@ describe("SessionStore", () => {
     expect(store.list()).toHaveLength(0);
     expect(s1.close).toHaveBeenCalled();
     expect(s2.close).toHaveBeenCalled();
+  });
+
+  it("closeAll preserves attached surfaces", async () => {
+    const store = createSessionStore();
+    const launched = stubSurface();
+    const attached = stubSurface();
+    store.create(launched, "playwright", { mode: "launch" });
+    store.create(attached, "ax", { mode: "attach" });
+    await store.closeAll();
+    expect(store.list()).toHaveLength(0);
+    expect(launched.close).toHaveBeenCalled();
+    expect(attached.close).not.toHaveBeenCalled();
+  });
+
+  it("touch updates lastActivity", () => {
+    const store = createSessionStore();
+    const id = store.create(stubSurface(), "playwright");
+    const before = store.get(id)!.lastActivity;
+    // Small delay to ensure time difference
+    store.touch(id);
+    const after = store.get(id)!.lastActivity;
+    expect(new Date(after).getTime()).toBeGreaterThanOrEqual(new Date(before).getTime());
+  });
+
+  it("expireSessions removes expired sessions", async () => {
+    const store = createSessionStore();
+    const surface = stubSurface();
+    const id = store.create(surface, "playwright", { ttlMs: 0 });
+    // TTL of 0 means immediately expired
+    const expired = await store.expireSessions();
+    expect(expired).toContain(id);
+    expect(store.get(id)).toBeUndefined();
+    expect(surface.close).toHaveBeenCalled();
+  });
+
+  it("expireSessions does not close attached surfaces", async () => {
+    const store = createSessionStore();
+    const surface = stubSurface();
+    store.create(surface, "ax", { mode: "attach", ttlMs: 0 });
+    await store.expireSessions();
+    expect(surface.close).not.toHaveBeenCalled();
+  });
+
+  it("expireSessions keeps active sessions", async () => {
+    const store = createSessionStore();
+    const id = store.create(stubSurface(), "playwright", { ttlMs: 60_000 });
+    const expired = await store.expireSessions();
+    expect(expired).toHaveLength(0);
+    expect(store.get(id)).toBeDefined();
   });
 });

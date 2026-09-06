@@ -102,7 +102,23 @@
 
 ## T05 — Broker discovery and session lifecycle
 
-**Status:** pending
+**Status:** complete
+
+**Files created/modified:**
+- `packages/surface-control/src/broker.ts`: Broker descriptor lifecycle: `writeBrokerDescriptor()`, `readBrokerDescriptor()`, `removeBrokerDescriptor()`, `discoverBroker()`, `generateToken()`, `isProcessAlive()`, `brokerStateDir()`. Descriptor stores URL, token, PID, and startedAt. OS-specific state directories (darwin: ~/Library/Application Support/yam, linux: $XDG_STATE_HOME/yam, win32: %APPDATA%/yam). Owner-only permissions (0o700 dir, 0o600 file).
+- `packages/surface-control/src/sessions.ts`: Extended with `SessionMode` (launch/attach), TTL, `touch()` for activity tracking, `expireSessions()` for TTL sweep. `closeAll()` only closes launched surfaces, preserving attached ones.
+- `packages/surface-control/test/broker.test.ts`: 11 tests — token generation, descriptor read/write/remove, owner-only permissions, stale process cleanup, idempotent remove.
+- `packages/surface-control/test/sessions.test.ts`: Updated to 11 tests — adds mode, touch, expiry, attach/launch close semantics.
+
+**Done conditions verified:**
+- Stale descriptor recovery: dead PID descriptor cleaned up automatically on discover
+- Close/expiry cleans launched resources, preserves attached: tested in sessions and expiry
+- Token lifecycle: generateToken produces unique 32-char hex tokens
+- OS-specific paths: brokerStateDir returns platform-appropriate directories
+
+**Deviations:** Wave 1 does not implement multi-process broker sharing (full broker service with HTTP). The descriptor is written/discovered, but wave 1 CLI processes are self-contained — each manages its own sessions in-process. The broker descriptor is the foundation for T10'/T11' to share sessions across processes.
+
+**Known gaps:** none.
 
 ---
 

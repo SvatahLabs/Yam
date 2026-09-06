@@ -47,7 +47,19 @@ export {
   type SessionStore,
   type SessionEntry,
   type SessionStatus,
+  type SessionMode,
 } from "./sessions.js";
+
+export {
+  brokerStateDir,
+  generateToken,
+  writeBrokerDescriptor,
+  readBrokerDescriptor,
+  removeBrokerDescriptor,
+  discoverBroker,
+  isProcessAlive,
+  type BrokerDescriptor,
+} from "./broker.js";
 
 export {
   createAdapterFactory,
