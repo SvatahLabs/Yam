@@ -186,8 +186,8 @@ function flows(state: FlowsState, now: number): PaneModel {
                 ? []
                 : [
                     heading("candidates"),
-                    ...state.inspector.binding.candidates.map((one) => ({
-                      key: `${one.by}-${one.value}`,
+                    ...state.inspector.binding.candidates.map((one, at) => ({
+                      key: `${one.by}-${one.value}-${at}`,
                       cells: [
                         dim(one.by, { width: 8 }),
                         text(one.value, { grow: true }),
@@ -201,7 +201,10 @@ function flows(state: FlowsState, now: number): PaneModel {
       title: "Lint",
       empty: "nothing to report",
       lines: state.lint.map((one, at) => ({
-        key: `${one.code ?? ""}-${one.line ?? at}`,
+        // Two diagnostics can share a code and a line (a project with two
+        // unset secrets reports `W_SECRET_UNSET` twice at line 0), so the index
+        // is part of the key rather than a fallback for a missing line.
+        key: `${one.code ?? ""}-${one.line ?? ""}-${at}`,
         cells: [
           dim(String(one.line ?? ""), { width: 5 }),
           dim(one.code ?? "", { width: 22 }),
@@ -270,8 +273,8 @@ function runScreen(state: RunState): PaneModel {
                 ? []
                 : [
                     heading("candidates tried"),
-                    ...state.inspector.candidatesTried.map((one) => ({
-                      key: `${one.by}-${one.value}`,
+                    ...state.inspector.candidatesTried.map((one, at) => ({
+                      key: `${one.by}-${one.value}-${at}`,
                       cells: [
                         dim(one.by, { width: 8 }),
                         text(one.value, { grow: true }),

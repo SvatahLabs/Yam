@@ -538,11 +538,23 @@ describe("all twelve screens draw in the cockpit (T10.1, T10.2)", () => {
           size,
         ),
       );
-      await settle();
-      const frame = lastFrame();
+      /*
+       * Polled, not slept (P10-F9).
+       *
+       * `load()` is a promise and the whole suite runs in parallel, so a fixed
+       * fifty milliseconds is enough on an idle machine and not on a busy one:
+       * this failed once in a full run with the frame still on `loading…`, and
+       * passed alone. The loaded state is what the assertions are about, so it
+       * is what the test waits for.
+       */
+      const word = screenById(id).title.split(" ")[0]!;
+      const frame = await until(
+        () => (lastFrame().includes(word) ? lastFrame() : undefined),
+        `${id} to load at ${size.columns} columns`,
+      );
       expect(frame, `${id} drew nothing at ${size.columns} columns`).not.toBe("");
       // The screen's own title is on the header, from the model.
-      expect(frame).toContain(screenById(id).title.split(" ")[0]!);
+      expect(frame).toContain(word);
       const widest = Math.max(...frame.split("\n").map((one) => one.length));
       expect(widest, `${id} drew past the right edge at ${size.columns}`).toBeLessThanOrEqual(
         size.columns,

@@ -19,6 +19,7 @@
  */
 import { Box, Text } from "ink";
 import { STATUS, type StatusTone } from "@svatah/ui-tokens";
+import { budget } from "./layout.js";
 import type { Pane, UiState } from "./model.js";
 import { paneModel, type Cell, type Line, type PaneContent } from "./rows.js";
 
@@ -35,13 +36,21 @@ export function Panel({
   title,
   focused,
   children,
-  grow,
+  width,
 }: {
   readonly number: number;
   readonly title: string;
   readonly focused: boolean;
   readonly children: React.ReactNode;
-  readonly grow?: boolean;
+  /**
+   * The pane's whole width, border and padding included (P10-F9).
+   *
+   * Stated rather than grown into. A box that sized itself to its content was
+   * the outer half of the 104-character line: the rows inside were over budget,
+   * the border went round them, and the pane came out wider than the terminal
+   * however narrow the column it was given.
+   */
+  readonly width: number;
 }): React.JSX.Element {
   return (
     <Box
@@ -49,7 +58,9 @@ export function Panel({
       borderStyle="single"
       borderColor={focused ? "magenta" : "gray"}
       paddingX={1}
-      flexGrow={grow === true ? 1 : 0}
+      width={width}
+      flexGrow={0}
+      flexShrink={0}
       overflow="hidden"
     >
       <Text color="gray">
@@ -62,7 +73,13 @@ export function Panel({
 
 /** `"a string"` cut to `width`, so a narrow terminal does not wrap a table. */
 export const fit = (text: string, width: number): string =>
-  text.length <= width ? text.padEnd(width) : `${text.slice(0, Math.max(0, width - 1))}…`;
+  // A column the budget squeezed to nothing draws nothing: an ellipsis on its
+  // own is one character of overflow and no information (P10-F9).
+  width <= 0
+    ? ""
+    : text.length <= width
+      ? text.padEnd(width)
+      : `${text.slice(0, Math.max(0, width - 1))}…`;
 
 /**
  * One line's cells, laid out inside `width` characters.
@@ -73,15 +90,31 @@ export const fit = (text: string, width: number): string =>
  * screen (P9-F4).
  */
 function draw(cells: readonly Cell[], width: number): React.JSX.Element[] {
-  const gaps = Math.max(0, cells.length - 1);
-  const fixed = cells.reduce((sum, one) => sum + (one.grow === true ? 0 : (one.width ?? one.text.length)), 0);
-  const growers = cells.filter((one) => one.grow === true).length;
-  const spare = Math.max(0, width - fixed - gaps);
-  const each = growers === 0 ? 0 : Math.max(4, Math.floor(spare / growers));
+  /*
+   * Every cell, not only the growers (P10-F9).
+   *
+   * The Phase 10 arithmetic gave a cell with neither a `width` nor `grow`
+   * whatever `text.length` happened to be and then handed each grower a floor
+   * of four columns on top, so a long step name or a long project path drew a
+   * line wider than the pane — 104 characters on a 100-column terminal. The
+   * budget is `layout.ts`'s now, it covers every cell, and
+   * `test/layout.test.ts` holds it to `sum(sizes) + gaps <= width`.
+   */
+  const sizes = budget(cells, width);
 
+  /*
+   * A dropped column draws nothing *and no separator*. On a pane narrow enough
+   * that the separators alone would not fit, a row of spaces standing in for
+   * columns that are not there is exactly the overflow this is about; it is
+   * also the arithmetic `drawnWidth` states.
+   */
+  let drawnAlready = false;
   return cells.map((cell, at) => {
-    const size = cell.grow === true ? each : (cell.width ?? cell.text.length);
+    const size = sizes[at] ?? 0;
+    if (size === 0) return <Text key={at} />;
     const body = fit(cell.text, size);
+    const separator = drawnAlready;
+    drawnAlready = true;
     return (
       <Text
         key={at}
@@ -91,7 +124,7 @@ function draw(cells: readonly Cell[], width: number): React.JSX.Element[] {
             ? { color: "gray" }
             : {})}
       >
-        {at === 0 ? body : ` ${body}`}
+        {separator ? ` ${body}` : body}
       </Text>
     );
   });
@@ -129,7 +162,6 @@ function PaneBox({
   height,
   cursor,
   focused,
-  grow,
 }: {
   readonly number: number;
   readonly content: PaneContent;
@@ -137,13 +169,18 @@ function PaneBox({
   readonly height: number;
   readonly cursor: number;
   readonly focused: boolean;
-  readonly grow?: boolean;
 }): React.JSX.Element {
-  const inner = Math.max(8, width - 4);
+  /*
+   * The border takes two columns and `paddingX={1}` two more, so the rows have
+   * four fewer than the pane (P10-F9). `Math.max(1, …)` and not `Math.max(8, …)`:
+   * a floor of eight on a pane of ten was four characters of overflow written
+   * into the arithmetic itself.
+   */
+  const inner = Math.max(1, width - 4);
   const rows = content.footer === undefined ? height : Math.max(1, height - 1);
   const start = window(cursor, content.lines.length, rows);
   return (
-    <Panel number={number} title={fit(content.title, inner).trimEnd()} focused={focused} grow={grow}>
+    <Panel number={number} title={fit(content.title, inner).trimEnd()} focused={focused} width={width}>
       {content.lines.length === 0 ? (
         <Text color="gray">{fit(content.empty, inner)}</Text>
       ) : (
@@ -197,7 +234,6 @@ export function MainPane({ ui }: { readonly ui: UiState }): React.JSX.Element {
       height={ui.layout.listRows}
       cursor={ui.cursor.main}
       focused={ui.focus === "main"}
-      grow
     />
   );
 }

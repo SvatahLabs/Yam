@@ -43,7 +43,7 @@ import {
   type Pane,
   type UiState,
 } from "./model.js";
-import { INSPECTOR_MIN_COLUMNS, sizeOf } from "./layout.js";
+import { INSPECTOR_MIN_COLUMNS, footerFor, sizeOf } from "./layout.js";
 
 export interface AppProps {
   readonly service: ScreenService;
@@ -347,7 +347,7 @@ export function App(props: AppProps): React.JSX.Element {
         defect this correction is about, one row higher.
       */}
       {ui.layout.inspectorCollapsed ? (
-        <Text color="gray">
+        <Text color="gray" wrap="truncate-end">
           {` inspector collapsed at ${ui.layout.columns} cols ` +
             `(${INSPECTOR_MIN_COLUMNS} to sit beside) · press 3 to open it below`}
         </Text>
@@ -360,32 +360,44 @@ export function App(props: AppProps): React.JSX.Element {
 
       <AuditPane ui={ui} />
 
-      {/* the footer: the keys, exactly as the artboard prints them */}
-      <Box>
-        <Text color="gray">
-          <Text color="white">^K</Text> commands {"  "}
-          <Text color="white">1-4</Text> pane {"  "}
-          <Text color="white">Tab</Text> next {"  "}
-          <Text color="white">j k</Text> move {"  "}
-          <Text color="white">Enter</Text> open {"  "}
-          <Text color="white">[ ]</Text> screen{" "}
-          {actions
-            .filter((one) => one.key !== undefined && one.key.length === 1)
-            .map((one) => `  ${one.key!.toLowerCase()} ${one.label.toLowerCase()}`)
-            .join("")}
-          {"  "}
-          <Text color="white">q</Text> quit
+      {/*
+        The footer: the keys, exactly as the artboard prints them — and inside
+        the terminal, whatever the screen's own actions are called (P10-F9).
+
+        `footerFor` keeps the six keys a person needs to get anywhere and `q`,
+        and takes as many of the screen's single-letter accelerators as still
+        fit. Wrapping instead would push the panes above it up on a short
+        terminal, and truncating the whole line would take `q quit` off a
+        cockpit a person is trying to leave.
+      */}
+      <Box width={ui.layout.columns}>
+        <Text color="gray" wrap="truncate-end">
+          {footerFor(ui.layout.columns, actions).map((one, at) => (
+            <Text key={one.key}>
+              {at === 0 ? "" : "  "}
+              <Text color="white">{one.key}</Text> {one.label}
+            </Text>
+          ))}
         </Text>
       </Box>
       {ui.message === undefined && !busy ? null : (
-        <Text color={busy ? colourOf("info") : colourOf("neutral")}>
+        <Text
+          color={busy ? colourOf("info") : colourOf("neutral")}
+          wrap="truncate-end"
+        >
           {busy ? "working…" : ui.message}
         </Text>
       )}
 
       {/* the palette: the same rows the ADE's ⌘K shows */}
       {ui.paletteOpen ? (
-        <Box flexDirection="column" borderStyle="single" borderColor="magenta" paddingX={1}>
+        <Box
+          flexDirection="column"
+          borderStyle="single"
+          borderColor="magenta"
+          paddingX={1}
+          width={ui.layout.columns}
+        >
           <Text>
             <Text color="magenta">›</Text> {ui.paletteQuery}
             <Text inverse> </Text>
@@ -393,7 +405,7 @@ export function App(props: AppProps): React.JSX.Element {
           {paletteRows(ui)
             .slice(0, 8)
             .map((row, at) => (
-              <Text key={row.id} inverse={at === 0}>
+              <Text key={row.id} inverse={at === 0} wrap="truncate-end">
                 {row.area.padEnd(10)}
                 {row.label.padEnd(34)}
                 <Text color="gray">{row.cli ?? ""}</Text>
