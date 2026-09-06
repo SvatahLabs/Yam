@@ -7,12 +7,24 @@
  *
  * Two halves, and the second is the interesting one.
  *
- * **The operation tools** — `compile`, `lint`, `run`, `record`, `heal`,
- * `bindings`, `results` — run *the same functions the CLI runs*. No logic lives
- * in this file, exactly as none lives in the local service (LLD §13.5): an agent
- * that compiled a project through MCP and a person who compiled it on a terminal
- * must get the same `plan.json`, and the only way to guarantee that is for there
- * to be one implementation.
+ * **The operation tools** — `yam_compile`, `yam_lint`, `yam_run`,
+ * `yam_bindings`, `yam_results` — run *the same functions the CLI runs*. No
+ * logic lives in this file, exactly as none lives in the local service
+ * (LLD §13.5): an agent that compiled a project through MCP and a person who
+ * compiled it on a terminal must get the same `plan.json`, and the only way to
+ * guarantee that is for there to be one implementation.
+ *
+ * Five, and `docs/mcp.md` lists the same five — a test compares them, because
+ * this comment claimed `record` and `heal` for four phases and no such tool was
+ * ever registered. What is *not* here, and why:
+ *
+ *   * `record` — a recording is driven by a person or a gateway and its result
+ *     is reviewed before it reaches the store. Since Draft 2.23 the verb alone
+ *     means a person driving the browser, which is not a call an agent makes.
+ *   * `heal` — proposes repairs for a person to read; `yam heal` is where that
+ *     review happens.
+ *   * `workflow` and `tool` — a story called as a function is its own server,
+ *     `yam tool serve` (REQ-BEH-3), whose tools are the stories themselves.
  *
  * **The raw surface tools** — `surface_snapshot`, `surface_act`, `surface_read`,
  * `surface_check` — hand an agent the actual `AgentSurface`, with one addition:

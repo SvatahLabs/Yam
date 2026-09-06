@@ -92,32 +92,51 @@ afterAll(async () => {
 });
 
 describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
-  it("publishes the operation tools and the raw surface tools", async () => {
+  /**
+   * The list, exactly, and the same list `docs/mcp.md` publishes.
+   *
+   * This was `toContain` per name, which is a subset check: it passed while the
+   * module's own comment claimed `record` and `heal` among the operation tools
+   * and neither was ever registered, and it would have passed had a tool been
+   * added and documented nowhere. What an agent is offered is the contract
+   * (REQ-AGT-2), so it is asserted as a whole and against the page a person
+   * reads.
+   */
+  const PUBLISHED = [
+    "surface_act",
+    "surface_check",
+    "surface_read",
+    "surface_snapshot",
+    "surface_trajectory",
+    "yam_bindings",
+    "yam_compile",
+    "yam_lint",
+    "yam_results",
+    "yam_run",
+  ];
+
+  it("publishes exactly the operation tools and the raw surface tools", async () => {
     const project = scaffold();
     const session = await connect(project, join(project, "runs", "t", "trajectory.jsonl"));
     try {
       const { tools } = await session.client.listTools();
-      const names = tools.map((one) => one.name).sort();
-
-      // LLD §15: "operation tools … plus raw surface tools (`surface_snapshot`,
-      // `surface_act`, `surface_read`, `surface_check`)".
-      for (const name of [
-        "yam_compile",
-        "yam_lint",
-        "yam_run",
-        "yam_bindings",
-        "yam_results",
-        "surface_snapshot",
-        "surface_act",
-        "surface_read",
-        "surface_check",
-      ]) {
-        expect(names, name).toContain(name);
-      }
+      expect(tools.map((one) => one.name).sort()).toEqual(PUBLISHED);
     } finally {
       await session.close();
     }
   }, 180_000);
+
+  it("offers what docs/mcp.md says it offers, and nothing else", () => {
+    const page = readFileSync(join(ROOT, "docs", "mcp.md"), "utf8");
+    // The tool tables' first column: `| `name` | … |`.
+    const documented = [...page.matchAll(/^\| `((?:yam|surface)_[a-z_]+)` \|/gm)]
+      .map((one) => one[1]!)
+      .sort();
+    expect(documented).toEqual(PUBLISHED);
+    // And the verbs that are deliberately absent stay absent from the tables.
+    expect(documented).not.toContain("yam_record");
+    expect(documented).not.toContain("yam_heal");
+  });
 
   it("requires an intent on every raw surface tool (LLD §13.4)", async () => {
     /*

@@ -34,9 +34,12 @@ implementation, which is the same rule the local service follows (LLD §13.5).
 | `yam_bindings` | The store: every element the project has recorded, and the phrases that name it |
 | `yam_results` | The summary and step results of a run under `runs/` |
 
-`workflow` and `tool` are LLD §15's remaining operation tools and arrive with
-T5.2 and T5.3; a server that offered them now would be offering something that
-does not exist.
+Five, and no more. `record` is not here: a recording is driven by a person or a
+gateway and reviewed before it reaches the store, and since Draft 2.23 the verb
+alone means a person driving the browser. `heal` is not here: it proposes
+repairs for a person to read. `workflow` and `tool` are not here either,
+because a story called as a function has its own server — [`yam tool serve`](behaviors.md),
+whose tools *are* the stories, with the agent recorded as the invoker.
 
 ## The raw surface tools
 
