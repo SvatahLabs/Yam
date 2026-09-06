@@ -69,7 +69,7 @@ story: Sign in
   Type {data.user.email} into the username field
   Type {data.user.password} into the password field
   Click the sign in button
-  The dashboard heading should be visible
+  The page title should contain "Dashboard"
 
 test: Sign in
 `;

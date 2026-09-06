@@ -141,6 +141,12 @@ export function readRunFailures(runDir: string): HealInput[] {
  * `LocatorError` builds its message from the id.
  */
 function elementIdOf(result: StepResult): string | undefined {
-  const match = /Could not resolve "([^"]+)"/.exec(result.failure?.message ?? "");
-  return match?.[1];
+  const message = result.failure?.message ?? "";
+  // "Could not resolve "<id>"" when candidates were tried; "No binding for
+  // `<phrase>` (<id>)." or "No binding for "<id>"." when none exist (Draft 2.20).
+  return (
+    /Could not resolve "([^"]+)"/.exec(message)?.[1] ??
+    /No binding for `[^`]*` \(([^)]+)\)\./.exec(message)?.[1] ??
+    /No binding for "([^"]+)"\./.exec(message)?.[1]
+  );
 }

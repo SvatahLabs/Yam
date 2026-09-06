@@ -6,7 +6,8 @@
  * because a repair is a proposal about what an element means and a person has to
  * agree with it (REQ-HEAL-2).
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { BindingsStore } from "@svatah/yam-bindings";
 import { dirname, join } from "node:path";
 import {
   clearRegrounder,
@@ -72,7 +73,21 @@ export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
     return EXIT.failed;
   }
 
+  /*
+   * A target that was never recorded has nothing to relocalize from: no
+   * candidates were tried and there is no fingerprint. Say so, name the verb
+   * that creates the binding, and heal the rest (Draft 2.20, REQ-CLI-5).
+   */
+  const recorded = existsSync(bindingsDir) ? new Set(BindingsStore.load(bindingsDir).ids()) : new Set<string>();
+  const unbound = inputs.filter((one) => one.source === "run" && !recorded.has(one.id));
+  for (const one of unbound) {
+    io.err(
+      `\`${one.phrase ?? one.id}\` (${one.id}) has never been recorded; there is nothing to relocalize from. → yam record`,
+    );
+  }
+  inputs = inputs.filter((one) => !unbound.includes(one));
   if (inputs.length === 0) {
+    if (unbound.length > 0) return EXIT.someUnrepaired;
     const where = runId === undefined ? join(outputDir, "bind-failures.jsonl") : join(runsDir, runId);
     io.out(`No locator failures in ${where}. Nothing to repair.`);
     return EXIT.ok;
