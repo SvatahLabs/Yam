@@ -50,6 +50,12 @@ export {
 } from "./sessions.js";
 
 export {
+  createAdapterFactory,
+  type AdapterFactoryFn,
+  type ConnectOptions,
+} from "./adapter-factory.js";
+
+export {
   dispatchConnect,
   dispatchSnapshot,
   dispatchAct,

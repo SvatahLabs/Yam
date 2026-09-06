@@ -82,7 +82,21 @@
 
 ## T04 — Extract surface control from project loading
 
-**Status:** pending
+**Status:** complete
+
+**Files created:**
+- `packages/surface-control/src/adapter-factory.ts`: `createAdapterFactory()` builds an `AdapterFactoryFn` from a resolver and a registry lister. Validates adapter registration before creating a surface. Constructs a minimal `Config` with `DEFAULT_CONFIG` — no project, no flows, no bindings needed.
+- `packages/surface-control/test/projectless.test.ts`: 6 tests proving connect/snapshot/act/read/check/close work with no project loaded, adapter factory refuses unknown adapters, dispatcher has no project dependency, and source files import no compiler/recorder/gateway/service packages.
+
+**Done conditions verified:**
+- connect/snapshot/act/check work with no flow/compiler/binding load: tested with stubbed surface, all return `status: "succeeded"`
+- No model credential needed: dispatcher chain has no gateway or model import
+- Invalid unrelated flow files cannot prevent surface control: dispatcher takes a pre-created surface via factory, not a project
+- Import boundary enforced: automated test scans every source file for forbidden imports
+
+**Deviations:** none.
+
+**Known gaps:** none.
 
 ---
 
