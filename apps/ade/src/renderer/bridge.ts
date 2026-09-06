@@ -25,6 +25,10 @@ export interface AdeBridge {
   pickFile(kind: "directory" | "file"): Promise<string | null>;
   preferences(next?: Partial<Preferences>): Promise<Preferences>;
   onServiceLog(listener: (line: string) => void): () => void;
+  /** A project the main process opened from `SVATAH_ADE_PROJECT` (T8.1). */
+  onServiceOpened(
+    listener: (event: { connection?: ServiceInfo; error?: string }) => void,
+  ): () => void;
 }
 
 declare global {

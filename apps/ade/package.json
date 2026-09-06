@@ -12,12 +12,13 @@
   "scripts": {
     "build": "node ../../scripts/generate-ade-client.mjs && tsc --noEmit -p tsconfig.json",
     "ensure-electron": "node ../../scripts/ensure-electron.mjs",
-    "make": "pnpm run ensure-electron && electron-forge make",
-    "package": "pnpm run ensure-electron && electron-forge package",
+    "make": "pnpm run ensure-electron && pnpm run stage-cli && electron-forge make",
+    "package": "pnpm run ensure-electron && pnpm run stage-cli && electron-forge package",
     "smoke": "pnpm run ensure-electron && node ../../scripts/ade-smoke.mjs",
     "start": "pnpm run ensure-electron && electron-forge start",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "stage-cli": "node ../../scripts/stage-ade-cli.mjs"
   },
   "dependencies": {
     "@svatah/schema": "workspace:*"

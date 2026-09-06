@@ -99,6 +99,16 @@ export interface StartOptions {
   readonly userDataDir: string;
   /** The `svatah` entry point. Bundled with the app in a packaged build. */
   readonly cli: string;
+  /**
+   * The interpreter that runs the CLI (Draft 2.9 LLD §13.6, T8.1).
+   *
+   * Resolved by `resolveNodeRuntime` and passed in, never `process.execPath`:
+   * in a packaged build that is the ADE itself with the `RunAsNode` fuse off,
+   * so the child is a second ADE that prints no handshake — the whole of P7-F1.
+   * Passing it in rather than resolving it here keeps this file's only impure
+   * function `spawn`, and lets the caller show the resolution's own alert.
+   */
+  readonly runtime: string;
   readonly onLog?: (line: string) => void;
   /** How long the handshake may take before the spawn is abandoned. */
   readonly timeoutMs?: number;
@@ -133,11 +143,27 @@ export async function startOrAdopt(options: StartOptions): Promise<RunningServic
     rmSync(lockPath, { force: true });
   }
 
-  const child = spawn(process.execPath, [options.cli, "serve", options.project, "--port", "0"], {
+  const child = spawn(options.runtime, [options.cli, "serve", options.project, "--port", "0"], {
     stdio: ["ignore", "pipe", "pipe"],
-    // The service must not inherit a credential from the app's environment: it
-    // compiles and runs, and neither needs a model (REQ-RUN-1).
-    env: { ...process.env, ANTHROPIC_API_KEY: "", ANTHROPIC_AUTH_TOKEN: "" },
+    env: {
+      ...process.env,
+      // The service must not inherit a credential from the app's environment: it
+      // compiles and runs, and neither needs a model (REQ-RUN-1).
+      ANTHROPIC_API_KEY: "",
+      ANTHROPIC_AUTH_TOKEN: "",
+      /*
+       * And it must not inherit the ADE's own startup instructions (T8.1).
+       *
+       * While the spawn was `process.execPath` the child *was* an ADE, and it
+       * read `SVATAH_ADE_SMOKE` from this environment, opened the project, and
+       * spawned another: the verifier's "a second ADE instance appears" is one
+       * generation of a fork bomb that reached 594 processes here. The runtime
+       * fix removes the cause; clearing these removes the blast radius, which
+       * is worth keeping for whatever the next mis-spawn turns out to be.
+       */
+      SVATAH_ADE_SMOKE: "",
+      SVATAH_ADE_PROJECT: "",
+    },
   });
 
   const handshake = await waitForHandshake(child, options);

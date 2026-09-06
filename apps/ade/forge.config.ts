@@ -27,6 +27,16 @@ const config: ForgeConfig = {
     // The project directory is the only source of truth (REQ-ADE-2), so there is
     // nothing to sign a manifest of and nothing to bundle but the app.
     asar: true,
+    /*
+     * The bundled CLI (T8.1, LLD §13.6: "locate the bundled CLI").
+     *
+     * `scripts/stage-ade-cli.mjs` writes it here with `pnpm deploy`, and Forge
+     * copies it to `Resources/svatah`. Outside the asar on purpose: the ADE
+     * *spawns* the CLI, and a program inside an asar has no path a `spawn` can
+     * use. Phase 7 shipped an application with nothing here, which is why a
+     * packaged ADE could not open a project even with a Node to hand (P7-F1).
+     */
+    extraResource: [".stage/svatah"],
   },
   rebuildConfig: {},
 

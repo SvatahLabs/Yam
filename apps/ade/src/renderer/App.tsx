@@ -68,7 +68,28 @@ export function App(): React.JSX.Element {
       .serviceInfo()
       .then(setInfo)
       .catch(() => undefined);
-    return bridge().onServiceLog((line) => setLog((lines) => [...lines.slice(-40), line]));
+    const offLog = bridge().onServiceLog((line) => setLog((lines) => [...lines.slice(-40), line]));
+    /*
+     * A project the main process opened from `SVATAH_ADE_PROJECT` (T8.1).
+     *
+     * The same two outcomes the Recent list has — the tabs appear, or the
+     * alert does — for a launch nobody clicked. §13.6: "the desktop
+     * conformance gate passes the fixtures project this way, so its cases read
+     * a project screen rather than the welcome screen."
+     */
+    const offOpened = bridge().onServiceOpened((event) => {
+      if (event.connection !== undefined) {
+        setInfo(event.connection);
+        setScreen("project");
+        setError(undefined);
+        return;
+      }
+      setError(event.error ?? "The project could not be opened.");
+    });
+    return () => {
+      offLog();
+      offOpened();
+    };
   }, []);
 
   const open = useCallback(async (directory: string) => {

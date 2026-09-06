@@ -12,9 +12,24 @@
  *
  * Headless: `SVATAH_ADE_SMOKE` makes the main process open the project, print one
  * line, and exit. On Linux it needs a display — CI wraps it in `xvfb-run`.
+ *
+ * ## Against the packaged application when there is one (Draft 2.9 §13.6, T8.1)
+ *
+ * "The smoke check (`SVATAH_ADE_SMOKE`) and `scripts/ade-smoke.mjs` run against
+ * the **packaged** application when one exists under `apps/ade/out/`, and
+ * against the unpackaged build otherwise, and say which."
+ *
+ * Phase 7's version always launched `node_modules/electron/cli.js`, which is a
+ * development Electron running the ADE's sources. That build has the `RunAsNode`
+ * fuse *on* and a CLI it can find in the workspace, so it passed while the
+ * product a person downloads could not open a project at all (P7-F1). A check
+ * that cannot fail the way the product fails is not a check.
+ *
+ * `SVATAH_CLI` is deliberately *not* set for a packaged run: the point is that
+ * the application finds its own bundled CLI and resolves its own Node.
  */
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -28,26 +43,67 @@ if (!existsSync(cli)) {
   process.exit(1);
 }
 
-const electron = join(ROOT, "node_modules", "electron", "cli.js");
+/** The packaged application for this host, when `electron-forge package` made one. */
+function packagedApp() {
+  const out = join(ADE, "out");
+  if (!existsSync(out)) return undefined;
+  const candidates =
+    process.platform === "darwin"
+      ? readdirSync(out)
+          .filter((one) => one.startsWith("Svatah ADE-darwin-"))
+          .map((one) => join(out, one, "Svatah ADE.app", "Contents", "MacOS", "Svatah ADE"))
+      : process.platform === "win32"
+        ? readdirSync(out)
+            .filter((one) => one.startsWith("Svatah ADE-win32-"))
+            .map((one) => join(out, one, "Svatah ADE.exe"))
+        : readdirSync(out)
+            .filter((one) => one.startsWith("Svatah ADE-linux-"))
+            .map((one) => join(out, one, "svatah-ade"));
+  return candidates.find((one) => existsSync(one));
+}
+
+const packaged = packagedApp();
 const entry = join(ADE, ".vite", "build", "main.js");
-if (!existsSync(entry)) {
+
+if (packaged === undefined && !existsSync(entry)) {
   process.stderr.write(
-    "No build yet. Run `pnpm --filter @svatah/ade exec electron-forge package` first.\n",
+    "No build yet. Run `pnpm --filter @svatah/ade package` first.\n",
   );
   process.exit(1);
 }
 
-const child = spawn(process.execPath, [electron, ADE], {
-  cwd: ADE,
-  stdio: "inherit",
-  env: {
-    ...process.env,
-    SVATAH_ADE_SMOKE: project,
-    SVATAH_CLI: cli,
-    SVATAH_A11Y: "1",
-    ELECTRON_ENABLE_LOGGING: "1",
-  },
-});
+process.stdout.write(
+  packaged === undefined
+    ? `svatah-ade smoke target=unpackaged (${entry})\n`
+    : `svatah-ade smoke target=packaged (${packaged})\n`,
+);
+
+const child =
+  packaged === undefined
+    ? spawn(process.execPath, [join(ROOT, "node_modules", "electron", "cli.js"), ADE], {
+        cwd: ADE,
+        stdio: "inherit",
+        env: {
+          ...process.env,
+          SVATAH_ADE_SMOKE: project,
+          SVATAH_CLI: cli,
+          SVATAH_A11Y: "1",
+          ELECTRON_ENABLE_LOGGING: "1",
+        },
+      })
+    : spawn(packaged, [], {
+        cwd: ADE,
+        stdio: "inherit",
+        env: {
+          ...process.env,
+          SVATAH_ADE_SMOKE: project,
+          // No `SVATAH_CLI`, and no `SVATAH_NODE`: a packaged ADE has to find
+          // its own CLI under `resources/` and its own Node on `PATH` (§13.6).
+          SVATAH_CLI: "",
+          SVATAH_A11Y: "1",
+          ELECTRON_ENABLE_LOGGING: "1",
+        },
+      });
 
 /*
  * A hard deadline, because an Electron that cannot start does not always say so.

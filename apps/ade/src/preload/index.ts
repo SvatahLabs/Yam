@@ -44,6 +44,21 @@ export interface AdeBridge {
   preferences(next?: Partial<Preferences>): Promise<Preferences>;
   /** Lines the service wrote to stderr while starting. */
   onServiceLog(listener: (line: string) => void): () => void;
+  /**
+   * The result of a project opened by the *main* process (T8.1, §13.6).
+   *
+   * `SVATAH_ADE_PROJECT=<dir>` opens a project on ready, before the renderer
+   * exists, so there is no call for the renderer to await. This carries the
+   * answer — a connection, or the message the Project screen shows as its
+   * alert — to a screen that did not ask for it.
+   *
+   * One way, no arguments, no handler on the other end: it can start nothing
+   * and read nothing, which is what keeps the bridge's shape (§13.6) an
+   * honest description of what the renderer can do.
+   */
+  onServiceOpened(
+    listener: (event: { connection?: ServiceInfo; error?: string }) => void,
+  ): () => void;
 }
 
 const bridge: AdeBridge = {
@@ -55,6 +70,12 @@ const bridge: AdeBridge = {
     const handler = (_event: unknown, line: string): void => listener(line);
     ipcRenderer.on("service:log", handler);
     return () => ipcRenderer.off("service:log", handler);
+  },
+  onServiceOpened: (listener) => {
+    const handler = (_event: unknown, payload: { connection?: ServiceInfo; error?: string }): void =>
+      listener(payload);
+    ipcRenderer.on("service:opened", handler);
+    return () => ipcRenderer.off("service:opened", handler);
   },
 };
 

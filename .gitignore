@@ -72,3 +72,8 @@ packages/schema/conformance/
 
 # `pnpm release:dry-run` output (T7.6): real tarballs, never published.
 release/
+
+# The CLI staged for the packaged ADE (T8.1). `scripts/stage-ade-cli.mjs`
+# writes a `pnpm deploy` of `@svatah/cli` here and Forge copies it into
+# `Resources/svatah`; it is a build product of `packages/cli/dist`.
+apps/ade/.stage/

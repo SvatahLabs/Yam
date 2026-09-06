@@ -147,7 +147,62 @@ function hasWindow() {
 
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
-/** Launch the ADE at one variant and wait for its window; answer with the child. */
+/**
+ * Is a project open on the ADE's window yet (T8.1)?
+ *
+ * The window appearing is not enough: `SVATAH_ADE_PROJECT` opens the project
+ * *after* ready, and every flow case is about a control that exists only on a
+ * project screen. Phase 7's gate asked for those controls on the welcome
+ * screen and reported five adapter failures for a launch that had not finished
+ * (P7-F1). The tabs are the cheapest proof — they render only with a project
+ * open — and `screen-project` is one of them.
+ */
+function hasProject() {
+  if (process.platform !== "darwin") {
+    const probe = spawnSync(
+      "powershell.exe",
+      [
+        "-NoProfile",
+        "-Command",
+        `@(Get-Process -Name '${PROCESS_NAME}' -ErrorAction SilentlyContinue | ` +
+          "Where-Object { $_.MainWindowTitle -ne '' }).Count",
+      ],
+      { encoding: "utf8", timeout: 20_000 },
+    );
+    return probe.status === 0 && Number((probe.stdout ?? "0").trim()) > 0;
+  }
+  const probe = spawnSync(
+    "osascript",
+    [
+      "-l",
+      "JavaScript",
+      "-e",
+      "ObjC.import('ApplicationServices');" +
+        "function attr(e,n){const o=Ref();" +
+        "if($.AXUIElementCopyAttributeValue(e,$(n),o)!==0)return undefined;return o[0];}" +
+        "function run(argv){const apps=$.NSWorkspace.sharedWorkspace.runningApplications;" +
+        "let pid=-1;for(let i=0;i<apps.count;i++){const a=apps.objectAtIndex(i);" +
+        "if(ObjC.unwrap(a.localizedName)===argv[0]&&a.processIdentifier>0){" +
+        "const el=$.AXUIElementCreateApplication(a.processIdentifier);" +
+        "const w=attr(el,'AXWindows');if(w===undefined)continue;" +
+        "if(ObjC.castRefToObject(w).count>0){pid=a.processIdentifier;break;}}}" +
+        "if(pid<0)return 'no';const el=$.AXUIElementCreateApplication(pid);" +
+        "const w=ObjC.castRefToObject(attr(el,'AXWindows')).objectAtIndex(0);" +
+        "let found='no';const stack=[w];let seen=0;" +
+        "while(stack.length>0&&seen<4000){const e=stack.pop();seen++;" +
+        "const id=attr(e,'AXDOMIdentifier');" +
+        "if(id!==undefined&&ObjC.unwrap(ObjC.castRefToObject(id))==='screen-project'){found='yes';break;}" +
+        "const k=attr(e,'AXChildren');if(k===undefined)continue;" +
+        "const arr=ObjC.castRefToObject(k);for(let i=0;i<arr.count;i++)stack.push(arr.objectAtIndex(i));}" +
+        "return found;}",
+      PROCESS_NAME,
+    ],
+    { encoding: "utf8", timeout: 30_000 },
+  );
+  return probe.status === 0 && (probe.stdout ?? "").trim() === "yes";
+}
+
+/** Launch the ADE at one variant and wait for its project screen; answer with the child. */
 async function launch(variant) {
   const child = spawn(app, [], {
     stdio: "ignore",
@@ -158,19 +213,34 @@ async function launch(variant) {
       ...(variant === 0 ? {} : { SVATAH_A11Y_VARIANT: String(variant) }),
       SVATAH_CLI: cli,
       SVATAH_ADE_SMOKE: "",
+      /*
+       * Draft 2.9 §13.6: "the desktop conformance gate passes the fixtures
+       * project this way, so its cases read a project screen rather than the
+       * welcome screen."
+       */
+      SVATAH_ADE_PROJECT: project,
     },
   });
   const startedAt = Date.now();
+  let windowAt;
   while (Date.now() - startedAt < WINDOW_TIMEOUT_MS) {
     await sleep(1_000);
-    if (hasWindow()) {
+    if (windowAt === undefined && hasWindow()) {
+      windowAt = Date.now() - startedAt;
       process.stderr.write(
-        `variant ${variant}: the ADE's window appeared after ${Date.now() - startedAt} ms\n`,
+        `variant ${variant}: the ADE's window appeared after ${windowAt} ms\n`,
       );
-      return { child, waitedMs: Date.now() - startedAt };
+    }
+    if (windowAt !== undefined && hasProject()) {
+      const waitedMs = Date.now() - startedAt;
+      process.stderr.write(
+        `variant ${variant}: the project screen was open after ${waitedMs} ms ` +
+          `(${project})\n`,
+      );
+      return { child, waitedMs, windowAt };
     }
   }
-  return { child, waitedMs: Date.now() - startedAt, timedOut: true };
+  return { child, waitedMs: Date.now() - startedAt, windowAt, timedOut: true };
 }
 
 /* ── 3. the three passes ──────────────────────────────────────────────────── */
@@ -198,8 +268,12 @@ try {
       stop();
       die(
         2,
-        `The ADE was launched at variant ${variant} but showed no window within ` +
-          `${WINDOW_TIMEOUT_MS} ms. That is a launch failure, not an adapter failure, and it is ` +
+        `The ADE was launched at variant ${variant} but ` +
+          (launched.windowAt === undefined
+            ? `showed no window within ${WINDOW_TIMEOUT_MS} ms`
+            : `showed no open project within ${WINDOW_TIMEOUT_MS} ms ` +
+              `(its window appeared after ${launched.windowAt} ms; SVATAH_ADE_PROJECT=${project})`) +
+          ". That is a launch failure, not an adapter failure, and it is " +
           "reported as one so the report is not a list of cases that never had anything to read.\n" +
           `Nothing was written to ${report}.\n` +
           `\`svatah surface doctor --adapter ${adapter}\` said:\n${doctorOutput}`,

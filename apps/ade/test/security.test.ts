@@ -106,7 +106,15 @@ describe("no renderer source reaches for Node (REQ-ADE-2)", () => {
   }
 });
 
-describe("the preload bridge is four functions (LLD §13.6)", () => {
+describe("the preload bridge is four functions and two listeners (LLD §13.6)", () => {
+  /*
+   * §13.6 names four *callable* functions. The two `on…` entries are one-way
+   * listeners with no handler on the other end: they can start nothing and read
+   * nothing, and they exist because the main process sometimes has news the
+   * renderer did not ask for — a service log line, and (T8.1) the project
+   * `SVATAH_ADE_PROJECT` opened before the renderer was there to open it.
+   * Recorded as a deviation in `docs/spec/progress/phase-8.md`.
+   */
   it("exposes exactly openProject, serviceInfo, pickFile and preferences", () => {
     const exposed = [...preload.matchAll(/^\s{2}(\w+):/gm)].map((match) => match[1]);
     expect(exposed).toEqual([
@@ -115,6 +123,7 @@ describe("the preload bridge is four functions (LLD §13.6)", () => {
       "pickFile",
       "preferences",
       "onServiceLog",
+      "onServiceOpened",
     ]);
   });
 

@@ -25,6 +25,7 @@ import {
   writeLock,
   type RunningService,
 } from "../src/main/service.js";
+import { resolveNodeRuntime } from "@svatah/service/runtime";
 import {
   DEFAULT_PREFERENCES,
   normalise,
@@ -38,6 +39,15 @@ const ADE = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT = join(ADE, "..", "..");
 const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
 const PROJECT = join(ROOT, "evals", "fixtures");
+/*
+ * The interpreter the ADE would resolve (Draft 2.9 §13.6, T8.1).
+ *
+ * Resolved rather than `process.execPath`, because that is the change P7-F1 is
+ * about — under vitest the two happen to be the same Node, and a test that used
+ * `process.execPath` would keep passing on the day the ADE went back to
+ * spawning its own binary.
+ */
+const RUNTIME = resolveNodeRuntime({ cli: CLI }).runtime?.path ?? "node";
 
 let userData: string;
 const started: RunningService[] = [];
@@ -121,6 +131,7 @@ describe("opening the fixture project (T3.6)", () => {
       project: PROJECT,
       userDataDir: fresh(),
       cli: CLI,
+      runtime: RUNTIME,
     });
     started.push(running);
 
@@ -140,7 +151,7 @@ describe("opening the fixture project (T3.6)", () => {
 
   it("writes a lock, and adopts rather than starting a second service", async () => {
     const dir = fresh();
-    const first = await startOrAdopt({ project: PROJECT, userDataDir: dir, cli: CLI });
+    const first = await startOrAdopt({ project: PROJECT, userDataDir: dir, cli: CLI, runtime: RUNTIME });
     started.push(first);
 
     const lockPath = lockPathFor(dir, PROJECT);
@@ -149,7 +160,7 @@ describe("opening the fixture project (T3.6)", () => {
 
     // A reload of the ADE, or a second window: two services writing to one
     // `runs/` directory is the thing this prevents.
-    const second = await startOrAdopt({ project: PROJECT, userDataDir: dir, cli: CLI });
+    const second = await startOrAdopt({ project: PROJECT, userDataDir: dir, cli: CLI, runtime: RUNTIME });
     expect(second.connection.adopted).toBe(true);
     expect(second.connection.url).toBe(first.connection.url);
 
@@ -160,7 +171,7 @@ describe("opening the fixture project (T3.6)", () => {
 
   it("stops the service it started, and removes the lock", async () => {
     const dir = fresh();
-    const running = await startOrAdopt({ project: PROJECT, userDataDir: dir, cli: CLI });
+    const running = await startOrAdopt({ project: PROJECT, userDataDir: dir, cli: CLI, runtime: RUNTIME });
     const { url, token } = running.connection;
 
     await running.stop();
@@ -180,7 +191,7 @@ describe("opening the fixture project (T3.6)", () => {
       pid: 999_999,
     });
 
-    const running = await startOrAdopt({ project: PROJECT, userDataDir: dir, cli: CLI });
+    const running = await startOrAdopt({ project: PROJECT, userDataDir: dir, cli: CLI, runtime: RUNTIME });
     started.push(running);
     expect(running.connection.adopted).toBe(false);
     expect(running.connection.url).not.toBe("http://127.0.0.1:1");
@@ -192,6 +203,7 @@ describe("opening the fixture project (T3.6)", () => {
         project: PROJECT,
         userDataDir: fresh(),
         cli: join(ROOT, "packages", "cli", "dist", "not-a-file.js"),
+        runtime: RUNTIME,
         timeoutMs: 15_000,
       }),
     ).rejects.toThrow(/exited with|did not print/);

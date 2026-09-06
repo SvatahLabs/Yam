@@ -37,6 +37,12 @@ import {
   type Preferences,
 } from "./preferences.js";
 import { startOrAdopt, type RunningService, type ServiceConnection } from "./service.js";
+import {
+  describeRuntime,
+  resolveNodeRuntime,
+  runtimeNotFoundMessage,
+  type NodeRuntime,
+} from "@svatah/service/runtime";
 
 /** Injected by Electron Forge's Vite plugin. */
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
@@ -45,6 +51,8 @@ declare const MAIN_WINDOW_VITE_NAME: string;
 let window_: BrowserWindow | undefined;
 let service: RunningService | undefined;
 let preferences: Preferences = DEFAULT_PREFERENCES;
+/** The runtime the last `openProject` chose, for the smoke check's line. */
+let runtime_: NodeRuntime | undefined;
 
 /**
  * Where `svatah` is.
@@ -58,7 +66,12 @@ function cliPath(): string {
   if (configured !== undefined && configured !== "") return configured;
 
   const candidates = app.isPackaged
-    ? [join(process.resourcesPath, "svatah", "bin.js")]
+    ? [
+        // Where `scripts/stage-ade-cli.mjs` puts the deployed CLI, which Forge
+        // copies into `Resources/svatah` as an `extraResource` (T8.1).
+        join(process.resourcesPath, "svatah", "dist", "bin.js"),
+        join(process.resourcesPath, "svatah", "bin.js"),
+      ]
     : [resolve(app.getAppPath(), "..", "..", "packages", "cli", "dist", "bin.js")];
 
   for (const candidate of candidates) if (existsSync(candidate)) return candidate;
@@ -68,13 +81,34 @@ function cliPath(): string {
   );
 }
 
+/**
+ * Which Node runs the CLI (Draft 2.9 LLD §13.6, T8.1).
+ *
+ * Never `process.execPath`. Packaged, that is this application with the
+ * `RunAsNode` fuse off, and spawning it produced a second ADE that printed no
+ * handshake — the defect the whole of T8.1 is about. The three places §13.6
+ * names are tried in order and the failure names all three, because the person
+ * who sees it is looking at an application and has no terminal to read.
+ */
+function nodeRuntime(cli: string): NodeRuntime {
+  const resolution = resolveNodeRuntime({ cli });
+  if (resolution.runtime === undefined) throw new Error(runtimeNotFoundMessage(resolution.attempts));
+  return resolution.runtime;
+}
+
 async function openProject(directory: string): Promise<ServiceConnection> {
   await closeProject();
+
+  const cli = cliPath();
+  const runtime = nodeRuntime(cli);
+  runtime_ = runtime;
+  window_?.webContents.send("service:log", describeRuntime({ runtime, attempts: [] }));
 
   const started = await startOrAdopt({
     project: resolve(directory),
     userDataDir: app.getPath("userData"),
-    cli: cliPath(),
+    cli,
+    runtime: runtime.path,
     onLog: (line) => window_?.webContents.send("service:log", line),
   });
 
@@ -212,7 +246,13 @@ async function smoke(project: string): Promise<void> {
   const summary = (await response.json()) as { root: string; flows: string[]; stories: unknown[] };
   process.stdout.write(
     `svatah-ade smoke ok project=${summary.root} flows=${summary.flows.length} ` +
-      `stories=${summary.stories.length} window=${window_ === undefined ? "none" : "open"}\n`,
+      `stories=${summary.stories.length} window=${window_ === undefined ? "none" : "open"} ` +
+      // §13.6: "`svatah surface doctor` and the ADE's own smoke check report
+      // which runtime was chosen." Without it the check passes identically
+      // whether the ADE ran the CLI with a Node or with itself, which is the
+      // one thing P7-F1 was about.
+      `packaged=${app.isPackaged ? "yes" : "no"} ` +
+      `${describeRuntime({ ...(runtime_ === undefined ? {} : { runtime: runtime_ }), attempts: [] })}\n`,
   );
 
   await closeProject();
@@ -241,6 +281,44 @@ void app.whenReady().then(() => {
       app.exit(1);
     });
     return;
+  }
+
+  /*
+   * `SVATAH_ADE_PROJECT=<dir>` opens a project on ready (Draft 2.9 §13.6, T8.1).
+   *
+   * "The desktop conformance gate passes the fixtures project this way, so its
+   * cases read a project screen rather than the welcome screen." Phase 7's gate
+   * launched the ADE and then asked for controls that only exist once a project
+   * is open, and every flow case failed on a screen that could not have them.
+   *
+   * It goes through the same `openProject` the Recent list does — not a second
+   * path — and its answer reaches the renderer on `service:opened`, because the
+   * window is created before this resolves and the renderer's own
+   * `serviceInfo()` would otherwise race it.
+   */
+  const startup = process.env["SVATAH_ADE_PROJECT"];
+  if (startup !== undefined && startup !== "") {
+    /*
+     * Held until the renderer has loaded. A `send` to a page that is still
+     * loading is dropped, and the project usually opens faster than the window
+     * paints — which would have made this work on a slow host and silently not
+     * on a fast one, the worst of the two.
+     */
+    const announce = (payload: { connection?: ServiceConnection; error?: string }): void => {
+      const target = window_;
+      if (target === undefined) return;
+      if (target.webContents.isLoading()) {
+        target.webContents.once("did-finish-load", () =>
+          target.webContents.send("service:opened", payload),
+        );
+      } else {
+        target.webContents.send("service:opened", payload);
+      }
+    };
+    void openProject(startup).then(
+      (connection) => announce({ connection }),
+      (error: unknown) => announce({ error: error instanceof Error ? error.message : String(error) }),
+    );
   }
 
   app.on("activate", () => {
