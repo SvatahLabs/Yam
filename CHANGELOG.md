@@ -5,7 +5,7 @@ whole workspace's changelog and every package version below is the same number.
 It follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] — unreleased (ready to publish)
+## [0.1.0] — 2026-09-06 (ready to publish; the tag is the owner's)
 
 The first release. **Nothing is published to a registry until the owner triggers
 the pipeline** (T8.5): `node scripts/publish.mjs` prints the twenty-six exact
@@ -15,12 +15,24 @@ the pipeline** (T8.5): `node scripts/publish.mjs` prints the twenty-six exact
 installs the module (a) four into an empty Playwright project outside this
 workspace and records, runs and heals there.
 
+**Verifying the publish is one command** (T12.5). `pnpm quick-start:registry`
+asks the registry whether the four module (a) packages are there at this
+version; when they are, it installs them **by name, with no overrides** into an
+empty project and runs the same quick start — which is the last thing nobody can
+test beforehand, because a `workspace:*` that escaped into what was uploaded
+fails there and nowhere else. Until then it says the packages are not published,
+runs the tarball quick start instead, and says which mode it took.
+
+The **git tag `v0.1.0` is not created here**. A tag is a claim that a version
+exists somewhere, and until the owner triggers `custom: publish` it does not.
+
 **What is measured**, and where the number is:
 
 | | |
 |---|---|
-| Compiler, exact match | 97.7 % overall; tier 1 100 %, tier 2 86.8 % (`reports/eval-compiler.md`) |
-| macOS Accessibility conformance | conformant — 7 of 7 flow cases and both healing cases, live against the packaged ADE; the project screen reads in 914 ms (`reports/adapter-ax.md`) |
+| Compiler, exact match | 98.0 % overall over **303** pairs; tier 1 100 % (250/250), tier 2 88.0 % (`reports/eval-compiler.md`) |
+| macOS Accessibility conformance | conformant — 10 cases across ADE variants 0, 1 and 2, live against the packaged ADE; 1017 nodes in 1488 ms, 1.46 ms per node at load average 5.15 over 8 CPUs (`reports/adapter-ax.md`) |
+| Svatah verifies Svatah | 100 % agreement over the 29 checks both sides reach; Svatah 30 of 48, external 47 of 48 (`reports/self-parity.md`) |
 | Java runtime conformance | artifacts valid, zero mismatches (`reports/runtime-java.md`) |
 | Healing, grounding, adapter conformance | `reports/eval-healing.md`, `reports/eval-grounding.md`, `reports/eval-conformance.md` |
 | Tier 2 fine-tune | **not met**, and withdrawn — see below (`reports/eval-finetune.md`) |

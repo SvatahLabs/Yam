@@ -253,6 +253,14 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      # And the one thing nobody can check before a publish (T12.5, REQ-PKG-2):
+      # that the published versions install **by name**, with no overrides, out
+      # of an empty project. A `workspace:*` that escaped into what was uploaded
+      # fails here and nowhere else. Without a publish it runs in tarball mode
+      # and says so, so the step is safe on every dispatch.
+      - name: The quick start, from the registry
+        run: pnpm quick-start:registry
+
       # The installers and the reports are attached by the jobs that produce
       # them — `ade-installers` on its three-OS matrix, `eval-reports` and
       # `tarballs` on theirs — and this job waits for all three. Attaching them

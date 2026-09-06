@@ -61,7 +61,8 @@
     "ade:shoot:update": "node scripts/shoot-ade.mjs --update",
     "ui:capture": "node scripts/capture-tui.mjs",
     "self:http": "node scripts/self-http.mjs",
-    "self:sdk": "node scripts/self-sdk.mjs"
+    "self:sdk": "node scripts/self-sdk.mjs",
+    "quick-start:registry": "node scripts/quick-start-registry.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

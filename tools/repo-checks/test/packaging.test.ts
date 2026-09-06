@@ -287,6 +287,14 @@ describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
   it("offers the two scripts the release candidate is made of", () => {
     expect(rootManifest.scripts["release:dry-run"]).toBe("node scripts/release-dry-run.mjs");
     expect(rootManifest.scripts["quick-start:packed"]).toBe("node scripts/quick-start-packed.mjs");
+    /*
+     * And the one that verifies a publish (T12.5). It runs in tarball mode
+     * until the registry has the version, so it is safe to wire in before the
+     * owner has published anything.
+     */
+    expect(rootManifest.scripts["quick-start:registry"]).toBe(
+      "node scripts/quick-start-registry.mjs",
+    );
     expect(existsSync(fromRoot("scripts/release-dry-run.mjs"))).toBe(true);
     expect(existsSync(fromRoot("scripts/quick-start-packed.mjs"))).toBe(true);
   });
