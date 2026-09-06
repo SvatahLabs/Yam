@@ -7,15 +7,26 @@
  * rule in `scripts/audit-sheet.mjs` is therefore shown to bite here, against a
  * page written to break exactly one of them.
  *
- * ## About axe-core
+ * ## About axe-core (Draft 2.12 §13.7, P9-F3)
  *
  * The task's wording is "an axe-core run". axe-core is MPL-2.0 and REQ-PKG-3
  * admits MIT, Apache-2.0 and BSD — `scripts/check-licenses.mjs` refuses MPL by
- * name, and this phase's working rules say "permissive licences only". So the
- * audit is ours, `--axe <path>` runs axe-core beside it for a verifier who has
- * a copy, and the deviation is recorded in `docs/spec/progress/phase-9.md`.
+ * name, and the phase's working rules say "permissive licences only". So the
+ * audit is ours and axe-core is **fetched at test time, outside the dependency
+ * tree**, to run beside it:
  *
- * Refs: T9.2, REQ-ADE-12, REQ-PKG-3, LLD §13.7.
+ * > The sheet's accessibility audit implements every axe-core rule the sheet has
+ * > ever failed, `landmark-unique` included, and CI fetches axe-core at test
+ * > time, outside the dependency tree, to run beside it; a rule axe reports and
+ * > the audit does not is a defect in the audit.
+ *
+ * `scripts/fetch-axe.mjs` downloads one pinned build into the system temporary
+ * directory and refuses anything whose SHA-256 is not the recorded one. The
+ * Phase 9 verification found eleven `landmark-unique` violations on a sheet this
+ * audit called clean; the last case below is what makes that impossible to
+ * repeat, because it fails when axe reports a rule the audit has no id for.
+ *
+ * Refs: T9.2, T10.4, P9-F3, REQ-ADE-12, REQ-PKG-3, LLD §13.7.
  */
 import { afterEach, describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
@@ -33,6 +44,24 @@ interface Finding {
   node?: string;
 }
 
+/**
+ * The pinned axe-core, fetched before the file declares its cases.
+ *
+ * Top-level `await` rather than `beforeAll`, because `it.runIf(...)` is decided
+ * when the file is *collected* — a hook that ran later would leave both axe
+ * cases permanently skipped, which is exactly the silent "did less" this
+ * correction is about.
+ */
+let axe: string | undefined;
+/** Why it was not fetched, when it was not: printed rather than silently skipped. */
+let axeRefused: string | undefined;
+try {
+  const { ensureAxe } = await import("../../../scripts/fetch-axe.mjs");
+  axe = await ensureAxe();
+} catch (cause) {
+  axeRefused = cause instanceof Error ? cause.message : String(cause);
+}
+
 interface Report {
   sheet: string;
   checked: { interactive: number; ids: number; pills: number; contrastPairs: number };
@@ -40,10 +69,10 @@ interface Report {
 }
 
 /** Run the audit over a page and read its JSON, whatever the exit code. */
-function audit(sheet: string): Report {
+function audit(sheet: string, extra: string[] = []): Report {
   try {
     return JSON.parse(
-      execFileSync(process.execPath, [AUDIT, "--sheet", sheet, "--json"], {
+      execFileSync(process.execPath, [AUDIT, "--sheet", sheet, "--json", ...extra], {
         cwd: REPO_ROOT,
         encoding: "utf8",
         maxBuffer: 32 * 1024 * 1024,
@@ -139,6 +168,22 @@ describe("every rule in the audit can fail (T9.2)", () => {
     expect(rules(report)).toContain("a11y-heading");
   });
 
+  it("a11y-landmark-unique — two regions with one name (P9-F3)", () => {
+    const report = auditPage(
+      '<section aria-labelledby="a-heading"><h2 id="a-heading">Buttons</h2></section>' +
+        '<section aria-labelledby="b-heading"><h2 id="b-heading">Buttons</h2></section>',
+    );
+    expect(rules(report)).toContain("a11y-landmark-unique");
+  });
+
+  it("a11y-landmark-unique — says nothing about two regions with different names", () => {
+    const report = auditPage(
+      '<section aria-labelledby="a-heading"><h2 id="a-heading">Buttons — Dark</h2></section>' +
+        '<section aria-labelledby="b-heading"><h2 id="b-heading">Buttons — Light</h2></section>',
+    );
+    expect(rules(report)).not.toContain("a11y-landmark-unique");
+  });
+
   it("a11y-colour-word — a status colour with no word beside it", () => {
     const report = auditPage('<span class="sv-pill"><span aria-hidden="true">✓</span></span>');
     expect(rules(report)).toContain("a11y-colour-word");
@@ -161,4 +206,68 @@ describe("every rule in the audit can fail (T9.2)", () => {
     );
     expect(report.findings).toEqual([]);
   });
+});
+
+/**
+ * The audit and a real axe-core agree on the sheet (T10.4 Validate, P9-F3).
+ *
+ * Two claims, and the second is the one the Phase 9 verification bought at the
+ * price of a finding: not merely that axe is clean, but that **every rule axe
+ * can report on this page, the audit has an id for**. A green audit beside a red
+ * axe is what happened in Phase 9; a green axe beside an audit that would not
+ * have noticed is the same defect waiting.
+ */
+describe("axe-core, fetched at test time, agrees with the audit (T10.4)", () => {
+  it("was fetched, or says why it was not", () => {
+    if (axe === undefined) {
+      process.stderr.write(
+        `axe-core was not fetched, so the third-party accessibility run did not happen: ` +
+          `${axeRefused ?? "no reason given"}\n` +
+          "The in-house audit above still ran. Draft 2.12 §13.7 asks CI to fetch axe-core at " +
+          "test time; a host with no network cannot, and this says so rather than passing " +
+          "quietly.\n",
+      );
+    }
+    expect(axeRefused === undefined || axe === undefined).toBe(true);
+  });
+
+  it.runIf(axe !== undefined)("reports zero violations on the sheet", () => {
+    const report = audit(SHEET, ["--axe", axe!]);
+    const fromAxe = report.findings.filter((one) => one.rule.startsWith("axe:"));
+    expect(fromAxe, JSON.stringify(fromAxe, null, 2)).toEqual([]);
+    expect(report.findings, JSON.stringify(report.findings, null, 2)).toEqual([]);
+  }, 180_000);
+
+  it.runIf(axe !== undefined)(
+    "a rule axe reports and the audit does not is a defect in the audit",
+    () => {
+      /*
+       * A page that breaks `landmark-unique` and nothing else. Both sides must
+       * see it: axe by its own rule, the audit by `a11y-landmark-unique`. Before
+       * T10.4 axe saw it eleven times and the audit not at all.
+       */
+      const dir = mkdtempSync(join(tmpdir(), "svatah-axe-agree-"));
+      workspaces.push(dir);
+      const page = join(dir, "index.html");
+      writeFileSync(
+        page,
+        '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>probe</title></head>' +
+          "<body><main><h1>Probe</h1>" +
+          '<section aria-labelledby="a-heading"><h2 id="a-heading">Buttons</h2></section>' +
+          '<section aria-labelledby="b-heading"><h2 id="b-heading">Buttons</h2></section>' +
+          "</main></body></html>",
+        "utf8",
+      );
+
+      const report = audit(page, ["--axe", axe!]);
+      const found = new Set(report.findings.map((one) => one.rule));
+      expect([...found]).toContain("axe:landmark-unique");
+      expect(
+        [...found],
+        "axe found a rule the in-house audit has no id for; that is a defect in the audit " +
+          "(Draft 2.12 §13.7)",
+      ).toContain("a11y-landmark-unique");
+    },
+    180_000,
+  );
 });

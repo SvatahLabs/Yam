@@ -56,6 +56,24 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
   const suffix = theme === "dark" ? "" : "-light";
   const [paletteOpen, setPaletteOpen] = useState(false);
 
+  /*
+   * Every section's heading says which theme it belongs to (P9-F3, T10.4).
+   *
+   * `InspectorSection` renders a `<section aria-labelledby>`, which is a
+   * `region` landmark, and the sheet draws each of the eleven twice — once per
+   * theme. Two landmarks with the same role and the same accessible name are
+   * indistinguishable to anyone navigating by landmark, which is axe-core's
+   * `landmark-unique` and eleven violations of it on this page (the Phase 9
+   * verification, F3).
+   *
+   * The name is made unique by saying the true thing rather than by hiding a
+   * label: this *is* the dark half's Buttons section, and a reader jumping to
+   * "Buttons — Light" gets the one they meant. LLD §13.7's rule that a visible
+   * label is the accessible name is kept — the heading reads what the landmark
+   * is called.
+   */
+  const named = (title: string): string => `${title} — ${theme === "dark" ? "Dark" : "Light"}`;
+
   return (
     <section
       data-theme={theme}
@@ -66,7 +84,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
         {theme === "dark" ? "Dark" : "Light"}
       </h2>
 
-      <InspectorSection id={`sheet-buttons${suffix}`} title="Buttons">
+      <InspectorSection id={`sheet-buttons${suffix}`} title={named("Buttons")}>
         <div className="sv-sheet-row">
           <Button id={`sheet-run${suffix}`} label="Run" variant="primary" accelerator="⌘↵" />
           <Button id={`sheet-record${suffix}`} label="Record" accelerator="R" />
@@ -76,7 +94,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
         </div>
       </InspectorSection>
 
-      <InspectorSection id={`sheet-fields${suffix}`} title="Fields">
+      <InspectorSection id={`sheet-fields${suffix}`} title={named("Fields")}>
         <div className="sv-sheet-row">
           <Field id={`sheet-filter${suffix}`} label="Filter flows" placeholder="Filter flows…" />
           <Chooser
@@ -91,7 +109,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
         </div>
       </InspectorSection>
 
-      <InspectorSection id={`sheet-status${suffix}`} title="Status">
+      <InspectorSection id={`sheet-status${suffix}`} title={named("Status")}>
         <div className="sv-sheet-row">
           {STATUS_TONES.map((tone) => (
             <Pill key={tone} tone={tone} label={WORD[tone]} glyph />
@@ -105,7 +123,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
         </div>
       </InspectorSection>
 
-      <InspectorSection id={`sheet-rail${suffix}`} title="Rail">
+      <InspectorSection id={`sheet-rail${suffix}`} title={named("Rail")}>
         <nav className="sv-sheet-rail" aria-label={`Sections (${theme})`}>
           <RailItem id={`sheet-rail-flows${suffix}`} label="Flows" count={7} />
           <RailItem id={`sheet-rail-runs${suffix}`} label="Runs" count={12} active />
@@ -113,7 +131,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
         </nav>
       </InspectorSection>
 
-      <InspectorSection id={`sheet-table${suffix}`} title="Table">
+      <InspectorSection id={`sheet-table${suffix}`} title={named("Table")}>
         <Table<Row>
           id={`sheet-bindings-table${suffix}`}
           label="Bindings"
@@ -137,7 +155,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
         />
       </InspectorSection>
 
-      <InspectorSection id={`sheet-tabs${suffix}`} title="Tabs">
+      <InspectorSection id={`sheet-tabs${suffix}`} title={named("Tabs")}>
         <TabStrip
           id={`sheet-tabstrip${suffix}`}
           label="Flow views"
@@ -155,7 +173,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
         />
       </InspectorSection>
 
-      <InspectorSection id={`sheet-inspector${suffix}`} title="Inspector">
+      <InspectorSection id={`sheet-inspector${suffix}`} title={named("Inspector")}>
         <KeyValues
           rows={[
             { key: "Compiles at", value: "Tier 1 · grammar, pattern 28" },
@@ -166,7 +184,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
         />
       </InspectorSection>
 
-      <InspectorSection id={`sheet-alerts${suffix}`} title="Alerts">
+      <InspectorSection id={`sheet-alerts${suffix}`} title={named("Alerts")}>
         <Alert id={`sheet-alert-fail${suffix}`} tone="fail">
           The Svatah ADE could not find a Node 22 or newer to run{" "}
           <span className="sv-mono">svatah serve</span>. It looked in three places: SVATAH_NODE,
@@ -178,7 +196,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
         </Alert>
       </InspectorSection>
 
-      <InspectorSection id={`sheet-type${suffix}`} title="Type ramp">
+      <InspectorSection id={`sheet-type${suffix}`} title={named("Type ramp")}>
         <ul className="sv-sheet-type">
           {Object.entries(TYPE).map(([name, ramp]) => (
             <li key={name} style={{ fontSize: `${ramp.size}px`, fontWeight: ramp.weight }}>
@@ -188,7 +206,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
         </ul>
       </InspectorSection>
 
-      <InspectorSection id={`sheet-palette${suffix}`} title="Command palette">
+      <InspectorSection id={`sheet-palette${suffix}`} title={named("Command palette")}>
         <Button
           id={`sheet-open-palette${suffix}`}
           label="Open the command palette"
@@ -231,7 +249,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
         />
       </InspectorSection>
 
-      <InspectorSection id={`sheet-tokens${suffix}`} title="Tokens">
+      <InspectorSection id={`sheet-tokens${suffix}`} title={named("Tokens")}>
         <ul className="sv-sheet-swatches">
           {Object.entries(THEMES[theme]).map(([name, value]) => (
             <li key={name}>

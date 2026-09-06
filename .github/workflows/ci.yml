@@ -83,6 +83,17 @@ jobs:
       - name: Privacy mode (REQ-NFR-3)
         run: node scripts/privacy-check.mjs
 
+      # T10.4, Draft 2.12 §13.7: the component sheet's accessibility audit, with a
+      # real axe-core beside it. axe-core is MPL-2.0 and REQ-PKG-3 admits MIT,
+      # Apache-2.0 and BSD, so it is never a dependency — `scripts/fetch-axe.mjs`
+      # downloads one pinned build into the system temporary directory at test
+      # time, outside the dependency tree, and refuses anything whose SHA-256 is
+      # not the recorded one. A rule axe reports and the audit does not is a
+      # defect in the audit.
+      - name: Component sheet accessibility (audit and axe-core)
+        shell: bash
+        run: node scripts/audit-sheet.mjs --axe "$(node scripts/fetch-axe.mjs)"
+
       # T5.6: the examples run. An example nobody runs is documentation that
       # drifts, and `examples/cron/book.sh` and `examples/mcp-agent/` are the
       # two that *can* run — the CI ones are workflow files for other people's

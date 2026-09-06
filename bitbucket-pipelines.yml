@@ -63,6 +63,11 @@ definitions:
           # T4.7: privacy mode. A failure here says "a command reached the
           # network" (REQ-NFR-3, REQ-RUN-1, REQ-NFR-1).
           - node scripts/privacy-check.mjs
+          # T10.4, Draft 2.12 §13.7: the sheet's accessibility audit with a real
+          # axe-core beside it. axe-core is MPL-2.0 (REQ-PKG-3 admits MIT,
+          # Apache-2.0 and BSD), so one pinned build is fetched at test time into
+          # the system temporary directory, outside the dependency tree.
+          - node scripts/audit-sheet.mjs --axe "$(node scripts/fetch-axe.mjs)"
           # T5.6: the examples run. An example nobody runs is documentation that
           # drifts (REQ-AGT-4).
           - pnpm examples

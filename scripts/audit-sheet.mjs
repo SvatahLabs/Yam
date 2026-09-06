@@ -13,9 +13,22 @@
  * `scripts/check-licenses.mjs` refuses MPL by name. The two requirements cannot
  * both be satisfied by adding the dependency, and the phase's working rules say
  * "permissive licences only", so this is a check of our own over the rules the
- * sheet actually has to keep, and `--axe` is how a verifier who has axe-core to
- * hand runs it as well. The deviation is recorded in
- * `docs/spec/progress/phase-9.md`.
+ * sheet actually has to keep, and `--axe` is how axe-core runs beside it. The
+ * deviation is recorded in `docs/spec/progress/phase-9.md`.
+ *
+ * ## The audit and axe must agree (Draft 2.12 §13.7, P9-F3)
+ *
+ * > The sheet's accessibility audit implements every axe-core rule the sheet has
+ * > ever failed, `landmark-unique` included, and CI fetches axe-core at test
+ * > time, outside the dependency tree, to run beside it; a rule axe reports and
+ * > the audit does not is a defect in the audit.
+ *
+ * The Phase 9 verification ran a real axe-core against a sheet this audit called
+ * clean and found eleven `landmark-unique` violations — two landmarks per
+ * component section, one for each theme, with the same role and the same name.
+ * `a11y-landmark-unique` below is that rule, implemented here; `--axe` is what
+ * proves the two agree, and `tools/repo-checks/test/sheet-audit.test.ts` fetches
+ * axe-core at test time so CI runs both.
  *
  * ## The rules
  *
@@ -30,6 +43,7 @@
  *   a11y-button-type every <button> says what kind it is
  *   a11y-heading     headings descend without skipping a level
  *   a11y-landmark    the page has a main landmark and a heading
+ *   a11y-landmark-unique  no two landmarks share a role and an accessible name
  *   a11y-contrast    text meets WCAG AA against what is behind it
  *   a11y-colour-word no status colour appears without a word beside it
  *   a11y-lang        the document declares a language
@@ -209,6 +223,53 @@ for (const heading of document.querySelectorAll("h1, h2, h3, h4, h5, h6")) {
 if (document.querySelector("main") === null) {
   fail("a11y-landmark", "The page has no <main> landmark.");
 }
+
+/*
+ * Two landmarks with one name (axe-core's `landmark-unique`, P9-F3).
+ *
+ * A landmark is how someone navigating without a pointer jumps around a page,
+ * and two regions called "Buttons" are two destinations with one name. The
+ * sheet draws every component section twice — once per theme — so this is the
+ * rule it is most able to break, and it broke it eleven times before the
+ * headings started saying which half they belong to.
+ *
+ * `<section>` and `<form>` are landmarks *only when named*, which is why the
+ * name is computed first and an unnamed one is skipped rather than counted as a
+ * collision of empties.
+ */
+const LANDMARKS = {
+  main: "main",
+  nav: "navigation",
+  aside: "complementary",
+  header: "banner",
+  footer: "contentinfo",
+  form: "form",
+  section: "region",
+};
+
+const landmarks = new Map();
+for (const node of document.querySelectorAll(
+  "main, nav, aside, header, footer, form, section, [role]",
+)) {
+  if (!inTheTree(node)) continue;
+  const explicit = (node.getAttribute("role") ?? "").trim();
+  const role = explicit === "" ? LANDMARKS[node.tagName.toLowerCase()] : explicit;
+  if (role === undefined || !Object.values(LANDMARKS).includes(role)) continue;
+  const name = accessibleName(node);
+  // An unnamed `<section>` or `<form>` is not a landmark at all, and an unnamed
+  // `<nav>` is one landmark of its kind — neither is a duplicate name.
+  if (name === "") continue;
+  const key = `${role}\u0000${name.toLowerCase()}`;
+  if (landmarks.has(key)) {
+    fail(
+      "a11y-landmark-unique",
+      `Two "${role}" landmarks are both called "${name}"; landmark navigation cannot ` +
+        "tell them apart.",
+      node,
+    );
+  }
+  landmarks.set(key, node);
+}
 if (document.querySelector("h1") === null) {
   fail("a11y-landmark", "The page has no level-1 heading.");
 }
@@ -346,6 +407,7 @@ const checked = {
   pills: document.querySelectorAll(".sv-pill").length,
   themes: 2,
   contrastPairs: PAIRS.length * 2,
+  landmarks: landmarks.size,
 };
 
 if (asJson) {
@@ -354,6 +416,7 @@ if (asJson) {
   process.stdout.write(
     `${sheet}: 0 violations — ${checked.interactive} interactive elements named and id'd, ` +
       `${checked.ids} unique ids, ${checked.pills} status pills each with a word, ` +
+      `${checked.landmarks} distinctly named landmarks, ` +
       `${checked.contrastPairs} contrast pairs across both themes.\n`,
   );
 } else {
