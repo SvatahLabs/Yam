@@ -523,6 +523,32 @@ Phase 11 total: 18.5 ideal days.
 
 Phase 12 total: 15 ideal days.
 
+---
+
+## Phase 13 — Process and terminal (Draft 2.16)
+
+### T13.1 The process adapter
+**Refs:** REQ-ADP-10, REQ-SURF-3, LLD §2.4 · **Est:** 4
+**Do:** `adapter-process`: a session over a pseudo-terminal library under a permissive licence with a pipe fallback; snapshot of the screen as rows, the process state, and files under a root; `type`, `press`, `run`, `signal`; `screen`, `stdout`, `stderr`, `exit`, `file` reads; text, pattern, exit-code, and file predicates; the surface conformance suite gains a `process` case list against a small sample program in `apps/sample-cli`.
+**Validate:** The process suite passes; a secret handed as an input never appears in a snapshot, a read, or a report; a read outside the root is refused; the cockpit is driven in a real pseudo-terminal through the adapter at 100 and 160 columns.
+
+### T13.2 Patterns 34 to 38
+**Refs:** REQ-LANG-12, LLD §4.2 · **Est:** 2
+**Do:** The five process sentences and the pattern 19 form in the grammar, the IR, the reference with two examples each, and golden entries; the recorder binds `t<n>` and `f<path>` references without a model.
+**Validate:** Tier 1 golden at 100 percent; a flow that runs `svatah ui --json`, waits for the screen, and checks the exit code, green.
+
+### T13.3 The six checks move to Svatah's side
+**Refs:** REQ-SELF-1, 2, LLD §13.9 · **Est:** 2
+**Do:** The generated-client smoke, the artboard audit, the desktop gate script, the import's filesystem assertion, and the two cockpit checks become process flows in `evals/self`; their external sides stay.
+**Validate:** `svatah eval self` at 100 percent with Svatah reaching 45 of 48; the three remaining one-sided checks are the REQ-SELF-3 oracles and nothing else.
+
+### T13.4 The verification library
+**Refs:** REQ-SELF-4, LLD §13.9 · **Est:** 3
+**Do:** `@svatah/verify`: the catalogue schema as JSON Schema, the source runners, the comparison, the report; `svatah eval self --catalogue <file>` for any project; a README quick start that gates a stranger's Playwright project against its own flows in under ten minutes; packed with the release.
+**Validate:** The quick start scripted against the tarball in an empty project; the repository's own gate runs through the package with the same numbers.
+
+Phase 13 total: 11 ideal days.
+
 
 ---
 
@@ -631,6 +657,7 @@ Phase 12 total: 15 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.16 (process and terminal): Phase 13 added — the process adapter, patterns 34–38, the six checks moved, the verification library. Total 275.5 ideal days.
 - Draft 2.15 (after Phase 11 verification): T12.7 added — the one-sided list closed by patterns 32 and 33 and three extensions, the HTTP and SDK self flows, and the three findings. Total 264.5 ideal days.
 - Draft 2.14 (Svatah verifies Svatah): Phase 11 is now the corrections (T11.1) plus launch/quit/attach (T11.2), desktop grounding (T11.3), the self suite (T11.4), the parity gate (T11.5), and the record (T11.6); the release becomes Phase 12 with T12.1–T12.6. Total 259.5 ideal days.
 - Draft 2.13 (after Phase 10 verification): T11.7 added — the windowless launch, the live-gate findings, the Record toolbar, the corrected artboards, editing for flows and API requests. Total 246 ideal days.

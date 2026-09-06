@@ -80,6 +80,7 @@ Constraints stated by the owner:
 | REQ-ADP-7 | macOS Accessibility adapter with the same candidate kinds; documents the accessibility permission grant. Conformance target as REQ-ADP-6. The adapter snapshots the ADE's project screen within the surface's default deadline, and its conformance report records nodes read and milliseconds per node (Draft 2.8). | P2 | T |
 | REQ-ADP-8 | Linux AT-SPI adapter. | P3 | T |
 | REQ-ADP-9 | WebMCP-aware behaviour: when a page declares tools, the recorder may store a `webmcp` candidate and the executor prefers it over locators for that binding. | P2 | T |
+| REQ-ADP-10 | A `process` adapter drives a command in a pseudo-terminal or an attached one: the screen, the streams, the exit code, and files under a configured root are the surface; keystrokes, commands, and signals are the actions; it never reads outside its root or prints a secret handed to it (Draft 2.16). | P1 | T |
 | REQ-ADP-10 | An external frozen-step browser (for example an ABP-style build) can be wrapped as an adapter; no browser is forked or vendored in this project. | P3 | R |
 | REQ-ADP-11 | Selenium / WebDriver classic adapter is possible but not scheduled. | P3 | — |
 
@@ -236,6 +237,7 @@ Constraints stated by the owner:
 | REQ-SELF-1 | Svatah verifies itself: `evals/self` holds prose flows that drive the sample application, the packaged ADE through the desktop adapters, the local service through the HTTP adapter, and the cockpit through its JSON mode; a phase is not accepted until the suite is green (Draft 2.14). | P1 | T, E |
 | REQ-SELF-2 | Every self check has an independent external implementation; `svatah eval self` runs both sides and publishes agreement, coverage per side, and every disagreement and one-sided check; the gate requires 100 percent agreement on the checks both sides reach, and one-sided checks are published as Svatah's own shortcomings (Draft 2.14). | P1 | E, R |
 | REQ-SELF-3 | Three oracles stay external by design: the healing eval's ground-truth keys, axe-core on the component sheet, and the renderer-versus-adapter tree agreement (Draft 2.14). | P1 | T, R |
+| REQ-SELF-4 | The catalogue schema, the source runners, the comparison, and the report are a published package, `@svatah/verify`, and `svatah eval self --catalogue <file>` runs any project's catalogue, so a third party gates its own application two-sidedly with the same rules (Draft 2.16). | P1 | T, R |
 
 ## 4. Non-functional requirements
 
@@ -288,6 +290,7 @@ Each requirement is referenced by at least one HLD section, one LLD section, and
 - Draft 2.13 (after Phase 10 verification): no requirement text changes; T11.7 added for the verification's corrections, the windowless-launch diagnosis, and the editing work a release needs.
 - Draft 2.14 (Svatah verifies Svatah): `REQ-SELF-1..3` added; Phase 11 becomes corrections plus the self-verification suite and parity gate; the release moves to Phase 12.
 - Draft 2.15 (after Phase 11 verification): no requirement text changes; T12.7 added to close the one-sided list's language gaps and the verification's three findings before the release.
+- Draft 2.16 (process and terminal): `REQ-ADP-10` and `REQ-SELF-4` added; Phase 13 added after the release.
 - Draft 2.4 (after Phase 2 verification): `REQ-LANG-10` states the run-block semantics inherited from the legacy parser.
 - Draft 2.3 (after Phase 1 verification): `REQ-HEAL-5` defines recovery against the ground-truth element and the denominator.
 - Draft 2.1: `REQ-ADE-1..9` added for the local service and a new Svatah ADE Electron client designed to the vision, with the prototype as the blueprint of jobs only; the ADE is the desktop conformance target for `REQ-ADP-6/7`; constraint 7 added.

@@ -285,6 +285,7 @@ svatah/
     adapter-appium/       mobile adapter (P1)
     adapter-uia/          Windows UI Automation (P2)
     adapter-ax/           macOS Accessibility (P2)
+    adapter-process/      command in a pseudo-terminal, streams, exit code, files under a root (Draft 2.16)
     bindings/             store, resolver, synthesis, fingerprint, relocalization   ← module (a) core
     healer/               failure selection, repair, verify, diff                    ← module (a)
     playwright-test/      bind() fixture for plain Playwright tests                   ← module (a)
@@ -303,6 +304,7 @@ svatah/
     ui/                   React components on Radix primitives, the component sheet (Draft 2.11)
     tui/                  svatah ui, the Ink terminal cockpit (Draft 2.11, REQ-TUI-1)
     sdk/                  typed client generated from the OpenAPI description (Draft 2.11, LLD §13.8)
+    verify/               catalogue schema, source runners, comparison, report — the parity gate as a package (Draft 2.16)
     trajectory/           trajectory capture and compile (P2)
     cli/                  svatah CLI + MCP server (operations + raw surface)
     service/              local HTTP + event-stream service (svatah serve) for the ADE and other clients
@@ -338,6 +340,7 @@ Published npm modules (Draft 2.3; no aggregate packages, each package publishes 
 | 10 | **Builder surfaces, complete (Draft 2.11):** every screen of the former eleven rebuilt on the model in both renderers (record review, runs and evidence, heal review, bindings, agents and tools, API, data, explorer, import, settings), the command palette with parity asserted, the accessibility contract enforced by the desktop suite, the ADE installers rebuilt, the packaged ADE the conformance target again | REQ-ADE-10..13, REQ-TUI-1, REQ-ADE-6 (re-validated) |
 | 11 | **Corrections, and Svatah verifies Svatah (Draft 2.14):** the Phase 10 corrections including the windowless launch; `app.launch`/`app.quit`, `Quit the app`, CDP attach, desktop grounding; `evals/self` and `svatah eval self`, the two-sided parity gate at 100 percent agreement with coverage and one-sided checks published; the verification contract becomes the gate | REQ-SELF-1, 2, 3, REQ-ADE-6, REQ-ADP-1, 7 |
 | 12 | **Release 0.1.0 and the open P0 items (Draft 2.10, renumbered 2.14):** the desktop gate is race-free and load-aware; the compiler golden set reaches 300; the ADE names every control and the gate makes a real run before reading results; the three-OS CI matrix is observed on a runner the owner attaches; 0.1.0 is published by the owner's trigger and verified from the registry by a scripted install into an empty project; the Windows gate carried | REQ-COMP-9, REQ-PKG-1, 2, 4 (from the registry), REQ-ADE-6, REQ-ADP-6 (carried) |
+| 13 | **Process and terminal (Draft 2.16):** the `process` surface kind and adapter, patterns 34–38, the six outside-surface checks moved to Svatah's side, `@svatah/verify` published for third parties; the parity gate's ceiling reaches 45 of 48 | REQ-ADP-10, REQ-SELF-1, 2, 4 |
 
 ## 14. Risks and mitigations
 
