@@ -1,9 +1,10 @@
 # Examples
 
-Four runnable projects, each answering one question about how Yam is used.
+Five runnable projects, each answering one question about how Yam is used.
 
 | Example | The question |
 |---|---|
+| [`surface-control/`](surface-control/) | How do I drive a browser from the CLI or MCP with no project and no model? (SF-01, SF-06, SF-07) |
 | [`plain-playwright/`](plain-playwright/) | How does an existing Playwright project adopt the bindings and the model-free healer, with no flow language at all? (module (a), REQ-PKG-2) |
 | [`ci/`](ci/) | How does a CI job replay a flow, and what does it do with the artifacts? (REQ-BEH-1) |
 | [`cron/`](cron/) | How does a scheduled job run a story as a *function* and use its outputs? (REQ-BEH-2) |

@@ -10,7 +10,7 @@ init  →  record (or write a flow, then bind it)  →  check  →  run  →  he
 
 ```bash
 npm install --save-dev @svatah/yam
-npx yam init my-project
+npx @svatah/yam init my-project
 cd my-project
 yam
 ```

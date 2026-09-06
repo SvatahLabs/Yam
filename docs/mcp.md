@@ -40,6 +40,7 @@ the trajectory so the exploration can be compiled into a flow.
 
 | Tool | |
 |---|---|
+| `surface_targets` | Discover available targets and adapter readiness on this machine |
 | `surface_connect` | Open a surface session against a target. Returns a session ID |
 | `surface_snapshot` | The page as a semantic tree, with a stable `[ref=…]` per element |
 | `surface_act` | One action, addressed by a reference |
