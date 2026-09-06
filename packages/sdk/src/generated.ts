@@ -46,6 +46,7 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "postRecordByIdDecision", verb: "post", path: "/record/{id}/decision", summary: "Accept, re-pick or reject the grounding a session is waiting on" },
   { id: "postRecordByIdStop", verb: "post", path: "/record/{id}/stop", summary: "Stop a recording session" },
   { id: "postRun", verb: "post", path: "/run", summary: "Start a run; step events arrive on the stream" },
+  { id: "postRunsByIdStop", verb: "post", path: "/runs/{id}/stop", summary: "Stop a run that is going" },
   { id: "postSurfaceBySessionAct", verb: "post", path: "/surface/{session}/act", summary: "Act in the explored session; `intent` is required" },
   { id: "postSurfaceBySessionCheck", verb: "post", path: "/surface/{session}/check", summary: "Check in the explored session; `intent` is required" },
   { id: "postSurfaceBySessionClose", verb: "post", path: "/surface/{session}/close", summary: "Close an explored session" },
@@ -238,6 +239,11 @@ export class GeneratedClient {
   /** `POST /run` — Start a run; step events arrive on the stream */
   async postRun(body?: unknown): Promise<unknown> {
     return await this.call("post", `/run`, { body, });
+  }
+
+  /** `POST /runs/{id}/stop` — Stop a run that is going */
+  async postRunsByIdStop(id: string): Promise<unknown> {
+    return await this.call("post", `/runs/${encodeURIComponent(id)}/stop`, { });
   }
 
   /** `POST /surface/{session}/act` — Act in the explored session; `intent` is required */

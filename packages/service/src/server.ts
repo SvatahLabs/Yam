@@ -180,6 +180,16 @@ export async function createService(options: ServeOptions): Promise<RunningServi
 
   /* ── runs ───────────────────────────────────────────────────────────────── */
 
+  /**
+   * The runs that are going, so one can be stopped (Draft 2.12 §13.5, T10.4).
+   *
+   * A run id maps to the `AbortController` its executor is watching, and the
+   * entry is dropped when the run ends — so `POST /runs/:id/stop` for a run that
+   * has finished is a 404 rather than a success that did nothing. The same shape
+   * as the recording sessions' map below, for the same reason.
+   */
+  const running = new Map<string, AbortController>();
+
   fastify.post<{ Body?: { flows?: string[]; stories?: string[]; inputs?: Record<string, unknown> } }>(
     "/run",
     async (request, reply) => {
@@ -213,6 +223,16 @@ export async function createService(options: ServeOptions): Promise<RunningServi
       const runId = api.newRunId();
 
       /*
+       * The handle `POST /runs/:id/stop` aborts (Draft 2.12 §13.5, T10.4).
+       *
+       * Held for as long as the run is going and dropped when it ends, so a run
+       * id can only be stopped while there is something to stop — a stop for a
+       * run that has finished is a 404 and not a silent success.
+       */
+      const stopper = new AbortController();
+      running.set(runId, stopper);
+
+      /*
        * Started, then answered. A client gets the run id immediately and
        * watches the stream; blocking until a browser run finished would make
        * the ADE's Run screen a spinner (REQ-ADE-3).
@@ -227,6 +247,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
             ...(body.stories === undefined ? {} : { stories: body.stories }),
             ...(body.inputs === undefined ? {} : { inputs: body.inputs }),
             onResult: (result) => events.emit({ kind: "step.result", runId, result }),
+            signal: stopper.signal,
           });
           events.emit({ kind: "run.summary", runId, summary: outcome.summary });
         } catch (error) {
@@ -235,12 +256,41 @@ export async function createService(options: ServeOptions): Promise<RunningServi
             runId,
             message: error instanceof Error ? error.message : String(error),
           });
+        } finally {
+          running.delete(runId);
         }
       })();
 
       return reply.code(202).send({ runId });
     },
   );
+
+  /**
+   * Stop a run that is going (Draft 2.12 §13.5, T10.4).
+   *
+   * The executor cancels **between steps**: a step already under way has
+   * touched the application and its result is the only account of what it did,
+   * so it finishes and the steps after it are recorded `skipped`. The summary
+   * says `stopped: true` and `audit.jsonl` gains a `stop` line naming the last
+   * step that ran.
+   *
+   * 202 rather than 200: the run is *stopping*, and the caller learns it has
+   * stopped from `run.summary` on the stream, exactly as it learns everything
+   * else about a run.
+   */
+  fastify.post<{ Params: { id: string } }>("/runs/:id/stop", async (request, reply) => {
+    const stopper = running.get(request.params.id);
+    if (stopper === undefined) {
+      return reply.code(404).send({
+        error: "not-running",
+        message:
+          `No run "${request.params.id}" is going. A run that has already finished cannot be ` +
+          "stopped; GET /runs/:id has its summary.",
+      });
+    }
+    stopper.abort();
+    return reply.code(202).send({ ok: true, runId: request.params.id });
+  });
 
   const runsDir = async (): Promise<string> => join(root, (await load()).config.run.outputDir);
 

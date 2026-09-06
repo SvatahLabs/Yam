@@ -711,6 +711,130 @@ describe("parallelism (REQ-RUN-3)", () => {
   });
 });
 
+/**
+ * Stopping a run between steps (T10.4, Draft 2.12 §13.5).
+ *
+ * > `POST /runs/:id/stop` cancels a run between steps and the Run screen's Stop
+ * > action calls it.
+ *
+ * Three things have to be true, and the first is the one that is easy to get
+ * wrong: a step already under way is **not** interrupted. It has clicked, or
+ * typed, and the application has already changed; a runtime that tore the
+ * session down mid-action would leave a state that no result describes.
+ */
+describe("stopping a run (T10.4, Draft 2.12 §13.5)", () => {
+  it("finishes the step under way, skips the rest, and says the run stopped", async () => {
+    const stopper = new AbortController();
+    const surface = new StubSurface({});
+    /*
+     * Aborted from *inside* the second step's `act`, which is exactly the race
+     * the route creates: the button is pressed while a step is running.
+     */
+    const acting = surface.act.bind(surface);
+    let acts = 0;
+    surface.act = async (...args) => {
+      acts += 1;
+      if (acts === 2) stopper.abort();
+      return await acting(...args);
+    };
+
+    const outcome = await run({
+      config: config(),
+      plan: plan([
+        story("S", [
+          step({ id: "a", action: "click", target: target("one") }),
+          step({ id: "b", action: "click", target: target("two") }),
+          step({ id: "c", action: "click", target: target("three") }),
+          step({ id: "d", action: "click", target: target("four") }),
+        ]),
+      ]),
+      openSurface: async () => surface,
+      resolve: stubResolver({}),
+      signal: stopper.signal,
+    } as RunOptions);
+
+    // The two that ran, then the two that never started.
+    expect(statuses(outcome.results)).toEqual([
+      "a:passed",
+      "b:passed",
+      "c:skipped",
+      "d:skipped",
+    ]);
+    // The step under way finished: three acts would mean `c` ran too.
+    expect(acts).toBe(2);
+
+    expect(outcome.summary.stopped).toBe(true);
+    expect(outcome.stopped).toBe(true);
+    expect(outcome.summary.totals).toMatchObject({ passed: 2, failed: 0, skipped: 2 });
+  });
+
+  it("writes one `stop` audit line naming the last step that ran", async () => {
+    const stopper = new AbortController();
+    const surface = new StubSurface({});
+    const acting = surface.act.bind(surface);
+    let acts = 0;
+    surface.act = async (...args) => {
+      acts += 1;
+      if (acts === 1) stopper.abort();
+      return await acting(...args);
+    };
+
+    const outcome = await run({
+      config: config(),
+      plan: plan([
+        story("S", [
+          step({ id: "a", action: "click", target: target("one") }),
+          step({ id: "b", action: "click", target: target("two") }),
+        ]),
+      ]),
+      openSurface: async () => surface,
+      resolve: stubResolver({}),
+      signal: stopper.signal,
+    } as RunOptions);
+
+    const stops = outcome.auditLines.filter(
+      (one) => (one as { kind?: string }).kind === "stop",
+    ) as Array<{ story?: string; stepId?: string; detail?: { reason?: string } }>;
+    expect(stops).toHaveLength(1);
+    expect(stops[0]!.story).toBe("S");
+    // The last step that *ran*, so a reader can see where the run got to.
+    expect(stops[0]!.stepId).toBe("a");
+    expect(stops[0]!.detail?.reason).toBe("POST /runs/:id/stop");
+  });
+
+  it("says nothing about a run that was asked to stop after its last step", async () => {
+    // The signal aborted, but nothing was skipped: the run finished on its own,
+    // and a summary that said `stopped` would be about the button.
+    const stopper = new AbortController();
+    const outcome = await execute(
+      [story("S", [step({ id: "a", action: "click", target: target("one") })])],
+      { signal: stopper.signal },
+    );
+    stopper.abort();
+    expect(outcome.outcome.summary.stopped).toBeUndefined();
+  });
+
+  it("never opens a session for a flow the stop arrived before", async () => {
+    const stopper = new AbortController();
+    stopper.abort();
+    let opened = 0;
+    const outcome = await run({
+      config: config(),
+      plan: plan([story("S", [step({ id: "a", action: "click", target: target("one") })])]),
+      openSurface: async () => {
+        opened += 1;
+        return new StubSurface({});
+      },
+      resolve: stubResolver({}),
+      signal: stopper.signal,
+    } as RunOptions);
+    // Launching a browser for a run somebody has already cancelled is the one
+    // thing a stop is unambiguously supposed to prevent.
+    expect(opened).toBe(0);
+    expect(outcome.results).toEqual([]);
+  });
+});
+
 describe("determinism (REQ-RUN-2)", () => {
   it("two runs of one plan produce the same statuses and the same matches", async () => {
     const stories = [

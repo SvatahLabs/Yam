@@ -79,6 +79,19 @@ export interface RunOptions {
    * to, and starts at `resume.from`.
    */
   readonly resume?: Resume;
+  /**
+   * Somebody asked for this run to stop (Draft 2.12 §13.5, T10.4).
+   *
+   * `POST /runs/:id/stop` aborts this; the executor notices **between** steps
+   * and records the rest as `skipped`, and the summary says `stopped: true`. It
+   * is an `AbortSignal` and not a flag because that is what the service already
+   * holds for a recording session, and because a caller with one can wire a
+   * `SIGINT` to it without inventing a protocol.
+   *
+   * A step already under way is never interrupted: it has touched the
+   * application, and its result is the only account of what it did.
+   */
+  readonly signal?: AbortSignal;
 }
 
 export interface RunOutcome {
@@ -87,6 +100,8 @@ export interface RunOutcome {
   readonly results: readonly StepResult[];
   readonly outputs: Record<string, unknown>;
   readonly auditLines: readonly unknown[];
+  /** True when `options.signal` aborted before the run finished (T10.4). */
+  readonly stopped?: boolean;
 }
 
 /** A lexicographically sortable id, which is what a run directory wants. */
@@ -168,6 +183,15 @@ export async function run(options: RunOptions): Promise<RunOutcome> {
       const index = next++;
       if (index >= flows.length) return;
       const [flow, stories] = flows[index]!;
+      /*
+       * A flow that has not opened a session when the stop arrives never opens
+       * one (T10.4). Launching a browser for a run somebody has already
+       * cancelled is the one thing a stop is unambiguously supposed to prevent.
+       */
+      if (options.signal?.aborted === true) {
+        flowStatuses[flow] = { status: "failed", passed: 0, failed: 0, skipped: 0 };
+        continue;
+      }
       const outcome = await runFlow(flow, stories, {
         runId,
         behavior,
@@ -188,6 +212,16 @@ export async function run(options: RunOptions): Promise<RunOutcome> {
 
   const endedAt = new Date();
   const { totals, exitCode } = summarise(results);
+
+  /*
+   * Was this run stopped (Draft 2.12 §13.5, T10.4)?
+   *
+   * The signal's own state, read at the end. A run that was asked to stop after
+   * its last step still finished on its own, and saying otherwise would be a
+   * summary about the button rather than about the run — but the ordinary case
+   * is that steps were skipped, and `stopped` is what says who skipped them.
+   */
+  const stopped = options.signal?.aborted === true && results.some((one) => one.status === "skipped");
 
   const summary: Summary = {
     schemaVersion: SCHEMA_VERSION,
@@ -217,6 +251,7 @@ export async function run(options: RunOptions): Promise<RunOutcome> {
       : { inputs: Object.keys(options.inputs!).sort() }),
     totals,
     exitCode,
+    ...(stopped ? { stopped: true as const } : {}),
   };
 
   options.directory?.summary(summary);
@@ -231,7 +266,7 @@ export async function run(options: RunOptions): Promise<RunOutcome> {
     detail: { totals, exitCode },
   });
 
-  return { runId, summary, results, outputs, auditLines };
+  return { runId, summary, results, outputs, auditLines, ...(stopped ? { stopped } : {}) };
 }
 
 /* ── one flow ─────────────────────────────────────────────────────────────── */
@@ -473,6 +508,17 @@ async function runFlow(
 
       const outcome = await runStory(story, inputs, {
         ...storyContext(flow, story, scope, surface, auditor, context, at, record),
+        /*
+         * The stop is asked about between steps (T10.4). `runStory` reads it;
+         * the auditor writes one line where it was noticed, so `audit.jsonl`
+         * says which step was the last to run.
+         */
+        ...(options.signal === undefined
+          ? {}
+          : {
+              stopRequested: () => options.signal!.aborted,
+              onStopped: (where) => auditor.stopped(where, "POST /runs/:id/stop"),
+            }),
         // Only the story the resume starts in skips steps; the ones after it
         // run whole.
         ...(resume !== undefined && name === resume.story ? { startAt: resume.from } : {}),

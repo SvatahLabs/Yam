@@ -155,6 +155,21 @@ export const summarySchema = z
       .strict(),
     /** Non-zero on failed, healed or aborted (REQ-RUN-9). */
     exitCode: z.number().int().nonnegative(),
+    /**
+     * The run was cancelled between steps by `POST /runs/:id/stop`
+     * (Draft 2.12 §13.5, T10.4).
+     *
+     * A field of its own rather than a sixth `FLOW_STATUSES` member, because
+     * stopping is a fact about *the run* and not about how a flow ended: the
+     * flows that had finished when the button was pressed keep the status they
+     * earned, the one that was interrupted has its remaining steps `skipped`,
+     * and this is what says a person is the reason. A foreign runtime that does
+     * not implement stopping simply never writes it (REQ-STD-3).
+     *
+     * `true` or absent. `stopped: false` would be a third state to reason about
+     * for no gain.
+     */
+    stopped: z.literal(true).optional(),
   })
   .strict();
 export type Summary = z.infer<typeof summarySchema>;
@@ -175,6 +190,13 @@ export const AUDIT_KINDS = [
    * any surface call, so nothing else in this file would ever mention it.
    */
   "dialog",
+  /*
+   * Draft 2.12 §13.5, T10.4: `POST /runs/:id/stop` cancels a run between steps,
+   * and a run that stopped because somebody asked has to say so — otherwise it
+   * is indistinguishable in `audit.jsonl` from a run whose remaining steps were
+   * skipped by a policy.
+   */
+  "stop",
 ] as const;
 export const auditKindSchema = z.enum(AUDIT_KINDS);
 export type AuditKind = z.infer<typeof auditKindSchema>;

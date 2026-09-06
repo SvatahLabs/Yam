@@ -134,6 +134,10 @@
           "format": "date-time",
           "type": "string"
         },
+        "stopped": {
+          "const": true,
+          "type": "boolean"
+        },
         "totals": {
           "additionalProperties": false,
           "properties": {

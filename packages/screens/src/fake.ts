@@ -145,6 +145,7 @@ export function fakeService(responses: FakeResponses = {}): FakeService {
     },
     postRecordByIdDecision: (id, body) => wrote("postRecordByIdDecision", id, body),
     postRecordByIdStop: (id, body) => wrote("postRecordByIdStop", id, body),
+    postRunsByIdStop: (id, body) => wrote("postRunsByIdStop", id, body),
     async postHeal(body) {
       record("postHeal", body);
       return { healId: "heal-3" };

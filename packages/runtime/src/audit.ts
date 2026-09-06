@@ -113,6 +113,19 @@ export class Auditor {
   }
 
   /**
+   * Somebody stopped this run (Draft 2.12 §13.5, T10.4).
+   *
+   * Written where the executor noticed — between two steps, in a named story —
+   * so `audit.jsonl` says which step was the last one to run and which never
+   * started. Without it a stopped run is indistinguishable from one whose
+   * remaining steps a policy skipped, and the difference is whether a person
+   * did it.
+   */
+  stopped(where: { story?: string; stepId?: string }, reason: string): void {
+    this.record("stop", { ...where, detail: { reason } });
+  }
+
+  /**
    * One dialog the adapter answered (Draft 2.9 LLD §3.2, T8.3).
    *
    * "A dialog answered with no armed policy writes an audit line

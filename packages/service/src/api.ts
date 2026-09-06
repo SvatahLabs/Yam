@@ -88,6 +88,15 @@ export interface ServiceApi {
       stories?: readonly string[];
       inputs?: Record<string, unknown>;
       onResult?: (result: StepResult) => void;
+      /**
+       * Cancel this run between steps (Draft 2.12 §13.5, T10.4).
+       *
+       * `POST /runs/:id/stop` aborts it. The executor notices before the next
+       * step starts — never during one, because a step that has clicked has
+       * already changed the application — records the rest as `skipped`, writes
+       * a `stop` audit line and marks the summary `stopped`.
+       */
+      signal?: AbortSignal;
     },
   ): Promise<RunOutcome>;
   newRunId(): string;

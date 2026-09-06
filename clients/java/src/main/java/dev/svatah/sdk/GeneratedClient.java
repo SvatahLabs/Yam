@@ -53,6 +53,7 @@ public class GeneratedClient {
       "POST /record/{id}/decision",
       "POST /record/{id}/stop",
       "POST /run",
+      "POST /runs/{id}/stop",
       "POST /surface/{session}/act",
       "POST /surface/{session}/check",
       "POST /surface/{session}/close",
@@ -277,6 +278,11 @@ public class GeneratedClient {
   /** {@code POST /run} — Start a run; step events arrive on the stream */
   public String postRun(String body) {
     return call("post", "/run", body, "application/json");
+  }
+
+  /** {@code POST /runs/{id}/stop} — Stop a run that is going */
+  public String postRunsByIdStop(String id) {
+    return call("post", "/runs/" + segment(id) + "/stop", null, "application/json");
   }
 
   /** {@code POST /surface/{session}/act} — Act in the explored session; `intent` is required */

@@ -47,6 +47,7 @@ ENDPOINTS = [
     {"id": "postRecordByIdDecision", "verb": "post", "path": "/record/{id}/decision"},
     {"id": "postRecordByIdStop", "verb": "post", "path": "/record/{id}/stop"},
     {"id": "postRun", "verb": "post", "path": "/run"},
+    {"id": "postRunsByIdStop", "verb": "post", "path": "/runs/{id}/stop"},
     {"id": "postSurfaceBySessionAct", "verb": "post", "path": "/surface/{session}/act"},
     {"id": "postSurfaceBySessionCheck", "verb": "post", "path": "/surface/{session}/check"},
     {"id": "postSurfaceBySessionClose", "verb": "post", "path": "/surface/{session}/close"},
@@ -221,6 +222,10 @@ class GeneratedClient:
     def post_run(self, body: Any = None) -> Any:
         """`POST /run` — Start a run; step events arrive on the stream"""
         return self._call("post", f"/run", body=body)
+
+    def post_runs_by_id_stop(self, id) -> Any:
+        """`POST /runs/{id}/stop` — Stop a run that is going"""
+        return self._call("post", f"/runs/{id}/stop")
 
     def post_surface_by_session_act(self, session, body: Any = None) -> Any:
         """`POST /surface/{session}/act` — Act in the explored session; `intent` is required"""

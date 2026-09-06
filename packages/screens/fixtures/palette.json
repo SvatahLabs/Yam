@@ -95,6 +95,13 @@
       "screen": "record"
     },
     {
+      "id": "run.stop",
+      "label": "Stop",
+      "group": "Actions",
+      "screen": "run",
+      "key": "S"
+    },
+    {
       "id": "heal.run",
       "label": "Heal",
       "group": "Actions",

@@ -264,6 +264,92 @@ describe("POST /run (REQ-ADE-1, REQ-ADE-3)", () => {
   });
 });
 
+/**
+ * `POST /runs/:id/stop` (T10.4, Draft 2.12 §13.5).
+ *
+ * The route's own behaviour, against a fake executor that waits to be aborted:
+ * a run that is going can be stopped, the signal it gets is the one the route
+ * aborts, and a run that has finished is a 404 rather than a success that did
+ * nothing. What the *executor* does with the signal is
+ * `packages/runtime/test/run.test.ts`; what the whole thing does against a real
+ * browser is `tools/repo-checks/test/run-stop.test.ts`.
+ */
+describe("POST /runs/:id/stop (T10.4, LLD §13.5)", () => {
+  it("aborts the signal the executor is watching, and answers 202", async () => {
+    let seen: AbortSignal | undefined;
+    let release: (() => void) | undefined;
+    const slow = await createService({
+      project: PROJECT,
+      token: TOKEN,
+      port: 0,
+      api: fakeApi({
+        runProject: async (_loaded, options) => {
+          seen = options?.signal;
+          // Wait until somebody aborts, which is what a run between steps does.
+          await new Promise<void>((done) => {
+            release = done;
+            options?.signal?.addEventListener("abort", () => done());
+          });
+          return { runId: "fake-run", summary: {} as never, results: [] };
+        },
+      }),
+    });
+    try {
+      const started = await fetch(`${slow.url}/run`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+        // A flow with no story, so `POST /run` has no signature to refuse: what
+        // is under test is the stop, not the input check above.
+        body: JSON.stringify({ flows: ["flows/does-not-exist.flow"] }),
+      });
+      const body = (await started.json()) as { runId: string };
+      expect(started.status, JSON.stringify(body)).toBe(202);
+      const runId = body.runId;
+
+      // The executor is running and holding the signal.
+      for (let waited = 0; seen === undefined && waited < 50; waited += 1) {
+        await new Promise((done) => setTimeout(done, 20));
+      }
+      expect(seen, "the service did not hand the executor a signal").toBeDefined();
+      expect(seen!.aborted).toBe(false);
+
+      const stopped = await fetch(`${slow.url}/runs/${runId}/stop`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${TOKEN}` },
+      });
+      expect(stopped.status).toBe(202);
+      expect(await stopped.json()).toEqual({ ok: true, runId });
+      expect(seen!.aborted, "the run's signal was not aborted").toBe(true);
+
+      release?.();
+      // And once it has ended, there is nothing left to stop.
+      for (let waited = 0; waited < 50; waited += 1) {
+        const again = await fetch(`${slow.url}/runs/${runId}/stop`, {
+          method: "POST",
+          headers: { authorization: `Bearer ${TOKEN}` },
+        });
+        if (again.status === 404) {
+          expect(((await again.json()) as { error: string }).error).toBe("not-running");
+          return;
+        }
+        await new Promise((done) => setTimeout(done, 20));
+      }
+      throw new Error("the run never left the running map");
+    } finally {
+      await slow.close();
+    }
+  }, 30_000);
+
+  it("404s a run id nothing is running", async () => {
+    const response = await get("/runs/never-started/stop", { method: "POST" });
+    expect(response.status).toBe(404);
+    const body = (await json(response)) as { error: string; message: string };
+    expect(body.error).toBe("not-running");
+    // The message says where to look instead, rather than only refusing.
+    expect(body.message).toContain("GET /runs/:id");
+  });
+});
+
 /*
  * Inputs, before anything starts (P2-F4, Draft 2.4, LLD §13.5).
  *

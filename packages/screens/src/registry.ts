@@ -246,6 +246,30 @@ const ACTIONS_ONLY: readonly Action[] = [
     },
   },
   {
+    id: "run.stop",
+    label: "Stop",
+    group: "Actions",
+    screen: "run",
+    key: "S",
+    /*
+     * No CLI command (Draft 2.12 §13.5, T10.4).
+     *
+     * `svatah run` is the run: stopping it from a terminal is `^C`, which is
+     * not a command anyone types into a palette. What the route exists for is a
+     * run somebody started from a *screen* and can no longer reach with a
+     * keyboard interrupt — the ADE's and the cockpit's.
+     */
+    availableWhen: (state) => (state as { live?: boolean }).live === true,
+    async run(service, args): Promise<ActionOutcome> {
+      if (typeof args.runId !== "string") return refused("No run is selected.");
+      const value = await service.postRunsByIdStop(args.runId);
+      return ok(
+        `Stopping run ${args.runId}. The step under way finishes; the rest are skipped.`,
+        { value },
+      );
+    },
+  },
+  {
     id: "heal.run",
     label: "Heal",
     group: "Actions",

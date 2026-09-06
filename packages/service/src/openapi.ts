@@ -184,6 +184,34 @@ export function openApiDocument(version: string): Record<string, unknown> {
       "/runs/{id}": {
         get: { summary: "One run's summary", security: bearer, parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "Summary", ...json(ref("results.summary")) } } },
       },
+      "/runs/{id}/stop": {
+        post: {
+          summary: "Stop a run that is going",
+          description:
+            "The executor cancels **between steps** (Draft 2.12 §13.5): a step already under " +
+            "way has touched the application and its result is the only account of what it " +
+            "did, so it finishes and the steps after it are recorded `skipped`. The summary " +
+            "says `stopped: true` and `audit.jsonl` gains a `stop` line naming the last step " +
+            "that ran. 202 because the run is *stopping*; `run.summary` on the stream is how " +
+            "a caller learns it has.",
+          security: bearer,
+          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+          responses: {
+            202: {
+              description: "Stopping",
+              ...json({ type: "object", properties: { ok: { const: true }, runId: { type: "string" } } }),
+            },
+            404: {
+              description: "No run by that id is going",
+              ...json({
+                type: "object",
+                properties: { error: { const: "not-running" }, message: { type: "string" } },
+                required: ["error", "message"],
+              }),
+            },
+          },
+        },
+      },
       "/runs/{id}/results": {
         get: { summary: "One run's step results", security: bearer, parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }], responses: { 200: { description: "StepResult[]", ...json({ type: "array", items: ref("results.step") }) } } },
       },

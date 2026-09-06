@@ -93,6 +93,8 @@ export interface SummaryResponse {
   invoker?: { kind?: string; id?: string; via?: string };
   flows?: Record<string, { status?: string; passed?: number; failed?: number; skipped?: number }>;
   totals?: { passed?: number; failed?: number; skipped?: number; healed?: number; aborted?: number };
+  /** Somebody stopped the run between steps (Draft 2.12 §13.5, T10.4). */
+  stopped?: true;
 }
 
 export interface StepResultResponse {

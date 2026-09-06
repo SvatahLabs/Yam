@@ -109,6 +109,13 @@ export interface RunState extends ScreenStateBase {
   readonly inspector?: RunInspector;
   /** True while the run is still producing events; the Stop action needs it. */
   readonly live: boolean;
+  /**
+   * Somebody stopped this run (Draft 2.12 §13.5, T10.4).
+   *
+   * `summary.stopped`, carried through so a renderer can say "stopped" rather
+   * than leaving a reader to infer it from a pile of skipped steps.
+   */
+  readonly stopped?: true;
   /** The step `run.resume` would resume from: the first failure. */
   readonly resumeFrom?: string;
   readonly planHash?: string;
@@ -123,6 +130,14 @@ const PILL: Readonly<Record<string, Pill>> = {
   healed: { tone: "healed", label: "healed" },
   aborted: { tone: "abort", label: "aborted" },
   running: { tone: "info", label: "running" },
+  /*
+   * Somebody pressed Stop (Draft 2.12 §13.5, T10.4). `abort`'s tone, because it
+   * is the same kind of thing as a compensation — the run did not finish, and
+   * nothing about the application went wrong — and its own word, because the
+   * difference between "a policy stopped this" and "a person stopped this" is
+   * the whole reason `summary.stopped` exists.
+   */
+  stopped: { tone: "abort", label: "stopped" },
 };
 
 const NONE: Pill = { tone: "neutral", label: "no run" };
@@ -285,13 +300,15 @@ export function runStateFrom(
       : summary.endedAt === undefined
         ? PILL["running"]!
         : (PILL[
-            flowStatuses.includes("aborted")
-              ? "aborted"
-              : totals.failed > 0
-                ? "failed"
-                : totals.healed > 0
-                  ? "healed"
-                  : "passed"
+            summary.stopped === true
+              ? "stopped"
+              : flowStatuses.includes("aborted")
+                ? "aborted"
+                : totals.failed > 0
+                  ? "failed"
+                  : totals.healed > 0
+                    ? "healed"
+                    : "passed"
           ] ?? NONE);
 
   const storyNames = [...new Set(results.map((one) => one.story ?? ""))].filter((one) => one !== "");
@@ -453,6 +470,8 @@ export function runStateFrom(
     audit: auditRows,
     ...(inspector === undefined ? {} : { inspector }),
     live: runId !== undefined && summary.endedAt === undefined,
+    /** True when somebody pressed Stop: `summary.stopped` (T10.4). */
+    ...(summary.stopped === true ? { stopped: true as const } : {}),
     ...(failedStep?.stepId === undefined ? {} : { resumeFrom: failedStep.stepId }),
     ...(summary.planHash === undefined ? {} : { planHash: summary.planHash }),
     ...(summary.bindingsHash === undefined ? {} : { bindingsHash: summary.bindingsHash }),
@@ -467,6 +486,7 @@ export const runScreen: Screen<RunState> = {
   keys: [
     { action: "run.again", key: "⌘↵", terminal: "r", description: "Run the same thing again" },
     { action: "run.resume", key: "⇧R", terminal: "R", description: "Resume from the failing step" },
+    { action: "run.stop", key: "S", terminal: "s", description: "Stop this run between steps" },
     { action: "heal.run", key: "H", terminal: "h", description: "Heal this run" },
   ] satisfies readonly Binding[],
   async load(service: ScreenService, params: ScreenParams = {}): Promise<RunState> {
@@ -578,12 +598,15 @@ export function applyEvent(state: RunState, event: ServiceEventLike): RunState {
       },
       outcome:
         PILL[
-          Object.values(summary.flows ?? {}).some((one) => one.status === "aborted")
-            ? "aborted"
-            : (summary.totals?.failed ?? 0) > 0
-              ? "failed"
-              : "passed"
+          summary.stopped === true
+            ? "stopped"
+            : Object.values(summary.flows ?? {}).some((one) => one.status === "aborted")
+              ? "aborted"
+              : (summary.totals?.failed ?? 0) > 0
+                ? "failed"
+                : "passed"
         ] ?? state.outcome,
+      ...(summary.stopped === true ? { stopped: true as const } : {}),
       ...(summary.exitCode === undefined ? {} : { exitCode: summary.exitCode }),
     };
   }

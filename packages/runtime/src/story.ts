@@ -72,6 +72,18 @@ export interface StoryContext extends Omit<StepContext, "scope"> {
   /** Runs the compensating story named by a policy. */
   readonly compensate?: (story: string) => Promise<readonly StepResult[]>;
   /**
+   * Somebody asked for this run to stop (Draft 2.12 §13.5, T10.4).
+   *
+   * Checked **between** steps and never during one: a step that is halfway
+   * through a `click` has already changed the application, and a runtime that
+   * tore down a session mid-action would leave a state no result describes.
+   * The remaining steps are recorded `skipped`, exactly as a policy's are —
+   * what says a person did it is the `stop` audit line and `summary.stopped`.
+   */
+  readonly stopRequested?: () => boolean;
+  /** Called once, with the step the stop was noticed after. */
+  readonly onStopped?: (where: { story: string; stepId?: string }) => void;
+  /**
    * Skip every step before this one (REQ-AUTO-3, T5.1).
    *
    * Skipped, not recorded as `skipped`: a resumed run's `results.jsonl` holds
@@ -199,11 +211,29 @@ export async function runStory(
   let pending: StepResult | undefined;
   let failedStep: Step | undefined;
   let stopped = false;
+  /** The last step that actually ran, so a stop line can name it. */
+  let lastStepId: string | undefined;
   /** Held with the failure, so the results read in step order. */
   const afterwards: StepResult[] = [];
 
+  /** True when the *policy* stopped the flow; a person stopping it is below. */
+  let byRequest = false;
+
   for (const step of story.steps.slice(start)) {
     if (stopped) {
+      afterwards.push(skipped(step, story, context));
+      continue;
+    }
+
+    /*
+     * Between steps, before the next one starts (T10.4). A step already under
+     * way is left alone: it has touched the application, and its result is the
+     * only account of what it did.
+     */
+    if (context.stopRequested?.() === true) {
+      byRequest = true;
+      stopped = true;
+      context.onStopped?.({ story: story.name, ...(lastStepId === undefined ? {} : { stepId: lastStepId }) });
       afterwards.push(skipped(step, story, context));
       continue;
     }
@@ -249,7 +279,20 @@ export async function runStory(
     }
 
     emit(result);
+    lastStepId = step.id;
     if (context.checkpoint !== undefined) await context.checkpoint(step);
+  }
+
+  /*
+   * Stopped by request, with nothing failed: the steps that never started are
+   * `skipped` and the flow stops. It is not `failed` — nothing about the
+   * application went wrong — and it is not `passed`, because the story did not
+   * finish. `summary.stopped` is what a reader looks at (Draft 2.12 §13.5).
+   */
+  if (byRequest && failedStep === undefined) {
+    for (const result of afterwards) emit(result);
+    scope.leaveStory();
+    return { results, outputs: {}, status: "failed", flowStopped: true };
   }
 
   if (failedStep === undefined) {

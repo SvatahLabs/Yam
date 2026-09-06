@@ -42,7 +42,7 @@
  * a build.
  */
 import { chromium, expect, test, type Browser, type Page } from "@playwright/test";
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { cpSync, existsSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -167,10 +167,38 @@ test.skip(
     "Electron cannot fail the way the product failed in Phase 8.",
 );
 
+/**
+ * Any ADE this checkout left running, gone before this one starts.
+ *
+ * The same defect the desktop gate has (P8-F1): a build from a previous run that
+ * is still up holds `DEBUG_PORT`, so the new one cannot bind its DevTools
+ * endpoint and `connectOverCDP` attaches to the *old* application — which then
+ * fails tests about code it does not have. Matching on this checkout's own
+ * `apps/ade/out` path means a Svatah ADE somebody has open from elsewhere is
+ * left alone.
+ */
+function stopLeftovers(): void {
+  if (executable === undefined || process.platform === "win32") return;
+  const listed = spawnSync("pgrep", ["-f", executable], { encoding: "utf8" });
+  const pids = (listed.stdout ?? "")
+    .split("\n")
+    .map((one) => Number(one.trim()))
+    .filter((pid) => Number.isInteger(pid) && pid > 0 && pid !== process.pid);
+  for (const pid of pids) {
+    try {
+      process.kill(pid, "SIGKILL");
+    } catch {
+      // It went on its own between the list and the signal, which is the
+      // outcome this wanted.
+    }
+  }
+}
+
 test.beforeAll(async () => {
   if (executable === undefined) return;
   if (!existsSync(CLI)) throw new Error("Run `pnpm -r build` first.");
 
+  stopLeftovers();
   app = await startSampleWeb();
 
   /*
@@ -267,6 +295,9 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
 test.afterAll(async () => {
   await browser?.close().catch(() => undefined);
   ade?.kill("SIGTERM");
+  // SIGTERM asks; this checks. An Electron main that is mid-quit outlives the
+  // signal, and the next run of this file is what pays for it.
+  stopLeftovers();
   app?.child.kill("SIGTERM");
   if (project !== undefined) rmSync(project, { recursive: true, force: true });
 });
@@ -607,6 +638,54 @@ test("Run again is a button on the Run screen, and it starts another run", async
   await again.click();
   await expect(page.locator("#status-context")).toContainText(/Started run/, { timeout: 180_000 });
   await expect(page.locator(".sv-step").first()).toBeVisible({ timeout: 180_000 });
+});
+
+/**
+ * T10.4 Validate — "a run started from the Run screen is stopped from it and its
+ * summary says `stopped`" (Draft 2.12 §13.5).
+ *
+ * Through the screen's own buttons, on the packaged application, against a real
+ * browser run — which is the only way to press Stop while there is something to
+ * stop. `guards-and-compensation.flow` takes about a second, so the Stop is
+ * pressed the moment the first step's row appears rather than after a sleep.
+ */
+test("a run started from the Run screen can be stopped from it (T10.4)", async () => {
+  page = await livePage();
+
+  // Start one from the Flows screen, as a person does.
+  await page.locator("#rail-flows").click();
+  await page.locator("#flows-list").getByText("guards-and-compensation.flow").click();
+  await page.locator("#action-run-flow").click();
+  await expect(page.getByRole("heading", { name: /^Run / })).toBeVisible({ timeout: 180_000 });
+
+  const stop = page.locator("#action-run-stop");
+  await expect(stop).toBeVisible();
+  await expect(stop).toContainText("Stop");
+
+  /*
+   * Pressed as soon as the button is live. `run.stop`'s `availableWhen` is the
+   * model's `live`, so an enabled Stop *is* the screen saying there is a run to
+   * stop — which is a better signal to wait for than a step row, and is the
+   * thing the button's contract is about.
+   */
+  await expect(stop).toBeEnabled({ timeout: 180_000 });
+  await stop.click();
+
+  await expect(page.locator("#status-context")).toContainText(/Stopping run/, {
+    timeout: 60_000,
+  });
+
+  // And when it has stopped, the screen says so rather than leaving a reader to
+  // infer it from a pile of skipped steps.
+  await expect(page.locator(".sv-toolbar .sv-pill").first()).toContainText("stopped", {
+    timeout: 180_000,
+  });
+  await expect(stop).toBeDisabled();
+
+  const skipped = await page.evaluate(
+    () => document.querySelectorAll(".sv-step-glyph.sv-tone-skip").length,
+  );
+  expect(skipped, "a stopped run should have skipped what it never started").toBeGreaterThan(0);
 });
 
 test("the command palette opens on ⌘K and lists the registry's actions", async () => {

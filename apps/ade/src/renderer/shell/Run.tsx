@@ -35,14 +35,25 @@ export function RunScreen(props: RunProps): React.JSX.Element {
         <Pill tone={state.outcome.tone} label={state.outcome.label} />
         <span className="sv-toolbar-sub">{state.subtitle}</span>
         <span className="sv-spacer" />
+        {/*
+          Stop first, because while a run is going it is the only one of the
+          four that does anything (T10.4). It disables itself the moment the
+          run ends: `run.stop`'s `availableWhen` is the model's `live`.
+        */}
         {props.actions
-          .filter((one) => ["heal.run", "run.resume", "run.again"].includes(one.id))
+          .filter((one) => ["run.stop", "heal.run", "run.resume", "run.again"].includes(one.id))
           .map((one) => (
             <Button
               key={one.id}
               id={`action-${one.id.replace(/\./g, "-")}`}
               label={one.id === "heal.run" ? `Heal run ${state.runId ?? ""}`.trim() : one.label}
-              variant={one.id === "run.again" ? "primary" : "default"}
+              variant={
+                one.id === "run.stop" && state.live
+                  ? "danger"
+                  : one.id === "run.again"
+                    ? "primary"
+                    : "default"
+              }
               {...(one.key === undefined ? {} : { accelerator: one.key })}
               disabled={!one.availableWhen(state)}
               onPress={() => props.onAction(one.id)}

@@ -270,6 +270,15 @@ export interface RunProjectOptions {
   readonly allowSideEffects?: boolean;
   /** Who is running this, for the audit log (REQ-AUTO-6). */
   readonly invoker?: Invoker;
+  /**
+   * Cancel this run between steps (Draft 2.12 §13.5, T10.4).
+   *
+   * `POST /runs/:id/stop` aborts it; the executor notices before the next step
+   * starts, records the rest as `skipped`, writes one `stop` audit line and
+   * marks the summary `stopped`. `svatah run` passes none and behaves as it
+   * always did.
+   */
+  readonly signal?: AbortSignal;
 }
 
 /**
@@ -414,6 +423,7 @@ export async function runProject(
     ...(resume === undefined ? {} : { resume }),
     ...(options.behavior === undefined ? {} : { behavior: options.behavior }),
     ...(options.invoker === undefined ? {} : { invoker: options.invoker }),
+    ...(options.signal === undefined ? {} : { signal: options.signal }),
   };
 
   /*
