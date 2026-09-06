@@ -302,7 +302,7 @@ const main = async () => {
   };
 
   await evaluate(
-    `window.desktopApp.preferences({ recentProjects: [${JSON.stringify(project)}] }).then(() => "ok")`,
+    `window.yam.preferences({ recentProjects: [${JSON.stringify(project)}] }).then(() => "ok")`,
   );
 
   /*

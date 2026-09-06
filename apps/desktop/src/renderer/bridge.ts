@@ -1,7 +1,7 @@
 /**
  * The preload bridge, as the renderer sees it.
  *
- * Four functions on `window.desktopApp` and nothing else (LLD §13.6). Typed here rather
+ * Four functions on `window.yam` and nothing else (LLD §13.6). Typed here rather
  * than imported from `../preload/index.js`, because the renderer must not import
  * from a module that imports `electron` — a bundler that followed that edge
  * would pull the main process's world into a browser.
@@ -33,16 +33,16 @@ export interface AppBridge {
 
 declare global {
   interface Window {
-    readonly desktopApp: AppBridge;
+    readonly yam: AppBridge;
   }
 }
 
 export function bridge(): AppBridge {
-  if (typeof window === "undefined" || window.desktopApp === undefined) {
+  if (typeof window === "undefined" || window.yam === undefined) {
     throw new Error(
       "The app bridge is missing. This build is meant to run inside Electron with the " +
         "preload script loaded (LLD §13.6).",
     );
   }
-  return window.desktopApp;
+  return window.yam;
 }

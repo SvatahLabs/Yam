@@ -79,4 +79,4 @@ const bridge: AppBridge = {
   },
 };
 
-contextBridge.exposeInMainWorld("app", bridge);
+contextBridge.exposeInMainWorld("yam", bridge);

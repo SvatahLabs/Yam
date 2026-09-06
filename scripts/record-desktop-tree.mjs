@@ -405,7 +405,7 @@ async function main() {
    * Open the project through the app's own preload bridge, and then click the
    * screen's tab — the same two things a person does, driven from outside.
    *
-   * `window.desktopApp.openProject` is the bridge the renderer uses; using it rather
+   * `window.yam.openProject` is the bridge the renderer uses; using it rather
    * than reaching into React's state is what makes this a recording of the
    * application rather than of a rendering of it. The tab is clicked by its
    * accessible name, which is the name the AX tree will show and the name a
@@ -433,7 +433,7 @@ async function main() {
    * here would start the service and leave React none the wiser.
    */
   await evaluate(
-    `window.desktopApp.preferences({ recentProjects: [${JSON.stringify(project)}] }).then(() => "ok")`,
+    `window.yam.preferences({ recentProjects: [${JSON.stringify(project)}] }).then(() => "ok")`,
   );
 
   const name = project.split(/[\\/]/).pop();

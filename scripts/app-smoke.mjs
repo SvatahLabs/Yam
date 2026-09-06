@@ -103,7 +103,7 @@ const child =
   packaged === undefined
     ? spawn(process.execPath, [join(ROOT, "node_modules", "electron", "cli.js"), APP_DIR], {
         cwd: APP_DIR,
-        stdio: "inherit",
+        stdio: ["inherit", "pipe", "pipe"],
         env: {
           ...process.env,
           YAM_APP_SMOKE: project,
@@ -114,7 +114,7 @@ const child =
       })
     : spawn(packaged, [], {
         cwd: APP_DIR,
-        stdio: "inherit",
+        stdio: ["inherit", "pipe", "pipe"],
         env: {
           ...process.env,
           YAM_APP_SMOKE: project,
@@ -138,6 +138,29 @@ const deadline = setTimeout(() => {
   process.exit(1);
 }, 120_000);
 
+/*
+ * The renderer's console reaches Electron's stderr under ELECTRON_ENABLE_LOGGING.
+ * An uncaught error there is a broken window behind a main process that still
+ * answers, which is what Draft 2.19's bridge rename produced and this smoke
+ * passed: the project opened, the service ran, and the screen was blank. So the
+ * output is echoed and read, and an uncaught renderer error fails the smoke.
+ */
+let uncaught = "";
+const watch = (stream, sink) => {
+  stream?.on("data", (chunk) => {
+    const text = String(chunk);
+    sink.write(text);
+    const match = /Uncaught (?:Error|TypeError|ReferenceError)[^"\n]*/.exec(text);
+    if (match !== null && uncaught === "") uncaught = match[0];
+  });
+};
+watch(child.stdout, process.stdout);
+watch(child.stderr, process.stderr);
+
 const code = await new Promise((done) => child.on("exit", (value) => done(value ?? 1)));
 clearTimeout(deadline);
+if (code === 0 && uncaught !== "") {
+  process.stderr.write(`yam smoke: the window opened but the renderer threw: ${uncaught}\n`);
+  process.exit(1);
+}
 process.exit(code);
