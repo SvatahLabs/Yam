@@ -375,6 +375,8 @@ export interface ExplorerState extends ScreenStateBase {
   readonly adapters: readonly string[];
   /** Every call needs an intent (REQ-BEH-4); the screen carries the next one. */
   readonly intent?: string;
+  /** The surface action selected for the next explorer.act call. */
+  readonly action?: string;
   readonly trajectory?: string;
   readonly snapshot: readonly SnapshotLine[];
   readonly calls: readonly TrajectoryCall[];

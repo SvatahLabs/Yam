@@ -23,6 +23,7 @@ import type {
   ScreenParams,
   SettingsState,
 } from "@svatah/yam-screens";
+import { SURFACE_ACTIONS } from "@svatah/yam-schema";
 import { Code, Counts, EmptyInspector, Toolbar } from "./parts.js";
 
 /** What every one of these six takes. */
@@ -563,6 +564,13 @@ export function ExplorerScreen(props: ScreenProps<ExplorerState>): React.JSX.Ele
               placeholder="what this call is for"
               onChange={(value) => props.onParams({ ...props.params, intent: value })}
               onSubmit={() => props.onAction("explorer.snapshot")}
+            />
+            <Chooser
+              id="explorer-action"
+              label="Action"
+              value={state.action ?? "click"}
+              options={SURFACE_ACTIONS.map((a) => ({ value: a, label: a }))}
+              onChange={(action) => props.onParams({ ...props.params, action })}
             />
           </div>
 

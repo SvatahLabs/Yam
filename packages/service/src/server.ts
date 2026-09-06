@@ -906,7 +906,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     Awaited<ReturnType<NonNullable<ServiceApi["openSurfaceSession"]>>>
   >();
 
-  fastify.post<{ Params: { session: string }; Body?: { headed?: boolean } }>(
+  fastify.post<{ Params: { session: string }; Body?: { headed?: boolean; adapter?: string } }>(
     "/surface/:session/open",
     async (request, reply) => {
       if (api.openSurfaceSession === undefined) {
@@ -919,6 +919,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
       const session = await api.openSurfaceSession(await load(), {
         sessionId: id,
         ...(request.body?.headed === undefined ? {} : { headed: request.body.headed }),
+        ...(request.body?.adapter === undefined ? {} : { adapter: request.body.adapter }),
       });
       exploring.set(id, session);
       return { sessionId: id, trajectory: session.trajectoryPath };
@@ -933,28 +934,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
         if (session === undefined) {
           return reply.code(404).send({ error: "no-session", message: "Open the session first." });
         }
-        /*
-         * `intent` is required, on every call (LLD §13.4). An exploration whose
-         * calls do not say what they were for is a log rather than something the
-         * trajectory compiler can read, and the explorer is exactly the client
-         * that would be tempted to leave it out.
-         */
         const body = request.body ?? {};
-        if (typeof body["intent"] !== "string" || body["intent"].trim() === "") {
-          return reply.code(400).send({
-            error: "missing-intent",
-            message:
-              "Every surface call needs an `intent`: what you are trying to do, in the words " +
-              "you would use to describe the step to a person. It is the sentence this call " +
-              "compiles into (LLD §13.4).",
-          });
-        }
-        /*
-         * Wrapped, always. `read` answers with a bare value — a string, a
-         * number — and a bare string is not JSON, so a client that parses every
-         * answer as JSON would choke on the one route that returns text.
-         * `{ value }` costs a key and makes every surface route the same shape.
-         */
         return { value: await session.call(call, body) };
       },
     );

@@ -170,4 +170,38 @@
 
 ## T0B — The six verified defects
 
-**Status:** pending
+**Status:** complete
+
+**Defects fixed:**
+
+**G02** (fixed by T10'): `yam surface snapshot` and `yam surface act` now exist. The bindings-cli surface command no longer rejects all subcommands except "conform".
+- File: `packages/bindings-cli/src/commands/surface.ts`
+- Regression: `audit-regressions.test.ts` G02 tests (2/2 pass)
+
+**G03**: Explorer now provides a surface action selector for `explorer.act`.
+- File: `apps/desktop/src/renderer/shell/Secondary.tsx` — added `Chooser` for surface action using `SURFACE_ACTIONS` from `@svatah/yam-schema`
+- File: `packages/screens/src/screens/secondary.ts` — added `action?: string` field to `ExplorerState`
+- Regression: `audit-regressions.test.ts` G03 test (1/1 pass)
+
+**G04**: Service `/surface/:session/open` now accepts `adapter` in the request body.
+- File: `packages/service/src/server.ts` — added `adapter?: string` to the body type and forwarded it to `openSurfaceSession`
+- Regression: `audit-regressions.test.ts` G04 tests (3/3 pass)
+
+**G05** (fixed by T11' + service): Intent is no longer required for direct surface control.
+- File: `packages/service/src/server.ts` — removed the `missing-intent` check from the surface dispatch loop
+- File: `packages/cli/src/commands/mcp.ts` — intent is optional on all MCP surface tools
+- Regression: `audit-regressions.test.ts` G05 tests (2/2 pass)
+
+**G07**: Service surface dispatch now forwards `ref2` and `name`.
+- File: `packages/cli/src/service-api.ts` — added `ref2` to `surface.act()` call and `name` to `surface.read()` call
+- Regression: `audit-regressions.test.ts` G07 tests (5/5 pass, including updated source-check test)
+
+**G11** (fixed by T11'): `docs/mcp.md` now references `@svatah/yam` instead of bare `yam`.
+- File: `docs/mcp.md` — `npx yam` → `npx @svatah/yam` and `"args": ["yam"...]` → `"args": ["@svatah/yam"...]`
+- Regression: `audit-regressions.test.ts` G11 test (1/1 pass)
+
+**Evidence:** All 15 regression tests pass (66 total in surface-control, all green).
+
+**Deviations:** none.
+
+**Known gaps:** none.

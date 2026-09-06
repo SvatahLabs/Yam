@@ -433,9 +433,10 @@ export async function serviceOpenSurfaceSession(
                   rest["action"] as never,
                   ref,
                   (rest["args"] ?? {}) as never,
+                  rest["ref2"] as string | undefined,
                 )
               : call === "read"
-                ? await surface.read((rest["kind"] ?? "text") as never, ref)
+                ? await surface.read((rest["kind"] ?? "text") as never, ref, rest["name"] as string | undefined)
                 : await surface.check(
                     rest["predicate"] as never,
                     (rest["subject"] ?? "ref") as never,

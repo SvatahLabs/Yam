@@ -295,20 +295,17 @@ describe("G07: ref2, name, and snapshot options are not dropped (SF-03, SF-06, S
       join(ROOT, "packages", "cli", "src", "service-api.ts"),
       "utf8",
     );
-    // On baseline, act drops ref2 (only passes action, ref, args)
-    // and read drops name (only passes kind, ref).
-    // After fix, both must be forwarded.
-    const actCall = source.match(/surface\.act\([\s\S]*?\)/);
-    expect(actCall).toBeTruthy();
-    const actCallStr = actCall![0];
-    // ref2 must appear as an argument to surface.act
-    expect(actCallStr, "surface.act call must include ref2").toContain("ref2");
+    // The dispatch block where act/read/check calls are made must forward
+    // ref2 for act and name for read. Scan a window around each call site.
+    const actIdx = source.indexOf("surface.act(", source.indexOf("call === \"act\""));
+    expect(actIdx, "must find the dispatch surface.act call").toBeGreaterThan(-1);
+    const actWindow = source.slice(actIdx, actIdx + 200);
+    expect(actWindow, "dispatch surface.act must forward ref2").toContain("ref2");
 
-    const readCall = source.match(/surface\.read\([\s\S]*?\)/);
-    expect(readCall).toBeTruthy();
-    const readCallStr = readCall![0];
-    // name must appear as an argument to surface.read
-    expect(readCallStr, "surface.read call must include name").toContain("name");
+    const readIdx = source.indexOf("surface.read(", source.indexOf("call === \"read\""));
+    expect(readIdx, "must find the dispatch surface.read call").toBeGreaterThan(-1);
+    const readWindow = source.slice(readIdx, readIdx + 200);
+    expect(readWindow, "dispatch surface.read must forward name").toContain("name");
   });
 });
 
