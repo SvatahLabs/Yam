@@ -112,6 +112,14 @@ export {
 } from "./redaction.js";
 
 export {
+  generateOpenApiDocument,
+  generateOpenApiPaths,
+  generateTypeScriptClient,
+  generatePythonClient,
+  generateJavaClient,
+} from "./codegen.js";
+
+export {
   dispatchTargets,
   dispatchConnect,
   dispatchSnapshot,

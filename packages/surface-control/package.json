@@ -45,6 +45,7 @@
   "dependencies": {
     "@svatah/yam-schema": "workspace:*",
     "@svatah/yam-surface": "workspace:*",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zod-to-json-schema": "catalog:"
   }
 }
