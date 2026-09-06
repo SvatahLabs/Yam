@@ -703,3 +703,64 @@ are in the P8-F2 section above. The command that closes it, on a macOS host with
 an interactive login and the grant:
 `node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md`,
 three times, once beside `pnpm -r test`.
+
+---
+
+## Post-verification corrections (added in Phase 10, P9-F6)
+
+The adversarial verification of this branch scored it **8.4 / 10** and accepted
+it with corrections; `docs/spec/progress/phase-9-verification.md` is its report.
+Six of its results belong in *this* file, because they are things this phase
+claimed and a second pair of hands measured differently. They are recorded here
+rather than only in the phase that fixed them, so a reader of the Phase 9 record
+is not left with a claim the verification had already qualified.
+
+**The contract on Node 22, and the one flake.** The six-command contract passed
+with no credential on Node v25.6.1 — 3,344 vitest tests, 0 failed. On Node
+v22.23.2 with `CI=true` the typecheck passed and the suite reported **1 failed**:
+`tui-pty.test.ts › prints the Flows screen the same way`, expecting
+`"run 20 s ago"` and receiving `"run 19 s ago"`; it passed when run alone. This
+file's K6 said Node 22 was a verifier's leg to run, and it was: the flake is
+real, it is a wall-clock race, and it is P9-F4. The state carried a relative
+time as *text*, so two loads a second apart were different values for a project
+nothing had happened to.
+
+**axe-core found a rule the in-house audit lacks.** T9.2's Validate is "the
+sheet passes an axe-core run with zero violations". The in-house audit reported
+zero and axe-core 4.10.3, run through this phase's own `--axe` hook, reported
+**one**: `landmark-unique`, 11 nodes — the eleven component sections, drawn once
+per theme, each pair sharing a role and an accessible name. Deviation D1 below
+argued the licence made the audit the honest substitute; the substitute was
+incomplete, which is the risk D1 took. P9-F3.
+
+**The fixture check depends on a directory it does not own.**
+`node scripts/record-screen-fixtures.mjs --check` failed twice during the
+verification and passed only once `evals/fixtures/runs` held nothing but `comp`.
+The recorder ran `comp` *inside* `evals/fixtures` and recorded `GET /runs`, so
+the suite, `scripts/smoke-clients.mjs` and any person running a flow all changed
+the answer. The "Fixtures are a recording" section above is true of the
+recording and was not true of the check. P9-F1.
+
+**The parity check is true of the built package.** T9.1's Validate is "a
+deliberately renamed action makes it fail", and it does — *after* a build.
+`pnpm --filter @svatah/screens build` with `heal.run`'s label renamed fails four
+assertions; the same edit without a rebuild passes, because
+`tools/repo-checks/test/action-parity.test.ts` reads the built registry. That is
+the right place for it — the contract builds before it tests — and the claim is
+recorded here with its condition rather than without it.
+
+**`pnpm clients:smoke` does not exist.** The command is
+`node scripts/smoke-clients.mjs`, which answered python 3 of 3, java 3 of 3,
+PASS both. Wherever this file says `pnpm clients:smoke`, read the script.
+
+**The live macOS gate was blocked for both of us, on different hosts.** K9 above
+says this host's display was locked; the verifier's was too, and the gate
+reported exit 2 with the same launch-failure message. Neither of us had a number
+to publish. Draft 2.12 §7.5 adds `ax/session` to `svatah surface doctor` — does
+any process in the login session own an on-screen window, and is `loginwindow`
+the only one — and asks the gate to name that as the cause of its exit 2 rather
+than reporting a launch failure. P9-F7. K9 stays open; what changes is that the
+next reader is told why.
+
+Where each correction was made, with the commands that demonstrate it, is
+`docs/spec/progress/phase-10.md`.
