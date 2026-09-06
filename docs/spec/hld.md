@@ -1,16 +1,21 @@
 # Yam — High-Level Design
 
-Status: Draft 2.1 · Date: 2026-09-02
-Companion documents: [requirements.md](requirements.md) · [lld.md](lld.md) · [tasks.md](tasks.md)
+Status: Draft 2.25 · Date: 2026-09-07
+Companion documents: [requirements.md](requirements.md) · [lld.md](lld.md) · [tasks.md](tasks.md) · [surface-first spec](surface-first/README.md)
 
 ## 1. Purpose and scope
 
-This document describes the system that satisfies [requirements.md](requirements.md) Draft 2: a deterministic automation runtime built as three layers, a standard agent surface with platform adapters, a determinism layer of committed artifacts, and a behavior layer that runs the same plan as a test, a workflow, or an agent tool. It covers positioning, context, component decomposition by layer, data flows, artifact contracts, technology choices, architecture decisions, execution model, cross-cutting concerns, repository layout, delivery phases, and risks. Interface-level detail is in the LLD.
+This document describes the system that satisfies [requirements.md](requirements.md) Draft 2.25: a deterministic automation runtime whose primary journey is **connect → inspect → act → verify** against a live target, for a person and for an agent, with no project, flow, binding, plan or model credential required for direct control. The surface layer operates independently; flows and runs build on it as optional automation. It covers positioning, context, component decomposition by layer, data flows, artifact contracts, technology choices, architecture decisions, execution model, cross-cutting concerns, repository layout, delivery phases, and risks. Interface-level detail is in the LLD.
 
 ## 2. Positioning in one figure
 
 ```
- ┌──────────────────────────── BEHAVIOR ────────────────────────────┐
+ PRIMARY JOURNEY: connect → inspect → act → verify (no project, flow or model needed)
+
+ ┌──────────── SURFACE CONTROL (independent, projectless) ─────────┐
+ │   connect · snapshot · act · read · check · close                 │
+ │   session lifecycle · target identity · shared operation dispatch  │
+ ├──────────────────────────── BEHAVIOR ────────────────────────────┤
  │   test (oracle)        workflow (function)        tool (MCP)      │
  │   Playwright Test host · standalone runtime · trajectory compiler │
  ├──────────────────────── DETERMINISM (the standard) ──────────────┤
@@ -86,9 +91,10 @@ Actors: authors (people or agents) who write flows or explore; reviewers who app
 | B9 | **CLI and MCP server** | All operations; raw surface exposure for agents. | REQ-AGT-1, 2, 4 |
 | B10 | **Migration tool** | v1/v2 → v3 flows, seed bindings, data. | REQ-LANG-11 |
 | B11 | **Evals** | Compiler, grounding, healing, conformance; published reports. | REQ-COMP-9, REQ-REC-10, REQ-HEAL-5, REQ-PKG-4 |
-| B12 | **Local service** | `yam serve`: HTTP plus event stream over the CLI operations, results, bindings, API client, and raw surface; the single integration point for clients. | REQ-ADE-1 |
-| B13 | **Yam** (separate repository, new build) | Electron desktop client designed around the new artifacts: project, prose flow editor with lint, plan view, record with review, run with live events, results and audit, bindings and heal review, API client, data editor, surface explorer, tool panel. Reference client of B12. Also the desktop conformance target for S7. | REQ-ADE-2..9, REQ-ADP-6, 7 |
+| B12 | **Local service** | `yam serve`: HTTP plus event stream over the CLI operations, results, bindings, API client, and raw surface; the single integration point for clients. Starts with no project for direct surface control. | REQ-ADE-1 |
+| B13 | **Yam** (separate repository, new build) | Electron desktop client with Surfaces as the default navigation. Surface control is directly reachable without visiting Automations or opening a project. Automations hold project, flows, recording, binding, healing and runs. Reference client of B12. Also the desktop conformance target for S7. | REQ-ADE-2..9, REQ-ADP-6, 7 |
 | B14 | **Front door** (Draft 2.20) | The command line's default (state and next verb), `check`, per-command help and topics, the next-step diagnostics catalogue, the session context group, and the tmux workspace over `yam ui`. Arrangement and guidance over the same functions; no new artifact. | REQ-CLI-1..9, REQ-TUI-2 |
+| B15 | **Surface control** (Draft 2.25) | Shared operation dispatcher, session lifecycle, operation catalogue generating CLI/MCP/service schemas. No import of compiler, recorder, gateway or service. | SF-01..SF-07, SF-09..SF-12 |
 
 ## 6. Data flows
 
@@ -300,6 +306,7 @@ yam/                      github.com/SvatahLabs/yam (Draft 2.18)
     recorder/             grounding, session, report; bind() record mode
     workflow/             story-as-function runner, resume
     tool/                 MCP tool server over stories
+    surface-control/      shared operation dispatcher, session lifecycle, operation catalogue — no compiler/recorder/gateway/service imports (Draft 2.25)
     screens/              headless screen model and action registry (Draft 2.11, LLD §13.7)
     ui-tokens/            design tokens for both themes, TS and generated CSS (Draft 2.11)
     ui/                   React components on Radix primitives, the component sheet (Draft 2.11)
@@ -344,6 +351,7 @@ Published npm modules (Draft 2.3; no aggregate packages, each package publishes 
 | 13 | **Yam (Draft 2.18, 2.19):** the product named Yam under the Svatah brand and the `@svatah` scope, the frozen Java project removed, GitHub Actions the only CI, the readiness corrections with trusted publishing, the documentation set with its generated reference, the desktop client renamed from the ADE to Yam; the publish and its verification the owner's | REQ-PKG-1, 2, 4, REQ-STD-1 (under the new names) |
 | 14 | **The front door (Draft 2.20):** `yam` prints state and the next verb, `check`, one-screen top-level help with per-command help and topics, next-step diagnostics, `heal` on the last run, the session context documented once, no internal vocabulary, and `yam ui --tmux`; runs before T13.6's publish. Draft 2.21: the human gateway, a person as primary grounder through the driven session, and `yam explore`, an agent's first draft as a proposal, with the front door naming both | REQ-CLI-1..10, REQ-TUI-2, REQ-REC-12, REQ-AGT-5 |
 | 15 | **Process and terminal (Draft 2.16):** the `process` surface kind and adapter, patterns 34–38, the six outside-surface checks moved to Yam's side, `@svatah/yam-verify` published for third parties; the parity gate's ceiling reaches 45 of 48; the tmux workspace is the adapter's first target | REQ-ADP-10, REQ-SELF-1, 2, 4 |
+| 16 | **Surface-first (Draft 2.25):** the primary journey becomes connect → inspect → act → verify with no project, flow or intent required; `packages/surface-control` with the shared operation dispatcher, session lifecycle and the operation catalogue generating CLI/MCP/service schemas; `yam surface` direct commands; MCP default profile foregrounds surface tools with optional intent; desktop navigation becomes Surfaces (default), Automations, Activity, Settings; the six verified defects fixed; see [surface-first spec](surface-first/README.md) | SF-01..SF-23 |
 
 ## 14. Risks and mitigations
 

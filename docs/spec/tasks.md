@@ -1,7 +1,7 @@
 # Yam — Task Breakdown
 
-Status: Draft 2.1 · Date: 2026-09-02
-Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [lld.md](lld.md)
+Status: Draft 2.25 · Date: 2026-09-07
+Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [lld.md](lld.md) · [surface-first tasks](surface-first/tasks.md)
 
 ## How to use this file
 
@@ -645,6 +645,13 @@ Phase 14 total: 13.5 ideal days.
 
 Phase 15 total: 11 ideal days.
 
+---
+
+## Phase 16 — Surface-first (Draft 2.25)
+
+The primary journey becomes connect → inspect → act → verify. See [surface-first tasks](surface-first/tasks.md) for the 23 implementation tasks (T01..T23), their dependencies and release gates. This phase's wave 1 implements T01–T05, a narrow T10/T11 journey, and the six verified defects (T0B). Detailed task breakdown, requirements (SF-01..SF-23), design and gap analysis are in the [surface-first specification](surface-first/README.md).
+
+Phase 16 total: see [surface-first tasks](surface-first/tasks.md).
 
 ---
 
