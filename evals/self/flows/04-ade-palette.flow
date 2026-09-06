@@ -72,6 +72,22 @@ story: the Run screen opens from the palette and shows its own controls
   Every control on this screen should have a name
   Every control on this screen should have an id
 
+# The audit beside the steps, and the one thing it must not say.
+#
+# The Playwright case reads the audit's rows and asserts three things: that the
+# kind column is the *call* — `locate`, `act`, `read` — and not "surface" on
+# every line (P9-F5), that a locate line names what it looked for and whether it
+# matched, and that each row has the shape a regular expression describes. The
+# first two are sentences now; the third is not, and `checks.yaml` says so.
+#
+# It needs a run on the screen, which the story above puts there.
+story: the audit pane renders the call detail the model carries
+  The run audit list should be visible
+  The run audit list should contain "locate"
+  The run audit list should contain "matched"
+  The run audit list should contain "ok"
+  No text in the run audit list should contain "surface"
+
 story: the Heal review opens from the palette and offers the runs worth healing
   Click the Flows rail item
   Press "Meta+k"
@@ -132,6 +148,7 @@ test: the ADE's palette and its window
   the command palette opens on the chord and lists the registry's actions
   the Record review opens from the palette and chooses its gateway
   the Run screen opens from the palette and shows its own controls
+  the audit pane renders the call detail the model carries
   the Heal review opens from the palette and offers the runs worth healing
   the Surface explorer opens from the palette and refuses a call with no intent
   the Record toolbar keeps its title and its select at two widths

@@ -1,13 +1,13 @@
 # Svatah verifies Svatah — the parity gate
 
-Run at 2026-09-06T19:36:31.789Z on darwin arm64, Node v25.6.1.
+Run at 2026-09-06T22:48:53.240Z on darwin arm64, Node v25.6.1.
 
 **100 percent agreement** over the 29 check(s) both sides reached. The gate passes only at 100 percent (REQ-SELF-2).
 
 | | Svatah | External |
 |---|---|---|
 | Checks reached | 30 of 48 | 47 of 48 |
-| Wall time | 216.6 s | 422.0 s |
+| Wall time | 222.0 s | 460.8 s |
 
 ## Disagreements
 
@@ -37,9 +37,9 @@ doctor's own words rather than guessed at (P10-F1, P10-F5).
 | `ade.the-run-screen-shows-the-run-s-steps-audit-and-inspector` | external | needs a run to read, and starting one means starting a Svatah run from inside a Svatah run: the click works, and what is missing is a sentence that waits for a *second* run to finish and reads its result. The screen itself is reachable and every control on it is bound. |
 | `ade.the-run-toolbar-keeps-its-buttons-on-one-line-however-long-t` | external | a *geometry* assertion — box heights and right edges across the toolbar's children. `Expect … to have size/location` exists for one element (pattern 24); comparing two elements' boxes does not. |
 | `ade.the-inspector-says-each-of-its-headings-once` | external | pattern 32 quantifies over a set — `Every`, `No` — and this needs a *count*: "each heading appears once" is a uniqueness claim, and neither quantifier can say it. An `Exactly one …` or a `… should be unique` is the sentence that would close it. |
-| `ade.the-audit-pane-renders-the-call-detail-the-model-carries` | external | pattern 32 can now assert over the audit's rows, and what it cannot assert is their *shape*: the case matches each row against a regular expression, and the predicate set has no regex outside a scope guard (pattern 29's `matches`). The rows also only exist while a run is in flight, which is the second half of the same gap. |
 | `ade.run-again-is-a-button-on-the-run-screen-and-it-starts-anothe` | external | the button is bound and clickable; what cannot be asserted is that a second run started, because a flow has no sentence that waits for a run other than its own and reads its result. |
 | `ade.a-run-started-from-the-run-screen-can-be-stopped-from-it-t10` | external | needs a run in flight to stop, which means starting a Svatah run from inside a Svatah run — and no sentence waits for a second run or reads its state while it is going. |
+| `ade.the-runs-screen-filters-and-its-inspector-shows-the-failing-` | external | the filter chips cycle through the values the *run history* has, so `status: all → status: passed` on one machine is `status: all → status: failed` on another. A flow that named a value would be a flow about one machine's runs; what it needs is to read a control's label back and compare it with the one before, and a captured value has no sentence that compares it (pattern 29's `expr` is a guard over scope, not an assertion). This was written as a two-sided check in T12.7 and the gate caught it — a disagreement whose cause was the check, not either oracle. |
 | `ade.a-flow-is-edited-and-saved-through-the-ade-and-re-linted-k6` | external | Draft 2.15 gave `Type` its multi-line value, which was the sentence this needed. What is left is the *restore*: the case rewrites a file in the committed fixtures project and puts it back, and a flow that failed between the two would leave the checkout modified. `onFailure: compensate:<flow>` is the mechanism (REQ-AUTO-4) and no compensating story is written, so this stays the external side's. |
 | `ade.a-saved-api-request-is-edited-and-saved-through-the-ade-k7` | external | adds a header by filling the blank last row of a table, and addressing "the last row" of a growing list is a positional target the language has no sentence for. |
 
@@ -75,7 +75,7 @@ this gate from grading its own homework.
 | `ade.the-run-screen-shows-the-run-s-steps-audit-and-inspector` | unreachable | pass | the Run screen shows the run's steps, audit and inspector |
 | `ade.the-run-toolbar-keeps-its-buttons-on-one-line-however-long-t` | unreachable | pass | the Run toolbar keeps its buttons on one line, however long the title |
 | `ade.the-inspector-says-each-of-its-headings-once` | unreachable | pass | the inspector says each of its headings once |
-| `ade.the-audit-pane-renders-the-call-detail-the-model-carries` | unreachable | pass | the audit pane renders the call detail the model carries |
+| `ade.the-audit-pane-renders-the-call-detail-the-model-carries` | pass | pass | the audit pane renders the call detail the model carries |
 | `ade.run-again-is-a-button-on-the-run-screen-and-it-starts-anothe` | unreachable | pass | Run again is a button on the Run screen, and it starts another run |
 | `ade.a-run-started-from-the-run-screen-can-be-stopped-from-it-t10` | unreachable | pass | a run started from the Run screen can be stopped from it (T10.4) |
 | `ade.the-command-palette-opens-on-k-and-lists-the-registry-s-acti` | pass | pass | the command palette opens on ⌘K and lists the registry's actions |
@@ -91,7 +91,7 @@ this gate from grading its own homework.
 | `ade.run-opens-and-every-control-on-it-is-named-and-id-d` | pass | pass | run opens and every control on it is named and id'd |
 | `ade.heal-opens-and-every-control-on-it-is-named-and-id-d` | pass | pass | heal opens and every control on it is named and id'd |
 | `ade.explorer-opens-and-every-control-on-it-is-named-and-id-d` | pass | pass | explorer opens and every control on it is named and id'd |
-| `ade.the-runs-screen-filters-and-its-inspector-shows-the-failing-` | pass | pass | the Runs screen filters, and its inspector shows the failing step's evidence |
+| `ade.the-runs-screen-filters-and-its-inspector-shows-the-failing-` | unreachable | pass | the Runs screen filters, and its inspector shows the failing step's evidence |
 | `ade.the-bindings-screen-shows-the-store-and-one-element-s-resolv` | pass | pass | the Bindings screen shows the store and one element's resolver order |
 | `ade.the-heal-review-offers-the-runs-worth-healing` | pass | pass | the Heal review offers the runs worth healing |
 | `ade.the-record-review-chooses-its-gateway-and-says-what-a-fake-s` | pass | pass | the Record review chooses its gateway and says what a fake session is |
@@ -111,13 +111,13 @@ this gate from grading its own homework.
 
 | Source | Command | Wall | Answered about |
 |---|---|---|---|
-| `ade-playwright` | `npx playwright test --reporter=json` | 16.3 s | 38 name(s) |
-| `artboards` | `node scripts/audit-artboards.mjs` | 0.8 s | 1 name(s) |
-| `axe-sheet` | `node scripts/audit-sheet.mjs` | 0.6 s | 1 name(s) |
+| `ade-playwright` | `npx playwright test --reporter=json` | 21.4 s | 38 name(s) |
+| `artboards` | `node scripts/audit-artboards.mjs` | 0.7 s | 1 name(s) |
+| `axe-sheet` | `node scripts/audit-sheet.mjs` | 0.8 s | 1 name(s) |
 | `client-smoke` | `node scripts/smoke-clients.mjs` | 24.2 s | 1 name(s) |
-| `desktop-gate` | `node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md` | 74.7 s | 1 name(s) |
-| `healing-eval` | `node scripts/eval-healing.mjs --report reports/eval-healing.md` | 218.2 s | 1 name(s) |
-| `svatah` | `node packages/cli/dist/bin.js run evals/self --host none` | 215.0 s | 26 name(s) |
-| `svatah-cdp` | `node packages/cli/dist/bin.js run evals/self/cdp --host none` | 1.6 s | 1 name(s) |
-| `tree-agreement` | `node scripts/tree-agreement.mjs` | 4.5 s | 1 name(s) |
-| `tui-pty` | `npx vitest run test/tui-pty.test.ts --reporter=json` | 82.7 s | 78 name(s) |
+| `desktop-gate` | `node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md` | 100.2 s | 1 name(s) |
+| `healing-eval` | `node scripts/eval-healing.mjs --report reports/eval-healing.md` | 222.8 s | 1 name(s) |
+| `svatah` | `node packages/cli/dist/bin.js run evals/self --host none` | 220.2 s | 26 name(s) |
+| `svatah-cdp` | `node packages/cli/dist/bin.js run evals/self/cdp --host none` | 1.8 s | 1 name(s) |
+| `tree-agreement` | `node scripts/tree-agreement.mjs` | 5.3 s | 1 name(s) |
+| `tui-pty` | `npx vitest run test/tui-pty.test.ts --reporter=json` | 85.4 s | 78 name(s) |

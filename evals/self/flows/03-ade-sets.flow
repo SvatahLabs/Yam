@@ -82,30 +82,6 @@ story: the Bindings screen shows the store and one element's resolver order
   Every row of the bindings table should be visible
   Click the Verify all bindings button
 
-# The filters cycle, and a cycle is a value read back and compared.
-#
-# The parity report called this one unreachable because "asserting the *cycle*
-# needs reading a control's own label back and comparing it with the previous
-# one". It does not: the cycle is *deterministic* — `status: all` → `status:
-# passed` → `status: all` — so what a flow says is the three labels in order,
-# which is a stronger claim than "it changed" and one pattern 23 has always been
-# able to make. The binding is the chip's `automationId`, so it survives every
-# label it takes.
-story: the Runs screen filters, and its inspector shows the failing step's evidence
-  Click the Runs rail item
-  The runs table should be visible
-  The status: all button should say "status: all"
-  Click the status: all button
-  The status: all button should say "status: passed"
-  Click the status: all button
-  The status: all button should say "status: all"
-  The behavior: all button should say "behavior: all"
-  Click the behavior: all button
-  The behavior: all button should say "behavior: tool"
-  Click the behavior: all button
-  The run inspector panel should be visible
-  The artifacts panel should be visible
-
 story: the legacy screens are gone
   Click the Flows rail item
   The Flows heading should be visible
@@ -123,5 +99,4 @@ test: the ADE's sets
   the API screen shows a saved request and its headers
   the Import screen previews into the open project and nowhere else
   the Bindings screen shows the store and one element's resolver order
-  the Runs screen filters, and its inspector shows the failing step's evidence
   the legacy screens are gone
