@@ -14,8 +14,7 @@
     "  node -e \"import('./packages/screens/dist/index.js').then(m => console.log(JSON.stringify(m.ACTIONS.map(a => ({id:a.id,label:a.label,group:a.group,screen:a.screen,...(a.key?{key:a.key}:{}),...(a.cli?{cli:a.cli}:{})})), null, 2)))\"",
     "and read the diff before committing it."
   ],
-  "actions":
-[
+  "actions": [
     {
       "id": "flows.compile",
       "label": "Compile",
@@ -28,14 +27,14 @@
       "label": "Save flow",
       "group": "Actions",
       "screen": "flows",
-      "key": "⌘S"
+      "key": "\u2318S"
     },
     {
       "id": "run.flow",
       "label": "Run",
       "group": "Actions",
       "screen": "flows",
-      "key": "⌘↵",
+      "key": "\u2318\u21b5",
       "cli": "svatah run --flow <file>"
     },
     {
@@ -50,7 +49,7 @@
       "label": "Run again",
       "group": "Actions",
       "screen": "run",
-      "key": "⌘↵",
+      "key": "\u2318\u21b5",
       "cli": "svatah run --flow <file>"
     },
     {
@@ -59,12 +58,6 @@
       "group": "Actions",
       "screen": "run",
       "cli": "svatah run --resume <runId> --from <stepId>"
-    },
-    {
-      "id": "run.stop",
-      "label": "Stop run",
-      "group": "Actions",
-      "screen": "run"
     },
     {
       "id": "record.start",
@@ -142,7 +135,7 @@
       "label": "Send request",
       "group": "Actions",
       "screen": "api",
-      "key": "⌘↵"
+      "key": "\u2318\u21b5"
     },
     {
       "id": "data.save",

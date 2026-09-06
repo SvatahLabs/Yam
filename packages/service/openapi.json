@@ -1515,6 +1515,7 @@
     "/events": {
       "get": {
         "summary": "The event stream (WebSocket)",
+        "description": "Every message is a JSON object with a `kind`. The kinds are: `step.result`, `run.summary`, `run.started`, `run.failed`, `record.started`, `record.step`, `record.decision`, `record.candidates`, `record.decision.expired`, `record.finished`, `record.failed`, `heal.proposal`, `heal.finished`, `heal.failed`, `tool.invocation`, `log`. Their shapes are `@svatah/service`'s `ServiceEvent` union (LLD §13.5).",
         "security": [
           {
             "bearerAuth": []
@@ -1530,6 +1531,7 @@
     "/events/sse": {
       "get": {
         "summary": "The event stream (server-sent events)",
+        "description": "Every message is a JSON object with a `kind`. The kinds are: `step.result`, `run.summary`, `run.started`, `run.failed`, `record.started`, `record.step`, `record.decision`, `record.candidates`, `record.decision.expired`, `record.finished`, `record.failed`, `heal.proposal`, `heal.finished`, `heal.failed`, `tool.invocation`, `log`. Their shapes are `@svatah/service`'s `ServiceEvent` union (LLD §13.5).",
         "security": [
           {
             "bearerAuth": []
@@ -1541,7 +1543,8 @@
             "content": {
               "text/event-stream": {
                 "schema": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "One JSON object per `data:` line, whose `kind` is one of the values below."
                 }
               }
             }

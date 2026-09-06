@@ -69,6 +69,7 @@ const workspaceStep = bitbucketSteps.find((s) => s.name?.startsWith("workspace")
 const javaStep = bitbucketSteps.find((s) => s.name === "legacy Java project compiles")!;
 const quickStartStep = bitbucketSteps.find((s) => s.name?.startsWith("quick start"))!;
 const runtimeStep = bitbucketSteps.find((s) => s.name?.startsWith("Java runtime conformance"))!;
+const clientsStep = bitbucketSteps.find((s) => s.name?.startsWith("generated clients"))!;
 const desktopSteps = (bitbucket.pipelines.custom?.["desktop-gates"]?.[0]?.parallel ?? []).map(
   (p) => p.step,
 );
@@ -77,6 +78,8 @@ describe("CI mirrors (P0-F5)", () => {
   it("both workflows exist", () => {
     expect(Object.keys(github.jobs).sort()).toEqual([
       "ade-installers",
+      // T9.3: the generated clients against a live service (REQ-SDK-1, 2).
+      "clients-smoke",
       "desktop-conformance",
       "grounding-eval",
       "legacy-java",
@@ -234,6 +237,49 @@ describe("CI mirrors (P0-F5)", () => {
       const script = ax.script.join("\n");
       expect(script).toContain('if [ "$code" = "2" ]');
       expect(script).toContain('exit "$code"');
+    });
+  });
+
+  /**
+   * T9.3 — the generated clients are exercised against a live service in CI.
+   *
+   * > the Python and Java clients each run one smoke script against a live
+   * > service (`GET /project`, `POST /run`, events) in CI.
+   *
+   * Both halves are checked: the drift check, which is what makes "generated"
+   * mean something, and the smoke, which is what makes "client" mean something.
+   * And the toolchains are *installed* rather than hoped for —
+   * `scripts/smoke-clients.mjs` skips a language whose toolchain is missing, so
+   * a leg without a JDK would go green having run one client.
+   */
+  describe("the generated clients run in CI (T9.3)", () => {
+    it("is a job in both workflows, on every branch and pull request", () => {
+      for (const [where, steps] of [
+        ["default", bitbucket.pipelines.default[0]!.parallel!],
+        ["branches", bitbucket.pipelines.branches["**"]![0]!.parallel!],
+        ["pull-requests", bitbucket.pipelines["pull-requests"]["**"]![0]!.parallel!],
+      ] as const) {
+        expect(
+          steps.some((p) => p.step.name?.startsWith("generated clients")),
+          `the ${where} pipeline does not run the client smoke`,
+        ).toBe(true);
+      }
+    });
+
+    it("checks the drift and runs the smoke, in both files", () => {
+      for (const script of [githubCommands("clients-smoke").join("\n"), clientsStep.script.join("\n")]) {
+        expect(script).toContain("pnpm clients:check");
+        expect(script).toContain("pnpm clients:smoke");
+      }
+    });
+
+    it("installs a JDK and a Python, because a missing one is a skip", () => {
+      const github17 = JSON.stringify(github.jobs["clients-smoke"]!.steps);
+      expect(github17).toContain("setup-java");
+      expect(github17).toContain("setup-python");
+      const script = clientsStep.script.join("\n");
+      expect(script).toContain("openjdk-17-jdk-headless");
+      expect(script).toContain("python3");
     });
   });
 

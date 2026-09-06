@@ -107,6 +107,29 @@ definitions:
         artifacts:
           - reports/runtime-java.md
 
+    - step: &clients-smoke
+        name: generated clients (python, java)
+        caches:
+          - pnpm
+        script:
+          - corepack enable
+          - corepack prepare --activate
+          # A JDK and a Python, because the image is Node's and a missing
+          # toolchain is a *skip* — which would make this leg green without
+          # having run either client.
+          - apt-get update && apt-get install -y --no-install-recommends openjdk-17-jdk-headless python3
+          - java -version
+          - python3 --version
+          - pnpm install --frozen-lockfile
+          - pnpm -r build
+          - pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+          # T9.3, LLD §13.8: a route the service renamed and nobody regenerated
+          # is a red build.
+          - pnpm clients:check
+          # T9.3's Validate: GET /project, POST /run, and the event stream, for
+          # each client, against a live `svatah serve`.
+          - pnpm clients:smoke
+
     - step: &uia-gate
         name: desktop conformance (windows, uia)
         runs-on:
@@ -236,6 +259,7 @@ pipelines:
         - step: *workspace
         - step: *quick-start
         - step: *runtime-conformance
+        - step: *clients-smoke
         - step: *legacy-java
   branches:
     '**':
@@ -243,6 +267,7 @@ pipelines:
           - step: *workspace
           - step: *quick-start
           - step: *runtime-conformance
+          - step: *clients-smoke
           - step: *legacy-java
   pull-requests:
     '**':
@@ -250,6 +275,7 @@ pipelines:
           - step: *workspace
           - step: *quick-start
           - step: *runtime-conformance
+          - step: *clients-smoke
           - step: *legacy-java
   custom:
     # The two legs that need a runner this account does not have yet (T7.2).

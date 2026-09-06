@@ -11,7 +11,24 @@
  * which is the drift that actually matters.
  */
 
+import { SERVICE_EVENT_KINDS } from "./events.js";
+
 export const OPENAPI_VERSION = "3.1.0";
+
+/**
+ * What the event stream carries, stated in the description itself (Draft 2.11,
+ * LLD §13.8).
+ *
+ * A client generated from this document has to know what a `data:` line can
+ * say; before this, each of the three would have carried its own copy of the
+ * list, and a new event kind would have had three places to be missing from.
+ * The list is the union's own (`SERVICE_EVENT_KINDS`), so it cannot drift from
+ * the events the service actually emits.
+ */
+const EVENT_STREAM_DESCRIPTION =
+  "Every message is a JSON object with a `kind`. The kinds are: " +
+  SERVICE_EVENT_KINDS.map((kind) => `\`${kind}\``).join(", ") +
+  ". Their shapes are `@svatah/service`'s `ServiceEvent` union (LLD §13.5).";
 
 /** Every path the service serves, in LLD §13.5's order. */
 export function openApiDocument(version: string): Record<string, unknown> {
@@ -465,18 +482,45 @@ export function openApiDocument(version: string): Record<string, unknown> {
           responses: { 200: { description: "Tools and invocations", ...json({ type: "object" }) } },
         },
       },
+      /*
+       * The stream's message kinds are *in* the description (Draft 2.11, §13.8).
+       *
+       * They were not, and the clients generated from this document had no way
+       * to know what a `data:` line could say — so each of the three would have
+       * carried its own copy of the list, which is three places for a new event
+       * kind to be missing from. `SERVICE_EVENT_KINDS` is the union's own list
+       * (`events.ts`), so the description states it and
+       * `scripts/generate-clients.mjs` reads it from here.
+       */
       "/events": {
         get: {
           summary: "The event stream (WebSocket)",
+          description: EVENT_STREAM_DESCRIPTION,
           security: bearer,
-          responses: { 101: { description: "Switching protocols" } },
+          responses: {
+            101: { description: "Switching protocols" },
+          },
         },
       },
       "/events/sse": {
         get: {
           summary: "The event stream (server-sent events)",
+          description: EVENT_STREAM_DESCRIPTION,
           security: bearer,
-          responses: { 200: { description: "text/event-stream", content: { "text/event-stream": { schema: { type: "string" } } } } },
+          responses: {
+            200: {
+              description: "text/event-stream",
+              content: {
+                "text/event-stream": {
+                  schema: {
+                    type: "string",
+                    description:
+                      "One JSON object per `data:` line, whose `kind` is one of the values below.",
+                  },
+                },
+              },
+            },
+          },
         },
       },
       "/openapi.json": {

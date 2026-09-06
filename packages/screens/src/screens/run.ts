@@ -387,7 +387,6 @@ export const runScreen: Screen<RunState> = {
     { action: "run.again", key: "⌘↵", terminal: "r", description: "Run the same thing again" },
     { action: "run.resume", key: "⇧R", terminal: "R", description: "Resume from the failing step" },
     { action: "heal.run", key: "H", terminal: "h", description: "Heal this run" },
-    { action: "run.stop", key: "Esc", terminal: "s", description: "Stop a run in progress" },
   ] satisfies readonly Binding[],
   async load(service: ScreenService, params: ScreenParams = {}): Promise<RunState> {
     const sources = new Sources();

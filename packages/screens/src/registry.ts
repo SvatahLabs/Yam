@@ -166,18 +166,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     },
   },
   {
-    id: "run.stop",
-    label: "Stop run",
-    group: "Actions",
-    screen: "run",
-    availableWhen: (state) => loaded(state) && (state as { live?: boolean }).live === true,
-    async run(service, args): Promise<ActionOutcome> {
-      if (typeof args.runId !== "string") return refused("No run is selected.");
-      const value = await service.postRunsByIdStop(args.runId);
-      return ok(`Asked run ${args.runId} to stop.`, { value });
-    },
-  },
-  {
     id: "record.start",
     label: "Record",
     group: "Actions",
@@ -207,7 +195,10 @@ const ACTIONS_ONLY: readonly Action[] = [
     availableWhen: has("decision"),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No recording session is open.");
-      const value = await service.postRecordByIdDecision(args.sessionId, { decision: "accept" });
+      // `{ accept: true }` is the body `POST /record/:id/decision` takes; a
+      // body it does not understand is read as a *rejection*, which stops the
+      // session — so the shape is the service's, not a word of our own.
+      const value = await service.postRecordByIdDecision(args.sessionId, { accept: true });
       return ok("Accepted the grounding.", { value });
     },
   },
@@ -222,10 +213,7 @@ const ACTIONS_ONLY: readonly Action[] = [
       if (typeof args.sessionId !== "string") return refused("No recording session is open.");
       const ref = args["ref"];
       if (typeof ref !== "string") return refused("Pick an element in the driven session first.");
-      const value = await service.postRecordByIdDecision(args.sessionId, {
-        decision: "repick",
-        ref,
-      });
+      const value = await service.postRecordByIdDecision(args.sessionId, { repick: ref });
       return ok(`Re-picked ${ref}.`, { value });
     },
   },
@@ -238,7 +226,10 @@ const ACTIONS_ONLY: readonly Action[] = [
     availableWhen: has("decision"),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No recording session is open.");
-      const value = await service.postRecordByIdDecision(args.sessionId, { decision: "reject" });
+      const value = await service.postRecordByIdDecision(args.sessionId, {
+        accept: false,
+        ...(typeof args["why"] === "string" ? { why: args["why"] } : {}),
+      });
       return ok("Rejected the grounding.", { value });
     },
   },

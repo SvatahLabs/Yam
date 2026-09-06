@@ -138,7 +138,6 @@ export function fakeService(responses: FakeResponses = {}): FakeService {
       record("postRun", body);
       return { runId: "comp" };
     },
-    postRunsByIdStop: (id, body) => wrote("postRunsByIdStop", id, body),
     postBindingsVerify: (body) => wrote("postBindingsVerify", body),
     async postRecord(body) {
       record("postRecord", body);

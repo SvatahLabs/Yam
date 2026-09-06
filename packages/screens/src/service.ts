@@ -47,8 +47,14 @@ export interface ScreenService {
   getRunsByIdResults(id: string): Promise<unknown>;
   /** `GET /runs/{id}/audit` */
   getRunsByIdAudit(id: string): Promise<unknown>;
-  /** `POST /runs/{id}/stop` */
-  postRunsByIdStop(id: string, body?: unknown): Promise<unknown>;
+  /*
+   * `POST /runs/:id/stop` is in LLD §13.5's table and the service does not
+   * publish it (T2.11 shipped `POST /record/:id/stop` and no run half), so it is
+   * not here: a screen may only ask for a route that exists. The Run screen
+   * therefore has no Stop action, which is recorded as a known gap in
+   * `docs/spec/progress/phase-9.md`. Stopping a run needs the executor to be
+   * cancellable, which is a runtime change and not a screen's.
+   */
   /** `GET /bindings` — the list of `{ id, file }` rows. */
   getBindings(): Promise<unknown>;
   /** `GET /bindings/{id}` — one binding file, as the YAML on disk. */

@@ -1,0 +1,45 @@
+{
+  "name": "@svatah/sdk",
+  "version": "0.1.0",
+  "description": "The typed TypeScript client for the Svatah local service, generated from its OpenAPI description (REQ-SDK-1)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "node ../../scripts/generate-clients.mjs && tsup --config ../../tsup.config.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clients": "node scripts/generate-clients.mjs",
+    "clients:check": "node scripts/generate-clients.mjs --check",
+    "clients:smoke": "node scripts/smoke-clients.mjs"
+  },
+  "dependencies": {
+    "@svatah/screens": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "@svatah/cli": "workspace:*",
+    "@svatah/service": "workspace:*",
+    "sample-web": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

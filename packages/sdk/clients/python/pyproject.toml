@@ -1,0 +1,35 @@
+# `svatah-sdk` on PyPI (REQ-SDK-2, LLD §13.8).
+#
+# Generated from the service's OpenAPI description by
+# `node scripts/generate-clients.mjs`, published from the same pipeline as the
+# npm tarballs and versioned with them.
+#
+# No dependencies. `urllib` is enough for a loopback HTTP client and an
+# `text/event-stream` reader, and a client for a *local* service that pulled in
+# `requests` and its transitive tree would be a client whose licence surface is
+# larger than its code (REQ-PKG-3).
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "svatah-sdk"
+version = "0.1.0"
+description = "Typed client for the Svatah local service, generated from its OpenAPI description"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Atul Sharma" }]
+keywords = ["svatah", "automation", "testing", "agent"]
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Testing",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/a-t-u-l/svatah"
+
+[tool.setuptools]
+packages = ["svatah_sdk"]
