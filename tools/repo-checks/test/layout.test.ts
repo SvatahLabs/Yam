@@ -29,6 +29,8 @@ function hldPackages(): string[] {
     if (inPackages) {
       const m = /^\s{4}([a-z0-9-]+)\/\s/.exec(line);
       if (m) {
+        // Draft 2.17: a package HLD §12 lists as planned for a later phase does not exist yet.
+        if (/planned: Phase \d+/.test(line)) continue;
         names.push(m[1]!);
         continue;
       }

@@ -146,7 +146,8 @@ interface Step {
   guard?: { subject: "target" | "page" | "dialog" | "scope"; predicate: Predicate; mode: "onlyIf" | "unless";
             target?: TargetRef };          // Draft 2.7: a `target` guard about another element; the recorder grounds it and the resolver resolves it before evaluation. A `target` guard with no element anywhere is E_GUARD_NO_TARGET.
   expect?: { subject: "target" | "page" | "dialog" | "scope"; predicate: Predicate };
-  capture?: { name: string; from: "text" | "value" | "attribute" | "title" | "result" | "response" | "output"; attribute?: string; jsonPath?: string };
+                                             // Draft 2.17: subject also `set` with `set: { quantifier: "every" | "none" | "exactlyOne" | "unique"; noun: string }`, the scope being the step's target; a set excludes window chrome and a select's own options; an empty set fails; `absent` and `hidden` take a resolver failure as their answer.
+  capture?: { name: string; from: "text" | "value" | "attribute" | "title" | "result" | "response" | "output" | "url"; attribute?: string; jsonPath?: string };
   custom?: { id: string; params: Record<string, ValueRef>; targets?: Record<string, TargetRef> };   // action === "custom"; `target` placeholders land in `targets`, never in `params`
   invoke?: { story: string; inputs: Record<string, ValueRef> };      // action === "invoke"
   sideEffect?: boolean;                                              // set by lint heuristics or declared in custom step
@@ -251,6 +252,7 @@ Run-block semantics (Draft 2.4): a `compose:` block's lines are story names; a `
 ### 4.2 Sentence patterns (Tier 1)
 
 Draft 2.16 additions to the pattern table: `Type` accepts a multi-line value (a quoted string may span lines; each line is typed with Enter between) — Draft 2.15's rule, stated here where the grammar lives. Patterns 34 to 38 belong to the `process` kind: 34 `Run "<command>"` (starts the session's command, or a further one in an open session); 35 `Type "<text>" into the terminal` and `Press <key> in the terminal`; 36 `The terminal should show "<text>"` / `should match /<pattern>/`, with `Wait for the terminal to show "<text>"` as the pattern 19 form; 37 `The command should exit with <code>`; 38 `The file "<path>" should exist` / `should contain "<text>"`, over the session's root. Each has two examples in `docs/flow-language.md` and golden entries.
+Draft 2.17 additions: pattern 32 gains `Exactly one <noun> …` and `… should be unique`; pattern 24 gains a two-element form (`The <a> should be to the left of the <b>`, `… on the same row as …`); pattern 22's captures compare (`{a} should equal {b}`); `app.attach.serviceLock` reads the lock file the ADE writes and exposes `{app.serviceUrl}` and `{app.serviceToken}` so `Wait for the "<name>" API` can address the application's own service. Desktop `textContains` walks the subtree as the web adapter's does.
 
 Patterns 1–26 are unchanged from Draft 1 and listed in `docs/flow-language.md`. Additions:
 
@@ -638,6 +640,7 @@ MCP server (`svatah mcp`): operation tools (`compile`, `lint`, `record`, `run`, 
 ## 17. Changes from Draft 1
 
 - Draft 2.7 (after Phase 5 verification): `Step.guard.target` (§3.2); compensating-story steps keep their own statuses (§8.3); `svatah trajectory compile` in the command table (§15); the trajectory line shape and the proposal context hash (§13.4); `POST /record` gateway, 409, and decision deadline (§13.5); the ADE Record screen chooses the gateway and renders failures (§13.6).
+- Draft 2.17 (after Phase 12 verification): `capture.from` gains `url`, pattern 32's IR is the `set` subject, the set and resolver-failure rules (§3.2); the remaining one-sided sentences and `app.attach.serviceLock` (§4.2, Phase 13); the HTTP adapter registered as a surface (§2.4); Phase 13's packages marked planned in HLD §12 until they exist.
 - Draft 2.16 (process and terminal, owner decision of 2026-09-06): the `process` surface kind and `adapter-process` (§2.4); patterns 34–38 and the multi-line `Type` in the pattern table (§4.2); `@svatah/verify` and `svatah eval self --catalogue` for third parties, and the six outside-surface checks moved to Svatah's side (§13.9); Phase 13 added after the release.
 - Draft 2.15 (after Phase 11 verification): tracked placeholders for the self project's optional directories, catalogue matching by ancestor titles and title, gate reports outside the tree, patterns 32 and 33 and the extensions to 19, 11 and `Type`, the HTTP and SDK self flows written (§13.9, §4.2); the Phase 10 windowless-launch finding withdrawn as a locked-display artefact (§7.5).
 - Draft 2.14 (Svatah verifies Svatah, owner decision of 2026-09-05): the self-verification suite `evals/self`, the check catalogue, `svatah eval self` and the two-sided parity gate at 100 percent agreement, the three oracles kept external, `app.launch`/`app.quit` and `Quit the app` (pattern 31), the Playwright adapter's CDP attach, desktop grounding (§13.9, §4.2, §7.1, §7.5); the verification contract becomes the gate plus its one-sided list.

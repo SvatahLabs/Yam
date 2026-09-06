@@ -12,7 +12,7 @@ You are continuing the Svatah implementation. Phases 0 through 12 are merged on 
 Read, in this order, and treat them as the source of truth:
 - docs/spec/requirements.md (REQ-ADP-10 and REQ-SELF-4 are new)
 - docs/spec/hld.md
-- docs/spec/lld.md (§2.4's `process` kind, §4.2's patterns 34–38, §13.9's verification library)
+- docs/spec/lld.md (§2.4's `process` kind, §4.2's patterns 34–38, §13.9's verification library) and its Draft 2.17 additions: the quantifier, geometry, and comparison sentences, and `app.attach.serviceLock`
 - docs/spec/tasks.md (Phase 13, T13.1 through T13.4)
 - docs/spec/progress/phase-12.md and docs/spec/progress/phase-12-verification.md
 
@@ -20,7 +20,7 @@ Branching: create branch phase-13 from master. Commit after each item with "P12-
 
 PHASE 12 CORRECTIONS (before any Phase 13 task): apply every finding docs/spec/progress/phase-12-verification.md lists under "Findings", in order, each as its own commit, with a self check for each, and add a "Post-verification corrections" section to docs/spec/progress/phase-12.md. The gate must be at 100 percent before T13.1 starts.
 
-PHASE 13 SCOPE: tasks T13.1 through T13.4 in docs/spec/tasks.md, in order. Nothing beyond Phase 13.
+PHASE 13 SCOPE: tasks T13.1 through T13.4 in docs/spec/tasks.md, in order. Nothing beyond Phase 13. The target after T13.3 is 45 of 48 on Svatah's side; the ADE's Playwright cases refuse to start while another test-bundle instance is running (Phase 12 verification, F2).
 
 Environment and fallbacks (state which applied in the progress file):
 - The pseudo-terminal library must be under a permissive licence (REQ-PKG-3). If the one you choose needs a native build, it is an optional dependency with the pipe fallback; say which path the suite used.

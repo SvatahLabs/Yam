@@ -285,7 +285,7 @@ svatah/
     adapter-appium/       mobile adapter (P1)
     adapter-uia/          Windows UI Automation (P2)
     adapter-ax/           macOS Accessibility (P2)
-    adapter-process/      command in a pseudo-terminal, streams, exit code, files under a root (Draft 2.16)
+    adapter-process/      command in a pseudo-terminal, streams, exit code, files under a root (Draft 2.16, planned: Phase 13)
     bindings/             store, resolver, synthesis, fingerprint, relocalization   ← module (a) core
     healer/               failure selection, repair, verify, diff                    ← module (a)
     playwright-test/      bind() fixture for plain Playwright tests                   ← module (a)
@@ -304,7 +304,7 @@ svatah/
     ui/                   React components on Radix primitives, the component sheet (Draft 2.11)
     tui/                  svatah ui, the Ink terminal cockpit (Draft 2.11, REQ-TUI-1)
     sdk/                  typed client generated from the OpenAPI description (Draft 2.11, LLD §13.8)
-    verify/               catalogue schema, source runners, comparison, report — the parity gate as a package (Draft 2.16)
+    verify/               catalogue schema, source runners, comparison, report — the parity gate as a package (Draft 2.16, planned: Phase 13)
     trajectory/           trajectory capture and compile (P2)
     cli/                  svatah CLI + MCP server (operations + raw surface)
     service/              local HTTP + event-stream service (svatah serve) for the ADE and other clients

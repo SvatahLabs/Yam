@@ -291,6 +291,7 @@ Each requirement is referenced by at least one HLD section, one LLD section, and
 - Draft 2.14 (Svatah verifies Svatah): `REQ-SELF-1..3` added; Phase 11 becomes corrections plus the self-verification suite and parity gate; the release moves to Phase 12.
 - Draft 2.15 (after Phase 11 verification): no requirement text changes; T12.7 added to close the one-sided list's language gaps and the verification's three findings before the release.
 - Draft 2.16 (process and terminal): `REQ-ADP-10` and `REQ-SELF-4` added; Phase 13 added after the release.
+- Draft 2.17 (after Phase 12 verification): no requirement text changes; T13.2 extended with the sentences that close the last non-oracle one-sided checks; 0.1.0 accepted for the owner's validation.
 - Draft 2.4 (after Phase 2 verification): `REQ-LANG-10` states the run-block semantics inherited from the legacy parser.
 - Draft 2.3 (after Phase 1 verification): `REQ-HEAL-5` defines recovery against the ground-truth element and the denominator.
 - Draft 2.1: `REQ-ADE-1..9` added for the local service and a new Svatah ADE Electron client designed to the vision, with the prototype as the blueprint of jobs only; the ADE is the desktop conformance target for `REQ-ADP-6/7`; constraint 7 added.

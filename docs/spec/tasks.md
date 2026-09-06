@@ -534,8 +534,8 @@ Phase 12 total: 15 ideal days.
 
 ### T13.2 Patterns 34 to 38
 **Refs:** REQ-LANG-12, LLD §4.2 · **Est:** 2
-**Do:** The five process sentences and the pattern 19 form in the grammar, the IR, the reference with two examples each, and golden entries; the recorder binds `t<n>` and `f<path>` references without a model.
-**Validate:** Tier 1 golden at 100 percent; a flow that runs `svatah ui --json`, waits for the screen, and checks the exit code, green.
+**Do:** The five process sentences and the pattern 19 form in the grammar, the IR, the reference with two examples each, and golden entries; the recorder binds `t<n>` and `f<path>` references without a model. Draft 2.17: also `Exactly one …` and `… should be unique` (pattern 32), the two-element form of pattern 24, the capture comparison of pattern 22, and `app.attach.serviceLock` with `{app.serviceUrl}` and `{app.serviceToken}`; and the ADE's Playwright cases refuse to start while another instance of the test bundle is running.
+**Validate:** Tier 1 golden at 100 percent; a flow that runs `svatah ui --json`, waits for the screen, and checks the exit code, green. Draft 2.17: the four run-inside-a-run checks, the count check, the geometry check, and the label-comparison check each two-sided.
 
 ### T13.3 The six checks move to Svatah's side
 **Refs:** REQ-SELF-1, 2, LLD §13.9 · **Est:** 2
@@ -657,6 +657,7 @@ Phase 13 total: 11 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.17 (after Phase 12 verification): T13.2 extended with the last non-oracle sentences and the service lock; estimate unchanged at the phase level, 275.5 ideal days.
 - Draft 2.16 (process and terminal): Phase 13 added — the process adapter, patterns 34–38, the six checks moved, the verification library. Total 275.5 ideal days.
 - Draft 2.15 (after Phase 11 verification): T12.7 added — the one-sided list closed by patterns 32 and 33 and three extensions, the HTTP and SDK self flows, and the three findings. Total 264.5 ideal days.
 - Draft 2.14 (Svatah verifies Svatah): Phase 11 is now the corrections (T11.1) plus launch/quit/attach (T11.2), desktop grounding (T11.3), the self suite (T11.4), the parity gate (T11.5), and the record (T11.6); the release becomes Phase 12 with T12.1–T12.6. Total 259.5 ideal days.
