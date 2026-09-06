@@ -426,7 +426,8 @@ knows nothing about which screen it is showing.
 ### Validate — "the palette lists every action of the four screens"
 
 `tools/repo-checks/test/action-parity.test.ts` and `palette-parity.test.ts` pass
-against a registry that now has 40 actions. Three of the four own actions;
+against a registry that now has 38 actions — 26 in the `Actions` group and one
+`Go to` per screen. Three of the four own actions;
 `runs` owns none, and that is right rather than missing — its two keys are
 `go.run`, which the palette's second group carries, and `heal.run`, which belongs
 to the Run screen (Draft 2.12's D6). An action invented so a screen would have

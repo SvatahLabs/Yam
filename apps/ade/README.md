@@ -55,8 +55,8 @@ measured against a changed one — the desktop half of what
 | Variant | What changes | What it breaks |
 |---|---|---|
 | `0` (unset) | nothing — the real interface | — |
-| `1` | the **Flow editor** tab becomes **Editor**; the Project screen's **Open a project…** button becomes **Choose a project…** | the *name* a binding matched on; the structure is untouched |
-| `2` | the Record screen's gateway control moves into a `Session settings` panel beside the session status | the control's *place* in the tree and its neighbours; the name and the role are untouched |
+| `1` | the rail's **Flows** row becomes **Editor**; the welcome screen's **Open a project…** button becomes **Choose a project…** | the *name* a binding matched on; the structure is untouched |
+| `2` | the Record screen's gateway control moves out of the toolbar and into the session panel's head | the control's *place* in the tree — its `controlPath`, its neighbours, its sibling index and its box; the name and the role are untouched |
 
 Both keep every control's `id`, which is what the desktop adapters publish as
 `automationId` and what the healing cases use as ground truth — the equivalent
