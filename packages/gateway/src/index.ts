@@ -1,5 +1,5 @@
 /**
- * @svatah/gateway
+ * @svatah/yam-gateway
  *
  * The only place in the workspace that talks to a model (T3.1, LLD §10).
  *
@@ -10,7 +10,7 @@
  * makes no model calls", a build-time fact.
  *
  * ```ts
- * const gateway = anthropicGateway({ cache: new DiskCache(".svatah/model-cache") });
+ * const gateway = anthropicGateway({ cache: new DiskCache(".yam/model-cache") });
  * const { value, provenance } = await gateway.ask({
  *   promptVersion: "g-1",
  *   system: INSTRUCTIONS,          // stable, cached

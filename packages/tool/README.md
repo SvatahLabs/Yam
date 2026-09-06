@@ -1,4 +1,4 @@
-# @svatah/tool
+# @svatah/yam-tool
 
 MCP tool server exposing stories as deterministic tools.
 

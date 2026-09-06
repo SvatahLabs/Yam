@@ -1,12 +1,12 @@
 {
-  "process": "Svatah ADE",
-  "title": "Svatah ADE",
+  "process": "Yam ADE",
+  "title": "Yam ADE",
   "truncated": false,
   "nodes": [
     {
       "parent": -1,
       "controlType": "Window",
-      "name": "Svatah ADE",
+      "name": "Yam ADE",
       "className": "Chrome_WidgetWin_1",
       "isEnabled": true,
       "box": [
@@ -20,7 +20,7 @@
       "parent": 0,
       "controlType": "Document",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah ADE",
+      "name": "Yam ADE",
       "isEnabled": true,
       "hasKeyboardFocus": true,
       "box": [
@@ -205,7 +205,7 @@
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "flows Compile svatah compile",
+      "name": "flows Compile yam compile",
       "isEnabled": true,
       "isSelected": false,
       "patterns": [
@@ -263,7 +263,7 @@
       "parent": 16,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah compile",
+      "name": "yam compile",
       "isEnabled": true,
       "box": [
         841,
@@ -276,7 +276,7 @@
       "parent": 21,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah compile",
+      "name": "yam compile",
       "isEnabled": true
     },
     {
@@ -341,7 +341,7 @@
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "run Run svatah run --flow <file>",
+      "name": "run Run yam run --flow <file>",
       "isEnabled": true,
       "isSelected": false,
       "patterns": [
@@ -399,7 +399,7 @@
       "parent": 28,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah run --flow <file>",
+      "name": "yam run --flow <file>",
       "isEnabled": true,
       "box": [
         731,
@@ -412,14 +412,14 @@
       "parent": 33,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah run --flow <file>",
+      "name": "yam run --flow <file>",
       "isEnabled": true
     },
     {
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "run Run story svatah run --story <name>",
+      "name": "run Run story yam run --story <name>",
       "isEnabled": true,
       "isSelected": false,
       "patterns": [
@@ -477,7 +477,7 @@
       "parent": 35,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah run --story <name>",
+      "name": "yam run --story <name>",
       "isEnabled": true,
       "box": [
         759,
@@ -490,14 +490,14 @@
       "parent": 40,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah run --story <name>",
+      "name": "yam run --story <name>",
       "isEnabled": true
     },
     {
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "run Run again svatah run --flow <file>",
+      "name": "run Run again yam run --flow <file>",
       "isEnabled": true,
       "isSelected": false,
       "patterns": [
@@ -555,7 +555,7 @@
       "parent": 42,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah run --flow <file>",
+      "name": "yam run --flow <file>",
       "isEnabled": true,
       "box": [
         731,
@@ -568,14 +568,14 @@
       "parent": 47,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah run --flow <file>",
+      "name": "yam run --flow <file>",
       "isEnabled": true
     },
     {
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "run Resume from step svatah run --resume <runId> --from <stepId>",
+      "name": "run Resume from step yam run --resume <runId> --from <stepId>",
       "isEnabled": false,
       "isSelected": false,
       "patterns": [
@@ -633,7 +633,7 @@
       "parent": 49,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah run --resume <runId> --from <stepId>",
+      "name": "yam run --resume <runId> --from <stepId>",
       "isEnabled": true,
       "box": [
         624,
@@ -646,14 +646,14 @@
       "parent": 54,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah run --resume <runId> --from <stepId>",
+      "name": "yam run --resume <runId> --from <stepId>",
       "isEnabled": true
     },
     {
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "record Record svatah record --flow <file>",
+      "name": "record Record yam record --flow <file>",
       "isEnabled": true,
       "isSelected": false,
       "patterns": [
@@ -711,7 +711,7 @@
       "parent": 56,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah record --flow <file>",
+      "name": "yam record --flow <file>",
       "isEnabled": true,
       "box": [
         715,
@@ -724,7 +724,7 @@
       "parent": 61,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah record --flow <file>",
+      "name": "yam record --flow <file>",
       "isEnabled": true
     },
     {
@@ -1021,7 +1021,7 @@
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "heal Heal svatah heal --run <id>",
+      "name": "heal Heal yam heal --run <id>",
       "isEnabled": true,
       "isSelected": false,
       "patterns": [
@@ -1079,7 +1079,7 @@
       "parent": 88,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah heal --run <id>",
+      "name": "yam heal --run <id>",
       "isEnabled": true,
       "box": [
         753,
@@ -1092,14 +1092,14 @@
       "parent": 93,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah heal --run <id>",
+      "name": "yam heal --run <id>",
       "isEnabled": true
     },
     {
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "heal Heal from bind failures svatah heal --from-bind-failures",
+      "name": "heal Heal from bind failures yam heal --from-bind-failures",
       "isEnabled": true,
       "isSelected": false,
       "patterns": [
@@ -1157,7 +1157,7 @@
       "parent": 95,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah heal --from-bind-failures",
+      "name": "yam heal --from-bind-failures",
       "isEnabled": true,
       "box": [
         706,
@@ -1170,7 +1170,7 @@
       "parent": 100,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah heal --from-bind-failures",
+      "name": "yam heal --from-bind-failures",
       "isEnabled": true
     },
     {
@@ -1235,7 +1235,7 @@
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "bindings Verify all bindings svatah bindings verify",
+      "name": "bindings Verify all bindings yam bindings verify",
       "isEnabled": true,
       "isSelected": false,
       "patterns": [
@@ -1293,7 +1293,7 @@
       "parent": 107,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah bindings verify",
+      "name": "yam bindings verify",
       "isEnabled": true,
       "box": [
         753,
@@ -1306,14 +1306,14 @@
       "parent": 112,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah bindings verify",
+      "name": "yam bindings verify",
       "isEnabled": true
     },
     {
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "bindings Prune unused bindings svatah bindings prune",
+      "name": "bindings Prune unused bindings yam bindings prune",
       "isEnabled": false,
       "isSelected": false,
       "patterns": [
@@ -1371,7 +1371,7 @@
       "parent": 114,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah bindings prune",
+      "name": "yam bindings prune",
       "isEnabled": true,
       "box": [
         789,
@@ -1384,7 +1384,7 @@
       "parent": 119,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah bindings prune",
+      "name": "yam bindings prune",
       "isEnabled": true
     },
     {
@@ -1507,7 +1507,7 @@
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "agents Start the tool server svatah tool serve",
+      "name": "agents Start the tool server yam tool serve",
       "isEnabled": false,
       "isSelected": false,
       "patterns": [
@@ -1565,7 +1565,7 @@
       "parent": 131,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah tool serve",
+      "name": "yam tool serve",
       "isEnabled": true,
       "box": [
         819,
@@ -1578,14 +1578,14 @@
       "parent": 136,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah tool serve",
+      "name": "yam tool serve",
       "isEnabled": true
     },
     {
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "explorer Open a session svatah surface snapshot",
+      "name": "explorer Open a session yam surface snapshot",
       "isEnabled": true,
       "isSelected": false,
       "patterns": [
@@ -1643,7 +1643,7 @@
       "parent": 138,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah surface snapshot",
+      "name": "yam surface snapshot",
       "isEnabled": true,
       "box": [
         745,
@@ -1656,7 +1656,7 @@
       "parent": 143,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah surface snapshot",
+      "name": "yam surface snapshot",
       "isEnabled": true
     },
     {
@@ -1721,7 +1721,7 @@
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "explorer Act on the element svatah surface act",
+      "name": "explorer Act on the element yam surface act",
       "isEnabled": false,
       "isSelected": false,
       "patterns": [
@@ -1779,7 +1779,7 @@
       "parent": 150,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah surface act",
+      "name": "yam surface act",
       "isEnabled": true,
       "box": [
         811,
@@ -1792,14 +1792,14 @@
       "parent": 155,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah surface act",
+      "name": "yam surface act",
       "isEnabled": true
     },
     {
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "explorer Snapshot the session svatah surface snapshot",
+      "name": "explorer Snapshot the session yam surface snapshot",
       "isEnabled": false,
       "isSelected": false,
       "patterns": [
@@ -1857,7 +1857,7 @@
       "parent": 157,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah surface snapshot",
+      "name": "yam surface snapshot",
       "isEnabled": true,
       "box": [
         774,
@@ -1870,14 +1870,14 @@
       "parent": 162,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah surface snapshot",
+      "name": "yam surface snapshot",
       "isEnabled": true
     },
     {
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "import Import prototype database svatah migrate <dest> --from-ade <electron-db dir>",
+      "name": "import Import prototype database yam migrate <dest> --from-ade <electron-db dir>",
       "isEnabled": true,
       "isSelected": false,
       "patterns": [
@@ -1935,7 +1935,7 @@
       "parent": 164,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah migrate <dest> --from-ade <electron-db dir>",
+      "name": "yam migrate <dest> --from-ade <electron-db dir>",
       "isEnabled": true,
       "box": [
         571,
@@ -1948,14 +1948,14 @@
       "parent": 169,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah migrate <dest> --from-ade <electron-db dir>",
+      "name": "yam migrate <dest> --from-ade <electron-db dir>",
       "isEnabled": true
     },
     {
       "parent": 12,
       "controlType": "ListItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "trajectory Compile a trajectory svatah trajectory compile <trajectory.jsonl>",
+      "name": "trajectory Compile a trajectory yam trajectory compile <trajectory.jsonl>",
       "isEnabled": false,
       "isSelected": false,
       "patterns": [
@@ -2013,7 +2013,7 @@
       "parent": 171,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah trajectory compile <trajectory.jsonl>",
+      "name": "yam trajectory compile <trajectory.jsonl>",
       "isEnabled": true,
       "box": [
         616,
@@ -2026,7 +2026,7 @@
       "parent": 176,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah trajectory compile <trajectory.jsonl>",
+      "name": "yam trajectory compile <trajectory.jsonl>",
       "isEnabled": true
     },
     {

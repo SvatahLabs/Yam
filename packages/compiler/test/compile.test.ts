@@ -15,8 +15,8 @@ import {
   readProjectFrom,
   type Diagnostic,
   type Project,
-} from "@svatah/spec";
-import { defineStep, loadSteps, StepRegistry } from "@svatah/steps";
+} from "@svatah/yam-spec";
+import { defineStep, loadSteps, StepRegistry } from "@svatah/yam-steps";
 import { compile, lintPlan, renderPlan, STABLE_TIMESTAMP } from "../src/index.js";
 
 /** The module-level `compile`, reachable inside describes that shadow the name. */
@@ -227,7 +227,7 @@ story: One
 
   it("says nothing about data paths when the project has no data file", () => {
     // A project with no `data.yaml` is not a project where every reference is
-    // wrong; it is a project that supplies data another way (SVATAH_DATA_*).
+    // wrong; it is a project that supplies data another way (YAM_DATA_*).
     const { ok } = compileFlow(`story: One\n  Type {data.anything} into the username field\n`);
     expect(ok).toBe(true);
   });
@@ -363,7 +363,7 @@ describe("the fixture flows compile clean (REQ-NFR-8, T2.5 Validate)", () => {
   });
   const { plan, diagnostics, ok } = compile({
     project: fixtures,
-    projectName: "svatah-fixtures",
+    projectName: "yam-fixtures",
     stable: true,
   });
 
@@ -406,7 +406,7 @@ describe("the fixture flows compile clean (REQ-NFR-8, T2.5 Validate)", () => {
   });
 
   it("is byte-stable across two compiles", () => {
-    const again = compile({ project: fixtures, projectName: "svatah-fixtures", stable: true });
+    const again = compile({ project: fixtures, projectName: "yam-fixtures", stable: true });
     expect(renderPlan(again.plan)).toBe(renderPlan(plan));
   });
 });

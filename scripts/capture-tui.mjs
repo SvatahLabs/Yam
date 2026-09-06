@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Capture `svatah ui`'s panes in a real terminal (T9.4, T9.5).
+ * Capture `yam ui`'s panes in a real terminal (T9.4, T9.5).
  *
  *   pnpm ui:capture
  *
@@ -50,15 +50,15 @@ if (spawnSync("script", ["-h"], { encoding: "utf8" }).status === null) {
 }
 
 const app = await startSampleApp(0);
-const project = mkdtempSync(join(tmpdir(), "svatah-ui-capture-"));
+const project = mkdtempSync(join(tmpdir(), "yam-ui-capture-"));
 cpSync(join(ROOT, "evals", "fixtures"), project, {
   recursive: true,
   filter: (from) => !from.includes("node_modules") && !from.includes(`${"runs"}`),
 });
 writeFileSync(
-  join(project, "svatah.config.yaml"),
+  join(project, "yam.config.yaml"),
   `schemaVersion: "1.0.0"
-project: "svatah-fixtures"
+project: "yam-fixtures"
 environment: test
 adapter: playwright
 app: { baseUrl: "${app.origin}" }
@@ -115,14 +115,14 @@ try {
   const handshake = await new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [CLI, "serve", project, "--port", "0"], {
       cwd: ROOT,
-      env: { ...process.env, SVATAH_BASE_URL: app.origin },
+      env: { ...process.env, YAM_BASE_URL: app.origin },
     });
     serve = child;
     let buffer = "";
     const timer = setTimeout(() => reject(new Error("no handshake")), 30_000);
     child.stdout.on("data", (chunk) => {
       buffer += String(chunk);
-      const match = /^svatah serve listening url=(\S+) token=(\S+)$/m.exec(buffer);
+      const match = /^yam serve listening url=(\S+) token=(\S+)$/m.exec(buffer);
       if (match !== null) {
         clearTimeout(timer);
         resolve({ url: match[1], token: match[2] });

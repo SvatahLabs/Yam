@@ -17,8 +17,8 @@
  * cannot say which element was meant, and taking the first would make the run
  * depend on document order.
  */
-import type { BindingEntry, Candidate, Ref } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+import type { BindingEntry, Candidate, Ref } from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 import { contextHash } from "./context.js";
 import { LocatorError, type CandidateAttempt } from "./errors.js";
 import type { BindingsStore, EntrySelector } from "./store.js";

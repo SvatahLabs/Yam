@@ -6,7 +6,7 @@ description (`GET /openapi.json`, LLD §13.5, §13.8). It is committed so a clie
 builds without a running service, and a test regenerates it and diffs, so drift
 between a client and the service is a red build rather than a discovery.
 
-Bodies are `unknown` on purpose: their types are `@svatah/schema`'s, and
+Bodies are `unknown` on purpose: their types are `@svatah/yam-schema`'s, and
 re-deriving them here would make a second, subtly different set of the same
 types (REQ-STD-1).
 """
@@ -204,7 +204,7 @@ class GeneratedClient:
         return self._call("post", f"/heal", body=body)
 
     def post_migrate(self, body: Any = None) -> Any:
-        """`POST /migrate` — Import a Svatah ADE prototype's electron-db directory into this project"""
+        """`POST /migrate` — Import a Yam ADE prototype's electron-db directory into this project"""
         return self._call("post", f"/migrate", body=body)
 
     def post_record(self, body: Any = None) -> Any:

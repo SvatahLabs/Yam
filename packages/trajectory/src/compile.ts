@@ -47,9 +47,9 @@ import {
   type Candidate,
   type Proposal,
   type Story,
-} from "@svatah/schema";
-import { compile } from "@svatah/compiler";
-import { elementId, readFlow, TargetDictionary } from "@svatah/spec";
+} from "@svatah/yam-schema";
+import { compile } from "@svatah/yam-compiler";
+import { elementId, readFlow, TargetDictionary } from "@svatah/yam-spec";
 import type { TrajectoryLine } from "./capture.js";
 import { draftFor, type DraftStep } from "./sentence.js";
 
@@ -407,7 +407,7 @@ function bindingsFor(
              * trajectory does have is the hash of the whole page as it was, and
              * that is a real recorded fact rather than an invented one. It is a
              * broader key than a recorded binding's, so it drifts sooner; the
-             * first `svatah record` after the proposal is applied replaces it
+             * first `yam record` after the proposal is applied replaces it
              * with the narrow one. Another reason these are `verified: false`.
              */
             hash: draft.snapshotHash ?? canonicalHash(describe),
@@ -444,7 +444,7 @@ function bindingsFor(
 /**
  * Candidates from a description, model-free (LLD §13.4, REQ-REC-3).
  *
- * The same ranking `@svatah/bindings`' `synthesise` uses, applied to a
+ * The same ranking `@svatah/yam-bindings`' `synthesise` uses, applied to a
  * description rather than to a live surface: `synthesise` asks the surface how
  * many elements each candidate matches, and a proposal has no surface to ask.
  * So the ambiguity check is the one thing missing, and it is exactly why these

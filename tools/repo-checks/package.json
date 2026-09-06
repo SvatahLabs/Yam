@@ -1,28 +1,28 @@
 {
-  "name": "@svatah/repo-checks",
+  "name": "@svatah/yam-repo-checks",
   "version": "0.1.0",
   "private": true,
   "description": "Workspace-level checks that span package directories: import boundaries, licences, eval and documentation coverage",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
-    "build": "echo \"@svatah/repo-checks has nothing to build\"",
+    "build": "echo \"@svatah/yam-repo-checks has nothing to build\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/schema": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
     "yaml": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@svatah/cli": "workspace:*",
-    "@svatah/compiler": "workspace:*",
-    "@svatah/migrate": "workspace:*",
-    "@svatah/screens": "workspace:*",
-    "@svatah/sdk": "workspace:*",
-    "@svatah/spec": "workspace:*",
-    "@svatah/ui-tokens": "workspace:*",
+    "@svatah/yam": "workspace:*",
+    "@svatah/yam-compiler": "workspace:*",
+    "@svatah/yam-migrate": "workspace:*",
+    "@svatah/yam-screens": "workspace:*",
+    "@svatah/yam-sdk": "workspace:*",
+    "@svatah/yam-spec": "workspace:*",
+    "@svatah/yam-ui-tokens": "workspace:*",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "sample-web": "workspace:*",

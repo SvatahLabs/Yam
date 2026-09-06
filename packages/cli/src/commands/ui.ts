@@ -1,25 +1,25 @@
 /**
- * `svatah ui` — the terminal cockpit (T9.4, REQ-TUI-1, LLD §13.7, §15).
+ * `yam ui` — the terminal cockpit (T9.4, REQ-TUI-1, LLD §13.7, §15).
  *
- *   svatah ui [dir] [--screen flows|run|…] [--flow <file>] [--run <id>]
+ *   yam ui [dir] [--screen flows|run|…] [--flow <file>] [--run <id>]
  *             [--story <name>] [--url <url> --token <t>] [--json]
  *             [--capture <ms>]
  *
- * > `svatah ui` is a full authoring cockpit in the terminal: a standalone Ink
+ * > `yam ui` is a full authoring cockpit in the terminal: a standalone Ink
  * > application over the local service rendering the same screen model as the
  * > ADE […] It opens or adopts a service exactly as the ADE does.
  *
  * ## "Exactly as the ADE does"
  *
  * The ADE, on project open: look for a service already serving this directory,
- * and connect to it if there is one; otherwise spawn `svatah serve --port 0`,
+ * and connect to it if there is one; otherwise spawn `yam serve --port 0`,
  * read the url and token off its stdout, and stop it on quit (LLD §13.6). This
  * does the same three things, with one difference that is the terminal's: a
- * `--url`/`--token` pair, or `SVATAH_SERVICE_URL`/`SVATAH_SERVICE_TOKEN`, skips
+ * `--url`/`--token` pair, or `YAM_SERVICE_URL`/`YAM_SERVICE_TOKEN`, skips
  * the search — which is how an agent points the cockpit at a service it already
  * has, and what `tools/repo-checks/test/tui-pty.test.ts` uses.
  *
- * The service is spawned rather than mounted in-process on purpose. `svatah
+ * The service is spawned rather than mounted in-process on purpose. `yam
  * serve` prints a handshake line and owns a port; a cockpit that had *become*
  * the service would be a second implementation of it, and `--json` would then be
  * printing a state no other client could reach.
@@ -32,16 +32,16 @@ import {
   type CommandIo,
   type ExitCode,
   type ParsedArgs,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 import { resolve } from "node:path";
 
-/** The one line `svatah serve` prints when it is listening (LLD §13.6). */
+/** The one line `yam serve` prints when it is listening (LLD §13.6). */
 export function parseHandshake(line: string): { url: string; token: string } | undefined {
-  const match = /^svatah serve listening url=(\S+) token=(\S+)$/m.exec(line);
+  const match = /^yam serve listening url=(\S+) token=(\S+)$/m.exec(line);
   return match === null ? undefined : { url: match[1]!, token: match[2]! };
 }
 
-/** Start `svatah serve` on this directory and wait for its handshake. */
+/** Start `yam serve` on this directory and wait for its handshake. */
 async function openService(
   project: string,
 ): Promise<{ url: string; token: string; child: ChildProcess }> {
@@ -54,8 +54,8 @@ async function openService(
       child.kill("SIGTERM");
       fail(
         new Error(
-          "`svatah serve` printed no handshake within 30 s. Run it by hand to see what it says, " +
-            "then point the cockpit at it with `svatah ui --url <url> --token <token>`.",
+          "`yam serve` printed no handshake within 30 s. Run it by hand to see what it says, " +
+            "then point the cockpit at it with `yam ui --url <url> --token <token>`.",
         ),
       );
     }, 30_000);
@@ -82,7 +82,7 @@ async function openService(
     });
     child.on("exit", (code) => {
       clearTimeout(timer);
-      fail(new Error(`\`svatah serve\` exited ${code ?? "?"} before it was listening.\n${buffer}`));
+      fail(new Error(`\`yam serve\` exited ${code ?? "?"} before it was listening.\n${buffer}`));
     });
   });
 }
@@ -92,8 +92,8 @@ export async function uiCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCo
   const asJson = args.options["json"] !== undefined;
 
   const given = {
-    url: stringOption(args, "url") ?? process.env["SVATAH_SERVICE_URL"],
-    token: stringOption(args, "token") ?? process.env["SVATAH_SERVICE_TOKEN"],
+    url: stringOption(args, "url") ?? process.env["YAM_SERVICE_URL"],
+    token: stringOption(args, "token") ?? process.env["YAM_SERVICE_TOKEN"],
   };
 
   let started: ChildProcess | undefined;
@@ -113,11 +113,11 @@ export async function uiCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCo
 
   try {
     /*
-     * Imported lazily, like every other command: `svatah run` should not pay
-     * for loading Ink and React, and `svatah --help` should load nothing.
+     * Imported lazily, like every other command: `yam run` should not pay
+     * for loading Ink and React, and `yam --help` should load nothing.
      */
-    const { runUi, screenFrom } = await import("@svatah/tui");
-    const { SvatahClient } = await import("@svatah/sdk");
+    const { runUi, screenFrom } = await import("@svatah/yam-tui");
+    const { YamClient } = await import("@svatah/yam-sdk");
 
     const screen = screenFrom(stringOption(args, "screen"));
     const params = {
@@ -130,7 +130,7 @@ export async function uiCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCo
     };
 
     await runUi({
-      service: new SvatahClient(connection),
+      service: new YamClient(connection),
       connection: { url: connection.url, project },
       ...(screen === undefined ? {} : { screen }),
       params,

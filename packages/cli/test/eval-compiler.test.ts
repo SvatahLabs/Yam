@@ -1,5 +1,5 @@
 /**
- * `svatah eval compiler` (T4.3, T4.4, REQ-COMP-9, REQ-PKG-4).
+ * `yam eval compiler` (T4.3, T4.4, REQ-COMP-9, REQ-PKG-4).
  *
  * The numbers in `reports/eval-compiler.md` come from a real local model and are
  * measured by hand; the contract has no model server, so what runs here is
@@ -18,8 +18,8 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readGolden } from "@svatah/compiler";
-import { EXIT } from "@svatah/bindings-cli";
+import { readGolden } from "@svatah/yam-compiler";
+import { EXIT } from "@svatah/yam-bindings-cli";
 import { main } from "../src/index.js";
 import {
   meetsThresholds,
@@ -128,7 +128,7 @@ describe("the golden set (REQ-COMP-9)", () => {
      * would have claimed is one Tier 1 answers before the model is ever asked,
      * and it would be scored as a Tier 2 success.
      */
-    const { parseSentence } = await import("@svatah/compiler");
+    const { parseSentence } = await import("@svatah/yam-compiler");
     const claimed = entries
       .filter((e) => e.tier === 2)
       .filter((e) => parseSentence(e.text, { file: "golden", line: 1 }).raw !== undefined)
@@ -146,7 +146,7 @@ describe("the golden set (REQ-COMP-9)", () => {
 /**
  * The configuration the number is reproducible from (P4-F2, Draft 2.6, LLD §16).
  *
- * Phase 4's verifier ran `svatah eval compiler --tier2` on a clean checkout and
+ * Phase 4's verifier ran `yam eval compiler --tier2` on a clean checkout and
  * got 0 of 41 and "Below REQ-COMP-9's thresholds". The eval read `compile.tier2`
  * from the config at `--project` (default `.`), the repository root has none, so
  * no model was registered and every tier 2 sentence was scored as a wrong
@@ -157,10 +157,10 @@ describe("the golden set (REQ-COMP-9)", () => {
  * configured is `not measured` rather than zero.
  */
 describe("the golden project's own config (P4-F2, LLD §16)", () => {
-  const configPath = join(PROJECT, "svatah.config.yaml");
+  const configPath = join(PROJECT, "yam.config.yaml");
 
   it("is committed, with the model and the digest the report names", () => {
-    expect(existsSync(configPath), "evals/compiler/project/svatah.config.yaml").toBe(true);
+    expect(existsSync(configPath), "evals/compiler/project/yam.config.yaml").toBe(true);
     const config = readFileSync(configPath, "utf8");
     expect(config).toContain("qwen2.5:3b");
     expect(config).toContain(
@@ -193,7 +193,7 @@ describe("the golden project's own config (P4-F2, LLD §16)", () => {
      * — not be compiled with no model registered and counted as 41 wrong
      * answers, which is what produced "tier2 0/41, Below thresholds".
      */
-    const empty = mkdtempSync(join(tmpdir(), "svatah-eval-noconfig-"));
+    const empty = mkdtempSync(join(tmpdir(), "yam-eval-noconfig-"));
     try {
       const { report, code, err } = await evaluate("--only", "tier2", "--project", empty);
       expect(report.notMeasured?.["tier2"]).toBeTypeOf("string");
@@ -238,7 +238,7 @@ describe("the published report (REQ-PKG-4)", () => {
   const path = join(ROOT, "reports", "eval-compiler.md");
 
   it("exists and is a real result rather than a placeholder", () => {
-    expect(existsSync(path), "run `svatah eval compiler --report reports/eval-compiler.md`").toBe(
+    expect(existsSync(path), "run `yam eval compiler --report reports/eval-compiler.md`").toBe(
       true,
     );
     const report = readFileSync(path, "utf8");

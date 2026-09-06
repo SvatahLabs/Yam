@@ -1,5 +1,5 @@
 /*
- * `dev.svatah:svatah-sdk` (REQ-SDK-2, LLD §13.8).
+ * `com.svatah.yam:svatah-yam` (REQ-SDK-2, LLD §13.8).
  *
  * Generated from the service's OpenAPI description by
  * `node scripts/generate-clients.mjs`, published from the same pipeline as the
@@ -20,7 +20,7 @@ plugins {
     `maven-publish`
 }
 
-group = "dev.svatah"
+group = "com.svatah.yam"
 version = "0.1.0"
 
 java {
@@ -36,13 +36,13 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-            artifactId = "svatah-sdk"
+            artifactId = "svatah-yam"
             pom {
-                name.set("Svatah SDK")
+                name.set("Yam SDK")
                 description.set(
-                    "Typed client for the Svatah local service, generated from its OpenAPI description",
+                    "Typed client for the Yam local service, generated from its OpenAPI description",
                 )
-                url.set("https://github.com/a-t-u-l/svatah")
+                url.set("https://github.com/SvatahLabs/yam")
                 licenses {
                     license {
                         name.set("Apache License, Version 2.0")

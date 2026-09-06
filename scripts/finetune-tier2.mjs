@@ -62,12 +62,12 @@ const numLayers = Number(option("layers", "8"));
 const stack = option("stack", process.platform === "darwin" ? "mlx" : "peft");
 /*
  * The interpreter, so a virtual environment works without activating one.
- * `SVATAH_FINETUNE_PYTHON=/path/to/venv/bin/python` is how CI and a developer
+ * `YAM_FINETUNE_PYTHON=/path/to/venv/bin/python` is how CI and a developer
  * both point this at a stack that is not on the system Python — which is the
  * normal case, because a system Python on macOS is externally managed and
  * `pip install` into it fails.
  */
-const python = option("python", process.env["SVATAH_FINETUNE_PYTHON"] ?? "python3");
+const python = option("python", process.env["YAM_FINETUNE_PYTHON"] ?? "python3");
 
 const die = (code, message) => {
   process.stderr.write(`${message}\n`);
@@ -84,11 +84,11 @@ if (!existsSync(pairsPath)) {
 
 /* The base model, from the golden project's own committed config (LLD §16). */
 const goldenConfig = parseYaml(
-  readFileSync(join(ROOT, "evals/compiler/project/svatah.config.yaml"), "utf8"),
+  readFileSync(join(ROOT, "evals/compiler/project/yam.config.yaml"), "utf8"),
 );
 const base = option("base", goldenConfig?.compile?.tier2?.model);
 if (base === undefined) {
-  die(2, "No Tier 2 model is configured in evals/compiler/project/svatah.config.yaml.");
+  die(2, "No Tier 2 model is configured in evals/compiler/project/yam.config.yaml.");
 }
 
 /**
@@ -148,7 +148,7 @@ if (!available) {
       (stack === "mlx"
         ? "  .venv/bin/pip install mlx-lm\n"
         : "  .venv/bin/pip install peft transformers torch datasets\n") +
-      `  SVATAH_FINETUNE_PYTHON=.venv/bin/python node scripts/finetune-tier2.mjs --epochs ${epochs}\n` +
+      `  YAM_FINETUNE_PYTHON=.venv/bin/python node scripts/finetune-tier2.mjs --epochs ${epochs}\n` +
       "\nNothing was written. A report from a training run that did not happen would be " +
       "worse than no report (ADR-4).",
   );
@@ -268,7 +268,7 @@ if (stack === "mlx") {
   }
 }
 
-const tunedModel = option("name", `${String(base).replace(/[:.]/g, "-")}-svatah`);
+const tunedModel = option("name", `${String(base).replace(/[:.]/g, "-")}-yam`);
 writeFileSync(
   join(out, "Modelfile"),
   `# The tuned Tier 2 model (T6.5, ADR-4).\n` +
@@ -298,7 +298,7 @@ writeFileSync(
  * The digest is over the *adapter*, not over the name.
  *
  * `compile.tier2.digest` exists so provenance can say which build of a model
- * produced a step (LLD §16), and a tuned model whose name is `qwen2.5:3b-svatah`
+ * produced a step (LLD §16), and a tuned model whose name is `qwen2.5:3b-yam`
  * says nothing about which training run made it. Hashing the adapter weights and
  * the training set together is what makes the answer reproducible.
  */

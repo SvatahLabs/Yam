@@ -92,7 +92,7 @@ afterEach(() => {
 
 /** Write a one-off page and audit it. */
 function auditPage(body: string, options: { lang?: string } = {}): Report {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-sheet-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-sheet-"));
   workspaces.push(dir);
   const file = join(dir, "index.html");
   writeFileSync(
@@ -246,7 +246,7 @@ describe("axe-core, fetched at test time, agrees with the audit (T10.4)", () => 
        * see it: axe by its own rule, the audit by `a11y-landmark-unique`. Before
        * T10.4 axe saw it eleven times and the audit not at all.
        */
-      const dir = mkdtempSync(join(tmpdir(), "svatah-axe-agree-"));
+      const dir = mkdtempSync(join(tmpdir(), "yam-axe-agree-"));
       workspaces.push(dir);
       const page = join(dir, "index.html");
       writeFileSync(

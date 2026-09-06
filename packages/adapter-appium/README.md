@@ -1,4 +1,4 @@
-# @svatah/adapter-appium
+# @svatah/yam-adapter-appium
 
 The Appium adapter: `AgentSurface` on Android and iOS (REQ-ADP-5, LLD §7.4).
 
@@ -11,7 +11,7 @@ which of the two it is in — that is the point of the surface being a boundary.
 ## Configuring it
 
 ```yaml
-# svatah.config.yaml
+# yam.config.yaml
 adapter: appium
 mobile:
   appium: "http://127.0.0.1:4723"
@@ -29,15 +29,15 @@ app:
 
 | Variable | Meaning |
 |---|---|
-| `SVATAH_APPIUM_URL` | Where the Appium server is; overrides `mobile.appium` |
-| `SVATAH_APPIUM_CAPS` | A JSON object of capabilities, merged **over** `mobile.capabilities` |
+| `YAM_APPIUM_URL` | Where the Appium server is; overrides `mobile.appium` |
+| `YAM_APPIUM_CAPS` | A JSON object of capabilities, merged **over** `mobile.capabilities` |
 
 ## The emulator gate
 
 T4.2's Validate list has a half that no fake can establish, and this is it. The
 adapter's conversion, candidate mapping, action table and predicates are unit
 tested against recorded page sources and a fake device
-(`pnpm --filter @svatah/adapter-appium test`); what those cannot show is that a
+(`pnpm --filter @svatah/yam-adapter-appium test`); what those cannot show is that a
 real driver accepts these selectors and that a real screen looks like the
 fixtures. Run this on a machine with an emulator:
 
@@ -54,14 +54,14 @@ pnpm --filter sample-web start &
 
 # 3. Android Chrome replays the migrated fixtures (T4.2's first Validate item).
 cp -R evals/fixtures /tmp/appium-fixtures
-sed -i '' 's/^adapter: playwright$/adapter: appium/' /tmp/appium-fixtures/svatah.config.yaml
-SVATAH_APPIUM_CAPS='{"platformName":"Android","appium:automationName":"UiAutomator2","browserName":"Chrome"}' \
-SVATAH_BASE_URL=http://10.0.2.2:4173 \
+sed -i '' 's/^adapter: playwright$/adapter: appium/' /tmp/appium-fixtures/yam.config.yaml
+YAM_APPIUM_CAPS='{"platformName":"Android","appium:automationName":"UiAutomator2","browserName":"Chrome"}' \
+YAM_BASE_URL=http://10.0.2.2:4173 \
   node packages/cli/dist/bin.js run /tmp/appium-fixtures --host none --flow flows/svatah.flow
 
 # 4. The surface conformance subset that does not need windows, dialogs,
 #    frames or a file picker — the capabilities a phone does not have.
-SVATAH_APPIUM_CAPS='{"platformName":"Android","appium:automationName":"UiAutomator2","browserName":"Chrome"}' \
+YAM_APPIUM_CAPS='{"platformName":"Android","appium:automationName":"UiAutomator2","browserName":"Chrome"}' \
   node packages/cli/dist/bin.js surface conform --adapter appium \
     --base-url http://10.0.2.2:4173 \
     --only home.snapshot,home.click-navigates,login.snapshot-states,login.type-changes-value,\
@@ -69,7 +69,7 @@ login.checkbox-state,login.describe,login.locate-cardinality,dashboard.read-kind
 dashboard.state,widgets.select,errors.typed,capabilities.descriptor
 
 # 5. Native: grounding and three steps against an app under test.
-SVATAH_APPIUM_CAPS='{"platformName":"Android","appium:automationName":"UiAutomator2","appium:app":"/path/to/sample.apk"}' \
+YAM_APPIUM_CAPS='{"platformName":"Android","appium:automationName":"UiAutomator2","appium:app":"/path/to/sample.apk"}' \
   node packages/cli/dist/bin.js record /tmp/native-project --gateway fake --rebind
 ```
 

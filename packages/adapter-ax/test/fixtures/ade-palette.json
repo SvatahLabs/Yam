@@ -1,13 +1,13 @@
 {
-  "process": "Svatah ADE",
-  "title": "Svatah ADE",
+  "process": "Yam ADE",
+  "title": "Yam ADE",
   "truncated": false,
   "nodes": [
     {
       "parent": -1,
       "role": "AXWindow",
       "subrole": "AXStandardWindow",
-      "title": "Svatah ADE",
+      "title": "Yam ADE",
       "box": [
         0,
         0,
@@ -18,7 +18,7 @@
     {
       "parent": 0,
       "role": "AXWebArea",
-      "description": "Svatah ADE",
+      "description": "Yam ADE",
       "enabled": true,
       "focused": true,
       "box": [
@@ -185,7 +185,7 @@
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "flows Compile svatah compile",
+      "title": "flows Compile yam compile",
       "enabled": true,
       "selected": false,
       "actions": [
@@ -238,7 +238,7 @@
     {
       "parent": 16,
       "role": "AXStaticText",
-      "title": "svatah compile",
+      "title": "yam compile",
       "enabled": true,
       "box": [
         841,
@@ -250,7 +250,7 @@
     {
       "parent": 21,
       "role": "AXStaticText",
-      "title": "svatah compile",
+      "title": "yam compile",
       "enabled": true
     },
     {
@@ -309,7 +309,7 @@
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "run Run svatah run --flow <file>",
+      "title": "run Run yam run --flow <file>",
       "enabled": true,
       "selected": false,
       "actions": [
@@ -362,7 +362,7 @@
     {
       "parent": 28,
       "role": "AXStaticText",
-      "title": "svatah run --flow <file>",
+      "title": "yam run --flow <file>",
       "enabled": true,
       "box": [
         731,
@@ -374,13 +374,13 @@
     {
       "parent": 33,
       "role": "AXStaticText",
-      "title": "svatah run --flow <file>",
+      "title": "yam run --flow <file>",
       "enabled": true
     },
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "run Run story svatah run --story <name>",
+      "title": "run Run story yam run --story <name>",
       "enabled": true,
       "selected": false,
       "actions": [
@@ -433,7 +433,7 @@
     {
       "parent": 35,
       "role": "AXStaticText",
-      "title": "svatah run --story <name>",
+      "title": "yam run --story <name>",
       "enabled": true,
       "box": [
         759,
@@ -445,13 +445,13 @@
     {
       "parent": 40,
       "role": "AXStaticText",
-      "title": "svatah run --story <name>",
+      "title": "yam run --story <name>",
       "enabled": true
     },
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "run Run again svatah run --flow <file>",
+      "title": "run Run again yam run --flow <file>",
       "enabled": true,
       "selected": false,
       "actions": [
@@ -504,7 +504,7 @@
     {
       "parent": 42,
       "role": "AXStaticText",
-      "title": "svatah run --flow <file>",
+      "title": "yam run --flow <file>",
       "enabled": true,
       "box": [
         731,
@@ -516,13 +516,13 @@
     {
       "parent": 47,
       "role": "AXStaticText",
-      "title": "svatah run --flow <file>",
+      "title": "yam run --flow <file>",
       "enabled": true
     },
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "run Resume from step svatah run --resume <runId> --from <stepId>",
+      "title": "run Resume from step yam run --resume <runId> --from <stepId>",
       "enabled": false,
       "selected": false,
       "actions": [
@@ -575,7 +575,7 @@
     {
       "parent": 49,
       "role": "AXStaticText",
-      "title": "svatah run --resume <runId> --from <stepId>",
+      "title": "yam run --resume <runId> --from <stepId>",
       "enabled": true,
       "box": [
         624,
@@ -587,13 +587,13 @@
     {
       "parent": 54,
       "role": "AXStaticText",
-      "title": "svatah run --resume <runId> --from <stepId>",
+      "title": "yam run --resume <runId> --from <stepId>",
       "enabled": true
     },
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "record Record svatah record --flow <file>",
+      "title": "record Record yam record --flow <file>",
       "enabled": true,
       "selected": false,
       "actions": [
@@ -646,7 +646,7 @@
     {
       "parent": 56,
       "role": "AXStaticText",
-      "title": "svatah record --flow <file>",
+      "title": "yam record --flow <file>",
       "enabled": true,
       "box": [
         715,
@@ -658,7 +658,7 @@
     {
       "parent": 61,
       "role": "AXStaticText",
-      "title": "svatah record --flow <file>",
+      "title": "yam record --flow <file>",
       "enabled": true
     },
     {
@@ -929,7 +929,7 @@
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "heal Heal svatah heal --run <id>",
+      "title": "heal Heal yam heal --run <id>",
       "enabled": true,
       "selected": false,
       "actions": [
@@ -982,7 +982,7 @@
     {
       "parent": 88,
       "role": "AXStaticText",
-      "title": "svatah heal --run <id>",
+      "title": "yam heal --run <id>",
       "enabled": true,
       "box": [
         753,
@@ -994,13 +994,13 @@
     {
       "parent": 93,
       "role": "AXStaticText",
-      "title": "svatah heal --run <id>",
+      "title": "yam heal --run <id>",
       "enabled": true
     },
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "heal Heal from bind failures svatah heal --from-bind-failures",
+      "title": "heal Heal from bind failures yam heal --from-bind-failures",
       "enabled": true,
       "selected": false,
       "actions": [
@@ -1053,7 +1053,7 @@
     {
       "parent": 95,
       "role": "AXStaticText",
-      "title": "svatah heal --from-bind-failures",
+      "title": "yam heal --from-bind-failures",
       "enabled": true,
       "box": [
         706,
@@ -1065,7 +1065,7 @@
     {
       "parent": 100,
       "role": "AXStaticText",
-      "title": "svatah heal --from-bind-failures",
+      "title": "yam heal --from-bind-failures",
       "enabled": true
     },
     {
@@ -1124,7 +1124,7 @@
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "bindings Verify all bindings svatah bindings verify",
+      "title": "bindings Verify all bindings yam bindings verify",
       "enabled": true,
       "selected": false,
       "actions": [
@@ -1177,7 +1177,7 @@
     {
       "parent": 107,
       "role": "AXStaticText",
-      "title": "svatah bindings verify",
+      "title": "yam bindings verify",
       "enabled": true,
       "box": [
         753,
@@ -1189,13 +1189,13 @@
     {
       "parent": 112,
       "role": "AXStaticText",
-      "title": "svatah bindings verify",
+      "title": "yam bindings verify",
       "enabled": true
     },
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "bindings Prune unused bindings svatah bindings prune",
+      "title": "bindings Prune unused bindings yam bindings prune",
       "enabled": false,
       "selected": false,
       "actions": [
@@ -1248,7 +1248,7 @@
     {
       "parent": 114,
       "role": "AXStaticText",
-      "title": "svatah bindings prune",
+      "title": "yam bindings prune",
       "enabled": true,
       "box": [
         789,
@@ -1260,7 +1260,7 @@
     {
       "parent": 119,
       "role": "AXStaticText",
-      "title": "svatah bindings prune",
+      "title": "yam bindings prune",
       "enabled": true
     },
     {
@@ -1372,7 +1372,7 @@
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "agents Start the tool server svatah tool serve",
+      "title": "agents Start the tool server yam tool serve",
       "enabled": false,
       "selected": false,
       "actions": [
@@ -1425,7 +1425,7 @@
     {
       "parent": 131,
       "role": "AXStaticText",
-      "title": "svatah tool serve",
+      "title": "yam tool serve",
       "enabled": true,
       "box": [
         819,
@@ -1437,13 +1437,13 @@
     {
       "parent": 136,
       "role": "AXStaticText",
-      "title": "svatah tool serve",
+      "title": "yam tool serve",
       "enabled": true
     },
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "explorer Open a session svatah surface snapshot",
+      "title": "explorer Open a session yam surface snapshot",
       "enabled": true,
       "selected": false,
       "actions": [
@@ -1496,7 +1496,7 @@
     {
       "parent": 138,
       "role": "AXStaticText",
-      "title": "svatah surface snapshot",
+      "title": "yam surface snapshot",
       "enabled": true,
       "box": [
         745,
@@ -1508,7 +1508,7 @@
     {
       "parent": 143,
       "role": "AXStaticText",
-      "title": "svatah surface snapshot",
+      "title": "yam surface snapshot",
       "enabled": true
     },
     {
@@ -1567,7 +1567,7 @@
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "explorer Act on the element svatah surface act",
+      "title": "explorer Act on the element yam surface act",
       "enabled": false,
       "selected": false,
       "actions": [
@@ -1620,7 +1620,7 @@
     {
       "parent": 150,
       "role": "AXStaticText",
-      "title": "svatah surface act",
+      "title": "yam surface act",
       "enabled": true,
       "box": [
         811,
@@ -1632,13 +1632,13 @@
     {
       "parent": 155,
       "role": "AXStaticText",
-      "title": "svatah surface act",
+      "title": "yam surface act",
       "enabled": true
     },
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "explorer Snapshot the session svatah surface snapshot",
+      "title": "explorer Snapshot the session yam surface snapshot",
       "enabled": false,
       "selected": false,
       "actions": [
@@ -1691,7 +1691,7 @@
     {
       "parent": 157,
       "role": "AXStaticText",
-      "title": "svatah surface snapshot",
+      "title": "yam surface snapshot",
       "enabled": true,
       "box": [
         774,
@@ -1703,13 +1703,13 @@
     {
       "parent": 162,
       "role": "AXStaticText",
-      "title": "svatah surface snapshot",
+      "title": "yam surface snapshot",
       "enabled": true
     },
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "import Import prototype database svatah migrate <dest> --from-ade <electron-db dir>",
+      "title": "import Import prototype database yam migrate <dest> --from-ade <electron-db dir>",
       "enabled": true,
       "selected": false,
       "actions": [
@@ -1762,7 +1762,7 @@
     {
       "parent": 164,
       "role": "AXStaticText",
-      "title": "svatah migrate <dest> --from-ade <electron-db dir>",
+      "title": "yam migrate <dest> --from-ade <electron-db dir>",
       "enabled": true,
       "box": [
         571,
@@ -1774,13 +1774,13 @@
     {
       "parent": 169,
       "role": "AXStaticText",
-      "title": "svatah migrate <dest> --from-ade <electron-db dir>",
+      "title": "yam migrate <dest> --from-ade <electron-db dir>",
       "enabled": true
     },
     {
       "parent": 12,
       "role": "AXMenuItem",
-      "title": "trajectory Compile a trajectory svatah trajectory compile <trajectory.jsonl>",
+      "title": "trajectory Compile a trajectory yam trajectory compile <trajectory.jsonl>",
       "enabled": false,
       "selected": false,
       "actions": [
@@ -1833,7 +1833,7 @@
     {
       "parent": 171,
       "role": "AXStaticText",
-      "title": "svatah trajectory compile <trajectory.jsonl>",
+      "title": "yam trajectory compile <trajectory.jsonl>",
       "enabled": true,
       "box": [
         616,
@@ -1845,7 +1845,7 @@
     {
       "parent": 176,
       "role": "AXStaticText",
-      "title": "svatah trajectory compile <trajectory.jsonl>",
+      "title": "yam trajectory compile <trajectory.jsonl>",
       "enabled": true
     },
     {

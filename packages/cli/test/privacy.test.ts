@@ -21,11 +21,11 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { EXIT } from "@svatah/bindings-cli";
+import { EXIT } from "@svatah/yam-bindings-cli";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 const BLOCKER = join(ROOT, "scripts", "block-external-network.mjs");
 
 let app: SampleServer;
@@ -37,18 +37,18 @@ const projects: string[] = [];
  * is a YAML error rather than an override.
  */
 function scaffold(compileSection?: string): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-privacy-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-privacy-"));
   projects.push(dir);
   for (const entry of ["bindings", "flows", "api"]) {
     cpSync(join(FIXTURES, entry), join(dir, entry), { recursive: true });
   }
   cpSync(join(FIXTURES, "data.yaml"), join(dir, "data.yaml"));
-  const base = readFileSync(join(FIXTURES, "svatah.config.yaml"), "utf8").replace(
+  const base = readFileSync(join(FIXTURES, "yam.config.yaml"), "utf8").replace(
     /baseUrl: ".*"/,
     `baseUrl: "${app.origin}"`,
   );
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
+    join(dir, "yam.config.yaml"),
     compileSection === undefined
       ? base
       : // `compile:` and every indented or blank line under it, up to the next
@@ -67,13 +67,13 @@ function offline(
 ): Promise<{ code: number; output: string }> {
   return new Promise((done) => {
     let output = "";
-    const child = spawn(process.execPath, [SVATAH, ...args], {
+    const child = spawn(process.execPath, [YAM, ...args], {
       cwd,
       env: {
         ...process.env,
-        SVATAH_SAMPLE_PASSWORD: "qwerty123",
-        SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-        SVATAH_SAMPLE_CARD_CVV: "123",
+        YAM_SAMPLE_PASSWORD: "qwerty123",
+        YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+        YAM_SAMPLE_CARD_CVV: "123",
         NODE_OPTIONS: [process.env["NODE_OPTIONS"], `--import=${BLOCKER}`]
           .filter(Boolean)
           .join(" "),
@@ -87,7 +87,7 @@ function offline(
 }
 
 beforeAll(async () => {
-  if (!existsSync(SVATAH)) throw new Error("Run `pnpm -r build` first.");
+  if (!existsSync(YAM)) throw new Error("Run `pnpm -r build` first.");
   app = await startSampleApp(0);
 }, 180_000);
 
@@ -101,9 +101,9 @@ describe("compile reaches nothing at all (REQ-NFR-3)", () => {
     // The default, and the point: no step text leaves the machine because
     // nothing is sent anywhere. `--tier2` and `--tier3` are opt-in.
     const project = scaffold();
-    const result = await offline(["compile", ".", "--stable", "--out", ".svatah/plan.json"], project);
+    const result = await offline(["compile", ".", "--stable", "--out", ".yam/plan.json"], project);
     expect(result.code, result.output).toBe(EXIT.ok);
-    expect(existsSync(join(project, ".svatah", "plan.json"))).toBe(true);
+    expect(existsSync(join(project, ".yam", "plan.json"))).toBe(true);
     expect(result.output).not.toContain("Blocked a");
   }, 180_000);
 
@@ -124,7 +124,7 @@ describe("compile reaches nothing at all (REQ-NFR-3)", () => {
     await new Promise<void>((done) => {
       const child = spawn(
         process.execPath,
-        [SVATAH, "compile", ".", "--stable", "--out", "online.json"],
+        [YAM, "compile", ".", "--stable", "--out", "online.json"],
         { cwd: project, env: process.env },
       );
       child.on("close", () => done());
@@ -275,7 +275,7 @@ describe("the documentation names what still needs a remote model (T4.7)", () =>
 
   it("says which commands reach a remote model and which do not", () => {
     expect(doc).toContain("## What reaches a remote model");
-    for (const command of ["svatah compile", "svatah run", "svatah record", "svatah heal"]) {
+    for (const command of ["yam compile", "yam run", "yam record", "yam heal"]) {
       expect(doc, command).toContain(command);
     }
   });

@@ -1,5 +1,5 @@
 /**
- * Resolving the Node that runs `svatah serve` (T8.1, P7-F1, Draft 2.9 §13.6).
+ * Resolving the Node that runs `yam serve` (T8.1, P7-F1, Draft 2.9 §13.6).
  *
  * The order, the version floor, and the message — the three things the ADE's
  * behaviour rests on. Every candidate is probed through an injected function, so
@@ -20,23 +20,23 @@ import {
 
 /** A directory holding files named as an executable would be. */
 function withFiles(...names: readonly string[]): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-runtime-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-runtime-"));
   for (const name of names) writeFileSync(join(dir, name), "", "utf8");
   return dir;
 }
 
 describe("the order LLD §13.6 states", () => {
-  it("prefers SVATAH_NODE", () => {
+  it("prefers YAM_NODE", () => {
     const path = join(withFiles("my-node"), "my-node");
     const resolution = resolveNodeRuntime({
-      env: { SVATAH_NODE: path, PATH: withFiles("node") },
+      env: { YAM_NODE: path, PATH: withFiles("node") },
       platform: "darwin",
       probe: () => "v22.23.2",
     });
-    expect(resolution.runtime).toEqual({ path, source: "SVATAH_NODE", version: "v22.23.2" });
+    expect(resolution.runtime).toEqual({ path, source: "YAM_NODE", version: "v22.23.2" });
   });
 
-  it("falls through to a `node` on PATH when SVATAH_NODE is unset", () => {
+  it("falls through to a `node` on PATH when YAM_NODE is unset", () => {
     const dir = withFiles("node");
     const resolution = resolveNodeRuntime({
       env: { PATH: dir },
@@ -63,14 +63,14 @@ describe("the order LLD §13.6 states", () => {
 
   it("uses a Node beside the CLI under resources/ when the packager shipped one", () => {
     const resources = withFiles("node");
-    const cli = join(resources, "svatah", "dist", "bin.js");
+    const cli = join(resources, "yam", "dist", "bin.js");
     const resolution = resolveNodeRuntime({
-      cli: join(resources, "svatah", "bin.js"),
+      cli: join(resources, "yam", "bin.js"),
       env: { PATH: "" },
       platform: "darwin",
       probe: () => "v22.23.2",
     });
-    expect(cli).toContain("svatah");
+    expect(cli).toContain("yam");
     expect(resolution.runtime?.source).toBe("resources");
     expect(resolution.runtime?.path).toBe(join(resources, "node"));
   });
@@ -90,7 +90,7 @@ describe("what it says when there is nothing to run", () => {
   it("names the three places, which is what the Project screen shows", () => {
     const resolution = resolveNodeRuntime({ env: { PATH: "" }, platform: "darwin" });
     const message = runtimeNotFoundMessage(resolution.attempts);
-    expect(message).toContain("SVATAH_NODE");
+    expect(message).toContain("YAM_NODE");
     expect(message).toContain("PATH");
     expect(message).toContain("resources/");
     expect(message).toContain(`Node ${SUPPORTED_NODE_MAJOR}`);

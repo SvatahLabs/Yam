@@ -12,8 +12,8 @@
  * The check walks a story's steps in order and carries the set of names defined
  * so far, which is exactly what the executor's scope will hold at that point.
  */
-import type { Signature, Step, ValueRef } from "@svatah/schema";
-import { diagnostic, type Diagnostic } from "@svatah/spec";
+import type { Signature, Step, ValueRef } from "@svatah/yam-schema";
+import { diagnostic, type Diagnostic } from "@svatah/yam-spec";
 
 export interface ValidateContext {
   readonly file: string;

@@ -3,7 +3,7 @@
 # Nineteen rows of the Phase 11 parity report said the same thing in different
 # words — "the language asserts about one element, not about a set" — and
 # Draft 2.15 gave the language the sentence. This file is what that sentence
-# bought: every story here is the Svatah side of a check that had only the
+# bought: every story here is the Yam side of a check that had only the
 # Playwright one, and the check ids in `checks.yaml` pair them.
 #
 # ## Why the scope is named
@@ -31,7 +31,7 @@
 #
 # ## The number in the file name
 #
-# `svatah run` executes a project's `test:` blocks in file order and one session
+# `yam run` executes a project's `test:` blocks in file order and one session
 # serves the whole run, so `99-` — the flow that quits — stays last.
 
 story: every interactive control on the Flows screen is named and id'd
@@ -46,12 +46,12 @@ story: every interactive control on the Flows screen is named and id'd
 story: the Data screen names every secret and shows none of them
   Click the Data rail item
   The Save data button should be visible
-  The run data table should contain "SVATAH_SAMPLE_PASSWORD"
+  The run data table should contain "YAM_SAMPLE_PASSWORD"
   No text on this screen should contain {data.injected.password}
 
 story: the Settings screen shows the project and never a credential
   Click the Settings rail item
-  The project settings table should contain "svatah-fixtures"
+  The project settings table should contain "yam-fixtures"
   The run settings table should contain "playwright"
   The diagnostics panel should be visible
   No text on this screen should contain {data.injected.modelKey}
@@ -74,7 +74,7 @@ story: the Import screen previews into the open project and nowhere else
   Click the Import prototype database rail item
   The prototype database field should be visible
   The where it may write panel should contain "anything outside it"
-  The terminal panel should contain "svatah migrate"
+  The terminal panel should contain "yam migrate"
 
 story: the Bindings screen shows the store and one element's resolver order
   Click the Bindings rail item

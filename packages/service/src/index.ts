@@ -1,12 +1,12 @@
 /**
- * @svatah/service
+ * @svatah/yam-service
  *
  * The local HTTP and event-stream service (REQ-ADE-1, LLD §13.5): the only
- * integration point for the Svatah ADE and for any other client.
+ * integration point for the Yam ADE and for any other client.
  *
  * Every handler calls the same function the CLI calls. LLD §1's import boundary
- * is what keeps that true — this package may import `@svatah/cli` and
- * `@svatah/schema` and nothing else — so the ADE and the CLI cannot end up
+ * is what keeps that true — this package may import `@svatah/yam` and
+ * `@svatah/yam-schema` and nothing else — so the ADE and the CLI cannot end up
  * disagreeing about what a run is.
  */
 export {

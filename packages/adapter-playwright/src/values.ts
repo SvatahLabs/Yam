@@ -8,8 +8,8 @@
  * `{input.x}`; if one arrives it is a caller mistake, and saying so is better
  * than comparing against the string "{data.x}".
  */
-import type { ValueRef } from "@svatah/schema";
-import { DataError } from "@svatah/surface";
+import type { ValueRef } from "@svatah/yam-schema";
+import { DataError } from "@svatah/yam-surface";
 
 export function literalValue(ref: ValueRef): string {
   switch (ref.kind) {

@@ -8,7 +8,7 @@
  * which stories are refused.
  */
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CONFIG, SCHEMA_VERSION, type Config, type Plan, type Story } from "@svatah/schema";
+import { DEFAULT_CONFIG, SCHEMA_VERSION, type Config, type Plan, type Story } from "@svatah/yam-schema";
 import {
   callTool,
   definitionOf,
@@ -53,7 +53,7 @@ const plan = (stories: Story[]): Plan => ({
  *
  * `DEFAULT_CONFIG` is `Omit<Config, "project">` — the project's name is the one
  * field with no defensible default — so the name has to be supplied here. The
- * same construction was wrong in `@svatah/workflow` and is what kept
+ * same construction was wrong in `@svatah/yam-workflow` and is what kept
  * `pnpm -r typecheck` red, which Draft 2.8 §16 now makes part of the
  * verification contract.
  */

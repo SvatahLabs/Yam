@@ -2,8 +2,8 @@
  * What the service is given, rather than what it imports (LLD §13.5).
  *
  * "Every handler calls the same functions the CLI calls; no logic lives in the
- * service." The first draft satisfied that by importing `@svatah/cli` — and made
- * the workspace graph cyclic, because the CLI mounts `svatah serve`. A clean
+ * service." The first draft satisfied that by importing `@svatah/yam` — and made
+ * the workspace graph cyclic, because the CLI mounts `yam serve`. A clean
  * clone then failed to build: pnpm picked an order and the service's type build
  * ran before the CLI had any types to offer.
  *
@@ -15,7 +15,7 @@
  * It also makes the service testable without a browser: a fake `api` is four
  * functions.
  */
-import type { StepResult, Summary } from "@svatah/schema";
+import type { StepResult, Summary } from "@svatah/yam-schema";
 
 /** A project, as the CLI loaded it. Structural, so the service imports nothing. */
 export interface ProjectHandle {
@@ -104,7 +104,7 @@ export interface ServiceApi {
    * Execute one `ApiRequest` ad hoc, for the ADE's API client (LLD §13.5).
    *
    * The HTTP adapter is module (b)'s and the service imports only
-   * `@svatah/schema`, so this arrives the same way the others do. `svatah run`
+   * `@svatah/yam-schema`, so this arrives the same way the others do. `yam run`
    * calls the same function for an `api` step, which is what keeps the ADE's API
    * client from being a second HTTP client with its own idea of a header.
    */
@@ -121,7 +121,7 @@ export interface ServiceApi {
    *
    * `review` is called once per target, *before* the binding is written
    * (REQ-ADE-4), and the service turns each call into a `record.decision` event
-   * and waits for the client's answer. `svatah record` passes no reviewer and
+   * and waits for the client's answer. `yam record` passes no reviewer and
    * behaves exactly as it did.
    */
   record?(
@@ -189,13 +189,13 @@ export interface ServiceApi {
   /* ── T6.6: the prototype database import (REQ-ADE-9, LLD §13.5) ────────── */
 
   /**
-   * Import a Svatah ADE prototype's electron-db directory into this project.
+   * Import a Yam ADE prototype's electron-db directory into this project.
    *
    * Into *this* project, deliberately: the service confines every write to the
    * directory it was opened on, and an import that could write anywhere would
    * be the one route around that. The ADE's flow is therefore "open an empty
    * directory as a project, then import into it", which is also what
-   * `svatah migrate <dest> --from-ade <src>` does.
+   * `yam migrate <dest> --from-ade <src>` does.
    *
    * The source is a path outside the project, and reading it is the point.
    */

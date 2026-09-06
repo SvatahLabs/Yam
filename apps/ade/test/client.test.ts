@@ -12,7 +12,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { openApiDocument } from "@svatah/service";
+import { openApiDocument } from "@svatah/yam-service";
 import { ENDPOINTS } from "../src/renderer/client.generated.js";
 
 const ADE = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -21,7 +21,7 @@ const COMMITTED = join(ADE, "src", "renderer", "client.generated.ts");
 
 describe("the committed client is what the generator writes (T3.6)", () => {
   it("regenerating produces the same bytes", () => {
-    const out = mkdtempSync(join(tmpdir(), "svatah-ade-client-"));
+    const out = mkdtempSync(join(tmpdir(), "yam-ade-client-"));
     try {
       const path = join(out, "client.generated.ts");
       execFileSync(

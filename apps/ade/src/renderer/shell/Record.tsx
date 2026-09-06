@@ -15,8 +15,8 @@
  *   * a failed session is an alert whose advice is written for whoever is
  *     looking at it, never a CLI flag.
  */
-import { Alert, Chooser, InspectorSection, KeyValues, Pill, Table } from "@svatah/ui";
-import type { Action, RecordState, ScreenParams } from "@svatah/screens";
+import { Alert, Chooser, InspectorSection, KeyValues, Pill, Table } from "@svatah/yam-ui";
+import type { Action, RecordState, ScreenParams } from "@svatah/yam-screens";
 import { a11yVariant } from "../a11y-variant.js";
 import { Code, EmptyInspector, GLYPH, Toolbar } from "./parts.js";
 

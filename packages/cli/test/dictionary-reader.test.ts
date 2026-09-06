@@ -16,7 +16,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { main } from "../src/index.js";
-import { EXIT } from "@svatah/bindings-cli";
+import { EXIT } from "@svatah/yam-bindings-cli";
 
 interface Run {
   readonly code: number;
@@ -72,12 +72,12 @@ const ENTRY = `entries:
  * written however the caller likes.
  */
 function project(phrasesBlock: string): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-dict-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-dict-"));
   mkdirSync(join(dir, "flows"), { recursive: true });
   mkdirSync(join(dir, "bindings", "login"), { recursive: true });
 
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
+    join(dir, "yam.config.yaml"),
     'project: "dictionary-reader"\napp:\n  baseUrl: "http://127.0.0.1:4173"\n',
     "utf8",
   );
@@ -94,7 +94,7 @@ function project(phrasesBlock: string): string {
   return dir;
 }
 
-/** The one step's target, as `svatah compile --json` reports it. */
+/** The one step's target, as `yam compile --json` reports it. */
 async function targetOf(dir: string): Promise<{ ref: string; status: string }> {
   const { code, out } = await cli("compile", dir, "--stable", "--json");
   expect(code).toBe(EXIT.ok);

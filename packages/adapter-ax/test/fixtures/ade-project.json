@@ -1,13 +1,13 @@
 {
-  "process": "Svatah ADE",
-  "title": "Svatah ADE",
+  "process": "Yam ADE",
+  "title": "Yam ADE",
   "truncated": false,
   "nodes": [
     {
       "parent": -1,
       "role": "AXWindow",
       "subrole": "AXStandardWindow",
-      "title": "Svatah ADE",
+      "title": "Yam ADE",
       "box": [
         0,
         0,
@@ -18,7 +18,7 @@
     {
       "parent": 0,
       "role": "AXWebArea",
-      "description": "Svatah ADE",
+      "description": "Yam ADE",
       "enabled": true,
       "focused": true,
       "box": [
@@ -55,7 +55,7 @@
     {
       "parent": 3,
       "role": "AXStaticText",
-      "title": "Svatah",
+      "title": "Yam",
       "enabled": true,
       "box": [
         50,
@@ -67,7 +67,7 @@
     {
       "parent": 4,
       "role": "AXStaticText",
-      "title": "Svatah",
+      "title": "Yam",
       "enabled": true
     },
     {
@@ -617,7 +617,7 @@
     {
       "parent": 52,
       "role": "AXStaticText",
-      "title": "svatah-fixtures · test · playwright",
+      "title": "yam-fixtures · test · playwright",
       "enabled": true,
       "box": [
         305,
@@ -629,7 +629,7 @@
     {
       "parent": 56,
       "role": "AXStaticText",
-      "title": "svatah-fixtures · test · playwright",
+      "title": "yam-fixtures · test · playwright",
       "enabled": true
     },
     {
@@ -800,7 +800,7 @@
     {
       "parent": 70,
       "role": "AXCell",
-      "title": "svatah-fixtures",
+      "title": "yam-fixtures",
       "enabled": true,
       "box": [
         321,
@@ -812,7 +812,7 @@
     {
       "parent": 74,
       "role": "AXStaticText",
-      "title": "svatah-fixtures",
+      "title": "yam-fixtures",
       "enabled": true,
       "box": [
         333,
@@ -824,7 +824,7 @@
     {
       "parent": 75,
       "role": "AXStaticText",
-      "title": "svatah-fixtures",
+      "title": "yam-fixtures",
       "enabled": true
     },
     {
@@ -871,7 +871,7 @@
     {
       "parent": 77,
       "role": "AXCell",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "title": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "enabled": true,
       "box": [
         321,
@@ -883,7 +883,7 @@
     {
       "parent": 81,
       "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "title": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "enabled": true,
       "box": [
         333,
@@ -895,7 +895,7 @@
     {
       "parent": 82,
       "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-",
+      "title": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-",
       "enabled": true
     },
     {
@@ -1998,7 +1998,7 @@
     {
       "parent": 184,
       "role": "AXStaticText",
-      "title": "data.yaml · line 0 · user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+      "title": "data.yaml · line 0 · user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
       "enabled": true,
       "box": [
         942,
@@ -2016,7 +2016,7 @@
     {
       "parent": 192,
       "role": "AXStaticText",
-      "title": "user.password reads ${SVATAH_SAMPLE_PASSWORD},",
+      "title": "user.password reads ${YAM_SAMPLE_PASSWORD},",
       "enabled": true
     },
     {
@@ -2108,7 +2108,7 @@
     {
       "parent": 197,
       "role": "AXStaticText",
-      "title": "data.yaml · line 0 · card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
+      "title": "data.yaml · line 0 · card.number reads ${YAM_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
       "enabled": true,
       "box": [
         942,
@@ -2132,7 +2132,7 @@
     {
       "parent": 205,
       "role": "AXStaticText",
-      "title": "${SVATAH_SAMPLE_CARD_NUMBER}, which is not set.",
+      "title": "${YAM_SAMPLE_CARD_NUMBER}, which is not set.",
       "enabled": true
     },
     {
@@ -2218,7 +2218,7 @@
     {
       "parent": 210,
       "role": "AXStaticText",
-      "title": "data.yaml · line 0 · card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
+      "title": "data.yaml · line 0 · card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
       "enabled": true,
       "box": [
         942,
@@ -2236,7 +2236,7 @@
     {
       "parent": 218,
       "role": "AXStaticText",
-      "title": "card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which",
+      "title": "card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which",
       "enabled": true
     },
     {
@@ -2393,7 +2393,7 @@
     {
       "parent": 235,
       "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "title": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "enabled": true,
       "box": [
         24,
@@ -2405,7 +2405,7 @@
     {
       "parent": 236,
       "role": "AXStaticText",
-      "title": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "title": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "enabled": true
     },
     {

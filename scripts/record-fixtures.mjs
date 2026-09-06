@@ -57,16 +57,16 @@ const FLOWS = [
 
 /** The secrets the fixtures read. Fixed, so two recordings type the same characters. */
 const SECRETS = {
-  SVATAH_SAMPLE_PASSWORD: "qwerty123",
-  SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-  SVATAH_SAMPLE_CARD_CVV: "123",
+  YAM_SAMPLE_PASSWORD: "qwerty123",
+  YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+  YAM_SAMPLE_CARD_CVV: "123",
 };
 
 /** `simple.flow` declares typed inputs; the others take none. */
-const INPUTS = ["--input", "email=connected2atul@gmail.com", "--input", `password=${SECRETS.SVATAH_SAMPLE_PASSWORD}`];
+const INPUTS = ["--input", "email=connected2atul@gmail.com", "--input", `password=${SECRETS.YAM_SAMPLE_PASSWORD}`];
 
 const project = dryRun
-  ? mkdtempSync(join(tmpdir(), "svatah-record-fixtures-"))
+  ? mkdtempSync(join(tmpdir(), "yam-record-fixtures-"))
   : join(ROOT, "evals", "fixtures");
 
 if (dryRun) {
@@ -74,7 +74,7 @@ if (dryRun) {
     const from = join(ROOT, "evals", "fixtures", name);
     if (existsSync(from)) cpSync(from, join(project, name), { recursive: true });
   }
-  for (const name of ["data.yaml", "svatah.config.yaml"]) {
+  for (const name of ["data.yaml", "yam.config.yaml"]) {
     cpSync(join(ROOT, "evals", "fixtures", name), join(project, name));
   }
   process.stderr.write(`dry run into ${project}\n`);
@@ -98,7 +98,7 @@ function record(flow) {
         ...INPUTS,
         ...(gateway === undefined ? [] : ["--gateway", gateway]),
       ],
-      { env: { ...process.env, ...SECRETS, SVATAH_BASE_URL: app.origin } },
+      { env: { ...process.env, ...SECRETS, YAM_BASE_URL: app.origin } },
     );
     child.stdout.on("data", (c) => (output += String(c)));
     child.stderr.on("data", (c) => {
@@ -125,7 +125,7 @@ try {
  * One merged report, because the four sessions are one milestone.
  *
  * `record-report.json` in the project is overwritten by each session — that is
- * right for `svatah record`, which reports on the session it just ran — so the
+ * right for `yam record`, which reports on the session it just ran — so the
  * merge happens here and is what gets committed.
  */
 const merged = {
@@ -178,4 +178,4 @@ if (dryRun) {
   }
 }
 
-rmSync(join(project, ".svatah", "record"), { recursive: true, force: true });
+rmSync(join(project, ".yam", "record"), { recursive: true, force: true });

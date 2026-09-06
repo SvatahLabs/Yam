@@ -16,8 +16,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { ACTIONS } from "@svatah/screens";
-import { EVENT_KINDS } from "@svatah/sdk";
+import { ACTIONS } from "@svatah/yam-screens";
+import { EVENT_KINDS } from "@svatah/yam-sdk";
 import { fromRoot } from "../src/repo.js";
 
 const ADE = readFileSync(fromRoot("apps/ade/src/renderer/shell/Shell.tsx"), "utf8");
@@ -43,7 +43,7 @@ describe("both palettes are the one registry (T9.4)", () => {
     const known = new Set<string>([...ACTIONS.map((one) => one.id), ...EVENT_KINDS]);
     for (const [name, source] of [
       ["the ADE", ADE],
-      ["svatah ui", TUI],
+      ["yam ui", TUI],
     ] as const) {
       const mentioned = [...source.matchAll(/"([a-z]+\.[a-z][a-z-]*)"/g)].map((match) => match[1]!);
       const invented = [...new Set(mentioned)].filter((one) => !known.has(one));
@@ -56,7 +56,7 @@ describe("both palettes are the one registry (T9.4)", () => {
   it("neither renderer hides a group", () => {
     /*
      * `Actions` then `Go to` (§13.7). The ADE draws the headings, because it has
-     * the room; `svatah ui` lists the same rows in the same order without them,
+     * the room; `yam ui` lists the same rows in the same order without them,
      * which is what the `TUI` artboard shows. What neither may do is *filter* on
      * the group — that would make every screen but its own unreachable from the
      * palette.
@@ -82,7 +82,7 @@ describe("both palettes are the one registry (T9.4)", () => {
   it("runs an action through the registry rather than through a switch", () => {
     for (const [name, source] of [
       ["the ADE", ADE],
-      ["svatah ui", TUI],
+      ["yam ui", TUI],
     ] as const) {
       expect(source, `${name} does not resolve actions by id`).toContain("actionById(");
       expect(source, `${name} does not ask whether an action is available`).toContain(

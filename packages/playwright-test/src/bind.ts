@@ -6,7 +6,7 @@
  * with no flow language, no compiler and no model anywhere.
  *
  * ```ts
- * import { test } from "@svatah/playwright-test";
+ * import { test } from "@svatah/yam-playwright-test";
  *
  * test("login", async ({ page, bind }) => {
  *   await page.goto("/login");
@@ -15,12 +15,12 @@
  * });
  * ```
  *
- * Three modes, chosen by `SVATAH_MODE`:
+ * Three modes, chosen by `YAM_MODE`:
  *
  * * **run** (the default) — the resolver reads the store and returns a Playwright
  *   `Locator`. No model, no network beyond the application under test. A failure
  *   raises `LocatorError` with every candidate tried, and writes a line to
- *   `.svatah/bind-failures.jsonl` for the healer (LLD §12).
+ *   `.yam/bind-failures.jsonl` for the healer (LLD §12).
  * * **record** — an id with no binding for the current context is grounded by a
  *   person clicking it, and the binding is synthesised with
  *   `provenance.model: "human"`. Module (a) records without any model.
@@ -32,7 +32,7 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve as resolvePath } from "node:path";
 import type { Locator, Page } from "playwright";
-import type { LocatorError } from "@svatah/bindings";
+import type { LocatorError } from "@svatah/yam-bindings";
 import {
   BindingsStore,
   contextHash,
@@ -41,9 +41,9 @@ import {
   relocalize,
   synthesise,
   tryResolve,
-} from "@svatah/bindings";
-import { HUMAN_PROVENANCE_MODEL, type BindingEntry, type Candidate } from "@svatah/schema";
-import { PlaywrightSurface } from "@svatah/adapter-playwright";
+} from "@svatah/yam-bindings";
+import { HUMAN_PROVENANCE_MODEL, type BindingEntry, type Candidate } from "@svatah/yam-schema";
+import { PlaywrightSurface } from "@svatah/yam-adapter-playwright";
 import { clearPickerStamp, parseProgrammaticPicks, pickInteractively, pickSelector } from "./picker.js";
 import { currentBindGrounder, hasBindGrounder } from "./grounder.js";
 
@@ -63,7 +63,7 @@ export interface BindOutcome {
 export interface BindOptions {
   /** Where the store lives. Default `bindings/`. */
   bindingsDir?: string;
-  /** Where bind failures and staged repairs are written. Default `.svatah/`. */
+  /** Where bind failures and staged repairs are written. Default `.yam/`. */
   outputDir?: string;
   mode?: BindMode;
   /** Attributes treated as test ids. */
@@ -81,7 +81,7 @@ export interface BindOptions {
   pickTimeoutMs?: number;
   /**
    * Element id → selector, for recording without a person. A test affordance so
-   * record mode can run headless in CI; `SVATAH_PICK` sets it from the
+   * record mode can run headless in CI; `YAM_PICK` sets it from the
    * environment. Not part of the quick start.
    */
   picks?: ReadonlyMap<string, string>;
@@ -89,11 +89,11 @@ export interface BindOptions {
   onOutcome?: (outcome: BindOutcome) => void;
 }
 
-/** `SVATAH_MODE`, defaulting to `run` (LLD §6.5). */
+/** `YAM_MODE`, defaulting to `run` (LLD §6.5). */
 export function modeFromEnvironment(value: string | undefined): BindMode {
   const mode = (value ?? "run").trim().toLowerCase();
   if (mode === "record" || mode === "heal" || mode === "run") return mode;
-  throw new Error(`SVATAH_MODE must be "run", "record" or "heal"; got "${value ?? ""}".`);
+  throw new Error(`YAM_MODE must be "run", "record" or "heal"; got "${value ?? ""}".`);
 }
 
 /**
@@ -114,15 +114,15 @@ export class Binder {
   ) {}
 
   get mode(): BindMode {
-    return this.options.mode ?? modeFromEnvironment(process.env["SVATAH_MODE"]);
+    return this.options.mode ?? modeFromEnvironment(process.env["YAM_MODE"]);
   }
 
   private get bindingsDir(): string {
-    return resolvePath(this.options.bindingsDir ?? process.env["SVATAH_BINDINGS"] ?? "bindings");
+    return resolvePath(this.options.bindingsDir ?? process.env["YAM_BINDINGS"] ?? "bindings");
   }
 
   private get outputDir(): string {
-    return resolvePath(this.options.outputDir ?? process.env["SVATAH_OUT"] ?? ".svatah");
+    return resolvePath(this.options.outputDir ?? process.env["YAM_OUT"] ?? ".yam");
   }
 
   private get testIdAttributes(): readonly string[] {
@@ -189,8 +189,8 @@ export class Binder {
     }
 
     // The failure line is written whatever the mode: the healer's other input is
-    // `.svatah/bind-failures.jsonl`, so a plain `run` produces the material a
-    // later `svatah heal --from-bind-failures` works from (LLD §12).
+    // `.yam/bind-failures.jsonl`, so a plain `run` produces the material a
+    // later `yam heal --from-bind-failures` works from (LLD §12).
     this.writeFailure(attempt.error);
 
     if (mode !== "heal") {
@@ -222,7 +222,7 @@ export class Binder {
     /*
      * Module (b), if it is installed (LLD §6.5, T3.3).
      *
-     * With the flow language present, `@svatah/host-playwright` has registered
+     * With the flow language present, `@svatah/yam-host-playwright` has registered
      * the recorder's grounder, and `bind("login.username-field", "the username
      * field")` is grounded by the same `ground()` a flow gets. Module (a) alone
      * has none registered and goes straight to the picker, which is what keeps
@@ -243,7 +243,7 @@ export class Binder {
       }
     }
 
-    const picks = this.options.picks ?? parseProgrammaticPicks(process.env["SVATAH_PICK"], this.testIdAttributes[0]);
+    const picks = this.options.picks ?? parseProgrammaticPicks(process.env["YAM_PICK"], this.testIdAttributes[0]);
     const programmatic = picks.get(id);
 
     let selector: string;
@@ -258,7 +258,7 @@ export class Binder {
       const pick = await pickInteractively(this.page, id, this.options.pickTimeoutMs ?? 120_000);
       if (pick === null) {
         throw new Error(
-          `Recording "${id}" was cancelled. Click the element, or set SVATAH_PICK to name it ` +
+          `Recording "${id}" was cancelled. Click the element, or set YAM_PICK to name it ` +
             "when there is nobody at the keyboard.",
         );
       }

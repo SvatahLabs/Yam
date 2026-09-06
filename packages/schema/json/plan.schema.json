@@ -1,5 +1,5 @@
 {
-  "$id": "https://svatah.dev/schema/1.0.0/plan.schema.json",
+  "$id": "https://yam.svatah.com/schema/1.0.0/plan.schema.json",
   "$ref": "#/definitions/plan",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
@@ -867,7 +867,7 @@
       "type": "object"
     }
   },
-  "description": "plan.json — the compiled IR for a project (LLD §3.2). Svatah schemaVersion 1.0.0.",
+  "description": "plan.json — the compiled IR for a project (LLD §3.2). Yam schemaVersion 1.0.0.",
   "title": "plan",
-  "x-svatah-schema-version": "1.0.0"
+  "x-yam-schema-version": "1.0.0"
 }

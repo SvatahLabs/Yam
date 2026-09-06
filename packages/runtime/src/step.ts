@@ -27,9 +27,9 @@ import type {
   Step,
   StepResult,
   TargetRef,
-} from "@svatah/schema";
-import type { AgentSurface, SnapshotNode } from "@svatah/surface";
-import { CheckError, isWindowChrome } from "@svatah/surface";
+} from "@svatah/yam-schema";
+import type { AgentSurface, SnapshotNode } from "@svatah/yam-surface";
+import { CheckError, isWindowChrome } from "@svatah/yam-surface";
 import { GuardError, candidatesTried, classify, messageOf, stackOf } from "./failure.js";
 import { DataError, type Scope } from "./scope.js";
 
@@ -43,7 +43,7 @@ export type Resolver = (
  * Runs a Tier 0 custom step.
  *
  * Injected rather than imported: LLD §1 draws `runtime ─► bindings, surface,
- * schema` and nothing else. The CLI, which has both, wires `@svatah/steps` in.
+ * schema` and nothing else. The CLI, which has both, wires `@svatah/yam-steps` in.
  * That also means a foreign runtime can execute a plan without custom steps at
  * all and say so, rather than failing to start.
  */
@@ -246,7 +246,7 @@ async function perform(
       if (context.api === undefined) {
         throw new DataError(
           "This step calls an API and no HTTP adapter is wired in. " +
-            "`svatah run` registers one; a foreign runtime has to supply its own.",
+            "`yam run` registers one; a foreign runtime has to supply its own.",
         );
       }
       const value = await context.api(step, { scope, args });
@@ -257,7 +257,7 @@ async function perform(
       if (context.custom === undefined) {
         throw new DataError(
           `This step is the custom step ${step.custom?.id ?? "?"}, and no runner for custom steps ` +
-            "is wired in. `svatah run` loads `steps/`; a foreign runtime cannot execute Tier 0.",
+            "is wired in. `yam run` loads `steps/`; a foreign runtime cannot execute Tier 0.",
         );
       }
       await context.custom(step, {
@@ -292,7 +292,7 @@ async function perform(
      * Every other `waitFor` is the adapter's: it is waiting for an element on
      * the screen in front of it. This one is not — it polls a service until it
      * answers something, which is what four of the parity gate's one-sided
-     * checks needed: the ADE's Run button starts a *second* Svatah run, and a
+     * checks needed: the ADE's Run button starts a *second* Yam run, and a
      * flow could not wait for it or read its result.
      *
      * The poll is the step's own timeout, half a second apart. A request that
@@ -308,7 +308,7 @@ async function perform(
       if (context.api === undefined) {
         throw new DataError(
           "This step waits on an API and no HTTP adapter is wired in. " +
-            "`svatah run` registers one; a foreign runtime has to supply its own.",
+            "`yam run` registers one; a foreign runtime has to supply its own.",
         );
       }
       const deadline = Date.now() + step.timeoutMs;
@@ -744,7 +744,7 @@ function describePredicate(predicate: Predicate): string {
  * `failure.session` is what lets a healer get back to the page without a plan:
  * module (a)'s session-state `Replayer` reads it out of `results.jsonl` and
  * restores it (LLD §10). Without it, every flow failure was `unreachable` to
- * `svatah-bindings heal --run`, which is the defect F1 names.
+ * `yam-bindings heal --run`, which is the defect F1 names.
  *
  * Reading the state is best effort. A session that has already crashed cannot
  * answer, and a failure record that says less is far better than a failure

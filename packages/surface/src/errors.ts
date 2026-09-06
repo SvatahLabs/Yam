@@ -1,4 +1,4 @@
-import type { FailureClass } from "@svatah/schema";
+import type { FailureClass } from "@svatah/yam-schema";
 
 /**
  * The typed errors adapters throw (LLD §2.3).
@@ -25,7 +25,7 @@ export abstract class SurfaceError extends Error {
  * A candidate matched no element, or matched more than one where exactly one was
  * required (LLD §6.3).
  *
- * The resolver in `@svatah/bindings` raises its own richer `LocatorError`, which
+ * The resolver in `@svatah/yam-bindings` raises its own richer `LocatorError`, which
  * adds the candidate list and the context-drift flag; this is the adapter-level
  * error it is built from.
  */

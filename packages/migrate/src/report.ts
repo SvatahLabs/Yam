@@ -61,7 +61,7 @@ const EXPLANATIONS: Record<ReviewNote["kind"], string> = {
     "the one you want.",
   "ade-multiple-projects":
     "One project was imported. Run the import again with --project to bring another across; " +
-    "each becomes its own directory, because a Svatah project is a directory.",
+    "each becomes its own directory, because a Yam project is a directory.",
   "ade-unknown-browser":
     "The prototype's browser names are Selenium's. Where one has no Playwright equivalent " +
     "the setting was left out rather than passed through to fail at run time.",
@@ -91,7 +91,7 @@ export function renderReviewReport(input: ReportInput): string {
   const lines: string[] = [
     "# Migration review",
     "",
-    `\`svatah migrate ${input.source} ${input.destination}\``,
+    `\`yam migrate ${input.source} ${input.destination}\``,
     "",
     "Story names and step order are preserved exactly, so the old file and the new one",
     "read side by side. What follows is everything the migration had to guess at.",

@@ -3,13 +3,13 @@
  *
  * "Every handler calls the same functions the CLI calls; no logic lives in the
  * service. The functions are injected through a `ServiceApi` interface so the
- * service imports only `@svatah/schema`."
+ * service imports only `@svatah/yam-schema`."
  *
  * Phase 3 injected four. Phase 5's ADE screens need five more — record with a
  * reviewer, bindings verify, heal, a surface session, and the tool list — and
  * every one of them is here rather than in the service for the reason the rule
  * exists: an ADE that recorded through its own code and a person who recorded
- * through `svatah record` would be doing two different things, and the store
+ * through `yam record` would be doing two different things, and the store
  * would be the place they disagreed.
  *
  * Each function below opens a browser, calls the same package the command does,
@@ -17,23 +17,23 @@
  */
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { BindingsStore, resolve as resolveBinding } from "@svatah/bindings";
+import { BindingsStore, resolve as resolveBinding } from "@svatah/yam-bindings";
 import {
   clearRegrounder,
   heal as healJob,
   readRunFailures,
   type HealResult,
-} from "@svatah/healer";
-import { record, type GroundingProposal, type ReviewDecision } from "@svatah/recorder";
-import { createSurface, type AgentSurface } from "@svatah/surface";
-import { toolsFor as deriveTools } from "@svatah/tool";
+} from "@svatah/yam-healer";
+import { record, type GroundingProposal, type ReviewDecision } from "@svatah/yam-recorder";
+import { createSurface, type AgentSurface } from "@svatah/yam-surface";
+import { toolsFor as deriveTools } from "@svatah/yam-tool";
 import {
   compileTrajectory,
   readTrajectory,
   TrajectoryWriter,
   writeProposal,
-} from "@svatah/trajectory";
-import type { Config, Ref } from "@svatah/schema";
+} from "@svatah/yam-trajectory";
+import type { Config, Ref } from "@svatah/yam-schema";
 import { registerAllAdapters } from "./adapters.js";
 import { compileProject } from "./project.js";
 import type { loadProject } from "./project.js";
@@ -43,7 +43,7 @@ import { registerRuntimeReplayer } from "./replayer.js";
 
 type Loaded = Awaited<ReturnType<typeof loadProject>>;
 
-/** A session opened the way `svatah run` and `svatah record` open one. */
+/** A session opened the way `yam run` and `yam record` open one. */
 async function open(
   loaded: Loaded,
   options: { headed?: boolean } = {},
@@ -108,7 +108,7 @@ export async function serviceRecord(
   });
   options.onSurface?.(surface);
 
-  const screenshotDir = resolve(loaded.root, ".svatah", "record");
+  const screenshotDir = resolve(loaded.root, ".yam", "record");
   mkdirSync(screenshotDir, { recursive: true });
   let shot = 0;
 
@@ -177,7 +177,7 @@ export async function serviceRecord(
  *
  * The same `resolve` a run uses, against a live page — which is what makes the
  * bindings browser's status mean something rather than being a re-reading of the
- * YAML. `svatah bindings verify` does exactly this from a command line.
+ * YAML. `yam bindings verify` does exactly this from a command line.
  */
 export async function serviceVerifyBindings(
   loaded: Loaded,
@@ -232,7 +232,7 @@ export async function serviceVerifyBindings(
 /**
  * Heal a run, streaming each proposal as it is decided.
  *
- * The same job `svatah heal --run` runs, with the same runtime replayer
+ * The same job `yam heal --run` runs, with the same runtime replayer
  * registered (LLD §10) and the same `--input` bargain: a story with a signature
  * cannot replay without its inputs, and a run records only their names.
  */
@@ -323,7 +323,7 @@ export async function serviceHeal(
 /**
  * A session the explorer drives call by call, writing `trajectory.jsonl`.
  *
- * The same thing `svatah mcp`'s raw-surface tools do, and for the same reason:
+ * The same thing `yam mcp`'s raw-surface tools do, and for the same reason:
  * an intent per call is what turns an exploration into something T5.5 can
  * compile (LLD §13.4). The service refuses a call without one; this records what
  * it is given.
@@ -445,7 +445,7 @@ export async function serviceToolsFor(
 /* ── T6.6: the prototype database import (REQ-ADE-9, LLD §13.5) ───────────── */
 
 /**
- * `POST /migrate`, which is `svatah migrate <dest> --from-ade <src>`.
+ * `POST /migrate`, which is `yam migrate <dest> --from-ade <src>`.
  *
  * The same two steps the command line takes, in the same order and through the
  * same functions: extract the prototype's database back into the v2 files it
@@ -457,7 +457,7 @@ export async function serviceMigrateFromAde(
   loaded: Loaded,
   options: { source: string; project?: string },
 ): Promise<unknown> {
-  const { extractAdeProject, migrate, renderReviewReport } = await import("@svatah/migrate");
+  const { extractAdeProject, migrate, renderReviewReport } = await import("@svatah/yam-migrate");
   const destination = loaded.root;
 
   const extracted = extractAdeProject({

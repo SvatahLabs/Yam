@@ -11,7 +11,7 @@
  * Every other candidate says *where* an element is: this CSS selector, this
  * role and name, this point. A declared tool says what the page will *do* —
  * "book-slot takes a location and a date" — which is information the page
- * publishes deliberately and maintains, rather than a shape Svatah inferred
+ * publishes deliberately and maintains, rather than a shape Yam inferred
  * from a rendering. A tool survives the redesign that breaks every locator on
  * the page, and it cannot be ambiguous.
  *

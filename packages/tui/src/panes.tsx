@@ -13,12 +13,12 @@
  *
  * There is no fetching here, no formatting decision and no arithmetic the ADE
  * does differently — the numbers, the words and the status labels are the
- * model's. Colour comes from `@svatah/ui-tokens`'s `STATUS` table, by the same
+ * model's. Colour comes from `@svatah/yam-ui-tokens`'s `STATUS` table, by the same
  * names the browser uses: a terminal has no CSS variables; it has the same seven
  * tones.
  */
 import { Box, Text } from "ink";
-import { STATUS, type StatusTone } from "@svatah/ui-tokens";
+import { STATUS, type StatusTone } from "@svatah/yam-ui-tokens";
 import { budget } from "./layout.js";
 import type { Pane, UiState } from "./model.js";
 import { paneModel, type Cell, type Line, type PaneContent } from "./rows.js";

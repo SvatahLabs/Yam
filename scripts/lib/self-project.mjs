@@ -21,7 +21,7 @@
 import { cpSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-/** The parts of a Svatah project, and whether a copy may do without one. */
+/** The parts of a Yam project, and whether a copy may do without one. */
 export const SELF_PROJECT_PARTS = Object.freeze({
   required: Object.freeze(["flows"]),
   optional: Object.freeze(["steps", "api", "bindings"]),

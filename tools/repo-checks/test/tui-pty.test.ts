@@ -1,5 +1,5 @@
 /**
- * T9.4 Validate — "`svatah ui` runs `comp` in a pseudo-terminal test and its
+ * T9.4 Validate — "`yam ui` runs `comp` in a pseudo-terminal test and its
  * `--json` output equals the model's state" (REQ-TUI-1, REQ-ADE-13, LLD §13.7).
  *
  * Two claims, and they need different things:
@@ -48,15 +48,15 @@ beforeAll(async () => {
   };
   app = await startSampleApp(0);
 
-  project = mkdtempSync(join(tmpdir(), "svatah-tui-pty-"));
+  project = mkdtempSync(join(tmpdir(), "yam-tui-pty-"));
   cpSync(FIXTURES, project, {
     recursive: true,
     filter: (from) => !from.includes("node_modules") && !from.includes(`${"runs"}`),
   });
   writeFileSync(
-    join(project, "svatah.config.yaml"),
+    join(project, "yam.config.yaml"),
     `schemaVersion: "1.0.0"
-project: "svatah-fixtures"
+project: "yam-fixtures"
 environment: test
 adapter: playwright
 app: { baseUrl: "${app.origin}" }
@@ -121,14 +121,14 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
     const child = spawn(
       process.execPath,
       [CLI, "serve", project, "--port", "0", "--token", TOKEN],
-      { cwd: REPO_ROOT, env: { ...process.env, SVATAH_BASE_URL: app.origin } },
+      { cwd: REPO_ROOT, env: { ...process.env, YAM_BASE_URL: app.origin } },
     );
     serve = child;
     let buffer = "";
     const timer = setTimeout(() => reject(new Error("no handshake")), 30_000);
     child.stdout?.on("data", (chunk) => {
       buffer += String(chunk);
-      const match = /^svatah serve listening url=(\S+) token=(\S+)$/m.exec(buffer);
+      const match = /^yam serve listening url=(\S+) token=(\S+)$/m.exec(buffer);
       if (match !== null) {
         clearTimeout(timer);
         resolve({ url: match[1]!, token: match[2]! });
@@ -145,7 +145,7 @@ afterAll(async () => {
 });
 
 /**
- * Run `svatah ui` inside a pseudo-terminal and capture what it drew.
+ * Run `yam ui` inside a pseudo-terminal and capture what it drew.
  *
  * `script(1)` allocates a real pseudo-terminal on macOS, Linux and the BSDs and
  * is in every base install — so no dependency, and no `node-pty` to compile.
@@ -256,7 +256,7 @@ const plain = (text: string): string =>
     text.replace(/\u001b\[[0-9;?]*[A-Za-z]/g, "").replace(/\u001b[()][A-Z0-9]/g, ""),
   );
 
-describe.runIf(hasScript)("`svatah ui` draws in a pseudo-terminal (T9.4)", () => {
+describe.runIf(hasScript)("`yam ui` draws in a pseudo-terminal (T9.4)", () => {
   it("opens on the `comp` run and draws its four panes", () => {
     const captured = plain(inPty(["--screen", "run", "--run", RUN_ID]));
 
@@ -281,7 +281,7 @@ describe.runIf(hasScript)("`svatah ui` draws in a pseudo-terminal (T9.4)", () =>
     /*
      * The point of the pseudo-terminal. `ink-testing-library` writes to a
      * stream that is not a TTY, so chalk emits no colour and the status tones
-     * of `@svatah/ui-tokens` cannot be checked there at all.
+     * of `@svatah/yam-ui-tokens` cannot be checked there at all.
      */
     // eslint-disable-next-line no-control-regex
     expect(captured).toMatch(/\[3[0-9]m/);
@@ -351,14 +351,14 @@ describe.runIf(hasScript)("`svatah ui` draws in a pseudo-terminal (T9.4)", () =>
 
   /*
    * T10.1 and T10.2's Validate: "each screen driven end to end through its own
-   * controls … in `svatah ui` under a pseudo-terminal, against the fixtures
+   * controls … in `yam ui` under a pseudo-terminal, against the fixtures
    * project with the fake gateway."
    *
    * Every one of the twelve, in a real terminal, against a real service — which
    * is what `packages/tui/test/cockpit.test.tsx` cannot say, because
    * `ink-testing-library` writes into a stream and the fake service is a
    * recording. What each screen *shows* is checked there and in
-   * `@svatah/screens`; what this says is that it draws, in colour, with its
+   * `@svatah/yam-screens`; what this says is that it draws, in colour, with its
    * four numbered panes, on a project a person could open.
    */
   it.each([
@@ -398,8 +398,8 @@ describe.runIf(hasScript)("`svatah ui` draws in a pseudo-terminal (T9.4)", () =>
   }, 60_000);
 });
 
-describe("`svatah ui --json` is the model's state (T9.4, REQ-ADE-13)", () => {
-  /** `svatah ui … --json`, parsed. No terminal needed: it draws nothing. */
+describe("`yam ui --json` is the model's state (T9.4, REQ-ADE-13)", () => {
+  /** `yam ui … --json`, parsed. No terminal needed: it draws nothing. */
   function json(args: string[]): Record<string, unknown> {
     const result = spawnSync(
       process.execPath,
@@ -419,9 +419,9 @@ describe("`svatah ui --json` is the model's state (T9.4, REQ-ADE-13)", () => {
      * JSON — a second evaluation of the same function, which is what "equals
      * the model's state" means.
      */
-    const { screenById } = await import("@svatah/screens");
-    const { SvatahClient } = await import("@svatah/sdk");
-    const state = await screenById("run").load(new SvatahClient(connection), { runId: RUN_ID });
+    const { screenById } = await import("@svatah/yam-screens");
+    const { YamClient } = await import("@svatah/yam-sdk");
+    const state = await screenById("run").load(new YamClient(connection), { runId: RUN_ID });
 
     expect(printed["screen"]).toBe("run");
     expect(printed["params"]).toEqual({ runId: RUN_ID });
@@ -432,9 +432,9 @@ describe("`svatah ui --json` is the model's state (T9.4, REQ-ADE-13)", () => {
     const file = "flows/guards-and-compensation.flow";
     const printed = json(["--screen", "flows", "--flow", file]);
 
-    const { screenById } = await import("@svatah/screens");
-    const { SvatahClient } = await import("@svatah/sdk");
-    const state = await screenById("flows").load(new SvatahClient(connection), { file });
+    const { screenById } = await import("@svatah/yam-screens");
+    const { YamClient } = await import("@svatah/yam-sdk");
+    const state = await screenById("flows").load(new YamClient(connection), { file });
 
     expect(printed["state"]).toEqual(JSON.parse(JSON.stringify(state)));
   }, 120_000);
@@ -450,9 +450,9 @@ describe("`svatah ui --json` is the model's state (T9.4, REQ-ADE-13)", () => {
    */
   it("prints the same Flows state ten times running (T10.4, P9-F4)", async () => {
     const file = "flows/guards-and-compensation.flow";
-    const { screenById } = await import("@svatah/screens");
-    const { SvatahClient } = await import("@svatah/sdk");
-    const client = new SvatahClient(connection);
+    const { screenById } = await import("@svatah/yam-screens");
+    const { YamClient } = await import("@svatah/yam-sdk");
+    const client = new YamClient(connection);
 
     const first = JSON.stringify(json(["--screen", "flows", "--flow", file]));
     for (let round = 1; round <= 10; round += 1) {
@@ -530,7 +530,7 @@ describe("the pseudo-terminal is available on this host", () => {
   it("says so, rather than silently skipping (the phase's environment rule)", () => {
     if (!hasScript) {
       process.stderr.write(
-        "script(1) is not on this host, so `svatah ui` was checked with " +
+        "script(1) is not on this host, so `yam ui` was checked with " +
           "ink-testing-library only (packages/tui/test/cockpit.test.tsx). The phase's " +
           "environment note allows that and requires it to be said.\n",
       );

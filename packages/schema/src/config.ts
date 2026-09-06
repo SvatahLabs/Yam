@@ -4,16 +4,16 @@ import { SCHEMA_VERSION } from "./version.js";
 /**
  * The default of `bindings.ignoreAttributes` (LLD §3.5, §16, Draft 2.3).
  *
- * `data-svatah-eval` is the healing eval's ground-truth label. It is on this
+ * `data-yam-eval` is the healing eval's ground-truth label. It is on this
  * list by default rather than only in the eval's own configuration so that no
  * arrangement of options can accidentally let a binding be built on it: an
  * application that carried the attribute into production would otherwise get a
  * flatteringly unbreakable candidate, and the eval would be scoring its own
  * bookkeeping.
  */
-export const DEFAULT_IGNORE_ATTRIBUTES = ["data-svatah-eval"];
+export const DEFAULT_IGNORE_ATTRIBUTES = ["data-yam-eval"];
 
-/** Project configuration, `svatah.config.yaml` (LLD §3.5). */
+/** Project configuration, `yam.config.yaml` (LLD §3.5). */
 
 export const adapterNameSchema = z.enum(["playwright", "bidi", "appium", "uia", "ax", "http"]);
 export type AdapterName = z.infer<typeof adapterNameSchema>;
@@ -62,7 +62,7 @@ export const configSchema = z
             /** An executable, spawned directly. Windows and Linux. */
             path: z.string().min(1).optional(),
             args: z.array(z.string()).optional(),
-            /** Added to the launched process's environment, never to Svatah's. */
+            /** Added to the launched process's environment, never to Yam's. */
             env: z.record(z.string(), z.string()).optional(),
             /** How long to wait for a window before the session fails. */
             timeoutMs: z.number().int().positive().optional(),
@@ -84,7 +84,7 @@ export const configSchema = z
          * How to stop it: a graceful route, then a signal (T11.2, LLD §13.9).
          *
          * The graceful route is what lets an application put its own house in
-         * order — the ADE stops the `svatah serve` it spawned and writes its
+         * order — the ADE stops the `yam serve` it spawned and writes its
          * preferences. A bare signal ends the main process where it stands, and
          * P10-F1 measured what that leaves behind.
          */
@@ -104,7 +104,7 @@ export const configSchema = z
          * Attach to a Chromium that is already running (T11.2, LLD §13.9).
          *
          * > The Playwright adapter attaches to an existing Chromium when
-         * > `SVATAH_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi
+         * > `YAM_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi
          * > adapter attaches, so a flow can drive the ADE's renderer.
          */
         attach: z
@@ -272,7 +272,7 @@ export const configSchema = z
   });
 export type Config = z.infer<typeof configSchema>;
 
-/** The default configuration `svatah init` writes; also the base a partial config merges onto. */
+/** The default configuration `yam init` writes; also the base a partial config merges onto. */
 export const DEFAULT_CONFIG: Omit<Config, "project"> = {
   schemaVersion: SCHEMA_VERSION,
   environment: "test",

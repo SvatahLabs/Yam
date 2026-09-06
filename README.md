@@ -1,11 +1,11 @@
-# Svatah
+# Yam
 
 A **deterministic automation runtime with a standard agent surface**. Describe a
 behaviour once in plain language, compile it into a typed plan with element
 bindings by driving the real platform, then replay that plan deterministically —
 no model in the loop — on any platform an adapter exists for.
 
-Svatah is built in three layers:
+Yam is built in three layers:
 
 | Layer | What it is |
 |---|---|
@@ -19,17 +19,17 @@ The specification is the source of truth and lives in [`docs/spec/`](docs/spec/)
 
 ## Bindings in a plain Playwright project — start here
 
-The first thing Svatah ships is the piece you can adopt on its own: **bindings and
+The first thing Yam ships is the piece you can adopt on its own: **bindings and
 model-free healing for an existing Playwright project**. One dependency, one
 import, no flow language, no compiler, and no model at any point (REQ-PKG-1,
 REQ-PKG-2).
 
 ```bash
-npm install --save-dev @svatah/playwright-test
+npm install --save-dev @svatah/yam-playwright-test
 ```
 
 ```ts
-import { test, expect } from "@svatah/playwright-test";
+import { test, expect } from "@svatah/yam-playwright-test";
 
 test("sign in", async ({ page, bind }) => {
   await page.goto("/login");
@@ -41,9 +41,9 @@ test("sign in", async ({ page, bind }) => {
 
 `bind(id, phrase?)` returns a Playwright `Locator`, so everything you already do
 with a locator still works. Record once by clicking the elements
-(`SVATAH_MODE=record`); the bindings become reviewable YAML files you commit.
+(`YAM_MODE=record`); the bindings become reviewable YAML files you commit.
 Replay reads those files and calls no model. When a front-end change breaks one,
-`SVATAH_MODE=heal` finds the element again from its recorded fingerprint and
+`YAM_MODE=heal` finds the element again from its recorded fingerprint and
 annotates the test `healed` — never `passed`.
 
 The ten-minute quick start, with the record and heal passes explained, is
@@ -99,11 +99,11 @@ test: Sign in
 ```
 
 ```bash
-svatah compile                    # flows -> plan.json, byte-stable
-svatah lint                       # long sleeps, unused captures, side effects in tools
-svatah run --host playwright      # or --host none for the runner-agnostic executor
-svatah migrate ./legacy ./flows   # v1/v2 flows and prototype databases
-svatah serve                      # the local HTTP and event-stream service
+yam compile                    # flows -> plan.json, byte-stable
+yam lint                       # long sleeps, unused captures, side effects in tools
+yam run --host playwright      # or --host none for the runner-agnostic executor
+yam migrate ./legacy ./flows   # v1/v2 flows and prototype databases
+yam serve                      # the local HTTP and event-stream service
 ```
 
 The same plan runs under both hosts and produces identical results — statuses and
@@ -123,7 +123,7 @@ built and how each item was verified, and
 [`phase-1.md`](docs/spec/progress/phase-1.md) and
 [`phase-0.md`](docs/spec/progress/phase-0.md) for what came before.
 
-Not built yet, and honest about it: `svatah record`, the model gateway and the
+Not built yet, and honest about it: `yam record`, the model gateway and the
 Tier 2 and Tier 3 compilers, the workflow and tool runners, and every adapter
 except Playwright and HTTP. Those packages exist as skeletons so the layout and
 the import boundaries are enforced from the start; they are Phases 3 and 4.
@@ -136,14 +136,14 @@ or the model gateway — and a dependency-tree test holds that.
 
 | Package | What it is |
 |---|---|
-| [`@svatah/playwright-test`](packages/playwright-test) | The `bind()` fixture, and nothing else. **The one dependency you add.** |
-| [`@svatah/bindings`](packages/bindings) | Store, context hash, resolver, synthesis, fingerprints, relocalization |
-| [`@svatah/healer`](packages/healer) | Failure selection, repair, verification, diff |
-| [`@svatah/adapter-playwright`](packages/adapter-playwright) | The default web adapter |
-| [`@svatah/surface`](packages/surface) | The published `AgentSurface` interface and adapter registry |
-| [`@svatah/schema`](packages/schema) | The artifact contract, as Zod and as JSON Schema |
-| [`@svatah/conformance`](packages/conformance) | The suite an adapter must pass to be conformant |
-| [`@svatah/bindings-cli`](packages/bindings-cli) | `svatah-bindings`: inspect, verify and heal the store from a terminal |
+| [`@svatah/yam-playwright-test`](packages/playwright-test) | The `bind()` fixture, and nothing else. **The one dependency you add.** |
+| [`@svatah/yam-bindings`](packages/bindings) | Store, context hash, resolver, synthesis, fingerprints, relocalization |
+| [`@svatah/yam-healer`](packages/healer) | Failure selection, repair, verification, diff |
+| [`@svatah/yam-adapter-playwright`](packages/adapter-playwright) | The default web adapter |
+| [`@svatah/yam-surface`](packages/surface) | The published `AgentSurface` interface and adapter registry |
+| [`@svatah/yam-schema`](packages/schema) | The artifact contract, as Zod and as JSON Schema |
+| [`@svatah/yam-conformance`](packages/conformance) | The suite an adapter must pass to be conformant |
+| [`@svatah/yam-bindings-cli`](packages/bindings-cli) | `yam-bindings`: inspect, verify and heal the store from a terminal |
 
 ## Repository layout
 
@@ -177,7 +177,7 @@ adapter's workspace. Playwright is also a root dev dependency, so
 `pnpm exec playwright install chromium` works from the repository root too.
 
 `typecheck` and `lint` joined the contract in Draft 2.8 because they were
-outside it and red: `pnpm -r typecheck` failed in `@svatah/workflow` for two
+outside it and red: `pnpm -r typecheck` failed in `@svatah/yam-workflow` for two
 phases while every other gate was green, which is what a check nobody has to
 run looks like (K9; Phase 6 verification, F5).
 
@@ -240,18 +240,18 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 ## The verification contract (from Phase 11 on)
 
-A phase's evidence is **`svatah eval self` green with its report**, plus whatever
+A phase's evidence is **`yam eval self` green with its report**, plus whatever
 that report lists as one-sided (REQ-SELF-2, LLD §13.9).
 
 ```
 pnpm install --frozen-lockfile && pnpm browsers && pnpm -r build \
   && pnpm -r typecheck && pnpm -r test && pnpm lint     # the tree, on two Node LTSes
-pnpm --filter @svatah/ade package                        # the conformance target
+pnpm --filter @svatah/yam-ade package                        # the conformance target
 node packages/cli/dist/bin.js eval self --update    # or `pnpm self`
 ```
 
-`svatah eval self` runs **both sides of every check** in
-`evals/self/checks.yaml` and compares their verdicts: Svatah's own flows through
+`yam eval self` runs **both sides of every check** in
+`evals/self/checks.yaml` and compares their verdicts: Yam's own flows through
 the desktop, web, HTTP and SDK adapters on one side; the Playwright cases, the
 pseudo-terminal captures, the generated clients' smoke and the scripts on the
 other. It **passes only at 100 percent agreement** over the checks both sides
@@ -260,7 +260,7 @@ pieces of evidence.
 
 What the report also publishes, and what a reader should look at first, is the
 **one-sided list**: every check only one side can reach, each naming the adapter
-or the sentence Svatah lacks. That list is Svatah's own shortcomings, and it is
+or the sentence Yam lacks. That list is Yam's own shortcomings, and it is
 expected to shrink phase by phase.
 
 Without `--update` the gate writes every report — its own and the two its
@@ -271,5 +271,5 @@ the committed `reports/self-parity.md`, `reports/adapter-ax.md` and
 
 Three oracles stay external on purpose (REQ-SELF-3) and the report says so: the
 healing eval's ground-truth keys, axe-core on the component sheet, and the
-renderer-versus-adapter tree agreement. They sit below the surface Svatah
+renderer-versus-adapter tree agreement. They sit below the surface Yam
 drives, and they are what keeps the gate from grading its own homework.

@@ -17,8 +17,8 @@ import {
   SCHEMA_VERSION,
   type BindingEntry,
   type BindingFile,
-} from "@svatah/schema";
-import { DataError } from "@svatah/surface";
+} from "@svatah/yam-schema";
+import { DataError } from "@svatah/yam-surface";
 import { assertElementId, idToSegments, pathToId } from "./ids.js";
 import { patternMatches } from "./context.js";
 
@@ -305,7 +305,7 @@ function walk(dir: string): string[] {
  * This is the fix and the reason it lives here rather than in the CLI: the
  * dictionary's entries come from the *same loader the store uses*, so a file the
  * store accepts contributes exactly the phrases it declares, whatever its
- * quoting, style or indentation. `@svatah/spec` still takes them as data
+ * quoting, style or indentation. `@svatah/yam-spec` still takes them as data
  * (LLD §1: `spec ─► schema` and nothing else), so this does not move the
  * boundary — it moves the parsing to the side of it that owns binding files.
  */

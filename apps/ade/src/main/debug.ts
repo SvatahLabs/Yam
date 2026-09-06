@@ -2,7 +2,7 @@
  * The ADE's window-lifecycle log (Draft 2.13 §13.6, P10-F1).
  *
  * > the ADE logs its window lifecycle to its user-data directory when
- * > `SVATAH_ADE_DEBUG=1`
+ * > `YAM_ADE_DEBUG=1`
  *
  * The finding this exists for: a packaged ADE that "runs without a window".
  * Every symptom of that is *outside* the application — a gate polling System
@@ -17,7 +17,7 @@
  *
  * ## Off unless asked
  *
- * `SVATAH_ADE_DEBUG=1`. A log is a file with a person's project paths in it and
+ * `YAM_ADE_DEBUG=1`. A log is a file with a person's project paths in it and
  * the ADE stores nothing it does not have to (REQ-ADE-2), so it is opt-in, it
  * says where it is on the first line, and it never records a token or a URL
  * with one in it.
@@ -35,9 +35,9 @@ import { dirname, join } from "node:path";
 export const debugLogPath = (userDataDir: string): string =>
   join(userDataDir, "ade-debug.log");
 
-/** Is the log on? `SVATAH_ADE_DEBUG=1`, and nothing else. */
+/** Is the log on? `YAM_ADE_DEBUG=1`, and nothing else. */
 export const debugEnabled = (env: NodeJS.ProcessEnv = process.env): boolean =>
-  env["SVATAH_ADE_DEBUG"] === "1";
+  env["YAM_ADE_DEBUG"] === "1";
 
 /**
  * One line: an instant, an event name, and the facts.

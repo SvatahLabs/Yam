@@ -8,11 +8,11 @@
  *
  * ## Why it lives in the CLI
  *
- * The obvious home is `@svatah/host-playwright`, since importing that package is
+ * The obvious home is `@svatah/yam-host-playwright`, since importing that package is
  * the moment a project has both modules. It is the wrong home: LLD §1 keeps the
  * host model-free, because the host is what *replays* a plan and REQ-RUN-1 says
  * replay makes no model calls. LLD §10 already names the right one — "module (b)
- * registers the recorder's implementation at CLI start" — and `@svatah/cli` is
+ * registers the recorder's implementation at CLI start" — and `@svatah/yam` is
  * the package allowed to import everything precisely so that wiring lives in one
  * place.
  *
@@ -20,8 +20,8 @@
  *
  * ```ts
  * // playwright.config.ts, or a global setup
- * import { installModelGrounding } from "@svatah/cli";
- * installModelGrounding({ cacheDir: ".svatah/model-cache" });
+ * import { installModelGrounding } from "@svatah/yam";
+ * installModelGrounding({ cacheDir: ".yam/model-cache" });
  * ```
  *
  * ## Why it is not an import side effect
@@ -31,14 +31,14 @@
  * credential, so a project with no `ANTHROPIC_API_KEY` records the way module (a)
  * does instead of failing at the first `bind()`.
  */
-import { registerBindGrounder, clearBindGrounder, hasBindGrounder } from "@svatah/playwright-test";
+import { registerBindGrounder, clearBindGrounder, hasBindGrounder } from "@svatah/yam-playwright-test";
 import {
   anthropicGateway,
   credentialInEnvironment,
   DiskCache,
   type Gateway,
-} from "@svatah/gateway";
-import { recorderBindGrounder } from "@svatah/recorder";
+} from "@svatah/yam-gateway";
+import { recorderBindGrounder } from "@svatah/yam-recorder";
 
 export interface ModelGroundingOptions {
   /** A gateway to use. Built from the environment when absent. */

@@ -3,7 +3,7 @@
  *
  * "Editing a flow in the ADE and compiling from the CLI yields the same
  * `plan.json`; a run started from the ADE produces the same `runs/<id>` files as
- * the CLI; lint warnings in the editor match `svatah lint --json`."
+ * the CLI; lint warnings in the editor match `yam lint --json`."
  *
  * The ADE's screens are React, and rendering them proves nothing about any of
  * that: what makes those three claims true is that a screen has no way to reach
@@ -22,13 +22,13 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { createService, type RunningService } from "@svatah/service";
+import { createService, type RunningService } from "@svatah/yam-service";
 import {
   compileProject,
   loadProject,
   newRunId,
   runProject,
-} from "@svatah/cli";
+} from "@svatah/yam";
 import { ServiceClient } from "../src/renderer/client.js";
 
 const ADE = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -55,14 +55,14 @@ beforeAll(async () => {
   if (!existsSync(CLI)) throw new Error("Run `pnpm -r build` first.");
   app = await startSampleApp(0);
 
-  project = mkdtempSync(join(tmpdir(), "svatah-ade-parity-"));
+  project = mkdtempSync(join(tmpdir(), "yam-ade-parity-"));
   cpSync(join(FIXTURES, "bindings"), join(project, "bindings"), { recursive: true });
   mkdirSync(join(project, "flows"), { recursive: true });
   mkdirSync(join(project, "api"), { recursive: true });
   writeFileSync(join(project, "flows", "smoke.flow"), FLOW, "utf8");
   writeFileSync(join(project, "data.yaml"), "user:\n  email: \"a@b.c\"\n", "utf8");
   writeFileSync(
-    join(project, "svatah.config.yaml"),
+    join(project, "yam.config.yaml"),
     `schemaVersion: "1.0.0"
 project: "ade-parity"
 environment: test
@@ -94,7 +94,7 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
     project,
     token: TOKEN,
     port: 0,
-    // The wiring `svatah serve` does, which is the whole reason the ADE can
+    // The wiring `yam serve` does, which is the whole reason the ADE can
     // claim to show nothing the CLI cannot produce.
     api: { loadProject, compileProject, runProject, newRunId } as never,
   });
@@ -108,7 +108,7 @@ afterAll(async () => {
 });
 
 /**
- * `svatah <args>` in the project, as a person would run it.
+ * `yam <args>` in the project, as a person would run it.
  *
  * Asynchronous, and that is load-bearing rather than stylistic:
  * `apps/sample-web` runs *in this process*, and a synchronous `execFileSync`
@@ -126,7 +126,7 @@ function cli(...args: string[]): Promise<{ code: number; output: string }> {
     let output = "";
     const child = spawn(process.execPath, [CLI, ...args], {
       cwd: project,
-      env: { ...environment, SVATAH_SAMPLE_PASSWORD: "qwerty123" },
+      env: { ...environment, YAM_SAMPLE_PASSWORD: "qwerty123" },
     });
     child.stdout.on("data", (chunk) => (output += String(chunk)));
     child.stderr.on("data", (chunk) => (output += String(chunk)));
@@ -146,12 +146,12 @@ describe("editing a flow in the ADE, compiling from the CLI (T3.7)", () => {
     const viaCli = await cli("compile", ".", "--stable", "--json");
     expect(viaCli.code).toBe(0);
 
-    const planPath = join(project, ".svatah", "plan.json");
+    const planPath = join(project, ".yam", "plan.json");
     const plan = JSON.parse(readFileSync(planPath, "utf8")) as { hash: string };
     expect(viaService.plan.hash).toBe(plan.hash);
   }, 120_000);
 
-  it("shows the lint `svatah lint --json` shows", async () => {
+  it("shows the lint `yam lint --json` shows", async () => {
     const viaService = (await client.postCompile()) as {
       errors: unknown[];
       warnings: Array<{ code?: string; line?: number; message?: string }>;
@@ -225,11 +225,11 @@ describe("a run started from the ADE (T3.7)", () => {
 });
 
 describe("the plan the Plan screen renders (T3.7)", () => {
-  it("is the plan `svatah compile` writes", async () => {
+  it("is the plan `yam compile` writes", async () => {
     const viaService = (await client.getPlan()) as { hash: string; stories: unknown[] };
     await cli("compile", ".", "--stable");
     const onDisk = JSON.parse(
-      readFileSync(join(project, ".svatah", "plan.json"), "utf8"),
+      readFileSync(join(project, ".yam", "plan.json"), "utf8"),
     ) as { hash: string; stories: unknown[] };
 
     expect(viaService.hash).toBe(onDisk.hash);
@@ -241,7 +241,7 @@ describe("the data editor keeps the secrets it cannot see (T3.7, REQ-NFR-6)", ()
   it("writes back a redacted value as the value that was there", async () => {
     writeFileSync(
       join(project, "data.yaml"),
-      'user:\n  email: "a@b.c"\n  password: "${SVATAH_SAMPLE_PASSWORD}"\nsecrets:\n  - user.password\n',
+      'user:\n  email: "a@b.c"\n  password: "${YAM_SAMPLE_PASSWORD}"\nsecrets:\n  - user.password\n',
       "utf8",
     );
 
@@ -264,7 +264,7 @@ describe("the data editor keeps the secrets it cannot see (T3.7, REQ-NFR-6)", ()
 
     // And on disk the indirection survived: the marker was never written.
     const text = readFileSync(join(project, "data.yaml"), "utf8");
-    expect(text).toContain("${SVATAH_SAMPLE_PASSWORD}");
+    expect(text).toContain("${YAM_SAMPLE_PASSWORD}");
     expect(text).not.toContain("«redacted»");
   }, 120_000);
 });

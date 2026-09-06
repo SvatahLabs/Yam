@@ -22,7 +22,7 @@
  * written here, minimal, the way the README describes it.
  *
  * The sample application is served from *this* repository and reached over
- * `SVATAH_BASE_URL`, which is what the example's own README says a real project
+ * `YAM_BASE_URL`, which is what the example's own README says a real project
  * does. Pulling `sample-web` into the empty project would put a workspace
  * package back into the thing being tested.
  */
@@ -39,10 +39,10 @@ export const BUDGET_MS = 10 * 60 * 1000;
 
 /** The four packages REQ-PKG-1 says a Playwright user installs. */
 export const MODULE_A = [
-  "@svatah/bindings",
-  "@svatah/healer",
-  "@svatah/playwright-test",
-  "@svatah/bindings-cli",
+  "@svatah/yam-bindings",
+  "@svatah/yam-healer",
+  "@svatah/yam-playwright-test",
+  "@svatah/yam-bindings-cli",
 ];
 
 /** The picks that stand in for a person clicking, so this runs headless. */
@@ -69,7 +69,7 @@ export function playwrightVersion() {
 /**
  * An empty Playwright project that depends on module (a), and nothing else.
  *
- * `dependencies` is the caller's — `{ "@svatah/bindings": "0.1.0" }` from the
+ * `dependencies` is the caller's — `{ "@svatah/yam-bindings": "0.1.0" }` from the
  * registry, or a `file:` path per tarball — and `overrides` is how a tarball
  * install redirects the *transitive* `@svatah/*` names a registry does not have.
  * A registry install passes none, which is the point of the difference.
@@ -82,7 +82,7 @@ export function scaffold({ prefix, dependencies, overrides = {} }) {
     join(project, "package.json"),
     `${JSON.stringify(
       {
-        name: "svatah-quick-start",
+        name: "yam-quick-start",
         version: "0.0.0",
         private: true,
         type: "module",
@@ -100,7 +100,7 @@ export function scaffold({ prefix, dependencies, overrides = {} }) {
     `import { defineConfig, devices } from "@playwright/test";
 
 // The whole configuration a reader writes: a base URL and a project. Nothing
-// here is Svatah-specific (REQ-PKG-2).
+// here is Yam-specific (REQ-PKG-2).
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: false,
@@ -109,7 +109,7 @@ export default defineConfig({
   reporter: [["list"]],
   timeout: 60_000,
   use: {
-    baseURL: process.env["SVATAH_BASE_URL"],
+    baseURL: process.env["YAM_BASE_URL"],
     headless: true,
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
@@ -177,23 +177,23 @@ export async function runQuickStart(project, { label, keep }) {
 
   const bindings = join(project, "bindings");
   const shared = {
-    SVATAH_BASE_URL: app.origin,
-    SVATAH_BINDINGS: bindings,
-    SVATAH_OUT: join(project, ".svatah"),
+    YAM_BASE_URL: app.origin,
+    YAM_BINDINGS: bindings,
+    YAM_OUT: join(project, ".yam"),
   };
 
   const started = Date.now();
   try {
     await must("3. record the bindings", npm, ["exec", "--", "playwright", "test", "tests/login.spec.ts"], {
       ...shared,
-      SVATAH_MODE: "record",
-      SVATAH_PICK: PICK,
+      YAM_MODE: "record",
+      YAM_PICK: PICK,
     });
     await must("4. run", npm, ["exec", "--", "playwright", "test", "tests/login.spec.ts"], {
       ...shared,
-      SVATAH_MODE: "run",
+      YAM_MODE: "run",
     });
-    await must("5. heal", npm, ["exec", "--", "playwright", "test"], { ...shared, SVATAH_MODE: "heal" });
+    await must("5. heal", npm, ["exec", "--", "playwright", "test"], { ...shared, YAM_MODE: "heal" });
   } finally {
     await app.close();
   }

@@ -1,5 +1,5 @@
 /**
- * @svatah/recorder
+ * @svatah/yam-recorder
  *
  * Grounding, the record session, and the record report (T3.2, T3.3, LLD §11).
  *

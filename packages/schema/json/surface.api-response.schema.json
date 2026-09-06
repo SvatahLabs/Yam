@@ -1,5 +1,5 @@
 {
-  "$id": "https://svatah.dev/schema/1.0.0/surface.api-response.schema.json",
+  "$id": "https://yam.svatah.com/schema/1.0.0/surface.api-response.schema.json",
   "$ref": "#/definitions/surface.api-response",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
@@ -49,7 +49,7 @@
       "type": "object"
     }
   },
-  "description": "HTTP adapter: a response (REQ-ADP-2). Svatah schemaVersion 1.0.0.",
+  "description": "HTTP adapter: a response (REQ-ADP-2). Yam schemaVersion 1.0.0.",
   "title": "surface.api-response",
-  "x-svatah-schema-version": "1.0.0"
+  "x-yam-schema-version": "1.0.0"
 }

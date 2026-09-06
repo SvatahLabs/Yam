@@ -15,7 +15,7 @@
       header. It is not in `connect-src` or `script-src`, so nothing can be
       *fetched* or *run* from one.
 
-      The fonts are `'self'`: `@svatah/ui-tokens` ships IBM Plex as packaged
+      The fonts are `'self'`: `@svatah/yam-ui-tokens` ships IBM Plex as packaged
       woff2 files that Vite bundles as assets, so the first paint makes no
       network call (T9.2).
     -->
@@ -23,7 +23,7 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://127.0.0.1:* http://localhost:*; connect-src http://127.0.0.1:* ws://127.0.0.1:* http://localhost:* ws://localhost:*"
     />
-    <title>Svatah ADE</title>
+    <title>Yam ADE</title>
   </head>
   <body>
     <div id="root"></div>

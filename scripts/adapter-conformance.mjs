@@ -50,7 +50,7 @@ try {
         status: "skipped",
         detail:
           "no WebDriver BiDi endpoint and no Gecko browser — `pnpm browsers` downloads one, " +
-          "or set SVATAH_BIDI_URL",
+          "or set YAM_BIDI_URL",
       });
       continue;
     }

@@ -192,13 +192,13 @@ describe("data (REQ-LANG-9)", () => {
     expect(diagnostics.map((d) => d.code)).toEqual(["E_DATA"]);
   });
 
-  it("applies SVATAH_DATA_* overrides", () => {
-    const { project } = data(`user:\n  email: "a@b.c"\n`, { SVATAH_DATA_USER__EMAIL: "x@y.z" });
+  it("applies YAM_DATA_* overrides", () => {
+    const { project } = data(`user:\n  email: "a@b.c"\n`, { YAM_DATA_USER__EMAIL: "x@y.z" });
     expect(project.data.values).toEqual({ user: { email: "x@y.z" } });
   });
 
   it("accepts a dotted override name too", () => {
-    const { project } = data(`user:\n  email: "a@b.c"\n`, { "SVATAH_DATA_user.email": "x@y.z" });
+    const { project } = data(`user:\n  email: "a@b.c"\n`, { "YAM_DATA_user.email": "x@y.z" });
     expect(project.data.values).toEqual({ user: { email: "x@y.z" } });
   });
 
@@ -286,7 +286,7 @@ describe("named API requests (REQ-LANG-8, REQ-ADP-2)", () => {
  */
 describe("flows.include and flows.exclude (T11.2)", () => {
   const project = (files: Record<string, string>, paths: Record<string, unknown> = {}) => {
-    const root = mkdtempSync(join(tmpdir(), "svatah-include-"));
+    const root = mkdtempSync(join(tmpdir(), "yam-include-"));
     for (const [name, text] of Object.entries(files)) {
       mkdirSync(dirname(join(root, "flows", name)), { recursive: true });
       writeFileSync(join(root, "flows", name), text, "utf8");

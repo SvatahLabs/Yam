@@ -2,7 +2,7 @@
 /**
  * Launch the ADE, open a project, and quit (T3.6's Validate item).
  *
- *   pnpm --filter @svatah/ade smoke [-- <project>]
+ *   pnpm --filter @svatah/yam-ade smoke [-- <project>]
  *
  * "The app opens a fixture project and shows `GET /project` data; killing the
  * app stops the service." The other checks in `apps/ade/test/` read a
@@ -10,12 +10,12 @@
  * it is the one that would notice a preload path that does not resolve in a
  * packaged build or an `index.html` the renderer cannot load.
  *
- * Headless: `SVATAH_ADE_SMOKE` makes the main process open the project, print one
+ * Headless: `YAM_ADE_SMOKE` makes the main process open the project, print one
  * line, and exit. On Linux it needs a display — CI wraps it in `xvfb-run`.
  *
  * ## Against the packaged application when there is one (Draft 2.9 §13.6, T8.1)
  *
- * "The smoke check (`SVATAH_ADE_SMOKE`) and `scripts/ade-smoke.mjs` run against
+ * "The smoke check (`YAM_ADE_SMOKE`) and `scripts/ade-smoke.mjs` run against
  * the **packaged** application when one exists under `apps/ade/out/`, and
  * against the unpackaged build otherwise, and say which."
  *
@@ -25,7 +25,7 @@
  * product a person downloads could not open a project at all (P7-F1). A check
  * that cannot fail the way the product fails is not a check.
  *
- * `SVATAH_CLI` is deliberately *not* set for a packaged run: the point is that
+ * `YAM_CLI` is deliberately *not* set for a packaged run: the point is that
  * the application finds its own bundled CLI and resolves its own Node.
  */
 import { spawn } from "node:child_process";
@@ -54,7 +54,7 @@ if (!existsSync(cli)) {
 function packagedApp() {
   const out = join(ADE, "out");
   if (!existsSync(out)) return undefined;
-  const prefix = `Svatah ADE-${process.platform}-`;
+  const prefix = `Yam ADE-${process.platform}-`;
   for (const dir of readdirSync(out).filter((one) => one.startsWith(prefix))) {
     const platformDir = join(out, dir);
     if (process.platform === "darwin") {
@@ -88,15 +88,15 @@ const entry = join(ADE, ".vite", "build", "main.js");
 
 if (packaged === undefined && !existsSync(entry)) {
   process.stderr.write(
-    "No build yet. Run `pnpm --filter @svatah/ade package` first.\n",
+    "No build yet. Run `pnpm --filter @svatah/yam-ade package` first.\n",
   );
   process.exit(1);
 }
 
 process.stdout.write(
   packaged === undefined
-    ? `svatah-ade smoke target=unpackaged (${entry})\n`
-    : `svatah-ade smoke target=packaged (${packaged})\n`,
+    ? `yam-ade smoke target=unpackaged (${entry})\n`
+    : `yam-ade smoke target=packaged (${packaged})\n`,
 );
 
 const child =
@@ -106,9 +106,9 @@ const child =
         stdio: "inherit",
         env: {
           ...process.env,
-          SVATAH_ADE_SMOKE: project,
-          SVATAH_CLI: cli,
-          SVATAH_A11Y: "1",
+          YAM_ADE_SMOKE: project,
+          YAM_CLI: cli,
+          YAM_A11Y: "1",
           ELECTRON_ENABLE_LOGGING: "1",
         },
       })
@@ -117,11 +117,11 @@ const child =
         stdio: "inherit",
         env: {
           ...process.env,
-          SVATAH_ADE_SMOKE: project,
-          // No `SVATAH_CLI`, and no `SVATAH_NODE`: a packaged ADE has to find
+          YAM_ADE_SMOKE: project,
+          // No `YAM_CLI`, and no `YAM_NODE`: a packaged ADE has to find
           // its own CLI under `resources/` and its own Node on `PATH` (§13.6).
-          SVATAH_CLI: "",
-          SVATAH_A11Y: "1",
+          YAM_CLI: "",
+          YAM_A11Y: "1",
           ELECTRON_ENABLE_LOGGING: "1",
         },
       });
@@ -134,7 +134,7 @@ const child =
  */
 const deadline = setTimeout(() => {
   child.kill("SIGKILL");
-  process.stderr.write("svatah-ade smoke timed out after 120 s.\n");
+  process.stderr.write("yam-ade smoke timed out after 120 s.\n");
   process.exit(1);
 }, 120_000);
 

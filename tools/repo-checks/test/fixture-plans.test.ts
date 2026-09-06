@@ -1,7 +1,7 @@
 /**
  * Committed fixture plans do not drift (T2.8).
  *
- * `@svatah/host-playwright` cannot compile its own test plan: LLD §1 forbids the
+ * `@svatah/yam-host-playwright` cannot compile its own test plan: LLD §1 forbids the
  * host depending on the compiler, in devDependencies as much as anywhere, and
  * the boundary is right — a host consumes a plan and does not make one.
  *

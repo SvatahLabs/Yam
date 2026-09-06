@@ -25,25 +25,25 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import type { AuditLine, StepResult, Summary } from "@svatah/schema";
+import type { AuditLine, StepResult, Summary } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 const FLOW = "flows/guards-and-compensation.flow";
 
 let app: SampleServer;
 const projects: string[] = [];
 
 function scaffold(): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-guards-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-guards-"));
   projects.push(dir);
   for (const entry of ["bindings", "flows", "api", "data.yaml"]) {
     cpSync(join(FIXTURES, entry), join(dir, entry), { recursive: true });
   }
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
-    readFileSync(join(FIXTURES, "svatah.config.yaml"), "utf8").replace(
+    join(dir, "yam.config.yaml"),
+    readFileSync(join(FIXTURES, "yam.config.yaml"), "utf8").replace(
       /baseUrl: ".*"/,
       `baseUrl: "${app.origin}"`,
     ),
@@ -55,13 +55,13 @@ function scaffold(): string {
 function cli(args: readonly string[], cwd: string): Promise<{ code: number; output: string }> {
   return new Promise((done) => {
     let output = "";
-    const child = spawn(process.execPath, [SVATAH, ...args], {
+    const child = spawn(process.execPath, [YAM, ...args], {
       cwd,
       env: {
         ...process.env,
-        SVATAH_SAMPLE_PASSWORD: "qwerty123",
-        SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-        SVATAH_SAMPLE_CARD_CVV: "123",
+        YAM_SAMPLE_PASSWORD: "qwerty123",
+        YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+        YAM_SAMPLE_CARD_CVV: "123",
       },
     });
     child.stdout.on("data", (chunk) => (output += String(chunk)));
@@ -81,7 +81,7 @@ const audit = (project: string, runId: string): AuditLine[] =>
   lines<AuditLine>(project, runId, "audit.jsonl");
 
 beforeAll(async () => {
-  if (!existsSync(SVATAH)) throw new Error("Run `pnpm -r build` first.");
+  if (!existsSync(YAM)) throw new Error("Run `pnpm -r build` first.");
   app = await startSampleApp(0);
 }, 120_000);
 
@@ -183,7 +183,7 @@ test: Guard about another element
 
     // The guard carries its own target, and the step keeps its own. Read from
     // the plan the compile wrote, which is what the executor reads.
-    const plan = JSON.parse(readFileSync(join(project, ".svatah", "plan.json"), "utf8")) as {
+    const plan = JSON.parse(readFileSync(join(project, ".yam", "plan.json"), "utf8")) as {
       stories: Array<{
         name: string;
         steps: Array<{

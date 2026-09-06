@@ -7,12 +7,12 @@
  * block, an inspector's empty state — expressed once.
  *
  * Nothing here knows what a run, a binding or a tool is: the screens hand it
- * strings the model produced. That is the same rule `@svatah/ui` keeps one layer
+ * strings the model produced. That is the same rule `@svatah/yam-ui` keeps one layer
  * down, applied to this application's own layout.
  */
 import { useLayoutEffect, useRef, useState } from "react";
-import { Button, Chip, InspectorSection } from "@svatah/ui";
-import type { Action, ScreenStateBase } from "@svatah/screens";
+import { Button, Chip, InspectorSection } from "@svatah/yam-ui";
+import type { Action, ScreenStateBase } from "@svatah/yam-screens";
 
 /** `run.stop` → `action-run-stop`: the id a desktop adapter binds to. */
 export const actionId = (id: string): string => `action-${id.replace(/[^a-zA-Z0-9]+/g, "-")}`;

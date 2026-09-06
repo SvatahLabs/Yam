@@ -1,5 +1,5 @@
 /**
- * `svatah bindings list|show|verify|prune` (T1.6, LLD §15).
+ * `yam bindings list|show|verify|prune` (T1.6, LLD §15).
  *
  * `verify` needs a browser and a running application and is exercised end to end
  * in the Phase 1 progress record; what is here is everything that does not:
@@ -59,7 +59,7 @@ schemaVersion: "1.0.0"
 `;
 
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "svatah-cli-"));
+  dir = mkdtempSync(join(tmpdir(), "yam-cli-"));
   mkdirSync(join(dir, "bindings", "login"), { recursive: true });
   writeFileSync(join(dir, "bindings", "login", "username-field.yaml"), BINDING, "utf8");
 });
@@ -82,7 +82,7 @@ describe("bindings list", () => {
     const io = capture();
     expect(await main(["bindings", "list", "--dir", join(dir, "absent")], io)).toBe(EXIT.ok);
     expect(io.stdout.join("\n")).toContain("No bindings in");
-    expect(io.stdout.join("\n")).toContain("SVATAH_MODE=record");
+    expect(io.stdout.join("\n")).toContain("YAM_MODE=record");
   });
 
   it("answers as JSON when asked", async () => {

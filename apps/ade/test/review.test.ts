@@ -14,7 +14,7 @@
  * but the generated client, and `test/screen-rule.test.ts` proves that
  * statically; what the screens *show* is whatever the service answers with. So
  * this drives the client the screens drive, against a service wired exactly as
- * `svatah serve` wires one, and checks the answers — which is the part a
+ * `yam serve` wires one, and checks the answers — which is the part a
  * rendering test could not check and the part that can be wrong.
  *
  * Electron never starts, and a browser does: the recorder, the healer and the
@@ -35,7 +35,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { createService, type RunningService } from "@svatah/service";
+import { createService, type RunningService } from "@svatah/yam-service";
 import {
   compileProject,
   loadProject,
@@ -48,10 +48,10 @@ import {
   serviceRecord,
   serviceToolsFor,
   serviceVerifyBindings,
-} from "@svatah/cli";
+} from "@svatah/yam";
 import { ServiceClient, type StreamedEvent } from "../src/renderer/client.js";
 import { adviseOnFailure } from "../src/renderer/shell/Record.js";
-import type { RecordState } from "@svatah/screens";
+import type { RecordState } from "@svatah/yam-screens";
 
 const ADE = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT = join(ADE, "..", "..");
@@ -71,7 +71,7 @@ let app: SampleServer;
 const projects: string[] = [];
 
 function scaffold(options: { flow?: string; bindings?: boolean; empty?: boolean } = {}): string {
-  const project = mkdtempSync(join(tmpdir(), "svatah-ade-review-"));
+  const project = mkdtempSync(join(tmpdir(), "yam-ade-review-"));
   projects.push(project);
   if (options.bindings !== false) {
     cpSync(join(FIXTURES, "bindings"), join(project, "bindings"), { recursive: true });
@@ -87,7 +87,7 @@ function scaffold(options: { flow?: string; bindings?: boolean; empty?: boolean 
   }
   writeFileSync(join(project, "data.yaml"), 'user:\n  email: "a@b.c"\n', "utf8");
   writeFileSync(
-    join(project, "svatah.config.yaml"),
+    join(project, "yam.config.yaml"),
     `schemaVersion: "1.0.0"
 project: "ade-review"
 environment: test
@@ -118,7 +118,7 @@ tool: { expose: ["Sign in and look"], requireIdempotent: false }
   return project;
 }
 
-/** A service wired exactly as `svatah serve` wires one (LLD §13.5). */
+/** A service wired exactly as `yam serve` wires one (LLD §13.5). */
 async function serve(
   project: string,
   options: { credential?: boolean } = {},
@@ -133,7 +133,7 @@ async function serve(
       runProject,
       newRunId,
       /*
-       * What `svatah serve` injects is `credentialInEnvironment` (REQ-ADE-4).
+       * What `yam serve` injects is `credentialInEnvironment` (REQ-ADE-4).
        * Here it is a constant, so a test can have a service that reports a
        * credential without one being in this process's environment — and,
        * more to the point, without the recording session then reaching a real
@@ -349,7 +349,7 @@ describe("the Record screen chooses the gateway (P5-F2, REQ-ADE-4, LLD §13.5, �
      * computes it now, so this drives the model — which is a better check,
      * because both renderers get the same answer from it.
      */
-    const { fakeService, screenById } = await import("@svatah/screens");
+    const { fakeService, screenById } = await import("@svatah/yam-screens");
     const load = async (credential: boolean): Promise<RecordState> =>
       (await screenById("record").load(
         fakeService({ project: { gateway: { credential }, flows: [] } }),
@@ -491,7 +491,7 @@ describe("the prototype database import (T6.6, REQ-ADE-9, LLD §13.5)", () => {
 
       expect(result.project).toBe("Zoomcar regression");
       expect(result.stories).toHaveLength(14);
-      expect(result.files).toContain("svatah.config.yaml");
+      expect(result.files).toContain("yam.config.yaml");
       expect(result.files).toContain("data.yaml");
       expect(result.files.some((one) => one.startsWith("bindings/"))).toBe(true);
       expect(result.files).toContain("migration-review.md");
@@ -723,7 +723,7 @@ describe("the tool panel (T5.8, REQ-ADE-8, REQ-BEH-3)", () => {
      *
      * The invocation is produced the way a tool call produces one — a run with
      * `behavior: "tool"` and an agent invoker — and the panel finds it by
-     * reading `runs/`, which is why a `svatah tool serve` in another terminal
+     * reading `runs/`, which is why a `yam tool serve` in another terminal
      * would appear here too (REQ-ADE-2).
      */
     const project = scaffold();

@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/recorder",
+  "name": "@svatah/yam-recorder",
   "version": "0.1.0",
   "description": "Grounding, record session and report",
   "license": "Apache-2.0",
@@ -26,18 +26,18 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/gateway": "workspace:*",
-    "@svatah/bindings": "workspace:*",
-    "@svatah/runtime": "workspace:*",
-    "@svatah/surface": "workspace:*",
-    "@svatah/schema": "workspace:*",
+    "@svatah/yam-gateway": "workspace:*",
+    "@svatah/yam-bindings": "workspace:*",
+    "@svatah/yam-runtime": "workspace:*",
+    "@svatah/yam-surface": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "@svatah/schema": "workspace:*"
+    "@svatah/yam-schema": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

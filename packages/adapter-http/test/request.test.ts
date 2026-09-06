@@ -11,7 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { ApiRequest } from "@svatah/schema";
+import type { ApiRequest } from "@svatah/yam-schema";
 import { ApiRequestError, executeRequest, HttpSurface } from "../src/index.js";
 import { startEchoServer, type EchoServer } from "./server.js";
 
@@ -122,7 +122,7 @@ describe("the field matrix (REQ-ADP-2)", () => {
   });
 
   it("uploads a file as multipart, with the field name and the file name", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "svatah-http-"));
+    const dir = mkdtempSync(join(tmpdir(), "yam-http-"));
     writeFileSync(join(dir, "summary.pdf"), "%PDF-1.4 pretend");
 
     const result = await echo(

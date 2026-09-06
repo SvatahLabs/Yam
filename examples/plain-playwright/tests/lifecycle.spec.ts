@@ -8,7 +8,7 @@
  * The four phases run serially against one bindings store in a temporary
  * directory, so the spec is the record → run → break → heal lifecycle rather than
  * four unrelated assertions. Recording uses the programmatic pick
- * (`svatahPicks`), which is the test affordance that lets the picker path run
+ * (`yamPicks`), which is the test affordance that lets the picker path run
  * with nobody at the keyboard; the headed interactive picker is the same code
  * path with the pick coming from a click instead.
  *
@@ -21,12 +21,12 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
-import { test, expect, HEALED_ANNOTATION, modeFromEnvironment } from "@svatah/playwright-test";
+import { test, expect, HEALED_ANNOTATION, modeFromEnvironment } from "@svatah/yam-playwright-test";
 
 /** One store for the whole lifecycle, thrown away at the end. */
-const WORKSPACE = mkdtempSync(join(tmpdir(), "svatah-example-"));
+const WORKSPACE = mkdtempSync(join(tmpdir(), "yam-example-"));
 const BINDINGS = join(WORKSPACE, "bindings");
-const OUTPUT = join(WORKSPACE, ".svatah");
+const OUTPUT = join(WORKSPACE, ".yam");
 
 /** The three bindings recorded in phase 1, and how the pick names each. */
 const PICKS: Record<string, string> = {
@@ -74,7 +74,7 @@ function blockEverythingButTheApplication(allowedOrigin: string): () => void {
 /* ── phase 1: record ──────────────────────────────────────────────────────── */
 
 test.describe("1 — record", () => {
-  test.use({ svatahMode: "record", bindingsDir: BINDINGS, svatahOutputDir: OUTPUT, svatahPicks: PICKS });
+  test.use({ yamMode: "record", bindingsDir: BINDINGS, yamOutputDir: OUTPUT, yamPicks: PICKS });
 
   test("records three bindings by picking the elements", async ({ page, bind, bindOutcomes }, testInfo) => {
     const restore = blockEverythingButTheApplication(testInfo.project.use.baseURL!);
@@ -131,7 +131,7 @@ test.describe("1 — record", () => {
 /* ── phase 2: run ─────────────────────────────────────────────────────────── */
 
 test.describe("2 — run", () => {
-  test.use({ svatahMode: "run", bindingsDir: BINDINGS, svatahOutputDir: OUTPUT });
+  test.use({ yamMode: "run", bindingsDir: BINDINGS, yamOutputDir: OUTPUT });
 
   test("replays the recorded bindings with no model and no other network", async ({
     page,
@@ -155,7 +155,7 @@ test.describe("2 — run", () => {
     expect(testInfo.annotations.filter((a) => a.type === HEALED_ANNOTATION)).toHaveLength(0);
   });
 
-  test("SVATAH_MODE selects the mode, and run is the default", () => {
+  test("YAM_MODE selects the mode, and run is the default", () => {
     expect(modeFromEnvironment(undefined)).toBe("run");
     expect(modeFromEnvironment("run")).toBe("run");
     expect(modeFromEnvironment("record")).toBe("record");
@@ -183,19 +183,19 @@ test.describe("2 — run", () => {
 /* ── phase 3: break, and heal ─────────────────────────────────────────────── */
 
 test.describe("3 — break on variant 3, and heal inline", () => {
-  test.use({ svatahMode: "heal", bindingsDir: BINDINGS, svatahOutputDir: OUTPUT });
+  test.use({ yamMode: "heal", bindingsDir: BINDINGS, yamOutputDir: OUTPUT });
 
   /** The XPath a v1 flow had for this field, before there were bindings at all. */
   const LEGACY_XPATH = '//form[@id="login"]/div[1]/input';
 
   test("narrows a binding to the single structural locator a migration produces", async ({ page }) => {
     // What a project arriving from hand-written locators has: one XPath per
-    // element and nothing else. `svatah migrate` (T2.9) produces exactly this
+    // element and nothing else. `yam migrate` (T2.9) produces exactly this
     // shape from a v1 `.locator` file — the legacy sample flows are full of
     // `~xpath://input[@type='text']~` — and it is the shape healing exists for.
     // The fingerprint is the real recorded one, so relocalization has something
     // truthful to score against.
-    const { BindingsStore } = await import("@svatah/bindings");
+    const { BindingsStore } = await import("@svatah/yam-bindings");
     const store = BindingsStore.load(BINDINGS);
 
     const recorded = store.entryFor("login.username-field", {})!;
@@ -253,7 +253,7 @@ test.describe("3 — break on variant 3, and heal inline", () => {
       .map((line) => JSON.parse(line) as { id: string; tried: Array<{ by: string }> });
 
     const failure = failures.find((f) => f.id === "login.legacy-username");
-    expect(failure, ".svatah/bind-failures.jsonl has no line for the broken binding").toBeDefined();
+    expect(failure, ".yam/bind-failures.jsonl has no line for the broken binding").toBeDefined();
     expect(failure!.tried.map((t) => t.by)).toEqual(["xpath"]);
 
     const proposals = readFileSync(join(OUTPUT, "heal-proposals.jsonl"), "utf8")
@@ -269,7 +269,7 @@ test.describe("3 — break on variant 3, and heal inline", () => {
     // The store still holds the broken binding. A repair reaches the repository
     // through a diff someone reads, not through a test run (REQ-HEAL-2,
     // REQ-HEAL-4): green has to keep meaning that a deterministic replay passed.
-    const { BindingsStore } = await import("@svatah/bindings");
+    const { BindingsStore } = await import("@svatah/yam-bindings");
     const store = BindingsStore.load(BINDINGS);
     expect(store.entryFor("login.legacy-username", {})!.candidates).toHaveLength(1);
   });

@@ -1,7 +1,7 @@
 /**
  * Tier 2 — the local model tier (T4.3, REQ-COMP-3, REQ-COMP-7, REQ-NFR-3).
  *
- * The *accuracy* is measured by `svatah eval compiler --only tier2` against a
+ * The *accuracy* is measured by `yam eval compiler --only tier2` against a
  * real local model, and published in `reports/eval-compiler.md`. This is the
  * other half: the machinery around the model, exercised with a fake gateway so
  * it runs on a clean checkout with no model server present — which is the
@@ -24,11 +24,11 @@ import {
   hasModelTiers,
   registerTier,
   toRawStep,
-} from "@svatah/compiler";
-import { fakeGateway, localGateway } from "@svatah/gateway";
-import { readProject } from "@svatah/spec";
-import { configSchema, DEFAULT_CONFIG } from "@svatah/schema";
-import { EXIT } from "@svatah/bindings-cli";
+} from "@svatah/yam-compiler";
+import { fakeGateway, localGateway } from "@svatah/yam-gateway";
+import { readProject } from "@svatah/yam-spec";
+import { configSchema, DEFAULT_CONFIG } from "@svatah/yam-schema";
+import { EXIT } from "@svatah/yam-bindings-cli";
 import { z } from "zod";
 import { main } from "../src/index.js";
 import { retrieve, shapeWords, suggestedAction, tier2, TIER2_MAX_CONFIDENCE } from "../src/tiers/tier2.js";
@@ -69,10 +69,10 @@ const ANSWERS: Record<string, Record<string, unknown>> = {
 };
 
 function project(config: string): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-tier2-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-tier2-"));
   mkdirSync(join(dir, "flows"), { recursive: true });
   writeFileSync(join(dir, "flows", "loose.flow"), FLOW, "utf8");
-  writeFileSync(join(dir, "svatah.config.yaml"), config, "utf8");
+  writeFileSync(join(dir, "yam.config.yaml"), config, "utf8");
   return dir;
 }
 

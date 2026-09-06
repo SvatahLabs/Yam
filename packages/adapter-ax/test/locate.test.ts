@@ -3,7 +3,7 @@
  * LLD §3.3, §6.3, REQ-REC-3).
  */
 import { describe, expect, it } from "vitest";
-import { LocateError } from "@svatah/surface";
+import { LocateError } from "@svatah/yam-surface";
 import { convertTree, matchNodes, synthesise, type AxSnapshotNode } from "../src/index.js";
 import { recordedWindow } from "./recorded.js";
 

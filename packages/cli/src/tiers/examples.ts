@@ -50,7 +50,7 @@ interface GoldenLine {
  * A golden entry's IR step, in the shape the model is asked for.
  *
  * The golden set stores the finished `Step` fields; the model answers in the
- * narrower shape of `modelStepSchema` (see `@svatah/compiler`'s `raw-schema.ts`).
+ * narrower shape of `modelStepSchema` (see `@svatah/yam-compiler`'s `raw-schema.ts`).
  * Showing an example in a shape the model cannot produce would be showing it the
  * wrong thing, so the two are converted here — literal arguments flattened to
  * plain strings, references left as `argRefs`, everything else dropped.

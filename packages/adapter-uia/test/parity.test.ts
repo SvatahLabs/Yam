@@ -35,7 +35,7 @@
  *
  * The first two were found by this test and closed by it: both needed an
  * adapter to read an element's *parent*, which the flat role maps in
- * `@svatah/surface` cannot express, and neither would have been noticed by
+ * `@svatah/yam-surface` cannot express, and neither would have been noticed by
  * either adapter's own tests. The third is not an interactive control, so it
  * changes nothing a flow can name; it is a known gap in
  * `docs/spec/progress/phase-6.md`.
@@ -44,9 +44,9 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { convertTree as convertAx, type AxNode } from "@svatah/adapter-ax";
+import { convertTree as convertAx, type AxNode } from "@svatah/yam-adapter-ax";
 import { convertTree as convertUia } from "../src/index.js";
-import { isWindowChrome } from "@svatah/surface";
+import { isWindowChrome } from "@svatah/yam-surface";
 import { ADE_SCREENS, recordedWindow, type AdeScreen } from "./recorded.js";
 
 const AX_FIXTURES = join(

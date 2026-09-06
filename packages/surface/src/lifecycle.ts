@@ -26,7 +26,7 @@
  *
  * **A signal is not a quit.** Node's default `SIGTERM` handling ends a main
  * process where it stands, so an Electron application never runs `before-quit`
- * — the ADE's `svatah serve` child was left with no parent to stop it, one
+ * — the ADE's `yam serve` child was left with no parent to stop it, one
  * orphan per launch (P10-F1). The graceful route is an Apple-event `quit` on
  * macOS and `CloseMainWindow` on Windows; the signal is what follows if it does
  * not work, and `SIGKILL` is what follows that.
@@ -45,7 +45,7 @@ export interface LaunchConfig {
   /** An executable, spawned directly. Windows and Linux. */
   readonly path?: string;
   readonly args?: readonly string[];
-  /** Added to the launched process's environment, never to Svatah's. */
+  /** Added to the launched process's environment, never to Yam's. */
   readonly env?: Readonly<Record<string, string>>;
   /** How long to wait for a window. Default 60 s, as LLD §15's gate does. */
   readonly timeoutMs?: number;

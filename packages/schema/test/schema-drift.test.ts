@@ -33,7 +33,7 @@ describe("published JSON Schemas (REQ-STD-1)", () => {
       const onDisk = readFileSync(join(JSON_DIR, file), "utf8");
       expect(
         onDisk,
-        `packages/schema/json/${file} is stale. Run: pnpm --filter @svatah/schema build`,
+        `packages/schema/json/${file} is stale. Run: pnpm --filter @svatah/yam-schema build`,
       ).toBe(generated[file]);
     },
   );
@@ -45,8 +45,8 @@ describe("published JSON Schemas (REQ-STD-1)", () => {
   it("every published schema carries the contract version", () => {
     for (const file of committed) {
       const doc = JSON.parse(readFileSync(join(JSON_DIR, file), "utf8")) as Record<string, unknown>;
-      expect(doc["x-svatah-schema-version"]).toBe(SCHEMA_VERSION);
-      expect(doc["$id"]).toBe(`https://svatah.dev/schema/${SCHEMA_VERSION}/${file}`);
+      expect(doc["x-yam-schema-version"]).toBe(SCHEMA_VERSION);
+      expect(doc["$id"]).toBe(`https://yam.svatah.com/schema/${SCHEMA_VERSION}/${file}`);
       expect(doc["$schema"]).toBe("http://json-schema.org/draft-07/schema#");
     }
   });

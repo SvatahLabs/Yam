@@ -27,16 +27,16 @@ Bridge: the largest window read was 1017 nodes in 1857 ms (1.83 ms per node, 162
 
 | Case | Page | Status | Checks |
 |---|---|---|---|
-| `ade.snapshot` | `Svatah ADE` | passed | 10/10 |
-| `ade.project` | `Svatah ADE` | passed | 4/4 |
-| `ade.flow` | `Svatah ADE` | passed | 4/4 |
-| `ade.run` | `Svatah ADE` | passed | 6/6 |
-| `ade.result` | `Svatah ADE` | passed | 10/10 |
-| `ade.api-client` | `Svatah ADE` | passed | 4/4 |
-| `ade.inspector` | `Svatah ADE` | passed | 3/3 |
-| `ade.no-navigation` | `Svatah ADE` | passed | 2/2 |
-| `ade.heal.renamed-control` | `Svatah ADE` | skipped | 1/1 |
-| `ade.heal.moved-panel` | `Svatah ADE` | skipped | 2/2 |
+| `ade.snapshot` | `Yam ADE` | passed | 10/10 |
+| `ade.project` | `Yam ADE` | passed | 4/4 |
+| `ade.flow` | `Yam ADE` | passed | 4/4 |
+| `ade.run` | `Yam ADE` | passed | 6/6 |
+| `ade.result` | `Yam ADE` | passed | 10/10 |
+| `ade.api-client` | `Yam ADE` | passed | 4/4 |
+| `ade.inspector` | `Yam ADE` | passed | 3/3 |
+| `ade.no-navigation` | `Yam ADE` | passed | 2/2 |
+| `ade.heal.renamed-control` | `Yam ADE` | skipped | 1/1 |
+| `ade.heal.moved-panel` | `Yam ADE` | skipped | 2/2 |
 
 ## ADE variant 1
 
@@ -50,16 +50,16 @@ Bridge: the largest window read was 340 nodes in 2339 ms (6.88 ms per node, 5445
 
 | Case | Page | Status | Checks |
 |---|---|---|---|
-| `ade.snapshot` | `Svatah ADE` | skipped | 0/0 |
-| `ade.project` | `Svatah ADE` | skipped | 0/0 |
-| `ade.flow` | `Svatah ADE` | skipped | 0/0 |
-| `ade.run` | `Svatah ADE` | skipped | 0/0 |
-| `ade.result` | `Svatah ADE` | skipped | 0/0 |
-| `ade.api-client` | `Svatah ADE` | skipped | 0/0 |
-| `ade.inspector` | `Svatah ADE` | skipped | 0/0 |
-| `ade.no-navigation` | `Svatah ADE` | skipped | 0/0 |
-| `ade.heal.renamed-control` | `Svatah ADE` | passed | 4/4 |
-| `ade.heal.moved-panel` | `Svatah ADE` | skipped | 0/0 |
+| `ade.snapshot` | `Yam ADE` | skipped | 0/0 |
+| `ade.project` | `Yam ADE` | skipped | 0/0 |
+| `ade.flow` | `Yam ADE` | skipped | 0/0 |
+| `ade.run` | `Yam ADE` | skipped | 0/0 |
+| `ade.result` | `Yam ADE` | skipped | 0/0 |
+| `ade.api-client` | `Yam ADE` | skipped | 0/0 |
+| `ade.inspector` | `Yam ADE` | skipped | 0/0 |
+| `ade.no-navigation` | `Yam ADE` | skipped | 0/0 |
+| `ade.heal.renamed-control` | `Yam ADE` | passed | 4/4 |
+| `ade.heal.moved-panel` | `Yam ADE` | skipped | 0/0 |
 
 ## ADE variant 2
 
@@ -73,14 +73,14 @@ Bridge: the largest window read was 340 nodes in 1513 ms (4.45 ms per node, 5445
 
 | Case | Page | Status | Checks |
 |---|---|---|---|
-| `ade.snapshot` | `Svatah ADE` | skipped | 0/0 |
-| `ade.project` | `Svatah ADE` | skipped | 0/0 |
-| `ade.flow` | `Svatah ADE` | skipped | 0/0 |
-| `ade.run` | `Svatah ADE` | skipped | 0/0 |
-| `ade.result` | `Svatah ADE` | skipped | 0/0 |
-| `ade.api-client` | `Svatah ADE` | skipped | 0/0 |
-| `ade.inspector` | `Svatah ADE` | skipped | 0/0 |
-| `ade.no-navigation` | `Svatah ADE` | skipped | 0/0 |
-| `ade.heal.renamed-control` | `Svatah ADE` | skipped | 0/0 |
-| `ade.heal.moved-panel` | `Svatah ADE` | passed | 5/5 |
+| `ade.snapshot` | `Yam ADE` | skipped | 0/0 |
+| `ade.project` | `Yam ADE` | skipped | 0/0 |
+| `ade.flow` | `Yam ADE` | skipped | 0/0 |
+| `ade.run` | `Yam ADE` | skipped | 0/0 |
+| `ade.result` | `Yam ADE` | skipped | 0/0 |
+| `ade.api-client` | `Yam ADE` | skipped | 0/0 |
+| `ade.inspector` | `Yam ADE` | skipped | 0/0 |
+| `ade.no-navigation` | `Yam ADE` | skipped | 0/0 |
+| `ade.heal.renamed-control` | `Yam ADE` | skipped | 0/0 |
+| `ade.heal.moved-panel` | `Yam ADE` | passed | 5/5 |
 

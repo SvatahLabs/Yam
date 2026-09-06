@@ -1,10 +1,10 @@
 /**
- * `svatah eval finetune corpus` and `svatah eval finetune export`
+ * `yam eval finetune corpus` and `yam eval finetune export`
  * (T8.4, T6.5, ADR-4, REQ-COMP-3).
  *
  * ```
- * svatah eval finetune corpus [--json]
- * svatah eval finetune export [--out evals/compiler/finetune/pairs.jsonl] [--json]
+ * yam eval finetune corpus [--json]
+ * yam eval finetune export [--out evals/compiler/finetune/pairs.jsonl] [--json]
  * ```
  *
  * ## What Phase 7 trained on, and why it made the model worse
@@ -52,7 +52,7 @@ import {
   type CommandIo,
   type ExitCode,
   type ParsedArgs,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 import { asExample } from "../tiers/examples.js";
 import { TIER2_PROMPT_VERSION } from "../tiers/tier2.js";
 
@@ -68,7 +68,7 @@ export interface Pair {
    * literal args as plain strings and references under `argRefs`. The finished
    * `Step` carries an element id, a secret flag, a timeout and a positional id,
    * every one of which is a fact about the project that a model has no basis
-   * for (see `@svatah/compiler`'s `raw-schema.ts`).
+   * for (see `@svatah/yam-compiler`'s `raw-schema.ts`).
    *
    * Training on the finished shape would teach the model to emit something the
    * tier's own parser rejects, and the tuned model would score *worse* while
@@ -254,8 +254,8 @@ export async function finetuneCommand(args: ParsedArgs, io: CommandIo): Promise<
   if (sub !== "export" && sub !== "corpus") {
     io.err(
       `Unknown "eval finetune" subcommand ${sub === undefined ? "(none given)" : `"${sub}"`}.\n` +
-        "  svatah eval finetune corpus [--json]\n" +
-        "  svatah eval finetune export [--out <path.jsonl>] [--json]\n\n" +
+        "  yam eval finetune corpus [--json]\n" +
+        "  yam eval finetune export [--out <path.jsonl>] [--json]\n\n" +
         "Training and the base-versus-tuned comparison are `scripts/finetune-tier2.mjs`, " +
         "which needs a fine-tuning stack this command deliberately does not depend on.",
     );
@@ -293,7 +293,7 @@ export async function finetuneCommand(args: ParsedArgs, io: CommandIo): Promise<
         `\n  ${corpus.pairs.length} training pair(s); excluded ${corpus.excludedGolden} in the ` +
           `golden set and ${corpus.excludedDuplicate} duplicate(s).`,
       );
-      io.out("  `svatah eval finetune export` writes them, and nothing else.");
+      io.out("  `yam eval finetune export` writes them, and nothing else.");
     }
     return corpus.pairs.length === 0 ? EXIT.failed : EXIT.ok;
   }
@@ -304,7 +304,7 @@ export async function finetuneCommand(args: ParsedArgs, io: CommandIo): Promise<
     io.err(
       `No reviewed pairs in ${relative(root, corpusPaths(root).refusedPath)}. ` +
         "The corpus is the export's only source (T8.4): add reviewed (sentence, step) pairs " +
-        "there, or run `svatah eval finetune corpus` to see what is collected.",
+        "there, or run `yam eval finetune corpus` to see what is collected.",
     );
     return EXIT.failed;
   }
@@ -326,7 +326,7 @@ export async function finetuneCommand(args: ParsedArgs, io: CommandIo): Promise<
      * is a Tier 2 *answer* and not the IR, or they will train on the wrong
      * thing and the tuned model will score worse for a reason nobody can see.
      */
-    shape: "modelStepSchema (@svatah/compiler raw-schema.ts) — the shape a Tier 2 answer has",
+    shape: "modelStepSchema (@svatah/yam-compiler raw-schema.ts) — the shape a Tier 2 answer has",
     promptVersion: TIER2_PROMPT_VERSION,
     excluded: { golden: corpus.excludedGolden, duplicate: corpus.excludedDuplicate },
     candidates: corpus.candidates.length,

@@ -6,7 +6,7 @@
  * builds without a running service, and a test regenerates it and diffs, so drift
  * between a client and the service is a red build rather than a discovery.
  *
- * Bodies are `unknown` on purpose: their types are `@svatah/schema`'s, and
+ * Bodies are `unknown` on purpose: their types are `@svatah/yam-schema`'s, and
  * re-deriving them here would make a second, subtly different set of the same
  * types (REQ-STD-1).
  */
@@ -41,7 +41,7 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "postBindingsVerify", verb: "post", path: "/bindings/verify", summary: "Dry-resolve the store, or one binding" },
   { id: "postCompile", verb: "post", path: "/compile", summary: "Compile and lint" },
   { id: "postHeal", verb: "post", path: "/heal", summary: "Heal a run; proposals arrive on the stream" },
-  { id: "postMigrate", verb: "post", path: "/migrate", summary: "Import a Svatah ADE prototype's electron-db directory into this project" },
+  { id: "postMigrate", verb: "post", path: "/migrate", summary: "Import a Yam ADE prototype's electron-db directory into this project" },
   { id: "postRecord", verb: "post", path: "/record", summary: "Start a recording session; decisions arrive on the stream" },
   { id: "postRecordByIdDecision", verb: "post", path: "/record/{id}/decision", summary: "Accept, re-pick or reject the grounding a session is waiting on" },
   { id: "postRecordByIdStop", verb: "post", path: "/record/{id}/stop", summary: "Stop a recording session" },
@@ -216,7 +216,7 @@ export class GeneratedClient {
     return await this.call("post", `/heal`, { body, });
   }
 
-  /** `POST /migrate` — Import a Svatah ADE prototype's electron-db directory into this project */
+  /** `POST /migrate` — Import a Yam ADE prototype's electron-db directory into this project */
   async postMigrate(body?: unknown): Promise<unknown> {
     return await this.call("post", `/migrate`, { body, });
   }

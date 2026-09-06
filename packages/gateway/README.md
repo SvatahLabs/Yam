@@ -1,4 +1,4 @@
-# @svatah/gateway
+# @svatah/yam-gateway
 
 The only place in the workspace that talks to a model (T3.1, LLD §10).
 
@@ -9,10 +9,10 @@ import it at all, which is what makes REQ-RUN-1 — "the executor makes no model
 calls" — a build-time fact rather than a promise.
 
 ```ts
-import { anthropicGateway, DiskCache } from "@svatah/gateway";
+import { anthropicGateway, DiskCache } from "@svatah/yam-gateway";
 import { z } from "zod";
 
-const gateway = anthropicGateway({ cache: new DiskCache(".svatah/model-cache") });
+const gateway = anthropicGateway({ cache: new DiskCache(".yam/model-cache") });
 
 const { value, provenance, cached } = await gateway.ask({
   promptVersion: "g-1",

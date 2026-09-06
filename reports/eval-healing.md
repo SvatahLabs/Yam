@@ -1,4 +1,4 @@
-# Svatah eval report — healing
+# Yam eval report — healing
 
 Generated: 2026-09-06T22:42:20.023Z
 
@@ -8,7 +8,7 @@ Generated: 2026-09-06T22:42:20.023Z
 
 ## Method
 
-Bindings are recorded for every interactive element on every sample page at variant 0. The headline number is taken with test-id attributes disabled: an application that carries a data-testid on every control barely needs healing, and measuring on it would flatter the result. The same run with test ids enabled is reported alongside it. Each variant is then loaded on the pages it changes. A candidate has broken when it no longer identifies exactly one element. A binding is degraded when at least one of its candidates has broken, and those are the cases this number is about. Recovered means two things together: the element relocalization proposed carries the same ground-truth key as the element the binding was recorded on, AND a candidate re-synthesised from that element resolves back to exactly one element. The key is a data-svatah-eval attribute the sample application stamps on every interactive element, identical across all variants; the eval reads it with a page script outside the surface, and bindings.ignoreAttributes strips it from describe(), from native, from synthesis and from fingerprints, so it can never help relocalization find anything. A proposal with a different key is wrong-element however high it scored; one whose key matches but which cannot be re-synthesised into a unique candidate is unverified, not recovered. No model is involved.
+Bindings are recorded for every interactive element on every sample page at variant 0. The headline number is taken with test-id attributes disabled: an application that carries a data-testid on every control barely needs healing, and measuring on it would flatter the result. The same run with test ids enabled is reported alongside it. Each variant is then loaded on the pages it changes. A candidate has broken when it no longer identifies exactly one element. A binding is degraded when at least one of its candidates has broken, and those are the cases this number is about. Recovered means two things together: the element relocalization proposed carries the same ground-truth key as the element the binding was recorded on, AND a candidate re-synthesised from that element resolves back to exactly one element. The key is a data-yam-eval attribute the sample application stamps on every interactive element, identical across all variants; the eval reads it with a page script outside the surface, and bindings.ignoreAttributes strips it from describe(), from native, from synthesis and from fingerprints, so it can never help relocalization find anything. A proposal with a different key is wrong-element however high it scored; one whose key matches but which cannot be re-synthesised into a unique candidate is unverified, not recovered. No model is involved.
 
 Headline population: `no-test-ids`.
 

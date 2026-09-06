@@ -9,8 +9,8 @@ import { describe, expect, it } from "vitest";
 import { mkdtempSync, readFileSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { StepResult } from "@svatah/schema";
-import { LocateError, TimeoutError } from "@svatah/surface";
+import type { StepResult } from "@svatah/yam-schema";
+import { LocateError, TimeoutError } from "@svatah/yam-surface";
 import { openRunDirectory, run, EXIT, type RunOptions } from "../src/index.js";
 import {
   config,
@@ -860,7 +860,7 @@ describe("determinism (REQ-RUN-2)", () => {
 
 describe("checkpoints (REQ-AUTO-2)", () => {
   it("writes one per step, with the scope and the session", async () => {
-    const out = mkdtempSync(join(tmpdir(), "svatah-run-"));
+    const out = mkdtempSync(join(tmpdir(), "yam-run-"));
     const directory = openRunDirectory(out, "r1");
 
     await run({
@@ -889,7 +889,7 @@ describe("checkpoints (REQ-AUTO-2)", () => {
   });
 
   it("writes none when checkpoints are off", async () => {
-    const out = mkdtempSync(join(tmpdir(), "svatah-run-"));
+    const out = mkdtempSync(join(tmpdir(), "yam-run-"));
     const directory = openRunDirectory(out, "r2");
     await run({
       config: config({ checkpoints: false }),
@@ -904,7 +904,7 @@ describe("checkpoints (REQ-AUTO-2)", () => {
 
 describe("the run directory (REQ-RUN-9)", () => {
   it("writes results.jsonl, summary.json and audit.jsonl", async () => {
-    const out = mkdtempSync(join(tmpdir(), "svatah-run-"));
+    const out = mkdtempSync(join(tmpdir(), "yam-run-"));
     const directory = openRunDirectory(out, "r3");
     await run({
       config: config(),

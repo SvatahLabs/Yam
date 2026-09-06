@@ -1,5 +1,5 @@
 /**
- * The `svatah-bindings` command line (LLD §1, §15, HLD §12, Draft 2.3).
+ * The `yam-bindings` command line (LLD §1, §15, HLD §12, Draft 2.3).
  *
  * Module (a) is what a plain Playwright user installs: the store, model-free
  * healing, the adapter and the `bind()` fixture, with no flow language, compiler
@@ -7,36 +7,36 @@
  * line of its own, so someone who added one dependency and one fixture can still
  * inspect, verify and repair their bindings from a terminal.
  *
- * `@svatah/cli` mounts these same functions under `svatah`, so there is one
+ * `@svatah/yam` mounts these same functions under `yam`, so there is one
  * implementation behind two executables rather than two that drift apart.
  */
 import { parseArgs, type ParsedArgs } from "./args.js";
 import { EXIT, type ExitCode } from "./exit-codes.js";
 import { surfaceCommand, type CommandIo } from "./commands/surface.js";
 
-const USAGE = `svatah-bindings — the bindings store and model-free healing (module a)
+const USAGE = `yam-bindings — the bindings store and model-free healing (module a)
 
-  svatah-bindings bindings list [--dir <bindings>] [--json]
-  svatah-bindings bindings show <id> [--dir <bindings>] [--json]
-  svatah-bindings bindings verify [--adapter <name>] [--base-url <url>] [--id <id>] [--json]
-  svatah-bindings bindings prune [--used-in <dirs>] [--apply] [--json]
-  svatah-bindings heal --from-bind-failures | --run <id>
-                       [--dir <bindings>] [--out <.svatah>] [--runs <runs>]
+  yam-bindings bindings list [--dir <bindings>] [--json]
+  yam-bindings bindings show <id> [--dir <bindings>] [--json]
+  yam-bindings bindings verify [--adapter <name>] [--base-url <url>] [--id <id>] [--json]
+  yam-bindings bindings prune [--used-in <dirs>] [--apply] [--json]
+  yam-bindings heal --from-bind-failures | --run <id>
+                       [--dir <bindings>] [--out <.yam>] [--runs <runs>]
                        [--base-url <url>] [--storage-state <path.json>]
                        [--apply] [--no-model] [--headed] [--json]
-  svatah-bindings surface conform --adapter <name> [--base-url <url>] [--headed]
+  yam-bindings surface conform --adapter <name> [--base-url <url>] [--headed]
                                   [--only <ids>] [--report <path.md>] [--json]
-  svatah-bindings eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
+  yam-bindings eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
 
 Every command that opens a session takes its base URL and storage state from
-the --base-url / --storage-state flag, then SVATAH_BASE_URL /
-SVATAH_STORAGE_STATE, then config.app, in that order (LLD §15).
+the --base-url / --storage-state flag, then YAM_BASE_URL /
+YAM_STORAGE_STATE, then config.app, in that order (LLD §15).
 
-Every one of these is also a \`svatah\` subcommand, if the whole project is
+Every one of these is also a \`yam\` subcommand, if the whole project is
 installed. Exit codes are the table in LLD §15.
 `;
 
-/** The commands module (a) owns. Mounted by `@svatah/cli` under `svatah` too. */
+/** The commands module (a) owns. Mounted by `@svatah/yam` under `yam` too. */
 export async function runBindingsCommand(
   command: string,
   args: ParsedArgs,
@@ -52,7 +52,7 @@ export async function runBindingsCommand(
     case "eval":
       return await (await import("./commands/eval.js")).evalCommand(args, io);
     default:
-      // Not one of ours. `@svatah/cli` tries its own commands next.
+      // Not one of ours. `@svatah/yam` tries its own commands next.
       return undefined;
   }
 }
@@ -72,7 +72,7 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
   io.err(
     `Unknown command "${command}".\n\n${USAGE}\n` +
       "If you were looking for `compile`, `run` or `migrate`, those are the flow half of " +
-      "Svatah and live in `@svatah/cli` — install it and use `svatah`.",
+      "Yam and live in `@svatah/yam` — install it and use `yam`.",
   );
   return EXIT.usage;
 }

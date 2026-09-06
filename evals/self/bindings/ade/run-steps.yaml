@@ -9,7 +9,7 @@
 #
 # The fingerprint carries the role and the id and nothing invented: no box
 # nobody measured, no neighbours nobody read. `verified: false` says the same
-# thing in one word, and `svatah bindings verify` is what turns it true against
+# thing in one word, and `yam bindings verify` is what turns it true against
 # a running ADE.
 schemaVersion: "1.0.0"
 id: "ade.run-steps"
@@ -22,7 +22,7 @@ entries:
         score: 0.99
     context:
       platform: "desktop"
-      pattern: "Svatah ADE"
+      pattern: "Yam ADE"
       hash: "3b3943f18c9f17ca1c9c49465e02f0fa70398dc140210d7f193810c0569d9e56"
     fingerprint:
       tag: "AXUnknown"

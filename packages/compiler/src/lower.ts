@@ -23,9 +23,9 @@ import type {
   Step,
   TargetRef,
   ValueRef,
-} from "@svatah/schema";
-import type { TargetDictionary } from "@svatah/spec";
-import type { Diagnostic } from "@svatah/spec";
+} from "@svatah/yam-schema";
+import type { TargetDictionary } from "@svatah/yam-spec";
+import type { Diagnostic } from "@svatah/yam-spec";
 import type { RawPredicate, RawStep, RawTarget, RawValue } from "./raw.js";
 
 export interface LowerContext {
@@ -42,7 +42,7 @@ export interface LowerContext {
 /**
  * Target phrases that make a step side-effecting (REQ-AUTO-8).
  *
- * A heuristic, and a deliberately narrow one. Its only job is to make `svatah
+ * A heuristic, and a deliberately narrow one. Its only job is to make `yam
  * lint` say "this story changes something and is exposed as a tool without being
  * marked idempotent", and a list that fired on every click would make that
  * warning worthless. It errs towards silence: a story that really does have side

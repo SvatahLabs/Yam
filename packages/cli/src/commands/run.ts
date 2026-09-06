@@ -1,8 +1,8 @@
 /**
- * `svatah run` (REQ-RUN-9, 12, REQ-BEH-1, 5, REQ-AGT-1, LLD §15).
+ * `yam run` (REQ-RUN-9, 12, REQ-BEH-1, 5, REQ-AGT-1, LLD §15).
  *
  * ```
- * svatah run [--host playwright|none] [--flow f] [--story s] [--workers n]
+ * yam run [--host playwright|none] [--flow f] [--story s] [--workers n]
  *            [--headed] [--out runs] [--json]
  * ```
  *
@@ -21,11 +21,11 @@ import { spawn } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
-import type { Invoker, Plan, StepResult, Summary } from "@svatah/schema";
-import { canonicalJson } from "@svatah/schema";
-import { BindingsStore, resolve as resolveBinding } from "@svatah/bindings";
-import { HttpSurface } from "@svatah/adapter-http";
-import { generateSpecs } from "@svatah/host-playwright";
+import type { Invoker, Plan, StepResult, Summary } from "@svatah/yam-schema";
+import { canonicalJson } from "@svatah/yam-schema";
+import { BindingsStore, resolve as resolveBinding } from "@svatah/yam-bindings";
+import { HttpSurface } from "@svatah/yam-adapter-http";
+import { generateSpecs } from "@svatah/yam-host-playwright";
 import {
   expandRuns,
   newRunId,
@@ -38,9 +38,9 @@ import {
   type CustomStepRunner,
   type Resolver,
   type RunOptions,
-} from "@svatah/runtime";
-import { createSurface } from "@svatah/surface";
-import { runWorkflow } from "@svatah/workflow";
+} from "@svatah/yam-runtime";
+import { createSurface } from "@svatah/yam-surface";
+import { runWorkflow } from "@svatah/yam-workflow";
 import {
   boolOption,
   inputOptions,
@@ -51,13 +51,13 @@ import {
   stringOptions,
   type ParsedArgs,
   type SessionTarget,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
-import { EXIT, type ExitCode } from "@svatah/bindings-cli";
+import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import { ConfigError } from "../config-error.js";
 import { compileProject, loadProject } from "../project.js";
 import { report } from "./compile.js";
-import type { CommandIo } from "@svatah/bindings-cli";
+import type { CommandIo } from "@svatah/yam-bindings-cli";
 
 export async function runCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const root = args.command[1] ?? ".";
@@ -92,8 +92,8 @@ export async function runCommand(args: ParsedArgs, io: CommandIo): Promise<ExitC
    * because the Playwright host runs in a child process whose working directory
    * is the project rather than wherever the CLI was invoked.
    */
-  const planPath = resolve(root, ".svatah", "plan.json");
-  mkdirSync(resolve(root, ".svatah"), { recursive: true });
+  const planPath = resolve(root, ".yam", "plan.json");
+  mkdirSync(resolve(root, ".yam"), { recursive: true });
   writeFileSync(planPath, `${canonicalJson(compiled.plan)}\n`, "utf8");
 
   if (host === "playwright") {
@@ -213,7 +213,7 @@ async function runStandalone(context: RunContext, io: CommandIo): Promise<ExitCo
  * config that will not load: nothing about it is discovered by running, and a
  * stack trace out of the YAML parser tells a person nothing they can act on. As
  * a `ConfigError` it is reported as a diagnostic and exits with the config-error
- * code, the same as a bad `svatah.config.yaml`.
+ * code, the same as a bad `yam.config.yaml`.
  *
  * Called before the run directory is opened, so a refused run leaves no
  * half-written `runs/<id>` behind for a reader to mistake for a real one.
@@ -250,7 +250,7 @@ export interface RunProjectOptions {
    * The `--base-url` / `--storage-state` flags, when the caller had any.
    *
    * The flag layer of LLD §15's precedence. The environment and `config.app`
-   * are applied here, so `POST /run` gets the same answer as `svatah run` with
+   * are applied here, so `POST /run` gets the same answer as `yam run` with
    * no flags — one place decides where a session opens (Draft 2.5).
    */
   readonly session?: SessionTarget;
@@ -275,7 +275,7 @@ export interface RunProjectOptions {
    *
    * `POST /runs/:id/stop` aborts it; the executor notices before the next step
    * starts, records the rest as `skipped`, writes one `stop` audit line and
-   * marks the summary `stopped`. `svatah run` passes none and behaves as it
+   * marks the summary `stopped`. `yam run` passes none and behaves as it
    * always did.
    */
   readonly signal?: AbortSignal;
@@ -313,7 +313,7 @@ export async function runProject(
    * A binding file that will not parse is a project error, in the same family as
    * a config that will not load: nothing about it is discovered by running, and
    * a stack trace out of the YAML parser tells a person nothing they can fix. So
-   * it becomes a `ConfigError` naming the file, which `svatah run` reports as a
+   * it becomes a `ConfigError` naming the file, which `yam run` reports as a
    * diagnostic and exits with the config-error code — and because this happens
    * before `openRunDirectory`, no half-written run is left behind to be read as
    * a real one.
@@ -431,7 +431,7 @@ export async function runProject(
    *
    * It applies the environment policy, forces checkpoints and audit on, and
    * un-namespaces the outputs — and it does that by *configuring* `run()`, so a
-   * step means exactly what it means under `svatah run` (REQ-BEH-5).
+   * step means exactly what it means under `yam run` (REQ-BEH-5).
    */
   if (options.behavior === "workflow" || options.behavior === "tool") {
     const storyName = options.stories?.[0];
@@ -473,7 +473,7 @@ export async function runProject(
 }
 
 /**
- * `--input k=v`, repeated, beneath `SVATAH_INPUT_<NAME>` (LLD §10, §15).
+ * `--input k=v`, repeated, beneath `YAM_INPUT_<NAME>` (LLD §10, §15).
  *
  * The shared parser, so `run`, `workflow run` and `heal --run` take their inputs
  * the same way — which is what LLD §10's "exactly as `run` does" asks for, and
@@ -532,10 +532,10 @@ async function runUnderPlaywright(context: RunContext, io: CommandIo): Promise<E
 
   // Written fresh each time: a stale spec for a flow this run excluded would be
   // discovered by Playwright and run anyway.
-  rmSync(join(context.root, ".svatah", "specs"), { recursive: true, force: true });
+  rmSync(join(context.root, ".yam", "specs"), { recursive: true, force: true });
   const specs = generateSpecs({
     plan,
-    outDir: join(context.root, ".svatah", "specs"),
+    outDir: join(context.root, ".yam", "specs"),
     planPath: context.planPath!,
   });
 
@@ -543,7 +543,7 @@ async function runUnderPlaywright(context: RunContext, io: CommandIo): Promise<E
     io.err("No flow has a run block, so there is nothing to generate.");
     return EXIT.ok;
   }
-  io.err(`generated ${specs.length} spec(s) in .svatah/specs`);
+  io.err(`generated ${specs.length} spec(s) in .yam/specs`);
 
   /*
    * Playwright Test is spawned rather than driven in-process: it owns the
@@ -569,27 +569,27 @@ async function runUnderPlaywright(context: RunContext, io: CommandIo): Promise<E
       stdio: "inherit",
       env: {
         ...process.env,
-        SVATAH_PLAN: context.planPath!,
-        SVATAH_BINDINGS: resolve(context.root, context.loaded.config.bindings.dir),
-        SVATAH_RUN_ID: context.runId,
-        SVATAH_OUT: context.outputDir,
+        YAM_PLAN: context.planPath!,
+        YAM_BINDINGS: resolve(context.root, context.loaded.config.bindings.dir),
+        YAM_RUN_ID: context.runId,
+        YAM_OUT: context.outputDir,
         ...(inputsFrom(context.args) === undefined
           ? {}
-          : { SVATAH_INPUTS: JSON.stringify(inputsFrom(context.args)) }),
-        SVATAH_DATA: JSON.stringify(context.loaded.project.data.values),
-        SVATAH_SECRETS: JSON.stringify([...context.loaded.project.data.secrets]),
+          : { YAM_INPUTS: JSON.stringify(inputsFrom(context.args)) }),
+        YAM_DATA: JSON.stringify(context.loaded.project.data.values),
+        YAM_SECRETS: JSON.stringify([...context.loaded.project.data.secrets]),
         /*
          * The resolved session target, passed down as the environment layer of
          * LLD §15's precedence. The host reads its base URL from the config and
          * the environment, and it is a separate process, so a `--base-url` given
-         * to `svatah run --host playwright` reaches it only this way. Resolving
-         * first means the flag beats an inherited `SVATAH_BASE_URL`, which is
+         * to `yam run --host playwright` reaches it only this way. Resolving
+         * first means the flag beats an inherited `YAM_BASE_URL`, which is
          * the order the spec gives.
          */
-        ...(hostSession.baseUrl === undefined ? {} : { SVATAH_BASE_URL: hostSession.baseUrl }),
+        ...(hostSession.baseUrl === undefined ? {} : { YAM_BASE_URL: hostSession.baseUrl }),
         ...(hostSession.storageState === undefined
           ? {}
-          : { SVATAH_STORAGE_STATE: hostSession.storageState }),
+          : { YAM_STORAGE_STATE: hostSession.storageState }),
       },
     });
     child.on("close", (code) => done(code ?? 1));
@@ -616,7 +616,7 @@ export interface ProjectRunnerOptions {
  * collaborators; `runtime` imports neither `steps` nor `adapter-http`" (Draft
  * 2.4, LLD §8).
  *
- * Shared by `svatah run` and `svatah record` rather than written twice. The
+ * Shared by `yam run` and `yam record` rather than written twice. The
  * recorder performs every step it records (REQ-REC-5), so an `api` step or a
  * Tier 0 step has to do the same thing in both — a second copy would drift, and
  * the drift would be a binding verified against behaviour a run does not repeat.

@@ -8,7 +8,7 @@
  *
  * This file is that list. There is one of it, and every surface resolves an
  * action from here rather than declaring its own: the ADE's palette and toolbar
- * buttons, `svatah ui`'s palette and single-letter keys, `@svatah/sdk`'s
+ * buttons, `yam ui`'s palette and single-letter keys, `@svatah/yam-sdk`'s
  * `actions`, and — through `cli` — the command line.
  *
  * ## Why the CLI string is data and not a link
@@ -25,7 +25,7 @@
  * ## Actions with no CLI
  *
  * Navigation has none: "Go to run comp" is not a command, and inventing
- * `svatah goto` would put a row in LLD §15's table that nobody would ever type.
+ * `yam goto` would put a row in LLD §15's table that nobody would ever type.
  * Neither do the three review decisions (accept, re-pick, reject): they answer a
  * `record.decision` event on an open session, which a command line has no way to
  * be holding.
@@ -67,7 +67,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Compile",
     group: "Actions",
     screen: "flows",
-    cli: "svatah compile",
+    cli: "yam compile",
     availableWhen: loaded,
     async run(service: ScreenService): Promise<ActionOutcome> {
       const value = await service.postCompile();
@@ -83,7 +83,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     screen: "flows",
     key: "⌘S",
     // `PUT /flows/:file` writes the file the CLI reads; from a terminal you
-    // would use an editor, which is what `svatah ui`'s `e` key opens.
+    // would use an editor, which is what `yam ui`'s `e` key opens.
     availableWhen: has("file"),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.file !== "string") return refused("No flow file is open.");
@@ -109,7 +109,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "flows",
     key: "⌘↵",
-    cli: "svatah run --flow <file>",
+    cli: "yam run --flow <file>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
       const value = await service.postRun(
@@ -128,7 +128,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Run story",
     group: "Actions",
     screen: "flows",
-    cli: "svatah run --story <name>",
+    cli: "yam run --story <name>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.story !== "string") return refused("No story is selected.");
@@ -147,7 +147,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "run",
     key: "⌘↵",
-    cli: "svatah run --flow <file>",
+    cli: "yam run --flow <file>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
       const value = await service.postRun(
@@ -166,7 +166,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Resume from step",
     group: "Actions",
     screen: "run",
-    cli: "svatah run --resume <runId> --from <stepId>",
+    cli: "yam run --resume <runId> --from <stepId>",
     availableWhen: has("resumeFrom"),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.runId !== "string") return refused("No run is selected.");
@@ -182,7 +182,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "flows",
     key: "R",
-    cli: "svatah record --flow <file>",
+    cli: "yam record --flow <file>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
       const value = await service.postRecord({
@@ -265,7 +265,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     /*
      * No CLI command (Draft 2.12 §13.5, T10.4).
      *
-     * `svatah run` is the run: stopping it from a terminal is `^C`, which is
+     * `yam run` is the run: stopping it from a terminal is `^C`, which is
      * not a command anyone types into a palette. What the route exists for is a
      * run somebody started from a *screen* and can no longer reach with a
      * keyboard interrupt — the ADE's and the cockpit's.
@@ -286,7 +286,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "run",
     key: "H",
-    cli: "svatah heal --run <id>",
+    cli: "yam heal --run <id>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.runId !== "string") return refused("No run is selected.");
@@ -299,7 +299,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Heal from bind failures",
     group: "Actions",
     screen: "heal",
-    cli: "svatah heal --from-bind-failures",
+    cli: "yam heal --from-bind-failures",
     availableWhen: loaded,
     async run(service): Promise<ActionOutcome> {
       const value = await service.postHeal({ fromBindFailures: true });
@@ -324,7 +324,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "bindings",
     key: "V",
-    cli: "svatah bindings verify",
+    cli: "yam bindings verify",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
       const value = await service.postBindingsVerify(
@@ -338,13 +338,13 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Prune unused bindings",
     group: "Actions",
     screen: "bindings",
-    cli: "svatah bindings prune",
-    // Nothing on the service prunes: `svatah bindings prune` writes the store
+    cli: "yam bindings prune",
+    // Nothing on the service prunes: `yam bindings prune` writes the store
     // directly, and LLD §13.5 has no route for it. The palette shows the
     // command rather than pretending there is a button that runs it.
     availableWhen: () => false,
     async run(): Promise<ActionOutcome> {
-      return refused("Run `svatah bindings prune` from a terminal; the service has no route for it.");
+      return refused("Run `yam bindings prune` from a terminal; the service has no route for it.");
     },
   },
   {
@@ -410,13 +410,13 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Start the tool server",
     group: "Actions",
     screen: "agents",
-    cli: "svatah tool serve",
+    cli: "yam tool serve",
     // The tool server is a process, not a service route (LLD §13.5 has none):
     // the screen lists what is exposed and its invocations, and the command is
     // how it is started.
     availableWhen: () => false,
     async run(): Promise<ActionOutcome> {
-      return refused("Run `svatah tool serve` from a terminal; the service has no route for it.");
+      return refused("Run `yam tool serve` from a terminal; the service has no route for it.");
     },
   },
   {
@@ -425,7 +425,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "explorer",
     key: "O",
-    cli: "svatah surface snapshot",
+    cli: "yam surface snapshot",
     // A session that is already open is not opened twice; `explorer.close`
     // is what ends one.
     availableWhen: (state) => (state as { sessionId?: string }).sessionId === undefined,
@@ -467,7 +467,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Act on the element",
     group: "Actions",
     screen: "explorer",
-    cli: "svatah surface act",
+    cli: "yam surface act",
     availableWhen: has("sessionId"),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No surface session is open.");
@@ -492,7 +492,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Snapshot the session",
     group: "Actions",
     screen: "explorer",
-    cli: "svatah surface snapshot",
+    cli: "yam surface snapshot",
     availableWhen: has("sessionId"),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No surface session is open.");
@@ -520,7 +520,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Import the database",
     group: "Actions",
     screen: "import",
-    cli: "svatah migrate <dest> --from-ade <electron-db dir>",
+    cli: "yam migrate <dest> --from-ade <electron-db dir>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
       const source = args["source"];
@@ -534,7 +534,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Compile a trajectory",
     group: "Actions",
     screen: "explorer",
-    cli: "svatah trajectory compile <trajectory.jsonl>",
+    cli: "yam trajectory compile <trajectory.jsonl>",
     availableWhen: has("trajectory"),
     async run(service, args): Promise<ActionOutcome> {
       const path = args["trajectory"];

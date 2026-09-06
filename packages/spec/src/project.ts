@@ -50,7 +50,7 @@ export interface ProjectSource {
   /**
    * The bindings store's ids and phrases, if the caller has one.
    *
-   * Passed as data rather than read here: `@svatah/spec` is module (b) and the
+   * Passed as data rather than read here: `@svatah/yam-spec` is module (b) and the
    * store is module (a), and LLD §1 draws `spec ─► schema` and nothing else.
    */
   readonly bindings?: ReadonlyArray<{ id: string; phrases: readonly string[] }>;

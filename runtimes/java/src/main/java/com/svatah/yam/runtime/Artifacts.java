@@ -1,4 +1,4 @@
-package dev.svatah.runtime;
+package com.svatah.yam.runtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,17 +56,17 @@ public final class Artifacts {
     /**
      * The project's configuration.
      *
-     * <p>{@code svatah.config.yaml} or {@code svatah.config.json}, and a project
+     * <p>{@code yam.config.yaml} or {@code yam.config.json}, and a project
      * with neither runs on the defaults — which is what the TypeScript reader
      * does (LLD §3.5), and the reason the fixture project's own config is a
      * partial one.
      */
     public static JsonNode readConfig(Path root) {
-        for (String name : List.of("svatah.config.yaml", "svatah.config.yml")) {
+        for (String name : List.of("yam.config.yaml", "yam.config.yml")) {
             Path path = root.resolve(name);
             if (Files.exists(path)) return readYaml(path);
         }
-        Path asJson = root.resolve("svatah.config.json");
+        Path asJson = root.resolve("yam.config.json");
         if (Files.exists(asJson)) return readJson(asJson);
         return JSON.createObjectNode();
     }

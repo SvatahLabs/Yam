@@ -1,4 +1,4 @@
-# @svatah/recorder
+# @svatah/yam-recorder
 
 Grounding, the record session, and the record report (LLD §11).
 
@@ -36,8 +36,8 @@ binding verified because a model was confident about it would empty the word.
 
 ## The session, and what it writes
 
-`record()` is a loop around `runStep` from `@svatah/runtime` — the same function
-`svatah run` and the Playwright host call — with grounding added before each
+`record()` is a loop around `runStep` from `@svatah/yam-runtime` — the same function
+`yam run` and the Playwright host call — with grounding added before each
 step. That is REQ-REC-5 taken literally: recording verifies a binding by
 *performing the step*, and the verification only means something if recording
 performs a step the way replay will.
@@ -53,7 +53,7 @@ it proved and not the fourth, and an impossible expectation writes nothing.
 `recorderRegrounder()` is the healer's model half (LLD §10), reached only after
 relocalization could not place a fingerprint. `recorderBindGrounder()` is
 `bind()`'s record mode (LLD §6.5), which module (a) otherwise answers by waiting
-for a person to click. Both return `null` rather than failing, and `@svatah/cli`
+for a person to click. Both return `null` rather than failing, and `@svatah/yam`
 registers them — LLD §10 puts that wiring at CLI start, and the CLI is the one
 package allowed to import everything.
 

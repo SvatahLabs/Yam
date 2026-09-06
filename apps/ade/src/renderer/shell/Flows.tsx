@@ -1,11 +1,11 @@
 /**
  * The ADE's Flows screen (T9.4, REQ-ADE-11, LLD §13.7; the `Main` artboard).
  *
- * List, editor with lint, plan — drawn from `@svatah/screens`'s `FlowsState`
+ * List, editor with lint, plan — drawn from `@svatah/yam-screens`'s `FlowsState`
  * and from nothing else. Every number, every status word and every note in here
  * is the model's; this file decides where they go on a page.
  *
- * The same state renders in `svatah ui` as four panes of text. If either
+ * The same state renders in `yam ui` as four panes of text. If either
  * renderer had to compute something the other did not, the two would disagree
  * the first time a project changed — which is the whole argument for a headless
  * model and the reason this file has no arithmetic in it.
@@ -17,10 +17,10 @@ import {
   Pill,
   Table,
   TabStrip,
-} from "@svatah/ui";
+} from "@svatah/yam-ui";
 import { useEffect, useState } from "react";
-import { ago } from "@svatah/screens";
-import type { Action, FlowsState, ScreenParams } from "@svatah/screens";
+import { ago } from "@svatah/yam-screens";
+import type { Action, FlowsState, ScreenParams } from "@svatah/yam-screens";
 
 export interface FlowsProps {
   readonly state: FlowsState;
@@ -109,7 +109,7 @@ export function FlowsScreen(props: FlowsProps): React.JSX.Element {
             rowKey={(row) => row.file}
             selected={state.file ?? ""}
             onSelect={(file) => props.onParams({ ...props.params, file, selected: undefined })}
-            empty="No flow files yet. `svatah init` writes one."
+            empty="No flow files yet. `yam init` writes one."
             columns={[
               {
                 key: "name",
@@ -118,7 +118,7 @@ export function FlowsScreen(props: FlowsProps): React.JSX.Element {
                  * The relative time is the *renderer's* (P9-F4, Draft 2.12
                  * §13.7). The model carries `lastRunAt`, an instant, so two
                  * loads of an unchanged project are the same value; "run 4 min
-                 * ago" is computed here from the same `ago()` `svatah ui` uses,
+                 * ago" is computed here from the same `ago()` `yam ui` uses,
                  * so the two renderers still say the same words.
                  */
                 cell: (row) => (

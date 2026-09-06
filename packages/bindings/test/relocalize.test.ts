@@ -10,7 +10,7 @@
  * Refs: REQ-HEAL-1 (relocalize), LLD §6.4.
  */
 import { describe, expect, it } from "vitest";
-import type { ElementDescription, Fingerprint } from "@svatah/schema";
+import type { ElementDescription, Fingerprint } from "@svatah/yam-schema";
 import {
   attrSimilarity,
   boxProximity,
@@ -26,7 +26,7 @@ import {
   WEIGHTS,
 } from "../src/index.js";
 import { StubSurface } from "./stub-surface.js";
-import { buildSnapshot, structuralHash } from "@svatah/surface";
+import { buildSnapshot, structuralHash } from "@svatah/yam-surface";
 
 const RECORDED: Fingerprint = {
   tag: "input",

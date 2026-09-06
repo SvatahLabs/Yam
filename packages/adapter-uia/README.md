@@ -1,20 +1,20 @@
-# `@svatah/adapter-uia`
+# `@svatah/yam-adapter-uia`
 
 The Windows UI Automation adapter (REQ-ADP-6,
 [LLD §7.5](../../docs/spec/lld.md)). It implements the published agent surface
-over `UIAutomationClient`, so a Svatah flow drives a desktop application through
+over `UIAutomationClient`, so a Yam flow drives a desktop application through
 the same `snapshot` / `act` / `read` / `check` calls it uses on a web page.
 
-Its conformance target is the **Svatah ADE** (REQ-ADE-6): an Electron
+Its conformance target is the **Yam ADE** (REQ-ADE-6): an Electron
 application whose Chromium publishes the renderer's accessibility tree once
 `app.setAccessibilitySupportEnabled(true)` has been called, which is what
-`SVATAH_A11Y=1` does.
+`YAM_A11Y=1` does.
 
 ```yaml
-# svatah.config.yaml
+# yam.config.yaml
 adapter: uia
 app:
-  processName: "Svatah ADE"
+  processName: "Yam ADE"
 ```
 
 There is no default process name. Driving "whatever is frontmost" would make a
@@ -26,15 +26,15 @@ run depend on what the person at the machine last clicked.
 first thing to know if you have used that one: Windows grants no accessibility
 permission and asks for none. Two things can still go wrong:
 
-| `svatah surface doctor --adapter uia` says | It means |
+| `yam surface doctor --adapter uia` says | It means |
 |---|---|
 | `available` | `UIAutomationClient` loads and the root element answers |
 | `unavailable` | PowerShell is constrained — check that `powershell.exe` is on PATH and that Constrained Language Mode is not in force |
 | `unsupported` | not Windows |
 
 And one thing that reports as "no window" rather than as an error: **a process
-at a higher integrity level than Svatah is invisible to UI Automation.** An
-application started as administrator needs Svatah started the same way. That is
+at a higher integrity level than Yam is invisible to UI Automation.** An
+application started as administrator needs Yam started the same way. That is
 the failure that wastes the most time on Windows, so the adapter's message names
 it.
 
@@ -115,7 +115,7 @@ which here is Control.
 
 ```powershell
 pnpm -r build
-pnpm --filter @svatah/ade exec electron-forge package
+pnpm --filter @svatah/yam-ade exec electron-forge package
 node scripts/desktop-conformance.mjs --adapter uia --report reports/adapter-uia.md
 ```
 
@@ -130,10 +130,10 @@ is an interface. `test/recorded.ts` replays UI Automation trees recorded from th
 real ADE (`node scripts/record-desktop-tree.mjs --shape uia --screen <name>`).
 
 `test/parity.test.ts` is the one worth reading: it records **one** ADE window in
-both platform vocabularies and checks that this adapter and `@svatah/adapter-ax`
+both platform vocabularies and checks that this adapter and `@svatah/yam-adapter-ax`
 normalise it to the same tree — which is REQ-SURF-4 stated as a test rather than
 as a claim. It found two real defects that neither adapter's own tests could
 have: a `<select>`'s options were `menuitem` on macOS and `option` on Windows,
 and a `<td>` was `cell` on one and `row` on the other. Both needed an adapter to
-read an element's *parent*, which the flat role maps in `@svatah/surface` cannot
+read an element's *parent*, which the flat role maps in `@svatah/yam-surface` cannot
 express.

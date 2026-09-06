@@ -8,7 +8,7 @@
  * The unit-level half is here; the byte-for-byte comparison against the
  * committed output is `tools/repo-checks/test/migrate.test.ts`, and the
  * "compiles clean" half is there too, because it needs the compiler and
- * `@svatah/migrate` must not depend on it (LLD §1).
+ * `@svatah/yam-migrate` must not depend on it (LLD §1).
  */
 import { describe, expect, it } from "vitest";
 import { mkdtempSync, readFileSync } from "node:fs";
@@ -204,10 +204,10 @@ describe("data files (REQ-NFR-6)", () => {
     // the new one exactly as unsafe.
     const result = migrateData("user.email = a@b.c\nuser.password = qwerty123\n");
     expect(result.values).toEqual({
-      user: { email: "a@b.c", password: "${SVATAH_USER_PASSWORD}" },
+      user: { email: "a@b.c", password: "${YAM_USER_PASSWORD}" },
     });
     expect(result.secrets).toEqual(["user.password"]);
-    expect(result.redacted).toEqual([{ key: "user.password", variable: "SVATAH_USER_PASSWORD" }]);
+    expect(result.redacted).toEqual([{ key: "user.password", variable: "YAM_USER_PASSWORD" }]);
   });
 
   it("leaves an ordinary value alone", () => {
@@ -216,7 +216,7 @@ describe("data files (REQ-NFR-6)", () => {
 });
 
 describe("the whole legacy project (T2.9 Validate)", () => {
-  const out = mkdtempSync(join(tmpdir(), "svatah-migrate-"));
+  const out = mkdtempSync(join(tmpdir(), "yam-migrate-"));
   const result = migrate({ source: LEGACY, destination: out, at: "2026-09-02T00:00:00.000Z" });
 
   it("converts every step", () => {

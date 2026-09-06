@@ -27,7 +27,7 @@ export function renderHealingEvalMarkdown(
   const percent = (value: number): string => `${(value * 100).toFixed(1)}%`;
   const lines: string[] = [];
 
-  lines.push("# Svatah eval report — healing");
+  lines.push("# Yam eval report — healing");
   lines.push("");
   lines.push(`Generated: ${report.at}`);
   lines.push("");

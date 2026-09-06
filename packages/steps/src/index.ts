@@ -1,5 +1,5 @@
 /**
- * @svatah/steps
+ * @svatah/yam-steps
  *
  * Tier 0 custom typed steps (REQ-LANG-15, 16, LLD §5): the `defineStep`
  * authoring API, the template compiler, the loader for a project's `steps/`

@@ -1,5 +1,5 @@
 /**
- * @svatah/adapter-appium
+ * @svatah/yam-adapter-appium
  *
  * The Appium adapter: `AgentSurface` on Android and iOS (REQ-ADP-5, LLD §7.4).
  *

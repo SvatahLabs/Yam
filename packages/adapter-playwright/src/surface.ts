@@ -36,9 +36,9 @@ import type {
   Snapshot,
   SurfaceAction,
   SurfaceKind,
-} from "@svatah/schema";
-import { DEFAULT_IGNORE_ATTRIBUTES } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+} from "@svatah/yam-schema";
+import { DEFAULT_IGNORE_ATTRIBUTES } from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 import {
   ActionabilityError,
   DialogError,
@@ -48,7 +48,7 @@ import {
   ScriptError,
   SessionError,
   TimeoutError,
-} from "@svatah/surface";
+} from "@svatah/yam-surface";
 import { describeElement } from "./page-script.js";
 import { coordsOf, locatorFor } from "./locate.js";
 import { callTool, declaredTools, declaresTool, type DeclaredTool } from "./webmcp.js";
@@ -88,7 +88,7 @@ export interface PlaywrightAdapterOptions {
   ignoreAttributes?: readonly string[];
   /** Where `trace(true, path)` writes when no path is given. */
   outputDir?: string;
-  /** Force a snapshot mechanism; otherwise `SVATAH_PW_SNAPSHOT`, otherwise auto. */
+  /** Force a snapshot mechanism; otherwise `YAM_PW_SNAPSHOT`, otherwise auto. */
   snapshotMechanism?: SnapshotMechanism | "auto";
   /** Drive an existing context instead of launching a browser (the Playwright Test host). */
   context?: BrowserContext;
@@ -102,7 +102,7 @@ export interface PlaywrightAdapterOptions {
    * Attach to a Chromium that is already running, over CDP (T11.2, LLD §13.9).
    *
    * > The Playwright adapter attaches to an existing Chromium when
-   * > `SVATAH_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi
+   * > `YAM_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi
    * > adapter attaches, so a flow can drive the ADE's renderer.
    *
    * The ADE is the case it exists for. Playwright's `_electron.launch` cannot
@@ -202,16 +202,16 @@ export class PlaywrightSurface implements AgentSurface {
      * precedence for every session-opening command).
      */
     const fromEnvironment =
-      process.env["SVATAH_CDP_URL"] === undefined || process.env["SVATAH_CDP_URL"] === ""
+      process.env["YAM_CDP_URL"] === undefined || process.env["YAM_CDP_URL"] === ""
         ? undefined
-        : process.env["SVATAH_CDP_URL"];
+        : process.env["YAM_CDP_URL"];
     /*
      * The session's own, then the environment, then the configuration — LLD
      * §15's precedence for every session-opening command, and the order matters
      * (T11.5).
      *
      * The configuration was first, so `evals/self/cdp`'s written-down port beat
-     * the one `svatah eval self` had actually started an ADE on, and the
+     * the one `yam eval self` had actually started an ADE on, and the
      * attaching side of the parity gate reported "could not attach to
      * 127.0.0.1:9464" — a port nothing was listening on, named in a file. A
      * port in a configuration is a *default* for somebody with no better idea;
@@ -294,7 +294,7 @@ export class PlaywrightSurface implements AgentSurface {
     this.activeFrame = this.page().mainFrame();
     this.mechanism = await chooseMechanism(
       this.activeFrame,
-      this.options.snapshotMechanism ?? process.env["SVATAH_PW_SNAPSHOT"],
+      this.options.snapshotMechanism ?? process.env["YAM_PW_SNAPSHOT"],
     );
     this.space = new RefSpace(
       this.activeFrame,
@@ -317,7 +317,7 @@ export class PlaywrightSurface implements AgentSurface {
      * is the connection.
      */
     if (this.browser !== undefined) {
-      if (this.attached) await this.browser.close({ reason: "svatah detaching" }).catch(() => undefined);
+      if (this.attached) await this.browser.close({ reason: "yam detaching" }).catch(() => undefined);
       else await this.browser.close();
     }
     this.context = undefined;
@@ -1164,9 +1164,9 @@ export class PlaywrightSurface implements AgentSurface {
         const handle = await space.handleFor(ref).catch(() => null);
         if (handle === null) continue;
         const marker: string = `m${locators.length}`;
-        await handle.evaluate((el, m) => el.setAttribute("data-svatah-mask", m), marker);
+        await handle.evaluate((el, m) => el.setAttribute("data-yam-mask", m), marker);
         marked.push({ ref, handle });
-        locators.push(this.frame().locator(`[data-svatah-mask="${marker}"]`));
+        locators.push(this.frame().locator(`[data-yam-mask="${marker}"]`));
       }
       await this.page().screenshot({
         path,
@@ -1175,7 +1175,7 @@ export class PlaywrightSurface implements AgentSurface {
     } finally {
       for (const { ref, handle } of marked) {
         await handle
-          .evaluate((el) => el.removeAttribute("data-svatah-mask"))
+          .evaluate((el) => el.removeAttribute("data-yam-mask"))
           .catch(() => undefined);
         // A handle the ref space owns stays alive: disposing it here would make
         // the caller's own reference unusable after taking a screenshot.

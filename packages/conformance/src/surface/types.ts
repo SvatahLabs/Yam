@@ -4,7 +4,7 @@
  * "For each sample app page, a script of surface calls with expected snapshot
  * invariants (roles present, names, states), expected `act` effects (URL change,
  * value change, dialog appears), and error types. Runs against any adapter via
- * `svatah surface conform --adapter <name>`."
+ * `yam surface conform --adapter <name>`."
  *
  * A suite is data, not code that happens to assert: every check carries what it
  * expected and what it saw, so the report a third party gets from a failing
@@ -12,8 +12,8 @@
  * reading the suite's source (REQ-STD-2 — the suite is published and runnable by
  * third parties).
  */
-import type { Fingerprint, Ref } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+import type { Fingerprint, Ref } from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 
 /**
  * What the desktop healing cases need, and this package will not import
@@ -22,7 +22,7 @@ import type { AgentSurface } from "@svatah/surface";
  * > a binding recorded at variant 0 must relocalize on both through the desktop
  * > adapter with the same weights and threshold as the web healing eval
  *
- * The relocalizer lives in `@svatah/bindings`, which this package does not
+ * The relocalizer lives in `@svatah/yam-bindings`, which this package does not
  * depend on and should not: the suite is published for third parties to run
  * against *their* adapter, and a conformance suite that dragged the healer in
  * with it would make that a bigger ask than it is. So it arrives the way the
@@ -36,7 +36,7 @@ export interface RecordedElement {
   /**
    * The ground truth: the element's `automationId`.
    *
-   * The desktop equivalent of `apps/sample-web`'s `data-svatah-eval`
+   * The desktop equivalent of `apps/sample-web`'s `data-yam-eval`
    * (LLD §16). It is read through `describe()` — which does not apply
    * `ignoreAttributes` — while the relocalizer is told to ignore it, so the
    * answer key cannot help the answer.

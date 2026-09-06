@@ -2,7 +2,7 @@
  * The Tier 0 step the golden set's `custom` entries compile against
  * (g-149, g-150; LLD §5, `docs/flow-language.md` §6).
  */
-import { defineStep } from "@svatah/steps";
+import { defineStep } from "@svatah/yam-steps";
 
 export default defineStep(
   "Transfer {amount:number} from {from:target} to {to:target}",

@@ -1,4 +1,4 @@
-# Svatah — High-Level Design
+# Yam — High-Level Design
 
 Status: Draft 2.1 · Date: 2026-09-02
 Companion documents: [requirements.md](requirements.md) · [lld.md](lld.md) · [tasks.md](tasks.md)
@@ -25,7 +25,7 @@ This document describes the system that satisfies [requirements.md](requirements
 
 ## 3. Context
 
-External systems: the target platform (web app, mobile app, desktop app, HTTP service); the platform driver behind each adapter (Playwright browsers, a BiDi-capable stock browser, an Appium server, OS accessibility APIs); an optional local model server; the Anthropic API for Tier 3, grounding, and healing; the CI system or external orchestrator that invokes replay; and external agents that call Svatah over MCP either to run tools or to explore through the surface.
+External systems: the target platform (web app, mobile app, desktop app, HTTP service); the platform driver behind each adapter (Playwright browsers, a BiDi-capable stock browser, an Appium server, OS accessibility APIs); an optional local model server; the Anthropic API for Tier 3, grounding, and healing; the CI system or external orchestrator that invokes replay; and external agents that call Yam over MCP either to run tools or to explore through the surface.
 
 Actors: authors (people or agents) who write flows or explore; reviewers who approve plans, bindings, and heal diffs in pull requests; operators who invoke runs from CI, cron, or an agent; foreign-runtime implementers who consume the published schemas.
 
@@ -86,8 +86,8 @@ Actors: authors (people or agents) who write flows or explore; reviewers who app
 | B9 | **CLI and MCP server** | All operations; raw surface exposure for agents. | REQ-AGT-1, 2, 4 |
 | B10 | **Migration tool** | v1/v2 → v3 flows, seed bindings, data. | REQ-LANG-11 |
 | B11 | **Evals** | Compiler, grounding, healing, conformance; published reports. | REQ-COMP-9, REQ-REC-10, REQ-HEAL-5, REQ-PKG-4 |
-| B12 | **Local service** | `svatah serve`: HTTP plus event stream over the CLI operations, results, bindings, API client, and raw surface; the single integration point for clients. | REQ-ADE-1 |
-| B13 | **Svatah ADE** (separate repository, new build) | Electron desktop client designed around the new artifacts: project, prose flow editor with lint, plan view, record with review, run with live events, results and audit, bindings and heal review, API client, data editor, surface explorer, tool panel. Reference client of B12. Also the desktop conformance target for S7. | REQ-ADE-2..9, REQ-ADP-6, 7 |
+| B12 | **Local service** | `yam serve`: HTTP plus event stream over the CLI operations, results, bindings, API client, and raw surface; the single integration point for clients. | REQ-ADE-1 |
+| B13 | **Yam ADE** (separate repository, new build) | Electron desktop client designed around the new artifacts: project, prose flow editor with lint, plan view, record with review, run with live events, results and audit, bindings and heal review, API client, data editor, surface explorer, tool panel. Reference client of B12. Also the desktop conformance target for S7. | REQ-ADE-2..9, REQ-ADP-6, 7 |
 
 ## 6. Data flows
 
@@ -140,13 +140,13 @@ trajectory.jsonl ─► B8 ─► proposals/<date>/<name>.flow + plan fragment +
 ### 6.7 ADE session
 
 ```
-ADE (Electron main) ─spawn─► B12 svatah serve --port <p> --project <dir>
+ADE (Electron main) ─spawn─► B12 yam serve --port <p> --project <dir>
 ADE renderer ─HTTP─► B12: projects, compile, lint, record, run, results, bindings, api, surface
 ADE renderer ◄─events─ B12: step results, record decisions, heal proposals (WebSocket or SSE)
 B12 ─► B2/B3/D6/D7 exactly as the CLI does; all artifacts land in the project directory
 ```
 
-The prototype spawned `jar/svatah-service-1.0.3.jar` on port 8095 and kept projects, flows, locators, data, and results in electron-db, so the client and the framework had separate sources of truth. The new ADE keeps only UI preferences locally; every screen is a view over files in the project directory reached through the service, so the ADE, the CLI, CI, and an agent over MCP all see the same artifacts.
+The prototype spawned `jar/yam-service-1.0.3.jar` on port 8095 and kept projects, flows, locators, data, and results in electron-db, so the client and the framework had separate sources of truth. The new ADE keeps only UI preferences locally; every screen is a view over files in the project directory reached through the service, so the ADE, the CLI, CI, and an agent over MCP all see the same artifacts.
 
 ## 7. Artifact contracts
 
@@ -158,7 +158,7 @@ All artifacts are JSON or YAML validated against schemas in `packages/schema`, e
 | Custom steps | `steps/**/*.ts` | human | B2, D6 |
 | Run data | `data.yaml` | human, migrate | B2, D6 |
 | API requests | `api/*.yaml` | human, migrate | B2, S4 |
-| Project config | `svatah.config.yaml` | human | all |
+| Project config | `yam.config.yaml` | human | all |
 | Plan | `plan.json` | B2 | B3, D6, D7, foreign runtimes |
 | Bindings | `bindings/<app>/<page>/<element>.yaml` | B3, D7, migrate | D3, D7 |
 | Run results | `runs/<runId>/results.jsonl`, `summary.json` | D6 | D7, CI, humans |
@@ -205,7 +205,7 @@ Step IR (abridged; full in LLD §3):
 | MCP | `@modelcontextprotocol/sdk` | Tool server and raw surface exposure. | — |
 | Persistence | Files in the repo | Reviewable, diffable, no service. | SQLite index for results (P2). |
 | Local service | Fastify plus WebSocket (or SSE) in `packages/service` | Thin HTTP façade over the same functions the CLI calls; one integration point for the ADE and other clients. | gRPC (heavier for an Electron renderer). |
-| Desktop client | New Svatah ADE: Electron current LTS via Electron Forge's Vite template, TypeScript throughout, React renderer, context isolation with a typed preload bridge, a generated service client from the local service's OpenAPI description, bundled CLI. | The prototype proves the jobs; its Electron 8 shell, jQuery renderer, and electron-db storage conflict with the service boundary, the file-based source of truth, and the security baseline, so a new build is cheaper than retrofitting. Electron keeps it a UIA and AX conformance target. | Upgrade the prototype in place (rejected: three foundations to replace); Tauri (rejected: WebView accessibility trees are less uniform than Chromium's for the desktop adapters). |
+| Desktop client | New Yam ADE: Electron current LTS via Electron Forge's Vite template, TypeScript throughout, React renderer, context isolation with a typed preload bridge, a generated service client from the local service's OpenAPI description, bundled CLI. | The prototype proves the jobs; its Electron 8 shell, jQuery renderer, and electron-db storage conflict with the service boundary, the file-based source of truth, and the security baseline, so a new build is cheaper than retrofitting. Electron keeps it a UIA and AX conformance target. | Upgrade the prototype in place (rejected: three foundations to replace); Tauri (rejected: WebView accessibility trees are less uniform than Chromium's for the desktop adapters). |
 | Testing | vitest; Playwright Test for adapters; sample web, mobile, and desktop apps | Fast unit loop; real platforms for conformance. | — |
 
 ## 9. Architecture decisions
@@ -234,7 +234,7 @@ Step IR (abridged; full in LLD §3):
 
 **ADR-12 Automation guarantees in the schema from version 1.** Guards, checkpoints, abort policy, signatures, and audit are fields now, runtime support later; retrofitting them would break the standard.
 
-**ADR-13 No RPA platform.** Scheduling, queues, human-in-the-loop UI, and dashboards are external; Svatah is invoked through CLI and MCP.
+**ADR-13 No RPA platform.** Scheduling, queues, human-in-the-loop UI, and dashboards are external; Yam is invoked through CLI and MCP.
 
 **ADR-14 The artifact layer is the standard.** Versioned schemas, published conformance suites, mandatory provenance. Transport standards (CDP, BiDi, WebMCP) and agent-surface competitors (Playwright MCP, ABP) are used or interoperated with, not challenged.
 
@@ -242,7 +242,7 @@ Step IR (abridged; full in LLD §3):
 
 **ADR-17 The ADE is rebuilt to the vision; the prototype is the blueprint of jobs, not code to retain.** The prototype establishes that a desktop client must let a person manage a project, author flows, run them, inspect results and screenshots, and exercise APIs. The new ADE delivers those jobs redesigned around the new artifacts (prose flows with lint, plan view, record with review, bindings and heal review, audit, surface explorer, tool panel), talks to the core only through the local service, and stores nothing but UI preferences. Because it is an Electron app whose Chromium exposes an accessibility tree through UIA and AX, it replaces a separate desktop sample application for validating the OS adapters. Rejected: upgrading the prototype in place (its shell, renderer, and storage all conflict with the new boundaries), keeping electron-db as a second source of truth, letting the renderer import core packages directly, and building a separate desktop sample app. Until its first tagged release the new ADE is developed in this repository under `apps/ade`, so Phase 3 and the desktop conformance work verify in one checkout; the split to the `svatahADE` repository happens at that release, and the prototype's code is archived there on a `prototype` branch.
 
-**ADR-16 Trajectory compile replaces a standalone explorer.** Agents explore through Svatah's raw surface so their trajectories are captured and compiled into deterministic tools, rather than Svatah owning an exploration agent.
+**ADR-16 Trajectory compile replaces a standalone explorer.** Agents explore through Yam's raw surface so their trajectories are captured and compiled into deterministic tools, rather than Yam owning an exploration agent.
 
 ## 10. Execution model
 
@@ -289,8 +289,8 @@ yam/                      github.com/SvatahLabs/yam (Draft 2.18)
     bindings/             store, resolver, synthesis, fingerprint, relocalization   ← module (a) core
     healer/               failure selection, repair, verify, diff                    ← module (a)
     playwright-test/      bind() fixture for plain Playwright tests                   ← module (a)
-    bindings-cli/         svatah-bindings bin: bindings, heal, conform, eval healing  ← module (a)
-    host-playwright/      flow host: svatah fixture, generated spec per flow, reporter ← module (b)
+    bindings-cli/         yam-bindings bin: bindings, heal, conform, eval healing  ← module (a)
+    host-playwright/      flow host: yam fixture, generated spec per flow, reporter ← module (b)
     runtime/              executor core: scope, guards, checkpoints, policies, results, audit
     spec/                 flow reader, grammar, target dictionary, signatures
     steps/                defineStep API and Tier 0 matcher
@@ -302,33 +302,33 @@ yam/                      github.com/SvatahLabs/yam (Draft 2.18)
     screens/              headless screen model and action registry (Draft 2.11, LLD §13.7)
     ui-tokens/            design tokens for both themes, TS and generated CSS (Draft 2.11)
     ui/                   React components on Radix primitives, the component sheet (Draft 2.11)
-    tui/                  svatah ui, the Ink terminal cockpit (Draft 2.11, REQ-TUI-1)
+    tui/                  yam ui, the Ink terminal cockpit (Draft 2.11, REQ-TUI-1)
     sdk/                  typed client generated from the OpenAPI description (Draft 2.11, LLD §13.8)
     verify/               catalogue schema, source runners, comparison, report — the parity gate as a package (Draft 2.16, planned: Phase 14)
     trajectory/           trajectory capture and compile (P2)
-    cli/                  svatah CLI + MCP server (operations + raw surface)
-    service/              local HTTP + event-stream service (svatah serve) for the ADE and other clients
+    cli/                  yam CLI + MCP server (operations + raw surface)
+    service/              local HTTP + event-stream service (yam serve) for the ADE and other clients
     migrate/              v1/v2 → v3, plus prototype database import (P2)
     conformance/          surface and runtime conformance suites
   clients/
     python/, java/        clients generated from the same description (Draft 2.11)
   apps/
     sample-web/           sample web app with variants
-    ade/                  the new Svatah ADE (Electron), developed in-repo until its first release, then split to the svatahADE repository (ADR-17); also the desktop conformance target
+    ade/                  the new Yam ADE (Electron), developed in-repo until its first release, then split to the svatahADE repository (ADR-17); also the desktop conformance target
   evals/
     compiler/  grounding/  healing/  conformance/
   docs/spec/              this document set
   evals/migrate/source/   the four legacy sample flows, the locator file and ActionSynonyms.java, kept as the migrate inputs (Draft 2.18; `legacy/` itself is gone)
 ```
 
-Published npm modules (Draft 2.3; no aggregate packages, each package publishes individually). Draft 2.18: the scope is the organisation, so the product name is the prefix — `@svatah/cli` publishes as `@svatah/yam` and every other package below as `@svatah/yam-<name>`; the names in this paragraph are the directory names. Module groups: module (a) = `@svatah/schema`, `@svatah/surface`, `@svatah/adapter-playwright`, `@svatah/bindings`, `@svatah/healer`, `@svatah/playwright-test`, `@svatah/bindings-cli`, `@svatah/conformance`; module (b) = `@svatah/spec`, `@svatah/steps`, `@svatah/compiler`, `@svatah/gateway`, `@svatah/recorder`, `@svatah/runtime`, `@svatah/host-playwright`, `@svatah/workflow`, `@svatah/tool`, `@svatah/trajectory`, `@svatah/service`, `@svatah/migrate`, `@svatah/cli`; module (c) = the schema and conformance packages consumed by foreign runtimes. `runtime` stays in module (b); module (a) reaches replay only through the healer's `Replayer` plugin (LLD §10). Other adapters are separate packages.
+Published npm modules (Draft 2.3; no aggregate packages, each package publishes individually). Draft 2.18: the scope is the organisation, so the product name is the prefix — `@svatah/yam` publishes as `@svatah/yam` and every other package below as `@svatah/yam-<name>`; the names in this paragraph are the directory names. Module groups: module (a) = `@svatah/yam-schema`, `@svatah/yam-surface`, `@svatah/yam-adapter-playwright`, `@svatah/yam-bindings`, `@svatah/yam-healer`, `@svatah/yam-playwright-test`, `@svatah/yam-bindings-cli`, `@svatah/yam-conformance`; module (b) = `@svatah/yam-spec`, `@svatah/yam-steps`, `@svatah/yam-compiler`, `@svatah/yam-gateway`, `@svatah/yam-recorder`, `@svatah/yam-runtime`, `@svatah/yam-host-playwright`, `@svatah/yam-workflow`, `@svatah/yam-tool`, `@svatah/yam-trajectory`, `@svatah/yam-service`, `@svatah/yam-migrate`, `@svatah/yam`; module (c) = the schema and conformance packages consumed by foreign runtimes. `runtime` stays in module (b); module (a) reaches replay only through the healer's `Replayer` plugin (LLD §10). Other adapters are separate packages.
 
 ## 13. Delivery phases
 
 | Phase | Outcome | Requirements closed |
 |---|---|---|
 | 0 | Skeleton, schemas with automation fields, surface spec, sample web app with variants, language reference, golden seed | REQ-STD-1, REQ-SURF-1, REQ-LANG-12 |
-| 1 | **Module (a):** Playwright adapter, bindings store, resolver, synthesis, fingerprints, relocalization, `bind()` fixture, model-free healer, `svatah bindings` CLI, adapter conformance suite; published healing eval (relocalize-only) | REQ-ADP-1, REQ-SURF-2..5, REQ-REC-3, 4, 6, 9, 11, REQ-RUN-5, REQ-HEAL-1(relocalize), 2, 3, 5(relocalize), 6, REQ-PKG-1(a), 2 |
+| 1 | **Module (a):** Playwright adapter, bindings store, resolver, synthesis, fingerprints, relocalization, `bind()` fixture, model-free healer, `yam bindings` CLI, adapter conformance suite; published healing eval (relocalize-only) | REQ-ADP-1, REQ-SURF-2..5, REQ-REC-3, 4, 6, 9, 11, REQ-RUN-5, REQ-HEAL-1(relocalize), 2, 3, 5(relocalize), 6, REQ-PKG-1(a), 2 |
 | 2 | **Module (b) test behavior:** reader, Tier 0 and Tier 1, lint, executor core, HTTP adapter, Playwright Test host, migration, local service, compatibility run | REQ-LANG-*, REQ-COMP-1, 2, 5..9, REQ-RUN-1..4, 6..10, 12, 13, REQ-ADP-2, 3, REQ-BEH-1, 5, REQ-AUTO-5, 6, REQ-NFR-8, REQ-ADE-1 |
 | 3 | **Recorder, model healing, ADE foundation:** gateway, grounding, session, report, `record`; healer with re-grounding; grounding and full healing evals published; new ADE shell and core screens (project, flow editor with lint, plan view, run with live events, results, API client, data editor) | REQ-REC-1, 2, 5, 7, 8, 10, REQ-HEAL-1(model), 4, 5(model), REQ-AGT-3, REQ-NFR-2, 6, REQ-ADE-2, 3, 7 |
 | 4 | **Independence and tiers:** BiDi adapter, Appium adapter, Tier 2 and 3, privacy mode, REPL, MCP server with raw surface | REQ-ADP-4, 5, REQ-COMP-3, 4, REQ-NFR-3, REQ-RUN-11, REQ-AGT-2 |
@@ -336,11 +336,11 @@ Published npm modules (Draft 2.3; no aggregate packages, each package publishes 
 | 6 | **Reach:** Windows UIA and macOS AX validated against the ADE, prototype data import, WebMCP candidate, Java conformance runtime, Tier 2 fine-tune | REQ-ADP-6, 7, 9, REQ-STD-3, REQ-ADE-6, 9 |
 | 7 | **Hardening and release candidate (Draft 2.8):** the live desktop gates pass on the hosts that can run them and the pipeline carries every gate; the Java runtime's artifacts validate; the dialog IR and the type check join the contract; the fine-tune is measured or stated blocked; module (a), the CLI, the schemas, and the ADE installers are packaged as a 0.1.0 release candidate with the published evals attached | REQ-PKG-1, 2, 4, REQ-STD-2, 3, REQ-ADP-6, 7 (closed live) |
 | 8 | **Ship (Draft 2.9):** the packaged ADE opens a project with a resolved Node runtime and the gate opens one without a dialog; the AX bridge meets the budget on the measured project screen and the macOS gate passes live; dialog arming is documented, linted and audited; the fine-tune is withdrawn from 0.1.0's claims with the Tier 2 corpus as its precondition; 0.1.0 is published from the pipeline by a manual, token-gated step the owner triggers, with installers and the eval reports attached | REQ-ADE-2, 6 (packaged), REQ-ADP-7 (budget), REQ-PKG-1, 4 (published) |
-| 9 | **Builder surfaces, foundation (Draft 2.11):** the headless screen model and its action registry, the design system on Radix with the approved tokens, `@svatah/sdk` generated from the OpenAPI description with Python and Java clients, the ADE shell rebuilt as rail, workspace and inspector with the Flows and Run screens live, `svatah ui` rendering the same two screens; the Phase 8 corrections applied | REQ-ADE-10, 11, 12, 13, REQ-TUI-1, REQ-SDK-1, 2 (foundation) |
+| 9 | **Builder surfaces, foundation (Draft 2.11):** the headless screen model and its action registry, the design system on Radix with the approved tokens, `@svatah/yam-sdk` generated from the OpenAPI description with Python and Java clients, the ADE shell rebuilt as rail, workspace and inspector with the Flows and Run screens live, `yam ui` rendering the same two screens; the Phase 8 corrections applied | REQ-ADE-10, 11, 12, 13, REQ-TUI-1, REQ-SDK-1, 2 (foundation) |
 | 10 | **Builder surfaces, complete (Draft 2.11):** every screen of the former eleven rebuilt on the model in both renderers (record review, runs and evidence, heal review, bindings, agents and tools, API, data, explorer, import, settings), the command palette with parity asserted, the accessibility contract enforced by the desktop suite, the ADE installers rebuilt, the packaged ADE the conformance target again | REQ-ADE-10..13, REQ-TUI-1, REQ-ADE-6 (re-validated) |
-| 11 | **Corrections, and Svatah verifies Svatah (Draft 2.14):** the Phase 10 corrections including the windowless launch; `app.launch`/`app.quit`, `Quit the app`, CDP attach, desktop grounding; `evals/self` and `svatah eval self`, the two-sided parity gate at 100 percent agreement with coverage and one-sided checks published; the verification contract becomes the gate | REQ-SELF-1, 2, 3, REQ-ADE-6, REQ-ADP-1, 7 |
+| 11 | **Corrections, and Yam verifies Yam (Draft 2.14):** the Phase 10 corrections including the windowless launch; `app.launch`/`app.quit`, `Quit the app`, CDP attach, desktop grounding; `evals/self` and `yam eval self`, the two-sided parity gate at 100 percent agreement with coverage and one-sided checks published; the verification contract becomes the gate | REQ-SELF-1, 2, 3, REQ-ADE-6, REQ-ADP-1, 7 |
 | 12 | **Release 0.1.0 and the open P0 items (Draft 2.10, renumbered 2.14):** the desktop gate is race-free and load-aware; the compiler golden set reaches 300; the ADE names every control and the gate makes a real run before reading results; the three-OS CI matrix is observed on a runner the owner attaches; 0.1.0 is published by the owner's trigger and verified from the registry by a scripted install into an empty project; the Windows gate carried | REQ-COMP-9, REQ-PKG-1, 2, 4 (from the registry), REQ-ADE-6, REQ-ADP-6 (carried) |
-| 13 | **Process and terminal (Draft 2.16):** the `process` surface kind and adapter, patterns 34–38, the six outside-surface checks moved to Svatah's side, `@svatah/verify` published for third parties; the parity gate's ceiling reaches 45 of 48 | REQ-ADP-10, REQ-SELF-1, 2, 4 |
+| 13 | **Process and terminal (Draft 2.16):** the `process` surface kind and adapter, patterns 34–38, the six outside-surface checks moved to Yam's side, `@svatah/yam-verify` published for third parties; the parity gate's ceiling reaches 45 of 48 | REQ-ADP-10, REQ-SELF-1, 2, 4 |
 
 ## 14. Risks and mitigations
 

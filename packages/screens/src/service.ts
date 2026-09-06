@@ -1,13 +1,13 @@
 /**
  * What a screen may ask the world (T9.1, LLD §13.7, §13.5).
  *
- * > The ADE and the terminal cockpit `svatah ui` are two renderers of one
+ * > The ADE and the terminal cockpit `yam ui` are two renderers of one
  * > headless **screen model**, and both are views over the local service
  * > (§13.5) and nothing else.
  *
  * ## Why this is an interface here and not an import
  *
- * `@svatah/sdk` is generated *from* the service's OpenAPI description and takes
+ * `@svatah/yam-sdk` is generated *from* the service's OpenAPI description and takes
  * its `actions` list from this package (§13.8) — so a screen that imported the
  * SDK would make the workspace graph cyclic, which is the same mistake the
  * service made in Phase 2 and fixed by injecting `ServiceApi` (§13.5). The
@@ -25,7 +25,7 @@
  * the SDK and the fake all satisfy this structurally with nothing to adapt.
  */
 
-/** A screen asks for what it renders and gets `unknown`; it parses with `@svatah/schema`. */
+/** A screen asks for what it renders and gets `unknown`; it parses with `@svatah/yam-schema`. */
 export interface ScreenService {
   /** `GET /project` */
   getProject(): Promise<unknown>;
@@ -35,7 +35,7 @@ export interface ScreenService {
   putFlowsByFile(file: string, body?: unknown): Promise<unknown>;
   /** `POST /compile` — the lint a screen shows beside the editor. */
   postCompile(body?: unknown): Promise<unknown>;
-  /** `GET /plan` — the compiled plan, exactly as `svatah compile` writes it. */
+  /** `GET /plan` — the compiled plan, exactly as `yam compile` writes it. */
   getPlan(): Promise<unknown>;
   /** `POST /run` */
   postRun(body?: unknown): Promise<unknown>;
@@ -101,7 +101,7 @@ export interface ScreenService {
 /**
  * One line of the event stream, as far as a screen cares.
  *
- * The full union is `@svatah/service`'s `ServiceEvent`, which this package must
+ * The full union is `@svatah/yam-service`'s `ServiceEvent`, which this package must
  * not import (the service is a runtime package and §13.7 keeps the model over
  * the wire). `kind` is what a screen switches on and the rest is carried
  * through, so a new event kind reaches a renderer without a change here.

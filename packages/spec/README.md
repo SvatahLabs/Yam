@@ -1,4 +1,4 @@
-# @svatah/spec
+# @svatah/yam-spec
 
 Flow reader, grammar, target dictionary, signatures.
 

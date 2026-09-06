@@ -14,9 +14,9 @@
  * side effect: which of the two modules is installed is a fact about the
  * project, and the thing that knows it is the thing the project ran.
  */
-import type { AgentSurface } from "@svatah/surface";
-import type { BindingEntry } from "@svatah/schema";
-import type { Gateway } from "@svatah/gateway";
+import type { AgentSurface } from "@svatah/yam-surface";
+import type { BindingEntry } from "@svatah/yam-schema";
+import type { Gateway } from "@svatah/yam-gateway";
 import { ground, type GroundOptions } from "./ground.js";
 
 /** Everything both plugins need. The caller supplies the gateway and the config. */

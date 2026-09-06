@@ -9,7 +9,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { fromRoot } from "../src/repo.js";
+import { fromRoot, specifierOf } from "../src/repo.js";
 
 /** Directory names listed under `packages/` in HLD §12's layout block. */
 function hldPackages(): string[] {
@@ -45,9 +45,9 @@ const isDir = (p: string) => existsSync(p) && statSync(p).isDirectory();
 /**
  * The packages Draft 2.11 requires and HLD §12's layout block does not list.
  *
- * Draft 2.11 adds the builder surfaces — `@svatah/screens` (LLD §13.7),
- * `@svatah/ui-tokens` and `@svatah/ui` (§13.7's design system), `@svatah/sdk`
- * (§13.8) and `@svatah/tui` (REQ-TUI-1) — and states each of them by name in
+ * Draft 2.11 adds the builder surfaces — `@svatah/yam-screens` (LLD §13.7),
+ * `@svatah/yam-ui-tokens` and `@svatah/yam-ui` (§13.7's design system), `@svatah/yam-sdk`
+ * (§13.8) and `@svatah/yam-tui` (REQ-TUI-1) — and states each of them by name in
  * the LLD and in `tasks.md`'s Phase 9. It does not extend §12's layout block,
  * which was last touched in Draft 2.3.
  *
@@ -87,12 +87,12 @@ describe("repository layout (HLD §12)", () => {
       name: string;
       scripts: Record<string, string>;
     };
-    expect(pkg.name).toBe(`@svatah/${name}`);
+    expect(pkg.name).toBe(specifierOf(name));
     expect(pkg.scripts.build).toBeTruthy();
     expect(pkg.scripts.test).toBeTruthy();
     /*
      * `src/index.ts`, or `src/index.tsx` for a package whose entry point is a
-     * component: `@svatah/ui` and `@svatah/tui` are React and Ink, and a `.ts`
+     * component: `@svatah/yam-ui` and `@svatah/yam-tui` are React and Ink, and a `.ts`
      * entry for either would be a file that re-exports the real one for the
      * sake of a check. LLD §1 says one entry point per package; it does not say
      * which extension.
@@ -136,7 +136,7 @@ describe("repository layout (HLD §12)", () => {
     expect(existsSync(fromRoot("runtimes", "java", "build.gradle"))).toBe(true);
     expect(existsSync(fromRoot("runtimes", "java", "gradlew"))).toBe(true);
     expect(
-      existsSync(fromRoot("runtimes", "java", "src", "main", "java", "dev", "svatah", "runtime")),
+      existsSync(fromRoot("runtimes", "java", "src", "main", "java", "com", "svatah", "yam", "runtime")),
     ).toBe(true);
 
     const gradle = readFileSync(fromRoot("runtimes", "java", "build.gradle"), "utf8");

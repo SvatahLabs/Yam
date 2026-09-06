@@ -1,12 +1,12 @@
 {
-  "process": "Svatah ADE",
-  "title": "Svatah ADE",
+  "process": "Yam ADE",
+  "title": "Yam ADE",
   "truncated": false,
   "nodes": [
     {
       "parent": -1,
       "controlType": "Window",
-      "name": "Svatah ADE",
+      "name": "Yam ADE",
       "className": "Chrome_WidgetWin_1",
       "isEnabled": true,
       "box": [
@@ -20,7 +20,7 @@
       "parent": 0,
       "controlType": "Document",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah ADE",
+      "name": "Yam ADE",
       "isEnabled": true,
       "hasKeyboardFocus": true,
       "box": [
@@ -72,7 +72,7 @@
       "parent": 4,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah",
+      "name": "Yam",
       "isEnabled": true,
       "box": [
         50,
@@ -85,7 +85,7 @@
       "parent": 5,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah",
+      "name": "Yam",
       "isEnabled": true
     },
     {

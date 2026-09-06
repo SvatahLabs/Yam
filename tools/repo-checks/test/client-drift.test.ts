@@ -27,10 +27,10 @@ const GENERATOR = fromRoot("scripts/generate-clients.mjs");
 
 const CLIENTS = [
   { language: "ts", path: fromRoot("packages/sdk/src/generated.ts") },
-  { language: "py", path: fromRoot("clients/python/svatah_sdk/generated.py") },
+  { language: "py", path: fromRoot("clients/python/svatah_yam/generated.py") },
   {
     language: "java",
-    path: fromRoot("clients/java/src/main/java/dev/svatah/sdk/GeneratedClient.java"),
+    path: fromRoot("clients/java/src/main/java/com/svatah/yam/sdk/GeneratedClient.java"),
   },
 ];
 
@@ -127,7 +127,7 @@ describe("a drift fails the check (T9.3 Validate)", () => {
 
     const result = drift();
     expect(result.code).toBe(1);
-    expect(result.output).toContain("clients/python/svatah_sdk/generated.py");
+    expect(result.output).toContain("clients/python/svatah_yam/generated.py");
   });
 });
 
@@ -155,7 +155,7 @@ describe("no compiled caches are tracked (P9-F2, T10.4)", () => {
   it("and .gitignore says so, so the next smoke run does not add them back", () => {
     const ignored = execFileSync(
       "git",
-      ["check-ignore", "clients/python/svatah_sdk/__pycache__/generated.cpython-314.pyc"],
+      ["check-ignore", "clients/python/svatah_yam/__pycache__/generated.cpython-314.pyc"],
       { cwd: REPO_ROOT, encoding: "utf8" },
     ).trim();
     expect(ignored).toContain("__pycache__");

@@ -1,5 +1,5 @@
 /**
- * The version of the Svatah artifact contract.
+ * The version of the Yam artifact contract.
  *
  * Every artifact that crosses a process or a repository boundary carries this
  * string in its `schemaVersion` field (REQ-STD-1). It is independent of the npm

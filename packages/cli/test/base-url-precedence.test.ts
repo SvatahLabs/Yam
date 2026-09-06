@@ -2,8 +2,8 @@
  * P3-F2 — one base-URL and storage-state precedence, for every command that
  * opens a session (LLD §15, Draft 2.5).
  *
- * > the `--base-url` / `--storage-state` flag, then the `SVATAH_BASE_URL` /
- * > `SVATAH_STORAGE_STATE` environment variable, then `config.app`. A command
+ * > the `--base-url` / `--storage-state` flag, then the `YAM_BASE_URL` /
+ * > `YAM_STORAGE_STATE` environment variable, then `config.app`. A command
  * > that opens a session and ignores any of the three is a defect.
  *
  * Phase 3 had three different answers. `run` and `record` read the environment
@@ -27,13 +27,13 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { EXIT } from "@svatah/bindings-cli";
-import type { Summary } from "@svatah/schema";
+import { EXIT } from "@svatah/yam-bindings-cli";
+import type { Summary } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
-const SVATAH_BINDINGS = join(ROOT, "packages", "bindings-cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM_BINDINGS = join(ROOT, "packages", "bindings-cli", "dist", "bin.js");
 
 let app: SampleServer;
 /** A port nothing is listening on, so `config.app` cannot answer for anything. */
@@ -61,7 +61,7 @@ test: Sign in
 
 /** A fixture project whose config points at the dead port and nothing else. */
 function scaffold(): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-baseurl-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-baseurl-"));
   projects.push(dir);
   cpSync(join(FIXTURES, "bindings"), join(dir, "bindings"), { recursive: true });
   cpSync(join(FIXTURES, "api"), join(dir, "api"), { recursive: true });
@@ -70,7 +70,7 @@ function scaffold(): string {
   writeFileSync(join(dir, "flows", "sign-in.flow"), FLOW, "utf8");
 
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
+    join(dir, "yam.config.yaml"),
     `schemaVersion: "1.0.0"
 project: "base-url-precedence"
 environment: test
@@ -113,14 +113,14 @@ function cli(
       cwd,
       env: {
         ...process.env,
-        SVATAH_SAMPLE_PASSWORD: "qwerty123",
-        SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-        SVATAH_SAMPLE_CARD_CVV: "123",
+        YAM_SAMPLE_PASSWORD: "qwerty123",
+        YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+        YAM_SAMPLE_CARD_CVV: "123",
         // Never inherited: the gateway and the base URL are both chosen here.
         ANTHROPIC_API_KEY: "",
         ANTHROPIC_AUTH_TOKEN: "",
-        SVATAH_BASE_URL: "",
-        SVATAH_STORAGE_STATE: "",
+        YAM_BASE_URL: "",
+        YAM_STORAGE_STATE: "",
         ...env,
       },
     });
@@ -136,7 +136,7 @@ function cli(
 }
 
 beforeAll(async () => {
-  if (!existsSync(SVATAH)) throw new Error("Run `pnpm -r build` first.");
+  if (!existsSync(YAM)) throw new Error("Run `pnpm -r build` first.");
   app = await startSampleApp(0);
   dead = await closedPort();
 }, 120_000);
@@ -148,27 +148,27 @@ afterAll(async () => {
 
 /* ── run ──────────────────────────────────────────────────────────────────── */
 
-describe("svatah run", () => {
+describe("yam run", () => {
   const summaryOf = (project: string, runId: string): Summary =>
     JSON.parse(readFileSync(join(project, "runs", runId, "summary.json"), "utf8")) as Summary;
 
-  it("honours SVATAH_BASE_URL when only the environment says where", async () => {
+  it("honours YAM_BASE_URL when only the environment says where", async () => {
     const project = scaffold();
-    const result = await cli(SVATAH, ["run", ".", "--run-id", "env-only"], project, {
-      SVATAH_BASE_URL: app.origin,
+    const result = await cli(YAM, ["run", ".", "--run-id", "env-only"], project, {
+      YAM_BASE_URL: app.origin,
     });
     expect(result.code, result.output).toBe(EXIT.ok);
     expect(summaryOf(project, "env-only").totals.passed).toBe(4);
   }, 180_000);
 
-  it("prefers --base-url to SVATAH_BASE_URL", async () => {
+  it("prefers --base-url to YAM_BASE_URL", async () => {
     const project = scaffold();
     const result = await cli(
-      SVATAH,
+      YAM,
       ["run", ".", "--run-id", "flag-wins", "--base-url", app.origin],
       project,
       // The environment names the dead port. Only the flag can save this run.
-      { SVATAH_BASE_URL: dead },
+      { YAM_BASE_URL: dead },
     );
     expect(result.code, result.output).toBe(EXIT.ok);
     expect(summaryOf(project, "flag-wins").totals.passed).toBe(4);
@@ -177,26 +177,26 @@ describe("svatah run", () => {
 
 /* ── record ───────────────────────────────────────────────────────────────── */
 
-describe("svatah record", () => {
+describe("yam record", () => {
   const recorded = (project: string): { complete: boolean; written: string[] } =>
     JSON.parse(readFileSync(join(project, "record-report.json"), "utf8")) as never;
 
-  it("honours SVATAH_BASE_URL when only the environment says where", async () => {
+  it("honours YAM_BASE_URL when only the environment says where", async () => {
     const project = scaffold();
     const result = await cli(
-      SVATAH,
+      YAM,
       ["record", ".", "--gateway", "fake", "--rebind", "--story", "Sign in"],
       project,
-      { SVATAH_BASE_URL: app.origin },
+      { YAM_BASE_URL: app.origin },
     );
     expect(result.code, result.output).toBe(EXIT.ok);
     expect(recorded(project).written).toContain("home.sign-in-button");
   }, 300_000);
 
-  it("prefers --base-url to SVATAH_BASE_URL", async () => {
+  it("prefers --base-url to YAM_BASE_URL", async () => {
     const project = scaffold();
     const result = await cli(
-      SVATAH,
+      YAM,
       [
         "record",
         ".",
@@ -209,7 +209,7 @@ describe("svatah record", () => {
         app.origin,
       ],
       project,
-      { SVATAH_BASE_URL: dead },
+      { YAM_BASE_URL: dead },
     );
     expect(result.code, result.output).toBe(EXIT.ok);
     expect(recorded(project).written).toContain("home.sign-in-button");
@@ -242,43 +242,43 @@ async function brokenRun(env: Record<string, string>): Promise<string> {
     text.slice(0, end).replace(/^(\s+(?:value|name): )"(.*)"$/gm, '$1"$2-GONE"') + text.slice(end),
     "utf8",
   );
-  const result = await cli(SVATAH, ["run", ".", "--run-id", "broken"], project, env);
+  const result = await cli(YAM, ["run", ".", "--run-id", "broken"], project, env);
   // A failed run is the input to healing; anything else means the fixture is
   // wrong rather than the precedence.
   expect(result.code, result.output).toBe(EXIT.failed);
   return project;
 }
 
-describe("svatah heal --run", () => {
-  it("honours SVATAH_BASE_URL when only the environment says where", async () => {
-    const env = { SVATAH_BASE_URL: app.origin };
+describe("yam heal --run", () => {
+  it("honours YAM_BASE_URL when only the environment says where", async () => {
+    const env = { YAM_BASE_URL: app.origin };
     const project = await brokenRun(env);
-    const result = await cli(SVATAH, ["heal", "--run", "broken", "--json"], project, env);
+    const result = await cli(YAM, ["heal", "--run", "broken", "--json"], project, env);
     expect(result.code, result.output).toBe(EXIT.ok);
     const report = JSON.parse(result.json) as { totals: { repaired: number } };
     expect(report.totals.repaired).toBeGreaterThan(0);
   }, 240_000);
 
-  it("prefers --base-url to SVATAH_BASE_URL", async () => {
-    const project = await brokenRun({ SVATAH_BASE_URL: app.origin });
+  it("prefers --base-url to YAM_BASE_URL", async () => {
+    const project = await brokenRun({ YAM_BASE_URL: app.origin });
     const result = await cli(
-      SVATAH,
+      YAM,
       ["heal", "--run", "broken", "--base-url", app.origin, "--json"],
       project,
-      { SVATAH_BASE_URL: dead },
+      { YAM_BASE_URL: dead },
     );
     expect(result.code, result.output).toBe(EXIT.ok);
     const report = JSON.parse(result.json) as { totals: { repaired: number } };
     expect(report.totals.repaired).toBeGreaterThan(0);
   }, 240_000);
 
-  it("reaches the same page through `svatah-bindings heal`", async () => {
+  it("reaches the same page through `yam-bindings heal`", async () => {
     // Module (a)'s command line applies the same precedence, from the same
     // function: one implementation behind two executables (LLD §1).
-    const env = { SVATAH_BASE_URL: app.origin };
+    const env = { YAM_BASE_URL: app.origin };
     const project = await brokenRun(env);
     const result = await cli(
-      SVATAH_BINDINGS,
+      YAM_BINDINGS,
       ["heal", "--run", "broken", "--json"],
       project,
       env,
@@ -291,14 +291,14 @@ describe("svatah heal --run", () => {
 
 /* ── bindings verify ──────────────────────────────────────────────────────── */
 
-describe("svatah bindings verify", () => {
-  it("honours SVATAH_BASE_URL when only the environment says where", async () => {
+describe("yam bindings verify", () => {
+  it("honours YAM_BASE_URL when only the environment says where", async () => {
     const project = scaffold();
     const result = await cli(
-      SVATAH,
+      YAM,
       ["bindings", "verify", "--id", "home.sign-in-button", "--json"],
       project,
-      { SVATAH_BASE_URL: app.origin },
+      { YAM_BASE_URL: app.origin },
     );
     expect(result.code, result.output).toBe(EXIT.ok);
     const report = JSON.parse(result.json) as { baseUrl: string; results: Array<{ ok: boolean }> };
@@ -306,13 +306,13 @@ describe("svatah bindings verify", () => {
     expect(report.results[0]!.ok).toBe(true);
   }, 120_000);
 
-  it("prefers --base-url to SVATAH_BASE_URL", async () => {
+  it("prefers --base-url to YAM_BASE_URL", async () => {
     const project = scaffold();
     const result = await cli(
-      SVATAH,
+      YAM,
       ["bindings", "verify", "--id", "home.sign-in-button", "--base-url", app.origin, "--json"],
       project,
-      { SVATAH_BASE_URL: dead },
+      { YAM_BASE_URL: dead },
     );
     expect(result.code, result.output).toBe(EXIT.ok);
     const report = JSON.parse(result.json) as { baseUrl: string; results: Array<{ ok: boolean }> };
@@ -323,30 +323,30 @@ describe("svatah bindings verify", () => {
 
 /* ── surface conform ──────────────────────────────────────────────────────── */
 
-describe("svatah surface conform", () => {
+describe("yam surface conform", () => {
   // One case, because what is under test is where the session opened, not the
   // suite; the whole suite runs in its own test (T1.2).
   const only = ["--only", "home.snapshot"];
 
-  it("honours SVATAH_BASE_URL when only the environment says where", async () => {
+  it("honours YAM_BASE_URL when only the environment says where", async () => {
     const project = scaffold();
     const result = await cli(
-      SVATAH,
+      YAM,
       ["surface", "conform", "--adapter", "playwright", ...only, "--json"],
       project,
-      { SVATAH_BASE_URL: app.origin },
+      { YAM_BASE_URL: app.origin },
     );
     expect(result.code, result.output).toBe(EXIT.ok);
     expect(JSON.parse(result.json).conformant).toBe(true);
   }, 120_000);
 
-  it("prefers --base-url to SVATAH_BASE_URL", async () => {
+  it("prefers --base-url to YAM_BASE_URL", async () => {
     const project = scaffold();
     const result = await cli(
-      SVATAH,
+      YAM,
       ["surface", "conform", "--adapter", "playwright", ...only, "--base-url", app.origin, "--json"],
       project,
-      { SVATAH_BASE_URL: dead },
+      { YAM_BASE_URL: dead },
     );
     expect(result.code, result.output).toBe(EXIT.ok);
     expect(JSON.parse(result.json).conformant).toBe(true);
@@ -355,26 +355,26 @@ describe("svatah surface conform", () => {
 
 /* ── eval ─────────────────────────────────────────────────────────────────── */
 
-describe("svatah eval", () => {
-  it("grounding honours SVATAH_BASE_URL when only the environment says where", async () => {
+describe("yam eval", () => {
+  it("grounding honours YAM_BASE_URL when only the environment says where", async () => {
     const project = scaffold();
     const result = await cli(
-      SVATAH,
+      YAM,
       ["eval", "grounding", "--gateway", "fake", "--limit", "1", "--json"],
       project,
-      { SVATAH_BASE_URL: app.origin },
+      { YAM_BASE_URL: app.origin },
     );
     expect(result.code, result.output).toBe(EXIT.ok);
     expect(JSON.parse(result.json).totals.correct).toBe(1);
   }, 180_000);
 
-  it("grounding prefers --base-url to SVATAH_BASE_URL", async () => {
+  it("grounding prefers --base-url to YAM_BASE_URL", async () => {
     const project = scaffold();
     const result = await cli(
-      SVATAH,
+      YAM,
       ["eval", "grounding", "--gateway", "fake", "--limit", "1", "--base-url", app.origin, "--json"],
       project,
-      { SVATAH_BASE_URL: dead },
+      { YAM_BASE_URL: dead },
     );
     expect(result.code, result.output).toBe(EXIT.ok);
     expect(JSON.parse(result.json).totals.correct).toBe(1);
@@ -386,23 +386,23 @@ describe("svatah eval", () => {
    * URL: read `/api/variants` from it. A run that reaches for the dead port
    * names the dead port, and that is the whole of the question here.
    */
-  it("healing honours SVATAH_BASE_URL when only the environment says where", async () => {
+  it("healing honours YAM_BASE_URL when only the environment says where", async () => {
     const project = scaffold();
-    const result = await cli(SVATAH, ["eval", "healing", "--population", "no-test-ids"], project, {
-      SVATAH_BASE_URL: dead,
+    const result = await cli(YAM, ["eval", "healing", "--population", "no-test-ids"], project, {
+      YAM_BASE_URL: dead,
     });
     expect(result.code).toBe(EXIT.failed);
     expect(result.output).toContain(`${dead}/api/variants`);
   }, 120_000);
 
-  it("healing prefers --base-url to SVATAH_BASE_URL", async () => {
+  it("healing prefers --base-url to YAM_BASE_URL", async () => {
     const project = scaffold();
     const other = await closedPort();
     const result = await cli(
-      SVATAH,
+      YAM,
       ["eval", "healing", "--population", "no-test-ids", "--base-url", other],
       project,
-      { SVATAH_BASE_URL: dead },
+      { YAM_BASE_URL: dead },
     );
     expect(result.code).toBe(EXIT.failed);
     expect(result.output).toContain(`${other}/api/variants`);

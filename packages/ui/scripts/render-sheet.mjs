@@ -2,8 +2,8 @@
 /**
  * Render the component sheet to a static page (T9.2, LLD §13.7).
  *
- *   pnpm --filter @svatah/ui sheet            # writes sheet/index.html
- *   pnpm --filter @svatah/ui sheet --open     # and prints the file:// URL
+ *   pnpm --filter @svatah/yam-ui sheet            # writes sheet/index.html
+ *   pnpm --filter @svatah/yam-ui sheet --open     # and prints the file:// URL
  *
  * > a component sheet page rendering all of them in both themes that the
  * > accessibility adapters can read.
@@ -45,7 +45,7 @@ const html = `<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Svatah design system — component sheet</title>
+  <title>Yam design system — component sheet</title>
   <style>
 ${styles}
 ${ui}

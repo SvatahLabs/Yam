@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/gateway",
+  "name": "@svatah/yam-gateway",
   "version": "0.1.0",
   "description": "Model gateway: local and frontier backends, caching, redaction, provenance",
   "license": "Apache-2.0",
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "catalog:",
-    "@svatah/schema": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
     "zod": "catalog:",
     "zod-to-json-schema": "catalog:"
   },

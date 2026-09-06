@@ -1,5 +1,5 @@
 {
-  "$id": "https://svatah.dev/schema/1.0.0/checkpoint.schema.json",
+  "$id": "https://yam.svatah.com/schema/1.0.0/checkpoint.schema.json",
   "$ref": "#/definitions/checkpoint",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
@@ -143,7 +143,7 @@
       "type": "object"
     }
   },
-  "description": "State sufficient to resume a flow (LLD §3.4). Svatah schemaVersion 1.0.0.",
+  "description": "State sufficient to resume a flow (LLD §3.4). Yam schemaVersion 1.0.0.",
   "title": "checkpoint",
-  "x-svatah-schema-version": "1.0.0"
+  "x-yam-schema-version": "1.0.0"
 }

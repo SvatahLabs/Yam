@@ -1,4 +1,4 @@
-package dev.svatah.runtime;
+package com.svatah.yam.runtime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

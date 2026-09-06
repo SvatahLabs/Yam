@@ -38,7 +38,7 @@ entries:
         after:
           - "Read the docs"
         before:
-          - "Svatah Sample Menu Dashboard Book a slot Widgets Docs"
+          - "Yam Sample Menu Dashboard Book a slot Widgets Docs"
           - "Deterministic automation, once described"
           - "Describe a behaviour, record the bindings, replay it forever."
       rolePath:

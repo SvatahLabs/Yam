@@ -13,8 +13,8 @@
  * way module (a) does instead of failing at the first `bind()`.
  */
 import { afterEach, describe, expect, it } from "vitest";
-import { fakeGateway } from "@svatah/gateway";
-import { clearBindGrounder, currentBindGrounder, hasBindGrounder } from "@svatah/playwright-test";
+import { fakeGateway } from "@svatah/yam-gateway";
+import { clearBindGrounder, currentBindGrounder, hasBindGrounder } from "@svatah/yam-playwright-test";
 import { hasModelGrounding, installModelGrounding, uninstallModelGrounding } from "../src/index.js";
 
 afterEach(() => {

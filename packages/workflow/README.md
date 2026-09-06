@@ -1,4 +1,4 @@
-# @svatah/workflow
+# @svatah/yam-workflow
 
 Story-as-function runner and resume.
 

@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/steps",
+  "name": "@svatah/yam-steps",
   "version": "0.1.0",
   "description": "defineStep API and the Tier 0 matcher",
   "license": "Apache-2.0",
@@ -26,8 +26,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/schema": "workspace:*",
-    "@svatah/surface": "workspace:*"
+    "@svatah/yam-schema": "workspace:*",
+    "@svatah/yam-surface": "workspace:*"
   },
   "devDependencies": {
     "tsup": "catalog:",

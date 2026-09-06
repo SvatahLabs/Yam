@@ -8,7 +8,7 @@
  * around it: reject v1/v2 syntax first, parse, and hand the raw AST to `lower`.
  * Nothing here decides what a sentence means.
  */
-import { diagnostic, type Diagnostic } from "@svatah/spec";
+import { diagnostic, type Diagnostic } from "@svatah/yam-spec";
 import { parse, SyntaxError as PeggySyntaxError } from "./generated/step-parser.js";
 import type { RawStep } from "./raw.js";
 import { checkSigils } from "./sigils.js";

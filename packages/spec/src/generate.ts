@@ -5,15 +5,15 @@
  * `Action` type at compile time; the YAML is generated from it and committed, so
  * that a foreign runtime, `migrate`, or a person auditing the port against
  * `ActionSynonyms.java` can read it without a TypeScript toolchain. This is the
- * same arrangement as the JSON Schemas in `@svatah/schema`: one source, one
+ * same arrangement as the JSON Schemas in `@svatah/yam-schema`: one source, one
  * published artifact, and a drift test that fails when they disagree.
  */
 import { VOCABULARY, type Verb } from "./vocabulary.js";
 
-const HEADER = `# The Svatah action vocabulary (T2.2, LLD §4.3, REQ-RUN-10).
+const HEADER = `# The Yam action vocabulary (T2.2, LLD §4.3, REQ-RUN-10).
 #
 # GENERATED from packages/spec/src/vocabulary.ts — do not edit by hand.
-# Regenerate with \`pnpm --filter @svatah/spec build\`.
+# Regenerate with \`pnpm --filter @svatah/yam-spec build\`.
 #
 # A port of the legacy ActionSynonyms.java, verb for verb, onto the v3 IR action
 # set. \`legacy\` is the Java name, kept so the port is auditable and so migrate

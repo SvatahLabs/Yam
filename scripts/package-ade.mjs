@@ -2,8 +2,8 @@
 /**
  * Package the ADE, as the product or as the suite's own build (T11.1, P10-F7).
  *
- *   node scripts/package-ade.mjs            # apps/ade/out,      "Svatah ADE"
- *   node scripts/package-ade.mjs --test     # apps/ade/out-test, "Svatah ADE Test"
+ *   node scripts/package-ade.mjs            # apps/ade/out,      "Yam ADE"
+ *   node scripts/package-ade.mjs --test     # apps/ade/out-test, "Yam ADE Test"
  *   node scripts/package-ade.mjs --make     # installers instead of a directory
  *
  * Electron Forge takes its configuration from a file and not from the command
@@ -14,7 +14,7 @@
  *
  * Why the second identity exists: the Playwright cases and the desktop gate
  * both drive *a packaged ADE*, both stopped leftovers by executable path, and
- * both addressed the process called `Svatah ADE`. Run at the same time — which
+ * both addressed the process called `Yam ADE`. Run at the same time — which
  * is what `pnpm -r test` beside a gate run is — each stopped the other's
  * application mid-case, and the Phase 10 verification saw exactly that. With
  * its own product name, bundle identifier and output directory, the suite's
@@ -38,6 +38,6 @@ for (const step of [["ensure-electron"], ["stage-cli"]]) {
 const forge = spawnSync("pnpm", ["exec", "electron-forge", command], {
   cwd: ADE,
   stdio: "inherit",
-  env: { ...process.env, ...(test ? { SVATAH_ADE_TEST_BUILD: "1" } : {}) },
+  env: { ...process.env, ...(test ? { YAM_ADE_TEST_BUILD: "1" } : {}) },
 });
 process.exit(forge.status ?? 1);

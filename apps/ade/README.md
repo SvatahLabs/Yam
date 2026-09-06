@@ -1,13 +1,13 @@
-# Svatah ADE
+# Yam ADE
 
 The Automation Development Environment: an Electron client for the local service,
 and the service's reference client (REQ-ADE-1, 2).
 
 ```bash
 pnpm -r build                      # the CLI the ADE spawns
-pnpm --filter @svatah/ade start    # run it
-pnpm --filter @svatah/ade make     # installers for this platform
-pnpm --filter @svatah/ade smoke    # open the fixture project and quit
+pnpm --filter @svatah/yam-ade start    # run it
+pnpm --filter @svatah/yam-ade make     # installers for this platform
+pnpm --filter @svatah/yam-ade smoke    # open the fixture project and quit
 ```
 
 Each of those fetches Electron's runtime binary first if it is not there.
@@ -41,13 +41,13 @@ Three things make that structural rather than aspirational:
 
 `test/parity.test.ts` is the consequence, checked: an edit through the ADE and a
 compile from the CLI give the same plan hash, a run started through the ADE
-writes the same `runs/<id>` files, and the editor's lint is `svatah lint --json`.
+writes the same `runs/<id>` files, and the editor's lint is `yam lint --json`.
 
-## The accessibility variants (`SVATAH_A11Y_VARIANT`)
+## The accessibility variants (`YAM_A11Y_VARIANT`)
 
 The ADE is the desktop conformance target (REQ-ADE-6), and Draft 2.8 LLD §16
-makes it the desktop *healing* target too. `SVATAH_A11Y=1` publishes the
-renderer's accessibility tree; `SVATAH_A11Y_VARIANT` then changes one thing
+makes it the desktop *healing* target too. `YAM_A11Y=1` publishes the
+renderer's accessibility tree; `YAM_A11Y_VARIANT` then changes one thing
 about the interface, so that a binding recorded against the real one can be
 measured against a changed one — the desktop half of what
 `apps/sample-web/VARIANTS.md` is for the web.
@@ -60,7 +60,7 @@ measured against a changed one — the desktop half of what
 
 Both keep every control's `id`, which is what the desktop adapters publish as
 `automationId` and what the healing cases use as ground truth — the equivalent
-of `apps/sample-web`'s `data-svatah-eval`, and excluded from scoring for the
+of `apps/sample-web`'s `data-yam-eval`, and excluded from scoring for the
 same reason.
 
 The variant reaches the renderer as a query parameter on the window's URL rather
@@ -68,7 +68,7 @@ than through the preload bridge, because LLD §13.6 says that bridge exposes fou
 functions and only those four.
 
 ```bash
-SVATAH_A11Y=1 SVATAH_A11Y_VARIANT=1 open -a "…/Svatah ADE.app"
+YAM_A11Y=1 YAM_A11Y_VARIANT=1 open -a "…/Yam ADE.app"
 
 # and the gate that drives all three, launching the ADE once per variant:
 node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md
@@ -86,14 +86,14 @@ would need.
 
 ## The service's lifecycle
 
-On project open the main process spawns `svatah serve --project <dir> --port 0`,
+On project open the main process spawns `yam serve --project <dir> --port 0`,
 reads the one handshake line, and writes a lock in the app's user-data directory —
 never in the project, because a token in a repository is a token in a pull
 request. A second window, or a reload, adopts that service instead of starting a
 rival one on the same `runs/`. Quitting stops the service the ADE started, and a
 lock whose service does not answer is removed rather than adopted.
 
-`svatah serve` deliberately writes no lock of its own ("a token in a file is a
+`yam serve` deliberately writes no lock of its own ("a token in a file is a
 token that outlives the process that needed it"), which is right for a command a
 person stops with Ctrl-C. The lock belongs to whoever can guarantee its lifetime.
 

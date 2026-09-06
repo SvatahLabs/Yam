@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 #
-# A scheduled Svatah workflow (REQ-BEH-2, REQ-AGT-4).
+# A scheduled Yam workflow (REQ-BEH-2, REQ-AGT-4).
 #
-# `crontab` is the scheduler. Svatah is a command that takes typed inputs and
+# `crontab` is the scheduler. Yam is a command that takes typed inputs and
 # prints typed outputs, and this is the fifteen lines between them.
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 
 # Secrets through the environment, never on the command line: a password on a
-# command line is a password in the process list. `SVATAH_INPUT_<NAME>` supplies
+# command line is a password in the process list. `YAM_INPUT_<NAME>` supplies
 # a story input the same way `--input name=value` does (LLD §10, §15).
-export SVATAH_INPUT_LOCATION="${LOCATION:-Indiranagar}"
+export YAM_INPUT_LOCATION="${LOCATION:-Indiranagar}"
 
 # stdout is only the outputs; progress goes to stderr. That is what makes the
 # pipe below work.

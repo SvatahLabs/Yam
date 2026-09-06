@@ -1,6 +1,6 @@
-# @svatah/schema
+# @svatah/yam-schema
 
-The Svatah artifact contract (REQ-STD-1): Zod definitions for everything in
+The Yam artifact contract (REQ-STD-1): Zod definitions for everything in
 LLD §3 and the agent-surface wire shapes of LLD §2, plus the JSON Schemas
 generated from them.
 
@@ -25,15 +25,15 @@ a reviewable diff rather than noise (REQ-REC-9).
 
 ## The published JSON Schemas
 
-`pnpm --filter @svatah/schema build` regenerates `json/` from the Zod
+`pnpm --filter @svatah/yam-schema build` regenerates `json/` from the Zod
 definitions, and a drift test asserts the committed files match. Consume them
 directly:
 
 ```ts
-import irSchema from "@svatah/schema/json/ir.schema.json" with { type: "json" };
+import irSchema from "@svatah/yam-schema/json/ir.schema.json" with { type: "json" };
 ```
 
-Each carries `$id` and `x-svatah-schema-version`. `schemaVersion` is `1.0.0` and
+Each carries `$id` and `x-yam-schema-version`. `schemaVersion` is `1.0.0` and
 is independent of the npm version: it is bumped on any change to the shapes in
 LLD §3.
 

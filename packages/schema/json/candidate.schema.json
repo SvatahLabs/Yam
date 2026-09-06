@@ -1,5 +1,5 @@
 {
-  "$id": "https://svatah.dev/schema/1.0.0/candidate.schema.json",
+  "$id": "https://yam.svatah.com/schema/1.0.0/candidate.schema.json",
   "$ref": "#/definitions/candidate",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
@@ -74,7 +74,7 @@
       "type": "object"
     }
   },
-  "description": "One locator candidate (LLD §3.3). Svatah schemaVersion 1.0.0.",
+  "description": "One locator candidate (LLD §3.3). Yam schemaVersion 1.0.0.",
   "title": "candidate",
-  "x-svatah-schema-version": "1.0.0"
+  "x-yam-schema-version": "1.0.0"
 }

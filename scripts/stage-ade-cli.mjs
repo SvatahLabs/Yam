@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * Stage the `svatah` CLI for the packaged ADE (T8.1, LLD §13.6).
+ * Stage the `yam` CLI for the packaged ADE (T8.1, LLD §13.6).
  *
- *   node scripts/stage-ade-cli.mjs [--out apps/ade/.stage/svatah]
+ *   node scripts/stage-ade-cli.mjs [--out apps/ade/.stage/yam]
  *
  * §13.6: "on project open, locate the bundled CLI (or a configured one)". Phase
- * 7 packaged an ADE with no CLI in it at all — `Resources/svatah/bin.js` did not
+ * 7 packaged an ADE with no CLI in it at all — `Resources/yam/bin.js` did not
  * exist — so a packaged ADE launched with no environment could not open a
- * project even before it tried to spawn one. `SVATAH_CLI` hid it: every test and
+ * project even before it tried to spawn one. `YAM_CLI` hid it: every test and
  * every gate set it, and none of them ran the product a person downloads.
  *
  * `pnpm deploy` is what produces a CLI that runs outside the workspace: it
@@ -31,7 +31,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const at = args.indexOf("--out");
-const out = resolve(at < 0 ? join(ROOT, "apps", "ade", ".stage", "svatah") : args[at + 1]);
+const out = resolve(at < 0 ? join(ROOT, "apps", "ade", ".stage", "yam") : args[at + 1]);
 
 if (!existsSync(join(ROOT, "packages", "cli", "dist", "bin.js"))) {
   process.stderr.write("Run `pnpm -r build` first: there is no CLI to stage.\n");
@@ -46,7 +46,7 @@ rmSync(out, { recursive: true, force: true });
  */
 const deploy = spawnSync(
   "pnpm",
-  ["deploy", "--filter", "@svatah/cli", "--prod", "--legacy", out],
+  ["deploy", "--filter", "@svatah/yam", "--prod", "--legacy", out],
   { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" },
 );
 
@@ -63,4 +63,4 @@ if (!existsSync(entry)) {
   process.exit(1);
 }
 
-process.stdout.write(`staged the svatah CLI for packaging at ${out}\n`);
+process.stdout.write(`staged the yam CLI for packaging at ${out}\n`);

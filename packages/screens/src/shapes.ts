@@ -2,7 +2,7 @@
  * What the service's answers look like, as far as a screen reads them.
  *
  * Structural and partial on purpose. The authoritative shapes are
- * `@svatah/schema`'s (`StepResult`, `Summary`, `BindingFile`) and the service's
+ * `@svatah/yam-schema`'s (`StepResult`, `Summary`, `BindingFile`) and the service's
  * OpenAPI description; re-declaring them in full here would make a second,
  * subtly different set of the same types — the mistake
  * `scripts/generate-ade-client.mjs` avoids by returning `unknown`.
@@ -173,7 +173,7 @@ export interface BindingListRow {
   file?: string;
 }
 
-/** `GET /bindings/:id`, parsed: the YAML `svatah bindings show` prints. */
+/** `GET /bindings/:id`, parsed: the YAML `yam bindings show` prints. */
 export interface BindingFileResponse {
   id?: string;
   phrases?: string[];

@@ -31,7 +31,7 @@
 import { appendFileSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { z } from "zod";
-import { canonicalJsonCompact, elementDescriptionSchema, refSchema } from "@svatah/schema";
+import { canonicalJsonCompact, elementDescriptionSchema, refSchema } from "@svatah/yam-schema";
 
 /** Which surface call a line records. */
 export const trajectoryCallSchema = z.enum(["snapshot", "act", "read", "check"]);

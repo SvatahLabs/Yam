@@ -1,4 +1,4 @@
-# Every screen of the ADE, opened and read by Svatah (T11.4, REQ-SELF-1).
+# Every screen of the ADE, opened and read by Yam (T11.4, REQ-SELF-1).
 #
 # > flows covering every ADE screen's Validate items of Phases 9 and 10 through
 # > the AX adapter
@@ -24,7 +24,7 @@
 #
 # ## The number in the file name
 #
-# `svatah run` executes a project's `test:` blocks in file order, and one
+# `yam run` executes a project's `test:` blocks in file order, and one
 # session serves the whole run — so a flow that ends with `Quit the app` has to
 # be the last one, or every flow after it drives an application that is not
 # there. `99-` says that out loud; `01-` and `02-` say the rest may run in any

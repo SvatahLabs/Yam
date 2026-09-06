@@ -15,7 +15,7 @@
  * the build would fail.
  */
 import { describe, expect, it, expectTypeOf } from "vitest";
-import type { AgentSurface } from "@svatah/surface";
+import type { AgentSurface } from "@svatah/yam-surface";
 import type { StepContext } from "../src/index.js";
 
 describe("the step context exposes the surface and nothing under it", () => {

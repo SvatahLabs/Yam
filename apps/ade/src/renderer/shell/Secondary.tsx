@@ -7,12 +7,12 @@
  * or a table, an editor, an inspector — and six files each with the same three
  * shapes in it would be five opportunities for them to drift.
  *
- * Every value is the model's (`@svatah/screens`'s `AgentsState`, `ApiState`,
+ * Every value is the model's (`@svatah/yam-screens`'s `AgentsState`, `ApiState`,
  * `DataState`, `ExplorerState`, `ImportState`, `SettingsState`). What this file
  * decides is where each goes on a page.
  */
 import { useEffect, useState } from "react";
-import { Alert, Button, Chooser, Field, InspectorSection, KeyValues, Pill, Table } from "@svatah/ui";
+import { Alert, Button, Chooser, Field, InspectorSection, KeyValues, Pill, Table } from "@svatah/yam-ui";
 import type {
   Action,
   AgentsState,
@@ -22,7 +22,7 @@ import type {
   ImportState,
   ScreenParams,
   SettingsState,
-} from "@svatah/screens";
+} from "@svatah/yam-screens";
 import { Code, Counts, EmptyInspector, Toolbar } from "./parts.js";
 
 /** What every one of these six takes. */
@@ -62,7 +62,7 @@ export function AgentsScreen(props: ScreenProps<AgentsState>): React.JSX.Element
             rowKey={(row) => row.name}
             selected={state.selected ?? ""}
             onSelect={(selected) => props.onParams({ ...props.params, selected })}
-            empty="No story is exposed as a tool. `svatah tool serve --expose` chooses them."
+            empty="No story is exposed as a tool. `yam tool serve --expose` chooses them."
             columns={[
               {
                 key: "name",
@@ -384,7 +384,7 @@ export function ApiInspector(props: ScreenProps<ApiState>): React.JSX.Element {
           ]}
         />
         <p className="sv-card">
-          Sent through the same function <span className="sv-mono">svatah run</span> uses for an
+          Sent through the same function <span className="sv-mono">yam run</span> uses for an
           <span className="sv-mono"> api</span> step, so this is not a second HTTP client with its
           own idea of a header.
         </p>
@@ -659,7 +659,7 @@ export function ImportScreen(props: ScreenProps<ImportState>): React.JSX.Element
             id="import-source"
             label="Prototype database"
             value={state.source ?? ""}
-            placeholder="~/Library/Application Support/svatah-ade/db"
+            placeholder="~/Library/Application Support/yam-ade/db"
             monospace
             onChange={(source) => props.onParams({ ...props.params, source })}
             onSubmit={() => props.onAction("import.prototype")}
@@ -739,7 +739,7 @@ export function ImportInspector(props: ScreenProps<ImportState>): React.JSX.Elem
 
       <InspectorSection id="inspector-cli" title="The same thing from a terminal">
         <p className="sv-card sv-mono">
-          svatah migrate {state.root ?? "<dest>"} --from-ade {state.source ?? "<src>"}
+          yam migrate {state.root ?? "<dest>"} --from-ade {state.source ?? "<src>"}
         </p>
       </InspectorSection>
 

@@ -1,22 +1,22 @@
-# The check catalogue — Svatah verifies Svatah (T11.4, REQ-SELF-2, LLD §13.9).
+# The check catalogue — Yam verifies Yam (T11.4, REQ-SELF-2, LLD §13.9).
 #
 # > The check catalogue `evals/self/checks.yaml` lists every check with an id, a
-# > sentence, and two implementations: `svatah` names a story in the self
+# > sentence, and two implementations: `yam` names a story in the self
 # > project; `external` names the independent implementation (a Playwright case
 # > over CDP, an osascript probe, a generated-client smoke, a pseudo-terminal
 # > capture). Each side answers `pass`, `fail`, or `unreachable` with evidence;
 # > `unreachable` says why (no adapter, no grant, no host).
 #
-# `svatah eval self` runs both sides and compares them. It passes only at 100
+# `yam eval self` runs both sides and compares them. It passes only at 100
 # percent agreement over the checks both sides reach, and publishes the
-# one-sided ones as **Svatah's own shortcomings** — every one naming the adapter
-# or the step Svatah lacks, so the list can be read as a to-do rather than as an
+# one-sided ones as **Yam's own shortcomings** — every one naming the adapter
+# or the step Yam lacks, so the list can be read as a to-do rather than as an
 # excuse.
 #
-# ## How to read a `svatah.unreachable`
+# ## How to read a `yam.unreachable`
 #
 # It is never "this is hard". It is the sentence the flow language does not have
-# or the surface Svatah cannot open, said precisely enough that somebody could
+# or the surface Yam cannot open, said precisely enough that somebody could
 # implement it.
 #
 # ## What Draft 2.15 closed, and what is left (T12.7)
@@ -26,7 +26,7 @@
 #
 #   * **an assertion over a set** — "every control has an id", "no secret is
 #     anywhere on this screen" — is **pattern 32**, and it closed eleven rows.
-#   * **a window Svatah cannot resize** is **pattern 33**, and it closed two.
+#   * **a window Yam cannot resize** is **pattern 33**, and it closed two.
 #     `app.launch.size` is the initial size, `Resize the window to <w> by <h>`
 #     the rest.
 #   * **a chord sent to the window** turned out to be a sentence the language
@@ -36,7 +36,7 @@
 #
 # What is left, and each row below says which it is:
 #
-#   * **a run inside a run** — the ADE's Run button starts a Svatah run, and
+#   * **a run inside a run** — the ADE's Run button starts a Yam run, and
 #     pattern 19 can now wait on a service's answer, but the ADE's service
 #     listens on a port it chose at start-up and an `api/` request names a URL.
 #   * **a count** — pattern 32 quantifies (`Every`, `No`) and does not count, so
@@ -48,376 +48,376 @@
 # ## Three oracles stay external on purpose (REQ-SELF-3)
 #
 # The healing eval's ground-truth keys, axe-core on the component sheet, and the
-# renderer-versus-adapter tree agreement. They sit below the surface Svatah
+# renderer-versus-adapter tree agreement. They sit below the surface Yam
 # drives, and they are what keeps this gate from grading its own homework. They
 # carry `externalByDesign`, and the report names them.
 
 schemaVersion: "1.0.0"
 checks:
   - id: "ade.launch-open-read-quit"
-    says: "Svatah launches the packaged ADE, opens the fixtures project through its Recent list, reads the Flows toolbar, and quits it."
-    svatah:
-      source: "svatah"
+    says: "Yam launches the packaged ADE, opens the fixtures project through its Recent list, reads the Flows toolbar, and quits it."
+    yam:
+      source: "yam"
       name: "the ADE opens a project, shows its flows, and quits"
     external:
-      unreachable: "no Playwright case launches or quits the application: `_electron.launch` cannot open a packaged build with the `RunAsNode` fuse off (T8.1), so the ADE's own suite attaches to a build somebody else started. Launching and quitting is what T11.2 gave Svatah and the external side does not have."
+      unreachable: "no Playwright case launches or quits the application: `_electron.launch` cannot open a packaged build with the `RunAsNode` fuse off (T8.1), so the ADE's own suite attaches to a build somebody else started. Launching and quitting is what T11.2 gave Yam and the external side does not have."
   - id: "ade.screen-through-two-adapters"
     says: "The same flow drives the ADE's Flows screen through the accessibility tree and through the DOM over CDP."
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the ADE opens a project and shows its flows"
     external:
-      source: "svatah-cdp"
+      source: "yam-cdp"
       name: "the ADE opens a project and shows its flows"
   - id: "gate.desktop-conformance"
     says: "The live macOS desktop conformance gate is conformant at ADE variants 0, 1 and 2."
-    svatah:
-      unreachable: "the gate *is* Svatah's surface conformance suite, driven by a script that launches three ADE variants and carries recorded fingerprints between them. A flow cannot relaunch its own application at a different variant mid-run: `app.launch` opens the session, and there is no sentence for a second one."
+    yam:
+      unreachable: "the gate *is* Yam's surface conformance suite, driven by a script that launches three ADE variants and carries recorded fingerprints between them. A flow cannot relaunch its own application at a different variant mid-run: `app.launch` opens the session, and there is no sentence for a second one."
     external:
       source: "desktop-gate"
       name: "gate"
   - id: "cockpit.pseudo-terminal"
-    says: "`svatah ui` draws its panes in a real pseudo-terminal and its `--json` equals the model's state."
-    svatah:
-      unreachable: "driving a terminal needs a pseudo-terminal adapter, and Svatah has none: the surface kinds are `web`, `desktop`, `mobile` and `http` (LLD \u00a72.4). `script(1)` and `ink-testing-library` are the external side."
+    says: "`yam ui` draws its panes in a real pseudo-terminal and its `--json` equals the model's state."
+    yam:
+      unreachable: "driving a terminal needs a pseudo-terminal adapter, and Yam has none: the surface kinds are `web`, `desktop`, `mobile` and `http` (LLD \u00a72.4). `script(1)` and `ink-testing-library` are the external side."
     external:
       source: "tui-pty"
-      name: "`svatah ui` draws in a pseudo-terminal (T9.4) > opens on the `comp` run and draws its four panes"
+      name: "`yam ui` draws in a pseudo-terminal (T9.4) > opens on the `comp` run and draws its four panes"
   - id: "cockpit.json-is-the-model"
-    says: "`svatah ui --json` prints exactly what the screen model loads, ten times without a diff."
-    svatah:
-      unreachable: "the same missing adapter: a flow cannot run a command and read its stdout. `svatah ui --json` is the SDK's own answer and comparing it with the model is a program, not a flow."
+    says: "`yam ui --json` prints exactly what the screen model loads, ten times without a diff."
+    yam:
+      unreachable: "the same missing adapter: a flow cannot run a command and read its stdout. `yam ui --json` is the SDK's own answer and comparing it with the model is a program, not a flow."
     external:
       source: "tui-pty"
-      name: "`svatah ui --json` is the model's state (T9.4, REQ-ADE-13) > prints the same Flows state ten times running (T10.4, P9-F4)"
+      name: "`yam ui --json` is the model's state (T9.4, REQ-ADE-13) > prints the same Flows state ten times running (T10.4, P9-F4)"
   - id: "clients.generated-smoke"
     says: "The generated Python and Java clients drive the local service and agree with the TypeScript SDK."
-    svatah:
+    yam:
       unreachable: "an HTTP flow could call the service's routes, and it would be testing the *service* rather than the clients. What the smoke checks is that three generated clients agree, which is a comparison between programs and not something a flow observes."
     external:
       source: "client-smoke"
       name: "clients"
   - id: "design.artboards-fit"
     says: "Every artboard fits its own frame: one-row toolbars, a twelve-character title, an inspector that contains its contents."
-    svatah:
+    yam:
       unreachable: "the artboards are HTML files rendered headless, not an application with a window; there is nothing for a desktop adapter to attach to and no service for an HTTP one. A `web` flow could open them, and it would still need geometry assertions over sets (see the toolbar checks)."
     external:
       source: "artboards"
       name: "artboards"
   - id: "oracle.axe-sheet"
     says: "axe-core and the in-house audit both report zero violations on the component sheet."
-    externalByDesign: "REQ-SELF-3. axe-core is a second implementation of the accessibility rules Svatah's own audit implements; checking one with the other is the point, and checking either with Svatah would be checking a thing with itself."
-    svatah:
+    externalByDesign: "REQ-SELF-3. axe-core is a second implementation of the accessibility rules Yam's own audit implements; checking one with the other is the point, and checking either with Yam would be checking a thing with itself."
+    yam:
       unreachable: "external by design (REQ-SELF-3)."
     external:
       source: "axe-sheet"
       name: "sheet"
   - id: "oracle.healing-ground-truth"
     says: "The healing eval recovers a degraded binding onto the element the ground-truth key names."
-    externalByDesign: "REQ-SELF-3. The ground-truth key is stamped on the sample application *outside* the surface and `bindings.ignoreAttributes` removes it from synthesis, fingerprints and `native` \u2014 so nothing Svatah can see may know the answer. A self flow that could read it would be the eval finding the answer in the answer key."
-    svatah:
+    externalByDesign: "REQ-SELF-3. The ground-truth key is stamped on the sample application *outside* the surface and `bindings.ignoreAttributes` removes it from synthesis, fingerprints and `native` \u2014 so nothing Yam can see may know the answer. A self flow that could read it would be the eval finding the answer in the answer key."
+    yam:
       unreachable: "external by design (REQ-SELF-3)."
     external:
       source: "healing-eval"
       name: "healing"
   - id: "oracle.tree-agreement"
     says: "The ADE's renderer tree over CDP and its accessibility snapshot agree about every identified control's role and name."
-    externalByDesign: "REQ-SELF-3. This is the check that the *adapter's picture of a window is the window*: its two sides are the DOM Chromium renders and the accessibility tree macOS publishes from it, and Svatah is in neither. Every other check goes through something Svatah wrote."
-    svatah:
+    externalByDesign: "REQ-SELF-3. This is the check that the *adapter's picture of a window is the window*: its two sides are the DOM Chromium renders and the accessibility tree macOS publishes from it, and Yam is in neither. Every other check goes through something Yam wrote."
+    yam:
       unreachable: "external by design (REQ-SELF-3)."
     external:
       source: "tree-agreement"
       name: "tree"
   - id: "ade.opens-into-the-new-flows-screen-not-the-eleven-tabs"
     says: "opens into the new Flows screen, not the eleven tabs"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the ADE opens a project and shows its flows"
     external:
       source: "ade-playwright"
       name: "opens into the new Flows screen, not the eleven tabs"
   - id: "ade.every-interactive-control-on-the-flows-screen-is-named-and-i"
     says: "every interactive control on the Flows screen is named and id'd (P8-F3)"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "every interactive control on the Flows screen is named and id'd"
     external:
       source: "ade-playwright"
       name: "every interactive control on the Flows screen is named and id'd (P8-F3)"
   - id: "ade.record-on-the-flows-screen-starts-a-session-with-the-fake-ga"
     says: "Record on the Flows screen starts a session with the fake gateway"
-    svatah:
-      unreachable: "the Record button starts a recording session, and a recording session is what a Svatah *run* is not: `svatah record` and `svatah run` are different commands, and a flow cannot ask for one from inside the other."
+    yam:
+      unreachable: "the Record button starts a recording session, and a recording session is what a Yam *run* is not: `yam record` and `yam run` are different commands, and a flow cannot ask for one from inside the other."
     external:
       source: "ade-playwright"
       name: "Record on the Flows screen starts a session with the fake gateway"
   - id: "ade.run-on-the-flows-screen-starts-a-run-and-opens-the-run-scree"
     says: "Run on the Flows screen starts a run and opens the Run screen"
-    svatah:
+    yam:
       unreachable: "pattern 19 now waits on a service's answer, so the *sentence* exists. What is missing is the request: the ADE's own service listens on a port it chose at start-up, and an `api/` request names a URL. A flow that could ask the ADE which port it is on would close this one."
     external:
       source: "ade-playwright"
       name: "Run on the Flows screen starts a run and opens the Run screen"
   - id: "ade.the-run-screen-shows-the-run-s-steps-audit-and-inspector"
     says: "the Run screen shows the run's steps, audit and inspector"
-    svatah:
-      unreachable: "needs a run to read, and starting one means starting a Svatah run from inside a Svatah run: the click works, and what is missing is a sentence that waits for a *second* run to finish and reads its result. The screen itself is reachable and every control on it is bound."
+    yam:
+      unreachable: "needs a run to read, and starting one means starting a Yam run from inside a Yam run: the click works, and what is missing is a sentence that waits for a *second* run to finish and reads its result. The screen itself is reachable and every control on it is bound."
     external:
       source: "ade-playwright"
       name: "the Run screen shows the run's steps, audit and inspector"
   - id: "ade.the-run-toolbar-keeps-its-buttons-on-one-line-however-long-t"
     says: "the Run toolbar keeps its buttons on one line, however long the title"
-    svatah:
+    yam:
       unreachable: "a *geometry* assertion \u2014 box heights and right edges across the toolbar's children. `Expect \u2026 to have size/location` exists for one element (pattern 24); comparing two elements' boxes does not."
     external:
       source: "ade-playwright"
       name: "the Run toolbar keeps its buttons on one line, however long the title"
   - id: "ade.the-inspector-says-each-of-its-headings-once"
     says: "the inspector says each of its headings once"
-    svatah:
+    yam:
       unreachable: "pattern 32 quantifies over a set \u2014 `Every`, `No` \u2014 and this needs a *count*: \"each heading appears once\" is a uniqueness claim, and neither quantifier can say it. An `Exactly one \u2026` or a `\u2026 should be unique` is the sentence that would close it."
     external:
       source: "ade-playwright"
       name: "the inspector says each of its headings once"
   - id: "ade.the-audit-pane-renders-the-call-detail-the-model-carries"
     says: "the audit pane renders the call detail the model carries"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the audit pane renders the call detail the model carries"
     external:
       source: "ade-playwright"
       name: "the audit pane renders the call detail the model carries"
   - id: "ade.run-again-is-a-button-on-the-run-screen-and-it-starts-anothe"
     says: "Run again is a button on the Run screen, and it starts another run"
-    svatah:
+    yam:
       unreachable: "the button is bound and clickable; what cannot be asserted is that a second run started, because a flow has no sentence that waits for a run other than its own and reads its result."
     external:
       source: "ade-playwright"
       name: "Run again is a button on the Run screen, and it starts another run"
   - id: "ade.a-run-started-from-the-run-screen-can-be-stopped-from-it-t10"
     says: "a run started from the Run screen can be stopped from it (T10.4)"
-    svatah:
-      unreachable: "needs a run in flight to stop, which means starting a Svatah run from inside a Svatah run — and no sentence waits for a second run or reads its state while it is going."
+    yam:
+      unreachable: "needs a run in flight to stop, which means starting a Yam run from inside a Yam run — and no sentence waits for a second run or reads its state while it is going."
     external:
       source: "ade-playwright"
       name: "a run started from the Run screen can be stopped from it (T10.4)"
   - id: "ade.the-command-palette-opens-on-k-and-lists-the-registry-s-acti"
     says: "the command palette opens on \u2318K and lists the registry's actions"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the command palette opens on the chord and lists the registry's actions"
     external:
       source: "ade-playwright"
       name: "the command palette opens on \u2318K and lists the registry's actions"
   - id: "ade.flows-opens-and-every-control-on-it-is-named-and-id-d"
     says: "flows opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Flows screen opens and shows its own controls"
     external:
       source: "ade-playwright"
       name: "flows opens and every control on it is named and id'd"
   - id: "ade.runs-opens-and-every-control-on-it-is-named-and-id-d"
     says: "runs opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Runs screen opens and shows its own controls"
     external:
       source: "ade-playwright"
       name: "runs opens and every control on it is named and id'd"
   - id: "ade.bindings-opens-and-every-control-on-it-is-named-and-id-d"
     says: "bindings opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Bindings screen opens and shows its own controls"
     external:
       source: "ade-playwright"
       name: "bindings opens and every control on it is named and id'd"
   - id: "ade.agents-opens-and-every-control-on-it-is-named-and-id-d"
     says: "agents opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Agents screen opens and shows its own controls"
     external:
       source: "ade-playwright"
       name: "agents opens and every control on it is named and id'd"
   - id: "ade.api-opens-and-every-control-on-it-is-named-and-id-d"
     says: "api opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the API screen opens and shows its own controls"
     external:
       source: "ade-playwright"
       name: "api opens and every control on it is named and id'd"
   - id: "ade.data-opens-and-every-control-on-it-is-named-and-id-d"
     says: "data opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Data screen opens and shows its own controls"
     external:
       source: "ade-playwright"
       name: "data opens and every control on it is named and id'd"
   - id: "ade.import-opens-and-every-control-on-it-is-named-and-id-d"
     says: "import opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Import screen opens and shows its own controls"
     external:
       source: "ade-playwright"
       name: "import opens and every control on it is named and id'd"
   - id: "ade.settings-opens-and-every-control-on-it-is-named-and-id-d"
     says: "settings opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Settings screen opens and shows its own controls"
     external:
       source: "ade-playwright"
       name: "settings opens and every control on it is named and id'd"
   - id: "ade.record-opens-and-every-control-on-it-is-named-and-id-d"
     says: "record opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Record review opens from the palette and chooses its gateway"
     external:
       source: "ade-playwright"
       name: "record opens and every control on it is named and id'd"
   - id: "ade.run-opens-and-every-control-on-it-is-named-and-id-d"
     says: "run opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Run screen opens from the palette and shows its own controls"
     external:
       source: "ade-playwright"
       name: "run opens and every control on it is named and id'd"
   - id: "ade.heal-opens-and-every-control-on-it-is-named-and-id-d"
     says: "heal opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Heal review opens from the palette and offers the runs worth healing"
     external:
       source: "ade-playwright"
       name: "heal opens and every control on it is named and id'd"
   - id: "ade.explorer-opens-and-every-control-on-it-is-named-and-id-d"
     says: "explorer opens and every control on it is named and id'd"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Surface explorer opens from the palette and refuses a call with no intent"
     external:
       source: "ade-playwright"
       name: "explorer opens and every control on it is named and id'd"
   - id: "ade.the-runs-screen-filters-and-its-inspector-shows-the-failing-"
     says: "the Runs screen filters, and its inspector shows the failing step's evidence"
-    svatah:
+    yam:
       unreachable: "the filter chips cycle through the values the *run history* has, so `status: all \u2192 status: passed` on one machine is `status: all \u2192 status: failed` on another. A flow that named a value would be a flow about one machine's runs; what it needs is to read a control's label back and compare it with the one before, and a captured value has no sentence that compares it (pattern 29's `expr` is a guard over scope, not an assertion). This was written as a two-sided check in T12.7 and the gate caught it \u2014 a disagreement whose cause was the check, not either oracle."
     external:
       source: "ade-playwright"
       name: "the Runs screen filters, and its inspector shows the failing step's evidence"
   - id: "ade.the-bindings-screen-shows-the-store-and-one-element-s-resolv"
     says: "the Bindings screen shows the store and one element's resolver order"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Bindings screen shows the store and one element's resolver order"
     external:
       source: "ade-playwright"
       name: "the Bindings screen shows the store and one element's resolver order"
   - id: "ade.the-heal-review-offers-the-runs-worth-healing"
     says: "the Heal review offers the runs worth healing"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Heal review opens from the palette and offers the runs worth healing"
     external:
       source: "ade-playwright"
       name: "the Heal review offers the runs worth healing"
   - id: "ade.the-record-review-chooses-its-gateway-and-says-what-a-fake-s"
     says: "the Record review chooses its gateway and says what a fake session is"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Record review opens from the palette and chooses its gateway"
     external:
       source: "ade-playwright"
       name: "the Record review chooses its gateway and says what a fake session is"
   - id: "ade.the-api-screen-shows-a-saved-request-and-its-headers"
     says: "the API screen shows a saved request and its headers"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the API screen shows a saved request and its headers"
     external:
       source: "ade-playwright"
       name: "the API screen shows a saved request and its headers"
   - id: "ade.the-data-screen-names-every-secret-and-shows-none-of-them"
     says: "the Data screen names every secret and shows none of them"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Data screen names every secret and shows none of them"
     external:
       source: "ade-playwright"
       name: "the Data screen names every secret and shows none of them"
   - id: "ade.the-surface-explorer-refuses-a-call-with-no-intent"
     says: "the Surface explorer refuses a call with no intent"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Surface explorer opens from the palette and refuses a call with no intent"
     external:
       source: "ade-playwright"
       name: "the Surface explorer refuses a call with no intent"
   - id: "ade.the-import-screen-previews-into-the-open-project-and-nowhere"
     says: "the Import screen previews into the open project and nowhere else"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Import screen previews into the open project and nowhere else"
     external:
       source: "ade-playwright"
       name: "the Import screen previews into the open project and nowhere else"
   - id: "ade.the-settings-screen-shows-the-project-and-never-a-credential"
     says: "the Settings screen shows the project and never a credential"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Settings screen shows the project and never a credential"
     external:
       source: "ade-playwright"
       name: "the Settings screen shows the project and never a credential"
   - id: "ade.the-agents-screen-lists-what-an-agent-may-call"
     says: "the Agents screen lists what an agent may call"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Agents screen lists what an agent may call"
     external:
       source: "ade-playwright"
       name: "the Agents screen lists what an agent may call"
   - id: "ade.the-legacy-screens-are-gone-t10-3"
     says: "the legacy screens are gone (T10.3)"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the legacy screens are gone"
     external:
       source: "ade-playwright"
       name: "the legacy screens are gone (T10.3)"
   - id: "ade.the-record-screen-s-toolbar-keeps-its-title-its-select-and-a"
     says: "the Record screen's toolbar keeps its title, its select and availableWhen (P10-F3)"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "the Record toolbar keeps its title and its select at two widths"
     external:
       source: "ade-playwright"
       name: "the Record screen's toolbar keeps its title, its select and availableWhen (P10-F3)"
   - id: "ade.a-toolbar-that-runs-out-of-room-sheds-into-the-palette-and-s"
     says: "a toolbar that runs out of room sheds into the palette, and says so (P10-F3)"
-    svatah:
-      source: "svatah"
+    yam:
+      source: "yam"
       name: "a toolbar that runs out of room sheds into the palette"
     external:
       source: "ade-playwright"
       name: "a toolbar that runs out of room sheds into the palette, and says so (P10-F3)"
   - id: "ade.a-flow-is-edited-and-saved-through-the-ade-and-re-linted-k6"
     says: "a flow is edited and saved through the ADE, and re-linted (K6)"
-    svatah:
+    yam:
       unreachable: "Draft 2.15 gave `Type` its multi-line value, which was the sentence this needed. What is left is the *restore*: the case rewrites a file in the committed fixtures project and puts it back, and a flow that failed between the two would leave the checkout modified. `onFailure: compensate:<flow>` is the mechanism (REQ-AUTO-4) and no compensating story is written, so this stays the external side's."
     external:
       source: "ade-playwright"
       name: "a flow is edited and saved through the ADE, and re-linted (K6)"
   - id: "ade.a-saved-api-request-is-edited-and-saved-through-the-ade-k7"
     says: "a saved API request is edited and saved through the ADE (K7)"
-    svatah:
+    yam:
       unreachable: "adds a header by filling the blank last row of a table, and addressing \"the last row\" of a growing list is a positional target the language has no sentence for."
     external:
       source: "ade-playwright"

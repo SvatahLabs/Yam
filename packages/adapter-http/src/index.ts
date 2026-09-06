@@ -1,5 +1,5 @@
 /**
- * @svatah/adapter-http
+ * @svatah/yam-adapter-http
  *
  * The HTTP adapter (REQ-ADP-2, REQ-ADP-3, LLD §7.2): named requests with the
  * field set the legacy Java builder had, templating from the run's scope,

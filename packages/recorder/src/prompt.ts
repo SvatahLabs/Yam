@@ -6,7 +6,7 @@
  *
  * `SYSTEM` never changes from call to call, and that is the whole design: prompt
  * caching is a prefix match, so the instructions are one cached block and the
- * snapshot goes after it (see `@svatah/gateway`'s `render`). A prompt that
+ * snapshot goes after it (see `@svatah/yam-gateway`'s `render`). A prompt that
  * interpolated the page into its instructions would pay full price on every
  * step of every story.
  *

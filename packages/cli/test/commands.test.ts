@@ -12,7 +12,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { main } from "../src/index.js";
-import { EXIT } from "@svatah/bindings-cli";
+import { EXIT } from "@svatah/yam-bindings-cli";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
@@ -29,7 +29,7 @@ async function cli(...argv: string[]): Promise<{ code: number; out: string; err:
 
 /** A throwaway project. */
 function project(files: Record<string, string>): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-cli-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-cli-"));
   for (const [name, text] of Object.entries(files)) {
     mkdirSync(join(dir, name, ".."), { recursive: true });
     writeFileSync(join(dir, name), text, "utf8");
@@ -40,15 +40,15 @@ function project(files: Record<string, string>): string {
 describe("help and unknown commands", () => {
   it("lists both halves of the command line", async () => {
     const { out } = await cli("help");
-    expect(out).toContain("svatah compile");
-    expect(out).toContain("svatah run");
-    expect(out).toContain("svatah bindings list");
+    expect(out).toContain("yam compile");
+    expect(out).toContain("yam run");
+    expect(out).toContain("yam bindings list");
   });
 
   it("names the subcommand a built command wants", async () => {
     /*
      * The "not built yet" table is empty since Phase 5 built `workflow` and
-     * `tool`, its last two entries. `svatah workflow` with nothing after it is
+     * `tool`, its last two entries. `yam workflow` with nothing after it is
      * now a usage error about *this* command rather than a promise about a
      * later phase — still not a bare "unknown command", which would be a third
      * and wrong answer.
@@ -65,12 +65,12 @@ describe("help and unknown commands", () => {
   });
 });
 
-describe("svatah init (REQ-AGT-1)", () => {
+describe("yam init (REQ-AGT-1)", () => {
   it("writes a project that lints", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "svatah-init-"));
+    const dir = mkdtempSync(join(tmpdir(), "yam-init-"));
     expect((await cli("init", dir)).code).toBe(EXIT.ok);
 
-    for (const file of ["svatah.config.yaml", "flows/sign-in.flow", "data.yaml", ".gitignore"]) {
+    for (const file of ["yam.config.yaml", "flows/sign-in.flow", "data.yaml", ".gitignore"]) {
       expect(existsSync(join(dir, file)), file).toBe(true);
     }
     // The example flow it writes has to be a flow that compiles, or `init`
@@ -79,7 +79,7 @@ describe("svatah init (REQ-AGT-1)", () => {
   });
 
   it("refuses to overwrite an existing project", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "svatah-init-"));
+    const dir = mkdtempSync(join(tmpdir(), "yam-init-"));
     await cli("init", dir);
     const { code, err } = await cli("init", dir);
     expect(code).toBe(EXIT.usage);
@@ -87,7 +87,7 @@ describe("svatah init (REQ-AGT-1)", () => {
   });
 });
 
-describe("svatah lint and compile (REQ-COMP-7, 8)", () => {
+describe("yam lint and compile (REQ-COMP-7, 8)", () => {
   const good = {
     "flows/a.flow": 'story: One\n  Open "/"\n  Click the sign in button\n\ntest: One\n',
   };
@@ -114,7 +114,7 @@ describe("svatah lint and compile (REQ-COMP-7, 8)", () => {
     const { code, err } = await cli("lint", dir);
     expect(code).toBe(EXIT.compileErrors);
     expect(err).toContain("E_SIGIL");
-    expect(err).toContain("svatah migrate");
+    expect(err).toContain("yam migrate");
   });
 
   it("writes a plan, and two compiles write the same bytes (REQ-COMP-7)", async () => {
@@ -136,9 +136,9 @@ describe("svatah lint and compile (REQ-COMP-7, 8)", () => {
   });
 });
 
-describe("svatah migrate (REQ-LANG-11, LLD §15)", () => {
+describe("yam migrate (REQ-LANG-11, LLD §15)", () => {
   it("converts the frozen legacy project and writes a review", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "svatah-migrated-"));
+    const dir = mkdtempSync(join(tmpdir(), "yam-migrated-"));
     const { code } = await cli("migrate", join(ROOT, "evals", "migrate", "source"), dir);
     expect(code).toBe(EXIT.ok);
     expect(existsSync(join(dir, "flows", "simple.flow"))).toBe(true);
@@ -149,7 +149,7 @@ describe("svatah migrate (REQ-LANG-11, LLD §15)", () => {
     // The step is left in the flow as a comment; the exit code is what says the
     // output is not finished.
     const source = project({ "a.flow": "story: One\n+frobnicate+ the ~widget~\n" });
-    const dir = mkdtempSync(join(tmpdir(), "svatah-migrated-"));
+    const dir = mkdtempSync(join(tmpdir(), "yam-migrated-"));
     const { code } = await cli("migrate", source, dir);
     expect(code).toBe(EXIT.unmapped);
     expect(readFileSync(join(dir, "flows", "a.flow"), "utf8")).toContain("TODO(migrate)");
@@ -160,7 +160,7 @@ describe("svatah migrate (REQ-LANG-11, LLD §15)", () => {
   });
 });
 
-describe("svatah host generate (REQ-RUN-12)", () => {
+describe("yam host generate (REQ-RUN-12)", () => {
   it("writes one spec per flow", async () => {
     const dir = project({
       "flows/a.flow": 'story: One\n  Open "/"\n\nstory: Two\n  Open "/x"\n\ntest: everything\n  One\n  Two\n',
@@ -168,14 +168,14 @@ describe("svatah host generate (REQ-RUN-12)", () => {
     const { code } = await cli("host", "generate", dir);
     expect(code).toBe(EXIT.ok);
 
-    const spec = readFileSync(join(dir, ".svatah", "specs", "a.spec.ts"), "utf8");
+    const spec = readFileSync(join(dir, ".yam", "specs", "a.spec.ts"), "utf8");
     expect(spec).toContain('test("One"');
     expect(spec).toContain('test("Two"');
     expect(spec).toContain('mode: "serial"');
   });
 });
 
-describe("svatah doctor (REQ-AGT-1)", () => {
+describe("yam doctor (REQ-AGT-1)", () => {
   it("reports what it found and what to do about it", async () => {
     const dir = project({ "flows/a.flow": 'story: One\n  Open "/"\n\ntest: One\n' });
     const { out } = await cli("doctor", dir);
@@ -187,14 +187,14 @@ describe("svatah doctor (REQ-AGT-1)", () => {
   });
 
   it("returns non-zero when something is wrong", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "svatah-empty-"));
+    const dir = mkdtempSync(join(tmpdir(), "yam-empty-"));
     const { code, out } = await cli("doctor", dir);
     expect(code).not.toBe(EXIT.ok);
     expect(out).toContain("no stories");
   });
 });
 
-describe("svatah run (LLD §15)", () => {
+describe("yam run (LLD §15)", () => {
   it("refuses a host it does not have", async () => {
     const dir = project({ "flows/a.flow": 'story: One\n  Open "/"\n\ntest: One\n' });
     const { code, err } = await cli("run", dir, "--host", "selenium");
@@ -226,7 +226,7 @@ describe("svatah run (LLD §15)", () => {
   ] as const) {
     it(`reports a binding file that ${what}, and writes no run`, async () => {
       const dir = project({
-        "svatah.config.yaml": 'schemaVersion: "1.0.0"\nbindings: { dir: bindings }\n',
+        "yam.config.yaml": 'schemaVersion: "1.0.0"\nbindings: { dir: bindings }\n',
         "flows/a.flow": 'story: One\n  Go to "/"\n\ntest: One\n',
         "bindings/home/sign-in-button.yaml": text,
       });
@@ -244,7 +244,7 @@ describe("svatah run (LLD §15)", () => {
 
   it("reports it under the Playwright host too, before a worker starts", async () => {
     const dir = project({
-      "svatah.config.yaml": 'schemaVersion: "1.0.0"\nbindings: { dir: bindings }\n',
+      "yam.config.yaml": 'schemaVersion: "1.0.0"\nbindings: { dir: bindings }\n',
       "flows/a.flow": 'story: One\n  Go to "/"\n\ntest: One\n',
       "bindings/home/sign-in-button.yaml": "this: [is: not: valid\n",
     });
@@ -269,7 +269,7 @@ describe("the project config (LLD §3.5, §15)", () => {
     // `bindings: { dir: ... }` must not silently drop `testIdAttributes` and
     // `ignoreAttributes`; nobody writing one key means to unset the other two.
     const dir = project({
-      "svatah.config.yaml": 'schemaVersion: "1.0.0"\nbindings: { dir: fixtures }\n',
+      "yam.config.yaml": 'schemaVersion: "1.0.0"\nbindings: { dir: fixtures }\n',
       "flows/signin.flow": flow,
     });
     const { loadConfig } = await import("../src/project.js");
@@ -284,7 +284,7 @@ describe("the project config (LLD §3.5, §15)", () => {
 
   it("compiles a project whose config names only what it changes", async () => {
     const dir = project({
-      "svatah.config.yaml":
+      "yam.config.yaml":
         'schemaVersion: "1.0.0"\napp: { baseUrl: "http://127.0.0.1:4173" }\nbindings: { dir: bindings }\n',
       "flows/signin.flow": flow,
     });
@@ -294,19 +294,19 @@ describe("the project config (LLD §3.5, §15)", () => {
 
   it("reports a bad config as a usage error, not a stack trace", async () => {
     const dir = project({
-      "svatah.config.yaml": 'schemaVersion: "1.0.0"\nrun: { workers: "four" }\n',
+      "yam.config.yaml": 'schemaVersion: "1.0.0"\nrun: { workers: "four" }\n',
       "flows/signin.flow": flow,
     });
     const { code, err } = await cli("compile", dir);
     expect(code).toBe(EXIT.usage);
-    expect(err).toContain("svatah.config.yaml is not a valid Svatah config");
+    expect(err).toContain("yam.config.yaml is not a valid Yam config");
     expect(err).toContain("run.workers");
     expect(err).not.toContain("ZodError");
   });
 });
 
 /*
- * The flow in the README is the first Svatah anyone reads. An example that does
+ * The flow in the README is the first Yam anyone reads. An example that does
  * not compile is worse than no example, and there is no way to notice by eye —
  * the first draft of this one used three patterns the grammar does not have.
  */
@@ -317,7 +317,7 @@ describe("the README's flow example", () => {
     expect(block, "the README no longer contains the flow example").not.toBeNull();
 
     const dir = project({
-      "svatah.config.yaml": 'schemaVersion: "1.0.0"\napp: { baseUrl: "http://127.0.0.1:4173" }\n',
+      "yam.config.yaml": 'schemaVersion: "1.0.0"\napp: { baseUrl: "http://127.0.0.1:4173" }\n',
       "flows/signin.flow": block![1]!,
     });
     const { code, err } = await cli("compile", dir, "--stable");

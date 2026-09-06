@@ -1,8 +1,8 @@
 /**
- * `svatah tool serve` (T5.3, REQ-BEH-3, REQ-AUTO-6, 8, REQ-AGT-1, LLD §13.3, §15).
+ * `yam tool serve` (T5.3, REQ-BEH-3, REQ-AUTO-6, 8, REQ-AGT-1, LLD §13.3, §15).
  *
  * ```
- * svatah tool serve --expose "Book a slot,Cancel booking" [--stdio]
+ * yam tool serve --expose "Book a slot,Cancel booking" [--stdio]
  * ```
  *
  * An MCP server whose tools *are* the exposed stories: one tool per story, its
@@ -11,12 +11,12 @@
  *
  * ## What this file is allowed to be
  *
- * Thin. `@svatah/tool` decides which stories become tools and what a call
- * returns; `@svatah/workflow` runs them; this wires the two to the MCP SDK and
- * to a project on disk. The rule that keeps `svatah mcp` honest — "no logic
+ * Thin. `@svatah/yam-tool` decides which stories become tools and what a call
+ * returns; `@svatah/yam-workflow` runs them; this wires the two to the MCP SDK and
+ * to a project on disk. The rule that keeps `yam mcp` honest — "no logic
  * lives in this file" (LLD §13.5's rule for the service, and §15's for MCP) —
  * applies here for the same reason: an agent calling `book_a_slot` and a person
- * running `svatah workflow run "Book a slot"` must do the same thing.
+ * running `yam workflow run "Book a slot"` must do the same thing.
  *
  * ## No model, and it is checkable
  *
@@ -30,8 +30,8 @@ import { resolve } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z, type ZodRawShape } from "zod";
-import { callTool, toolsFor, type ToolDefinition } from "@svatah/tool";
-import type { Invoker, Signature } from "@svatah/schema";
+import { callTool, toolsFor, type ToolDefinition } from "@svatah/yam-tool";
+import type { Invoker, Signature } from "@svatah/yam-schema";
 import {
   boolOption,
   EXIT,
@@ -40,13 +40,13 @@ import {
   type CommandIo,
   type ExitCode,
   type ParsedArgs,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
 import { compileProject, loadProject } from "../project.js";
 import { report } from "./compile.js";
 import { runProject } from "./run.js";
 
-const USAGE = `svatah tool serve [dir] [--expose "Story one,Story two"] [--stdio]
+const USAGE = `yam tool serve [dir] [--expose "Story one,Story two"] [--stdio]
                          [--base-url <url>] [--storage-state <path.json>]
                          [--headed] [--allow-side-effects] [--out runs] [--json]`;
 
@@ -85,7 +85,7 @@ export interface BuildToolServerOptions {
  * Build the server.
  *
  * Exported so the integration test can drive it over the SDK's in-memory
- * transport, as `svatah mcp`'s test does: what is under test is the tools, and a
+ * transport, as `yam mcp`'s test does: what is under test is the tools, and a
  * test that had to parse stdio framing would be testing the SDK.
  */
 export async function buildToolServer(
@@ -123,10 +123,10 @@ export async function buildToolServer(
   const invocations: Invocation[] = [];
 
   const server = new McpServer(
-    { name: "svatah-tools", version: "0.1.0" },
+    { name: "yam-tools", version: "0.1.0" },
     {
       instructions:
-        "Each tool runs one Svatah story as a deterministic function: the same plan and the " +
+        "Each tool runs one Yam story as a deterministic function: the same plan and the " +
         "same element bindings every time, with no model in the loop. Arguments are validated " +
         "against the story's signature before anything runs, and every call is recorded in " +
         "the run's audit log with the caller's identity. The `runId` in the result names the " +
@@ -213,7 +213,7 @@ export async function buildToolServer(
 
 export async function toolCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   if (args.command[1] !== "serve") {
-    io.err(`\`svatah tool\` takes one subcommand, \`serve\`.\n\n${USAGE}`);
+    io.err(`\`yam tool\` takes one subcommand, \`serve\`.\n\n${USAGE}`);
     return EXIT.usage;
   }
 
@@ -242,7 +242,7 @@ export async function toolCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
   if (built.tools.length === 0) {
     io.err(
       "No stories are exposed, so the server would have no tools. Name them with " +
-        '--expose "Story one,Story two" or in `tool.expose` in svatah.config.yaml.',
+        '--expose "Story one,Story two" or in `tool.expose` in yam.config.yaml.',
     );
     await built.close();
     return EXIT.usage;

@@ -1,8 +1,8 @@
 /**
- * `svatah surface doctor` (T6.1, T6.2, LLD §7.5, REQ-ADP-6, 7, REQ-NFR-7).
+ * `yam surface doctor` (T6.1, T6.2, LLD §7.5, REQ-ADP-6, 7, REQ-NFR-7).
  *
  * > AX: […] documents the accessibility permission prompt and provides a
- * > `svatah surface doctor` check.
+ * > `yam surface doctor` check.
  *
  * The desktop adapters are the only ones with a **host requirement that is not
  * a dependency**. A browser is installed by `pnpm browsers`; an Appium server is
@@ -11,7 +11,7 @@
  * them fails as a `locator` failure for an element that was there all along.
  * This is the command that says so before a run does.
  *
- * It lives in `@svatah/cli` rather than in `@svatah/bindings-cli`, where the
+ * It lives in `@svatah/yam` rather than in `@svatah/yam-bindings-cli`, where the
  * rest of `surface` lives, because it has to reach the desktop adapters and
  * module (a)'s command line has neither in its dependency tree (LLD §1).
  *
@@ -19,8 +19,8 @@
  * job can gate a desktop conformance run on it rather than discovering the
  * permission is missing halfway through a suite.
  */
-import { boolOption, stringOption, EXIT, type CommandIo, type ExitCode, type ParsedArgs } from "@svatah/bindings-cli";
-import { describeRuntime, resolveNodeRuntime, SUPPORTED_NODE_MAJOR } from "@svatah/service/runtime";
+import { boolOption, stringOption, EXIT, type CommandIo, type ExitCode, type ParsedArgs } from "@svatah/yam-bindings-cli";
+import { describeRuntime, resolveNodeRuntime, SUPPORTED_NODE_MAJOR } from "@svatah/yam-service/runtime";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
@@ -94,9 +94,9 @@ export async function surfaceDoctorCommand(
 }
 
 /**
- * Which Node the ADE would run `svatah serve` with (Draft 2.9 §13.6, T8.1).
+ * Which Node the ADE would run `yam serve` with (Draft 2.9 §13.6, T8.1).
  *
- * "`svatah surface doctor` and the ADE's own smoke check report which runtime
+ * "`yam surface doctor` and the ADE's own smoke check report which runtime
  * was chosen." It is a desktop-gate check like the other two: the gate drives
  * the ADE's project screen, and an ADE that cannot resolve a runtime never has
  * one. Asking here means the answer is available without launching an
@@ -113,9 +113,9 @@ function runtimeCheck(): SurfaceCheck {
     ok: resolution.runtime !== undefined,
     detail: describeRuntime(resolution),
     fix:
-      `The ADE spawns \`svatah serve\` with a resolved Node, never with its own binary. ` +
+      `The ADE spawns \`yam serve\` with a resolved Node, never with its own binary. ` +
       `Install Node ${SUPPORTED_NODE_MAJOR} LTS or newer so that \`node\` is on PATH, or set ` +
-      "SVATAH_NODE to the interpreter to use. Looked in: " +
+      "YAM_NODE to the interpreter to use. Looked in: " +
       resolution.attempts
         .map((one) => `${one.where}${one.rejected === undefined ? "" : ` (${one.rejected})`}`)
         .join("; ") +
@@ -137,13 +137,13 @@ async function axChecks(): Promise<SurfaceCheck[]> {
     ];
   }
 
-  const { osascriptBridge } = await import("@svatah/adapter-ax");
+  const { osascriptBridge } = await import("@svatah/yam-adapter-ax");
   const bridge = osascriptBridge({ process: "System Events" });
   const permission = await bridge.permission();
   /*
    * The login session (Draft 2.12 §7.5, P9-F7).
    *
-   * > `svatah surface doctor --adapter ax` also reports `ax/session`: whether
+   * > `yam surface doctor --adapter ax` also reports `ax/session`: whether
    * > any process in the login session owns an on-screen window; when only
    * > `loginwindow` does, the display is locked or the session has no
    * > WindowServer, and the gate names that as the cause of its exit 2 rather
@@ -182,7 +182,7 @@ async function axChecks(): Promise<SurfaceCheck[]> {
  *
  * LLD §7.5: "screenshots via OS APIs". On macOS that is `screencapture`, and it
  * answers `could not create image from display` — exit 1, nothing written —
- * when the program running Svatah has not been granted Screen Recording. The
+ * when the program running Yam has not been granted Screen Recording. The
  * accessibility tree is unaffected, so this is advisory: a run keeps its
  * results and loses its pictures, and this is the line that says which.
  */
@@ -202,14 +202,14 @@ function screenRecordingCheck(): SurfaceCheck {
     fix:
       "Screenshots come from `screencapture`, which needs Screen Recording — a different grant " +
       "from Accessibility. Open System Settings → Privacy & Security → Screen & System Audio " +
-      "Recording, switch it on for the program running Svatah, and restart it. Without it the " +
+      "Recording, switch it on for the program running Yam, and restart it. Without it the " +
       "adapter still reads the accessibility tree; a run simply has no screenshots.",
   };
 }
 
 /** A path `screencapture` can write to and nobody has to clean up. */
 function devNull(): string {
-  return join(tmpdir(), `svatah-screencapture-probe-${process.pid}.png`);
+  return join(tmpdir(), `yam-screencapture-probe-${process.pid}.png`);
 }
 
 /** Windows UI Automation (REQ-ADP-6). */
@@ -218,7 +218,7 @@ async function uiaChecks(): Promise<SurfaceCheck[]> {
     return [{ adapter: "uia", name: "platform", ok: false, skipped: true, detail: "not Windows" }];
   }
 
-  const { powershellBridge } = await import("@svatah/adapter-uia");
+  const { powershellBridge } = await import("@svatah/yam-adapter-uia");
   const availability = await powershellBridge({ process: "" }).availability();
   return [
     {

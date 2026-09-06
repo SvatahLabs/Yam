@@ -39,7 +39,7 @@ entries:
           - "Checkout"
           - "Logout"
         before:
-          - "Svatah Sample Menu Dashboard Book a slot Widgets Docs"
+          - "Yam Sample Menu Dashboard Book a slot Widgets Docs"
           - "☰"
           - "Overview"
       rolePath:

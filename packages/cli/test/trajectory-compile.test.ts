@@ -28,26 +28,26 @@ import {
   readTrajectory,
   writeProposal,
   type TrajectoryLine,
-} from "@svatah/trajectory";
-import { proposalSchema } from "@svatah/schema";
+} from "@svatah/yam-trajectory";
+import { proposalSchema } from "@svatah/yam-schema";
 import { buildMcpServer } from "../src/commands/mcp.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 
 let app: SampleServer;
 const projects: string[] = [];
 
 function scaffold(): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-traj-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-traj-"));
   projects.push(dir);
   for (const entry of ["bindings", "flows", "api", "data.yaml"]) {
     cpSync(join(FIXTURES, entry), join(dir, entry), { recursive: true });
   }
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
-    readFileSync(join(FIXTURES, "svatah.config.yaml"), "utf8").replace(
+    join(dir, "yam.config.yaml"),
+    readFileSync(join(FIXTURES, "yam.config.yaml"), "utf8").replace(
       /baseUrl: ".*"/,
       `baseUrl: "${app.origin}"`,
     ),
@@ -293,13 +293,13 @@ describe("what the compiler will not phrase, it says out loud", () => {
 });
 
 /**
- * `svatah trajectory compile` — the same compile, through the command line.
+ * `yam trajectory compile` — the same compile, through the command line.
  *
  * The ADE's "compile to proposal" (T5.8) and a person at a terminal call one
  * function, which is the rule LLD §13.5 states for the service and §15 for MCP:
  * an agent and a person must get the same artifact.
  */
-describe("svatah trajectory compile (T5.5, REQ-AGT-1)", () => {
+describe("yam trajectory compile (T5.5, REQ-AGT-1)", () => {
   it("writes the proposal and reports the rate", async () => {
     const project = scaffold();
     const path = join(project, "runs", "t", "trajectory.jsonl");
@@ -350,7 +350,7 @@ function cli(
   return new Promise((done) => {
     let output = "";
     let out = "";
-    const child = spawn(process.execPath, [SVATAH, ...args], { cwd, env: process.env });
+    const child = spawn(process.execPath, [YAM, ...args], { cwd, env: process.env });
     child.stdout.on("data", (chunk) => {
       out += String(chunk);
       output += String(chunk);

@@ -8,7 +8,7 @@
  * the session leaves behind replays.
  *
  * The last part is the one that matters and the one a unit test cannot make:
- * the flow the REPL writes is fed back to `svatah run`, with no model in the
+ * the flow the REPL writes is fed back to `yam run`, with no model in the
  * loop, and has to pass.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -18,23 +18,23 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { EXIT } from "@svatah/bindings-cli";
+import { EXIT } from "@svatah/yam-bindings-cli";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 
 let app: SampleServer;
 const projects: string[] = [];
 
 /** A copy of the fixture project, with no flows: the REPL writes its own. */
 function scaffold(options: { drop?: string[] } = {}): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-repl-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-repl-"));
   projects.push(dir);
   cpSync(join(FIXTURES, "bindings"), join(dir, "bindings"), { recursive: true });
   cpSync(join(FIXTURES, "api"), join(dir, "api"), { recursive: true });
   cpSync(join(FIXTURES, "data.yaml"), join(dir, "data.yaml"));
-  cpSync(join(FIXTURES, "svatah.config.yaml"), join(dir, "svatah.config.yaml"));
+  cpSync(join(FIXTURES, "yam.config.yaml"), join(dir, "yam.config.yaml"));
   for (const path of options.drop ?? []) rmSync(join(dir, path), { force: true });
   return dir;
 }
@@ -47,13 +47,13 @@ function cli(
   return new Promise((done) => {
     let output = "";
     let json = "";
-    const child = spawn(process.execPath, [SVATAH, ...args], {
+    const child = spawn(process.execPath, [YAM, ...args], {
       cwd,
       env: {
         ...process.env,
-        SVATAH_SAMPLE_PASSWORD: "qwerty123",
-        SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-        SVATAH_SAMPLE_CARD_CVV: "123",
+        YAM_SAMPLE_PASSWORD: "qwerty123",
+        YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+        YAM_SAMPLE_CARD_CVV: "123",
         // The gateway is chosen by flag, never inherited.
         ANTHROPIC_API_KEY: "",
         ANTHROPIC_AUTH_TOKEN: "",
@@ -77,7 +77,7 @@ const flowIn = (dir: string): string => {
 };
 
 beforeAll(async () => {
-  if (!existsSync(SVATAH)) throw new Error("Run `pnpm -r build` first.");
+  if (!existsSync(YAM)) throw new Error("Run `pnpm -r build` first.");
   app = await startSampleApp(0);
 }, 180_000);
 
@@ -86,7 +86,7 @@ afterAll(async () => {
   for (const dir of projects) rmSync(dir, { recursive: true, force: true });
 });
 
-describe("svatah repl, three sentences over stdin (T4.5, REQ-RUN-11)", () => {
+describe("yam repl, three sentences over stdin (T4.5, REQ-RUN-11)", () => {
   it("performs them in order against one session and writes a flow that replays", async () => {
     const project = scaffold();
     const session = await cli(

@@ -1,5 +1,5 @@
 /**
- * `svatah init` (REQ-AGT-1, LLD §15).
+ * `yam init` (REQ-AGT-1, LLD §15).
  *
  * Writes the directories and the config a project needs, and one flow that
  * explains the shape of a flow by being one. It refuses to overwrite: `init` in
@@ -8,11 +8,11 @@
  */
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { boolOption, type ParsedArgs } from "@svatah/bindings-cli";
-import { EXIT, type ExitCode } from "@svatah/bindings-cli";
-import type { CommandIo } from "@svatah/bindings-cli";
+import { boolOption, type ParsedArgs } from "@svatah/yam-bindings-cli";
+import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
+import type { CommandIo } from "@svatah/yam-bindings-cli";
 
-const CONFIG = `# Svatah project configuration (LLD §3.5).
+const CONFIG = `# Yam project configuration (LLD §3.5).
 schemaVersion: "1.0.0"
 project: "PROJECT"
 environment: test
@@ -61,7 +61,7 @@ heal:
 const EXAMPLE_FLOW = `// A flow is prose. One sentence per step, no locators, no sigils.
 //
 // The target phrases below have no bindings yet, so the first run records them
-// (\`svatah record\`, or \`SVATAH_MODE=record\` in a Playwright test). After that
+// (\`yam record\`, or \`YAM_MODE=record\` in a Playwright test). After that
 // the same flow replays with no model in the loop.
 
 story: Sign in
@@ -78,10 +78,10 @@ test: Sign in
  * What a project must not commit (LLD §16, Draft 2.5).
  *
  * "Run artifacts are committed only under `evals/conformance/` and `reports/`.
- * Every project directory ignores `runs/`, `.svatah/`, and any absolute-path
+ * Every project directory ignores `runs/`, `.yam/`, and any absolute-path
  * echo such as `var/`."
  *
- * `var/` is not a directory Svatah writes on purpose. It is what an absolute
+ * `var/` is not a directory Yam writes on purpose. It is what an absolute
  * `--out` leaves behind when something joins it onto the project root instead
  * of resolving it — which is exactly how fourteen run artifacts came to be
  * committed under `evals/fixtures/var/folders/…` in Phase 2 and stayed there
@@ -91,7 +91,7 @@ test: Sign in
 const GITIGNORE = `# Run output. Results, screenshots and traces are artifacts of a run, not of
 # the project: they are reproduced by re-running and never reviewed as a diff.
 runs/
-.svatah/
+.yam/
 
 # The shape an absolute --out leaves behind when it is joined onto the project
 # root rather than resolved (LLD §16).
@@ -110,7 +110,7 @@ const DATA = `# Run-level data (REQ-LANG-9).
 
 user:
   email: "someone@example.com"
-  password: "\${SVATAH_PASSWORD}"
+  password: "\${YAM_PASSWORD}"
 
 secrets:
   - user.password
@@ -121,14 +121,14 @@ export async function initCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
   const force = boolOption(args, "force");
 
   const files: Array<[string, string]> = [
-    ["svatah.config.yaml", CONFIG.replace("PROJECT", root === "." ? "my-project" : root)],
+    ["yam.config.yaml", CONFIG.replace("PROJECT", root === "." ? "my-project" : root)],
     [join("flows", "sign-in.flow"), EXAMPLE_FLOW],
     ["data.yaml", DATA],
     [".gitignore", GITIGNORE],
   ];
 
   /*
-   * A `.gitignore` that is already there is not a reason to refuse: `svatah
+   * A `.gitignore` that is already there is not a reason to refuse: `yam
    * init` inside an existing repository is a normal thing to do, and the file
    * is the repository's, not ours. It is written only when absent.
    */
@@ -137,7 +137,7 @@ export async function initCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
     .filter((name) => name !== ".gitignore" && existsSync(join(root, name)));
   if (existing.length > 0 && !force) {
     io.err(
-      `${existing.join(", ")} already exist(s). \`svatah init\` in a project that has one is ` +
+      `${existing.join(", ")} already exist(s). \`yam init\` in a project that has one is ` +
         "almost always a mistake; pass --force if it is not.",
     );
     return EXIT.usage;
@@ -154,9 +154,9 @@ export async function initCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
 
   io.err(
     `Initialised ${root}.\n\n` +
-      "  svatah lint      check the flow reads and compiles\n" +
-      "  svatah compile   write .svatah/plan.json\n" +
-      "  svatah run       replay it\n",
+      "  yam lint      check the flow reads and compiles\n" +
+      "  yam compile   write .yam/plan.json\n" +
+      "  yam run       replay it\n",
   );
   return EXIT.ok;
 }

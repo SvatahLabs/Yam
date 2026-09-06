@@ -1,5 +1,5 @@
 /**
- * `svatah heal` (T1.7, LLD §15).
+ * `yam heal` (T1.7, LLD §15).
  *
  * The end-to-end repair — failure, heal, `git apply`, re-run — needs a browser
  * and is in `packages/playwright-test/test/heal-job.spec.ts`. What is here is the
@@ -21,12 +21,12 @@ function capture(): CommandIo & { stdout: string[]; stderr: string[] } {
 let dir: string;
 
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "svatah-heal-cli-"));
-  mkdirSync(join(dir, ".svatah"), { recursive: true });
+  dir = mkdtempSync(join(tmpdir(), "yam-heal-cli-"));
+  mkdirSync(join(dir, ".yam"), { recursive: true });
 });
 afterEach(() => rmSync(dir, { recursive: true, force: true }));
 
-describe("svatah heal", () => {
+describe("yam heal", () => {
   it("needs a source of failures", async () => {
     const io = capture();
     expect(await main(["heal"], io)).toBe(EXIT.usage);
@@ -35,7 +35,7 @@ describe("svatah heal", () => {
 
   it("says there is nothing to repair when there are no failures", async () => {
     const io = capture();
-    expect(await main(["heal", "--from-bind-failures", "--out", join(dir, ".svatah")], io)).toBe(
+    expect(await main(["heal", "--from-bind-failures", "--out", join(dir, ".yam")], io)).toBe(
       EXIT.ok,
     );
     expect(io.stdout.join("\n")).toContain("Nothing to repair");
@@ -43,7 +43,7 @@ describe("svatah heal", () => {
 
   it("reads the bind-failure lines a run wrote", async () => {
     writeFileSync(
-      join(dir, ".svatah", "bind-failures.jsonl"),
+      join(dir, ".yam", "bind-failures.jsonl"),
       [
         JSON.stringify({
           id: "login.username-field",
@@ -66,8 +66,8 @@ describe("svatah heal", () => {
       "utf8",
     );
 
-    const { readBindFailures } = await import("@svatah/healer");
-    const inputs = readBindFailures(join(dir, ".svatah"));
+    const { readBindFailures } = await import("@svatah/yam-healer");
+    const inputs = readBindFailures(join(dir, ".yam"));
     expect(inputs).toHaveLength(1);
     expect(inputs[0]!.url).toContain("variant=3");
     expect(inputs[0]!.contextDrift).toBe(true);
@@ -75,14 +75,14 @@ describe("svatah heal", () => {
 
   it("refuses an adapter that is not registered", async () => {
     writeFileSync(
-      join(dir, ".svatah", "bind-failures.jsonl"),
+      join(dir, ".yam", "bind-failures.jsonl"),
       JSON.stringify({ id: "a.b", at: "x", contextDrift: false, tried: [] }) + "\n",
       "utf8",
     );
     const io = capture();
     expect(
       await main(
-        ["heal", "--from-bind-failures", "--out", join(dir, ".svatah"), "--adapter", "uia"],
+        ["heal", "--from-bind-failures", "--out", join(dir, ".yam"), "--adapter", "uia"],
         io,
       ),
     ).toBe(EXIT.usage);
@@ -90,9 +90,9 @@ describe("svatah heal", () => {
   });
 
   it("reports a bind-failures file it cannot read", async () => {
-    writeFileSync(join(dir, ".svatah", "bind-failures.jsonl"), "{ not json\n", "utf8");
+    writeFileSync(join(dir, ".yam", "bind-failures.jsonl"), "{ not json\n", "utf8");
     const io = capture();
-    expect(await main(["heal", "--from-bind-failures", "--out", join(dir, ".svatah")], io)).toBe(
+    expect(await main(["heal", "--from-bind-failures", "--out", join(dir, ".yam")], io)).toBe(
       EXIT.failed,
     );
     expect(io.stderr.join("\n")).toContain("not valid JSON");
@@ -141,7 +141,7 @@ describe("svatah heal", () => {
       "utf8",
     );
 
-    const { readRunFailures } = await import("@svatah/healer");
+    const { readRunFailures } = await import("@svatah/yam-healer");
     const inputs = readRunFailures(runDir);
     // A timeout is not something relocalization can repair, and a passing step is
     // not a failure: only the `locator` failure is selected (REQ-HEAL-1).
@@ -157,7 +157,7 @@ describe("svatah heal", () => {
     // useful answer, and a missing file is not.
     const io = capture();
     writeFileSync(
-      join(dir, ".svatah", "bind-failures.jsonl"),
+      join(dir, ".yam", "bind-failures.jsonl"),
       JSON.stringify({
         id: "login.username-field",
         at: "2026-09-02T10:00:00.000Z",
@@ -172,7 +172,7 @@ describe("svatah heal", () => {
         "heal",
         "--from-bind-failures",
         "--out",
-        join(dir, ".svatah"),
+        join(dir, ".yam"),
         "--dir",
         join(dir, "bindings"),
       ],
@@ -180,8 +180,8 @@ describe("svatah heal", () => {
     );
 
     expect(code).toBe(EXIT.someUnrepaired);
-    expect(existsSync(join(dir, ".svatah", "heal", "bindings.diff"))).toBe(true);
-    expect(existsSync(join(dir, ".svatah", "heal", "report.md"))).toBe(true);
+    expect(existsSync(join(dir, ".yam", "heal", "bindings.diff"))).toBe(true);
+    expect(existsSync(join(dir, ".yam", "heal", "report.md"))).toBe(true);
     expect(io.stdout.join("\n")).toContain("no-binding");
     expect(io.stdout.join("\n")).toContain("0 repaired");
   });

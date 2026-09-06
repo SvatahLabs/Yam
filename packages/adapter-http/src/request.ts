@@ -29,7 +29,7 @@ import {
   FormData as UndiciFormData,
   type RequestInit as UndiciRequestInit,
 } from "undici";
-import type { ApiRequest, ApiResponse } from "@svatah/schema";
+import type { ApiRequest, ApiResponse } from "@svatah/yam-schema";
 import { expand, expandRecord, fillPathParams, type TemplateScope } from "./template.js";
 
 export interface RequestOptions {

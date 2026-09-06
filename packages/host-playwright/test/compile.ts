@@ -1,7 +1,7 @@
 /**
  * The host tests' fixture plan.
  *
- * Read from `project/plan.json`, not compiled here: `@svatah/host-playwright`
+ * Read from `project/plan.json`, not compiled here: `@svatah/yam-host-playwright`
  * must not depend on the compiler (LLD §1), in devDependencies as much as
  * anywhere, and the boundary is right — the host *consumes* a plan.
  *
@@ -12,7 +12,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { planSchema, type Plan } from "@svatah/schema";
+import { planSchema, type Plan } from "@svatah/yam-schema";
 
 export const PROJECT = join(dirname(fileURLToPath(import.meta.url)), "project");
 

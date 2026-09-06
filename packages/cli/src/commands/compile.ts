@@ -1,13 +1,13 @@
 /**
- * `svatah compile` and `svatah lint` (REQ-COMP-7, 8, REQ-AGT-1, LLD §15).
+ * `yam compile` and `yam lint` (REQ-COMP-7, 8, REQ-AGT-1, LLD §15).
  *
  * ```
- * svatah compile [--stable] [--out .svatah/plan.json] [--json]
- * svatah lint    [--json]
+ * yam compile [--stable] [--out .yam/plan.json] [--json]
+ * yam lint    [--json]
  * ```
  *
  * They are one command with two outputs: `lint` compiles and then reports what
- * `svatah lint` reports (REQ-COMP-8) without writing a plan, and `compile`
+ * `yam lint` reports (REQ-COMP-8) without writing a plan, and `compile`
  * writes the plan and reports errors. Splitting them into two pipelines would
  * mean lint could pass on something compile refuses.
  *
@@ -15,13 +15,13 @@
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { lintPlan, renderPlan } from "@svatah/compiler";
-import { formatDiagnostic, type Diagnostic } from "@svatah/spec";
-import { boolOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
-import { EXIT, type ExitCode } from "@svatah/bindings-cli";
+import { lintPlan, renderPlan } from "@svatah/yam-compiler";
+import { formatDiagnostic, type Diagnostic } from "@svatah/yam-spec";
+import { boolOption, stringOption, type ParsedArgs } from "@svatah/yam-bindings-cli";
+import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import { compileProjectWithTiers, loadProject, type LoadedProject } from "../project.js";
 import { isDigestMismatch, registerModelTiers } from "../tiers/register.js";
-import type { CommandIo } from "@svatah/bindings-cli";
+import type { CommandIo } from "@svatah/yam-bindings-cli";
 
 /** Print diagnostics, worst first, in the shape editors parse. */
 export function report(diagnostics: readonly Diagnostic[], io: CommandIo): void {
@@ -113,7 +113,7 @@ export async function compileCommand(args: ParsedArgs, io: CommandIo): Promise<E
   const compiled = attempt.result;
   const diagnostics = [...loaded.diagnostics, ...compiled.diagnostics];
 
-  const out = stringOption(args, "out") ?? join(loaded.config.run.outputDir, "..", ".svatah", "plan.json");
+  const out = stringOption(args, "out") ?? join(loaded.config.run.outputDir, "..", ".yam", "plan.json");
   const errors = diagnostics.filter((d) => d.severity === "error");
 
   if (boolOption(args, "json")) {

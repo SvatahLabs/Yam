@@ -84,7 +84,7 @@ export const PUBLISHED_SCHEMAS: readonly PublishedSchema[] = [
   { name: "checkpoint", description: "State sufficient to resume a flow (LLD §3.4)", schema: checkpointSchema },
 
   // Config and proposals.
-  { name: "config", description: "svatah.config.yaml (LLD §3.5)", schema: configSchema },
+  { name: "config", description: "yam.config.yaml (LLD §3.5)", schema: configSchema },
   { name: "proposal", description: "A trajectory-compiled proposal (HLD §6.6)", schema: proposalSchema },
 
   // Surface (LLD §2.5).

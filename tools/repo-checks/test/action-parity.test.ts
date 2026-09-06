@@ -11,7 +11,7 @@
  *
  * ## The three sources, and why none of them is generated from another
  *
- * 1. **The registry** — `@svatah/screens`'s `ACTIONS`. The thing itself.
+ * 1. **The registry** — `@svatah/yam-screens`'s `ACTIONS`. The thing itself.
  * 2. **The CLI's command table** — `packages/cli/src/cli.ts`'s `USAGE` block and
  *    its dispatch, read from the source. Not a copy of the registry: it is the
  *    list of commands the CLI *has*, which existed before the registry did. An
@@ -29,7 +29,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { ACTIONS, SCREEN_IDS, type Action } from "@svatah/screens";
+import { ACTIONS, SCREEN_IDS, type Action } from "@svatah/yam-screens";
 import { fromRoot } from "../src/repo.js";
 
 /* ── source 2: the CLI's own command table ────────────────────────────────── */
@@ -41,7 +41,7 @@ const BINDINGS_CLI_SOURCE = readFileSync(
 );
 
 /**
- * Every `svatah <command>` line in the usage block.
+ * Every `yam <command>` line in the usage block.
  *
  * The usage block is the CLI's table (LLD §15) as a person reads it, and the
  * dispatch below is the same table as the program reads it. A command has to be
@@ -49,7 +49,7 @@ const BINDINGS_CLI_SOURCE = readFileSync(
  * a documented one that answers "unknown command".
  */
 const documented = new Set(
-  [...CLI_SOURCE.matchAll(/^\s{2}svatah ([a-z-]+)/gm)].map((match) => match[1]!),
+  [...CLI_SOURCE.matchAll(/^\s{2}yam ([a-z-]+)/gm)].map((match) => match[1]!),
 );
 
 /**
@@ -57,8 +57,8 @@ const documented = new Set(
  *
  * Module (b)'s `switch` in `runModuleB`, the three `eval` subcommands and
  * `surface doctor` intercepted before it, and module (a)'s own table in
- * `@svatah/bindings-cli` — which is where `bindings`, `heal`, `surface` and
- * `eval healing` live, because `svatah-bindings` is a second executable over the
+ * `@svatah/yam-bindings-cli` — which is where `bindings`, `heal`, `surface` and
+ * `eval healing` live, because `yam-bindings` is a second executable over the
  * same functions.
  */
 const dispatched = new Set([
@@ -134,15 +134,15 @@ describe("the action registry, the palette fixture and the CLI agree (T9.1)", ()
     for (const action of ACTIONS) {
       if (action.cli === undefined) continue;
       const words = action.cli.split(/\s+/);
-      expect(words[0], `${action.id}: "${action.cli}" does not start with svatah`).toBe("svatah");
+      expect(words[0], `${action.id}: "${action.cli}" does not start with yam`).toBe("yam");
       const command = words[1]!;
       expect(
         documented.has(command),
-        `${action.id}: \`svatah ${command}\` is not in the CLI's usage block`,
+        `${action.id}: \`yam ${command}\` is not in the CLI's usage block`,
       ).toBe(true);
       expect(
         dispatched.has(command),
-        `${action.id}: \`svatah ${command}\` is not dispatched by the CLI`,
+        `${action.id}: \`yam ${command}\` is not dispatched by the CLI`,
       ).toBe(true);
     }
   });
@@ -195,7 +195,7 @@ describe("a deliberately renamed action fails the check (T9.1 Validate)", () => 
 
   it("fails on a changed CLI command", () => {
     const renamed = ACTIONS.map((one) =>
-      one.id === "run.flow" ? { ...one, cli: "svatah execute --flow <file>" } : one,
+      one.id === "run.flow" ? { ...one, cli: "yam execute --flow <file>" } : one,
     );
     const failures = parityFailures(renamed, PALETTE);
     expect(failures).toHaveLength(1);

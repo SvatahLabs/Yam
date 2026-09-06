@@ -4,7 +4,7 @@
  *
  * ## What this is, and what it is not
  *
- * It is the published suite (`@svatah/conformance`'s `DESKTOP_CASES`) run
+ * It is the published suite (`@svatah/yam-conformance`'s `DESKTOP_CASES`) run
  * against this adapter, with the bridge replaying the trees `test/recorded.ts`
  * describes. Every case, every check, the real runner and the real report.
  *
@@ -15,7 +15,7 @@
  * accessibility tree; it does not say `powershell` reads that tree correctly.
  */
 import { describe, expect, it } from "vitest";
-import { DESKTOP_CASES, runSurfaceConformance } from "@svatah/conformance";
+import { DESKTOP_CASES, runSurfaceConformance } from "@svatah/yam-conformance";
 import { UiaSurface } from "../src/index.js";
 import { ADE_SCREENS, recordedBridge, type AdeScreen } from "./recorded.js";
 
@@ -45,8 +45,8 @@ describe("the desktop conformance suite against the recorded ADE (T6.1)", () => 
       },
     });
 
-    const surface = new UiaSurface({ processName: "Svatah ADE", bridge });
-    await surface.open({ kind: "desktop", processName: "Svatah ADE" } as never);
+    const surface = new UiaSurface({ processName: "Yam ADE", bridge });
+    await surface.open({ kind: "desktop", processName: "Yam ADE" } as never);
 
     /** Which fixture each navigable control opens, by `automationId`. */
     const screens: Record<string, AdeScreen> = {
@@ -110,8 +110,8 @@ describe("the desktop conformance suite against the recorded ADE (T6.1)", () => 
       baseUrl: "",
       cases: DESKTOP_CASES,
       openSurface: async () => {
-        const one = new UiaSurface({ processName: "Svatah ADE", bridge });
-        await one.open({ kind: "desktop", processName: "Svatah ADE" } as never);
+        const one = new UiaSurface({ processName: "Yam ADE", bridge });
+        await one.open({ kind: "desktop", processName: "Yam ADE" } as never);
         return one;
       },
     });

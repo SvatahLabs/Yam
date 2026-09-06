@@ -30,7 +30,7 @@ describe("the sample application serves every page", () => {
     const res = await get(path);
     expect(res.status).toBe(200);
     expect(res.contentType).toContain("text/html");
-    expect(res.body).toContain(`<title>${title} · Svatah Sample</title>`);
+    expect(res.body).toContain(`<title>${title} · Yam Sample</title>`);
     expect(res.body.startsWith("<!doctype html>")).toBe(true);
   });
 

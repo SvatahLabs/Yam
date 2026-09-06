@@ -1,5 +1,5 @@
 {
-  "$id": "https://svatah.dev/schema/1.0.0/story.schema.json",
+  "$id": "https://yam.svatah.com/schema/1.0.0/story.schema.json",
   "$ref": "#/definitions/story",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
@@ -768,7 +768,7 @@
       "type": "object"
     }
   },
-  "description": "A named, ordered list of steps (LLD §3.2). Svatah schemaVersion 1.0.0.",
+  "description": "A named, ordered list of steps (LLD §3.2). Yam schemaVersion 1.0.0.",
   "title": "story",
-  "x-svatah-schema-version": "1.0.0"
+  "x-yam-schema-version": "1.0.0"
 }

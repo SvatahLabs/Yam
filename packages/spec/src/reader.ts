@@ -20,7 +20,7 @@
  * Every diagnostic carries a line, and the reader keeps going after one wherever
  * it can. A flow with three mistakes should report three, not the first.
  */
-import type { Signature } from "@svatah/schema";
+import type { Signature } from "@svatah/yam-schema";
 import type { FlowBlock, FlowFile, ListBlock, RawStep, StoryBlock } from "./ast.js";
 import { diagnostic, type Diagnostic } from "./diagnostics.js";
 import { parseMeta } from "./meta.js";

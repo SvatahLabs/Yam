@@ -6,11 +6,11 @@
  * builds without a running service, and a test regenerates it and diffs, so drift
  * between a client and the service is a red build rather than a discovery.
  *
- * Bodies are `unknown` on purpose: their types are `@svatah/schema`'s, and
+ * Bodies are `unknown` on purpose: their types are `@svatah/yam-schema`'s, and
  * re-deriving them here would make a second, subtly different set of the same
  * types (REQ-STD-1).
  */
-package dev.svatah.sdk;
+package com.svatah.yam.sdk;
 
 import java.io.IOException;
 import java.net.URI;
@@ -255,7 +255,7 @@ public class GeneratedClient {
     return call("post", "/heal", body, "application/json");
   }
 
-  /** {@code POST /migrate} — Import a Svatah ADE prototype's electron-db directory into this project */
+  /** {@code POST /migrate} — Import a Yam ADE prototype's electron-db directory into this project */
   public String postMigrate(String body) {
     return call("post", "/migrate", body, "application/json");
   }

@@ -2,7 +2,7 @@
  * T2.8 Validate, the end-to-end half.
  *
  * "Generated specs for the fixtures run under Playwright Test with two shards
- * and the HTML reporter; Svatah `results.jsonl` produced alongside; retries
+ * and the HTML reporter; Yam `results.jsonl` produced alongside; retries
  * disabled unless permitted (test)."
  *
  * The generated spec is run in a *child* Playwright Test process, because that
@@ -16,7 +16,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, 
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { canonicalJson, type StepResult } from "@svatah/schema";
+import { canonicalJson, type StepResult } from "@svatah/yam-schema";
 import { startSampleApp, type SampleServer } from "sample-web";
 import { generateSpecs } from "../src/index.js";
 import { compiledPlan, PROJECT } from "./compile.js";
@@ -118,7 +118,7 @@ async function runPlaywright(
 
   const child = spawn(process.execPath, [PLAYWRIGHT_CLI, "test", ...args], {
     cwd: dir,
-    env: { ...environment, SVATAH_BINDINGS: join(PROJECT, "bindings"), ...env },
+    env: { ...environment, YAM_BINDINGS: join(PROJECT, "bindings"), ...env },
   });
 
   let output = "";
@@ -131,10 +131,10 @@ async function runPlaywright(
   return { status, output };
 }
 
-test("a generated spec runs under Playwright Test and writes Svatah results", async () => {
+test("a generated spec runs under Playwright Test and writes Yam results", async () => {
   test.setTimeout(180_000);
 
-  const runs = mkdtempSync(join(tmpdir(), "svatah-runs-"));
+  const runs = mkdtempSync(join(tmpdir(), "yam-runs-"));
   const dir = scaffold({ runsDir: runs });
   await writePlan(dir);
 
@@ -145,7 +145,7 @@ test("a generated spec runs under Playwright Test and writes Svatah results", as
   /* The runner's own report is produced, unchanged. */
   expect(existsSync(join(dir, "html", "index.html"))).toBe(true);
 
-  /* And the Svatah results alongside it (REQ-RUN-12). */
+  /* And the Yam results alongside it (REQ-RUN-12). */
   const runDir = join(runs, "host-run");
   const results = readFileSync(join(runDir, "results.jsonl"), "utf8")
     .trim()
@@ -173,7 +173,7 @@ test("the second story reads what the first captured, because the worker owns th
   // `Check the heading` asserts on `{Sign in.heading}`. If the fixture were
   // test-scoped rather than worker-scoped, that reference would read nothing and
   // the second story would fail.
-  const runs = mkdtempSync(join(tmpdir(), "svatah-runs-"));
+  const runs = mkdtempSync(join(tmpdir(), "yam-runs-"));
   const dir = scaffold({ runsDir: runs });
   await writePlan(dir);
 
@@ -192,7 +192,7 @@ test("the second story reads what the first captured, because the worker owns th
 test("runs under two shards, and the two halves together are the whole run", async () => {
   test.setTimeout(240_000);
 
-  const dir = scaffold({ runsDir: mkdtempSync(join(tmpdir(), "svatah-runs-")) });
+  const dir = scaffold({ runsDir: mkdtempSync(join(tmpdir(), "yam-runs-")) });
   await writePlan(dir);
 
   // Sharding is per *file*, and this flow is one file, so one shard runs it and
@@ -215,13 +215,13 @@ test("runs under two shards, and the two halves together are the whole run", asy
 test("a failing step fails the Playwright test, with the failure class in the message", async () => {
   test.setTimeout(180_000);
 
-  const runs = mkdtempSync(join(tmpdir(), "svatah-runs-"));
+  const runs = mkdtempSync(join(tmpdir(), "yam-runs-"));
   const dir = scaffold({ runsDir: runs });
   const planPath = await writePlan(dir);
 
   // Point one binding at an element that is not there. The step then fails the
   // way a real locator failure does, which is the path worth testing.
-  const broken = mkdtempSync(join(tmpdir(), "svatah-bindings-"));
+  const broken = mkdtempSync(join(tmpdir(), "yam-bindings-"));
   mkdirSync(join(broken, "login"), { recursive: true });
   for (const name of readdirSync(join(PROJECT, "bindings", "login"))) {
     const text = readFileSync(join(PROJECT, "bindings", "login", name), "utf8");
@@ -232,7 +232,7 @@ test("a failing step fails the Playwright test, with the failure class in the me
     );
   }
 
-  const result = await runPlaywright(dir, [], { SVATAH_BINDINGS: broken, SVATAH_PLAN: planPath });
+  const result = await runPlaywright(dir, [], { YAM_BINDINGS: broken, YAM_PLAN: planPath });
   const output = result.output;
 
   expect(result.status).not.toBe(0);

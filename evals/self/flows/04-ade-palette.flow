@@ -6,7 +6,7 @@
 #   * "⌘K is a keystroke to the *application*, and `Press` targets an element
 #     (pattern 11). A chord sent to the window with no target is a sentence the
 #     language does not have."
-#   * "a geometry assertion at two window widths, and Svatah cannot resize a
+#   * "a geometry assertion at two window widths, and Yam cannot resize a
 #     desktop window: `app.launch` has no size and no `resize` action exists."
 #
 # Both were wrong about the first and right about the second. `Press "Meta+k"`
@@ -32,7 +32,7 @@
 #
 # ## The number in the file name
 #
-# `svatah run` executes a project's `test:` blocks in file order and one session
+# `yam run` executes a project's `test:` blocks in file order and one session
 # serves the whole run, so `99-` — the flow that quits — stays last.
 
 story: the command palette opens on the chord and lists the registry's actions

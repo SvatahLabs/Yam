@@ -5,11 +5,11 @@ import { predicateSchema, surfaceActionSchema } from "./ir.js";
 /**
  * Wire shapes for the agent surface (LLD §2).
  *
- * They live in `@svatah/schema` rather than in `@svatah/surface` for two reasons:
+ * They live in `@svatah/yam-schema` rather than in `@svatah/yam-surface` for two reasons:
  * HLD §7 publishes them as `packages/schema/json/surface.*.schema.json`, and the
  * dependency graph runs `schema ◄── surface`, so putting the shapes at the bottom
  * lets the checkpoint and result schemas embed `SessionState` without inverting it.
- * `@svatah/surface` re-exports these and adds the interface, registry and errors.
+ * `@svatah/yam-surface` re-exports these and adds the interface, registry and errors.
  */
 
 /** Opaque above the surface: `"r12"` style, stable within one snapshot (LLD §2.2). */

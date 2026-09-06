@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { CANDIDATE_KINDS, SURFACE_ACTIONS } from "@svatah/schema";
+import { CANDIDATE_KINDS, SURFACE_ACTIONS } from "@svatah/yam-schema";
 import {
   CAPABILITY_FLAGS,
   ROLE_MAPS,

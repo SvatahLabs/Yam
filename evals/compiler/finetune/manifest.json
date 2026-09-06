@@ -24,7 +24,7 @@
     }
   ],
   "pairs": 184,
-  "shape": "modelStepSchema (@svatah/compiler raw-schema.ts) — the shape a Tier 2 answer has",
+  "shape": "modelStepSchema (@svatah/yam-compiler raw-schema.ts) — the shape a Tier 2 answer has",
   "promptVersion": "c2-1",
   "excluded": {
     "golden": 0,

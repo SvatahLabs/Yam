@@ -12,13 +12,13 @@
  * Phase 3's screens each called the generated client and attributed each value
  * to the route it came from, and this file read the sources for both. Phase 10's
  * screens do not call anything: a screen is a function of a `ScreenState` that
- * `@svatah/screens` loaded, and the ADE is one of its two renderers (§13.7). So
+ * `@svatah/yam-screens` loaded, and the ADE is one of its two renderers (§13.7). So
  * the rule is now checkable in a harder form —
  *
  *   1. **no screen reaches the network at all**: no `fetch`, no `EventSource`,
  *      no `client.` call outside the shell, which is the one file that holds a
  *      client and hands it to the model;
- *   2. **every screen's props are a state type from `@svatah/screens`**, so a
+ *   2. **every screen's props are a state type from `@svatah/yam-screens`**, so a
  *      value it draws is one the model produced;
  *   3. **every screen id has a body**, so a screen cannot exist in the model and
  *      be unreachable in the application;
@@ -29,7 +29,7 @@ import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { SCREEN_IDS } from "@svatah/screens";
+import { SCREEN_IDS } from "@svatah/yam-screens";
 import { ENDPOINTS } from "../src/renderer/client.generated.js";
 
 const ADE = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -106,14 +106,14 @@ describe("the ADE renders the model and nothing else (T3.7, T10.1, T10.2)", () =
       /*
        * The imports, not the whole file: what is checked is where a screen's
        * `…State` types *come from*, and every one of them has to come from
-       * `@svatah/screens`. A screen with a state type of its own would be a
+       * `@svatah/yam-screens`. A screen with a state type of its own would be a
        * screen with a value the other renderer cannot show.
        */
       const imported = screen.source.slice(0, screen.source.indexOf("export function"));
       const states = [...imported.matchAll(/\b(\w+State)\b/g)].map((one) => one[1]!);
       expect(states.length, `${screen.name} imports no screen state`).toBeGreaterThan(0);
       expect(imported, `${screen.name} does not import from the model`).toContain(
-        'from "@svatah/screens"',
+        'from "@svatah/yam-screens"',
       );
       // And it declares none of its own.
       const body = screen.source.slice(screen.source.indexOf("export function"));
@@ -141,9 +141,9 @@ describe("the ADE renders the model and nothing else (T3.7, T10.1, T10.2)", () =
 /**
  * The endpoints LLD §13.6's screen table names are reached (REQ-ADE-3).
  *
- * By the *model* now: `@svatah/screens`'s `load()` and the action registry are
+ * By the *model* now: `@svatah/yam-screens`'s `load()` and the action registry are
  * the only things in this system that call the service, and the ADE and
- * `svatah ui` both go through them. Reading the model's sources rather than the
+ * `yam ui` both go through them. Reading the model's sources rather than the
  * ADE's is the same check one layer down, and it covers both renderers at once.
  */
 describe("the endpoints the screens exercise (REQ-ADE-3, LLD §13.6)", () => {
@@ -241,7 +241,7 @@ describe("the Record screen's gateway choice (P5-F2, REQ-ADE-4, LLD §13.6)", ()
     expect(literals.length).toBeGreaterThan(0);
     for (const literal of literals) {
       expect(literal, `advice reads: ${literal}`).not.toMatch(/--[a-z]/);
-      expect(literal, `advice reads: ${literal}`).not.toMatch(/\bsvatah [a-z]+/);
+      expect(literal, `advice reads: ${literal}`).not.toMatch(/\byam [a-z]+/);
     }
   });
 });

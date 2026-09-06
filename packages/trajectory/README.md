@@ -1,4 +1,4 @@
-# @svatah/trajectory
+# @svatah/yam-trajectory
 
 Trajectory capture and compile to proposals.
 

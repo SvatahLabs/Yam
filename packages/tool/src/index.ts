@@ -1,5 +1,5 @@
 /**
- * @svatah/tool
+ * @svatah/yam-tool
  *
  * The tool behavior (REQ-BEH-3, REQ-AUTO-6, 8, LLD §13.3): selected stories
  * exposed over MCP as deterministic tools.

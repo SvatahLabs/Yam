@@ -1,5 +1,5 @@
 /**
- * `@svatah/ui-tokens` — the design tokens (T9.2, REQ-ADE-12, LLD §13.7).
+ * `@svatah/yam-ui-tokens` — the design tokens (T9.2, REQ-ADE-12, LLD §13.7).
  *
  * > Dark-first with a light theme, IBM Plex Sans and IBM Plex Mono (OFL), one
  * > lavender accent for chrome and focus, five status colours (pass, fail, skip,
@@ -13,9 +13,9 @@
  *
  *   * `tokens.css` — generated from here by `scripts/write-css.mjs`, so the two
  *     cannot drift and a test can assert that the themes differ only in tokens;
- *   * `@svatah/ui` — a component that needs a status colour asks for the token,
+ *   * `@svatah/yam-ui` — a component that needs a status colour asks for the token,
  *     never for `#4fc48a`;
- *   * `@svatah/tui` — a terminal has no CSS variables, and renders the same
+ *   * `@svatah/yam-tui` — a terminal has no CSS variables, and renders the same
  *     status set as ANSI colours from the same names.
  *
  * ## Why the light theme is a second table and not a filter
@@ -160,7 +160,7 @@ export const THEMES: Readonly<Record<Theme, Readonly<Record<TokenName, string>>>
  * > five status colours […] that never appear without a word or glyph beside
  * > them.
  *
- * The rule is enforced in `@svatah/ui`: `Pill` takes a label and refuses an
+ * The rule is enforced in `@svatah/yam-ui`: `Pill` takes a label and refuses an
  * empty one. This table is what a renderer maps a status onto, so a terminal
  * and a browser call the same outcome the same thing.
  */
@@ -174,7 +174,7 @@ export interface StatusStyle {
   readonly soft: TokenName | "bg3";
   /** The glyph the terminal and the editor gutter use, beside the word. */
   readonly glyph: string;
-  /** The ANSI colour `svatah ui` renders it in; the terminal has no tokens. */
+  /** The ANSI colour `yam ui` renders it in; the terminal has no tokens. */
   readonly ansi: "green" | "red" | "gray" | "cyan" | "yellow" | "blue" | "white";
 }
 
@@ -283,7 +283,7 @@ export function stylesheet(): string {
 
   return [
     "/*",
-    " * GENERATED FILE — do not edit. `pnpm --filter @svatah/ui-tokens build` writes it",
+    " * GENERATED FILE — do not edit. `pnpm --filter @svatah/yam-ui-tokens build` writes it",
     " * from `src/index.ts`, which is the one place the values live (T9.2, REQ-ADE-12).",
     " *",
     " * Dark-first: `:root` is the dark theme and `[data-theme=\"light\"]` overrides every",

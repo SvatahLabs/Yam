@@ -49,15 +49,15 @@
  * carried over from the legacy suite. Every one of them is in
  * `evals/fixtures/bindings`, beside the element it means, so they are read from
  * there rather than invented: the case set gets the wording a real project uses,
- * and `svatah record --gateway fake` can record the fixtures from it.
+ * and `yam record --gateway fake` can record the fixtures from it.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, PAGES, VARIANTS, GROUND_TRUTH_ATTRIBUTE } from "sample-web";
-import { PlaywrightSurface } from "@svatah/adapter-playwright";
-import { BindingsStore } from "@svatah/bindings";
-import { isInteractiveRole } from "@svatah/surface";
+import { PlaywrightSurface } from "@svatah/yam-adapter-playwright";
+import { BindingsStore } from "@svatah/yam-bindings";
+import { isInteractiveRole } from "@svatah/yam-surface";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outArg = process.argv.indexOf("--out");
@@ -89,8 +89,8 @@ const cases = [];
 /**
  * Phrases the fake gateway can answer but the eval cannot score.
  *
- * Written beside the cases as `fixture-answers.jsonl`. `svatah record --gateway
- * fake` reads both; `svatah eval grounding` reads only the cases, so a phrase
+ * Written beside the cases as `fixture-answers.jsonl`. `yam record --gateway
+ * fake` reads both; `yam eval grounding` reads only the cases, so a phrase
  * that cannot be checked can never flatter or drag a published number.
  */
 const answers = [];
@@ -268,7 +268,7 @@ try {
          * and the fixtures bind two of them. The eval cannot check such an
          * answer, so scoring it would put a permanently unreachable case in
          * REQ-REC-10's denominator — a rigged threshold, not a hard case. But
-         * `svatah record --gateway fake` still has to be able to answer the
+         * `yam record --gateway fake` still has to be able to answer the
          * phrase, or the fixtures cannot be recorded without a credential. So it
          * goes in the answer book and not in the case set.
          */

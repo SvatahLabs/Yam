@@ -25,7 +25,7 @@ import { parse, type HTMLElement } from "node-html-parser";
  *   variant *adds* has no key, which is exactly right: relocalizing onto it is a
  *   miss.
  * * **Nothing above the surface can see it.** `bindings.ignoreAttributes`
- *   defaults to `["data-svatah-eval"]`, and the adapter strips the attribute
+ *   defaults to `["data-yam-eval"]`, and the adapter strips the attribute
  *   from `describe()` and from `native` before anything else looks. The eval
  *   reads it with a page script instead, going around the surface rather than
  *   through it. Otherwise the label would be the best locator on the page and
@@ -33,7 +33,7 @@ import { parse, type HTMLElement } from "node-html-parser";
  */
 
 /** The attribute LLD §16 names. Also `bindings.ignoreAttributes`' default. */
-export const GROUND_TRUTH_ATTRIBUTE = "data-svatah-eval";
+export const GROUND_TRUTH_ATTRIBUTE = "data-yam-eval";
 
 /**
  * Elements that get a key: everything the surface reports as interactive
@@ -91,7 +91,7 @@ function hint(element: HTMLElement): string {
 }
 
 /**
- * Stamp `data-svatah-eval` on every interactive element of a baseline document.
+ * Stamp `data-yam-eval` on every interactive element of a baseline document.
  *
  * Idempotent: an element that already carries a key keeps it, so stamping twice
  * — or stamping a document a variant has already touched — cannot renumber

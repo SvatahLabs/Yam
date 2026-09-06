@@ -1,4 +1,4 @@
-package dev.svatah.runtime;
+package com.svatah.yam.runtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URI;

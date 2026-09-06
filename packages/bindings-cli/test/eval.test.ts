@@ -1,5 +1,5 @@
 /**
- * `svatah eval <suite>` (T1.8, LLD §15).
+ * `yam eval <suite>` (T1.8, LLD §15).
  *
  * The healing suite itself drives a browser and is run by `pnpm eval:healing`;
  * its committed output is checked in `tools/repo-checks/test/reports.test.ts`.
@@ -15,7 +15,7 @@ function capture(): CommandIo & { stdout: string[]; stderr: string[] } {
   return { stdout, stderr, out: (t) => stdout.push(t), err: (t) => stderr.push(t) };
 }
 
-describe("svatah eval", () => {
+describe("yam eval", () => {
   it("needs a suite", async () => {
     const io = capture();
     expect(await main(["eval"], io)).toBe(EXIT.usage);

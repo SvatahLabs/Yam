@@ -125,7 +125,7 @@ describe("the Flows screen against the fixtures project (the `Main` artboard)", 
     /*
      * And the flow the `comp` run was about carries that run's outcome.
      *
-     * `svatah run --story <name>` writes `summary.flows` keyed `(selected)`
+     * `yam run --story <name>` writes `summary.flows` keyed `(selected)`
      * rather than by the file, so a list that matched on the key alone said
      * "not run" beside a run that had just happened. The stories the run's
      * results name belong to a file, and that is the flow the row is about.
@@ -136,7 +136,7 @@ describe("the Flows screen against the fixtures project (the `Main` artboard)", 
     /*
      * And the last run as an *instant* (P9-F4, Draft 2.12 §13.7). "run 4 min
      * ago" is the renderer's; a state that carried it would be a different
-     * value every second, which is what made `svatah ui --json` unequal to a
+     * value every second, which is what made `yam ui --json` unequal to a
      * second load of the same screen.
      */
     expect(guards.lastRunAt).toMatch(/^\d{4}-\d\d-\d\dT/);
@@ -426,7 +426,7 @@ describe("the other ten screens against the fixtures project", () => {
     };
     const byLabel = Object.fromEntries(state.rows.map((one) => [one.label, one.value]));
     // T10.2 groups the rows; the labels within a group are what the screen says.
-    expect(byLabel["Name"]).toBe("svatah-fixtures");
+    expect(byLabel["Name"]).toBe("yam-fixtures");
     expect(byLabel["Adapter"]).toBe("playwright");
     // A boolean, never the key (REQ-NFR-6, REQ-ADE-4).
     expect(["available", "none"]).toContain(byLabel["Model credential"]);

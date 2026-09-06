@@ -83,7 +83,7 @@ const agentsScreen: Screen<AgentsState> = {
           `${(tools.tools?.refused ?? []).length} refused`,
           plural((tools.invocations ?? []).length, "invocation"),
         ),
-        "`svatah tool serve` exposes them over MCP",
+        "`yam tool serve` exposes them over MCP",
       ),
       screen: "agents",
       tools: exposed.map((one) => ({
@@ -213,7 +213,7 @@ const apiScreen: Screen<ApiState> = {
         "api",
         "API",
         dotted(plural(requests.length, "named request"), "api/*.yaml"),
-        selected ?? "`svatah run` calls them from a flow",
+        selected ?? "`yam run` calls them from a flow",
       ),
       screen: "api",
       requests: requests.map((one) => ({
@@ -258,7 +258,7 @@ export interface DataRow {
   /** The value, or — for a secret — the variable it is read from. */
   readonly value: string;
   readonly secret: boolean;
-  /** `${SVATAH_SAMPLE_PASSWORD}` → the name, when the value is an indirection. */
+  /** `${YAM_SAMPLE_PASSWORD}` → the name, when the value is an indirection. */
   readonly reads?: string;
   readonly kind: Pill;
   readonly selected: boolean;
@@ -551,7 +551,7 @@ const importScreen: Screen<ImportState> = {
       ...sources.base(
         "import",
         "Import prototype database",
-        "Reads a Svatah ADE prototype's electron-db into the open project",
+        "Reads a Yam ADE prototype's electron-db into the open project",
         project.root ?? "",
       ),
       screen: "import",

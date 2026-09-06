@@ -26,10 +26,10 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import type { StepResult } from "@svatah/schema";
+import type { StepResult } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 
 let app: SampleServer;
 const projects: string[] = [];
@@ -84,13 +84,13 @@ const binding = (id: string, phrase: string, testId: string, tag: string): strin
 
 /** A project with one flow: answer the confirm one way, then the other. */
 function scaffold(flow?: readonly string[]): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-dialog-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-dialog-"));
   projects.push(dir);
   mkdirSync(join(dir, "flows"), { recursive: true });
   mkdirSync(join(dir, "bindings", "widgets"), { recursive: true });
 
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
+    join(dir, "yam.config.yaml"),
     `schemaVersion: "1.0.0"\napp:\n  baseUrl: "${app.origin}"\n`,
     "utf8",
   );
@@ -141,7 +141,7 @@ const audit = (project: string, runId: string): AuditLine[] => {
 function cli(args: readonly string[], cwd: string): Promise<{ code: number; output: string }> {
   return new Promise((done) => {
     let output = "";
-    const child = spawn(process.execPath, [SVATAH, ...args], { cwd });
+    const child = spawn(process.execPath, [YAM, ...args], { cwd });
     child.stdout.on("data", (chunk) => (output += String(chunk)));
     child.stderr.on("data", (chunk) => (output += String(chunk)));
     child.on("close", (code) => done({ code: code ?? 1, output }));
@@ -154,7 +154,7 @@ const results = (project: string, runId: string): StepResult[] => {
 };
 
 beforeAll(async () => {
-  if (!existsSync(SVATAH)) throw new Error("Run `pnpm -r build` first.");
+  if (!existsSync(YAM)) throw new Error("Run `pnpm -r build` first.");
   app = await startSampleApp(0);
 }, 120_000);
 
@@ -241,7 +241,7 @@ describe("pattern 21 against /widgets, end to end (T7.3, LLD §3.2)", () => {
      * which is the only way the rule can be tested, and the only way it can stop
      * being true by accident.
      */
-    const { PlaywrightSurface } = await import("@svatah/adapter-playwright");
+    const { PlaywrightSurface } = await import("@svatah/yam-adapter-playwright");
     const surface = new PlaywrightSurface({ browser: "chromium", headless: true });
     await surface.open({ baseUrl: app.origin });
     try {

@@ -8,7 +8,7 @@
  *
  * Refs: REQ-SURF-1, REQ-SURF-4, LLD §2.2, §7.1.
  */
-import { snapshotSchema } from "@svatah/schema";
+import { snapshotSchema } from "@svatah/yam-schema";
 import {
   parseAiSnapshot,
   playwrightMechanismAvailable,

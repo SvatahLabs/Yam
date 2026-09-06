@@ -1,16 +1,16 @@
-# `svatah repl`
+# `yam repl`
 
 One sentence at a time against an open session, appended to a session flow and
 bindings (REQ-RUN-11, LLD §15).
 
 ```bash
-svatah repl                                    # the project in the current directory
-svatah repl . --base-url http://127.0.0.1:4173
-svatah repl . --headless --gateway fake        # what the tests do
+yam repl                                    # the project in the current directory
+yam repl . --base-url http://127.0.0.1:4173
+yam repl . --headless --gateway fake        # what the tests do
 ```
 
 ```
-svatah repl — playwright at http://127.0.0.1:4173
+yam repl — playwright at http://127.0.0.1:4173
   grounding through anthropic:claude-opus-5
   .help for the commands, .exit to write the flow and stop
 
@@ -24,7 +24,7 @@ The login button should be visible
 wrote flows/repl-2026-09-03T20-10-49-480.flow (3 step(s))
 ```
 
-That file is the point. It is an ordinary flow: `svatah run` replays it, with no
+That file is the point. It is an ordinary flow: `yam run` replays it, with no
 model in the loop, and the elements its sentences name are in the bindings store
 where the rest of the toolchain reads them.
 
@@ -33,10 +33,10 @@ where the rest of the toolchain reads them.
 Nothing here is a second implementation, which is the only reason a REPL is
 trustworthy at all:
 
-1. **Compiled** by the same compiler `svatah compile` uses — Tier 0, then the
+1. **Compiled** by the same compiler `yam compile` uses — Tier 0, then the
    grammar, then the model tiers if `--tier2` or `--tier3` asked for them.
 2. **Grounded**, if it names an element nothing has recorded, by the same
-   `ground()` `svatah record` uses.
+   `ground()` `yam record` uses.
 3. **Performed** by the same `runStep()` the executor uses, against the open
    session.
 4. **Appended** to the flow if it passed.
@@ -76,14 +76,14 @@ REPL grounds it once and remembers it for the rest of the session.
 it is grounded, so the next sentence can use it, and the store is saved on
 `.save` or `.exit`. A binding is *kept* only when the step it was grounded for
 passed, and rolled back when it did not — REQ-REC-5's "unverified bindings never
-reach disk" holds here exactly as it does for `svatah record`.
+reach disk" holds here exactly as it does for `yam record`.
 
 ## Options
 
 | | |
 |---|---|
 | `--adapter <name>` | override `config.adapter`: `playwright`, `bidi`, `appium` |
-| `--base-url <url>` | where the session opens. Then `SVATAH_BASE_URL`, then `config.app` (LLD §15) |
+| `--base-url <url>` | where the session opens. Then `YAM_BASE_URL`, then `config.app` (LLD §15) |
 | `--storage-state <path>` | a session to inject, so the REPL starts signed in |
 | `--headless` | headed by default, because a REPL is something a person watches |
 | `--gateway anthropic\|fake\|none` | as above |
@@ -98,10 +98,10 @@ Most exploration starts behind a login. Two ways:
 
 ```bash
 # A session recorded once and reused.
-svatah repl . --storage-state .svatah/signed-in.json
+yam repl . --storage-state .yam/signed-in.json
 
 # Or sign in in the REPL, and let the flow it writes include the sign-in.
-svatah repl .
+yam repl .
 ```
 
 The second is usually what you want: the flow that comes out is one that can run
@@ -110,5 +110,5 @@ from nothing.
 ## What it is not
 
 It does not compile a plan, run a flow, or write a run directory. A REPL session
-is exploration; `svatah run` is the thing with results, an audit log and an exit
+is exploration; `yam run` is the thing with results, an audit log and an exit
 code. What connects them is the file the session leaves behind.

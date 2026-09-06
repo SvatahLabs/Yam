@@ -4,7 +4,7 @@
  * ## Where these came from, exactly
  *
  * `node scripts/record-desktop-tree.mjs --shape uia --screen <name>` launches the real ADE with
- * `SVATAH_A11Y=1`, opens `evals/fixtures` **through the ADE's own Recent-project
+ * `YAM_A11Y=1`, opens `evals/fixtures` **through the ADE's own Recent-project
  * button**, clicks the screen's tab, and reads Chromium's accessibility tree
  * over the DevTools protocol — roles, names, values, DOM ids, boxes — mapping it
  * into the `UiaNode` shape this adapter consumes: `ControlType`, `Name`,

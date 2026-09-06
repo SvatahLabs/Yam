@@ -21,8 +21,8 @@
  *
  * Everything operates on `surface.describe()` output, so it works on any adapter.
  */
-import type { ElementDescription, Fingerprint, Ref } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+import type { ElementDescription, Fingerprint, Ref } from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 import { fingerprintOf } from "./synthesis.js";
 
 /** The weights of LLD §6.4. They sum to 1. */

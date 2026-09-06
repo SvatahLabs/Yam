@@ -1,7 +1,7 @@
 /*
- * `@svatah/ui`'s stylesheet (T9.2, REQ-ADE-12, LLD §13.7).
+ * `@svatah/yam-ui`'s stylesheet (T9.2, REQ-ADE-12, LLD §13.7).
  *
- * Every rule below reads a token from `@svatah/ui-tokens` and never a colour.
+ * Every rule below reads a token from `@svatah/yam-ui-tokens` and never a colour.
  * That is what makes T9.2's "the two themes differ only in tokens" true rather
  * than aspirational: no rule here selects on a theme, and
  * `packages/ui/test/theme.test.ts` fails if one starts to.

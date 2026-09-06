@@ -1,13 +1,13 @@
-# `@svatah/tui`
+# `@svatah/yam-tui`
 
-`svatah ui` — the terminal cockpit, and the second renderer of the screen model
+`yam ui` — the terminal cockpit, and the second renderer of the screen model
 (REQ-TUI-1, LLD §13.7).
 
 ```console
-$ svatah ui                                  # the cockpit, on the current project
-$ svatah ui --screen run --run comp          # opened on one run
-$ svatah ui --json                           # the model's state, and nothing drawn
-$ svatah ui --capture 4000 > panes.txt       # draw for four seconds, then quit
+$ yam ui                                  # the cockpit, on the current project
+$ yam ui --screen run --run comp          # opened on one run
+$ yam ui --json                           # the model's state, and nothing drawn
+$ yam ui --capture 4000 > panes.txt       # draw for four seconds, then quit
 ```
 
 Four numbered panes — tree, main, inspector, audit — with `1`–`4` to focus one,
@@ -17,7 +17,7 @@ tmux; it runs in any terminal.
 
 ## It renders the model and adds nothing
 
-Everything a person reads here is a `ScreenState` from `@svatah/screens`, loaded
+Everything a person reads here is a `ScreenState` from `@svatah/yam-screens`, loaded
 by the same `load()` the ADE calls. Every key runs an `Action` from the same
 registry the ADE's ⌘K shows, resolved by the same id.
 `tools/repo-checks/test/palette-parity.test.ts` holds the two renderers to that.
@@ -27,7 +27,7 @@ That is what `--json` is for: it prints the loaded screen and draws nothing, and
 with `screenById("run").load(client, { runId: "comp" })` evaluated in another
 process. A cockpit that had massaged a number for the terminal would fail it.
 
-Colour comes from `@svatah/ui-tokens`'s `STATUS` table, by the same names the
+Colour comes from `@svatah/yam-ui-tokens`'s `STATUS` table, by the same names the
 browser uses: a terminal has no CSS variables, and it has the same seven tones.
 A status word never appears without its colour and a colour never without its
 word.
@@ -35,7 +35,7 @@ word.
 ## Opening a service
 
 Exactly as the ADE does (LLD §13.6): `--url`/`--token`, or
-`SVATAH_SERVICE_URL`/`SVATAH_SERVICE_TOKEN`, or else `svatah serve --port 0` is
+`YAM_SERVICE_URL`/`YAM_SERVICE_TOKEN`, or else `yam serve --port 0` is
 spawned, its handshake read, and it is stopped on exit.
 
 ## `--capture <ms>`

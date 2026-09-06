@@ -24,8 +24,8 @@
  * page it is looking at is incomplete and can answer null instead of picking the
  * closest surviving line.
  */
-import type { Snapshot, SnapshotNode } from "@svatah/schema";
-import { estimateTokens, isInteractiveRole, renderSnapshot } from "@svatah/surface";
+import type { Snapshot, SnapshotNode } from "@svatah/yam-schema";
+import { estimateTokens, isInteractiveRole, renderSnapshot } from "@svatah/yam-surface";
 
 /** Roles that give an element its address rather than being the answer. */
 export const STRUCTURAL_ROLES: ReadonlySet<string> = new Set([

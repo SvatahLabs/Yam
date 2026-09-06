@@ -2,7 +2,7 @@
  * The desktop healing cases, against the ADE's recorded variant trees
  * (T7.1, P6-F3, Draft 2.8 LLD §16, REQ-HEAL-5, REQ-ADE-6).
  *
- * > the ADE gains `SVATAH_A11Y_VARIANT=1|2`, where variant 1 renames one screen
+ * > the ADE gains `YAM_A11Y_VARIANT=1|2`, where variant 1 renames one screen
  * > tab and one button on the Project screen and variant 2 moves the Record
  * > screen's gateway control into a different panel; a binding recorded at
  * > variant 0 must relocalize on both through the desktop adapter with the same
@@ -11,7 +11,7 @@
  * T6.1 asked for this and Phase 6 shipped without it and without a deviation
  * (Phase 6 verification, F3). This is the part of it that runs anywhere: the
  * published healing cases, the real runner, the real `relocalize` from
- * `@svatah/bindings` with its own weights and threshold, and both desktop
+ * `@svatah/yam-bindings` with its own weights and threshold, and both desktop
  * adapters — driven against the trees `scripts/record-desktop-tree.mjs` recorded
  * from the real ADE at variants 0, 1 and 2.
  *
@@ -23,7 +23,7 @@
  *
  * ## Why this test lives in `cli`
  *
- * It needs the relocalizer *and* a desktop adapter. `@svatah/bindings-cli` may
+ * It needs the relocalizer *and* a desktop adapter. `@svatah/yam-bindings-cli` may
  * reach only the Playwright adapter (LLD §1), and an adapter may not reach the
  * bindings store — `cli` is the one package the boundaries let hold both, which
  * is the same reason it is the only place that registers adapters. The recorded
@@ -35,16 +35,16 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { fingerprint, relocalize } from "@svatah/bindings";
+import { fingerprint, relocalize } from "@svatah/yam-bindings";
 import {
   DESKTOP_HEALING_CASES,
   runSurfaceConformance,
   type DesktopHealing,
   type RecordedElement,
-} from "@svatah/conformance";
-import { AxSurface, type AxBridge, type AxWindow } from "@svatah/adapter-ax";
-import { UiaSurface, type UiaBridge, type UiaWindow } from "@svatah/adapter-uia";
-import type { AgentSurface } from "@svatah/surface";
+} from "@svatah/yam-conformance";
+import { AxSurface, type AxBridge, type AxWindow } from "@svatah/yam-adapter-ax";
+import { UiaSurface, type UiaBridge, type UiaWindow } from "@svatah/yam-adapter-uia";
+import type { AgentSurface } from "@svatah/yam-surface";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const fixtures = (adapter: "ax" | "uia"): string =>
@@ -77,8 +77,8 @@ function axSurface(file: string): AgentSurface {
       return {
         usable: true,
         state: "usable",
-        owners: ["Svatah ADE"],
-        detail: "1 application(s) own a window: Svatah ADE",
+        owners: ["Yam ADE"],
+        detail: "1 application(s) own a window: Yam ADE",
         advice: "recorded",
       };
     },
@@ -90,7 +90,7 @@ function axSurface(file: string): AgentSurface {
     },
     async screenshot() {},
   };
-  return new AxSurface({ processName: "Svatah ADE", bridge });
+  return new AxSurface({ processName: "Yam ADE", bridge });
 }
 
 function uiaSurface(file: string): AgentSurface {
@@ -104,7 +104,7 @@ function uiaSurface(file: string): AgentSurface {
     async perform() {},
     async screenshot() {},
   };
-  return new UiaSurface({ processName: "Svatah ADE", bridge });
+  return new UiaSurface({ processName: "Yam ADE", bridge });
 }
 
 /**
@@ -159,7 +159,7 @@ async function pass(
     healing: healingFor(variant, state),
     openSurface: async () => {
       const surface = open(join(fixtures(adapter), `${screen}.json`));
-      await surface.open({ kind: "desktop", processName: "Svatah ADE" } as never);
+      await surface.open({ kind: "desktop", processName: "Yam ADE" } as never);
       return surface;
     },
   });
@@ -219,7 +219,7 @@ for (const [adapter, open] of [
         variant: 1,
         openSurface: async () => {
           const surface = open(join(fixtures(adapter), "ade-flows-v1.json"));
-          await surface.open({ kind: "desktop", processName: "Svatah ADE" } as never);
+          await surface.open({ kind: "desktop", processName: "Yam ADE" } as never);
           return surface;
         },
       });

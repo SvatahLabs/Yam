@@ -1,5 +1,5 @@
 /**
- * T2.8 — `svatah host generate` and the retry policy (REQ-RUN-12, LLD §9.1).
+ * T2.8 — `yam host generate` and the retry policy (REQ-RUN-12, LLD §9.1).
  *
  * The generated spec is what makes a flow a thing Playwright Test can discover,
  * so what it says matters as much as that it exists: a serial describe, one test
@@ -16,7 +16,7 @@ const plan = await compiledPlan();
 
 test.describe("host generate", () => {
   test("writes one spec per flow, with one test per story in order", async () => {
-    const out = mkdtempSync(join(tmpdir(), "svatah-specs-"));
+    const out = mkdtempSync(join(tmpdir(), "yam-specs-"));
     const specs = generateSpecs({ plan, outDir: out, importFrom: "../../src/index.js" });
 
     expect(specs).toHaveLength(1);
@@ -50,7 +50,7 @@ test.describe("host generate", () => {
   test("writes no file for a flow whose run block is empty", async () => {
     // An empty spec is a test file Playwright reports as having no tests, which
     // reads like a configuration problem rather than an empty flow.
-    const out = mkdtempSync(join(tmpdir(), "svatah-specs-"));
+    const out = mkdtempSync(join(tmpdir(), "yam-specs-"));
     generateSpecs({ plan: { ...plan, runs: { "flows/empty.flow": [] } }, outDir: out });
     expect(readdirSync(out)).toEqual([]);
   });

@@ -1,7 +1,7 @@
 /*
  * The Java client's smoke script (T9.3, REQ-SDK-2).
  *
- *   javac -d <out> clients/java/src/main/java/dev/svatah/sdk/GeneratedClient.java \
+ *   javac -d <out> clients/java/src/main/java/com/svatah/yam/sdk/GeneratedClient.java \
  *                  clients/java/Smoke.java
  *   java -cp <out> Smoke
  *
@@ -13,7 +13,7 @@
  * that could do the first and not the third would pass a test that never
  * watched a run.
  *
- * `scripts/smoke-clients.mjs` starts `svatah serve` and passes its url and
+ * `scripts/smoke-clients.mjs` starts `yam serve` and passes its url and
  * token in the environment; this compiles with `javac` alone and pulls nothing
  * from a repository, so the smoke path has no network in it.
  *
@@ -23,7 +23,7 @@
  * testing the parser.
  */
 
-import dev.svatah.sdk.GeneratedClient;
+import com.svatah.yam.sdk.GeneratedClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -31,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 
 public final class Smoke {
   public static void main(String[] args) throws Exception {
-    String url = env("SVATAH_SERVICE_URL");
-    String token = env("SVATAH_SERVICE_TOKEN");
+    String url = env("YAM_SERVICE_URL");
+    String token = env("YAM_SERVICE_TOKEN");
     GeneratedClient client = new GeneratedClient(url, token);
 
     /* 1. `GET /project` — the read every screen starts from. */
@@ -76,14 +76,14 @@ public final class Smoke {
     Thread.sleep(500);
 
     /* 3. `POST /run` — a write that starts work and reports on the stream. */
-    String story = System.getenv("SVATAH_SMOKE_STORY");
+    String story = System.getenv("YAM_SMOKE_STORY");
     String body = story == null ? "{}" : "{\"stories\":[\"" + story.replace("\"", "\\\"") + "\"]}";
     String started = client.postRun(body);
     String runId = string(started, "runId");
     if (runId == null) fail("POST /run answered no runId: " + trim(started));
     System.out.println("POST /run         started " + runId);
 
-    long timeout = Long.parseLong(System.getenv().getOrDefault("SVATAH_SMOKE_TIMEOUT", "180"));
+    long timeout = Long.parseLong(System.getenv().getOrDefault("YAM_SMOKE_TIMEOUT", "180"));
     if (!finished.await(timeout, TimeUnit.SECONDS)) {
       fail("no run.summary within " + timeout + " s; saw " + seen.size() + " event(s)");
     }
@@ -112,7 +112,7 @@ public final class Smoke {
     if (value == null || value.isEmpty()) {
       fail(
           name
-              + " is not set. Start a service with `svatah serve --project <dir>` and export the "
+              + " is not set. Start a service with `yam serve --project <dir>` and export the "
               + "url and token it prints. The SDK never reads a model credential (LLD 13.8).");
     }
     return value;

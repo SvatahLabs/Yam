@@ -1,8 +1,8 @@
 # Builder surfaces — design source (Draft 2.11)
 
-The approved mockups for the ADE redesign, the `svatah ui` terminal cockpit, and the design system beneath both. Reviewed and approved by the owner on 2026-09-05 on the design canvas: https://claude.ai/code/artifact/62b56432-b5c4-4226-9c37-444f6fa134f8
+The approved mockups for the ADE redesign, the `yam ui` terminal cockpit, and the design system beneath both. Reviewed and approved by the owner on 2026-09-05 on the design canvas: https://claude.ai/code/artifact/62b56432-b5c4-4226-9c37-444f6fa134f8
 
-- `base.css` — the tokens, type ramp, and component styles every artboard shares. This is the seed of `@svatah/ui-tokens`.
+- `base.css` — the tokens, type ramp, and component styles every artboard shares. This is the seed of `@svatah/yam-ui-tokens`.
 - `artboards/*.html` — one file per screen: Main (Flows), RecordReview, Run, Results, HealReview, Bindings, Agents, Palette, TUI, Tokens, Secondary. `@@TOPBAR`, `@@SIDEBAR`, `@@STATUS` are expanded by `build.mjs`.
 - `canvas.json` — the layout and the notes that were on the canvas.
 

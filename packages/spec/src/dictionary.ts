@@ -17,7 +17,7 @@
  *   the *same* phrase in two steps produce the *same* id, and therefore one
  *   binding rather than two.
  *
- * The dictionary does not import the bindings store: `@svatah/spec` is module
+ * The dictionary does not import the bindings store: `@svatah/yam-spec` is module
  * (b) and the store is module (a) (LLD §1). It takes ids and phrases as data,
  * which also means the service and the ADE can build one from anything.
  */
@@ -39,7 +39,7 @@ export type TargetScope = "page" | "dialog" | "frame" | "desktop" | "window";
 export interface DictionaryEntry {
   readonly id: string;
   readonly phrases: readonly string[];
-  /** Where the entry came from, for `svatah bindings list` and diagnostics. */
+  /** Where the entry came from, for `yam bindings list` and diagnostics. */
   readonly source: "bindings" | "targets" | "inferred";
   /**
    * The element's scope, when the project declared one.
@@ -177,7 +177,7 @@ export class TargetDictionary {
    * Resolve, and produce the diagnostic the resolution deserves.
    *
    * `W_AMBIGUOUS_TARGET` is a warning: the compile succeeds, the plan names one
-   * of the ids, and `svatah lint` says which phrase needs a decision
+   * of the ids, and `yam lint` says which phrase needs a decision
    * (REQ-COMP-8).
    */
   resolveWithDiagnostic(

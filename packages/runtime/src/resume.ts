@@ -2,7 +2,7 @@
  * Resuming an interrupted run (REQ-AUTO-3, LLD §8.1, T5.1).
  *
  * ```
- * svatah run --resume <runId> --from <stepId>
+ * yam run --resume <runId> --from <stepId>
  * ```
  *
  * "Continues a flow from a checkpoint with the same plan and bindings hash;
@@ -29,7 +29,7 @@
  * could detect. Exit 12 and a message naming which hash moved is the only honest
  * answer (LLD §15).
  */
-import type { Checkpoint, Plan, Story } from "@svatah/schema";
+import type { Checkpoint, Plan, Story } from "@svatah/yam-schema";
 import { readCheckpoint } from "./results.js";
 
 /** The plan or the bindings moved under a checkpoint (LLD §15, exit 12). */
@@ -115,7 +115,7 @@ export function planResume(options: {
       `There is no checkpoint before "${options.from}" in ${options.runDir}. ` +
         (at === 0
           ? "It is the first step of the flow, so there is nothing to resume from: " +
-            "`svatah run` without --resume is the same thing."
+            "`yam run` without --resume is the same thing."
           : "The run may have been started with `run.checkpoints: false`, or it stopped " +
             "before reaching this step."),
     );

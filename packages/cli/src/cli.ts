@@ -1,5 +1,5 @@
 /**
- * The `svatah` command line (LLD §15).
+ * The `yam` command line (LLD §15).
  *
  * Phase 1 built the commands module (a) needs — `surface conform`, `bindings`,
  * `heal`, `eval healing`. Phase 2 adds module (b)'s: `compile`, `lint`, `run`
@@ -7,8 +7,8 @@
  * which task builds it rather than printing a bare "unknown command", because
  * "not yet" and "never" are different answers.
  *
- * Commands are imported lazily. `svatah bindings list` should not pay for
- * loading the compiler, and `svatah --help` should not load anything at all.
+ * Commands are imported lazily. `yam bindings list` should not pay for
+ * loading the compiler, and `yam --help` should not load anything at all.
  */
 import {
   EXIT,
@@ -18,74 +18,74 @@ import {
   type CommandIo,
   type ExitCode,
   type ParsedArgs,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 import { ConfigError } from "./config-error.js";
 
 /** Commands LLD §15 lists that are not built yet, and what builds them. */
 const LATER: Record<string, string> = {};
 
-const USAGE = `svatah — a deterministic automation runtime with a standard agent surface
+const USAGE = `yam — a deterministic automation runtime with a standard agent surface
 
 Flows (module b):
 
-  svatah init [dir] [--force]
-  svatah lint [dir] [--json]
-  svatah compile [dir] [--stable] [--out .svatah/plan.json] [--json]
+  yam init [dir] [--force]
+  yam lint [dir] [--json]
+  yam compile [dir] [--stable] [--out .yam/plan.json] [--json]
                  [--tier2] [--tier3] [--allow-model-drift]
-  svatah record [dir] [--flow <file>] [--story <name>] [--rebind] [--headed]
+  yam record [dir] [--flow <file>] [--story <name>] [--rebind] [--headed]
                 [--base-url <url>] [--storage-state <path.json>]
                 [--gateway anthropic|fake] [--input k=v] [--force-production] [--json]
-  svatah run [dir] [--host playwright|none] [--flow <file>] [--story <name>]
+  yam run [dir] [--host playwright|none] [--flow <file>] [--story <name>]
              [--base-url <url>] [--storage-state <path.json>] [--input k=v]
              [--resume <runId> --from <stepId>]
              [--workers <n>] [--headed] [--out runs] [--run-id <id>] [--json]
-  svatah host generate [dir] [--out .svatah/specs]
-  svatah migrate <src> <dest> [--keep-original] [--json]
-  svatah migrate <dest> --from-ade <electron-db dir> [--project <name>]
-  svatah doctor [dir] [--json]
-  svatah serve [dir] [--port 0] [--token <t>]
-  svatah ui [dir] [--screen flows|run] [--flow <file>] [--run <id>] [--story <name>]
+  yam host generate [dir] [--out .yam/specs]
+  yam migrate <src> <dest> [--keep-original] [--json]
+  yam migrate <dest> --from-ade <electron-db dir> [--project <name>]
+  yam doctor [dir] [--json]
+  yam serve [dir] [--port 0] [--token <t>]
+  yam ui [dir] [--screen flows|run] [--flow <file>] [--run <id>] [--story <name>]
             [--url <url>] [--token <t>] [--json] [--capture <ms>]
-  svatah repl [dir] [--adapter <name>] [--base-url <url>] [--headless]
+  yam repl [dir] [--adapter <name>] [--base-url <url>] [--headless]
               [--gateway anthropic|fake|none] [--tier2] [--tier3]
               [--out <flows>] [--name <flow name>] [--json]
-  svatah workflow run <story> [dir] [--input k=v] [--allow-side-effects]
+  yam workflow run <story> [dir] [--input k=v] [--allow-side-effects]
                               [--base-url <url>] [--storage-state <path.json>]
                               [--headed] [--resume <runId> --from <stepId>]
                               [--out runs] [--run-id <id>] [--json]
-  svatah tool serve [dir] [--expose "Story one,Story two"] [--stdio]
+  yam tool serve [dir] [--expose "Story one,Story two"] [--stdio]
                     [--base-url <url>] [--storage-state <path.json>]
                     [--headed] [--allow-side-effects] [--out runs] [--json]
-  svatah mcp [dir] [--trajectory <path.jsonl>] [--session <id>]
-  svatah trajectory compile <trajectory.jsonl> [dir] [--name "Story name"]
+  yam mcp [dir] [--trajectory <path.jsonl>] [--session <id>]
+  yam trajectory compile <trajectory.jsonl> [dir] [--name "Story name"]
                             [--out proposals] [--app proposed] [--json]
 
 Bindings and healing (module a):
 
-  svatah surface conform --adapter <name> [--base-url <url>] [--headed] [--only <ids>]
+  yam surface conform --adapter <name> [--base-url <url>] [--headed] [--only <ids>]
                          [--report <path.md>] [--json]
-  svatah bindings list [--dir <bindings>] [--json]
-  svatah bindings show <id> [--dir <bindings>] [--json]
-  svatah bindings verify [--adapter <name>] [--base-url <url>] [--id <id>] [--json]
-  svatah bindings prune [--used-in <dirs>] [--apply] [--json]
-  svatah heal --from-bind-failures | --run <id> [--project <dir>]
-              [--dir <bindings>] [--out <.svatah>] [--runs <runs>]
+  yam bindings list [--dir <bindings>] [--json]
+  yam bindings show <id> [--dir <bindings>] [--json]
+  yam bindings verify [--adapter <name>] [--base-url <url>] [--id <id>] [--json]
+  yam bindings prune [--used-in <dirs>] [--apply] [--json]
+  yam heal --from-bind-failures | --run <id> [--project <dir>]
+              [--dir <bindings>] [--out <.yam>] [--runs <runs>]
               [--base-url <url>] [--storage-state <path.json>]
               [--input k=v] [--apply] [--no-model] [--headed] [--json]
-  svatah eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
-  svatah surface doctor [--adapter ax|uia] [--json]
-  svatah eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
+  yam eval healing [--no-model] [--base-url <url>] [--report <path.md>] [--json]
+  yam surface doctor [--adapter ax|uia] [--json]
+  yam eval grounding [--gateway anthropic|fake] [--base-url <url>] [--cases <path.jsonl>]
                         [--limit <n>] [--report <path.md>] [--json]
-  svatah eval finetune corpus [--json]
-  svatah eval finetune export [--out <path.jsonl>] [--json]
-  svatah eval self [--update] [--report <path.md>] [--only <check-id>]
-                   [--side svatah|external]
-  svatah eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
+  yam eval finetune corpus [--json]
+  yam eval finetune export [--out <path.jsonl>] [--json]
+  yam eval self [--update] [--report <path.md>] [--only <check-id>]
+                   [--side yam|external]
+  yam eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
                        [--only tier1,tier2] [--report <path.md>] [--json]
 
 Every command that opens a session takes its base URL and storage state from
-the --base-url / --storage-state flag, then SVATAH_BASE_URL /
-SVATAH_STORAGE_STATE, then config.app, in that order (LLD §15).
+the --base-url / --storage-state flag, then YAM_BASE_URL /
+YAM_STORAGE_STATE, then config.app, in that order (LLD §15).
 
 Exit codes are the table in LLD §15.
 `;
@@ -108,13 +108,13 @@ async function registerModelRegrounder(args: ParsedArgs, io: CommandIo): Promise
 
   try {
     const { credentialInEnvironment, anthropicGateway, DiskCache } = await import(
-      "@svatah/gateway"
+      "@svatah/yam-gateway"
     );
     if (!credentialInEnvironment()) return;
 
     const { loadProject } = await import("./project.js");
-    const { registerRegrounder } = await import("@svatah/healer");
-    const { recorderRegrounder } = await import("@svatah/recorder");
+    const { registerRegrounder } = await import("@svatah/yam-healer");
+    const { recorderRegrounder } = await import("@svatah/yam-recorder");
 
     const root = typeof args.options["project"] === "string" ? args.options["project"] : ".";
     const loaded = await loadProject(root).catch(() => undefined);
@@ -124,7 +124,7 @@ async function registerModelRegrounder(args: ParsedArgs, io: CommandIo): Promise
       recorderRegrounder({
         gateway: anthropicGateway({
           model: loaded.config.record.model,
-          cache: new DiskCache(`${loaded.root}/.svatah/model-cache`),
+          cache: new DiskCache(`${loaded.root}/.yam/model-cache`),
           onCall: (line) => io.err(`      ${line}`),
         }),
         maxSnapshotTokens: loaded.config.record.maxSnapshotTokens,
@@ -145,7 +145,7 @@ async function registerModelRegrounder(args: ParsedArgs, io: CommandIo): Promise
 }
 
 /**
- * Prepare `svatah heal --run <id>`: the replayer, and where the flow starts.
+ * Prepare `yam heal --run <id>`: the replayer, and where the flow starts.
  *
  * Two things the project knows and module (a) does not.
  *
@@ -167,7 +167,7 @@ async function prepareRunHeal(args: ParsedArgs, io: CommandIo): Promise<ParsedAr
   try {
     const { loadProject } = await import("./project.js");
     const { registerRuntimeReplayer } = await import("./replayer.js");
-    const { BindingsStore, resolve: resolveBinding } = await import("@svatah/bindings");
+    const { BindingsStore, resolve: resolveBinding } = await import("@svatah/yam-bindings");
 
     const root = typeof args.options["project"] === "string" ? args.options["project"] : ".";
     const loaded = await loadProject(root);
@@ -176,7 +176,7 @@ async function prepareRunHeal(args: ParsedArgs, io: CommandIo): Promise<ParsedAr
     /*
      * The failing stories' inputs (Draft 2.6, LLD §10).
      *
-     * `--input k=v` and `SVATAH_INPUT_<NAME>`, read by the same function `run`
+     * `--input k=v` and `YAM_INPUT_<NAME>`, read by the same function `run`
      * reads them with. Replaying the prefix of a story that types
      * `{input.password}` needs the password, and the run recorded only its name
      * — a secret never reaches a run directory (REQ-NFR-6), so the caller
@@ -208,7 +208,7 @@ async function prepareRunHeal(args: ParsedArgs, io: CommandIo): Promise<ParsedAr
     /*
      * The project root, so `sessionTarget` can read `config.app` as the last of
      * LLD §15's three sources. Injecting the *values* here — what Phase 3 did —
-     * would make them look like flags and beat `SVATAH_BASE_URL`, which is the
+     * would make them look like flags and beat `YAM_BASE_URL`, which is the
      * defect F2 names.
      */
     return { ...args, options: { project: loaded.root, ...args.options } };
@@ -224,9 +224,9 @@ async function prepareRunHeal(args: ParsedArgs, io: CommandIo): Promise<ParsedAr
 /**
  * Register every adapter this build ships (LLD §1).
  *
- * Lazily and best-effort: `svatah lint` should not pay for loading a browser
+ * Lazily and best-effort: `yam lint` should not pay for loading a browser
  * protocol client, and an adapter that fails to load is a reason for
- * `--adapter <that one>` to fail, not for `svatah bindings list` to.
+ * `--adapter <that one>` to fail, not for `yam bindings list` to.
  */
 async function registerEveryAdapter(io: CommandIo): Promise<void> {
   try {
@@ -249,17 +249,17 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
   }
 
   /*
-   * Module (a)'s commands first, from `@svatah/bindings-cli` (Draft 2.3).
+   * Module (a)'s commands first, from `@svatah/yam-bindings-cli` (Draft 2.3).
    *
-   * One implementation behind two executables: `svatah bindings list` and
-   * `svatah-bindings bindings list` are the same function, so they cannot drift
+   * One implementation behind two executables: `yam bindings list` and
+   * `yam-bindings bindings list` are the same function, so they cannot drift
    * apart, and someone who installed module (a) alone still has a command line.
    */
   /*
-   * `svatah heal --run <id>` replays the story to the failing step, which needs
+   * `yam heal --run <id>` replays the story to the failing step, which needs
    * the executor. The healer cannot import it (module (a), REQ-PKG-1), so the
    * CLI registers a runtime-backed `Replayer` first (LLD §10, Draft 2.3).
-   * `svatah-bindings heal --from-bind-failures` has no runtime and keeps module
+   * `yam-bindings heal --from-bind-failures` has no runtime and keeps module
    * (a)'s session-state default, which is the right answer for a bind failure.
    */
   /*
@@ -283,7 +283,7 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
    * `eval self` is the parity gate (T11.5, REQ-SELF-2, LLD §13.9, §15).
    *
    * Module (b)'s, and not because of a dependency: it *spawns* every other
-   * source — `svatah run`, a Playwright suite, a vitest file, a script — and
+   * source — `yam run`, a Playwright suite, a vitest file, a script — and
    * compares their verdicts. It needs nothing from an adapter, which is why it
    * sits above them all.
    */
@@ -314,12 +314,12 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
   /*
    * Every adapter, before module (a)'s commands run (LLD §1, REQ-SURF-2).
    *
-   * `svatah surface conform --adapter bidi` and `svatah bindings verify
+   * `yam surface conform --adapter bidi` and `yam bindings verify
    * --adapter bidi` are module (a) commands mounted here, and module (a)'s own
    * registration knows only Playwright — it is what a plain Playwright user
    * installs, and the other adapters are not in its dependency tree. Registering
-   * from here is what makes the whole adapter set reachable under `svatah` while
-   * `svatah-bindings` stays module (a).
+   * from here is what makes the whole adapter set reachable under `yam` while
+   * `yam-bindings` stays module (a).
    */
   await registerEveryAdapter(io);
 
@@ -328,7 +328,7 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
    *
    * The rest of `surface` is module (a)'s, and module (a) has neither desktop
    * adapter in its dependency tree — so the one subcommand that has to reach
-   * them is answered here, and `svatah-bindings surface doctor` correctly says
+   * them is answered here, and `yam-bindings surface doctor` correctly says
    * it does not know it.
    */
   if (command === "surface" && args.command[1] === "doctor") {
@@ -390,7 +390,7 @@ async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Pro
       io.err(
         task === undefined
           ? `Unknown command "${command}".\n\n${USAGE}`
-          : `\`svatah ${command}\` is not built yet; it arrives with ${task} (see docs/spec/tasks.md).`,
+          : `\`yam ${command}\` is not built yet; it arrives with ${task} (see docs/spec/tasks.md).`,
       );
       return EXIT.usage;
     }

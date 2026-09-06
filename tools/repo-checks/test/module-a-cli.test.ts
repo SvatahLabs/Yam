@@ -1,5 +1,5 @@
 /**
- * T2.12 — `@svatah/bindings-cli` is module (a), and is a command line
+ * T2.12 — `@svatah/yam-bindings-cli` is module (a), and is a command line
  * (REQ-PKG-1, 2, HLD §12, LLD §1, Draft 2.3).
  *
  * The point of the package is that someone who installed module (a) alone — the
@@ -10,7 +10,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { fromRoot } from "../src/repo.js";
+import { fromRoot, dirOf } from "../src/repo.js";
 
 interface Manifest {
   bin?: Record<string, string>;
@@ -41,12 +41,12 @@ const MODULE_B = [
   "cli",
 ];
 
-describe("@svatah/bindings-cli (T2.12)", () => {
-  it("declares the svatah-bindings executable", () => {
+describe("@svatah/yam-bindings-cli (T2.12)", () => {
+  it("declares the yam-bindings executable", () => {
     // The whole reason the package exists. A `bin` that is missing means module
     // (a) installs and then has no command line.
     const bin = manifest("bindings-cli").bin;
-    expect(bin?.["svatah-bindings"]).toBe("./dist/bin.js");
+    expect(bin?.["yam-bindings"]).toBe("./dist/bin.js");
   });
 
   it("publishes what the executable needs", () => {
@@ -62,9 +62,8 @@ describe("@svatah/bindings-cli (T2.12)", () => {
       const m = manifest(current);
       for (const field of ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"] as const) {
         for (const specifier of Object.keys(m[field] ?? {})) {
-          const match = /^@svatah\/([^/]+)$/.exec(specifier);
-          if (match === null) continue;
-          const next = match[1]!;
+          const next = dirOf(specifier);
+          if (next === undefined) continue;
           if (seen.has(next) || !existsSync(fromRoot("packages", next, "package.json"))) continue;
           seen.add(next);
           queue.push(next);
@@ -80,17 +79,17 @@ describe("@svatah/bindings-cli (T2.12)", () => {
     // in front of this comment.
     const dependencies = Object.keys(manifest("bindings-cli").dependencies ?? {}).sort();
     expect(dependencies.filter((name) => name.startsWith("@svatah/"))).toEqual([
-      "@svatah/adapter-playwright",
-      "@svatah/bindings",
-      "@svatah/conformance",
-      "@svatah/healer",
-      "@svatah/schema",
-      "@svatah/surface",
+      "@svatah/yam-adapter-playwright",
+      "@svatah/yam-bindings",
+      "@svatah/yam-conformance",
+      "@svatah/yam-healer",
+      "@svatah/yam-schema",
+      "@svatah/yam-surface",
     ]);
 
     /*
      * `yaml` is the third-party half, and there is exactly one of it: Draft 2.5
-     * moves `svatah.config.yaml` loading here, because LLD §15's base-URL
+     * moves `yam.config.yaml` loading here, because LLD §15's base-URL
      * precedence is "applied identically by every command that opens a session"
      * and three of those commands — `bindings verify`, `surface conform`,
      * `eval` — are module (a)'s. A second config reader beside it is how the two
@@ -99,11 +98,11 @@ describe("@svatah/bindings-cli (T2.12)", () => {
     expect(dependencies.filter((name) => !name.startsWith("@svatah/"))).toEqual(["yaml"]);
   });
 
-  it("is what @svatah/cli mounts, rather than a second implementation", () => {
+  it("is what @svatah/yam mounts, rather than a second implementation", () => {
     // One implementation behind two executables. If the CLI re-implemented these
-    // commands, `svatah bindings list` and `svatah-bindings bindings list` would
+    // commands, `yam bindings list` and `yam-bindings bindings list` would
     // drift apart, which is exactly what a user would never expect.
-    expect(manifest("cli").dependencies?.["@svatah/bindings-cli"]).toBeDefined();
+    expect(manifest("cli").dependencies?.["@svatah/yam-bindings-cli"]).toBeDefined();
     const cliSource = readFileSync(fromRoot("packages", "cli", "src", "cli.ts"), "utf8");
     expect(cliSource).toContain("runBindingsCommand");
 
@@ -118,7 +117,7 @@ describe("@svatah/bindings-cli (T2.12)", () => {
     expect(existsSync(join(commands, "eval-grounding.ts"))).toBe(true);
 
     for (const moved of ["bindings.ts", "heal.ts", "surface.ts", "eval.ts"]) {
-      expect(existsSync(join(commands, moved)), `${moved} is still in @svatah/cli`).toBe(false);
+      expect(existsSync(join(commands, moved)), `${moved} is still in @svatah/yam`).toBe(false);
     }
   });
 });
@@ -127,7 +126,7 @@ describe("the healer's Replayer plugin (LLD §10, §12, Draft 2.3)", () => {
   it("the healer defines it and does not import the runtime", () => {
     const m = manifest("healer");
     for (const field of ["dependencies", "devDependencies", "peerDependencies"] as const) {
-      expect(Object.keys(m[field] ?? {})).not.toContain("@svatah/runtime");
+      expect(Object.keys(m[field] ?? {})).not.toContain("@svatah/yam-runtime");
     }
     expect(existsSync(fromRoot("packages", "healer", "src", "replayer.ts"))).toBe(true);
   });

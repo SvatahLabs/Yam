@@ -1,5 +1,5 @@
 /**
- * `svatah doctor` (REQ-AGT-1, LLD §15).
+ * `yam doctor` (REQ-AGT-1, LLD §15).
  *
  * Answers "why did that not work" before it is asked. Every check reports what
  * it found and what to do about it, because a diagnostic that only says "failed"
@@ -7,12 +7,12 @@
  */
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { listAdapters } from "@svatah/surface";
+import { listAdapters } from "@svatah/yam-surface";
 import { registerAllAdapters } from "../adapters.js";
-import { boolOption, type ParsedArgs } from "@svatah/bindings-cli";
-import { EXIT, type ExitCode } from "@svatah/bindings-cli";
+import { boolOption, type ParsedArgs } from "@svatah/yam-bindings-cli";
+import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
 import { CONFIG_FILES, loadProject } from "../project.js";
-import type { CommandIo } from "@svatah/bindings-cli";
+import type { CommandIo } from "@svatah/yam-bindings-cli";
 
 interface Check {
   readonly name: string;
@@ -31,7 +31,7 @@ export async function doctorCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
     name: "Node",
     ok: Number(major) >= 22,
     detail: `v${process.versions.node}`,
-    fix: "Svatah targets Node 22 LTS (REQ-NFR-7).",
+    fix: "Yam targets Node 22 LTS (REQ-NFR-7).",
   });
 
   registerAllAdapters();
@@ -47,7 +47,7 @@ export async function doctorCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
     name: "config",
     ok: configFile !== undefined,
     detail: configFile ?? "none — using the defaults",
-    fix: "`svatah init` writes one. The defaults work, but they are not your project.",
+    fix: "`yam init` writes one. The defaults work, but they are not your project.",
   });
 
   try {
@@ -62,7 +62,7 @@ export async function doctorCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
         stories === 0
           ? `no stories under ${loaded.config.flows.dir}/`
           : `${loaded.project.flows.length} file(s), ${stories} stories, ${errors.length} error(s)`,
-      fix: stories === 0 ? "`svatah init` writes an example flow." : "`svatah lint` says what is wrong.",
+      fix: stories === 0 ? "`yam init` writes an example flow." : "`yam lint` says what is wrong.",
     });
 
     const bindings = existsSync(join(root, loaded.config.bindings.dir));
@@ -70,7 +70,7 @@ export async function doctorCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
       name: "bindings",
       ok: bindings,
       detail: bindings ? loaded.config.bindings.dir : "none",
-      fix: "Record them: `svatah record`, or `SVATAH_MODE=record` in a Playwright test.",
+      fix: "Record them: `yam record`, or `YAM_MODE=record` in a Playwright test.",
     });
 
     checks.push({

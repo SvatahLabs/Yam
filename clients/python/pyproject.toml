@@ -1,4 +1,4 @@
-# `svatah-sdk` on PyPI (REQ-SDK-2, LLD §13.8).
+# `svatah-yam` on PyPI (REQ-SDK-2, LLD §13.8).
 #
 # Generated from the service's OpenAPI description by
 # `node scripts/generate-clients.mjs`, published from the same pipeline as the
@@ -13,14 +13,14 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "svatah-sdk"
+name = "svatah-yam"
 version = "0.1.0"
-description = "Typed client for the Svatah local service, generated from its OpenAPI description"
+description = "Typed client for the Yam local service, generated from its OpenAPI description"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache-2.0" }
 authors = [{ name = "Atul Sharma" }]
-keywords = ["svatah", "automation", "testing", "agent"]
+keywords = ["yam", "automation", "testing", "agent"]
 classifiers = [
   "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
@@ -29,7 +29,7 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/a-t-u-l/svatah"
+Homepage = "https://github.com/SvatahLabs/yam"
 
 [tool.setuptools]
-packages = ["svatah_sdk"]
+packages = ["svatah_yam"]

@@ -6,7 +6,7 @@
  * a real application, read as `test/recorded.ts` describes.
  */
 import { describe, expect, it } from "vitest";
-import { AX_ROLE_MAP, isInteractiveRole } from "@svatah/surface";
+import { AX_ROLE_MAP, isInteractiveRole } from "@svatah/yam-surface";
 import {
   automationIdOf,
   childIndex,
@@ -156,7 +156,7 @@ describe("automationId (LLD §3.3, §7.5)", () => {
     /*
      * And there is exactly one node called "Gateway" now (T10.3): the `<label
      * for>` is the control's accessible *name* rather than a second named node
-     * beside it, which is what `@svatah/ui`'s `Chooser` gives every select. A
+     * beside it, which is what `@svatah/yam-ui`'s `Chooser` gives every select. A
      * binding on the name resolves to one element, which is what the resolver's
      * exactly-one rule wants.
      */
@@ -209,7 +209,7 @@ describe("the snapshot shape (LLD §2.2)", () => {
     const budgeted = convertTree(nodesOf("project"), {
       maxNodes: 20,
       interactiveOnly: false,
-      windowTitle: "Svatah ADE",
+      windowTitle: "Yam ADE",
     });
     expect(budgeted).toHaveLength(20);
     expect(budgeted[0]!.role).toBe("window");
@@ -219,21 +219,21 @@ describe("the snapshot shape (LLD §2.2)", () => {
 describe("controlPath (LLD §3.3, §7.5)", () => {
   it("starts at the window title", () => {
     const nodes = convert("record");
-    expect(nodes[0]!.controlPath).toBe("Window[Svatah ADE]");
-    expect(nodes.every((node) => node.controlPath.startsWith("Window[Svatah ADE]"))).toBe(true);
+    expect(nodes[0]!.controlPath).toBe("Window[Yam ADE]");
+    expect(nodes.every((node) => node.controlPath.startsWith("Window[Yam ADE]"))).toBe(true);
   });
 
   it("addresses a named element by its name and an anonymous one by its index", () => {
     const raw: AxNode[] = [
-      { parent: -1, role: "AXWindow", title: "Svatah ADE" },
+      { parent: -1, role: "AXWindow", title: "Yam ADE" },
       { parent: 0, role: "AXGroup" },
       { parent: 0, role: "AXGroup" },
       { parent: 2, role: "AXButton", title: "Stop recording" },
     ];
     const children = childIndex(raw);
-    expect(controlPathOf(raw, 2, children, "Svatah ADE")).toBe("Window[Svatah ADE]/AXGroup[1]");
-    expect(controlPathOf(raw, 3, children, "Svatah ADE")).toBe(
-      "Window[Svatah ADE]/AXGroup[1]/AXButton[Stop recording]",
+    expect(controlPathOf(raw, 2, children, "Yam ADE")).toBe("Window[Yam ADE]/AXGroup[1]");
+    expect(controlPathOf(raw, 3, children, "Yam ADE")).toBe(
+      "Window[Yam ADE]/AXGroup[1]/AXButton[Stop recording]",
     );
   });
 

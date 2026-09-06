@@ -32,21 +32,21 @@
  */
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { planSchema, type Plan, type Story } from "@svatah/schema";
-import type { HealInput, Replayer, ReplayContext, ReplayOutcome } from "@svatah/healer";
-import { reachedRecordedPage, registerReplayer } from "@svatah/healer";
-import { runStory, Scope, type Resolver } from "@svatah/runtime";
-import type { AgentSurface } from "@svatah/surface";
+import { planSchema, type Plan, type Story } from "@svatah/yam-schema";
+import type { HealInput, Replayer, ReplayContext, ReplayOutcome } from "@svatah/yam-healer";
+import { reachedRecordedPage, registerReplayer } from "@svatah/yam-healer";
+import { runStory, Scope, type Resolver } from "@svatah/yam-runtime";
+import type { AgentSurface } from "@svatah/yam-surface";
 
 export interface RuntimeReplayerOptions {
-  /** The project root, for finding `.svatah/plan.json`. */
+  /** The project root, for finding `.yam/plan.json`. */
   readonly root: string;
   /** Resolves a target, the same resolver the run used. */
   readonly resolve: Resolver;
   /**
    * The plan, when the caller already has it (T5.7).
    *
-   * `svatah heal --run` reads `.svatah/plan.json`, because a command line heals
+   * `yam heal --run` reads `.yam/plan.json`, because a command line heals
    * a project it has not just compiled. The local service *has* just compiled
    * it — `POST /heal` loads the project the same way `POST /compile` does — and
    * making it write a file as a side effect of healing would put a compile
@@ -92,10 +92,10 @@ export function runtimeReplayer(options: RuntimeReplayerOptions): Replayer {
       if (options.plan !== undefined) {
         plan = options.plan;
       } else {
-        const planPath = join(options.root, ".svatah", "plan.json");
+        const planPath = join(options.root, ".yam", "plan.json");
         if (!existsSync(planPath)) {
           options.onProgress?.(
-            `no plan at ${planPath}; run \`svatah compile\` before healing a run directory`,
+            `no plan at ${planPath}; run \`yam compile\` before healing a run directory`,
           );
           return "unreachable";
         }
@@ -128,7 +128,7 @@ export function runtimeReplayer(options: RuntimeReplayerOptions): Replayer {
        * The prefix of `I want to validate login` types `{input.email}` and
        * `{input.password}`; with an empty scope those two steps fail and the
        * replay reports `unreachable` for a reason that has nothing to do with
-       * the page. The values come from `--input` / `SVATAH_INPUT_<NAME>`,
+       * the page. The values come from `--input` / `YAM_INPUT_<NAME>`,
        * because the run recorded only their names — a secret is never written
        * into a run directory (REQ-NFR-6).
        */
@@ -137,7 +137,7 @@ export function runtimeReplayer(options: RuntimeReplayerOptions): Replayer {
        * Only what this story declares. `--input` is about the *run*, and a run
        * holds stories with different signatures; handing a story something it
        * never asked for is an error (`"X" has no input "y"`), and it would be a
-       * strange one to get while healing something else. `svatah run` filters
+       * strange one to get while healing something else. `yam run` filters
        * the same way for the same reason.
        */
       const inputs = Object.fromEntries(
@@ -156,7 +156,7 @@ export function runtimeReplayer(options: RuntimeReplayerOptions): Replayer {
             `${missing.map((name) => `"${name}"`).join(", ")} to replay the ${at} step(s) ` +
             `before ${input.stepId}, and ${missing.length === 1 ? "it was" : "they were"} ` +
             `not supplied. Pass --input ${first}=… or set ` +
-            `SVATAH_INPUT_${environmentName(first)}.`,
+            `YAM_INPUT_${environmentName(first)}.`,
         };
       }
 
@@ -226,12 +226,12 @@ function missingInputs(story: Story, supplied: Readonly<Record<string, unknown>>
     .sort();
 }
 
-/** `password` → `PASSWORD`, the way `SVATAH_INPUT_<NAME>` spells it. */
+/** `password` → `PASSWORD`, the way `YAM_INPUT_<NAME>` spells it. */
 function environmentName(name: string): string {
   return name.replace(/[^A-Za-z0-9]+/g, "_").toUpperCase();
 }
 
-/** Register it. `svatah heal --run <id>` calls this; nothing else does. */
+/** Register it. `yam heal --run <id>` calls this; nothing else does. */
 export function registerRuntimeReplayer(options: RuntimeReplayerOptions): void {
   registerReplayer(runtimeReplayer(options));
 }

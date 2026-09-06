@@ -1,11 +1,11 @@
 /**
- * @svatah/cli
+ * @svatah/yam
  *
- * The `svatah` command line (LLD §15) — the whole of it. Module (b)'s commands
+ * The `yam` command line (LLD §15) — the whole of it. Module (b)'s commands
  * live here (`compile`, `lint`, `run`, `host generate`, `migrate`, `init`,
- * `doctor`, `serve`); module (a)'s come from `@svatah/bindings-cli` and are
- * mounted under the same executable, so `svatah bindings list` and
- * `svatah-bindings bindings list` are the same function (Draft 2.3).
+ * `doctor`, `serve`); module (a)'s come from `@svatah/yam-bindings-cli` and are
+ * mounted under the same executable, so `yam bindings list` and
+ * `yam-bindings bindings list` are the same function (Draft 2.3).
  *
  * It registers every adapter, which is why the import-boundary lint lets it —
  * and only it, `bindings-cli` and the two Playwright hosts — import an
@@ -28,7 +28,7 @@ export {
   type ParsedArgs,
   type ExitCode,
   type CommandIo,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 
 export { registerAllAdapters } from "./adapters.js";
 
@@ -37,7 +37,7 @@ export { registerAllAdapters } from "./adapters.js";
  * same functions the CLI calls; no logic lives in the service").
  *
  * Exporting them is what makes that rule enforceable rather than aspirational:
- * `@svatah/service` may import this package and `@svatah/schema` and nothing
+ * `@svatah/yam-service` may import this package and `@svatah/yam-schema` and nothing
  * else, so a second implementation of `run` behind `POST /run` cannot compile.
  */
 export {
@@ -56,9 +56,9 @@ export { runProject, type RunProjectOptions } from "./commands/run.js";
  * to its failing step arrives as a plugin the CLI registers.
  */
 export { registerRuntimeReplayer, runtimeReplayer, type RuntimeReplayerOptions } from "./replayer.js";
-export { newRunId } from "@svatah/runtime";
+export { newRunId } from "@svatah/yam-runtime";
 
-/** `svatah record` and the fixture answers `--gateway fake` uses (T3.3). */
+/** `yam record` and the fixture answers `--gateway fake` uses (T3.3). */
 export { recordCommand } from "./commands/record.js";
 export { projectRunners, loadBindings, type ProjectRunnerOptions } from "./commands/run.js";
 export {
@@ -84,11 +84,11 @@ export {
   type ModelGroundingOptions,
 } from "./bind-grounding.js";
 
-/** `svatah eval grounding` — module (b)'s eval suite (T3.4). */
+/** `yam eval grounding` — module (b)'s eval suite (T3.4). */
 export { groundingEvalCommand } from "./commands/eval-grounding.js";
 
 /**
- * The functions `svatah serve` gives the local service beyond the first four
+ * The functions `yam serve` gives the local service beyond the first four
  * (T5.7, T5.8, LLD §13.5).
  *
  * Exported so the ADE's own tests can build a service wired exactly as the
@@ -116,7 +116,7 @@ export {
 export { TIER2_PROMPT_VERSION, TIER2_SYSTEM_PROMPT } from "./tiers/tier2.js";
 
 /**
- * `svatah eval self` — the two-sided parity gate, and the one rule about names
+ * `yam eval self` — the two-sided parity gate, and the one rule about names
  * that a repository check needs too (T11.5, P11-F2).
  *
  * `vitestCaseNames` is how a vitest case is addressed by a catalogue; the check

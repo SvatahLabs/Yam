@@ -38,7 +38,7 @@ describe("reports/eval-healing.md (REQ-HEAL-5, REQ-PKG-4)", () => {
    */
   it("says recovery was verified against the ground-truth element", () => {
     expect(report).toContain("ground-truth key");
-    expect(report).toContain("data-svatah-eval");
+    expect(report).toContain("data-yam-eval");
     expect(report).toContain("bindings.ignoreAttributes");
     expect(report).toContain("Relocalized onto the wrong element");
   });

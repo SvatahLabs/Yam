@@ -1,7 +1,7 @@
 /**
  * The gate leaves the tree alone unless asked not to (P11-F3, LLD §13.9).
  *
- * `svatah eval self` answers two of its checks by running scripts that write
+ * `yam eval self` answers two of its checks by running scripts that write
  * *committed* reports as a side effect: the healing eval writes
  * `reports/eval-healing.md`, the desktop gate writes `reports/adapter-ax.md`.
  * So a clean checkout was dirty after running the contract's own gate, and a
@@ -33,7 +33,7 @@ function dirtyReports(): string[] {
     .filter((one) => one.trim() !== "");
 }
 
-describe("`svatah eval self` writes its reports outside the tree (P11-F3)", () => {
+describe("`yam eval self` writes its reports outside the tree (P11-F3)", () => {
   it.runIf(existsSync(cli))(
     "runs a check and leaves reports/ exactly as it found it",
     () => {

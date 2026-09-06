@@ -7,7 +7,7 @@
  * correctly; that is the live gate `docs/spec/progress/phase-6.md` records.
  */
 import { describe, expect, it } from "vitest";
-import { ActionabilityError, LocateError, NavigationError, SessionError } from "@svatah/surface";
+import { ActionabilityError, LocateError, NavigationError, SessionError } from "@svatah/yam-surface";
 import { escapeSendKeys, sendKeysFor, UiaSurface, UIA_CAPABILITIES } from "../src/index.js";
 import { recordedBridge, type RecordedBridge } from "./recorded.js";
 
@@ -15,8 +15,8 @@ async function open(
   options: Parameters<typeof recordedBridge>[0] = {},
 ): Promise<{ surface: UiaSurface; bridge: RecordedBridge }> {
   const bridge = recordedBridge({ screen: "record", ...options });
-  const surface = new UiaSurface({ processName: "Svatah ADE", bridge });
-  await surface.open({ kind: "desktop", processName: "Svatah ADE" } as never);
+  const surface = new UiaSurface({ processName: "Yam ADE", bridge });
+  await surface.open({ kind: "desktop", processName: "Yam ADE" } as never);
   return { surface, bridge };
 }
 
@@ -31,7 +31,7 @@ describe("opening a session (REQ-ADP-6, LLD §7.5)", () => {
      * There is no permission to grant on Windows — which is the difference from
      * the AX adapter, and the reason the message says what it does. What can go
      * wrong is a constrained PowerShell, or a target at a higher integrity
-     * level than Svatah.
+     * level than Yam.
      */
     const bridge = recordedBridge({
       availability: {
@@ -39,10 +39,10 @@ describe("opening a session (REQ-ADP-6, LLD §7.5)", () => {
         advice: "`UIAutomationClient` would not load; check Constrained Language Mode.",
       },
     });
-    const surface = new UiaSurface({ processName: "Svatah ADE", bridge });
+    const surface = new UiaSurface({ processName: "Yam ADE", bridge });
     await expect(surface.open({ kind: "desktop" } as never)).rejects.toThrow(SessionError);
     await expect(surface.open({ kind: "desktop" } as never)).rejects.toThrow(
-      /not reachable \(unavailable\).*svatah surface doctor/s,
+      /not reachable \(unavailable\).*yam surface doctor/s,
     );
   });
 
@@ -79,7 +79,7 @@ describe("snapshot, locate and describe", () => {
     // The patterns are what `act` chooses from, so a report of a failed action
     // can say which one was available.
     expect(described.attrs["patterns"]).toContain("Value");
-    expect(described.native?.["controlPath"]).toContain("Window[Svatah ADE]");
+    expect(described.native?.["controlPath"]).toContain("Window[Yam ADE]");
     expect(described.rolePath[0]).toBe("window");
   });
 
@@ -209,7 +209,7 @@ describe("state and restore", () => {
   it("reports the window it is on, and restores by activating it", async () => {
     const { surface, bridge } = await open();
     const state = await surface.state();
-    expect(state).toEqual({ kind: "desktop", windowTitle: "Svatah ADE", windowIndex: 0 });
+    expect(state).toEqual({ kind: "desktop", windowTitle: "Yam ADE", windowIndex: 0 });
     await surface.restore(state);
     expect(bridge.commands.filter((one) => one.kind === "activate").length).toBeGreaterThan(1);
   });

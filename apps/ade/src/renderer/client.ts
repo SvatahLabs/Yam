@@ -24,7 +24,7 @@ import {
 
 export { ENDPOINTS, ServiceError, type ServiceConnection, type ServiceEndpoint };
 
-/** An event the service streams (`ServiceEvent` in `@svatah/schema`). */
+/** An event the service streams (`ServiceEvent` in `@svatah/yam-schema`). */
 export interface StreamedEvent {
   readonly kind: string;
   readonly runId?: string;

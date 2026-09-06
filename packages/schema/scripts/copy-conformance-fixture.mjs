@@ -2,7 +2,7 @@
  * Copy the runtime conformance fixture into the published package (T7.6,
  * REQ-STD-2, REQ-STD-3, LLD §14).
  *
- * > `@svatah/schema` with the JSON Schema files and the conformance fixtures
+ * > `@svatah/yam-schema` with the JSON Schema files and the conformance fixtures
  * > included.
  *
  * A third party writing a runtime downloads this package for two things: the

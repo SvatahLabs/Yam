@@ -39,7 +39,7 @@ entries:
           - "Overview Schedule Build Bookings Checkout Logout"
           - "Welcome back, Enterprise You have 3 active builds. Refresh count BuildStatus nightly-1042passed nightly-1043running nightly-1044queued"
         before:
-          - "Svatah Sample Menu Dashboard Book a slot Widgets Docs"
+          - "Yam Sample Menu Dashboard Book a slot Widgets Docs"
       rolePath:
         - "complementary"
       tag: "button"

@@ -1,5 +1,5 @@
 /**
- * `svatah migrate <src> <dest>` (REQ-LANG-11, LLD §15).
+ * `yam migrate <src> <dest>` (REQ-LANG-11, LLD §15).
  *
  * "`migrate` converts v1/v2 flows, `.locator`, and `.data` files into v3 flows, a
  * seed bindings store, and `data.yaml`, preserving names and step order."
@@ -20,7 +20,7 @@
  */
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, extname, join, relative, sep } from "node:path";
-import { canonicalYaml } from "@svatah/schema";
+import { canonicalYaml } from "@svatah/yam-schema";
 import { parseLocatorFile, seedBinding, type MigratedLocator } from "./locators.js";
 import { migrateData } from "./data.js";
 import { readLegacyFlow, type LegacyFlow } from "./v2.js";
@@ -185,7 +185,7 @@ function convertFlow(
   notes: ReviewNote[],
 ): { text: string; unmapped: number; stories: Array<{ name: string; steps: number }> } {
   const lines: string[] = [
-    `// Migrated from ${legacy.file} by \`svatah migrate\`.`,
+    `// Migrated from ${legacy.file} by \`yam migrate\`.`,
     "//",
     "// Story names and step order are preserved exactly (REQ-LANG-11). Read the",
     "// review report beside this file before trusting it: a legacy locator says",

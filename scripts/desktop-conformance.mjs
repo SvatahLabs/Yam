@@ -8,7 +8,7 @@
  *
  * One command, because the gate has three parts that are easy to get wrong
  * separately: the ADE has to be *packaged*, it has to be launched with
- * `SVATAH_A11Y=1` so Chromium publishes its accessibility tree, and the host
+ * `YAM_A11Y=1` so Chromium publishes its accessibility tree, and the host
  * permission has to be in place. This checks all three, says which one is
  * missing, and only then runs the suite.
  *
@@ -19,7 +19,7 @@
  * ## Three passes, because a healing case needs a before and an after
  *
  * Draft 2.8 LLD §16 makes T6.1's "healing variant subset" concrete: the ADE
- * gains `SVATAH_A11Y_VARIANT=1|2`, and a binding recorded at variant 0 must
+ * gains `YAM_A11Y_VARIANT=1|2`, and a binding recorded at variant 0 must
  * relocalize at both. The variant is fixed when the window is created, so this
  * launches the ADE three times — variant 0 records, variants 1 and 2 heal —
  * carrying the recorded fingerprints between the passes in a state file, and
@@ -58,9 +58,9 @@ const adapter = option("adapter", process.platform === "darwin" ? "ax" : "uia");
 const report = resolve(option("report", join(ROOT, "reports", `adapter-${adapter}.md`)));
 const project = option("project", join(ROOT, "evals", "fixtures"));
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
-const PROCESS_NAME = "Svatah ADE";
+const PROCESS_NAME = "Yam ADE";
 /** What LaunchServices calls this build; the graceful quit route addresses it. */
-const BUNDLE_ID = process.env["SVATAH_ADE_BUNDLE_ID"] ?? "com.electron.svatah-ade";
+const BUNDLE_ID = process.env["YAM_ADE_BUNDLE_ID"] ?? "com.electron.yam-ade";
 /** LLD §15: "polls for the ADE window up to 60 s". */
 const WINDOW_TIMEOUT_MS = Number(option("window-timeout-ms", "60000"));
 
@@ -88,7 +88,7 @@ if (!existsSync(cli)) die(2, "Run `pnpm -r build` first.");
 /*
  * The adapter's own platform, before anything is launched (T8.6).
  *
- * `svatah surface doctor --adapter uia` on macOS answers `skip  uia/platform
+ * `yam surface doctor --adapter uia` on macOS answers `skip  uia/platform
  * not Windows` and exits 0 — correctly, because a skipped check is not a failed
  * one — so the gate went on to launch an ADE and wait sixty seconds for a
  * window it was never going to read. "The host cannot run this adapter" and
@@ -175,17 +175,17 @@ function lockedDisplay() {
 /* ── 2. the ADE ───────────────────────────────────────────────────────────── */
 
 /** The macOS application bundle, which is what LaunchServices opens. */
-const bundle = join(ROOT, "apps", "ade", "out", "Svatah ADE-darwin-arm64", "Svatah ADE.app");
+const bundle = join(ROOT, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
 const app =
   process.platform === "darwin"
-    ? join(bundle, "Contents", "MacOS", "Svatah ADE")
-    : join(ROOT, "apps", "ade", "out", `Svatah ADE-win32-x64`, "Svatah ADE.exe");
+    ? join(bundle, "Contents", "MacOS", "Yam ADE")
+    : join(ROOT, "apps", "ade", "out", `Yam ADE-win32-x64`, "Yam ADE.exe");
 
 if (!existsSync(app)) {
   die(
     2,
     `The ADE is not packaged (${app}).\n` +
-      "Run: pnpm --filter @svatah/ade exec electron-forge package\n" +
+      "Run: pnpm --filter @svatah/yam-ade exec electron-forge package\n" +
       `Nothing was written to ${report}.`,
   );
 }
@@ -220,7 +220,7 @@ const REAL_WINDOW_SCRIPT = [
 /**
  * Does the application have a window yet?
  *
- * Asked of the OS rather than of Svatah, and deliberately not through the
+ * Asked of the OS rather than of Yam, and deliberately not through the
  * adapter: a poll that used the adapter would fold "the bridge is slow" into
  * "the window is not there yet", which are the two things this gate has to keep
  * apart. The call is the cheapest one each platform has.
@@ -262,7 +262,7 @@ const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 /**
  * Is a project open on the ADE's window yet (T8.1)?
  *
- * The window appearing is not enough: `SVATAH_ADE_PROJECT` opens the project
+ * The window appearing is not enough: `YAM_ADE_PROJECT` opens the project
  * *after* ready, and every case is about a control that exists only once one is
  * open. Phase 7's gate asked for those controls on the welcome screen and
  * reported five adapter failures for a launch that had not finished (P7-F1).
@@ -330,17 +330,17 @@ function hasProject() {
 /**
  * The environment every launch gets.
  *
- * `SVATAH_ADE_PROJECT` is Draft 2.9 §13.6: "the desktop conformance gate passes
+ * `YAM_ADE_PROJECT` is Draft 2.9 §13.6: "the desktop conformance gate passes
  * the fixtures project this way, so its cases read a project screen rather than
  * the welcome screen."
  */
 function launchEnvironment(variant) {
   return {
-    SVATAH_A11Y: "1",
-    ...(variant === 0 ? {} : { SVATAH_A11Y_VARIANT: String(variant) }),
-    SVATAH_CLI: cli,
-    SVATAH_ADE_SMOKE: "",
-    SVATAH_ADE_PROJECT: project,
+    YAM_A11Y: "1",
+    ...(variant === 0 ? {} : { YAM_A11Y_VARIANT: String(variant) }),
+    YAM_CLI: cli,
+    YAM_ADE_SMOKE: "",
+    YAM_ADE_PROJECT: project,
     /*
      * The window-lifecycle log (Draft 2.13 §13.6, P10-F1).
      *
@@ -349,7 +349,7 @@ function launchEnvironment(variant) {
      * and this host will not show it", and the log is the only thing that can:
      * every probe the gate has is outside the application.
      */
-    SVATAH_ADE_DEBUG: "1",
+    YAM_ADE_DEBUG: "1",
   };
 }
 
@@ -359,7 +359,7 @@ function launchEnvironment(variant) {
  * > the gate stops an instance through a graceful quit route before it signals
  *
  * On macOS an Apple-event `quit`, which Electron delivers as `before-quit`, so
- * the ADE stops the `svatah serve` it spawned and writes its preferences. On
+ * the ADE stops the `yam serve` it spawned and writes its preferences. On
  * Windows, `CloseMainWindow`. Both are best-effort and neither is waited on
  * here: `stop()` polls for the process to be gone and escalates on its own
  * clock, which is what makes the route an *addition* to the signal rather than
@@ -443,7 +443,7 @@ async function launch(variant) {
 
 /* ── 3. the three passes ──────────────────────────────────────────────────── */
 
-const workspace = mkdtempSync(join(tmpdir(), "svatah-desktop-"));
+const workspace = mkdtempSync(join(tmpdir(), "yam-desktop-"));
 const healState = join(workspace, "heal-state.json");
 const passes = [];
 let running;
@@ -452,7 +452,7 @@ let running;
  * The process ids of this checkout's packaged ADE, right now (P8-F1).
  *
  * The executable path is what identifies them: it is unique to this checkout's
- * build, so a second Svatah ADE installed elsewhere on the machine is not
+ * build, so a second Yam ADE installed elsewhere on the machine is not
  * counted and not killed.
  */
 function processIds() {
@@ -492,7 +492,7 @@ const GRACEFUL_QUIT_MS = Number(option("graceful-quit-ms", "10000"));
  *
  * The defect this closes: `pkill` returns as soon as the signal is *delivered*,
  * and an Electron application takes a second or two to unwind. The gate then
- * opened the next variant, the bridge asked macOS for "Svatah ADE", and the
+ * opened the next variant, the bridge asked macOS for "Yam ADE", and the
  * answer was sometimes the instance that was still exiting — which owns no
  * window, so every case at the new variant threw `no-window`. One of the
  * verifier's three runs did exactly that, under load.
@@ -512,7 +512,7 @@ const stop = () => {
    * The graceful route first (Draft 2.13 §13.6, P10-F1).
    *
    * A `pkill` is a `SIGTERM`, and Node's default handling of one ends the main
-   * process where it stands: `before-quit` never ran, so the `svatah serve` the
+   * process where it stands: `before-quit` never ran, so the `yam serve` the
    * ADE had spawned was left with no parent to stop it and went on holding the
    * project's `runs/` directory for the next variant. The ADE runs its own quit
    * on a signal now, and this asks it to quit before sending one at all.
@@ -680,18 +680,18 @@ try {
               (launched.windowAt === undefined
                 ? `showed no window within ${WINDOW_TIMEOUT_MS} ms`
                 : `showed no open project within ${WINDOW_TIMEOUT_MS} ms ` +
-                  `(its window appeared after ${launched.windowAt} ms; SVATAH_ADE_PROJECT=${project})`) +
+                  `(its window appeared after ${launched.windowAt} ms; YAM_ADE_PROJECT=${project})`) +
               ". That is a launch failure, not an adapter failure, and it is " +
               "reported as one so the report is not a list of cases that never had anything to " +
               `read.\nNothing was written to ${report}.\n` +
-              `\`svatah surface doctor --adapter ${adapter}\` said:\n${doctorOutput}`
+              `\`yam surface doctor --adapter ${adapter}\` said:\n${doctorOutput}`
           : `The ADE showed no window at variant ${variant} because this login session cannot ` +
               `show one: ${locked.detail}.\n` +
               "That is the cause, not a launch failure and not an adapter failure — nothing " +
               "launched here would get a window.\n" +
               `${locked.fix ?? ""}\n` +
               `Nothing was written to ${report}.\n` +
-              `\`svatah surface doctor --adapter ${adapter}\` said:\n${doctorOutput}`,
+              `\`yam surface doctor --adapter ${adapter}\` said:\n${doctorOutput}`,
       );
     }
 
@@ -826,7 +826,7 @@ try {
 } finally {
   stop();
   sampleWeb?.kill("SIGTERM");
-  if (process.env["SVATAH_KEEP_WORKSPACE"] !== "1") {
+  if (process.env["YAM_KEEP_WORKSPACE"] !== "1") {
     rmSync(workspace, { recursive: true, force: true });
   } else {
     process.stderr.write(`kept ${workspace}\n`);

@@ -15,7 +15,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { stepResultSchema, summarySchema } from "@svatah/schema";
+import { stepResultSchema, summarySchema } from "@svatah/yam-schema";
 import { fromRoot } from "../src/repo.js";
 
 const DIR = fromRoot("evals", "conformance", "runtime");

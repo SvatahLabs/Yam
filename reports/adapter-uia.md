@@ -1,7 +1,7 @@
 # Desktop conformance — `uia` (Windows UI Automation)
 
 Status: **blocked — no Windows host.** Four defects found and fixed without one.
-Date: 2026-09-05 · Adapter: `@svatah/adapter-uia` · Task: T8.6 (carried from T7.2; LLD §7.5, §14, REQ-ADP-6, REQ-STD-2)
+Date: 2026-09-05 · Adapter: `@svatah/yam-adapter-uia` · Task: T8.6 (carried from T7.2; LLD §7.5, §14, REQ-ADP-6, REQ-STD-2)
 
 ## The blocked command, and the host's answer
 
@@ -42,7 +42,7 @@ different one from "the adapter is wrong".
 
 ```powershell
 pnpm -r build
-pnpm --filter @svatah/ade exec electron-forge package
+pnpm --filter @svatah/yam-ade exec electron-forge package
 node scripts/desktop-conformance.mjs --adapter uia --report reports/adapter-uia.md
 ```
 
@@ -66,9 +66,9 @@ every Windows machine**.
 ```console
 ParserError:
 Line |
-   6 |  -Request {"process":"Svatah ADE","maxNodes":1500}
+   6 |  -Request {"process":"Yam ADE","maxNodes":1500}
      |                     ~~~~~~~~~~~~~
-     | Unexpected token ':"Svatah ADE"' in expression or statement.
+     | Unexpected token ':"Yam ADE"' in expression or statement.
 ```
 
 The bridge spawned `powershell.exe -Command <script> -Request <json>` and every
@@ -88,7 +88,7 @@ UTF-8. The conformance target's own buttons are called **Open a project…** and
 **Import prototype database…**. The preamble now sets
 `[Console]::OutputEncoding` to UTF-8 as its first line, before anything writes.
 
-Verified: `Svatah ADE — “Open a project…”` round-trips through
+Verified: `Yam ADE — “Open a project…”` round-trips through
 `encodePowershell` and back out of PowerShell byte for byte.
 
 ### 3. A one-pattern element answered a string, not a list
@@ -139,7 +139,7 @@ it is the one script of the four that this exercise could not check.
 Nothing in the UIA bridge, and three things in the harness it runs through, all
 of which a Windows run will exercise for the first time:
 
-- The gate launches the ADE with `SVATAH_ADE_PROJECT` and waits for the
+- The gate launches the ADE with `YAM_ADE_PROJECT` and waits for the
   **project screen**, not merely for a window (T8.1). On Windows that wait uses
   `Get-Process … MainWindowTitle`; on macOS it reads the accessibility tree.
 - The packaged ADE resolves a Node runtime and bundles its own CLI (T8.1). The

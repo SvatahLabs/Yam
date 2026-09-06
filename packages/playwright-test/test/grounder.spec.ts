@@ -3,7 +3,7 @@
  * present (test toggles installation)".
  *
  * Module (a) alone records by a person clicking (LLD §6.5). With module (b)
- * installed, `@svatah/host-playwright` registers the recorder's grounder here
+ * installed, `@svatah/yam-host-playwright` registers the recorder's grounder here
  * and record mode asks it first. This toggles that registration and shows the
  * difference — which is the only way to check "module (a) has no dependency on
  * (b)" is still true at the level where it matters: behaviour, not manifests.
@@ -21,9 +21,9 @@ import {
   contextHash,
   fingerprintOf,
   synthesise,
-} from "@svatah/bindings";
-import type { BindingEntry } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+} from "@svatah/yam-bindings";
+import type { BindingEntry } from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 import {
   Binder,
   clearBindGrounder,
@@ -48,7 +48,7 @@ test("module (a) alone has no grounder, and record mode needs a person", async (
 });
 
 test("with one registered, record mode binds without anybody clicking", async ({ page, app }) => {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-grounder-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-grounder-"));
   try {
     /*
      * A stand-in for module (b): it grounds "the username field" by finding the
@@ -120,7 +120,7 @@ test("a grounder that declines falls back to the picker, rather than failing", a
   page,
   app,
 }) => {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-grounder-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-grounder-"));
   try {
     registerBindGrounder({
       name: "declines",
@@ -153,7 +153,7 @@ test("a grounder that throws also falls back, so a model outage is not a failed 
   page,
   app,
 }) => {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-grounder-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-grounder-"));
   try {
     registerBindGrounder({
       name: "broken",

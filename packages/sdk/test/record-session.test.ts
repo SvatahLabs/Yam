@@ -2,7 +2,7 @@
  * T9.3 Validate — "the SDK drives a fake-gateway record session end to end in a
  * test (start, decision, accept, stop) and subscribes to its events".
  *
- * Against a real `svatah serve`, wired exactly as the CLI wires one, driving
+ * Against a real `yam serve`, wired exactly as the CLI wires one, driving
  * `apps/sample-web` with the **fake gateway**: the committed grounding answers
  * from `evals/grounding/cases`, so the test needs no model credential and makes
  * no network call (REQ-ADE-4, the phase's rule "every recording in the suite
@@ -11,7 +11,7 @@
  * The four steps of the Validate item are the four things a reviewer does on the
  * Record screen, in order: the session starts, a decision arrives on the stream,
  * it is accepted, and the session stops. What makes it an SDK test rather than a
- * service test is that every one of them goes through `SvatahClient` — the
+ * service test is that every one of them goes through `YamClient` — the
  * generated method, and `subscribe()` over SSE — so a route the description
  * renamed would fail here rather than in a renderer.
  */
@@ -21,15 +21,15 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { createService, type RunningService } from "@svatah/service";
+import { createService, type RunningService } from "@svatah/yam-service";
 import {
   compileProject,
   loadProject,
   newRunId,
   runProject,
   serviceRecord,
-} from "@svatah/cli";
-import { SvatahClient, type ServiceEvent } from "../src/index.js";
+} from "@svatah/yam";
+import { YamClient, type ServiceEvent } from "../src/index.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..", "..", "..");
@@ -48,11 +48,11 @@ test: book a slot
 let app: SampleServer;
 let project: string;
 let service: RunningService;
-let client: SvatahClient;
+let client: YamClient;
 
 beforeAll(async () => {
   app = await startSampleApp(0);
-  project = mkdtempSync(join(tmpdir(), "svatah-sdk-record-"));
+  project = mkdtempSync(join(tmpdir(), "svatah-yam-record-"));
   mkdirSync(join(project, "flows"), { recursive: true });
   mkdirSync(join(project, "api"), { recursive: true });
   writeFileSync(join(project, "flows", "record.flow"), FLOW, "utf8");
@@ -68,7 +68,7 @@ beforeAll(async () => {
   rmSync(join(project, "bindings", "booking", "book-now-button.yaml"), { force: true });
 
   writeFileSync(
-    join(project, "svatah.config.yaml"),
+    join(project, "yam.config.yaml"),
     `schemaVersion: "1.0.0"
 project: "sdk-record"
 environment: test
@@ -108,7 +108,7 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
       record: serviceRecord,
     } as never,
   });
-  client = new SvatahClient({ url: service.url, token: TOKEN });
+  client = new YamClient({ url: service.url, token: TOKEN });
 }, 240_000);
 
 afterAll(async () => {
@@ -175,7 +175,7 @@ describe("the SDK drives a record session end to end (T9.3)", () => {
     await Promise.race([finished, sleep(30_000)]);
 
     const kinds = seen.map((one) => one.kind);
-    if (process.env["SVATAH_SDK_DEBUG"] === "1") {
+    if (process.env["YAM_SDK_DEBUG"] === "1") {
       process.stderr.write(`${JSON.stringify(seen, null, 2)}\n`);
     }
     expect(kinds, kinds.join(", ")).toContain("record.started");

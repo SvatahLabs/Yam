@@ -1,4 +1,4 @@
-# @svatah/runtime
+# @svatah/yam-runtime
 
 Runner-agnostic executor core: scope, guards, checkpoints, policies, results, audit.
 

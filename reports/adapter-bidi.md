@@ -9,7 +9,7 @@ firefox 153.0 (launched)
 ```
 
 The stock-browser attach route was not exercised on this machine: no
-chromedriver on `PATH` and no `SVATAH_CHROMEDRIVER`. Install one matching
+chromedriver on `PATH` and no `YAM_CHROMEDRIVER`. Install one matching
 your Chrome or Edge and re-run to include it.
 
 ## Result
@@ -19,12 +19,12 @@ driving: firefox 153.0 (launched)
 surface conformance: 16 passed, 0 failed, 0 skipped (73 checks)
 determinism (REQ-RUN-2): two BiDi runs agree over 40 steps
 runtime conformance (REQ-STD-2): 40 steps compared, 0 difference(s) from the Playwright baseline
-stock-browser attach: not run — no chromedriver on PATH and no SVATAH_CHROMEDRIVER. The launch route above proves the protocol; this proves the route stock Chrome and Edge take.
+stock-browser attach: not run — no chromedriver on PATH and no YAM_CHROMEDRIVER. The launch route above proves the protocol; this proves the route stock Chrome and Edge take.
 ```
 
 ## What this measures
 
-1. `svatah surface conform --adapter bidi` — the surface conformance suite
+1. `yam surface conform --adapter bidi` — the surface conformance suite
    (REQ-SURF-3): the adapter is conformant only when every case passes.
 2. The four migrated fixtures replayed on BiDi and compared step by step
    against `evals/conformance/runtime/results.jsonl`, the committed
@@ -33,8 +33,8 @@ stock-browser attach: not run — no chromedriver on PATH and no SVATAH_CHROMEDR
    rather than to the plan and are not compared.
 3. Two BiDi runs of the same plan, compared with each other (REQ-RUN-2).
 4. The stock-browser attach route, whenever a chromedriver or msedgedriver is
-   on `PATH` or named by `SVATAH_CHROMEDRIVER`: a classic session created with
-   `webSocketUrl: true`, then `svatah surface conform --adapter bidi` against
+   on `PATH` or named by `YAM_CHROMEDRIVER`: a classic session created with
+   `webSocketUrl: true`, then `yam surface conform --adapter bidi` against
    the `…/session/<id>` it hands back (LLD §7.3, Draft 2.6). The adapter must
    attach to that session, not create a second one.
 

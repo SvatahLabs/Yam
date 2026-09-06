@@ -1,13 +1,13 @@
 /**
- * @svatah/compiler
+ * @svatah/yam-compiler
  *
  * Tier 1 — the deterministic controlled grammar (REQ-COMP-2, LLD §4.2) — and the
  * pipeline that turns a project's flow files into a plan (T2.5).
  *
- * Tier 0 lives in `@svatah/steps` and is matched first. Tiers 2 and 3 are
+ * Tier 0 lives in `@svatah/yam-steps` and is matched first. Tiers 2 and 3 are
  * pluggable: the compiler declares the interface and defaults to nothing, which
  * is what keeps `compile` offline unless a project asks otherwise (REQ-NFR-3)
- * and keeps this package free of a dependency on the model gateway. `@svatah/cli`
+ * and keeps this package free of a dependency on the model gateway. `@svatah/yam`
  * registers them (T4.3, T4.4).
  */
 export { parseSentence, parseGuard, type Tier1Result } from "./tier1.js";

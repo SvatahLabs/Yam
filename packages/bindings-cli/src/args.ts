@@ -106,7 +106,7 @@ export function numberOption(args: ParsedArgs, name: string): number | undefined
 }
 
 /**
- * `--input k=v`, repeated, beneath `SVATAH_INPUT_<NAME>` (LLD §10, §15).
+ * `--input k=v`, repeated, beneath `YAM_INPUT_<NAME>` (LLD §10, §15).
  *
  * Two sources because a story's inputs are two different things at once. At a
  * terminal they are arguments and belong on the command line; in CI one of them
@@ -114,7 +114,7 @@ export function numberOption(args: ParsedArgs, name: string): number | undefined
  * list. The flag wins, so an exported default can still be overridden for one
  * invocation.
  *
- * `SVATAH_INPUT_PASSWORD` names the input `password`: the environment is upper
+ * `YAM_INPUT_PASSWORD` names the input `password`: the environment is upper
  * case by convention and the mapping is a lower-casing, so an input whose name
  * is not a plain lower-case word has to use the flag.
  *
@@ -129,8 +129,8 @@ export function inputOptions(
   const out: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(environment)) {
-    if (!key.startsWith("SVATAH_INPUT_") || value === undefined) continue;
-    const name = key.slice("SVATAH_INPUT_".length).toLowerCase();
+    if (!key.startsWith("YAM_INPUT_") || value === undefined) continue;
+    const name = key.slice("YAM_INPUT_".length).toLowerCase();
     if (name !== "") out[name] = value;
   }
 

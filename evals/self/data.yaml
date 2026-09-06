@@ -2,14 +2,14 @@
 # `${ENV}` (LLD §13.9), and nothing here is a credential at all: the suite runs
 # with `--gateway fake` and never opens a model.
 project:
-  name: "svatah-fixtures"
+  name: "yam-fixtures"
   flow: "guards-and-compensation.flow"
 
 # Two strings that are injected into the ADE and must never appear on its
 # screen (T12.7, REQ-NFR-6).
 #
-# `app.launch.env` in `svatah.config.yaml` gives the packaged ADE these exact
-# values for `SVATAH_SAMPLE_PASSWORD` and `ANTHROPIC_API_KEY`, so the Data
+# `app.launch.env` in `yam.config.yaml` gives the packaged ADE these exact
+# values for `YAM_SAMPLE_PASSWORD` and `ANTHROPIC_API_KEY`, so the Data
 # screen has a secret that is genuinely *set* and the Settings screen has a
 # credential that genuinely exists. The screens must then show the variable's
 # name and the word "set", and never the value — which is what

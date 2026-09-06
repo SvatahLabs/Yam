@@ -1,13 +1,13 @@
-# @svatah/cli
+# @svatah/yam
 
-The `svatah` command line (LLD §15), and the only package that registers
+The `yam` command line (LLD §15), and the only package that registers
 adapters — which is why the import-boundary lint lets it, and only it and the
 Playwright Test host, import an `adapter-*` package (LLD §1).
 
 ## Phase 1
 
 ```
-svatah surface conform --adapter <name> [--base-url <url>] [--headed]
+yam surface conform --adapter <name> [--base-url <url>] [--headed]
                        [--only <ids>] [--report <path.md>] [--json]
 ```
 

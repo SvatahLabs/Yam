@@ -1,13 +1,13 @@
 {
-  "process": "Svatah ADE",
-  "title": "Svatah ADE",
+  "process": "Yam ADE",
+  "title": "Yam ADE",
   "truncated": false,
   "nodes": [
     {
       "parent": -1,
       "role": "AXWindow",
       "subrole": "AXStandardWindow",
-      "title": "Svatah ADE",
+      "title": "Yam ADE",
       "box": [
         0,
         0,
@@ -18,7 +18,7 @@
     {
       "parent": 0,
       "role": "AXWebArea",
-      "description": "Svatah ADE",
+      "description": "Yam ADE",
       "enabled": true,
       "focused": true,
       "box": [
@@ -55,7 +55,7 @@
     {
       "parent": 3,
       "role": "AXStaticText",
-      "title": "Svatah",
+      "title": "Yam",
       "enabled": true,
       "box": [
         50,
@@ -67,7 +67,7 @@
     {
       "parent": 4,
       "role": "AXStaticText",
-      "title": "Svatah",
+      "title": "Yam",
       "enabled": true
     },
     {
@@ -1570,7 +1570,7 @@
     {
       "parent": 149,
       "role": "AXStaticText",
-      "title": "svatah run",
+      "title": "yam run",
       "enabled": true,
       "box": [
         1114,
@@ -1582,7 +1582,7 @@
     {
       "parent": 152,
       "role": "AXStaticText",
-      "title": "svatah run",
+      "title": "yam run",
       "enabled": true
     },
     {

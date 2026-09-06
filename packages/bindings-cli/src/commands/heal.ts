@@ -1,5 +1,5 @@
 /**
- * `svatah heal --run <id> | --from-bind-failures` (LLD §15, T1.7).
+ * `yam heal --run <id> | --from-bind-failures` (LLD §15, T1.7).
  *
  * Exit 0 when everything was repaired, 7 when some failures were not (LLD §15).
  * `--apply` writes the repaired store; without it the diff is the whole output,
@@ -16,9 +16,9 @@ import {
   renderHealMarkdown,
   renderHealReport,
   type HealInput,
-} from "@svatah/healer";
-import { createSurface, listAdapters } from "@svatah/surface";
-import { DEFAULT_CONFIG, type Config } from "@svatah/schema";
+} from "@svatah/yam-healer";
+import { createSurface, listAdapters } from "@svatah/yam-surface";
+import { DEFAULT_CONFIG, type Config } from "@svatah/yam-schema";
 import { registerAllAdapters } from "../adapters.js";
 import { boolOption, inputOptions, stringOption, type ParsedArgs } from "../args.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
@@ -34,20 +34,20 @@ export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
     return EXIT.usage;
   }
 
-  const bindingsDir = stringOption(args, "dir") ?? process.env["SVATAH_BINDINGS"] ?? "bindings";
-  const outputDir = stringOption(args, "out") ?? process.env["SVATAH_OUT"] ?? ".svatah";
+  const bindingsDir = stringOption(args, "dir") ?? process.env["YAM_BINDINGS"] ?? "bindings";
+  const outputDir = stringOption(args, "out") ?? process.env["YAM_OUT"] ?? ".yam";
   const runsDir = stringOption(args, "runs") ?? "runs";
   const adapter = stringOption(args, "adapter") ?? "playwright";
   /*
-   * Flag, then `SVATAH_BASE_URL` / `SVATAH_STORAGE_STATE`, then `config.app`
+   * Flag, then `YAM_BASE_URL` / `YAM_STORAGE_STATE`, then `config.app`
    * (LLD §15, Draft 2.5). Phase 3 read the flag and the config but not the
    * environment, so a run started against an ephemeral port — the normal shape
    * of a CI job — could not be healed without repeating the flag by hand
    * (Phase 3 verification, F2).
    *
-   * `@svatah/cli` merges the *project's* `config.app` in before delegating here
+   * `@svatah/yam` merges the *project's* `config.app` in before delegating here
    * (`prepareRunHeal`), which is the same value `root` would find; reading it
-   * here as well is what makes `svatah-bindings heal` behave identically when
+   * here as well is what makes `yam-bindings heal` behave identically when
    * no project loads.
    */
   const { baseUrl, storageState } = sessionTarget(args, {
@@ -107,8 +107,8 @@ export async function healCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
      * reaches a run directory (REQ-NFR-6) — so they are supplied again here, in
      * exactly the two ways `run` takes them.
      *
-     * Accepted by both command lines even though only `svatah heal` has a
-     * replayer that replays: `svatah-bindings heal` restores the recorded page
+     * Accepted by both command lines even though only `yam heal` has a
+     * replayer that replays: `yam-bindings heal` restores the recorded page
      * instead and needs no inputs, and a flag that exists under one name and not
      * the other would be a trap for anyone moving between them.
      */

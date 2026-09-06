@@ -1,4 +1,4 @@
-package dev.svatah.runtime;
+package com.svatah.yam.runtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * `svatah-runtime-java <project> [--plan p] [--run-id r] [--base-url u] [--flow f]`
+ * `yam-runtime-java <project> [--plan p] [--run-id r] [--base-url u] [--flow f]`
  * (T6.4, REQ-STD-3, LLD §14, §15).
  *
  * <p>Executes `plan.json` and bindings without the TypeScript compiler, and
@@ -31,7 +31,7 @@ public final class Main {
     public static void main(String[] argv) {
         /*
          * Options accumulate. `--flow a --flow b` selects two flows, exactly as
-         * `svatah run` does, and a parser that kept only the last value ran one
+         * `yam run` does, and a parser that kept only the last value ran one
          * quarter of the conformance suite and reported the rest as missing —
          * which looked like a runtime that could not execute them.
          */
@@ -52,11 +52,11 @@ public final class Main {
         Path root = Path.of(positional.isEmpty() ? "." : positional.get(0)).toAbsolutePath().normalize();
         JsonNode config = Artifacts.readConfig(root);
 
-        Path planPath = root.resolve(option(options, "plan", ".svatah/plan.json"));
+        Path planPath = root.resolve(option(options, "plan", ".yam/plan.json"));
         if (!Files.exists(planPath)) {
             System.err.println(
                     "No plan at " + planPath + ". A foreign runtime consumes `plan.json`; compile it "
-                            + "first with `svatah compile <project> --stable` (REQ-STD-3).");
+                            + "first with `yam compile <project> --stable` (REQ-STD-3).");
             System.exit(2);
         }
         JsonNode plan = Artifacts.readJson(planPath);
@@ -68,7 +68,7 @@ public final class Main {
          * ephemeral port a fixture server takes.
          */
         String baseUrl = options.containsKey("base-url") ? options.get("base-url").get(0) : null;
-        if (baseUrl == null) baseUrl = System.getenv("SVATAH_BASE_URL");
+        if (baseUrl == null) baseUrl = System.getenv("YAM_BASE_URL");
         if (baseUrl == null) baseUrl = Artifacts.text(config.path("app").path("baseUrl"), "");
 
         Map<String, JsonNode> bindings = Artifacts.readBindings(root, config);
@@ -81,7 +81,7 @@ public final class Main {
         List<String> onlyFlows = options.getOrDefault("flow", List.of());
 
         /*
-         * Story inputs (`--input k=v` and `SVATAH_INPUT_<NAME>`, LLD §15, §10).
+         * Story inputs (`--input k=v` and `YAM_INPUT_<NAME>`, LLD §15, §10).
          *
          * A story with a signature is a function, and a runtime that ignored its
          * arguments would type the empty string into the login form and then
@@ -91,8 +91,8 @@ public final class Main {
          */
         Map<String, Object> inputs = new LinkedHashMap<>();
         for (Map.Entry<String, String> variable : System.getenv().entrySet()) {
-            if (!variable.getKey().startsWith("SVATAH_INPUT_")) continue;
-            inputs.put(variable.getKey().substring("SVATAH_INPUT_".length()).toLowerCase(
+            if (!variable.getKey().startsWith("YAM_INPUT_")) continue;
+            inputs.put(variable.getKey().substring("YAM_INPUT_".length()).toLowerCase(
                     java.util.Locale.ROOT), variable.getValue());
         }
         for (String pair : options.getOrDefault("input", List.of())) {
@@ -254,7 +254,7 @@ public final class Main {
             summary.put("configHash", "none");
             summary.putObject("invoker")
                     .put("kind", "ci")
-                    .put("id", "svatah-runtime-java")
+                    .put("id", "yam-runtime-java")
                     .put("via", "cli");
             summary.put("startedAt", Executor.timestamp(startedAt));
             summary.put("endedAt", Executor.timestamp(Instant.now()));

@@ -16,9 +16,9 @@ export const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 /** The three sets of T7.6, by the package each one starts from. */
 export const SETS = {
-  "module-a": ["@svatah/bindings", "@svatah/healer", "@svatah/playwright-test", "@svatah/bindings-cli"],
-  cli: ["@svatah/cli"],
-  schema: ["@svatah/schema"],
+  "module-a": ["@svatah/yam-bindings", "@svatah/yam-healer", "@svatah/yam-playwright-test", "@svatah/yam-bindings-cli"],
+  cli: ["@svatah/yam"],
+  schema: ["@svatah/yam-schema"],
 };
 
 /** Every workspace package, by name, with its directory and manifest. */
@@ -53,8 +53,8 @@ export function closureOf(roots, byName) {
 /**
  * Dependencies before dependents.
  *
- * npm does not require it — a registry will take `@svatah/cli` before
- * `@svatah/schema` — but a publish that fails halfway is far easier to finish by
+ * npm does not require it — a registry will take `@svatah/yam` before
+ * `@svatah/yam-schema` — but a publish that fails halfway is far easier to finish by
  * hand when what is already up is a consistent prefix.
  */
 export function inDependencyOrder(names, byName) {

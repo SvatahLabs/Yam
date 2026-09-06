@@ -29,10 +29,10 @@ export function generateJsonSchemas(): GeneratedSchemas {
 
     out[schemaFileName(name)] = canonicalJson({
       ...json,
-      $id: `https://svatah.dev/schema/${SCHEMA_VERSION}/${schemaFileName(name)}`,
+      $id: `https://yam.svatah.com/schema/${SCHEMA_VERSION}/${schemaFileName(name)}`,
       title: name,
-      description: `${description}. Svatah schemaVersion ${SCHEMA_VERSION}.`,
-      "x-svatah-schema-version": SCHEMA_VERSION,
+      description: `${description}. Yam schemaVersion ${SCHEMA_VERSION}.`,
+      "x-yam-schema-version": SCHEMA_VERSION,
     });
   }
   return out;

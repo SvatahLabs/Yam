@@ -10,9 +10,9 @@
  * offline, `--tier2` reaches a server on localhost, and only `--tier3` reaches a
  * remote one.
  */
-import { registerTier, clearTiers } from "@svatah/compiler";
-import { credentialInEnvironment, GatewayUnavailable, type Gateway } from "@svatah/gateway";
-import type { Config } from "@svatah/schema";
+import { registerTier, clearTiers } from "@svatah/yam-compiler";
+import { credentialInEnvironment, GatewayUnavailable, type Gateway } from "@svatah/yam-gateway";
+import type { Config } from "@svatah/yam-schema";
 import { tier2 } from "./tier2.js";
 import { tier3 } from "./tier3.js";
 

@@ -3,13 +3,13 @@
  *
  * LLD §1: "Playwright Test for adapter and host tests". This package is the host
  * — the `bind()` fixture and the generated specs — and it is also the one place
- * the dependency graph lets `@svatah/bindings` and `@svatah/adapter-playwright`
+ * the dependency graph lets `@svatah/yam-bindings` and `@svatah/yam-adapter-playwright`
  * meet (LLD §1), so the browser-backed synthesis and fingerprint tests live here
  * rather than in either of them.
  */
 import { defineConfig, devices } from "@playwright/test";
 
-const allBrowsers = process.env["SVATAH_PW_BROWSERS"] === "all";
+const allBrowsers = process.env["YAM_PW_BROWSERS"] === "all";
 
 export default defineConfig({
   testDir: "./test",

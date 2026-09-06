@@ -4,11 +4,11 @@
  * Phase 2's verification found that healing a *run* did not work through either
  * command line, for two different reasons:
  *
- * - `svatah heal --run` answered `not-found`. Its runtime replayer reported
+ * - `yam heal --run` answered `not-found`. Its runtime replayer reported
  *   `reached` for a failure at a story's first step without opening the base URL
  *   first, so relocalization ran against `about:blank` and, correctly, found
  *   nothing there.
- * - `svatah-bindings heal --run` answered `unreachable`. The executor recorded
+ * - `yam-bindings heal --run` answered `unreachable`. The executor recorded
  *   no session state with a failure, so module (a)'s session-state replayer had
  *   no page to restore.
  *
@@ -33,7 +33,7 @@
  *
  * So the third shape: a story *with a signature*, failing behind its login. It
  * is exercised through both command lines and both ways of supplying an input —
- * `--input` and `SVATAH_INPUT_<NAME>` — and the no-input case is asserted too,
+ * `--input` and `YAM_INPUT_<NAME>` — and the no-input case is asserted too,
  * because "unreachable" that does not name the missing input is the defect.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -43,12 +43,12 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import type { StepResult } from "@svatah/schema";
+import type { StepResult } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
-const SVATAH_BINDINGS = join(ROOT, "packages", "bindings-cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM_BINDINGS = join(ROOT, "packages", "bindings-cli", "dist", "bin.js");
 
 let app: SampleServer;
 const projects: string[] = [];
@@ -98,13 +98,13 @@ const EMAIL = "connected2atul@gmail.com";
 const PASSWORD = "qwerty123";
 
 function scaffold(flow: string = FLOW): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-heal-cycle-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-heal-cycle-"));
   projects.push(dir);
   cpSync(join(FIXTURES, "bindings"), join(dir, "bindings"), { recursive: true });
   mkdirSync(join(dir, "flows"), { recursive: true });
   writeFileSync(join(dir, "flows", "cycle.flow"), flow, "utf8");
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
+    join(dir, "yam.config.yaml"),
     `schemaVersion: "1.0.0"
 project: "heal-cycle"
 environment: test
@@ -182,14 +182,14 @@ async function runFlow(
   inputs: readonly string[] = [],
 ): Promise<{ code: number; output: string }> {
   return await cli(
-    SVATAH,
+    YAM,
     ["run", ".", "--host", "none", "--run-id", runId, ...inputs.flatMap((i) => ["--input", i])],
     project,
   );
 }
 
 beforeAll(async () => {
-  if (!existsSync(SVATAH) || !existsSync(SVATAH_BINDINGS)) {
+  if (!existsSync(YAM) || !existsSync(YAM_BINDINGS)) {
     throw new Error("Run `pnpm -r build` first: this exercises the two installed command lines.");
   }
   app = await startSampleApp(0);
@@ -232,18 +232,18 @@ async function cycle(
 }
 
 describe("healing a run repairs it, through both command lines (P2-F1, LLD §10, §12)", () => {
-  it("svatah heal --run: a failure at a story's first step", async () => {
+  it("yam heal --run: a failure at a story's first step", async () => {
     await cycle(
-      (project) => cli(SVATAH, ["heal", "--run", "broken", "--apply"], project),
+      (project) => cli(YAM, ["heal", "--run", "broken", "--apply"], project),
       "home.sign-in-button",
     );
   }, 180_000);
 
-  it("svatah-bindings heal --run: a failure at a story's first step", async () => {
+  it("yam-bindings heal --run: a failure at a story's first step", async () => {
     await cycle(
       (project) =>
         cli(
-          SVATAH_BINDINGS,
+          YAM_BINDINGS,
           ["heal", "--run", "broken", "--base-url", app.origin, "--apply"],
           project,
         ),
@@ -251,18 +251,18 @@ describe("healing a run repairs it, through both command lines (P2-F1, LLD §10,
     );
   }, 180_000);
 
-  it("svatah heal --run: a failure at a later step, behind a navigation", async () => {
+  it("yam heal --run: a failure at a later step, behind a navigation", async () => {
     await cycle(
-      (project) => cli(SVATAH, ["heal", "--run", "broken", "--apply"], project),
+      (project) => cli(YAM, ["heal", "--run", "broken", "--apply"], project),
       "app.schedule-build-link",
     );
   }, 180_000);
 
-  it("svatah-bindings heal --run: a failure at a later step, behind a navigation", async () => {
+  it("yam-bindings heal --run: a failure at a later step, behind a navigation", async () => {
     await cycle(
       (project) =>
         cli(
-          SVATAH_BINDINGS,
+          YAM_BINDINGS,
           ["heal", "--run", "broken", "--base-url", app.origin, "--apply"],
           project,
         ),
@@ -316,10 +316,10 @@ async function cycleWithInputs(
 }
 
 describe("healing a story with inputs, behind its login (P4-F1, LLD §10)", () => {
-  it("svatah heal --run --input: the replay is given the credentials", async () => {
+  it("yam heal --run --input: the replay is given the credentials", async () => {
     await cycleWithInputs((project) =>
       cli(
-        SVATAH,
+        YAM,
         [
           "heal",
           "--run",
@@ -335,19 +335,19 @@ describe("healing a story with inputs, behind its login (P4-F1, LLD §10)", () =
     );
   }, 180_000);
 
-  it("svatah heal --run with SVATAH_INPUT_<NAME>: the same, from the environment", async () => {
+  it("yam heal --run with YAM_INPUT_<NAME>: the same, from the environment", async () => {
     await cycleWithInputs((project) =>
-      cli(SVATAH, ["heal", "--run", "broken", "--apply"], project, {
-        SVATAH_INPUT_EMAIL: EMAIL,
-        SVATAH_INPUT_PASSWORD: PASSWORD,
+      cli(YAM, ["heal", "--run", "broken", "--apply"], project, {
+        YAM_INPUT_EMAIL: EMAIL,
+        YAM_INPUT_PASSWORD: PASSWORD,
       }),
     );
   }, 180_000);
 
-  it("svatah-bindings heal --run: restores the recorded page, inputs or not", async () => {
+  it("yam-bindings heal --run: restores the recorded page, inputs or not", async () => {
     await cycleWithInputs((project) =>
       cli(
-        SVATAH_BINDINGS,
+        YAM_BINDINGS,
         [
           "heal",
           "--run",
@@ -372,7 +372,7 @@ describe("healing a story with inputs, behind its login (P4-F1, LLD §10)", () =
       1,
     );
 
-    const healed = await cli(SVATAH, ["heal", "--run", "broken", "--json"], project);
+    const healed = await cli(YAM, ["heal", "--run", "broken", "--json"], project);
     expect(healed.code).toBe(7);
 
     const report = JSON.parse(healed.output.slice(healed.output.indexOf("{"))) as {
@@ -382,21 +382,21 @@ describe("healing a story with inputs, behind its login (P4-F1, LLD §10)", () =
     // The point of the fix: it says *which* input, not "did not reach the step".
     expect(report.results[0]?.message).toContain('"email"');
     expect(report.results[0]?.message).toContain('"password"');
-    expect(report.results[0]?.message).toContain("SVATAH_INPUT_EMAIL");
+    expect(report.results[0]?.message).toContain("YAM_INPUT_EMAIL");
   }, 180_000);
 });
 
 describe("the replayers say how they got there (LLD §10)", () => {
-  it("svatah heal --run replays the story; svatah-bindings restores the recorded page", async () => {
+  it("yam heal --run replays the story; yam-bindings restores the recorded page", async () => {
     const project = scaffold();
     breakBinding(project, "app.schedule-build-link");
     expect((await runFlow(project, "broken")).code).toBe(1);
 
-    const viaRuntime = await cli(SVATAH, ["heal", "--run", "broken", "--json"], project);
+    const viaRuntime = await cli(YAM, ["heal", "--run", "broken", "--json"], project);
     expect(JSON.parse(viaRuntime.output.slice(viaRuntime.output.indexOf("{"))).replayer).toBe("runtime");
 
     const viaState = await cli(
-      SVATAH_BINDINGS,
+      YAM_BINDINGS,
       ["heal", "--run", "broken", "--base-url", app.origin, "--json"],
       project,
     );

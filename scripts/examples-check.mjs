@@ -22,9 +22,9 @@ import { startSampleApp } from "sample-web";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SECRETS = {
-  SVATAH_SAMPLE_PASSWORD: "qwerty123",
-  SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-  SVATAH_SAMPLE_CARD_CVV: "123",
+  YAM_SAMPLE_PASSWORD: "qwerty123",
+  YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+  YAM_SAMPLE_CARD_CVV: "123",
 };
 
 function run(command, args, env = {}) {
@@ -49,8 +49,8 @@ const check = (name, ok, detail = "") => {
 /* ── the two CI examples: valid YAML, naming the commands ─────────────────── */
 
 for (const [file, wanted] of [
-  ["examples/ci/github-actions.yml", ["svatah compile --stable", "svatah run --host playwright"]],
-  ["examples/ci/gitlab-ci.yml", ["svatah compile --stable", "svatah run --host playwright"]],
+  ["examples/ci/github-actions.yml", ["yam compile --stable", "yam run --host playwright"]],
+  ["examples/ci/gitlab-ci.yml", ["yam compile --stable", "yam run --host playwright"]],
 ]) {
   const text = readFileSync(join(ROOT, file), "utf8");
   let parsed;
@@ -73,7 +73,7 @@ console.log(`sample-web on ${app.origin}`);
 
 try {
   const cron = await run("bash", [join(ROOT, "examples", "cron", "book.sh")], {
-    SVATAH_BASE_URL: app.origin,
+    YAM_BASE_URL: app.origin,
     LOCATION: "Indiranagar",
   });
   check(
@@ -85,7 +85,7 @@ try {
   const agent = await run(
     process.execPath,
     [join(ROOT, "examples", "mcp-agent", "call-a-tool.mjs"), "evals/fixtures"],
-    { SVATAH_BASE_URL: app.origin },
+    { YAM_BASE_URL: app.origin },
   );
   check(
     "examples/mcp-agent calls a story as a tool over MCP",

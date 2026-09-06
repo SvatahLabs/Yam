@@ -1,4 +1,4 @@
-# @svatah/surface
+# @svatah/yam-surface
 
 The published agent surface (REQ-SURF-1..5, LLD §2): the `AgentSurface` interface
 every adapter implements, the adapter registry, the typed errors, the snapshot
@@ -56,11 +56,11 @@ visible in the results rather than silently miscategorised.
 ## Conformance
 
 An adapter is **conformant** only when
-[`@svatah/conformance`](../conformance)'s surface suite passes against it
+[`@svatah/yam-conformance`](../conformance)'s surface suite passes against it
 (REQ-SURF-3):
 
 ```bash
-svatah surface conform --adapter <name>
+yam surface conform --adapter <name>
 ```
 
 ## Licence

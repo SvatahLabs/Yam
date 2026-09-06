@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/playwright-test",
+  "name": "@svatah/yam-playwright-test",
   "version": "0.1.0",
   "description": "The bind() fixture for an existing Playwright Test project",
   "license": "Apache-2.0",
@@ -26,11 +26,11 @@
     "test": "playwright test"
   },
   "dependencies": {
-    "@svatah/adapter-playwright": "workspace:*",
-    "@svatah/bindings": "workspace:*",
-    "@svatah/healer": "workspace:*",
-    "@svatah/schema": "workspace:*",
-    "@svatah/surface": "workspace:*",
+    "@svatah/yam-adapter-playwright": "workspace:*",
+    "@svatah/yam-bindings": "workspace:*",
+    "@svatah/yam-healer": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
+    "@svatah/yam-surface": "workspace:*",
     "playwright": "catalog:"
   },
   "devDependencies": {

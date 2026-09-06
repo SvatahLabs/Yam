@@ -7,11 +7,11 @@
  *   node scripts/generate-clients.mjs --check   # regenerate and diff (drift)
  *   node scripts/generate-clients.mjs --only ts # one language
  *
- * > `@svatah/sdk` (TypeScript): a typed client generated from the service's
+ * > `@svatah/yam-sdk` (TypeScript): a typed client generated from the service's
  * > OpenAPI description at build time […] Nothing in it is hand-written that the
  * > description already states; a drift between the two fails the build.
- * > Generated clients for Python (`svatah-sdk` on PyPI) and Java
- * > (`dev.svatah:svatah-sdk`) from the same description.
+ * > Generated clients for Python (`svatah-yam` on PyPI) and Java
+ * > (`com.svatah.yam:svatah-yam`) from the same description.
  *
  * ## Why the generator is ours
  *
@@ -27,7 +27,7 @@
  *
  * What is actually needed is small. The description is 36 routes with path
  * parameters, a request body or not, and JSON or text back. Bodies are
- * deliberately *not* typed from the schemas: their types are `@svatah/schema`'s
+ * deliberately *not* typed from the schemas: their types are `@svatah/yam-schema`'s
  * (`StepResult`, `Summary`, `BindingFile`), and re-deriving them from a JSON
  * Schema round-trip would produce a second, subtly different set of the same
  * types — the reasoning `scripts/generate-ade-client.mjs` already records.
@@ -39,7 +39,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
-import { openApiDocument } from "@svatah/service";
+import { openApiDocument } from "@svatah/yam-service";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);
@@ -116,7 +116,7 @@ const eventKinds = (() => {
   const described = document.paths["/events/sse"]?.get?.description ?? "";
   /*
    * The list, not every backticked word in the sentence. `log` is a kind and has
-   * no dot in it, and `kind`, `ServiceEvent` and `@svatah/service` are not kinds
+   * no dot in it, and `kind`, `ServiceEvent` and `@svatah/yam-service` are not kinds
    * and do — so the segment between the two fixed phrases is what is read, and a
    * description that stopped writing them fails loudly below.
    */
@@ -140,7 +140,7 @@ const BANNER = [
   "builds without a running service, and a test regenerates it and diffs, so drift",
   "between a client and the service is a red build rather than a discovery.",
   "",
-  "Bodies are `unknown` on purpose: their types are `@svatah/schema`'s, and",
+  "Bodies are `unknown` on purpose: their types are `@svatah/yam-schema`'s, and",
   "re-deriving them here would make a second, subtly different set of the same",
   "types (REQ-STD-1).",
 ];
@@ -357,7 +357,7 @@ function python() {
 /** `getRunsByIdResults` is already a Java method name; `id` is already a parameter. */
 function java() {
   const lines = ["/*", ...BANNER.map((one) => (one === "" ? " *" : ` * ${one}`)), " */"];
-  lines.push("package dev.svatah.sdk;");
+  lines.push("package com.svatah.yam.sdk;");
   lines.push("");
   lines.push("import java.io.IOException;");
   lines.push("import java.net.URI;");
@@ -502,12 +502,12 @@ const outputs = [
   { language: "ts", path: join(ROOT, "packages/sdk/src/generated.ts"), text: typescript() },
   {
     language: "py",
-    path: join(ROOT, "clients/python/svatah_sdk/generated.py"),
+    path: join(ROOT, "clients/python/svatah_yam/generated.py"),
     text: python(),
   },
   {
     language: "java",
-    path: join(ROOT, "clients/java/src/main/java/dev/svatah/sdk/GeneratedClient.java"),
+    path: join(ROOT, "clients/java/src/main/java/com/svatah/yam/sdk/GeneratedClient.java"),
     text: java(),
   },
 ].filter((one) => only === undefined || one.language === only);

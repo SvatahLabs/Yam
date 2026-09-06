@@ -21,11 +21,11 @@ node packages/cli/dist/bin.js eval finetune export
 
 # 2. Train a LoRA on the Tier 2 base model.
 python3 -m venv .venv && .venv/bin/pip install mlx-lm     # or peft on Linux
-SVATAH_FINETUNE_PYTHON=.venv/bin/python node scripts/finetune-tier2.mjs
+YAM_FINETUNE_PYTHON=.venv/bin/python node scripts/finetune-tier2.mjs
 
 # 3. Serve it, and measure it against the base.
-ollama create qwen2-5-3b-svatah -f evals/compiler/finetune/tuned/Modelfile
-node scripts/finetune-eval.mjs --tuned qwen2-5-3b-svatah
+ollama create qwen2-5-3b-yam -f evals/compiler/finetune/tuned/Modelfile
+node scripts/finetune-eval.mjs --tuned qwen2-5-3b-yam
 ```
 
 ## The schedule, and the machine it has to fit in (T7.5)
@@ -150,7 +150,7 @@ adapter is already on disk:
 
 `compile.tier2.digest` exists so provenance can say *which build* of a model
 produced a step (REQ-COMP-3, LLD §16). A tuned model called
-`qwen2.5-3b-svatah` says nothing about which training run made it, so the digest
+`qwen2.5-3b-yam` says nothing about which training run made it, so the digest
 is over the **adapter weights and the training set together** — which is what
 makes a run reproducible and an answer attributable.
 

@@ -1,13 +1,13 @@
 /**
- * `svatah host generate` (REQ-RUN-12, LLD §9.1).
+ * `yam host generate` (REQ-RUN-12, LLD §9.1).
  *
- * Writes `.svatah/specs/<flow>.spec.ts`: one `test()` per story, in order, under
+ * Writes `.yam/specs/<flow>.spec.ts`: one `test()` per story, in order, under
  * a serial `describe`.
  *
  * ```ts
- * import { test } from "@svatah/host-playwright";
+ * import { test } from "@svatah/yam-host-playwright";
  * test.describe("simple.flow", () => {
- *   test("Validate login", async ({ svatah }) => { await svatah.runStory("Validate login"); });
+ *   test("Validate login", async ({ yam }) => { await yam.runStory("Validate login"); });
  * });
  * ```
  *
@@ -21,15 +21,15 @@
  * matches the story in the flow file.
  *
  * The generated file is committed or not as the project prefers; it is derived,
- * so `.svatah/` is the natural home and `.gitignore` the natural treatment.
+ * so `.yam/` is the natural home and `.gitignore` the natural treatment.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import type { Plan } from "@svatah/schema";
+import type { Plan } from "@svatah/yam-schema";
 
 export interface GenerateOptions {
   readonly plan: Plan;
-  /** Where the specs go. Default `.svatah/specs`. */
+  /** Where the specs go. Default `.yam/specs`. */
   readonly outDir?: string;
   /** The package the generated spec imports. Overridden in this repo's tests. */
   readonly importFrom?: string;
@@ -56,10 +56,10 @@ export function renderSpec(
   stories: readonly string[],
   options: { importFrom?: string; planPath?: string } = {},
 ): string {
-  const from = options.importFrom ?? "@svatah/host-playwright";
+  const from = options.importFrom ?? "@svatah/yam-host-playwright";
   const lines = [
     "/*",
-    ` * GENERATED from ${flow} by \`svatah host generate\` — do not edit.`,
+    ` * GENERATED from ${flow} by \`yam host generate\` — do not edit.`,
     " *",
     " * One test per story, in the order the flow's run block gives, under a serial",
     " * describe so a later story sees what an earlier one did (LLD §9.1).",
@@ -68,14 +68,14 @@ export function renderSpec(
     "",
     ...(options.planPath === undefined
       ? []
-      : [`test.use({ svatahPlan: ${JSON.stringify(options.planPath)}, svatahFlow: ${JSON.stringify(flow)} });`, ""]),
+      : [`test.use({ yamPlan: ${JSON.stringify(options.planPath)}, yamFlow: ${JSON.stringify(flow)} });`, ""]),
     `test.describe(${JSON.stringify(flow)}, () => {`,
     "  test.describe.configure({ mode: \"serial\" });",
     "",
     ...stories.map(
       (story) =>
-        `  test(${JSON.stringify(story)}, async ({ svatah }) => {\n` +
-        `    await svatah.runStory(${JSON.stringify(story)});\n` +
+        `  test(${JSON.stringify(story)}, async ({ yam }) => {\n` +
+        `    await yam.runStory(${JSON.stringify(story)});\n` +
         `  });`,
     ),
     "});",
@@ -92,7 +92,7 @@ export function renderSpec(
  * like a configuration problem.
  */
 export function generateSpecs(options: GenerateOptions): GeneratedSpec[] {
-  const outDir = options.outDir ?? join(".svatah", "specs");
+  const outDir = options.outDir ?? join(".yam", "specs");
   mkdirSync(outDir, { recursive: true });
 
   const out: GeneratedSpec[] = [];

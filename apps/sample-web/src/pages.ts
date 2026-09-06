@@ -24,7 +24,7 @@ export interface Page {
 const NAV = `
     <nav class="navbar" aria-label="Main">
       <div class="navbar-brand">
-        <a class="navbar-item" href="/" data-testid="brand">Svatah Sample</a>
+        <a class="navbar-item" href="/" data-testid="brand">Yam Sample</a>
       </div>
       <button class="navbar-toggle" data-testid="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
       <div class="navbar-menu">
@@ -53,7 +53,7 @@ function shell(title: string, body: string, extraHead = ""): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${title} · Svatah Sample</title>
+  <title>${title} · Yam Sample</title>
   <link rel="stylesheet" href="/app.css">${extraHead}
 </head>
 <body>

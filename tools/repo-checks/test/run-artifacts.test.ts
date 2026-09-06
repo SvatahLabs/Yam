@@ -3,7 +3,7 @@
  *
  * > Run artifacts (`results.jsonl`, `summary.json`, `audit.jsonl`, screenshots,
  * > traces) are committed only under `evals/conformance/` and `reports/`. Every
- * > project directory ignores `runs/`, `.svatah/`, and any absolute-path echo
+ * > project directory ignores `runs/`, `.yam/`, and any absolute-path echo
  * > such as `var/`; a repository check enforces it.
  *
  * Phase 2's compatibility milestone passed an absolute `--out` at a temp
@@ -76,9 +76,9 @@ describe("committed run artifacts (LLD §16, P3-F3)", () => {
     });
   }
 
-  it("commits nothing under a run, .svatah or absolute-path-echo directory", () => {
+  it("commits nothing under a run, .yam or absolute-path-echo directory", () => {
     const offenders = tracked.filter((path) =>
-      /(^|\/)(runs|\.svatah|var\/folders|private\/var)\//.test(path),
+      /(^|\/)(runs|\.yam|var\/folders|private\/var)\//.test(path),
     );
     expect(offenders).toEqual([]);
   });
@@ -91,28 +91,28 @@ describe("committed run artifacts (LLD §16, P3-F3)", () => {
 
 describe("project directories ignore what a run writes (LLD §16, P3-F3)", () => {
   /**
-   * Every directory this repository treats as a Svatah project.
+   * Every directory this repository treats as a Yam project.
    *
-   * `svatah init` writes the same list into a new project's `.gitignore`; these
+   * `yam init` writes the same list into a new project's `.gitignore`; these
    * are the ones already here, which `init` never touched.
    */
   const projects = ["evals/fixtures", "examples/plain-playwright"];
 
   for (const project of projects) {
-    it(`${project} ignores runs/, .svatah/ and var/`, () => {
+    it(`${project} ignores runs/, .yam/ and var/`, () => {
       const path = fromRoot(...project.split("/"), ".gitignore");
       expect(existsSync(path), `${project}/.gitignore`).toBe(true);
       const rules = readFileSync(path, "utf8")
         .split("\n")
         .map((line) => line.trim())
         .filter((line) => line !== "" && !line.startsWith("#"));
-      for (const rule of ["runs/", ".svatah/", "var/"]) {
+      for (const rule of ["runs/", ".yam/", "var/"]) {
         expect(rules, `${project} must ignore ${rule}`).toContain(rule);
       }
     });
   }
 
-  it("`svatah init` writes the same rules into a new project", () => {
+  it("`yam init` writes the same rules into a new project", () => {
     // The template, read from the source: a new project must start ignoring
     // what an existing one ignores, or this check only holds for the two
     // directories that happen to be here today.
@@ -122,7 +122,7 @@ describe("project directories ignore what a run writes (LLD §16, P3-F3)", () =>
     );
     const template = /const GITIGNORE = `([\s\S]*?)`;/.exec(source)?.[1];
     expect(template, "init.ts must define a GITIGNORE template").toBeDefined();
-    for (const rule of ["runs/", ".svatah/", "var/"]) {
+    for (const rule of ["runs/", ".yam/", "var/"]) {
       expect(template!.split("\n").map((l) => l.trim())).toContain(rule);
     }
   });

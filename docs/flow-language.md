@@ -1,4 +1,4 @@
-# The Svatah flow language
+# The Yam flow language
 
 A flow file is prose. There are no sigils, no locators, and no locator-type
 prefixes — a step is one plain sentence, and the elements it names are resolved
@@ -173,12 +173,12 @@ scoped to the flow and namespaced by story; inputs are scoped to the story.
 ```yaml
 user:
   email: "atul@example.com"
-  password: "${SVATAH_SAMPLE_PASSWORD}"
+  password: "${YAM_SAMPLE_PASSWORD}"
 secrets:
   - user.password
 ```
 
-`SVATAH_DATA_*` environment variables override individual paths.
+`YAM_DATA_*` environment variables override individual paths.
 
 ---
 
@@ -1024,7 +1024,7 @@ or its own timeout runs out; a request that throws is not a failure yet, because
 a service that has not finished starting answers with a connection refused.
 
 This is the sentence four one-sided checks were waiting for: a button in the ADE
-starts a **second** Svatah run, and until Draft 2.15 a flow had no way to wait
+starts a **second** Yam run, and until Draft 2.15 a flow had no way to wait
 for a run other than its own and read its result.
 
 `Wait for the "run status" API to answer "$.status" to be "passed"` compiles to:
@@ -1149,7 +1149,7 @@ story: Cancelling asks first
   The confirm result should say "dismissed"
 ```
 
-`svatah lint` reports that flow twice: **`W_DIALOG_UNARMED`** on the click,
+`yam lint` reports that flow twice: **`W_DIALOG_UNARMED`** on the click,
 which would take the default, and **`W_DIALOG_NEVER_OPENED`** on the `dialog`
 step, which arms an answer no later step can collect.
 A dialog answered with nothing armed is not silent either: the run's
@@ -1376,8 +1376,8 @@ Check that the username field has the value "atul"
 Ensure the docs link has the "target" attribute "_blank"
 Make sure the sign in button occupies 40, 180, 100, 36
 
-Expect the page title to contain "Svatah"
-Verify the page title contains "Svatah"
+Expect the page title to contain "Yam"
+Verify the page title contains "Yam"
 Expect the URL to be "https://sample.test/dashboard"
 Ensure the URL contains "/dashboard"
 ```
@@ -1761,7 +1761,7 @@ Use the "book-slot" site tool with date={data.date}
 A **site tool** is a thing the page says it will do, published through
 `navigator.modelContext` (WebMCP). Every other kind of binding says *where* an
 element is; a declared tool says what the page will *do*, which is information
-the site maintains rather than a shape Svatah inferred from a rendering. So the
+the site maintains rather than a shape Yam inferred from a rendering. So the
 resolver prefers it: a tool survives the redesign that breaks every locator, and
 it cannot be ambiguous.
 
@@ -2005,12 +2005,12 @@ whatever width the last person left it at:
 ```yaml
 app:
   launch:
-    bundle: "…/Svatah ADE.app"
+    bundle: "…/Yam ADE.app"
     size: [1440, 900]
 ```
 
 Three of the parity gate's one-sided checks were toolbar rules measured at
-several widths, and what stopped Svatah reaching them was exactly this: a flow
+several widths, and what stopped Yam reaching them was exactly this: a flow
 could not change the width.
 
 `Resize the window to 1440 by 900` compiles to:
@@ -2047,7 +2047,7 @@ sentence with typed placeholders, and it is matched **before** the grammar
 (LLD §5).
 
 ```ts
-import { defineStep } from "@svatah/flow";
+import { defineStep } from "@svatah/yam-flow";
 
 export default defineStep(
   "Transfer {amount:number} from {from:target} to {to:target}",
@@ -2170,7 +2170,7 @@ noun), and `api` (pattern 19's `Wait for … to answer`).
 
 ## 8. Migrating v1 and v2 flows
 
-`svatah migrate <src> <dest>` converts v1 and v2 flows, `.locator` files and
+`yam migrate <src> <dest>` converts v1 and v2 flows, `.locator` files and
 `.data` files into v3 flows, a seed bindings store and `data.yaml`, preserving
 story names and step order (REQ-LANG-11). Nothing about v1 or v2 is supported at
 run time — `migrate` is the only path.
@@ -2292,7 +2292,7 @@ outputs: enterprise: string
 
 ## 9. Lint
 
-`svatah lint` reports (REQ-COMP-8):
+`yam lint` reports (REQ-COMP-8):
 
 | Code | Meaning |
 |---|---|

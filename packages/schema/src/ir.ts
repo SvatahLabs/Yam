@@ -52,7 +52,7 @@ export const ACTIONS = [
    * > the initial size, performed through the window's size attribute.
    *
    * Three of the parity gate's one-sided checks were toolbar rules measured at
-   * several window widths, and the reason Svatah could not reach them was this
+   * several window widths, and the reason Yam could not reach them was this
    * one missing action: `app.launch` named no size and no sentence changed one.
    * An adapter that has no window — HTTP — refuses it, as it refuses `click`.
    */

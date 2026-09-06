@@ -1,9 +1,9 @@
 /**
  * T2.9 — the migration is pinned, and its output compiles (REQ-LANG-11).
  *
- * Two things live here rather than in `@svatah/migrate`'s own tests:
+ * Two things live here rather than in `@svatah/yam-migrate`'s own tests:
  *
- * * **"compiles clean"** needs the compiler, and `@svatah/migrate` must not
+ * * **"compiles clean"** needs the compiler, and `@svatah/yam-migrate` must not
  *   depend on it (LLD §1 draws `migrate ─► spec, bindings`). This package has no
  *   boundary to keep, so it is where the two can meet.
  * * **the byte-for-byte comparison** is against `evals/migrate/expected`, which
@@ -21,15 +21,15 @@ import { describe, expect, it } from "vitest";
 import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { compile } from "@svatah/compiler";
-import { renderReviewReport } from "@svatah/migrate";
-import { formatDiagnostic, isStoryBlock, readFlow, readProject } from "@svatah/spec";
+import { compile } from "@svatah/yam-compiler";
+import { renderReviewReport } from "@svatah/yam-migrate";
+import { formatDiagnostic, isStoryBlock, readFlow, readProject } from "@svatah/yam-spec";
 import { fromRoot } from "../src/repo.js";
 import { EXPECTED, migrateLegacy, snapshot } from "../../../scripts/migrate-legacy.mjs";
 
 /** A fresh migration into a temporary directory, for comparison. */
 function fresh(): Map<string, string> {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-migrate-check-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-migrate-check-"));
   try {
     migrateLegacy(dir);
     return snapshot(dir);
@@ -168,14 +168,14 @@ describe("the review report (REQ-LANG-11: verified by review)", () => {
           file: "store/svatah.data",
           line: 0,
           kind: "secret",
-          message: '"user.password" looks like a secret, so it reads ${SVATAH_USER_PASSWORD}.',
+          message: '"user.password" looks like a secret, so it reads ${YAM_USER_PASSWORD}.',
         },
       ],
       unmapped: 0,
       stories: [],
     });
     expect(rendered).toContain("Values that became secrets");
-    expect(rendered).toContain("SVATAH_USER_PASSWORD");
+    expect(rendered).toContain("YAM_USER_PASSWORD");
     expect(rendered).toContain("REQ-NFR-6");
   });
 

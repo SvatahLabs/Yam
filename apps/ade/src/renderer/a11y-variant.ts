@@ -2,7 +2,7 @@
  * The ADE's accessibility variants (Draft 2.8 LLD §16, T7.1).
  *
  * > Desktop healing cases (Draft 2.8, T6.1's "healing variant subset" made
- * > concrete): the ADE gains `SVATAH_A11Y_VARIANT=1|2`, where variant 1 renames
+ * > concrete): the ADE gains `YAM_A11Y_VARIANT=1|2`, where variant 1 renames
  * > one screen tab and one button on the Project screen and variant 2 moves the
  * > Record screen's gateway control into a different panel; a binding recorded
  * > at variant 0 must relocalize on both through the desktop adapter with the
@@ -22,7 +22,7 @@
  * LLD §13.6 says the preload bridge exposes `openProject`, `serviceInfo`,
  * `pickFile` and `preferences` — "only" those four. A fifth function for a test
  * fixture would widen the one surface in the ADE that is deliberately narrow. The
- * main process reads `SVATAH_A11Y_VARIANT` and puts it on the renderer's URL
+ * main process reads `YAM_A11Y_VARIANT` and puts it on the renderer's URL
  * instead, which costs nothing and changes no contract.
  */
 

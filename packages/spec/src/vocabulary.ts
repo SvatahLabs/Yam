@@ -32,7 +32,7 @@
  * The android and desktop lists in the Java file are identical apart from the
  * mapper class they name, so this is one list.
  */
-import type { Action } from "@svatah/schema";
+import type { Action } from "@svatah/yam-schema";
 
 export interface Verb {
   /**

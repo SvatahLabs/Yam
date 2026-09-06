@@ -14,13 +14,13 @@
     { "file": "Agents.dc.html", "title": "Agents and tools", "x": 0, "y": 3120, "w": 1440, "h": 900, "page": "page-ade" },
     { "file": "Palette.dc.html", "title": "Command palette", "x": 1540, "y": 3120, "w": 1440, "h": 900, "page": "page-ade" },
     { "file": "Secondary.dc.html", "title": "Secondary screens · wireframe", "x": 0, "y": 4160, "w": 1440, "h": 900, "page": "page-ade" },
-    { "file": "TUI.dc.html", "title": "svatah ui · terminal cockpit", "x": 0, "y": 0, "w": 1180, "h": 720, "page": "page-tui" },
+    { "file": "TUI.dc.html", "title": "yam ui · terminal cockpit", "x": 0, "y": 0, "w": 1180, "h": 720, "page": "page-tui" },
     { "file": "Tokens.dc.html", "title": "Tokens, type, controls, rules", "x": 0, "y": 0, "w": 1440, "h": 1000, "page": "page-system" }
   ],
   "annotations": [
     { "id": "note-ia", "x": 0, "y": -150, "w": 700, "text": "Structure: left rail (Flows, Runs, Bindings, Agents and tools, API, Data, Settings), centre workspace, right inspector. The eleven tabs are gone; every old screen has a home. Command palette on ⌘K lists the same actions the TUI, SDK and CLI have.", "page": "page-ade" },
     { "id": "note-content", "x": 760, "y": -150, "w": 640, "text": "All content is real: the fixtures project, the comp run that compensated, the fake-gateway record decision, the WebMCP binding, the heal of schedule-build-link, the agent invocations from the audit.", "page": "page-ade" },
-    { "id": "note-tui", "x": 0, "y": -130, "w": 700, "text": "svatah ui: full authoring cockpit, standalone Ink app over the same service. Four numbered panes, Tab to cycle, ^K palette with the same action list as the ADE. --json streams the audit pane for agents. Shown: run comp after compensation, palette open on 'heal'.", "page": "page-tui" },
+    { "id": "note-tui", "x": 0, "y": -130, "w": 700, "text": "yam ui: full authoring cockpit, standalone Ink app over the same service. Four numbered panes, Tab to cycle, ^K palette with the same action list as the ADE. --json streams the audit pane for agents. Shown: run comp after compensation, palette open on 'heal'.", "page": "page-tui" },
     { "id": "note-system", "x": 0, "y": -130, "w": 700, "text": "Dark-first, light theme beside it. Radix primitives, own tokens. One accent (amber), five status colours with words beside them. Every control named and id'd for the desktop adapters.", "page": "page-system" }
   ],
   "launch": { "view": "canvas", "page": "page-ade" }

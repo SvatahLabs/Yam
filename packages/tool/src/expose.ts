@@ -13,7 +13,7 @@
  * will eventually call it, and a tool that refuses on invocation has already told
  * the agent the operation exists. A tool that is not listed cannot be called.
  */
-import type { Config, Plan, Story } from "@svatah/schema";
+import type { Config, Plan, Story } from "@svatah/yam-schema";
 
 export interface Exposed {
   readonly story: Story;

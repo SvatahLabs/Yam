@@ -14,8 +14,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { compile, lintPlan } from "@svatah/compiler";
-import { readProject } from "@svatah/spec";
+import { compile, lintPlan } from "@svatah/yam-compiler";
+import { readProject } from "@svatah/yam-spec";
 import { fromRoot } from "../src/repo.js";
 
 interface LintEntry {
@@ -30,7 +30,7 @@ const entries: LintEntry[] = readFileSync(fromRoot("evals", "compiler", "lint.js
   .filter((line) => line.trim() !== "")
   .map((line) => JSON.parse(line) as LintEntry);
 
-/** The warnings `svatah lint` reports for one flow file. */
+/** The warnings `yam lint` reports for one flow file. */
 function warnings(flow: string): string[] {
   const { project } = readProject({ flows: [{ file: "flows/a.flow", text: flow }], env: {} });
   const { plan, diagnostics } = compile({ project, projectName: "lint-golden", stable: true });

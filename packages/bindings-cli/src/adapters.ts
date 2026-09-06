@@ -7,9 +7,9 @@
  *
  * This one registers Playwright and nothing else. Module (a) is what a plain
  * Playwright user installs (REQ-PKG-1), and the other adapters live in module
- * (b)'s dependency tree; `@svatah/cli` registers all of them.
+ * (b)'s dependency tree; `@svatah/yam` registers all of them.
  */
-import { registerPlaywrightAdapter } from "@svatah/adapter-playwright";
+import { registerPlaywrightAdapter } from "@svatah/yam-adapter-playwright";
 
 let registered = false;
 

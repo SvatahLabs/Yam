@@ -30,9 +30,9 @@ import type {
   Snapshot,
   SurfaceAction,
   SurfaceKind,
-} from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
-import { buildSnapshot, DataError, NO_CAPABILITIES, structuralHash } from "@svatah/surface";
+} from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
+import { buildSnapshot, DataError, NO_CAPABILITIES, structuralHash } from "@svatah/yam-surface";
 import { executeRequest, type RequestOptions } from "./request.js";
 import { readJsonPath } from "./jsonpath.js";
 import type { TemplateScope } from "./template.js";

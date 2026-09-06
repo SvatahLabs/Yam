@@ -1,5 +1,5 @@
 {
-  "$id": "https://svatah.dev/schema/1.0.0/surface.session-init.schema.json",
+  "$id": "https://yam.svatah.com/schema/1.0.0/surface.session-init.schema.json",
   "$ref": "#/definitions/surface.session-init",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
@@ -99,7 +99,7 @@
       "type": "object"
     }
   },
-  "description": "Agent surface: how a session is opened (LLD §2.1). Svatah schemaVersion 1.0.0.",
+  "description": "Agent surface: how a session is opened (LLD §2.1). Yam schemaVersion 1.0.0.",
   "title": "surface.session-init",
-  "x-svatah-schema-version": "1.0.0"
+  "x-yam-schema-version": "1.0.0"
 }

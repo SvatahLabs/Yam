@@ -1,4 +1,4 @@
-# Svatah — Task Breakdown
+# Yam — Task Breakdown
 
 Status: Draft 2.1 · Date: 2026-09-02
 Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [lld.md](lld.md)
@@ -55,7 +55,7 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T1.2 Surface conformance suite (web)
 **Refs:** REQ-SURF-3, REQ-STD-2, LLD §14 · **Est:** 2
-**Do:** `packages/conformance/surface`: scripts of calls and expected invariants per sample page; `svatah surface conform --adapter playwright`.
+**Do:** `packages/conformance/surface`: scripts of calls and expected invariants per sample page; `yam surface conform --adapter playwright`.
 **Validate:** Playwright adapter passes; a deliberately broken mock adapter fails with a readable report.
 
 ### T1.3 Bindings store, context hash, resolver
@@ -75,7 +75,7 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T1.6 `bind()` fixture with record, run, heal modes
 **Refs:** REQ-REC-11, REQ-HEAL-6, REQ-PKG-1, 2, LLD §6.5, §9.2 · **Est:** 4
-**Do:** `@svatah/bindings/playwright` test extension: `bind(id, phrase?)`; run mode via resolver; record mode via interactive headed picker (no model) with `provenance.model: "human"`; heal mode with inline relocalization and `healed` annotation; bind-failure lines to `.svatah/bind-failures.jsonl`; `svatah bindings list|show|verify|prune`.
+**Do:** `@svatah/yam-bindings/playwright` test extension: `bind(id, phrase?)`; run mode via resolver; record mode via interactive headed picker (no model) with `provenance.model: "human"`; heal mode with inline relocalization and `healed` annotation; bind-failure lines to `.yam/bind-failures.jsonl`; `yam bindings list|show|verify|prune`.
 **Validate:** A plain Playwright project (fixture in `examples/plain-playwright`) records three bindings by picker in headed mode, replays headless with the model endpoint blocked, breaks on variant 3, heals inline, and the annotation reads `healed`; quick start doc verified by a fresh-checkout CI job that completes in under ten minutes.
 
 ### T1.7 Model-free healer job and diff
@@ -85,12 +85,12 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T1.8 Healing eval (relocalize-only) and publish
 **Refs:** REQ-HEAL-5, REQ-PKG-4 · **Est:** 1.5
-**Do:** `svatah eval healing --no-model` over variants with a Markdown report; release workflow attaches it.
+**Do:** `yam eval healing --no-model` over variants with a Markdown report; release workflow attaches it.
 **Validate:** Threshold 0.60 met; report artifact present on a tagged pre-release.
 
 ### T1.9 Module (a) release
 **Refs:** REQ-PKG-1, 2, 3 · **Est:** 1
-**Do:** Publish `@svatah/bindings`, `@svatah/schema`, `@svatah/conformance`, `@svatah/adapter-playwright` 0.1; README with the ten-minute quick start and the published healing numbers.
+**Do:** Publish `@svatah/yam-bindings`, `@svatah/yam-schema`, `@svatah/yam-conformance`, `@svatah/yam-adapter-playwright` 0.1; README with the ten-minute quick start and the published healing numbers.
 **Validate:** `npm install` in a clean Playwright project works; module (a) has no dependency on module (b) packages (test inspects the dependency tree).
 
 ---
@@ -134,8 +134,8 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T2.8 Playwright Test host
 **Refs:** REQ-RUN-12, REQ-BEH-1, LLD §9 · **Est:** 3
-**Do:** In the module (b) package `host-playwright`: `svatah` fixture, `host generate`, reporter writing Svatah results, retry policy gating, annotations with failure class; re-export `bind()` from `@svatah/playwright-test`. `@svatah/playwright-test` itself gains nothing and keeps no runtime dependency.
-**Validate:** Generated specs for the fixtures run under Playwright Test with two shards and the HTML reporter; Svatah `results.jsonl` produced alongside; retries disabled unless permitted (test).
+**Do:** In the module (b) package `host-playwright`: `yam` fixture, `host generate`, reporter writing Yam results, retry policy gating, annotations with failure class; re-export `bind()` from `@svatah/yam-playwright-test`. `@svatah/yam-playwright-test` itself gains nothing and keeps no runtime dependency.
+**Validate:** Generated specs for the fixtures run under Playwright Test with two shards and the HTML reporter; Yam `results.jsonl` produced alongside; retries disabled unless permitted (test).
 
 ### T2.9 Migration tool
 **Refs:** REQ-LANG-11, LLD §11 (Draft 1) · **Est:** 3
@@ -149,13 +149,13 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T2.11 Local service
 **Refs:** REQ-ADE-1, REQ-ADE-7, LLD §13.5 · **Est:** 3
-**Do:** `packages/service`: Fastify on `127.0.0.1` with a bearer token, every endpoint in LLD §13.5 delegating to the CLI's functions, WebSocket event stream (SSE fallback), `svatah serve`. No business logic in handlers (lint rule: `service` may import only `cli`'s command functions and `schema`).
+**Do:** `packages/service`: Fastify on `127.0.0.1` with a bearer token, every endpoint in LLD §13.5 delegating to the CLI's functions, WebSocket event stream (SSE fallback), `yam serve`. No business logic in handlers (lint rule: `service` may import only `cli`'s command functions and `schema`).
 **Validate:** Contract tests per endpoint against the fixtures project; an unauthenticated request is refused; a `run` streams one `step.result` per step and a final `run.summary`; the same run started via CLI and via service produces identical `results.jsonl`.
 
 ### T2.12 Module (a) command line and healer replay plugin
 **Refs:** REQ-PKG-1, 2, REQ-HEAL-1, LLD §1, §10, HLD §12 · **Est:** 2
-**Do:** Create `@svatah/bindings-cli` (bin `svatah-bindings`) holding `bindings list|show|verify|prune`, `heal --from-bind-failures`, `surface conform`, and `eval healing`, moved out of `@svatah/cli`; `@svatah/cli` depends on it and mounts the same commands under `svatah`. Add the `Replayer` plugin interface to `@svatah/healer` with the session-state default; register a runtime-backed `Replayer` from `@svatah/cli` for flow runs.
-**Validate:** The dependency-tree test covers `bindings-cli` as module (a); a clean install of the module (a) tarballs exposes `svatah-bindings`; `svatah heal --run <id>` on a Phase 2 run directory replays to the failing step through the runtime, while `svatah-bindings heal --from-bind-failures` still works with no module (b) package installed.
+**Do:** Create `@svatah/yam-bindings-cli` (bin `yam-bindings`) holding `bindings list|show|verify|prune`, `heal --from-bind-failures`, `surface conform`, and `eval healing`, moved out of `@svatah/yam`; `@svatah/yam` depends on it and mounts the same commands under `yam`. Add the `Replayer` plugin interface to `@svatah/yam-healer` with the session-state default; register a runtime-backed `Replayer` from `@svatah/yam` for flow runs.
+**Validate:** The dependency-tree test covers `bindings-cli` as module (a); a clean install of the module (a) tarballs exposes `yam-bindings`; `yam heal --run <id>` on a Phase 2 run directory replays to the failing step through the runtime, while `yam-bindings heal --from-bind-failures` still works with no module (b) package installed.
 
 ---
 
@@ -188,13 +188,13 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T3.6 New ADE shell (`apps/ade`, fresh build; split to the svatahADE repository at first release)
 **Refs:** REQ-ADE-2, 7, HLD ADR-17, LLD §13.6 · **Est:** 3
-**Do:** Scaffold Electron current LTS with Forge's Vite plus TypeScript template; `main/` with window, project chooser, service process lifecycle (spawn `svatah serve --port 0`, read port and token, health-check, stop on close, connect if a lock file exists), and the accessibility flag; typed preload bridge with only `openProject`, `serviceInfo`, `pickFile`, `preferences`; React renderer with a client generated from `GET /openapi.json`; preferences store; installers for macOS, Windows, Linux in CI. Archive the prototype's code on a `prototype` branch of the repository.
+**Do:** Scaffold Electron current LTS with Forge's Vite plus TypeScript template; `main/` with window, project chooser, service process lifecycle (spawn `yam serve --port 0`, read port and token, health-check, stop on close, connect if a lock file exists), and the accessibility flag; typed preload bridge with only `openProject`, `serviceInfo`, `pickFile`, `preferences`; React renderer with a client generated from `GET /openapi.json`; preferences store; installers for macOS, Windows, Linux in CI. Archive the prototype's code on a `prototype` branch of the repository.
 **Validate:** Renderer has no Node access (test); the app opens a fixture project and shows `GET /project` data; killing the app stops the service; Electron security checklist passes; installers build on three OSes.
 
 ### T3.7 ADE core screens
 **Refs:** REQ-ADE-3, LLD §13.6 · **Est:** 6
 **Do:** Project screen (open, init); flow editor with inline lint from `/compile` and a custom-step palette; plan view per story (step, tier, confidence, target status); run screen with live `step.result` events, screenshots, audit tail, and `run.summary`; results history from `GET /runs`; API client over `POST /api/request` with save to `api/`; data editor over `GET/PUT /data` with secrets masked. Screen rule: every screen renders a service response or a project file and nothing the CLI cannot produce.
-**Validate:** Editing a flow in the ADE and compiling from the CLI yields the same `plan.json`; a run started from the ADE produces the same `runs/<id>` files as the CLI; lint warnings in the editor match `svatah lint --json`; a review confirms no ADE-only logic.
+**Validate:** Editing a flow in the ADE and compiling from the CLI yields the same `plan.json`; a run started from the ADE produces the same `runs/<id>` files as the CLI; lint warnings in the editor match `yam lint --json`; a review confirms no ADE-only logic.
 
 ---
 
@@ -286,7 +286,7 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 ### T6.1 Windows UIA adapter validated against the ADE
 **Refs:** REQ-ADP-6, REQ-ADE-6, REQ-SURF-3, LLD §7.5, §16 · **Est:** 9
 **Do:** UIA adapter with role mapping, `automationId` and `controlPath` candidates, patterns and input fallback, screenshots, `state`/`restore`; desktop conformance flows against the ADE (create project, open flow, run, open result, API client); add ARIA roles and names in the ADE UI where the tree is thin.
-**Validate:** Surface conformance on a Windows runner that builds and launches the ADE with `SVATAH_A11Y=1`; the desktop flows record and replay; a healing variant subset (renamed control, moved panel) passes relocalization.
+**Validate:** Surface conformance on a Windows runner that builds and launches the ADE with `YAM_A11Y=1`; the desktop flows record and replay; a healing variant subset (renamed control, moved panel) passes relocalization.
 
 ### T6.2 macOS Accessibility adapter validated against the ADE
 **Refs:** REQ-ADP-7, REQ-ADE-6 · **Est:** 8
@@ -295,7 +295,7 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T6.6 Prototype data import
 **Refs:** REQ-ADE-9, LLD §13.5 · **Est:** 1.5
-**Do:** `svatah migrate --from-ade <path>` reading the prototype's electron-db files and emitting config, flows (then v2→v3), seed bindings, `data.yaml`, and `api/*.yaml`; an "Import prototype database" action in the ADE project screen.
+**Do:** `yam migrate --from-ade <path>` reading the prototype's electron-db files and emitting config, flows (then v2→v3), seed bindings, `data.yaml`, and `api/*.yaml`; an "Import prototype database" action in the ADE project screen.
 **Validate:** A captured prototype database converts to a project that compiles clean and whose story names and step counts match.
 
 ### T6.3 WebMCP candidate
@@ -319,8 +319,8 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T7.1 The macOS Accessibility live gate passes, and the desktop healing cases
 **Refs:** REQ-ADP-7, REQ-SURF-3, REQ-ADE-6, LLD §7.5, §14, §16 · **Est:** 4
-**Do:** Rewrite the AX bridge's window read to bulk attribute reads (`entire contents` plus `properties`, one process invocation per snapshot); make the timeout message a bridge timeout with nodes and milliseconds when `doctor` has said `granted`; poll for the ADE window up to 60 s; resolve `--report` against the current directory; record nodes read, wall time, and ms per node in the report. Add `SVATAH_A11Y_VARIANT=1|2` to the ADE (LLD §16) and the desktop healing cases to the desktop suite for both adapters.
-**Validate:** `node scripts/desktop-conformance.mjs --adapter ax` passes 7 of 7 on a macOS host with the permission granted, with the project screen (≥400 nodes) read within 10 s and the cost in the report; the two healing cases relocalize at variant 1 and 2 and the report says so; `svatah surface doctor` still reports `denied` and `prompt-pending` correctly against recorded exchanges.
+**Do:** Rewrite the AX bridge's window read to bulk attribute reads (`entire contents` plus `properties`, one process invocation per snapshot); make the timeout message a bridge timeout with nodes and milliseconds when `doctor` has said `granted`; poll for the ADE window up to 60 s; resolve `--report` against the current directory; record nodes read, wall time, and ms per node in the report. Add `YAM_A11Y_VARIANT=1|2` to the ADE (LLD §16) and the desktop healing cases to the desktop suite for both adapters.
+**Validate:** `node scripts/desktop-conformance.mjs --adapter ax` passes 7 of 7 on a macOS host with the permission granted, with the project screen (≥400 nodes) read within 10 s and the cost in the report; the two healing cases relocalize at variant 1 and 2 and the report says so; `yam surface doctor` still reports `denied` and `prompt-pending` correctly against recorded exchanges.
 
 ### T7.2 Windows UIA live gate and the pipeline that carries every gate
 **Refs:** REQ-ADP-6, REQ-STD-2, REQ-STD-3, LLD §7.5, §14 · **Est:** 3
@@ -329,7 +329,7 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T7.3 Dialog IR agreement, type check in the contract, small defects
 **Refs:** REQ-LANG-*, REQ-RUN-8, LLD §3.2, §15, §16 · **Est:** 1.5
-**Do:** `dialog` args become `{ action, text? }` end to end: grammar, `modelStepSchema`, the Playwright and BiDi adapters, the Java runtime (fail by name if unimplemented), pattern 21 golden entries and a run against `/widgets`. Fix `@svatah/workflow`'s `Config` construction so `pnpm -r typecheck` is green, and add `typecheck` to the contract in the README and the CI. Fix the report path and the window poll of the desktop gate script if T7.1 has not.
+**Do:** `dialog` args become `{ action, text? }` end to end: grammar, `modelStepSchema`, the Playwright and BiDi adapters, the Java runtime (fail by name if unimplemented), pattern 21 golden entries and a run against `/widgets`. Fix `@svatah/yam-workflow`'s `Config` construction so `pnpm -r typecheck` is green, and add `typecheck` to the contract in the README and the CI. Fix the report path and the window poll of the desktop gate script if T7.1 has not.
 **Validate:** `Dismiss the dialog` leaves the sample page saying `dismissed` and `Accept the dialog` saying `confirmed`, in the suite; `pnpm -r typecheck` exits 0 from a clean checkout; the contract line in `README.md` includes it.
 
 ### T7.4 The Java runtime writes the published schemas
@@ -344,7 +344,7 @@ Companion documents: [requirements.md](requirements.md) · [hld.md](hld.md) · [
 
 ### T7.6 Release candidate 0.1.0
 **Refs:** REQ-PKG-1, 2, 3, 4, REQ-STD-1, 2, LLD §16 · **Est:** 4
-**Do:** Version every publishable package 0.1.0 with a changelog; `npm pack` dry runs for module (a) (`@svatah/bindings`, `@svatah/healer`, `@svatah/playwright-test`, `@svatah/bindings-cli`), the `svatah` CLI, and `@svatah/schema` with the JSON Schema files and the conformance fixtures included; a release workflow that builds the ADE installers on the three-OS matrix and attaches `reports/*.md` to the release notes; the module (a) ten-minute quick start executed from the packed tarballs in an empty Playwright project by a script, not by hand.
+**Do:** Version every publishable package 0.1.0 with a changelog; `npm pack` dry runs for module (a) (`@svatah/yam-bindings`, `@svatah/yam-healer`, `@svatah/yam-playwright-test`, `@svatah/yam-bindings-cli`), the `yam` CLI, and `@svatah/yam-schema` with the JSON Schema files and the conformance fixtures included; a release workflow that builds the ADE installers on the three-OS matrix and attaches `reports/*.md` to the release notes; the module (a) ten-minute quick start executed from the packed tarballs in an empty Playwright project by a script, not by hand.
 **Validate:** `pnpm release:dry-run` produces the tarballs and lists their contents; the quick-start script passes against the tarballs on Node 22 and the current LTS with no credential; the licence check passes on the packed dependency trees; the release workflow runs to the artifact step on the pipeline that exists.
 
 Phase 7 total: 16.5 ideal days.
@@ -355,7 +355,7 @@ Phase 7 total: 16.5 ideal days.
 
 ### T8.1 The packaged ADE opens a project
 **Refs:** REQ-ADE-2, REQ-ADE-6, LLD §13.6 · **Est:** 2.5
-**Do:** Resolve the service's runtime as §13.6 states (`SVATAH_NODE`, then `node` on `PATH` of the supported major or newer, then a Node beside the CLI under `resources/` when packaged with one); never `process.execPath` in a packaged build; the Project screen's alert names the three places when none is found; `doctor` and the smoke check report the chosen runtime. `SVATAH_ADE_PROJECT=<dir>` opens a project on ready. `scripts/ade-smoke.mjs` and the ADE smoke test run against the packaged application when `apps/ade/out/` exists and say so. The desktop gate passes the fixtures project through `SVATAH_ADE_PROJECT`.
+**Do:** Resolve the service's runtime as §13.6 states (`YAM_NODE`, then `node` on `PATH` of the supported major or newer, then a Node beside the CLI under `resources/` when packaged with one); never `process.execPath` in a packaged build; the Project screen's alert names the three places when none is found; `doctor` and the smoke check report the chosen runtime. `YAM_ADE_PROJECT=<dir>` opens a project on ready. `scripts/ade-smoke.mjs` and the ADE smoke test run against the packaged application when `apps/ade/out/` exists and say so. The desktop gate passes the fixtures project through `YAM_ADE_PROJECT`.
 **Validate:** The packaged ADE, launched by hand with no environment, opens a project from its Recent list within 30 s and shows the eleven tabs; with `PATH` emptied it shows the alert and opens nothing; `pnpm ade:smoke` runs against the packaged app in CI on the three-OS matrix; the gate's variant 0 log shows the project screen open before the first case.
 
 ### T8.2 The AX bridge within budget, and the macOS gate green
@@ -370,7 +370,7 @@ Phase 7 total: 16.5 ideal days.
 
 ### T8.4 The fine-tune withdrawn from 0.1.0, and the corpus that would bring it back
 **Refs:** ADR-4, REQ-COMP-3 · **Est:** 2
-**Do:** Record in `reports/eval-finetune.md` and the release notes that the Tier 2 fine-tune target is not met and the tuned digest is not used; add `svatah eval finetune corpus`, which collects sentences the grammar refuses from the golden set's `tier: 2` entries, the migration fixtures' review notes, and a new `evals/compiler/refused.jsonl` seeded with at least 150 reviewed (sentence, Step) pairs; export pairs from that corpus only, with the golden `tier: 2` subset still excluded.
+**Do:** Record in `reports/eval-finetune.md` and the release notes that the Tier 2 fine-tune target is not met and the tuned digest is not used; add `yam eval finetune corpus`, which collects sentences the grammar refuses from the golden set's `tier: 2` entries, the migration fixtures' review notes, and a new `evals/compiler/refused.jsonl` seeded with at least 150 reviewed (sentence, Step) pairs; export pairs from that corpus only, with the golden `tier: 2` subset still excluded.
 **Validate:** The corpus export reports its sources and counts and shares no sentence with the golden set; no training run is required, and none is reported unless measured with early stopping on a held-out split that is not the training set.
 
 ### T8.5 Publish 0.1.0
@@ -393,23 +393,23 @@ The owner reviewed and approved the mockups under `docs/spec/design/` on 2026-09
 
 ### T9.1 The screen model and the action registry
 **Refs:** REQ-ADE-10, REQ-ADE-13, LLD §13.7 · **Est:** 4
-**Do:** `@svatah/screens`: the `Screen`, `State`, `Action`, `Binding` types; the twelve screen ids; `load()` for every screen from the service and files; the action registry with `id`, `label`, `run`, `availableWhen`, `cli`; a fake-service harness for tests. A repository check reads the registry, the CLI's command table, and the palette fixture and fails when an action's id, label, or CLI command differs between them.
-**Validate:** Every screen loads against the fake service in tests with the state the mockup shows for the fixtures project; the parity check passes and a deliberately renamed action makes it fail; `svatah ui --json` (T9.4) prints exactly the model's state.
+**Do:** `@svatah/yam-screens`: the `Screen`, `State`, `Action`, `Binding` types; the twelve screen ids; `load()` for every screen from the service and files; the action registry with `id`, `label`, `run`, `availableWhen`, `cli`; a fake-service harness for tests. A repository check reads the registry, the CLI's command table, and the palette fixture and fails when an action's id, label, or CLI command differs between them.
+**Validate:** Every screen loads against the fake service in tests with the state the mockup shows for the fixtures project; the parity check passes and a deliberately renamed action makes it fail; `yam ui --json` (T9.4) prints exactly the model's state.
 
 ### T9.2 The design system
 **Refs:** REQ-ADE-12, LLD §13.7 · **Est:** 3
-**Do:** `@svatah/ui-tokens` (CSS variables for both themes from `docs/spec/design/base.css`, the type ramp, the status set) and `@svatah/ui` (React components on Radix primitives: button, field, select, pill, chip, table, tabs, rail item, inspector sections, alert, palette, kbd), every component requiring a visible label and an id; a component sheet page rendering all of them in both themes that the accessibility adapters can read.
+**Do:** `@svatah/yam-ui-tokens` (CSS variables for both themes from `docs/spec/design/base.css`, the type ramp, the status set) and `@svatah/yam-ui` (React components on Radix primitives: button, field, select, pill, chip, table, tabs, rail item, inspector sections, alert, palette, kbd), every component requiring a visible label and an id; a component sheet page rendering all of them in both themes that the accessibility adapters can read.
 **Validate:** The sheet passes an axe-core run with zero violations; every interactive component throws in development without a label and an id; the two themes differ only in tokens; the licence check stays permissive.
 
 ### T9.3 The SDK and the generated clients
 **Refs:** REQ-SDK-1, REQ-SDK-2, LLD §13.8 · **Est:** 3
-**Do:** `@svatah/sdk` generated from `packages/service/openapi.json` at build time (client, typed events over SSE and WebSocket, `actions` from `@svatah/screens`); Python and Java clients generated from the same description into `clients/python` and `clients/java` with their build files; a drift check that regenerates and diffs.
+**Do:** `@svatah/yam-sdk` generated from `packages/service/openapi.json` at build time (client, typed events over SSE and WebSocket, `actions` from `@svatah/yam-screens`); Python and Java clients generated from the same description into `clients/python` and `clients/java` with their build files; a drift check that regenerates and diffs.
 **Validate:** The SDK drives a fake-gateway record session end to end in a test (start, decision, accept, stop) and subscribes to its events; the Python and Java clients each run one smoke script against a live service (`GET /project`, `POST /run`, events) in CI; regenerating from a changed description fails the drift check.
 
 ### T9.4 The two renderers, two screens each
 **Refs:** REQ-ADE-11, REQ-TUI-1, REQ-ADE-6, LLD §13.6, §13.7 · **Est:** 5
-**Do:** The ADE shell rebuilt as top bar, rail, workspace, inspector, status bar, and palette on `@svatah/ui`, rendering `flows` (list, editor with lint, plan inspector) and `run` (live steps, audit, evidence) from the model; the other screens still reachable through the old tabs behind a "Legacy" rail item until Phase 10. `svatah ui` (`@svatah/tui`, Ink) rendering the same two screens with four panes, keys, and the palette; `--json`. Both open or adopt the service the same way. Apply the Phase 8 corrections to the desktop gate first (P8-F1..F3).
-**Validate:** The packaged ADE opens the fixtures project into the new Flows screen, and the desktop suite's snapshot case finds every control on it named and id'd; a record and a run driven through the new Run screen's buttons under Playwright; `svatah ui` runs `comp` in a pseudo-terminal test and its `--json` output equals the model's state; the same action ids appear in both palettes.
+**Do:** The ADE shell rebuilt as top bar, rail, workspace, inspector, status bar, and palette on `@svatah/yam-ui`, rendering `flows` (list, editor with lint, plan inspector) and `run` (live steps, audit, evidence) from the model; the other screens still reachable through the old tabs behind a "Legacy" rail item until Phase 10. `yam ui` (`@svatah/yam-tui`, Ink) rendering the same two screens with four panes, keys, and the palette; `--json`. Both open or adopt the service the same way. Apply the Phase 8 corrections to the desktop gate first (P8-F1..F3).
+**Validate:** The packaged ADE opens the fixtures project into the new Flows screen, and the desktop suite's snapshot case finds every control on it named and id'd; a record and a run driven through the new Run screen's buttons under Playwright; `yam ui` runs `comp` in a pseudo-terminal test and its `--json` output equals the model's state; the same action ids appear in both palettes.
 
 ### T9.5 Progress and the design record
 **Refs:** LLD §13.7 · **Est:** 0.5
@@ -425,7 +425,7 @@ Phase 9 total: 15.5 ideal days.
 ### T10.1 The authoring loop screens
 **Refs:** REQ-ADE-10..13, REQ-TUI-1, LLD §13.7 · **Est:** 6
 **Do:** `record` (session, decisions, re-pick through the snapshot, deadline), `runs` (list, filters, evidence inspector), `heal` (proposals, before and after, scores, apply), `bindings` (table, resolver order, verify, prune) on the model in both renderers, to the mockups.
-**Validate:** Each screen driven end to end through its own controls in the ADE under Playwright and in `svatah ui` under a pseudo-terminal, against the fixtures project with the fake gateway; every control named and id'd; the palette lists every action of the four screens.
+**Validate:** Each screen driven end to end through its own controls in the ADE under Playwright and in `yam ui` under a pseudo-terminal, against the fixtures project with the fake gateway; every control named and id'd; the palette lists every action of the four screens.
 
 ### T10.2 Agents and tools, API, Data, Explorer, Import, Settings
 **Refs:** REQ-ADE-10..13, REQ-TUI-1, LLD §13.7 · **Est:** 5
@@ -446,40 +446,40 @@ Phase 10 total: 15 ideal days.
 
 ---
 
-## Phase 11 — Corrections, and Svatah verifies Svatah (Draft 2.14)
+## Phase 11 — Corrections, and Yam verifies Yam (Draft 2.14)
 
-The owner's decision of 2026-09-05: verification, validation, and the ADE's own testing are driven by Svatah itself, with the verifier's external tools kept as the second side of a parity gate. Corrections first, because the windowless launch blocks every desktop flow.
+The owner's decision of 2026-09-05: verification, validation, and the ADE's own testing are driven by Yam itself, with the verifier's external tools kept as the second side of a parity gate. Corrections first, because the windowless launch blocks every desktop flow.
 
 ### T11.1 The Phase 10 verification's corrections, the windowless launch, and the editing a release needs
 **Refs:** REQ-ADE-6, REQ-ADE-10..13, LLD §13.6, §13.7, §7.5, §16 · **Est:** 5
 **Do:** Diagnose and fix the windowless packaged launch (F1) with the debug log and the graceful quit route of Draft 2.13; exempt standard window chrome from the id rule, select the first row by default, re-record the variant-1 fixture against the live app and make `rail-flows` relocalize live (F2); the Record screen's toolbar to the title budget, one-line select, and `availableWhen` on its buttons (F3); the Explorer toolbar and the Data inspector per F4, then build the four secondary screens to the corrected artboards; a timed-out session probe is "could not tell" (F5); `ade:shoot` writes outside the tree unless `--update` (F6); the test build's own bundle name (F7); the flow editor edits and saves with lint on save, and the API screen edits a saved request (K6, K7).
-**Validate:** The live macOS gate 7 of 7 plus both healing cases on three consecutive runs with the project screen's cost on the bridge line, the ADE launched and stopped by the gate ten times in a row with a window every time; the Record screen's toolbar case under Playwright at 1440 and 1100 px; a flow edited, saved, and re-linted through the ADE and through `svatah ui`; a request edited and saved; the suite green while a person's ADE is open.
+**Validate:** The live macOS gate 7 of 7 plus both healing cases on three consecutive runs with the project screen's cost on the bridge line, the ADE launched and stopped by the gate ten times in a row with a window every time; the Record screen's toolbar case under Playwright at 1440 and 1100 px; a flow edited, saved, and re-linted through the ADE and through `yam ui`; a request edited and saved; the suite green while a person's ADE is open.
 
 
 ### T11.2 Launch, quit, and attach
 **Refs:** REQ-SELF-1, REQ-ADP-1, REQ-ADP-7, LLD §13.9, §4.2, §7.1, §7.5 · **Est:** 3
-**Do:** Desktop adapters take `app.launch` and `app.quit` in configuration and open a session by launching when no process of that name owns a window; the language gains `Quit the app` (pattern 31) with a golden entry and a run against the packaged ADE; the Playwright adapter attaches to an existing Chromium through `SVATAH_CDP_URL` or `app.attach.cdpUrl`, tested against recorded exchanges and live against the packaged ADE's renderer.
+**Do:** Desktop adapters take `app.launch` and `app.quit` in configuration and open a session by launching when no process of that name owns a window; the language gains `Quit the app` (pattern 31) with a golden entry and a run against the packaged ADE; the Playwright adapter attaches to an existing Chromium through `YAM_CDP_URL` or `app.attach.cdpUrl`, tested against recorded exchanges and live against the packaged ADE's renderer.
 **Validate:** A flow that launches the ADE, opens the fixtures project through its Recent list, reads the Flows toolbar, and quits, green through the AX adapter three times running; the same flow through the Playwright adapter attached over CDP; the ADE launched and quit ten times without a leftover process.
 
 ### T11.3 Desktop grounding
 **Refs:** REQ-REC-1, REQ-ADP-7, LLD §13.9, §7.5 · **Est:** 2
-**Do:** The recorder grounds a desktop snapshot the way it grounds a web one; the fake gateway gains a desktop case set recorded from the ADE; `svatah record` on a desktop project writes bindings with `automationId` and `controlPath` candidates and a fingerprint.
-**Validate:** `svatah record --gateway fake` on a self flow against the ADE writes every binding; the same flow replays; a variant-1 rename relocalizes live.
+**Do:** The recorder grounds a desktop snapshot the way it grounds a web one; the fake gateway gains a desktop case set recorded from the ADE; `yam record` on a desktop project writes bindings with `automationId` and `controlPath` candidates and a fingerprint.
+**Validate:** `yam record --gateway fake` on a self flow against the ADE writes every binding; the same flow replays; a variant-1 rename relocalizes live.
 
 ### T11.4 The self-verification suite
 **Refs:** REQ-SELF-1, LLD §13.9 · **Est:** 5
-**Do:** `evals/self` as a Svatah project: flows covering every ADE screen's Validate items of Phases 9 and 10 through the AX adapter, the service's endpoints through the HTTP adapter with JSON-path expectations, the sample application's behaviours (compensation, guards, dialogs, WebMCP, resume, workflow, tool) through the Playwright adapter, and the cockpit through `svatah ui --json` and the SDK; `evals/self/checks.yaml` naming every check's `svatah` story and its `external` implementation.
-**Validate:** `svatah run evals/self` green on this host; every Playwright case of `apps/ade/test/shell.spec.ts` has a self story with the same check id; every check has both implementations or names why one is unreachable.
+**Do:** `evals/self` as a Yam project: flows covering every ADE screen's Validate items of Phases 9 and 10 through the AX adapter, the service's endpoints through the HTTP adapter with JSON-path expectations, the sample application's behaviours (compensation, guards, dialogs, WebMCP, resume, workflow, tool) through the Playwright adapter, and the cockpit through `yam ui --json` and the SDK; `evals/self/checks.yaml` naming every check's `yam` story and its `external` implementation.
+**Validate:** `yam run evals/self` green on this host; every Playwright case of `apps/ade/test/shell.spec.ts` has a self story with the same check id; every check has both implementations or names why one is unreachable.
 
 ### T11.5 The parity gate
 **Refs:** REQ-SELF-2, REQ-SELF-3, LLD §13.9, §15 · **Est:** 3
-**Do:** `svatah eval self` runs both sides of every check, compares verdicts, and writes `reports/self-parity.md` with agreement, coverage per side, wall time per side, disagreements, and one-sided checks; exit 1 on any disagreement; the tree-agreement oracle over CDP versus the AX snapshot; the three external oracles named in the report as kept by design.
+**Do:** `yam eval self` runs both sides of every check, compares verdicts, and writes `reports/self-parity.md` with agreement, coverage per side, wall time per side, disagreements, and one-sided checks; exit 1 on any disagreement; the tree-agreement oracle over CDP versus the AX snapshot; the three external oracles named in the report as kept by design.
 **Validate:** The gate at 100 percent agreement on this host with the one-sided list published; a deliberately wrong flow expectation makes it fail with both pieces of evidence; the README's contract names the gate.
 
 ### T11.6 Progress and the contract
 **Refs:** LLD §13.9 · **Est:** 0.5
-**Do:** `docs/spec/progress/phase-11.md` with the gate's report embedded, the one-sided list read as Svatah's shortcomings, and what each will take.
-**Validate:** The report and the list are in the file; the verifier can reproduce every number from `svatah eval self`.
+**Do:** `docs/spec/progress/phase-11.md` with the gate's report embedded, the one-sided list read as Yam's shortcomings, and what each will take.
+**Validate:** The report and the list are in the file; the verifier can reproduce every number from `yam eval self`.
 
 Phase 11 total: 18.5 ideal days.
 
@@ -519,7 +519,7 @@ Phase 11 total: 18.5 ideal days.
 ### T12.7 Close the one-sided list, and the Phase 11 corrections
 **Refs:** REQ-SELF-1, REQ-SELF-2, REQ-LANG-12, LLD §13.9, §4.2 · **Est:** 5
 **Do:** Track placeholders for `evals/self/steps` and `evals/self/api` and make the copying scripts tolerate a missing optional directory (F1); match catalogue names by ancestor titles and title and assert every external name against its source (F2); the gate writes reports outside the tree unless `--update` (F3); patterns 32 and 33, the pattern 19 and 11 extensions, and a multi-line `Type`, each with golden entries and a run; `app.launch.size`; the HTTP and SDK sides of the self suite written; then convert every one-sided check the new sentences reach into a two-sided one.
-**Validate:** `svatah eval self` at 100 percent with Svatah reaching at least 30 of the 48 checks; `pnpm self:bite` and `pnpm self:record` green from a clean checkout; the tree clean after the gate; the golden set at 100 percent on tier 1 with the new patterns; the two cockpit checks two-sided.
+**Validate:** `yam eval self` at 100 percent with Yam reaching at least 30 of the 48 checks; `pnpm self:bite` and `pnpm self:record` green from a clean checkout; the tree clean after the gate; the golden set at 100 percent on tier 1 with the new patterns; the two cockpit checks two-sided.
 
 Phase 12 total: 15 ideal days.
 
@@ -531,8 +531,8 @@ The owner's decisions of 2026-09-06: Svatah is the brand and the organisation, a
 
 ### T13.1 The organisation and the accounts (owner)
 **Refs:** REQ-PKG-1, REQ-NFR-6 · **Est:** 0.5 (the owner's action)
-**Do:** Create the GitHub organisation `SvatahLabs` and the empty repository `SvatahLabs/yam`; verify the `svatah.com` domain on the organisation and require two-factor authentication; create the npm organisation `svatah` and configure trusted publishing (OIDC) for `release.yml` so no long-lived token exists; reserve `svatah-yam` on PyPI; point `yam.svatah.com` at the documentation.
-**Validate:** The repository exists; `npm org ls svatah` lists the owner; the release workflow's publish step has an OIDC trust and no `NPM_TOKEN` secret is required; the domain badge is visible on the organisation.
+**Do:** Create the GitHub organisation `SvatahLabs` and the empty repository `SvatahLabs/yam`; verify the `svatah.com` domain on the organisation and require two-factor authentication; create the npm organisation `yam` and configure trusted publishing (OIDC) for `release.yml` so no long-lived token exists; reserve `svatah-yam` on PyPI; point `yam.svatah.com` at the documentation.
+**Validate:** The repository exists; `npm org ls yam` lists the owner; the release workflow's publish step has an OIDC trust and no `NPM_TOKEN` secret is required; the domain badge is visible on the organisation.
 
 ### T13.2 The clean repository
 **Refs:** REQ-NFR-8, HLD §12 · **Est:** 1
@@ -541,7 +541,7 @@ The owner's decisions of 2026-09-06: Svatah is the brand and the organisation, a
 
 ### T13.3 The rename
 **Refs:** REQ-PKG-1, REQ-STD-1, LLD §1, §15, HLD §12 · **Est:** 2
-**Do:** `@svatah/cli` becomes `@svatah/yam` with the bin `yam`; every other package becomes `@svatah/yam-<name>`; `svatah-bindings` becomes `yam-bindings`; `yam.config.yaml`, `.yam/`, `~/.yam-node`, `YAM_*`; the ADE is `Yam ADE` with the bundle id `com.svatah.yam.ade`; the Java packages are `com.svatah.yam`, the Python client `svatah_yam` (`svatah-yam` on PyPI); the schema `$id`s live under `https://yam.svatah.com/schema/`; every manifest gains `repository`, `homepage` and `bugs` pointing at `SvatahLabs/yam`; `Svatah` stays wherever it names the brand, the organisation or the copyright; the progress records and prompts of Phases 0 to 12 keep their text as history.
+**Do:** `@svatah/yam` becomes `@svatah/yam` with the bin `yam`; every other package becomes `@svatah/yam-<name>`; `yam-bindings` becomes `yam-bindings`; `yam.config.yaml`, `.yam/`, `~/.yam-node`, `YAM_*`; the ADE is `Yam ADE` with the bundle id `com.svatah.yam.ade`; the Java packages are `com.svatah.yam`, the Python client `svatah_yam` (`svatah-yam` on PyPI); the schema `$id`s live under `https://yam.svatah.com/schema/`; every manifest gains `repository`, `homepage` and `bugs` pointing at `SvatahLabs/yam`; `Yam` stays wherever it names the brand, the organisation or the copyright; the progress records and prompts of Phases 0 to 12 keep their text as history.
 **Validate:** A repo check enumerates every allowed form of the old name (the scope, the domain, the organisation, the copyright, the historical records) and fails on any other; the six-command contract green; the generated schemas regenerated and their drift test clean; the Java runtime and both generated clients build; the release dry run's thirty tarballs carry the new names and no `workspace:*`.
 
 ### T13.4 The readiness corrections
@@ -573,16 +573,16 @@ Phase 13 total: 8.5 ideal days.
 ### T14.2 Patterns 34 to 38
 **Refs:** REQ-LANG-12, LLD §4.2 · **Est:** 2
 **Do:** The five process sentences and the pattern 19 form in the grammar, the IR, the reference with two examples each, and golden entries; the recorder binds `t<n>` and `f<path>` references without a model. Draft 2.17: also `Exactly one …` and `… should be unique` (pattern 32), the two-element form of pattern 24, the capture comparison of pattern 22, and `app.attach.serviceLock` with `{app.serviceUrl}` and `{app.serviceToken}`; and the ADE's Playwright cases refuse to start while another instance of the test bundle is running.
-**Validate:** Tier 1 golden at 100 percent; a flow that runs `svatah ui --json`, waits for the screen, and checks the exit code, green. Draft 2.17: the four run-inside-a-run checks, the count check, the geometry check, and the label-comparison check each two-sided.
+**Validate:** Tier 1 golden at 100 percent; a flow that runs `yam ui --json`, waits for the screen, and checks the exit code, green. Draft 2.17: the four run-inside-a-run checks, the count check, the geometry check, and the label-comparison check each two-sided.
 
-### T14.3 The six checks move to Svatah's side
+### T14.3 The six checks move to Yam's side
 **Refs:** REQ-SELF-1, 2, LLD §13.9 · **Est:** 2
 **Do:** The generated-client smoke, the artboard audit, the desktop gate script, the import's filesystem assertion, and the two cockpit checks become process flows in `evals/self`; their external sides stay.
-**Validate:** `svatah eval self` at 100 percent with Svatah reaching 45 of 48; the three remaining one-sided checks are the REQ-SELF-3 oracles and nothing else.
+**Validate:** `yam eval self` at 100 percent with Yam reaching 45 of 48; the three remaining one-sided checks are the REQ-SELF-3 oracles and nothing else.
 
 ### T14.4 The verification library
 **Refs:** REQ-SELF-4, LLD §13.9 · **Est:** 3
-**Do:** `@svatah/verify`: the catalogue schema as JSON Schema, the source runners, the comparison, the report; `svatah eval self --catalogue <file>` for any project; a README quick start that gates a stranger's Playwright project against its own flows in under ten minutes; packed with the release.
+**Do:** `@svatah/yam-verify`: the catalogue schema as JSON Schema, the source runners, the comparison, the report; `yam eval self --catalogue <file>` for any project; a README quick start that gates a stranger's Playwright project against its own flows in under ten minutes; packed with the release.
 **Validate:** The quick start scripted against the tarball in an empty project; the repository's own gate runs through the package with the same numbers.
 
 Phase 14 total: 11 ideal days.
@@ -682,7 +682,7 @@ Phase 14 total: 11 ideal days.
 | Phase | Ideal days | Releasable outcome |
 |---|---|---|
 | 0 | 11.5 | Foundation |
-| 1 | 25 | `@svatah/bindings` 0.1 for Playwright users, with published healing numbers |
+| 1 | 25 | `@svatah/yam-bindings` 0.1 for Playwright users, with published healing numbers |
 | 2 | 32.5 | Module (b) 0.1: prose flows, test behavior in Playwright Test; local service; module (a) CLI and replay plugin |
 | 3 | 21.5 | Recorder with model grounding; full healing; published evals; new ADE shell and core screens |
 | 4 | 22.5 | BiDi and Appium adapters; local and frontier tiers; REPL; MCP |
@@ -699,7 +699,7 @@ Phase 14 total: 11 ideal days.
 - Draft 2.17 (after Phase 12 verification): T13.2 extended with the last non-oracle sentences and the service lock; estimate unchanged at the phase level, 275.5 ideal days.
 - Draft 2.16 (process and terminal): Phase 13 added — the process adapter, patterns 34–38, the six checks moved, the verification library. Total 275.5 ideal days.
 - Draft 2.15 (after Phase 11 verification): T12.7 added — the one-sided list closed by patterns 32 and 33 and three extensions, the HTTP and SDK self flows, and the three findings. Total 264.5 ideal days.
-- Draft 2.14 (Svatah verifies Svatah): Phase 11 is now the corrections (T11.1) plus launch/quit/attach (T11.2), desktop grounding (T11.3), the self suite (T11.4), the parity gate (T11.5), and the record (T11.6); the release becomes Phase 12 with T12.1–T12.6. Total 259.5 ideal days.
+- Draft 2.14 (Yam verifies Yam): Phase 11 is now the corrections (T11.1) plus launch/quit/attach (T11.2), desktop grounding (T11.3), the self suite (T11.4), the parity gate (T11.5), and the record (T11.6); the release becomes Phase 12 with T12.1–T12.6. Total 259.5 ideal days.
 - Draft 2.13 (after Phase 10 verification): T11.7 added — the windowless launch, the live-gate findings, the Record toolbar, the corrected artboards, editing for flows and API requests. Total 246 ideal days.
 - Draft 2.12 (after Phase 9 verification): T10.4 added for the verification's corrections and the run-stop route. Total 241 ideal days.
 - Draft 2.11 (builder surfaces, after the owner's design review): Phase 9 (foundation: screen model, design system, SDK, two screens in both renderers) and Phase 10 (every screen, retire the old ones) inserted; the release phase and its tasks renumbered 11 and T11.x. Total 239 ideal days.

@@ -5,12 +5,12 @@
  * one of two ways, and this file covers both without knowing anything about the
  * adapter above it:
  *
- * 1. **An endpoint someone else started.** `SVATAH_BIDI_URL` names a running
+ * 1. **An endpoint someone else started.** `YAM_BIDI_URL` names a running
  *    BiDi WebSocket — geckodriver, chromedriver with `webSocketUrl: true`, Edge
  *    WebDriver, a remote grid, or a browser already launched by hand. This is
  *    the route for stock Chrome and Edge, whose remote agent speaks CDP rather
  *    than BiDi: their driver hosts the BiDi mapper, exactly as the W3C protocol
- *    intends, and Svatah connects to it.
+ *    intends, and Yam connects to it.
  * 2. **A Gecko binary this adapter launches.** Firefox's remote agent *is* a
  *    BiDi server: `firefox --remote-debugging-port=<p>` prints
  *    `WebDriver BiDi listening on ws://127.0.0.1:<p>` and serves the protocol at
@@ -27,7 +27,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { SessionError } from "@svatah/surface";
+import { SessionError } from "@svatah/yam-surface";
 
 /** Where a session is talking, and to what. */
 export interface BidiEndpoint {
@@ -90,10 +90,10 @@ export interface LaunchOptions {
   readonly onLog?: (line: string) => void;
 }
 
-/** `SVATAH_BIDI_URL`: attach to a BiDi endpoint someone else is hosting. */
-export const BIDI_URL_ENV = "SVATAH_BIDI_URL";
-/** `SVATAH_BIDI_BROWSER`: the Gecko binary to launch. */
-export const BIDI_BROWSER_ENV = "SVATAH_BIDI_BROWSER";
+/** `YAM_BIDI_URL`: attach to a BiDi endpoint someone else is hosting. */
+export const BIDI_URL_ENV = "YAM_BIDI_URL";
+/** `YAM_BIDI_BROWSER`: the Gecko binary to launch. */
+export const BIDI_BROWSER_ENV = "YAM_BIDI_BROWSER";
 
 const DEFAULT_STARTUP_TIMEOUT_MS = 60_000;
 
@@ -158,7 +158,7 @@ export function findGecko(env: NodeJS.ProcessEnv = process.env): string | undefi
 /**
  * Whether this machine can run the BiDi adapter at all.
  *
- * Used by the tests and by `svatah doctor`: a suite that silently passed because
+ * Used by the tests and by `yam doctor`: a suite that silently passed because
  * no browser was there would be worse than one that says it was skipped.
  */
 export function bidiAvailable(env: NodeJS.ProcessEnv = process.env): boolean {
@@ -208,7 +208,7 @@ export async function openEndpoint(options: LaunchOptions = {}): Promise<BidiEnd
  * conformance suite is that it can run beside another one.
  */
 async function launchGecko(binary: string, options: LaunchOptions): Promise<BidiEndpoint> {
-  const profile = mkdtempSync(join(tmpdir(), "svatah-bidi-"));
+  const profile = mkdtempSync(join(tmpdir(), "yam-bidi-"));
   const args = [
     "--remote-debugging-port=0",
     "--profile",

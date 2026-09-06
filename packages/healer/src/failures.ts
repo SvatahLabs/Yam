@@ -1,8 +1,8 @@
 /**
  * Where a heal job's input comes from (LLD §12, REQ-HEAL-1).
  *
- * "Input comes either from a Svatah run directory or from the `bind()` failure
- * lines written by host tests (`.svatah/bind-failures.jsonl`), so module (a)
+ * "Input comes either from a Yam run directory or from the `bind()` failure
+ * lines written by host tests (`.yam/bind-failures.jsonl`), so module (a)
  * users heal without flows."
  *
  * Both shapes reduce to the same thing: an element id that would not resolve, the
@@ -10,7 +10,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Candidate, SessionState, StepResult } from "@svatah/schema";
+import type { Candidate, SessionState, StepResult } from "@svatah/yam-schema";
 
 /** One failure to repair. */
 export interface HealInput {
@@ -42,7 +42,7 @@ interface BindFailureLine {
 }
 
 /**
- * Read `.svatah/bind-failures.jsonl`.
+ * Read `.yam/bind-failures.jsonl`.
  *
  * The file is append-only and a test run appends to it every time, so the same
  * element can appear many times. Only the most recent line per element is

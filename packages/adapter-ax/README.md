@@ -1,20 +1,20 @@
-# `@svatah/adapter-ax`
+# `@svatah/yam-adapter-ax`
 
 The macOS Accessibility adapter (REQ-ADP-7, [LLD §7.5](../../docs/spec/lld.md)).
-It implements the published agent surface over `AXUIElement`, so a Svatah flow
+It implements the published agent surface over `AXUIElement`, so a Yam flow
 drives a desktop application through the same `snapshot` / `act` / `read` /
 `check` calls it uses on a web page.
 
-Its conformance target is the **Svatah ADE** (REQ-ADE-6): an Electron
+Its conformance target is the **Yam ADE** (REQ-ADE-6): an Electron
 application whose Chromium publishes the renderer's accessibility tree once
 `app.setAccessibilitySupportEnabled(true)` has been called, which is what
-`SVATAH_A11Y=1` does.
+`YAM_A11Y=1` does.
 
 ```yaml
-# svatah.config.yaml
+# yam.config.yaml
 adapter: ax
 app:
-  processName: "Svatah ADE"
+  processName: "Yam ADE"
 ```
 
 There is no default process name. Driving "whatever is frontmost" would make a
@@ -23,7 +23,7 @@ run depend on what the person at the machine last clicked.
 ## The permission
 
 macOS gates the accessibility API behind a per-application grant. **The grant is
-for the program running Svatah**, not for Svatah and not for the application
+for the program running Yam**, not for Yam and not for the application
 being driven — a permission granted to Terminal does not carry to iTerm, to VS
 Code, or to a CI agent, and macOS does not re-read the setting for a process
 that is already running.
@@ -35,7 +35,7 @@ System Settings → Privacy & Security → Accessibility → add your terminal, 
 Check it before anything else:
 
 ```bash
-svatah surface doctor --adapter ax
+yam surface doctor --adapter ax
 ```
 
 | It reports | It means |
@@ -56,7 +56,7 @@ that was there all along.
 window:
 
 ```
-ok    ax/session   9 application(s) own a window: Finder, Svatah ADE, …
+ok    ax/session   9 application(s) own a window: Finder, Yam ADE, …
 warn  ax/session   only loginwindow owns a window — the display is locked
 ```
 
@@ -161,7 +161,7 @@ an Electron application: a `<select id="record-gateway">` has an `id` and no
 
 ```bash
 pnpm -r build
-pnpm --filter @svatah/ade exec electron-forge package
+pnpm --filter @svatah/yam-ade exec electron-forge package
 node scripts/desktop-conformance.mjs --adapter ax --report reports/adapter-ax.md
 ```
 

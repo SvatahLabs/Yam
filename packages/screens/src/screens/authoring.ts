@@ -9,7 +9,7 @@
  * against the fake service" — and rendered neither. This file is what the
  * `Results`, `Bindings`, `RecordReview` and `HealReview` artboards actually
  * show, and it is the only place that decides what any of it means: the ADE and
- * `svatah ui` draw these rows differently and agree about every word in them.
+ * `yam ui` draw these rows differently and agree about every word in them.
  *
  * ## The two that have no `GET`
  *
@@ -125,7 +125,7 @@ function subjectOf(summary: SummaryResponse, results: readonly StepResultRespons
   const keys = Object.keys(summary.flows ?? {}).filter((one) => one !== "(selected)");
   if (keys.length > 0) return keys.map((one) => one.split("/").pop() ?? one).join(", ");
   /*
-   * `svatah run --story <name>` writes one `(selected)` entry, so the flow key
+   * `yam run --story <name>` writes one `(selected)` entry, so the flow key
    * says nothing. The stories the results name are what the run was about, and
    * that is what the `Results` artboard's second column shows.
    */
@@ -264,7 +264,7 @@ const runsScreen: Screen<RunsState> = {
               plural(rows.length, "run"),
               rows.length === summaries.length ? undefined : `of ${summaries.length}`,
             ),
-        selected ?? "`svatah run` writes one",
+        selected ?? "`yam run` writes one",
       ),
       screen: "runs",
       rows,
@@ -808,7 +808,7 @@ const healScreen: Screen<HealState> = {
         candidates.length === 0
           ? "No run has a failure to heal"
           : `${plural(candidates.length, "run")} with a failure`,
-        runId ?? "`svatah heal --run <id>` does the same thing",
+        runId ?? "`yam heal --run <id>` does the same thing",
       ),
       screen: "heal",
       ...(runId === undefined ? {} : { runId }),

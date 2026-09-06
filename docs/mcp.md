@@ -1,6 +1,6 @@
-# `svatah mcp`
+# `yam mcp`
 
-Svatah's operations and its raw agent surface, over the Model Context Protocol,
+Yam's operations and its raw agent surface, over the Model Context Protocol,
 so an external agent can drive a project and have its exploration captured
 (REQ-AGT-2, REQ-BEH-4, LLD §15, §13.4).
 
@@ -8,9 +8,9 @@ so an external agent can drive a project and have its exploration captured
 // An MCP client's server list
 {
   "mcpServers": {
-    "svatah": {
+    "yam": {
       "command": "npx",
-      "args": ["svatah", "mcp", "/path/to/the/project"]
+      "args": ["yam", "mcp", "/path/to/the/project"]
     }
   }
 }
@@ -28,11 +28,11 @@ implementation, which is the same rule the local service follows (LLD §13.5).
 
 | Tool | |
 |---|---|
-| `svatah_compile` | Compile every flow into a plan, with the diagnostics `svatah compile` reports. `write: true` also writes `.svatah/plan.json` |
-| `svatah_lint` | Everything `svatah lint` reports |
-| `svatah_run` | Replay the plan, deterministically and with no model. Returns the run id, the totals and every step's status |
-| `svatah_bindings` | The store: every element the project has recorded, and the phrases that name it |
-| `svatah_results` | The summary and step results of a run under `runs/` |
+| `yam_compile` | Compile every flow into a plan, with the diagnostics `yam compile` reports. `write: true` also writes `.yam/plan.json` |
+| `yam_lint` | Everything `yam lint` reports |
+| `yam_run` | Replay the plan, deterministically and with no model. Returns the run id, the totals and every step's status |
+| `yam_bindings` | The store: every element the project has recorded, and the phrases that name it |
+| `yam_results` | The summary and step results of a run under `runs/` |
 
 `workflow` and `tool` are LLD §15's remaining operation tools and arrive with
 T5.2 and T5.3; a server that offered them now would be offering something that
@@ -106,20 +106,20 @@ debug from.
 
 ## What happens to it next
 
-`svatah trajectory compile` — T5.5 — turns the file into a story draft, a plan
+`yam trajectory compile` — T5.5 — turns the file into a story draft, a plan
 fragment and `verified: false` bindings under `proposals/<date>/`, for review.
 Phase 4 builds the capture; the shape above is what the compiler reads.
 
-That is ADR-16 in practice: Svatah does not own an exploration agent. It owns the
+That is ADR-16 in practice: Yam does not own an exploration agent. It owns the
 surface an agent explores through, and the file that comes out.
 
 ## Options
 
 | | |
 |---|---|
-| `svatah mcp [dir]` | the project; the current directory by default |
+| `yam mcp [dir]` | the project; the current directory by default |
 | `--trajectory <path.jsonl>` | where the trajectory goes; `runs/<session>/trajectory.jsonl` by default |
 | `--session <id>` | fix the session id, so the trajectory's path is predictable |
 
 The session opens where `config.app.baseUrl` says, subject to LLD §15's
-precedence — the flag, then `SVATAH_BASE_URL`, then the config.
+precedence — the flag, then `YAM_BASE_URL`, then the config.

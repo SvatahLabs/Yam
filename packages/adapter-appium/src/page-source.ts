@@ -15,8 +15,8 @@
  * for the same ideas, so both spellings are read and the adapter above does not
  * have to know which platform it is on.
  */
-import { APPIUM_ANDROID_ROLE_MAP, FALLBACK_ROLE, isInteractiveRole } from "@svatah/surface";
-import type { SnapshotNode } from "@svatah/schema";
+import { APPIUM_ANDROID_ROLE_MAP, FALLBACK_ROLE, isInteractiveRole } from "@svatah/yam-surface";
+import type { SnapshotNode } from "@svatah/yam-schema";
 
 /** One element as the page source describes it, before any normalisation. */
 export interface SourceNode {
@@ -211,7 +211,7 @@ export function boxOf(node: SourceNode): [number, number, number, number] | unde
 /**
  * The role a native class means, in the ARIA vocabulary (REQ-SURF-4).
  *
- * Android goes through the published table in `@svatah/surface`, so the mapping
+ * Android goes through the published table in `@svatah/yam-surface`, so the mapping
  * the documentation prints and the mapping the adapter applies are one thing.
  * iOS's `XCUIElementType*` names are regular enough to derive from, which is
  * better than a second table that would fall behind the first.

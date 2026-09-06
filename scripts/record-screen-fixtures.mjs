@@ -6,9 +6,9 @@
  *   node scripts/record-screen-fixtures.mjs --check    # fail if the committed
  *                                                     # fixtures have drifted
  *
- * `@svatah/screens` is tested against a fake service, and a fake service is only
+ * `@svatah/yam-screens` is tested against a fake service, and a fake service is only
  * worth testing against if its answers are ones a real service gave. So this
- * starts `apps/sample-web`, wires the service exactly as `svatah serve` does,
+ * starts `apps/sample-web`, wires the service exactly as `yam serve` does,
  * makes the run the mockups are drawn from, and writes every response into
  * `packages/screens/test/fixtures/`.
  *
@@ -23,7 +23,7 @@
  * ## Why it needs a browser and the fixtures do not
  *
  * The recording needs Chromium and the sample application; the tests that read
- * the recording need neither, which is what keeps `@svatah/screens` a fast,
+ * the recording need neither, which is what keeps `@svatah/yam-screens` a fast,
  * DOM-free package. `--check` is what a verifier runs to prove the recording is
  * still what the service says.
  *
@@ -132,8 +132,8 @@ function comparable(text) {
     .replace(/"durationMs": [0-9.]+/g, '"durationMs": 0');
 }
 
-/** `svatah <args>`, as a person would run it, with the sample application's URL. */
-function svatah(args, options = {}) {
+/** `yam <args>`, as a person would run it, with the sample application's URL. */
+function yam(args, options = {}) {
   const { NODE_OPTIONS, ...environment } = process.env;
   void NODE_OPTIONS;
   return new Promise((done) => {
@@ -161,7 +161,7 @@ if (!existsSync(CLI)) {
  *
  * `runs/` and `node_modules/` are left behind: the first is what made the check
  * depend on its surroundings, and the second is a symlink farm nobody needs to
- * copy. `.svatah/` goes too — it is a build product of `svatah compile` and the
+ * copy. `.yam/` goes too — it is a build product of `yam compile` and the
  * run makes its own.
  */
 const app = await startSampleApp(0);
@@ -171,14 +171,14 @@ const app = await startSampleApp(0);
  * normalised against only one of the two spellings keeps the other, which is an
  * absolute path from this machine in a committed fixture.
  */
-const workspace = realpathSync(mkdtempSync(join(tmpdir(), "svatah-screen-fixtures-")));
+const workspace = realpathSync(mkdtempSync(join(tmpdir(), "yam-screen-fixtures-")));
 const PROJECT = join(workspace, "fixtures");
 cpSync(SOURCE, PROJECT, {
   recursive: true,
   filter: (from) =>
     !from.includes(`${sep}node_modules`) &&
     !from.includes(`${sep}runs`) &&
-    !from.includes(`${sep}.svatah`),
+    !from.includes(`${sep}.yam`),
 });
 const runsDir = join(PROJECT, "runs");
 let serve;
@@ -186,7 +186,7 @@ try {
   /*
    * The run first, so `GET /runs` and the Flows screen's gutter have something
    * to read. Through the command line, because the fixtures have to be what
-   * *the service* answers and the service calls the same functions `svatah run`
+   * *the service* answers and the service calls the same functions `yam run`
    * does — a fixture assembled in this process would be a fixture about this
    * script.
    *
@@ -194,7 +194,7 @@ try {
    * runs the compensating story, and that is the subject of the Run artboard.
    */
   rmSync(join(runsDir, RUN_ID), { recursive: true, force: true });
-  const ran = await svatah([
+  const ran = await yam([
     "run",
     PROJECT,
     "--host",
@@ -209,7 +209,7 @@ try {
   ]);
   if (ran.code !== 11) {
     process.stderr.write(
-      `\`svatah run\` exited ${ran.code}; the Run artboard is drawn from an aborted run ` +
+      `\`yam run\` exited ${ran.code}; the Run artboard is drawn from an aborted run ` +
         `(exit 11).\n${ran.output}\n`,
     );
     process.exit(1);
@@ -220,14 +220,14 @@ try {
     const child = spawn(
       process.execPath,
       [CLI, "serve", PROJECT, "--port", "0", "--token", TOKEN],
-      { cwd: ROOT, env: { ...process.env, SVATAH_BASE_URL: app.origin } },
+      { cwd: ROOT, env: { ...process.env, YAM_BASE_URL: app.origin } },
     );
     serve = child;
     let buffer = "";
-    const timer = setTimeout(() => reject(new Error("`svatah serve` printed no handshake")), 30_000);
+    const timer = setTimeout(() => reject(new Error("`yam serve` printed no handshake")), 30_000);
     child.stdout.on("data", (chunk) => {
       buffer += String(chunk);
-      const match = /^svatah serve listening url=(\S+) token=(\S+)$/m.exec(buffer);
+      const match = /^yam serve listening url=(\S+) token=(\S+)$/m.exec(buffer);
       if (match !== null) {
         clearTimeout(timer);
         resolve({ url: match[1], token: match[2] });
@@ -264,7 +264,7 @@ try {
    * Every binding file, not only the list. `GET /bindings` answers `{ id, file }`
    * rows and `GET /bindings/:id` answers the YAML — which is the file the CLI
    * reads, so a screen that shows a candidate table reads the same bytes
-   * `svatah bindings show` prints.
+   * `yam bindings show` prints.
    */
   const bindingList = await call("/bindings");
   const bindingById = {};

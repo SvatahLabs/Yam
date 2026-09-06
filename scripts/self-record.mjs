@@ -6,7 +6,7 @@
  *
  * The T11.3 Validate items, as a command:
  *
- *   > `svatah record --gateway fake` on a self flow against the ADE writes
+ *   > `yam record --gateway fake` on a self flow against the ADE writes
  *   > every binding; the same flow replays.
  *
  * ## Against a copy, always
@@ -34,10 +34,10 @@ import { copyProjectParts } from "./lib/self-project.mjs";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 const source = join(ROOT, "evals", "self");
-const bundle = join(ROOT, "apps", "ade", "out", "Svatah ADE-darwin-arm64", "Svatah ADE.app");
+const bundle = join(ROOT, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
 const keep = process.argv.includes("--keep");
 
-const project = mkdtempSync(join(tmpdir(), "svatah-self-record-"));
+const project = mkdtempSync(join(tmpdir(), "yam-self-record-"));
 const skipped = copyProjectParts(source, project, ["flows", "steps", "api"]);
 if (skipped.length > 0) {
   process.stderr.write(`the self project has no ${skipped.join(", ")}; copied without\n`);
@@ -45,13 +45,13 @@ if (skipped.length > 0) {
 cpSync(join(source, "data.yaml"), join(project, "data.yaml"));
 mkdirSync(join(project, "bindings"), { recursive: true });
 
-const config = readFileSync(join(source, "svatah.config.yaml"), "utf8").replace(
+const config = readFileSync(join(source, "yam.config.yaml"), "utf8").replace(
   /bundle: ".*"/,
   `bundle: ${JSON.stringify(bundle)}`,
 );
-writeFileSync(join(project, "svatah.config.yaml"), config, "utf8");
+writeFileSync(join(project, "yam.config.yaml"), config, "utf8");
 
-const executable = join(bundle, "Contents", "MacOS", "Svatah ADE");
+const executable = join(bundle, "Contents", "MacOS", "Yam ADE");
 
 /**
  * Stop the ADE, and do not come back until it is gone.
@@ -68,7 +68,7 @@ const stop = () => {
       .split("\n")
       .filter((one) => one.trim() !== "");
   if (alive().length === 0) return;
-  spawnSync("osascript", ["-e", 'tell application id "com.electron.svatah-ade" to quit'], {
+  spawnSync("osascript", ["-e", 'tell application id "com.electron.yam-ade" to quit'], {
     encoding: "utf8",
   });
   for (let waited = 0; waited < 20_000 && alive().length > 0; waited += 250) {
@@ -83,7 +83,7 @@ const stop = () => {
 };
 
 const run = (what, extra) => {
-  process.stderr.write(`\n$ svatah ${what} ${extra.join(" ")}\n`);
+  process.stderr.write(`\n$ yam ${what} ${extra.join(" ")}\n`);
   const ran = spawnSync(process.execPath, [cli, what, project, ...extra], {
     encoding: "utf8",
     cwd: ROOT,

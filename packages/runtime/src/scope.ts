@@ -23,7 +23,7 @@
  * writing one down (REQ-NFR-6). Knowing it here rather than pattern-matching for
  * things that look like passwords is what makes the guarantee checkable.
  */
-import type { Signature, ValueRef } from "@svatah/schema";
+import type { Signature, ValueRef } from "@svatah/yam-schema";
 
 /** What a secret becomes wherever it would otherwise be written. */
 export const REDACTED = "«redacted»";

@@ -59,7 +59,7 @@ describe("parsing an Appium page source", () => {
   it("reads attributes, including XML-escaped text", () => {
     const error = source("android-login.xml").children[0]!.children[6]!;
     expect(error.attrs["text"]).toBe("Invalid credentials & try again");
-    expect(error.attrs["resource-id"]).toBe("com.svatah.sample:id/error");
+    expect(error.attrs["resource-id"]).toBe("com.yam.sample:id/error");
   });
 
   it("decodes every entity a label can contain", () => {
@@ -119,11 +119,11 @@ describe("roles come from the published table (REQ-SURF-4)", () => {
 
   it("gives an application's own class a role from what it is", () => {
     /*
-     * `com.svatah.sample.widget.FancyButton` is in no table and is a button to
+     * `com.yam.sample.widget.FancyButton` is in no table and is a button to
      * anyone looking at the screen. A node that fell to `generic` would be one
      * the recorder cannot describe and a person cannot name.
      */
-    expect(roleOf({ tag: "com.svatah.sample.widget.FancyButton", attrs: {}, children: [] })).toBe(
+    expect(roleOf({ tag: "com.yam.sample.widget.FancyButton", attrs: {}, children: [] })).toBe(
       "button",
     );
     expect(roleOf({ tag: "com.acme.ui.PrettyEditText", attrs: {}, children: [] })).toBe("textbox");
@@ -221,7 +221,7 @@ describe("the whole conversion (LLD §2.2)", () => {
       { ref: "r8", role: "text", name: "Invalid credentials & try again" },
     ]);
     expect(nodes[3]!.box).toEqual([42, 360, 996, 144]);
-    expect(nodes[3]!.native?.["resource-id"]).toBe("com.svatah.sample:id/username");
+    expect(nodes[3]!.native?.["resource-id"]).toBe("com.yam.sample:id/username");
   });
 
   it("counts depth in nodes rather than in layout containers", () => {
@@ -252,7 +252,7 @@ describe("the whole conversion (LLD §2.2)", () => {
     });
     const exposed = nodes.map(({ path: _path, ...node }) => node);
     expect(nodes[3]!.native?.["resource-id"]).toBeUndefined();
-    expect(JSON.stringify(exposed)).not.toContain("com.svatah.sample:id/username");
+    expect(JSON.stringify(exposed)).not.toContain("com.yam.sample:id/username");
   });
 });
 

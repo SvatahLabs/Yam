@@ -1,14 +1,14 @@
 /**
- * `svatah eval grounding` (T3.4, REQ-REC-10, REQ-PKG-4, LLD §15, §16).
+ * `yam eval grounding` (T3.4, REQ-REC-10, REQ-PKG-4, LLD §15, §16).
  *
  * ```
- * svatah eval grounding [--base-url <url>] [--cases <path.jsonl>]
+ * yam eval grounding [--base-url <url>] [--cases <path.jsonl>]
  *                       [--gateway anthropic|fake] [--cache <dir>]
  *                       [--report <path.md>] [--limit <n>] [--json]
  * ```
  *
  * The other suites stay where they are: `eval healing` is module (a)'s and runs
- * from `@svatah/bindings-cli`, so a plain Playwright user has it without the flow
+ * from `@svatah/yam-bindings-cli`, so a plain Playwright user has it without the flow
  * language. This one needs a model gateway and the recorder, so it is module
  * (b)'s and lives here — in `eval-grounding.ts`, not `eval.ts`, because
  * `commands/eval.ts` moved to `bindings-cli` in T2.12 and a file back under that
@@ -29,22 +29,22 @@
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { canonicalJson, DEFAULT_CONFIG, DEFAULT_IGNORE_ATTRIBUTES, type Config } from "@svatah/schema";
+import { canonicalJson, DEFAULT_CONFIG, DEFAULT_IGNORE_ATTRIBUTES, type Config } from "@svatah/yam-schema";
 import {
   anthropicGateway,
   credentialInEnvironment,
   DiskCache,
   fakeGateway,
   type Gateway,
-} from "@svatah/gateway";
+} from "@svatah/yam-gateway";
 import {
   GROUNDING_THRESHOLD,
   renderGroundingEvalMarkdown,
   renderGroundingEvalSummary,
   runGroundingEval,
-} from "@svatah/recorder";
-import type { AgentSurface } from "@svatah/surface";
-import { createSurface } from "@svatah/surface";
+} from "@svatah/yam-recorder";
+import type { AgentSurface } from "@svatah/yam-surface";
+import { createSurface } from "@svatah/yam-surface";
 import {
   boolOption,
   numberOption,
@@ -54,7 +54,7 @@ import {
   type ExitCode,
   sessionTarget,
   type ParsedArgs,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
 import { groundingAnswers, readCases } from "../grounding-answers.js";
 
@@ -62,7 +62,7 @@ export async function groundingEvalCommand(
   args: ParsedArgs,
   io: CommandIo,
 ): Promise<ExitCode> {
-  // Flag, then `SVATAH_BASE_URL`, then `config.app`, then the sample app's
+  // Flag, then `YAM_BASE_URL`, then `config.app`, then the sample app's
   // port (LLD §15, Draft 2.5).
   const target = sessionTarget(args, {
     root: stringOption(args, "project") ?? ".",
@@ -81,7 +81,7 @@ export async function groundingEvalCommand(
    * (`desktop-cases.jsonl`) is keyed on a window title rather than a page and
    * is driven by launching an application, not by navigating to a URL. This
    * eval opens `apps/sample-web` at `${baseUrl}${page}`, so a case with no page
-   * is a case it has nowhere to take. `svatah eval self` is where the desktop
+   * is a case it has nowhere to take. `yam eval self` is where the desktop
    * cases are measured (T11.5).
    */
   const all = readCases(casesPath).filter(
@@ -222,7 +222,7 @@ function gatewayFor(
 
   return anthropicGateway({
     model: DEFAULT_CONFIG.record.model,
-    cache: new DiskCache(cache ?? ".svatah/model-cache"),
+    cache: new DiskCache(cache ?? ".yam/model-cache"),
     onCall: (line) => {
       if (!boolOption(args, "json")) io.err(`      ${line}`);
     },

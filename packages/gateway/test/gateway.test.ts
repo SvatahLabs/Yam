@@ -259,7 +259,7 @@ describe("the cache (REQ-NFR-2)", () => {
   });
 
   it("survives a process, and a corrupt entry is a miss rather than a crash", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "svatah-gateway-cache-"));
+    const dir = mkdtempSync(join(tmpdir(), "yam-gateway-cache-"));
     try {
       const { client, seen } = stubClient(reply('{"ref":"r7","why":"ok"}'));
       await anthropicGateway({ client, cache: new DiskCache(dir) }).ask(ask());

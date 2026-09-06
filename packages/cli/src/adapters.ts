@@ -11,12 +11,12 @@
  * to accommodate either. That is the claim REQ-SURF-2 makes, and this file is
  * where it is either true or not.
  */
-import { registerPlaywrightAdapter } from "@svatah/adapter-playwright";
-import { registerBidiAdapter } from "@svatah/adapter-bidi";
-import { registerAppiumAdapter } from "@svatah/adapter-appium";
-import { registerHttpAdapter } from "@svatah/adapter-http";
-import { registerAxAdapter } from "@svatah/adapter-ax";
-import { registerUiaAdapter } from "@svatah/adapter-uia";
+import { registerPlaywrightAdapter } from "@svatah/yam-adapter-playwright";
+import { registerBidiAdapter } from "@svatah/yam-adapter-bidi";
+import { registerAppiumAdapter } from "@svatah/yam-adapter-appium";
+import { registerHttpAdapter } from "@svatah/yam-adapter-http";
+import { registerAxAdapter } from "@svatah/yam-adapter-ax";
+import { registerUiaAdapter } from "@svatah/yam-adapter-uia";
 
 let registered = false;
 
@@ -27,7 +27,7 @@ export function registerAllAdapters(): void {
   registerAppiumAdapter();
   /*
    * The desktop adapters are registered on every platform, not only on their
-   * own (T6.1, T6.2). `svatah surface doctor` has to be able to say "ax: not
+   * own (T6.1, T6.2). `yam surface doctor` has to be able to say "ax: not
    * macOS" on Windows, and `createSurface({ adapter: "uia" })` has to fail with
    * the adapter's own message about the host rather than with "no such
    * adapter", which would send someone looking for a missing install.

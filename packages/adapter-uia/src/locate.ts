@@ -1,7 +1,7 @@
 /**
  * `Candidate` → elements of a UI Automation tree (T6.1, LLD §7.5, §3.3).
  *
- * The sibling of `@svatah/adapter-ax`'s `locate.ts`. UIA does have a query
+ * The sibling of `@svatah/yam-adapter-ax`'s `locate.ts`. UIA does have a query
  * language — `AutomationElement.FindAll` with a `PropertyCondition` — and it is
  * deliberately not used: a `FindAll` is another marshalled round trip per
  * candidate, and matching against the snapshot the adapter already took means a
@@ -10,8 +10,8 @@
  * A candidate kind this tree cannot express is refused with the reason, not
  * matched against nothing (LLD §6.3).
  */
-import type { Candidate } from "@svatah/schema";
-import { LocateError } from "@svatah/surface";
+import type { Candidate } from "@svatah/yam-schema";
+import { LocateError } from "@svatah/yam-surface";
 import type { UiaSnapshotNode } from "./tree.js";
 
 /** Candidate kinds that belong to a web or mobile adapter. */

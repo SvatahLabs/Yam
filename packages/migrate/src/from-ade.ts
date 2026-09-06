@@ -1,8 +1,8 @@
 /**
- * `svatah migrate --from-ade <path>` (T6.6, REQ-ADE-9, LLD §13.5).
+ * `yam migrate --from-ade <path>` (T6.6, REQ-ADE-9, LLD §13.5).
  *
- * > Prototype database import (`svatah migrate --from-ade <path>`, P2) maps the
- * > prototype's electron-db records: `project` → `svatah.config.yaml` (name,
+ * > Prototype database import (`yam migrate --from-ade <path>`, P2) maps the
+ * > prototype's electron-db records: `project` → `yam.config.yaml` (name,
  * > browser, threadCount → workers, url → baseUrl, takeStepScreenshot →
  * > screenshots), `flows` → `flows/<filename>` then v2→v3 migration,
  * > `project.locatorFile` JSON → `.locator` → seed bindings, `config.dataFile`
@@ -44,7 +44,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { canonicalYaml, SCHEMA_VERSION } from "@svatah/schema";
+import { canonicalYaml, SCHEMA_VERSION } from "@svatah/yam-schema";
 import type { ReviewNote } from "./report.js";
 
 /** One electron-db table, as rows. */
@@ -182,7 +182,7 @@ export function extractAdeProject(options: FromAdeOptions): FromAdeResult {
   const screenshots = String(config?.["takeStepScreenshot"] ?? "").toLowerCase();
   const browser = String(config?.["browser"] ?? "").toLowerCase();
 
-  const svatahConfig: Record<string, unknown> = {
+  const yamConfig: Record<string, unknown> = {
     schemaVersion: SCHEMA_VERSION,
     project: projectName,
     environment: "test",
@@ -241,14 +241,14 @@ export function extractAdeProject(options: FromAdeOptions): FromAdeResult {
   }
 
   writeFileSync(
-    join(options.destination, "svatah.config.yaml"),
-    `# Imported from a Svatah ADE prototype database (REQ-ADE-9, LLD §13.5).\n` +
+    join(options.destination, "yam.config.yaml"),
+    `# Imported from a Yam ADE prototype database (REQ-ADE-9, LLD §13.5).\n` +
       `# Source: ${options.source}\n` +
       `# Results and screenshots are deliberately not imported.\n` +
-      canonicalYaml(svatahConfig),
+      canonicalYaml(yamConfig),
     "utf8",
   );
-  files.push("svatah.config.yaml");
+  files.push("yam.config.yaml");
 
   /* ── the flows ──────────────────────────────────────────────────────────── */
 
@@ -354,7 +354,7 @@ export function extractAdeProject(options: FromAdeOptions): FromAdeResult {
     }
     writeFileSync(
       join(options.destination, "api", `${slug(name)}.yaml`),
-      `# Imported from a Svatah ADE prototype database (REQ-ADE-9).\n${canonicalYaml(request)}`,
+      `# Imported from a Yam ADE prototype database (REQ-ADE-9).\n${canonicalYaml(request)}`,
       "utf8",
     );
     files.push(`api/${slug(name)}.yaml`);

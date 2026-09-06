@@ -1,4 +1,4 @@
-package dev.svatah.runtime;
+package com.svatah.yam.runtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.microsoft.playwright.Browser;
@@ -16,7 +16,7 @@ import java.util.Locale;
 /**
  * The agent surface, over Playwright for Java (T6.4, LLD §2, §7.1).
  *
- * <p>Narrower than {@code @svatah/adapter-playwright} on purpose. A conformance
+ * <p>Narrower than {@code @svatah/yam-adapter-playwright} on purpose. A conformance
  * runtime has to execute the published artifacts and produce identical results —
  * it does not have to be a second product (HLD §13 Phase 6). What is here is
  * what the runtime conformance fixture exercises, and anything else fails loudly

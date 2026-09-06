@@ -5,7 +5,7 @@
  *
  *   node scripts/self-http.mjs [--keep]
  *
- * > `evals/self/` is a Svatah project: flows … over the HTTP adapter against
+ * > `evals/self/` is a Yam project: flows … over the HTTP adapter against
  * > the local service …
  *
  * This is the "D5" the Phase 11 verification carried: the check catalogue named
@@ -32,7 +32,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 const keep = process.argv.includes("--keep");
 
-/** `svatah serve listening url=http://127.0.0.1:1234 token=…`, off its stdout. */
+/** `yam serve listening url=http://127.0.0.1:1234 token=…`, off its stdout. */
 function startService() {
   const child = spawn(process.execPath, [cli, "serve", join(ROOT, "evals", "fixtures"), "--port", "0"], {
     cwd: ROOT,
@@ -77,14 +77,14 @@ try {
       stdio: "inherit",
       env: {
         ...process.env,
-        SVATAH_SELF_SERVICE_URL: url,
+        YAM_SELF_SERVICE_URL: url,
         /*
          * The token is a secret in `evals/self/http/data.yaml`, so it is
          * redacted in results, in the audit and anywhere else a person or a
          * model could read it (REQ-NFR-6). It is in this process's environment
          * and nowhere else.
          */
-        SVATAH_SELF_SERVICE_TOKEN: token,
+        YAM_SELF_SERVICE_TOKEN: token,
       },
     },
   );

@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/bindings",
+  "name": "@svatah/yam-bindings",
   "version": "0.1.0",
   "description": "Bindings store, context hash, resolver, synthesis, fingerprint, relocalization",
   "license": "Apache-2.0",
@@ -26,8 +26,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/schema": "workspace:*",
-    "@svatah/surface": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
+    "@svatah/yam-surface": "workspace:*",
     "yaml": "catalog:"
   },
   "devDependencies": {

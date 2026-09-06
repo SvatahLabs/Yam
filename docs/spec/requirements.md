@@ -1,4 +1,4 @@
-# Svatah — Requirements Specification
+# Yam — Requirements Specification
 
 Status: Draft 2.1 · Date: 2026-09-02 · Owner: Atul Sharma
 Companion documents: [hld.md](hld.md) · [lld.md](lld.md) · [tasks.md](tasks.md)
@@ -13,7 +13,7 @@ Verification methods: **T** automated test, **E** eval suite with a numeric thre
 
 ## 1. Objective and positioning
 
-Svatah is a **deterministic automation runtime with a standard agent surface**. It lets a person or an agent describe a behavior once in plain language, compiles that description into a typed plan with element bindings by driving the target platform, and then replays the plan deterministically with no model in the loop, on any platform for which an adapter exists.
+Yam is a **deterministic automation runtime with a standard agent surface**. It lets a person or an agent describe a behavior once in plain language, compiles that description into a typed plan with element bindings by driving the target platform, and then replays the plan deterministically with no model in the loop, on any platform for which an adapter exists.
 
 It is built in three layers:
 
@@ -21,7 +21,7 @@ It is built in three layers:
 2. **Determinism.** The step IR, the bindings store with fingerprints, the resolver, model-free relocalization, provenance, checkpoints, and replay. This layer is the standard the project publishes.
 3. **Behavior.** Plain-language flows compiled to plans. Three behaviors run on the same plan: **test** (expectations and a pass or fail oracle), **workflow** (guards, typed inputs and outputs, checkpoints, abort policy), and **tool** (a recorded flow exposed over MCP as a deterministic tool an agent calls instead of driving the platform itself).
 
-What Svatah is not: a testing tool as its identity, an RPA platform (no scheduler, queue, human-in-the-loop UI, or dashboard), a browser fork, or a per-step model agent.
+What Yam is not: a testing tool as its identity, an RPA platform (no scheduler, queue, human-in-the-loop UI, or dashboard), a browser fork, or a per-step model agent.
 
 Constraints stated by the owner:
 
@@ -31,7 +31,7 @@ Constraints stated by the owner:
 4. The core moves to a stack where the surface, the model gateway, and the runner ecosystem are native; multi-language consumption comes from published schemas and foreign runtimes.
 5. Pieces must be adoptable alone. The bindings and healing module for plain Playwright users ships first.
 6. Testing is the first fully supported behavior because it has an oracle and a controlled environment, but the automation guarantees are in the contract from the start.
-7. A desktop client, the Svatah ADE (Automation Development Environment), is part of the offering. The existing prototype at `github.com/a-t-u-l/svatahADE` (Electron, spawning the Java service jar) is the blueprint of the jobs such a client must do: manage projects, author flows, run them, inspect results and screenshots, exercise APIs. The new ADE is designed to the three-layer vision around the new artifacts; none of the prototype's code, storage, or UI framework is a constraint. The ADE is an Electron application and doubles as the desktop application against which the OS accessibility adapters are validated.
+7. A desktop client, the Yam ADE (Automation Development Environment), is part of the offering. The existing prototype at `github.com/a-t-u-l/svatahADE` (Electron, spawning the Java service jar) is the blueprint of the jobs such a client must do: manage projects, author flows, run them, inspect results and screenshots, exercise APIs. The new ADE is designed to the three-layer vision around the new artifacts; none of the prototype's code, storage, or UI framework is a constraint. The ADE is an Electron application and doubles as the desktop application against which the OS accessibility adapters are validated.
 
 ## 2. Glossary
 
@@ -76,7 +76,7 @@ Constraints stated by the owner:
 | REQ-ADP-3 | HTTP calls from a web flow can share the session's cookies or not. | P0 | T |
 | REQ-ADP-4 | WebDriver BiDi adapter drives stock Chrome, Edge, and Firefox with no patched builds; it proves the surface boundary and passes the conformance suite. | P1 | T |
 | REQ-ADP-5 | Appium adapter targets Android Chrome and native Android; native bindings use accessibility id, resource id, and XPath candidates. | P1 | T |
-| REQ-ADP-6 | Windows UI Automation adapter drives desktop applications; candidates are automation id, role plus name, and tree path. The conformance target is the new Svatah ADE Electron application. | P2 | T |
+| REQ-ADP-6 | Windows UI Automation adapter drives desktop applications; candidates are automation id, role plus name, and tree path. The conformance target is the new Yam ADE Electron application. | P2 | T |
 | REQ-ADP-7 | macOS Accessibility adapter with the same candidate kinds; documents the accessibility permission grant. Conformance target as REQ-ADP-6. The adapter snapshots the ADE's project screen within the surface's default deadline, and its conformance report records nodes read and milliseconds per node (Draft 2.8). | P2 | T |
 | REQ-ADP-8 | Linux AT-SPI adapter. | P3 | T |
 | REQ-ADP-9 | WebMCP-aware behaviour: when a page declares tools, the recorder may store a `webmcp` candidate and the executor prefers it over locators for that binding. | P2 | T |
@@ -96,7 +96,7 @@ Constraints stated by the owner:
 | REQ-LANG-6 | Variables use braces: `{name}` same story, `{Story name.name}` another story in the flow, `{data.key}` run-level data, `{input.name}` a story input. Replaces `#var#`, `#story.var#`, `$key`. | P0 | T |
 | REQ-LANG-7 | Capture with `… as <name>` or `Remember <target> as <name>`. Replaces `var : name` and `var(type) : name`. | P0 | T |
 | REQ-LANG-8 | API steps reference named requests in `api/`: `Call the "active count" API and remember the response as activeCount`. | P0 | T |
-| REQ-LANG-9 | Run-level data comes from `data.yaml` (or JSON) and `SVATAH_DATA_*` environment variables; secrets by `${ENV}` indirection under a `secrets:` list. | P0 | T |
+| REQ-LANG-9 | Run-level data comes from `data.yaml` (or JSON) and `YAM_DATA_*` environment variables; secrets by `${ENV}` indirection under a `secrets:` list. | P0 | T |
 | REQ-LANG-10 | `compose:` expands in place; the run block defines execution order for the flow. A run block with no lines runs the story or composition of its own name. A flow with no run block runs its `scenario` blocks in file order and its `story` blocks not at all, matching the legacy parser. | P0 | T |
 | REQ-LANG-11 | `migrate` converts v1/v2 flows, `.locator`, and `.data` files into v3 flows, a seed bindings store, and `data.yaml`, preserving names and step order. | P0 | T, R |
 | REQ-LANG-12 | A grammar reference documents every sentence pattern with at least two examples and every IR action. | P0 | R |
@@ -150,7 +150,7 @@ Constraints stated by the owner:
 | REQ-RUN-9 | A run directory holds `results.jsonl`, `summary.json`, `audit.jsonl`, screenshots, and adapter traces; exit code is non-zero on failure, healed, or aborted. | P0 | T |
 | REQ-RUN-10 | Every action in the existing Selenium vocabulary has an implementation on the Playwright adapter. | P0 | T |
 | REQ-RUN-11 | REPL: one sentence at a time against an open session, appended to a session flow and bindings. | P1 | D |
-| REQ-RUN-12 | Playwright Test host: for web test behavior, the executor runs inside Playwright Test through a generated spec per flow and a fixture, inheriting fixtures, projects, sharding, retries, reporters, and the trace viewer. Results are additionally written in the Svatah schema. | P0 | T, D |
+| REQ-RUN-12 | Playwright Test host: for web test behavior, the executor runs inside Playwright Test through a generated spec per flow and a fixture, inheriting fixtures, projects, sharding, retries, reporters, and the trace viewer. Results are additionally written in the Yam schema. | P0 | T, D |
 | REQ-RUN-13 | The runtime core is runner-agnostic and usable standalone (workflow and tool behaviors, non-web adapters). | P0 | T |
 
 ### 3.6 Automation guarantees (`REQ-AUTO`)
@@ -171,8 +171,8 @@ Constraints stated by the owner:
 | ID | Requirement | Pri | Ver |
 |---|---|---|---|
 | REQ-BEH-1 | Test behavior: flows with expectations produce a pass or fail oracle, run in the Playwright Test host for web and in the standalone runtime for other adapters. | P0 | T |
-| REQ-BEH-2 | Workflow behavior: a story with a signature runs as a function with guards, checkpoints, abort policy, and outputs; `svatah workflow run <story> --input k=v` returns outputs as JSON. | P1 | T, D |
-| REQ-BEH-3 | Tool behavior: `svatah tool serve` exposes selected stories over MCP as tools whose schema derives from the story signature; each invocation is a deterministic run with an audit record; no model is involved in execution. | P1 | T, D |
+| REQ-BEH-2 | Workflow behavior: a story with a signature runs as a function with guards, checkpoints, abort policy, and outputs; `yam workflow run <story> --input k=v` returns outputs as JSON. | P1 | T, D |
+| REQ-BEH-3 | Tool behavior: `yam tool serve` exposes selected stories over MCP as tools whose schema derives from the story signature; each invocation is a deterministic run with an audit record; no model is involved in execution. | P1 | T, D |
 | REQ-BEH-4 | Trajectory compiler: an agent's exploration over the surface (a recorded sequence of surface calls with the agent's stated intent per call) compiles into a story draft, a plan, and bindings, written to `proposals/` for review. Replaces the standalone explorer. | P2 | D |
 | REQ-BEH-5 | Behaviors share one plan; switching behavior never requires recompiling or re-recording. | P0 | T |
 
@@ -192,7 +192,7 @@ Constraints stated by the owner:
 | ID | Requirement | Pri | Ver |
 |---|---|---|---|
 | REQ-AGT-1 | CLI: `compile`, `lint`, `record`, `run`, `heal`, `migrate`, `repl`, `eval`, `bindings`, `workflow`, `tool`, `surface` (interactive surface calls for agents), with `--json`. | P0 | T |
-| REQ-AGT-2 | MCP server exposes the CLI operations and the raw agent surface (`snapshot`, `act`, `read`, `check`) so external agents can explore through Svatah and have trajectories captured. | P1 | D |
+| REQ-AGT-2 | MCP server exposes the CLI operations and the raw agent surface (`snapshot`, `act`, `read`, `check`) so external agents can explore through Yam and have trajectories captured. | P1 | D |
 | REQ-AGT-3 | Every model-produced artifact carries provenance: model id or digest, prompt version, timestamp, tokens, cost, cache hit. | P0 | T |
 | REQ-AGT-4 | Orchestration is external: the project ships examples for CI, cron, and an MCP-driven agent, and no scheduler, queue, or UI of its own. | P0 | R |
 
@@ -218,26 +218,26 @@ Constraints stated by the owner:
 
 | ID | Requirement | Pri | Ver |
 |---|---|---|---|
-| REQ-ADE-1 | The core exposes a local service (`svatah serve`) over HTTP plus an event stream (WebSocket or SSE) covering: project discovery, compile and lint, record, run with live step events, results, audit and screenshots, bindings read and verify, heal, API client requests, and raw surface calls. The service is the only integration point for the ADE and for any other client; the ADE is its reference client. | P1 | T |
+| REQ-ADE-1 | The core exposes a local service (`yam serve`) over HTTP plus an event stream (WebSocket or SSE) covering: project discovery, compile and lint, record, run with live step events, results, audit and screenshots, bindings read and verify, heal, API client requests, and raw surface calls. The service is the only integration point for the ADE and for any other client; the ADE is its reference client. | P1 | T |
 | REQ-ADE-2 | The ADE is a new Electron application (current LTS, context isolation, no `nodeIntegration`, preload bridge) that bundles or locates the CLI, spawns or connects to the local service, and has no storage of its own beyond UI preferences. The project directory is the only source of truth; anything the ADE shows is a file the CLI also reads or writes. | P1 | R, T |
 | REQ-ADE-3 | The ADE covers the prototype's jobs, redesigned around the new artifacts: project open and init; prose flow editor with live lint and Tier 0 step discovery; plan view per story (compiled steps, tier, confidence, unbound targets); run with live step events, screenshots, and audit; results history read from `runs/`; API client backed by the HTTP adapter with save-to-`api/`; data editor for `data.yaml` with secrets masked. | P1 | D, T |
 | REQ-ADE-4 | Record with review: a record session streams grounding decisions; the ADE shows the snapshot excerpt, chosen reference, candidate bundle, and fingerprint per target, with accept, re-pick by clicking in the driven session, or reject, before bindings are written. The screen chooses the gateway (a credentialed model or the committed fake answers, labelled as such) and shows a failed session as an alert with advice a screen user can act on. | P2 | D |
 | REQ-ADE-5 | Bindings and healing review: a bindings browser with context entries and dry-resolve status; a heal review that shows a proposed diff with before and after candidates and applies it on accept. | P2 | D |
-| REQ-ADE-6 | The ADE enables Chromium accessibility support so its own UI is drivable by the UIA and AX adapters; Svatah flows against the ADE (open project, edit flow, run, open result, API client) form the desktop conformance suite. The desktop conformance target is the **packaged** ADE, which must open a project on every supported host with a Node runtime resolved as LLD §13.6 states; the gate opens the fixtures project without a dialog (Draft 2.9). | P2 | T |
+| REQ-ADE-6 | The ADE enables Chromium accessibility support so its own UI is drivable by the UIA and AX adapters; Yam flows against the ADE (open project, edit flow, run, open result, API client) form the desktop conformance suite. The desktop conformance target is the **packaged** ADE, which must open a project on every supported host with a Node runtime resolved as LLD §13.6 states; the gate opens the fixtures project without a dialog (Draft 2.9). | P2 | T |
 | REQ-ADE-7 | The ADE remains a local developer client. It has no scheduler, queue, multi-user server, or dashboard role (consistent with REQ-AGT-4). | P0 | R |
 | REQ-ADE-8 | Agent workbench: a surface explorer that drives any adapter session step by step with `intent` recorded, and a tool panel that exposes stories over MCP from the ADE and shows tool invocations with their audit records. | P2 | D |
 | REQ-ADE-9 | Prototype data import: a one-time import of an existing prototype database (projects, flows, locators, data, API requests) into a project directory, through `migrate --from-ade`. Results and screenshots from the prototype are not imported. | P2 | T |
-| REQ-ADE-10 | The ADE is one of two renderers of a headless screen model (`@svatah/screens`) whose screens, actions, and keys are shared with the terminal cockpit; an action exists once, with one name, in the palette, the TUI, the SDK, and the CLI, and a repository check asserts it (Draft 2.11). | P1 | T, R |
+| REQ-ADE-10 | The ADE is one of two renderers of a headless screen model (`@svatah/yam-screens`) whose screens, actions, and keys are shared with the terminal cockpit; an action exists once, with one name, in the palette, the TUI, the SDK, and the CLI, and a repository check asserts it (Draft 2.11). | P1 | T, R |
 | REQ-ADE-11 | The ADE is organised as a left rail (Flows, Runs, Bindings, Agents and tools; API, Data; Import, Settings), a centre workspace, and a right inspector, with a command palette on ⌘K; every one of the former eleven screens has exactly one home; the approved mockups under `docs/spec/design/` are the visual reference (Draft 2.11). | P1 | R, D |
-| REQ-ADE-12 | The ADE is built on a design system (`@svatah/ui-tokens`, `@svatah/ui` on Radix primitives): dark-first with a light theme, one accent, status colours never without a word or glyph, and every interactive control carrying a visible label that is its accessible name and a stable id (Draft 2.11). | P1 | T, R |
+| REQ-ADE-12 | The ADE is built on a design system (`@svatah/yam-ui-tokens`, `@svatah/yam-ui` on Radix primitives): dark-first with a light theme, one accent, status colours never without a word or glyph, and every interactive control carrying a visible label that is its accessible name and a stable id (Draft 2.11). | P1 | T, R |
 | REQ-ADE-13 | Every screen's state is available as JSON through the service and the SDK; nothing exists only in a UI, so an agent can use the same screens through the service or through the accessibility adapters (Draft 2.11). | P1 | T |
-| REQ-TUI-1 | `svatah ui` is a full authoring cockpit in the terminal: a standalone Ink application over the local service rendering the same screen model as the ADE, with numbered panes, the same actions and keys, the same command palette, and a `--json` mode that streams screen state and audit lines for agents; no tmux dependency (Draft 2.11). | P1 | T, D |
-| REQ-SDK-1 | `@svatah/sdk` is a typed TypeScript client generated from the service's OpenAPI description, with typed event subscription and the screen model's actions runnable out of process; drift between the description and the client fails the build (Draft 2.11). | P1 | T |
+| REQ-TUI-1 | `yam ui` is a full authoring cockpit in the terminal: a standalone Ink application over the local service rendering the same screen model as the ADE, with numbered panes, the same actions and keys, the same command palette, and a `--json` mode that streams screen state and audit lines for agents; no tmux dependency (Draft 2.11). | P1 | T, D |
+| REQ-SDK-1 | `@svatah/yam-sdk` is a typed TypeScript client generated from the service's OpenAPI description, with typed event subscription and the screen model's actions runnable out of process; drift between the description and the client fails the build (Draft 2.11). | P1 | T |
 | REQ-SDK-2 | Python and Java clients are generated from the same description, published with the release, and versioned with it (Draft 2.11). | P1 | T, R |
-| REQ-SELF-1 | Svatah verifies itself: `evals/self` holds prose flows that drive the sample application, the packaged ADE through the desktop adapters, the local service through the HTTP adapter, and the cockpit through its JSON mode; a phase is not accepted until the suite is green (Draft 2.14). | P1 | T, E |
-| REQ-SELF-2 | Every self check has an independent external implementation; `svatah eval self` runs both sides and publishes agreement, coverage per side, and every disagreement and one-sided check; the gate requires 100 percent agreement on the checks both sides reach, and one-sided checks are published as Svatah's own shortcomings (Draft 2.14). | P1 | E, R |
+| REQ-SELF-1 | Yam verifies itself: `evals/self` holds prose flows that drive the sample application, the packaged ADE through the desktop adapters, the local service through the HTTP adapter, and the cockpit through its JSON mode; a phase is not accepted until the suite is green (Draft 2.14). | P1 | T, E |
+| REQ-SELF-2 | Every self check has an independent external implementation; `yam eval self` runs both sides and publishes agreement, coverage per side, and every disagreement and one-sided check; the gate requires 100 percent agreement on the checks both sides reach, and one-sided checks are published as Yam's own shortcomings (Draft 2.14). | P1 | E, R |
 | REQ-SELF-3 | Three oracles stay external by design: the healing eval's ground-truth keys, axe-core on the component sheet, and the renderer-versus-adapter tree agreement (Draft 2.14). | P1 | T, R |
-| REQ-SELF-4 | The catalogue schema, the source runners, the comparison, and the report are a published package, `@svatah/verify`, and `svatah eval self --catalogue <file>` runs any project's catalogue, so a third party gates its own application two-sidedly with the same rules (Draft 2.16). | P1 | T, R |
+| REQ-SELF-4 | The catalogue schema, the source runners, the comparison, and the report are a published package, `@svatah/yam-verify`, and `yam eval self --catalogue <file>` runs any project's catalogue, so a third party gates its own application two-sidedly with the same rules (Draft 2.16). | P1 | T, R |
 
 ## 4. Non-functional requirements
 
@@ -288,11 +288,11 @@ Each requirement is referenced by at least one HLD section, one LLD section, and
 - Draft 2.11 (builder surfaces, after the owner's design review of 2026-09-05): `REQ-ADE-10..13`, `REQ-TUI-1`, `REQ-SDK-1..2` added; Phase 9 (builder surfaces foundation) and Phase 10 (builder surfaces complete) inserted; the release phase becomes Phase 11.
 - Draft 2.12 (after Phase 9 verification): no requirement text changes; T10.4 added for the verification's corrections and the run-stop route.
 - Draft 2.13 (after Phase 10 verification): no requirement text changes; T11.7 added for the verification's corrections, the windowless-launch diagnosis, and the editing work a release needs.
-- Draft 2.14 (Svatah verifies Svatah): `REQ-SELF-1..3` added; Phase 11 becomes corrections plus the self-verification suite and parity gate; the release moves to Phase 12.
+- Draft 2.14 (Yam verifies Yam): `REQ-SELF-1..3` added; Phase 11 becomes corrections plus the self-verification suite and parity gate; the release moves to Phase 12.
 - Draft 2.15 (after Phase 11 verification): no requirement text changes; T12.7 added to close the one-sided list's language gaps and the verification's three findings before the release.
 - Draft 2.16 (process and terminal): `REQ-ADP-10` and `REQ-SELF-4` added; Phase 13 added after the release.
 - Draft 2.18 (Yam, owner decisions of 2026-09-06): no requirement text changes; the product is named Yam under the Svatah brand and the `@svatah` scope, the frozen Java project leaves the repository, and the repository moves to `github.com/SvatahLabs/yam`; Phase 13 inserted for that work, process and terminal renumbered to Phase 14.
 - Draft 2.17 (after Phase 12 verification): no requirement text changes; T13.2 extended with the sentences that close the last non-oracle one-sided checks; 0.1.0 accepted for the owner's validation.
 - Draft 2.4 (after Phase 2 verification): `REQ-LANG-10` states the run-block semantics inherited from the legacy parser.
 - Draft 2.3 (after Phase 1 verification): `REQ-HEAL-5` defines recovery against the ground-truth element and the denominator.
-- Draft 2.1: `REQ-ADE-1..9` added for the local service and a new Svatah ADE Electron client designed to the vision, with the prototype as the blueprint of jobs only; the ADE is the desktop conformance target for `REQ-ADP-6/7`; constraint 7 added.
+- Draft 2.1: `REQ-ADE-1..9` added for the local service and a new Yam ADE Electron client designed to the vision, with the prototype as the blueprint of jobs only; the ADE is the desktop conformance target for `REQ-ADP-6/7`; constraint 7 added.

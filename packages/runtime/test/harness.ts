@@ -31,10 +31,10 @@ import {
   type SurfaceAction,
   type SurfaceKind,
   DEFAULT_CONFIG,
-} from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
-import { buildSnapshot, CheckError, NO_CAPABILITIES, structuralHash } from "@svatah/surface";
-import { LocatorError } from "@svatah/bindings";
+} from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
+import { buildSnapshot, CheckError, NO_CAPABILITIES, structuralHash } from "@svatah/yam-surface";
+import { LocatorError } from "@svatah/yam-bindings";
 import type { Resolver } from "../src/index.js";
 
 export interface StubOptions {

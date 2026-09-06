@@ -1,5 +1,5 @@
 /**
- * @svatah/healer — module (a)'s repair half (REQ-HEAL-1..6).
+ * @svatah/yam-healer — module (a)'s repair half (REQ-HEAL-1..6).
  *
  * The healer consumes a run or a set of `bind()` failures, selects the `locator`
  * failures, repairs them by fingerprint relocalization first (no model), verifies

@@ -13,7 +13,7 @@
  * report whose numbers cannot be read: "95% accurate" means something different
  * when the answers came from a fixture.
  */
-import { formatUsd } from "@svatah/gateway";
+import { formatUsd } from "@svatah/yam-gateway";
 import type { RecordReport, RecordedStep } from "./session.js";
 
 /** The file written beside the bindings (REQ-REC-9). */
@@ -21,7 +21,7 @@ export function reportJson(report: RecordReport): string {
   return `${JSON.stringify(report, null, 2)}\n`;
 }
 
-/** What `svatah record` prints when it finishes. */
+/** What `yam record` prints when it finishes. */
 export function renderReport(report: RecordReport): string {
   const lines: string[] = [];
   const t = report.totals;

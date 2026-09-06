@@ -26,7 +26,7 @@
  * kinds, the capture sources, the scopes.
  */
 import { z } from "zod";
-import { ACTIONS, PREDICATE_KINDS } from "@svatah/schema";
+import { ACTIONS, PREDICATE_KINDS } from "@svatah/yam-schema";
 import type { RawPredicate, RawStep, RawValue } from "./raw.js";
 
 /**

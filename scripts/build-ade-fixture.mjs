@@ -6,7 +6,7 @@
  *
  * ## Why this is synthesised, and why it is still worth trusting
  *
- * No Svatah ADE prototype database was available on the machine T6.6 was
+ * No Yam ADE prototype database was available on the machine T6.6 was
  * implemented on, and REQ-ADE-9's Validate needs one. So this builds one — and
  * neither its shape nor its content is invented:
  *

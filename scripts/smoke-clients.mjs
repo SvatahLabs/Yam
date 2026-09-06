@@ -9,7 +9,7 @@
  * > the Python and Java clients each run one smoke script against a live
  * > service (`GET /project`, `POST /run`, events) in CI.
  *
- * This is the *harness*: it starts `apps/sample-web`, starts `svatah serve` on
+ * This is the *harness*: it starts `apps/sample-web`, starts `yam serve` on
  * a copy of the fixtures project exactly as the ADE spawns it, and runs each
  * smoke script with the url and token in the environment. The scripts
  * themselves start nothing, so the same command a person types against a
@@ -51,7 +51,7 @@ if (!existsSync(CLI)) {
 const has = (command) => spawnSync(command, ["--version"], { encoding: "utf8" }).status === 0;
 
 const app = await startSampleApp(0);
-const project = mkdtempSync(join(tmpdir(), "svatah-clients-smoke-"));
+const project = mkdtempSync(join(tmpdir(), "yam-clients-smoke-"));
 let serve;
 const results = [];
 
@@ -61,7 +61,7 @@ try {
     filter: (from) => !from.includes(`${"runs"}`) && !from.includes("node_modules"),
   });
   writeFileSync(
-    join(project, "svatah.config.yaml"),
+    join(project, "yam.config.yaml"),
     `schemaVersion: "1.0.0"
 project: "clients-smoke"
 environment: test
@@ -93,14 +93,14 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
     const child = spawn(
       process.execPath,
       [CLI, "serve", project, "--port", "0", "--token", TOKEN],
-      { cwd: ROOT, env: { ...process.env, SVATAH_BASE_URL: app.origin } },
+      { cwd: ROOT, env: { ...process.env, YAM_BASE_URL: app.origin } },
     );
     serve = child;
     let buffer = "";
-    const timer = setTimeout(() => reject(new Error("`svatah serve` printed no handshake")), 30_000);
+    const timer = setTimeout(() => reject(new Error("`yam serve` printed no handshake")), 30_000);
     child.stdout.on("data", (chunk) => {
       buffer += String(chunk);
-      const match = /^svatah serve listening url=(\S+) token=(\S+)$/m.exec(buffer);
+      const match = /^yam serve listening url=(\S+) token=(\S+)$/m.exec(buffer);
       if (match !== null) {
         clearTimeout(timer);
         resolve({ url: match[1], token: match[2] });
@@ -113,9 +113,9 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
 
   const environment = {
     ...process.env,
-    SVATAH_SERVICE_URL: handshake.url,
-    SVATAH_SERVICE_TOKEN: handshake.token,
-    SVATAH_SMOKE_STORY: STORY,
+    YAM_SERVICE_URL: handshake.url,
+    YAM_SERVICE_TOKEN: handshake.token,
+    YAM_SMOKE_STORY: STORY,
   };
 
   /** Run one smoke script, inheriting stdio so its own output is the report. */
@@ -145,14 +145,14 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
     if (!has("javac")) {
       results.push({ name: "java", status: "skipped", why: "javac is not on PATH" });
     } else {
-      const classes = mkdtempSync(join(tmpdir(), "svatah-java-smoke-"));
+      const classes = mkdtempSync(join(tmpdir(), "yam-java-smoke-"));
       try {
         const compiled = spawnSync(
           "javac",
           [
             "-d",
             classes,
-            join(ROOT, "clients/java/src/main/java/dev/svatah/sdk/GeneratedClient.java"),
+            join(ROOT, "clients/java/src/main/java/com/svatah/yam/sdk/GeneratedClient.java"),
             join(ROOT, "clients/java/Smoke.java"),
           ],
           { encoding: "utf8", cwd: ROOT },
@@ -171,7 +171,7 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
 } finally {
   serve?.kill("SIGTERM");
   await app.close();
-  if (process.env["SVATAH_KEEP_WORKSPACE"] === "1") {
+  if (process.env["YAM_KEEP_WORKSPACE"] === "1") {
     process.stderr.write(`kept ${project}\n`);
   } else {
     rmSync(project, { recursive: true, force: true });

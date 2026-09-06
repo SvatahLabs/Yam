@@ -5,9 +5,9 @@
  * > to, each row showing the action's key and, for CLI-backed actions, the CLI
  * > command.
  *
- * The rows come from `@svatah/screens`'s registry — this component takes them as
+ * The rows come from `@svatah/yam-screens`'s registry — this component takes them as
  * props and knows nothing about what an action does. That is the boundary the
- * design system keeps: `@svatah/ui` may not import the screen model
+ * design system keeps: `@svatah/yam-ui` may not import the screen model
  * (`eslint.config.js`), so the palette cannot grow an opinion about which
  * actions exist.
  *
@@ -20,7 +20,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Kbd } from "./controls.js";
 import { portalHost } from "./portal.js";
 
-/** One row of the palette, as the ADE and `svatah ui` both build it. */
+/** One row of the palette, as the ADE and `yam ui` both build it. */
 export interface PaletteRow {
   readonly id: string;
   readonly label: string;

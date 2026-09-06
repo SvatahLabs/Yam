@@ -11,8 +11,8 @@
  * failed expectation or a guard that skips the step (LLD §8.2, §8.3).
  */
 import type { ElementHandle, Frame, Page } from "playwright";
-import type { CheckResult, CheckSubject, Predicate } from "@svatah/schema";
-import { CheckError, DialogError } from "@svatah/surface";
+import type { CheckResult, CheckSubject, Predicate } from "@svatah/yam-schema";
+import { CheckError, DialogError } from "@svatah/yam-surface";
 import { literalValue } from "./values.js";
 
 export interface CheckContext {

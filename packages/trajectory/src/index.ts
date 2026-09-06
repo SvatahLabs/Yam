@@ -1,5 +1,5 @@
 /**
- * @svatah/trajectory
+ * @svatah/yam-trajectory
  *
  * An agent's exploration over the surface, captured and — from T5.5 — compiled
  * into a story draft, a plan fragment and `verified: false` bindings under

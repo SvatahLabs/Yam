@@ -2,7 +2,7 @@
  * `defineStep` — the Tier 0 authoring API (REQ-LANG-15, LLD §5).
  *
  * ```ts
- * import { defineStep } from "@svatah/steps";
+ * import { defineStep } from "@svatah/yam-steps";
  *
  * export default defineStep(
  *   "Transfer {amount:number} from {from:target} to {to:target}",

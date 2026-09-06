@@ -11,13 +11,13 @@
  * > with the AX or UIA snapshot of the same screen**. Those three sit below the
  * > surface and are what keeps the gate from grading its own homework.
  *
- * ## Why this is not something Svatah can check about itself
+ * ## Why this is not something Yam can check about itself
  *
  * Every other check in the parity gate has two implementations that both go
- * *through* something Svatah wrote: a flow through an adapter, a Playwright case
+ * *through* something Yam wrote: a flow through an adapter, a Playwright case
  * through a browser. This one is about whether the adapter's picture of a window
  * is the window. Its two sides are the DOM Chromium renders and the
- * accessibility tree macOS publishes from it, and Svatah is in neither: the
+ * accessibility tree macOS publishes from it, and Yam is in neither: the
  * comparison happens outside the surface entirely, which is precisely why it is
  * worth having.
  *
@@ -41,8 +41,8 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const json = args.includes("--json");
-const bundle = join(ROOT, "apps", "ade", "out", "Svatah ADE-darwin-arm64", "Svatah ADE.app");
-const executable = join(bundle, "Contents", "MacOS", "Svatah ADE");
+const bundle = join(ROOT, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
+const executable = join(bundle, "Contents", "MacOS", "Yam ADE");
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 const project = join(ROOT, "evals", "fixtures");
 const PORT = 9800 + Math.floor(Math.random() * 150);
@@ -56,7 +56,7 @@ if (process.platform !== "darwin") {
   unreachable("The tree-agreement oracle compares an AX snapshot; that needs macOS.");
 }
 if (!existsSync(executable)) {
-  unreachable(`The ADE is not packaged (${executable}). Run \`pnpm --filter @svatah/ade package\`.`);
+  unreachable(`The ADE is not packaged (${executable}). Run \`pnpm --filter @svatah/yam-ade package\`.`);
 }
 if (!existsSync(cli)) unreachable("Run `pnpm -r build` first.");
 
@@ -68,7 +68,7 @@ const alive = () =>
 
 function stop() {
   if (alive().length === 0) return;
-  spawnSync("osascript", ["-e", 'tell application id "com.electron.svatah-ade" to quit'], {
+  spawnSync("osascript", ["-e", 'tell application id "com.electron.yam-ade" to quit'], {
     encoding: "utf8",
   });
   for (let waited = 0; waited < 20_000 && alive().length > 0; waited += 250) {
@@ -81,10 +81,10 @@ function stop() {
 
 stop();
 const environment = {
-  SVATAH_A11Y: "1",
-  SVATAH_ADE_DEBUG: "1",
-  SVATAH_CLI: cli,
-  SVATAH_ADE_PROJECT: project,
+  YAM_A11Y: "1",
+  YAM_ADE_DEBUG: "1",
+  YAM_CLI: cli,
+  YAM_ADE_PROJECT: project,
 };
 const open = ["-n", "-F"];
 for (const [name, value] of Object.entries(environment)) open.push("--env", `${name}=${value}`);
@@ -235,9 +235,9 @@ try {
     ...DEFAULT_CONFIG,
     project: "tree-agreement",
     adapter: "ax",
-    app: { processName: "Svatah ADE" },
+    app: { processName: "Yam ADE" },
   });
-  await surface.open({ processName: "Svatah ADE" });
+  await surface.open({ processName: "Yam ADE" });
   snapshot = await surface.snapshot();
 } catch (error) {
   stop();

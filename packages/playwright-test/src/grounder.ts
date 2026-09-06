@@ -7,7 +7,7 @@
  * cannot import one. What module (a) ships is the picker — a person clicks the
  * element — which is the right answer at a keyboard and a poor one in CI.
  *
- * When module (b) is installed, `@svatah/host-playwright` registers the
+ * When module (b) is installed, `@svatah/yam-host-playwright` registers the
  * recorder's implementation here, and `bind("login.username-field", "the
  * username field")` is grounded by exactly the same `ground()` a flow gets. One
  * grounding, two entry points; a second implementation would drift, and the
@@ -16,8 +16,8 @@
  * Returning `null` falls back to the picker. That is what makes registering it
  * safe: a model that cannot see the element leaves a person able to point at it.
  */
-import type { BindingEntry } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+import type { BindingEntry } from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 
 /** What record mode knows about the element it is asked to bind. */
 export interface BindGroundRequest {
@@ -45,7 +45,7 @@ export const NO_BIND_GROUNDER: BindGrounder = {
 let registered: BindGrounder = NO_BIND_GROUNDER;
 
 /**
- * Register module (b)'s grounder. `@svatah/host-playwright` does this when the
+ * Register module (b)'s grounder. `@svatah/yam-host-playwright` does this when the
  * recorder is present; nothing else may.
  */
 export function registerBindGrounder(grounder: BindGrounder): void {

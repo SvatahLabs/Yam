@@ -3,7 +3,7 @@
 The four sample flows from the frozen Java project, hand-migrated to v3
 (T0.6). They are the compatibility baseline REQ-NFR-8 names: once the compiler
 (T2.4, T2.5) and the executor (T2.7) exist, these must compile clean and run end
-to end against `apps/sample-web`, and `svatah migrate` (T2.9) must reproduce them
+to end against `apps/sample-web`, and `yam migrate` (T2.9) must reproduce them
 from the originals.
 
 | v3 fixture | Original |

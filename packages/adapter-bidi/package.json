@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/adapter-bidi",
+  "name": "@svatah/yam-adapter-bidi",
   "version": "0.1.0",
   "description": "WebDriver BiDi adapter (independence proof)",
   "license": "Apache-2.0",
@@ -26,8 +26,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/surface": "workspace:*",
-    "@svatah/schema": "workspace:*"
+    "@svatah/yam-surface": "workspace:*",
+    "@svatah/yam-schema": "workspace:*"
   },
   "devDependencies": {
     "sample-web": "workspace:*",

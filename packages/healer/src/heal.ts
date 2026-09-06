@@ -18,9 +18,9 @@ import {
   relocalize,
   synthesise,
   type Match,
-} from "@svatah/bindings";
-import type { AgentSurface } from "@svatah/surface";
-import { canonicalYaml, type BindingEntry, type BindingFile } from "@svatah/schema";
+} from "@svatah/yam-bindings";
+import type { AgentSurface } from "@svatah/yam-surface";
+import { canonicalYaml, type BindingEntry, type BindingFile } from "@svatah/yam-schema";
 import type { HealInput } from "./failures.js";
 import { unifiedDiffFor, type FileChange } from "./diff.js";
 import { currentRegrounder, hasRegrounder } from "./regrounder.js";
@@ -85,12 +85,12 @@ export interface HealOptions {
   /**
    * The failing stories' inputs, by name (Draft 2.6, LLD §10).
    *
-   * `svatah heal --run` replays the steps before the failing one, and a story
+   * `yam heal --run` replays the steps before the failing one, and a story
    * with `inputs: email: string, password: secret` cannot replay
    * `Type {input.password} into the password field` without being told what it
    * was. A run records only the input *names* (secrets are never written down,
    * REQ-NFR-6), so the caller supplies the values again — `--input k=v` or
-   * `SVATAH_INPUT_<NAME>`, exactly as `run` takes them.
+   * `YAM_INPUT_<NAME>`, exactly as `run` takes them.
    */
   readonly storyInputs?: Readonly<Record<string, unknown>>;
   /** Open a session and put it on the page a failure happened on. */
@@ -244,7 +244,7 @@ async function healOne(
         (reason ??
           (replayer.name === "session-state"
             ? "The recorded state did not land on the right page — a flow's failing step often " +
-              "needs the story replayed to it, which `svatah heal` does when the runtime is present."
+              "needs the story replayed to it, which `yam heal` does when the runtime is present."
             : "The replay did not reach the failing step.")),
     };
   }

@@ -9,7 +9,7 @@
  * ones that cannot be phrased at all.
  */
 import { describe, expect, it } from "vitest";
-import type { ElementDescription } from "@svatah/schema";
+import type { ElementDescription } from "@svatah/yam-schema";
 import {
   captureNameFor,
   compileTrajectory,

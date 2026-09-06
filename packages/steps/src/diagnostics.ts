@@ -1,8 +1,8 @@
 /**
  * The diagnostics Tier 0 produces.
  *
- * `@svatah/spec` owns the diagnostic type for the language as a whole, but
- * `@svatah/steps` cannot import it: LLD §1 draws `steps ─► schema, surface`, and
+ * `@svatah/yam-spec` owns the diagnostic type for the language as a whole, but
+ * `@svatah/yam-steps` cannot import it: LLD §1 draws `steps ─► schema, surface`, and
  * a dependency on `spec` would put the authoring API behind the flow reader for
  * no reason. So the shape is repeated here, structurally identical, and the
  * compiler — which depends on both — passes them through unchanged.

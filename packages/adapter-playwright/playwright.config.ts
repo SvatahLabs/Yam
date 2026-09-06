@@ -7,13 +7,13 @@
  * verification contract.
  *
  * Only `chromium` is required for Phase 1. `firefox` and `webkit` are declared
- * so `pnpm --filter @svatah/adapter-playwright test:browsers` can run the same
+ * so `pnpm --filter @svatah/yam-adapter-playwright test:browsers` can run the same
  * suite on all three once those browsers are installed; the default project list
  * is chromium alone so a clean checkout needs one download.
  */
 import { defineConfig, devices } from "@playwright/test";
 
-const allBrowsers = process.env["SVATAH_PW_BROWSERS"] === "all";
+const allBrowsers = process.env["YAM_PW_BROWSERS"] === "all";
 
 export default defineConfig({
   testDir: "./test",

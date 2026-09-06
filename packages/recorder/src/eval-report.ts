@@ -10,7 +10,7 @@
  * report says "96%" and nothing else is a report nobody can act on; one that
  * names the four phrases that went to the wrong element is a list of bugs.
  */
-import { formatUsd } from "@svatah/gateway";
+import { formatUsd } from "@svatah/yam-gateway";
 import type { GroundingEvalReport, GroundingEvalResult } from "./eval.js";
 
 const METHOD = `Each case is a phrase, a page, and the element the phrase means. The eval opens the
@@ -18,7 +18,7 @@ page — variant 0 unless the case names one — takes one snapshot, and runs th
 \`ground()\` the recorder runs, with the same prompt (\`g-1\`) and the same token budget.
 
 The answer is checked against a ground-truth key. \`apps/sample-web\` stamps every
-interactive element with \`data-svatah-eval\`, identical across all twenty variants, and
+interactive element with \`data-yam-eval\`, identical across all twenty variants, and
 \`bindings.ignoreAttributes\` makes the surface blind to it: the eval reads it with a page
 script, around the surface rather than through it (LLD §16). "It resolved" is not the
 question; "is it the element the phrase meant" is.
@@ -39,7 +39,7 @@ export function renderGroundingEvalMarkdown(report: GroundingEvalReport): string
   const percent = (value: number): string => `${(value * 100).toFixed(1)}%`;
   const lines: string[] = [];
 
-  lines.push("# Svatah eval report — grounding");
+  lines.push("# Yam eval report — grounding");
   lines.push("");
   lines.push(`Generated: ${report.at}`);
   lines.push("");
@@ -123,7 +123,7 @@ export function renderGroundingEvalMarkdown(report: GroundingEvalReport): string
   return `${lines.join("\n")}\n`;
 }
 
-/** What `svatah eval grounding` prints. */
+/** What `yam eval grounding` prints. */
 export function renderGroundingEvalSummary(report: GroundingEvalReport): string {
   const percent = (value: number): string => `${(value * 100).toFixed(1)}%`;
   const lines: string[] = [];

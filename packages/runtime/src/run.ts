@@ -12,8 +12,8 @@
  * ## Runner-agnostic on purpose (REQ-RUN-13)
  *
  * Nothing here knows about Playwright Test, or about any runner. The host
- * (`@svatah/host-playwright`, T2.8) calls `runStory` inside a `test()` and
- * supplies its own surface; `svatah run --host none` calls this. The two share
+ * (`@svatah/yam-host-playwright`, T2.8) calls `runStory` inside a `test()` and
+ * supplies its own surface; `yam run --host none` calls this. The two share
  * every line of what a step *means*, which is what makes REQ-BEH-5 — "switching
  * behavior never requires recompiling or re-recording" — true rather than
  * aspirational.
@@ -34,9 +34,9 @@ import {
   type StepResult,
   type Story,
   type Summary,
-} from "@svatah/schema";
+} from "@svatah/yam-schema";
 import { verifyResumeHashes, type Resume } from "./resume.js";
-import type { AgentSurface } from "@svatah/surface";
+import type { AgentSurface } from "@svatah/yam-surface";
 import { Auditor, MemoryAuditSink, type AuditSink } from "./audit.js";
 import { abortedByPolicy as aborts, checkpointFor, summarise, type RunDirectory } from "./results.js";
 import { Scope } from "./scope.js";
@@ -240,7 +240,7 @@ export async function run(options: RunOptions): Promise<RunOutcome> {
      *
      * Names only. A run directory is attached to bug reports and committed to
      * CI artifacts, and an input may be a secret (REQ-NFR-6). What the names are
-     * for is `svatah heal --run <id>`: healing a failure at step 5 replays the
+     * for is `yam heal --run <id>`: healing a failure at step 5 replays the
      * four steps before it, two of which type `{input.email}` and
      * `{input.password}`, and the replay has to be told what they were. The
      * summary is what lets it say *which* input it is missing rather than
@@ -680,7 +680,7 @@ function storyContext(
                  *
                  * What resume does about it is what `heal --run` does: the
                  * caller supplies the value again with `--input` or
-                 * `SVATAH_INPUT_<NAME>`, and it is merged over the restored
+                 * `YAM_INPUT_<NAME>`, and it is merged over the restored
                  * scope. A secret is never recorded, so it is always
                  * re-supplied.
                  */

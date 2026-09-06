@@ -15,7 +15,7 @@
  * asked about nothing looks exactly like a working one.
  */
 import { describe, expect, it } from "vitest";
-import type { StepResult } from "@svatah/schema";
+import type { StepResult } from "@svatah/yam-schema";
 import { run, type RunOptions } from "../src/index.js";
 import {
   config,
@@ -143,7 +143,7 @@ describe("an assertion over a set (pattern 32, T12.7)", () => {
           value: { kind: "literal", value: "sk-live" },
         }),
       ],
-      { nodes: { "": [node({ ref: "r1", role: "text", name: "SVATAH_SAMPLE_PASSWORD — set" })] } },
+      { nodes: { "": [node({ ref: "r1", role: "text", name: "YAM_SAMPLE_PASSWORD — set" })] } },
     );
     expect(results[0]!.status).toBe("passed");
   });

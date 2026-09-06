@@ -3,7 +3,7 @@
  *
  * The runner is injected, so what is tested here is everything except macOS
  * itself: which script is sent, how a timeout is read, how a refusal is
- * classified, and what `svatah surface doctor` is told.
+ * classified, and what `yam surface doctor` is told.
  *
  * The timeout behaviour is the part that matters most and is the part hardest to
  * see. An `osascript` that trips the Accessibility prompt blocks on a dialog
@@ -37,10 +37,10 @@ const answering = (
   return { run, calls };
 };
 
-describe("the permission check (REQ-ADP-7, `svatah surface doctor`)", () => {
+describe("the permission check (REQ-ADP-7, `yam surface doctor`)", () => {
   it("is granted only when an assistive-access call answers", async () => {
     const { run, calls } = answering('{"ok":true,"processes":42,"elements":7}');
-    const permission = await osascriptBridge({ process: "Svatah ADE", run }).permission();
+    const permission = await osascriptBridge({ process: "Yam ADE", run }).permission();
     expect(permission.state).toBe("granted");
 
     /*
@@ -54,7 +54,7 @@ describe("the permission check (REQ-ADP-7, `svatah surface doctor`)", () => {
      */
     expect(calls[0]!.script).toContain("uiElements()");
     // And it touches no application under test.
-    expect(calls[0]!.script).not.toContain("Svatah ADE");
+    expect(calls[0]!.script).not.toContain("Yam ADE");
   });
 
   it("reads `not allowed assistive access` as denied, which is what it is", async () => {
@@ -64,14 +64,14 @@ describe("the permission check (REQ-ADP-7, `svatah surface doctor`)", () => {
       stderr: "execution error: Error: Error: osascript is not allowed assistive access. (-25211)",
       timedOut: false,
     });
-    const permission = await osascriptBridge({ process: "Svatah ADE", run: refused }).permission();
+    const permission = await osascriptBridge({ process: "Yam ADE", run: refused }).permission();
     expect(permission.state).toBe("denied");
     expect(permission.advice).toContain("restart it");
   });
 
   it("reads a timeout as the unanswered prompt, and says where to grant it", async () => {
     const run: Run = async () => ({ code: null, stdout: "", stderr: "", timedOut: true });
-    const permission = await osascriptBridge({ process: "Svatah ADE", run }).permission();
+    const permission = await osascriptBridge({ process: "Yam ADE", run }).permission();
     expect(permission.state).toBe("prompt-pending");
     expect(permission.advice).toContain("System Settings → Privacy & Security → Accessibility");
     // The part people get wrong: the grant is per program, so one granted to
@@ -81,7 +81,7 @@ describe("the permission check (REQ-ADP-7, `svatah surface doctor`)", () => {
 
   it("uses a short deadline, because a blocked prompt takes two minutes", async () => {
     const { run, calls } = answering('{"ok":true}');
-    await osascriptBridge({ process: "Svatah ADE", run, timeoutMs: 60_000 }).permission();
+    await osascriptBridge({ process: "Yam ADE", run, timeoutMs: 60_000 }).permission();
     expect(calls[0]!.timeoutMs).toBe(5_000);
   });
 
@@ -92,7 +92,7 @@ describe("the permission check (REQ-ADP-7, `svatah surface doctor`)", () => {
       stderr: "execution error: Not authorised to send Apple events (-1743)",
       timedOut: false,
     });
-    const permission = await osascriptBridge({ process: "Svatah ADE", run: denied }).permission();
+    const permission = await osascriptBridge({ process: "Yam ADE", run: denied }).permission();
     expect(permission.state).toBe("denied");
     // The other thing people get wrong: macOS does not re-read the setting for
     // a process that is already running.
@@ -177,11 +177,11 @@ describe("an action System Events refused for no window (P11)", () => {
   };
 
   const aWindow = (): string =>
-    answer({ title: "Svatah ADE" }, [node({ 0: "-1", 1: "AXWindow", 3: "Svatah ADE" })]);
+    answer({ title: "Yam ADE" }, [node({ 0: "-1", 1: "AXWindow", 3: "Yam ADE" })]);
 
   it("shows the application and sends it again, while the API can see the window", async () => {
     const { run, sent } = oracles(['{"ok":false,"error":"no-window"}', '{"ok":true}'], aWindow());
-    await osascriptBridge({ process: "Svatah ADE", run }).perform({
+    await osascriptBridge({ process: "Yam ADE", run }).perform({
       kind: "action",
       path: [0],
       action: "AXPress",
@@ -195,12 +195,12 @@ describe("an action System Events refused for no window (P11)", () => {
   it("is a cause when both oracles say there is no window", async () => {
     const { run } = oracles(['{"ok":false,"error":"no-window"}'], "ERR\u001fno-window");
     await expect(
-      osascriptBridge({ process: "Svatah ADE", run }).perform({
+      osascriptBridge({ process: "Yam ADE", run }).perform({
         kind: "action",
         path: [0],
         action: "AXPress",
       }),
-    ).rejects.toThrow(/no window for "Svatah ADE"/);
+    ).rejects.toThrow(/no window for "Yam ADE"/);
   });
 
   it("does not ask the API at all when the action worked", async () => {
@@ -209,7 +209,7 @@ describe("an action System Events refused for no window (P11)", () => {
       if (!script.includes("processWithWindow")) windowReads += 1;
       return { code: 0, stdout: '{"ok":true}', stderr: "", timedOut: false };
     };
-    await osascriptBridge({ process: "Svatah ADE", run }).perform({
+    await osascriptBridge({ process: "Yam ADE", run }).perform({
       kind: "action",
       path: [0],
       action: "AXPress",
@@ -221,17 +221,17 @@ describe("an action System Events refused for no window (P11)", () => {
 describe("reading a window", () => {
   it("sends the process, the node budget and its own deadline, as JXA", async () => {
     const { run, calls } = answering(
-      answer({ title: "Svatah ADE", calls: 40 }, [
-        node({ 0: "-1", 1: "AXWindow", 3: "Svatah ADE" }),
+      answer({ title: "Yam ADE", calls: 40 }, [
+        node({ 0: "-1", 1: "AXWindow", 3: "Yam ADE" }),
         node({ 0: "0", 1: "AXButton", 3: "Run", 8: "1", 17: "AXPress", 18: frame(10, 20, 80, 24) }),
       ]),
     );
-    const window = await osascriptBridge({ process: "Svatah ADE", run }).window({
-      process: "Svatah ADE",
+    const window = await osascriptBridge({ process: "Yam ADE", run }).window({
+      process: "Yam ADE",
       maxNodes: 500,
     });
 
-    expect(window.title).toBe("Svatah ADE");
+    expect(window.title).toBe("Yam ADE");
     expect(window.nodes).toHaveLength(2);
     expect(window.nodes[1]).toMatchObject({
       parent: 0,
@@ -249,7 +249,7 @@ describe("reading a window", () => {
      * Objective-C bridge metadata happens before the script's clock starts.
      */
     expect(calls[0]!.argument).toEqual({
-      process: "Svatah ADE",
+      process: "Yam ADE",
       maxNodes: 500,
       deadlineMs: 9_000,
     });
@@ -285,8 +285,8 @@ describe("reading a window", () => {
     const { run } = answering(
       answer({ calls: 103 }, [node({ 0: "-1", 1: "AXWindow" }), node({ 0: "0", 1: "AXGroup" })]),
     );
-    const window = await osascriptBridge({ process: "Svatah ADE", run }).window({
-      process: "Svatah ADE",
+    const window = await osascriptBridge({ process: "Yam ADE", run }).window({
+      process: "Yam ADE",
       maxNodes: 500,
     });
     // §7.5: "The desktop conformance report records nodes read, wall time, and
@@ -335,19 +335,19 @@ describe("reading a window", () => {
   it("says which application had no window, and which had no process", async () => {
     const noWindow = answering(["ERR", "no-window"].join(US));
     await expect(
-      osascriptBridge({ process: "Svatah ADE", run: noWindow.run }).window({
-        process: "Svatah ADE",
+      osascriptBridge({ process: "Yam ADE", run: noWindow.run }).window({
+        process: "Yam ADE",
         maxNodes: 10,
       }),
-    ).rejects.toThrow(/"Svatah ADE" has no window/);
+    ).rejects.toThrow(/"Yam ADE" has no window/);
 
     const noProcess = answering(["ERR", "no-process"].join(US));
     await expect(
-      osascriptBridge({ process: "Svatah ADE", run: noProcess.run }).window({
-        process: "Svatah ADE",
+      osascriptBridge({ process: "Yam ADE", run: noProcess.run }).window({
+        process: "Yam ADE",
         maxNodes: 10,
       }),
-    ).rejects.toThrow(/No application process is named "Svatah ADE"/);
+    ).rejects.toThrow(/No application process is named "Yam ADE"/);
   });
 
   it("reports a blown budget as a bridge timeout with the numbers, once granted", async () => {
@@ -372,13 +372,13 @@ describe("reading a window", () => {
         timedOut: false,
       };
     };
-    const bridge = osascriptBridge({ process: "Svatah ADE", run });
+    const bridge = osascriptBridge({ process: "Yam ADE", run });
     expect((await bridge.permission()).state).toBe("granted");
 
     await expect(
-      bridge.window({ process: "Svatah ADE", maxNodes: 500 }),
-    ).rejects.toThrow(/did not finish reading the window of "Svatah ADE" within 10000 ms: 2 nodes/);
-    await expect(bridge.window({ process: "Svatah ADE", maxNodes: 500 })).rejects.toThrow(
+      bridge.window({ process: "Yam ADE", maxNodes: 500 }),
+    ).rejects.toThrow(/did not finish reading the window of "Yam ADE" within 10000 ms: 2 nodes/);
+    await expect(bridge.window({ process: "Yam ADE", maxNodes: 500 })).rejects.toThrow(
       /not a permission prompt/,
     );
   });
@@ -386,11 +386,11 @@ describe("reading a window", () => {
   it("still reads a killed process as the prompt when the permission is unknown", async () => {
     const run: Run = async () => ({ code: null, stdout: "", stderr: "", timedOut: true });
     await expect(
-      osascriptBridge({ process: "Svatah ADE", run }).window({
-        process: "Svatah ADE",
+      osascriptBridge({ process: "Yam ADE", run }).window({
+        process: "Yam ADE",
         maxNodes: 10,
       }),
-    ).rejects.toThrow(/svatah surface doctor/);
+    ).rejects.toThrow(/yam surface doctor/);
   });
 
   it("does not lose a node over one missing attribute", async () => {
@@ -427,7 +427,7 @@ describe("reading a window", () => {
 describe("performing a command", () => {
   it("addresses an element by its path, because a specifier does not survive", async () => {
     const { run, calls } = answering('{"ok":true}');
-    await osascriptBridge({ process: "Svatah ADE", run }).perform({
+    await osascriptBridge({ process: "Yam ADE", run }).perform({
       kind: "action",
       path: [0, 3, 1],
       action: "AXPress",
@@ -436,7 +436,7 @@ describe("performing a command", () => {
       kind: "action",
       path: [0, 3, 1],
       action: "AXPress",
-      process: "Svatah ADE",
+      process: "Yam ADE",
     });
   });
 
@@ -471,7 +471,7 @@ describe("performing a command", () => {
  * seconds after a `pkill` the first match is the instance that is still exiting.
  *
  * The script is macOS-only and never runs anywhere a test does, so it is
- * executed here against a fake System Events: three processes called "Svatah
+ * executed here against a fake System Events: three processes called "Yam
  * ADE", the first two with no window, the third with the one the command must
  * reach.
  */
@@ -535,9 +535,9 @@ describe("the perform script chooses the process that owns a window (P8-F1)", ()
     };
   }
 
-  const noWindow: FakeProcess = { name: "Svatah ADE", children: [] };
+  const noWindow: FakeProcess = { name: "Yam ADE", children: [] };
   const withWindow = (mark: { pressed: boolean }): FakeProcess => ({
-    name: "Svatah ADE",
+    name: "Yam ADE",
     children: [
       {
         actions: {
@@ -553,7 +553,7 @@ describe("the perform script chooses the process that owns a window (P8-F1)", ()
 
   it("presses the element in the instance that has a window, not the first match", () => {
     const mark = { pressed: false };
-    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Svatah ADE" }, [
+    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Yam ADE" }, [
       noWindow,
       noWindow,
       withWindow(mark),
@@ -564,7 +564,7 @@ describe("the perform script chooses the process that owns a window (P8-F1)", ()
 
   it("skips a process that refuses the question rather than failing on it", () => {
     const mark = { pressed: false };
-    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Svatah ADE" }, [
+    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Yam ADE" }, [
       { ...noWindow, refuses: true },
       withWindow(mark),
     ]);
@@ -573,12 +573,12 @@ describe("the perform script chooses the process that owns a window (P8-F1)", ()
   });
 
   it("activates the windowed instance too", () => {
-    const { answer, frontmost } = perform({ kind: "activate", process: "Svatah ADE" }, [
+    const { answer, frontmost } = perform({ kind: "activate", process: "Yam ADE" }, [
       noWindow,
       withWindow({ pressed: false }),
     ]);
     expect(answer.ok).toBe(true);
-    expect(frontmost).toEqual(["Svatah ADE#1"]);
+    expect(frontmost).toEqual(["Yam ADE#1"]);
   });
 
   /*
@@ -592,7 +592,7 @@ describe("the perform script chooses the process that owns a window (P8-F1)", ()
    */
   it("asks again when System Events answers an empty list, and finds the window", () => {
     const mark = { pressed: false };
-    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Svatah ADE" }, [
+    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Yam ADE" }, [
       { ...withWindow(mark), emptyFirst: 3 },
     ]);
     expect(answer.ok).toBe(true);
@@ -601,7 +601,7 @@ describe("the perform script chooses the process that owns a window (P8-F1)", ()
 
   it("gives up after ten empty answers, so a gone application is still a cause", () => {
     const mark = { pressed: false };
-    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Svatah ADE" }, [
+    const { answer } = perform({ kind: "action", path: [0], action: "AXPress", process: "Yam ADE" }, [
       { ...withWindow(mark), emptyFirst: 500 },
     ]);
     expect(answer.ok).toBe(false);
@@ -610,7 +610,7 @@ describe("the perform script chooses the process that owns a window (P8-F1)", ()
   });
 
   it("still answers `no-window` when not one of them has a window", () => {
-    const { answer } = perform({ kind: "focus", path: [0], process: "Svatah ADE" }, [
+    const { answer } = perform({ kind: "focus", path: [0], process: "Yam ADE" }, [
       noWindow,
       noWindow,
     ]);
@@ -632,16 +632,16 @@ describe("the snapshot cost records what the machine was doing (P8-F2, LLD §7.5
   const US = "\u001f";
   /** One window record in that wire format. */
   const window1 = (flags: string, calls: string): string =>
-    ["OK", "Svatah ADE", flags, calls, "1"].join(US) +
+    ["OK", "Yam ADE", flags, calls, "1"].join(US) +
     RS +
-    ["-1", "AXWindow", "AXStandardWindow", "Svatah ADE", ...new Array(14).fill(""), "AXRaise", ""].join(
+    ["-1", "AXWindow", "AXStandardWindow", "Yam ADE", ...new Array(14).fill(""), "AXRaise", ""].join(
       US,
     );
 
   it("puts the one-minute load average and the CPU count on every read", async () => {
     const { run } = answering(window1("", "17"));
-    const window = await osascriptBridge({ process: "Svatah ADE", run }).window({
-      process: "Svatah ADE",
+    const window = await osascriptBridge({ process: "Yam ADE", run }).window({
+      process: "Yam ADE",
       maxNodes: 10,
     });
 
@@ -655,8 +655,8 @@ describe("the snapshot cost records what the machine was doing (P8-F2, LLD §7.5
     // it had, which is §7.5's "bridge timeout with those numbers".
     const { run } = answering(window1("D", "9000"));
     await expect(
-      osascriptBridge({ process: "Svatah ADE", run }).window({
-        process: "Svatah ADE",
+      osascriptBridge({ process: "Yam ADE", run }).window({
+        process: "Yam ADE",
         maxNodes: 10,
       }),
     ).rejects.toThrow(/load average [\d.]+ over \d+ CPUs/);
@@ -666,7 +666,7 @@ describe("the snapshot cost records what the machine was doing (P8-F2, LLD §7.5
 /**
  * The login-session check (T10.4, P9-F7, Draft 2.12 §7.5).
  *
- * > `svatah surface doctor --adapter ax` also reports `ax/session`: whether any
+ * > `yam surface doctor --adapter ax` also reports `ax/session`: whether any
  * > process in the login session owns an on-screen window; when only
  * > `loginwindow` does, the display is locked or the session has no
  * > WindowServer, and the gate names that as the cause of its exit 2 rather than
@@ -692,15 +692,15 @@ describe("the login-session check (P9-F7, Draft 2.12 §7.5, Draft 2.13)", () => 
 
   it.runIf(macOnly)("names what owns a window when something does", async () => {
     const { run, calls } = answering(
-      '{"ok":true,"asked":12,"owners":["loginwindow","Svatah ADE","Finder"],' +
-        '"claimed":["loginwindow","Svatah ADE","Finder"],"lockKnown":true,"locked":false,' +
+      '{"ok":true,"asked":12,"owners":["loginwindow","Yam ADE","Finder"],' +
+        '"claimed":["loginwindow","Yam ADE","Finder"],"lockKnown":true,"locked":false,' +
         '"onConsole":true}',
     );
-    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    const session = await osascriptBridge({ process: "Yam ADE", run }).session();
     expect(session.usable).toBe(true);
     expect(session.state).toBe("usable");
-    expect(session.owners).toContain("Svatah ADE");
-    expect(session.detail).toContain("Svatah ADE");
+    expect(session.owners).toContain("Yam ADE");
+    expect(session.detail).toContain("Yam ADE");
 
     // It reads AXWindows per application, in one invocation, like the window
     // read — never one osascript per process.
@@ -727,11 +727,11 @@ describe("the login-session check (P9-F7, Draft 2.12 §7.5, Draft 2.13)", () => 
   it.runIf(macOnly)("says the screen is locked, whatever the owner count claims", async () => {
     const { run } = answering(
       '{"ok":true,"asked":14,"owners":[],' +
-        '"claimed":["Notes","Finder","TextEdit","Svatah ADE","System Settings","Passwords",' +
+        '"claimed":["Notes","Finder","TextEdit","Yam ADE","System Settings","Passwords",' +
         '"Keychain Access","ChatGPT","Claude","Screen Sharing","loginwindow"],' +
         '"lockKnown":true,"locked":true,"onConsole":true}',
     );
-    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    const session = await osascriptBridge({ process: "Yam ADE", run }).session();
     expect(session.usable).toBe(false);
     expect(session.state).toBe("locked");
     expect(session.detail).toContain("the screen is locked");
@@ -745,7 +745,7 @@ describe("the login-session check (P9-F7, Draft 2.12 §7.5, Draft 2.13)", () => 
       '{"ok":true,"asked":9,"owners":["loginwindow"],"claimed":["loginwindow"],' +
         '"lockKnown":false,"locked":false}',
     );
-    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    const session = await osascriptBridge({ process: "Yam ADE", run }).session();
     expect(session.usable).toBe(false);
     expect(session.state).toBe("locked");
     expect(session.detail).toContain("loginwindow");
@@ -760,9 +760,9 @@ describe("the login-session check (P9-F7, Draft 2.12 §7.5, Draft 2.13)", () => 
    */
   it.runIf(macOnly)("will not guess when it cannot read the session dictionary", async () => {
     const { run } = answering(
-      '{"ok":true,"asked":14,"owners":[],"claimed":["Finder","Svatah ADE"],"lockKnown":false}',
+      '{"ok":true,"asked":14,"owners":[],"claimed":["Finder","Yam ADE"],"lockKnown":false}',
     );
-    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    const session = await osascriptBridge({ process: "Yam ADE", run }).session();
     expect(session.usable).toBe(false);
     expect(session.state).toBe("unknown");
     expect(session.detail).toContain("what a locked display looks like");
@@ -773,7 +773,7 @@ describe("the login-session check (P9-F7, Draft 2.12 §7.5, Draft 2.13)", () => 
     const { run } = answering(
       '{"ok":true,"asked":4,"owners":[],"claimed":[],"lockKnown":true,"locked":false}',
     );
-    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    const session = await osascriptBridge({ process: "Yam ADE", run }).session();
     expect(session.usable).toBe(false);
     expect(session.state).toBe("no-session");
     expect(session.detail).toContain("no process in this login session owns a window");
@@ -786,7 +786,7 @@ describe("the login-session check (P9-F7, Draft 2.12 §7.5, Draft 2.13)", () => 
       stderr: "execution error: Not authorised (-1743)",
       timedOut: false,
     });
-    const session = await osascriptBridge({ process: "Svatah ADE", run: refused }).session();
+    const session = await osascriptBridge({ process: "Yam ADE", run: refused }).session();
     expect(session.usable).toBe(false);
     // Not a cause (P10-F5): the gate may not print this as a reason.
     expect(session.state).toBe("unknown");
@@ -798,7 +798,7 @@ describe("the login-session check (P9-F7, Draft 2.12 §7.5, Draft 2.13)", () => 
 
   it.runIf(macOnly)("calls a timed-out probe `unknown`, never a locked display (P10-F5)", async () => {
     const slow: Run = async () => ({ code: null, stdout: "", stderr: "", timedOut: true });
-    const session = await osascriptBridge({ process: "Svatah ADE", run: slow }).session();
+    const session = await osascriptBridge({ process: "Yam ADE", run: slow }).session();
     expect(session.state).toBe("unknown");
     expect(session.detail).toContain("could not tell");
     expect(session.detail).not.toContain("locked");
@@ -807,7 +807,7 @@ describe("the login-session check (P9-F7, Draft 2.12 §7.5, Draft 2.13)", () => 
 
   it.runIf(!macOnly)("says it is a macOS question on any other host", async () => {
     const { run } = answering("{}");
-    const session = await osascriptBridge({ process: "Svatah ADE", run }).session();
+    const session = await osascriptBridge({ process: "Yam ADE", run }).session();
     expect(session.usable).toBe(false);
     expect(session.detail).toBe("not macOS");
   });

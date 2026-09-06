@@ -15,8 +15,8 @@
  * longer matches the stored one, the page's shape changed, which is a different
  * story from "the element moved" (LLD §6.3).
  */
-import type { Snapshot, SnapshotNode } from "@svatah/schema";
-import { structuralHash } from "@svatah/surface";
+import type { Snapshot, SnapshotNode } from "@svatah/yam-schema";
+import { structuralHash } from "@svatah/yam-surface";
 
 /**
  * The roles that scope a context, in the order LLD §6.2 tries them: a landmark,

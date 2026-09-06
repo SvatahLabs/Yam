@@ -5,9 +5,9 @@
  * > Tier 2 is a local 1.7B to 4B instruct model with output constrained to the
  * > IR JSON Schema, temperature 0, fixed seed, pinned digest in provenance.
  *
- * It lives in `@svatah/cli` rather than in `@svatah/compiler` because the
+ * It lives in `@svatah/yam` rather than in `@svatah/yam-compiler` because the
  * compiler declares the tier interface and nothing more: that is what keeps
- * `svatah compile` offline unless a project asks otherwise, and what keeps the
+ * `yam compile` offline unless a project asks otherwise, and what keeps the
  * compiler free of a dependency on the model gateway (LLD §1, `tiers.ts`).
  *
  * Four things make a 3B model usable for this at all, and each is a decision
@@ -22,11 +22,11 @@
  *   "here are the rules".
  * * **Temperature 0 and a fixed seed**, in the gateway (REQ-COMP-7).
  * * **A confidence penalty.** A Tier 2 step is never confident. It carries a
- *   ceiling below any sensible `compile.confidenceThreshold`, so `svatah lint`
+ *   ceiling below any sensible `compile.confidenceThreshold`, so `yam lint`
  *   flags every one of them for a person to read (REQ-COMP-8's `W_LOW_CONFIDENCE`
  *   alongside `W_TIER2`).
  */
-import { modelStepSchema, toRawStep, type ModelTier, type ModelTierAnswer } from "@svatah/compiler";
+import { modelStepSchema, toRawStep, type ModelTier, type ModelTierAnswer } from "@svatah/yam-compiler";
 import {
   GatewayRefusal,
   GatewayShapeError,
@@ -34,8 +34,8 @@ import {
   localGateway,
   type Gateway,
   type LocalProvider,
-} from "@svatah/gateway";
-import { diagnostic, VOCABULARY, type Diagnostic } from "@svatah/spec";
+} from "@svatah/yam-gateway";
+import { diagnostic, VOCABULARY, type Diagnostic } from "@svatah/yam-spec";
 import { conventionsBlock } from "./conventions.js";
 import { readGoldenSet, type GoldenExample } from "./examples.js";
 

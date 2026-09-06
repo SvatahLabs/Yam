@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/surface",
+  "name": "@svatah/yam-surface",
   "version": "0.1.0",
   "description": "The published AgentSurface interface, adapter registry and wire schemas",
   "license": "Apache-2.0",
@@ -26,7 +26,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/schema": "workspace:*"
+    "@svatah/yam-schema": "workspace:*"
   },
   "devDependencies": {
     "tsup": "catalog:",

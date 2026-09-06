@@ -1,7 +1,7 @@
 {
-  "name": "@svatah/host-playwright",
+  "name": "@svatah/yam-host-playwright",
   "version": "0.1.0",
-  "description": "Playwright Test host for Svatah flows: the svatah fixture, generated specs and the results reporter",
+  "description": "Playwright Test host for Yam flows: the yam fixture, generated specs and the results reporter",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -44,12 +44,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@svatah/adapter-playwright": "workspace:*",
-    "@svatah/bindings": "workspace:*",
-    "@svatah/playwright-test": "workspace:*",
-    "@svatah/runtime": "workspace:*",
-    "@svatah/schema": "workspace:*",
-    "@svatah/surface": "workspace:*"
+    "@svatah/yam-adapter-playwright": "workspace:*",
+    "@svatah/yam-bindings": "workspace:*",
+    "@svatah/yam-playwright-test": "workspace:*",
+    "@svatah/yam-runtime": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
+    "@svatah/yam-surface": "workspace:*"
   },
   "peerDependencies": {
     "@playwright/test": "catalog:"

@@ -19,7 +19,7 @@
  *   * `GET /flows/:file` — the text in the editor.
  *
  * A renderer adds nothing to this. That is the point of the model: the ADE and
- * `svatah ui` draw the same rows differently and agree about every word in them.
+ * `yam ui` draw the same rows differently and agree about every word in them.
  */
 import { Sources, dotted, plural } from "../load.js";
 import { actionsForScreen } from "../registry.js";
@@ -56,8 +56,8 @@ export interface FlowRow {
    * A timestamp, never "4 min ago" (Draft 2.12 §13.7: "State carries
    * timestamps, never a relative time as text"). The state of a project that
    * nothing has happened to must be the same value a second later, or
-   * `svatah ui --json` is not the model's state and two loads cannot be
-   * compared. Both renderers call `ago()` from `@svatah/screens` on this, so
+   * `yam ui --json` is not the model's state and two loads cannot be
+   * compared. Both renderers call `ago()` from `@svatah/yam-screens` on this, so
    * they still print the same words.
    */
   readonly lastRunAt?: string;
@@ -235,7 +235,7 @@ export const flowsScreen: Screen<FlowsState> = {
      * Which flow a run belongs to, when the run does not say.
      *
      * `summary.flows` is keyed by flow file for a whole-flow run and by the
-     * literal `(selected)` for `svatah run --story <name>` — which is what the
+     * literal `(selected)` for `yam run --story <name>` — which is what the
      * mockup's `comp` run is. So a match on the key alone left every row in the
      * list saying "not run" beside a run that had just happened. The stories the
      * run's results name belong to a file (`GET /project` says which), and that
@@ -361,7 +361,7 @@ export const flowsScreen: Screen<FlowsState> = {
         ? stepAt.get(selectedLine)
         : undefined;
     /*
-     * The binding behind the selected step, read the way `svatah bindings show`
+     * The binding behind the selected step, read the way `yam bindings show`
      * reads it: `GET /bindings/:id` answers the YAML file itself. One request,
      * for one step, when the inspector has a subject — a screen that fetched
      * thirty files to fill a toolbar count would be a screen with an opinion
@@ -478,7 +478,7 @@ function FLOW_KEYS(): readonly Binding[] {
      * The two renderers edit a file the way their own medium does. The ADE has
      * a text area and a Save button; a terminal has `$EDITOR`, and a cockpit
      * that built its own modal editor inside Ink would be a worse `vi` nobody
-     * asked for. `svatah ui` opens the file in the editor a person already has,
+     * asked for. `yam ui` opens the file in the editor a person already has,
      * and saves what comes back through the same `flows.save` action and the
      * same `PUT /flows/:file` — which is what makes it one action rather than
      * two features.

@@ -29,9 +29,9 @@ export function looksSecret(key: string): boolean {
   return SECRET_WORDS.some((word) => lower.includes(word));
 }
 
-/** `user.password` → `SVATAH_USER_PASSWORD`. */
+/** `user.password` → `YAM_USER_PASSWORD`. */
 export function environmentName(key: string): string {
-  return `SVATAH_${key.replace(/[^A-Za-z0-9]+/g, "_").toUpperCase()}`;
+  return `YAM_${key.replace(/[^A-Za-z0-9]+/g, "_").toUpperCase()}`;
 }
 
 export function migrateData(text: string): MigratedData {

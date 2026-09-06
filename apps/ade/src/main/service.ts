@@ -1,13 +1,13 @@
 /**
  * The local service's lifecycle, from the ADE's side (T3.6, LLD §13.6).
  *
- * "On project open, locate the bundled CLI (or a configured one), spawn `svatah
+ * "On project open, locate the bundled CLI (or a configured one), spawn `yam
  * serve --project <dir> --port 0`, read port and token from stdout, health-check
  * `GET /project`, and stop it on project close or app quit. If a service is
  * already running for the directory (lock file with port and token), connect
  * instead."
  *
- * ## Why the lock file is written here and not by `svatah serve`
+ * ## Why the lock file is written here and not by `yam serve`
  *
  * `serve` deliberately writes nothing: "a token in a file is a token that
  * outlives the process that needed it." That is right for a command a person
@@ -41,9 +41,9 @@ export interface ServiceConnection {
   readonly adopted: boolean;
 }
 
-/** The one line `svatah serve` prints when it is listening. */
+/** The one line `yam serve` prints when it is listening. */
 export function parseHandshake(line: string): { url: string; token: string } | undefined {
-  const match = /^svatah serve listening url=(\S+) token=(\S+)$/m.exec(line);
+  const match = /^yam serve listening url=(\S+) token=(\S+)$/m.exec(line);
   return match === null ? undefined : { url: match[1]!, token: match[2]! };
 }
 
@@ -97,7 +97,7 @@ export async function isStale(lock: Lock, fetcher: typeof fetch = fetch): Promis
 export interface StartOptions {
   readonly project: string;
   readonly userDataDir: string;
-  /** The `svatah` entry point. Bundled with the app in a packaged build. */
+  /** The `yam` entry point. Bundled with the app in a packaged build. */
   readonly cli: string;
   /**
    * The interpreter that runs the CLI (Draft 2.9 LLD §13.6, T8.1).
@@ -155,14 +155,14 @@ export async function startOrAdopt(options: StartOptions): Promise<RunningServic
        * And it must not inherit the ADE's own startup instructions (T8.1).
        *
        * While the spawn was `process.execPath` the child *was* an ADE, and it
-       * read `SVATAH_ADE_SMOKE` from this environment, opened the project, and
+       * read `YAM_ADE_SMOKE` from this environment, opened the project, and
        * spawned another: the verifier's "a second ADE instance appears" is one
        * generation of a fork bomb that reached 594 processes here. The runtime
        * fix removes the cause; clearing these removes the blast radius, which
        * is worth keeping for whatever the next mis-spawn turns out to be.
        */
-      SVATAH_ADE_SMOKE: "",
-      SVATAH_ADE_PROJECT: "",
+      YAM_ADE_SMOKE: "",
+      YAM_ADE_PROJECT: "",
     },
   });
 
@@ -172,7 +172,7 @@ export async function startOrAdopt(options: StartOptions): Promise<RunningServic
    *
    * The ADE launched by the desktop gate is quit as soon as its window is up,
    * which can be a second after `app.ready` and two seconds before
-   * `svatah serve` finishes starting. Registering this after `await` left the
+   * `yam serve` finishes starting. Registering this after `await` left the
    * half-started service with no parent and no lock file to find it by: one
    * orphan per launch loop, holding the fixtures project's `runs/` directory.
    */
@@ -208,7 +208,7 @@ function waitForHandshake(
       child.kill("SIGTERM");
       reject(
         new Error(
-          `\`svatah serve\` did not print its handshake within ${options.timeoutMs ?? 30_000} ms. ` +
+          `\`yam serve\` did not print its handshake within ${options.timeoutMs ?? 30_000} ms. ` +
             `What it did say:\n${buffer.slice(-2000)}`,
         ),
       );
@@ -231,7 +231,7 @@ function waitForHandshake(
 
     child.once("exit", (code) => {
       clearTimeout(timer);
-      reject(new Error(`\`svatah serve\` exited with ${code ?? "no code"}:\n${buffer.slice(-2000)}`));
+      reject(new Error(`\`yam serve\` exited with ${code ?? "no code"}:\n${buffer.slice(-2000)}`));
     });
   });
 }

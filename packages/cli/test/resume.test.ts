@@ -1,5 +1,5 @@
 /**
- * `svatah run --resume <runId> --from <stepId>` (T5.1, REQ-AUTO-3, LLD §8.1, §15).
+ * `yam run --resume <runId> --from <stepId>` (T5.1, REQ-AUTO-3, LLD §8.1, §15).
  *
  * T5.1's Validate list, as one file:
  *
@@ -32,11 +32,11 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import type { Checkpoint, StepResult } from "@svatah/schema";
+import type { Checkpoint, StepResult } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 
 const EMAIL = "connected2atul@gmail.com";
 const PASSWORD = "qwerty123";
@@ -66,12 +66,12 @@ test: I want to validate login
 `;
 
 function scaffold(): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-resume-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-resume-"));
   projects.push(dir);
   cpSync(join(FIXTURES, "bindings"), join(dir, "bindings"), { recursive: true });
   cpSync(join(FIXTURES, "data.yaml"), join(dir, "data.yaml"));
   cpSync(join(FIXTURES, "api"), join(dir, "api"), { recursive: true });
-  writeFileSync(join(dir, "svatah.config.yaml"), config(), "utf8");
+  writeFileSync(join(dir, "yam.config.yaml"), config(), "utf8");
   mkdirSync(join(dir, "flows"), { recursive: true });
   writeFileSync(join(dir, "flows", "resume.flow"), FLOW, "utf8");
   return dir;
@@ -107,9 +107,9 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
 function cli(args: readonly string[], cwd: string): Promise<{ code: number; output: string }> {
   return new Promise((done) => {
     let output = "";
-    const child = spawn(process.execPath, [SVATAH, ...args], {
+    const child = spawn(process.execPath, [YAM, ...args], {
       cwd,
-      env: { ...process.env, SVATAH_SAMPLE_PASSWORD: PASSWORD },
+      env: { ...process.env, YAM_SAMPLE_PASSWORD: PASSWORD },
     });
     child.stdout.on("data", (chunk) => (output += String(chunk)));
     child.stderr.on("data", (chunk) => (output += String(chunk)));
@@ -133,7 +133,7 @@ const comparable = (r: StepResult): Record<string, unknown> => ({
 });
 
 beforeAll(async () => {
-  if (!existsSync(SVATAH)) throw new Error("Run `pnpm -r build` first.");
+  if (!existsSync(YAM)) throw new Error("Run `pnpm -r build` first.");
   app = await startSampleApp(0);
 }, 120_000);
 

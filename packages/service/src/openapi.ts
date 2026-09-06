@@ -28,7 +28,7 @@ export const OPENAPI_VERSION = "3.1.0";
 const EVENT_STREAM_DESCRIPTION =
   "Every message is a JSON object with a `kind`. The kinds are: " +
   SERVICE_EVENT_KINDS.map((kind) => `\`${kind}\``).join(", ") +
-  ". Their shapes are `@svatah/service`'s `ServiceEvent` union (LLD §13.5).";
+  ". Their shapes are `@svatah/yam-service`'s `ServiceEvent` union (LLD §13.5).";
 
 /** Every path the service serves, in LLD §13.5's order. */
 export function openApiDocument(version: string): Record<string, unknown> {
@@ -37,16 +37,16 @@ export function openApiDocument(version: string): Record<string, unknown> {
     content: { "application/json": { schema } },
   });
   const ref = (name: string): Record<string, unknown> => ({
-    $ref: `https://svatah.dev/schema/${name}.schema.json`,
+    $ref: `https://yam.svatah.com/schema/${name}.schema.json`,
   });
 
   return {
     openapi: OPENAPI_VERSION,
     info: {
-      title: "Svatah local service",
+      title: "Yam local service",
       version,
       description:
-        "The local integration point for the Svatah ADE and any other client " +
+        "The local integration point for the Yam ADE and any other client " +
         "(REQ-ADE-1, LLD §13.5). Bound to 127.0.0.1, behind a bearer token printed " +
         "on stdout. Every handler calls the same function the CLI calls; no logic " +
         "lives here.",
@@ -136,7 +136,7 @@ export function openApiDocument(version: string): Record<string, unknown> {
         get: {
           summary: "The compiled plan, story by story",
           description:
-            "The object `svatah compile` writes to `.svatah/plan.json`. `POST /compile` " +
+            "The object `yam compile` writes to `.yam/plan.json`. `POST /compile` " +
             "answers with a reference; this is the plan the ADE's Plan screen renders.",
           security: bearer,
           responses: { 200: { description: "Plan", ...json(ref("plan")) } },
@@ -225,7 +225,7 @@ export function openApiDocument(version: string): Record<string, unknown> {
         get: {
           summary: "One binding",
           description:
-            "The YAML file on disk, byte for byte — the same bytes `svatah bindings show` " +
+            "The YAML file on disk, byte for byte — the same bytes `yam bindings show` " +
             "prints and a reviewer reads in a pull request. A `GET /bindings/:id.json` would " +
             "be a second representation of the store, and the moment one exists someone has " +
             "to keep the two in step (LLD §6.1, §13.5).",
@@ -275,7 +275,7 @@ export function openApiDocument(version: string): Record<string, unknown> {
         post: {
           summary: "Execute one API request ad hoc",
           description:
-            "Through the same function `svatah run` uses for an `api` step, so the ADE's " +
+            "Through the same function `yam run` uses for an `api` step, so the ADE's " +
             "API client is not a second HTTP client (LLD §13.5).",
           security: bearer,
           requestBody: json({
@@ -379,10 +379,10 @@ export function openApiDocument(version: string): Record<string, unknown> {
       },
       "/migrate": {
         post: {
-          summary: "Import a Svatah ADE prototype's electron-db directory into this project",
+          summary: "Import a Yam ADE prototype's electron-db directory into this project",
           description:
             "Reads the prototype's `project`, `config`, `flows` and `api` tables and writes " +
-            "`svatah.config.yaml`, `flows/`, seed `bindings/`, `data.yaml` and `api/*.yaml` " +
+            "`yam.config.yaml`, `flows/`, seed `bindings/`, `data.yaml` and `api/*.yaml` " +
             "into **this** project directory — the one the service was opened on, because " +
             "every write the service makes is confined to it (REQ-ADE-9, LLD §13.5).\n\n" +
             "Results and screenshots are not imported: a `runs/` directory reconstructed " +
@@ -519,7 +519,7 @@ export function openApiDocument(version: string): Record<string, unknown> {
           summary: "The tools this project exposes, and every invocation served",
           description:
             "Invocations are read from the run directories — `behavior: \"tool\"` summaries and " +
-            "their audit lines — so the panel shows what a `svatah tool serve` in another " +
+            "their audit lines — so the panel shows what a `yam tool serve` in another " +
             "terminal served too (REQ-ADE-2).",
           security: bearer,
           parameters: [{ name: "expose", in: "query", required: false, schema: { type: "string" } }],

@@ -116,7 +116,7 @@ export class VerbTrie {
     return undefined;
   }
 
-  /** Every synonym in the trie, sorted. For tests and for `svatah doctor`. */
+  /** Every synonym in the trie, sorted. For tests and for `yam doctor`. */
   synonyms(): string[] {
     return [...this.claimed.keys()].sort();
   }

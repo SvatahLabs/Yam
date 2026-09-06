@@ -38,7 +38,7 @@ entries:
           - "Project Core Adapters ADE Run build"
           - "Build scheduled."
         before:
-          - "Svatah Sample Menu Dashboard Book a slot Widgets Docs"
+          - "Yam Sample Menu Dashboard Book a slot Widgets Docs"
           - "☰ Overview Schedule Build Bookings Checkout Logout"
       rolePath:
         - "main"

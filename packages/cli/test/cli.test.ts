@@ -41,7 +41,7 @@ describe("the command table (LLD §15)", () => {
   it("prints usage and exits 64 when given nothing", async () => {
     const io = capture();
     expect(await main([], io)).toBe(EXIT.usage);
-    expect(io.stdout.join("\n")).toContain("svatah surface conform");
+    expect(io.stdout.join("\n")).toContain("yam surface conform");
   });
 
   it("prints usage and exits 0 for `help`", async () => {
@@ -53,7 +53,7 @@ describe("the command table (LLD §15)", () => {
     /*
      * `workflow` and `tool` were the last two entries in the "not built yet"
      * table, and Phase 5 built them (T5.2, T5.3), so the table is empty. What
-     * `svatah workflow` with no subcommand says now is what it takes — which is
+     * `yam workflow` with no subcommand says now is what it takes — which is
      * the same rule as before applied to a command that exists: "not yet" and
      * "never" and "you left something out" are three different answers.
      */
@@ -72,7 +72,7 @@ describe("the command table (LLD §15)", () => {
     // any of them later would be lying.
     const io = capture();
     await main(["help"], io);
-    for (const command of ["svatah repl", "svatah workflow run", "svatah tool serve"]) {
+    for (const command of ["yam repl", "yam workflow run", "yam tool serve"]) {
       expect(io.stdout.join("\n")).toContain(command);
     }
   });
@@ -104,17 +104,17 @@ describe("the command table (LLD §15)", () => {
     expect(io.stderr.join("\n")).toContain("playwright");
   });
 
-  it("registers every adapter this build ships, under `svatah` (T4.1, T6.1, T6.2, LLD §1)", async () => {
+  it("registers every adapter this build ships, under `yam` (T4.1, T6.1, T6.2, LLD §1)", async () => {
     /*
      * `surface conform` and `bindings verify` are module (a) commands mounted
-     * under `svatah`, and module (a)'s own registration knows only Playwright —
+     * under `yam`, and module (a)'s own registration knows only Playwright —
      * it is what a plain Playwright user installs. Registering the rest from
-     * `@svatah/cli` is what makes `--adapter bidi` reachable here while
-     * `svatah-bindings` stays module (a).
+     * `@svatah/yam` is what makes `--adapter bidi` reachable here while
+     * `yam-bindings` stays module (a).
      */
     const io = capture();
     await main(["surface", "conform", "--adapter", "atspi"], io);
-    const { listAdapters } = await import("@svatah/surface");
+    const { listAdapters } = await import("@svatah/yam-surface");
     /*
      * The HTTP adapter is here too, since T12.7.
      *

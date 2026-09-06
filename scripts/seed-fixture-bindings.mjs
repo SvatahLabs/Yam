@@ -17,9 +17,9 @@
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { canonicalYaml, SCHEMA_VERSION } from "@svatah/schema";
-import { contextHash, contextPattern, fingerprint, synthesise } from "@svatah/bindings";
-import { PlaywrightSurface } from "@svatah/adapter-playwright";
+import { canonicalYaml, SCHEMA_VERSION } from "@svatah/yam-schema";
+import { contextHash, contextPattern, fingerprint, synthesise } from "@svatah/yam-bindings";
+import { PlaywrightSurface } from "@svatah/yam-adapter-playwright";
 import { startSampleApp } from "sample-web";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");

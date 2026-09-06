@@ -1,7 +1,7 @@
 {
-  "name": "@svatah/adapter-ax",
+  "name": "@svatah/yam-adapter-ax",
   "version": "0.1.0",
-  "description": "macOS Accessibility adapter: the Svatah agent surface over AXUIElement",
+  "description": "macOS Accessibility adapter: the Yam agent surface over AXUIElement",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,11 +26,11 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@svatah/surface": "workspace:*",
-    "@svatah/schema": "workspace:*"
+    "@svatah/yam-surface": "workspace:*",
+    "@svatah/yam-schema": "workspace:*"
   },
   "devDependencies": {
-    "@svatah/conformance": "workspace:*",
+    "@svatah/yam-conformance": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
@@ -39,7 +39,7 @@
     "access": "public"
   },
   "keywords": [
-    "svatah",
+    "yam",
     "accessibility",
     "macos",
     "automation",

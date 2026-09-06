@@ -3,7 +3,7 @@
  *
  * The runner is injected, so what is tested here is everything except Windows:
  * which script is sent, how a timeout is read, how a refusal is classified, and
- * what `svatah surface doctor` is told.
+ * what `yam surface doctor` is told.
  */
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -28,18 +28,18 @@ const answering = (
   return { run, calls };
 };
 
-describe("availability (`svatah surface doctor`)", () => {
+describe("availability (`yam surface doctor`)", () => {
   it("is available when UIAutomationClient loads", async () => {
     const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
     Object.defineProperty(process, "platform", { value: "win32", configurable: true });
     try {
       const { run, calls } = answering('{"ok":true,"root":"Desktop"}');
-      const availability = await powershellBridge({ process: "Svatah ADE", run }).availability();
+      const availability = await powershellBridge({ process: "Yam ADE", run }).availability();
       expect(availability.state).toBe("available");
       // The smallest call: load the assembly and read the root. It touches no
       // application, so a failure is about the host rather than about the target.
       expect(calls[0]!.script).toContain("UIAutomationClient");
-      expect(calls[0]!.script).not.toContain("Svatah ADE");
+      expect(calls[0]!.script).not.toContain("Yam ADE");
     } finally {
       Object.defineProperty(process, "platform", platform);
     }
@@ -83,18 +83,18 @@ describe("reading a window", () => {
     const { run, calls } = answering(
       JSON.stringify({
         ok: true,
-        process: "Svatah ADE",
-        title: "Svatah ADE",
+        process: "Yam ADE",
+        title: "Yam ADE",
         truncated: false,
-        nodes: [{ parent: -1, controlType: "Window", name: "Svatah ADE" }],
+        nodes: [{ parent: -1, controlType: "Window", name: "Yam ADE" }],
       }),
     );
-    const window = await powershellBridge({ process: "Svatah ADE", run }).window({
-      process: "Svatah ADE",
+    const window = await powershellBridge({ process: "Yam ADE", run }).window({
+      process: "Yam ADE",
       maxNodes: 500,
     });
     expect(window.nodes).toHaveLength(1);
-    expect(calls[0]!.argument).toEqual({ process: "Svatah ADE", maxNodes: 500 });
+    expect(calls[0]!.argument).toEqual({ process: "Yam ADE", maxNodes: 500 });
     // Breadth-first with a budget, and the ControlView walker — not the raw
     // tree, which is full of nodes no user can see.
     expect(calls[0]!.script).toContain("ControlViewWalker");
@@ -108,8 +108,8 @@ describe("reading a window", () => {
      */
     const { run } = answering(JSON.stringify({ ok: false, error: "no-window" }));
     await expect(
-      powershellBridge({ process: "Svatah ADE", run }).window({
-        process: "Svatah ADE",
+      powershellBridge({ process: "Yam ADE", run }).window({
+        process: "Yam ADE",
         maxNodes: 10,
       }),
     ).rejects.toThrow(/higher integrity level/);
@@ -136,7 +136,7 @@ describe("reading a window", () => {
 describe("performing a command", () => {
   it("addresses an element by its path, because a COM object does not survive", async () => {
     const { run, calls } = answering('{"ok":true}');
-    await powershellBridge({ process: "Svatah ADE", run }).perform({
+    await powershellBridge({ process: "Yam ADE", run }).perform({
       kind: "pattern",
       path: [0, 3, 1],
       pattern: "Invoke",
@@ -147,7 +147,7 @@ describe("performing a command", () => {
       path: [0, 3, 1],
       pattern: "Invoke",
       method: "Invoke",
-      process: "Svatah ADE",
+      process: "Yam ADE",
     });
   });
 
@@ -196,14 +196,14 @@ describe("how the request reaches the script (T7.2)", () => {
      * arguments". The JSON was appended to the script as *text* and parsed:
      *
      *   ParserError:
-     *      6 |  -Request {"process":"Svatah ADE","maxNodes":1500}
-     *        | Unexpected token ':"Svatah ADE"' in expression or statement.
+     *      6 |  -Request {"process":"Yam ADE","maxNodes":1500}
+     *        | Unexpected token ':"Yam ADE"' in expression or statement.
      */
     const decoded = Buffer.from(
-      encodePowershell("$req = $Request | ConvertFrom-Json", { process: "Svatah ADE" }),
+      encodePowershell("$req = $Request | ConvertFrom-Json", { process: "Yam ADE" }),
       "base64",
     ).toString("utf16le");
-    expect(decoded).toContain(`$Request = '{"process":"Svatah ADE"}'`);
+    expect(decoded).toContain(`$Request = '{"process":"Yam ADE"}'`);
     expect(decoded).toContain("$req = $Request | ConvertFrom-Json");
   });
 

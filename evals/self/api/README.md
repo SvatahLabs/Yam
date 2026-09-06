@@ -1,11 +1,11 @@
 # `evals/self/api` — where the HTTP side's requests live
 
-The self project declares `api: { dir: api }` in `svatah.config.yaml`. The
+The self project declares `api: { dir: api }` in `yam.config.yaml`. The
 requests the HTTP side of the suite calls are in `evals/self/http/api`, beside
 the configuration that names the local service's base URL; this directory
 belongs to the *desktop* half, which calls no API of its own.
 
-It is tracked because git carries no empty directory, and `svatah.config.yaml`
+It is tracked because git carries no empty directory, and `yam.config.yaml`
 names it: `scripts/self-parity-bite.mjs` and `scripts/self-record.mjs` copy the
 project before they touch it and crashed here from a clean checkout (P11-F1).
 The copy tolerates a missing optional directory now too.

@@ -11,8 +11,8 @@
  * against — which is the difference between "this element moved" and "this is a
  * different page".
  */
-import type { Candidate, SessionState } from "@svatah/schema";
-import { LocateError } from "@svatah/surface";
+import type { Candidate, SessionState } from "@svatah/yam-schema";
+import { LocateError } from "@svatah/yam-surface";
 
 /** What one candidate did when it was tried. */
 export interface CandidateAttempt {
@@ -46,7 +46,7 @@ export class LocatorError extends LocateError {
     this.detail = detail;
   }
 
-  /** The failure as a line for `.svatah/bind-failures.jsonl` (LLD §12). */
+  /** The failure as a line for `.yam/bind-failures.jsonl` (LLD §12). */
   toFailureLine(): Record<string, unknown> {
     return {
       id: this.detail.id,

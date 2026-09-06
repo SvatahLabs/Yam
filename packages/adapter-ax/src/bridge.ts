@@ -4,7 +4,7 @@
  * > AX: `AXUIElement` via a small native module; `AXRole` → role map;
  * > `AXIdentifier` → `automationId`; actions via `AXPress`, `AXSetValue`,
  * > keyboard events; documents the accessibility permission prompt and provides
- * > a `svatah surface doctor` check.
+ * > a `yam surface doctor` check.
  *
  * ## Two halves: a native helper for reading, System Events for acting
  *
@@ -182,7 +182,7 @@ export type AxPermissionState =
 
 export interface AxPermission {
   readonly state: AxPermissionState;
-  /** What to do about it, written for whoever runs `svatah surface doctor`. */
+  /** What to do about it, written for whoever runs `yam surface doctor`. */
   readonly advice: string;
   /** The raw `osascript` diagnostic, when there was one. */
   readonly detail?: string;
@@ -191,7 +191,7 @@ export interface AxPermission {
 /**
  * Whether anything in this login session owns a window (Draft 2.12 §7.5, P9-F7).
  *
- * > `svatah surface doctor --adapter ax` also reports `ax/session`: whether any
+ * > `yam surface doctor --adapter ax` also reports `ax/session`: whether any
  * > process in the login session owns an on-screen window; when only
  * > `loginwindow` does, the display is locked or the session has no
  * > WindowServer, and the gate names that as the cause of its exit 2 rather than
@@ -227,7 +227,7 @@ export interface AxSession {
   readonly state: "usable" | "locked" | "no-session" | "unknown";
   /** The processes that own at least one on-screen window, by name. */
   readonly owners: readonly string[];
-  /** One sentence for `svatah surface doctor` and for the gate's exit message. */
+  /** One sentence for `yam surface doctor` and for the gate's exit message. */
   readonly detail: string;
   /** What to do about it. */
   readonly advice: string;
@@ -309,7 +309,7 @@ export type OsascriptLanguage = "JavaScript" | "AppleScript";
  *
  * The deadline is not a nicety. An `osascript` that trips the Accessibility
  * prompt blocks on a dialog nobody may be there to answer and then fails with
- * `-1712` after roughly two minutes; a `svatah surface doctor` that inherited
+ * `-1712` after roughly two minutes; a `yam surface doctor` that inherited
  * that wait would be useless exactly when it is needed. Killing the child and
  * reporting the timeout as a *permission* answer is the honest reading: an
  * accessibility call that cannot complete is an accessibility call you do not
@@ -552,7 +552,7 @@ function run(argv) {
  *
  * `NSWorkspace.runningApplications`, filtered by `localizedName` and then by
  * *having a window*. An Electron application registers several processes under
- * one name — helpers among them — and "the first one called Svatah ADE" is
+ * one name — helpers among them — and "the first one called Yam ADE" is
  * sometimes a helper with no window, which read as a window that had not
  * appeared yet. Asking for the one with a window removes a whole class of
  * flake from the gate's launch poll.
@@ -1041,7 +1041,7 @@ function run(argv) {
 }`;
 
 export interface OsascriptBridgeOptions {
-  /** The application process to drive: the ADE is `Svatah ADE` (LLD §16). */
+  /** The application process to drive: the ADE is `Yam ADE` (LLD §16). */
   readonly process: string;
   /** How long one Apple event may take. Default 20 s; `permission()` uses 5 s. */
   readonly timeoutMs?: number;
@@ -1143,7 +1143,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
     return new AxBridgeError(
       `The accessibility call did not answer within ${deadlineMs} ms (${measured}). The ` +
         "Accessibility permission has not been confirmed for this program, and an unanswered " +
-        "prompt looks exactly like this: run `svatah surface doctor`.",
+        "prompt looks exactly like this: run `yam surface doctor`.",
     );
   };
 
@@ -1152,7 +1152,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
     if (result.timedOut) {
       throw new AxBridgeError(
         `The accessibility call did not answer within ${ms} ms. On macOS that is what an ` +
-          "unanswered Accessibility permission prompt looks like: run `svatah surface doctor`.",
+          "unanswered Accessibility permission prompt looks like: run `yam surface doctor`.",
       );
     }
     if (result.code !== 0) {
@@ -1268,7 +1268,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
           detail: `could not tell — ${error instanceof AxBridgeError ? error.message : String(error)}`,
           advice:
             "The session check needs the same Accessibility permission the adapter does; run " +
-            "`svatah surface doctor --adapter ax` and grant it. Until it answers, this says " +
+            "`yam surface doctor --adapter ax` and grant it. Until it answers, this says " +
             "nothing about the display either way.",
         };
       }
@@ -1340,8 +1340,8 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
             "`AXWindow` — which is what a locked display looks like from the accessibility " +
             "API, and what a withdrawn Accessibility grant looks like too",
           advice:
-            "Unlock the display, or check that the program running Svatah still has the " +
-            "Accessibility permission: `svatah surface doctor --adapter ax`.",
+            "Unlock the display, or check that the program running Yam still has the " +
+            "Accessibility permission: `yam surface doctor --adapter ax`.",
         };
       }
 
@@ -1484,7 +1484,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
               "accessibility API agreed for another " +
               `${Math.round(PERFORM_ADJUDICATION_MS / 1000)} s. Either the application has ` +
               "gone, or nothing has a window on this display — " +
-              "`svatah surface doctor --adapter ax` says which."
+              "`yam surface doctor --adapter ax` says which."
             : `The accessibility action failed: ${answer.error ?? "unknown"}.`,
         );
       }
@@ -1517,13 +1517,13 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
 }
 
 const PROMPT_ADVICE =
-  "The Accessibility permission has not been granted to the program running Svatah. " +
+  "The Accessibility permission has not been granted to the program running Yam. " +
   "Open System Settings → Privacy & Security → Accessibility, add the terminal (or the " +
   "test runner) you are running from, and switch it on. macOS asks once and remembers " +
   "the answer per program, so a permission granted to Terminal does not carry to iTerm, " +
   "to VS Code, or to a CI agent.";
 
 const DENIED_ADVICE =
-  "The Accessibility permission was refused for the program running Svatah. Open System " +
+  "The Accessibility permission was refused for the program running Yam. Open System " +
   "Settings → Privacy & Security → Accessibility, switch it on for that program, and " +
   "restart it — macOS does not re-read the setting for a process that is already running.";

@@ -16,7 +16,7 @@ import { describe, expect, it } from "vitest";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { SCHEMA_VERSION, type Checkpoint } from "@svatah/schema";
+import { SCHEMA_VERSION, type Checkpoint } from "@svatah/yam-schema";
 import {
   checkpointFor,
   openRunDirectory,
@@ -45,7 +45,7 @@ function checkpoint(parts: Partial<Checkpoint> & { stepId: string; story: string
 
 /** A run directory with checkpoints for the steps named. */
 function runDirectory(stepIds: readonly string[], storyName: string): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-resume-unit-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-resume-unit-"));
   const directory = openRunDirectory(dir, "r1");
   for (const stepId of stepIds) directory.checkpoint(checkpoint({ stepId, story: storyName }));
   return join(dir, "r1");
@@ -109,7 +109,7 @@ describe("choosing the checkpoint a --from resumes out of (T5.1)", () => {
     try {
       planResume({ runDir: dir, plan: PLAN, order: ORDER, from: "First#1" });
     } catch (error) {
-      // And says the useful thing: `svatah run` is the same command.
+      // And says the useful thing: `yam run` is the same command.
       expect((error as Error).message).toContain("first step");
     }
   });

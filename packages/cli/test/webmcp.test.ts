@@ -24,11 +24,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { EXIT } from "@svatah/bindings-cli";
-import type { AuditLine, BindingFile, StepResult } from "@svatah/schema";
+import { EXIT } from "@svatah/yam-bindings-cli";
+import type { AuditLine, BindingFile, StepResult } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 
 let app: SampleServer;
 const projects: string[] = [];
@@ -50,7 +50,7 @@ test: Book through the site
 `;
 
 function scaffold(query = ""): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-webmcp-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-webmcp-"));
   projects.push(dir);
   mkdirSync(join(dir, "flows"), { recursive: true });
   mkdirSync(join(dir, "bindings"), { recursive: true });
@@ -58,7 +58,7 @@ function scaffold(query = ""): string {
   writeFileSync(join(dir, "flows", "site-tools.flow"), FLOW, "utf8");
   writeFileSync(join(dir, "data.yaml"), "{}\n", "utf8");
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
+    join(dir, "yam.config.yaml"),
     `schemaVersion: "1.0.0"
 project: "webmcp"
 environment: test
@@ -91,7 +91,7 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
 function cli(args: readonly string[], cwd: string): Promise<{ code: number; output: string }> {
   return new Promise((done) => {
     let output = "";
-    const child = spawn(process.execPath, [SVATAH, ...args], { cwd });
+    const child = spawn(process.execPath, [YAM, ...args], { cwd });
     child.stdout.on("data", (chunk) => (output += String(chunk)));
     child.stderr.on("data", (chunk) => (output += String(chunk)));
     child.on("close", (code) => done({ code: code ?? 1, output }));
@@ -109,7 +109,7 @@ const lines = <T>(project: string, runId: string, file: string): T[] => {
 };
 
 beforeAll(async () => {
-  if (!existsSync(SVATAH)) throw new Error("Run `pnpm -r build` first.");
+  if (!existsSync(YAM)) throw new Error("Run `pnpm -r build` first.");
   app = await startSampleApp(0);
 }, 120_000);
 

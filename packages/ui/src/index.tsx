@@ -1,7 +1,7 @@
 /**
- * `@svatah/ui` — the design system (T9.2, REQ-ADE-12, LLD §13.7).
+ * `@svatah/yam-ui` — the design system (T9.2, REQ-ADE-12, LLD §13.7).
  *
- * > `@svatah/ui` (React components on Radix primitives: button, field, select,
+ * > `@svatah/yam-ui` (React components on Radix primitives: button, field, select,
  * > pill, chip, table, tabs, rail item, inspector sections, alert, palette,
  * > kbd), every component requiring a visible label and an id.
  *
@@ -15,9 +15,9 @@
  * 2. **A status colour never appears without a word.** `Pill` refuses an empty
  *    label; there is no way through this package to draw a bare coloured dot.
  *
- * The package knows nothing about Svatah. It has no idea what a plan, a run or a
+ * The package knows nothing about Yam. It has no idea what a plan, a run or a
  * binding is — `eslint.config.js` forbids it importing anything but
- * `@svatah/ui-tokens` — so a screen's meaning lives in `@svatah/screens` and its
+ * `@svatah/yam-ui-tokens` — so a screen's meaning lives in `@svatah/yam-screens` and its
  * appearance lives here, and neither can quietly acquire the other's job.
  */
 export { requireNamed, UnnamedControlError, AUTOMATION_ID_FORM, type Named } from "./named.js";

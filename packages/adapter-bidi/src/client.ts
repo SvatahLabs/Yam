@@ -27,7 +27,7 @@ import {
   ScriptError,
   SessionError,
   TimeoutError,
-} from "@svatah/surface";
+} from "@svatah/yam-surface";
 
 /** One unsolicited message: `{ method, params }` with no `id`. */
 export interface BidiEvent {
@@ -40,7 +40,7 @@ export type BidiEventHandler = (event: BidiEvent) => void;
 export interface BidiClientOptions {
   /** How long one command may take before it is a `TimeoutError`. */
   readonly commandTimeoutMs?: number;
-  /** Every message sent and received, for `SVATAH_BIDI_TRACE=1`. */
+  /** Every message sent and received, for `YAM_BIDI_TRACE=1`. */
   readonly onTraffic?: (direction: "→" | "←", message: unknown) => void;
 }
 

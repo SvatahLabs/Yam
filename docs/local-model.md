@@ -5,7 +5,7 @@ the controlled grammar refused (REQ-COMP-3, LLD §4.3). It exists for two
 reasons: so that a paraphrase does not have to become a compile error, and so
 that no step text has to leave the machine to avoid one (REQ-NFR-3).
 
-It is **off unless you ask for it**. `svatah compile` with no flags reaches no
+It is **off unless you ask for it**. `yam compile` with no flags reaches no
 network at all; `--tier2` reaches a server on localhost; only `--tier3` reaches a
 remote one. See [privacy.md](privacy.md).
 
@@ -23,7 +23,7 @@ curl -s http://127.0.0.1:11434/api/tags |
 ```
 
 ```yaml
-# svatah.config.yaml
+# yam.config.yaml
 compile:
   confidenceThreshold: 0.8
   tier2:
@@ -34,9 +34,9 @@ compile:
 ```
 
 ```bash
-svatah compile --tier2            # the grammar, then the local model
-svatah lint --tier2               # the same, reporting W_TIER2 per step
-svatah eval compiler --only tier2 # the measurement below, on your machine
+yam compile --tier2            # the grammar, then the local model
+yam lint --tier2               # the same, reporting W_TIER2 per step
+yam eval compiler --only tier2 # the measurement below, on your machine
 ```
 
 ## Which model
@@ -56,7 +56,7 @@ help with and what a larger model does better without help.
 Reproduce either with:
 
 ```bash
-svatah eval compiler --only tier2 --report reports/eval-compiler.md
+yam eval compiler --only tier2 --report reports/eval-compiler.md
 ```
 
 ## Why it is deterministic
@@ -76,7 +76,7 @@ action does not. It is a *closed* object down to the argument names — `url`,
 from a real 3B model, is now impossible rather than merely discouraged.
 
 **A pinned digest.** `compile.tier2.digest` is the sha256 of the weights. Ollama
-reports it on `/api/tags` — *not* on the generation response — so Svatah resolves
+reports it on `/api/tags` — *not* on the generation response — so Yam resolves
 it once per session and compares before the first call. A mismatch **fails the
 compile**:
 
@@ -144,11 +144,11 @@ property of the artifact rather than of a report beside it.
 
 Every Tier 2 step carries `origin.tier: 2`, `origin.confidence: 0.6` and full
 provenance. The confidence is a **ceiling**, deliberately below the default
-`compile.confidenceThreshold` of 0.8, so `svatah lint` reports every one of them
+`compile.confidenceThreshold` of 0.8, so `yam lint` reports every one of them
 twice — once as `W_TIER2` and once as `W_LOW_CONFIDENCE`:
 
 ```
-$ svatah lint --tier2
+$ yam lint --tier2
 flows/sign-in.flow:4: warning W_TIER2: Compiled by the local model, not by the grammar: "Tap the sign in button".
 flows/sign-in.flow:4: warning W_LOW_CONFIDENCE: Confidence 0.60 is below the configured 0.80: "Tap the sign in button".
 ```

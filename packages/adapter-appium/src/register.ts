@@ -1,7 +1,7 @@
-import { registerAdapter, hasAdapter } from "@svatah/surface";
+import { registerAdapter, hasAdapter } from "@svatah/yam-surface";
 import { createAppiumSurface } from "./surface.js";
 
-/** The name this adapter is selected by in `svatah.config.yaml` (LLD §2.4). */
+/** The name this adapter is selected by in `yam.config.yaml` (LLD §2.4). */
 export const APPIUM_ADAPTER_NAME = "appium";
 
 /**

@@ -1,8 +1,8 @@
 /**
- * `svatah record` (T3.3, REQ-REC-1, 5, 8, 9, REQ-AGT-1, REQ-AUTO-7, LLD §15).
+ * `yam record` (T3.3, REQ-REC-1, 5, 8, 9, REQ-AGT-1, REQ-AUTO-7, LLD §15).
  *
  * ```
- * svatah record [dir] [--flow f] [--story s] [--rebind] [--headed]
+ * yam record [dir] [--flow f] [--story s] [--rebind] [--headed]
  *               [--force-production] [--gateway anthropic|fake] [--json]
  * ```
  *
@@ -25,10 +25,10 @@
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { canonicalJson } from "@svatah/schema";
-import { GatewayUnavailable, type Gateway } from "@svatah/gateway";
-import { EnvironmentRefused, record, renderReport, reportJson } from "@svatah/recorder";
-import { createSurface } from "@svatah/surface";
+import { canonicalJson } from "@svatah/yam-schema";
+import { GatewayUnavailable, type Gateway } from "@svatah/yam-gateway";
+import { EnvironmentRefused, record, renderReport, reportJson } from "@svatah/yam-recorder";
+import { createSurface } from "@svatah/yam-surface";
 import {
   boolOption,
   sessionTarget,
@@ -37,7 +37,7 @@ import {
   type CommandIo,
   type ExitCode,
   type ParsedArgs,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
 import { gatewayForRecording } from "../gateway-for.js";
 import { compileProject, loadProject } from "../project.js";
@@ -104,7 +104,7 @@ export async function recordCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
     await surface.act("navigate", undefined, { url: config.app.baseUrl });
   }
 
-  const screenshotDir = resolve(loaded.root, ".svatah", "record");
+  const screenshotDir = resolve(loaded.root, ".yam", "record");
   mkdirSync(screenshotDir, { recursive: true });
   let shot = 0;
 
@@ -199,7 +199,7 @@ export async function recordCommand(args: ParsedArgs, io: CommandIo): Promise<Ex
  * default: a store recorded from fixtures that a person believes came from a
  * model is the failure mode worth an extra flag.
  */
-/** `--input k=v`, repeated. The same shape `svatah run` takes. */
+/** `--input k=v`, repeated. The same shape `yam run` takes. */
 function inputsFrom(args: ParsedArgs): Record<string, unknown> | undefined {
   const out: Record<string, unknown> = {};
   for (const one of stringOptions(args, "input")) {

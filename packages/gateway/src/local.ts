@@ -15,7 +15,7 @@
  * they are called with `fetch` — the rule against raw HTTP is about calling
  * Anthropic without its SDK, and there is no SDK for a local server.
  */
-import { provenanceSchema, type Provenance } from "@svatah/schema";
+import { provenanceSchema, type Provenance } from "@svatah/yam-schema";
 import { cacheKey, NO_CACHE, type GatewayCache } from "./cache.js";
 import { redactText, schemaOf } from "./render.js";
 import {

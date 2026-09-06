@@ -77,9 +77,9 @@
  * changes: `usedModel` is false, `withModel` equals `relocalizeOnly`, and the
  * report says so rather than reporting a model number nobody measured.
  */
-import type { AgentSurface } from "@svatah/surface";
-import type { BindingEntry, Candidate, Fingerprint } from "@svatah/schema";
-import { fingerprintOf, relocalize, synthesise, type RelocalizeResult } from "@svatah/bindings";
+import type { AgentSurface } from "@svatah/yam-surface";
+import type { BindingEntry, Candidate, Fingerprint } from "@svatah/yam-schema";
+import { fingerprintOf, relocalize, synthesise, type RelocalizeResult } from "@svatah/yam-bindings";
 import { currentRegrounder, hasRegrounder } from "./regrounder.js";
 
 /** A binding recorded at variant 0. */
@@ -213,7 +213,7 @@ export const METHOD = [
   "are the cases this number is about.",
   "Recovered means two things together: the element relocalization proposed carries the same",
   "ground-truth key as the element the binding was recorded on, AND a candidate re-synthesised",
-  "from that element resolves back to exactly one element. The key is a data-svatah-eval",
+  "from that element resolves back to exactly one element. The key is a data-yam-eval",
   "attribute the sample application stamps on every interactive element, identical across all",
   "variants; the eval reads it with a page script outside the surface, and",
   "bindings.ignoreAttributes strips it from describe(), from native, from synthesis and from",

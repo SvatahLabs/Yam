@@ -3,7 +3,7 @@
  * `pnpm conform:playwright` — start the sample application, run the surface
  * conformance suite against the Playwright adapter, and stop the app again.
  *
- * The suite itself needs no such wrapper: `svatah surface conform --adapter
+ * The suite itself needs no such wrapper: `yam surface conform --adapter
  * playwright --base-url <url>` runs against any deployment. This exists so a
  * verifier has one command to type (T1.2).
  */

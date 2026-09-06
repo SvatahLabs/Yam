@@ -12,8 +12,8 @@ import { App } from "./App.js";
  * The design system, then this application's layout. There is no third
  * stylesheet: T10.3 deleted `app.css` with the eleven screens it dressed.
  */
-import "@svatah/ui-tokens/tokens.css";
-import "@svatah/ui/ui.css";
+import "@svatah/yam-ui-tokens/tokens.css";
+import "@svatah/yam-ui/ui.css";
 import "./shell/shell.css";
 
 const root = document.getElementById("root");

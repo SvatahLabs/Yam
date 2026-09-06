@@ -15,8 +15,8 @@
  * not exist here" are different answers, and only the first one means the screen
  * changed.
  */
-import type { Candidate } from "@svatah/schema";
-import { APPIUM_ANDROID_ROLE_MAP, LocateError } from "@svatah/surface";
+import type { Candidate } from "@svatah/yam-schema";
+import { APPIUM_ANDROID_ROLE_MAP, LocateError } from "@svatah/yam-surface";
 
 /** One W3C `using` / `value` pair, as `POST /session/:id/elements` takes it. */
 export interface Strategy {

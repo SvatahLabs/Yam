@@ -18,9 +18,9 @@ plugins {
     id 'application'
 }
 
-group = 'dev.svatah'
+group = 'com.svatah.yam'
 version = '0.1.0'
-description = 'Svatah runtime for Java: executes plan.json and bindings (REQ-STD-3)'
+description = 'Yam runtime for Java: executes plan.json and bindings (REQ-STD-3)'
 
 java {
     // REQ-PKG-3 and the phase's constraint: JDK 17.
@@ -41,7 +41,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-application { mainClass = 'dev.svatah.runtime.Main' }
+application { mainClass = 'com.svatah.yam.runtime.Main' }
 
 test { useJUnitPlatform() }
 
@@ -58,7 +58,7 @@ run {
 tasks.register('fatJar', Jar) {
     archiveClassifier = 'all'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest { attributes 'Main-Class': 'dev.svatah.runtime.Main' }
+    manifest { attributes 'Main-Class': 'com.svatah.yam.runtime.Main' }
     from sourceSets.main.output
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     // Signature files from signed dependencies break a shaded jar's verification.

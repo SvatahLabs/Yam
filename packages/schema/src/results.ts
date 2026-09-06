@@ -87,7 +87,7 @@ export const stepResultSchema = z
          * "The surface state at failure, so a healer can restore it without a
          * plan." A run directory that records only *what* failed leaves module
          * (a)'s session-state replayer with nowhere to go, which is why
-         * `svatah-bindings heal --run` used to answer `unreachable` for every
+         * `yam-bindings heal --run` used to answer `unreachable` for every
          * flow failure.
          */
         session: sessionStateSchema.optional(),
@@ -139,7 +139,7 @@ export const summarySchema = z
      *
      * Names, never values: an input may be a secret, and a run directory is a
      * thing people attach to bug reports (REQ-NFR-6). What the names buy is that
-     * a later `svatah heal --run <id>` whose replay cannot get past
+     * a later `yam heal --run <id>` whose replay cannot get past
      * `Type {input.password}` can say *which* input it is missing, instead of
      * reporting `unreachable` and leaving the reader to guess.
      */

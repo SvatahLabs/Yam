@@ -21,7 +21,7 @@ import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { checkTrajectory, readTrajectory } from "@svatah/trajectory";
+import { checkTrajectory, readTrajectory } from "@svatah/yam-trajectory";
 import { buildMcpServer } from "../src/commands/mcp.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -31,7 +31,7 @@ let app: SampleServer;
 const projects: string[] = [];
 
 function scaffold(): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-mcp-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-mcp-"));
   projects.push(dir);
   for (const entry of ["bindings", "flows", "api"]) {
     cpSync(join(FIXTURES, entry), join(dir, entry), { recursive: true });
@@ -40,8 +40,8 @@ function scaffold(): string {
   // The application is on an ephemeral port, so the config has to name it: the
   // fixture's own `baseUrl` is the one a developer runs against by hand.
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
-    readFileSync(join(FIXTURES, "svatah.config.yaml"), "utf8").replace(
+    join(dir, "yam.config.yaml"),
+    readFileSync(join(FIXTURES, "yam.config.yaml"), "utf8").replace(
       /baseUrl: ".*"/,
       `baseUrl: "${app.origin}"`,
     ),
@@ -102,11 +102,11 @@ describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
       // LLD §15: "operation tools … plus raw surface tools (`surface_snapshot`,
       // `surface_act`, `surface_read`, `surface_check`)".
       for (const name of [
-        "svatah_compile",
-        "svatah_lint",
-        "svatah_run",
-        "svatah_bindings",
-        "svatah_results",
+        "yam_compile",
+        "yam_lint",
+        "yam_run",
+        "yam_bindings",
+        "yam_results",
         "surface_snapshot",
         "surface_act",
         "surface_read",
@@ -147,7 +147,7 @@ describe("an agent compiles and runs the project (T4.6's Validate)", () => {
     const session = await connect(project, join(project, "runs", "t", "trajectory.jsonl"));
     try {
       const compiled = answer(
-        await session.client.callTool({ name: "svatah_compile", arguments: {} }),
+        await session.client.callTool({ name: "yam_compile", arguments: {} }),
       ) as { ok: boolean; hash: string; stories: Array<{ name: string; steps: unknown[] }> };
 
       expect(compiled.ok).toBe(true);
@@ -169,7 +169,7 @@ describe("an agent compiles and runs the project (T4.6's Validate)", () => {
     try {
       const outcome = answer(
         await session.client.callTool({
-          name: "svatah_run",
+          name: "yam_run",
           arguments: {
             flows: ["flows/natural_language_login.flow"],
             // The story declares a typed signature, so the run supplies them —
@@ -185,7 +185,7 @@ describe("an agent compiles and runs the project (T4.6's Validate)", () => {
 
       expect(outcome.steps.length).toBeGreaterThan(0);
       expect(outcome.totals.passed, JSON.stringify(outcome.steps, null, 1)).toBeGreaterThan(0);
-      // A real run directory, the same one `svatah run` writes.
+      // A real run directory, the same one `yam run` writes.
       expect(existsSync(join(project, "runs", outcome.runId, "results.jsonl"))).toBe(true);
     } finally {
       await session.close();
@@ -197,19 +197,19 @@ describe("an agent compiles and runs the project (T4.6's Validate)", () => {
     const session = await connect(project, join(project, "runs", "t", "trajectory.jsonl"));
     try {
       const bindings = answer(
-        await session.client.callTool({ name: "svatah_bindings", arguments: {} }),
+        await session.client.callTool({ name: "yam_bindings", arguments: {} }),
       ) as Array<{ id: string; phrases: string[] }>;
       expect(bindings.some((one) => one.id === "home.sign-in-button")).toBe(true);
 
       await session.client.callTool({
-        name: "svatah_run",
+        name: "yam_run",
         arguments: {
           flows: ["flows/natural_language_login.flow"],
           inputs: { email: "connected2atul@gmail.com", password: "qwerty123" },
         },
       });
       const results = answer(
-        await session.client.callTool({ name: "svatah_results", arguments: {} }),
+        await session.client.callTool({ name: "yam_results", arguments: {} }),
       ) as { runId: string; steps: unknown[] };
       expect(results.steps.length, JSON.stringify(results)).toBeGreaterThan(0);
     } finally {

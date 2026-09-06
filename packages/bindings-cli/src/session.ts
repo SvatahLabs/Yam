@@ -4,7 +4,7 @@
  * > Base URL and storage state precedence, applied identically by every command
  * > that opens a session (`run`, `record`, `heal`, `bindings verify`,
  * > `surface conform`, `eval`, `repl`): the `--base-url` / `--storage-state`
- * > flag, then the `SVATAH_BASE_URL` / `SVATAH_STORAGE_STATE` environment
+ * > flag, then the `YAM_BASE_URL` / `YAM_STORAGE_STATE` environment
  * > variable, then `config.app`. A command that opens a session and ignores any
  * > of the three is a defect.
  *
@@ -46,10 +46,10 @@ export interface SessionTargetSources {
   readonly fallbackBaseUrl?: string;
 }
 
-/** `SVATAH_BASE_URL`, the environment half of the precedence. */
-export const BASE_URL_ENV = "SVATAH_BASE_URL";
-/** `SVATAH_STORAGE_STATE`, the environment half of the precedence. */
-export const STORAGE_STATE_ENV = "SVATAH_STORAGE_STATE";
+/** `YAM_BASE_URL`, the environment half of the precedence. */
+export const BASE_URL_ENV = "YAM_BASE_URL";
+/** `YAM_STORAGE_STATE`, the environment half of the precedence. */
+export const STORAGE_STATE_ENV = "YAM_STORAGE_STATE";
 
 /** An empty environment variable is not an answer; treat it as unset. */
 function fromEnv(env: NodeJS.ProcessEnv, name: string): string | undefined {
@@ -68,7 +68,7 @@ function fromEnv(env: NodeJS.ProcessEnv, name: string): string | undefined {
  *
  * Taking the flag layer as values rather than as `ParsedArgs` is what lets the
  * service and the host reach the same precedence without inventing a command
- * line: `runProject` is called by `svatah run` and by `POST /run`, and both must
+ * line: `runProject` is called by `yam run` and by `POST /run`, and both must
  * open in the same place (LLD §13.5).
  */
 export function resolveSessionTarget(

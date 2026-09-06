@@ -184,7 +184,7 @@ if (treeAt === undefined) {
   const rootPkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
   if (rootPkg.license !== "Apache-2.0") {
     offenders.push({
-      name: "svatah (this project)",
+      name: "yam (this project)",
       versions: rootPkg.version,
       license: rootPkg.license,
     });

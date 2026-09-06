@@ -1,6 +1,6 @@
-# `@svatah/ui`
+# `@svatah/yam-ui`
 
-The Svatah design system: React components on Radix primitives (REQ-ADE-12,
+The Yam design system: React components on Radix primitives (REQ-ADE-12,
 LLD §13.7).
 
 Button, field, chooser, pill, chip, table, tabs, rail item, inspector sections,
@@ -15,9 +15,9 @@ in the code rather than in a review:
 2. **A status colour never appears without a word.** `Pill` refuses an empty
    label. There is no way through this package to draw a bare coloured dot.
 
-The package knows nothing about Svatah — `eslint.config.js` forbids it importing
-anything but `@svatah/ui-tokens` — so a screen's *meaning* lives in
-`@svatah/screens` and its *appearance* lives here.
+The package knows nothing about Yam — `eslint.config.js` forbids it importing
+anything but `@svatah/yam-ui-tokens` — so a screen's *meaning* lives in
+`@svatah/yam-screens` and its *appearance* lives here.
 
 ## The component sheet
 

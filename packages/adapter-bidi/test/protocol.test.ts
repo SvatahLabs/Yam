@@ -17,7 +17,7 @@ import {
   ScriptError,
   SessionError,
   TimeoutError,
-} from "@svatah/surface";
+} from "@svatah/yam-surface";
 import { BidiError } from "../src/client.js";
 import {
   bidiAvailable,
@@ -175,7 +175,7 @@ describe("capabilities declare what BiDi cannot do (LLD §2.4, §7.3)", () => {
 describe("finding an endpoint (LLD §7.3)", () => {
   it("prefers an endpoint someone else is hosting", async () => {
     // The route for stock Chrome and Edge, whose remote agent speaks CDP: their
-    // driver hosts the BiDi mapper and Svatah connects to it.
+    // driver hosts the BiDi mapper and Yam connects to it.
     const endpoint = await openEndpoint({
       env: { [BIDI_URL_ENV]: "ws://127.0.0.1:4444/session" },
     });
@@ -314,17 +314,17 @@ describe("attaching to the two endpoint shapes (P4-F3, LLD §7.3)", () => {
   it("says what to do when there is neither an endpoint nor a browser", async () => {
     await expect(
       openEndpoint({ env: { HOME: join(tmpdir(), "definitely-not-a-home") } }),
-    ).rejects.toThrow(/SVATAH_BIDI_URL|pnpm browsers/);
+    ).rejects.toThrow(/YAM_BIDI_URL|pnpm browsers/);
   });
 
-  it("takes the binary SVATAH_BIDI_BROWSER names, when it exists", () => {
-    const dir = mkdtempSync(join(tmpdir(), "svatah-gecko-"));
+  it("takes the binary YAM_BIDI_BROWSER names, when it exists", () => {
+    const dir = mkdtempSync(join(tmpdir(), "yam-gecko-"));
     const binary = join(dir, "firefox");
     writeFileSync(binary, "#!/bin/sh\n", "utf8");
     expect(findGecko({ [BIDI_BROWSER_ENV]: binary })).toBe(binary);
   });
 
-  it("ignores a SVATAH_BIDI_BROWSER that names nothing", () => {
+  it("ignores a YAM_BIDI_BROWSER that names nothing", () => {
     // A stale path in an environment file should fall through to the search,
     // not make the adapter refuse to start.
     const found = findGecko({

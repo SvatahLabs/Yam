@@ -1,13 +1,13 @@
 {
-  "process": "Svatah ADE",
-  "title": "Svatah ADE",
+  "process": "Yam ADE",
+  "title": "Yam ADE",
   "truncated": false,
   "nodes": [
     {
       "parent": -1,
       "role": "AXWindow",
       "subrole": "AXStandardWindow",
-      "title": "Svatah ADE",
+      "title": "Yam ADE",
       "box": [
         0,
         0,
@@ -18,7 +18,7 @@
     {
       "parent": 0,
       "role": "AXWebArea",
-      "description": "Svatah ADE",
+      "description": "Yam ADE",
       "enabled": true,
       "focused": true,
       "box": [
@@ -55,7 +55,7 @@
     {
       "parent": 3,
       "role": "AXStaticText",
-      "title": "Svatah",
+      "title": "Yam",
       "enabled": true,
       "box": [
         50,
@@ -67,7 +67,7 @@
     {
       "parent": 4,
       "role": "AXStaticText",
-      "title": "Svatah",
+      "title": "Yam",
       "enabled": true
     },
     {
@@ -4457,7 +4457,7 @@
     {
       "parent": 443,
       "role": "AXStaticText",
-      "title": "user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+      "title": "user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
       "enabled": true,
       "box": [
         779,
@@ -4475,7 +4475,7 @@
     {
       "parent": 448,
       "role": "AXStaticText",
-      "title": "${SVATAH_SAMPLE_PASSWORD},",
+      "title": "${YAM_SAMPLE_PASSWORD},",
       "enabled": true
     },
     {
@@ -4552,7 +4552,7 @@
     {
       "parent": 455,
       "role": "AXStaticText",
-      "title": "card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
+      "title": "card.number reads ${YAM_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
       "enabled": true,
       "box": [
         779,
@@ -4570,7 +4570,7 @@
     {
       "parent": 460,
       "role": "AXStaticText",
-      "title": "${SVATAH_SAMPLE_CARD_NUMBER},",
+      "title": "${YAM_SAMPLE_CARD_NUMBER},",
       "enabled": true
     },
     {
@@ -4647,7 +4647,7 @@
     {
       "parent": 467,
       "role": "AXStaticText",
-      "title": "card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
+      "title": "card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
       "enabled": true,
       "box": [
         779,
@@ -4665,7 +4665,7 @@
     {
       "parent": 472,
       "role": "AXStaticText",
-      "title": "${SVATAH_SAMPLE_CARD_CVV},",
+      "title": "${YAM_SAMPLE_CARD_CVV},",
       "enabled": true
     },
     {

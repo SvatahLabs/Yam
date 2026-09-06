@@ -1,8 +1,8 @@
 /*
  * The ADE's layout (T9.4, REQ-ADE-11, LLD §13.7; the `Main` and `Run` artboards).
  *
- * Layout only. Every colour is a token from `@svatah/ui-tokens` and every
- * control's own appearance is `@svatah/ui`'s `ui.css` — this file says where
+ * Layout only. Every colour is a token from `@svatah/yam-ui-tokens` and every
+ * control's own appearance is `@svatah/yam-ui`'s `ui.css` — this file says where
  * things go, which is the one thing a component library cannot.
  *
  * The grid is the artboard's: a 220 px rail, a workspace, a 360 px inspector,
@@ -476,7 +476,7 @@
 /*
  * In the audit a tone is a *colour*, not a pill.
  *
- * `@svatah/ui`'s `.sv-tone-*` carry a soft background because they are what a
+ * `@svatah/yam-ui`'s `.sv-tone-*` carry a soft background because they are what a
  * `Pill` is painted with; on a log line that reads as a highlighted block behind
  * every `ok`. The word is still there and still coloured, which is the rule
  * (§13.7); the background is not.

@@ -18,7 +18,7 @@
  *     does not see import expressions at all;
  *   * a forbidden package *declared* in a `package.json` dependency field. With
  *     pnpm's strict isolation this is the guard that holds at run time: a package
- *     that does not declare `@svatah/gateway` cannot resolve it however it is
+ *     that does not declare `@svatah/yam-gateway` cannot resolve it however it is
  *     written. The lint is the guard that names the rule; this test is the guard
  *     that makes the rule true.
  *
@@ -28,7 +28,7 @@ import { describe, expect, it, afterEach } from "vitest";
 import { execFileSync } from "node:child_process";
 import { writeFileSync, readFileSync, rmSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { fromRoot, REPO_ROOT } from "../src/repo.js";
+import { fromRoot, REPO_ROOT, specifierOf, dirOf } from "../src/repo.js";
 import { BOUNDARIES } from "../../../eslint.config.js";
 
 interface EslintMessage {
@@ -97,7 +97,7 @@ function lintThrowaway(pkg: string, body: string): EslintMessage[] {
 function lintForbiddenImport(pkg: string, forbidden: string): EslintMessage[] {
   return lintThrowaway(
     pkg,
-    `import * as forbidden from "@svatah/${forbidden}";\nexport const probe = forbidden;\n`,
+    `import * as forbidden from "${specifierOf(forbidden)}";\nexport const probe = forbidden;\n`,
   );
 }
 
@@ -114,7 +114,7 @@ function lintForbiddenDynamicImport(pkg: string, forbidden: string): EslintMessa
   return lintThrowaway(
     pkg,
     `export async function probe(): Promise<unknown> {\n` +
-      `  return await import("@svatah/${forbidden}");\n` +
+      `  return await import("${specifierOf(forbidden)}");\n` +
       `}\n`,
   );
 }
@@ -124,7 +124,7 @@ describe("import boundaries (LLD §1)", () => {
     const errors = lintForbiddenImport("bindings", "compiler");
     expect(errors.length).toBeGreaterThan(0);
     expect(errors.map((e) => e.message).join("\n")).toContain(
-      "@svatah/bindings must not import @svatah/compiler",
+      "@svatah/yam-bindings must not import @svatah/yam-compiler",
     );
   });
 
@@ -132,7 +132,7 @@ describe("import boundaries (LLD §1)", () => {
     const errors = lintForbiddenImport("runtime", "gateway");
     expect(errors.length).toBeGreaterThan(0);
     expect(errors.map((e) => e.message).join("\n")).toContain(
-      "@svatah/runtime must not import @svatah/gateway",
+      "@svatah/yam-runtime must not import @svatah/yam-gateway",
     );
   });
 
@@ -146,7 +146,7 @@ describe("import boundaries (LLD §1)", () => {
         "import resolver is not configured (LLD §1, Draft 2.2)",
     ).toBeGreaterThan(0);
     expect(errors.map((e) => e.message).join("\n")).toContain(
-      "@svatah/runtime must not import @svatah/gateway",
+      "@svatah/yam-runtime must not import @svatah/yam-gateway",
     );
   });
 
@@ -162,7 +162,7 @@ describe("import boundaries (LLD §1)", () => {
         "does not see import expressions (LLD §1, Draft 2.2)",
     ).toBeGreaterThan(0);
     expect(errors.map((e) => e.message).join("\n")).toContain(
-      "@svatah/runtime must not import @svatah/gateway",
+      "@svatah/yam-runtime must not import @svatah/yam-gateway",
     );
   });
 
@@ -262,13 +262,13 @@ describe("package.json dependency graph (LLD §1, Draft 2.2)", () => {
     for (const field of DEPENDENCY_FIELDS) {
       const declared = Object.keys(manifest[field] ?? {});
       for (const specifier of declared) {
-        const match = /^@svatah\/([^/]+)$/.exec(specifier);
-        if (match === null) continue;
-        const why = forbidden.get(match[1]!);
+        const next = dirOf(specifier);
+        if (next === undefined) continue;
+        const why = forbidden.get(next);
         expect(
           why,
           `packages/${dir}/package.json declares "${specifier}" under ${field}. ` +
-            `@svatah/${dir} must not depend on ${specifier}. ${why ?? ""}`,
+            `${specifierOf(dir)} must not depend on ${specifier}. ${why ?? ""}`,
         ).toBeUndefined();
       }
     }
@@ -343,9 +343,8 @@ describe("package.json dependency graph (LLD §1, Draft 2.2)", () => {
         const manifest = manifestOf(current);
         for (const field of DEPENDENCY_FIELDS) {
           for (const specifier of Object.keys(manifest[field] ?? {})) {
-            const match = /^@svatah\/([^/]+)$/.exec(specifier);
-            if (match === null) continue;
-            const next = match[1]!;
+            const next = dirOf(specifier);
+            if (next === undefined) continue;
             if (seen.has(next) || !existsSync(fromRoot("packages", next, "package.json"))) continue;
             seen.add(next);
             queue.push(next);

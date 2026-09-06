@@ -119,7 +119,7 @@ describe("the preload bridge is four functions and two listeners (LLD §13.6)", 
    * listeners with no handler on the other end: they can start nothing and read
    * nothing, and they exist because the main process sometimes has news the
    * renderer did not ask for — a service log line, and (T8.1) the project
-   * `SVATAH_ADE_PROJECT` opened before the renderer was there to open it.
+   * `YAM_ADE_PROJECT` opened before the renderer was there to open it.
    * Recorded as a deviation in `docs/spec/progress/phase-8.md`.
    */
   it("exposes exactly openProject, serviceInfo, pickFile and preferences", () => {
@@ -153,8 +153,8 @@ describe("the preload bridge is four functions and two listeners (LLD §13.6)", 
 });
 
 describe("accessibility, because the ADE is the desktop conformance target", () => {
-  it("enables Chromium's accessibility support under SVATAH_A11Y (REQ-ADE-6)", () => {
+  it("enables Chromium's accessibility support under YAM_A11Y (REQ-ADE-6)", () => {
     expect(main).toContain("setAccessibilitySupportEnabled(true)");
-    expect(main).toContain('SVATAH_A11Y');
+    expect(main).toContain('YAM_A11Y');
   });
 });

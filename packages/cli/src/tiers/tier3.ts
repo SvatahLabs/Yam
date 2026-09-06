@@ -16,16 +16,16 @@
  * lowering — is the same path, which is what makes the two tiers comparable in
  * a per-tier report (REQ-COMP-9).
  */
-import { modelStepSchema, toRawStep, type ModelTier, type ModelTierAnswer } from "@svatah/compiler";
+import { modelStepSchema, toRawStep, type ModelTier, type ModelTierAnswer } from "@svatah/yam-compiler";
 import {
   anthropicGateway,
   GatewayRefusal,
   GatewayShapeError,
   GatewayUnavailable,
   type Gateway,
-} from "@svatah/gateway";
-import { ACTIONS, PREDICATE_KINDS } from "@svatah/schema";
-import { diagnostic, type Diagnostic } from "@svatah/spec";
+} from "@svatah/yam-gateway";
+import { ACTIONS, PREDICATE_KINDS } from "@svatah/yam-schema";
+import { diagnostic, type Diagnostic } from "@svatah/yam-spec";
 import { conventionsBlock } from "./conventions.js";
 
 /** The prompt version recorded in provenance (REQ-AGT-3, T4.4's `c3-1`). */
@@ -37,7 +37,7 @@ export const TIER3_PROMPT_VERSION = "c3-1";
  * Higher than Tier 2's and still below the default threshold of 0.8, on purpose.
  * A frontier model reading one sentence out of context is better at this than a
  * 3B model is, and it is still a *guess about what a person meant* — which is
- * exactly the thing `svatah lint` exists to put in front of a person before it
+ * exactly the thing `yam lint` exists to put in front of a person before it
  * is committed (REQ-COMP-8).
  */
 export const TIER3_MAX_CONFIDENCE = 0.75;

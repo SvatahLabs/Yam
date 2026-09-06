@@ -192,7 +192,7 @@ export function policyText(policy: string | { compensate?: string } | undefined)
  * A candidate as the `Run` artboard writes one: `testid "pay"`, `role button "Pay"`.
  *
  * The audit records a `locate` call's candidate reduced to what identifies it
- * (`@svatah/runtime`'s `candidateOf`), and this is the sentence form of it. Not
+ * (`@svatah/yam-runtime`'s `candidateOf`), and this is the sentence form of it. Not
  * `by "testid" value "pay"` — the mockup's audit pane reads like a person
  * describing what was tried, and `key "value"` pairs read like a dump.
  */
@@ -505,7 +505,7 @@ export const runScreen: Screen<RunState> = {
     const runId = params.runId ?? summaries[0]?.runId;
     if (runId === undefined) {
       return {
-        ...sources.base("run", "Run", "No runs yet", "`svatah run` writes one"),
+        ...sources.base("run", "Run", "No runs yet", "`yam run` writes one"),
         screen: "run",
         outcome: NONE,
         totals: { passed: 0, failed: 0, skipped: 0, healed: 0 },

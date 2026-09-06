@@ -1,22 +1,22 @@
-# `@svatah/ui-tokens`
+# `@svatah/yam-ui-tokens`
 
-The Svatah design tokens: two themes, one type ramp, one status set
+The Yam design tokens: two themes, one type ramp, one status set
 (REQ-ADE-12, LLD §13.7).
 
 The values are `docs/spec/design/base.css`'s, transcribed once into
 `src/index.ts` — because three things need them and only one is a stylesheet:
 
 - `tokens.css`, generated from `src/index.ts` at build time and committed;
-- `@svatah/ui`, whose components ask for a token and never for a hex;
-- `@svatah/tui`, which renders the same status set as ANSI colours in a terminal
+- `@svatah/yam-ui`, whose components ask for a token and never for a hex;
+- `@svatah/yam-tui`, which renders the same status set as ANSI colours in a terminal
   that has no CSS variables.
 
 ```ts
-import { DARK, LIGHT, STATUS, METRICS } from "@svatah/ui-tokens";
+import { DARK, LIGHT, STATUS, METRICS } from "@svatah/yam-ui-tokens";
 ```
 
 ```css
-@import "@svatah/ui-tokens/tokens.css";
+@import "@svatah/yam-ui-tokens/tokens.css";
 ```
 
 `:root` is the dark theme; `[data-theme="light"]` overrides every token and

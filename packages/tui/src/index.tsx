@@ -1,5 +1,5 @@
 /**
- * `@svatah/tui` — `svatah ui`, the terminal cockpit (T9.4, REQ-TUI-1,
+ * `@svatah/yam-tui` — `yam ui`, the terminal cockpit (T9.4, REQ-TUI-1,
  * LLD §13.7).
  *
  * The second renderer of the screen model. It opens or adopts a service exactly
@@ -7,15 +7,15 @@
  * registry, and draws them with Ink.
  *
  * ```console
- * $ svatah ui                      # the cockpit
- * $ svatah ui --screen run --run comp
- * $ svatah ui --json               # the model's state, and nothing drawn
+ * $ yam ui                      # the cockpit
+ * $ yam ui --screen run --run comp
+ * $ yam ui --json               # the model's state, and nothing drawn
  * ```
  */
 import { render } from "ink";
 import { createElement } from "react";
-import { SCREEN_IDS, screenById, type ScreenId, type ScreenParams } from "@svatah/screens";
-import type { ScreenService } from "@svatah/screens";
+import { SCREEN_IDS, screenById, type ScreenId, type ScreenParams } from "@svatah/yam-screens";
+import type { ScreenService } from "@svatah/yam-screens";
 import { App } from "./app.js";
 import { asJson, loadUi } from "./model.js";
 
@@ -54,7 +54,7 @@ export interface UiOptions {
   /**
    * Draw for this many milliseconds and then quit (T9.4, T9.5).
    *
-   * `svatah ui --capture 4000 > panes.txt` in a terminal writes what the
+   * `yam ui --capture 4000 > panes.txt` in a terminal writes what the
    * cockpit drew and gives the terminal back — which is how the progress
    * record's "capture of its panes" is taken, and how
    * `tools/repo-checks/test/tui-pty.test.ts` proves the cockpit draws in a real

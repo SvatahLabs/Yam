@@ -1,5 +1,5 @@
 /**
- * `svatah bindings list|show <id>|verify|prune` (LLD §15, T1.6).
+ * `yam bindings list|show <id>|verify|prune` (LLD §15, T1.6).
  *
  * The store is files in a repository, so most of what a person needs is `git`
  * and an editor. These four are what `git` cannot do: say what the store holds
@@ -12,9 +12,9 @@ import {
   Dictionary,
   tryResolve,
   type LocatorError,
-} from "@svatah/bindings";
-import { createSurface, listAdapters } from "@svatah/surface";
-import { DEFAULT_CONFIG, type Config } from "@svatah/schema";
+} from "@svatah/yam-bindings";
+import { createSurface, listAdapters } from "@svatah/yam-surface";
+import { DEFAULT_CONFIG, type Config } from "@svatah/yam-schema";
 import { registerAllAdapters } from "../adapters.js";
 import { boolOption, stringOption, type ParsedArgs } from "../args.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
@@ -23,7 +23,7 @@ import type { CommandIo } from "./surface.js";
 
 export async function bindingsCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   const sub = args.command[1] ?? "list";
-  const dir = stringOption(args, "dir") ?? process.env["SVATAH_BINDINGS"] ?? "bindings";
+  const dir = stringOption(args, "dir") ?? process.env["YAM_BINDINGS"] ?? "bindings";
   const json = boolOption(args, "json");
 
   let store: BindingsStore;
@@ -71,7 +71,7 @@ function list(store: BindingsStore, dir: string, io: CommandIo, json: boolean): 
   }
 
   if (rows.length === 0) {
-    io.out(`No bindings in ${dir}. Record some with SVATAH_MODE=record.`);
+    io.out(`No bindings in ${dir}. Record some with YAM_MODE=record.`);
     return EXIT.ok;
   }
 

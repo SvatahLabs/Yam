@@ -5,13 +5,13 @@
  *
  *   node scripts/self-sdk.mjs
  *
- * > `evals/self/` is a Svatah project: flows … over the SDK against
- * > `svatah ui --json`.
+ * > `evals/self/` is a Yam project: flows … over the SDK against
+ * > `yam ui --json`.
  *
  * This is the other half of the "D5" the Phase 11 verification carried. It is a
  * script rather than a flow, and that is not a shortcut: the check catalogue
  * has said since Phase 11 that "a flow cannot run a command and read its
- * stdout", which is exactly what comparing `svatah ui --json` with the model
+ * stdout", which is exactly what comparing `yam ui --json` with the model
  * requires. LLD §13.9 Draft 2.15 settles it — "the HTTP and SDK sides of the
  * self suite are written, not catalogued" — because there is no second oracle
  * for this that is not the same code twice.
@@ -20,10 +20,10 @@
  *
  * For every screen the model has:
  *
- *   1. `@svatah/sdk` loads the screen's state from the running service, in this
+ *   1. `@svatah/yam-sdk` loads the screen's state from the running service, in this
  *      process, which is REQ-SDK-1's "the screen model's actions runnable out of
  *      process";
- *   2. `svatah ui --json --screen <id>` prints a state from another process;
+ *   2. `yam ui --json --screen <id>` prints a state from another process;
  *   3. the two are the same document.
  *
  * A difference is a drift between the SDK and the cockpit — two clients of one
@@ -104,10 +104,10 @@ try {
 process.stderr.write(`the local service is on ${connection.url}\n`);
 
 const { SCREENS } = await import(join(ROOT, "packages", "screens", "dist", "index.js"));
-const { SvatahClient } = await import(join(ROOT, "packages", "sdk", "dist", "index.js"));
-const client = new SvatahClient({ url: connection.url, token: connection.token });
+const { YamClient } = await import(join(ROOT, "packages", "sdk", "dist", "index.js"));
+const client = new YamClient({ url: connection.url, token: connection.token });
 
-/** `svatah ui --json --screen <id>`, from another process entirely. */
+/** `yam ui --json --screen <id>`, from another process entirely. */
 function cockpit(screen) {
   const ran = spawnSync(
     process.execPath,
@@ -117,7 +117,7 @@ function cockpit(screen) {
   const at = ran.stdout.indexOf("{");
   if (at < 0) {
     throw new Error(
-      `\`svatah ui --json --screen ${screen}\` printed no JSON (exit ${ran.status ?? "none"}): ` +
+      `\`yam ui --json --screen ${screen}\` printed no JSON (exit ${ran.status ?? "none"}): ` +
         `${(ran.stderr || ran.stdout).trim().split("\n").slice(-3).join(" ")}`,
     );
   }
@@ -150,7 +150,7 @@ for (const screen of SCREENS) {
   if (a !== b) {
     const at = [...a].findIndex((char, index) => char !== b[index]);
     disagreements.push(
-      `${screen.id}: the SDK and \`svatah ui --json\` differ from character ${at}\n` +
+      `${screen.id}: the SDK and \`yam ui --json\` differ from character ${at}\n` +
         `  sdk:     ${a.slice(Math.max(0, at - 40), at + 120).replace(/\n/g, " ")}\n` +
         `  cockpit: ${b.slice(Math.max(0, at - 40), at + 120).replace(/\n/g, " ")}`,
     );
@@ -161,7 +161,7 @@ service.child.kill("SIGTERM");
 
 process.stdout.write(
   disagreements.length === 0
-    ? `the SDK and \`svatah ui --json\` agree on all ${compared} screen(s)\n`
+    ? `the SDK and \`yam ui --json\` agree on all ${compared} screen(s)\n`
     : `${disagreements.length} screen(s) disagree:\n${disagreements.join("\n")}\n`,
 );
 process.exit(disagreements.length === 0 ? 0 : 1);

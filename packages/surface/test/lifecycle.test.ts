@@ -47,17 +47,17 @@ const instantly = async (): Promise<void> => undefined;
 
 describe("where the executable is (T11.2)", () => {
   it("reads a macOS bundle's executable out of it", () => {
-    expect(executableOf({ bundle: "/Applications/Svatah ADE.app" }, "darwin")).toBe(
-      "/Applications/Svatah ADE.app/Contents/MacOS/Svatah ADE",
+    expect(executableOf({ bundle: "/Applications/Yam ADE.app" }, "darwin")).toBe(
+      "/Applications/Yam ADE.app/Contents/MacOS/Yam ADE",
     );
     // A trailing slash is a path somebody typed, not a different application.
-    expect(executableOf({ bundle: "/a/Svatah ADE.app/" }, "darwin")).toBe(
-      "/a/Svatah ADE.app/Contents/MacOS/Svatah ADE",
+    expect(executableOf({ bundle: "/a/Yam ADE.app/" }, "darwin")).toBe(
+      "/a/Yam ADE.app/Contents/MacOS/Yam ADE",
     );
   });
 
   it("is the path itself where there is one", () => {
-    expect(executableOf({ path: "C:/x/Svatah ADE.exe" }, "win32")).toBe("C:/x/Svatah ADE.exe");
+    expect(executableOf({ path: "C:/x/Yam ADE.exe" }, "win32")).toBe("C:/x/Yam ADE.exe");
     // A `path` wins over a `bundle`, on any platform: it is the more specific.
     expect(executableOf({ path: "/a/b", bundle: "/c.app" }, "darwin")).toBe("/a/b");
   });
@@ -71,7 +71,7 @@ describe("launching (T11.2, LLD §7.5)", () => {
   it("goes through LaunchServices on macOS, with a fresh instance", () => {
     const runner = fake();
     const step = launchApplication(
-      { bundle: "/a/Svatah ADE.app", env: { SVATAH_A11Y: "1" }, args: ["--headed"] },
+      { bundle: "/a/Yam ADE.app", env: { YAM_A11Y: "1" }, args: ["--headed"] },
       { platform: "darwin", runner },
     );
     expect(step.ok).toBe(true);
@@ -84,8 +84,8 @@ describe("launching (T11.2, LLD §7.5)", () => {
     expect(call).toContain("open -n -F");
     // The environment is on the command line: LaunchServices does not inherit
     // this process's.
-    expect(call).toContain("--env SVATAH_A11Y=1");
-    expect(call).toContain("-a /a/Svatah ADE.app");
+    expect(call).toContain("--env YAM_A11Y=1");
+    expect(call).toContain("-a /a/Yam ADE.app");
     expect(call).toContain("--args --headed");
   });
 
@@ -116,17 +116,17 @@ describe("launching (T11.2, LLD §7.5)", () => {
 describe("finding the processes (P8-F1, P10-F7)", () => {
   it("matches the executable path, so another copy is not counted", () => {
     const runner = fake([{ match: /^pgrep/, stdout: "101\n102\n" }]);
-    expect(processIdsOf("/a/Svatah ADE.app/Contents/MacOS/Svatah ADE", {
+    expect(processIdsOf("/a/Yam ADE.app/Contents/MacOS/Yam ADE", {
       platform: "darwin",
       runner,
     })).toEqual([101, 102]);
-    expect(runner.calls[0]).toContain("pgrep -f /a/Svatah ADE.app/Contents/MacOS/Svatah ADE");
+    expect(runner.calls[0]).toContain("pgrep -f /a/Yam ADE.app/Contents/MacOS/Yam ADE");
   });
 
   it("asks PowerShell by process name on Windows", () => {
     const runner = fake([{ match: /Get-Process/, stdout: "  17 \n\n 18\n" }]);
-    expect(processIdsOf("C:/x/Svatah ADE.exe", { platform: "win32", runner })).toEqual([17, 18]);
-    expect(runner.calls[0]).toContain("Get-Process -Name 'Svatah ADE'");
+    expect(processIdsOf("C:/x/Yam ADE.exe", { platform: "win32", runner })).toEqual([17, 18]);
+    expect(runner.calls[0]).toContain("Get-Process -Name 'Yam ADE'");
   });
 });
 
@@ -160,8 +160,8 @@ describe("quitting: the graceful route, then a signal (T11.2, P10-F1)", () => {
   it("asks the application to quit before it signals, on macOS", async () => {
     const runner = going(2);
     const outcome = await quitApplication(
-      "/a/Svatah ADE.app/Contents/MacOS/Svatah ADE",
-      { bundleId: "com.electron.svatah-ade" },
+      "/a/Yam ADE.app/Contents/MacOS/Yam ADE",
+      { bundleId: "com.electron.yam-ade" },
       { platform: "darwin", runner, sleep: instantly },
     );
     expect(outcome.gone).toBe(true);

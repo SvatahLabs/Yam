@@ -1,4 +1,4 @@
-# @svatah/conformance
+# @svatah/yam-conformance
 
 The published conformance suites (REQ-STD-2). An adapter is **conformant** only
 when the surface suite passes against it (REQ-SURF-3).
@@ -10,13 +10,13 @@ LLD §14 names: roles, names and states present in the snapshot; the effect an
 `act` must have had; and the error type a call must throw.
 
 The suite is handed an `AgentSurface` and knows nothing else — no Playwright, no
-browser, no Svatah internals. That is what lets a third party run it against
+browser, no Yam internals. That is what lets a third party run it against
 their own adapter, and it is why `packages/conformance/test` can exercise the
 whole suite against a mock adapter with no browser at all.
 
 ```bash
 # Against a running sample application:
-svatah surface conform --adapter playwright --base-url http://127.0.0.1:4173
+yam surface conform --adapter playwright --base-url http://127.0.0.1:4173
 
 # Or, from a checkout, with the sample application started for you:
 pnpm conform:playwright

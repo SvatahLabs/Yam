@@ -10,8 +10,8 @@
  * is the emulator gate in `README.md`.
  */
 import { describe, expect, it } from "vitest";
-import { LocateError } from "@svatah/surface";
-import type { Candidate } from "@svatah/schema";
+import { LocateError } from "@svatah/yam-surface";
+import type { Candidate } from "@svatah/yam-schema";
 import {
   classesForRole,
   isNativeContext,
@@ -30,7 +30,7 @@ describe("which context a session is in", () => {
     expect(isNativeContext("native_app")).toBe(true);
     expect(isNativeContext("")).toBe(true);
     expect(isNativeContext("WEBVIEW_chrome")).toBe(false);
-    expect(isNativeContext("WEBVIEW_com.svatah.sample")).toBe(false);
+    expect(isNativeContext("WEBVIEW_com.yam.sample")).toBe(false);
   });
 });
 
@@ -40,9 +40,9 @@ describe("native strategies (REQ-ADP-5)", () => {
       using: "accessibility id",
       value: "Sign in button",
     });
-    expect(nativeStrategy(candidate({ by: "resourceId", value: "com.svatah:id/submit" }))).toEqual({
+    expect(nativeStrategy(candidate({ by: "resourceId", value: "com.yam:id/submit" }))).toEqual({
       using: "id",
-      value: "com.svatah:id/submit",
+      value: "com.yam:id/submit",
     });
     expect(nativeStrategy(candidate({ by: "xpath", value: "//android.widget.Button[1]" }))).toEqual({
       using: "xpath",

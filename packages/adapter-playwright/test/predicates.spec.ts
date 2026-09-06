@@ -12,8 +12,8 @@
  *
  * Refs: REQ-ADP-1, LLD §2.3, §3.2.
  */
-import { PREDICATE_KINDS } from "@svatah/schema";
-import { DataError } from "@svatah/surface";
+import { PREDICATE_KINDS } from "@svatah/yam-schema";
+import { DataError } from "@svatah/yam-surface";
 import { expect, MECHANISMS, refByTestId, test } from "./fixtures.js";
 
 const literal = (value: string) => ({ kind: "literal" as const, value });
@@ -109,7 +109,7 @@ for (const mechanism of MECHANISMS) {
 
     test("[title][titleContains] title and titleContains", async ({ openSurface }) => {
       const surface = await openSurface(mechanism, "/dashboard");
-      expect((await surface.check({ kind: "title", value: literal("Dashboard · Svatah Sample") }, "page")).ok).toBe(true);
+      expect((await surface.check({ kind: "title", value: literal("Dashboard · Yam Sample") }, "page")).ok).toBe(true);
       expect((await surface.check({ kind: "titleContains", value: literal("Dashboard") }, "page")).ok).toBe(true);
       expect((await surface.check({ kind: "title", value: literal("Dashboard") }, "page")).ok).toBe(false);
     });

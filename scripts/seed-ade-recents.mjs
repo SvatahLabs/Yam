@@ -15,7 +15,7 @@
  * nothing else: the theme and the window size are left as they are, and a
  * project already in the list is moved to the front rather than duplicated.
  *
- * The alternative was `SVATAH_ADE_PROJECT`, which opens a project *for* the ADE
+ * The alternative was `YAM_ADE_PROJECT`, which opens a project *for* the ADE
  * on ready — and then the welcome screen never appears and the flow is not
  * about the Recent list at all. Seeding the list and clicking it is the flow
  * the Validate item asks for.
@@ -33,10 +33,10 @@ const project = resolve(at < 0 ? join(ROOT, "evals", "fixtures") : args[at + 1])
 /** Where Electron puts the ADE's user data, per platform. */
 const userData =
   process.platform === "darwin"
-    ? join(homedir(), "Library", "Application Support", "Svatah ADE")
+    ? join(homedir(), "Library", "Application Support", "Yam ADE")
     : process.platform === "win32"
-      ? join(process.env["APPDATA"] ?? homedir(), "Svatah ADE")
-      : join(process.env["XDG_CONFIG_HOME"] ?? join(homedir(), ".config"), "Svatah ADE");
+      ? join(process.env["APPDATA"] ?? homedir(), "Yam ADE")
+      : join(process.env["XDG_CONFIG_HOME"] ?? join(homedir(), ".config"), "Yam ADE");
 
 const path = join(userData, "preferences.json");
 let preferences = { theme: "system", window: { width: 1280, height: 860 }, recentProjects: [] };

@@ -1,8 +1,8 @@
 /**
- * `svatah eval compiler` (T4.3, T4.4, REQ-COMP-9, REQ-PKG-4).
+ * `yam eval compiler` (T4.3, T4.4, REQ-COMP-9, REQ-PKG-4).
  *
  * ```
- * svatah eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
+ * yam eval compiler [--tier2] [--tier3] [--gateway local|anthropic|fake]
  *                      [--only tier1,tier2] [--report reports/eval-compiler.md] [--json]
  * ```
  *
@@ -27,9 +27,9 @@ import {
   type CaseResult,
   type EvalReport,
   type GoldenEntry,
-} from "@svatah/compiler";
-import { credentialInEnvironment, fakeGateway, type Gateway } from "@svatah/gateway";
-import { parseTargets, readData, TargetDictionary } from "@svatah/spec";
+} from "@svatah/yam-compiler";
+import { credentialInEnvironment, fakeGateway, type Gateway } from "@svatah/yam-gateway";
+import { parseTargets, readData, TargetDictionary } from "@svatah/yam-spec";
 import {
   boolOption,
   EXIT,
@@ -37,10 +37,10 @@ import {
   type CommandIo,
   type ExitCode,
   type ParsedArgs,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 import { loadConfig } from "../project.js";
 import { registerModelTiers } from "../tiers/register.js";
-import { loadSteps, type StepRegistry } from "@svatah/steps";
+import { loadSteps, type StepRegistry } from "@svatah/yam-steps";
 
 /** The thresholds REQ-COMP-9 names. */
 export const TIER1_THRESHOLD = 1;
@@ -199,8 +199,8 @@ export async function compilerEvalCommand(args: ParsedArgs, io: CommandIo): Prom
   /*
    * The model tiers come from the golden set's *own* project (Draft 2.6, LLD §16).
    *
-   * "`svatah eval compiler` reads `compile.tier2` and `compile.tier3` from the
-   * golden project's own committed `svatah.config.yaml` (`evals/compiler/project/`),
+   * "`yam eval compiler` reads `compile.tier2` and `compile.tier3` from the
+   * golden project's own committed `yam.config.yaml` (`evals/compiler/project/`),
    * which pins the local model and its digest; `--project` may override it."
    *
    * Phase 4 read the config at `--project` (default `.`), and the repository
@@ -214,7 +214,7 @@ export async function compilerEvalCommand(args: ParsedArgs, io: CommandIo): Prom
   const { config, file: configFile } = loadConfig(configDir);
   if (configFile === undefined && !boolOption(args, "json")) {
     io.err(
-      `  no svatah.config.yaml in ${configDir}; the model tiers have nothing to be ` +
+      `  no yam.config.yaml in ${configDir}; the model tiers have nothing to be ` +
         "configured from and will be reported as not measured",
     );
   }

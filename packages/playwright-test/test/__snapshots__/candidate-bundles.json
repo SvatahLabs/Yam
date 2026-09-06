@@ -10,14 +10,14 @@
         },
         {
           "by": "role",
-          "name": "Svatah Sample",
+          "name": "Yam Sample",
           "role": "link",
           "score": 0.92
         },
         {
           "by": "text",
           "score": 0.75,
-          "value": "Svatah Sample"
+          "value": "Yam Sample"
         },
         {
           "by": "css",
@@ -30,8 +30,8 @@
           "value": "//*[@data-testid='brand']"
         }
       ],
-      "element": "a#brand[link] \"Svatah Sample\"@0",
-      "name": "Svatah Sample",
+      "element": "a#brand[link] \"Yam Sample\"@0",
+      "name": "Yam Sample",
       "role": "link"
     },
     {
@@ -278,14 +278,14 @@
         },
         {
           "by": "role",
-          "name": "Svatah Sample",
+          "name": "Yam Sample",
           "role": "link",
           "score": 0.92
         },
         {
           "by": "text",
           "score": 0.75,
-          "value": "Svatah Sample"
+          "value": "Yam Sample"
         },
         {
           "by": "css",
@@ -298,8 +298,8 @@
           "value": "//*[@data-testid='brand']"
         }
       ],
-      "element": "a#brand[link] \"Svatah Sample\"@0",
-      "name": "Svatah Sample",
+      "element": "a#brand[link] \"Yam Sample\"@0",
+      "name": "Yam Sample",
       "role": "link"
     },
     {
@@ -1034,14 +1034,14 @@
         },
         {
           "by": "role",
-          "name": "Svatah Sample",
+          "name": "Yam Sample",
           "role": "link",
           "score": 0.92
         },
         {
           "by": "text",
           "score": 0.75,
-          "value": "Svatah Sample"
+          "value": "Yam Sample"
         },
         {
           "by": "css",
@@ -1054,8 +1054,8 @@
           "value": "//*[@data-testid='brand']"
         }
       ],
-      "element": "a#brand[link] \"Svatah Sample\"@0",
-      "name": "Svatah Sample",
+      "element": "a#brand[link] \"Yam Sample\"@0",
+      "name": "Yam Sample",
       "role": "link"
     },
     {
@@ -1642,14 +1642,14 @@
         },
         {
           "by": "role",
-          "name": "Svatah Sample",
+          "name": "Yam Sample",
           "role": "link",
           "score": 0.92
         },
         {
           "by": "text",
           "score": 0.75,
-          "value": "Svatah Sample"
+          "value": "Yam Sample"
         },
         {
           "by": "css",
@@ -1662,8 +1662,8 @@
           "value": "//*[@data-testid='brand']"
         }
       ],
-      "element": "a#brand[link] \"Svatah Sample\"@0",
-      "name": "Svatah Sample",
+      "element": "a#brand[link] \"Yam Sample\"@0",
+      "name": "Yam Sample",
       "role": "link"
     },
     {
@@ -2086,14 +2086,14 @@
         },
         {
           "by": "role",
-          "name": "Svatah Sample",
+          "name": "Yam Sample",
           "role": "link",
           "score": 0.92
         },
         {
           "by": "text",
           "score": 0.75,
-          "value": "Svatah Sample"
+          "value": "Yam Sample"
         },
         {
           "by": "css",
@@ -2106,8 +2106,8 @@
           "value": "//*[@data-testid='brand']"
         }
       ],
-      "element": "a#brand[link] \"Svatah Sample\"@0",
-      "name": "Svatah Sample",
+      "element": "a#brand[link] \"Yam Sample\"@0",
+      "name": "Yam Sample",
       "role": "link"
     },
     {
@@ -2463,14 +2463,14 @@
         },
         {
           "by": "role",
-          "name": "Svatah Sample",
+          "name": "Yam Sample",
           "role": "link",
           "score": 0.92
         },
         {
           "by": "text",
           "score": 0.75,
-          "value": "Svatah Sample"
+          "value": "Yam Sample"
         },
         {
           "by": "css",
@@ -2483,8 +2483,8 @@
           "value": "//*[@data-testid='brand']"
         }
       ],
-      "element": "a#brand[link] \"Svatah Sample\"@0",
-      "name": "Svatah Sample",
+      "element": "a#brand[link] \"Yam Sample\"@0",
+      "name": "Yam Sample",
       "role": "link"
     },
     {
@@ -2703,14 +2703,14 @@
         },
         {
           "by": "role",
-          "name": "Svatah Sample",
+          "name": "Yam Sample",
           "role": "link",
           "score": 0.92
         },
         {
           "by": "text",
           "score": 0.75,
-          "value": "Svatah Sample"
+          "value": "Yam Sample"
         },
         {
           "by": "css",
@@ -2723,8 +2723,8 @@
           "value": "//*[@data-testid='brand']"
         }
       ],
-      "element": "a#brand[link] \"Svatah Sample\"@0",
-      "name": "Svatah Sample",
+      "element": "a#brand[link] \"Yam Sample\"@0",
+      "name": "Yam Sample",
       "role": "link"
     },
     {
@@ -3191,14 +3191,14 @@
         },
         {
           "by": "role",
-          "name": "Svatah Sample",
+          "name": "Yam Sample",
           "role": "link",
           "score": 0.92
         },
         {
           "by": "text",
           "score": 0.75,
-          "value": "Svatah Sample"
+          "value": "Yam Sample"
         },
         {
           "by": "css",
@@ -3211,8 +3211,8 @@
           "value": "//*[@data-testid='brand']"
         }
       ],
-      "element": "a#brand[link] \"Svatah Sample\"@0",
-      "name": "Svatah Sample",
+      "element": "a#brand[link] \"Yam Sample\"@0",
+      "name": "Yam Sample",
       "role": "link"
     },
     {

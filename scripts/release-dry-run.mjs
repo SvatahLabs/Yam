@@ -15,17 +15,17 @@
  *
  * `pnpm pack` rather than `npm pack`: pnpm rewrites `workspace:*` into the real
  * version on the way out, which is the whole reason the workspace protocol is
- * safe to use. An `npm pack` of these packages would ship `"@svatah/schema":
+ * safe to use. An `npm pack` of these packages would ship `"@svatah/yam-schema":
  * "workspace:*"` to a registry that has never heard of the protocol.
  *
  * ## The three sets, and why they are separate
  *
- * - **Module (a)** — `@svatah/bindings`, `@svatah/healer`,
- *   `@svatah/playwright-test`, `@svatah/bindings-cli`: the adoption wedge. A
+ * - **Module (a)** — `@svatah/yam-bindings`, `@svatah/yam-healer`,
+ *   `@svatah/yam-playwright-test`, `@svatah/yam-bindings-cli`: the adoption wedge. A
  *   Playwright user installs these and nothing else (REQ-PKG-1), which is the
  *   claim the packed quick start checks.
- * - **The `svatah` CLI** — module (b), which is everything.
- * - **`@svatah/schema`** — the published contract (REQ-STD-1): the generated
+ * - **The `yam` CLI** — module (b), which is everything.
+ * - **`@svatah/yam-schema`** — the published contract (REQ-STD-1): the generated
  *   JSON Schemas, and the conformance fixtures a third party needs to check
  *   their own runtime against (REQ-STD-2, LLD §14).
  *
@@ -132,14 +132,14 @@ for (const [name, listing] of contents) {
 }
 
 /*
- * `@svatah/schema` is the published contract (REQ-STD-1, T7.6): "the JSON Schema
+ * `@svatah/yam-schema` is the published contract (REQ-STD-1, T7.6): "the JSON Schema
  * files and the conformance fixtures included". Both are checked by name,
  * because both are things a third party downloads this package *for*.
  */
-const schema = contents.get("@svatah/schema") ?? [];
+const schema = contents.get("@svatah/yam-schema") ?? [];
 claim(
   schema.some((file) => file.startsWith("json/") && file.endsWith(".schema.json")),
-  "@svatah/schema: no generated JSON Schemas",
+  "@svatah/yam-schema: no generated JSON Schemas",
 );
 for (const required of [
   // The three a foreign runtime is held to (LLD §14): the step IR it executes,
@@ -148,7 +148,7 @@ for (const required of [
   "json/results.schema.json",
   "json/summary.schema.json",
 ]) {
-  claim(schema.includes(required), `@svatah/schema: ${required} is missing`);
+  claim(schema.includes(required), `@svatah/yam-schema: ${required} is missing`);
 }
 for (const required of [
   "conformance/runtime/results.jsonl",
@@ -159,7 +159,7 @@ for (const required of [
   // conformance result (F2).
   "conformance/runtime/README.md",
 ]) {
-  claim(schema.includes(required), `@svatah/schema: ${required} is missing (REQ-STD-2, LLD §14)`);
+  claim(schema.includes(required), `@svatah/yam-schema: ${required} is missing (REQ-STD-2, LLD §14)`);
 }
 
 /* ── 4. say what happened ─────────────────────────────────────────────────── */

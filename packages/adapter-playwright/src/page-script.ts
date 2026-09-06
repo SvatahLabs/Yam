@@ -53,7 +53,7 @@ export interface RawDescription {
  * `refToElement` reads it back. It is reset by every `walkDocument` call and lost
  * on navigation, which matches `Ref` being "stable within the snapshot".
  */
-export const REGISTRY = "__svatahRefs__";
+export const REGISTRY = "__yamRefs__";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * walkDocument — evaluated in the page.

@@ -5,7 +5,7 @@
 // Each suite becomes runnable in the task that builds it (T1.8 healing, T3.4 grounding,
 // T4.4 compiler, T1.2/T4.1 conformance). Until then this script emits a report saying
 // the suite is not yet runnable, naming the task that will make it so, rather than
-// failing the release. Once `svatah eval <suite>` exists, `runner` below is switched
+// failing the release. Once `yam eval <suite>` exists, `runner` below is switched
 // from null to the command.
 
 import { mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
@@ -28,7 +28,7 @@ const SUITES = [
      * says so beats a missing one, and beats a fake standing in for a model
      * whose accuracy is the entire point of the number.
      */
-    runner: process.env.SVATAH_TIER2 === "1"
+    runner: process.env.YAM_TIER2 === "1"
       ? ["node", "scripts/eval-compiler.mjs", "--report"]
       : ["node", "scripts/eval-compiler.mjs", "--only", "tier0,tier1", "--report"],
   },
@@ -55,7 +55,7 @@ const SUITES = [
     /*
      * Runnable since T1.8; the model half since T3.4.
      *
-     * `svatah eval healing` registers the recorder's `Regrounder` when there is
+     * `yam eval healing` registers the recorder's `Regrounder` when there is
      * a credential and `heal.useModel` allows it, so the same command measures
      * both numbers when a model is available and says the second is unmeasured
      * when one is not.
@@ -108,7 +108,7 @@ for (const suite of SUITES) {
   writeFileSync(
     target,
     [
-      `# Svatah eval report — ${suite.name}`,
+      `# Yam eval report — ${suite.name}`,
       "",
       `Version: ${version} · Generated: ${at}`,
       "",

@@ -14,7 +14,7 @@
  * and then act on nothing. The schema now rejects it, and this is the code that
  * has to get it right.
  */
-import type { TargetRef, ValueRef } from "@svatah/schema";
+import type { TargetRef, ValueRef } from "@svatah/yam-schema";
 import type { Placeholder } from "./types.js";
 import type { TemplateMatch } from "./template.js";
 

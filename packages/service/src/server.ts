@@ -1,13 +1,13 @@
 /**
  * The local service (REQ-ADE-1, REQ-ADE-7, LLD §13.5).
  *
- * "`svatah serve --project <dir> --port <p> [--token <t>]` starts a Fastify
+ * "`yam serve --project <dir> --port <p> [--token <t>]` starts a Fastify
  * server bound to `127.0.0.1` with a bearer token printed on stdout. Every
  * handler calls the same functions the CLI calls; no logic lives in the service."
  *
  * ## No logic here, and the boundary that keeps it that way
  *
- * A handler reads its arguments, calls one function from `@svatah/cli`, and
+ * A handler reads its arguments, calls one function from `@svatah/yam`, and
  * shapes the answer. That is the whole rule, and LLD §1's import boundary is
  * what enforces it: `service` may import `cli` and `schema` and nothing else. If
  * the service could reach the compiler or the runtime directly, it would grow a
@@ -83,7 +83,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
      * `/events` is a server-sent-event stream and the ADE holds one open for as
      * long as a project is open, so `fastify.close()` waited for a response
      * that is never going to end: every ADE quit took the five seconds its
-     * child-stop escalation allows before the `SIGKILL`, and a `svatah serve`
+     * child-stop escalation allows before the `SIGKILL`, and a `yam serve`
      * stopped from a terminal took the same. The streams are ended by the
      * shutdown hook below; this is what stops an idle keep-alive socket from
      * holding the listener open after them.
@@ -99,7 +99,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
   fastify.addHook("onRequest", async (request: FastifyRequest, reply: FastifyReply) => {
     if (OPEN.has(request.url.split("?")[0] ?? "")) return;
     const header = request.headers.authorization ?? "";
-    const given = header.startsWith("Bearer ") ? header.slice(7) : request.headers["x-svatah-token"];
+    const given = header.startsWith("Bearer ") ? header.slice(7) : request.headers["x-yam-token"];
     if (given !== token) {
       await reply.code(401).send({
         error: "unauthorised",
@@ -182,8 +182,8 @@ export async function createService(options: ServeOptions): Promise<RunningServi
    * `POST /compile` answers with a reference — the hash and a count — because
    * that is what a caller checking whether a project compiles wants. The ADE's
    * Plan screen wants the steps: their tier, their confidence, and which targets
-   * are still `unbound`. That is exactly the object `svatah compile` writes to
-   * `.svatah/plan.json`, so serving it keeps the screen rule (T3.7: "every screen
+   * are still `unbound`. That is exactly the object `yam compile` writes to
+   * `.yam/plan.json`, so serving it keeps the screen rule (T3.7: "every screen
    * renders a service response or a project file and nothing the CLI cannot
    * produce") rather than bending it.
    */
@@ -467,7 +467,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
      * The loaded project has every `${ENV}` indirection *resolved*, so merging
      * over it and writing the result would put the plaintext secret into
      * `data.yaml` — the opposite of what the redaction is for. The raw file has
-     * `${SVATAH_SAMPLE_PASSWORD}`, which is exactly what has to stay.
+     * `${YAM_SAMPLE_PASSWORD}`, which is exactly what has to stay.
      *
      * `secrets:` is a key of the same file, and it is not a value the editor
      * shows; it is carried across untouched, because a save that dropped it
@@ -505,7 +505,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
   /**
    * Execute one request ad hoc, for the ADE's API client (LLD §13.5).
    *
-   * Through the same function `svatah run` uses for an `api` step, injected like
+   * Through the same function `yam run` uses for an `api` step, injected like
    * every other. An ADE that had its own HTTP client would have its own idea of
    * a header, a redirect and a cookie, and "the API client agrees with the run"
    * would be a coincidence.
@@ -929,7 +929,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
    * Read from each run's `summary.json` and `audit.jsonl` rather than from a
    * register the service keeps: "an MCP client invocation appears in the tool
    * panel with its audit record" (T5.8) is a fact about *files*, and reading
-   * them means the panel shows invocations served by a `svatah tool serve`
+   * them means the panel shows invocations served by a `yam tool serve`
    * running in another terminal too (REQ-ADE-2).
    */
   fastify.get<{ Querystring: { expose?: string } }>("/tools", async (request) => {
@@ -1057,7 +1057,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
  * to say about it, and the only way to change one is to change the environment it
  * indirects to.
  *
- * `onDisk` must be the *raw* tree — `${SVATAH_SAMPLE_PASSWORD}`, not what that
+ * `onDisk` must be the *raw* tree — `${YAM_SAMPLE_PASSWORD}`, not what that
  * resolves to — or this would write the plaintext into a committed file.
  *
  * Recursive, because a secret can be nested (`user.password`).

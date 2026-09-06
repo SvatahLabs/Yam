@@ -8,12 +8,12 @@
  * be added without a decision appearing here.
  *
  * `locate` returns 0, 1 or many references; the "exactly one" rule belongs to the
- * resolver in `@svatah/bindings` (LLD §6.3), not to the adapter.
+ * resolver in `@svatah/yam-bindings` (LLD §6.3), not to the adapter.
  *
  * Refs: REQ-ADP-1, REQ-RUN-5, LLD §3.3, §7.1.
  */
-import { CANDIDATE_KINDS, type Candidate } from "@svatah/schema";
-import { LocateError } from "@svatah/surface";
+import { CANDIDATE_KINDS, type Candidate } from "@svatah/yam-schema";
+import { LocateError } from "@svatah/yam-surface";
 import { expect, MECHANISMS, test } from "./fixtures.js";
 
 const candidate = (c: Omit<Candidate, "score">): Candidate => ({ ...c, score: 1 } as Candidate);

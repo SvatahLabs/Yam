@@ -2,7 +2,7 @@
 # a run, not of the project: they are reproduced by re-running and never
 # reviewed as a diff.
 runs/
-.svatah/
+.yam/
 
 # The shape an absolute --out leaves behind when it is joined onto the project
 # root rather than resolved.

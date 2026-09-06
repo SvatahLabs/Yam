@@ -6,7 +6,7 @@
  * compiler. The code is what tests and tooling match on; the message is what
  * someone reads at 6pm when a build is red.
  *
- * Errors fail the compile. Warnings are reported by `svatah lint` and do not.
+ * Errors fail the compile. Warnings are reported by `yam lint` and do not.
  */
 
 /** Codes that fail a compile. */
@@ -42,7 +42,7 @@ export const ERROR_CODES = [
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
-/** Codes `svatah lint` reports without failing. */
+/** Codes `yam lint` reports without failing. */
 export const WARNING_CODES = [
   "W_AMBIGUOUS_TARGET",
   "W_TIER2",

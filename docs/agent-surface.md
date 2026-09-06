@@ -1,4 +1,4 @@
-# The Svatah agent surface
+# The Yam agent surface
 
 The contract an adapter implements.
 
@@ -9,7 +9,7 @@ and addresses elements by reference or by a stored candidate. That is the whole
 boundary (REQ-SURF-2, REQ-SURF-5).
 
 The TypeScript interface lives in
-[`@svatah/surface`](../packages/surface/src/surface.ts). The wire shapes are
+[`@svatah/yam-surface`](../packages/surface/src/surface.ts). The wire shapes are
 generated from Zod and published as JSON Schema under
 [`packages/schema/json/`](../packages/schema/json/), so an adapter written in
 another language has the same contract without reading TypeScript.
@@ -124,7 +124,7 @@ Rules an adapter must honour:
 4. **`native` carries adapter-specific extras** (`data-testid`, `AutomationId`,
    `resource-id`). Nothing above the surface reads it except candidate synthesis.
 5. **`text` is the rendering below**, produced by `renderSnapshot` from
-   `@svatah/surface` so every adapter's prompt input reads the same.
+   `@svatah/yam-surface` so every adapter's prompt input reads the same.
 6. **`hash` is the structural hash** of LLD §6.2, computed from this tree rather
    than from the DOM, which is what makes it adapter-neutral.
 
@@ -256,7 +256,7 @@ Candidate kinds on this platform: `automationId` (from `AutomationId`),
 
 Candidate kinds: `automationId` (from `AXIdentifier`, falling back to
 `aria-label`), `controlPath`, then `coords`. The adapter must document the
-accessibility permission grant and offer `svatah surface doctor` to check it.
+accessibility permission grant and offer `yam surface doctor` to check it.
 
 ### 3.3 Appium, native Android (REQ-ADP-5)
 
@@ -404,7 +404,7 @@ error shows up in the results rather than being silently miscategorised.
 ## 7. Registration
 
 ```ts
-import { registerAdapter } from "@svatah/surface";
+import { registerAdapter } from "@svatah/yam-surface";
 
 registerAdapter("playwright", (config) => new PlaywrightSurface(config));
 ```
@@ -424,13 +424,13 @@ An adapter is **conformant** only when the surface conformance suite passes agai
 it (REQ-SURF-3, LLD §14):
 
 ```bash
-svatah surface conform --adapter <name>
+yam surface conform --adapter <name>
 ```
 
 The suite is a fixed script of surface calls per sample page with expected snapshot
 invariants, expected effects, and expected error types. It ships in
-`@svatah/conformance` and is runnable by third parties (REQ-STD-2). The suite and
-the `svatah surface conform` command are built in T1.2; Phase 0 publishes the
+`@svatah/yam-conformance` and is runnable by third parties (REQ-STD-2). The suite and
+the `yam surface conform` command are built in T1.2; Phase 0 publishes the
 contract they check.
 
 ## 9. Checklist for a new adapter
@@ -443,4 +443,4 @@ contract they check.
 5. Implement the candidate kinds your platform has; return `[]` for the rest.
 6. Throw the typed errors in §6 — never a bare `Error`.
 7. Register the adapter from the CLI only.
-8. Pass `svatah surface conform --adapter <name>`.
+8. Pass `yam surface conform --adapter <name>`.

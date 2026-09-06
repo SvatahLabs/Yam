@@ -1,10 +1,10 @@
 // A story with a typed signature, run as a function (T5.2, REQ-BEH-2, REQ-AUTO-5).
 //
-// This flow has no run block, so `svatah run` runs nothing from it: a `story`
+// This flow has no run block, so `yam run` runs nothing from it: a `story`
 // block outside a run block is a function waiting to be called, not a test
 // (REQ-LANG-10). It is invoked by name —
 //
-//   svatah workflow run "Book a slot" --input location=Indiranagar
+//   yam workflow run "Book a slot" --input location=Indiranagar
 //
 // — and by the tool server over MCP (T5.3), which derives the tool's schema from
 // the signature below.

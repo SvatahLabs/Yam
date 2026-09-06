@@ -4,7 +4,7 @@
  * The registry is how `config.adapter` selects an implementation without anything
  * above the surface importing one. Only the CLI calls this.
  */
-import { registerAdapter } from "@svatah/surface";
+import { registerAdapter } from "@svatah/yam-surface";
 import { createHttpSurface } from "./surface.js";
 
 export const HTTP_ADAPTER = "http";

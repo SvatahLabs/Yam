@@ -295,7 +295,7 @@ WaitFor
  * > <predicate>` over a service response.
  *
  * Four of the parity gate's one-sided checks were the same shape: a button in
- * the ADE starts a *second* Svatah run and the flow has no way to wait for it
+ * the ADE starts a *second* Yam run and the flow has no way to wait for it
  * and read its result. A run is a thing the local service answers about, so
  * what was missing was not a new kind of waiting but a subject: this polls the
  * named request until the value at the JSON path satisfies the predicate, or
@@ -352,7 +352,7 @@ Windows
  * > initial size, performed through the window's size attribute.
  *
  * Three one-sided checks were toolbar rules measured at several widths, and
- * what stopped Svatah reaching them was that a flow could not change the width.
+ * what stopped Yam reaching them was that a flow could not change the width.
  * The numbers are bare, not quoted: they are a size, the same way pattern 24's
  * `should be 800 by 600` is one, and quoting them would make a size read like a
  * value somebody typed.

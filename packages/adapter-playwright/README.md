@@ -1,11 +1,11 @@
-# @svatah/adapter-playwright
+# @svatah/yam-adapter-playwright
 
 The default web adapter (REQ-ADP-1): the published
 [`AgentSurface`](../surface/README.md) implemented on Playwright.
 
 Playwright is consumed as an adapter, not as the core. Nothing above the surface
-imports this package except `@svatah/cli`, which registers it, and
-`@svatah/playwright-test`, which hosts it — the import-boundary lint and the
+imports this package except `@svatah/yam`, which registers it, and
+`@svatah/yam-playwright-test`, which hosts it — the import-boundary lint and the
 dependency-graph test in `tools/repo-checks` enforce that (LLD §1).
 
 ## What it implements
@@ -36,7 +36,7 @@ produced a reference:
   registers the elements, so a reference resolves with no Playwright internal
   involved at all.
 
-`SVATAH_PW_SNAPSHOT=own|playwright|auto` selects one. `auto` is the default: it
+`YAM_PW_SNAPSHOT=own|playwright|auto` selects one. `auto` is the default: it
 uses Playwright's mechanism while the internal call answers and falls back to
 `own` when it does not, which is what will happen by itself if Playwright removes
 it. **Every behavioural test in this package runs twice, once per mechanism**, and
@@ -54,14 +54,14 @@ LLD §2.2 says. Using one afterwards is an error that says to take a new snapsho
 
 ```bash
 pnpm browsers   # or: pnpm exec playwright install chromium
-pnpm --filter @svatah/adapter-playwright test
+pnpm --filter @svatah/yam-adapter-playwright test
 ```
 
 Only chromium is required. To run the same suite on all three browsers:
 
 ```bash
-pnpm --filter @svatah/adapter-playwright exec playwright install firefox webkit
-SVATAH_PW_BROWSERS=all pnpm --filter @svatah/adapter-playwright test
+pnpm --filter @svatah/yam-adapter-playwright exec playwright install firefox webkit
+YAM_PW_BROWSERS=all pnpm --filter @svatah/yam-adapter-playwright test
 ```
 
 ## Licence

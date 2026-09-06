@@ -373,7 +373,7 @@ describe("the desktop snapshot case and unnamed controls (P8-F3, LLD §13.7)", (
 
   /** The smallest window that satisfies every other check in `ade.snapshot`. */
   const windowWith = (nodes: readonly FakeNode[]): readonly FakeNode[] => [
-    { ref: "e0", role: "window", name: "Svatah ADE", states: [], box: [0, 0, 1440, 900] },
+    { ref: "e0", role: "window", name: "Yam ADE", states: [], box: [0, 0, 1440, 900] },
     ...nodes,
   ];
 

@@ -1,7 +1,7 @@
 /**
- * @svatah/schema
+ * @svatah/yam-schema
  *
- * The Svatah artifact contract: Zod definitions for everything in LLD §3 plus the
+ * The Yam artifact contract: Zod definitions for everything in LLD §3 plus the
  * agent-surface wire shapes of LLD §2, and the generator that publishes them as
  * JSON Schema files under `json/` (REQ-STD-1).
  *

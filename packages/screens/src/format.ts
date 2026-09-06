@@ -7,7 +7,7 @@
  *
  * The Flows screen's list used to carry `"run 20 s ago"` as a string in its
  * state. Two loads a second apart therefore produced two different states for a
- * project nothing had happened to — which made `svatah ui --json` unequal to a
+ * project nothing had happened to — which made `yam ui --json` unequal to a
  * second evaluation of the same screen, and flaked
  * `tui-pty.test.ts › prints the Flows screen the same way` on Node 22 with
  * `"run 19 s ago"` against `"run 20 s ago"`.
@@ -15,7 +15,7 @@
  * A state is a value. A value that changes when nothing changed cannot be
  * compared, cached, or printed for an agent twice — so the model carries the
  * instant (`lastRunAt`, an ISO timestamp the service wrote) and this is what the
- * ADE and `svatah ui` each call to turn it into words. Both call the *same*
+ * ADE and `yam ui` each call to turn it into words. Both call the *same*
  * function, so the two renderers still say the same thing.
  */
 

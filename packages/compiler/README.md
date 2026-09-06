@@ -1,4 +1,4 @@
-# @svatah/compiler
+# @svatah/yam-compiler
 
 Compiler tiers, validation, lint and plan writer.
 

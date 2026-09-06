@@ -41,7 +41,7 @@ const AXE_URL = `https://cdn.jsdelivr.net/npm/axe-core@${AXE_VERSION}/axe.min.js
 
 /** Outside the repository and outside `node_modules`, by name and by place. */
 export function axePath() {
-  return join(tmpdir(), "svatah-axe-core", `axe-${AXE_VERSION}.min.js`);
+  return join(tmpdir(), "yam-axe-core", `axe-${AXE_VERSION}.min.js`);
 }
 
 const digestOf = (text) => createHash("sha256").update(text, "utf8").digest("hex");
@@ -79,7 +79,7 @@ export async function ensureAxe() {
     );
   }
 
-  mkdirSync(join(tmpdir(), "svatah-axe-core"), { recursive: true });
+  mkdirSync(join(tmpdir(), "yam-axe-core"), { recursive: true });
   // Written whole, so two test files racing leave no half a file behind.
   const staging = `${path}.${process.pid}.tmp`;
   writeFileSync(staging, text, "utf8");

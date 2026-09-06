@@ -13,7 +13,7 @@
 import { mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { migrate, renderReviewReport } from "@svatah/migrate";
+import { migrate, renderReviewReport } from "@svatah/yam-migrate";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const SOURCE = "evals/migrate/source";

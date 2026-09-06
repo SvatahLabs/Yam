@@ -59,7 +59,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
-import { DARK, LIGHT } from "@svatah/ui-tokens";
+import { DARK, LIGHT } from "@svatah/yam-ui-tokens";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);
@@ -72,7 +72,7 @@ const sheet = resolve(option("sheet") ?? join(ROOT, "packages", "ui", "sheet", "
 
 if (!existsSync(sheet)) {
   process.stderr.write(
-    `${sheet} does not exist. Run \`pnpm --filter @svatah/ui sheet\` first.\n`,
+    `${sheet} does not exist. Run \`pnpm --filter @svatah/yam-ui sheet\` first.\n`,
   );
   process.exit(2);
 }

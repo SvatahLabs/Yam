@@ -8,13 +8,13 @@
  * This runs *before* the grammar, and that ordering is the whole point. A v2
  * sentence would otherwise fail to parse and be reported as "no pattern matched
  * this sentence" — technically true, and useless. Someone with a directory of v2
- * flows needs to be told that the file is v2 and that `svatah migrate` converts
+ * flows needs to be told that the file is v2 and that `yam migrate` converts
  * it, in one message, on the first line that shows it.
  *
  * Each form is matched separately so the message can name the form and show what
  * it becomes.
  */
-import { diagnostic, type Diagnostic } from "@svatah/spec";
+import { diagnostic, type Diagnostic } from "@svatah/yam-spec";
 
 interface Form {
   readonly name: string;
@@ -92,7 +92,7 @@ export function checkSigils(
     return diagnostic(
       "E_SIGIL",
       `This step uses ${form.name}, which v3 does not have. It becomes ${form.becomes}. ` +
-        "Run `svatah migrate <src> <dest>` to convert v1 and v2 flows.",
+        "Run `yam migrate <src> <dest>` to convert v1 and v2 flows.",
       { ...where, source: text },
     );
   }

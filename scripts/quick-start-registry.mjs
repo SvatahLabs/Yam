@@ -103,13 +103,13 @@ say(`\nAll four module (a) packages are on the registry at ${version}.`);
  *
  * The packed quick start redirects every `@svatah/*` name to a file, because a
  * tarball's dependencies name versions no registry has. Here nothing is
- * redirected: npm resolves `@svatah/healer`'s dependency on `@svatah/bindings`
+ * redirected: npm resolves `@svatah/yam-healer`'s dependency on `@svatah/yam-bindings`
  * out of the registry, and if what was published still says `workspace:*` — the
  * failure REQ-PKG-1 is most exposed to — the install fails here and nowhere
  * else.
  */
 const project = scaffold({
-  prefix: "svatah-registry-",
+  prefix: "yam-registry-",
   dependencies: Object.fromEntries(MODULE_A.map((name) => [name, version])),
 });
 

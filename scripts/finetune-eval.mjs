@@ -8,7 +8,7 @@
  * > **Validate:** At least 5 points improvement on `tier: 2` golden without
  * > Tier 1 regressions.
  *
- * Two runs of `svatah eval compiler --tier2`, one against the base model and
+ * Two runs of `yam eval compiler --tier2`, one against the base model and
  * one against the tuned one, and the difference. Both are the *published* eval
  * (REQ-COMP-9) run twice, not a private harness: a fine-tune measured by
  * something other than the suite the project publishes would be a number nobody
@@ -62,8 +62,8 @@ if (tuned === undefined) {
     "\nNo tuned model to compare against.\n\n" +
       "  1. node packages/cli/dist/bin.js eval finetune export\n" +
       "  2. node scripts/finetune-tier2.mjs\n" +
-      "  3. ollama create qwen2.5-3b-svatah -f <the Modelfile the trainer wrote>\n" +
-      "  4. node scripts/finetune-eval.mjs --tuned qwen2.5-3b-svatah\n\n" +
+      "  3. ollama create qwen2.5-3b-yam -f <the Modelfile the trainer wrote>\n" +
+      "  4. node scripts/finetune-eval.mjs --tuned qwen2.5-3b-yam\n\n" +
       "Nothing was written. Printing the base model's number twice, or estimating the " +
       "improvement, would be reporting something that was not measured (ADR-4).",
   );
@@ -78,19 +78,19 @@ if (tuned === undefined) {
  * the pinned `digest` removed — the tuned model is by definition not the pinned
  * weights, and leaving the pin in would make every run exit 3.
  *
- * It used to be two environment variables, `SVATAH_TIER2_MODEL` and
- * `SVATAH_ALLOW_MODEL_DRIFT`. **Nothing in the CLI read either of them.** So
+ * It used to be two environment variables, `YAM_TIER2_MODEL` and
+ * `YAM_ALLOW_MODEL_DRIFT`. **Nothing in the CLI read either of them.** So
  * both runs used the base model, the "comparison" compared a model with itself,
  * and the script that says in its own header that it "does not print the base
  * twice" did exactly that. Found by running it (T7.5); it had never been run.
  */
 function goldenProjectFor(model) {
   const source = join(ROOT, "evals", "compiler", "project");
-  const target = join(ROOT, ".svatah", `golden-project-${model.replace(/[^\w.-]/g, "-")}`);
+  const target = join(ROOT, ".yam", `golden-project-${model.replace(/[^\w.-]/g, "-")}`);
   rmSync(target, { recursive: true, force: true });
   cpSync(source, target, { recursive: true });
 
-  const configPath = join(target, "svatah.config.yaml");
+  const configPath = join(target, "yam.config.yaml");
   const config = readFileSync(configPath, "utf8")
     .replace(/^(\s*)model:\s*".*"$/m, `$1model: "${model}"`)
     .replace(/^\s*digest:\s*".*"\n/m, "");
@@ -100,7 +100,7 @@ function goldenProjectFor(model) {
 
 /** One run of the published compiler eval, as JSON. */
 function measure(model, label) {
-  const out = join(ROOT, ".svatah", `finetune-${label}.md`);
+  const out = join(ROOT, ".yam", `finetune-${label}.md`);
   mkdirSync(dirname(out), { recursive: true });
   const result = spawnSync(
     process.execPath,
@@ -152,7 +152,7 @@ if (before.gateway === after.gateway) {
 process.stderr.write(`base ran on ${before.gateway}; tuned ran on ${after.gateway}\n`);
 
 /**
- * One tier's exact-match rate, from `svatah eval compiler --json`.
+ * One tier's exact-match rate, from `yam eval compiler --json`.
  *
  * The shape is `byTier: { tier2: { total, matched, rate } }`. This used to read
  * `result.tiers.find(t => t.tier === 2)`, which matches nothing that command has
@@ -193,11 +193,11 @@ const lines = [
     ? []
     : [
         "> **Withdrawn from 0.1.0 (T8.4, Draft 2.9).** ADR-4's Tier 2 fine-tune target is",
-        "> **not met**, the tuned adapter is **not used**, and no Svatah release depends on",
-        "> one. `evals/compiler/project/svatah.config.yaml` names the base model, and every",
+        "> **not met**, the tuned adapter is **not used**, and no Yam release depends on",
+        "> one. `evals/compiler/project/yam.config.yaml` names the base model, and every",
         "> published compiler number is the base model's. Draft 2.9 makes a Tier 2 corpus the",
         "> precondition for another attempt: `evals/compiler/refused.jsonl`, read by",
-        "> `svatah eval finetune corpus`.",
+        "> `yam eval finetune corpus`.",
         "",
       ]),
   `Run at ${new Date().toISOString()}`,
@@ -273,8 +273,8 @@ const lines = [
         "how much that costs.",
         "",
         "```",
-        "svatah eval finetune corpus     # the three sources and what each contributes",
-        "svatah eval finetune export     # writes evals/compiler/finetune/pairs.jsonl",
+        "yam eval finetune corpus     # the three sources and what each contributes",
+        "yam eval finetune export     # writes evals/compiler/finetune/pairs.jsonl",
         "```",
       ]),
 ];

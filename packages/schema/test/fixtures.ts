@@ -190,10 +190,10 @@ export const bindingEntry: BindingEntry = {
 
 /** A desktop binding, exercising the `automationId` and `controlPath` candidate kinds. */
 export const desktopBindingEntry: BindingEntry = {
-  context: { pattern: "Svatah ADE*", hash: "2".repeat(64), platform: "desktop" },
+  context: { pattern: "Yam ADE*", hash: "2".repeat(64), platform: "desktop" },
   candidates: [
     { by: "automationId", value: "project-open", score: 0.95 },
-    { by: "controlPath", value: "Window[Svatah ADE]/Pane[2]/Button[Open project]", score: 0.7 },
+    { by: "controlPath", value: "Window[Yam ADE]/Pane[2]/Button[Open project]", score: 0.7 },
     { by: "coords", value: "412,86", score: 0.1 },
   ],
   fingerprint: {
@@ -252,7 +252,7 @@ export const summary: Summary = {
   planHash: "3".repeat(64),
   bindingsHash: "4".repeat(64),
   configHash: "5".repeat(64),
-  invoker: { kind: "ci", id: "github:svatah/ci#1421", via: "cli" },
+  invoker: { kind: "ci", id: "github:yam/ci#1421", via: "cli" },
   startedAt: AT,
   endedAt: "2026-09-02T10:01:00.000Z",
   flows: {

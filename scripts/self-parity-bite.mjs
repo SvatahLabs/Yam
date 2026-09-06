@@ -34,10 +34,10 @@ import { copyProjectParts } from "./lib/self-project.mjs";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 const source = join(ROOT, "evals", "self");
-const bundle = join(ROOT, "apps", "ade", "out", "Svatah ADE-darwin-arm64", "Svatah ADE.app");
+const bundle = join(ROOT, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
 const keep = process.argv.includes("--keep");
 
-const scratch = mkdtempSync(join(tmpdir(), "svatah-parity-bite-"));
+const scratch = mkdtempSync(join(tmpdir(), "yam-parity-bite-"));
 const project = join(scratch, "self");
 mkdirSync(project, { recursive: true });
 const skipped = copyProjectParts(source, project, ["flows", "steps", "api", "bindings"]);
@@ -46,8 +46,8 @@ if (skipped.length > 0) {
 }
 cpSync(join(source, "data.yaml"), join(project, "data.yaml"));
 writeFileSync(
-  join(project, "svatah.config.yaml"),
-  readFileSync(join(source, "svatah.config.yaml"), "utf8").replace(
+  join(project, "yam.config.yaml"),
+  readFileSync(join(source, "yam.config.yaml"), "utf8").replace(
     /bundle: ".*"/,
     `bundle: ${JSON.stringify(bundle)}`,
   ),
@@ -69,7 +69,7 @@ if (after === before) {
 writeFileSync(flow, after, "utf8");
 
 /*
- * One check, and it is the one whose two sides are both Svatah's own — the
+ * One check, and it is the one whose two sides are both Yam's own — the
  * accessibility tree and the DOM over CDP. Breaking the flow breaks *both*
  * sides of that one, which is not a disagreement; so the check the gate is
  * asked about is the ADE screen one, whose external side is a Playwright case
@@ -86,8 +86,8 @@ writeFileSync(
     "checks:",
     '  - id: "ade.opens-into-the-new-flows-screen-not-the-eleven-tabs"',
     '    says: "opens into the new Flows screen, not the eleven tabs"',
-    "    svatah:",
-    '      source: "svatah"',
+    "    yam:",
+    '      source: "yam"',
     '      project: "self"',
     '      name: "the ADE opens a project and shows its flows"',
     "    external:",
@@ -112,7 +112,7 @@ const bit =
   /Not conformant/.test(text) &&
   /## Disagreements/.test(text) &&
   /ade\.opens-into-the-new-flows-screen/.test(text) &&
-  // Both pieces of evidence: what Svatah saw, and what the external side saw.
+  // Both pieces of evidence: what Yam saw, and what the external side saw.
   /Frobnicate/.test(text) &&
   /pass/.test(text.split("## Disagreements")[1]?.split("##")[0] ?? "");
 

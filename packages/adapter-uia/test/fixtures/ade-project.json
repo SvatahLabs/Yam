@@ -1,12 +1,12 @@
 {
-  "process": "Svatah ADE",
-  "title": "Svatah ADE",
+  "process": "Yam ADE",
+  "title": "Yam ADE",
   "truncated": false,
   "nodes": [
     {
       "parent": -1,
       "controlType": "Window",
-      "name": "Svatah ADE",
+      "name": "Yam ADE",
       "className": "Chrome_WidgetWin_1",
       "isEnabled": true,
       "box": [
@@ -20,7 +20,7 @@
       "parent": 0,
       "controlType": "Document",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah ADE",
+      "name": "Yam ADE",
       "isEnabled": true,
       "hasKeyboardFocus": true,
       "box": [
@@ -60,7 +60,7 @@
       "parent": 3,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah",
+      "name": "Yam",
       "isEnabled": true,
       "box": [
         50,
@@ -73,7 +73,7 @@
       "parent": 4,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah",
+      "name": "Yam",
       "isEnabled": true
     },
     {
@@ -675,7 +675,7 @@
       "parent": 52,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah-fixtures · test · playwright",
+      "name": "yam-fixtures · test · playwright",
       "isEnabled": true,
       "box": [
         305,
@@ -688,7 +688,7 @@
       "parent": 56,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah-fixtures · test · playwright",
+      "name": "yam-fixtures · test · playwright",
       "isEnabled": true
     },
     {
@@ -879,7 +879,7 @@
       "parent": 70,
       "controlType": "DataItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah-fixtures",
+      "name": "yam-fixtures",
       "isEnabled": true,
       "box": [
         321,
@@ -892,7 +892,7 @@
       "parent": 74,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah-fixtures",
+      "name": "yam-fixtures",
       "isEnabled": true,
       "box": [
         333,
@@ -905,7 +905,7 @@
       "parent": 75,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "svatah-fixtures",
+      "name": "yam-fixtures",
       "isEnabled": true
     },
     {
@@ -957,7 +957,7 @@
       "parent": 77,
       "controlType": "DataItem",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "name": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "isEnabled": true,
       "box": [
         321,
@@ -970,7 +970,7 @@
       "parent": 81,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "name": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "isEnabled": true,
       "box": [
         333,
@@ -983,7 +983,7 @@
       "parent": 82,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-",
+      "name": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-",
       "isEnabled": true
     },
     {
@@ -2202,7 +2202,7 @@
       "parent": 184,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "data.yaml · line 0 · user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+      "name": "data.yaml · line 0 · user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
       "isEnabled": true,
       "box": [
         942,
@@ -2222,7 +2222,7 @@
       "parent": 192,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "user.password reads ${SVATAH_SAMPLE_PASSWORD},",
+      "name": "user.password reads ${YAM_SAMPLE_PASSWORD},",
       "isEnabled": true
     },
     {
@@ -2325,7 +2325,7 @@
       "parent": 197,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "data.yaml · line 0 · card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
+      "name": "data.yaml · line 0 · card.number reads ${YAM_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
       "isEnabled": true,
       "box": [
         942,
@@ -2352,7 +2352,7 @@
       "parent": 205,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "${SVATAH_SAMPLE_CARD_NUMBER}, which is not set.",
+      "name": "${YAM_SAMPLE_CARD_NUMBER}, which is not set.",
       "isEnabled": true
     },
     {
@@ -2448,7 +2448,7 @@
       "parent": 210,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "data.yaml · line 0 · card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
+      "name": "data.yaml · line 0 · card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
       "isEnabled": true,
       "box": [
         942,
@@ -2468,7 +2468,7 @@
       "parent": 218,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which",
+      "name": "card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which",
       "isEnabled": true
     },
     {
@@ -2642,7 +2642,7 @@
       "parent": 235,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "name": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "isEnabled": true,
       "box": [
         24,
@@ -2655,7 +2655,7 @@
       "parent": 236,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
+      "name": "/Users/atul/Workspace/Yam/automator/.claude/worktrees/bridge-cse_01X2cj1iXF9arnYHru7B5xGz/evals/fixtures",
       "isEnabled": true
     },
     {

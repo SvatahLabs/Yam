@@ -1,12 +1,12 @@
 # Running a flow in CI (REQ-BEH-1, REQ-AGT-4)
 
 The test behavior, invoked by somebody else's runner. There is nothing
-Svatah-specific in the workflow beyond the command and the exit code.
+Yam-specific in the workflow beyond the command and the exit code.
 
 ```yaml
-# .github/workflows/svatah.yml
-- run: pnpm svatah compile --stable
-- run: pnpm svatah run --host playwright
+# .github/workflows/yam.yml
+- run: pnpm yam compile --stable
+- run: pnpm yam run --host playwright
 ```
 
 `github-actions.yml` beside this file is the whole job. `gitlab-ci.yml` is the
@@ -25,7 +25,7 @@ decide deliberately. `11` is a flow that aborted under a compensation policy;
 a failure is readable a month later without re-running anything. There is no
 service to ask.
 
-**That the plan is committed.** `svatah compile --stable` is byte-stable
+**That the plan is committed.** `yam compile --stable` is byte-stable
 (REQ-COMP-7), so a compile in CI that differs from the committed `plan.json` is
 a real difference — a flow someone edited without recompiling — and
 `git diff --exit-code` is the check. A plan produced fresh on every run would
@@ -38,7 +38,7 @@ CI job needs no credential, and one that has one is not using it here.
 ## Healing is a separate step, on purpose
 
 ```bash
-svatah run --host playwright || svatah heal --run "$(cat .svatah/last-run)" --input password="$PASSWORD"
+yam run --host playwright || yam heal --run "$(cat .yam/last-run)" --input password="$PASSWORD"
 ```
 
 A heal proposes a diff to the bindings store and a report; it does not apply one

@@ -1,4 +1,4 @@
-# @svatah/adapter-http
+# @svatah/yam-adapter-http
 
 HTTP/API adapter.
 

@@ -14,7 +14,7 @@
 import { startSampleApp, DEFAULT_PORT, type SampleServer } from "sample-web";
 
 export default async function globalSetup(): Promise<void> {
-  if (process.env["SVATAH_BASE_URL"] !== undefined) return;
+  if (process.env["YAM_BASE_URL"] !== undefined) return;
 
   let app: SampleServer;
   try {
@@ -23,6 +23,6 @@ export default async function globalSetup(): Promise<void> {
     app = await startSampleApp(0);
   }
 
-  process.env["SVATAH_BASE_URL"] = app.origin;
+  process.env["YAM_BASE_URL"] = app.origin;
   (globalThis as Record<string, unknown>)["__sampleApp"] = app;
 }

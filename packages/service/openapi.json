@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Svatah local service",
+    "title": "Yam local service",
     "version": "0.1.0",
-    "description": "The local integration point for the Svatah ADE and any other client (REQ-ADE-1, LLD §13.5). Bound to 127.0.0.1, behind a bearer token printed on stdout. Every handler calls the same function the CLI calls; no logic lives here."
+    "description": "The local integration point for the Yam ADE and any other client (REQ-ADE-1, LLD §13.5). Bound to 127.0.0.1, behind a bearer token printed on stdout. Every handler calls the same function the CLI calls; no logic lives here."
   },
   "servers": [
     {
@@ -74,7 +74,7 @@
                             "type": "integer"
                           },
                           "signature": {
-                            "$ref": "https://svatah.dev/schema/signature.schema.json"
+                            "$ref": "https://yam.svatah.com/schema/signature.schema.json"
                           }
                         },
                         "required": [
@@ -222,7 +222,7 @@
     "/plan": {
       "get": {
         "summary": "The compiled plan, story by story",
-        "description": "The object `svatah compile` writes to `.svatah/plan.json`. `POST /compile` answers with a reference; this is the plan the ADE's Plan screen renders.",
+        "description": "The object `yam compile` writes to `.yam/plan.json`. `POST /compile` answers with a reference; this is the plan the ADE's Plan screen renders.",
         "security": [
           {
             "bearerAuth": []
@@ -234,7 +234,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://svatah.dev/schema/plan.schema.json"
+                  "$ref": "https://yam.svatah.com/schema/plan.schema.json"
                 }
               }
             }
@@ -390,7 +390,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://svatah.dev/schema/results.summary.schema.json"
+                  "$ref": "https://yam.svatah.com/schema/results.summary.schema.json"
                 }
               }
             }
@@ -487,7 +487,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://svatah.dev/schema/results.step.schema.json"
+                    "$ref": "https://yam.svatah.com/schema/results.step.schema.json"
                   }
                 }
               }
@@ -553,7 +553,7 @@
     "/bindings/{id}": {
       "get": {
         "summary": "One binding",
-        "description": "The YAML file on disk, byte for byte — the same bytes `svatah bindings show` prints and a reviewer reads in a pull request. A `GET /bindings/:id.json` would be a second representation of the store, and the moment one exists someone has to keep the two in step (LLD §6.1, §13.5).",
+        "description": "The YAML file on disk, byte for byte — the same bytes `yam bindings show` prints and a reviewer reads in a pull request. A `GET /bindings/:id.json` would be a second representation of the store, and the moment one exists someone has to keep the two in step (LLD §6.1, §13.5).",
         "security": [
           {
             "bearerAuth": []
@@ -707,7 +707,7 @@
     "/api/request": {
       "post": {
         "summary": "Execute one API request ad hoc",
-        "description": "Through the same function `svatah run` uses for an `api` step, so the ADE's API client is not a second HTTP client (LLD §13.5).",
+        "description": "Through the same function `yam run` uses for an `api` step, so the ADE's API client is not a second HTTP client (LLD §13.5).",
         "security": [
           {
             "bearerAuth": []
@@ -720,7 +720,7 @@
                 "type": "object",
                 "properties": {
                   "request": {
-                    "$ref": "https://svatah.dev/schema/surface.api-request.schema.json"
+                    "$ref": "https://yam.svatah.com/schema/surface.api-request.schema.json"
                   },
                   "withSessionCookies": {
                     "type": "boolean"
@@ -739,7 +739,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://svatah.dev/schema/surface.api-response.schema.json"
+                  "$ref": "https://yam.svatah.com/schema/surface.api-response.schema.json"
                 }
               }
             }
@@ -789,7 +789,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "https://svatah.dev/schema/surface.api-request.schema.json"
+                "$ref": "https://yam.svatah.com/schema/surface.api-request.schema.json"
               }
             }
           }
@@ -1025,8 +1025,8 @@
     },
     "/migrate": {
       "post": {
-        "summary": "Import a Svatah ADE prototype's electron-db directory into this project",
-        "description": "Reads the prototype's `project`, `config`, `flows` and `api` tables and writes `svatah.config.yaml`, `flows/`, seed `bindings/`, `data.yaml` and `api/*.yaml` into **this** project directory — the one the service was opened on, because every write the service makes is confined to it (REQ-ADE-9, LLD §13.5).\n\nResults and screenshots are not imported: a `runs/` directory reconstructed from another tool's database would look like something you could re-run and diff, and would be neither.",
+        "summary": "Import a Yam ADE prototype's electron-db directory into this project",
+        "description": "Reads the prototype's `project`, `config`, `flows` and `api` tables and writes `yam.config.yaml`, `flows/`, seed `bindings/`, `data.yaml` and `api/*.yaml` into **this** project directory — the one the service was opened on, because every write the service makes is confined to it (REQ-ADE-9, LLD §13.5).\n\nResults and screenshots are not imported: a `runs/` directory reconstructed from another tool's database would look like something you could re-run and diff, and would be neither.",
         "security": [
           {
             "bearerAuth": []
@@ -1289,7 +1289,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://svatah.dev/schema/surface.snapshot.schema.json"
+                  "$ref": "https://yam.svatah.com/schema/surface.snapshot.schema.json"
                 }
               }
             }
@@ -1556,7 +1556,7 @@
     "/tools": {
       "get": {
         "summary": "The tools this project exposes, and every invocation served",
-        "description": "Invocations are read from the run directories — `behavior: \"tool\"` summaries and their audit lines — so the panel shows what a `svatah tool serve` in another terminal served too (REQ-ADE-2).",
+        "description": "Invocations are read from the run directories — `behavior: \"tool\"` summaries and their audit lines — so the panel shows what a `yam tool serve` in another terminal served too (REQ-ADE-2).",
         "security": [
           {
             "bearerAuth": []
@@ -1589,7 +1589,7 @@
     "/events": {
       "get": {
         "summary": "The event stream (WebSocket)",
-        "description": "Every message is a JSON object with a `kind`. The kinds are: `step.result`, `run.summary`, `run.started`, `run.failed`, `record.started`, `record.step`, `record.decision`, `record.candidates`, `record.decision.expired`, `record.finished`, `record.failed`, `heal.proposal`, `heal.finished`, `heal.failed`, `tool.invocation`, `log`. Their shapes are `@svatah/service`'s `ServiceEvent` union (LLD §13.5).",
+        "description": "Every message is a JSON object with a `kind`. The kinds are: `step.result`, `run.summary`, `run.started`, `run.failed`, `record.started`, `record.step`, `record.decision`, `record.candidates`, `record.decision.expired`, `record.finished`, `record.failed`, `heal.proposal`, `heal.finished`, `heal.failed`, `tool.invocation`, `log`. Their shapes are `@svatah/yam-service`'s `ServiceEvent` union (LLD §13.5).",
         "security": [
           {
             "bearerAuth": []
@@ -1605,7 +1605,7 @@
     "/events/sse": {
       "get": {
         "summary": "The event stream (server-sent events)",
-        "description": "Every message is a JSON object with a `kind`. The kinds are: `step.result`, `run.summary`, `run.started`, `run.failed`, `record.started`, `record.step`, `record.decision`, `record.candidates`, `record.decision.expired`, `record.finished`, `record.failed`, `heal.proposal`, `heal.finished`, `heal.failed`, `tool.invocation`, `log`. Their shapes are `@svatah/service`'s `ServiceEvent` union (LLD §13.5).",
+        "description": "Every message is a JSON object with a `kind`. The kinds are: `step.result`, `run.summary`, `run.started`, `run.failed`, `record.started`, `record.step`, `record.decision`, `record.candidates`, `record.decision.expired`, `record.finished`, `record.failed`, `heal.proposal`, `heal.finished`, `heal.failed`, `tool.invocation`, `log`. Their shapes are `@svatah/yam-service`'s `ServiceEvent` union (LLD §13.5).",
         "security": [
           {
             "bearerAuth": []

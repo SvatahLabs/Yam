@@ -1,5 +1,5 @@
 {
-  "$id": "https://svatah.dev/schema/1.0.0/predicate.schema.json",
+  "$id": "https://yam.svatah.com/schema/1.0.0/predicate.schema.json",
   "$ref": "#/definitions/predicate",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
@@ -250,7 +250,7 @@
       ]
     }
   },
-  "description": "Expectation and guard predicates (LLD §3.2). Svatah schemaVersion 1.0.0.",
+  "description": "Expectation and guard predicates (LLD §3.2). Yam schemaVersion 1.0.0.",
   "title": "predicate",
-  "x-svatah-schema-version": "1.0.0"
+  "x-yam-schema-version": "1.0.0"
 }

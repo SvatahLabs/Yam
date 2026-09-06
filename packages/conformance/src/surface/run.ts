@@ -5,7 +5,7 @@
  * decided here and nowhere else: every case ran, every check held, and a case the
  * adapter's capabilities exclude was skipped rather than silently passed.
  */
-import type { AgentSurface } from "@svatah/surface";
+import type { AgentSurface } from "@svatah/yam-surface";
 import { SURFACE_CASES } from "./cases.js";
 import type {
   BridgeCost,
@@ -84,7 +84,7 @@ async function runCase(
   /*
    * A surface that will not open is a *failed case*, not a crash (T6.2).
    *
-   * It used to be thrown from here, outside the `try`, so `svatah surface
+   * It used to be thrown from here, outside the `try`, so `yam surface
    * conform` printed a stack trace and no report. That was survivable while
    * every adapter's session failure meant "the browser did not launch"; the
    * desktop adapters made it wrong. A missing macOS Accessibility permission is

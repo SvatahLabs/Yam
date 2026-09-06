@@ -5,7 +5,7 @@
 # ephemeral port so two runs can overlap — and is written here so the project
 # reads sensibly on its own.
 schemaVersion: "1.0.0"
-project: "svatah-fixtures"
+project: "yam-fixtures"
 environment: test
 adapter: playwright
 

@@ -36,7 +36,7 @@
  * answer. The failing step carries `failure.policyApplied`, which is what says
  * a compensation happened and is what `abortedByPolicy` reads.
  */
-import type { Signature, Step, StepResult, Story } from "@svatah/schema";
+import type { Signature, Step, StepResult, Story } from "@svatah/yam-schema";
 import type { Scope } from "./scope.js";
 import { messageOf } from "./failure.js";
 import { runStep, type StepContext } from "./step.js";

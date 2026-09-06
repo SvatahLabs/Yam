@@ -1,5 +1,5 @@
 loading…
-svatah ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-capture-2LBoaA   http://127.0.0.1:61768   Flows · 7 files · 22 stories · 30 bindin…
+yam ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-ui-capture-2LBoaA   http://127.0.0.1:61768   Flows · 7 files · 22 stories · 30 bindin…
 ┌────────────────────────────────┐┌──────────────────────────────────────────────────────────────────────────────┐┌────────────────────────────────────────────┐
 │ 1 Flows                        ││ 2 flows/guards-and-compensation.flow                                         ││ 3 Inspect                                  │
 │ booking-compensati… not run    ││   1   // Guards and compensation, end to end (T5.4, REQ-LANG-14, REQ-AUTO-1… ││ no step selected                           │
@@ -23,12 +23,12 @@ svatah ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-ca
                                   │  19     Click the Book a slot link                          tier 1 · bound   │
                                   │  20     Remember the text of the booking status as status   tier 1 · bound   │
                                   │  21     // True: the page is the booking page.                               │
-                                  │ lint: 3 — W_SECRET_UNSET user.password reads ${SVATAH_SAMPLE_PASSWORD}, whi… │
+                                  │ lint: 3 — W_SECRET_UNSET user.password reads ${YAM_SAMPLE_PASSWORD}, whi… │
                                   └──────────────────────────────────────────────────────────────────────────────┘
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ 4 Lint                                                                                                                                                       │
-│ 0     W_SECRET_UNSET         user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.               │
-│ 0     W_SECRET_UNSET         card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.              │
-│ 0     W_SECRET_UNSET         card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.                    │
+│ 0     W_SECRET_UNSET         user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.               │
+│ 0     W_SECRET_UNSET         card.number reads ${YAM_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.              │
+│ 0     W_SECRET_UNSET         card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.                    │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r record  q quit

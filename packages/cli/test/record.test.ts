@@ -6,7 +6,7 @@
  *
  * `packages/recorder`'s own tests replay a recorded page, because that is where
  * the grounding decisions live and `recorder` may not import an adapter (LLD §1).
- * These are the other half: a real Chromium, the real `svatah record`, and the
+ * These are the other half: a real Chromium, the real `yam record`, and the
  * store on disk afterwards.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -25,19 +25,19 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { EXIT } from "@svatah/bindings-cli";
-import type { BindingFile } from "@svatah/schema";
+import { EXIT } from "@svatah/yam-bindings-cli";
+import type { BindingFile } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 
 let app: SampleServer;
 const projects: string[] = [];
 
 /** A copy of the fixture project, so a recording can write to it. */
 function scaffold(overrides: { flows?: Record<string, string>; environment?: string } = {}): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-record-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-record-"));
   projects.push(dir);
   cpSync(join(FIXTURES, "bindings"), join(dir, "bindings"), { recursive: true });
   cpSync(join(FIXTURES, "flows"), join(dir, "flows"), { recursive: true });
@@ -53,7 +53,7 @@ function scaffold(overrides: { flows?: Record<string, string>; environment?: str
   }
 
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
+    join(dir, "yam.config.yaml"),
     `schemaVersion: "1.0.0"
 project: "record-test"
 environment: ${overrides.environment ?? "test"}
@@ -90,13 +90,13 @@ function cli(
 ): Promise<{ code: number; output: string }> {
   return new Promise((done) => {
     let output = "";
-    const child = spawn(process.execPath, [SVATAH, ...args], {
+    const child = spawn(process.execPath, [YAM, ...args], {
       cwd,
       env: {
         ...process.env,
-        SVATAH_SAMPLE_PASSWORD: "qwerty123",
-        SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-        SVATAH_SAMPLE_CARD_CVV: "123",
+        YAM_SAMPLE_PASSWORD: "qwerty123",
+        YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+        YAM_SAMPLE_CARD_CVV: "123",
         // The gateway must be chosen deliberately, never inherited from whoever
         // ran the suite.
         ANTHROPIC_API_KEY: "",
@@ -131,7 +131,7 @@ function report(project: string): {
 }
 
 beforeAll(async () => {
-  if (!existsSync(SVATAH)) throw new Error("Run `pnpm -r build` first.");
+  if (!existsSync(YAM)) throw new Error("Run `pnpm -r build` first.");
   app = await startSampleApp(0);
 }, 120_000);
 
@@ -140,7 +140,7 @@ afterAll(async () => {
   for (const dir of projects) rmSync(dir, { recursive: true, force: true });
 });
 
-describe("svatah record (REQ-REC-1, 5, 8, 9, LLD §11, §15)", () => {
+describe("yam record (REQ-REC-1, 5, 8, 9, LLD §11, §15)", () => {
   it("records simple.flow's login story and writes verified bindings", async () => {
     const project = scaffold();
     const result = await cli(

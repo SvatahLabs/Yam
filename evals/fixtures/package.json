@@ -1,5 +1,5 @@
 {
-  "name": "svatah-fixtures",
+  "name": "yam-fixtures",
   "version": "0.1.0",
   "private": true,
   "description": "The migrated sample flows, run against apps/sample-web as the compatibility milestone (T2.10, REQ-NFR-8)",
@@ -10,6 +10,6 @@
   },
   "devDependencies": {
     "@playwright/test": "catalog:",
-    "@svatah/host-playwright": "workspace:*"
+    "@svatah/yam-host-playwright": "workspace:*"
   }
 }

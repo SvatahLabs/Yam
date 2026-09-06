@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/runtime",
+  "name": "@svatah/yam-runtime",
   "version": "0.1.0",
   "description": "Runner-agnostic executor core: scope, guards, checkpoints, policies, results, audit",
   "license": "Apache-2.0",
@@ -26,9 +26,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/bindings": "workspace:*",
-    "@svatah/surface": "workspace:*",
-    "@svatah/schema": "workspace:*"
+    "@svatah/yam-bindings": "workspace:*",
+    "@svatah/yam-surface": "workspace:*",
+    "@svatah/yam-schema": "workspace:*"
   },
   "devDependencies": {
     "tsup": "catalog:",

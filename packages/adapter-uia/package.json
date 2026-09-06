@@ -1,7 +1,7 @@
 {
-  "name": "@svatah/adapter-uia",
+  "name": "@svatah/yam-adapter-uia",
   "version": "0.1.0",
-  "description": "Windows UI Automation adapter: the Svatah agent surface over UIAutomationClient",
+  "description": "Windows UI Automation adapter: the Yam agent surface over UIAutomationClient",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,12 +26,12 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@svatah/surface": "workspace:*",
-    "@svatah/schema": "workspace:*"
+    "@svatah/yam-surface": "workspace:*",
+    "@svatah/yam-schema": "workspace:*"
   },
   "devDependencies": {
-    "@svatah/adapter-ax": "workspace:*",
-    "@svatah/conformance": "workspace:*",
+    "@svatah/yam-adapter-ax": "workspace:*",
+    "@svatah/yam-conformance": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
@@ -40,7 +40,7 @@
     "access": "public"
   },
   "keywords": [
-    "svatah",
+    "yam",
     "ui-automation",
     "windows",
     "automation",

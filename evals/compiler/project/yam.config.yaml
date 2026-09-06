@@ -1,6 +1,6 @@
 # The golden set's own project (LLD §16, Draft 2.6).
 #
-# `svatah eval compiler` reads `compile.tier2` and `compile.tier3` from here
+# `yam eval compiler` reads `compile.tier2` and `compile.tier3` from here
 # rather than from the repository root, which has no config at all. Without this
 # file a clean checkout scored tier 2 at 0/41 and printed "Below REQ-COMP-9's
 # thresholds": the published 90.2 percent had been produced with a config that
@@ -11,7 +11,7 @@
 # `data.yaml` / `targets.yaml` / `steps/` beside this file. Everything else is
 # the schema's defaults, written out so the file validates on its own.
 schemaVersion: "1.0.0"
-project: "svatah-compiler-golden"
+project: "yam-compiler-golden"
 environment: test
 adapter: playwright
 
@@ -46,7 +46,7 @@ compile:
   # what the report records.
   #
   # Reproducing the number: `ollama pull qwen2.5:3b && ollama serve`, then
-  # `svatah eval compiler --tier2` from the repository root (docs/local-model.md).
+  # `yam eval compiler --tier2` from the repository root (docs/local-model.md).
   tier2:
     provider: ollama
     endpoint: "http://127.0.0.1:11434"

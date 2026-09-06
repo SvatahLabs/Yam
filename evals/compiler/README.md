@@ -39,11 +39,11 @@ look like* rather than one a model produced.
 does: `data.yaml`'s `secrets:` list, which is why `{data.card.number}` compiles
 to a secret value; `targets.yaml`, which is why "the frame button" carries
 `scope: frame`; `steps/`, the Tier 0 custom steps the `tier: 0` entries compile
-against; and `svatah.config.yaml`, whose `compile.tier2` names the local model
+against; and `yam.config.yaml`, whose `compile.tier2` names the local model
 and pins its digest. An eval that compiled against an empty project would score
 the compiler as wrong for being right.
 
-`svatah eval compiler` reads `compile.tier2` and `compile.tier3` from **this**
+`yam eval compiler` reads `compile.tier2` and `compile.tier3` from **this**
 config, not from the directory it was invoked in (LLD §16, Draft 2.6); `--project
 <dir>` overrides it. That is what makes the published Tier 2 number reproducible
 from a checkout: before Draft 2.6 the eval read the repository root, which has no
@@ -60,13 +60,13 @@ one that was never attempted.
 
 REQ-COMP-9 requires 100 % exact match on the tier-1 subset and at least 95 % end
 to end; REQ-COMP-3 requires at least 80 % on the tier-2 subset. All three are
-enforced by `svatah eval compiler`'s exit code.
+enforced by `yam eval compiler`'s exit code.
 
 ```bash
-svatah eval compiler --report reports/eval-compiler.md      # every tier
-svatah eval compiler --tier2                                # the published number
-svatah eval compiler --only tier1                           # no model needed
-svatah eval compiler --only tier2 --gateway fake            # the harness alone
+yam eval compiler --report reports/eval-compiler.md      # every tier
+yam eval compiler --tier2                                # the published number
+yam eval compiler --only tier1                           # no model needed
+yam eval compiler --only tier2 --gateway fake            # the harness alone
 ```
 
 Reproducing the published Tier 2 rate needs only `ollama serve` with
@@ -103,7 +103,7 @@ useful thing to have.
 
 Phase 0 seeded the first 148 tier-1 entries (T0.6). T2.4 measured against them.
 T4.3 added the 41-entry `tier: 2` subset and the local model that answers it;
-T4.4 built `svatah eval compiler` and published the report.
+T4.4 built `yam eval compiler` and published the report.
 
 P4-F4 added the 30 assertion-alias entries and moved three from tier 2 to tier 1.
 `Make sure the dashboard heading is visible`, `Verify that the sign in button is
@@ -139,8 +139,8 @@ answer the questions it is never asked (T7.5, and Phase 7 verification F7).
 Draft 2.9 withdraws the fine-tune from 0.1.0 and makes this corpus the
 precondition for another attempt.
 
-`svatah eval finetune corpus` reports the three sources it draws on and what
-each contributes; `svatah eval finetune export` writes the pairs from this file
+`yam eval finetune corpus` reports the three sources it draws on and what
+each contributes; `yam eval finetune export` writes the pairs from this file
 and nothing else. The golden set is the test set and is never exported.
 
 ### What is not in it

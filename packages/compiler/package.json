@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/compiler",
+  "name": "@svatah/yam-compiler",
   "version": "0.1.0",
   "description": "Compiler tiers, validation, lint and plan writer",
   "license": "Apache-2.0",
@@ -27,9 +27,9 @@
     "generate": "node scripts/build-grammar.mjs"
   },
   "dependencies": {
-    "@svatah/schema": "workspace:*",
-    "@svatah/spec": "workspace:*",
-    "@svatah/steps": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
+    "@svatah/yam-spec": "workspace:*",
+    "@svatah/yam-steps": "workspace:*",
     "yaml": "catalog:",
     "zod": "catalog:"
   },

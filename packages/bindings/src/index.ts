@@ -1,9 +1,9 @@
 /**
- * @svatah/bindings — module (a)'s core (REQ-PKG-1).
+ * @svatah/yam-bindings — module (a)'s core (REQ-PKG-1).
  *
  * The bindings store, the context hash, the resolver, candidate synthesis,
- * fingerprinting and model-free relocalization. It depends on `@svatah/surface`
- * and `@svatah/schema` and on nothing else: not on the flow language, not on the
+ * fingerprinting and model-free relocalization. It depends on `@svatah/yam-surface`
+ * and `@svatah/yam-schema` and on nothing else: not on the flow language, not on the
  * compiler, and not on the model gateway. The import-boundary lint and the
  * dependency-graph test in `tools/repo-checks` hold that (LLD §1).
  */

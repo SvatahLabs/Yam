@@ -1,7 +1,7 @@
 /**
  * Types for `scripts/migrate-legacy.mjs`, so the drift test can import it.
  */
-import type { MigrateResult } from "@svatah/migrate";
+import type { MigrateResult } from "@svatah/yam-migrate";
 
 /** `legacy/src/test/resources`, relative to the repository root. */
 export declare const SOURCE: string;

@@ -138,7 +138,7 @@ if (asJson) {
   );
 } else {
   process.stdout.write(
-    `svatah ${released} — ${commands.length} package(s) under @svatah, in dependency order.\n\n`,
+    `yam ${released} — ${commands.length} package(s) under @svatah, in dependency order.\n\n`,
   );
   for (const one of commands) process.stdout.write(`  ${one.command}\n`);
   process.stdout.write(

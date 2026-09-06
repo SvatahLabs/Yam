@@ -13,7 +13,7 @@
  * real application by `scripts/desktop-grounding-cases.mjs`. A binding seeded
  * from one of those is the id, the phrase, and nothing invented: no box nobody
  * measured, no neighbours nobody read, and `verified: false` until
- * `svatah bindings verify` says otherwise against a running ADE.
+ * `yam bindings verify` says otherwise against a running ADE.
  *
  * Written by a script rather than by hand because there are eighty of them and
  * because a hand-copied id is a typo waiting to be a flake.
@@ -102,7 +102,7 @@ const template = (control) => `# Seeded from an \`automationId\`, with no model 
 #
 # The fingerprint carries the role and the id and nothing invented: no box
 # nobody measured, no neighbours nobody read. \`verified: false\` says the same
-# thing in one word, and \`svatah bindings verify\` is what turns it true against
+# thing in one word, and \`yam bindings verify\` is what turns it true against
 # a running ADE.
 schemaVersion: "1.0.0"
 id: "ade.${control.element}"
@@ -115,7 +115,7 @@ entries:
         score: 0.99
     context:
       platform: "desktop"
-      pattern: ${JSON.stringify(control.window ?? "Svatah ADE")}
+      pattern: ${JSON.stringify(control.window ?? "Yam ADE")}
       hash: ${JSON.stringify(createHash("sha256").update(`seed:${control.element}`).digest("hex"))}
     fingerprint:
       tag: ${JSON.stringify(NATIVE_ROLE[control.role] ?? "AXUnknown")}

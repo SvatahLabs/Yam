@@ -5,16 +5,16 @@
  *    recovered; no false accept on the duplicate-buttons variant."
  *
  * The number this produces is the one REQ-HEAL-5 asks to be published, and T1.8
- * publishes it through `svatah eval healing --no-model` over the same harness.
- * The method is in `@svatah/healer`'s `eval.ts` and is repeated in the report:
+ * publishes it through `yam eval healing --no-model` over the same harness.
+ * The method is in `@svatah/yam-healer`'s `eval.ts` and is repeated in the report:
  * it matters, because a healing percentage without one is not a number.
  *
  * Refs: REQ-HEAL-1 (relocalize), REQ-HEAL-5 (relocalize), LLD §6.4.
  */
 import { GROUND_TRUTH_ATTRIBUTE, VARIANTS } from "sample-web";
-import { relocalize, synthesise, fingerprintOf } from "@svatah/bindings";
-import { RELOCALIZE_THRESHOLD, runHealingEval, type HealingEvalReport } from "@svatah/healer";
-import { PlaywrightSurface } from "@svatah/adapter-playwright";
+import { relocalize, synthesise, fingerprintOf } from "@svatah/yam-bindings";
+import { RELOCALIZE_THRESHOLD, runHealingEval, type HealingEvalReport } from "@svatah/yam-healer";
+import { PlaywrightSurface } from "@svatah/yam-adapter-playwright";
 import { expect, PAGES, test } from "./fixtures.js";
 
 /** Render the per-variant table the report and the console both show. */

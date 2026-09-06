@@ -1,7 +1,7 @@
 /**
  * The BiDi adapter against a real browser (T4.1, REQ-ADP-4, LLD §7.3).
  *
- * `svatah surface conform --adapter bidi` is the suite that decides whether the
+ * `yam surface conform --adapter bidi` is the suite that decides whether the
  * adapter is conformant, and `scripts/bidi-independence.mjs` runs it. These are
  * the things that suite does *not* ask, because they are BiDi's rather than the
  * surface's: that the actionability wait actually waits, that a reference
@@ -14,7 +14,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { LocateError } from "@svatah/surface";
+import { LocateError } from "@svatah/yam-surface";
 import { bidiAvailable } from "../src/launch.js";
 import { BidiSurface } from "../src/surface.js";
 
@@ -23,7 +23,7 @@ import { BidiSurface } from "../src/surface.js";
  *
  * A suite that passed because nothing ran would be worse than one that says it
  * did not run: `pnpm browsers` downloads the Gecko build these need, and
- * `SVATAH_BIDI_URL` points them at anything else that speaks the protocol.
+ * `YAM_BIDI_URL` points them at anything else that speaks the protocol.
  */
 const available = bidiAvailable();
 const describeWithBrowser = available ? describe : describe.skip;
@@ -31,7 +31,7 @@ const describeWithBrowser = available ? describe : describe.skip;
 if (!available) {
   console.warn(
     "adapter-bidi: no WebDriver BiDi endpoint and no Gecko browser, so the browser-backed " +
-      "tests are skipped. `pnpm browsers` downloads one, or set SVATAH_BIDI_URL.",
+      "tests are skipped. `pnpm browsers` downloads one, or set YAM_BIDI_URL.",
   );
 }
 
@@ -214,7 +214,7 @@ describeWithBrowser("describe feeds synthesis and fingerprinting (LLD §3.3)", (
     const surface = new BidiSurface({
       headless: true,
       timeoutMs: 10_000,
-      ignoreAttributes: ["data-svatah-eval", "id"],
+      ignoreAttributes: ["data-yam-eval", "id"],
     });
     opened.push(surface);
     await surface.open({ baseUrl: app.origin });
@@ -223,8 +223,8 @@ describeWithBrowser("describe feeds synthesis and fingerprinting (LLD §3.3)", (
     const [field] = await surface.locate({ by: "css", value: "input[name=username]", score: 1 });
     const described = await surface.describe(field!);
     expect(described.attrs["id"]).toBeUndefined();
-    expect(described.attrs["data-svatah-eval"]).toBeUndefined();
-    expect(JSON.stringify(described.native)).not.toContain("data-svatah-eval");
+    expect(described.attrs["data-yam-eval"]).toBeUndefined();
+    expect(JSON.stringify(described.native)).not.toContain("data-yam-eval");
   }, 120_000);
 });
 

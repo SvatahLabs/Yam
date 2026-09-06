@@ -1,7 +1,7 @@
 /**
- * The Svatah reporter (REQ-RUN-12, LLD §9.1).
+ * The Yam reporter (REQ-RUN-12, LLD §9.1).
  *
- * "Results are additionally written in the Svatah schema by a reporter."
+ * "Results are additionally written in the Yam schema by a reporter."
  *
  * *Additionally* is the word that matters. Playwright's own reporters keep doing
  * everything they do — the HTML report, the trace viewer, the terminal list —
@@ -11,13 +11,13 @@
  *
  * ```ts
  * // playwright.config.ts
- * reporter: [["list"], ["@svatah/host-playwright/reporter", { outputDir: "runs" }]]
+ * reporter: [["list"], ["@svatah/yam-host-playwright/reporter", { outputDir: "runs" }]]
  * ```
  *
  * ## Results come from the test, not from the reporter
  *
  * A reporter sees a test pass or fail; it does not see steps. So the fixture
- * attaches the Svatah results to the test (`testInfo.attach`) and the reporter
+ * attaches the Yam results to the test (`testInfo.attach`) and the reporter
  * collects them. That keeps one source of truth — the executor's own results —
  * rather than a second, thinner account reconstructed from Playwright's view.
  */
@@ -36,27 +36,27 @@ import {
   SCHEMA_VERSION,
   type StepResult,
   type Summary,
-} from "@svatah/schema";
-import { abortedByPolicy, newRunId, summarise } from "@svatah/runtime";
+} from "@svatah/yam-schema";
+import { abortedByPolicy, newRunId, summarise } from "@svatah/yam-runtime";
 
 /** The attachment name the fixture uses and the reporter reads. */
-export const RESULTS_ATTACHMENT = "svatah-results";
+export const RESULTS_ATTACHMENT = "yam-results";
 
-export interface SvatahReporterOptions {
+export interface YamReporterOptions {
   /** Where run directories go. Default `runs`. */
   readonly outputDir?: string;
   /** Fix the run id, for a test that compares two runs byte for byte. */
   readonly runId?: string;
 }
 
-export default class SvatahReporter implements Reporter {
+export default class YamReporter implements Reporter {
   private readonly outputDir: string;
   private readonly runId: string;
   private readonly results: StepResult[] = [];
   private startedAt = new Date();
   private planHash = "unknown";
 
-  constructor(options: SvatahReporterOptions = {}) {
+  constructor(options: YamReporterOptions = {}) {
     this.outputDir = options.outputDir ?? "runs";
     this.runId = options.runId ?? newRunId();
   }
@@ -126,7 +126,7 @@ export default class SvatahReporter implements Reporter {
       flows,
       totals,
       // Playwright's own status wins when it is worse: a test that failed to
-      // *start* produces no Svatah results at all, and a summary saying
+      // *start* produces no Yam results at all, and a summary saying
       // everything passed would be worse than no summary.
       exitCode: result.status === "passed" ? exitCode : Math.max(exitCode, 1),
     };

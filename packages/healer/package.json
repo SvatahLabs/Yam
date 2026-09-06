@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/healer",
+  "name": "@svatah/yam-healer",
   "version": "0.1.0",
   "description": "Failure selection, model-free repair, verification and diff",
   "license": "Apache-2.0",
@@ -26,9 +26,9 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@svatah/bindings": "workspace:*",
-    "@svatah/schema": "workspace:*",
-    "@svatah/surface": "workspace:*"
+    "@svatah/yam-bindings": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
+    "@svatah/yam-surface": "workspace:*"
   },
   "devDependencies": {
     "tsup": "catalog:",

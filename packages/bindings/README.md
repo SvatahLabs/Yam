@@ -1,9 +1,9 @@
-# @svatah/bindings
+# @svatah/yam-bindings
 
 Module (a)'s core (REQ-PKG-1): the bindings store, the context hash, the resolver,
 candidate synthesis, fingerprinting, and model-free relocalization.
 
-It depends on `@svatah/surface` and `@svatah/schema` and on nothing else — not on
+It depends on `@svatah/yam-surface` and `@svatah/yam-schema` and on nothing else — not on
 the flow language, not on the compiler, not on the model gateway. That is the
 whole point of the module: a Playwright user adopts it without adopting anything
 else. The import-boundary lint and the dependency-graph test in

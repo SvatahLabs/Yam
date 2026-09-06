@@ -6,7 +6,7 @@
  * Three of the four parts of a legacy line carry across mechanically:
  *
  * * the **action** — `+clicks+` is `click`, through the ported vocabulary
- *   (`@svatah/spec`'s `VOCABULARY`, which is `ActionSynonyms.java` verb for
+ *   (`@svatah/yam-spec`'s `VOCABULARY`, which is `ActionSynonyms.java` verb for
  *   verb), so no mapping is invented here;
  * * the **data** — `*qwerty123*` becomes `"qwerty123"`, and `*#var#*` becomes
  *   `{var}`;
@@ -22,7 +22,7 @@
  * This is why migration output is *reviewed*, not trusted: REQ-LANG-11 asks for
  * a converter, and the report is what tells the reviewer where to look.
  */
-import { VERBS, elementId, type Verb } from "@svatah/spec";
+import { VERBS, elementId, type Verb } from "@svatah/yam-spec";
 import type { LegacyLocator, LegacyStep } from "./v2.js";
 
 export interface RewriteResult {

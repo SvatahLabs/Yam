@@ -1,20 +1,20 @@
 # Bindings in a plain Playwright project — the ten-minute quick start
 
-This is the whole of what adopting Svatah's bindings module looks like
+This is the whole of what adopting Yam's bindings module looks like
 (REQ-PKG-2): **one dependency and one import**. No flow files, no compiler, no
 model — at run time or at record time.
 
 ## 1. Add the dependency
 
 ```bash
-npm install --save-dev @svatah/playwright-test
+npm install --save-dev @svatah/yam-playwright-test
 ```
 
 ## 2. Import `test` from it
 
 ```ts
 // tests/login.spec.ts
-import { test, expect } from "@svatah/playwright-test";
+import { test, expect } from "@svatah/yam-playwright-test";
 
 test("sign in", async ({ page, bind }) => {
   await page.goto("/login");
@@ -34,7 +34,7 @@ with a locator still works. A project that has its own fixtures extends this
 ## 3. Record the bindings, once
 
 ```bash
-SVATAH_MODE=record SVATAH_HEADED=1 npx playwright test
+YAM_MODE=record YAM_HEADED=1 npx playwright test
 ```
 
 A browser opens and, for each unbound id, asks you to click the element. What you
@@ -52,36 +52,36 @@ model was involved.
 npx playwright test
 ```
 
-`SVATAH_MODE=run` is the default. The resolver reads the store and tries the
+`YAM_MODE=run` is the default. The resolver reads the store and tries the
 candidates in order until one identifies exactly one element. There is no model
 call and no network beyond your own application.
 
 When a binding stops resolving, the failure names every candidate it tried, what
 each one matched, and whether the page's shape has drifted from the one the
-binding was recorded on — and a line goes to `.svatah/bind-failures.jsonl` for the
+binding was recorded on — and a line goes to `.yam/bind-failures.jsonl` for the
 healer.
 
 ## 5. Heal
 
 ```bash
-SVATAH_MODE=heal npx playwright test
+YAM_MODE=heal npx playwright test
 ```
 
 On a failure, relocalization scores every element now on the page against the
 recorded fingerprint. If one is clearly the element — above the threshold *and*
 clear of the runner-up — the test continues against it and is annotated
-`healed`. The repair is written to `.svatah/heal-proposals.jsonl` and **not**
+`healed`. The repair is written to `.yam/heal-proposals.jsonl` and **not**
 applied to the store: a run that only passed because bindings were healed is
 `healed`, never `passed` (REQ-HEAL-4), and a repair goes into your repository
 through a diff someone reads.
 
-## Recording without a person: `SVATAH_PICK`
+## Recording without a person: `YAM_PICK`
 
 Record mode needs somebody to click. In CI there is nobody, so
-`SVATAH_PICK` names the element for each id:
+`YAM_PICK` names the element for each id:
 
 ```bash
-SVATAH_MODE=record SVATAH_PICK='{"login.username-field":"username"}' npx playwright test
+YAM_MODE=record YAM_PICK='{"login.username-field":"username"}' npx playwright test
 ```
 
 A bare word is read as a test id; anything else is a CSS selector. **This is a
@@ -94,11 +94,11 @@ again, which is the thing bindings are for not doing.
 
 | Environment | Fixture option | Default | What it is |
 |---|---|---|---|
-| `SVATAH_MODE` | `svatahMode` | `run` | `run`, `record` or `heal` |
-| `SVATAH_BINDINGS` | `bindingsDir` | `bindings` | Where the store lives |
-| `SVATAH_OUT` | `svatahOutputDir` | `.svatah` | Bind failures and heal proposals |
-| `SVATAH_PICK` | `svatahPicks` | — | Element id → selector, for headless record |
-| — | `svatahTestIdAttributes` | `data-testid`, `data-test-id`, `data-test` | Attributes treated as test ids |
+| `YAM_MODE` | `yamMode` | `run` | `run`, `record` or `heal` |
+| `YAM_BINDINGS` | `bindingsDir` | `bindings` | Where the store lives |
+| `YAM_OUT` | `yamOutputDir` | `.yam` | Bind failures and heal proposals |
+| `YAM_PICK` | `yamPicks` | — | Element id → selector, for headless record |
+| — | `yamTestIdAttributes` | `data-testid`, `data-test-id`, `data-test` | Attributes treated as test ids |
 
 ## Running this example
 

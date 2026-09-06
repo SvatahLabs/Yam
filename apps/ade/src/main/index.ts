@@ -20,7 +20,7 @@
  *
  * ## Accessibility (REQ-ADE-6, ADR-17)
  *
- * `app.setAccessibilitySupportEnabled(true)` under `SVATAH_A11Y=1` or in
+ * `app.setAccessibilitySupportEnabled(true)` under `YAM_A11Y=1` or in
  * development. The ADE is the conformance target for the UIA and AX adapters
  * (REQ-ADP-6, 7), and an Electron app that has not been told to expose its
  * accessibility tree exposes almost nothing to either.
@@ -43,7 +43,7 @@ import {
   resolveNodeRuntime,
   runtimeNotFoundMessage,
   type NodeRuntime,
-} from "@svatah/service/runtime";
+} from "@svatah/yam-service/runtime";
 
 /** Injected by Electron Forge's Vite plugin. */
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
@@ -58,34 +58,34 @@ let runtime_: NodeRuntime | undefined;
  * The window-lifecycle log (Draft 2.13 §13.6, P10-F1).
  *
  * Off until `whenReady` has a user-data directory to put it in, and off
- * entirely without `SVATAH_ADE_DEBUG=1`.
+ * entirely without `YAM_ADE_DEBUG=1`.
  */
 let debug: DebugLog = Object.assign((): void => undefined, { enabled: false as const });
 
 /**
- * Where `svatah` is.
+ * Where `yam` is.
  *
  * In development it is the workspace's built CLI. In a packaged build it is
- * bundled beside the app. `SVATAH_CLI` overrides both, which is what the tests
+ * bundled beside the app. `YAM_CLI` overrides both, which is what the tests
  * and a developer with a checkout elsewhere use.
  */
 function cliPath(): string {
-  const configured = process.env["SVATAH_CLI"];
+  const configured = process.env["YAM_CLI"];
   if (configured !== undefined && configured !== "") return configured;
 
   const candidates = app.isPackaged
     ? [
         // Where `scripts/stage-ade-cli.mjs` puts the deployed CLI, which Forge
-        // copies into `Resources/svatah` as an `extraResource` (T8.1).
-        join(process.resourcesPath, "svatah", "dist", "bin.js"),
-        join(process.resourcesPath, "svatah", "bin.js"),
+        // copies into `Resources/yam` as an `extraResource` (T8.1).
+        join(process.resourcesPath, "yam", "dist", "bin.js"),
+        join(process.resourcesPath, "yam", "bin.js"),
       ]
     : [resolve(app.getAppPath(), "..", "..", "packages", "cli", "dist", "bin.js")];
 
   for (const candidate of candidates) if (existsSync(candidate)) return candidate;
   throw new Error(
-    `Could not find the svatah CLI. Looked in:\n  ${candidates.join("\n  ")}\n` +
-      "Set SVATAH_CLI to its `bin.js`, or run `pnpm -r build` in the workspace.",
+    `Could not find the yam CLI. Looked in:\n  ${candidates.join("\n  ")}\n` +
+      "Set YAM_CLI to its `bin.js`, or run `pnpm -r build` in the workspace.",
   );
 }
 
@@ -107,7 +107,7 @@ function nodeRuntime(cli: string): NodeRuntime {
 /**
  * The `openProject` that has not finished yet (P10-F1).
  *
- * A quit while a project is opening used to leave the `svatah serve` behind:
+ * A quit while a project is opening used to leave the `yam serve` behind:
  * `before-quit` looked at `service`, which is only assigned once the handshake
  * has come back, saw `undefined`, and let the application go. The desktop gate
  * quits the ADE as soon as its window is up — about a second after ready, and
@@ -170,13 +170,13 @@ function createWindow(): void {
     width: preferences.window.width,
     height: preferences.window.height,
     packaged: app.isPackaged,
-    a11y: process.env["SVATAH_A11Y"] ?? "",
-    variant: process.env["SVATAH_A11Y_VARIANT"] ?? "0",
+    a11y: process.env["YAM_A11Y"] ?? "",
+    variant: process.env["YAM_A11Y_VARIANT"] ?? "0",
   });
   window_ = new BrowserWindow({
     width: preferences.window.width,
     height: preferences.window.height,
-    title: "Svatah ADE",
+    title: "Yam ADE",
     backgroundColor: "#101418",
     webPreferences: {
       // Beside the main bundle. A sandboxed preload has no ES module loader,
@@ -253,7 +253,7 @@ function createWindow(): void {
   window_.on("unresponsive", () => say("window.unresponsive"));
 
   /*
-   * `SVATAH_A11Y_VARIANT=1|2` (Draft 2.8 LLD §16, T7.1).
+   * `YAM_A11Y_VARIANT=1|2` (Draft 2.8 LLD §16, T7.1).
    *
    * The desktop healing cases need the same window with one thing changed —
    * variant 1 renames a tab and a button, variant 2 moves the Record screen's
@@ -265,7 +265,7 @@ function createWindow(): void {
    * four; widening the ADE's narrowest surface for a test fixture would be the
    * wrong trade.
    */
-  const variant = process.env["SVATAH_A11Y_VARIANT"];
+  const variant = process.env["YAM_A11Y_VARIANT"];
   const query = variant === "1" || variant === "2" ? { a11yVariant: variant } : undefined;
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL !== undefined) {
@@ -293,7 +293,7 @@ ipcMain.handle("ade:serviceInfo", () => service?.connection ?? null);
 ipcMain.handle("ade:pickFile", async (_event, kind: unknown) => {
   const directory = kind === "directory";
   const result = await dialog.showOpenDialog(window_!, {
-    title: directory ? "Open a Svatah project" : "Choose a file",
+    title: directory ? "Open a Yam project" : "Choose a file",
     properties: [directory ? "openDirectory" : "openFile"],
   });
   return result.canceled ? null : (result.filePaths[0] ?? null);
@@ -308,7 +308,7 @@ ipcMain.handle("ade:preferences", (_event, next: unknown) => {
 });
 
 /**
- * The smoke check (`SVATAH_ADE_SMOKE=<project>`).
+ * The smoke check (`YAM_ADE_SMOKE=<project>`).
  *
  * Open the window, open the project, ask the service what is in it, print one
  * line, and quit. It is the T3.6 Validate item — "the app opens a fixture project
@@ -332,9 +332,9 @@ async function smoke(project: string): Promise<void> {
 
   const summary = (await response.json()) as { root: string; flows: string[]; stories: unknown[] };
   process.stdout.write(
-    `svatah-ade smoke ok project=${summary.root} flows=${summary.flows.length} ` +
+    `yam-ade smoke ok project=${summary.root} flows=${summary.flows.length} ` +
       `stories=${summary.stories.length} window=${window_ === undefined ? "none" : "open"} ` +
-      // §13.6: "`svatah surface doctor` and the ADE's own smoke check report
+      // §13.6: "`yam surface doctor` and the ADE's own smoke check report
       // which runtime was chosen." Without it the check passes identically
       // whether the ADE ran the CLI with a Node or with itself, which is the
       // one thing P7-F1 was about.
@@ -363,24 +363,24 @@ void app.whenReady().then(() => {
 
   // REQ-ADE-6: the ADE is the desktop conformance target, and an Electron app
   // has to be told to publish its accessibility tree before UIA or AX can see it.
-  if (process.env["SVATAH_A11Y"] === "1" || !app.isPackaged) {
+  if (process.env["YAM_A11Y"] === "1" || !app.isPackaged) {
     app.setAccessibilitySupportEnabled(true);
     debug("app.accessibility-enabled");
   }
 
   createWindow();
 
-  const project = process.env["SVATAH_ADE_SMOKE"];
+  const project = process.env["YAM_ADE_SMOKE"];
   if (project !== undefined && project !== "") {
     void smoke(project).catch((error: unknown) => {
-      process.stderr.write(`svatah-ade smoke failed: ${String(error)}\n`);
+      process.stderr.write(`yam-ade smoke failed: ${String(error)}\n`);
       app.exit(1);
     });
     return;
   }
 
   /*
-   * `SVATAH_ADE_PROJECT=<dir>` opens a project on ready (Draft 2.9 §13.6, T8.1).
+   * `YAM_ADE_PROJECT=<dir>` opens a project on ready (Draft 2.9 §13.6, T8.1).
    *
    * "The desktop conformance gate passes the fixtures project this way, so its
    * cases read a project screen rather than the welcome screen." Phase 7's gate
@@ -392,7 +392,7 @@ void app.whenReady().then(() => {
    * window is created before this resolves and the renderer's own
    * `serviceInfo()` would otherwise race it.
    */
-  const startup = process.env["SVATAH_ADE_PROJECT"];
+  const startup = process.env["YAM_ADE_PROJECT"];
   if (startup !== undefined && startup !== "") {
     /*
      * Held until the renderer has loaded. A `send` to a page that is still
@@ -490,7 +490,7 @@ app.on("will-quit", () => debug("app.will-quit"));
  *
  * Node's default `SIGTERM` handling ends the process where it stands, so
  * `before-quit` never ran, the preferences were never written, and the
- * `svatah serve` the ADE had spawned was left with no parent to stop it — a
+ * `yam serve` the ADE had spawned was left with no parent to stop it — a
  * `pkill` of the ADE left a service holding a project's `runs/` directory. The
  * signal runs the same route the menu's Quit does; a caller that means "die
  * now" still has `SIGKILL`, which nothing can catch and nothing should.

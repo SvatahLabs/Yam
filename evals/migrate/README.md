@@ -1,6 +1,6 @@
 # `evals/migrate`
 
-The committed output of `svatah migrate evals/migrate/source <dest>`.
+The committed output of `yam migrate evals/migrate/source <dest>`.
 
 ## Why this exists rather than a comparison with `evals/fixtures/flows`
 
@@ -30,8 +30,8 @@ node scripts/migrate-legacy.mjs
 
 ## `ade-db/` — the prototype database fixture (T6.6, REQ-ADE-9)
 
-The Svatah ADE prototype kept a project's flows, locators and data in an
-electron-db directory rather than on disk, and `svatah migrate <dest> --from-ade
+The Yam ADE prototype kept a project's flows, locators and data in an
+electron-db directory rather than on disk, and `yam migrate <dest> --from-ade
 <src>` reads one. REQ-ADE-9's Validate needs a database to read.
 
 **This one is synthesised, and no prototype database was available on the

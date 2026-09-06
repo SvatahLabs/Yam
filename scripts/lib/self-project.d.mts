@@ -5,7 +5,7 @@
  * build step; the types are here so a TypeScript test can use it without `any`.
  */
 
-/** The parts of a Svatah project, and whether a copy may do without one. */
+/** The parts of a Yam project, and whether a copy may do without one. */
 export declare const SELF_PROJECT_PARTS: {
   readonly required: readonly string[];
   readonly optional: readonly string[];

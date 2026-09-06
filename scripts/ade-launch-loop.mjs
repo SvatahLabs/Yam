@@ -13,7 +13,7 @@
  * ## Three questions, three sources, deliberately
  *
  * 1. **Did Electron make a window?** The ADE's own window-lifecycle log
- *    (`SVATAH_ADE_DEBUG=1` → `<userData>/ade-debug.log`, Draft 2.13). This is
+ *    (`YAM_ADE_DEBUG=1` → `<userData>/ade-debug.log`, Draft 2.13). This is
  *    the source Phase 10 did not have: every probe it used was outside the
  *    application, and none of them can tell "Electron never made a window" from
  *    "Electron made one and this host will not show it".
@@ -23,7 +23,7 @@
  * 3. **Can an accessibility client read it?** The same `AXRole === 'AXWindow'`
  *    test the desktop gate polls with. On a locked screen this is `no` for
  *    every application on the machine, Apple's own included, and
- *    `svatah surface doctor --adapter ax` says so — which is the whole of F1.
+ *    `yam surface doctor --adapter ax` says so — which is the whole of F1.
  *
  * Keeping the three apart is the point. A run where 1 and 2 are yes and 3 is no
  * is a locked display; a run where 1 is no is the ADE.
@@ -44,25 +44,25 @@ const option = (name, fallback) => {
 const times = Number(option("times", "10"));
 const project = resolve(option("project", join(ROOT, "evals", "fixtures")));
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
-const PROCESS_NAME = "Svatah ADE";
-const BUNDLE_ID = process.env["SVATAH_ADE_BUNDLE_ID"] ?? "com.electron.svatah-ade";
+const PROCESS_NAME = "Yam ADE";
+const BUNDLE_ID = process.env["YAM_ADE_BUNDLE_ID"] ?? "com.electron.yam-ade";
 
-const bundle = join(ROOT, "apps", "ade", "out", "Svatah ADE-darwin-arm64", "Svatah ADE.app");
+const bundle = join(ROOT, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
 const app =
   process.platform === "darwin"
-    ? join(bundle, "Contents", "MacOS", "Svatah ADE")
-    : join(ROOT, "apps", "ade", "out", "Svatah ADE-win32-x64", "Svatah ADE.exe");
+    ? join(bundle, "Contents", "MacOS", "Yam ADE")
+    : join(ROOT, "apps", "ade", "out", "Yam ADE-win32-x64", "Yam ADE.exe");
 
 /** Where Electron puts the ADE's user data, and so its debug log. */
 const userData =
   process.platform === "darwin"
-    ? join(homedir(), "Library", "Application Support", "Svatah ADE")
-    : join(process.env["APPDATA"] ?? homedir(), "Svatah ADE");
+    ? join(homedir(), "Library", "Application Support", "Yam ADE")
+    : join(process.env["APPDATA"] ?? homedir(), "Yam ADE");
 const debugLog = join(userData, "ade-debug.log");
 
 if (!existsSync(app)) {
   process.stderr.write(
-    `The ADE is not packaged (${app}).\nRun: pnpm --filter @svatah/ade package\n`,
+    `The ADE is not packaged (${app}).\nRun: pnpm --filter @svatah/yam-ade package\n`,
   );
   process.exit(2);
 }
@@ -98,7 +98,7 @@ function processIds() {
     .filter((one) => Number.isInteger(one) && one > 0);
 }
 
-/** The `svatah serve` processes this checkout's CLI is running, if any. */
+/** The `yam serve` processes this checkout's CLI is running, if any. */
 function serviceIds() {
   if (process.platform !== "darwin") return [];
   const found = spawnSync("pgrep", ["-f", `${cli} serve`], { encoding: "utf8" });
@@ -171,11 +171,11 @@ function loggedSince(mark) {
 
 function launch() {
   const environment = {
-    SVATAH_A11Y: "1",
-    SVATAH_ADE_DEBUG: "1",
-    SVATAH_CLI: cli,
-    SVATAH_ADE_SMOKE: "",
-    SVATAH_ADE_PROJECT: project,
+    YAM_A11Y: "1",
+    YAM_ADE_DEBUG: "1",
+    YAM_CLI: cli,
+    YAM_ADE_SMOKE: "",
+    YAM_ADE_PROJECT: project,
   };
   if (process.platform !== "darwin") {
     return spawn(app, [], { stdio: "ignore", env: { ...process.env, ...environment } });
@@ -247,7 +247,7 @@ rmSync(debugLog, { force: true });
 /*
  * The services that were already running before any of this.
  *
- * Counted out, not killed: a person may have a `svatah serve` open on a project
+ * Counted out, not killed: a person may have a `yam serve` open on a project
  * of their own, and a check that stopped it would be the P10-F7 defect in a new
  * place. What this loop is about is whether *it* leaves one behind.
  */

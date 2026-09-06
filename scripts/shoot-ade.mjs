@@ -10,14 +10,14 @@
  *   * `reports/ade-<screen>.png`, one per screen of LLD §13.7 — the renderer's
  *     own pixels, through the DevTools protocol. Always available.
  *   * `reports/ade-flows-ax.png` — the *window*, through
- *     `@svatah/adapter-ax`'s `screenshot()`, which is `screencapture` scoped to
+ *     `@svatah/yam-adapter-ax`'s `screenshot()`, which is `screencapture` scoped to
  *     the window's box. Needs macOS and the Screen Recording grant; when the
- *     grant is missing the script says so with the `svatah surface doctor` line
+ *     grant is missing the script says so with the `yam surface doctor` line
  *     and takes the other two, rather than fabricating one (the phase's
  *     environment rule).
  *
  * The application is the packaged one and it is opened on a copy of the fixtures
- * project through `SVATAH_ADE_PROJECT` — the same way the desktop gate opens it
+ * project through `YAM_ADE_PROJECT` — the same way the desktop gate opens it
  * (LLD §13.6).
  */
 import { spawn, spawnSync } from "node:child_process";
@@ -54,16 +54,16 @@ const OUT =
     ? resolve(args[outAt + 1])
     : update
       ? join(ROOT, "reports")
-      : mkdtempSync(join(tmpdir(), "svatah-ade-shots-out-"));
+      : mkdtempSync(join(tmpdir(), "yam-ade-shots-out-"));
 
 /** The packaged application, whatever the platform called its directory. */
 function packagedApp() {
   const out = join(ROOT, "apps", "ade", "out");
   if (!existsSync(out)) return undefined;
   for (const entry of readdirSync(out)) {
-    const mac = join(out, entry, "Svatah ADE.app", "Contents", "MacOS", "Svatah ADE");
+    const mac = join(out, entry, "Yam ADE.app", "Contents", "MacOS", "Yam ADE");
     if (existsSync(mac)) return mac;
-    for (const name of ["Svatah ADE.exe", "svatah-ade", "Svatah ADE"]) {
+    for (const name of ["Yam ADE.exe", "yam-ade", "Yam ADE"]) {
       const other = join(out, entry, name);
       if (existsSync(other)) return other;
     }
@@ -74,21 +74,21 @@ function packagedApp() {
 const executable = packagedApp();
 if (executable === undefined) {
   process.stderr.write(
-    "No packaged ADE under apps/ade/out. Run `pnpm --filter @svatah/ade package` first.\n",
+    "No packaged ADE under apps/ade/out. Run `pnpm --filter @svatah/yam-ade package` first.\n",
   );
   process.exit(2);
 }
 
 const app = await startSampleApp(0);
-const project = mkdtempSync(join(tmpdir(), "svatah-ade-shots-"));
+const project = mkdtempSync(join(tmpdir(), "yam-ade-shots-"));
 cpSync(join(ROOT, "evals", "fixtures"), project, {
   recursive: true,
   filter: (from) => !from.includes("node_modules") && !from.includes(`${"runs"}`),
 });
 writeFileSync(
-  join(project, "svatah.config.yaml"),
+  join(project, "yam.config.yaml"),
   `schemaVersion: "1.0.0"
-project: "svatah-fixtures"
+project: "yam-fixtures"
 environment: test
 adapter: playwright
 app: { baseUrl: "${app.origin}" }
@@ -151,11 +151,11 @@ const ade = spawn(executable, [`--remote-debugging-port=${PORT}`], {
   stdio: ["ignore", "pipe", "pipe"],
   env: {
     ...process.env,
-    SVATAH_ADE_PROJECT: project,
-    SVATAH_A11Y: "1",
-    SVATAH_CLI: CLI,
-    SVATAH_BASE_URL: app.origin,
-    SVATAH_ADE_SMOKE: "",
+    YAM_ADE_PROJECT: project,
+    YAM_A11Y: "1",
+    YAM_CLI: CLI,
+    YAM_BASE_URL: app.origin,
+    YAM_ADE_SMOKE: "",
   },
 });
 // Drained, or a full pipe blocks the application (see apps/ade/test/shell.spec.ts).
@@ -276,7 +276,7 @@ try {
     const { osascriptBridge } = await import(
       join(ROOT, "packages", "adapter-ax", "dist", "index.js")
     );
-    const bridge = osascriptBridge({ process: "Svatah ADE" });
+    const bridge = osascriptBridge({ process: "Yam ADE" });
     const permission = await bridge.permission();
     if (permission.state !== "granted") {
       process.stderr.write(
@@ -284,7 +284,7 @@ try {
           `${permission.advice}\n`,
       );
     } else {
-      const window = await bridge.window({ process: "Svatah ADE", maxNodes: 2_000 });
+      const window = await bridge.window({ process: "Yam ADE", maxNodes: 2_000 });
       const box = window.nodes[0]?.box;
       const path = join(OUT, "ade-flows-ax.png");
       await bridge.screenshot(path, box);

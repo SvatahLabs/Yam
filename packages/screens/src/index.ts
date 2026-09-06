@@ -1,16 +1,16 @@
 /**
- * `@svatah/screens` — the headless screen model (T9.1, REQ-ADE-10, REQ-ADE-13,
+ * `@svatah/yam-screens` — the headless screen model (T9.1, REQ-ADE-10, REQ-ADE-13,
  * LLD §13.7).
  *
- * > The ADE and the terminal cockpit `svatah ui` are two renderers of one
+ * > The ADE and the terminal cockpit `yam ui` are two renderers of one
  * > headless **screen model**, and both are views over the local service and
- * > nothing else. […] A screen's logic lives in `@svatah/screens`; the ADE and
- * > `svatah ui` render it and add nothing.
+ * > nothing else. […] A screen's logic lives in `@svatah/yam-screens`; the ADE and
+ * > `yam ui` render it and add nothing.
  *
  * Three things live here and nowhere else: the twelve screens, the action
  * registry behind every palette, and the key bindings both renderers read. The
  * package has no DOM, no terminal and no dependency on a runtime package —
- * `@svatah/schema` for the wire shapes, and a `ScreenService` it is handed.
+ * `@svatah/yam-schema` for the wire shapes, and a `ScreenService` it is handed.
  */
 export { SCREEN_IDS } from "./types.js";
 export type {

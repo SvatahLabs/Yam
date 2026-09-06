@@ -9,16 +9,16 @@
 baseUrl: "https://sample.test"
 date: "2026-09-03"
 env: "test"
-pw: "${SVATAH_GOLDEN_PW}"
+pw: "${YAM_GOLDEN_PW}"
 reportPath: "reports/summary.pdf"
 
 user:
   email: "connected2atul@gmail.com"
-  password: "${SVATAH_GOLDEN_PASSWORD}"
+  password: "${YAM_GOLDEN_PASSWORD}"
 
 card:
-  number: "${SVATAH_GOLDEN_CARD_NUMBER}"
-  cvv: "${SVATAH_GOLDEN_CARD_CVV}"
+  number: "${YAM_GOLDEN_CARD_NUMBER}"
+  cvv: "${YAM_GOLDEN_CARD_CVV}"
 
 # Only the card fields. `user.password` is deliberately *not* here even though it
 # reads from an environment variable: the golden set needs one data reference

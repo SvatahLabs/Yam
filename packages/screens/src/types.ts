@@ -46,7 +46,7 @@ export type ScreenId = (typeof SCREEN_IDS)[number];
  * What a screen was asked to show: which flow, which run, which binding.
  *
  * A screen is a function of the service and this, and of nothing else — which
- * is what makes `svatah ui --json` able to print "exactly the model's state"
+ * is what makes `yam ui --json` able to print "exactly the model's state"
  * (T9.1 Validate) and the ADE able to render the same thing from the same two
  * arguments.
  */
@@ -80,7 +80,7 @@ export interface ScreenParams {
    * `explorer`: what the next surface call is *for* (REQ-BEH-4).
    *
    * A parameter rather than renderer state, because the model refuses a call
-   * without one and `svatah ui --json` has to be able to show that refusal.
+   * without one and `yam ui --json` has to be able to show that refusal.
    */
   readonly intent?: string;
   /** `import`: the prototype's electron-db directory somebody chose. */
@@ -94,7 +94,7 @@ export interface ScreenParams {
  * bar's left-hand side. `sources` is the screen rule made visible (T3.7, §13.6:
  * "every screen renders a service response or a project file and nothing the
  * CLI cannot produce") — every screen says which endpoints it was built from,
- * and `svatah ui --json` prints them.
+ * and `yam ui --json` prints them.
  */
 export interface ScreenStateBase {
   readonly screen: ScreenId;

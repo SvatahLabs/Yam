@@ -1,7 +1,7 @@
 {
-  "name": "@svatah/bindings-cli",
+  "name": "@svatah/yam-bindings-cli",
   "version": "0.1.0",
-  "description": "The svatah-bindings command line: bindings, heal, surface conform and the healing eval for module (a)",
+  "description": "The yam-bindings command line: bindings, heal, surface conform and the healing eval for module (a)",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -35,15 +35,15 @@
     "access": "public"
   },
   "dependencies": {
-    "@svatah/adapter-playwright": "workspace:*",
-    "@svatah/bindings": "workspace:*",
-    "@svatah/conformance": "workspace:*",
-    "@svatah/healer": "workspace:*",
-    "@svatah/schema": "workspace:*",
-    "@svatah/surface": "workspace:*",
+    "@svatah/yam-adapter-playwright": "workspace:*",
+    "@svatah/yam-bindings": "workspace:*",
+    "@svatah/yam-conformance": "workspace:*",
+    "@svatah/yam-healer": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
+    "@svatah/yam-surface": "workspace:*",
     "yaml": "catalog:"
   },
   "bin": {
-    "svatah-bindings": "./dist/bin.js"
+    "yam-bindings": "./dist/bin.js"
   }
 }

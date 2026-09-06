@@ -80,40 +80,40 @@ importers:
       '@eslint/js':
         specifier: 'catalog:'
         version: 9.39.5
-      '@svatah/adapter-playwright':
+      '@svatah/yam-adapter-playwright':
         specifier: workspace:*
         version: link:packages/adapter-playwright
-      '@svatah/bindings':
+      '@svatah/yam-bindings':
         specifier: workspace:*
         version: link:packages/bindings
-      '@svatah/compiler':
+      '@svatah/yam-compiler':
         specifier: workspace:*
         version: link:packages/compiler
-      '@svatah/migrate':
+      '@svatah/yam-migrate':
         specifier: workspace:*
         version: link:packages/migrate
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:packages/schema
-      '@svatah/screens':
+      '@svatah/yam-screens':
         specifier: workspace:*
         version: link:packages/screens
-      '@svatah/service':
+      '@svatah/yam-service':
         specifier: workspace:*
         version: link:packages/service
-      '@svatah/spec':
+      '@svatah/yam-spec':
         specifier: workspace:*
         version: link:packages/spec
-      '@svatah/steps':
+      '@svatah/yam-steps':
         specifier: workspace:*
         version: link:packages/steps
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:packages/surface
-      '@svatah/ui':
+      '@svatah/yam-ui':
         specifier: workspace:*
         version: link:packages/ui
-      '@svatah/ui-tokens':
+      '@svatah/yam-ui-tokens':
         specifier: workspace:*
         version: link:packages/ui-tokens
       '@types/node':
@@ -155,16 +155,16 @@ importers:
 
   apps/ade:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../../packages/schema
-      '@svatah/screens':
+      '@svatah/yam-screens':
         specifier: workspace:*
         version: link:../../packages/screens
-      '@svatah/ui':
+      '@svatah/yam-ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@svatah/ui-tokens':
+      '@svatah/yam-ui-tokens':
         specifier: workspace:*
         version: link:../../packages/ui-tokens
     devDependencies:
@@ -195,10 +195,10 @@ importers:
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
-      '@svatah/cli':
+      '@svatah/yam':
         specifier: workspace:*
         version: link:../../packages/cli
-      '@svatah/service':
+      '@svatah/yam-service':
         specifier: workspace:*
         version: link:../../packages/service
       '@types/react':
@@ -259,7 +259,7 @@ importers:
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
-      '@svatah/host-playwright':
+      '@svatah/yam-host-playwright':
         specifier: workspace:*
         version: link:../../packages/host-playwright
 
@@ -275,14 +275,14 @@ importers:
 
   examples/plain-playwright:
     dependencies:
-      '@svatah/playwright-test':
+      '@svatah/yam-playwright-test':
         specifier: workspace:*
         version: link:../../packages/playwright-test
     devDependencies:
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
-      '@svatah/bindings':
+      '@svatah/yam-bindings':
         specifier: workspace:*
         version: link:../../packages/bindings
       '@types/node':
@@ -300,10 +300,10 @@ importers:
 
   packages/adapter-appium:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
       webdriverio:
@@ -322,14 +322,14 @@ importers:
 
   packages/adapter-ax:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
     devDependencies:
-      '@svatah/conformance':
+      '@svatah/yam-conformance':
         specifier: workspace:*
         version: link:../conformance
       tsup:
@@ -344,10 +344,10 @@ importers:
 
   packages/adapter-bidi:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
     devDependencies:
@@ -366,10 +366,10 @@ importers:
 
   packages/adapter-http:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
       undici:
@@ -388,10 +388,10 @@ importers:
 
   packages/adapter-playwright:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
       playwright:
@@ -401,7 +401,7 @@ importers:
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
-      '@svatah/conformance':
+      '@svatah/yam-conformance':
         specifier: workspace:*
         version: link:../conformance
       sample-web:
@@ -419,17 +419,17 @@ importers:
 
   packages/adapter-uia:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
     devDependencies:
-      '@svatah/adapter-ax':
+      '@svatah/yam-adapter-ax':
         specifier: workspace:*
         version: link:../adapter-ax
-      '@svatah/conformance':
+      '@svatah/yam-conformance':
         specifier: workspace:*
         version: link:../conformance
       tsup:
@@ -444,10 +444,10 @@ importers:
 
   packages/bindings:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
       yaml:
@@ -466,22 +466,22 @@ importers:
 
   packages/bindings-cli:
     dependencies:
-      '@svatah/adapter-playwright':
+      '@svatah/yam-adapter-playwright':
         specifier: workspace:*
         version: link:../adapter-playwright
-      '@svatah/bindings':
+      '@svatah/yam-bindings':
         specifier: workspace:*
         version: link:../bindings
-      '@svatah/conformance':
+      '@svatah/yam-conformance':
         specifier: workspace:*
         version: link:../conformance
-      '@svatah/healer':
+      '@svatah/yam-healer':
         specifier: workspace:*
         version: link:../healer
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
       yaml:
@@ -506,85 +506,85 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: 'catalog:'
         version: 1.30.0(zod@3.25.76)
-      '@svatah/adapter-appium':
+      '@svatah/yam-adapter-appium':
         specifier: workspace:*
         version: link:../adapter-appium
-      '@svatah/adapter-ax':
+      '@svatah/yam-adapter-ax':
         specifier: workspace:*
         version: link:../adapter-ax
-      '@svatah/adapter-bidi':
+      '@svatah/yam-adapter-bidi':
         specifier: workspace:*
         version: link:../adapter-bidi
-      '@svatah/adapter-http':
+      '@svatah/yam-adapter-http':
         specifier: workspace:*
         version: link:../adapter-http
-      '@svatah/adapter-playwright':
+      '@svatah/yam-adapter-playwright':
         specifier: workspace:*
         version: link:../adapter-playwright
-      '@svatah/adapter-uia':
+      '@svatah/yam-adapter-uia':
         specifier: workspace:*
         version: link:../adapter-uia
-      '@svatah/bindings':
+      '@svatah/yam-bindings':
         specifier: workspace:*
         version: link:../bindings
-      '@svatah/bindings-cli':
+      '@svatah/yam-bindings-cli':
         specifier: workspace:*
         version: link:../bindings-cli
-      '@svatah/compiler':
+      '@svatah/yam-compiler':
         specifier: workspace:*
         version: link:../compiler
-      '@svatah/conformance':
+      '@svatah/yam-conformance':
         specifier: workspace:*
         version: link:../conformance
-      '@svatah/gateway':
+      '@svatah/yam-gateway':
         specifier: workspace:*
         version: link:../gateway
-      '@svatah/healer':
+      '@svatah/yam-healer':
         specifier: workspace:*
         version: link:../healer
-      '@svatah/host-playwright':
+      '@svatah/yam-host-playwright':
         specifier: workspace:*
         version: link:../host-playwright
-      '@svatah/migrate':
+      '@svatah/yam-migrate':
         specifier: workspace:*
         version: link:../migrate
-      '@svatah/playwright-test':
+      '@svatah/yam-playwright-test':
         specifier: workspace:*
         version: link:../playwright-test
-      '@svatah/recorder':
+      '@svatah/yam-recorder':
         specifier: workspace:*
         version: link:../recorder
-      '@svatah/runtime':
+      '@svatah/yam-runtime':
         specifier: workspace:*
         version: link:../runtime
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/sdk':
+      '@svatah/yam-sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@svatah/service':
+      '@svatah/yam-service':
         specifier: workspace:*
         version: link:../service
-      '@svatah/spec':
+      '@svatah/yam-spec':
         specifier: workspace:*
         version: link:../spec
-      '@svatah/steps':
+      '@svatah/yam-steps':
         specifier: workspace:*
         version: link:../steps
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
-      '@svatah/tool':
+      '@svatah/yam-tool':
         specifier: workspace:*
         version: link:../tool
-      '@svatah/trajectory':
+      '@svatah/yam-trajectory':
         specifier: workspace:*
         version: link:../trajectory
-      '@svatah/tui':
+      '@svatah/yam-tui':
         specifier: workspace:*
         version: link:../tui
-      '@svatah/workflow':
+      '@svatah/yam-workflow':
         specifier: workspace:*
         version: link:../workflow
       yaml:
@@ -612,13 +612,13 @@ importers:
 
   packages/compiler:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/spec':
+      '@svatah/yam-spec':
         specifier: workspace:*
         version: link:../spec
-      '@svatah/steps':
+      '@svatah/yam-steps':
         specifier: workspace:*
         version: link:../steps
       yaml:
@@ -643,10 +643,10 @@ importers:
 
   packages/conformance:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
     devDependencies:
@@ -665,7 +665,7 @@ importers:
       '@anthropic-ai/sdk':
         specifier: 'catalog:'
         version: 0.123.0(zod@3.25.76)
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
       zod:
@@ -687,13 +687,13 @@ importers:
 
   packages/healer:
     dependencies:
-      '@svatah/bindings':
+      '@svatah/yam-bindings':
         specifier: workspace:*
         version: link:../bindings
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
     devDependencies:
@@ -709,22 +709,22 @@ importers:
 
   packages/host-playwright:
     dependencies:
-      '@svatah/adapter-playwright':
+      '@svatah/yam-adapter-playwright':
         specifier: workspace:*
         version: link:../adapter-playwright
-      '@svatah/bindings':
+      '@svatah/yam-bindings':
         specifier: workspace:*
         version: link:../bindings
-      '@svatah/playwright-test':
+      '@svatah/yam-playwright-test':
         specifier: workspace:*
         version: link:../playwright-test
-      '@svatah/runtime':
+      '@svatah/yam-runtime':
         specifier: workspace:*
         version: link:../runtime
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
     devDependencies:
@@ -752,13 +752,13 @@ importers:
 
   packages/migrate:
     dependencies:
-      '@svatah/bindings':
+      '@svatah/yam-bindings':
         specifier: workspace:*
         version: link:../bindings
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/spec':
+      '@svatah/yam-spec':
         specifier: workspace:*
         version: link:../spec
     devDependencies:
@@ -774,19 +774,19 @@ importers:
 
   packages/playwright-test:
     dependencies:
-      '@svatah/adapter-playwright':
+      '@svatah/yam-adapter-playwright':
         specifier: workspace:*
         version: link:../adapter-playwright
-      '@svatah/bindings':
+      '@svatah/yam-bindings':
         specifier: workspace:*
         version: link:../bindings
-      '@svatah/healer':
+      '@svatah/yam-healer':
         specifier: workspace:*
         version: link:../healer
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
       playwright:
@@ -811,19 +811,19 @@ importers:
 
   packages/recorder:
     dependencies:
-      '@svatah/bindings':
+      '@svatah/yam-bindings':
         specifier: workspace:*
         version: link:../bindings
-      '@svatah/gateway':
+      '@svatah/yam-gateway':
         specifier: workspace:*
         version: link:../gateway
-      '@svatah/runtime':
+      '@svatah/yam-runtime':
         specifier: workspace:*
         version: link:../runtime
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
       zod:
@@ -842,13 +842,13 @@ importers:
 
   packages/runtime:
     dependencies:
-      '@svatah/bindings':
+      '@svatah/yam-bindings':
         specifier: workspace:*
         version: link:../bindings
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
     devDependencies:
@@ -886,7 +886,7 @@ importers:
 
   packages/screens:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
       yaml:
@@ -905,14 +905,14 @@ importers:
 
   packages/sdk:
     dependencies:
-      '@svatah/screens':
+      '@svatah/yam-screens':
         specifier: workspace:*
         version: link:../screens
     devDependencies:
-      '@svatah/cli':
+      '@svatah/yam':
         specifier: workspace:*
         version: link:../cli
-      '@svatah/service':
+      '@svatah/yam-service':
         specifier: workspace:*
         version: link:../service
       sample-web:
@@ -933,7 +933,7 @@ importers:
       '@fastify/websocket':
         specifier: 'catalog:'
         version: 11.3.0
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
       fastify:
@@ -955,7 +955,7 @@ importers:
 
   packages/spec:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
       yaml:
@@ -974,10 +974,10 @@ importers:
 
   packages/steps:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/surface':
+      '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
     devDependencies:
@@ -993,7 +993,7 @@ importers:
 
   packages/surface:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
     devDependencies:
@@ -1009,10 +1009,10 @@ importers:
 
   packages/tool:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/workflow':
+      '@svatah/yam-workflow':
         specifier: workspace:*
         version: link:../workflow
     devDependencies:
@@ -1028,16 +1028,16 @@ importers:
 
   packages/trajectory:
     dependencies:
-      '@svatah/compiler':
+      '@svatah/yam-compiler':
         specifier: workspace:*
         version: link:../compiler
-      '@svatah/recorder':
+      '@svatah/yam-recorder':
         specifier: workspace:*
         version: link:../recorder
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
-      '@svatah/spec':
+      '@svatah/yam-spec':
         specifier: workspace:*
         version: link:../spec
       zod:
@@ -1056,13 +1056,13 @@ importers:
 
   packages/tui:
     dependencies:
-      '@svatah/screens':
+      '@svatah/yam-screens':
         specifier: workspace:*
         version: link:../screens
-      '@svatah/sdk':
+      '@svatah/yam-sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@svatah/ui-tokens':
+      '@svatah/yam-ui-tokens':
         specifier: workspace:*
         version: link:../ui-tokens
       ink:
@@ -1105,7 +1105,7 @@ importers:
       '@radix-ui/react-tabs':
         specifier: ^1.1.21
         version: 1.1.21(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@svatah/ui-tokens':
+      '@svatah/yam-ui-tokens':
         specifier: workspace:*
         version: link:../ui-tokens
     devDependencies:
@@ -1154,10 +1154,10 @@ importers:
 
   packages/workflow:
     dependencies:
-      '@svatah/runtime':
+      '@svatah/yam-runtime':
         specifier: workspace:*
         version: link:../runtime
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
     devDependencies:
@@ -1173,7 +1173,7 @@ importers:
 
   tools/repo-checks:
     dependencies:
-      '@svatah/schema':
+      '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../../packages/schema
       yaml:
@@ -1183,25 +1183,25 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
-      '@svatah/cli':
+      '@svatah/yam':
         specifier: workspace:*
         version: link:../../packages/cli
-      '@svatah/compiler':
+      '@svatah/yam-compiler':
         specifier: workspace:*
         version: link:../../packages/compiler
-      '@svatah/migrate':
+      '@svatah/yam-migrate':
         specifier: workspace:*
         version: link:../../packages/migrate
-      '@svatah/screens':
+      '@svatah/yam-screens':
         specifier: workspace:*
         version: link:../../packages/screens
-      '@svatah/sdk':
+      '@svatah/yam-sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@svatah/spec':
+      '@svatah/yam-spec':
         specifier: workspace:*
         version: link:../../packages/spec
-      '@svatah/ui-tokens':
+      '@svatah/yam-ui-tokens':
         specifier: workspace:*
         version: link:../../packages/ui-tokens
       '@types/node':

@@ -11,7 +11,7 @@
  * replay path cannot import this package at all (LLD §1), so "the executor makes
  * no model calls" is a build-time fact rather than a promise.
  */
-import type { Provenance } from "@svatah/schema";
+import type { Provenance } from "@svatah/yam-schema";
 import type { ZodType } from "zod";
 
 /** How hard the model should think (`output_config.effort`). */

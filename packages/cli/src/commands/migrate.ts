@@ -1,5 +1,5 @@
 /**
- * `svatah migrate <src> <dest>` (REQ-LANG-11, LLD §15).
+ * `yam migrate <src> <dest>` (REQ-LANG-11, LLD §15).
  *
  * Exit 0, or 8 when a step could not be converted — which is a real outcome, not
  * a failure: the step is left in the flow as a `// TODO(migrate):` comment and
@@ -9,7 +9,7 @@
  * ## `--from-ade` (T6.6, REQ-ADE-9)
  *
  * ```
- * svatah migrate <dest> --from-ade <electron-db dir> [--project <name>]
+ * yam migrate <dest> --from-ade <electron-db dir> [--project <name>]
  * ```
  *
  * The prototype ADE kept a project's flows, locators and data in an electron-db
@@ -19,10 +19,10 @@
  */
 import { rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { extractAdeProject, migrate, renderReviewReport } from "@svatah/migrate";
-import { boolOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
-import { EXIT, type ExitCode } from "@svatah/bindings-cli";
-import type { CommandIo } from "@svatah/bindings-cli";
+import { extractAdeProject, migrate, renderReviewReport } from "@svatah/yam-migrate";
+import { boolOption, stringOption, type ParsedArgs } from "@svatah/yam-bindings-cli";
+import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
+import type { CommandIo } from "@svatah/yam-bindings-cli";
 
 export const REVIEW_FILE = "migration-review.md";
 
@@ -33,8 +33,8 @@ export async function migrateCommand(args: ParsedArgs, io: CommandIo): Promise<E
 
   if (source === undefined || destination === undefined) {
     io.err(
-      "Usage: svatah migrate <src> <dest> [--keep-original] [--json]\n" +
-        "       svatah migrate <dest> --from-ade <electron-db dir> [--project <name>]",
+      "Usage: yam migrate <src> <dest> [--keep-original] [--json]\n" +
+        "       yam migrate <dest> --from-ade <electron-db dir> [--project <name>]",
     );
     return EXIT.usage;
   }
@@ -76,7 +76,7 @@ export async function migrateCommand(args: ParsedArgs, io: CommandIo): Promise<E
    * `.imported.locator` and `.imported.data` are the prototype's own files,
    * reconstructed so the v2 converter has something to read. Leaving them in the
    * project would put the old tool's locator file beside the new bindings store
-   * — the second source of truth ADR-17 rejected — and the next `svatah migrate`
+   * — the second source of truth ADR-17 rejected — and the next `yam migrate`
    * of the same directory would convert them again.
    */
   const written = [...result.files];

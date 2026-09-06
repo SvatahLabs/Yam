@@ -1,7 +1,7 @@
 /**
  * Choosing the gateway a grounding command runs against (T3.3, T4.5, LLD §10).
  *
- * `svatah record` and `svatah repl` both ground unbound targets, and both have
+ * `yam record` and `yam repl` both ground unbound targets, and both have
  * to answer the same question first: which model, and is it a model at all. One
  * implementation, so the two cannot come to disagree about what `--gateway fake`
  * means or about when a credential is required.
@@ -25,8 +25,8 @@ import {
   fakeGateway,
   GatewayUnavailable,
   type Gateway,
-} from "@svatah/gateway";
-import { stringOption, type CommandIo, type ParsedArgs } from "@svatah/bindings-cli";
+} from "@svatah/yam-gateway";
+import { stringOption, type CommandIo, type ParsedArgs } from "@svatah/yam-bindings-cli";
 import { groundingAnswers } from "./grounding-answers.js";
 import type { LoadedProject } from "./project.js";
 
@@ -34,8 +34,8 @@ export interface GatewayChoiceOptions {
   /**
    * Return `undefined` instead of throwing when there is no model.
    *
-   * `svatah record` requires one — a record session with no model grounds
-   * nothing. `svatah repl` does not: a session can drive an application through
+   * `yam record` requires one — a record session with no model grounds
+   * nothing. `yam repl` does not: a session can drive an application through
    * bindings that already exist, and only a sentence naming something new needs
    * a model at all.
    */
@@ -81,7 +81,7 @@ export function gatewayForRecording(
 
   return anthropicGateway({
     model: loaded.config.record.model,
-    cache: new DiskCache(join(loaded.root, ".svatah", "model-cache")),
+    cache: new DiskCache(join(loaded.root, ".yam", "model-cache")),
     secrets: secretValues(loaded.project.data.values, loaded.project.data.secrets),
     onCall: (line) => io.err(`      ${line}`),
   });

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * `svatah eval compiler`, as a script the release workflow can run (T4.4, REQ-PKG-4).
+ * `yam eval compiler`, as a script the release workflow can run (T4.4, REQ-PKG-4).
  *
  *   node scripts/eval-compiler.mjs [--only tier1,tier2] [--report reports/eval-compiler.md]
  *
  * A thin wrapper, deliberately: the measurement is the CLI's, so the number in
- * the release notes and the number a person gets from `svatah eval compiler` are
+ * the release notes and the number a person gets from `yam eval compiler` are
  * produced by the same code rather than by two that could drift.
  */
 import { spawn } from "node:child_process";

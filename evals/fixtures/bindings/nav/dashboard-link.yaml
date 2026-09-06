@@ -40,7 +40,7 @@ entries:
           - "Widgets"
           - "Docs"
         before:
-          - "Svatah Sample"
+          - "Yam Sample"
           - "Menu"
       rolePath:
         - "navigation"

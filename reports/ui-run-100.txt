@@ -1,5 +1,5 @@
 loading…
-svatah ui 100×30  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-capture-2LBoaA   http:…
+yam ui 100×30  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-ui-capture-2LBoaA   http:…
 ┌───────────────────────┐┌─────────────────────────────────────────────────────────────────────────┐
 │ 1 Stories             ││ 2 Run comp · aborted                                                    │
 │ I want to… failed     ││ ✓  1 Click the Book a slot link                   testid #0    104 ms   │
@@ -17,6 +17,6 @@ svatah ui 100×30  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-ca
 │ 00.001 run        invoker kind user id local via cli · inputs                                    │
 │ 00.395 story      inputs                                                                         │
 │ 00.405 state      ok · 7 ms                                                                      │
-│ svatah ui --json streams these same lines to stdout for an agent                                 │
+│ yam ui --json streams these same lines to stdout for an agent                                 │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  s stop  h heal  q quit

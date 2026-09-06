@@ -16,7 +16,7 @@
  * gets it done is the determinism layer's business and changing it must not
  * change the tool. That is REQ-BEH-5 seen from the outside.
  */
-import type { Signature, Story } from "@svatah/schema";
+import type { Signature, Story } from "@svatah/yam-schema";
 
 /** A JSON Schema for one story's inputs, as MCP's `inputSchema`. */
 export interface ToolSchema {
@@ -98,7 +98,7 @@ export function inputSchemaOf(story: Story): ToolSchema {
  * honest fallback is the story's name — which the author wrote as a sentence.
  */
 export function descriptionOf(story: Story): string {
-  const parts = [`Runs the Svatah story "${story.name}" as a deterministic function.`];
+  const parts = [`Runs the Yam story "${story.name}" as a deterministic function.`];
 
   const outputs = Object.keys(story.signature?.outputs ?? {});
   if (outputs.length > 0) parts.push(`Returns: ${outputs.sort().join(", ")}.`);

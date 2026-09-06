@@ -46,7 +46,7 @@ export const CONFORMANCE_DIR = "evals/conformance/runtime";
  * `booking-compensation.flow` is the fifth file in the directory and is not a
  * migration of anything — it is the REQ-AUTO-4 showcase — and it needs a "cancel
  * booking" control the sample application does not have. It is excluded here and
- * covered by the policy matrix in `@svatah/runtime`'s own tests.
+ * covered by the policy matrix in `@svatah/yam-runtime`'s own tests.
  */
 const FLOWS = [
   "flows/simple.flow",
@@ -57,9 +57,9 @@ const FLOWS = [
 
 /** The secrets the fixtures read. Fixed, so two runs type the same characters. */
 const SECRETS = {
-  SVATAH_SAMPLE_PASSWORD: "qwerty123",
-  SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-  SVATAH_SAMPLE_CARD_CVV: "123",
+  YAM_SAMPLE_PASSWORD: "qwerty123",
+  YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+  YAM_SAMPLE_CARD_CVV: "123",
 };
 
 /*
@@ -128,8 +128,8 @@ async function main() {
   const conformance = resolve(ROOT, outArg > 0 ? process.argv[outArg + 1] : CONFORMANCE_DIR);
 
   /* 3. Byte-stability: two compiles, one hash (REQ-COMP-7). */
-  const planA = mkdtempSync(join(tmpdir(), "svatah-plan-"));
-  const planB = mkdtempSync(join(tmpdir(), "svatah-plan-"));
+  const planA = mkdtempSync(join(tmpdir(), "yam-plan-"));
+  const planB = mkdtempSync(join(tmpdir(), "yam-plan-"));
   await runCli(["compile", PROJECT, "--stable", "--out", join(planA, "plan.json")]);
   await runCli(["compile", PROJECT, "--stable", "--out", join(planB, "plan.json")]);
   const first = readFileSync(join(planA, "plan.json"), "utf8");
@@ -148,7 +148,7 @@ async function main() {
   const app = await startSampleApp(0);
   console.log(`sample-web on ${app.origin}`);
 
-  const runs = mkdtempSync(join(tmpdir(), "svatah-compat-"));
+  const runs = mkdtempSync(join(tmpdir(), "yam-compat-"));
   const outcomes = [];
 
   try {
@@ -167,10 +167,10 @@ async function main() {
           "--out", runs,
           "--run-id", id,
           "--input", "email=connected2atul@gmail.com",
-          "--input", `password=${SECRETS.SVATAH_SAMPLE_PASSWORD}`,
+          "--input", `password=${SECRETS.YAM_SAMPLE_PASSWORD}`,
           ...FLOWS.flatMap((flow) => ["--flow", flow]),
         ],
-        { SVATAH_BASE_URL: app.origin },
+        { YAM_BASE_URL: app.origin },
       );
       outcomes.push({ host, id, dir: join(runs, id), status: result.status, output: result.output });
       console.log(`${host} run ${id}: exit ${result.status}`);
@@ -240,7 +240,7 @@ async function main() {
 
     writeFileSync(
       join(conformance, "plan.sha256"),
-      `${planSha}  plan.json (svatah compile evals/fixtures --stable)\n`,
+      `${planSha}  plan.json (yam compile evals/fixtures --stable)\n`,
       "utf8",
     );
     console.log(`wrote the conformance fixture to ${outArg > 0 ? process.argv[outArg + 1] : CONFORMANCE_DIR}`);

@@ -244,7 +244,7 @@ describe("POST /run (REQ-ADE-1, REQ-ADE-3)", () => {
   it("answers with a run id immediately rather than blocking", async () => {
     // The ADE's Run screen watches a run happen; a blocking call would make it
     // a spinner.
-    const runs = mkdtempSync(join(tmpdir(), "svatah-service-"));
+    const runs = mkdtempSync(join(tmpdir(), "yam-service-"));
     try {
       const response = await get("/run", {
         method: "POST",
@@ -453,12 +453,12 @@ describe("GET /project carries each story's signature (LLD §13.5)", () => {
 describe("the data editor's write keeps what it could not see (REQ-NFR-6)", () => {
   it("never writes a secret the editor was never shown", () => {
     const supplied = { user: { email: "changed@example.com", password: "«redacted»" } };
-    const onDisk = { user: { email: "a@b.c", password: "${SVATAH_SAMPLE_PASSWORD}" } };
+    const onDisk = { user: { email: "a@b.c", password: "${YAM_SAMPLE_PASSWORD}" } };
 
     const merged = keepRedacted(supplied, onDisk, new Set(["user.password"]));
 
     expect(merged).toEqual({
-      user: { email: "changed@example.com", password: "${SVATAH_SAMPLE_PASSWORD}" },
+      user: { email: "changed@example.com", password: "${YAM_SAMPLE_PASSWORD}" },
     });
   });
 
@@ -468,10 +468,10 @@ describe("the data editor's write keeps what it could not see (REQ-NFR-6)", () =
     // secret, so it has nothing to say about it.
     const merged = keepRedacted(
       { user: { password: "hunter2" } },
-      { user: { password: "${SVATAH_SAMPLE_PASSWORD}" } },
+      { user: { password: "${YAM_SAMPLE_PASSWORD}" } },
       new Set(["user.password"]),
     );
-    expect(merged).toEqual({ user: { password: "${SVATAH_SAMPLE_PASSWORD}" } });
+    expect(merged).toEqual({ user: { password: "${YAM_SAMPLE_PASSWORD}" } });
   });
 
   it("writes an ordinary value exactly as it arrived", () => {
@@ -671,7 +671,7 @@ describe("POST /record: one session, and a decision that expires (P5-F4, LLD §1
 
 describe("the config's decision deadline (P5-F4, LLD §13.5)", () => {
   it("defaults to ten minutes", async () => {
-    const { configSchema, DEFAULT_CONFIG } = await import("@svatah/schema");
+    const { configSchema, DEFAULT_CONFIG } = await import("@svatah/yam-schema");
     expect(DEFAULT_CONFIG.record.decisionDeadlineMs).toBe(600_000);
     // And a config that does not mention it gets the default rather than an error.
     const parsed = configSchema.parse({

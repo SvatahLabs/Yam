@@ -1,15 +1,15 @@
 # Running a story as a function, on a schedule (REQ-BEH-2, REQ-AGT-4)
 
 The workflow behavior. A story with a signature is a function: it takes typed
-inputs, returns typed outputs, and `svatah workflow run` prints them on **stdout
+inputs, returns typed outputs, and `yam workflow run` prints them on **stdout
 as JSON** so the command composes.
 
 ```bash
-svatah workflow run "Book a slot" --input location=Indiranagar | jq -r .booking
+yam workflow run "Book a slot" --input location=Indiranagar | jq -r .booking
 ```
 
 That is the whole integration. `book.sh` beside this file is the script a
-`crontab` line would call, and `crontab` is the scheduler — Svatah does not have
+`crontab` line would call, and `crontab` is the scheduler — Yam does not have
 one and will not (REQ-AGT-4, HLD ADR-13).
 
 ```cron
@@ -26,12 +26,12 @@ in the file, that it meant to.
 
 **Checkpoints and audit are on**, whatever the project's config says (LLD §13.2).
 A test that is not checkpointed can be re-run from the start; a workflow that
-booked three of four slots and stopped cannot. `svatah workflow run --resume <id>
+booked three of four slots and stopped cannot. `yam workflow run --resume <id>
 --from <step>` picks it up, refusing with exit 12 if the plan or the bindings
 moved since (REQ-AUTO-3).
 
 **Secrets are read from the environment**, not the command line
-(`SVATAH_INPUT_<NAME>`): a password on a command line is a password in the
+(`YAM_INPUT_<NAME>`): a password on a command line is a password in the
 process list. It reaches the story, is redacted in the audit, the results and the
 summary, and is never written to the run directory (REQ-NFR-6).
 

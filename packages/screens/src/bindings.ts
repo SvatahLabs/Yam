@@ -1,7 +1,7 @@
 /**
  * Reading a binding file (LLD §6.1, §13.5).
  *
- * `GET /bindings/:id` answers the YAML on disk — the file `svatah bindings show`
+ * `GET /bindings/:id` answers the YAML on disk — the file `yam bindings show`
  * prints and a reviewer reads in a pull request. So a screen that shows a
  * candidate table is reading the same bytes the CLI reads, which is the screen
  * rule (§13.6) at its most literal: there is no "binding as the ADE sees it".

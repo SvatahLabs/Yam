@@ -6,12 +6,12 @@
  * the candidates tried and what to do about it.
  *
  * Live and finished are the same screen. `step.result` and `run.summary` are
- * folded in by `applyEvent` from `@svatah/screens` — the renderer subscribes and
- * the *model* decides what an event means, so the ADE and `svatah ui` cannot
+ * folded in by `applyEvent` from `@svatah/yam-screens` — the renderer subscribes and
+ * the *model* decides what an event means, so the ADE and `yam ui` cannot
  * come to different conclusions about a run that is still going.
  */
-import { Button, InspectorSection, KeyValues, Pill, Table } from "@svatah/ui";
-import type { Action, RunState, ScreenParams } from "@svatah/screens";
+import { Button, InspectorSection, KeyValues, Pill, Table } from "@svatah/yam-ui";
+import type { Action, RunState, ScreenParams } from "@svatah/yam-screens";
 import { Toolbar } from "./parts.js";
 
 export interface RunProps {

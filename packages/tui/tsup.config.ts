@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 /**
- * `svatah ui` builds like every other package (LLD §1), with a `.tsx` entry and
+ * `yam ui` builds like every other package (LLD §1), with a `.tsx` entry and
  * React external — the CLI mounts this, and two copies of React in one process
  * is a broken hook.
  */

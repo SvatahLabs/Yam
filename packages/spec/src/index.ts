@@ -1,12 +1,12 @@
 /**
- * @svatah/spec
+ * @svatah/yam-spec
  *
  * The flow reader (LLD §4.1): flow files, story signatures, header metadata,
  * guards, `data.yaml` with secrets, and the named `api/*.yaml` requests.
  *
  * It reads the file's *structure* and stops at the sentence. What a sentence
- * means is Tier 0 (`@svatah/steps`) and Tier 1 (the grammar in
- * `@svatah/compiler`), both of which work over what this package produces.
+ * means is Tier 0 (`@svatah/yam-steps`) and Tier 1 (the grammar in
+ * `@svatah/yam-compiler`), both of which work over what this package produces.
  */
 export type { FlowBlock, FlowFile, ListBlock, RawStep, StoryBlock } from "./ast.js";
 export { isRunBlock, isStoryBlock } from "./ast.js";

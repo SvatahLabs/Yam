@@ -1,5 +1,5 @@
 /**
- * `svatah lint` (REQ-COMP-8, `docs/flow-language.md` §9).
+ * `yam lint` (REQ-COMP-8, `docs/flow-language.md` §9).
  *
  * "Reports ambiguous targets, Tier 2/3 steps, low confidence, unused captures,
  * sleeps over 5 s, side-effecting steps in stories not marked `idempotent` when
@@ -14,8 +14,8 @@
  * validation, where the context to produce them exists; this file holds the ones
  * that need the finished plan.
  */
-import type { Plan, Step, Story } from "@svatah/schema";
-import { diagnostic, type Diagnostic } from "@svatah/spec";
+import type { Plan, Step, Story } from "@svatah/yam-schema";
+import { diagnostic, type Diagnostic } from "@svatah/yam-spec";
 
 export interface LintOptions {
   /** `config.compile.confidenceThreshold`. */

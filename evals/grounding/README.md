@@ -8,7 +8,7 @@ pnpm eval:grounding -- --gateway fake      # measures the harness, and says so
 node scripts/grounding-cases.mjs           # rebuild cases.jsonl from the sample app
 ```
 
-Against any deployment: `svatah eval grounding --base-url <url> --report <path.md>`.
+Against any deployment: `yam eval grounding --base-url <url> --report <path.md>`.
 
 ## What a case is
 
@@ -17,7 +17,7 @@ Against any deployment: `svatah eval grounding --base-url <url> --report <path.m
 | `page`, `variant` | Where it is asked. A case with no `variant` is variant 0. |
 | `phrase` | What a person would write in a flow: "the username field". |
 | `expect` | `present` — the phrase names an element here. `absent` — it does not. |
-| `element` | The ground-truth key (`data-svatah-eval`) of the element meant. |
+| `element` | The ground-truth key (`data-yam-eval`) of the element meant. |
 | `role`, `name`, `nth` | Enough to find the element's snapshot line without a model, which is how `--gateway fake` answers. |
 | `source` | `fixtures` when the phrase came from a migrated flow rather than being generated. |
 
@@ -72,11 +72,11 @@ application is.
 **The key is the window title**, not a URL path. LLD §3.3 has always said a
 binding's context pattern is "a URL *or window-title* pattern"; a window has no
 segments to generalise. So a case carries `window` where a web case carries
-`page`, and the grounding question says `Window: Svatah ADE` where a web one
+`page`, and the grounding question says `Window: Yam ADE` where a web one
 says `Page: …`.
 
 **The ground truth is the `automationId`.** `apps/sample-web` stamps
-`data-svatah-eval` on every element for the web eval; the ADE needs no such
+`data-yam-eval` on every element for the web eval; the ADE needs no such
 stamp, because LLD §13.7's accessibility contract already requires an id on
 every button, link, tab, field and row action and the desktop snapshot case
 fails a live gate when one is missing.

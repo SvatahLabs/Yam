@@ -8,8 +8,8 @@
  * repair is a diff to the bindings store plus a report, and this screen is where
  * the diff is read.
  */
-import { InspectorSection, KeyValues, Pill, Table } from "@svatah/ui";
-import { ago, type Action, type HealState, type ScreenParams } from "@svatah/screens";
+import { InspectorSection, KeyValues, Pill, Table } from "@svatah/yam-ui";
+import { ago, type Action, type HealState, type ScreenParams } from "@svatah/yam-screens";
 import { EmptyInspector, Toolbar } from "./parts.js";
 
 export interface HealProps {

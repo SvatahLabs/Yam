@@ -2,7 +2,7 @@
  * Pointer and keyboard actions over BiDi's `input.performActions` (LLD §7.3).
  *
  * BiDi has one input primitive: a list of *source* streams — a pointer, a
- * keyboard, a wheel — each with a list of ticks. Every action Svatah's vocabulary
+ * keyboard, a wheel — each with a list of ticks. Every action Yam's vocabulary
  * names is a particular arrangement of those ticks, and this file is that
  * arrangement and nothing else.
  *
@@ -11,12 +11,12 @@
  * being sent would otherwise land the pointer somewhere else — which is exactly
  * the class of flake the actionability wait exists to remove, and would put back.
  */
-import { ScriptError } from "@svatah/surface";
+import { ScriptError } from "@svatah/yam-surface";
 import type { BidiSession } from "./session.js";
 
 /** The pointer source every pointer action shares, so ticks stay in one stream. */
-const MOUSE = "svatah-mouse";
-const KEYBOARD = "svatah-keyboard";
+const MOUSE = "yam-mouse";
+const KEYBOARD = "yam-keyboard";
 
 interface Tick {
   readonly type: string;

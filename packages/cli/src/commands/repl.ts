@@ -1,12 +1,12 @@
 /**
- * `svatah repl` (T4.5, REQ-RUN-11, LLD §15).
+ * `yam repl` (T4.5, REQ-RUN-11, LLD §15).
  *
  * > REPL: one sentence at a time against an open session, appended to a session
  * > flow and bindings.
  *
  * The whole point is that nothing here is a second implementation. A sentence
- * goes through the same compiler `svatah compile` uses, an unbound target is
- * grounded by the same `ground()` `svatah record` uses, and the step is
+ * goes through the same compiler `yam compile` uses, an unbound target is
+ * grounded by the same `ground()` `yam record` uses, and the step is
  * performed by the same `runStep()` the executor uses. What the REPL adds is the
  * loop and the two files it leaves behind: a flow you can commit, and the
  * bindings its steps recorded.
@@ -34,13 +34,13 @@
 import { createInterface } from "node:readline";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
-import { BindingsStore, resolve as resolveBinding } from "@svatah/bindings";
-import { compileSentence, tierFor } from "@svatah/compiler";
-import { ground, type GroundingResult } from "@svatah/recorder";
-import { Scope, runStep, type Resolver } from "@svatah/runtime";
-import { createSurface, type AgentSurface } from "@svatah/surface";
-import type { Config, Step } from "@svatah/schema";
-import { formatDiagnostic, TargetDictionary, type Diagnostic } from "@svatah/spec";
+import { BindingsStore, resolve as resolveBinding } from "@svatah/yam-bindings";
+import { compileSentence, tierFor } from "@svatah/yam-compiler";
+import { ground, type GroundingResult } from "@svatah/yam-recorder";
+import { Scope, runStep, type Resolver } from "@svatah/yam-runtime";
+import { createSurface, type AgentSurface } from "@svatah/yam-surface";
+import type { Config, Step } from "@svatah/yam-schema";
+import { formatDiagnostic, TargetDictionary, type Diagnostic } from "@svatah/yam-spec";
 import {
   boolOption,
   EXIT,
@@ -49,7 +49,7 @@ import {
   type CommandIo,
   type ExitCode,
   type ParsedArgs,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
 import { loadProject } from "../project.js";
 import { gatewayForRecording } from "../gateway-for.js";
@@ -143,7 +143,7 @@ export async function replCommand(args: ParsedArgs, io: CommandIo): Promise<Exit
   const outDir = resolve(loaded.root, stringOption(args, "out") ?? config.flows.dir);
   const flowPath = join(outDir, `${stringOption(args, "name") ?? sessionName()}.flow`);
 
-  io.err(`svatah repl — ${config.adapter}${target.baseUrl === undefined ? "" : ` at ${target.baseUrl}`}`);
+  io.err(`yam repl — ${config.adapter}${target.baseUrl === undefined ? "" : ` at ${target.baseUrl}`}`);
   io.err(
     gateway === undefined
       ? "  no model gateway: a sentence naming an unrecorded element will say so"
@@ -246,7 +246,7 @@ async function sentence(text: string, context: SentenceContext): Promise<void> {
    * grounded here, once, and staged into the live store so the next sentence
    * naming the same element resolves it without asking again (REQ-REC-1).
    *
-   * `staged` is what makes REQ-REC-5 hold here as it does for `svatah record`:
+   * `staged` is what makes REQ-REC-5 hold here as it does for `yam record`:
    * "the recorder performs the step with the top candidate and verifies any
    * expectation before committing". A binding is in the store only so the
    * resolver can find it; it is *kept* only if the step it was grounded for
@@ -460,16 +460,16 @@ function sessionName(): string {
 /**
  * The session, as a flow file (REQ-RUN-11).
  *
- * One story, one sentence per step, and a run block — the same shape `svatah
- * init` writes and `svatah compile` reads, so the file a session leaves behind
+ * One story, one sentence per step, and a run block — the same shape `yam
+ * init` writes and `yam compile` reads, so the file a session leaves behind
  * is a file the rest of the toolchain already knows what to do with.
  */
 export function renderFlow(accepted: readonly Accepted[]): string {
   const header = [
-    "// Written by `svatah repl`.",
+    "// Written by `yam repl`.",
     "//",
     "// Every sentence here ran successfully against a live session, and the",
-    "// elements they name are in the bindings store. `svatah run` replays it",
+    "// elements they name are in the bindings store. `yam run` replays it",
     "// with no model in the loop.",
     "",
     "story: REPL session",

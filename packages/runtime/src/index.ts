@@ -1,19 +1,19 @@
 /**
- * @svatah/runtime
+ * @svatah/yam-runtime
  *
  * The executor core (REQ-RUN-1..13, LLD §8): scope, guards, checkpoints,
  * policies, results, audit — and no model, ever (REQ-RUN-1; the import boundary
  * in LLD §1 makes it structural rather than a promise).
  *
  * Runner-agnostic (REQ-RUN-13). The Playwright Test host calls `runStory` inside
- * a `test()`; `svatah run --host none` calls `run()`. They share every line of
+ * a `test()`; `yam run --host none` calls `run()`. They share every line of
  * what a step *means*, which is what makes REQ-BEH-5 true rather than
  * aspirational.
  *
  * Three things are injected rather than imported, so the dependency graph in
  * LLD §1 stays as drawn (`runtime ─► bindings, surface, schema`): the resolver,
- * the custom-step runner (`@svatah/steps`) and the API runner
- * (`@svatah/adapter-http`). A foreign runtime can supply its own, or say it has
+ * the custom-step runner (`@svatah/yam-steps`) and the API runner
+ * (`@svatah/yam-adapter-http`). A foreign runtime can supply its own, or say it has
  * none and refuse those plans clearly.
  */
 export { run, newRunId, expandRuns, type RunOptions, type RunOutcome } from "./run.js";

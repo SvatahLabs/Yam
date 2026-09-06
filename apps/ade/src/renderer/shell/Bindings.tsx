@@ -4,12 +4,12 @@
  *
  * The store as a table, and an inspector with the selected element's resolver
  * order, its fingerprint and where it came from. The rows are the YAML files
- * `svatah bindings show` prints — `GET /bindings/:id` answers the bytes on
+ * `yam bindings show` prints — `GET /bindings/:id` answers the bytes on
  * disk — so a candidate table here and a candidate table in a pull request are
  * the same thing.
  */
-import { InspectorSection, KeyValues, Pill, Table } from "@svatah/ui";
-import type { Action, BindingsState, ScreenParams } from "@svatah/screens";
+import { InspectorSection, KeyValues, Pill, Table } from "@svatah/yam-ui";
+import type { Action, BindingsState, ScreenParams } from "@svatah/yam-screens";
 import { EmptyInspector, Toolbar } from "./parts.js";
 
 export interface BindingsProps {
@@ -44,7 +44,7 @@ export function BindingsScreen(props: BindingsProps): React.JSX.Element {
           rowKey={(row) => row.elementId}
           selected={state.bindingId ?? ""}
           onSelect={(bindingId) => props.onParams({ ...props.params, bindingId })}
-          empty="No bindings yet. `svatah record` writes them."
+          empty="No bindings yet. `yam record` writes them."
           columns={[
             { key: "element", header: "element", monospace: true, cell: (row) => row.elementId },
             { key: "phrase", header: "phrase", cell: (row) => row.phrase ?? "—" },

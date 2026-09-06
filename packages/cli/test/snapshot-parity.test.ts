@@ -12,15 +12,15 @@
  * needs it to — but this: both adapters are driven over the same pages and
  * required to report the same roles, names and states.
  *
- * It lives in `@svatah/cli` because the CLI is the one package LLD §1 allows to
+ * It lives in `@svatah/yam` because the CLI is the one package LLD §1 allows to
  * import every adapter. Putting it in either adapter would put the other one in
  * that adapter's dependency tree.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { bidiAvailable, BidiSurface } from "@svatah/adapter-bidi";
-import { PlaywrightSurface } from "@svatah/adapter-playwright";
-import type { AgentSurface, SnapshotNode } from "@svatah/surface";
+import { bidiAvailable, BidiSurface } from "@svatah/yam-adapter-bidi";
+import { PlaywrightSurface } from "@svatah/yam-adapter-playwright";
+import type { AgentSurface, SnapshotNode } from "@svatah/yam-surface";
 
 const available = bidiAvailable();
 const describeWithBidi = available ? describe : describe.skip;
@@ -28,7 +28,7 @@ const describeWithBidi = available ? describe : describe.skip;
 if (!available) {
   console.warn(
     "snapshot parity: no WebDriver BiDi endpoint and no Gecko browser, so the cross-adapter " +
-      "comparison is skipped. `pnpm browsers` downloads one, or set SVATAH_BIDI_URL.",
+      "comparison is skipped. `pnpm browsers` downloads one, or set YAM_BIDI_URL.",
   );
 }
 

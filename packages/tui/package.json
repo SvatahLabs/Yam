@@ -1,7 +1,7 @@
 {
-  "name": "@svatah/tui",
+  "name": "@svatah/yam-tui",
   "version": "0.1.0",
-  "description": "`svatah ui` — the terminal cockpit, a second renderer of the screen model (REQ-TUI-1)",
+  "description": "`yam ui` — the terminal cockpit, a second renderer of the screen model (REQ-TUI-1)",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,9 +26,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/screens": "workspace:*",
-    "@svatah/sdk": "workspace:*",
-    "@svatah/ui-tokens": "workspace:*",
+    "@svatah/yam-screens": "workspace:*",
+    "@svatah/yam-sdk": "workspace:*",
+    "@svatah/yam-ui-tokens": "workspace:*",
     "ink": "^7.1.1",
     "react": "^19.2.8"
   },

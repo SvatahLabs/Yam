@@ -11,7 +11,7 @@
  * resolver's independence: it knows `AgentSurface` and nothing else.
  */
 import { describe, expect, it } from "vitest";
-import { buildSnapshot, structuralHash } from "@svatah/surface";
+import { buildSnapshot, structuralHash } from "@svatah/yam-surface";
 import { BindingsStore, LocatorError, resolve, tryResolve } from "../src/index.js";
 import { StubSurface } from "./stub-surface.js";
 import { candidate, entry } from "./fixtures.js";
@@ -243,7 +243,7 @@ describe("LocatorError (REQ-RUN-5, REQ-HEAL-1)", () => {
   });
 
   it("is a LocateError, so the executor classifies it as `locator` (LLD §8.4)", async () => {
-    const { failureClassOf } = await import("@svatah/surface");
+    const { failureClassOf } = await import("@svatah/yam-surface");
     const surface = new StubSurface({ fallback: { kind: "refs", refs: [] } });
     const result = await tryResolve(ID, surface, storeWith(candidate({ by: "id", value: "x" })));
     expect(result.ok).toBe(false);
@@ -310,7 +310,7 @@ describe("LocatorError (REQ-RUN-5, REQ-HEAL-1)", () => {
     expect(line["recordedHash"]).toBe("a".repeat(64));
     expect(Array.isArray(line["tried"])).toBe(true);
     expect((line["tried"] as Array<{ by: string }>).map((t) => t.by)).toEqual(["testid", "css"]);
-    // It has to survive JSON: `.svatah/bind-failures.jsonl` is one line per failure.
+    // It has to survive JSON: `.yam/bind-failures.jsonl` is one line per failure.
     expect(() => JSON.parse(JSON.stringify(line))).not.toThrow();
   });
 });

@@ -1,8 +1,8 @@
 /**
- * `@svatah/sdk` — the typed client for the local service (T9.3, REQ-SDK-1,
+ * `@svatah/yam-sdk` — the typed client for the local service (T9.3, REQ-SDK-1,
  * LLD §13.8).
  *
- * > `@svatah/sdk` (TypeScript): a typed client generated from the service's
+ * > `@svatah/yam-sdk` (TypeScript): a typed client generated from the service's
  * > OpenAPI description at build time, plus `subscribe()` over the SSE and
  * > WebSocket streams with typed events, plus `actions` (the screen model's
  * > action list, runnable out of process). Nothing in it is hand-written that
@@ -15,22 +15,22 @@
  *    `tools/repo-checks/test/client-drift.test.ts` regenerates and diffs.
  * 2. **`subscribe()`** — the event stream, which an OpenAPI description cannot
  *    express as anything but "a string".
- * 3. **`actions`** — `@svatah/screens`'s registry, so an agent out of process
+ * 3. **`actions`** — `@svatah/yam-screens`'s registry, so an agent out of process
  *    runs the same action a person clicks, by the same id.
- * 4. **`connect()`** — where the service is: `SVATAH_SERVICE_URL` and
- *    `SVATAH_SERVICE_TOKEN`, or the lock file the ADE writes. Never a model
+ * 4. **`connect()`** — where the service is: `YAM_SERVICE_URL` and
+ *    `YAM_SERVICE_TOKEN`, or the lock file the ADE writes. Never a model
  *    credential (§13.8).
  *
  * ## Node, not a browser
  *
  * `connect()` reads the environment and a lock file, so this package targets
- * Node — a CI job, an agent, `svatah ui`. The ADE's *renderer* is a browser and
+ * Node — a CI job, an agent, `yam ui`. The ADE's *renderer* is a browser and
  * has neither: it is handed a `{ url, token }` by its preload bridge and
- * constructs `SvatahClient` directly, which needs nothing from `node:fs`.
+ * constructs `YamClient` directly, which needs nothing from `node:fs`.
  */
 import { existsSync, readFileSync } from "node:fs";
-import { ACTIONS, actionById } from "@svatah/screens";
-import type { Action, ActionArgs, ActionOutcome, ScreenService } from "@svatah/screens";
+import { ACTIONS, actionById } from "@svatah/yam-screens";
+import type { Action, ActionArgs, ActionOutcome, ScreenService } from "@svatah/yam-screens";
 import { GeneratedClient, ServiceError, EVENT_KINDS, ENDPOINTS } from "./generated.js";
 import type { EventKind, ServiceConnection, ServiceEndpoint } from "./generated.js";
 
@@ -41,7 +41,7 @@ export type { EventKind, ServiceConnection, ServiceEndpoint };
  * One message off the stream.
  *
  * `kind` is the union the description lists; the rest is carried through
- * untyped, because the *shapes* are `@svatah/schema`'s and re-deriving them here
+ * untyped, because the *shapes* are `@svatah/yam-schema`'s and re-deriving them here
  * would make a second set of the same types (REQ-STD-1). A caller that wants a
  * `StepResult` parses `event.result` with `stepResultSchema`.
  */
@@ -66,15 +66,15 @@ export interface SubscribeOptions {
  * The client.
  *
  * `ScreenService`-shaped by construction: it has a method per route with the
- * generated names, and `subscribe`. So `@svatah/screens`'s screens load against
+ * generated names, and `subscribe`. So `@svatah/yam-screens`'s screens load against
  * it with nothing to adapt, which is what "the same screens through the service"
  * means (REQ-ADE-13).
  */
-export class SvatahClient extends GeneratedClient implements ScreenService {
+export class YamClient extends GeneratedClient implements ScreenService {
   /**
    * Every action the screen model has, runnable out of process (§13.8).
    *
-   * The same list, by the same ids, that the ADE's palette and `svatah ui`'s
+   * The same list, by the same ids, that the ADE's palette and `yam ui`'s
    * palette show — `tools/repo-checks/test/action-parity.test.ts` is what holds
    * the three together.
    */
@@ -216,25 +216,25 @@ export class SvatahClient extends GeneratedClient implements ScreenService {
  * Where the service is (LLD §13.8).
  *
  * > Auth is the bearer token the service prints; the SDK reads
- * > `SVATAH_SERVICE_URL` and `SVATAH_SERVICE_TOKEN` or a lock file, and never a
+ * > `YAM_SERVICE_URL` and `YAM_SERVICE_TOKEN` or a lock file, and never a
  * > model credential.
  *
  * In that order, and the order matters: an environment variable is what a CI job
  * and an agent set, and the lock file is what the ADE wrote for a service it is
  * already running. A caller that passes a connection outright skips both.
  */
-export function connect(connection?: Partial<ServiceConnection>): SvatahClient {
-  const url = connection?.url ?? process.env["SVATAH_SERVICE_URL"];
-  const token = connection?.token ?? process.env["SVATAH_SERVICE_TOKEN"];
+export function connect(connection?: Partial<ServiceConnection>): YamClient {
+  const url = connection?.url ?? process.env["YAM_SERVICE_URL"];
+  const token = connection?.token ?? process.env["YAM_SERVICE_TOKEN"];
 
-  if (url !== undefined && token !== undefined) return new SvatahClient({ url, token });
+  if (url !== undefined && token !== undefined) return new YamClient({ url, token });
 
   const lock = readLock();
-  if (lock !== undefined) return new SvatahClient(lock);
+  if (lock !== undefined) return new YamClient(lock);
 
   throw new Error(
-    "No Svatah service to connect to. Start one with `svatah serve --project <dir>` and set " +
-      "SVATAH_SERVICE_URL and SVATAH_SERVICE_TOKEN to the url and token it prints, or open the " +
+    "No Yam service to connect to. Start one with `yam serve --project <dir>` and set " +
+      "YAM_SERVICE_URL and YAM_SERVICE_TOKEN to the url and token it prints, or open the " +
       "project in the ADE, which writes a lock file this reads. The SDK never reads a model " +
       "credential (LLD §13.8).",
   );
@@ -243,13 +243,13 @@ export function connect(connection?: Partial<ServiceConnection>): SvatahClient {
 /**
  * The lock file the ADE writes for a service it started (LLD §13.6).
  *
- * `SVATAH_SERVICE_LOCK` names one directly; otherwise the ADE's user-data
+ * `YAM_SERVICE_LOCK` names one directly; otherwise the ADE's user-data
  * directory is searched for the newest. Read lazily and defensively: a stale
  * lock from a service that died is a file that parses and a port that refuses,
  * and the connection error a caller then gets says which.
  */
 function readLock(): ServiceConnection | undefined {
-  const named = process.env["SVATAH_SERVICE_LOCK"];
+  const named = process.env["YAM_SERVICE_LOCK"];
   if (named === undefined) return undefined;
   try {
     if (!existsSync(named)) return undefined;
@@ -261,5 +261,5 @@ function readLock(): ServiceConnection | undefined {
   }
 }
 
-export { ACTIONS, actionById } from "@svatah/screens";
-export type { Action, ActionArgs, ActionOutcome, ScreenService } from "@svatah/screens";
+export { ACTIONS, actionById } from "@svatah/yam-screens";
+export type { Action, ActionArgs, ActionOutcome, ScreenService } from "@svatah/yam-screens";

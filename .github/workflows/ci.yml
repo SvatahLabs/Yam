@@ -59,7 +59,7 @@ jobs:
       # remote agent *is* a WebDriver BiDi server, so the independence proof
       # (T4.1) needs a browser that speaks the protocol natively (LLD §7.3).
       - name: Install browsers
-        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium firefox
+        run: pnpm --filter @svatah/yam-adapter-playwright exec playwright install --with-deps chromium firefox
 
       - name: Test
         run: pnpm -r test
@@ -131,7 +131,7 @@ jobs:
       # remote agent *is* a WebDriver BiDi server, so the independence proof
       # (T4.1) needs a browser that speaks the protocol natively (LLD §7.3).
       - name: Install browsers
-        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium firefox
+        run: pnpm --filter @svatah/yam-adapter-playwright exec playwright install --with-deps chromium firefox
 
       - name: Build
         run: pnpm -r build
@@ -172,7 +172,7 @@ jobs:
       # remote agent *is* a WebDriver BiDi server, so the independence proof
       # (T4.1) needs a browser that speaks the protocol natively (LLD §7.3).
       - name: Install browsers
-        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium firefox
+        run: pnpm --filter @svatah/yam-adapter-playwright exec playwright install --with-deps chromium firefox
 
       - name: Eval (REQ-REC-10)
         run: |
@@ -219,7 +219,7 @@ jobs:
       # remote agent *is* a WebDriver BiDi server, so the independence proof
       # (T4.1) needs a browser that speaks the protocol natively (LLD §7.3).
       - name: Install browsers
-        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium firefox
+        run: pnpm --filter @svatah/yam-adapter-playwright exec playwright install --with-deps chromium firefox
 
       - name: Skip without a credential
         id: credential
@@ -275,7 +275,7 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # The ADE spawns `svatah serve`, so the CLI has to exist before it runs —
+      # The ADE spawns `yam serve`, so the CLI has to exist before it runs —
       # and the generated service client is written from the service's build.
       - name: Build the workspace
         run: pnpm -r build
@@ -287,14 +287,14 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y fakeroot dpkg xvfb
 
       - name: Make
-        run: pnpm --filter @svatah/ade make
+        run: pnpm --filter @svatah/yam-ade make
 
       # T3.6's Validate item: the app opens a fixture project and shows
       # `GET /project` data, and quitting stops the service. Linux runners have
       # no display, so Electron gets a virtual one.
       #
       # T8.1: `make` has run, so `apps/ade/out/` holds a packaged application and
-      # this runs against *that* — with no `SVATAH_CLI`, so the app has to find
+      # this runs against *that* — with no `YAM_CLI`, so the app has to find
       # its own bundled CLI and resolve its own Node. Phase 7's smoke check
       # always launched the development Electron, which has the `RunAsNode` fuse
       # on and a CLI in the workspace, and so could not fail the way the product
@@ -367,9 +367,9 @@ jobs:
         run: node packages/cli/dist/bin.js surface doctor --adapter ${{ matrix.adapter }}
 
       # The conformance target is the ADE itself, packaged and launched with
-      # `SVATAH_A11Y=1` (LLD §16, REQ-ADE-6).
+      # `YAM_A11Y=1` (LLD §16, REQ-ADE-6).
       - name: Package the ADE
-        run: pnpm --filter @svatah/ade exec electron-forge package
+        run: pnpm --filter @svatah/yam-ade exec electron-forge package
 
       # Exit 2 (host not ready) is tolerated and says so; exit 1 (not
       # conformant) fails the leg. Never the other way round.
@@ -398,14 +398,14 @@ jobs:
 
   # T9.3: the generated clients, against a live service (REQ-SDK-1, REQ-SDK-2).
   #
-  # `@svatah/sdk`, `clients/python` and `clients/java` are generated from the
+  # `@svatah/yam-sdk`, `clients/python` and `clients/java` are generated from the
   # service's own OpenAPI description, so the thing worth running in CI is not
   # "do they compile" but "does a client that was generated last month still
   # talk to the service that is here today". Two checks:
   #
   #   * `pnpm clients:check` regenerates all three and diffs — a route the
   #     service renamed and nobody regenerated is a red build (LLD §13.8);
-  #   * `pnpm clients:smoke` starts `svatah serve` on a copy of the fixtures
+  #   * `pnpm clients:smoke` starts `yam serve` on a copy of the fixtures
   #     project and runs each smoke script against it: `GET /project`,
   #     `POST /run`, and the event stream, which is T9.3's Validate item.
   #
@@ -442,7 +442,7 @@ jobs:
       # The smoke runs a flow against the sample application, so it needs a
       # browser — the same chromium every other job installs.
       - name: Install browsers
-        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+        run: pnpm --filter @svatah/yam-adapter-playwright exec playwright install --with-deps chromium
 
       - name: The committed clients are what the description generates
         run: pnpm clients:check
@@ -484,7 +484,7 @@ jobs:
       # The sample application is served by the harness; Playwright for Java
       # brings its own driver but needs the browser's system libraries.
       - name: Install browsers
-        run: pnpm --filter @svatah/adapter-playwright exec playwright install --with-deps chromium
+        run: pnpm --filter @svatah/yam-adapter-playwright exec playwright install --with-deps chromium
 
       - name: Build the Java runtime
         working-directory: runtimes/java

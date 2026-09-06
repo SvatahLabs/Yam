@@ -1,5 +1,5 @@
 /**
- * `svatah workflow run <story>` (T5.2, REQ-BEH-2, REQ-AUTO-5, 7, LLD §13.2, §15).
+ * `yam workflow run <story>` (T5.2, REQ-BEH-2, REQ-AUTO-5, 7, LLD §13.2, §15).
  *
  * T5.2's Validate list:
  *
@@ -21,11 +21,11 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import type { AuditLine, Summary } from "@svatah/schema";
+import type { AuditLine, Summary } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 
 const CARD = "5123456789012346";
 
@@ -33,14 +33,14 @@ let app: SampleServer;
 const projects: string[] = [];
 
 function scaffold(environment: "test" | "production" = "test"): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-workflow-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-workflow-"));
   projects.push(dir);
-  for (const entry of ["bindings", "flows", "api", "data.yaml", "svatah.config.yaml"]) {
+  for (const entry of ["bindings", "flows", "api", "data.yaml", "yam.config.yaml"]) {
     cpSync(join(FIXTURES, entry), join(dir, entry), { recursive: true });
   }
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
-    readFileSync(join(dir, "svatah.config.yaml"), "utf8")
+    join(dir, "yam.config.yaml"),
+    readFileSync(join(dir, "yam.config.yaml"), "utf8")
       .replace("environment: test", `environment: ${environment}`)
       .replace(/^ {2}baseUrl: .*$/m, `  baseUrl: "${app.origin}"`),
     "utf8",
@@ -52,14 +52,14 @@ function cli(args: readonly string[], cwd: string): Promise<{ code: number; out:
   return new Promise((done) => {
     let out = "";
     let err = "";
-    const child = spawn(process.execPath, [SVATAH, ...args], {
+    const child = spawn(process.execPath, [YAM, ...args], {
       cwd,
       env: {
         ...process.env,
-        SVATAH_BASE_URL: app.origin,
-        SVATAH_SAMPLE_PASSWORD: "qwerty123",
-        SVATAH_SAMPLE_CARD_NUMBER: CARD,
-        SVATAH_SAMPLE_CARD_CVV: "123",
+        YAM_BASE_URL: app.origin,
+        YAM_SAMPLE_PASSWORD: "qwerty123",
+        YAM_SAMPLE_CARD_NUMBER: CARD,
+        YAM_SAMPLE_CARD_CVV: "123",
       },
     });
     child.stdout.on("data", (chunk) => (out += String(chunk)));
@@ -69,7 +69,7 @@ function cli(args: readonly string[], cwd: string): Promise<{ code: number; out:
 }
 
 beforeAll(async () => {
-  if (!existsSync(SVATAH)) throw new Error("Run `pnpm -r build` first.");
+  if (!existsSync(YAM)) throw new Error("Run `pnpm -r build` first.");
   app = await startSampleApp(0);
 }, 120_000);
 
@@ -126,7 +126,7 @@ describe("a story with a signature runs as a function (REQ-BEH-2, REQ-AUTO-5)", 
      * the start, and a workflow that got halfway through cannot.
      */
     const project = scaffold();
-    expect(readFileSync(join(project, "svatah.config.yaml"), "utf8")).toContain(
+    expect(readFileSync(join(project, "yam.config.yaml"), "utf8")).toContain(
       "checkpoints: false",
     );
 

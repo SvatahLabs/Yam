@@ -25,7 +25,7 @@ import { copyProjectParts, SELF_PROJECT_PARTS } from "../../../scripts/lib/self-
 describe("the self project is copyable from a clean checkout (P11-F1)", () => {
   it("tracks a placeholder in every optional directory its config names", () => {
     /*
-     * `svatah.config.yaml` names `steps: { dir: steps }` and `api: { dir: api }`,
+     * `yam.config.yaml` names `steps: { dir: steps }` and `api: { dir: api }`,
      * and a directory a config names is one a copying script will reach for.
      */
     for (const part of ["steps", "api"]) {
@@ -38,8 +38,8 @@ describe("the self project is copyable from a clean checkout (P11-F1)", () => {
   });
 
   it("copies a project whose optional directories are absent, and says which", () => {
-    const from = mkdtempSync(join(tmpdir(), "svatah-self-project-from-"));
-    const to = mkdtempSync(join(tmpdir(), "svatah-self-project-to-"));
+    const from = mkdtempSync(join(tmpdir(), "yam-self-project-from-"));
+    const to = mkdtempSync(join(tmpdir(), "yam-self-project-to-"));
     try {
       mkdirSync(join(from, "flows"), { recursive: true });
       writeFileSync(join(from, "flows", "one.flow"), "story: one\n\n", "utf8");
@@ -55,8 +55,8 @@ describe("the self project is copyable from a clean checkout (P11-F1)", () => {
   });
 
   it("still refuses a project with no flows, which is not a project", () => {
-    const from = mkdtempSync(join(tmpdir(), "svatah-self-project-empty-"));
-    const to = mkdtempSync(join(tmpdir(), "svatah-self-project-empty-to-"));
+    const from = mkdtempSync(join(tmpdir(), "yam-self-project-empty-"));
+    const to = mkdtempSync(join(tmpdir(), "yam-self-project-empty-to-"));
     try {
       expect(() => copyProjectParts(from, to, ["flows"])).toThrow(/not a project/);
     } finally {

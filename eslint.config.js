@@ -1,4 +1,4 @@
-// Svatah workspace lint configuration.
+// Yam workspace lint configuration.
 //
 // The substance of this file is the import-boundary enforcement required by
 // LLD §1 and REQ-SURF-2 / REQ-PKG-1. Every boundary is expressed twice:
@@ -33,7 +33,7 @@
 //   * a **computed dynamic specifier** — `await import(`@svatah/${name}`)`, or
 //     any expression the linter cannot evaluate. The selectors match a `Literal`
 //     argument; a template or a variable is not one.
-//   * **`createRequire`** — `createRequire(import.meta.url)("@svatah/gateway")`,
+//   * **`createRequire`** — `createRequire(import.meta.url)("@svatah/yam-gateway")`,
 //     and equally `process.getBuiltinModule`, `require.resolve` reached through
 //     an alias, or anything else that gets to a module through a value rather
 //     than through syntax.
@@ -138,8 +138,8 @@ const PLAYWRIGHT_ONLY = ["playwright-test", "host-playwright", "bindings-cli"];
  * `schema`)."
  *
  * Stricter than the spec's parenthetical, and for a reason. The first draft had
- * the service import `@svatah/cli`, which satisfied the rule and made the
- * workspace graph cyclic — the CLI mounts `svatah serve` — so a clean clone
+ * the service import `@svatah/yam`, which satisfied the rule and made the
+ * workspace graph cyclic — the CLI mounts `yam serve` — so a clean clone
  * failed to build with the service's type build running before the CLI had any
  * types. The CLI now *injects* those functions (`ServiceApi`), and the service
  * imports `schema` alone.
@@ -154,14 +154,14 @@ const SERVICE_MAY_NOT_IMPORT = ALL_PACKAGES.filter(
 /**
  * The screen model is over the wire and nothing else (Draft 2.11, LLD §13.7).
  *
- * "A screen's logic lives in `@svatah/screens`; the ADE and `svatah ui` render
+ * "A screen's logic lives in `@svatah/yam-screens`; the ADE and `yam ui` render
  * it and add nothing." A screen reaches the world through a `ScreenService` it
  * is *handed* — the interface in `packages/screens/src/service.ts` — so it may
- * name `@svatah/schema` for the wire shapes and nothing else in the workspace.
+ * name `@svatah/yam-schema` for the wire shapes and nothing else in the workspace.
  *
- * Two things this stops. A screen that imported `@svatah/runtime` or
- * `@svatah/compiler` would be a screen doing work the CLI cannot (the review
- * rule of §13.6, from the other side). A screen that imported `@svatah/sdk`
+ * Two things this stops. A screen that imported `@svatah/yam-runtime` or
+ * `@svatah/yam-compiler` would be a screen doing work the CLI cannot (the review
+ * rule of §13.6, from the other side). A screen that imported `@svatah/yam-sdk`
  * would make the graph cyclic: the SDK takes its `actions` from here (§13.8).
  */
 const SCREENS_MAY_NOT_IMPORT = ALL_PACKAGES.filter(
@@ -171,7 +171,7 @@ const SCREENS_MAY_NOT_IMPORT = ALL_PACKAGES.filter(
 /**
  * Neither renderer imports a runtime package (Draft 2.11, working rule 3).
  *
- * `@svatah/tui` is `svatah ui`; the ADE is `apps/ade` and is held to the same
+ * `@svatah/yam-tui` is `yam ui`; the ADE is `apps/ade` and is held to the same
  * rule by its own manifest, which declares the surface packages and nothing
  * that replays a plan. A renderer that could reach the executor would be a
  * renderer that could do something the service cannot, and the whole point of
@@ -188,12 +188,12 @@ export const BOUNDARIES = [
   ...SERVICE_MAY_NOT_IMPORT.map((to) => ({
     from: "service",
     to,
-    why: "LLD §13.5: the service may import @svatah/cli and @svatah/schema only; no logic lives in a handler.",
+    why: "LLD §13.5: the service may import @svatah/yam and @svatah/yam-schema only; no logic lives in a handler.",
   })),
   ...SCREENS_MAY_NOT_IMPORT.map((to) => ({
     from: "screens",
     to,
-    why: "LLD §13.7: the screen model is a view over the service it is handed; it may import @svatah/schema and nothing else (REQ-ADE-10).",
+    why: "LLD §13.7: the screen model is a view over the service it is handed; it may import @svatah/yam-schema and nothing else (REQ-ADE-10).",
   })),
   ...RENDERER_MAY_NOT_IMPORT.map((to) => ({
     from: "tui",
@@ -238,11 +238,17 @@ export const BOUNDARIES = [
   ),
 ];
 
+/**
+ * The npm specifier of a workspace package directory (Draft 2.18): the CLI is the
+ * umbrella package `@svatah/yam`; every other package is `@svatah/yam-<dir>`.
+ */
+const specifierOf = (dir) => (dir === "cli" ? "@svatah/yam" : `@svatah/yam-${dir}`);
+
 /** `import/no-restricted-paths` zones, keyed on resolved file paths. */
 const zones = BOUNDARIES.map(({ from, to, why }) => ({
   target: `./packages/${from}/src`,
   from: `./packages/${to}`,
-  message: `@svatah/${from} must not import @svatah/${to}. ${why}`,
+  message: `${specifierOf(from)} must not import ${specifierOf(to)}. ${why}`,
 }));
 
 /**
@@ -259,8 +265,8 @@ const specifierBlocks = ALL_PACKAGES.map((from) => {
         "error",
         {
           patterns: forbidden.map(({ to, why }) => ({
-            group: [`@svatah/${to}`, `@svatah/${to}/*`],
-            message: `@svatah/${from} must not import @svatah/${to}. ${why}`,
+            group: [specifierOf(to), `${specifierOf(to)}/*`],
+            message: `${specifierOf(from)} must not import ${specifierOf(to)}. ${why}`,
           })),
         },
       ],
@@ -271,8 +277,8 @@ const specifierBlocks = ALL_PACKAGES.map((from) => {
       "no-restricted-syntax": [
         "error",
         ...forbidden.flatMap(({ to, why }) => {
-          const message = `@svatah/${from} must not import @svatah/${to}. ${why}`;
-          const pattern = `/^@svatah\\u002F${to}(\\u002F|$)/`;
+          const message = `${specifierOf(from)} must not import ${specifierOf(to)}. ${why}`;
+          const pattern = `/^${specifierOf(to).replace("/", "\\u002F")}(\\u002F|$)/`;
           return [
             { selector: `ImportExpression > Literal[value=${pattern}]`, message },
             {
@@ -299,10 +305,10 @@ export default tseslint.config(
       // not source and linting it says nothing about this repository.
       "**/.vite/**",
       "apps/ade/out/**",
-      // `.svatah/` is a project's scratch directory — a compiled plan, a heal
+      // `.yam/` is a project's scratch directory — a compiled plan, a heal
       // diff, a model cache — and is git-ignored everywhere. It is generated
       // output, not source, and linting it says nothing about this repository.
-      "**/.svatah/**",
+      "**/.yam/**",
     ],
   },
   js.configs.recommended,

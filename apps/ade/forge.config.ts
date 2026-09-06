@@ -29,23 +29,23 @@ import type { ForgeConfig } from "@electron-forge/shared-types";
  * or a person's, fails them." The two callers in this repository — the
  * Playwright cases in `test/shell.spec.ts` and the desktop gate in
  * `scripts/desktop-conformance.mjs` — both packaged into `out/` and both looked
- * for a process called `Svatah ADE`, so running the suite beside the gate meant
+ * for a process called `Yam ADE`, so running the suite beside the gate meant
  * each one stopping the other's application mid-case.
  *
- * `SVATAH_ADE_TEST_BUILD=1` (which `node scripts/package-ade.mjs --test` sets)
+ * `YAM_ADE_TEST_BUILD=1` (which `node scripts/package-ade.mjs --test` sets)
  * gives the suite's build a product name, a bundle identifier and an output
  * directory of its own. Then `pgrep -f <executable>` cannot match the other's,
- * the accessibility bridge's `--process "Svatah ADE"` cannot address it, and a
+ * the accessibility bridge's `--process "Yam ADE"` cannot address it, and a
  * person's own ADE — installed anywhere — is untouched by either.
  */
-const testBuild = process.env["SVATAH_ADE_TEST_BUILD"] === "1";
-const productName = testBuild ? "Svatah ADE Test" : "Svatah ADE";
+const testBuild = process.env["YAM_ADE_TEST_BUILD"] === "1";
+const productName = testBuild ? "Yam ADE Test" : "Yam ADE";
 
 const config: ForgeConfig = {
   outDir: testBuild ? "out-test" : "out",
   packagerConfig: {
     name: productName,
-    appBundleId: testBuild ? "com.electron.svatah-ade-test" : "com.electron.svatah-ade",
+    appBundleId: testBuild ? "com.svatah.yam.ade.test" : "com.svatah.yam.ade",
     // The project directory is the only source of truth (REQ-ADE-2), so there is
     // nothing to sign a manifest of and nothing to bundle but the app.
     asar: true,
@@ -53,12 +53,12 @@ const config: ForgeConfig = {
      * The bundled CLI (T8.1, LLD §13.6: "locate the bundled CLI").
      *
      * `scripts/stage-ade-cli.mjs` writes it here with `pnpm deploy`, and Forge
-     * copies it to `Resources/svatah`. Outside the asar on purpose: the ADE
+     * copies it to `Resources/yam`. Outside the asar on purpose: the ADE
      * *spawns* the CLI, and a program inside an asar has no path a `spawn` can
      * use. Phase 7 shipped an application with nothing here, which is why a
      * packaged ADE could not open a project even with a Node to hand (P7-F1).
      */
-    extraResource: [".stage/svatah"],
+    extraResource: [".stage/yam"],
   },
   rebuildConfig: {},
 
@@ -70,9 +70,9 @@ const config: ForgeConfig = {
    */
   makers: [
     new MakerZIP({}, ["darwin", "linux", "win32"]),
-    new MakerSquirrel({ name: testBuild ? "svatah_ade_test" : "svatah_ade" }, ["win32"]),
+    new MakerSquirrel({ name: testBuild ? "yam_ade_test" : "yam_ade" }, ["win32"]),
     new MakerDeb(
-      { options: { name: testBuild ? "svatah-ade-test" : "svatah-ade", productName } },
+      { options: { name: testBuild ? "yam-ade-test" : "yam-ade", productName } },
       ["linux"],
     ),
   ],

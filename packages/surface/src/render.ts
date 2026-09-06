@@ -1,4 +1,4 @@
-import type { Snapshot, SnapshotNode } from "@svatah/schema";
+import type { Snapshot, SnapshotNode } from "@svatah/yam-schema";
 
 /**
  * The snapshot text renderer (LLD §2.2).

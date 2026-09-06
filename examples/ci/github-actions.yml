@@ -1,9 +1,9 @@
-# Replaying a Svatah flow in GitHub Actions (REQ-BEH-1, REQ-AGT-4).
+# Replaying a Yam flow in GitHub Actions (REQ-BEH-1, REQ-AGT-4).
 #
 # Orchestration is external: this is an ordinary job that runs a command and
-# keeps the files it wrote. Svatah has no scheduler and no dashboard, and the
+# keeps the files it wrote. Yam has no scheduler and no dashboard, and the
 # whole account of a run is `runs/<id>/`.
-name: Svatah
+name: Yam
 
 on:
   pull_request:
@@ -30,16 +30,16 @@ jobs:
       # regenerated on every run would make them invisible.
       - name: The committed plan is the plan this flow compiles to
         run: |
-          pnpm svatah compile --stable
-          git diff --exit-code .svatah/plan.json
+          pnpm yam compile --stable
+          git diff --exit-code .yam/plan.json
 
       # Replay. No credential: the runtime cannot import the model gateway and
       # the import boundary is linted (REQ-RUN-1).
       - name: Replay
         env:
-          SVATAH_BASE_URL: ${{ vars.APP_URL }}
-          SVATAH_INPUT_PASSWORD: ${{ secrets.APP_PASSWORD }}
-        run: pnpm svatah run --host playwright
+          YAM_BASE_URL: ${{ vars.APP_URL }}
+          YAM_INPUT_PASSWORD: ${{ secrets.APP_PASSWORD }}
+        run: pnpm yam run --host playwright
 
       # Whatever happened, keep the record: results, summary, audit,
       # checkpoints, screenshots and traces. A failure is then readable without
@@ -48,7 +48,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: svatah-runs
+          name: yam-runs
           path: runs/
 
       # A heal *proposes*; it never applies (REQ-HEAL-2). The diff belongs in a
@@ -57,13 +57,13 @@ jobs:
       - name: Propose repairs for the locator failures
         if: failure()
         env:
-          SVATAH_BASE_URL: ${{ vars.APP_URL }}
-          SVATAH_INPUT_PASSWORD: ${{ secrets.APP_PASSWORD }}
-        run: pnpm svatah heal --run "$(ls -1 runs | tail -1)" || true
+          YAM_BASE_URL: ${{ vars.APP_URL }}
+          YAM_INPUT_PASSWORD: ${{ secrets.APP_PASSWORD }}
+        run: pnpm yam heal --run "$(ls -1 runs | tail -1)" || true
 
       - name: Keep the proposed diff
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: svatah-heal
-          path: .svatah/heal/
+          name: yam-heal
+          path: .yam/heal/

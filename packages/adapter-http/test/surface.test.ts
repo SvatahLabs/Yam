@@ -8,7 +8,7 @@
  * plan at start (LLD §2.4).
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { ApiRequest } from "@svatah/schema";
+import type { ApiRequest } from "@svatah/yam-schema";
 import { HttpSurface } from "../src/index.js";
 import { startEchoServer, type EchoServer } from "./server.js";
 

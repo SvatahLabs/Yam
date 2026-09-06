@@ -5,7 +5,7 @@
     "What the command palette shows: every action's id, label, key and CLI command,",
     "in palette order. This file is maintained by hand and is one of the three",
     "things `tools/repo-checks/test/action-parity.test.ts` compares — the other two",
-    "being `@svatah/screens`'s registry and the CLI's own command table. A check",
+    "being `@svatah/yam-screens`'s registry and the CLI's own command table. A check",
     "that generated this from the registry would compare the registry with itself,",
     "so renaming an action here without renaming it there (or the other way round)",
     "is exactly what has to fail.",
@@ -20,7 +20,7 @@
       "label": "Compile",
       "group": "Actions",
       "screen": "flows",
-      "cli": "svatah compile"
+      "cli": "yam compile"
     },
     {
       "id": "flows.save",
@@ -35,14 +35,14 @@
       "group": "Actions",
       "screen": "flows",
       "key": "⌘↵",
-      "cli": "svatah run --flow <file>"
+      "cli": "yam run --flow <file>"
     },
     {
       "id": "run.story",
       "label": "Run story",
       "group": "Actions",
       "screen": "flows",
-      "cli": "svatah run --story <name>"
+      "cli": "yam run --story <name>"
     },
     {
       "id": "run.again",
@@ -50,14 +50,14 @@
       "group": "Actions",
       "screen": "run",
       "key": "⌘↵",
-      "cli": "svatah run --flow <file>"
+      "cli": "yam run --flow <file>"
     },
     {
       "id": "run.resume",
       "label": "Resume from step",
       "group": "Actions",
       "screen": "run",
-      "cli": "svatah run --resume <runId> --from <stepId>"
+      "cli": "yam run --resume <runId> --from <stepId>"
     },
     {
       "id": "record.start",
@@ -65,7 +65,7 @@
       "group": "Actions",
       "screen": "flows",
       "key": "R",
-      "cli": "svatah record --flow <file>"
+      "cli": "yam record --flow <file>"
     },
     {
       "id": "record.accept",
@@ -107,14 +107,14 @@
       "group": "Actions",
       "screen": "run",
       "key": "H",
-      "cli": "svatah heal --run <id>"
+      "cli": "yam heal --run <id>"
     },
     {
       "id": "heal.bind-failures",
       "label": "Heal from bind failures",
       "group": "Actions",
       "screen": "heal",
-      "cli": "svatah heal --from-bind-failures"
+      "cli": "yam heal --from-bind-failures"
     },
     {
       "id": "heal.apply",
@@ -128,14 +128,14 @@
       "group": "Actions",
       "screen": "bindings",
       "key": "V",
-      "cli": "svatah bindings verify"
+      "cli": "yam bindings verify"
     },
     {
       "id": "bindings.prune",
       "label": "Prune unused bindings",
       "group": "Actions",
       "screen": "bindings",
-      "cli": "svatah bindings prune"
+      "cli": "yam bindings prune"
     },
     {
       "id": "api.send",
@@ -162,7 +162,7 @@
       "label": "Start the tool server",
       "group": "Actions",
       "screen": "agents",
-      "cli": "svatah tool serve"
+      "cli": "yam tool serve"
     },
     {
       "id": "explorer.open",
@@ -170,7 +170,7 @@
       "group": "Actions",
       "screen": "explorer",
       "key": "O",
-      "cli": "svatah surface snapshot"
+      "cli": "yam surface snapshot"
     },
     {
       "id": "explorer.close",
@@ -183,28 +183,28 @@
       "label": "Act on the element",
       "group": "Actions",
       "screen": "explorer",
-      "cli": "svatah surface act"
+      "cli": "yam surface act"
     },
     {
       "id": "explorer.snapshot",
       "label": "Snapshot the session",
       "group": "Actions",
       "screen": "explorer",
-      "cli": "svatah surface snapshot"
+      "cli": "yam surface snapshot"
     },
     {
       "id": "import.prototype",
       "label": "Import the database",
       "group": "Actions",
       "screen": "import",
-      "cli": "svatah migrate <dest> --from-ade <electron-db dir>"
+      "cli": "yam migrate <dest> --from-ade <electron-db dir>"
     },
     {
       "id": "trajectory.compile",
       "label": "Compile a trajectory",
       "group": "Actions",
       "screen": "explorer",
-      "cli": "svatah trajectory compile <trajectory.jsonl>"
+      "cli": "yam trajectory compile <trajectory.jsonl>"
     },
     {
       "id": "go.flows",

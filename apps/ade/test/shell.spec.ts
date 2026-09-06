@@ -3,7 +3,7 @@
  * buttons under Playwright" (REQ-ADE-11, REQ-ADE-12, LLD §13.7).
  *
  * The **packaged** ADE, launched by Playwright's Electron support, opened on the
- * fixtures project through `SVATAH_ADE_PROJECT`, against a real
+ * fixtures project through `YAM_ADE_PROJECT`, against a real
  * `apps/sample-web`. Every click is a click on a control the desktop adapters
  * would find by the same name and the same id.
  *
@@ -37,7 +37,7 @@
  * which is what the screens are.
  *
  * It **skips with the reason** when `apps/ade/out/` has no packaged build:
- * packaging is `pnpm --filter @svatah/ade package` and takes about fifteen
+ * packaging is `pnpm --filter @svatah/yam-ade package` and takes about fifteen
  * seconds, and a test that packaged silently would make every run of the suite
  * a build.
  */
@@ -99,7 +99,7 @@ async function currentPage(): Promise<Page> {
   const context = browser.contexts()[0]!;
   const until = Date.now() + 60_000;
   for (;;) {
-      if (process.env["SVATAH_ADE_SPEC_VERBOSE"] === "1") {
+      if (process.env["YAM_ADE_SPEC_VERBOSE"] === "1") {
       process.stderr.write(
         `[pages] ${context
           .pages()
@@ -138,8 +138,8 @@ async function connectWhenReady(): Promise<Browser> {
 /**
  * The build this suite drives (P10-F7).
  *
- * `out-test` first — the suite's own build, product name "Svatah ADE Test",
- * bundle id `com.electron.svatah-ade-test`, made by
+ * `out-test` first — the suite's own build, product name "Yam ADE Test",
+ * bundle id `com.electron.yam-ade-test`, made by
  * `node scripts/package-ade.mjs --test`. It exists so these cases and the
  * desktop gate can run at the same time: both stop leftovers by executable path
  * and both used to package into `out/`, so each stopped the other's application
@@ -151,8 +151,8 @@ async function connectWhenReady(): Promise<Browser> {
  */
 function packagedApp(): string | undefined {
   for (const [directory, product] of [
-    ["out-test", "Svatah ADE Test"],
-    ["out", "Svatah ADE"],
+    ["out-test", "Yam ADE Test"],
+    ["out", "Yam ADE"],
   ] as const) {
     const out = join(ADE, directory);
     if (!existsSync(out)) continue;
@@ -190,7 +190,7 @@ const executable = packagedApp();
 
 test.skip(
   executable === undefined,
-  "No packaged ADE under apps/ade/out. Run `pnpm --filter @svatah/ade package` first: " +
+  "No packaged ADE under apps/ade/out. Run `pnpm --filter @svatah/yam-ade package` first: " +
     "REQ-ADE-6's conformance target is the packaged application, and a development " +
     "Electron cannot fail the way the product failed in Phase 8.",
 );
@@ -202,7 +202,7 @@ test.skip(
  * is still up holds `DEBUG_PORT`, so the new one cannot bind its DevTools
  * endpoint and `connectOverCDP` attaches to the *old* application — which then
  * fails tests about code it does not have. Matching on this checkout's own
- * `apps/ade/out` path means a Svatah ADE somebody has open from elsewhere is
+ * `apps/ade/out` path means a Yam ADE somebody has open from elsewhere is
  * left alone.
  */
 async function stopLeftovers(): Promise<void> {
@@ -249,15 +249,15 @@ test.beforeAll(async () => {
    * A copy of the fixtures project: a run writes `runs/`, and a test that
    * dirtied the repository would be one nobody could run twice.
    */
-  project = mkdtempSync(join(tmpdir(), "svatah-ade-shell-"));
+  project = mkdtempSync(join(tmpdir(), "yam-ade-shell-"));
   cpSync(FIXTURES, project, {
     recursive: true,
     filter: (from) => !from.includes("node_modules") && !from.includes(`${"runs"}`),
   });
   writeFileSync(
-    join(project, "svatah.config.yaml"),
+    join(project, "yam.config.yaml"),
     `schemaVersion: "1.0.0"
-project: "svatah-fixtures"
+project: "yam-fixtures"
 environment: test
 adapter: playwright
 app: { baseUrl: "${app.origin}" }
@@ -288,13 +288,13 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
     env: {
       ...process.env,
       // §13.6: the gate and this test open the project without a dialog.
-      SVATAH_ADE_PROJECT: project,
-      SVATAH_A11Y: "1",
+      YAM_ADE_PROJECT: project,
+      YAM_A11Y: "1",
       // The packaged application carries its own CLI; this points at the
       // workspace's so a rebuild is picked up without repackaging.
-      SVATAH_CLI: CLI,
-      SVATAH_BASE_URL: app.origin,
-      SVATAH_ADE_SMOKE: "",
+      YAM_CLI: CLI,
+      YAM_BASE_URL: app.origin,
+      YAM_ADE_SMOKE: "",
     },
   });
 
@@ -302,13 +302,13 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
    * Read the application's own output, and keep reading it.
    *
    * A piped stdio that nobody drains fills its 64 KB buffer and then *blocks the
-   * writer* — the ADE spawns `svatah serve`, whose logs are chatty, so the
+   * writer* — the ADE spawns `yam serve`, whose logs are chatty, so the
    * window froze part-way through this file and Playwright reported a closed
    * page. Draining is the whole fix; printing it is what makes a failure here
    * legible.
    */
   const say = (prefix: string) => (chunk: Buffer) => {
-    if (process.env["SVATAH_ADE_SPEC_VERBOSE"] === "1") {
+    if (process.env["YAM_ADE_SPEC_VERBOSE"] === "1") {
       process.stderr.write(`[${prefix}] ${String(chunk)}`);
     }
   };
@@ -530,7 +530,7 @@ test("the Run screen shows the run's steps, audit and inspector", async () => {
   await expect(page.locator(".sv-audit-at").first()).toHaveText(/^\d\d\.\d\d\d$/);
 
   // Choosing a step fills the inspector, which is the model re-loading with a
-  // different `selected` — the same thing `svatah ui` does with Enter.
+  // different `selected` — the same thing `yam ui` does with Enter.
   await steps.first().click();
   await expect(page.locator("#inspector-step")).toBeVisible();
 });
@@ -763,11 +763,11 @@ test("the command palette opens on ⌘K and lists the registry's actions", async
 
   // The rows are the registry's: a label, and the CLI command beside it.
   await expect(palette.getByText("Verify all bindings")).toBeVisible();
-  await expect(palette.getByText("svatah bindings verify")).toBeVisible();
+  await expect(palette.getByText("yam bindings verify")).toBeVisible();
 
   // It filters, and it closes.
   await palette.getByLabel("Search or run a command").fill("heal");
-  await expect(palette.getByText("svatah heal --run <id>")).toBeVisible();
+  await expect(palette.getByText("yam heal --run <id>")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(palette).toBeHidden();
 });
@@ -992,7 +992,7 @@ test("the Data screen names every secret and shows none of them", async () => {
   await goTo("data", "Data");
   await expect(page.locator("#data-table")).toBeVisible();
   // The variable, never the value (REQ-NFR-6).
-  await expect(page.locator("#data-table")).toContainText("SVATAH_SAMPLE_PASSWORD");
+  await expect(page.locator("#data-table")).toContainText("YAM_SAMPLE_PASSWORD");
   await page.locator("#data-table tbody tr").first().click();
   await expect(page.locator("#inspector-value")).toBeVisible();
 });
@@ -1010,12 +1010,12 @@ test("the Import screen previews into the open project and nowhere else", async 
   await goTo("import", "Import prototype database");
   await expect(page.locator("#import-source")).toBeVisible();
   await expect(page.locator("#inspector-confinement")).toContainText("anything outside it");
-  await expect(page.locator("#inspector-cli")).toContainText("svatah migrate");
+  await expect(page.locator("#inspector-cli")).toContainText("yam migrate");
 });
 
 test("the Settings screen shows the project and never a credential", async () => {
   await goTo("settings", "Settings");
-  await expect(page.locator("#settings-project")).toContainText("svatah-fixtures");
+  await expect(page.locator("#settings-project")).toContainText("yam-fixtures");
   await expect(page.locator("#settings-run")).toContainText("playwright");
   // A boolean, never the key (REQ-NFR-6, REQ-ADE-4).
   await expect(page.locator("#settings-service")).toContainText(/available|none/);
@@ -1389,7 +1389,7 @@ test("a saved API request is edited and saved through the ADE (K7)", async () =>
 
   // A header the request did not have: the blank last row is how one is added.
   const rows = await page.locator("#api-headers .sv-header-row").count();
-  await page.locator(`#api-header-key-${rows - 1}`).fill("X-Svatah-Test");
+  await page.locator(`#api-header-key-${rows - 1}`).fill("X-Yam-Test");
   await page.locator(`#api-header-value-${rows - 1}`).fill("k7");
   await expect(page.locator(".sv-toolbar").getByText("unsaved")).toBeVisible();
 
@@ -1404,7 +1404,7 @@ test("a saved API request is edited and saved through the ADE (K7)", async () =>
   await expect
     .poll(
       async () =>
-        await page.locator("#api-headers .sv-header-row input[value='X-Svatah-Test']").count(),
+        await page.locator("#api-headers .sv-header-row input[value='X-Yam-Test']").count(),
       { timeout: 60_000 },
     )
     .toBe(1);

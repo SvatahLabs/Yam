@@ -8,7 +8,7 @@
  *
  *   > a variant-1 rename relocalizes live.
  *
- * `SVATAH_A11Y_VARIANT=1` renames the Flows rail item to "Editor" and changes
+ * `YAM_A11Y_VARIANT=1` renames the Flows rail item to "Editor" and changes
  * nothing else about it — its id is the same, and the relocalizer is blind to
  * the id by design (LLD §16: it is the ground-truth key, and scoring on it
  * would let the check find the answer in the answer key). So what has to carry
@@ -28,8 +28,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const at = args.indexOf("--project");
 const project = at < 0 ? join(ROOT, "evals", "self") : args[at + 1];
-const bundle = join(ROOT, "apps", "ade", "out", "Svatah ADE-darwin-arm64", "Svatah ADE.app");
-const executable = join(bundle, "Contents", "MacOS", "Svatah ADE");
+const bundle = join(ROOT, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
+const executable = join(bundle, "Contents", "MacOS", "Yam ADE");
 
 const store = join(project, "bindings", "flows-rail-item.yaml");
 if (!existsSync(store)) {
@@ -52,7 +52,7 @@ const alive = () =>
 
 function stop() {
   if (alive().length === 0) return;
-  spawnSync("osascript", ["-e", 'tell application id "com.electron.svatah-ade" to quit'], {
+  spawnSync("osascript", ["-e", 'tell application id "com.electron.yam-ade" to quit'], {
     encoding: "utf8",
   });
   for (let waited = 0; waited < 20_000 && alive().length > 0; waited += 250) {
@@ -69,10 +69,10 @@ process.stderr.write(
 
 stop();
 const environment = {
-  SVATAH_A11Y: "1",
-  SVATAH_A11Y_VARIANT: "1",
-  SVATAH_CLI: join(ROOT, "packages", "cli", "dist", "bin.js"),
-  SVATAH_ADE_PROJECT: join(ROOT, "evals", "fixtures"),
+  YAM_A11Y: "1",
+  YAM_A11Y_VARIANT: "1",
+  YAM_CLI: join(ROOT, "packages", "cli", "dist", "bin.js"),
+  YAM_ADE_PROJECT: join(ROOT, "evals", "fixtures"),
 };
 const open = ["-n", "-F"];
 for (const [name, value] of Object.entries(environment)) open.push("--env", `${name}=${value}`);
@@ -84,10 +84,10 @@ const surface = await createSurface({
   ...DEFAULT_CONFIG,
   project: "self-relocalize",
   adapter: "ax",
-  app: { processName: "Svatah ADE" },
+  app: { processName: "Yam ADE" },
   run: { ...DEFAULT_CONFIG.run, candidateTimeoutMs: 8_000 },
 });
-await surface.open({ processName: "Svatah ADE" });
+await surface.open({ processName: "Yam ADE" });
 
 const live = (await surface.snapshot()).nodes.find(
   (one) => one.native?.["automationId"] === "rail-flows",

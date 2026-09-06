@@ -47,7 +47,7 @@ export interface AdeBridge {
   /**
    * The result of a project opened by the *main* process (T8.1, §13.6).
    *
-   * `SVATAH_ADE_PROJECT=<dir>` opens a project on ready, before the renderer
+   * `YAM_ADE_PROJECT=<dir>` opens a project on ready, before the renderer
    * exists, so there is no call for the renderer to await. This carries the
    * answer — a connection, or the message the Project screen shows as its
    * alert — to a screen that did not ask for it.

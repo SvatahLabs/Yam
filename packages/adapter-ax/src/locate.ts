@@ -16,8 +16,8 @@
  * not exist here" send whoever reads the failure to different places, and only
  * the first one means the window changed (LLD §6.3).
  */
-import type { Candidate } from "@svatah/schema";
-import { LocateError } from "@svatah/surface";
+import type { Candidate } from "@svatah/yam-schema";
+import { LocateError } from "@svatah/yam-surface";
 import type { AxSnapshotNode } from "./tree.js";
 
 /** Candidate kinds that belong to a web or mobile adapter. */

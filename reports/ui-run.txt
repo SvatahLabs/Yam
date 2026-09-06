@@ -1,10 +1,10 @@
 loading…
-svatah ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-capture-2LBoaA   http://127.0.0.1:61768   Run comp · test behavior · invoker user …
+yam ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-ui-capture-2LBoaA   http://127.0.0.1:61768   Run comp · test behavior · invoker user …
 ┌────────────────────────────────┐┌──────────────────────────────────────────────────────────────────────────────┐┌────────────────────────────────────────────┐
 │ 1 Stories                      ││ 2 Run comp · aborted                                                         ││ 3 Step 5 · Click the pay button            │
 │ I want to book and… failed     ││ ✓  1 Click the Book a slot link                        testid #0    104 ms   ││ failure       locator                      │
 │ cancel a booking    passed     ││ ✓  2 Type "Indiranagar" into the location field        testid #0    38 ms    ││ session       /booking · window 0          │
-└────────────────────────────────┘│ ✓  3 Click the Book now button                         testid #0    46 ms    ││ window        Booking · Svatah Sample      │
+└────────────────────────────────┘│ ✓  3 Click the Book now button                         testid #0    46 ms    ││ window        Booking · Yam Sample      │
                                   │ ✓  4 Remember the text of the booking reference as re… = BK-10428   54 ms    ││ dialog        none                         │
                                   │ ✗  5 Click the pay button                                           9123 ms  ││ policy        compensate: cancel a booking │
                                   │ ✓  1 Click the cancel booking button                   testid #0    36 ms    ││ CANDIDATES TRIED                           │
@@ -25,6 +25,6 @@ svatah ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-ca
 │ 00.428 locate     nav.book-a-slot-link · testid "booking-link" · matched 1 · ok · 22 ms                                                                      │
 │ 00.499 act        click · h0 · ok · 71 ms                                                                                                                    │
 │ 00.503 state      ok · 3 ms                                                                                                                                  │
-│ svatah ui --json streams these same lines to stdout for an agent                                                                                             │
+│ yam ui --json streams these same lines to stdout for an agent                                                                                             │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  s stop  h heal  q quit

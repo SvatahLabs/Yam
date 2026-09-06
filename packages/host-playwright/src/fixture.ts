@@ -1,7 +1,7 @@
 /**
- * The `svatah` fixture (REQ-RUN-12, REQ-BEH-1, LLD §9.1).
+ * The `yam` fixture (REQ-RUN-12, REQ-BEH-1, LLD §9.1).
  *
- * "The `svatah` fixture creates the Playwright adapter over the test's
+ * "The `yam` fixture creates the Playwright adapter over the test's
  * `context`, loads plan and bindings, and owns the scope for the flow so captures
  * cross stories inside the same worker."
  *
@@ -20,13 +20,13 @@
  *
  * A step that fails throws, so Playwright reports it the way it reports any
  * failure — with the trace, the screenshot and the HTML report entry the team
- * already reads. The Svatah failure class is in the message and in an annotation,
+ * already reads. The Yam failure class is in the message and in an annotation,
  * so nothing is lost, but the primary report is the runner's.
  */
 import { test as base, expect, type TestInfo } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { createPlaywrightSurface } from "@svatah/adapter-playwright";
-import { BindingsStore, resolve as resolveBinding } from "@svatah/bindings";
+import { createPlaywrightSurface } from "@svatah/yam-adapter-playwright";
+import { BindingsStore, resolve as resolveBinding } from "@svatah/yam-bindings";
 import {
   DEFAULT_CONFIG,
   planSchema,
@@ -34,38 +34,38 @@ import {
   type Plan,
   type StepResult,
   type Story,
-} from "@svatah/schema";
+} from "@svatah/yam-schema";
 import {
   Auditor,
   MemoryAuditSink,
   Scope,
   runStory,
   type Resolver,
-} from "@svatah/runtime";
-import type { AgentSurface } from "@svatah/surface";
+} from "@svatah/yam-runtime";
+import type { AgentSurface } from "@svatah/yam-surface";
 import { RESULTS_ATTACHMENT } from "./reporter.js";
 
 /** The annotation a failing step leaves, so a report can group by class. */
-export const FAILURE_ANNOTATION = "svatah-failure";
+export const FAILURE_ANNOTATION = "yam-failure";
 /** The annotation a healed test leaves (REQ-HEAL-4). */
 export const HEALED_ANNOTATION = "healed";
 
-export interface SvatahHostOptions {
-  /** Path to `plan.json`. Also `SVATAH_PLAN`. */
-  svatahPlan: string | undefined;
+export interface YamHostOptions {
+  /** Path to `plan.json`. Also `YAM_PLAN`. */
+  yamPlan: string | undefined;
   /** Which flow this spec is for; the plan's `runs` key. */
-  svatahFlow: string | undefined;
-  /** Where the bindings store lives. Also `SVATAH_BINDINGS`. */
-  svatahBindings: string | undefined;
+  yamFlow: string | undefined;
+  /** Where the bindings store lives. Also `YAM_BINDINGS`. */
+  yamBindings: string | undefined;
   /** Run data, already resolved. Supplied by the generated spec or by config. */
-  svatahData: Record<string, unknown> | undefined;
+  yamData: Record<string, unknown> | undefined;
   /** Dotted paths declared secret (REQ-NFR-6). */
-  svatahSecrets: readonly string[] | undefined;
+  yamSecrets: readonly string[] | undefined;
   /** Overrides for `config.run`. */
-  svatahConfig: Partial<Config["run"]> | undefined;
+  yamConfig: Partial<Config["run"]> | undefined;
 }
 
-export interface SvatahHostFixture {
+export interface YamHostFixture {
   /** Run one story of the flow, in the scope the worker owns. */
   runStory(name: string): Promise<readonly StepResult[]>;
   /** Every result this worker has produced, in order. */
@@ -74,14 +74,14 @@ export interface SvatahHostFixture {
   readonly surface: AgentSurface;
 }
 
-export interface SvatahHostFixtures {
-  svatah: SvatahHostFixture;
+export interface YamHostFixtures {
+  yam: YamHostFixture;
 }
 
 /**
  * A flow's state, owned by the worker.
  *
- * Built lazily on the first `runStory`, because a worker that runs no Svatah
+ * Built lazily on the first `runStory`, because a worker that runs no Yam
  * test should not open a browser context or read a plan.
  */
 class FlowSession {
@@ -161,15 +161,15 @@ function readPath(tree: Record<string, unknown>, path: string): unknown {
 }
 
 export const test = base.extend<
-  SvatahHostFixtures,
-  SvatahHostOptions & { svatahSession: FlowSession }
+  YamHostFixtures,
+  YamHostOptions & { yamSession: FlowSession }
 >({
-  svatahPlan: [undefined, { option: true, scope: "worker" }],
-  svatahFlow: [undefined, { option: true, scope: "worker" }],
-  svatahBindings: [undefined, { option: true, scope: "worker" }],
-  svatahData: [undefined, { option: true, scope: "worker" }],
-  svatahSecrets: [undefined, { option: true, scope: "worker" }],
-  svatahConfig: [undefined, { option: true, scope: "worker" }],
+  yamPlan: [undefined, { option: true, scope: "worker" }],
+  yamFlow: [undefined, { option: true, scope: "worker" }],
+  yamBindings: [undefined, { option: true, scope: "worker" }],
+  yamData: [undefined, { option: true, scope: "worker" }],
+  yamSecrets: [undefined, { option: true, scope: "worker" }],
+  yamConfig: [undefined, { option: true, scope: "worker" }],
 
   /**
    * The flow's session: one scope, one adapter, one store, for the whole worker.
@@ -185,19 +185,19 @@ export const test = base.extend<
    * first one. Recorded as a deviation from LLD §9.1's "over the test's
    * `context`", which cannot hold alongside the same sentence's "worker-scoped".
    */
-  svatahSession: [
+  yamSession: [
     async (
-      { browser, svatahPlan, svatahFlow, svatahBindings, svatahData, svatahSecrets, svatahConfig },
+      { browser, yamPlan, yamFlow, yamBindings, yamData, yamSecrets, yamConfig },
       use,
       workerInfo,
     ) => {
-      const planPath = svatahPlan ?? process.env["SVATAH_PLAN"] ?? ".svatah/plan.json";
+      const planPath = yamPlan ?? process.env["YAM_PLAN"] ?? ".yam/plan.json";
       const plan = planSchema.parse(JSON.parse(readFileSync(planPath, "utf8"))) as Plan;
 
       const config: Config = {
         ...DEFAULT_CONFIG,
         project: plan.project,
-        run: { ...DEFAULT_CONFIG.run, ...(svatahConfig ?? {}) },
+        run: { ...DEFAULT_CONFIG.run, ...(yamConfig ?? {}) },
       } as Config;
 
       const use_ = workerInfo.project.use as { baseURL?: string; viewport?: { width: number; height: number } | null };
@@ -210,7 +210,7 @@ export const test = base.extend<
       await surface.open({ ...(use_.baseURL === undefined ? {} : { baseUrl: use_.baseURL }) });
 
       /*
-       * Start at the base URL, exactly as `svatah run --host none` does.
+       * Start at the base URL, exactly as `yam run --host none` does.
        *
        * A new context starts at `about:blank`, and a migrated flow begins by
        * clicking something on the home page because the old runner opened the
@@ -224,20 +224,20 @@ export const test = base.extend<
 
       /*
        * The run's data and secrets travel by environment when the CLI spawned
-       * this process (`svatah run --host playwright`), and by fixture option
+       * this process (`yam run --host playwright`), and by fixture option
        * when a project wired the host itself. Both, so neither audience has to
        * do the other's setup.
        */
-      const data = svatahData ?? readJson(process.env["SVATAH_DATA"]) ?? {};
-      const secrets = svatahSecrets ?? (readJson(process.env["SVATAH_SECRETS"]) as string[] | undefined) ?? [];
-      const inputs = readJson(process.env["SVATAH_INPUTS"]) ?? {};
+      const data = yamData ?? readJson(process.env["YAM_DATA"]) ?? {};
+      const secrets = yamSecrets ?? (readJson(process.env["YAM_SECRETS"]) as string[] | undefined) ?? [];
+      const inputs = readJson(process.env["YAM_INPUTS"]) ?? {};
 
       const session = new FlowSession(
         plan,
-        svatahFlow ?? "(flow)",
+        yamFlow ?? "(flow)",
         config,
         surface,
-        svatahBindings ?? process.env["SVATAH_BINDINGS"] ?? "bindings",
+        yamBindings ?? process.env["YAM_BINDINGS"] ?? "bindings",
         data,
         new Set(secrets),
         inputs,
@@ -251,14 +251,14 @@ export const test = base.extend<
     { scope: "worker" },
   ],
 
-  svatah: async ({ svatahSession }, use, testInfo) => {
-    const fixture: SvatahHostFixture = {
-      plan: svatahSession.plan,
-      surface: svatahSession.surface,
+  yam: async ({ yamSession }, use, testInfo) => {
+    const fixture: YamHostFixture = {
+      plan: yamSession.plan,
+      surface: yamSession.surface,
       get results() {
-        return svatahSession.results;
+        return yamSession.results;
       },
-      runStory: async (name) => await runOne(svatahSession, name, testInfo),
+      runStory: async (name) => await runOne(yamSession, name, testInfo),
     };
     await use(fixture);
   },
@@ -267,7 +267,7 @@ export const test = base.extend<
 /**
  * Run one story, and turn its outcome into a Playwright outcome.
  *
- * The Svatah results are kept whole — the reporter writes them, and a foreign
+ * The Yam results are kept whole — the reporter writes them, and a foreign
  * runtime's conformance harness compares them (REQ-STD-2) — and the first
  * failure is thrown, so the runner reports the run the way it reports every
  * other one, with the trace, the screenshot and the HTML entry the team already
@@ -282,7 +282,7 @@ async function runOne(
   if (story === undefined) {
     throw new Error(
       `The plan has no story called "${name}". The generated spec is stale; ` +
-        "run `svatah host generate` again.",
+        "run `yam host generate` again.",
     );
   }
 
@@ -315,7 +315,7 @@ async function runOne(
   }
 
   /*
-   * The Svatah results are attached to the test, and the reporter collects them
+   * The Yam results are attached to the test, and the reporter collects them
    * (LLD §9.1). A reporter sees a test pass or fail and never sees steps, so the
    * results have to travel from here — which also keeps one source of truth
    * rather than a thinner account reconstructed from Playwright's view.

@@ -1,5 +1,5 @@
 /**
- * The `svatah ui` cockpit (T9.4, REQ-TUI-1, LLD §13.7; the `TUI` artboard).
+ * The `yam ui` cockpit (T9.4, REQ-TUI-1, LLD §13.7; the `TUI` artboard).
  *
  * > Full authoring cockpit: four numbered panes (tree, main, inspector, audit),
  * > `1–4` focus a pane, `Tab` cycles, `j/k` move, the same actions and keys as
@@ -7,7 +7,7 @@
  * > does. `--json` prints screen state and audit lines as JSON and draws
  * > nothing. No tmux dependency; it runs in any terminal.
  *
- * Everything a person reads here is a `ScreenState` from `@svatah/screens`,
+ * Everything a person reads here is a `ScreenState` from `@svatah/yam-screens`,
  * loaded by the same `load()` the ADE calls; every key runs an `Action` from
  * the same registry the ADE's palette shows. This file is the *terminal* half
  * and nothing else: panes, keys, and a palette drawn with Ink.
@@ -27,7 +27,7 @@ import {
   type ScreenId,
   type ScreenParams,
   type ScreenService,
-} from "@svatah/screens";
+} from "@svatah/yam-screens";
 import {
   AuditPane,
   InspectorPane,
@@ -164,7 +164,7 @@ export function App(props: AppProps): React.JSX.Element {
     }
 
     const editor = process.env["VISUAL"] ?? process.env["EDITOR"] ?? "vi";
-    const scratch = join(mkdtempSync(join(tmpdir(), "svatah-ui-")), file.split("/").pop() ?? "flow");
+    const scratch = join(mkdtempSync(join(tmpdir(), "yam-ui-")), file.split("/").pop() ?? "flow");
     writeFileSync(scratch, before, "utf8");
 
     setBusy(true);
@@ -379,11 +379,11 @@ export function App(props: AppProps): React.JSX.Element {
       <Box width={ui.layout.columns}>
         {/*
           `flexShrink={0}`: Ink shrinks a row's children to fit, and a header
-          whose first words are "svatah ui 160×40" must not become "svatah 160×4"
+          whose first words are "yam ui 160×40" must not become "yam 160×4"
           on a busy line. What may be cut is the subtitle, which pane 2 repeats.
         */}
         <Box flexShrink={0}>
-          <Text color="magenta">svatah ui</Text>
+          <Text color="magenta">yam ui</Text>
           <Text color="white"> {sizeOf(ui.layout)}</Text>
         </Box>
         <Box flexShrink={1} overflow="hidden">

@@ -5,7 +5,7 @@
  * > AX: `AXUIElement` via a small native module; `AXRole` → role map;
  * > `AXIdentifier` → `automationId`; actions via `AXPress`, `AXSetValue`,
  * > keyboard events; documents the accessibility permission prompt and provides
- * > a `svatah surface doctor` check. Both: `state()` returns the focused window
+ * > a `yam surface doctor` check. Both: `state()` returns the focused window
  * > and title; `restore` activates the window; screenshots via OS APIs; masks by
  * > box.
  *
@@ -46,8 +46,8 @@ import type {
   Snapshot,
   SurfaceAction,
   SurfaceKind,
-} from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+} from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 import {
   ActionabilityError,
   buildSnapshot,
@@ -64,7 +64,7 @@ import {
   type LaunchConfig,
   type QuitConfig,
   type SnapshotNode,
-} from "@svatah/surface";
+} from "@svatah/yam-surface";
 import {
   osascriptBridge,
   AxBridgeError,
@@ -187,7 +187,7 @@ export class AxSurface implements AgentSurface {
     if (permission.state !== "granted") {
       throw new SessionError(
         `The macOS Accessibility permission is not granted (${permission.state}). ` +
-          `${permission.advice} Run \`svatah surface doctor\` to check it.`,
+          `${permission.advice} Run \`yam surface doctor\` to check it.`,
         { adapter: "ax" },
       );
     }
@@ -195,7 +195,7 @@ export class AxSurface implements AgentSurface {
     if (name === undefined || name.trim() === "") {
       throw new SessionError(
         "The AX adapter needs the name of the application process to drive. Set " +
-          "`app.processName` in `svatah.config.yaml` (the ADE is \"Svatah ADE\"). Driving " +
+          "`app.processName` in `yam.config.yaml` (the ADE is \"Yam ADE\"). Driving " +
           "whatever happens to be frontmost would make a run depend on what was last clicked.",
         { adapter: "ax" },
       );
@@ -211,7 +211,7 @@ export class AxSurface implements AgentSurface {
      * "Owns a window", not "is running": a process that is still exiting and a
      * helper that shares its application's name are both running and neither
      * can be driven (P8-F1). The question is the one the bridge answers, which
-     * is why this is here and the *how* is `@svatah/surface`'s.
+     * is why this is here and the *how* is `@svatah/yam-surface`'s.
      *
      * A session that found the application already up does not remember a
      * launch, and so will not quit it: an adapter that closed a person's own
@@ -292,7 +292,7 @@ export class AxSurface implements AgentSurface {
     if (executable === undefined) {
       throw new SessionError(
         "`Quit the app` needs to know which application to quit. Set `app.launch.bundle` " +
-          "(macOS) or `app.launch.path` in `svatah.config.yaml`: a quit addressed by process " +
+          "(macOS) or `app.launch.path` in `yam.config.yaml`: a quit addressed by process " +
           "name alone would reach somebody else's copy of the same application.",
         { adapter: "ax" },
       );
@@ -548,7 +548,7 @@ export class AxSurface implements AgentSurface {
        * > which ends the session through the graceful route and fails if the
        * > process survives it.
        *
-       * The graceful route and the escalation are `@svatah/surface`'s
+       * The graceful route and the escalation are `@svatah/yam-surface`'s
        * `quitApplication`, because they are the same three decisions on every
        * platform; what belongs here is only that a quit *ends this session* —
        * the tree is gone and every ref with it, so a step after this one is a
@@ -844,7 +844,7 @@ export class AxSurface implements AgentSurface {
   async restore(state: SessionState): Promise<void> {
     /*
      * "`restore` activates the window" (LLD §7.5). There is no more than that
-     * to restore on a desktop: an application's state is its own, and Svatah
+     * to restore on a desktop: an application's state is its own, and Yam
      * has no storage state to re-apply. A resumed run therefore continues in
      * whatever state the application is in, which the checkpoint's window title
      * is the check on.

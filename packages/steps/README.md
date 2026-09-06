@@ -1,4 +1,4 @@
-# @svatah/steps
+# @svatah/yam-steps
 
 defineStep API and the Tier 0 matcher.
 

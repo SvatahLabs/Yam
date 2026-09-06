@@ -1,8 +1,8 @@
 {
-  "name": "@svatah/ade",
-  "productName": "Svatah ADE",
+  "name": "@svatah/yam-ade",
+  "productName": "Yam ADE",
   "version": "0.1.0",
-  "description": "The Svatah Automation Development Environment: the reference client for the local service",
+  "description": "The Yam Automation Development Environment: the reference client for the local service",
   "license": "Apache-2.0",
   "private": true,
   "main": ".vite/build/main.js",
@@ -22,10 +22,10 @@
     "stage-cli": "node ../../scripts/stage-ade-cli.mjs"
   },
   "dependencies": {
-    "@svatah/schema": "workspace:*",
-    "@svatah/screens": "workspace:*",
-    "@svatah/ui": "workspace:*",
-    "@svatah/ui-tokens": "workspace:*"
+    "@svatah/yam-schema": "workspace:*",
+    "@svatah/yam-screens": "workspace:*",
+    "@svatah/yam-ui": "workspace:*",
+    "@svatah/yam-ui-tokens": "workspace:*"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.11.2",
@@ -36,8 +36,8 @@
     "@electron-forge/plugin-vite": "^7.11.2",
     "@electron-forge/shared-types": "^7.11.2",
     "@electron/fuses": "^1.8.0",
-    "@svatah/cli": "workspace:*",
-    "@svatah/service": "workspace:*",
+    "@svatah/yam": "workspace:*",
+    "@svatah/yam-service": "workspace:*",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.2.0",

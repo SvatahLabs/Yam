@@ -15,9 +15,9 @@
  * page — these are what the *old* tool believed, carried across so a first run
  * has something to try, and the recorder replaces them (REQ-REC-1).
  */
-import { elementId } from "@svatah/spec";
-import type { BindingEntry, BindingFile, Candidate } from "@svatah/schema";
-import { SCHEMA_VERSION } from "@svatah/schema";
+import { elementId } from "@svatah/yam-spec";
+import type { BindingEntry, BindingFile, Candidate } from "@svatah/yam-schema";
+import { SCHEMA_VERSION } from "@svatah/yam-schema";
 
 /** How a legacy `by:` maps onto a v3 candidate kind (LLD §3.3). */
 const KINDS: Record<string, Candidate["by"]> = {
@@ -123,7 +123,7 @@ export function seedBinding(locator: MigratedLocator, at: string): BindingFile {
        * `unknown` is the honest value and behaves correctly: relocalization
        * scores tag equality, and `unknown` matches nothing, which is right for a
        * binding with no evidence behind it. The recorder replaces the whole
-       * entry on the first `svatah record` (REQ-REC-1).
+       * entry on the first `yam record` (REQ-REC-1).
        */
       tag: "unknown",
       attrs: {},

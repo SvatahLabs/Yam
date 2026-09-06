@@ -1,9 +1,9 @@
 # `evals/self/steps` — deliberately empty, and deliberately tracked
 
-The self project declares `steps: { dir: steps }` in `svatah.config.yaml`, so
+The self project declares `steps: { dir: steps }` in `yam.config.yaml`, so
 Tier 0 custom step definitions would live here (REQ-LANG-15, LLD §5). It has
 none: every sentence in the self flows is Tier 1 grammar, which is the point —
-the suite that verifies Svatah is written in the language Svatah publishes, not
+the suite that verifies Yam is written in the language Yam publishes, not
 in TypeScript handlers beside it.
 
 The directory is tracked because git carries no empty directory, and two

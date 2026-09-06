@@ -17,8 +17,8 @@ import {
   ScriptError,
   SessionError,
   TimeoutError,
-} from "@svatah/surface";
-import type { FailureClass } from "@svatah/schema";
+} from "@svatah/yam-surface";
+import type { FailureClass } from "@svatah/yam-schema";
 import { DataError } from "./scope.js";
 
 /** Thrown when a guard could not be evaluated (LLD §8.3). */

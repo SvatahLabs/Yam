@@ -13,7 +13,7 @@
  * there because it survives proxies that eat upgrades, and because `curl` can
  * read it.
  */
-import type { StepResult, Summary } from "@svatah/schema";
+import type { StepResult, Summary } from "@svatah/yam-schema";
 
 export type ServiceEvent =
   | { readonly kind: "step.result"; readonly runId: string; readonly result: StepResult }

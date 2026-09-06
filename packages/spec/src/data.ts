@@ -4,7 +4,7 @@
  * ```yaml
  * user:
  *   email: "atul@example.com"
- *   password: "${SVATAH_SAMPLE_PASSWORD}"
+ *   password: "${YAM_SAMPLE_PASSWORD}"
  * secrets:
  *   - user.password
  * ```
@@ -38,8 +38,8 @@ export const EMPTY_DATA: ProjectData = { values: {}, secrets: new Set() };
 /** `${NAME}` — the whole value, not an interpolation inside a longer string. */
 const INDIRECTION = /^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$/;
 
-/** Environment overrides: `SVATAH_DATA_USER__EMAIL` → `user.email`. */
-const OVERRIDE_PREFIX = "SVATAH_DATA_";
+/** Environment overrides: `YAM_DATA_USER__EMAIL` → `user.email`. */
+const OVERRIDE_PREFIX = "YAM_DATA_";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -116,7 +116,7 @@ function resolveIndirections(
   }
 }
 
-/** `SVATAH_DATA_*` overrides, applied after the file and after indirections. */
+/** `YAM_DATA_*` overrides, applied after the file and after indirections. */
 function applyOverrides(tree: Record<string, unknown>, env: NodeJS.ProcessEnv): void {
   const known = new Map(paths(tree).map((path) => [path.toLowerCase(), path]));
 

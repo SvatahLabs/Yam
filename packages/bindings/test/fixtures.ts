@@ -7,7 +7,7 @@ import {
   type Candidate,
   type Fingerprint,
   type Provenance,
-} from "@svatah/schema";
+} from "@svatah/yam-schema";
 
 export const humanProvenance: Provenance = {
   model: HUMAN_PROVENANCE_MODEL,

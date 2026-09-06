@@ -12,8 +12,8 @@
  * that a plan runs anywhere an adapter exists (REQ-SURF-2, REQ-STD-3). Making it
  * a type rather than a convention is what stops that happening by accident.
  */
-import type { AgentSurface } from "@svatah/surface";
-import type { Predicate, Ref, TargetRef, ValueRef } from "@svatah/schema";
+import type { AgentSurface } from "@svatah/yam-surface";
+import type { Predicate, Ref, TargetRef, ValueRef } from "@svatah/yam-schema";
 
 /** The placeholder types a template may declare (LLD §5). */
 export const PLACEHOLDER_TYPES = ["string", "number", "boolean", "target", "value"] as const;
@@ -44,7 +44,7 @@ export interface StepMeta {
    * exposed as a tool without being marked `idempotent`.
    */
   readonly sideEffect?: boolean;
-  /** One line, shown by `svatah lint` and by the ADE's step list. */
+  /** One line, shown by `yam lint` and by the ADE's step list. */
   readonly description?: string;
   /** Overrides `config.run.stepTimeoutMs` for this step. */
   readonly timeoutMs?: number;
@@ -119,7 +119,7 @@ export interface CustomStep<A extends StepArgs = StepArgs> {
 }
 
 /** Discriminates a `CustomStep` from anything else a module might export. */
-export const CUSTOM_STEP = Symbol.for("svatah.customStep");
+export const CUSTOM_STEP = Symbol.for("yam.customStep");
 
 export function isCustomStep(value: unknown): value is CustomStep {
   return (

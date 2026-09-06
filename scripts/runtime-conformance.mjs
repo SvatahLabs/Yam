@@ -49,7 +49,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp } from "sample-web";
-import { stepResultSchema, summarySchema } from "@svatah/schema";
+import { stepResultSchema, summarySchema } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PROJECT = join(ROOT, "evals", "fixtures");
@@ -85,9 +85,9 @@ const FLOWS = [
 
 /** Fixed, so the foreign runtime types the same characters the fixture did. */
 const SECRETS = {
-  SVATAH_SAMPLE_PASSWORD: "qwerty123",
-  SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-  SVATAH_SAMPLE_CARD_CVV: "123",
+  YAM_SAMPLE_PASSWORD: "qwerty123",
+  YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+  YAM_SAMPLE_CARD_CVV: "123",
 };
 
 const die = (code, message) => {
@@ -97,7 +97,7 @@ const die = (code, message) => {
 
 if (!existsSync(CLI)) die(2, "Run `pnpm -r build` first: the plan is compiled by the CLI.");
 
-const jar = join(ROOT, "runtimes", "java", "build", "libs", "svatah-runtime-java-0.1.0-all.jar");
+const jar = join(ROOT, "runtimes", "java", "build", "libs", "yam-runtime-java-0.1.0-all.jar");
 if (runtime === "java" && !existsSync(jar)) {
   die(
     2,
@@ -126,7 +126,7 @@ const readResults = (path) => {
 const expected = readResults(join(FIXTURE, "results.jsonl"));
 
 const app = await startSampleApp(0);
-const workspace = mkdtempSync(join(tmpdir(), "svatah-conformance-"));
+const workspace = mkdtempSync(join(tmpdir(), "yam-conformance-"));
 let exitCode = 0;
 
 try {
@@ -159,11 +159,11 @@ try {
 
   /* The project the foreign runtime is pointed at: the fixtures, plus the plan. */
   const project = join(workspace, "project");
-  mkdirSync(join(project, ".svatah"), { recursive: true });
-  for (const entry of ["bindings", "flows", "api", "data.yaml", "svatah.config.yaml"]) {
+  mkdirSync(join(project, ".yam"), { recursive: true });
+  for (const entry of ["bindings", "flows", "api", "data.yaml", "yam.config.yaml"]) {
     spawnSync("cp", ["-R", join(PROJECT, entry), join(project, entry)]);
   }
-  writeFileSync(join(project, ".svatah", "plan.json"), readFileSync(planPath, "utf8"));
+  writeFileSync(join(project, ".yam", "plan.json"), readFileSync(planPath, "utf8"));
 
   const started = Date.now();
   const outcome = await new Promise((done) => {
@@ -187,7 +187,7 @@ try {
         "--input",
         "email=connected2atul@gmail.com",
         "--input",
-        `password=${SECRETS.SVATAH_SAMPLE_PASSWORD}`,
+        `password=${SECRETS.YAM_SAMPLE_PASSWORD}`,
         ...FLOWS.flatMap((flow) => ["--flow", flow]),
       ],
       { env: { ...process.env, ...SECRETS } },

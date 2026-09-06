@@ -2,7 +2,7 @@
  * The window-lifecycle log (T11.1, P10-F1, Draft 2.13 §13.6).
  *
  * > the ADE logs its window lifecycle to its user-data directory when
- * > `SVATAH_ADE_DEBUG=1`
+ * > `YAM_ADE_DEBUG=1`
  *
  * What this file is for is the shape of the log rather than the events in it:
  * the events are Electron's and are exercised by `scripts/ade-launch-loop.mjs`
@@ -17,7 +17,7 @@ import { debugEnabled, debugLine, debugLogPath, openDebugLog } from "../src/main
 
 const made: string[] = [];
 const scratch = (): string => {
-  const one = mkdtempSync(join(tmpdir(), "svatah-ade-debug-"));
+  const one = mkdtempSync(join(tmpdir(), "yam-ade-debug-"));
   made.push(one);
   return one;
 };
@@ -26,10 +26,10 @@ afterEach(() => {
 });
 
 describe("the log is off unless it is asked for", () => {
-  it("is on only for SVATAH_ADE_DEBUG=1", () => {
-    expect(debugEnabled({ SVATAH_ADE_DEBUG: "1" })).toBe(true);
-    expect(debugEnabled({ SVATAH_ADE_DEBUG: "true" })).toBe(false);
-    expect(debugEnabled({ SVATAH_ADE_DEBUG: "0" })).toBe(false);
+  it("is on only for YAM_ADE_DEBUG=1", () => {
+    expect(debugEnabled({ YAM_ADE_DEBUG: "1" })).toBe(true);
+    expect(debugEnabled({ YAM_ADE_DEBUG: "true" })).toBe(false);
+    expect(debugEnabled({ YAM_ADE_DEBUG: "0" })).toBe(false);
     expect(debugEnabled({})).toBe(false);
   });
 
@@ -66,14 +66,14 @@ describe("one line per event, and a reader can parse it", () => {
   });
 
   it("never lets a space break a field", () => {
-    const line = debugLine("app.ready", { userData: "/Users/atul/Application Support/Svatah ADE" });
+    const line = debugLine("app.ready", { userData: "/Users/atul/Application Support/Yam ADE" });
     expect(line.trimEnd().split(" ")).toHaveLength(3);
     expect(line).toContain("Application_Support");
   });
 
   it("appends, so a launch does not lose the launch before it", () => {
     const directory = scratch();
-    const log = openDebugLog(directory, { SVATAH_ADE_DEBUG: "1" });
+    const log = openDebugLog(directory, { YAM_ADE_DEBUG: "1" });
     log("window.creating", { width: 1280 });
     log("window.closed");
     const lines = readFileSync(debugLogPath(directory), "utf8").trim().split("\n");
@@ -87,7 +87,7 @@ describe("one line per event, and a reader can parse it", () => {
   it("turns itself off rather than failing when it cannot write", () => {
     // A path whose parent is a file: `mkdirSync` refuses it.
     const directory = join(scratch(), "preferences.json", "nested");
-    const log = openDebugLog(directory, { SVATAH_ADE_DEBUG: "1" });
+    const log = openDebugLog(directory, { YAM_ADE_DEBUG: "1" });
     expect(() => log("window.creating")).not.toThrow();
   });
 });

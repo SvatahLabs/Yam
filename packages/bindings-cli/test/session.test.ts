@@ -17,7 +17,7 @@ const args = (...argv: string[]) => parseArgs(argv);
 
 describe("sessionTarget (LLD §15)", () => {
   const config = { baseUrl: "http://config:1", storageState: "config.json" };
-  const env = { SVATAH_BASE_URL: "http://env:2", SVATAH_STORAGE_STATE: "env.json" };
+  const env = { YAM_BASE_URL: "http://env:2", YAM_STORAGE_STATE: "env.json" };
 
   it("prefers the flag to everything", () => {
     expect(
@@ -56,24 +56,24 @@ describe("sessionTarget (LLD §15)", () => {
   });
 
   it("treats an empty environment variable as unset", () => {
-    // The shape a shell leaves behind after `SVATAH_BASE_URL=`, and the shape a
+    // The shape a shell leaves behind after `YAM_BASE_URL=`, and the shape a
     // test harness uses to clear an inherited one.
-    expect(sessionTarget(args(), { env: { SVATAH_BASE_URL: "" }, config })).toEqual(config);
+    expect(sessionTarget(args(), { env: { YAM_BASE_URL: "" }, config })).toEqual(config);
   });
 
   it("trims a trailing slash, wherever the value came from", () => {
     // `http://host/` and `http://host` name the same deployment; only one of
     // them concatenates with a path correctly.
     expect(sessionTarget(args("--base-url", "http://flag:3/"), {}).baseUrl).toBe("http://flag:3");
-    expect(sessionTarget(args(), { env: { SVATAH_BASE_URL: "http://env:2//" } }).baseUrl).toBe(
+    expect(sessionTarget(args(), { env: { YAM_BASE_URL: "http://env:2//" } }).baseUrl).toBe(
       "http://env:2",
     );
   });
 
   it("reads config.app from a project directory when given one", () => {
-    const dir = mkdtempSync(join(tmpdir(), "svatah-session-"));
+    const dir = mkdtempSync(join(tmpdir(), "yam-session-"));
     writeFileSync(
-      join(dir, "svatah.config.yaml"),
+      join(dir, "yam.config.yaml"),
       'project: "p"\napp: { baseUrl: "http://from-file:5", storageState: "state.json" }\n',
       "utf8",
     );
@@ -90,19 +90,19 @@ describe("sessionTarget (LLD §15)", () => {
 
 describe("resolveSessionTarget (LLD §13.5)", () => {
   it("takes the flag layer as values, for callers that have no command line", () => {
-    // `POST /run` and `svatah run` reach the same function, so they must reach
+    // `POST /run` and `yam run` reach the same function, so they must reach
     // the same precedence without the service inventing an argv.
     expect(
       resolveSessionTarget(
         { baseUrl: "http://explicit:1" },
-        { env: { SVATAH_BASE_URL: "http://env:2" }, config: { baseUrl: "http://config:3" } },
+        { env: { YAM_BASE_URL: "http://env:2" }, config: { baseUrl: "http://config:3" } },
       ),
     ).toEqual({ baseUrl: "http://explicit:1" });
 
     expect(
       resolveSessionTarget(
         {},
-        { env: { SVATAH_BASE_URL: "http://env:2" }, config: { baseUrl: "http://config:3" } },
+        { env: { YAM_BASE_URL: "http://env:2" }, config: { baseUrl: "http://config:3" } },
       ),
     ).toEqual({ baseUrl: "http://env:2" });
   });

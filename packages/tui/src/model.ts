@@ -1,9 +1,9 @@
 /**
- * What `svatah ui` holds while it is running (T9.4, REQ-TUI-1, LLD §13.7).
+ * What `yam ui` holds while it is running (T9.4, REQ-TUI-1, LLD §13.7).
  *
  * The cockpit is a *renderer*: it owns which pane has focus, which row the
  * cursor is on, and whether the palette is open — and nothing else. Everything
- * a person reads on it is a `ScreenState` from `@svatah/screens`, loaded by the
+ * a person reads on it is a `ScreenState` from `@svatah/yam-screens`, loaded by the
  * same `load()` the ADE calls.
  *
  * That separation is what `--json` is: printing this object's `state` prints
@@ -11,8 +11,8 @@
  * the model produces on its own. A cockpit that had massaged a number for the
  * terminal would fail that comparison, which is the point of making it.
  */
-import { screenById, type ScreenId, type ScreenParams, type ScreenStateBase } from "@svatah/screens";
-import type { ScreenService } from "@svatah/screens";
+import { screenById, type ScreenId, type ScreenParams, type ScreenStateBase } from "@svatah/yam-screens";
+import type { ScreenService } from "@svatah/yam-screens";
 import { layoutFor, type Layout } from "./layout.js";
 
 /** The four numbered panes of the `TUI` artboard. */

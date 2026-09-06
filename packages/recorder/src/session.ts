@@ -20,8 +20,8 @@
  * implementation of "what a step does" would drift, and the drift would show up
  * as a binding that was verified during recording and fails on the first run.
  *
- * So the session is a loop around `runStep` from `@svatah/runtime` — the same
- * function `svatah run` and the Playwright host call — with one thing added
+ * So the session is a loop around `runStep` from `@svatah/yam-runtime` — the same
+ * function `yam run` and the Playwright host call — with one thing added
  * before each step: grounding.
  *
  * ## Only what a step proved is written
@@ -46,7 +46,7 @@ import {
   synthesiseSiteTool,
   type BindingsStore,
   type Resolution,
-} from "@svatah/bindings";
+} from "@svatah/yam-bindings";
 import type {
   BindingEntry,
   BindingFile,
@@ -57,16 +57,16 @@ import type {
   StepResult,
   Story,
   TargetRef,
-} from "@svatah/schema";
-import type { Gateway } from "@svatah/gateway";
-import type { AgentSurface } from "@svatah/surface";
+} from "@svatah/yam-schema";
+import type { Gateway } from "@svatah/yam-gateway";
+import type { AgentSurface } from "@svatah/yam-surface";
 import {
   runStep,
   Scope,
   type ApiRunner,
   type CustomStepRunner,
   type Resolver,
-} from "@svatah/runtime";
+} from "@svatah/yam-runtime";
 import {
   assertRecordable,
   entryFor,
@@ -161,7 +161,7 @@ export interface RecordSessionOptions {
    * written would be showing a person a decision already made, and "reject"
    * would mean "undo", which is a different and much weaker promise.
    *
-   * Absent — which is what `svatah record` passes — every grounding is accepted,
+   * Absent — which is what `yam record` passes — every grounding is accepted,
    * so the command line behaves exactly as it did.
    */
   readonly review?: (proposal: GroundingProposal) => Promise<ReviewDecision>;

@@ -1,7 +1,7 @@
 # Generated clients
 
-Python and Java clients for the Svatah local service, generated from the same
-OpenAPI description as `@svatah/sdk` (REQ-SDK-2, LLD §13.8).
+Python and Java clients for the Yam local service, generated from the same
+OpenAPI description as `@svatah/yam-sdk` (REQ-SDK-2, LLD §13.8).
 
 ```console
 $ pnpm clients          # regenerate all three
@@ -39,7 +39,7 @@ path has no network in it.
 ## `python`
 
 ```console
-$ export SVATAH_SERVICE_URL=... SVATAH_SERVICE_TOKEN=...   # svatah serve prints them
+$ export YAM_SERVICE_URL=... YAM_SERVICE_TOKEN=...   # yam serve prints them
 $ python3 clients/python/smoke.py
 GET /project      clients-smoke: 7 flow(s), 22 story/stories
 POST /run         started 00mto7o3c8a3h79n
@@ -48,15 +48,15 @@ GET /runs/00mto7o3c8a3h79n/results  8 step(s), matching the stream
 python 3.14.3: 3 of 3 — the client is conformant
 ```
 
-Published as `svatah-sdk` on PyPI, versioned with the npm tarballs.
+Published as `svatah-yam` on PyPI, versioned with the npm tarballs.
 
 ## `java`
 
 ```console
-$ javac -d /tmp/svatah clients/java/src/main/java/dev/svatah/sdk/GeneratedClient.java \
+$ javac -d /tmp/yam clients/java/src/main/java/com/svatah/yam/sdk/GeneratedClient.java \
                        clients/java/Smoke.java
-$ java -cp /tmp/svatah Smoke
+$ java -cp /tmp/yam Smoke
 ```
 
-Published as `dev.svatah:svatah-sdk`, versioned with the npm tarballs. The
+Published as `com.svatah.yam:svatah-yam`, versioned with the npm tarballs. The
 Gradle build is for publishing; nothing in the smoke path needs it.

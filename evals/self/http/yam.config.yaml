@@ -23,7 +23,7 @@
 # not catalogued." There is no second oracle for them yet — the service's own
 # tests are unit tests over the same functions, which would be one side twice.
 schemaVersion: "1.0.0"
-project: "svatah-self-http"
+project: "yam-self-http"
 environment: test
 adapter: http
 

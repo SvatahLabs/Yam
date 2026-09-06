@@ -11,7 +11,7 @@
  * wrong about the file, which is what lets an unrecognised sentence be one
  * diagnostic pointing at one line instead of a cascade.
  */
-import type { Signature, StoryMeta } from "@svatah/schema";
+import type { Signature, StoryMeta } from "@svatah/yam-schema";
 
 /** A step line, with the guard that applies to it if there is one. */
 export interface RawStep {

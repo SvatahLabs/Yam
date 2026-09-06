@@ -1,7 +1,7 @@
 /**
- * `svatah eval <suite>` (LLD §15, §16, REQ-PKG-4).
+ * `yam eval <suite>` (LLD §15, §16, REQ-PKG-4).
  *
- * "`svatah eval <suite> --report <path>` writes a Markdown report that the
+ * "`yam eval <suite> --report <path>` writes a Markdown report that the
  * release workflow attaches to release notes."
  *
  * Phase 1 makes one suite runnable: `healing`, relocalize-only (T1.8). The
@@ -19,10 +19,10 @@ import {
   renderHealingEvalSummary,
   runHealingEval,
   clearRegrounder,
-} from "@svatah/healer";
-import type { AgentSurface } from "@svatah/surface";
-import { createSurface, listAdapters } from "@svatah/surface";
-import { DEFAULT_CONFIG, DEFAULT_IGNORE_ATTRIBUTES, type Config } from "@svatah/schema";
+} from "@svatah/yam-healer";
+import type { AgentSurface } from "@svatah/yam-surface";
+import { createSurface, listAdapters } from "@svatah/yam-surface";
+import { DEFAULT_CONFIG, DEFAULT_IGNORE_ATTRIBUTES, type Config } from "@svatah/yam-schema";
 import { registerAllAdapters } from "../adapters.js";
 import { boolOption, stringOption, type ParsedArgs } from "../args.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
@@ -33,7 +33,7 @@ import type { CommandIo } from "./surface.js";
 const LATER: Record<string, string> = {
   compiler: "T4.4",
   grounding: "T3.4",
-  conformance: "T1.2 (run it with `svatah surface conform --adapter <name>`)",
+  conformance: "T1.2 (run it with `yam surface conform --adapter <name>`)",
 };
 
 /** The sample pages the eval records on. */
@@ -88,7 +88,7 @@ function groundTruthReader(
 }
 
 async function healing(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
-  // Flag, then `SVATAH_BASE_URL`, then `config.app`, then the sample app's
+  // Flag, then `YAM_BASE_URL`, then `config.app`, then the sample app's
   // port (LLD §15, Draft 2.5).
   const target = sessionTarget(args, {
     root: stringOption(args, "project") ?? ".",
@@ -133,7 +133,7 @@ async function healing(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
       bindings: {
         ...DEFAULT_CONFIG.bindings,
         // The headline population is "an application with no test ids" — see the
-        // method in `@svatah/healer`. The adapter has none either, so its CSS and
+        // method in `@svatah/yam-healer`. The adapter has none either, so its CSS and
         // XPath paths are not anchored on one.
         testIdAttributes: withTestIds ? DEFAULT_CONFIG.bindings.testIdAttributes : [],
         // Never negotiable, in either population: the ground-truth label must

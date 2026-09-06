@@ -1,5 +1,5 @@
 /**
- * `svatah tool serve` (T5.3, REQ-BEH-3, REQ-AUTO-6, 8, LLD §13.3).
+ * `yam tool serve` (T5.3, REQ-BEH-3, REQ-AUTO-6, 8, LLD §13.3).
  *
  * T5.3's Validate list, in one file:
  *
@@ -31,12 +31,12 @@ import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { startSampleApp, type SampleServer } from "sample-web";
-import type { AuditLine, Summary } from "@svatah/schema";
+import type { AuditLine, Summary } from "@svatah/yam-schema";
 import { buildToolServer } from "../src/commands/tool.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 const BLOCKER = join(ROOT, "scripts", "block-external-network.mjs");
 
 const CARD = "5123456789012346";
@@ -45,14 +45,14 @@ let app: SampleServer;
 const projects: string[] = [];
 
 function scaffold(extra = ""): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-tool-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-tool-"));
   projects.push(dir);
   for (const entry of ["bindings", "flows", "api", "data.yaml"]) {
     cpSync(join(FIXTURES, entry), join(dir, entry), { recursive: true });
   }
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
-    readFileSync(join(FIXTURES, "svatah.config.yaml"), "utf8").replace(
+    join(dir, "yam.config.yaml"),
+    readFileSync(join(FIXTURES, "yam.config.yaml"), "utf8").replace(
       /baseUrl: ".*"/,
       `baseUrl: "${app.origin}"`,
     ) + extra,
@@ -239,8 +239,8 @@ describe("`requireIdempotent` decides what an agent can see (REQ-AUTO-8)", () =>
   it("is on by default in production and off in test", async () => {
     const production = scaffold().replace(/$/, "");
     writeFileSync(
-      join(production, "svatah.config.yaml"),
-      readFileSync(join(production, "svatah.config.yaml"), "utf8").replace(
+      join(production, "yam.config.yaml"),
+      readFileSync(join(production, "yam.config.yaml"), "utf8").replace(
         "environment: test",
         "environment: production",
       ),
@@ -324,14 +324,14 @@ function offline(
   return new Promise((done) => {
     let output = "";
     let out = "";
-    const child = spawn(process.execPath, [SVATAH, ...args], {
+    const child = spawn(process.execPath, [YAM, ...args], {
       cwd,
       env: {
         ...process.env,
-        SVATAH_BASE_URL: app.origin,
-        SVATAH_SAMPLE_PASSWORD: "qwerty123",
-        SVATAH_SAMPLE_CARD_NUMBER: CARD,
-        SVATAH_SAMPLE_CARD_CVV: "123",
+        YAM_BASE_URL: app.origin,
+        YAM_SAMPLE_PASSWORD: "qwerty123",
+        YAM_SAMPLE_CARD_NUMBER: CARD,
+        YAM_SAMPLE_CARD_CVV: "123",
         NODE_OPTIONS: [process.env["NODE_OPTIONS"], `--import=${BLOCKER}`]
           .filter(Boolean)
           .join(" "),

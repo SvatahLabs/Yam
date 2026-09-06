@@ -1,8 +1,8 @@
 /**
- * `svatah serve` (REQ-ADE-1, LLD §13.5, §15).
+ * `yam serve` (REQ-ADE-1, LLD §13.5, §15).
  *
  * ```
- * svatah serve [dir] [--port 0] [--token <t>]
+ * yam serve [dir] [--port 0] [--token <t>]
  * ```
  *
  * Prints the port and the token on stdout, once, in a line the ADE parses when
@@ -10,11 +10,11 @@
  * not written anywhere: a token in a file is a token that outlives the process
  * that needed it.
  */
-import { createService } from "@svatah/service";
-import { credentialInEnvironment } from "@svatah/gateway";
-import { HttpSurface } from "@svatah/adapter-http";
-import { apiRequestSchema } from "@svatah/schema";
-import { numberOption, stringOption, type ParsedArgs } from "@svatah/bindings-cli";
+import { createService } from "@svatah/yam-service";
+import { credentialInEnvironment } from "@svatah/yam-gateway";
+import { HttpSurface } from "@svatah/yam-adapter-http";
+import { apiRequestSchema } from "@svatah/yam-schema";
+import { numberOption, stringOption, type ParsedArgs } from "@svatah/yam-bindings-cli";
 import { compileProject, loadProject } from "../project.js";
 import {
   serviceCompileTrajectory,
@@ -26,14 +26,14 @@ import {
   serviceVerifyBindings,
 } from "../service-api.js";
 import { runProject } from "./run.js";
-import { newRunId } from "@svatah/runtime";
-import { EXIT, type ExitCode } from "@svatah/bindings-cli";
-import type { CommandIo } from "@svatah/bindings-cli";
+import { newRunId } from "@svatah/yam-runtime";
+import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
+import type { CommandIo } from "@svatah/yam-bindings-cli";
 
 /**
  * The ADE's API client, through the adapter a run uses (LLD §13.5).
  *
- * The service cannot import `adapter-http` — it imports only `@svatah/schema` —
+ * The service cannot import `adapter-http` — it imports only `@svatah/yam-schema` —
  * so this arrives the same way its other functions do. Sharing the adapter is
  * the point: an ADE with its own HTTP client would have its own idea of a
  * header, a redirect and a cookie, and "the API client agrees with the run"
@@ -68,7 +68,7 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
    * the rule stronger than a lint could: a handler has no way to reach the
    * compiler or the executor, only these four.
    *
-   * The first draft had the service import `@svatah/cli`, which made the
+   * The first draft had the service import `@svatah/yam`, which made the
    * workspace graph cyclic and gave pnpm an arbitrary build order; a clean clone
    * failed with the service's type build running before the CLI had types.
    */
@@ -108,7 +108,7 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
   });
 
   // One line, parsed by the ADE's spawn handshake (LLD §13.6).
-  io.out(`svatah serve listening url=${service.url} token=${service.token}`);
+  io.out(`yam serve listening url=${service.url} token=${service.token}`);
   io.err(
     `Serving ${project} on ${service.url}\n` +
       "  Bound to 127.0.0.1. Every route but /health and /openapi.json needs the token above.\n" +

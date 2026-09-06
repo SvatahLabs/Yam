@@ -6,13 +6,13 @@
  * the sentence is the `name:` in the file — not the filename, so renaming a file
  * does not break a flow.
  *
- * The shape is `apiRequestSchema` from `@svatah/schema`, which is the same shape
+ * The shape is `apiRequestSchema` from `@svatah/yam-schema`, which is the same shape
  * the HTTP adapter executes (T2.6) and the same shape the published JSON Schema
  * describes. Validating here rather than at run time means a typo in a header
  * name fails the compile, where the line number is known.
  */
 import { parse } from "yaml";
-import { apiRequestSchema, type ApiRequest } from "@svatah/schema";
+import { apiRequestSchema, type ApiRequest } from "@svatah/yam-schema";
 import { diagnostic, type Diagnostic } from "./diagnostics.js";
 
 export interface ApiCatalogue {

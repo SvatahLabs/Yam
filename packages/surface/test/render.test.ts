@@ -2,7 +2,7 @@
  * The snapshot text renderer and the role normalisation tables (LLD §2.2, REQ-SURF-4).
  */
 import { describe, expect, it } from "vitest";
-import type { SnapshotNode } from "@svatah/schema";
+import type { SnapshotNode } from "@svatah/yam-schema";
 import {
   APPIUM_ANDROID_ROLE_MAP,
   AX_ROLE_MAP,

@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/workflow",
+  "name": "@svatah/yam-workflow",
   "version": "0.1.0",
   "description": "Story-as-function runner and resume",
   "license": "Apache-2.0",
@@ -26,8 +26,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/runtime": "workspace:*",
-    "@svatah/schema": "workspace:*"
+    "@svatah/yam-runtime": "workspace:*",
+    "@svatah/yam-schema": "workspace:*"
   },
   "devDependencies": {
     "tsup": "catalog:",

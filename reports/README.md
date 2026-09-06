@@ -28,13 +28,13 @@ readable without running anything, and so a change to it is a diff someone sees.
 
 | Artefact | What it shows | Regenerate with |
 |---|---|---|
-| `sheet-dark.png`, `sheet-light.png` | The component sheet: every `@svatah/ui` component in both themes (T9.2) | `pnpm sheet && pnpm sheet:shoot` |
-| `ade-flows.png`, `ade-run.png` | The **packaged** ADE's two rebuilt screens, opened on the fixtures project and the `comp` run (T9.4) | `pnpm --filter @svatah/ade package && pnpm ade:shoot` |
-| `ui-flows.txt`, `ui-run.txt` | `svatah ui`'s own frames for the same two screens, captured inside a pseudo-terminal (T9.4) | `pnpm ui:capture` |
+| `sheet-dark.png`, `sheet-light.png` | The component sheet: every `@svatah/yam-ui` component in both themes (T9.2) | `pnpm sheet && pnpm sheet:shoot` |
+| `ade-flows.png`, `ade-run.png` | The **packaged** ADE's two rebuilt screens, opened on the fixtures project and the `comp` run (T9.4) | `pnpm --filter @svatah/yam-ade package && pnpm ade:shoot` |
+| `ui-flows.txt`, `ui-run.txt` | `yam ui`'s own frames for the same two screens, captured inside a pseudo-terminal (T9.4) | `pnpm ui:capture` |
 | `ade-flows-ax.png` | The ADE's window read through the AX adapter | `pnpm ade:shoot` on macOS **with the Screen Recording grant**; absent here, see `docs/spec/progress/phase-9.md` K1 |
 
 The two renderers' artefacts are of the same project and the same run, which is
-the comparison T9.5 is for: the ADE's flow list and `svatah ui`'s pane 1 are the
+the comparison T9.5 is for: the ADE's flow list and `yam ui`'s pane 1 are the
 same seven files with the same statuses.
 
 `adapter-uia.md` is the only report here that records a **blocked** run rather

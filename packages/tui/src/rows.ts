@@ -14,7 +14,7 @@
  * Selection is a *screen parameter* in both renderers (§13.7), so opening a row
  * in the cockpit and clicking it in the ADE reach the same state.
  */
-import type { StatusTone } from "@svatah/ui-tokens";
+import type { StatusTone } from "@svatah/yam-ui-tokens";
 import {
   ago,
   type AgentsState,
@@ -31,7 +31,7 @@ import {
   type ScreenParams,
   type ScreenStateBase,
   type SettingsState,
-} from "@svatah/screens";
+} from "@svatah/yam-screens";
 
 /** One column of a line. `grow` takes whatever width is left over. */
 export interface Cell {
@@ -305,7 +305,7 @@ function runScreen(state: RunState): PaneModel {
           },
         ],
       })),
-      footer: dim("svatah ui --json streams these same lines to stdout for an agent"),
+      footer: dim("yam ui --json streams these same lines to stdout for an agent"),
     },
   };
 }
@@ -341,7 +341,7 @@ function runs(state: RunsState, now: number): PaneModel {
     },
     main: {
       title: "Runs",
-      empty: state.total === 0 ? "`svatah run` writes one" : "no run matches these filters",
+      empty: state.total === 0 ? "`yam run` writes one" : "no run matches these filters",
       lines: state.rows.map((row) => ({
         key: row.runId,
         cells: [
@@ -421,7 +421,7 @@ function bindings(state: BindingsState): PaneModel {
     },
     main: {
       title: "Bindings",
-      empty: "`svatah record` writes them",
+      empty: "`yam record` writes them",
       lines: state.rows.map((row) => ({
         key: `main-${row.elementId}`,
         cells: [
@@ -751,7 +751,7 @@ function agents(state: AgentsState): PaneModel {
           dim(one.reason, { grow: true }),
         ],
       })),
-      footer: dim("`svatah tool serve` exposes them over MCP"),
+      footer: dim("`yam tool serve` exposes them over MCP"),
     },
   };
 }
@@ -1039,7 +1039,7 @@ function importing(state: ImportState): PaneModel {
         heading("the same thing from a terminal"),
         {
           key: "cli",
-          cells: [text(`svatah migrate ${state.root ?? "<dest>"} --from-ade <src>`, { grow: true })],
+          cells: [text(`yam migrate ${state.root ?? "<dest>"} --from-ade <src>`, { grow: true })],
         },
       ],
     },

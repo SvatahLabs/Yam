@@ -23,7 +23,7 @@ import {
   type Checkpoint,
   type StepResult,
   type Summary,
-} from "@svatah/schema";
+} from "@svatah/yam-schema";
 
 /** Non-zero on failed, healed or aborted (REQ-RUN-9, LLD §15). */
 export const EXIT = {

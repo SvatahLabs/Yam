@@ -1,8 +1,8 @@
 /**
- * `svatah ui`'s panes, keys and palette (T9.4, REQ-TUI-1, LLD §13.7).
+ * `yam ui`'s panes, keys and palette (T9.4, REQ-TUI-1, LLD §13.7).
  *
  * Ink rendered into a string by `ink-testing-library`, against the same
- * recorded service responses `@svatah/screens` tests against — so what is
+ * recorded service responses `@svatah/yam-screens` tests against — so what is
  * checked here is the *terminal* half and nothing else: that the four panes are
  * drawn, that `1–4`, `Tab`, `j`/`k` and `^K` do what the artboard says, and
  * that the palette lists the registry's actions with their CLI commands.
@@ -27,7 +27,7 @@ import {
   fakeService,
   screenById,
   type FakeResponses,
-} from "@svatah/screens";
+} from "@svatah/yam-screens";
 import { App } from "../src/app.js";
 import type { UiState } from "../src/model.js";
 import { INSPECTOR_MIN_COLUMNS, layoutFor } from "../src/layout.js";
@@ -41,7 +41,7 @@ const FIXTURES = JSON.parse(
   ),
 ) as FakeResponses;
 
-const CONNECTION = { url: "http://127.0.0.1:55702", project: "svatah-fixtures" };
+const CONNECTION = { url: "http://127.0.0.1:55702", project: "yam-fixtures" };
 
 /**
  * A terminal wide enough for four panes (T10.4, P9-F4).
@@ -223,7 +223,7 @@ describe("the four panes (the `TUI` artboard)", () => {
     const { lastFrame } = track(await cockpit("run", { runId: "comp" }));
     const frame = lastFrame() ?? "";
     expect(frame).toMatch(/\d\d\.\d\d\d/);
-    expect(frame).toContain("svatah ui --json streams these same lines");
+    expect(frame).toContain("yam ui --json streams these same lines");
   });
 
   it("draws the flow list and the editor on the Flows screen", async () => {
@@ -358,7 +358,7 @@ describe("the palette (^K) is the ADE's list (T9.4, REQ-ADE-10)", () => {
     expect(frame).toContain("same list as the ADE");
     // The rows are the registry's, by label and by command.
     expect(frame).toContain("Compile");
-    expect(frame).toContain("svatah compile");
+    expect(frame).toContain("yam compile");
   });
 
   it("filters as it is typed, over labels and CLI commands", async () => {
@@ -369,7 +369,7 @@ describe("the palette (^K) is the ADE's list (T9.4, REQ-ADE-10)", () => {
     await settle();
     const frame = lastFrame() ?? "";
     expect(frame).toContain("Heal");
-    expect(frame).toContain("svatah heal");
+    expect(frame).toContain("yam heal");
     // And nothing that does not match.
     expect(frame).not.toContain("Save data");
   });
@@ -403,7 +403,7 @@ describe("the cockpit renders the model and adds nothing (LLD §13.7)", () => {
   it("shows the project and service in its header", async () => {
     const { lastFrame } = track(await cockpit("run", { runId: "comp" }));
     const frame = lastFrame() ?? "";
-    expect(frame).toContain("svatah-fixtures");
+    expect(frame).toContain("yam-fixtures");
     expect(frame).toContain("127.0.0.1:55702");
   });
 
@@ -506,7 +506,7 @@ describe("the panes are sized to the terminal (T10.4, P9-F4)", () => {
  * Every screen draws, and every pane says what it has (T10.1, T10.2).
  *
  * T10.1 and T10.2's Validate is "each screen driven end to end through its own
- * controls … in `svatah ui` under a pseudo-terminal". The pseudo-terminal half
+ * controls … in `yam ui` under a pseudo-terminal". The pseudo-terminal half
  * is `tools/repo-checks/test/tui-pty.test.ts`, which needs a real service; this
  * is the half that runs everywhere, against the recorded fixtures, and it is
  * what says the cockpit has twelve screens rather than two.
@@ -676,7 +676,7 @@ describe("`e` edits the open flow through $EDITOR (K6)", () => {
   ): Promise<void> => {
     const before = process.env["EDITOR"];
     const visual = process.env["VISUAL"];
-    const directory = mkdtempSync(join(tmpdir(), "svatah-editor-"));
+    const directory = mkdtempSync(join(tmpdir(), "yam-editor-"));
     const editor = join(directory, "editor.sh");
     writeFileSync(
       editor,

@@ -117,7 +117,7 @@ describe("the CI workflow (T0.2, T13.2)", () => {
       "windows-latest",
     ]);
     const script = githubCommands("ade-installers").join("\n");
-    expect(script).toContain("pnpm --filter @svatah/ade make");
+    expect(script).toContain("pnpm --filter @svatah/yam-ade make");
     /*
      * And it launches the thing it just built (T3.6's Validate item), against
      * the *packaged* application (T8.1's). `pnpm ade:smoke` picks the packaged

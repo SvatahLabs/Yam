@@ -12,8 +12,8 @@
  * stops being true, and a candidate that matches more than one element is dropped
  * outright (REQ-REC-3) rather than guessed at.
  */
-import { DEFAULT_IGNORE_ATTRIBUTES, type Candidate, type ElementDescription, type Fingerprint, type Ref } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+import { DEFAULT_IGNORE_ATTRIBUTES, type Candidate, type ElementDescription, type Fingerprint, type Ref } from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 
 export interface SynthesisOptions {
   /** Attributes treated as test ids, most preferred first. */
@@ -241,7 +241,7 @@ export function candidatesFor(
   /*
    * 11. The desktop's own path (T11.3, LLD §7.5).
    *
-   * `Window[Svatah ADE]/AXGroup[0]/…/AXButton[Flows]` — the accessibility
+   * `Window[Yam ADE]/AXGroup[0]/…/AXButton[Flows]` — the accessibility
    * ancestry, which is what a desktop adapter can address an element by when
    * nothing else identifies it. Scored where a CSS path is, and for the same
    * reason: it is a route rather than an identity, and a panel inserted above

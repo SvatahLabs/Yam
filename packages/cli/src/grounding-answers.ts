@@ -1,5 +1,5 @@
 /**
- * Answers for `svatah record --gateway fake` (T3.3, T3.5).
+ * Answers for `yam record --gateway fake` (T3.3, T3.5).
  *
  * The grounding eval's committed cases (`evals/grounding/cases.jsonl`) say, for
  * one page and one phrase, which element is meant — by role and accessible name,
@@ -17,7 +17,7 @@
  *
  * These answers are a fixture. A store recorded from them is a store whose
  * bindings were chosen by a script that already knew the answers, and it measures
- * nothing about a model. `svatah record` requires `--gateway fake` to be typed,
+ * nothing about a model. `yam record` requires `--gateway fake` to be typed,
  * and the report says which gateway produced it, because "recorded with a model"
  * and "recorded from the eval's answers" are different claims about the same
  * files (REQ-PKG-4).
@@ -124,7 +124,7 @@ export function groundingAnswers(path?: string): GroundingAnswers {
        * A desktop snapshot is grounded the way a web one is, and the thing that
        * says *which screen* is the window title rather than a URL. A window
        * title is a name and not a path, so it is matched as it is — there is
-       * nothing in "Svatah ADE" to generalise.
+       * nothing in "Yam ADE" to generalise.
        */
       const url = /^Page: (.+)$/m.exec(question)?.[1]?.trim();
       const window = /^Window: (.+)$/m.exec(question)?.[1]?.trim();

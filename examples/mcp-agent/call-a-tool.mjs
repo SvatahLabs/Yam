@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * An MCP client calling a Svatah story as a tool (REQ-BEH-3, REQ-AUTO-6).
+ * An MCP client calling a Yam story as a tool (REQ-BEH-3, REQ-AUTO-6).
  *
  *   node examples/mcp-agent/call-a-tool.mjs [project] [story]
  *
- * Sixty lines and no Svatah-specific concept in any of them: the SDK, a stdio
+ * Sixty lines and no Yam-specific concept in any of them: the SDK, a stdio
  * transport, `listTools`, `callTool`. Point any MCP client at
- * `svatah tool serve` and it sees the same thing.
+ * `yam tool serve` and it sees the same thing.
  *
  * What comes back is the story's declared outputs and a `runId` — the directory
  * holding the step-by-step record and the audit log, which is the only account

@@ -12,7 +12,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { formatDiagnostic, isStoryBlock, readFlow, TargetDictionary } from "@svatah/spec";
+import { formatDiagnostic, isStoryBlock, readFlow, TargetDictionary } from "@svatah/yam-spec";
 import { lowerStep, parseGuard, parseSentence, RETIRED_FORMS } from "../src/index.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -52,7 +52,7 @@ describe("v1 and v2 syntax is refused, and says what to run (REQ-LANG-4)", () =>
     // that there is a command for it — not "no pattern matched this sentence",
     // which is true and useless.
     const { diagnostics } = parseSentence("user +clicks+ the ~button~", where);
-    expect(diagnostics[0]!.message).toContain("svatah migrate");
+    expect(diagnostics[0]!.message).toContain("yam migrate");
   });
 
   it("checks the sigils before the grammar, so a v2 line reads as v2", () => {
@@ -175,7 +175,7 @@ describe("the fixture flows parse with zero errors (REQ-NFR-8, T2.4 Validate)", 
 describe("performance (REQ-COMP-2: 1,000 steps in under 1 s)", () => {
   it("parses and lowers 1,000 steps well inside the budget", () => {
     // Not a microbenchmark: the number in the requirement is about a person
-    // editing a flow and about `svatah lint` in a pre-commit hook, so what is
+    // editing a flow and about `yam lint` in a pre-commit hook, so what is
     // measured is the whole path a step takes — sigil check, parse, lower.
     const sentences = [
       "Click the sign in button",
@@ -319,9 +319,9 @@ describe("assertion aliases lower to the canonical IR (P4-F4, LLD §4.2)", () =>
 
   it("covers the page title and the URL, not only elements", () => {
     same(
-      'The page title should contain "Svatah"',
-      'Expect the page title to contain "Svatah"',
-      'Verify the page title contains "Svatah"',
+      'The page title should contain "Yam"',
+      'Expect the page title to contain "Yam"',
+      'Verify the page title contains "Yam"',
     );
     same(
       'The page title should be "Dashboard"',

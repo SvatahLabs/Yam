@@ -4,7 +4,7 @@
  * Not one of the twelve. Every screen of LLD §13.7 is a view over a project's
  * service, and with no project there is no service to view — a rail over an
  * empty window would be eight rows that all say "open a project first". So this
- * is the one thing the ADE draws that is not `@svatah/screens`, and it does
+ * is the one thing the ADE draws that is not `@svatah/yam-screens`, and it does
  * exactly two things: open a directory, and say why the last attempt did not.
  *
  * It replaces the Phase 3 Project screen, whose *other* job — showing what
@@ -13,7 +13,7 @@
  * every button is named and id'd (P8-F3), and a packaged ADE that cannot resolve
  * a Node runtime renders an alert naming the three places it looked (§13.6).
  */
-import { Alert, Button } from "@svatah/ui";
+import { Alert, Button } from "@svatah/yam-ui";
 import { useEffect, useState } from "react";
 import { bridge } from "../bridge.js";
 import { a11yVariant } from "../a11y-variant.js";
@@ -61,7 +61,7 @@ export function Welcome({
       <header className="sv-welcome-head">
         <span className="sv-brand">
           <span className="sv-brand-mark" aria-hidden="true" />
-          Svatah ADE
+          Yam ADE
         </span>
         <p className="sv-empty">
           A project directory is the only source of truth. Everything this window shows is a file

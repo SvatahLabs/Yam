@@ -6,8 +6,8 @@
  * `test/recorded.ts` describes.
  */
 import { describe, expect, it } from "vitest";
-import { isInteractiveRole, UIA_ROLE_MAP } from "@svatah/surface";
-import { LocateError } from "@svatah/surface";
+import { isInteractiveRole, UIA_ROLE_MAP } from "@svatah/yam-surface";
+import { LocateError } from "@svatah/yam-surface";
 import {
   automationIdOf,
   childIndex,
@@ -178,22 +178,22 @@ describe("controlPath (LLD §3.3, §7.5)", () => {
      * person checks by hand in Inspect or Accessibility Insights, and those
      * show `Button`, not `button`.
      */
-    expect(record[0]!.controlPath).toBe("Window[Svatah ADE]");
+    expect(record[0]!.controlPath).toBe("Window[Yam ADE]");
     const button = record.find((node) => node.name === "Stop recording");
     expect(button?.controlPath).toContain("Button[Stop recording]");
   });
 
   it("addresses a named element by name and an anonymous one by index", () => {
     const raw: UiaNode[] = [
-      { parent: -1, controlType: "Window", name: "Svatah ADE" },
+      { parent: -1, controlType: "Window", name: "Yam ADE" },
       { parent: 0, controlType: "Group" },
       { parent: 0, controlType: "Group" },
       { parent: 2, controlType: "Button", name: "Stop recording" },
     ];
     const children = childIndex(raw);
-    expect(controlPathOf(raw, 2, children, "Svatah ADE")).toBe("Window[Svatah ADE]/Group[1]");
-    expect(controlPathOf(raw, 3, children, "Svatah ADE")).toBe(
-      "Window[Svatah ADE]/Group[1]/Button[Stop recording]",
+    expect(controlPathOf(raw, 2, children, "Yam ADE")).toBe("Window[Yam ADE]/Group[1]");
+    expect(controlPathOf(raw, 3, children, "Yam ADE")).toBe(
+      "Window[Yam ADE]/Group[1]/Button[Stop recording]",
     );
   });
 

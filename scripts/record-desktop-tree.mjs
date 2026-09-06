@@ -90,7 +90,7 @@ const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 const entry = join(ADE, ".vite", "build", "main.js");
 for (const [what, path] of [["the CLI", cli], ["the ADE build", entry]]) {
   if (!existsSync(path)) {
-    process.stderr.write(`${what} is not built (${path}). Run \`pnpm -r build\` and \`pnpm --filter @svatah/ade exec electron-forge package\`.\n`);
+    process.stderr.write(`${what} is not built (${path}). Run \`pnpm -r build\` and \`pnpm --filter @svatah/yam-ade exec electron-forge package\`.\n`);
     process.exit(1);
   }
 }
@@ -106,20 +106,20 @@ const child = spawn(
     stdio: ["ignore", "pipe", "pipe"],
     env: {
       ...process.env,
-      SVATAH_CLI: cli,
-      SVATAH_A11Y: "1",
-      ...(variant === "0" ? {} : { SVATAH_A11Y_VARIANT: variant }),
+      YAM_CLI: cli,
+      YAM_A11Y: "1",
+      ...(variant === "0" ? {} : { YAM_A11Y_VARIANT: variant }),
       /*
        * The project the ADE opens on (T8.1, §13.6, T10.3).
        *
-       * `SVATAH_ADE_PROJECT` is the variable the main process reads; the name
-       * here used to be `SVATAH_ADE_RECORD_PROJECT`, which nothing read, so
+       * `YAM_ADE_PROJECT` is the variable the main process reads; the name
+       * here used to be `YAM_ADE_RECORD_PROJECT`, which nothing read, so
        * every tree was recorded against an ADE with no project open. That was
        * invisible while the Project screen was the default and drew its "Open a
        * project…" button either way; with the rail it is not — a project-less
        * window has no rail at all.
        */
-      SVATAH_ADE_PROJECT: project,
+      YAM_ADE_PROJECT: project,
     },
   },
 );
@@ -409,7 +409,7 @@ async function main() {
    * than reaching into React's state is what makes this a recording of the
    * application rather than of a rendering of it. The tab is clicked by its
    * accessible name, which is the name the AX tree will show and the name a
-   * Svatah flow would use.
+   * Yam flow would use.
    */
   const evaluate = async (expression) => {
     const { result, exceptionDetails } = await cdp.send("Runtime.evaluate", {
@@ -424,7 +424,7 @@ async function main() {
   /*
    * The project opens two ways, and this waits for whichever happened (T10.3).
    *
-   * `SVATAH_ADE_PROJECT` opens one on ready (§13.6), so the shell is usually
+   * `YAM_ADE_PROJECT` opens one on ready (§13.6), so the shell is usually
    * already up by the time this attaches — and then there is no Recent list to
    * click, because the welcome screen is not showing. When the renderer came up
    * before the main process announced the project, it *is* showing, and the
@@ -612,7 +612,7 @@ async function main() {
   }
 
   const { result } = await cdp.send("Runtime.evaluate", { expression: "document.title" });
-  const title = result.value ?? "Svatah ADE";
+  const title = result.value ?? "Yam ADE";
 
   for (const shape of shapes) {
     writeShape(shape, { nodes, byId, geometry, title, screen });
@@ -808,7 +808,7 @@ function writeShape(shape, { nodes, byId, geometry, title, screen }) {
   const file = join(out, `ade-${screen}${variant === "0" ? "" : `-v${variant}`}.json`);
   writeFileSync(
     file,
-    `${JSON.stringify({ process: "Svatah ADE", title, truncated: false, nodes: window }, null, 2)}\n`,
+    `${JSON.stringify({ process: "Yam ADE", title, truncated: false, nodes: window }, null, 2)}\n`,
     "utf8",
   );
   process.stdout.write(`wrote ${window.length} node(s) to ${file}\n`);

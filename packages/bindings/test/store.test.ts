@@ -12,8 +12,8 @@ import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { canonicalYaml } from "@svatah/schema";
-import { DataError } from "@svatah/surface";
+import { canonicalYaml } from "@svatah/yam-schema";
+import { DataError } from "@svatah/yam-surface";
 import {
   BindingsStore,
   elementIdFromPhrase,
@@ -27,7 +27,7 @@ import { candidate, entry, file } from "./fixtures.js";
 let dir: string;
 
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "svatah-bindings-"));
+  dir = mkdtempSync(join(tmpdir(), "yam-bindings-"));
 });
 afterEach(() => {
   rmSync(dir, { recursive: true, force: true });

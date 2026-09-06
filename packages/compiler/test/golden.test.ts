@@ -17,7 +17,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { formatDiagnostic, parseTargets, readData, TargetDictionary } from "@svatah/spec";
+import { formatDiagnostic, parseTargets, readData, TargetDictionary } from "@svatah/yam-spec";
 import { lowerStep, parseSentence } from "../src/index.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");

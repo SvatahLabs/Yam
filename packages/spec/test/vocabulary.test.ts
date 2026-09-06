@@ -15,7 +15,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
-import { ACTIONS } from "@svatah/schema";
+import { ACTIONS } from "@svatah/yam-schema";
 import { generateActionsYaml, VERBS, VOCABULARY, VerbTrie } from "../src/index.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));

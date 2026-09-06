@@ -25,9 +25,9 @@ import type {
   Snapshot,
   SurfaceAction,
   SurfaceKind,
-} from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
-import { NO_CAPABILITIES, buildSnapshot } from "@svatah/surface";
+} from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
+import { NO_CAPABILITIES, buildSnapshot } from "@svatah/yam-surface";
 
 /** Which faults a broken adapter has. Each maps onto a check the suite makes. */
 export interface Faults {
@@ -195,7 +195,7 @@ export class BrokenAdapter implements AgentSurface {
 
   async read(kind: ReadKind, ref?: Ref): Promise<unknown> {
     if (kind === "url") return this.url;
-    if (kind === "title") return "Broken · Svatah Sample";
+    if (kind === "title") return "Broken · Yam Sample";
     const element = this.find(ref);
     if (kind === "value") return element?.value ?? "";
     if (kind === "text") return element?.name ?? "";

@@ -9,13 +9,13 @@
  * The verifier's command is:
  *
  *   pnpm --filter sample-web start &
- *   pnpm svatah surface conform --adapter playwright
+ *   pnpm yam surface conform --adapter playwright
  *
  * This test is the same run, with the sample app started for it.
  *
  * Refs: REQ-SURF-3, REQ-STD-2, LLD §14.
  */
-import { renderReport, runSurfaceConformance, SURFACE_CASES } from "@svatah/conformance";
+import { renderReport, runSurfaceConformance, SURFACE_CASES } from "@svatah/yam-conformance";
 import { PlaywrightSurface, type SnapshotMechanism } from "../src/index.js";
 import { expect, MECHANISMS, test } from "./fixtures.js";
 

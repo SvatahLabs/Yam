@@ -29,7 +29,7 @@
  * the index. The first is what a person would write, and the rest are the
  * honest fallbacks for an element that has nothing to be called.
  */
-import type { ElementDescription } from "@svatah/schema";
+import type { ElementDescription } from "@svatah/yam-schema";
 import type { TrajectoryLine } from "./capture.js";
 
 /** A step drafted from one or more calls. */

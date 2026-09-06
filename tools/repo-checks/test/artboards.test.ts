@@ -39,7 +39,7 @@ function audit(directory?: string): { status: number; output: string } {
 
 const made: string[] = [];
 const scratch = (): string => {
-  const one = mkdtempSync(join(tmpdir(), "svatah-artboards-"));
+  const one = mkdtempSync(join(tmpdir(), "yam-artboards-"));
   made.push(one);
   return one;
 };

@@ -12,8 +12,8 @@
  * relocalization and the residue is reported as unrepaired. It is never quietly
  * dropped, and the report says how many.
  */
-import type { AgentSurface } from "@svatah/surface";
-import type { BindingEntry } from "@svatah/schema";
+import type { AgentSurface } from "@svatah/yam-surface";
+import type { BindingEntry } from "@svatah/yam-schema";
 
 /** What the healer knows about the element it is trying to re-find. */
 export interface RegroundRequest {

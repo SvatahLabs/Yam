@@ -1,6 +1,6 @@
 /**
  * LLD §16 (Draft 2.3): "`apps/sample-web` stamps every interactive element with
- * `data-svatah-eval="<stable key>"`, identical across all variants."
+ * `data-yam-eval="<stable key>"`, identical across all variants."
  *
  * Two claims, and the eval's correctness rests on both: every interactive
  * element has a key, and a key means the same element on every variant. The

@@ -21,7 +21,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { provenanceSchema, type Provenance } from "@svatah/schema";
+import { provenanceSchema, type Provenance } from "@svatah/yam-schema";
 
 export interface CacheEntry {
   readonly value: unknown;

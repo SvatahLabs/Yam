@@ -30,8 +30,8 @@ import {
   run,
   type RunOptions,
   type RunOutcome,
-} from "@svatah/runtime";
-import type { Plan, Story } from "@svatah/schema";
+} from "@svatah/yam-runtime";
+import type { Plan, Story } from "@svatah/yam-schema";
 import { checkEnvironment, type PolicyOptions } from "./policy.js";
 
 export interface WorkflowOptions extends PolicyOptions {

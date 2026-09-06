@@ -1,4 +1,4 @@
-import type { AdapterName, Config } from "@svatah/schema";
+import type { AdapterName, Config } from "@svatah/yam-schema";
 import { SessionError } from "./errors.js";
 import type { AgentSurface } from "./surface.js";
 

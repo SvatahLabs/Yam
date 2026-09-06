@@ -1,20 +1,20 @@
 /**
- * Reading `svatah.config.yaml` (LLD §3.5, §15).
+ * Reading `yam.config.yaml` (LLD §3.5, §15).
  *
- * This lives in module (a) rather than in `@svatah/cli` because both command
+ * This lives in module (a) rather than in `@svatah/yam` because both command
  * lines need it. LLD §15 (Draft 2.5) requires one base-URL and storage-state
  * precedence "applied identically by every command that opens a session", and
  * three of those commands — `bindings verify`, `surface conform`, `eval` — are
  * module (a)'s. A second config reader beside this one is exactly how the two
  * halves would come to disagree about what `config.app` says.
  *
- * It reaches for nothing above `@svatah/schema`: the config schema, the YAML
+ * It reaches for nothing above `@svatah/yam-schema`: the config schema, the YAML
  * parser, and the defaults.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
-import { DEFAULT_CONFIG, configSchema, type Config } from "@svatah/schema";
+import { DEFAULT_CONFIG, configSchema, type Config } from "@svatah/yam-schema";
 
 /**
  * A project config that will not load (LLD §3.5, §15).
@@ -34,7 +34,7 @@ export class ConfigError extends Error {
   }
 }
 
-export const CONFIG_FILES = ["svatah.config.yaml", "svatah.config.yml", "svatah.config.json"];
+export const CONFIG_FILES = ["yam.config.yaml", "yam.config.yml", "yam.config.json"];
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -67,7 +67,7 @@ function withDefaults(parsed: Record<string, unknown>, project: string): Record<
  * run from wherever the person is standing. A relative bundle path is the
  * natural thing for a self-suite to write — the application it drives is the
  * one this checkout builds — and it has to mean the same thing whatever
- * directory `svatah run` was typed in.
+ * directory `yam run` was typed in.
  *
  * `resolve` leaves an absolute path alone, so a configuration that names one is
  * untouched.
@@ -110,7 +110,7 @@ export function loadConfig(root: string): { config: Config; file?: string } {
       const issues = result.error.issues
         .map((issue) => `  ${issue.path.join(".") || "(root)"}: ${issue.message}`)
         .join("\n");
-      throw new ConfigError(`${name} is not a valid Svatah config:\n${issues}`, name);
+      throw new ConfigError(`${name} is not a valid Yam config:\n${issues}`, name);
     }
     return { config: rooted(result.data, root), file: name };
   }
@@ -125,7 +125,7 @@ export function loadConfig(root: string): { config: Config; file?: string } {
 /**
  * `config.app` from a directory, or nothing.
  *
- * The forgiving form, for the module (a) commands: `svatah-bindings surface
+ * The forgiving form, for the module (a) commands: `yam-bindings surface
  * conform` is run from all sorts of directories, and one that has no config, or
  * a config with a typo in an unrelated section, is not a reason to refuse to
  * conform against an explicitly given `--base-url`.

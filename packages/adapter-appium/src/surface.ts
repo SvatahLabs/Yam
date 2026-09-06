@@ -32,9 +32,9 @@ import type {
   Snapshot,
   SurfaceAction,
   SurfaceKind,
-} from "@svatah/schema";
-import { DEFAULT_IGNORE_ATTRIBUTES } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+} from "@svatah/yam-schema";
+import { DEFAULT_IGNORE_ATTRIBUTES } from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 import {
   ActionabilityError,
   buildSnapshot,
@@ -44,7 +44,7 @@ import {
   SessionError,
   structuralHash,
   type SnapshotNode,
-} from "@svatah/surface";
+} from "@svatah/yam-surface";
 import {
   appiumServerUrl,
   capabilitiesFromEnv,
@@ -101,9 +101,9 @@ export const APPIUM_CAPABILITIES: Capabilities = {
 };
 
 export interface AppiumAdapterOptions {
-  /** Where the Appium server is; `SVATAH_APPIUM_URL`, else localhost:4723. */
+  /** Where the Appium server is; `YAM_APPIUM_URL`, else localhost:4723. */
   serverUrl?: string;
-  /** W3C capabilities, `appium:`-prefixed. Merged under `SVATAH_APPIUM_CAPS`. */
+  /** W3C capabilities, `appium:`-prefixed. Merged under `YAM_APPIUM_CAPS`. */
   capabilities?: Readonly<Record<string, unknown>>;
   timeoutMs?: number;
   testIdAttributes?: readonly string[];
@@ -154,7 +154,7 @@ export class AppiumSurface implements AgentSurface {
     /*
      * Android Chrome is a webview context, and a session started against it opens
      * in `NATIVE_APP` regardless (LLD §7.4). Switching when the capabilities
-     * asked for a browser is what makes `svatah run --adapter appium` against a
+     * asked for a browser is what makes `yam run --adapter appium` against a
      * mobile browser behave like `--adapter playwright` does.
      */
     if (capabilities["browserName"] !== undefined && isNativeContext(this.context)) {

@@ -1,7 +1,7 @@
-import { registerAdapter, hasAdapter } from "@svatah/surface";
+import { registerAdapter, hasAdapter } from "@svatah/yam-surface";
 import { createPlaywrightSurface } from "./surface.js";
 
-/** The name this adapter is selected by in `svatah.config.yaml` (LLD §2.4). */
+/** The name this adapter is selected by in `yam.config.yaml` (LLD §2.4). */
 export const PLAYWRIGHT_ADAPTER_NAME = "playwright";
 
 /**

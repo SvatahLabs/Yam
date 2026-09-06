@@ -1,8 +1,8 @@
 /**
- * `svatah mcp` — the MCP server (T4.6, REQ-AGT-2, LLD §15, §13.4).
+ * `yam mcp` — the MCP server (T4.6, REQ-AGT-2, LLD §15, §13.4).
  *
  * > MCP server exposes the CLI operations and the raw agent surface (`snapshot`,
- * > `act`, `read`, `check`) so external agents can explore through Svatah and
+ * > `act`, `read`, `check`) so external agents can explore through Yam and
  * > have trajectories captured.
  *
  * Two halves, and the second is the interesting one.
@@ -21,7 +21,7 @@
  * exploration into a deterministic tool" possible at all. An agent that cannot
  * say what it is doing is an agent whose exploration cannot become a tool.
  *
- * ADR-16: Svatah does not own an exploration agent. It owns the surface the
+ * ADR-16: Yam does not own an exploration agent. It owns the surface the
  * agent explores through, and the file that comes out.
  */
 import { randomUUID } from "node:crypto";
@@ -29,12 +29,12 @@ import { join, resolve } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { lintPlan, renderPlan } from "@svatah/compiler";
-import { TrajectoryWriter } from "@svatah/trajectory";
-import { createSurface, type AgentSurface } from "@svatah/surface";
-import type { ActArgs, Config, Predicate, ReadKind, Ref, SurfaceAction } from "@svatah/schema";
-import { predicateSchema, surfaceActionSchema } from "@svatah/schema";
-import { formatDiagnostic } from "@svatah/spec";
+import { lintPlan, renderPlan } from "@svatah/yam-compiler";
+import { TrajectoryWriter } from "@svatah/yam-trajectory";
+import { createSurface, type AgentSurface } from "@svatah/yam-surface";
+import type { ActArgs, Config, Predicate, ReadKind, Ref, SurfaceAction } from "@svatah/yam-schema";
+import { predicateSchema, surfaceActionSchema } from "@svatah/yam-schema";
+import { formatDiagnostic } from "@svatah/yam-spec";
 import {
   boolOption,
   EXIT,
@@ -43,7 +43,7 @@ import {
   type CommandIo,
   type ExitCode,
   type ParsedArgs,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 import { registerAllAdapters } from "../adapters.js";
 import { compileProject, loadProject, type LoadedProject } from "../project.js";
 
@@ -88,10 +88,10 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
   registerAllAdapters();
 
   const server = new McpServer(
-    { name: "svatah", version: "0.1.0" },
+    { name: "yam", version: "0.1.0" },
     {
       instructions:
-        "Svatah is a deterministic automation runtime. The `svatah_*` tools run the same " +
+        "Yam is a deterministic automation runtime. The `yam_*` tools run the same " +
         "operations the command line runs. The `surface_*` tools drive a live session " +
         "directly; each needs an `intent`, and the sequence is written to trajectory.jsonl " +
         "so the exploration can be compiled into a flow that replays without a model.",
@@ -111,7 +111,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
   /**
    * Opened on the first surface call, not at start.
    *
-   * An agent that only ever calls `svatah_compile` should not have started a
+   * An agent that only ever calls `yam_compile` should not have started a
    * browser, and a server that opened one eagerly would make every operation
    * tool wait for it.
    */
@@ -209,17 +209,17 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
   /* ── the operation tools (LLD §15) ──────────────────────────────────────── */
 
   server.registerTool(
-    "svatah_compile",
+    "yam_compile",
     {
       title: "Compile the project",
       description:
-        "Compile every flow into a plan, reporting the diagnostics `svatah compile` reports. " +
+        "Compile every flow into a plan, reporting the diagnostics `yam compile` reports. " +
         "The same function the command line runs, so an agent and a person get the same plan.",
       inputSchema: {
         write: z
           .boolean()
           .optional()
-          .describe("Write .svatah/plan.json as well as returning it. Default false."),
+          .describe("Write .yam/plan.json as well as returning it. Default false."),
       },
     },
     async ({ write }) => {
@@ -228,8 +228,8 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       const diagnostics = [...project0.diagnostics, ...compiled.diagnostics];
       if (write === true && compiled.ok) {
         const { mkdirSync, writeFileSync } = await import("node:fs");
-        mkdirSync(join(project0.root, ".svatah"), { recursive: true });
-        writeFileSync(join(project0.root, ".svatah", "plan.json"), renderPlan(compiled.plan), "utf8");
+        mkdirSync(join(project0.root, ".yam"), { recursive: true });
+        writeFileSync(join(project0.root, ".yam", "plan.json"), renderPlan(compiled.plan), "utf8");
       }
       return text({
         ok: compiled.ok,
@@ -250,11 +250,11 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
   );
 
   server.registerTool(
-    "svatah_lint",
+    "yam_lint",
     {
       title: "Lint the project",
       description:
-        "Everything `svatah lint` reports: ambiguous targets, model-compiled steps, low " +
+        "Everything `yam lint` reports: ambiguous targets, model-compiled steps, low " +
         "confidence, unused captures, long sleeps, side-effecting steps exposed as tools.",
       inputSchema: {},
     },
@@ -277,7 +277,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
   );
 
   server.registerTool(
-    "svatah_run",
+    "yam_run",
     {
       title: "Replay the project",
       description:
@@ -313,7 +313,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
   );
 
   server.registerTool(
-    "svatah_bindings",
+    "yam_bindings",
     {
       title: "Read the bindings store",
       description: "Every element the project has recorded, with the phrases that name it.",
@@ -322,7 +322,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ id }) => {
-      const { BindingsStore } = await import("@svatah/bindings");
+      const { BindingsStore } = await import("@svatah/yam-bindings");
       const project0 = await project();
       const store = BindingsStore.load(resolve(project0.root, project0.config.bindings.dir));
       if (id !== undefined) return text(store.get(id) ?? { error: `no bindings for "${id}"` });
@@ -337,7 +337,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
   );
 
   server.registerTool(
-    "svatah_results",
+    "yam_results",
     {
       title: "Read a run's results",
       description: "The summary and step results of a run under `runs/`.",
@@ -353,7 +353,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       /*
        * Only directories that actually hold a run. A session's
        * `trajectory.jsonl` lives under `runs/<session>/` too (HLD §7's artifact
-       * table), and a `svatah_results` that returned one of those would answer
+       * table), and a `yam_results` that returned one of those would answer
        * "no steps" for a project that has plenty.
        */
       const ids = readdirSync(runs)
@@ -502,7 +502,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
 }
 
 /**
- * `svatah mcp` — serve over stdio.
+ * `yam mcp` — serve over stdio.
  *
  * Stdio because that is how an MCP client starts a server it owns, and because
  * it is the transport with no port to collide and no token to leak. The
@@ -521,7 +521,7 @@ export async function mcpCommand(args: ParsedArgs, io: CommandIo): Promise<ExitC
       : { sessionId: stringOption(args, "session")! }),
   });
 
-  io.err(`svatah mcp — trajectory at ${built.trajectory.path}`);
+  io.err(`yam mcp — trajectory at ${built.trajectory.path}`);
   if (boolOption(args, "json")) io.err("(--json has no meaning for a protocol server)");
 
   const transport = new StdioServerTransport();

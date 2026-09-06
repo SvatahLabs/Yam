@@ -11,8 +11,8 @@
  * the surface gives came off the real page once.
  */
 import { describe, expect, it } from "vitest";
-import { fakeGateway, GatewayRefusal, type GatewayRequest } from "@svatah/gateway";
-import { estimateTokens, isInteractiveRole } from "@svatah/surface";
+import { fakeGateway, GatewayRefusal, type GatewayRequest } from "@svatah/yam-gateway";
+import { estimateTokens, isInteractiveRole } from "@svatah/yam-surface";
 import {
   assertRecordable,
   EnvironmentRefused,
@@ -541,12 +541,12 @@ describe("prompt g-1 (Draft 1 §9.2)", () => {
  */
 describe("a desktop session grounds by window (T11.3)", () => {
   const ade = () =>
-    new RecordedSurface(recordedPage("/login"), { kind: "desktop", windowTitle: "Svatah ADE" });
+    new RecordedSurface(recordedPage("/login"), { kind: "desktop", windowTitle: "Yam ADE" });
 
   it("asks about the window, not the page", async () => {
     const { gateway, questions } = reads(() => null);
     await ground({ id: "sign-in", phrase: "the Sign in button" }, ade(), options(gateway));
-    expect(questions[0]).toContain("Window: Svatah ADE");
+    expect(questions[0]).toContain("Window: Yam ADE");
     expect(questions[0]).not.toContain("Page:");
   });
 
@@ -568,6 +568,6 @@ describe("a desktop session grounds by window (T11.3)", () => {
     expect(decision.outcome, JSON.stringify(decision)).toBe("grounded");
     expect(entry?.context.platform).toBe("desktop");
     // A desktop pattern has no segments to generalise; `/` is not where it is.
-    expect(entry?.context.pattern).toBe("Svatah ADE");
+    expect(entry?.context.pattern).toBe("Yam ADE");
   });
 });

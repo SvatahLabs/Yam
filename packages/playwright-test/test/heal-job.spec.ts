@@ -19,7 +19,7 @@ import {
   fingerprintOf,
   synthesise,
   tryResolve,
-} from "@svatah/bindings";
+} from "@svatah/yam-bindings";
 import {
   clearRegrounder,
   heal,
@@ -31,17 +31,17 @@ import {
   renderHealReport,
   unifiedDiff,
   type HealInput,
-} from "@svatah/healer";
-import { HUMAN_PROVENANCE_MODEL, type BindingEntry } from "@svatah/schema";
-import { PlaywrightSurface } from "@svatah/adapter-playwright";
+} from "@svatah/yam-healer";
+import { HUMAN_PROVENANCE_MODEL, type BindingEntry } from "@svatah/yam-schema";
+import { PlaywrightSurface } from "@svatah/yam-adapter-playwright";
 import { expect, test } from "./fixtures.js";
 
 /** A throwaway git repository holding a bindings store. */
 function makeRepository(): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-heal-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-heal-"));
   execFileSync("git", ["init", "--quiet"], { cwd: dir });
   execFileSync("git", ["config", "user.email", "test@example.invalid"], { cwd: dir });
-  execFileSync("git", ["config", "user.name", "Svatah tests"], { cwd: dir });
+  execFileSync("git", ["config", "user.name", "Yam tests"], { cwd: dir });
   mkdirSync(join(dir, "bindings", "login"), { recursive: true });
   return dir;
 }
@@ -423,7 +423,7 @@ test.describe("the Regrounder plugin (LLD §10)", () => {
 
 test.describe("the diff generator", () => {
   test("produces a unified diff git apply accepts", () => {
-    const dir = mkdtempSync(join(tmpdir(), "svatah-diff-"));
+    const dir = mkdtempSync(join(tmpdir(), "yam-diff-"));
     try {
       execFileSync("git", ["init", "--quiet"], { cwd: dir });
       execFileSync("git", ["config", "user.email", "t@example.invalid"], { cwd: dir });

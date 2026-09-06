@@ -10,7 +10,7 @@
  * cannot be softened by accident.
  */
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CONFIG, type Config, type Story } from "@svatah/schema";
+import { DEFAULT_CONFIG, type Config, type Story } from "@svatah/yam-schema";
 import { checkEnvironment, EnvironmentRefusal } from "../src/index.js";
 
 const story = (parts: Partial<Story["meta"]> = {}): Story => ({

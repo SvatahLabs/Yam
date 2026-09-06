@@ -1,8 +1,8 @@
 /**
- * `svatah trajectory compile` (T5.5, REQ-BEH-4, LLD §13.4).
+ * `yam trajectory compile` (T5.5, REQ-BEH-4, LLD §13.4).
  *
  * ```
- * svatah trajectory compile runs/<id>/trajectory.jsonl [dir] [--name "Book a slot"]
+ * yam trajectory compile runs/<id>/trajectory.jsonl [dir] [--name "Book a slot"]
  * ```
  *
  * Turns an agent's exploration into a proposal under `proposals/<date>/`: a
@@ -18,13 +18,13 @@
  * it could reach them (T5.5's Validate: "nothing written outside `proposals/`").
  *
  * LLD §15 does not list a `trajectory` command — Phase 4 wrote trajectories from
- * `svatah mcp` and nothing read them. This is the command that reads them, and
+ * `yam mcp` and nothing read them. This is the command that reads them, and
  * it is recorded as a deviation in `docs/spec/progress/phase-5.md`: the
  * alternative was a compiler with no way to invoke it, and the ADE's "compile to
  * proposal" (T5.8) needs one function that both it and a person can call.
  */
 import { relative, resolve } from "node:path";
-import { compileTrajectory, readTrajectory, writeProposal } from "@svatah/trajectory";
+import { compileTrajectory, readTrajectory, writeProposal } from "@svatah/yam-trajectory";
 import {
   boolOption,
   EXIT,
@@ -32,21 +32,21 @@ import {
   type CommandIo,
   type ExitCode,
   type ParsedArgs,
-} from "@svatah/bindings-cli";
+} from "@svatah/yam-bindings-cli";
 import { loadConfig } from "../project.js";
 
-const USAGE = `svatah trajectory compile <trajectory.jsonl> [dir] [--name "Story name"]
+const USAGE = `yam trajectory compile <trajectory.jsonl> [dir] [--name "Story name"]
                                      [--out proposals] [--app proposed] [--json]`;
 
 export async function trajectoryCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   if (args.command[1] !== "compile") {
-    io.err(`\`svatah trajectory\` takes one subcommand, \`compile\`.\n\n${USAGE}`);
+    io.err(`\`yam trajectory\` takes one subcommand, \`compile\`.\n\n${USAGE}`);
     return EXIT.usage;
   }
 
   const path = args.command[2];
   if (path === undefined) {
-    io.err(`\`svatah trajectory compile\` needs a trajectory file.\n\n${USAGE}`);
+    io.err(`\`yam trajectory compile\` needs a trajectory file.\n\n${USAGE}`);
     return EXIT.usage;
   }
 

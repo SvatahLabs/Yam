@@ -1,11 +1,11 @@
 # An agent calling a story as a tool (REQ-BEH-3, REQ-AUTO-6, 8)
 
-The tool behavior. `svatah tool serve` is an MCP server whose tools *are* the
+The tool behavior. `yam tool serve` is an MCP server whose tools *are* the
 project's stories: each tool's schema is derived from the story's signature, and
 each call is a deterministic run with an audit record.
 
 ```bash
-svatah tool serve --expose "Book a slot"
+yam tool serve --expose "Book a slot"
 ```
 
 `call-a-tool.mjs` beside this file is a complete MCP client — the SDK, a stdio

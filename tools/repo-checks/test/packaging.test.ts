@@ -1,8 +1,8 @@
 /**
  * T1.9 — module (a) is publishable, and it is module (a).
  *
- * "Publish `@svatah/bindings`, `@svatah/schema`, `@svatah/conformance`,
- * `@svatah/adapter-playwright` 0.1; README with the ten-minute quick start and
+ * "Publish `@svatah/yam-bindings`, `@svatah/yam-schema`, `@svatah/yam-conformance`,
+ * `@svatah/yam-adapter-playwright` 0.1; README with the ten-minute quick start and
  * the published healing numbers."
  *
  * Validate: "`npm install` in a clean Playwright project works; module (a) has no
@@ -17,7 +17,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { fromRoot } from "../src/repo.js";
+import { fromRoot, specifierOf, dirOf } from "../src/repo.js";
 
 /**
  * The packages HLD §12 publishes as module (a). Draft 2.3 added `bindings-cli`,
@@ -78,7 +78,7 @@ const manifest = (pkg: string): Manifest =>
 describe("module (a) is publishable at 0.1.0 (T1.9)", () => {
   it.each(MODULE_A)("@svatah/%s declares what npm needs to publish it", (pkg) => {
     const m = manifest(pkg);
-    expect(m.name).toBe(`@svatah/${pkg}`);
+    expect(m.name).toBe(specifierOf(pkg));
     expect(m.version).toBe("0.1.0");
     expect(m.license, "REQ-PKG-3: the project itself is Apache-2.0").toBe("Apache-2.0");
     expect(m.type, "the workspace is ESM (LLD §1)").toBe("module");
@@ -87,18 +87,18 @@ describe("module (a) is publishable at 0.1.0 (T1.9)", () => {
 
     // `files` is what a consumer receives. Missing `dist` would publish an empty
     // package that installs and then fails to import.
-    expect(m.files ?? [], `@svatah/${pkg} publishes no dist`).toContain("dist");
-    expect(m.exports?.["."], `@svatah/${pkg} has no entry point`).toBeDefined();
+    expect(m.files ?? [], `${specifierOf(pkg)} publishes no dist`).toContain("dist");
+    expect(m.exports?.["."], `${specifierOf(pkg)} has no entry point`).toBeDefined();
   });
 
-  it("@svatah/schema publishes the JSON Schemas as well as the types (REQ-STD-1)", () => {
+  it("@svatah/yam-schema publishes the JSON Schemas as well as the types (REQ-STD-1)", () => {
     const m = manifest("schema");
     expect(m.files).toContain("json");
     expect(m.exports?.["./json/*"]).toBe("./json/*");
     expect(existsSync(fromRoot("packages", "schema", "json", "ir.schema.json"))).toBe(true);
   });
 
-  it("@svatah/playwright-test peers on the runner rather than depending on it", () => {
+  it("@svatah/yam-playwright-test peers on the runner rather than depending on it", () => {
     const m = manifest("playwright-test");
     // A consumer's tests run under *their* @playwright/test. Depending on it
     // would install a second copy, and two runners in one project is a bug that
@@ -133,9 +133,8 @@ describe("module (a) resolves no module (b) package (REQ-PKG-1)", () => {
         "optionalDependencies",
       ] as const) {
         for (const specifier of Object.keys(m[field] ?? {})) {
-          const match = /^@svatah\/([^/]+)$/.exec(specifier);
-          if (match === null) continue;
-          const next = match[1]!;
+          const next = dirOf(specifier);
+          if (next === undefined) continue;
           if (seen.has(next) || !existsSync(fromRoot("packages", next, "package.json"))) continue;
           seen.add(next);
           queue.push(next);
@@ -147,7 +146,7 @@ describe("module (a) resolves no module (b) package (REQ-PKG-1)", () => {
 
   it.each(MODULE_A)("@svatah/%s reaches no module (b) package", (pkg) => {
     const reached = closure(pkg).filter((p) => MODULE_B.includes(p));
-    expect(reached, `@svatah/${pkg} reaches ${reached.join(", ")}`).toEqual([]);
+    expect(reached, `${specifierOf(pkg)} reaches ${reached.join(", ")}`).toEqual([]);
   });
 
   it("the whole of module (a) is closed under its own dependencies", () => {
@@ -157,7 +156,7 @@ describe("module (a) resolves no module (b) package (REQ-PKG-1)", () => {
     for (const dependency of reached) {
       expect(
         MODULE_A as readonly string[],
-        `module (a) reaches @svatah/${dependency}, which is not published with it`,
+        `module (a) reaches ${specifierOf(dependency)}, which is not published with it`,
       ).toContain(dependency);
     }
   });
@@ -167,7 +166,7 @@ describe("module (a) resolves no module (b) package (REQ-PKG-1)", () => {
     // consumer's. Neither may be forced on someone who wanted only the schemas.
     for (const pkg of ["schema", "surface", "bindings", "healer", "conformance"] as const) {
       const deps = Object.keys(manifest(pkg).dependencies ?? {});
-      expect(deps, `@svatah/${pkg} depends on a browser runner`).not.toContain("playwright");
+      expect(deps, `${specifierOf(pkg)} depends on a browser runner`).not.toContain("playwright");
       expect(deps).not.toContain("@playwright/test");
     }
   });
@@ -177,8 +176,8 @@ describe("the README carries the quick start and the numbers (T1.9)", () => {
   const readme = readFileSync(fromRoot("README.md"), "utf8");
 
   it("shows the one dependency and the one import", () => {
-    expect(readme).toContain("npm install --save-dev @svatah/playwright-test");
-    expect(readme).toContain('import { test, expect } from "@svatah/playwright-test";');
+    expect(readme).toContain("npm install --save-dev @svatah/yam-playwright-test");
+    expect(readme).toContain('import { test, expect } from "@svatah/yam-playwright-test";');
     expect(readme).toContain("examples/plain-playwright/README.md");
   });
 
@@ -191,7 +190,7 @@ describe("the README carries the quick start and the numbers (T1.9)", () => {
 
   it("lists the packages module (a) publishes", () => {
     for (const pkg of MODULE_A) {
-      expect(readme, `the README does not list @svatah/${pkg}`).toContain(`@svatah/${pkg}`);
+      expect(readme, `the README does not list @svatah/${pkg}`).toContain(`${specifierOf(pkg)}`);
     }
   });
 
@@ -302,7 +301,7 @@ describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
   it("ships the published contract with the schemas and the fixture", () => {
     /*
      * REQ-STD-1 and REQ-STD-2 together: a third party writing a runtime
-     * downloads `@svatah/schema` for the schemas their artifacts must satisfy
+     * downloads `@svatah/yam-schema` for the schemas their artifacts must satisfy
      * *and* the fixture their results are compared against. Shipping one
      * without the other leaves them able to validate and unable to check.
      */
@@ -332,7 +331,7 @@ describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
     expect(release).toContain("pnpm release:dry-run");
     expect(release).toContain("pnpm quick-start:packed");
     // The three-OS installer matrix, and the reports on the release notes.
-    expect(release).toContain("pnpm --filter @svatah/ade make");
+    expect(release).toContain("pnpm --filter @svatah/yam-ade make");
     expect(release).toContain("files: reports/*.md");
 
   });

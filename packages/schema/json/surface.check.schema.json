@@ -1,5 +1,5 @@
 {
-  "$id": "https://svatah.dev/schema/1.0.0/surface.check.schema.json",
+  "$id": "https://yam.svatah.com/schema/1.0.0/surface.check.schema.json",
   "$ref": "#/definitions/surface.check",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
@@ -302,7 +302,7 @@
       "type": "object"
     }
   },
-  "description": "Agent surface: check() request and response (LLD §2.5). Svatah schemaVersion 1.0.0.",
+  "description": "Agent surface: check() request and response (LLD §2.5). Yam schemaVersion 1.0.0.",
   "title": "surface.check",
-  "x-svatah-schema-version": "1.0.0"
+  "x-yam-schema-version": "1.0.0"
 }

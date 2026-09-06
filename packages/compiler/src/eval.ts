@@ -23,7 +23,7 @@ import {
   tierSchema,
   type Step,
   type Tier,
-} from "@svatah/schema";
+} from "@svatah/yam-schema";
 
 /** The distinctive part of a compiled step: what the sentence itself determines. */
 const goldenStepSchema = stepSchema

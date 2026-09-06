@@ -1,7 +1,7 @@
 /**
- * `@svatah/adapter-ax` — the macOS Accessibility adapter (T6.2, REQ-ADP-7).
+ * `@svatah/yam-adapter-ax` — the macOS Accessibility adapter (T6.2, REQ-ADP-7).
  *
- * The conformance target is the Svatah ADE, launched with `SVATAH_A11Y=1` so
+ * The conformance target is the Yam ADE, launched with `YAM_A11Y=1` so
  * Chromium publishes the renderer's accessibility tree (LLD §7.5, REQ-ADE-6).
  * See `README.md` for the permission this needs and how to grant it.
  */

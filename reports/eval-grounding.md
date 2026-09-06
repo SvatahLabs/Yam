@@ -1,4 +1,4 @@
-# Svatah eval report — grounding
+# Yam eval report — grounding
 
 Generated: 2026-09-04T22:18:08.948Z
 
@@ -15,7 +15,7 @@ page — variant 0 unless the case names one — takes one snapshot, and runs th
 `ground()` the recorder runs, with the same prompt (`g-1`) and the same token budget.
 
 The answer is checked against a ground-truth key. `apps/sample-web` stamps every
-interactive element with `data-svatah-eval`, identical across all twenty variants, and
+interactive element with `data-yam-eval`, identical across all twenty variants, and
 `bindings.ignoreAttributes` makes the surface blind to it: the eval reads it with a page
 script, around the surface rather than through it (LLD §16). "It resolved" is not the
 question; "is it the element the phrase meant" is.

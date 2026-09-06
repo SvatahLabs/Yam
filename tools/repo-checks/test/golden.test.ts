@@ -6,7 +6,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
-import { ACTIONS, PREDICATE_KINDS, stepSchema } from "@svatah/schema";
+import { ACTIONS, PREDICATE_KINDS, stepSchema } from "@svatah/yam-schema";
 import { fromRoot } from "../src/repo.js";
 import { materialise, readGolden, type GoldenEntry } from "../src/golden.js";
 

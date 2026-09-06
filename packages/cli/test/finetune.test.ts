@@ -11,7 +11,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { modelStepSchema } from "@svatah/compiler";
+import { modelStepSchema } from "@svatah/yam-compiler";
 import { normalise, readCorpus, reviewCandidates } from "../src/commands/finetune.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");

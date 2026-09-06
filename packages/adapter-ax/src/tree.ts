@@ -19,8 +19,8 @@
  * against (LLD §6.4), and a tree that skipped its own scaffolding would give
  * two different windows the same path.
  */
-import { AX_ROLE_MAP, FALLBACK_ROLE, isInteractiveRole } from "@svatah/surface";
-import type { NodeState, SnapshotNode } from "@svatah/schema";
+import { AX_ROLE_MAP, FALLBACK_ROLE, isInteractiveRole } from "@svatah/yam-surface";
+import type { NodeState, SnapshotNode } from "@svatah/yam-schema";
 import type { AxNode } from "./bridge.js";
 
 /** A snapshot node, plus what only the walk knows. */
@@ -29,7 +29,7 @@ export interface AxSnapshotNode extends SnapshotNode {
   readonly path: readonly number[];
   /** The node this was built from, for `describe()`. */
   readonly source: AxNode;
-  /** `Window[Svatah ADE]/AXGroup[2]/AXButton[Run]` (LLD §3.3). */
+  /** `Window[Yam ADE]/AXGroup[2]/AXButton[Run]` (LLD §3.3). */
   readonly controlPath: string;
 }
 
@@ -365,7 +365,7 @@ export function convertTree(nodes: readonly AxNode[], options: ConvertOptions): 
 }
 
 /**
- * `Window[Svatah ADE]/AXGroup[2]/AXButton[Run]` (LLD §3.3, §7.5).
+ * `Window[Yam ADE]/AXGroup[2]/AXButton[Run]` (LLD §3.3, §7.5).
  *
  * > `controlPath` built from the ancestor chain with names and sibling indices
  * > […] `controlPath` starts at the top-level window title.

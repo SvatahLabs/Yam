@@ -6,7 +6,7 @@
  *   pnpm eval:grounding                       # needs a credential
  *   pnpm eval:grounding -- --gateway fake     # checks the harness, not grounding
  *
- * The suite itself needs no wrapper: `svatah eval grounding --base-url <url>`
+ * The suite itself needs no wrapper: `yam eval grounding --base-url <url>`
  * runs against any deployment. This exists so a verifier has one command to type,
  * and so the ephemeral port the sample application takes is handled for them.
  */

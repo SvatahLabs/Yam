@@ -1,7 +1,7 @@
-# The Svatah action vocabulary (T2.2, LLD §4.3, REQ-RUN-10).
+# The Yam action vocabulary (T2.2, LLD §4.3, REQ-RUN-10).
 #
 # GENERATED from packages/spec/src/vocabulary.ts — do not edit by hand.
-# Regenerate with `pnpm --filter @svatah/spec build`.
+# Regenerate with `pnpm --filter @svatah/yam-spec build`.
 #
 # A port of the legacy ActionSynonyms.java, verb for verb, onto the v3 IR action
 # set. `legacy` is the Java name, kept so the port is auditable and so migrate

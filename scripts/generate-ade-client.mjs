@@ -21,7 +21,7 @@
  * ## What it does not do
  *
  * It does not generate types for request and response bodies. Those are
- * `@svatah/schema`'s — `StepResult`, `Summary`, `BindingFile` — and re-deriving
+ * `@svatah/yam-schema`'s — `StepResult`, `Summary`, `BindingFile` — and re-deriving
  * them from a JSON Schema round-trip would produce a second, subtly different
  * set of the same types. The client returns `unknown` and the screens parse with
  * the schema package, which is the one source REQ-STD-1 names.
@@ -29,7 +29,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { openApiDocument } from "@svatah/service";
+import { openApiDocument } from "@svatah/yam-service";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outArg = process.argv.indexOf("--out");
@@ -101,7 +101,7 @@ lines.push(" * OpenAPI description (`GET /openapi.json`, LLD §13.5). It is comm
 lines.push(" * renderer builds without a running service, and a test regenerates it and diffs,");
 lines.push(" * so drift between the ADE and the service is a red build rather than a discovery.");
 lines.push(" *");
-lines.push(" * Bodies are `unknown` on purpose: their types are `@svatah/schema`'s, and");
+lines.push(" * Bodies are `unknown` on purpose: their types are `@svatah/yam-schema`'s, and");
 lines.push(" * re-deriving them here would make a second, subtly different set of the same");
 lines.push(" * types (REQ-STD-1).");
 lines.push(" */");

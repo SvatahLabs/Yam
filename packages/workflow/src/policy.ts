@@ -18,7 +18,7 @@
  * *behavior*: a test run against production is a normal thing to do (that is
  * what a smoke test is), and `runtime` is the thing both behaviors share.
  */
-import type { Config, Story } from "@svatah/schema";
+import type { Config, Story } from "@svatah/yam-schema";
 
 /** A run refused before it started (LLD §15, exit 10). */
 export class EnvironmentRefusal extends Error {

@@ -5,15 +5,15 @@
  * Windows — which is why every rule here is testable on the machine this was
  * written on, and why a recorded tree is a complete test input.
  *
- * The sibling of `@svatah/adapter-ax`'s `tree.ts`, deliberately: the two files
+ * The sibling of `@svatah/yam-adapter-ax`'s `tree.ts`, deliberately: the two files
  * do the same job from two vocabularies, and REQ-SURF-4's claim — "roles, names,
  * states, and a reference scheme with the same shape whether the source is ARIA,
  * UIA, AX, AT-SPI, or Appium page source" — is only true if they arrive at the
  * same answers. `packages/adapter-uia/test/parity.test.ts` checks that against
  * the same window recorded in both shapes.
  */
-import { FALLBACK_ROLE, isInteractiveRole, UIA_ROLE_MAP } from "@svatah/surface";
-import type { NodeState, SnapshotNode } from "@svatah/schema";
+import { FALLBACK_ROLE, isInteractiveRole, UIA_ROLE_MAP } from "@svatah/yam-surface";
+import type { NodeState, SnapshotNode } from "@svatah/yam-schema";
 import type { UiaNode } from "./bridge.js";
 
 /** A snapshot node, plus what only the walk knows. */
@@ -22,7 +22,7 @@ export interface UiaSnapshotNode extends SnapshotNode {
   readonly path: readonly number[];
   /** The node this was built from, for `describe()`. */
   readonly source: UiaNode;
-  /** `Window[Svatah ADE]/Group[2]/Button[Run]` (LLD §3.3). */
+  /** `Window[Yam ADE]/Group[2]/Button[Run]` (LLD §3.3). */
   readonly controlPath: string;
 }
 
@@ -293,7 +293,7 @@ export function convertTree(nodes: readonly UiaNode[], options: ConvertOptions):
 }
 
 /**
- * `Window[Svatah ADE]/Group[2]/Button[Run]` (LLD §3.3, §7.5).
+ * `Window[Yam ADE]/Group[2]/Button[Run]` (LLD §3.3, §7.5).
  *
  * > `controlPath` built from ancestor chain with names and sibling indices […]
  * > `controlPath` starts at the top-level window title.

@@ -2,7 +2,7 @@
 /**
  * Compiles the fixture projects whose plans are committed.
  *
- * `@svatah/host-playwright` needs a plan for its tests, and it must not depend on
+ * `@svatah/yam-host-playwright` needs a plan for its tests, and it must not depend on
  * the compiler to get one — LLD §1 forbids it, in devDependencies as much as
  * anywhere, because pnpm makes a devDependency resolvable from `src/` too. That
  * boundary is right: the host *consumes* a plan; it does not make one.
@@ -17,9 +17,9 @@
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { compile } from "@svatah/compiler";
-import { readProjectFrom } from "@svatah/spec";
-import { canonicalJson } from "@svatah/schema";
+import { compile } from "@svatah/yam-compiler";
+import { readProjectFrom } from "@svatah/yam-spec";
+import { canonicalJson } from "@svatah/yam-schema";
 
 /**
  * The repository root, resolved from this file.

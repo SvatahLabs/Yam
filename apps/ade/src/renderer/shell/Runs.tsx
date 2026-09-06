@@ -6,11 +6,11 @@
  * failing step and the evidence that step wrote.
  *
  * Every number and every status word is `RunsState`'s. This file decides where
- * they go on a page and nothing else — `svatah ui` draws the same state as four
+ * they go on a page and nothing else — `yam ui` draws the same state as four
  * panes of text and agrees about every one of them.
  */
-import { InspectorSection, KeyValues, Pill, Table } from "@svatah/ui";
-import { ago, type Action, type RunsState, type ScreenParams } from "@svatah/screens";
+import { InspectorSection, KeyValues, Pill, Table } from "@svatah/yam-ui";
+import { ago, type Action, type RunsState, type ScreenParams } from "@svatah/yam-screens";
 import { Counts, EmptyInspector, FilterChip, Toolbar } from "./parts.js";
 
 export interface RunsProps {
@@ -73,7 +73,7 @@ export function RunsScreen(props: RunsProps): React.JSX.Element {
           onSelect={(runId) => props.onParams({ ...props.params, runId })}
           empty={
             state.total === 0
-              ? "No runs yet. `svatah run` writes one."
+              ? "No runs yet. `yam run` writes one."
               : `No run matches these filters; ${state.total} in all.`
           }
           columns={[
@@ -103,7 +103,7 @@ export function RunsScreen(props: RunsProps): React.JSX.Element {
               key: "when",
               header: "when",
               // The relative time is the renderer's (P9-F4): the model carries
-              // the instant, and `ago()` is the same function `svatah ui` calls.
+              // the instant, and `ago()` is the same function `yam ui` calls.
               cell: (row) => ago(row.at, now)?.replace("run ", "") ?? "—",
             },
           ]}

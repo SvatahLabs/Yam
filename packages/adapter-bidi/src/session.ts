@@ -4,8 +4,8 @@
  * Everything between the wire (`client.ts`) and the surface (`surface.ts`).
  * `surface.ts` is a table of actions; this is what those actions are written in.
  */
-import type { Ref } from "@svatah/schema";
-import { ActionabilityError, LocateError, SessionError, TimeoutError } from "@svatah/surface";
+import type { Ref } from "@svatah/yam-schema";
+import { ActionabilityError, LocateError, SessionError, TimeoutError } from "@svatah/yam-surface";
 import type { BidiClient } from "./client.js";
 import {
   actionabilityOf,

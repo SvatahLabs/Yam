@@ -17,9 +17,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { candidateSchema, canonicalJson, fingerprintSchema } from "@svatah/schema";
-import { fingerprintOf, synthesise, synthesiseBundle } from "@svatah/bindings";
-import type { PlaywrightSurface } from "@svatah/adapter-playwright";
+import { candidateSchema, canonicalJson, fingerprintSchema } from "@svatah/yam-schema";
+import { fingerprintOf, synthesise, synthesiseBundle } from "@svatah/yam-bindings";
+import type { PlaywrightSurface } from "@svatah/yam-adapter-playwright";
 import { expect, PAGES, test } from "./fixtures.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -212,7 +212,7 @@ test.describe("fingerprints (REQ-REC-4)", () => {
  *
  * The committed file is what a reviewer reads to see what the synthesiser
  * actually produces, and what makes a change to the ranking a visible diff rather
- * than a silent one. `SVATAH_UPDATE_BUNDLES=1` rewrites it.
+ * than a silent one. `YAM_UPDATE_BUNDLES=1` rewrites it.
  */
 test("the committed bundle snapshot matches what synthesis produces", async ({ openSurface }) => {
   test.setTimeout(300_000);
@@ -248,7 +248,7 @@ test("the committed bundle snapshot matches what synthesis produces", async ({ o
 
   const rendered = canonicalJson(bundles);
 
-  if (process.env["SVATAH_UPDATE_BUNDLES"] === "1" || !existsSync(SNAPSHOT_PATH)) {
+  if (process.env["YAM_UPDATE_BUNDLES"] === "1" || !existsSync(SNAPSHOT_PATH)) {
     mkdirSync(dirname(SNAPSHOT_PATH), { recursive: true });
     writeFileSync(SNAPSHOT_PATH, rendered, "utf8");
     test.info().annotations.push({ type: "snapshot", description: `wrote ${SNAPSHOT_PATH}` });
@@ -258,7 +258,7 @@ test("the committed bundle snapshot matches what synthesis produces", async ({ o
   expect(
     rendered,
     "the synthesised bundles differ from the committed snapshot. Review the diff, then " +
-      "re-run with SVATAH_UPDATE_BUNDLES=1 if the change is intended.",
+      "re-run with YAM_UPDATE_BUNDLES=1 if the change is intended.",
   ).toBe(readFileSync(SNAPSHOT_PATH, "utf8"));
 });
 

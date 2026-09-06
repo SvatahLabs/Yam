@@ -1,10 +1,10 @@
 /**
- * The desktop conformance suite: the Svatah ADE (T6.1, T6.2, LLD §14, §16,
+ * The desktop conformance suite: the Yam ADE (T6.1, T6.2, LLD §14, §16,
  * REQ-ADE-6, REQ-SURF-3).
  *
- * > Desktop conformance target (P2): the Svatah ADE itself, built from its
+ * > Desktop conformance target (P2): the Yam ADE itself, built from its
  * > repository in CI on Windows and macOS runners and launched with
- * > `SVATAH_A11Y=1`. The desktop conformance flows are: create a project, open a
+ * > `YAM_A11Y=1`. The desktop conformance flows are: create a project, open a
  * > flow, run it, open the result, use the API client. No separate sample
  * > desktop app is built.
  *
@@ -31,7 +31,7 @@
  * both is the evidence for that requirement; a case that had to ask about
  * `AXButton` would be evidence against it.
  */
-import { isInteractiveRole, isWindowChrome } from "@svatah/surface";
+import { isInteractiveRole, isWindowChrome } from "@svatah/yam-surface";
 import type { CaseContext, ConformanceCase, DesktopHealing } from "./types.js";
 
 interface Node {
@@ -287,7 +287,7 @@ async function startARun(context: Parameters<ConformanceCase["run"]>[0]): Promis
 export const DESKTOP_CASES: readonly ConformanceCase[] = [
   {
     id: "ade.snapshot",
-    page: "Svatah ADE",
+    page: "Yam ADE",
     description:
       "The window's snapshot is the normalised shape of LLD §2.2, in the ARIA role vocabulary.",
     async run({ surface, check, equals }) {
@@ -363,7 +363,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
        * still in the application and several of their controls were named and
        * not identified, so the check would have failed the live gate on screens
        * that phase was not allowed to rebuild. T10.3 deleted them. Every control
-       * in the ADE now comes from `@svatah/ui`, which refuses one without both.
+       * in the ADE now comes from `@svatah/yam-ui`, which refuses one without both.
        *
        * Chromium publishes an element's `id` as `AXDOMIdentifier` on macOS and
        * as `AutomationId` on Windows, and `automationIdOf` in each adapter reads
@@ -420,7 +420,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
 
   {
     id: "ade.project",
-    page: "Svatah ADE",
+    page: "Yam ADE",
     description:
       "Flow 1: a project is open, and every rail item of LLD §13.7 is addressable by its id.",
     async run(context) {
@@ -457,10 +457,19 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
           actual: RAIL.map(([id]) => nodes.find((n) => n.native?.["automationId"] === id)?.name),
         },
       );
+      /*
+       * The gate opens `evals/fixtures`, whose config names the project
+       * `yam-fixtures`; the crumb carries the project's name or its directory.
+       * Until Draft 2.18 this looked for the product name anywhere in the tree,
+       * which the fixture flow `svatah.flow` satisfied by accident.
+       */
       check(
         "the open project is named in the window",
-        nodes.some((node) => (node.name ?? node.value ?? "").includes("svatah")),
-        { expected: "the project's name in the crumb" },
+        nodes.some((node) => {
+          const text = node.name ?? node.value ?? "";
+          return text === "fixtures" || text.includes("yam-fixtures");
+        }),
+        { expected: "the project's name or directory in the crumb" },
       );
       check(
         "the eleven tabs are gone (T10.3)",
@@ -472,7 +481,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
 
   {
     id: "ade.flow",
-    page: "Svatah ADE",
+    page: "Yam ADE",
     description: "Flow 2: a flow file opens in the editor, with its plan and its lint beside it.",
     async run(context) {
       const { check } = context;
@@ -503,7 +512,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
 
   {
     id: "ade.run",
-    page: "Svatah ADE",
+    page: "Yam ADE",
     description: "Flow 3: the Flows toolbar offers Record and Run, and the Run screen renders.",
     async run(context) {
       const { check } = context;
@@ -543,7 +552,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
 
   {
     id: "ade.result",
-    page: "Svatah ADE",
+    page: "Yam ADE",
     description:
       "Flow 4: the gate makes a run through the Run screen, then the Runs screen lists it.",
     async run(context) {
@@ -622,7 +631,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
 
   {
     id: "ade.api-client",
-    page: "Svatah ADE",
+    page: "Yam ADE",
     description: "Flow 5: the API screen's request list and its headers are addressable.",
     async run(context) {
       const { check } = context;
@@ -651,7 +660,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
 
   {
     id: "ade.inspector",
-    page: "Svatah ADE",
+    page: "Yam ADE",
     description:
       "T10.3: the right inspector is a list of landmarks, which is what makes controlPath short.",
     async run(context) {
@@ -685,7 +694,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
 
   {
     id: "ade.no-navigation",
-    page: "Svatah ADE",
+    page: "Yam ADE",
     description: "A desktop adapter refuses the web-only calls rather than pretending.",
     async run({ surface, throws }) {
       /*
@@ -713,7 +722,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
  * ──────────────────────────────────────────────────────────────────────────── */
 
 /**
- * > the ADE gains `SVATAH_A11Y_VARIANT=1|2`, where variant 1 renames one screen
+ * > the ADE gains `YAM_A11Y_VARIANT=1|2`, where variant 1 renames one screen
  * > tab and one button on the Project screen and variant 2 moves the Record
  * > screen's gateway control into a different panel; a binding recorded at
  * > variant 0 must relocalize on both through the desktop adapter with the same
@@ -746,7 +755,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
  * ## Why the key cannot help
  *
  * The ground truth is the control's `automationId`, which is the desktop
- * equivalent of `apps/sample-web`'s `data-svatah-eval` (LLD §16). The web
+ * equivalent of `apps/sample-web`'s `data-yam-eval` (LLD §16). The web
  * healing eval keeps its key out of synthesis and fingerprints through
  * `bindings.ignoreAttributes` so that the eval cannot find the answer in the
  * answer key, and the injected healer does the same here. The case reads the
@@ -795,7 +804,7 @@ async function healingCase(
       "a relocalizer was injected, so the healing case can run at all",
       false,
       {
-        expected: "`svatah surface conform --heal-state <path>`, which supplies the healer",
+        expected: "`yam surface conform --heal-state <path>`, which supplies the healer",
         actual: "no healer was injected",
       },
     );
@@ -947,7 +956,7 @@ async function healingCase(
 export const DESKTOP_HEALING_CASES: readonly ConformanceCase[] = [
   {
     id: "ade.heal.renamed-control",
-    page: "Svatah ADE",
+    page: "Yam ADE",
     description:
       "LLD §16 variant 1: a rail item is renamed, and a binding recorded at variant 0 " +
       "relocalizes onto it.",
@@ -970,7 +979,7 @@ export const DESKTOP_HEALING_CASES: readonly ConformanceCase[] = [
   },
   {
     id: "ade.heal.moved-panel",
-    page: "Svatah ADE",
+    page: "Yam ADE",
     description:
       "LLD §16 variant 2: the Record screen's gateway control moves into another panel, and a " +
       "binding recorded at variant 0 relocalizes onto it.",

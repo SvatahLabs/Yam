@@ -12,7 +12,7 @@
 import { mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { sessionStateSchema, CAPABILITY_FLAGS } from "@svatah/schema";
+import { sessionStateSchema, CAPABILITY_FLAGS } from "@svatah/yam-schema";
 import {
   clearAdapters,
   createSurface,
@@ -73,14 +73,14 @@ test.describe("capabilities (LLD §2.4)", () => {
           )
         ).ok,
       trace: async () => {
-        const dir = mkdtempSync(join(tmpdir(), "svatah-trace-"));
+        const dir = mkdtempSync(join(tmpdir(), "yam-trace-"));
         await surface.trace(true);
         await surface.act("scrollToBottom");
         await surface.trace(false, join(dir, "trace.zip"));
         return statSync(join(dir, "trace.zip")).size > 0;
       },
       screenshot: async () => {
-        const dir = mkdtempSync(join(tmpdir(), "svatah-shot-"));
+        const dir = mkdtempSync(join(tmpdir(), "yam-shot-"));
         await surface.screenshot(join(dir, "s.png"));
         return statSync(join(dir, "s.png")).size > 0;
       },
@@ -159,19 +159,19 @@ test.describe("state and restore (REQ-AUTO-2)", () => {
     // A cookie stands for the session a real flow would have. It is written into
     // a storage-state file, cleared, and put back by `restore`.
     await surface.act("evaluate", undefined, {
-      expression: 'document.cookie = "svatah_session=abc123; path=/";',
+      expression: 'document.cookie = "yam_session=abc123; path=/";',
     });
     const before = await surface.act("evaluate", undefined, { expression: "document.cookie" });
-    expect(String(before.value)).toContain("svatah_session=abc123");
+    expect(String(before.value)).toContain("yam_session=abc123");
 
-    const dir = mkdtempSync(join(tmpdir(), "svatah-state-"));
+    const dir = mkdtempSync(join(tmpdir(), "yam-state-"));
     const path = join(dir, "storage.json");
     writeFileSync(
       path,
       JSON.stringify({
         cookies: [
           {
-            name: "svatah_session",
+            name: "yam_session",
             value: "abc123",
             domain: new URL(origin).hostname,
             path: "/",
@@ -186,7 +186,7 @@ test.describe("state and restore (REQ-AUTO-2)", () => {
     );
 
     await surface.act("evaluate", undefined, {
-      expression: 'document.cookie = "svatah_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";',
+      expression: 'document.cookie = "yam_session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";',
     });
     const cleared = await surface.act("evaluate", undefined, { expression: "document.cookie" });
     expect(String(cleared.value)).not.toContain("abc123");
@@ -195,14 +195,14 @@ test.describe("state and restore (REQ-AUTO-2)", () => {
     await surface.restore({ ...saved, storageState: path });
 
     const after = await surface.act("evaluate", undefined, { expression: "document.cookie" });
-    expect(String(after.value)).toContain("svatah_session=abc123");
+    expect(String(after.value)).toContain("yam_session=abc123");
     expect(JSON.parse(readFileSync(path, "utf8")).cookies).toHaveLength(1);
   });
 
   test("restore refuses a state from another kind of adapter", async ({ openSurface }) => {
     const surface = await openSurface("own", "/");
     await expect(
-      surface.restore({ kind: "desktop", windowTitle: "Svatah ADE" }),
+      surface.restore({ kind: "desktop", windowTitle: "Yam ADE" }),
     ).rejects.toBeInstanceOf(SessionError);
   });
 
@@ -226,7 +226,7 @@ test.describe("screenshots and masking (REQ-NFR-6)", () => {
   }) => {
     const surface = await openSurface("own", "/login");
     const password = await refByTestId(surface, "password");
-    const dir = mkdtempSync(join(tmpdir(), "svatah-mask-"));
+    const dir = mkdtempSync(join(tmpdir(), "yam-mask-"));
     const path = join(dir, "masked.png");
 
     await surface.screenshot(path, [password]);
@@ -235,7 +235,7 @@ test.describe("screenshots and masking (REQ-NFR-6)", () => {
     // The marker attribute must not survive: `describe()` reads an element's
     // attributes, and an adapter artefact would end up in every fingerprint.
     const attrs = (await surface.describe(password)).attrs;
-    expect(Object.keys(attrs)).not.toContain("data-svatah-mask");
+    expect(Object.keys(attrs)).not.toContain("data-yam-mask");
   });
 });
 
@@ -321,7 +321,7 @@ test.describe("session lifecycle", () => {
  * Attaching to a Chromium that is already running (T11.2, LLD §13.9).
  *
  * > The Playwright adapter attaches to an existing Chromium when
- * > `SVATAH_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi adapter
+ * > `YAM_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi adapter
  * > attaches, so a flow can drive the ADE's renderer.
  *
  * A real Chromium with a real DevTools endpoint, because the thing worth
@@ -378,10 +378,10 @@ test.describe("attaching over CDP (T11.2, LLD §13.9)", () => {
     }
   });
 
-  test("reads `SVATAH_CDP_URL` when nothing else names one", async () => {
+  test("reads `YAM_CDP_URL` when nothing else names one", async () => {
     const other = await running();
-    const before = process.env["SVATAH_CDP_URL"];
-    process.env["SVATAH_CDP_URL"] = other.url;
+    const before = process.env["YAM_CDP_URL"];
+    process.env["YAM_CDP_URL"] = other.url;
     try {
       const surface = new PlaywrightSurface({});
       await surface.open({});
@@ -392,18 +392,18 @@ test.describe("attaching over CDP (T11.2, LLD §13.9)", () => {
         await surface.close();
       }
     } finally {
-      if (before === undefined) delete process.env["SVATAH_CDP_URL"];
-      else process.env["SVATAH_CDP_URL"] = before;
+      if (before === undefined) delete process.env["YAM_CDP_URL"];
+      else process.env["YAM_CDP_URL"] = before;
       await other.close();
     }
   });
 
   test("the session's own `attach.cdpUrl` wins over the environment", async () => {
     const other = await running();
-    const before = process.env["SVATAH_CDP_URL"];
+    const before = process.env["YAM_CDP_URL"];
     // A URL nothing is listening on: if the environment won, this would attach
     // to `other` and pass for the wrong reason.
-    process.env["SVATAH_CDP_URL"] = "http://127.0.0.1:1";
+    process.env["YAM_CDP_URL"] = "http://127.0.0.1:1";
     try {
       const surface = new PlaywrightSurface({});
       await surface.open({ attach: { cdpUrl: other.url } });
@@ -414,8 +414,8 @@ test.describe("attaching over CDP (T11.2, LLD §13.9)", () => {
         await surface.close();
       }
     } finally {
-      if (before === undefined) delete process.env["SVATAH_CDP_URL"];
-      else process.env["SVATAH_CDP_URL"] = before;
+      if (before === undefined) delete process.env["YAM_CDP_URL"];
+      else process.env["YAM_CDP_URL"] = before;
       await other.close();
     }
   });

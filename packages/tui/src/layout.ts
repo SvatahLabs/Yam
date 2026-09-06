@@ -17,7 +17,7 @@
  * inspector is **collapsed**: three panes — tree, main, audit — all of them
  * whole. It is still reachable, by focusing pane `3`, where it is drawn full
  * width under the main pane instead of squeezed beside it; and
- * `svatah ui --json` carries the inspector's contents whatever the width,
+ * `yam ui --json` carries the inspector's contents whatever the width,
  * because that is the model's and not the terminal's.
  *
  * No Ink here and no `process`: this is arithmetic, so

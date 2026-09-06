@@ -6,7 +6,7 @@
  * necessary: if a sentence matches a custom template *and* a grammar pattern,
  * the compile fails naming both, rather than silently preferring one.
  *
- * The registry cannot see the grammar — `@svatah/steps` depends on `schema` and
+ * The registry cannot see the grammar — `@svatah/yam-steps` depends on `schema` and
  * `surface` and nothing else (LLD §1) — so it answers "does Tier 0 claim this?"
  * and the compiler asks Tier 1 the same question and compares. Two custom
  * templates matching one sentence is a question the registry *can* answer, and

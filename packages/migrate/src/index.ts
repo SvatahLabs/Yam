@@ -1,5 +1,5 @@
 /**
- * @svatah/migrate
+ * @svatah/yam-migrate
  *
  * v1 and v2 flows, `.locator` files and `.data` files into v3 flows, a seed
  * bindings store and `data.yaml` (REQ-LANG-11).

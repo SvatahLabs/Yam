@@ -2,14 +2,14 @@
  * The tool behavior: stories over MCP as deterministic tools
  * (REQ-BEH-3, REQ-AUTO-6, 8, LLD §13.3, T5.3).
  *
- * "`svatah tool serve --expose "Book a slot,Cancel booking"`: an MCP server
+ * "`yam tool serve --expose "Book a slot,Cancel booking"`: an MCP server
  * whose tools are derived from story signatures. Each call runs `runWorkflow`
  * with `invoker: { kind: "agent", id: <mcp client id>, via: "mcp" }`, returns
  * `outputs` plus `runId`, and never touches a model."
  *
  * ## Why an agent calling a tool is not an agent driving a browser
  *
- * The MCP server in `@svatah/cli` (`svatah mcp`, T4.6) hands an agent the raw
+ * The MCP server in `@svatah/yam` (`yam mcp`, T4.6) hands an agent the raw
  * surface: snapshot, act by reference, one decision at a time. That is
  * exploration, and it is what a trajectory is made of.
  *
@@ -27,8 +27,8 @@
  * client's own name, and the inputs it passed with secrets redacted (REQ-AUTO-6).
  * That record is the only account of why the system changed.
  */
-import type { WorkflowOutcome } from "@svatah/workflow";
-import type { Config, Invoker, Plan, Story } from "@svatah/schema";
+import type { WorkflowOutcome } from "@svatah/yam-workflow";
+import type { Config, Invoker, Plan, Story } from "@svatah/yam-schema";
 import { exposeList, exposureFor, type Exposure } from "./expose.js";
 import { descriptionOf, inputSchemaOf, toolNameOf, type ToolSchema } from "./schema.js";
 

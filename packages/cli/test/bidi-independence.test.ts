@@ -14,7 +14,7 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { bidiAvailable } from "@svatah/adapter-bidi";
+import { bidiAvailable } from "@svatah/yam-adapter-bidi";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const SCRIPT = join(ROOT, "scripts", "bidi-independence.mjs");
@@ -25,7 +25,7 @@ const available = bidiAvailable();
 if (!available) {
   console.warn(
     "bidi independence: no WebDriver BiDi endpoint and no Gecko browser, so the proof is " +
-      "skipped. `pnpm browsers` downloads one, or set SVATAH_BIDI_URL.",
+      "skipped. `pnpm browsers` downloads one, or set YAM_BIDI_URL.",
   );
 }
 

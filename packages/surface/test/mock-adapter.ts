@@ -21,7 +21,7 @@ import type {
   SnapshotNode,
   SurfaceAction,
   SurfaceKind,
-} from "@svatah/schema";
+} from "@svatah/yam-schema";
 import {
   buildSnapshot,
   CheckError,

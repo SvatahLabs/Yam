@@ -14,7 +14,7 @@ import {
   LocateError,
   NavigationError,
   SessionError,
-} from "@svatah/surface";
+} from "@svatah/yam-surface";
 import { AxSurface, AX_CAPABILITIES, keyChord } from "../src/index.js";
 import { recordedBridge, type AdeScreen, type RecordedBridge } from "./recorded.js";
 
@@ -22,8 +22,8 @@ async function open(
   options: Parameters<typeof recordedBridge>[0] = {},
 ): Promise<{ surface: AxSurface; bridge: RecordedBridge }> {
   const bridge = recordedBridge({ screen: "record", ...options });
-  const surface = new AxSurface({ processName: "Svatah ADE", bridge });
-  await surface.open({ kind: "desktop", processName: "Svatah ADE" } as never);
+  const surface = new AxSurface({ processName: "Yam ADE", bridge });
+  await surface.open({ kind: "desktop", processName: "Yam ADE" } as never);
   return { surface, bridge };
 }
 
@@ -47,12 +47,12 @@ describe("opening a session (REQ-ADP-7, LLD §7.5)", () => {
         advice: "Open System Settings → Privacy & Security → Accessibility.",
       },
     });
-    const surface = new AxSurface({ processName: "Svatah ADE", bridge });
+    const surface = new AxSurface({ processName: "Yam ADE", bridge });
     await expect(surface.open({ kind: "desktop" } as never)).rejects.toThrow(
       /Accessibility permission is not granted \(prompt-pending\)/,
     );
     await expect(surface.open({ kind: "desktop" } as never)).rejects.toThrow(
-      /svatah surface doctor/,
+      /yam surface doctor/,
     );
   });
 
@@ -142,7 +142,7 @@ describe("locate and describe (LLD §6.3, §3.3)", () => {
     expect(described.role).toBe("combobox");
     expect(described.tag).toBe("AXPopUpButton");
     expect(described.attrs["automationId"]).toBe("record-gateway");
-    expect(described.native?.["controlPath"]).toContain("Window[Svatah ADE]");
+    expect(described.native?.["controlPath"]).toContain("Window[Yam ADE]");
   });
 
   it("applies `nth`, which is the binding's decision and not the adapter's", async () => {
@@ -223,7 +223,7 @@ describe("act (LLD §7.5)", () => {
 
   it("refuses to act on a disabled element", async () => {
     const bridge = recordedBridge({ screen: "record" });
-    const surface = new AxSurface({ processName: "Svatah ADE", bridge });
+    const surface = new AxSurface({ processName: "Yam ADE", bridge });
     await surface.open({ kind: "desktop" } as never);
     const snapshot = await surface.snapshot();
     const disabled = snapshot.nodes.find((node) => node.states.includes("disabled"));
@@ -286,7 +286,7 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
       score: 1,
     });
     expect(await surface.read("text", ref)).toBe("Stop recording");
-    expect(await surface.read("title")).toBe("Svatah ADE");
+    expect(await surface.read("title")).toBe("Yam ADE");
     await expect(surface.read("url")).rejects.toThrow(NavigationError);
   });
 
@@ -303,7 +303,7 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
     expect(
       (
         await surface.check(
-          { kind: "titleContains", value: { kind: "literal", value: "Svatah" } },
+          { kind: "titleContains", value: { kind: "literal", value: "Yam" } },
           "page",
         )
       ).ok,
@@ -316,7 +316,7 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
   it("reports the window it is on, and restores by activating it", async () => {
     const { surface, bridge } = await open();
     const state = await surface.state();
-    expect(state).toEqual({ kind: "desktop", windowTitle: "Svatah ADE", windowIndex: 0 });
+    expect(state).toEqual({ kind: "desktop", windowTitle: "Yam ADE", windowIndex: 0 });
 
     await surface.restore(state);
     expect(bridge.commands.filter((one) => one.kind === "activate").length).toBeGreaterThan(1);
@@ -324,7 +324,7 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
 
   it("refuses to resume onto a different window", async () => {
     /*
-     * A desktop application's state is its own: Svatah has no storage state to
+     * A desktop application's state is its own: Yam has no storage state to
      * re-apply, so the window title is the only check there is that the resume
      * is starting where the checkpoint stopped.
      */

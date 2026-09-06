@@ -108,7 +108,7 @@ await app.close();
  * runs (LLD §8.3), which is what makes this run worth recording a screen of.
  */
 if (code !== 11) {
-  process.stderr.write(`\n\`svatah run\` exited ${code}, not 11 — nothing was recorded.\n`);
+  process.stderr.write(`\n\`yam run\` exited ${code}, not 11 — nothing was recorded.\n`);
   process.exit(1);
 }
 process.stdout.write(`wrote ${runs} (exit ${code})\n`);

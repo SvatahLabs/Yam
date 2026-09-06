@@ -1,4 +1,4 @@
-# Svatah launches the ADE, drives it, and quits it (T11.2, LLD §13.9).
+# Yam launches the ADE, drives it, and quits it (T11.2, LLD §13.9).
 #
 # The Validate item this file *is*:
 #
@@ -20,7 +20,7 @@
 #
 # ## The number in the file name
 #
-# `svatah run` executes a project's `test:` blocks in file order, and one
+# `yam run` executes a project's `test:` blocks in file order, and one
 # session serves the whole run — so a flow that ends with `Quit the app` has to
 # be the last one, or every flow after it drives an application that is not
 # there. `99-` says that out loud; `01-` and `02-` say the rest may run in any

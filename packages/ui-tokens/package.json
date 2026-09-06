@@ -1,7 +1,7 @@
 {
-  "name": "@svatah/ui-tokens",
+  "name": "@svatah/yam-ui-tokens",
   "version": "0.1.0",
-  "description": "The Svatah design tokens: two themes, one type ramp, one status set (REQ-ADE-12)",
+  "description": "The Yam design tokens: two themes, one type ramp, one status set (REQ-ADE-12)",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",

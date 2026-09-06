@@ -12,8 +12,8 @@
  * `seq` is monotonic within a run, so lines can be ordered after the fact even
  * though flows run in parallel and their timestamps interleave.
  */
-import type { AgentSurface } from "@svatah/surface";
-import type { AuditKind, AuditLine, Invoker } from "@svatah/schema";
+import type { AgentSurface } from "@svatah/yam-surface";
+import type { AuditKind, AuditLine, Invoker } from "@svatah/yam-schema";
 import type { Scope } from "./scope.js";
 
 export interface AuditSink {

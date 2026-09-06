@@ -29,9 +29,9 @@ import type {
   SessionState,
   Snapshot,
   SurfaceKind,
-} from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
-import { NO_CAPABILITIES, buildSnapshot } from "@svatah/surface";
+} from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
+import { NO_CAPABILITIES, buildSnapshot } from "@svatah/yam-surface";
 import { clearRegrounder, registerRegrounder } from "../src/regrounder.js";
 import { MODEL_THRESHOLD, runHealingEval } from "../src/eval.js";
 

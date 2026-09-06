@@ -2,7 +2,7 @@
  * The Windows UI Automation adapter: `AgentSurface` on a desktop application
  * (T6.1, LLD §7.5, REQ-ADP-6, REQ-ADE-6).
  *
- * The sibling of `@svatah/adapter-ax`. References are indices into the last
+ * The sibling of `@svatah/yam-adapter-ax`. References are indices into the last
  * snapshot, for the same reason: a UIA `AutomationElement` is a COM object that
  * does not survive between PowerShell processes, so there is nothing to hold on
  * to between calls.
@@ -41,8 +41,8 @@ import type {
   Snapshot,
   SurfaceAction,
   SurfaceKind,
-} from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+} from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 import {
   ActionabilityError,
   buildSnapshot,
@@ -59,7 +59,7 @@ import {
   type LaunchConfig,
   type QuitConfig,
   type SnapshotNode,
-} from "@svatah/surface";
+} from "@svatah/yam-surface";
 import {
   powershellBridge,
   UiaBridgeError,
@@ -147,13 +147,13 @@ export class UiaSurface implements AgentSurface {
      *
      * Unlike macOS there is no permission to grant. What can go wrong is a
      * constrained PowerShell, or a target running at a higher integrity level
-     * than Svatah, and both are said plainly here.
+     * than Yam, and both are said plainly here.
      */
     const availability = await this.bridge.availability();
     if (availability.state !== "available") {
       throw new SessionError(
         `UI Automation is not reachable (${availability.state}). ${availability.advice} ` +
-          "Run `svatah surface doctor` to check it.",
+          "Run `yam surface doctor` to check it.",
         { adapter: "uia" },
       );
     }
@@ -161,7 +161,7 @@ export class UiaSurface implements AgentSurface {
     if (name === undefined || name.trim() === "") {
       throw new SessionError(
         "The UIA adapter needs the name of the process to drive. Set `app.processName` in " +
-          '`svatah.config.yaml` (the ADE is "Svatah ADE"). Driving whatever happens to be ' +
+          '`yam.config.yaml` (the ADE is "Yam ADE"). Driving whatever happens to be ' +
           "frontmost would make a run depend on what was last clicked.",
         { adapter: "uia" },
       );
@@ -220,7 +220,7 @@ export class UiaSurface implements AgentSurface {
     if (executable === undefined) {
       throw new SessionError(
         "`Quit the app` needs to know which application to quit. Set `app.launch.path` in " +
-          "`svatah.config.yaml`: a quit addressed by process name alone would reach somebody " +
+          "`yam.config.yaml`: a quit addressed by process name alone would reach somebody " +
           "else's copy of the same application.",
         { adapter: "uia" },
       );

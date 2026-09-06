@@ -5,11 +5,11 @@
  * The browser-backed half of T1.4 — every interactive element on every sample
  * page, fingerprints across a reload, and the committed bundle snapshot — is in
  * `packages/playwright-test/test/synthesis.spec.ts`, which is the one package the
- * dependency graph lets `@svatah/bindings` and the Playwright adapter meet in
+ * dependency graph lets `@svatah/yam-bindings` and the Playwright adapter meet in
  * (LLD §1).
  */
 import { describe, expect, it } from "vitest";
-import type { ElementDescription } from "@svatah/schema";
+import type { ElementDescription } from "@svatah/yam-schema";
 import { candidatesFor, fingerprintOf, looksGenerated, synthesise } from "../src/index.js";
 import { StubSurface } from "./stub-surface.js";
 
@@ -304,48 +304,48 @@ describe("ignoreAttributes (LLD §3.5)", () => {
     ref: "r0",
     role: "button",
     tag: "button",
-    attrs: { "data-svatah-eval": "login/10-sign-in", id: "sign-in" },
+    attrs: { "data-yam-eval": "login/10-sign-in", id: "sign-in" },
     text: "Sign in",
     neighbours: { before: [], after: [] },
     rolePath: ["main"],
     box: [0, 0, 80, 30],
     index: 0,
     states: [],
-    native: { tag: "button", "data-svatah-eval": "login/10-sign-in" },
+    native: { tag: "button", "data-yam-eval": "login/10-sign-in" },
   };
 
   it("keeps an ignored attribute out of every candidate", () => {
     const candidates = candidatesFor(labelled, {
       // Named as a test id *and* ignored: the ignore list wins, or the option
       // would be one misconfiguration away from doing nothing.
-      testIdAttributes: ["data-svatah-eval", "data-testid"],
-      ignoreAttributes: ["data-svatah-eval"],
+      testIdAttributes: ["data-yam-eval", "data-testid"],
+      ignoreAttributes: ["data-yam-eval"],
     });
 
     expect(candidates.length).toBeGreaterThan(0);
     for (const candidate of candidates) {
-      expect(candidate.attribute).not.toBe("data-svatah-eval");
+      expect(candidate.attribute).not.toBe("data-yam-eval");
       expect(candidate.value ?? "").not.toContain("login/10-sign-in");
     }
   });
 
   it("keeps it out of the fingerprint, so it cannot influence a score", () => {
-    const printed = fingerprintOf(labelled, { ignoreAttributes: ["data-svatah-eval"] });
-    expect(Object.keys(printed.attrs)).not.toContain("data-svatah-eval");
+    const printed = fingerprintOf(labelled, { ignoreAttributes: ["data-yam-eval"] });
+    expect(Object.keys(printed.attrs)).not.toContain("data-yam-eval");
     expect(printed.attrs["id"]).toBe("sign-in");
   });
 
   it("defaults to the schema's list, so the label is blocked without configuration", () => {
     // A caller that passes no options at all still cannot bind to it. The eval's
     // correctness must not depend on every call site remembering the option.
-    const candidates = candidatesFor(labelled, { testIdAttributes: ["data-svatah-eval"] });
-    expect(candidates.some((c) => c.attribute === "data-svatah-eval")).toBe(false);
-    expect(Object.keys(fingerprintOf(labelled).attrs)).not.toContain("data-svatah-eval");
+    const candidates = candidatesFor(labelled, { testIdAttributes: ["data-yam-eval"] });
+    expect(candidates.some((c) => c.attribute === "data-yam-eval")).toBe(false);
+    expect(Object.keys(fingerprintOf(labelled).attrs)).not.toContain("data-yam-eval");
   });
 
   it("is case-insensitive, since HTML attribute names are", () => {
-    const shouty = { ...labelled, attrs: { "DATA-SVATAH-EVAL": "login/10-sign-in" } };
-    expect(Object.keys(fingerprintOf(shouty).attrs)).not.toContain("DATA-SVATAH-EVAL");
+    const shouty = { ...labelled, attrs: { "DATA-YAM-EVAL": "login/10-sign-in" } };
+    expect(Object.keys(fingerprintOf(shouty).attrs)).not.toContain("DATA-YAM-EVAL");
   });
 });
 
@@ -391,7 +391,7 @@ describe("desktop candidates (T11.3)", () => {
     const candidates = candidatesFor(
       desktop({
         automationId: "rail-flows",
-        controlPath: "Window[Svatah ADE]/AXGroup[0]/AXButton[Flows]",
+        controlPath: "Window[Yam ADE]/AXGroup[0]/AXButton[Flows]",
       }),
     );
     const kinds = candidates.map((one) => one.by);

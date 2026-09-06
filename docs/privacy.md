@@ -3,7 +3,7 @@
 > Tier 3 can be disabled and Tier 2 local so no step text leaves the machine
 > during compile (REQ-NFR-3).
 
-Svatah's design puts every model call at *authoring* time and none at replay
+Yam's design puts every model call at *authoring* time and none at replay
 (HLD ADR-1). Privacy mode is what makes that a setting rather than an
 architecture diagram: a project can be configured so that nothing it does
 reaches beyond the machine it runs on, and there is a command that proves it.
@@ -11,7 +11,7 @@ reaches beyond the machine it runs on, and there is a command that proves it.
 ## The configuration
 
 ```yaml
-# svatah.config.yaml
+# yam.config.yaml
 compile:
   confidenceThreshold: 0.8
   # A model on this machine, for the sentences the grammar refuses.
@@ -44,18 +44,18 @@ Two things are not in that file and matter as much:
 
 | Command | | |
 |---|---|---|
-| `svatah compile` | **nothing** | The grammar and the custom steps. `--tier2` adds a server on localhost; only `--tier3` reaches out |
-| `svatah lint` | **nothing** | Same |
-| `svatah run` | **nothing but the application** | REQ-RUN-1: the executor makes no model calls, and `runtime` cannot import the gateway. Structural, not a promise |
-| `svatah repl` | **the application, and grounding** | `--gateway none` for no grounding at all; `--gateway fake` for the committed answers |
-| `svatah bindings`, `svatah results` | **nothing** | Files |
-| `svatah surface conform` | **the application** | |
-| **`svatah record`** | **a remote model**, unless `--gateway fake` | Grounding needs a model. `--gateway fake` records from the grounding eval's committed answers, which is a fixture and says so in its provenance |
-| **`svatah heal --run`** | **a remote model**, unless `--no-model` or `heal.useModel: false` | Relocalization is model-free; the re-grounding step is not (REQ-HEAL-1) |
-| **`svatah compile --tier3`** | **a remote model** | That is what Tier 3 is |
-| `svatah eval grounding` | **a remote model**, unless `--gateway fake` | |
-| `svatah eval healing` | **nothing**, unless a model regrounder is registered | |
-| `svatah mcp` | **nothing** | The tools it exposes are the ones above; whichever of them the agent calls is what reaches out |
+| `yam compile` | **nothing** | The grammar and the custom steps. `--tier2` adds a server on localhost; only `--tier3` reaches out |
+| `yam lint` | **nothing** | Same |
+| `yam run` | **nothing but the application** | REQ-RUN-1: the executor makes no model calls, and `runtime` cannot import the gateway. Structural, not a promise |
+| `yam repl` | **the application, and grounding** | `--gateway none` for no grounding at all; `--gateway fake` for the committed answers |
+| `yam bindings`, `yam results` | **nothing** | Files |
+| `yam surface conform` | **the application** | |
+| **`yam record`** | **a remote model**, unless `--gateway fake` | Grounding needs a model. `--gateway fake` records from the grounding eval's committed answers, which is a fixture and says so in its provenance |
+| **`yam heal --run`** | **a remote model**, unless `--no-model` or `heal.useModel: false` | Relocalization is model-free; the re-grounding step is not (REQ-HEAL-1) |
+| **`yam compile --tier3`** | **a remote model** | That is what Tier 3 is |
+| `yam eval grounding` | **a remote model**, unless `--gateway fake` | |
+| `yam eval healing` | **nothing**, unless a model regrounder is registered | |
+| `yam mcp` | **nothing** | The tools it exposes are the ones above; whichever of them the agent calls is what reaches out |
 
 **Local-only recording is P2** (REQ-NFR-3's own caveat). Today, recording either
 uses a remote model or uses the fake; there is no local-model grounding path.
@@ -64,8 +64,8 @@ which holds, and "no step text ever leaves the machine", which does not yet.
 
 ## Checking the claim
 
-The argument that `svatah run` makes no model call is structural: `runtime`,
-`bindings` and the replay path cannot import `@svatah/gateway`, the
+The argument that `yam run` makes no model call is structural: `runtime`,
+`bindings` and the replay path cannot import `@svatah/yam-gateway`, the
 import-boundary lint says so, and a dependency-graph test walks every
 `package.json` to be sure. But a structural argument is a thing a reader has to
 follow.

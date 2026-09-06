@@ -4,7 +4,7 @@
  */
 import { test as base } from "@playwright/test";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { PlaywrightSurface, type SnapshotMechanism } from "@svatah/adapter-playwright";
+import { PlaywrightSurface, type SnapshotMechanism } from "@svatah/yam-adapter-playwright";
 
 interface Worker {
   app: SampleServer;

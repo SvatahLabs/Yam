@@ -95,7 +95,7 @@ describe("the desktop gate's wait for the ADE window (P6-F6, LLD §15)", () => {
  * > Between variants the gate stops the ADE with `pkill -f <app>` and launches
  * > the next with `open -n`, and the bridge addresses the process by name. When
  * > the previous instance is still shutting down,
- * > `applicationProcesses.byName("Svatah ADE")` can answer the dying one, which
+ * > `applicationProcesses.byName("Yam ADE")` can answer the dying one, which
  * > owns no window, so every case at the new variant throws `no-window`.
  *
  * Neither half can be executed on a runner with no packaged ADE and no
@@ -109,7 +109,7 @@ describe("the desktop gate waits for the previous launch to go (P8-F1, LLD §7.5
 
   it("can list the processes of this checkout's build", () => {
     expect(source).toContain("function processIds()");
-    // By the executable path, so another Svatah ADE on the machine is neither
+    // By the executable path, so another Yam ADE on the machine is neither
     // counted nor killed.
     expect(source).toContain('spawnSync("pgrep", ["-f", app]');
   });
@@ -132,7 +132,7 @@ describe("the desktop gate waits for the previous launch to go (P8-F1, LLD §7.5
     expect(source).toContain("function requestQuit()");
     // The graceful route on each platform: an Apple-event quit, a
     // `CloseMainWindow`. Both reach the ADE's `before-quit`, which stops the
-    // `svatah serve` it spawned; a bare signal used to leave one behind.
+    // `yam serve` it spawned; a bare signal used to leave one behind.
     expect(source).toContain("to quit");
     expect(source).toContain("CloseMainWindow");
     expect(source).toContain("GRACEFUL_QUIT_MS");
@@ -229,7 +229,7 @@ describe("the gate records the load and retries once (P8-F2, LLD §7.5)", () => 
  * 60000 ms" — true, and useless, because it sends a reader to look at the ADE
  * when nothing launched on that machine would get a window.
  *
- * Draft 2.12 §7.5 adds `ax/session` to `svatah surface doctor` and asks the gate
+ * Draft 2.12 §7.5 adds `ax/session` to `yam surface doctor` and asks the gate
  * to name it. The gate itself needs a packaged ADE and a granted permission, so
  * what is checked here is that the source has the branch and the doctor has the
  * check — the same bargain the poll above is tested under, and for the same
@@ -259,7 +259,7 @@ describe("a locked display is the cause the gate names (P9-F7, Draft 2.12 §7.5)
 });
 
 /**
- * `svatah surface doctor --adapter ax` reports `ax/session` (P9-F7).
+ * `yam surface doctor --adapter ax` reports `ax/session` (P9-F7).
  *
  * Run for real: the check needs macOS and the Accessibility permission, and on
  * any other host `doctor` answers `skip ax/platform` — which this asserts

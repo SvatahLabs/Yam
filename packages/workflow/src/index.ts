@@ -1,5 +1,5 @@
 /**
- * @svatah/workflow
+ * @svatah/yam-workflow
  *
  * The workflow behavior (REQ-BEH-2, REQ-AUTO-3, 5, 7, LLD §13.2): a story with a
  * signature, run as a function.

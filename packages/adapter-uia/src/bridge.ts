@@ -151,7 +151,7 @@ export type UiaAvailabilityState =
 
 export interface UiaAvailability {
   readonly state: UiaAvailabilityState;
-  /** What to do about it, written for whoever ran `svatah surface doctor`. */
+  /** What to do about it, written for whoever ran `yam surface doctor`. */
   readonly advice: string;
   readonly detail?: string;
 }
@@ -230,7 +230,7 @@ function stripAnsi(text: string): string {
  * anything. PowerShell's own documentation says it: when the value of
  * `-Command` is a *string*, "Command must be the last parameter in the command,
  * because any characters typed after the command are interpreted as the command
- * arguments" — so `-Request {"process":"Svatah ADE",…}` was appended to the
+ * arguments" — so `-Request {"process":"Yam ADE",…}` was appended to the
  * script as **text** and parsed as PowerShell.
  *
  * Run against a real PowerShell it fails before it reaches UI Automation at all:
@@ -238,9 +238,9 @@ function stripAnsi(text: string): string {
  * ```
  * ParserError:
  * Line |
- *    6 |  -Request {"process":"Svatah ADE","maxNodes":1500}
+ *    6 |  -Request {"process":"Yam ADE","maxNodes":1500}
  *      |                     ~~~~~~~~~~~~~
- *      | Unexpected token ':"Svatah ADE"' in expression or statement.
+ *      | Unexpected token ':"Yam ADE"' in expression or statement.
  * ```
  *
  * Every UIA test injects its own runner, so nothing in this repository had ever
@@ -518,8 +518,8 @@ if ($cmd.kind -eq "setSize") {
   # position is left where it is: SWP_NOMOVE.
   Add-Type -MemberDefinition @"
 [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr a, int X, int Y, int cx, int cy, uint f);
-"@ -Name Window -Namespace Svatah
-  [void][Svatah.Window]::SetWindowPos($handle, [IntPtr]::Zero, 0, 0, $cmd.size[0], $cmd.size[1], 0x0006)
+"@ -Name Window -Namespace Yam
+  [void][Yam.Window]::SetWindowPos($handle, [IntPtr]::Zero, 0, 0, $cmd.size[0], $cmd.size[1], 0x0006)
   ConvertTo-Json -Compress @{ ok = $true }
   exit 0
 }
@@ -532,10 +532,10 @@ if ($cmd.kind -eq "click") {
   Add-Type -MemberDefinition @"
 [DllImport("user32.dll")] public static extern bool SetCursorPos(int X, int Y);
 [DllImport("user32.dll")] public static extern void mouse_event(uint f, uint x, uint y, uint d, int e);
-"@ -Name Mouse -Namespace Svatah
-  [void][Svatah.Mouse]::SetCursorPos($cmd.at[0], $cmd.at[1])
-  [Svatah.Mouse]::mouse_event(0x0002, 0, 0, 0, 0)
-  [Svatah.Mouse]::mouse_event(0x0004, 0, 0, 0, 0)
+"@ -Name Mouse -Namespace Yam
+  [void][Yam.Mouse]::SetCursorPos($cmd.at[0], $cmd.at[1])
+  [Yam.Mouse]::mouse_event(0x0002, 0, 0, 0, 0)
+  [Yam.Mouse]::mouse_event(0x0004, 0, 0, 0, 0)
   ConvertTo-Json -Compress @{ ok = $true }
   exit 0
 }
@@ -609,7 +609,7 @@ ConvertTo-Json -Compress @{ ok = $true }
 `;
 
 export interface PowershellBridgeOptions {
-  /** The process to drive, without `.exe`: the ADE is `Svatah ADE`. */
+  /** The process to drive, without `.exe`: the ADE is `Yam ADE`. */
   readonly process: string;
   readonly timeoutMs?: number;
   /** For tests: run a script without spawning anything. */
@@ -670,8 +670,8 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
           "Windows installation, so this usually means PowerShell itself is constrained: " +
           "check that `powershell.exe` is on PATH and that a Constrained Language Mode " +
           "policy is not in force. Unlike macOS, UI Automation needs no permission grant — " +
-          "but a process running at a higher integrity level than Svatah is invisible to " +
-          "it, so an application started as administrator needs Svatah started the same way.",
+          "but a process running at a higher integrity level than Yam is invisible to " +
+          "it, so an application started as administrator needs Yam started the same way.",
         ...(detail === "" ? {} : { detail }),
       };
     },
@@ -690,7 +690,7 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
         throw new UiaBridgeError(
           answer.error === "no-window"
             ? `The process "${request.process}" has no main window. Is it running, and not ` +
-              "minimised to the tray? A process at a higher integrity level than Svatah is " +
+              "minimised to the tray? A process at a higher integrity level than Yam is " +
               "also invisible to UI Automation."
             : `The UI Automation call failed: ${answer.error ?? "unknown"}.`,
         );

@@ -8,9 +8,9 @@
  * The second half is the one worth guarding. A catalogue where an unreachable
  * side says "not done yet" is a catalogue that has stopped being a to-do list
  * and become an excuse; LLD §13.9 asks every one to name "the adapter or step
- * Svatah lacks", and this is what holds it to that.
+ * Yam lacks", and this is what holds it to that.
  *
- * Nothing here runs a check. `svatah eval self` does that, and it takes
+ * Nothing here runs a check. `yam eval self` does that, and it takes
  * minutes; what this asserts is that the *catalogue* and the suites it names
  * have not drifted apart — which is the failure that would make a green gate
  * meaningless.
@@ -19,7 +19,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
-import { vitestCaseNames } from "@svatah/cli";
+import { vitestCaseNames } from "@svatah/yam";
 import { fromRoot } from "../src/repo.js";
 
 interface Side {
@@ -31,7 +31,7 @@ interface Side {
 interface Check {
   readonly id: string;
   readonly says: string;
-  readonly svatah?: Side;
+  readonly yam?: Side;
   readonly external?: Side;
   readonly externalByDesign?: string;
 }
@@ -76,8 +76,8 @@ describe("the catalogue and the suites agree (T11.4)", () => {
     /*
      * The other direction, and it is the one that rots: a case renamed in the
      * spec leaves the catalogue naming a title nothing answers to, and the gate
-     * would report it `unreachable` — a shortcoming of Svatah's, which it is
-     * not. `svatah eval self` says so at run time; this says so in a second.
+     * would report it `unreachable` — a shortcoming of Yam's, which it is
+     * not. `yam eval self` says so at run time; this says so in a second.
      */
     const titles = new Set([
       ...playwrightTitles(),
@@ -97,7 +97,7 @@ describe("the catalogue and the suites agree (T11.4)", () => {
 
   it("gives every check both sides, or says why one is missing", () => {
     const silent = checks.filter((one) => {
-      for (const side of [one.svatah, one.external]) {
+      for (const side of [one.yam, one.external]) {
         if (side === undefined) return true;
         const has = side.source !== undefined && side.name !== undefined;
         if (!has && (side.unreachable ?? "").trim() === "") return true;
@@ -110,15 +110,15 @@ describe("the catalogue and the suites agree (T11.4)", () => {
     ).toEqual([]);
   });
 
-  it("makes every `unreachable` name what Svatah lacks, not how it feels", () => {
+  it("makes every `unreachable` name what Yam lacks, not how it feels", () => {
     /*
-     * LLD §13.9: "every one names the adapter or step Svatah lacks". A reason
+     * LLD §13.9: "every one names the adapter or step Yam lacks". A reason
      * is a sentence somebody could implement from; "not yet" is not one.
      */
     const weak = checks
-      .filter((one) => one.svatah?.unreachable !== undefined)
+      .filter((one) => one.yam?.unreachable !== undefined)
       .filter((one) => {
-        const why = one.svatah!.unreachable!;
+        const why = one.yam!.unreachable!;
         /*
          * An oracle REQ-SELF-3 keeps external says so in three words, and the
          * paragraph explaining it is `externalByDesign` — where a reader looks
@@ -132,7 +132,7 @@ describe("the catalogue and the suites agree (T11.4)", () => {
       });
     expect(
       weak.map((one) => one.id),
-      "an `unreachable` that does not name the adapter or the step Svatah lacks",
+      "an `unreachable` that does not name the adapter or the step Yam lacks",
     ).toEqual([]);
   });
 
@@ -169,13 +169,13 @@ describe("the catalogue and the suites agree (T11.4)", () => {
      */
     const gate = readFileSync(fromRoot("packages/cli/src/commands/eval-self.ts"), "utf8");
     const known = new Set(
-      [...gate.matchAll(/^\s{4}"?([a-z-]+)"?:\s*(?:svatahSource|playwrightSource|vitestSource|commandSource)/gm)].map(
+      [...gate.matchAll(/^\s{4}"?([a-z-]+)"?:\s*(?:yamSource|playwrightSource|vitestSource|commandSource)/gm)].map(
         (one) => one[1]!,
       ),
     );
     expect(known.size, "no sources found in the gate").toBeGreaterThan(5);
     const used = new Set(
-      checks.flatMap((one) => [one.svatah?.source, one.external?.source]).filter(Boolean),
+      checks.flatMap((one) => [one.yam?.source, one.external?.source]).filter(Boolean),
     );
     const unknown = [...used].filter((one) => !known.has(one as string));
     expect(unknown, `the catalogue names sources the gate has not: ${unknown.join(", ")}`).toEqual([]);
@@ -193,7 +193,7 @@ describe("the catalogue and the suites agree (T11.4)", () => {
  * the same parts with a space. The runner matches on the parts now
  * (`vitestCaseNames`), and this is the half that says so in a second rather
  * than in the eight minutes the gate takes — a renamed `it` is a one-sided row
- * in a published report otherwise, and reads as a shortcoming of Svatah's.
+ * in a published report otherwise, and reads as a shortcoming of Yam's.
  *
  * Read from the source rather than by running it, because running
  * `tui-pty.test.ts` spawns pseudo-terminals. A `describe` block opens at column
@@ -263,11 +263,11 @@ describe("every external name is one its source reports (P11-F2)", () => {
     ).toEqual([]);
   });
 
-  it("names a story the self project has, on every `svatah` side", () => {
+  it("names a story the self project has, on every `yam` side", () => {
     const stories = new Set(storyNames());
     const invented = checks
-      .filter((one) => one.svatah?.source !== undefined)
-      .map((one) => one.svatah!.name!)
+      .filter((one) => one.yam?.source !== undefined)
+      .map((one) => one.yam!.name!)
       .filter((one) => !stories.has(one));
     expect(invented, `the catalogue names stories the self flows do not have: ${invented.join("; ")}`)
       .toEqual([]);
@@ -278,7 +278,7 @@ describe("every external name is one its source reports (P11-F2)", () => {
     expect(byName.size, "no command sources found in the gate").toBeGreaterThan(3);
     const wrong: string[] = [];
     for (const one of checks) {
-      for (const side of [one.svatah, one.external]) {
+      for (const side of [one.yam, one.external]) {
         const expected = side?.source === undefined ? undefined : byName.get(side.source);
         if (expected === undefined) continue;
         if (side!.name !== expected) wrong.push(`${one.id}: "${side!.name}" ≠ "${expected}"`);

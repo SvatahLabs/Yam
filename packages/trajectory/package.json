@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/trajectory",
+  "name": "@svatah/yam-trajectory",
   "version": "0.1.0",
   "description": "Trajectory capture and compile to proposals",
   "license": "Apache-2.0",
@@ -26,11 +26,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/compiler": "workspace:*",
-    "@svatah/recorder": "workspace:*",
-    "@svatah/schema": "workspace:*",
+    "@svatah/yam-compiler": "workspace:*",
+    "@svatah/yam-recorder": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
     "zod": "catalog:",
-    "@svatah/spec": "workspace:*"
+    "@svatah/yam-spec": "workspace:*"
   },
   "devDependencies": {
     "tsup": "catalog:",

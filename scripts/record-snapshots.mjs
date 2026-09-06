@@ -32,9 +32,9 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, PAGES } from "sample-web";
-import { PlaywrightSurface } from "@svatah/adapter-playwright";
-import { candidatesFor } from "@svatah/bindings";
-import { canonicalJson } from "@svatah/schema";
+import { PlaywrightSurface } from "@svatah/yam-adapter-playwright";
+import { candidatesFor } from "@svatah/yam-bindings";
+import { canonicalJson } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outArg = process.argv.indexOf("--out");

@@ -1,5 +1,5 @@
 /**
- * `svatah surface conform --adapter <name>` (LLD §15, REQ-SURF-3).
+ * `yam surface conform --adapter <name>` (LLD §15, REQ-SURF-3).
  *
  * The CLI is the only thing that registers adapters (LLD §1), so it is the only
  * place that can hand the conformance suite a live surface. The suite itself
@@ -7,7 +7,7 @@
  */
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import { fingerprint, relocalize } from "@svatah/bindings";
+import { fingerprint, relocalize } from "@svatah/yam-bindings";
 import {
   DESKTOP_CASES,
   DESKTOP_HEALING_CASES,
@@ -17,9 +17,9 @@ import {
   type ConformanceReport,
   type DesktopHealing,
   type RecordedElement,
-} from "@svatah/conformance";
-import { createSurface, listAdapters } from "@svatah/surface";
-import { DEFAULT_CONFIG, type Config } from "@svatah/schema";
+} from "@svatah/yam-conformance";
+import { createSurface, listAdapters } from "@svatah/yam-surface";
+import { DEFAULT_CONFIG, type Config } from "@svatah/yam-schema";
 import { registerAllAdapters } from "../adapters.js";
 import { boolOption, stringOption, type ParsedArgs } from "../args.js";
 import { EXIT, type ExitCode } from "../exit-codes.js";
@@ -36,7 +36,7 @@ const DEFAULT_BASE_URL = "http://127.0.0.1:4173";
 /**
  * The desktop healing cases' ground-truth key (Draft 2.8 LLD §16).
  *
- * The desktop equivalent of `apps/sample-web`'s `data-svatah-eval`: the control
+ * The desktop equivalent of `apps/sample-web`'s `data-yam-eval`: the control
  * keeps its `automationId` across every variant, so it is what says whether a
  * proposal is the *right* element. Which is exactly why the relocalizer is told
  * to ignore it — §16's rule for the web eval, applied here: "removes the
@@ -49,10 +49,10 @@ const GROUND_TRUTH_ATTRIBUTE = "automationId";
  * The healer the desktop healing cases are handed, and the file that carries
  * their state between the three passes over three ADE variants.
  *
- * The suite knows nothing about `@svatah/bindings`; the CLI does, and is the
+ * The suite knows nothing about `@svatah/yam-bindings`; the CLI does, and is the
  * only place that can hand it over (the same rule that makes this the only
  * place that registers adapters). The state is a file because each pass is a
- * separate `svatah surface conform` against a separately launched ADE.
+ * separate `yam surface conform` against a separately launched ADE.
  */
 function desktopHealing(variant: number, statePath: string): DesktopHealing {
   const state: Record<string, RecordedElement> =
@@ -67,7 +67,7 @@ function desktopHealing(variant: number, statePath: string): DesktopHealing {
     async relocalize(surface, print, preferRole) {
       /*
        * "with the same weights and threshold as the web healing eval" (§16):
-       * `relocalize`'s own defaults, which is exactly what `svatah eval healing`
+       * `relocalize`'s own defaults, which is exactly what `yam eval healing`
        * passes — it names neither a threshold nor a margin. Naming one here
        * would make the two numbers different the first time one moved.
        */
@@ -119,7 +119,7 @@ async function conform(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   }
 
   /*
-   * Flag, then `SVATAH_BASE_URL`, then `config.app`, then the sample app's port
+   * Flag, then `YAM_BASE_URL`, then `config.app`, then the sample app's port
    * (LLD §15, Draft 2.5). A conformance run against an application on an
    * ephemeral port should not have to repeat the flag every time.
    */
@@ -136,7 +136,7 @@ async function conform(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
    * `--process` for the desktop adapters (T6.1, T6.2, LLD §16).
    *
    * A desktop conformance run drives an application that is already running,
-   * named by its process — the ADE is "Svatah ADE" — where a web run drives a
+   * named by its process — the ADE is "Yam ADE" — where a web run drives a
    * browser it opens at a URL. Both go into `app`, and the adapter uses the one
    * that means something to it.
    */

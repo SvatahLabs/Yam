@@ -14,7 +14,7 @@ import { checkTrajectory, readTrajectory, TrajectoryWriter } from "../src/index.
 
 const dirs: string[] = [];
 const temp = (): string => {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-trajectory-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-trajectory-"));
   dirs.push(dir);
   return dir;
 };

@@ -39,7 +39,7 @@ ${nav("data", "Data", "", active)}
 ${nav("import", "Import prototype database", "", active)}
 ${nav("settings", "Settings", "", active)}
 </nav>`;
-const topbar = (crumb) => `<header class="topbar"><div class="brand"><span class="mark"></span>Svatah</div><div class="crumb"><span class="sep">/</span><b>svatah-fixtures</b><span class="sep">/</span><span>${crumb}</span></div><div class="spacer"></div><div class="palette-hint" role="button" aria-label="Command palette">${I.search}<span>Search or run a command</span><kbd>⌘K</kbd></div><span class="env"><span class="dot"></span>service 127.0.0.1:55702</span><span class="env">test · playwright</span></header>`;
+const topbar = (crumb) => `<header class="topbar"><div class="brand"><span class="mark"></span>Yam</div><div class="crumb"><span class="sep">/</span><b>yam-fixtures</b><span class="sep">/</span><span>${crumb}</span></div><div class="spacer"></div><div class="palette-hint" role="button" aria-label="Command palette">${I.search}<span>Search or run a command</span><kbd>⌘K</kbd></div><span class="env"><span class="dot"></span>service 127.0.0.1:55702</span><span class="env">test · playwright</span></header>`;
 const statusbar = (text) => `<footer class="statusbar">${text}<span class="spacer"></span><span><kbd>⌘K</kbd>commands</span><span><kbd>?</kbd>keys</span></footer>`;
 
 /** One artboard fragment with `@@TOPBAR`, `@@SIDEBAR` and `@@STATUS` expanded. */

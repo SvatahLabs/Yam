@@ -36,7 +36,7 @@ const BUDGET_MS = 10 * 60 * 1000;
 const EXAMPLE = join(process.cwd(), "examples", "plain-playwright");
 
 /** Where the quick start's own store goes, so the committed one is untouched. */
-const WORKSPACE = mkdtempSync(join(tmpdir(), "svatah-quick-start-"));
+const WORKSPACE = mkdtempSync(join(tmpdir(), "yam-quick-start-"));
 
 /** The picks that stand in for a person clicking, so this runs headless. */
 const PICK = JSON.stringify({
@@ -53,8 +53,8 @@ function step(name, command, args, env = {}) {
     stdio: "inherit",
     env: {
       ...process.env,
-      SVATAH_BINDINGS: join(WORKSPACE, "bindings"),
-      SVATAH_OUT: join(WORKSPACE, ".svatah"),
+      YAM_BINDINGS: join(WORKSPACE, "bindings"),
+      YAM_OUT: join(WORKSPACE, ".yam"),
       ...env,
     },
   });
@@ -92,13 +92,13 @@ const started = Date.now();
 let total = 0;
 
 total += step("3. record the bindings", "pnpm", ["exec", "playwright", "test", "tests/login.spec.ts"], {
-  SVATAH_MODE: "record",
-  SVATAH_PICK: PICK,
+  YAM_MODE: "record",
+  YAM_PICK: PICK,
 });
 total += step("4. run", "pnpm", ["exec", "playwright", "test", "tests/login.spec.ts"], {
-  SVATAH_MODE: "run",
+  YAM_MODE: "run",
 });
-total += step("5. heal", "pnpm", ["exec", "playwright", "test"], { SVATAH_MODE: "heal" });
+total += step("5. heal", "pnpm", ["exec", "playwright", "test"], { YAM_MODE: "heal" });
 
 const elapsed = Date.now() - started;
 process.stderr.write(

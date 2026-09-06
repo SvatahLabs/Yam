@@ -14,7 +14,7 @@
  *    conformance fixture (REQ-STD-2).
  * 3. **Two BiDi runs agree with each other** (REQ-RUN-2).
  * 4. **The stock-Chrome attach works**, whenever a chromedriver is on PATH or
- *    named by `SVATAH_CHROMEDRIVER` (Draft 2.6, LLD §7.3). Phase 4's report
+ *    named by `YAM_CHROMEDRIVER` (Draft 2.6, LLD §7.3). Phase 4's report
  *    described that route as implemented while it failed on its first message,
  *    because nothing in the suite ever took it: the proof ran on the Gecko
  *    launch route, which needs no driver. A route documented in a README and
@@ -49,9 +49,9 @@ const FLOWS = [
 
 /** The secrets the fixtures read. Fixed, so two runs type the same characters. */
 const SECRETS = {
-  SVATAH_SAMPLE_PASSWORD: "qwerty123",
-  SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-  SVATAH_SAMPLE_CARD_CVV: "123",
+  YAM_SAMPLE_PASSWORD: "qwerty123",
+  YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+  YAM_SAMPLE_CARD_CVV: "123",
 };
 
 function run(args, env = {}) {
@@ -84,7 +84,7 @@ const comparable = (result) => ({
 
 /** A chromedriver to attach through, if this machine has one. */
 function findChromedriver(env = process.env) {
-  const named = env["SVATAH_CHROMEDRIVER"];
+  const named = env["YAM_CHROMEDRIVER"];
   if (named !== undefined && named !== "" && existsSync(named)) return named;
   for (const dir of (env["PATH"] ?? "").split(delimiter)) {
     if (dir === "") continue;
@@ -101,7 +101,7 @@ function findChromedriver(env = process.env) {
  *
  * Exactly the commands `packages/adapter-bidi/README.md` gives: start the
  * driver, create a *classic* session with `webSocketUrl: true`, and point
- * `SVATAH_BIDI_URL` at the `…/session/<id>` it hands back. The adapter must
+ * `YAM_BIDI_URL` at the `…/session/<id>` it hands back. The adapter must
  * attach to that session rather than create a second one — `session.new` there
  * is answered with `session not created: session already exists`, which is what
  * used to happen on the adapter's first message.
@@ -182,7 +182,7 @@ async function attachThroughDriver(binary, baseUrl, say) {
 
     const conform = await run(
       ["surface", "conform", "--adapter", "bidi", "--base-url", baseUrl, "--json"],
-      { SVATAH_BIDI_URL: url },
+      { YAM_BIDI_URL: url },
     );
     const json = conform.output.slice(conform.output.indexOf("{"));
     let suite;
@@ -225,14 +225,14 @@ async function main() {
 
   /* A copy of the fixtures with `adapter: bidi`, so the committed project is
      untouched and the only difference from the baseline run is the adapter. */
-  const project = join(mkdtempSync(join(tmpdir(), "svatah-bidi-")), "fixtures");
+  const project = join(mkdtempSync(join(tmpdir(), "yam-bidi-")), "fixtures");
   mkdirSync(project, { recursive: true });
-  for (const entry of ["bindings", "flows", "api", "data.yaml", "svatah.config.yaml"]) {
+  for (const entry of ["bindings", "flows", "api", "data.yaml", "yam.config.yaml"]) {
     cpSync(join(FIXTURES, entry), join(project, entry), { recursive: true });
   }
   writeFileSync(
-    join(project, "svatah.config.yaml"),
-    readFileSync(join(project, "svatah.config.yaml"), "utf8").replace(
+    join(project, "yam.config.yaml"),
+    readFileSync(join(project, "yam.config.yaml"), "utf8").replace(
       /^adapter: .*$/m,
       "adapter: bidi",
     ),
@@ -286,7 +286,7 @@ async function main() {
           "--input",
           "email=connected2atul@gmail.com",
           "--input",
-          `password=${SECRETS.SVATAH_SAMPLE_PASSWORD}`,
+          `password=${SECRETS.YAM_SAMPLE_PASSWORD}`,
           ...FLOWS.flatMap((flow) => ["--flow", flow]),
         ],
         {},
@@ -328,7 +328,7 @@ async function main() {
     const chromedriver = findChromedriver();
     if (chromedriver === undefined) {
       say(
-        "stock-browser attach: not run — no chromedriver on PATH and no SVATAH_CHROMEDRIVER. " +
+        "stock-browser attach: not run — no chromedriver on PATH and no YAM_CHROMEDRIVER. " +
           "The launch route above proves the protocol; this proves the route stock Chrome and " +
           "Edge take.",
       );
@@ -362,7 +362,7 @@ async function main() {
           ...(attachedBrowser === undefined
             ? [
                 "The stock-browser attach route was not exercised on this machine: no",
-                "chromedriver on `PATH` and no `SVATAH_CHROMEDRIVER`. Install one matching",
+                "chromedriver on `PATH` and no `YAM_CHROMEDRIVER`. Install one matching",
                 "your Chrome or Edge and re-run to include it.",
                 "",
               ]
@@ -382,7 +382,7 @@ async function main() {
           "",
           "## What this measures",
           "",
-          "1. `svatah surface conform --adapter bidi` — the surface conformance suite",
+          "1. `yam surface conform --adapter bidi` — the surface conformance suite",
           "   (REQ-SURF-3): the adapter is conformant only when every case passes.",
           "2. The four migrated fixtures replayed on BiDi and compared step by step",
           "   against `evals/conformance/runtime/results.jsonl`, the committed",
@@ -391,8 +391,8 @@ async function main() {
           "   rather than to the plan and are not compared.",
           "3. Two BiDi runs of the same plan, compared with each other (REQ-RUN-2).",
           "4. The stock-browser attach route, whenever a chromedriver or msedgedriver is",
-          "   on `PATH` or named by `SVATAH_CHROMEDRIVER`: a classic session created with",
-          "   `webSocketUrl: true`, then `svatah surface conform --adapter bidi` against",
+          "   on `PATH` or named by `YAM_CHROMEDRIVER`: a classic session created with",
+          "   `webSocketUrl: true`, then `yam surface conform --adapter bidi` against",
           "   the `…/session/<id>` it hands back (LLD §7.3, Draft 2.6). The adapter must",
           "   attach to that session, not create a second one.",
           "",

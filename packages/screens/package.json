@@ -1,7 +1,7 @@
 {
-  "name": "@svatah/screens",
+  "name": "@svatah/yam-screens",
   "version": "0.1.0",
-  "description": "The headless screen model: one set of screens, actions and keys behind the ADE, `svatah ui`, the SDK and the CLI",
+  "description": "The headless screen model: one set of screens, actions and keys behind the ADE, `yam ui`, the SDK and the CLI",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -27,7 +27,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/schema": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
     "yaml": "catalog:"
   },
   "devDependencies": {

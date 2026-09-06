@@ -7,13 +7,13 @@
  * element, a reordered sidebar or a moved form is.
  *
  * Two callers need it and they are in different modules — an adapter, which fills
- * in `Snapshot.hash`, and `@svatah/bindings`, which hashes the subtree under an
- * element to get `BindingContext.hash`. `@svatah/surface` is the one package both
+ * in `Snapshot.hash`, and `@svatah/yam-bindings`, which hashes the subtree under an
+ * element to get `BindingContext.hash`. `@svatah/yam-surface` is the one package both
  * depend on (LLD §1), so the primitive lives here and each caller supplies the
  * nodes. That way there is one implementation and the two hashes cannot drift.
  */
 import { createHash } from "node:crypto";
-import type { SnapshotNode } from "@svatah/schema";
+import type { SnapshotNode } from "@svatah/yam-schema";
 
 /**
  * Names collapse to a length bucket: `0`, `1-8`, `9-32`, `33+` (LLD §6.2).

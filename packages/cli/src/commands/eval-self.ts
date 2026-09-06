@@ -1,8 +1,8 @@
 /**
- * `svatah eval self` — the two-sided parity gate (T11.5, REQ-SELF-2, REQ-SELF-3,
+ * `yam eval self` — the two-sided parity gate (T11.5, REQ-SELF-2, REQ-SELF-3,
  * LLD §13.9, §15).
  *
- * > `svatah eval self [--report reports/self-parity.md]` runs both sides of
+ * > `yam eval self [--report reports/self-parity.md]` runs both sides of
  * > every check and compares verdicts per check: agreement (both pass or both
  * > fail the same way), disagreement (one passes, the other fails), one-sided
  * > (one side unreachable). The report publishes agreement over the checks both
@@ -17,7 +17,7 @@
  * code. Running the suite that holds it once per check would run the ADE's
  * Playwright suite thirty-eight times. So each **source** runs once and answers
  * with a map of name → verdict, and the catalogue says which name belongs to
- * which check. The same for the Svatah side: one `svatah run` per project, and
+ * which check. The same for the Yam side: one `yam run` per project, and
  * a story name per check.
  *
  * That also means a source that cannot run at all — no macOS, no packaged ADE,
@@ -28,7 +28,7 @@
  *
  * REQ-SELF-3's three oracles stay external by design and the report names them:
  * the healing eval's ground-truth keys, axe-core on the component sheet, and the
- * renderer-versus-adapter tree agreement. They sit *below* the surface Svatah
+ * renderer-versus-adapter tree agreement. They sit *below* the surface Yam
  * drives, and they are what keeps the gate from grading its own homework.
  */
 import { spawnSync } from "node:child_process";
@@ -36,7 +36,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFil
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
-import { boolOption, stringOption, EXIT, type CommandIo, type ExitCode, type ParsedArgs } from "@svatah/bindings-cli";
+import { boolOption, stringOption, EXIT, type CommandIo, type ExitCode, type ParsedArgs } from "@svatah/yam-bindings-cli";
 
 /* ── the catalogue ────────────────────────────────────────────────────────── */
 
@@ -55,7 +55,7 @@ export interface SideSpec {
   readonly source: string;
   /** The name this check has within that source: a story, a test title. */
   readonly name?: string;
-  /** The project a `svatah` source runs, relative to the catalogue. */
+  /** The project a `yam` source runs, relative to the catalogue. */
   readonly project?: string;
   /** Why there is no implementation on this side at all. */
   readonly unreachable?: string;
@@ -64,7 +64,7 @@ export interface SideSpec {
 export interface Check {
   readonly id: string;
   readonly says: string;
-  readonly svatah?: SideSpec;
+  readonly yam?: SideSpec;
   readonly external?: SideSpec;
   /** REQ-SELF-3: an oracle that stays external on purpose, and why. */
   readonly externalByDesign?: string;
@@ -159,24 +159,24 @@ function readable(word: string, cwd: string): string {
 }
 
 /**
- * A `svatah run` of one self project, mapped story → verdict.
+ * A `yam run` of one self project, mapped story → verdict.
  *
  * The run's own artifacts are the evidence: `results.jsonl` carries a line per
  * step with its status and its failure, which is the same file a person reads
  * after a red run. Nothing is re-derived.
  */
-function svatahSource(project: string, options: { attach?: boolean } = {}): SourceSpec {
+function yamSource(project: string, options: { attach?: boolean } = {}): SourceSpec {
   return {
-    what: `svatah run ${project}`,
+    what: `yam run ${project}`,
     run({ root, catalogueDir, io }): SourceAnswers {
       const directory = resolve(catalogueDir, project);
       const cli = join(root, "packages", "cli", "dist", "bin.js");
-      if (!existsSync(join(directory, "svatah.config.yaml"))) {
+      if (!existsSync(join(directory, "yam.config.yaml"))) {
         return {
           byName: new Map(),
           unreachable: `no project at ${directory}`,
           wallMs: 0,
-          command: `svatah run ${project}`,
+          command: `yam run ${project}`,
         };
       }
       /*
@@ -188,7 +188,7 @@ function svatahSource(project: string, options: { attach?: boolean } = {}): Sour
        * deliberately does not — a session that launched its own would be
        * reading a different application from the one the other side read,
        * which is the one thing a parity gate must not do. So the gate starts
-       * one, points `SVATAH_CDP_URL` at it, and stops it afterwards.
+       * one, points `YAM_CDP_URL` at it, and stops it afterwards.
        */
       const ade = options.attach === true ? startAdeWithDebugging(root, io) : undefined;
       if (ade?.error !== undefined) {
@@ -196,14 +196,14 @@ function svatahSource(project: string, options: { attach?: boolean } = {}): Sour
           byName: new Map(),
           unreachable: ade.error,
           wallMs: 0,
-          command: `svatah run ${project}`,
+          command: `yam run ${project}`,
         };
       }
 
       io.err(`  running ${project}…`);
       const ran = shell(process.execPath, [cli, "run", directory, "--host", "none"], {
         cwd: root,
-        ...(ade?.url === undefined ? {} : { env: { SVATAH_CDP_URL: ade.url } }),
+        ...(ade?.url === undefined ? {} : { env: { YAM_CDP_URL: ade.url } }),
       });
       ade?.stop();
 
@@ -218,7 +218,7 @@ function svatahSource(project: string, options: { attach?: boolean } = {}): Sour
         return {
           byName,
           unreachable:
-            `\`svatah run ${project}\` wrote no run directory (exit ${ran.status ?? "none"}): ` +
+            `\`yam run ${project}\` wrote no run directory (exit ${ran.status ?? "none"}): ` +
             `${(ran.stderr || ran.stdout).trim().split("\n").slice(-3).join(" ")}`,
           wallMs: ran.wallMs,
           command: ran.line,
@@ -273,8 +273,8 @@ function startAdeWithDebugging(
   root: string,
   io: CommandIo,
 ): { url?: string; error?: string; stop: () => void } {
-  const bundle = join(root, "apps", "ade", "out", "Svatah ADE-darwin-arm64", "Svatah ADE.app");
-  const executable = join(bundle, "Contents", "MacOS", "Svatah ADE");
+  const bundle = join(root, "apps", "ade", "out", "Yam ADE-darwin-arm64", "Yam ADE.app");
+  const executable = join(bundle, "Contents", "MacOS", "Yam ADE");
   const noop = { stop: () => undefined };
   if (process.platform !== "darwin") {
     return { ...noop, error: "attaching to the ADE's renderer needs the packaged macOS build" };
@@ -282,7 +282,7 @@ function startAdeWithDebugging(
   if (!existsSync(executable)) {
     return {
       ...noop,
-      error: `the ADE is not packaged (${executable}); run \`pnpm --filter @svatah/ade package\``,
+      error: `the ADE is not packaged (${executable}); run \`pnpm --filter @svatah/yam-ade package\``,
     };
   }
 
@@ -292,7 +292,7 @@ function startAdeWithDebugging(
       .filter((one) => one.trim() !== "");
   const stop = (): void => {
     if (alive().length === 0) return;
-    spawnSync("osascript", ["-e", 'tell application id "com.electron.svatah-ade" to quit'], {
+    spawnSync("osascript", ["-e", 'tell application id "com.electron.yam-ade" to quit'], {
       encoding: "utf8",
     });
     for (let waited = 0; waited < 20_000 && alive().length > 0; waited += 250) {
@@ -306,7 +306,7 @@ function startAdeWithDebugging(
   const open = ["-n", "-F"];
   /*
    * The *same* environment the accessibility side's `app.launch` gives it, and
-   * `SVATAH_ADE_PROJECT` is deliberately not in it (T11.5).
+   * `YAM_ADE_PROJECT` is deliberately not in it (T11.5).
    *
    * That variable opens a project *for* the ADE on ready, so the welcome screen
    * never appears — and the self flows open the fixtures project through the
@@ -316,9 +316,9 @@ function startAdeWithDebugging(
    * in that list.
    */
   for (const [name, value] of Object.entries({
-    SVATAH_A11Y: "1",
-    SVATAH_ADE_DEBUG: "1",
-    SVATAH_CLI: join(root, "packages", "cli", "dist", "bin.js"),
+    YAM_A11Y: "1",
+    YAM_ADE_DEBUG: "1",
+    YAM_CLI: join(root, "packages", "cli", "dist", "bin.js"),
   })) {
     open.push("--env", `${name}=${value}`);
   }
@@ -393,12 +393,12 @@ function walkPlaywright(node: unknown, into: Map<string, SideResult>): void {
  * The catalogue writes a nested case the way a reader writes one — its
  * ancestors and its own title, joined by `>`:
  *
- *   `svatah ui` draws in a pseudo-terminal (T9.4) > opens on the `comp` run …
+ *   `yam ui` draws in a pseudo-terminal (T9.4) > opens on the `comp` run …
  *
  * Vitest's JSON reporter does *not*: `fullName` is those same parts joined by a
  * space, and the gate matched on that string alone. Two checks therefore found
  * nothing, and the report called them "neither side could look" — a shortcoming
- * of Svatah's, when the external side had run and passed (the Phase 11
+ * of Yam's, when the external side had run and passed (the Phase 11
  * verification, F2). LLD §13.9: "the catalogue names an external case by its
  * ancestor titles and its title, and the runner matches on those rather than on
  * a joined string."
@@ -500,7 +500,7 @@ function commandSource(
 
 interface Compared {
   readonly check: Check;
-  readonly svatah: SideResult;
+  readonly yam: SideResult;
   readonly external: SideResult;
   readonly outcome: "agree" | "disagree" | "one-sided" | "neither";
 }
@@ -509,11 +509,11 @@ interface Compared {
 /**
  * The source a side needs, including the project it names (T11.5).
  *
- * `svatah` runs `evals/self`, and a catalogue may point one check at a
+ * `yam` runs `evals/self`, and a catalogue may point one check at a
  * *different* project — a copy with something deliberately broken in it, which
  * is how `scripts/self-parity-bite.mjs` shows the gate biting. So the key is
  * the source and the project together, and two checks over two projects run two
- * `svatah run`s rather than sharing one.
+ * `yam run`s rather than sharing one.
  */
 function sourceKeyFor(spec: SideSpec): string {
   return spec.project === undefined ? spec.source : `${spec.source}:${spec.project}`;
@@ -533,9 +533,9 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
   /*
    * Where the reports go (P11-F3).
    *
-   *   svatah eval self                 # a temporary directory, and it says where
-   *   svatah eval self --update        # the committed set under reports/
-   *   svatah eval self --report <path> # this report there; the sources' still outside
+   *   yam eval self                 # a temporary directory, and it says where
+   *   yam eval self --update        # the committed set under reports/
+   *   yam eval self --report <path> # this report there; the sources' still outside
    *
    * Two of the gate's sources write a *committed* report as a side effect of
    * answering: the healing eval writes `reports/eval-healing.md` and the
@@ -549,7 +549,7 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
   const update = boolOption(args, "update");
   const reportsDir = update
     ? join(root, "reports")
-    : mkdtempSync(join(tmpdir(), "svatah-self-parity-"));
+    : mkdtempSync(join(tmpdir(), "yam-self-parity-"));
   const only = stringOption(args, "only");
   const side = stringOption(args, "side");
   const checks = catalogue.checks.filter((one) => only === undefined || one.id === only);
@@ -568,10 +568,10 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
   /* Which sources are actually needed, so nothing runs for nothing. */
   const wanted = new Set<string>();
   for (const check of checks) {
-    if (side !== "external" && check.svatah?.source !== undefined) {
-      wanted.add(sourceKeyFor(check.svatah));
+    if (side !== "external" && check.yam?.source !== undefined) {
+      wanted.add(sourceKeyFor(check.yam));
     }
-    if (side !== "svatah" && check.external?.source !== undefined) {
+    if (side !== "yam" && check.external?.source !== undefined) {
       wanted.add(sourceKeyFor(check.external));
     }
   }
@@ -580,17 +580,17 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
   const sources = sourcesFor(catalogue, reportsDir);
   for (const name of [...wanted].sort()) {
     /*
-     * `svatah:<project>` is a `svatah` run of a project the catalogue named;
+     * `yam:<project>` is a `yam` run of a project the catalogue named;
      * anything else is a source by name.
      */
     const [base, project] = name.includes(":") ? name.split(":") : [name, undefined];
     const source =
       project === undefined
         ? sources[base!]
-        : base === "svatah"
-          ? svatahSource(project)
-          : base === "svatah-cdp"
-            ? svatahSource(project, { attach: true })
+        : base === "yam"
+          ? yamSource(project)
+          : base === "yam-cdp"
+            ? yamSource(project, { attach: true })
             : undefined;
     if (source === undefined) {
       answers.set(name, {
@@ -631,23 +631,23 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
   };
 
   const compared: Compared[] = checks.map((check) => {
-    const svatah =
+    const yam =
       side === "external"
         ? { verdict: "unreachable" as const, evidence: "--side external" }
-        : verdictFor(check.svatah);
+        : verdictFor(check.yam);
     const external =
-      side === "svatah"
-        ? { verdict: "unreachable" as const, evidence: "--side svatah" }
+      side === "yam"
+        ? { verdict: "unreachable" as const, evidence: "--side yam" }
         : verdictFor(check.external);
     const outcome =
-      svatah.verdict === "unreachable" && external.verdict === "unreachable"
+      yam.verdict === "unreachable" && external.verdict === "unreachable"
         ? "neither"
-        : svatah.verdict === "unreachable" || external.verdict === "unreachable"
+        : yam.verdict === "unreachable" || external.verdict === "unreachable"
           ? "one-sided"
-          : svatah.verdict === external.verdict
+          : yam.verdict === external.verdict
             ? "agree"
             : "disagree";
-    return { check, svatah, external, outcome };
+    return { check, yam, external, outcome };
   });
 
   const both = compared.filter((one) => one.outcome === "agree" || one.outcome === "disagree");
@@ -667,7 +667,7 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
           checks: compared.map((one) => ({
             id: one.check.id,
             outcome: one.outcome,
-            svatah: one.svatah,
+            yam: one.yam,
             external: one.external,
           })),
         },
@@ -700,16 +700,16 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
 function sourcesFor(catalogue: Catalogue, reportsDir: string): Record<string, SourceSpec> {
   const projects = new Set<string>();
   for (const check of catalogue.checks) {
-    if (check.svatah?.source === "svatah" || check.svatah?.source === "svatah-cdp") {
-      projects.add(check.svatah.project ?? ".");
+    if (check.yam?.source === "yam" || check.yam?.source === "yam-cdp") {
+      projects.add(check.yam.project ?? ".");
     }
   }
   void projects;
   return {
     /** The AX side: `evals/self` driven through the desktop adapter. */
-    svatah: svatahSource("."),
+    yam: yamSource("."),
     /** The same flows through the Playwright adapter attached over CDP. */
-    "svatah-cdp": svatahSource("cdp", { attach: true }),
+    "yam-cdp": yamSource("cdp", { attach: true }),
     /** The ADE's own Playwright cases, over CDP against the packaged build. */
     "ade-playwright": playwrightSource("apps/ade", "the ADE's Playwright cases"),
     /** The cockpit in a real pseudo-terminal, and `--json` against the model. */
@@ -808,18 +808,18 @@ function renderReport(input: {
     for (const [name, source] of answers) if (which(name)) total += source.wallMs;
     return total;
   };
-  const svatahSources = (name: string): boolean => name.startsWith("svatah");
+  const yamSources = (name: string): boolean => name.startsWith("yam");
   const seconds = (ms: number): string => `${(ms / 1000).toFixed(1)} s`;
 
   const rows = (list: readonly Compared[]): string[] =>
     list.map(
       (one) =>
-        `| \`${one.check.id}\` | ${one.svatah.verdict} | ${one.external.verdict} | ` +
+        `| \`${one.check.id}\` | ${one.yam.verdict} | ${one.external.verdict} | ` +
         `${one.check.says.replace(/\|/g, "\\|")} |`,
     );
 
   return [
-    "# Svatah verifies Svatah — the parity gate",
+    "# Yam verifies Yam — the parity gate",
     "",
     `Run at ${new Date().toISOString()} on ${process.platform} ${process.arch}, Node ${process.version}.`,
     "",
@@ -829,29 +829,29 @@ function renderReport(input: {
       : `**Not conformant.** ${disagreements.length} disagreement(s) over the ${both.length} ` +
         "check(s) both sides reached. A disagreement means one oracle is wrong.",
     "",
-    "| | Svatah | External |",
+    "| | Yam | External |",
     "|---|---|---|",
-    `| Checks reached | ${reached((one) => one.svatah)} of ${compared.length} | ` +
+    `| Checks reached | ${reached((one) => one.yam)} of ${compared.length} | ` +
       `${reached((one) => one.external)} of ${compared.length} |`,
-    `| Wall time | ${seconds(wall(svatahSources))} | ${seconds(wall((n) => !svatahSources(n)))} |`,
+    `| Wall time | ${seconds(wall(yamSources))} | ${seconds(wall((n) => !yamSources(n)))} |`,
     "",
     "## Disagreements",
     "",
     disagreements.length === 0
       ? "None. Every check both sides reached, they answered the same way."
       : [
-          "| Check | Svatah says | External says |",
+          "| Check | Yam says | External says |",
           "|---|---|---|",
           ...disagreements.map(
             (one) =>
-              `| \`${one.check.id}\` | ${one.svatah.verdict}: ${one.svatah.evidence.replace(/\|/g, "\\|")} ` +
+              `| \`${one.check.id}\` | ${one.yam.verdict}: ${one.yam.evidence.replace(/\|/g, "\\|")} ` +
               `| ${one.external.verdict}: ${one.external.evidence.replace(/\|/g, "\\|")} |`,
           ),
         ].join("\n"),
     "",
-    "## One-sided checks — Svatah's own shortcomings",
+    "## One-sided checks — Yam's own shortcomings",
     "",
-    "Every one names the adapter or the step Svatah lacks, and the list is",
+    "Every one names the adapter or the step Yam lacks, and the list is",
     "expected to shrink phase by phase (LLD §13.9). A row whose reason is the",
     "*host* — a locked display, a refused permission — is not a shortcoming of",
     "either side: it is what this machine could not be asked, said in the",
@@ -863,8 +863,8 @@ function renderReport(input: {
           "| Check | Reached by | Why the other side does not |",
           "|---|---|---|",
           ...oneSided.map((one) => {
-            const missing = one.svatah.verdict === "unreachable" ? one.svatah : one.external;
-            const has = one.svatah.verdict === "unreachable" ? "external" : "Svatah";
+            const missing = one.yam.verdict === "unreachable" ? one.yam : one.external;
+            const has = one.yam.verdict === "unreachable" ? "external" : "Yam";
             return `| \`${one.check.id}\` | ${has} | ${missing.evidence.replace(/\|/g, "\\|")} |`;
           }),
         ].join("\n"),
@@ -874,18 +874,18 @@ function renderReport(input: {
       : [
           "## Neither side could look",
           "",
-          "| Check | Svatah | External |",
+          "| Check | Yam | External |",
           "|---|---|---|",
           ...neither.map(
             (one) =>
-              `| \`${one.check.id}\` | ${one.svatah.evidence.replace(/\|/g, "\\|")} | ` +
+              `| \`${one.check.id}\` | ${one.yam.evidence.replace(/\|/g, "\\|")} | ` +
               `${one.external.evidence.replace(/\|/g, "\\|")} |`,
           ),
           "",
         ]),
     "## Kept external by design (REQ-SELF-3)",
     "",
-    "Three oracles sit *below* the surface Svatah drives, and they are what keeps",
+    "Three oracles sit *below* the surface Yam drives, and they are what keeps",
     "this gate from grading its own homework.",
     "",
     "| Oracle | Why it stays external |",
@@ -896,7 +896,7 @@ function renderReport(input: {
     "",
     "## Every check",
     "",
-    "| Check | Svatah | External | What it says |",
+    "| Check | Yam | External | What it says |",
     "|---|---|---|---|",
     ...rows(compared),
     "",

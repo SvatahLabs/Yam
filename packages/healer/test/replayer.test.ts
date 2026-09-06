@@ -10,8 +10,8 @@
  * rather than in a relocalization against whatever is on screen.
  */
 import { afterEach, describe, expect, it } from "vitest";
-import type { SessionState } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+import type { SessionState } from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 import {
   clearReplayer,
   currentReplayer,

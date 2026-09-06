@@ -28,7 +28,7 @@ import {
   type Plan,
   type Step,
   type Story,
-} from "@svatah/schema";
+} from "@svatah/yam-schema";
 import {
   diagnostic,
   isStoryBlock,
@@ -36,8 +36,8 @@ import {
   type Project,
   type RawStep as ReaderStep,
   type StoryBlock,
-} from "@svatah/spec";
-import { emitCustom, type StepRegistry } from "@svatah/steps";
+} from "@svatah/yam-spec";
+import { emitCustom, type StepRegistry } from "@svatah/yam-steps";
 import { lowerStep, lowerValue, type LowerContext } from "./lower.js";
 import { parseGuard, parseSentence } from "./tier1.js";
 import { tierFor, type ModelTierAnswer } from "./tiers.js";

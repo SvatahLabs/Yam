@@ -1,4 +1,4 @@
-# @svatah/healer
+# @svatah/yam-healer
 
 Module (a)'s repair half (REQ-HEAL-1..6): failure selection, model-free
 relocalization, verification, and a diff.
@@ -35,7 +35,7 @@ resolving *entirely* (a synthesised bundle carries five to eight independent
 candidates, so a single-property change rarely takes them all), and how many
 degraded.
 
-Run it through `svatah eval healing --no-model`; the committed report is under
+Run it through `yam eval healing --no-model`; the committed report is under
 `reports/`.
 
 ## Licence

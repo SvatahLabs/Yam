@@ -17,7 +17,7 @@
  *   binding's context pattern is "a URL *or window-title* pattern"; a window has
  *   no segments to generalise.
  * * **The ground truth is the `automationId`.** `apps/sample-web` stamps
- *   `data-svatah-eval` on every element for the web eval; the ADE needs no such
+ *   `data-yam-eval` on every element for the web eval; the ADE needs no such
  *   stamp, because LLD §13.7's accessibility contract already requires an id on
  *   every button, link, tab, field and row action, and the desktop snapshot case
  *   fails the live gate when one is missing. The id is the answer key.
@@ -58,7 +58,7 @@ for (const [what, path] of [
   if (!existsSync(path)) {
     process.stderr.write(
       `${what} is not built (${path}). Run \`pnpm -r build\` and ` +
-        "`pnpm --filter @svatah/ade package`.\n",
+        "`pnpm --filter @svatah/yam-ade package`.\n",
     );
     process.exit(2);
   }
@@ -74,9 +74,9 @@ const child = spawn(
     stdio: ["ignore", "pipe", "pipe"],
     env: {
       ...process.env,
-      SVATAH_CLI: cli,
-      SVATAH_A11Y: "1",
-      ...(variant === "0" ? {} : { SVATAH_A11Y_VARIANT: variant }),
+      YAM_CLI: cli,
+      YAM_A11Y: "1",
+      ...(variant === "0" ? {} : { YAM_A11Y_VARIANT: variant }),
       /*
        * Started with *no* project, so the welcome screen is recorded too
        * (T11.3).
@@ -367,7 +367,7 @@ const main = async () => {
     }
   }
 
-  const title = (await evaluate("document.title")) ?? "Svatah ADE";
+  const title = (await evaluate("document.title")) ?? "Yam ADE";
   const cases = [];
   let n = 0;
   for (const control of [...seen.values()].sort((a, b) => a.id.localeCompare(b.id))) {

@@ -16,7 +16,7 @@ import type {
   Snapshot,
   SurfaceAction,
   SurfaceKind,
-} from "@svatah/schema";
+} from "@svatah/yam-schema";
 
 /**
  * The agent surface (LLD §2.1, REQ-SURF-1).

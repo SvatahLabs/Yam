@@ -1,6 +1,6 @@
 # Changelog
 
-Svatah is a monorepo of packages that release together, so this file is the
+Yam is a monorepo of packages that release together, so this file is the
 whole workspace's changelog and every package version below is the same number.
 It follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -32,7 +32,7 @@ exists somewhere, and until the owner triggers `custom: publish` it does not.
 |---|---|
 | Compiler, exact match | 98.0 % overall over **303** pairs; tier 1 100 % (250/250), tier 2 88.0 % (`reports/eval-compiler.md`) |
 | macOS Accessibility conformance | conformant — 10 cases across ADE variants 0, 1 and 2, live against the packaged ADE; 1017 nodes in 1488 ms, 1.46 ms per node at load average 5.15 over 8 CPUs (`reports/adapter-ax.md`) |
-| Svatah verifies Svatah | 100 % agreement over the 29 checks both sides reach; Svatah 30 of 48, external 47 of 48 (`reports/self-parity.md`) |
+| Yam verifies Yam | 100 % agreement over the 29 checks both sides reach; Yam 30 of 48, external 47 of 48 (`reports/self-parity.md`) |
 | Java runtime conformance | artifacts valid, zero mismatches (`reports/runtime-java.md`) |
 | Healing, grounding, adapter conformance | `reports/eval-healing.md`, `reports/eval-grounding.md`, `reports/eval-conformance.md` |
 | Tier 2 fine-tune | **not met**, and withdrawn — see below (`reports/eval-finetune.md`) |
@@ -44,18 +44,18 @@ declarations and its README and nothing else.
 
 | Set | Packages |
 |---|---|
-| Module (a) — the adoption wedge (REQ-PKG-1) | `@svatah/bindings`, `@svatah/healer`, `@svatah/playwright-test`, `@svatah/bindings-cli`, and their dependencies `@svatah/schema`, `@svatah/surface`, `@svatah/adapter-playwright`, `@svatah/conformance` |
-| The command line — module (b) | `@svatah/cli` (published as `svatah`) and its twenty-five workspace dependencies |
-| The published contract (REQ-STD-1, 2) | `@svatah/schema`, with the generated JSON Schemas under `json/` and the runtime conformance fixture under `conformance/` |
+| Module (a) — the adoption wedge (REQ-PKG-1) | `@svatah/yam-bindings`, `@svatah/yam-healer`, `@svatah/yam-playwright-test`, `@svatah/yam-bindings-cli`, and their dependencies `@svatah/yam-schema`, `@svatah/yam-surface`, `@svatah/yam-adapter-playwright`, `@svatah/yam-conformance` |
+| The command line — module (b) | `@svatah/yam` (published as `yam`) and its twenty-five workspace dependencies |
+| The published contract (REQ-STD-1, 2) | `@svatah/yam-schema`, with the generated JSON Schemas under `json/` and the runtime conformance fixture under `conformance/` |
 
-`svatah` and `@svatah/ade` are the two things a person runs; every other package
+`yam` and `@svatah/yam-ade` are the two things a person runs; every other package
 is a library another package depends on.
 
 ### Added
 
 - **Module (a)** — bindings, model-free relocalization, and `bind()` for plain
   Playwright tests. One dependency and one import: `test` comes from
-  `@svatah/playwright-test` instead of `@playwright/test` (REQ-PKG-1, REQ-PKG-2).
+  `@svatah/yam-playwright-test` instead of `@playwright/test` (REQ-PKG-1, REQ-PKG-2).
 - **The flow language and the compiler** — thirty sentence patterns over three
   tiers, a deterministic Tier 1 grammar, and a plan that compiles to the same
   bytes twice (REQ-COMP-7).
@@ -91,7 +91,7 @@ before it was fixed:
   defaulted to accept. Both read `action` now, and refuse a step without one
   (LLD §3.2).
 - **The desktop healing cases** T6.1 asked for and Phase 6 dropped: the ADE
-  gains `SVATAH_A11Y_VARIANT=1|2`, and a binding recorded against the real
+  gains `YAM_A11Y_VARIANT=1|2`, and a binding recorded against the real
   interface relocalizes against both (LLD §16).
 - **`pnpm -r typecheck` was red** in three packages and outside the verification
   contract. Both fixed (LLD §16).
@@ -109,12 +109,12 @@ found that the *packaged* product could not open a project — each reproduced
 before it was fixed:
 
 - **The packaged ADE could not open a project.** It spawned `process.execPath` to
-  run `svatah serve`; packaged, with the `RunAsNode` fuse off, that is the ADE
+  run `yam serve`; packaged, with the `RunAsNode` fuse off, that is the ADE
   itself, so the child was a second ADE that printed no handshake. The runtime is
-  resolved from `SVATAH_NODE`, then a `node` on `PATH` of Node 22 or newer, then
+  resolved from `YAM_NODE`, then a `node` on `PATH` of Node 22 or newer, then
   a Node beside the CLI under `resources/`, and the Project screen's alert names
   all three when none is found (LLD §13.6). The packager now ships the CLI, which
-  it never did; `SVATAH_ADE_PROJECT=<dir>` opens a project on ready; and the
+  it never did; `YAM_ADE_PROJECT=<dir>` opens a project on ready; and the
   smoke check runs against the packaged application.
 - **The macOS Accessibility bridge missed its budget on the screen the budget is
   about.** Phase 7's 10.4 ms per node was measured on the menu-bar tree; the
@@ -138,7 +138,7 @@ before it was fixed:
   training set: 83 pairs, all of them sentences the grammar *accepts*, against a
   tier that exists for the ones it refuses. `evals/compiler/refused.jsonl` — 184
   reviewed pairs of a refused sentence and the step it means — is the corpus that
-  would make another attempt worth making, and `svatah eval finetune corpus`
+  would make another attempt worth making, and `yam eval finetune corpus`
   reports it. `reports/eval-finetune.md`.
 
 ### Known gaps
@@ -150,7 +150,7 @@ Recorded rather than closed, with the command that closes each in
   `reports/adapter-uia.md` has the defects found without one.
 - No screenshot was taken through the macOS adapter on this host: `screencapture`
   needs the Screen Recording grant, which is separate from Accessibility.
-  `svatah surface doctor` reports it as an advisory check.
+  `yam surface doctor` reports it as an advisory check.
 - Nothing is published to a registry until the owner triggers the pipeline.
 
 [0.1.0]: https://github.com/SvatahLabs/yam/releases/tag/v0.1.0

@@ -16,7 +16,7 @@
  * `{data.x}` would make a story's signature depend on the run's data, and the
  * signature is the part that is supposed to be knowable without one.
  */
-import { INPUT_TYPES, OUTPUT_TYPES, type Signature } from "@svatah/schema";
+import { INPUT_TYPES, OUTPUT_TYPES, type Signature } from "@svatah/yam-schema";
 import { diagnostic, type Diagnostic } from "./diagnostics.js";
 
 type InputType = (typeof INPUT_TYPES)[number];

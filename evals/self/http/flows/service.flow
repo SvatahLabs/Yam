@@ -20,12 +20,12 @@ story: the service says it is alive, and which project it is serving
   Wait for the "health" API to answer "$.project" to contain "evals/fixtures"
 
 story: the service describes the project the ADE would open
-  Wait for the "project" API to answer "$.config.project" to be "svatah-fixtures"
+  Wait for the "project" API to answer "$.config.project" to be "yam-fixtures"
   Wait for the "project" API to answer "$.config.adapter" to be "playwright"
   Wait for the "project" API to answer "$.root" to contain "evals/fixtures"
 
 story: the service compiles the project and answers with the plan
-  Wait for the "plan" API to answer "$.project" to be "svatah-fixtures"
+  Wait for the "plan" API to answer "$.project" to be "yam-fixtures"
   Wait for the "plan" API to answer "$.schemaVersion" to be "1.0.0"
   Wait for the "plan" API to answer "$.stories.0.name" to be "book a slot"
   Wait for the "plan" API to answer "$.stories.0.steps.0.action" to be "click"
@@ -38,7 +38,7 @@ story: the service names every secret and values none of them
   Wait for the "data" API to answer "$.values.user.email" to be "connected2atul@gmail.com"
   Wait for the "data" API to answer "$.secrets.0" to be "user.password"
   Wait for the "data" API to answer "$.values.user.password" to contain "redacted"
-  Wait for the "data" API to answer "$.secretSources['user.password'].reads" to be "SVATAH_SAMPLE_PASSWORD"
+  Wait for the "data" API to answer "$.secretSources['user.password'].reads" to be "YAM_SAMPLE_PASSWORD"
 
 # The fixtures project exposes no story as a tool, and the answer says so as two
 # empty lists rather than as an absence — which is the difference between "no

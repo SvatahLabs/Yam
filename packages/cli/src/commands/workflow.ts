@@ -1,17 +1,17 @@
 /**
- * `svatah workflow run <story>` (REQ-BEH-2, REQ-AGT-1, LLD §13.2, §15, T5.2).
+ * `yam workflow run <story>` (REQ-BEH-2, REQ-AGT-1, LLD §13.2, §15, T5.2).
  *
  * ```
- * svatah workflow run "Book a slot" --input date=2026-09-03 --input user={data.user}
- * svatah workflow run "Book a slot" --resume <runId> --from <stepId>
+ * yam workflow run "Book a slot" --input date=2026-09-03 --input user={data.user}
+ * yam workflow run "Book a slot" --resume <runId> --from <stepId>
  * ```
  *
  * Outputs go to **stdout as JSON** and everything else to stderr, so the command
- * composes: `svatah workflow run "Book a slot" --input date=… | jq -r .bookingId`
+ * composes: `yam workflow run "Book a slot" --input date=… | jq -r .bookingId`
  * is the shape a cron job or a shell script wants, and a progress line on stdout
  * would break it.
  *
- * The run itself is `runProject`'s — the same function `svatah run` calls, with
+ * The run itself is `runProject`'s — the same function `yam run` calls, with
  * `behavior: "workflow"` and one story (LLD §13.2). What this file adds is the
  * command line: which story, which inputs, and where the outputs go.
  */
@@ -24,28 +24,28 @@ import {
   type CommandIo,
   type ExitCode,
   type ParsedArgs,
-} from "@svatah/bindings-cli";
-import { EnvironmentRefusal, UnknownStory } from "@svatah/workflow";
-import { ResumeMismatchError, ResumeUnavailableError } from "@svatah/runtime";
-import type { StepResult } from "@svatah/schema";
+} from "@svatah/yam-bindings-cli";
+import { EnvironmentRefusal, UnknownStory } from "@svatah/yam-workflow";
+import { ResumeMismatchError, ResumeUnavailableError } from "@svatah/yam-runtime";
+import type { StepResult } from "@svatah/yam-schema";
 import { compileProject, loadProject } from "../project.js";
 import { report } from "./compile.js";
 import { runProject } from "./run.js";
 
-const USAGE = `svatah workflow run <story> [dir] [--input k=v] [--base-url <url>]
+const USAGE = `yam workflow run <story> [dir] [--input k=v] [--base-url <url>]
                             [--storage-state <path.json>] [--headed]
                             [--allow-side-effects] [--resume <runId> --from <stepId>]
                             [--out runs] [--run-id <id>] [--json]`;
 
 export async function workflowCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
   if (args.command[1] !== "run") {
-    io.err(`\`svatah workflow\` takes one subcommand, \`run\`.\n\n${USAGE}`);
+    io.err(`\`yam workflow\` takes one subcommand, \`run\`.\n\n${USAGE}`);
     return EXIT.usage;
   }
 
   const storyName = args.command[2];
   if (storyName === undefined) {
-    io.err(`\`svatah workflow run\` needs a story name.\n\n${USAGE}`);
+    io.err(`\`yam workflow run\` needs a story name.\n\n${USAGE}`);
     return EXIT.usage;
   }
 

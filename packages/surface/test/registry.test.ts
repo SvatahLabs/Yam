@@ -13,7 +13,7 @@ import {
   surfaceActMessageSchema,
   surfaceSnapshotMessageSchema,
   type Config,
-} from "@svatah/schema";
+} from "@svatah/yam-schema";
 import {
   ActionabilityError,
   CheckError,

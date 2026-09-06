@@ -31,12 +31,12 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { EXIT } from "@svatah/bindings-cli";
-import { readLegacyFlow } from "@svatah/migrate";
-import type { Plan } from "@svatah/schema";
+import { EXIT } from "@svatah/yam-bindings-cli";
+import { readLegacyFlow } from "@svatah/yam-migrate";
+import type { Plan } from "@svatah/yam-schema";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const SVATAH = join(ROOT, "packages", "cli", "dist", "bin.js");
+const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 const DATABASE = join(ROOT, "evals", "migrate", "ade-db");
 const LEGACY = join(ROOT, "evals", "migrate", "source", "sample");
 
@@ -45,7 +45,7 @@ const projects: string[] = [];
 function cli(args: readonly string[], cwd = ROOT): Promise<{ code: number; output: string }> {
   return new Promise((done) => {
     let output = "";
-    const child = spawn(process.execPath, [SVATAH, ...args], { cwd });
+    const child = spawn(process.execPath, [YAM, ...args], { cwd });
     child.stdout.on("data", (chunk) => (output += String(chunk)));
     child.stderr.on("data", (chunk) => (output += String(chunk)));
     child.on("close", (code) => done({ code: code ?? 1, output }));
@@ -53,26 +53,26 @@ function cli(args: readonly string[], cwd = ROOT): Promise<{ code: number; outpu
 }
 
 function scratch(): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-from-ade-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-from-ade-"));
   projects.push(dir);
   return dir;
 }
 
 beforeAll(() => {
-  if (!existsSync(SVATAH)) throw new Error("Run `pnpm -r build` first.");
+  if (!existsSync(YAM)) throw new Error("Run `pnpm -r build` first.");
 });
 afterAll(() => {
   for (const dir of projects) rmSync(dir, { recursive: true, force: true });
 });
 
-describe("svatah migrate --from-ade (T6.6, REQ-ADE-9)", () => {
+describe("yam migrate --from-ade (T6.6, REQ-ADE-9)", () => {
   it("writes a project directory from the database's four tables", async () => {
     const project = scratch();
     const result = await cli(["migrate", project, "--from-ade", DATABASE]);
     expect(result.code, result.output).toBe(EXIT.ok);
 
     // LLD §13.5's mapping, file by file.
-    expect(existsSync(join(project, "svatah.config.yaml"))).toBe(true);
+    expect(existsSync(join(project, "yam.config.yaml"))).toBe(true);
     expect(readdirSync(join(project, "flows")).sort()).toEqual([
       "execution.flow",
       "natural_language_login.flow",
@@ -100,7 +100,7 @@ describe("svatah migrate --from-ade (T6.6, REQ-ADE-9)", () => {
   it("maps the prototype's config columns as LLD §13.5 says", async () => {
     const project = scratch();
     await cli(["migrate", project, "--from-ade", DATABASE]);
-    const config = parseYaml(readFileSync(join(project, "svatah.config.yaml"), "utf8")) as {
+    const config = parseYaml(readFileSync(join(project, "yam.config.yaml"), "utf8")) as {
       project: string;
       app: { baseUrl: string };
       run: { workers: number; browser?: string; screenshots: string };
@@ -137,7 +137,7 @@ describe("svatah migrate --from-ade (T6.6, REQ-ADE-9)", () => {
     const project = scratch();
     await cli(["migrate", project, "--from-ade", DATABASE]);
     const data = readFileSync(join(project, "data.yaml"), "utf8");
-    expect(data).toContain("${SVATAH_PASSWORD}");
+    expect(data).toContain("${YAM_PASSWORD}");
     expect(data).not.toContain("qwerty123");
     expect(data).toMatch(/secrets:/);
   }, 120_000);
@@ -148,7 +148,7 @@ describe("svatah migrate --from-ade (T6.6, REQ-ADE-9)", () => {
 
     const compile = await cli(["compile", "."], project);
     expect(compile.code, compile.output).toBe(EXIT.ok);
-    // A warning is allowed and expected: `${SVATAH_PASSWORD}` is unset, which
+    // A warning is allowed and expected: `${YAM_PASSWORD}` is unset, which
     // matters at run time and not at compile time. An *error* is not.
     expect(compile.output).not.toMatch(/\berror\b/);
   }, 180_000);
@@ -163,7 +163,7 @@ describe("svatah migrate --from-ade (T6.6, REQ-ADE-9)", () => {
     await cli(["migrate", project, "--from-ade", DATABASE]);
     await cli(["compile", "."], project);
 
-    const plan = JSON.parse(readFileSync(join(project, ".svatah", "plan.json"), "utf8")) as Plan;
+    const plan = JSON.parse(readFileSync(join(project, ".yam", "plan.json"), "utf8")) as Plan;
     const compiled = new Map(plan.stories.map((one) => [one.name, one.steps.length]));
 
     let checked = 0;
@@ -204,7 +204,7 @@ describe("svatah migrate --from-ade (T6.6, REQ-ADE-9)", () => {
     const result = await cli(["migrate", project, "--from-ade", DATABASE, "--project", "Smoke"]);
     expect(result.code, result.output).toBe(EXIT.ok);
 
-    const config = parseYaml(readFileSync(join(project, "svatah.config.yaml"), "utf8")) as {
+    const config = parseYaml(readFileSync(join(project, "yam.config.yaml"), "utf8")) as {
       project: string;
       run: { browser?: string };
     };

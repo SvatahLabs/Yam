@@ -51,7 +51,7 @@ things before writing anything here:
 
 REQ-STD-3 asks a foreign runtime to execute `plan.json` and bindings and pass a
 runtime conformance suite. This is the first fixture for that suite: the plan is
-`svatah compile evals/fixtures --stable` (its hash is in `plan.sha256`), the
+`yam compile evals/fixtures --stable` (its hash is in `plan.sha256`), the
 bindings are `evals/fixtures/bindings`, and a conformant runtime produces the
 same **status** and the same **matched candidate** for every step. Timestamps,
 durations and the run id belong to the run rather than to the plan and are not

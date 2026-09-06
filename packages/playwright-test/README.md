@@ -1,4 +1,4 @@
-# @svatah/playwright-test
+# @svatah/yam-playwright-test
 
 The Playwright Test host (LLD §9). Two things live here, and LLD §1 makes this
 the one package that may hold either: the **`bind()` fixture** for plain
@@ -13,7 +13,7 @@ and it imports exactly one: the Playwright adapter.
 One dependency, one import (REQ-PKG-2):
 
 ```ts
-import { test, expect } from "@svatah/playwright-test";
+import { test, expect } from "@svatah/yam-playwright-test";
 
 test("sign in", async ({ page, bind }) => {
   await page.goto("/login");
@@ -32,11 +32,11 @@ The ten-minute quick start, with the record and heal passes explained, is in
 
 ## Modes (LLD §6.5)
 
-| `SVATAH_MODE` | What happens |
+| `YAM_MODE` | What happens |
 |---|---|
-| `run` (default) | The resolver reads the store and returns a `Locator`. No model, no network beyond the application. A failure names every candidate tried and writes `.svatah/bind-failures.jsonl`. |
+| `run` (default) | The resolver reads the store and returns a `Locator`. No model, no network beyond the application. A failure names every candidate tried and writes `.yam/bind-failures.jsonl`. |
 | `record` | An id with no binding for the current context is grounded by a person clicking it, and synthesised with `provenance.model: "human"`. |
-| `heal` | On a failure, relocalization runs inline, the resolution is retried once, and the test is annotated `healed`. The repair is staged to `.svatah/heal-proposals.jsonl`, never applied. |
+| `heal` | On a failure, relocalization runs inline, the resolution is retried once, and the test is annotated `healed`. The repair is staged to `.yam/heal-proposals.jsonl`, never applied. |
 
 A healed run is `healed`, not `passed` (REQ-HEAL-4, ADR-6): a repair reaches the
 repository through a diff someone reads, so "green" keeps meaning that a
@@ -44,11 +44,11 @@ deterministic replay passed.
 
 ## Recording without a person
 
-`SVATAH_PICK` (or the `svatahPicks` fixture option) names the element for each id
+`YAM_PICK` (or the `yamPicks` fixture option) names the element for each id
 so record mode runs headless:
 
 ```bash
-SVATAH_MODE=record SVATAH_PICK='{"login.username-field":"username"}' npx playwright test
+YAM_MODE=record YAM_PICK='{"login.username-field":"username"}' npx playwright test
 ```
 
 A bare word is a test id; anything else is a CSS selector. **This is a test

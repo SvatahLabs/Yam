@@ -16,7 +16,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { LocateError, NavigationError, ScriptError } from "@svatah/surface";
+import { LocateError, NavigationError, ScriptError } from "@svatah/yam-surface";
 import type { AppiumClient, ElementId } from "../src/client.js";
 import { parsePageSource, xpathOf, type SourceNode } from "../src/page-source.js";
 import { AppiumSurface, APPIUM_CAPABILITIES } from "../src/surface.js";
@@ -40,7 +40,7 @@ function fakeDevice(options: { source: string; context?: string; url?: string })
   let source = parsePageSource(readFileSync(join(FIXTURES, options.source), "utf8"));
   let context = options.context ?? "NATIVE_APP";
   let url = options.url ?? "";
-  const contexts = ["NATIVE_APP", "WEBVIEW_com.svatah.sample"];
+  const contexts = ["NATIVE_APP", "WEBVIEW_com.yam.sample"];
 
   /** Every node with the path that names it. */
   const walk = (node: SourceNode, path: SourceNode[]): Array<[SourceNode, SourceNode[]]> => {
@@ -122,7 +122,7 @@ function fakeDevice(options: { source: string; context?: string; url?: string })
       url = to;
     },
     getUrl: async () => url,
-    getTitle: async () => "Svatah Sample",
+    getTitle: async () => "Yam Sample",
     back: async () => record("back"),
     forward: async () => record("forward"),
     refresh: async () => record("refresh"),
@@ -213,7 +213,7 @@ describe("snapshot over a native screen (REQ-SURF-4)", () => {
       ignoreAttributes: ["resource-id"],
     });
     const snapshot = await surface.snapshot();
-    expect(JSON.stringify(snapshot)).not.toContain("com.svatah.sample:id/username");
+    expect(JSON.stringify(snapshot)).not.toContain("com.yam.sample:id/username");
   });
 });
 
@@ -245,7 +245,7 @@ describe("locate and describe (LLD §6.3, §3.3)", () => {
 
     expect(described.role).toBe("button");
     expect(described.tag).toBe("android.widget.Button");
-    expect(described.attrs["resource-id"]).toBe("com.svatah.sample:id/submit");
+    expect(described.attrs["resource-id"]).toBe("com.yam.sample:id/submit");
     // The neighbours and the role path are what fingerprinting scores on, and
     // only the tree knows them — which is why a snapshot reference is described
     // from the page source rather than from the driver (LLD §3.3).
@@ -274,10 +274,10 @@ describe("three steps on a native screen (T4.2's Validate)", () => {
      */
     const { surface, device } = await open({ source: "android-login.xml" });
 
-    const [username] = await surface.locate({ by: "resourceId", value: "com.svatah.sample:id/username", score: 1 });
+    const [username] = await surface.locate({ by: "resourceId", value: "com.yam.sample:id/username", score: 1 });
     await surface.act("type", username!, { value: "someone@example.com" });
 
-    const [password] = await surface.locate({ by: "resourceId", value: "com.svatah.sample:id/password", score: 1 });
+    const [password] = await surface.locate({ by: "resourceId", value: "com.yam.sample:id/password", score: 1 });
     await surface.act("type", password!, { value: "hunter2" });
 
     const [submit] = await surface.locate({ by: "accessibilityId", value: "Sign in button", score: 1 });
@@ -352,7 +352,7 @@ describe("contexts are what a phone has instead of frames (LLD §7.4)", () => {
   it("switches to a webview and back", async () => {
     const { surface, device } = await open({ source: "android-login.xml" });
     await surface.act("switchFrame", undefined, { name: "webview" });
-    expect(device.of("switchContext").at(-1)!.args).toEqual(["WEBVIEW_com.svatah.sample"]);
+    expect(device.of("switchContext").at(-1)!.args).toEqual(["WEBVIEW_com.yam.sample"]);
 
     await surface.act("switchFrame", undefined, { name: "main" });
     expect(device.of("switchContext").at(-1)!.args).toEqual(["NATIVE_APP"]);
@@ -380,7 +380,7 @@ describe("contexts are what a phone has instead of frames (LLD §7.4)", () => {
   it("navigates and evaluates once the session is in a webview", async () => {
     const { surface, device } = await open({
       source: "android-login.xml",
-      context: "WEBVIEW_com.svatah.sample",
+      context: "WEBVIEW_com.yam.sample",
     });
     await surface.act("navigate", undefined, { url: "http://10.0.2.2:4173/login" });
     expect(device.of("navigateTo")[0]!.args).toEqual(["http://10.0.2.2:4173/login"]);
@@ -408,8 +408,8 @@ describe("session state (REQ-AUTO-2)", () => {
 
   it("restores the context it was told about", async () => {
     const { surface, device } = await open({ source: "android-login.xml" });
-    await surface.restore({ kind: "mobile", frame: "WEBVIEW_com.svatah.sample" });
-    expect(device.of("switchContext").at(-1)!.args).toEqual(["WEBVIEW_com.svatah.sample"]);
+    await surface.restore({ kind: "mobile", frame: "WEBVIEW_com.yam.sample" });
+    expect(device.of("switchContext").at(-1)!.args).toEqual(["WEBVIEW_com.yam.sample"]);
   });
 
   it("refuses to restore a web session into a phone", async () => {

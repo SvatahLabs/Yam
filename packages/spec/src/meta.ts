@@ -9,7 +9,7 @@
  * word. A typo in `continueOnFailure` that read as "no policy" would change what
  * a failing flow does, and would do it invisibly.
  */
-import type { OnFailure, StoryMeta } from "@svatah/schema";
+import type { OnFailure, StoryMeta } from "@svatah/yam-schema";
 import { diagnostic, type Diagnostic } from "./diagnostics.js";
 
 /** The keys REQ-LANG-2 allows, and nothing else. */

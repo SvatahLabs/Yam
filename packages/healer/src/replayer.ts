@@ -41,9 +41,9 @@
  * guess. What both replayers own is the rest: getting from there to the failing
  * step, and then *checking* they arrived (`reachedRecordedPage`). A failure at a
  * story's first step is `reached` only after that navigation, never on a blank
- * page, which is exactly what `svatah heal --run` used to get wrong.
+ * page, which is exactly what `yam heal --run` used to get wrong.
  */
-import type { AgentSurface } from "@svatah/surface";
+import type { AgentSurface } from "@svatah/yam-surface";
 import type { HealInput } from "./failures.js";
 
 /**
@@ -164,7 +164,7 @@ export function samePath(a: string, b: string): boolean {
 let registered: Replayer = SESSION_STATE_REPLAYER;
 
 /**
- * Register module (b)'s runtime-backed replayer. `@svatah/cli` does this when
+ * Register module (b)'s runtime-backed replayer. `@svatah/yam` does this when
  * the executor is present; nothing else may.
  */
 export function registerReplayer(replayer: Replayer): void {

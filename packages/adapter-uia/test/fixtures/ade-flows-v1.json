@@ -1,12 +1,12 @@
 {
-  "process": "Svatah ADE",
-  "title": "Svatah ADE",
+  "process": "Yam ADE",
+  "title": "Yam ADE",
   "truncated": false,
   "nodes": [
     {
       "parent": -1,
       "controlType": "Window",
-      "name": "Svatah ADE",
+      "name": "Yam ADE",
       "className": "Chrome_WidgetWin_1",
       "isEnabled": true,
       "box": [
@@ -20,7 +20,7 @@
       "parent": 0,
       "controlType": "Document",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah ADE",
+      "name": "Yam ADE",
       "isEnabled": true,
       "hasKeyboardFocus": true,
       "box": [
@@ -60,7 +60,7 @@
       "parent": 3,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah",
+      "name": "Yam",
       "isEnabled": true,
       "box": [
         50,
@@ -73,7 +73,7 @@
       "parent": 4,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "Svatah",
+      "name": "Yam",
       "isEnabled": true
     },
     {
@@ -4913,7 +4913,7 @@
       "parent": 443,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
+      "name": "user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.",
       "isEnabled": true,
       "box": [
         779,
@@ -4933,7 +4933,7 @@
       "parent": 448,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "${SVATAH_SAMPLE_PASSWORD},",
+      "name": "${YAM_SAMPLE_PASSWORD},",
       "isEnabled": true
     },
     {
@@ -5020,7 +5020,7 @@
       "parent": 455,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "card.number reads ${SVATAH_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
+      "name": "card.number reads ${YAM_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.",
       "isEnabled": true,
       "box": [
         779,
@@ -5040,7 +5040,7 @@
       "parent": 460,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "${SVATAH_SAMPLE_CARD_NUMBER},",
+      "name": "${YAM_SAMPLE_CARD_NUMBER},",
       "isEnabled": true
     },
     {
@@ -5127,7 +5127,7 @@
       "parent": 467,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "card.cvv reads ${SVATAH_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
+      "name": "card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which is not set. Compiling does not need the value; running will.",
       "isEnabled": true,
       "box": [
         779,
@@ -5147,7 +5147,7 @@
       "parent": 472,
       "controlType": "Text",
       "className": "Chrome_RenderWidgetHostHWND",
-      "name": "${SVATAH_SAMPLE_CARD_CVV},",
+      "name": "${YAM_SAMPLE_CARD_CVV},",
       "isEnabled": true
     },
     {

@@ -1,12 +1,12 @@
 /**
- * @svatah/surface
+ * @svatah/yam-surface
  *
  * The published agent surface (REQ-SURF-1..5, LLD §2): the `AgentSurface`
  * interface every adapter implements, the adapter registry, the typed errors and
  * their failure classes, the snapshot text renderer, and the role tables that
  * normalise UIA, AX and Appium trees onto the ARIA vocabulary.
  *
- * The wire shapes are defined in `@svatah/schema` and published as
+ * The wire shapes are defined in `@svatah/yam-schema` and published as
  * `packages/schema/json/surface.*.schema.json`; they are re-exported here so an
  * adapter implementer needs one import.
  */
@@ -131,4 +131,4 @@ export {
   type SnapshotNode,
   type SurfaceAction,
   type SurfaceKind,
-} from "@svatah/schema";
+} from "@svatah/yam-schema";

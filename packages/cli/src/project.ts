@@ -8,25 +8,25 @@
  */
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { readBindingIndex, type BindingIndexEntry } from "@svatah/bindings";
+import { readBindingIndex, type BindingIndexEntry } from "@svatah/yam-bindings";
 import {
   compile,
   compileWithModelTiers,
   type CompileOptions,
   type CompileResult,
-} from "@svatah/compiler";
-import { diagnostic, readProjectFrom, type Diagnostic, type Project } from "@svatah/spec";
-import { loadSteps, type StepRegistry } from "@svatah/steps";
-import type { Config } from "@svatah/schema";
-import { loadConfig as readConfig } from "@svatah/bindings-cli";
+} from "@svatah/yam-compiler";
+import { diagnostic, readProjectFrom, type Diagnostic, type Project } from "@svatah/yam-spec";
+import { loadSteps, type StepRegistry } from "@svatah/yam-steps";
+import type { Config } from "@svatah/yam-schema";
+import { loadConfig as readConfig } from "@svatah/yam-bindings-cli";
 import { ConfigError } from "./config-error.js";
 
 /*
- * Config loading lives in `@svatah/bindings-cli` since Draft 2.5, so that both
+ * Config loading lives in `@svatah/yam-bindings-cli` since Draft 2.5, so that both
  * command lines read one file with one set of defaults (LLD §15). Re-exported
  * here because this is where module (b) has always reached for it.
  */
-export { CONFIG_FILES, loadConfig } from "@svatah/bindings-cli";
+export { CONFIG_FILES, loadConfig } from "@svatah/yam-bindings-cli";
 
 export interface LoadedProject {
   readonly root: string;
@@ -120,7 +120,7 @@ export async function loadProject(root: string): Promise<LoadedProject> {
     diagnostics: [
       ...bindings.diagnostics,
       ...read.diagnostics,
-      // `@svatah/steps` keeps its own diagnostic shape (LLD §1); it is
+      // `@svatah/yam-steps` keeps its own diagnostic shape (LLD §1); it is
       // structurally the same, and the compiler passes it through unchanged.
       ...steps.diagnostics.map((d) => ({ ...d, severity: d.severity })),
     ] as readonly Diagnostic[],

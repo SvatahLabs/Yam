@@ -1,5 +1,5 @@
 {
-  "$id": "https://svatah.dev/schema/1.0.0/proposal.schema.json",
+  "$id": "https://yam.svatah.com/schema/1.0.0/proposal.schema.json",
   "$ref": "#/definitions/proposal",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
@@ -1083,7 +1083,7 @@
       "type": "object"
     }
   },
-  "description": "A trajectory-compiled proposal (HLD §6.6). Svatah schemaVersion 1.0.0.",
+  "description": "A trajectory-compiled proposal (HLD §6.6). Yam schemaVersion 1.0.0.",
   "title": "proposal",
-  "x-svatah-schema-version": "1.0.0"
+  "x-yam-schema-version": "1.0.0"
 }

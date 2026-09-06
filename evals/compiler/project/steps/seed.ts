@@ -1,5 +1,5 @@
 /** The second Tier 0 step the golden set uses (g-151). */
-import { defineStep } from "@svatah/steps";
+import { defineStep } from "@svatah/yam-steps";
 
 export const seedDatabase = defineStep(
   "Seed the database with {fixture:string}",

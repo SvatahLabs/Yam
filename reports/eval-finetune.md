@@ -1,11 +1,11 @@
 # Tier 2 fine-tune — base versus tuned
 
 > **Withdrawn from 0.1.0 (T8.4, Draft 2.9).** ADR-4's Tier 2 fine-tune target is
-> **not met**, the tuned adapter is **not used**, and no Svatah release depends on
-> one. `evals/compiler/project/svatah.config.yaml` names the base model, and every
+> **not met**, the tuned adapter is **not used**, and no Yam release depends on
+> one. `evals/compiler/project/yam.config.yaml` names the base model, and every
 > published compiler number is the base model's. Draft 2.9 makes a Tier 2 corpus the
 > precondition for another attempt: `evals/compiler/refused.jsonl`, read by
-> `svatah eval finetune corpus`.
+> `yam eval finetune corpus`.
 
 Run at 2026-09-05T04:59:08.704Z
 
@@ -14,7 +14,7 @@ Run at 2026-09-05T04:59:08.704Z
 | tier 2 | 86.8 % | 13.2 % | **-73.7** |
 | tier 1 | 100.0 % | 100.0 % | 0.0 |
 
-Base: `qwen2.5:3b` (served as `ollama:qwen2.5:3b`) · Tuned: `qwen2-5-3b-svatah-q4` (served as `ollama:qwen2-5-3b-svatah-q4`)
+Base: `qwen2.5:3b` (served as `ollama:qwen2.5:3b`) · Tuned: `qwen2-5-3b-yam-q4` (served as `ollama:qwen2-5-3b-yam-q4`)
 Adapter digest: `f90d4e432be6bdc9afe7ec6af3b436107d2e3603806629b10fd880fb8539b98b`
 
 | | |
@@ -49,6 +49,6 @@ grammar *accepts* teaches it the one job it never has to do, and the measurement
 how much that costs.
 
 ```
-svatah eval finetune corpus     # the three sources and what each contributes
-svatah eval finetune export     # writes evals/compiler/finetune/pairs.jsonl
+yam eval finetune corpus     # the three sources and what each contributes
+yam eval finetune export     # writes evals/compiler/finetune/pairs.jsonl
 ```

@@ -1,7 +1,7 @@
 /**
  * Writes `packages/spec/actions.yaml` from the vocabulary (T2.2).
  *
- * Runs after tsup as part of `pnpm --filter @svatah/spec build`, so it consumes
+ * Runs after tsup as part of `pnpm --filter @svatah/yam-spec build`, so it consumes
  * the package's own built entry point and needs no TypeScript loader.
  * `test/vocabulary.test.ts` fails if the committed file differs from what this
  * script would write.

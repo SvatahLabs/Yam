@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/adapter-playwright",
+  "name": "@svatah/yam-adapter-playwright",
   "version": "0.1.0",
   "description": "Default web adapter: AgentSurface on Playwright",
   "license": "Apache-2.0",
@@ -27,13 +27,13 @@
     "test:browsers": "playwright test --project=chromium --project=firefox --project=webkit"
   },
   "dependencies": {
-    "@svatah/surface": "workspace:*",
-    "@svatah/schema": "workspace:*",
+    "@svatah/yam-surface": "workspace:*",
+    "@svatah/yam-schema": "workspace:*",
     "playwright": "catalog:"
   },
   "devDependencies": {
     "@playwright/test": "catalog:",
-    "@svatah/conformance": "workspace:*",
+    "@svatah/yam-conformance": "workspace:*",
     "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",

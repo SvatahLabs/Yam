@@ -1,7 +1,7 @@
 /**
  * Writes the published JSON Schemas to `packages/schema/json/` (T0.3, REQ-STD-1).
  *
- * Runs after tsup as part of `pnpm --filter @svatah/schema build`, so it consumes
+ * Runs after tsup as part of `pnpm --filter @svatah/yam-schema build`, so it consumes
  * the package's own built entry point and needs no TypeScript loader.
  * `test/schema-drift.test.ts` fails if the committed files differ from what this
  * script would write.

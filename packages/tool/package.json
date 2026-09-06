@@ -1,5 +1,5 @@
 {
-  "name": "@svatah/tool",
+  "name": "@svatah/yam-tool",
   "version": "0.1.0",
   "description": "MCP tool server exposing stories as deterministic tools",
   "license": "Apache-2.0",
@@ -26,8 +26,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@svatah/workflow": "workspace:*",
-    "@svatah/schema": "workspace:*"
+    "@svatah/yam-workflow": "workspace:*",
+    "@svatah/yam-schema": "workspace:*"
   },
   "devDependencies": {
     "tsup": "catalog:",

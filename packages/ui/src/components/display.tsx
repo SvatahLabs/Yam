@@ -15,7 +15,7 @@
  * the rule is in the component rather than in a review comment.
  */
 import * as Tabs from "@radix-ui/react-tabs";
-import { STATUS, type StatusTone } from "@svatah/ui-tokens";
+import { STATUS, type StatusTone } from "@svatah/yam-ui-tokens";
 import type { ReactNode } from "react";
 import { requireNamed, type Named } from "../named.js";
 

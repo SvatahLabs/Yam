@@ -82,7 +82,7 @@ for (const name of MODULE_A) {
  * appears", and it is what makes an install with nothing published possible.
  */
 const project = scaffold({
-  prefix: "svatah-packed-",
+  prefix: "yam-packed-",
   dependencies: Object.fromEntries(MODULE_A.map((name) => [name, `file:${tarballs.get(name)}`])),
   overrides: Object.fromEntries([...tarballs].map(([name, file]) => [name, `file:${file}`])),
 });

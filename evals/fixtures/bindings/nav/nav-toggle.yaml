@@ -39,7 +39,7 @@ entries:
           - "Dashboard Book a slot Widgets Docs"
           - "Deterministic automation, once described Describe a behaviour, record the bindings, replay it forever. Sign in Read the docs"
         before:
-          - "Svatah Sample"
+          - "Yam Sample"
       rolePath:
         - "navigation"
       tag: "button"

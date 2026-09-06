@@ -8,8 +8,8 @@
  *
  * Refs: REQ-ADP-1, REQ-RUN-10, LLD §7.1.
  */
-import { SURFACE_ACTIONS, type SurfaceAction } from "@svatah/schema";
-import { LocateError, ScriptError, SessionError } from "@svatah/surface";
+import { SURFACE_ACTIONS, type SurfaceAction } from "@svatah/yam-schema";
+import { LocateError, ScriptError, SessionError } from "@svatah/yam-surface";
 import { expect, MECHANISMS, refByTestId, test } from "./fixtures.js";
 
 /**
@@ -263,7 +263,7 @@ for (const mechanism of MECHANISMS) {
      * `Resize the window to <w> by <h>` (pattern 33, T12.7, LLD §13.9).
      *
      * Three of the parity gate's one-sided checks were toolbar rules measured
-     * at several widths, and the reason Svatah could not reach them was that a
+     * at several widths, and the reason Yam could not reach them was that a
      * flow could not change the width. Asserted through the page's own view of
      * itself rather than through what was asked for: a viewport that the
      * browser rounded or refused is a resize that did not happen.

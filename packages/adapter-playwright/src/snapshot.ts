@@ -13,7 +13,7 @@
  *                  order and registers the elements in an in-page array, so a
  *                  ref resolves without any Playwright internal.
  *
- * `SVATAH_PW_SNAPSHOT=own|playwright|auto` picks. `auto`, the default, uses the
+ * `YAM_PW_SNAPSHOT=own|playwright|auto` picks. `auto`, the default, uses the
  * Playwright mechanism when the internal call answers and falls back to `own`
  * when it does not — which is what will happen by itself if Playwright removes
  * it. Both paths produce the same `Snapshot` shape and both are exercised by the
@@ -26,8 +26,8 @@
  * the rest of the adapter uses.
  */
 import type { ElementHandle, Frame } from "playwright";
-import type { Ref, Snapshot, SnapshotNode } from "@svatah/schema";
-import { buildSnapshot, isInteractiveRole, structuralHash } from "@svatah/surface";
+import type { Ref, Snapshot, SnapshotNode } from "@svatah/yam-schema";
+import { buildSnapshot, isInteractiveRole, structuralHash } from "@svatah/yam-surface";
 import { walkDocument, type RawNode } from "./page-script.js";
 
 export type SnapshotMechanism = "playwright" | "own";
@@ -39,7 +39,7 @@ export interface SnapshotOptions {
 }
 
 /** The in-page array `walkDocument` fills; see `page-script.ts`. */
-export const REGISTRY = "__svatahRefs__";
+export const REGISTRY = "__yamRefs__";
 
 /** Default cap on nodes; a larger page is truncated in document order. */
 export const DEFAULT_MAX_NODES = 2000;
@@ -104,7 +104,7 @@ export async function playwrightMechanismAvailable(frame: Frame): Promise<boolea
   }
 }
 
-/** Resolve `SVATAH_PW_SNAPSHOT` into a mechanism, probing the frame for `auto`. */
+/** Resolve `YAM_PW_SNAPSHOT` into a mechanism, probing the frame for `auto`. */
 export async function chooseMechanism(
   frame: Frame,
   requested: string | undefined,

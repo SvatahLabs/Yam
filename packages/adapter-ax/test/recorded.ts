@@ -4,7 +4,7 @@
  * ## Where these came from, exactly
  *
  * `node scripts/record-desktop-tree.mjs --shape ax --screen <name>` launches the real ADE with
- * `SVATAH_A11Y=1`, opens `evals/fixtures` **through the ADE's own Recent-project
+ * `YAM_A11Y=1`, opens `evals/fixtures` **through the ADE's own Recent-project
  * button**, clicks the screen's tab, and reads Chromium's accessibility tree
  * over the DevTools protocol — roles, names, values, DOM ids, boxes — mapping it
  * into the `AxNode` shape this adapter consumes.
@@ -178,8 +178,8 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
         options.session ?? {
           usable: true,
           state: "usable",
-          owners: ["Svatah ADE"],
-          detail: "1 application(s) own a window: Svatah ADE",
+          owners: ["Yam ADE"],
+          detail: "1 application(s) own a window: Yam ADE",
           advice: "This session has a WindowServer and applications can show windows.",
         }
       );

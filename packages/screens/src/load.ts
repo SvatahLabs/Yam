@@ -11,7 +11,7 @@
  * 2. **The screen rule is visible.** Every state carries `sources`: the
  *    endpoints it was built from, in call order (§13.6's "every screen renders a
  *    service response or a project file and nothing the CLI cannot produce").
- *    `svatah ui --json` prints them, so an agent reading the model can see where
+ *    `yam ui --json` prints them, so an agent reading the model can see where
  *    each number came from.
  */
 import type { ScreenStateBase } from "./types.js";

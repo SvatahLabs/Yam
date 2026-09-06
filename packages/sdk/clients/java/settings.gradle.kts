@@ -1,1 +1,1 @@
-rootProject.name = "svatah-sdk"
+rootProject.name = "svatah-yam"

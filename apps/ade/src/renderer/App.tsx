@@ -9,14 +9,14 @@
  * Phase 9 rebuilt the shell and two of the twelve screens and left the other ten
  * behind a **Legacy** rail item — the Phase 3–5 tabs, with their own stylesheet
  * and their own idea of a table. T10.3 deleted them: all twelve screens are
- * `@svatah/screens` rendered by `shell/`, and there is nowhere else in this
+ * `@svatah/yam-screens` rendered by `shell/`, and there is nowhere else in this
  * application for a screen to be.
  *
  * ## Every interactive control has a name and an id
  *
  * REQ-ADE-6 and LLD §13.7: the ADE is the desktop conformance target, and a
- * Svatah flow against it has to be able to say "the Run button" and mean
- * something. That is enforced by `@svatah/ui`, whose components throw in
+ * Yam flow against it has to be able to say "the Run button" and mean
+ * something. That is enforced by `@svatah/yam-ui`, whose components throw in
  * development without a visible label and an id in the `automationId` form, and
  * checked by the desktop suite's snapshot case and by
  * `apps/ade/test/shell.spec.ts`.
@@ -39,7 +39,7 @@ export function App(): React.JSX.Element {
       .catch(() => undefined);
     const offLog = bridge().onServiceLog((line) => setLog((lines) => [...lines.slice(-40), line]));
     /*
-     * A project the main process opened from `SVATAH_ADE_PROJECT` (T8.1).
+     * A project the main process opened from `YAM_ADE_PROJECT` (T8.1).
      *
      * The same two outcomes the Recent list has — the window opens on the Flows
      * screen, or the alert does — for a launch nobody clicked. §13.6: "the

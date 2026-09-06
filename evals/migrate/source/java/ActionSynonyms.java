@@ -1,4 +1,4 @@
-package com.svatah.automator.mappers;
+package com.yam.automator.mappers;
 
 /**
  * Created by AtulSharma on 05/11/18

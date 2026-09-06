@@ -1,7 +1,7 @@
 # The same flow, the same application, the other adapter (T11.2, LLD §13.9).
 #
 # > The Playwright adapter attaches to an existing Chromium when
-# > `SVATAH_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi adapter
+# > `YAM_CDP_URL` or `app.attach.cdpUrl` is set, exactly as the BiDi adapter
 # > attaches, so a flow can drive the ADE's renderer.
 #
 # This is the second side of the parity gate for every desktop check: the AX
@@ -9,7 +9,7 @@
 # DOM that tree is *serialised from*. Two adapters, one application, the same
 # sentences — and a disagreement between them is a finding rather than a flake.
 #
-# The URL is left to `SVATAH_CDP_URL` because the port is the launcher's: the
+# The URL is left to `YAM_CDP_URL` because the port is the launcher's: the
 # ADE is started with `--remote-debugging-port` by whoever is driving, and
 # writing a port here would be a configuration that is wrong for everybody but
 # the person who wrote it.
@@ -18,12 +18,12 @@
 # launched its own ADE would be reading a different application from the one the
 # AX side read — which is the one thing a parity gate must not do.
 schemaVersion: "1.0.0"
-project: "svatah-self-cdp"
+project: "yam-self-cdp"
 environment: test
 adapter: playwright
 
 app:
-  # `SVATAH_CDP_URL` overrides this, and normally does.
+  # `YAM_CDP_URL` overrides this, and normally does.
   attach:
     cdpUrl: "http://127.0.0.1:9464"
 
@@ -47,7 +47,7 @@ api: { dir: ../api }
 run:
   workers: 1
   headless: true
-  # The desktop half's patience, for the same reason (see ../svatah.config.yaml).
+  # The desktop half's patience, for the same reason (see ../yam.config.yaml).
   stepTimeoutMs: 45000
   candidateTimeoutMs: 15000
   screenshots: onFailure

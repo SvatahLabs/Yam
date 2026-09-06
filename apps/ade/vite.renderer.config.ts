@@ -15,7 +15,7 @@ export default defineConfig({
     /*
      * One React in the window (T9.4).
      *
-     * `@svatah/ui` declares React as a peer dependency *and* a devDependency, so
+     * `@svatah/yam-ui` declares React as a peer dependency *and* a devDependency, so
      * pnpm gives it its own copy under `packages/ui/node_modules/react` — and
      * Vite, resolving through the workspace link, bundled that one beside the
      * ADE's. Two Reacts share no dispatcher, so the first hook in a design-system

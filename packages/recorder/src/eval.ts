@@ -10,7 +10,7 @@
  *
  * ## The ground-truth key, and why the surface cannot see it
  *
- * `apps/sample-web` stamps every interactive element with `data-svatah-eval`, a
+ * `apps/sample-web` stamps every interactive element with `data-yam-eval`, a
  * key that is identical across all twenty variants, and
  * `bindings.ignoreAttributes` makes the surface blind to it — the eval reads it
  * with a page script, going around the surface rather than through it (LLD §16).
@@ -28,8 +28,8 @@
  * is the failure that costs the most in production: an automation that clicks the
  * closest-looking control, confidently, every night.
  */
-import type { Gateway } from "@svatah/gateway";
-import type { AgentSurface } from "@svatah/surface";
+import type { Gateway } from "@svatah/yam-gateway";
+import type { AgentSurface } from "@svatah/yam-surface";
 import { ground, type GroundOptions } from "./ground.js";
 
 export interface GroundingCase {

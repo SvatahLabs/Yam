@@ -16,13 +16,13 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
-import { createService, type RunningService, type ServiceEvent } from "@svatah/service";
+import { createService, type RunningService, type ServiceEvent } from "@svatah/yam-service";
 import { compileProject, loadProject, newRunId, runProject } from "../src/index.js";
 
 /**
  * The CLI's own functions, handed to the service (LLD §13.5).
  *
- * This is the wiring `svatah serve` does, written out: the service is given four
+ * This is the wiring `yam serve` does, written out: the service is given four
  * functions and imports nothing that could implement them itself.
  */
 const api = { loadProject, compileProject, runProject, newRunId } as never;
@@ -43,7 +43,7 @@ let service: RunningService;
  * story built from the same bindings.
  */
 function scaffold(runsDir: string): string {
-  const dir = mkdtempSync(join(tmpdir(), "svatah-service-project-"));
+  const dir = mkdtempSync(join(tmpdir(), "yam-service-project-"));
   cpSync(join(FIXTURES, "bindings"), join(dir, "bindings"), { recursive: true });
   mkdirSync(join(dir, "flows"), { recursive: true });
 
@@ -60,7 +60,7 @@ test: Sign in
     "utf8",
   );
   writeFileSync(
-    join(dir, "svatah.config.yaml"),
+    join(dir, "yam.config.yaml"),
     `schemaVersion: "1.0.0"
 project: "service-smoke"
 environment: test
@@ -226,7 +226,7 @@ describe("the service and the CLI run the same thing (LLD §13.5)", () => {
 /*
  * The 400 against a real project (P2-F4, Draft 2.4, LLD §13.5).
  *
- * `@svatah/service`'s own contract tests cover the rule with a fake project.
+ * `@svatah/yam-service`'s own contract tests cover the rule with a fake project.
  * This is the rule meeting a real one: a real flow file, read by the real
  * `loadProject`, whose signature really came out of the spec reader — which is
  * where "the stories the run invokes directly" stops being a phrase and starts

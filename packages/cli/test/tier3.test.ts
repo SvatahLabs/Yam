@@ -5,15 +5,15 @@
  * model's accuracy and nothing here claims to. What it does check is everything
  * that is true of a Tier 3 step whichever model produced it: that it is only
  * asked about what Tier 2 declined, that its provenance is mandatory and carries
- * the prompt version, and that `svatah lint` reports it.
+ * the prompt version, and that `yam lint` reports it.
  *
  * The real-model run is blocked and the command is recorded in
  * `docs/spec/progress/phase-4.md`.
  */
 import { afterEach, describe, expect, it } from "vitest";
-import { clearTiers, compileWithModelTiers, lintPlan, registerTier } from "@svatah/compiler";
-import { fakeGateway } from "@svatah/gateway";
-import { readProject } from "@svatah/spec";
+import { clearTiers, compileWithModelTiers, lintPlan, registerTier } from "@svatah/yam-compiler";
+import { fakeGateway } from "@svatah/yam-gateway";
+import { readProject } from "@svatah/yam-spec";
 import { tier2 } from "../src/tiers/tier2.js";
 import { tier3, TIER3_MAX_CONFIDENCE, TIER3_PROMPT_VERSION } from "../src/tiers/tier3.js";
 

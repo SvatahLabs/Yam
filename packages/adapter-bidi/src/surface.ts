@@ -39,9 +39,9 @@ import type {
   Snapshot,
   SurfaceAction,
   SurfaceKind,
-} from "@svatah/schema";
-import { DEFAULT_IGNORE_ATTRIBUTES } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+} from "@svatah/yam-schema";
+import { DEFAULT_IGNORE_ATTRIBUTES } from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 import {
   ActionabilityError,
   buildSnapshot,
@@ -51,7 +51,7 @@ import {
   SessionError,
   structuralHash,
   type SnapshotNode,
-} from "@svatah/surface";
+} from "@svatah/yam-surface";
 import { BidiClient } from "./client.js";
 import { openEndpoint, type BidiEndpoint, type LaunchOptions } from "./launch.js";
 import { BidiSession, fromRemoteValue, sleep, toLocalValue } from "./session.js";
@@ -143,12 +143,12 @@ export class BidiSurface implements AgentSurface {
         ? "attached to a driver-hosted session"
         : "attached";
 
-    const trace = process.env["SVATAH_BIDI_TRACE"] === "1";
+    const trace = process.env["YAM_BIDI_TRACE"] === "1";
     this.client = await BidiClient.connect(endpoint.url, {
       commandTimeoutMs: Math.max(30_000, (this.options.timeoutMs ?? 10_000) * 3),
       ...(trace
         ? {
-            // `SVATAH_BIDI_TRACE=1` exists to be read on a terminal, so it
+            // `YAM_BIDI_TRACE=1` exists to be read on a terminal, so it
             // writes to stderr rather than through a logger nothing here has.
             onTraffic: (direction, message) =>
               console.error(`bidi ${direction} ${JSON.stringify(message).slice(0, 400)}`),
@@ -906,7 +906,7 @@ export class BidiSurface implements AgentSurface {
     await this.live().callFunction(
       ((rects: Array<[number, number, number, number]>) => {
         const layer = document.createElement("div");
-        layer.id = "__svatah_mask__";
+        layer.id = "__yam_mask__";
         layer.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:2147483647";
         for (const [x, y, w, h] of rects) {
           const box = document.createElement("div");
@@ -922,7 +922,7 @@ export class BidiSurface implements AgentSurface {
 
   private async clearMasks(): Promise<void> {
     await this.live()
-      .evaluate("document.getElementById('__svatah_mask__')?.remove()")
+      .evaluate("document.getElementById('__yam_mask__')?.remove()")
       .catch(() => undefined);
   }
 

@@ -1,5 +1,5 @@
 {
-  "$id": "https://svatah.dev/schema/1.0.0/fingerprint.schema.json",
+  "$id": "https://yam.svatah.com/schema/1.0.0/fingerprint.schema.json",
   "$ref": "#/definitions/fingerprint",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
@@ -86,7 +86,7 @@
       "type": "object"
     }
   },
-  "description": "A structural fingerprint of an element (LLD §3.3). Svatah schemaVersion 1.0.0.",
+  "description": "A structural fingerprint of an element (LLD §3.3). Yam schemaVersion 1.0.0.",
   "title": "fingerprint",
-  "x-svatah-schema-version": "1.0.0"
+  "x-yam-schema-version": "1.0.0"
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** The `svatah-bindings` executable. */
+/** The `yam-bindings` executable. */
 import { main } from "./cli.js";
 
 const code = await main(process.argv.slice(2), {

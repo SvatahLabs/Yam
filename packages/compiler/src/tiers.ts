@@ -5,14 +5,14 @@
  *
  * | Tier | What it is | When it arrives |
  * |---|---|---|
- * | 0 | Custom typed steps (`@svatah/steps`) | T2.3 |
+ * | 0 | Custom typed steps (`@svatah/yam-steps`) | T2.3 |
  * | 1 | The controlled grammar | T2.4 |
  * | 2 | A local 1.7B–4B instruct model | Phase 4 |
  * | 3 | A frontier model, for Tier 2's residue | Phase 4 |
  *
  * Tiers 2 and 3 are *plugins*, registered by the CLI when a model is configured.
  * The compiler declares the interface and defaults to nothing, which is what
- * keeps `compile` offline by default (REQ-NFR-3) and keeps `@svatah/compiler`
+ * keeps `compile` offline by default (REQ-NFR-3) and keeps `@svatah/yam-compiler`
  * free of a dependency on the gateway.
  *
  * ## Why Tier 0 goes first, and why that needs a rule
@@ -24,8 +24,8 @@
  * even after Tier 0 has claimed a sentence: it has to know whether there was a
  * second claimant.
  */
-import type { Provenance } from "@svatah/schema";
-import type { Diagnostic } from "@svatah/spec";
+import type { Provenance } from "@svatah/yam-schema";
+import type { Diagnostic } from "@svatah/yam-spec";
 import type { RawStep } from "./raw.js";
 
 /** Where a sentence the grammar refused was written. */

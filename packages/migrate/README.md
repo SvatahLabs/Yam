@@ -1,4 +1,4 @@
-# @svatah/migrate
+# @svatah/yam-migrate
 
 v1/v2 to v3 migration and prototype database import.
 

@@ -12,8 +12,8 @@
  * falls through to the locator candidates behind it.
  */
 import type { Frame, Locator } from "playwright";
-import type { Candidate } from "@svatah/schema";
-import { LocateError } from "@svatah/surface";
+import type { Candidate } from "@svatah/yam-schema";
+import { LocateError } from "@svatah/yam-surface";
 
 /** Candidate kinds this adapter cannot honour, and which adapter owns each. */
 const FOREIGN_KINDS: Record<string, string> = {

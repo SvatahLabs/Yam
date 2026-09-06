@@ -16,25 +16,25 @@
         <tr><td class="mono">date</td><td class="mono">2026-09-03</td><td><span class="pill neutral">string</span></td><td>2 stories</td></tr>
         <tr><td class="mono">reportPath</td><td class="mono">reports/summary.pdf</td><td><span class="pill neutral">string</span></td><td>1 story</td></tr>
         <tr><td class="mono">user.email</td><td class="mono">connected2atul@gmail.com</td><td><span class="pill neutral">string</span></td><td>3 stories</td></tr>
-        <tr class="sel"><td class="mono">user.password</td><td class="mono" style="color:var(--muted)">reads <span class="ref">${SVATAH_SAMPLE_PASSWORD}</span></td><td><span class="pill pass">secret · set</span></td><td>3 stories</td></tr>
-        <tr><td class="mono">card.number</td><td class="mono" style="color:var(--muted)">reads <span class="ref">${SVATAH_SAMPLE_CARD_NUMBER}</span></td><td><span class="pill warn">secret · unset</span></td><td>1 story</td></tr>
-        <tr><td class="mono">card.cvv</td><td class="mono" style="color:var(--muted)">reads <span class="ref">${SVATAH_SAMPLE_CARD_CVV}</span></td><td><span class="pill pass">secret · set</span></td><td>1 story</td></tr>
+        <tr class="sel"><td class="mono">user.password</td><td class="mono" style="color:var(--muted)">reads <span class="ref">${YAM_SAMPLE_PASSWORD}</span></td><td><span class="pill pass">secret · set</span></td><td>3 stories</td></tr>
+        <tr><td class="mono">card.number</td><td class="mono" style="color:var(--muted)">reads <span class="ref">${YAM_SAMPLE_CARD_NUMBER}</span></td><td><span class="pill warn">secret · unset</span></td><td>1 story</td></tr>
+        <tr><td class="mono">card.cvv</td><td class="mono" style="color:var(--muted)">reads <span class="ref">${YAM_SAMPLE_CARD_CVV}</span></td><td><span class="pill pass">secret · set</span></td><td>1 story</td></tr>
       </table>
       <div class="panel-h"><span>data.yaml</span><span class="spacer"></span><span class="chip">YAML valid</span><span class="chip mono">21 lines</span></div>
       <div class="code" style="flex:none">
         <div class="ln"><span class="n">7</span><span class="g"></span><span><span class="head">user:</span></span><span></span></div>
         <div class="ln"><span class="n">8</span><span class="g"></span><span>  <span class="kw">email</span>: <span class="str">"connected2atul@gmail.com"</span></span><span></span></div>
-        <div class="ln cur"><span class="n">9</span><span class="g"></span><span>  <span class="kw">password</span>: <span class="str">"${SVATAH_SAMPLE_PASSWORD}"</span></span><span class="warn">read at run time · never stored</span></div>
+        <div class="ln cur"><span class="n">9</span><span class="g"></span><span>  <span class="kw">password</span>: <span class="str">"${YAM_SAMPLE_PASSWORD}"</span></span><span class="warn">read at run time · never stored</span></div>
         <div class="ln"><span class="n">10</span><span class="g"></span><span></span><span></span></div>
         <div class="ln"><span class="n">11</span><span class="g"></span><span><span class="head">card:</span></span><span></span></div>
-        <div class="ln"><span class="n">12</span><span class="g"></span><span>  <span class="kw">number</span>: <span class="str">"${SVATAH_SAMPLE_CARD_NUMBER}"</span></span><span class="warn">W_SECRET_UNSET</span></div>
+        <div class="ln"><span class="n">12</span><span class="g"></span><span>  <span class="kw">number</span>: <span class="str">"${YAM_SAMPLE_CARD_NUMBER}"</span></span><span class="warn">W_SECRET_UNSET</span></div>
       </div>
     </div>
   </div>
 </section>
 <aside class="inspector" aria-label="Inspector">
   <h2 class="mono">user.password</h2>
-  <div class="kv"><span class="k">Kind</span><span class="v">secret (REQ-LANG-9)</span><span class="k">Reads</span><span class="v mono">${SVATAH_SAMPLE_PASSWORD}</span><span class="k">On this machine</span><span class="v">set</span><span class="k">Written to</span><span class="v">nothing</span></div>
+  <div class="kv"><span class="k">Kind</span><span class="v">secret (REQ-LANG-9)</span><span class="k">Reads</span><span class="v mono">${YAM_SAMPLE_PASSWORD}</span><span class="k">On this machine</span><span class="v">set</span><span class="k">Written to</span><span class="v">nothing</span></div>
   <div class="card"><p>The value is never shown, never saved to <span class="mono">data.yaml</span>, and never reaches a prompt, the audit, a result, a trace or a screenshot (REQ-NFR-6). What is edited here is the <i>name</i> of the variable it is read from.</p></div>
   <h3>Read by</h3>
   <!--

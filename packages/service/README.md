@@ -1,11 +1,11 @@
-# @svatah/service
+# @svatah/yam-service
 
 The local HTTP and event-stream service (REQ-ADE-1, LLD §13.5) — the only
-integration point for the Svatah ADE and for any other client.
+integration point for the Yam ADE and for any other client.
 
 ```bash
-svatah serve --project . --port 0
-# svatah serve listening url=http://127.0.0.1:51234 token=…
+yam serve --project . --port 0
+# yam serve listening url=http://127.0.0.1:51234 token=…
 ```
 
 It binds to `127.0.0.1` and every route but `/health` and `/openapi.json` needs a
@@ -15,9 +15,9 @@ process that needed it, so there is no file.
 
 ## No logic lives here
 
-Every handler reads its arguments, calls one function from `@svatah/cli`, and
+Every handler reads its arguments, calls one function from `@svatah/yam`, and
 shapes the answer. LLD §1's import boundary is what enforces it — this package
-may import `@svatah/cli` and `@svatah/schema` and nothing else — and
+may import `@svatah/yam` and `@svatah/yam-schema` and nothing else — and
 `test/run.test.ts` is what proves it: it runs the same project through the
 service and through the CLI and diffs `results.jsonl`. If a handler ever grew
 logic of its own, the ADE would start showing something the CLI does not agree

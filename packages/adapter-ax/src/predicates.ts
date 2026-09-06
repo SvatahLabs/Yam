@@ -10,8 +10,8 @@
  * failed assertion, it is a question with no meaning here — and reporting it as
  * a failure would send whoever reads the run looking at the application.
  */
-import type { CheckResult, CheckSubject, Predicate, Ref, ValueRef } from "@svatah/schema";
-import { CheckError, DataError, NavigationError } from "@svatah/surface";
+import type { CheckResult, CheckSubject, Predicate, Ref, ValueRef } from "@svatah/yam-schema";
+import { CheckError, DataError, NavigationError } from "@svatah/yam-surface";
 import type { AxSnapshotNode } from "./tree.js";
 
 /** The literal a `ValueRef` names; an unresolved one is a caller mistake (LLD §8.2). */

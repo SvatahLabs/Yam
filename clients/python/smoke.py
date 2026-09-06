@@ -10,7 +10,7 @@ Three things, in that order, because they are the three shapes the service has:
 a read, a write that starts work, and a stream that reports it. A client that
 could do the first and not the third would pass a test that never watched a run.
 
-The service is `svatah serve` and is started by
+The service is `yam serve` and is started by
 `scripts/smoke-clients.mjs`, which passes its url and token in the environment;
 this script does not start anything, so it is also what a person runs by hand
 against a service they already have open.
@@ -27,9 +27,9 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from svatah_sdk import ServiceError, connect  # noqa: E402
+from svatah_yam import ServiceError, connect  # noqa: E402
 
-TIMEOUT_SECONDS = float(os.environ.get("SVATAH_SMOKE_TIMEOUT", "180"))
+TIMEOUT_SECONDS = float(os.environ.get("YAM_SMOKE_TIMEOUT", "180"))
 
 
 def main() -> int:
@@ -69,7 +69,7 @@ def main() -> int:
     time.sleep(0.5)
 
     # 3. `POST /run` — a write that starts work and reports on the stream.
-    story = os.environ.get("SVATAH_SMOKE_STORY")
+    story = os.environ.get("YAM_SMOKE_STORY")
     body = {"stories": [story]} if story else {}
     try:
         started = client.post_run(body)

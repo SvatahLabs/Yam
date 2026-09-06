@@ -7,7 +7,7 @@
  *
  * This is that port, and it is a *copy* rather than an import for the reason the
  * adapter exists at all. REQ-ADP-4 asks BiDi to prove the surface boundary; an
- * adapter that reached into `@svatah/adapter-playwright` for the thing it is
+ * adapter that reached into `@svatah/yam-adapter-playwright` for the thing it is
  * meant to be an independent implementation of would prove the opposite, and
  * would put Playwright in the dependency tree of the adapter whose whole claim is
  * that it does not need one.
@@ -73,7 +73,7 @@ export interface RawDescription {
  * The in-page array `walkDocument` fills. Reset by every walk and lost on
  * navigation, which is what "stable within the snapshot" means (LLD §2.2).
  */
-export const REGISTRY = "__svatahRefs__";
+export const REGISTRY = "__yamRefs__";
 
 /**
  * The in-page array `locate()` fills, for refs minted from a stored candidate.
@@ -84,7 +84,7 @@ export const REGISTRY = "__svatahRefs__";
  * that, and the bug it produces is an action on the wrong element rather than an
  * error. Handles live until the session navigates.
  */
-export const HANDLES = "__svatahHandles__";
+export const HANDLES = "__yamHandles__";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * walkDocument — evaluated in the page.

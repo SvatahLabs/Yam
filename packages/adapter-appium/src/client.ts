@@ -14,8 +14,8 @@
  * protocol names it, so a reader can follow a call from here into the Appium
  * documentation without a translation step.
  */
-import type { SessionError as SessionErrorType } from "@svatah/surface";
-import { SessionError } from "@svatah/surface";
+import type { SessionError as SessionErrorType } from "@svatah/yam-surface";
+import { SessionError } from "@svatah/yam-surface";
 
 /** An element the driver found: the opaque id the protocol hands back. */
 export type ElementId = string;
@@ -69,10 +69,10 @@ export interface AppiumConnectOptions {
   readonly connectionTimeoutMs?: number;
 }
 
-/** `SVATAH_APPIUM_URL`: where the Appium server is listening. */
-export const APPIUM_URL_ENV = "SVATAH_APPIUM_URL";
-/** `SVATAH_APPIUM_CAPS`: a JSON object of capabilities, merged over the config's. */
-export const APPIUM_CAPS_ENV = "SVATAH_APPIUM_CAPS";
+/** `YAM_APPIUM_URL`: where the Appium server is listening. */
+export const APPIUM_URL_ENV = "YAM_APPIUM_URL";
+/** `YAM_APPIUM_CAPS`: a JSON object of capabilities, merged over the config's. */
+export const APPIUM_CAPS_ENV = "YAM_APPIUM_CAPS";
 
 export const DEFAULT_APPIUM_URL = "http://127.0.0.1:4723";
 
@@ -91,7 +91,7 @@ export function appiumServerUrl(
  * A device farm, an emulator on a different port, an app under test built by
  * this CI run: all of them are things a project's committed config should not
  * have to name (REQ-NFR-7's portability, and the same argument as
- * `SVATAH_BASE_URL` in LLD §15).
+ * `YAM_BASE_URL` in LLD §15).
  */
 export function capabilitiesFromEnv(env: NodeJS.ProcessEnv = process.env): Record<string, unknown> {
   const raw = env[APPIUM_CAPS_ENV];
@@ -116,7 +116,7 @@ export function capabilitiesFromEnv(env: NodeJS.ProcessEnv = process.env): Recor
  *
  * Imported dynamically so that requiring the package — which the CLI does at
  * start, to register every adapter — does not pull WebdriverIO's tree into every
- * `svatah lint`. It is only loaded when a session is actually opened.
+ * `yam lint`. It is only loaded when a session is actually opened.
  */
 export async function connectWebdriverIo(options: AppiumConnectOptions): Promise<AppiumClient> {
   const url = new URL(appiumServerUrl(options.serverUrl));
@@ -124,7 +124,7 @@ export async function connectWebdriverIo(options: AppiumConnectOptions): Promise
   /*
    * The one shape this needs from WebdriverIO: a function that takes options and
    * gives back a driver. Typed structurally rather than by importing the
-   * package's types, so `@svatah/adapter-appium` compiles whether or not
+   * package's types, so `@svatah/yam-adapter-appium` compiles whether or not
    * WebdriverIO is installed — the real client is loaded only when a session is
    * actually opened.
    */
@@ -135,7 +135,7 @@ export async function connectWebdriverIo(options: AppiumConnectOptions): Promise
   } catch (cause) {
     throw new SessionError(
       "The Appium adapter needs `webdriverio`, which is not installed. " +
-        "Run `pnpm install` in the workspace, or install `@svatah/adapter-appium` " +
+        "Run `pnpm install` in the workspace, or install `@svatah/yam-adapter-appium` " +
         "with its dependencies.",
       { adapter: "appium", cause },
     );
@@ -226,7 +226,7 @@ export function webdriverIoClient(browser: WebdriverIoBrowser): AppiumClient {
 /**
  * The WebdriverIO surface this adapter uses, as a structural type.
  *
- * Written out rather than imported so that `@svatah/adapter-appium` type-checks
+ * Written out rather than imported so that `@svatah/yam-adapter-appium` type-checks
  * and its logic is testable whether or not WebdriverIO is installed — the real
  * client is loaded dynamically at `open()`.
  */

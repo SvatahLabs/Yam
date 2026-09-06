@@ -12,8 +12,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { compile, modelStepSchema } from "@svatah/compiler";
-import { readProject } from "@svatah/spec";
+import { compile, modelStepSchema } from "@svatah/yam-compiler";
+import { readProject } from "@svatah/yam-spec";
 import { fromRoot } from "../src/repo.js";
 
 interface RefusedEntry {
@@ -38,7 +38,7 @@ const normalise = (text: string): string => text.trim().replace(/\s+/g, " ").toL
 /**
  * `asExample`'s conversion, as the export applies it.
  *
- * Not imported: `@svatah/cli` is module (b)'s command line and this tool does
+ * Not imported: `@svatah/yam` is module (b)'s command line and this tool does
  * not depend on it. What is asserted here is that the *stored* step is a valid
  * `Step` shape; the export's own conversion is covered in `packages/cli/test`.
  */

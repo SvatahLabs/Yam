@@ -39,14 +39,14 @@ import {
   siteToolOf,
   synthesise,
   synthesiseSiteTool,
-} from "@svatah/bindings";
-import type { BindingEntry, Candidate, Provenance, Ref, Snapshot } from "@svatah/schema";
-import type { AgentSurface } from "@svatah/surface";
+} from "@svatah/yam-bindings";
+import type { BindingEntry, Candidate, Provenance, Ref, Snapshot } from "@svatah/yam-schema";
+import type { AgentSurface } from "@svatah/yam-surface";
 import {
   GatewayRefusal,
   type Gateway,
   type GatewayImage,
-} from "@svatah/gateway";
+} from "@svatah/yam-gateway";
 import { groundingAnswerSchema, PROMPT_VERSION, question, SYSTEM } from "./prompt.js";
 import { prune } from "./prune.js";
 
@@ -193,7 +193,7 @@ async function whereItIs(
  *
  * A desktop snapshot is a *moment*. A web page's is too, but Playwright's
  * locators wait and a DOM update is a few milliseconds; a desktop application
- * answers a click by doing work — the ADE starts a `svatah serve` — and a
+ * answers a click by doing work — the ADE starts a `yam serve` — and a
  * recorder that grounded the next step against the tree as it was the instant
  * after the click was asking the model about a screen that had not arrived.
  * Measured: "the Flows rail item" grounded `not-found` against a 303-token

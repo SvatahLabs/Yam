@@ -27,10 +27,10 @@ test("calls a story as a tool and gets its outputs and a runId", async () => {
         cwd: ROOT,
         env: {
           ...process.env,
-          SVATAH_BASE_URL: app.origin,
-          SVATAH_SAMPLE_PASSWORD: "qwerty123",
-          SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-          SVATAH_SAMPLE_CARD_CVV: "123",
+          YAM_BASE_URL: app.origin,
+          YAM_SAMPLE_PASSWORD: "qwerty123",
+          YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+          YAM_SAMPLE_CARD_CVV: "123",
         },
       });
       child.stdout.on("data", (chunk) => (out += String(chunk)));

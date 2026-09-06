@@ -19,7 +19,7 @@
  * component whose props changed and whose sheet entry did not would not compile.
  */
 import { useState } from "react";
-import { STATUS_TONES, THEMES, TYPE, type Theme } from "@svatah/ui-tokens";
+import { STATUS_TONES, THEMES, TYPE, type Theme } from "@svatah/yam-ui-tokens";
 import { Button, Chooser, Field, Kbd } from "./components/controls.js";
 import {
   Alert,
@@ -186,9 +186,9 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
 
       <InspectorSection id={`sheet-alerts${suffix}`} title={named("Alerts")}>
         <Alert id={`sheet-alert-fail${suffix}`} tone="fail">
-          The Svatah ADE could not find a Node 22 or newer to run{" "}
-          <span className="sv-mono">svatah serve</span>. It looked in three places: SVATAH_NODE,
-          PATH, resources/svatah/node.
+          The Yam ADE could not find a Node 22 or newer to run{" "}
+          <span className="sv-mono">yam serve</span>. It looked in three places: YAM_NODE,
+          PATH, resources/yam/node.
         </Alert>
         <Alert id={`sheet-alert-warn${suffix}`} tone="abort">
           “the pay button” is bound to <span className="sv-mono">checkout.pay-button</span>, which
@@ -225,7 +225,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
               group: "Actions",
               area: "run",
               key: "⌘↵",
-              cli: "svatah run --flow flows/guards-and-compensation.flow",
+              cli: "yam run --flow flows/guards-and-compensation.flow",
               available: true,
             },
             {
@@ -234,7 +234,7 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
               group: "Actions",
               area: "heal",
               key: "H",
-              cli: "svatah heal --run comp",
+              cli: "yam heal --run comp",
               available: true,
             },
             {
@@ -284,9 +284,9 @@ const WORD: Record<(typeof STATUS_TONES)[number], string> = {
 export function ComponentSheet(): React.JSX.Element {
   return (
     <main className="sv-sheet" aria-labelledby="sheet-heading">
-      <h1 id="sheet-heading">Svatah design system · component sheet</h1>
+      <h1 id="sheet-heading">Yam design system · component sheet</h1>
       <p className="sv-sheet-intro">
-        Every component in <span className="sv-mono">@svatah/ui</span>, in both themes. Every
+        Every component in <span className="sv-mono">@svatah/yam-ui</span>, in both themes. Every
         interactive control here has a visible label that is its accessible name and an id in the{" "}
         <span className="sv-mono">automationId</span> form; every status colour has a word beside
         it. Those two rules are what the desktop adapters and a screen reader both depend on.

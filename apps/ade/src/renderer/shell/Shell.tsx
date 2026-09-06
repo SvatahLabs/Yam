@@ -19,7 +19,7 @@
  * action id. It may not decide what a number means: every value comes from a
  * `ScreenState` the model loaded, and every action is an `Action` from the one
  * registry. A shell that formatted a duration would be a shell that formats it
- * differently from `svatah ui`.
+ * differently from `yam ui`.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -33,8 +33,8 @@ import {
   type ScreenId,
   type ScreenParams,
   type ScreenStateBase,
-} from "@svatah/screens";
-import { Alert, Button, CommandPalette, Kbd, RailItem, type PaletteRow } from "@svatah/ui";
+} from "@svatah/yam-screens";
+import { Alert, Button, CommandPalette, Kbd, RailItem, type PaletteRow } from "@svatah/yam-ui";
 import {
   applyExplorerEvent,
   applyHealEvent,
@@ -52,7 +52,7 @@ import {
   type RunState,
   type RunsState,
   type SettingsState,
-} from "@svatah/screens";
+} from "@svatah/yam-screens";
 import type { ServiceClient } from "../client.js";
 import { a11yVariant } from "../a11y-variant.js";
 import { FlowsInspector, FlowsScreen } from "./Flows.js";
@@ -163,7 +163,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
        * is looking at is dropped, and a screen that is showing folds every event
        * it understands. The model decides what each means — a renderer that had
        * built a decision itself would be a renderer that could disagree with
-       * `svatah ui` about what the recorder chose.
+       * `yam ui` about what the recorder chose.
        */
       setState((before) => {
         if (before === undefined) return before;
@@ -448,7 +448,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
       <header className="sv-topbar">
         <span className="sv-brand">
           <span className="sv-brand-mark" aria-hidden="true" />
-          Svatah
+          Yam
         </span>
         <nav className="sv-crumb" id="topbar-crumb" aria-label="Project">
           {/*
@@ -517,7 +517,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
         ) : state.error !== undefined ? (
           <Alert id="screen-error" tone="fail">
             {state.error} The service is at{" "}
-            <span className="sv-mono">{props.serviceUrl}</span>; `svatah serve --project{" "}
+            <span className="sv-mono">{props.serviceUrl}</span>; `yam serve --project{" "}
             {props.project}` starts one by hand.
           </Alert>
         ) : (

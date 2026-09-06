@@ -6,7 +6,7 @@
  *
  * 1. **The stylesheet has one theme in it.** `ui.css` reads tokens and never a
  *    colour, and there is no `[data-theme="light"]` rule in it: the only place
- *    the light theme exists is `@svatah/ui-tokens`'s second table. A rule that
+ *    the light theme exists is `@svatah/yam-ui-tokens`'s second table. A rule that
  *    said `.sv-btn-primary { background: #b8a1ff }` would work in the dark and
  *    be invisible in the light, and nobody would notice until a screenshot.
  * 2. **The two token tables have the same keys.** A token defined in one theme
@@ -20,7 +20,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { DARK, LIGHT, TOKEN_NAMES, declarations, stylesheet } from "@svatah/ui-tokens";
+import { DARK, LIGHT, TOKEN_NAMES, declarations, stylesheet } from "@svatah/yam-ui-tokens";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const UI_CSS = readFileSync(join(HERE, "..", "ui.css"), "utf8");

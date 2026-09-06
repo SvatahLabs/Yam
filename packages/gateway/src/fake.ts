@@ -18,7 +18,7 @@
  * REQ-AGT-3 taken literally: provenance says what made this, and "a fake did"
  * is a true and useful answer.
  */
-import { provenanceSchema, type Provenance } from "@svatah/schema";
+import { provenanceSchema, type Provenance } from "@svatah/yam-schema";
 import { assertNoSecret, render } from "./render.js";
 import {
   emptyUsage,

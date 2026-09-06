@@ -3,7 +3,7 @@
  * `pnpm eval:healing` — start the sample application, run the healing eval
  * against it, and write the report (T1.8, REQ-HEAL-5, REQ-PKG-4).
  *
- * The eval itself needs no wrapper: `svatah eval healing --base-url <url>` runs
+ * The eval itself needs no wrapper: `yam eval healing --base-url <url>` runs
  * against any deployment of `apps/sample-web`. This exists so a verifier, and the
  * release workflow, have one command.
  *

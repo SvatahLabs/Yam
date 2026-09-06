@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * The `svatah` executable.
+ * The `yam` executable.
  *
  * Everything the command does is in `main`, which takes its argv and its output
  * streams, so the CLI is testable without spawning a process — and so the exit

@@ -45,7 +45,7 @@ const WORDS = [
   "passed",
   "aborted",
   "Click the Book a slot link",
-  "/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-tui-pty-Qz51sP",
+  "/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-tui-pty-Qz51sP",
   "flows/guards-and-compensation.flow",
   "booking.book-now-button",
   "…",

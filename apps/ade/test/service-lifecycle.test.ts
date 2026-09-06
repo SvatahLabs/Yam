@@ -2,10 +2,10 @@
  * T3.6 Validate — "the app opens a fixture project and shows `GET /project`
  * data; killing the app stops the service" (LLD §13.6).
  *
- * The part of that which is the ADE's is the *lifecycle*: spawn `svatah serve`,
+ * The part of that which is the ADE's is the *lifecycle*: spawn `yam serve`,
  * read the handshake, health-check, adopt a service that is already there, and
  * stop the one it started. This drives that directly, against a real
- * `svatah serve` on the real fixture project.
+ * `yam serve` on the real fixture project.
  *
  * Electron never starts, and nothing here needs it: the main process is a Node
  * program, `startOrAdopt` is a Node function, and what a window does with the
@@ -25,7 +25,7 @@ import {
   writeLock,
   type RunningService,
 } from "../src/main/service.js";
-import { resolveNodeRuntime } from "@svatah/service/runtime";
+import { resolveNodeRuntime } from "@svatah/yam-service/runtime";
 import {
   DEFAULT_PREFERENCES,
   normalise,
@@ -62,36 +62,36 @@ afterEach(async () => {
 });
 
 function fresh(): string {
-  userData = mkdtempSync(join(tmpdir(), "svatah-ade-userdata-"));
+  userData = mkdtempSync(join(tmpdir(), "yam-ade-userdata-"));
   return userData;
 }
 
 describe("the handshake (LLD §13.6)", () => {
-  it("reads the one line `svatah serve` prints", () => {
+  it("reads the one line `yam serve` prints", () => {
     expect(
-      parseHandshake("svatah serve listening url=http://127.0.0.1:51234 token=abc123\n"),
+      parseHandshake("yam serve listening url=http://127.0.0.1:51234 token=abc123\n"),
     ).toEqual({ url: "http://127.0.0.1:51234", token: "abc123" });
   });
 
   it("finds it among the service's other output", () => {
     const noisy = [
       "some warning",
-      "svatah serve listening url=http://127.0.0.1:9 token=t",
+      "yam serve listening url=http://127.0.0.1:9 token=t",
       "Serving . on http://127.0.0.1:9",
     ].join("\n");
     expect(parseHandshake(noisy)?.token).toBe("t");
   });
 
   it("is nothing at all until the line is complete", () => {
-    expect(parseHandshake("svatah serve listening url=http://127.0.0.1:9 tok")).toBeUndefined();
+    expect(parseHandshake("yam serve listening url=http://127.0.0.1:9 tok")).toBeUndefined();
     expect(parseHandshake("")).toBeUndefined();
   });
 });
 
 describe("the lock file (LLD §13.6)", () => {
   it("lives in the user-data directory, never in the project", () => {
-    const path = lockPathFor("/home/someone/.config/svatah-ade", "/work/my-project");
-    expect(path.startsWith("/home/someone/.config/svatah-ade")).toBe(true);
+    const path = lockPathFor("/home/someone/.config/yam-ade", "/work/my-project");
+    expect(path.startsWith("/home/someone/.config/yam-ade")).toBe(true);
     // A token in a repository is a token in a pull request (REQ-NFR-6).
     expect(path).not.toContain("/work/my-project");
   });

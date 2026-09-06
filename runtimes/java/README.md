@@ -1,4 +1,4 @@
-# `svatah-runtime-java`
+# `yam-runtime-java`
 
 The Java conformance runtime (REQ-STD-3, [LLD §14](../../docs/spec/lld.md)).
 
@@ -40,13 +40,13 @@ line and the schema path.
 Directly:
 
 ```bash
-java -jar build/libs/svatah-runtime-java-0.1.0-all.jar <project> \
+java -jar build/libs/yam-runtime-java-0.1.0-all.jar <project> \
   --run-id my-run --base-url http://127.0.0.1:4173 \
   --flow flows/simple.flow --input email=a@b.c --input password=…
 ```
 
-It needs a compiled plan at `<project>/.svatah/plan.json`
-(`svatah compile <project> --stable`). It does not compile flows: that is
+It needs a compiled plan at `<project>/.yam/plan.json`
+(`yam compile <project> --stable`). It does not compile flows: that is
 module (b)'s, and a foreign runtime consuming the plan is the point.
 
 ## What is compared

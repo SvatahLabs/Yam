@@ -12,7 +12,7 @@
 import { describe, expect, it } from "vitest";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { TargetRef, ValueRef } from "@svatah/schema";
+import type { TargetRef, ValueRef } from "@svatah/yam-schema";
 import { defineStep, emitCustom, loadSteps, StepRegistry } from "../src/index.js";
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "fixtures");

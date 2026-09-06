@@ -24,7 +24,7 @@ import { startSampleApp } from "sample-web";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
 const BLOCKER = join(ROOT, "scripts", "block-external-network.mjs");
-const OUT = mkdtempSync(join(tmpdir(), "svatah-privacy-"));
+const OUT = mkdtempSync(join(tmpdir(), "yam-privacy-"));
 
 function offline(args, env = {}) {
   return new Promise((done) => {
@@ -33,9 +33,9 @@ function offline(args, env = {}) {
       cwd: ROOT,
       env: {
         ...process.env,
-        SVATAH_SAMPLE_PASSWORD: "qwerty123",
-        SVATAH_SAMPLE_CARD_NUMBER: "5123456789012346",
-        SVATAH_SAMPLE_CARD_CVV: "123",
+        YAM_SAMPLE_PASSWORD: "qwerty123",
+        YAM_SAMPLE_CARD_NUMBER: "5123456789012346",
+        YAM_SAMPLE_CARD_CVV: "123",
         NODE_OPTIONS: [process.env.NODE_OPTIONS, `--import=${BLOCKER}`].filter(Boolean).join(" "),
         ...env,
       },

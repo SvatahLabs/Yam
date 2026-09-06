@@ -3,7 +3,7 @@
 Status: T5.6 · Companion documents: [spec/requirements.md](spec/requirements.md) ·
 [spec/hld.md](spec/hld.md) · [spec/lld.md](spec/lld.md)
 
-A Svatah project compiles to one `plan.json` and one bindings store. What
+A Yam project compiles to one `plan.json` and one bindings store. What
 changes between a test, a workflow and a tool is **who is asking and what they
 get back** — not the plan, not the bindings, and not what a step means
 (REQ-BEH-5).
@@ -13,7 +13,7 @@ get back** — not the plan, not the bindings, and not what a step means
                                    │
      ┌─────────────────────────────┼─────────────────────────────┐
      ▼                             ▼                             ▼
-  svatah run                svatah workflow run           svatah tool serve
+  yam run                yam workflow run           yam tool serve
   a pass/fail oracle        a function: typed             an MCP tool an agent
   and runs/<id>/            inputs → typed outputs        calls; audited
   REQ-BEH-1                 REQ-BEH-2                     REQ-BEH-3
@@ -27,8 +27,8 @@ the same store.
 ## Test (REQ-BEH-1)
 
 ```bash
-svatah run --host playwright        # inside Playwright Test: fixtures, sharding, traces
-svatah run --host none              # the standalone executor, for non-web adapters
+yam run --host playwright        # inside Playwright Test: fixtures, sharding, traces
+yam run --host none              # the standalone executor, for non-web adapters
 ```
 
 An oracle. Expectations pass or fail, and the exit code is the answer: `0`, `1`
@@ -40,7 +40,7 @@ See [`examples/ci/`](../examples/ci/).
 ## Workflow (REQ-BEH-2)
 
 ```bash
-svatah workflow run "Book a slot" --input location=Indiranagar
+yam workflow run "Book a slot" --input location=Indiranagar
 # {"booking":"Slot booked.","place":"Indiranagar"}
 ```
 
@@ -64,7 +64,7 @@ See [`examples/cron/`](../examples/cron/).
 ## Tool (REQ-BEH-3)
 
 ```bash
-svatah tool serve --expose "Book a slot,Cancel booking"
+yam tool serve --expose "Book a slot,Cancel booking"
 ```
 
 An MCP server whose tools *are* the stories. Each tool's `inputSchema` is derived
@@ -89,8 +89,8 @@ See [`examples/mcp-agent/`](../examples/mcp-agent/).
 ## Trajectory compile (REQ-BEH-4)
 
 Not a fourth behavior — the other direction. An agent explores through the raw
-surface (`svatah mcp`, or the ADE's surface explorer), every call carrying what
-it was trying to do, and `svatah trajectory compile` turns the result into a
+surface (`yam mcp`, or the ADE's surface explorer), every call carrying what
+it was trying to do, and `yam trajectory compile` turns the result into a
 **proposal**: a `.flow` draft, a plan fragment and `verified: false` bindings
 under `proposals/<date>/`, for a person to read.
 
@@ -99,7 +99,7 @@ anyone, and a proposal is where it waits.
 
 ## Orchestration is external (REQ-AGT-4, HLD ADR-13)
 
-Svatah has no scheduler, no queue, no dashboard and no human-in-the-loop UI. It
+Yam has no scheduler, no queue, no dashboard and no human-in-the-loop UI. It
 is invoked and it writes files. The examples are CI, cron and an MCP client
 because those are what people already have, and because the boundary is the
 point rather than an omission:

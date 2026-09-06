@@ -7,7 +7,7 @@
  * store's layout is readable from an id and an id is readable from a path. That
  * matters because the whole store is committed and reviewed as files (REQ-REC-9).
  */
-import { DataError } from "@svatah/surface";
+import { DataError } from "@svatah/yam-surface";
 
 /**
  * A segment is lower-case alphanumerics and hyphens: what a target phrase

@@ -1,14 +1,14 @@
-# Svatah verifies Svatah: the ADE, through the desktop adapters (T11.2, T11.4,
+# Yam verifies Yam: the ADE, through the desktop adapters (T11.2, T11.4,
 # REQ-SELF-1, LLD §13.9).
 #
-# > `evals/self/` is a Svatah project: flows over the Playwright adapter against
+# > `evals/self/` is a Yam project: flows over the Playwright adapter against
 # > `apps/sample-web`, over the AX and UIA adapters against the packaged ADE,
 # > over the HTTP adapter against the local service, and over the SDK against
-# > `svatah ui --json`.
+# > `yam ui --json`.
 #
 # This is the *desktop* half's configuration and it is the default, because it
 # is the half that needs `app.launch` and `app.quit` — the others are selected
-# with `--adapter` and their own `app` block by `svatah eval self` (T11.5).
+# with `--adapter` and their own `app` block by `yam eval self` (T11.5).
 #
 # ## Why the bundle and not the executable
 #
@@ -22,31 +22,31 @@
 #
 # This project is *of* this repository — the application it drives is the one
 # this checkout builds — so a path that pointed anywhere else would be a suite
-# about somebody else's ADE. `svatah eval self` resolves them from the project
+# about somebody else's ADE. `yam eval self` resolves them from the project
 # directory.
 schemaVersion: "1.0.0"
-project: "svatah-self"
+project: "yam-self"
 environment: test
 adapter: ax
 
 app:
-  processName: "Svatah ADE"
+  processName: "Yam ADE"
   launch:
-    bundle: "../../apps/ade/out/Svatah ADE-darwin-arm64/Svatah ADE.app"
+    bundle: "../../apps/ade/out/Yam ADE-darwin-arm64/Yam ADE.app"
     env:
       # The ADE is the desktop conformance target and an Electron application
       # publishes almost nothing to UIA or AX until it is told to (REQ-ADE-6).
-      SVATAH_A11Y: "1"
+      YAM_A11Y: "1"
       # The window-lifecycle log, so a launch that goes wrong says so in the
       # application's own words rather than only in a probe's (Draft 2.13).
-      SVATAH_ADE_DEBUG: "1"
+      YAM_ADE_DEBUG: "1"
       # A secret that is genuinely set, and a credential that genuinely exists
       # (T12.7, REQ-NFR-6). `data.yaml` holds the same two strings, so
       # `No text on this screen should contain {data.injected.password}` is a
       # question with an answer rather than a check over an unset variable.
       # Neither is a credential: they are nonsense chosen to be unmistakable in
       # a failure message, and the suite runs `--gateway fake` throughout.
-      SVATAH_SAMPLE_PASSWORD: "not-a-real-password-8f21c4"
+      YAM_SAMPLE_PASSWORD: "not-a-real-password-8f21c4"
       ANTHROPIC_API_KEY: "sk-not-a-real-key-3d90ab"
     timeoutMs: 60000
     # The window's size, so a toolbar measured at 1440 points is measured at
@@ -55,7 +55,7 @@ app:
     # reading whatever width the last person left it at.
     size: [1440, 900]
   quit:
-    bundleId: "com.electron.svatah-ade"
+    bundleId: "com.electron.yam-ade"
     gracefulMs: 10000
     signalMs: 20000
 
@@ -69,7 +69,7 @@ api: { dir: api }
 
 # The timeouts are a loaded machine's, not an idle one's.
 #
-# `svatah eval self` runs this project *after* the healing eval — four minutes of
+# `yam eval self` runs this project *after* the healing eval — four minutes of
 # Chromium — and beside whatever else the machine is doing, and a desktop
 # adapter's locate is a fresh accessibility read of a thousand-node tree each
 # time round. At five seconds a candidate, a click that the ADE answered a
