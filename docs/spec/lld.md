@@ -58,7 +58,7 @@ interface AgentSurface {
   restore(state: SessionState): Promise<void>;
   trace?(start: boolean, path?: string): Promise<void>;
   request?(req: ApiRequest, opts: { withSessionCookies: boolean }): Promise<ApiResponse>;  // http-capable adapters
-  pick?(phrase: string, opts?: { timeoutMs?: number }): Promise<Ref | undefined>;         // Draft 2.21: highlight the phrase, wait for a person's click, return the element; undefined on Escape
+  pick?(phrase: string, opts?: { id?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<Ref | undefined>;  // Draft 2.21: highlight the phrase, wait for a person's click, return the element; undefined on Escape, timeout or abort
 }
 ```
 

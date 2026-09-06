@@ -42,7 +42,7 @@ interface AgentSurface {
 
   trace?(start: boolean, path?: string): Promise<void>;
   request?(req: ApiRequest, opts: { withSessionCookies: boolean }): Promise<ApiResponse>;
-  pick?(phrase: string, opts?: { id?: string; timeoutMs?: number }): Promise<Ref | undefined>;
+  pick?(phrase: string, opts?: { id?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<Ref | undefined>;
 }
 ```
 

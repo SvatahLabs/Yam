@@ -200,7 +200,10 @@ export class PlaywrightSurface implements AgentSurface {
    * element id (or phrase) to selector, module (a)'s test affordance — answers
    * without a person, so a test can drive the human gateway headless.
    */
-  async pick(phrase: string, opts: { id?: string; timeoutMs?: number } = {}): Promise<Ref | undefined> {
+  async pick(
+    phrase: string,
+    opts: { id?: string; timeoutMs?: number; signal?: AbortSignal } = {},
+  ): Promise<Ref | undefined> {
     const page = this.page();
     const scripted = process.env["YAM_PICK"];
     if (scripted !== undefined && scripted !== "") {
@@ -215,19 +218,44 @@ export class PlaywrightSurface implements AgentSurface {
       }
     }
     const stamp = opts.id ?? phrase;
-    const clicked = (await Promise.race([
-      page.evaluate(PICKER_SCRIPT, stamp),
-      new Promise<false>((done) => setTimeout(() => done(false), opts.timeoutMs ?? 300_000)),
-    ])) as boolean;
-    if (!clicked) {
-      await page.evaluate("() => { if (window.__yamPicker__) window.__yamPicker__.cancel(); }").catch(() => undefined);
+    if (opts.signal?.aborted === true) return undefined;
+    /*
+     * The script is a function *expression*, so it is evaluated and then
+     * called with the stamp, the way module (a)'s picker does it; handing the
+     * string to `evaluate` directly yields the function and never runs it.
+     */
+    const overlay = page
+      .evaluate(
+        ({ script, id }: { script: string; id: string }) => (0, eval)(`(${script})`)(id) as Promise<boolean>,
+        { script: PICKER_SCRIPT, id: stamp },
+      )
+      .catch(() => false);
+    const cancel = async (): Promise<void> => {
+      await page
+        .evaluate("(() => { if (window.__yamPicker__) window.__yamPicker__.cancel(); })()")
+        .catch(() => undefined);
+    };
+    let onAbort: (() => void) | undefined;
+    const aborted = new Promise<false>((done) => {
+      onAbort = () => done(false);
+      opts.signal?.addEventListener("abort", onAbort, { once: true });
+    });
+    const timeout = new Promise<false>((done) => setTimeout(() => done(false), opts.timeoutMs ?? 300_000));
+    const clicked = await Promise.race([overlay, aborted, timeout]);
+    if (onAbort !== undefined) opts.signal?.removeEventListener("abort", onAbort);
+    if (clicked !== true) {
+      await cancel();
       return undefined;
     }
-    const element = await page.$(`[${PICKED_ATTRIBUTE}="${stamp.replace(/"/g, '\\"')}"]`);
-    if (element === null) return undefined;
-    const ref = this.refs().mint(element as ElementHandle<Element>);
-    await element.evaluate((node, attribute) => node.removeAttribute(attribute), PICKED_ATTRIBUTE).catch(() => undefined);
-    return ref;
+    try {
+      const element = await page.$(`[${PICKED_ATTRIBUTE}="${stamp.replace(/"/g, '\\"')}"]`);
+      if (element === null) return undefined;
+      const ref = this.refs().mint(element as ElementHandle<Element>);
+      await element.evaluate((node, attribute) => node.removeAttribute(attribute), PICKED_ATTRIBUTE).catch(() => undefined);
+      return ref;
+    } catch {
+      return undefined;
+    }
   }
 
   async open(session: SessionInit): Promise<void> {

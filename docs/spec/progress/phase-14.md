@@ -234,6 +234,13 @@ Playing the newcomer's session by hand found two things the tests had not, fixed
 - `yam heal`'s line for a never-recorded target showed the id twice, because the healer parsed the phrase only out of the old "Could not resolve" wording; it reads both now.
 - `yam init`'s example flow ended on `The dashboard heading should be visible`, a phrase the fake gateway's 349 answers do not cover, so the very first recording a newcomer could make without a credential stopped one step short. The example ends on `The page title should contain "Dashboard"`, which needs no grounding, and the session above records and replays it whole.
 
+### The owner's first use of the human gateway found two defects (Draft 2.21)
+
+Both fixed in the commit that carries this section, and both are the kind a scripted pick cannot catch:
+
+- **`yam record` opened the browser and did not wait.** The adapter handed the picker script to `page.evaluate` as a string; Playwright evaluates a string as an expression, which yields the function and never calls it, so the pick resolved at once as "nothing picked" and every target was skipped. The adapter now evaluates and calls it the way module (a) does, and `packages/adapter-playwright/test/session.spec.ts` proves the overlay waits until a real click lands and that a second pick finds no stale stamp.
+- **In the app, Record did nothing and Stop could not be pressed.** The service opened the session headless, so the overlay waited in a browser nobody could see, and the session's stop signal never reached the wait. The service opens a headed session for `human`; `pick` takes an `AbortSignal`, which the recorder threads from the service's stop, so Stop ends the wait at once; and the recorder logs "waiting for your click on \`phrase\` in the browser" onto the stream while it waits.
+
 ## Deviations
 
 - **D1 — the input hash beside the plan.** LLD §15.1 says `check` "records the input hash in the plan"; the plan schema is `.strict()` and the published contract (LLD §3.2), so the hash is `.yam/plan.inputs.json` beside it. Same effect, no schema change.
@@ -249,6 +256,6 @@ Playing the newcomer's session by hand found two things the tests had not, fixed
 
 **K3 — the record's transcript is the fake gateway's.** With a credential the recorder grounds through a model; with neither, at a terminal, the human gateway of T14.8 now opens the browser for a click, and the session reads the same except for the gateway line and the overlay.
 
-**K4 — the human gateway's click is proven by a scripted pick.** `YAM_PICK` answers the overlay in every test; a person's real click in the headed browser was exercised by hand on this host and is not in the suite, which cannot click.
+**K4 — the human gateway's click is proven by a real click in the adapter's suite** (the overlay waiting, then a Playwright click on the element) **and by a scripted pick everywhere else.** A person's own click was exercised by the owner, which is what found the invocation defect above.
 
 **K5 — the desktop adapters cannot take a click yet.** `pick` is `false` on the UI Automation and Accessibility adapters; a person recording against a desktop application still needs a model gateway, and the catalogue row says so.

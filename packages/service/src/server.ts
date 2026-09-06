@@ -629,6 +629,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
             session.surface = surface as { snapshot(options?: unknown): Promise<unknown> };
           },
           onStep: (step) => events.emit({ kind: "record.step", sessionId, step }),
+          log: (message) => events.emit({ kind: "log", at: new Date().toISOString(), level: "info", message }),
           /*
            * The reviewer (REQ-ADE-4). The session blocks here until the client
            * answers, which is the whole point: a decision taken after the store

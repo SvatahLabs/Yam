@@ -32,6 +32,41 @@ import {
 } from "../src/index.js";
 import { expect, refByTestId, test } from "./fixtures.js";
 
+test.describe("pick: a person's click as an element (Draft 2.21, REQ-REC-12)", () => {
+  test("the overlay waits for a real click and returns the element clicked", async ({ openSurface }) => {
+    const surface = await openSurface("own", "/widgets");
+    const saved = process.env["YAM_PICK"];
+    delete process.env["YAM_PICK"];
+    try {
+      const pending = surface.pick!("the show alert button", { id: "show-alert" });
+      // Not resolved before anyone clicks: the overlay is waiting.
+      const early = await Promise.race([pending.then(() => "resolved"), new Promise((done) => setTimeout(() => done("waiting"), 500))]);
+      expect(early).toBe("waiting");
+      // A real click on the element, as a person would make it.
+      await surface.act("click", await refByTestId(surface, "show-alert"));
+      const ref = await pending;
+      expect(ref).toBeDefined();
+      expect((await surface.describe(ref!)).attrs?.["data-testid"]).toBe("show-alert");
+      // The stamp is gone, so a second pick can find nothing stale.
+      const stale = await surface.locate({ by: "css", value: "[data-yam-picked]", score: 1 });
+      expect(stale).toEqual([]);
+    } finally {
+      if (saved !== undefined) process.env["YAM_PICK"] = saved;
+    }
+  });
+
+  test("an aborted pick returns nothing and removes the overlay", async ({ openSurface }) => {
+    const surface = await openSurface("own", "/widgets");
+    delete process.env["YAM_PICK"];
+    const controller = new AbortController();
+    const pending = surface.pick!("the show alert button", { id: "show-alert", signal: controller.signal });
+    setTimeout(() => controller.abort(), 200);
+    expect(await pending).toBeUndefined();
+    const overlay = await surface.locate({ by: "css", value: "[data-yam-picker]", score: 1 });
+    expect(overlay).toEqual([]);
+  });
+});
+
 test.describe("capabilities (LLD §2.4)", () => {
   test("the descriptor names every flag the schema publishes", () => {
     expect(Object.keys(PLAYWRIGHT_CAPABILITIES).sort()).toEqual([...CAPABILITY_FLAGS].sort());

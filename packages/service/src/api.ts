@@ -136,6 +136,8 @@ export interface ServiceApi {
       gateway?: string;
       inputs?: Record<string, unknown>;
       onStep?: (step: unknown) => void;
+    /** A line about what the session is doing (Draft 2.21). */
+    log?: (message: string) => void;
       review?: (proposal: unknown) => Promise<unknown>;
       /** Handed the live surface, so the picker can snapshot the driven session. */
       onSurface?: (surface: unknown) => void;

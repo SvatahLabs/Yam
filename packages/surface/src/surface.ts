@@ -75,7 +75,7 @@ export interface AgentSurface {
    * when the person pressed Escape. Only adapters with the `pick` capability.
    * `opts.id` is the element id, so a scripted pick (`YAM_PICK`) can answer it.
    */
-  pick?(phrase: string, opts?: { id?: string; timeoutMs?: number }): Promise<Ref | undefined>;
+  pick?(phrase: string, opts?: { id?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<Ref | undefined>;
 }
 
 /** Every method name on `AgentSurface`, required first, then the optional ones. */

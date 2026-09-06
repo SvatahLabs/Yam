@@ -78,6 +78,8 @@ export async function serviceRecord(
     gateway?: string;
     inputs?: Record<string, unknown>;
     onStep?: (step: unknown) => void;
+    /** A line about what the session is doing, for the stream (Draft 2.21). */
+    log?: (message: string) => void;
     review?: (proposal: unknown) => Promise<unknown>;
     onSurface?: (surface: unknown) => void;
     signal?: AbortSignal;
@@ -103,8 +105,9 @@ export async function serviceRecord(
     );
   }
 
+  // A person cannot click in a headless browser: the human gateway is headed.
   const { surface, config } = await open(loaded, {
-    ...(options.headed === undefined ? {} : { headed: options.headed }),
+    ...(gateway.name === "human" ? { headed: true } : options.headed === undefined ? {} : { headed: options.headed }),
   });
   options.onSurface?.(surface);
 
@@ -149,6 +152,8 @@ export async function serviceRecord(
         },
       },
       ...(options.onStep === undefined ? {} : { onStep: options.onStep }),
+      ...(options.log === undefined ? {} : { log: options.log }),
+      ...(options.signal === undefined ? {} : { signal: options.signal }),
       ...(options.review === undefined
         ? {}
         : {

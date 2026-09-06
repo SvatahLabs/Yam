@@ -167,6 +167,8 @@ export interface RecordSessionOptions {
    */
   readonly review?: (proposal: GroundingProposal) => Promise<ReviewDecision>;
   readonly log?: (message: string) => void;
+  /** Stops a session that is waiting: on a person's click, or on a reviewer (Draft 2.21). */
+  readonly signal?: AbortSignal;
 }
 
 /** What a reviewer is shown for one target (REQ-ADE-4). */
@@ -298,7 +300,8 @@ export async function record(options: RecordSessionOptions): Promise<RecordRepor
          * comes back as a reference, and the entry is synthesised from it with
          * provenance `human`/`pick`. Escape is a rejection, as a reviewer's is.
          */
-        const picked = declared === undefined && gateway.name === "human" ? await pickByPerson(target, surface) : undefined;
+        const picked =
+          declared === undefined && gateway.name === "human" ? await pickByPerson(target, surface, options) : undefined;
         if (picked !== undefined && "stopped" in picked) {
           stoppedBecause = picked.stopped;
           break outer;
@@ -649,13 +652,23 @@ function readPath(tree: Readonly<Record<string, unknown>>, path: string): unknow
 async function pickByPerson(
   target: { readonly ref: string; readonly phrase: string },
   surface: AgentSurface,
+  options: { readonly log?: (message: string) => void; readonly signal?: AbortSignal },
 ): Promise<GroundingResult | { readonly stopped: string }> {
   if (surface.pick === undefined || surface.capabilities().pick !== true) {
     return { stopped: `The ${surface.kind} adapter cannot take a click, so a person cannot record on it; use a model gateway.` };
   }
-  const ref = await surface.pick(target.phrase, { id: target.ref });
+  options.log?.(`waiting for your click on \`${target.phrase}\` in the browser (Escape to stop)`);
+  const ref = await surface.pick(target.phrase, {
+    id: target.ref,
+    ...(options.signal === undefined ? {} : { signal: options.signal }),
+  });
   if (ref === undefined) {
-    return { stopped: `Nothing was picked for "${target.phrase}" (${target.ref}); the person pressed Escape.` };
+    return {
+      stopped:
+        options.signal?.aborted === true
+          ? `The session was stopped while waiting for a click on "${target.phrase}" (${target.ref}).`
+          : `Nothing was picked for "${target.phrase}" (${target.ref}); the person pressed Escape.`,
+    };
   }
   const entry = await entryFor(surface, ref, { promptVersion: "pick" });
   const snapshot = await surface.snapshot().catch(() => undefined);
