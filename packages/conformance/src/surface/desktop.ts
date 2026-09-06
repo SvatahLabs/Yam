@@ -62,18 +62,43 @@ const TABS = [
   "Tool panel",
 ] as const;
 
-/** Click the tab with this name, and answer with the snapshot that follows. */
+/**
+ * Click the tab with this name, and answer with the snapshot that follows.
+ *
+ * ## The Legacy rail item (Draft 2.11, T9.4)
+ *
+ * Phase 9 rebuilt the ADE's shell and rendered two screens — `flows` and `run` —
+ * on the new screen model; "the other screens still stay reachable through the
+ * old tabs behind a *Legacy* rail item until Phase 10". So the eleven tabs are
+ * still there and are no longer on screen when the application opens: the rail
+ * item has to be pressed first.
+ *
+ * This presses it only when the tab is not already there, so the same cases run
+ * against the pre-Phase-9 build and against this one. T10.3 replaces these cases
+ * with the new structure and this fallback goes with them.
+ */
 async function openScreen(
   context: Parameters<ConformanceCase["run"]>[0],
   tab: string,
 ): Promise<readonly Node[]> {
-  const refs = await context.surface.locate({
-    by: "role",
-    role: "tab",
-    name: tab,
-    exact: true,
-    score: 1,
-  });
+  const find = async (): Promise<readonly string[]> =>
+    await context.surface.locate({ by: "role", role: "tab", name: tab, exact: true, score: 1 });
+
+  let refs = await find();
+  if (refs.length !== 1) {
+    const legacy = await context.surface.locate({
+      by: "role",
+      role: "button",
+      name: "Legacy",
+      exact: true,
+      score: 1,
+    });
+    if (legacy.length === 1) {
+      await context.surface.act("click", legacy[0]!);
+      refs = await find();
+    }
+  }
+
   context.equals(`exactly one "${tab}" tab is located`, refs.length, 1);
   if (refs.length !== 1) return (await context.surface.snapshot()).nodes as readonly Node[];
   await context.surface.act("click", refs[0]!);

@@ -23,6 +23,9 @@
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@svatah/sdk": "workspace:*",
+    "sample-web": "workspace:*",
+    "@svatah/ui-tokens": "workspace:*"
   }
 }

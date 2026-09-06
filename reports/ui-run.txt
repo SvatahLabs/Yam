@@ -1,0 +1,30 @@
+^Dloading…
+svatah ui  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-capture-u81BUF   http://127.0.0.1:58749   Run comp · test behavior · invoker user via cli · 0.76 s
+┌──────────────────────────────┐┌────────────────────────────────────────────────────────────────────────────────────────────────────────────┐┌────────────────────────────────────┐
+│ 1 Stories                    ││ 2 Run comp · aborted                                                                                       ││ 3 Step 5 · Click the pay button    │
+│ I want to book and then f… ✗ ││ ✓  1 Click the Book a slot link                       testid #0   95 ms                                    ││ failure   locator                  │
+│ failed                       ││ ✓  2 Type "Indiranagar" into the location field       testid #0   30 ms                                    ││ session   /booking · window 0      │
+│ cancel a booking           ✓ ││ ✓  3 Click the Book now button                        testid #0   28 ms                                    ││ policy    compensate: cancel a     │
+│ passed                       ││ ✓  4 Remember the text of the booking reference as r… = BK-10428  3 ms                                     ││ booking                            │
+└──────────────────────────────┘│ ✗  5 Click the pay button                                         55 ms                                    ││ candidates tried                   │
+                                │ ✓  1 Click the cancel booking button                  testid #0   26 ms                                    ││   testid  pay                  0   │
+                                │ ✓  2 The booking reference should say {I want to boo… testid #0   4 ms                                     ││   role    button · "Pay"       0   │
+                                │ Could not resolve "checkout.pay-button" (the pay button): 5 candidates tried, none matched exactly one     ││   text    Pay                  0   │
+                                │ element.                                                                                                   ││   css     [data-testid="pay"]  0   │
+                                │ flow aborted · exit 11                                                                                     ││   xpath   //*[@data-testid='p… 0   │
+                                │                                                                                                            ││ screenshot                         │
+                                │                                                                                                            ││ I-want-to-book-and-then-fail-5.png │
+                                └────────────────────────────────────────────────────────────────────────────────────────────────────────────┘└────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4 Audit · follow                                                                                                                                                                 │
+│ 00.714 surface locate · ok · 2 ms                                                                                                                                                │
+│ 00.737 surface act · click · h3 · ok · 23 ms                                                                                                                                     │
+│ 00.738 surface state · ok · 0 ms                                                                                                                                                 │
+│ 00.739 surface locate · ok · 1 ms                                                                                                                                                │
+│ 00.740 surface state · ok · 0 ms                                                                                                                                                 │
+│ 00.741 surface locate · ok · 2 ms                                                                                                                                                │
+│ 00.742 surface check · ref · ok · 1 ms                                                                                                                                           │
+│ 00.742 output                                                                                                                                                                    │
+│ ─ svatah ui --json streams these same lines to stdout for an agent ─                                                                                                             │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+^K commands   1-4 pane   Tab next   j k move   Enter open   h heal  q quit

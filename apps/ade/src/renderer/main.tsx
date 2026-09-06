@@ -8,6 +8,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App.js";
+/*
+ * The design system first, then the shell's layout, then the eleven legacy
+ * screens' stylesheet — which Phase 10 deletes with them (T10.3).
+ */
+import "@svatah/ui-tokens/tokens.css";
+import "@svatah/ui/ui.css";
+import "./shell/shell.css";
 import "./app.css";
 
 const root = document.getElementById("root");

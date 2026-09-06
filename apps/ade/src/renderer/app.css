@@ -1,31 +1,39 @@
 /*
- * The ADE's whole stylesheet.
+ * The eleven legacy screens' stylesheet (T3.6; deleted with them in T10.3).
  *
  * Deliberately small: this is a developer client, and the thing a person reads
  * is the project's own text — a flow, a step result, a binding. Colour carries
  * status and nothing else, and `prefers-color-scheme` is honoured because the
  * ADE runs beside an editor rather than instead of one.
+ *
+ * ## Why every variable here is `--legacy-*` (T9.4)
+ *
+ * They used to be `--fg`, `--bg`, `--line`, `--accent` — the same names
+ * `@svatah/ui-tokens` declares. This file is imported after `tokens.css`, so its
+ * `:root` block won: the rebuilt shell drew `#14161a` text on the dark
+ * `--bg0`, and half of the Flows screen was invisible. Renaming them is the
+ * whole fix, and it is a rename inside a file Phase 10 deletes.
  */
 :root {
   color-scheme: light dark;
-  --bg: #ffffff;
-  --fg: #14161a;
-  --muted: #5b6472;
-  --line: #d8dde5;
-  --accent: #2f5bd7;
-  --ok: #1f7a45;
-  --bad: #b3261e;
-  --panel: #f6f7f9;
+  --legacy-bg: #ffffff;
+  --legacy-fg: #14161a;
+  --legacy-muted: #5b6472;
+  --legacy-line: #d8dde5;
+  --legacy-accent: #2f5bd7;
+  --legacy-ok: #1f7a45;
+  --legacy-bad: #b3261e;
+  --legacy-panel: #f6f7f9;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #101418;
-    --fg: #e6e9ee;
-    --muted: #9aa4b2;
-    --line: #2a323c;
-    --panel: #171d24;
+    --legacy-bg: #101418;
+    --legacy-fg: #e6e9ee;
+    --legacy-muted: #9aa4b2;
+    --legacy-line: #2a323c;
+    --legacy-panel: #171d24;
   }
 }
 
@@ -33,8 +41,8 @@
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--fg);
+  background: var(--legacy-bg);
+  color: var(--legacy-fg);
 }
 
 .app { display: flex; flex-direction: column; height: 100vh; }
@@ -42,40 +50,40 @@ body {
 .app-header h1 { font-size: 15px; margin: 0; }
 .app-main { flex: 1; overflow: auto; padding: 12px 16px 24px; }
 
-.muted { color: var(--muted); font-size: 12px; margin: 4px 0 0; }
-.error { color: var(--bad); font-size: 13px; margin: 8px 16px; }
+.muted { color: var(--legacy-muted); font-size: 12px; margin: 4px 0 0; }
+.error { color: var(--legacy-bad); font-size: 13px; margin: 8px 16px; }
 
-.tabs { display: flex; gap: 4px; padding: 8px 16px 0; border-bottom: 1px solid var(--line); }
+.tabs { display: flex; gap: 4px; padding: 8px 16px 0; border-bottom: 1px solid var(--legacy-line); }
 .tab {
   background: none;
   border: 1px solid transparent;
   border-bottom: none;
   border-radius: 6px 6px 0 0;
-  color: var(--muted);
+  color: var(--legacy-muted);
   cursor: pointer;
   font: inherit;
   font-size: 13px;
   padding: 6px 10px;
 }
-.tab-current { background: var(--panel); border-color: var(--line); color: var(--fg); }
+.tab-current { background: var(--legacy-panel); border-color: var(--legacy-line); color: var(--legacy-fg); }
 
 button, input, select, textarea { font: inherit; }
 button {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--legacy-panel);
+  border: 1px solid var(--legacy-line);
   border-radius: 6px;
-  color: var(--fg);
+  color: var(--legacy-fg);
   cursor: pointer;
   font-size: 13px;
   padding: 5px 10px;
 }
-button:disabled { color: var(--muted); cursor: default; }
+button:disabled { color: var(--legacy-muted); cursor: default; }
 
 input[type="text"], textarea, select {
-  background: var(--bg);
-  border: 1px solid var(--line);
+  background: var(--legacy-bg);
+  border: 1px solid var(--legacy-line);
   border-radius: 6px;
-  color: var(--fg);
+  color: var(--legacy-fg);
   padding: 5px 8px;
   width: 100%;
 }
@@ -85,12 +93,12 @@ h2 { font-size: 14px; margin: 0 0 8px; }
 h3 { font-size: 13px; margin: 16px 0 6px; }
 
 table { border-collapse: collapse; font-size: 12px; width: 100%; }
-th, td { border-bottom: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top; }
-th { color: var(--muted); font-weight: 500; }
+th, td { border-bottom: 1px solid var(--legacy-line); padding: 4px 8px; text-align: left; vertical-align: top; }
+th { color: var(--legacy-muted); font-weight: 500; }
 
 pre {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--legacy-panel);
+  border: 1px solid var(--legacy-line);
   border-radius: 6px;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
@@ -102,7 +110,7 @@ pre {
 .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
 .grow { flex: 1; }
 .split { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
-.passed { color: var(--ok); }
-.failed { color: var(--bad); }
-.skipped { color: var(--muted); }
-.source { color: var(--muted); font-size: 11px; margin-top: 4px; }
+.passed { color: var(--legacy-ok); }
+.failed { color: var(--legacy-bad); }
+.skipped { color: var(--legacy-muted); }
+.source { color: var(--legacy-muted); font-size: 11px; margin-top: 4px; }

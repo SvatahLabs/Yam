@@ -44,6 +44,8 @@ Flows (module b):
   svatah migrate <dest> --from-ade <electron-db dir> [--project <name>]
   svatah doctor [dir] [--json]
   svatah serve [dir] [--port 0] [--token <t>]
+  svatah ui [dir] [--screen flows|run] [--flow <file>] [--run <id>] [--story <name>]
+            [--url <url>] [--token <t>] [--json] [--capture <ms>]
   svatah repl [dir] [--adapter <name>] [--base-url <url>] [--headless]
               [--gateway anthropic|fake|none] [--tier2] [--tier3]
               [--out <flows>] [--name <flow name>] [--json]
@@ -357,6 +359,8 @@ async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Pro
       return await (await import("./commands/host.js")).hostCommand(args, io);
     case "serve":
       return await (await import("./commands/serve.js")).serveCommand(args, io);
+    case "ui":
+      return await (await import("./commands/ui.js")).uiCommand(args, io);
     case "repl":
       return await (await import("./commands/repl.js")).replCommand(args, io);
     case "mcp":

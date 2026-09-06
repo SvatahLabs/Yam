@@ -1,0 +1,27 @@
+^Dloading…
+svatah ui  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/svatah-ui-capture-u81BUF   http://127.0.0.1:58749   Flows · 7 files · 22 stories · 30 bindings, 1 unverified
+┌──────────────────────────┐┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐┌───────────────────────────────┐
+│ 1 Flows                  ││ 2 flows/guards-and-compensation.flow                                                                                ││ 3 Inspect                     │
+│ booking-compensation.flow││   1   // Guards and compensation, end to end (T5.4, REQ-LANG-…                                                      ││ no step selected              │
+│   · not run              ││   2   //                                                                                                            │└───────────────────────────────┘
+│ booking-workflow.flow    ││   3   // `booking-compensation.flow` beside this one is the *…                                                      │
+│   · not run              ││   4   // faithful sibling of `execution.flow`. This file is t…                                                      │
+│ execution.flow           ││   5   // the two guarantees T5.4 is about, on the smallest th…                                                      │
+│   · not run              ││   6   //                                                                                                            │
+│ guards-and-compensation.f││   7   //   * a guard whose predicate is false never performs …                                                      │
+│ … ! aborted              ││   8   //     log has no surface call for it (REQ-AUTO-1);                                                           │
+│ natural_language_login.fl││   9   //   * a failing story runs its compensating story with…                                                      │
+│ … · not run              ││  10   //     scope, and the run ends `aborted` with the polic…                                                      │
+│ simple.flow              ││  11                                                                                                                 │
+│   · not run              ││  12   // ── guards ──────────────────────────────────────────…                                                      │
+│ svatah.flow              ││  13   //                                                                                                            │
+│   · not run              ││  14   // Three guards, one of each subject the IR has: the pa…                                                      │
+└──────────────────────────┘│ lint: 3 — W_SECRET_UNSET user.password reads ${SVATAH_SAMPLE_PASSWORD}, which is not set. Compiling does not need   │
+                            │ the value; running will.                                                                                            │
+                            └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4 Audit · follow                                                                                                                                                                 │
+│ no audit lines on this screen                                                                                                                                                    │
+│ ─ svatah ui --json streams these same lines to stdout for an agent ─                                                                                                             │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+^K commands   1-4 pane   Tab next   j k move   Enter open   r record  q quit

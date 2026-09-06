@@ -91,7 +91,17 @@ describe("repository layout (HLD §12)", () => {
     expect(pkg.name).toBe(`@svatah/${name}`);
     expect(pkg.scripts.build).toBeTruthy();
     expect(pkg.scripts.test).toBeTruthy();
-    expect(existsSync(join(dir, "src", "index.ts"))).toBe(true);
+    /*
+     * `src/index.ts`, or `src/index.tsx` for a package whose entry point is a
+     * component: `@svatah/ui` and `@svatah/tui` are React and Ink, and a `.ts`
+     * entry for either would be a file that re-exports the real one for the
+     * sake of a check. LLD §1 says one entry point per package; it does not say
+     * which extension.
+     */
+    expect(
+      existsSync(join(dir, "src", "index.ts")) || existsSync(join(dir, "src", "index.tsx")),
+      `packages/${name} has no src/index.ts or src/index.tsx`,
+    ).toBe(true);
   });
 
   it("has no package under packages/ that HLD §12 does not list", () => {

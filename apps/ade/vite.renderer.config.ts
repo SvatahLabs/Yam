@@ -11,4 +11,20 @@ import { defineConfig } from "vite";
  */
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    /*
+     * One React in the window (T9.4).
+     *
+     * `@svatah/ui` declares React as a peer dependency *and* a devDependency, so
+     * pnpm gives it its own copy under `packages/ui/node_modules/react` — and
+     * Vite, resolving through the workspace link, bundled that one beside the
+     * ADE's. Two Reacts share no dispatcher, so the first hook in a design-system
+     * component threw `Cannot read properties of null (reading 'useState')` and
+     * the window rendered nothing.
+     *
+     * `dedupe` makes every `react` specifier resolve to the ADE's copy, which is
+     * what a peer dependency means.
+     */
+    dedupe: ["react", "react-dom", "react/jsx-runtime"],
+  },
 });

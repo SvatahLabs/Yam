@@ -52,7 +52,9 @@
     "@svatah/tool": "workspace:*",
     "@svatah/trajectory": "workspace:*",
     "@svatah/workflow": "workspace:*",
-    "yaml": "catalog:"
+    "yaml": "catalog:",
+    "@svatah/tui": "workspace:*",
+    "@svatah/sdk": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "catalog:",

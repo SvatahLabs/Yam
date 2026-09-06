@@ -47,7 +47,9 @@
     "sheet": "pnpm --filter @svatah/ui sheet",
     "sheet:audit": "node scripts/audit-sheet.mjs",
     "fixtures:screens": "node scripts/record-screen-fixtures.mjs",
-    "sheet:shoot": "node scripts/shoot-sheet.mjs"
+    "sheet:shoot": "node scripts/shoot-sheet.mjs",
+    "ade:shoot": "node scripts/shoot-ade.mjs",
+    "ui:capture": "node scripts/capture-tui.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

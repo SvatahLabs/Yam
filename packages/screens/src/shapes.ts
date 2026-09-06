@@ -143,9 +143,22 @@ export interface AuditResponse {
   kind?: string;
   story?: string;
   stepId?: string;
-  call?: string;
+  /**
+   * The surface call, not a string.
+   *
+   * `{ method: "act", action: "click", ref: "h0", args: [{ value: "…" }, null] }`
+   * — `args` is the call's *argument list*, so it is an array whose entries are
+   * whatever that method takes.
+   */
+  call?: {
+    method?: string;
+    action?: string;
+    ref?: string;
+    args?: unknown;
+  };
   ref?: string;
   outcome?: string;
+  durationMs?: number;
   detail?: unknown;
   message?: string;
   policy?: unknown;

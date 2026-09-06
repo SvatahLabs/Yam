@@ -164,6 +164,24 @@ export function policyText(policy: string | { compensate?: string } | undefined)
   return policy.compensate === undefined ? undefined : `compensate: ${policy.compensate}`;
 }
 
+/**
+ * One surface call as a phrase: `act click h0 value "Indiranagar"`.
+ *
+ * `args` is the *argument list* — an array whose entries are whatever the method
+ * takes, and mostly `{}` and `null`. Empty objects and nulls carry nothing a
+ * reader wants, so they are dropped; what is left is written as `key "value"`
+ * pairs, which is how the mockup's audit pane reads.
+ */
+function callText(call: AuditResponse["call"]): string | undefined {
+  if (call === undefined) return undefined;
+  const args = (Array.isArray(call.args) ? call.args : [call.args])
+    .filter((one): one is Record<string, unknown> => typeof one === "object" && one !== null)
+    .flatMap((one) => Object.entries(one))
+    .map(([key, value]) => `${key} ${typeof value === "string" ? `"${value}"` : String(value)}`)
+    .join(" ");
+  return dotted(call.method, call.action, call.ref, args === "" ? undefined : args);
+}
+
 /** One audit line's `detail`, which is an object on most kinds. */
 function detailText(detail: unknown): string | undefined {
   if (detail === undefined || detail === null) return undefined;
@@ -270,12 +288,21 @@ export function runStateFrom(
     seq: line.seq ?? at,
     at: stamp(line.at, summary.startedAt),
     kind: String(line.kind ?? ""),
+    /*
+     * One readable line, in the order the mockup writes one: what was called,
+     * on what, what came back, and how long it took.
+     *
+     * `call` is an *object* (`{ method, ref, args }`) rather than a string, and
+     * reading it as one produced twenty audit rows that all said "ok" — which
+     * is the shape of a log nobody can use.
+     */
     text: dotted(
-      typeof line.call === "string" ? line.call : undefined,
+      callText(line.call),
       typeof line.ref === "string" ? line.ref : undefined,
       detailText(line.detail),
       typeof line.message === "string" ? line.message : undefined,
       typeof line.outcome === "string" ? line.outcome : undefined,
+      line.durationMs === undefined ? undefined : `${line.durationMs} ms`,
     ),
     tone: auditTone(line),
   }));

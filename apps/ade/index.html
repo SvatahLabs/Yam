@@ -8,10 +8,20 @@
       `connect-src` is loopback only: the service is on 127.0.0.1, and a renderer
       that could reach anywhere else would be a renderer that could exfiltrate a
       project. `script-src 'self'` leaves no room for an injected script.
+
+      `blob:` is in `img-src` for the Run screen's evidence (T9.4): a run's
+      screenshot arrives as bytes over the token-authenticated route and is shown
+      through `URL.createObjectURL`, because an `<img src>` cannot carry a bearer
+      header. It is not in `connect-src` or `script-src`, so nothing can be
+      *fetched* or *run* from one.
+
+      The fonts are `'self'`: `@svatah/ui-tokens` ships IBM Plex as packaged
+      woff2 files that Vite bundles as assets, so the first paint makes no
+      network call (T9.2).
     -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: http://127.0.0.1:* http://localhost:*; connect-src http://127.0.0.1:* ws://127.0.0.1:* http://localhost:* ws://localhost:*"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://127.0.0.1:* http://localhost:*; connect-src http://127.0.0.1:* ws://127.0.0.1:* http://localhost:* ws://localhost:*"
     />
     <title>Svatah ADE</title>
   </head>

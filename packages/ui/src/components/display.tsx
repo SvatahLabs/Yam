@@ -258,7 +258,16 @@ export function InspectorSection({
   readonly children: ReactNode;
 }): React.JSX.Element {
   return (
-    <section className="sv-inspector-section" aria-labelledby={`${id}-heading`}>
+    /*
+     * The `id` goes on the *section*, and the heading gets `-heading`.
+     *
+     * A caller passing `id="inspector-step"` means "this section is
+     * `inspector-step`" — that is what a desktop adapter binds to and what a
+     * test addresses. Putting the id only on the heading made
+     * `#inspector-step` a selector that matched nothing, which is the same
+     * defect as an unnamed control from the other end.
+     */
+    <section id={id} className="sv-inspector-section" aria-labelledby={`${id}-heading`}>
       <h3 id={`${id}-heading`} className="sv-inspector-heading">
         {title}
       </h3>

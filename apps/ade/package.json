@@ -16,12 +16,15 @@
     "package": "pnpm run ensure-electron && pnpm run stage-cli && electron-forge package",
     "smoke": "pnpm run ensure-electron && node ../../scripts/ade-smoke.mjs",
     "start": "pnpm run ensure-electron && electron-forge start",
-    "test": "vitest run",
+    "test": "vitest run && playwright test",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "stage-cli": "node ../../scripts/stage-ade-cli.mjs"
   },
   "dependencies": {
-    "@svatah/schema": "workspace:*"
+    "@svatah/schema": "workspace:*",
+    "@svatah/screens": "workspace:*",
+    "@svatah/ui": "workspace:*",
+    "@svatah/ui-tokens": "workspace:*"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.11.2",
@@ -44,6 +47,7 @@
     "scheduler": "^0.27.0",
     "typescript": "catalog:",
     "vite": "^7.3.6",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@playwright/test": "catalog:"
   }
 }

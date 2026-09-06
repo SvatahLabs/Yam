@@ -1,0 +1,46 @@
+{
+  "name": "@svatah/tui",
+  "version": "0.1.0",
+  "description": "`svatah ui` — the terminal cockpit, a second renderer of the screen model (REQ-TUI-1)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsup --config ./tsup.config.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@svatah/screens": "workspace:*",
+    "@svatah/sdk": "workspace:*",
+    "@svatah/ui-tokens": "workspace:*",
+    "ink": "^7.1.1",
+    "react": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "ink-testing-library": "^4.0.0",
+    "react-devtools-core": "^6.1.2",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

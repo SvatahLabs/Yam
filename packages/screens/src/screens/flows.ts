@@ -220,10 +220,35 @@ export const flowsScreen: Screen<FlowsState> = {
         .filter((name) => name !== "");
 
     const now = Date.now();
-    const lastRunOf = (one: string): SummaryResponse | undefined =>
-      summaries.find((summary) =>
+
+    /*
+     * Which flow a run belongs to, when the run does not say.
+     *
+     * `summary.flows` is keyed by flow file for a whole-flow run and by the
+     * literal `(selected)` for `svatah run --story <name>` — which is what the
+     * mockup's `comp` run is. So a match on the key alone left every row in the
+     * list saying "not run" beside a run that had just happened. The stories the
+     * run's results name belong to a file (`GET /project` says which), and that
+     * is the flow the run was about.
+     */
+    const fileOfStory = new Map(
+      (project.stories ?? [])
+        .filter((story) => story.name !== undefined && story.file !== undefined)
+        .map((story) => [story.name!, story.file!]),
+    );
+    const filesOfLatestRun = new Set(
+      results
+        .map((result) => fileOfStory.get(result.story ?? ""))
+        .filter((one): one is string => one !== undefined),
+    );
+
+    const lastRunOf = (one: string): SummaryResponse | undefined => {
+      const byKey = summaries.find((summary) =>
         Object.keys(summary.flows ?? {}).some((key) => key === one || key.endsWith(basename(one))),
       );
+      if (byKey !== undefined) return byKey;
+      return filesOfLatestRun.has(one) ? latest : undefined;
+    };
 
     /*
      * The store's own count of what is unverified.
@@ -244,7 +269,13 @@ export const flowsScreen: Screen<FlowsState> = {
 
     const files: FlowRow[] = flows.map((one) => {
       const summary = lastRunOf(one);
-      const status = summary?.flows?.[Object.keys(summary.flows ?? {})[0] ?? ""]?.status;
+      /*
+       * The flow's own entry when the run named it, and the run's single entry
+       * when it did not — a `--story` run has one `(selected)` entry, and its
+       * status is the status of the thing that ran.
+       */
+      const entries = summary?.flows ?? {};
+      const status = (entries[one] ?? entries[Object.keys(entries)[0] ?? ""])?.status;
       const failing = results.find(
         (result) => result.status === "failed" && storiesOf(one).includes(result.story ?? ""),
       );

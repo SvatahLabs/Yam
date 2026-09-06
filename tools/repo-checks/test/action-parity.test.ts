@@ -101,7 +101,7 @@ const shapeOf = (one: Action | PaletteRow): string =>
  * against altered data instead of against the repository.
  */
 export function parityFailures(
-  registry: readonly Array<Action | PaletteRow>,
+  registry: ReadonlyArray<Action | PaletteRow>,
   palette: readonly PaletteRow[],
 ): string[] {
   const failures: string[] = [];

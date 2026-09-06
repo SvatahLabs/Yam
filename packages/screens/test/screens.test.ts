@@ -119,6 +119,18 @@ describe("the Flows screen against the fixtures project (the `Main` artboard)", 
     ]);
     // Every row carries a status *word*, never a colour alone (§13.7).
     for (const row of state.files) expect(row.status.label).not.toBe("");
+
+    /*
+     * And the flow the `comp` run was about carries that run's outcome.
+     *
+     * `svatah run --story <name>` writes `summary.flows` keyed `(selected)`
+     * rather than by the file, so a list that matched on the key alone said
+     * "not run" beside a run that had just happened. The stories the run's
+     * results name belong to a file, and that is the flow the row is about.
+     */
+    const guards = state.files.find((one) => one.name === "guards-and-compensation.flow")!;
+    expect(guards.status.label).toBe("aborted");
+    expect(guards.meta.join(" ")).toContain("locator");
   });
 
   it("opens the flow the mockup opens, with its gutter and its lint", async () => {
