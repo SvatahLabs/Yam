@@ -35,6 +35,7 @@ gradle-app.setting
 tmp/
 target/
 out/
+out-test/
 .idea/
 .vscode/
 .*.swp

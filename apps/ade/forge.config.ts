@@ -21,9 +21,31 @@ import { VitePlugin } from "@electron-forge/plugin-vite";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
 import type { ForgeConfig } from "@electron-forge/shared-types";
 
+/**
+ * The test build's own identity (P10-F7, T11.1).
+ *
+ * The Phase 10 verification: "the suite's ADE cases assume they own the
+ * machine's ADE. They stop leftovers by path, so any other instance, a gate run
+ * or a person's, fails them." The two callers in this repository — the
+ * Playwright cases in `test/shell.spec.ts` and the desktop gate in
+ * `scripts/desktop-conformance.mjs` — both packaged into `out/` and both looked
+ * for a process called `Svatah ADE`, so running the suite beside the gate meant
+ * each one stopping the other's application mid-case.
+ *
+ * `SVATAH_ADE_TEST_BUILD=1` (which `node scripts/package-ade.mjs --test` sets)
+ * gives the suite's build a product name, a bundle identifier and an output
+ * directory of its own. Then `pgrep -f <executable>` cannot match the other's,
+ * the accessibility bridge's `--process "Svatah ADE"` cannot address it, and a
+ * person's own ADE — installed anywhere — is untouched by either.
+ */
+const testBuild = process.env["SVATAH_ADE_TEST_BUILD"] === "1";
+const productName = testBuild ? "Svatah ADE Test" : "Svatah ADE";
+
 const config: ForgeConfig = {
+  outDir: testBuild ? "out-test" : "out",
   packagerConfig: {
-    name: "Svatah ADE",
+    name: productName,
+    appBundleId: testBuild ? "com.electron.svatah-ade-test" : "com.electron.svatah-ade",
     // The project directory is the only source of truth (REQ-ADE-2), so there is
     // nothing to sign a manifest of and nothing to bundle but the app.
     asar: true,
@@ -48,8 +70,11 @@ const config: ForgeConfig = {
    */
   makers: [
     new MakerZIP({}, ["darwin", "linux", "win32"]),
-    new MakerSquirrel({ name: "svatah_ade" }, ["win32"]),
-    new MakerDeb({ options: { name: "svatah-ade", productName: "Svatah ADE" } }, ["linux"]),
+    new MakerSquirrel({ name: testBuild ? "svatah_ade_test" : "svatah_ade" }, ["win32"]),
+    new MakerDeb(
+      { options: { name: testBuild ? "svatah-ade-test" : "svatah-ade", productName } },
+      ["linux"],
+    ),
   ],
 
   plugins: [

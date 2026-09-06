@@ -23,15 +23,38 @@
 import { spawn, spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { startSampleApp } from "sample-web";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
-const OUT = join(ROOT, "reports");
 const PORT = 9412;
+
+/**
+ * Where the screenshots go (P10-F6).
+ *
+ *   pnpm ade:shoot                 # a temporary directory, and it says where
+ *   pnpm ade:shoot --update        # the committed set under reports/
+ *   pnpm ade:shoot --out <dir>     # somewhere you name
+ *
+ * The Phase 10 verification's F6: this rewrote the twelve committed screenshots
+ * on *every* run, so a verifier who took a look at the ADE found twelve
+ * modified files in `git status` and had to work out whether they were a change
+ * or a side effect. Committed artefacts are updated when somebody asks to
+ * update them; a run that only wants to look at the application leaves the tree
+ * alone.
+ */
+const args = process.argv.slice(2);
+const outAt = args.indexOf("--out");
+const update = args.includes("--update");
+const OUT =
+  outAt >= 0 && args[outAt + 1] !== undefined
+    ? resolve(args[outAt + 1])
+    : update
+      ? join(ROOT, "reports")
+      : mkdtempSync(join(tmpdir(), "svatah-ade-shots-out-"));
 
 /** The packaged application, whatever the platform called its directory. */
 function packagedApp() {
@@ -118,6 +141,11 @@ await new Promise((done) => {
 });
 
 mkdirSync(OUT, { recursive: true });
+process.stderr.write(
+  update
+    ? `updating the committed screenshots in ${OUT}\n`
+    : `writing screenshots to ${OUT} (pass --update to refresh the committed set)\n`,
+);
 
 const ade = spawn(executable, [`--remote-debugging-port=${PORT}`], {
   stdio: ["ignore", "pipe", "pipe"],

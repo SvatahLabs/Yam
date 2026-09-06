@@ -135,15 +135,34 @@ async function connectWhenReady(): Promise<Browser> {
 }
 
 /** The packaged application, whatever the platform called its directory. */
+/**
+ * The build this suite drives (P10-F7).
+ *
+ * `out-test` first — the suite's own build, product name "Svatah ADE Test",
+ * bundle id `com.electron.svatah-ade-test`, made by
+ * `node scripts/package-ade.mjs --test`. It exists so these cases and the
+ * desktop gate can run at the same time: both stop leftovers by executable path
+ * and both used to package into `out/`, so each stopped the other's application
+ * mid-case, and a person's own ADE was in the line of fire as well.
+ *
+ * `out/` is still accepted, because a checkout that has only packaged the
+ * product should still be able to run the suite — it simply cannot then run it
+ * *beside* a gate, which the contract in `apps/ade/README.md` says.
+ */
 function packagedApp(): string | undefined {
-  const out = join(ADE, "out");
-  if (!existsSync(out)) return undefined;
-  for (const entry of readdirSync(out)) {
-    const mac = join(out, entry, "Svatah ADE.app", "Contents", "MacOS", "Svatah ADE");
-    if (existsSync(mac)) return mac;
-    for (const name of ["Svatah ADE.exe", "svatah-ade", "Svatah ADE"]) {
-      const other = join(out, entry, name);
-      if (existsSync(other)) return other;
+  for (const [directory, product] of [
+    ["out-test", "Svatah ADE Test"],
+    ["out", "Svatah ADE"],
+  ] as const) {
+    const out = join(ADE, directory);
+    if (!existsSync(out)) continue;
+    for (const entry of readdirSync(out)) {
+      const mac = join(out, entry, `${product}.app`, "Contents", "MacOS", product);
+      if (existsSync(mac)) return mac;
+      for (const name of [`${product}.exe`, product.toLowerCase().replace(/ /g, "-"), product]) {
+        const other = join(out, entry, name);
+        if (existsSync(other)) return other;
+      }
     }
   }
   return undefined;
@@ -156,6 +175,15 @@ let browser: Browser;
 let page: Page;
 
 /** A port nobody else in this repository's test suite uses. */
+/**
+ * The DevTools port this suite's build listens on (P10-F7).
+ *
+ * Different from anything else in the repository, and it has to be: the port is
+ * how `connectOverCDP` finds the application, so two callers sharing one would
+ * attach to each other's. 9411 here, 9412 for `scripts/shoot-ade.mjs`, 9300–9700
+ * for `scripts/record-desktop-tree.mjs`; the desktop gate opens no debugging
+ * port at all.
+ */
 const DEBUG_PORT = 9411;
 
 const executable = packagedApp();
@@ -626,14 +654,27 @@ test("the inspector says each of its headings once", async () => {
 
 test("the audit pane renders the call detail the model carries", async () => {
   await showRunScreen();
-  await expect(page.locator(".sv-audit li").first()).toBeVisible({ timeout: 60_000 });
+  /*
+   * Polled until the audit has filled, not until its first row appears (T11.1).
+   *
+   * The audit arrives as the run makes calls, and the first `<li>` is visible
+   * long before the run has made six. Asserting on the count right after the
+   * first row was a test that passed alone — where the run is started by this
+   * case — and failed in the suite, where an earlier case had left a Run screen
+   * open and this one read its audit mid-run. The same defect as P10-F9's fixed
+   * wait, in a different renderer.
+   */
+  const rowsIn = ".sv-audit li";
+  await expect
+    .poll(async () => await page.locator(rowsIn).count(), { timeout: 120_000 })
+    .toBeGreaterThan(5);
   const rows = await page.evaluate(() =>
     [...document.querySelectorAll(".sv-audit li")].map((one) => ({
       kind: (one.querySelector(".sv-audit-kind")?.textContent ?? "").trim(),
       text: (one.lastElementChild?.textContent ?? "").trim(),
     })),
   );
-  expect(rows.length).toBeGreaterThan(5);
+  expect(rows.length, JSON.stringify(rows, null, 1)).toBeGreaterThan(5);
 
   // The kind column is the call, not "surface" on every line (P9-F5).
   expect(rows.every((one) => one.kind !== "surface")).toBe(true);
