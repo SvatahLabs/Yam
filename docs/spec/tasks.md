@@ -477,7 +477,13 @@ Phase 10 total: 15 ideal days.
 **Refs:** REQ-ADP-6, LLD §7.5 · **Est:** 2 (needs a Windows host)
 **Do and Validate:** as T8.6. The Phase 8 corrections (gate race, load line, unnamed buttons) are applied in Phase 9, so T11.1 and T11.3 inherit them and re-verify.
 
-Phase 11 total: 10 ideal days.
+### T11.7 The Phase 10 verification's corrections, the windowless launch, and the editing a release needs
+**Refs:** REQ-ADE-6, REQ-ADE-10..13, LLD §13.6, §13.7, §7.5, §16 · **Est:** 5
+**Do:** Diagnose and fix the windowless packaged launch (F1) with the debug log and the graceful quit route of Draft 2.13; exempt standard window chrome from the id rule, select the first row by default, re-record the variant-1 fixture against the live app and make `rail-flows` relocalize live (F2); the Record screen's toolbar to the title budget, one-line select, and `availableWhen` on its buttons (F3); the Explorer toolbar and the Data inspector per F4, then build the four secondary screens to the corrected artboards; a timed-out session probe is "could not tell" (F5); `ade:shoot` writes outside the tree unless `--update` (F6); the test build's own bundle name (F7); the flow editor edits and saves with lint on save, and the API screen edits a saved request (K6, K7).
+**Validate:** The live macOS gate 7 of 7 plus both healing cases on three consecutive runs with the project screen's cost on the bridge line, the ADE launched and stopped by the gate ten times in a row with a window every time; the Record screen's toolbar case under Playwright at 1440 and 1100 px; a flow edited, saved, and re-linted through the ADE and through `svatah ui`; a request edited and saved; the suite green while a person's ADE is open.
+
+Phase 11 total: 15 ideal days.
+
 
 ---
 
@@ -586,6 +592,7 @@ Phase 11 total: 10 ideal days.
 - Phases reordered: module (a) ships in Phase 1 before any flow language work; test behavior in Phase 2; recorder in Phase 3; independence adapters and tiers in Phase 4; automation behaviors in Phase 5; desktop, WebMCP, Java, fine-tune in Phase 6.
 - New tasks: surface spec (T0.4), conformance suites (T1.2), `bind()` fixture (T1.6), model-free healer and published eval (T1.7, T1.8), module (a) release (T1.9), Tier 0 steps (T2.3), Playwright Test host (T2.8), BiDi adapter (T4.1), MCP raw surface and trajectory capture (T4.6), resume (T5.1), workflow (T5.2), tool server (T5.3), guards and compensation (T5.4), trajectory compiler (T5.5), desktop adapters (T6.1, T6.2), WebMCP (T6.3).
 - Estimate grows from 91.5 to 146 ideal days; the first releasable module lands at day 36.5 instead of at the end of Phase 1.
+- Draft 2.13 (after Phase 10 verification): T11.7 added — the windowless launch, the live-gate findings, the Record toolbar, the corrected artboards, editing for flows and API requests. Total 246 ideal days.
 - Draft 2.12 (after Phase 9 verification): T10.4 added for the verification's corrections and the run-stop route. Total 241 ideal days.
 - Draft 2.11 (builder surfaces, after the owner's design review): Phase 9 (foundation: screen model, design system, SDK, two screens in both renderers) and Phase 10 (every screen, retire the old ones) inserted; the release phase and its tasks renumbered 11 and T11.x. Total 239 ideal days.
 - Draft 2.10 (after Phase 8 verification): Phase 9 added — T9.1 the desktop gate race-free and load-aware, T9.2 the golden set at 300, T9.3 named controls and a real run before results, T9.4 the three-OS matrix observed, T9.5 0.1.0 published by the owner and verified from the registry, T9.6 the Windows gate carried. Total 210.5 ideal days.

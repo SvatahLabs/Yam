@@ -7,7 +7,7 @@ Paste the block below into a new Claude Code session opened at the repository ro
 ## Prompt
 
 ```
-You are continuing the Svatah implementation. Phases 0 through 10 are merged on master. The spec on master is Draft 2.11 or later; do not edit the four spec documents. You will apply the corrections the Phase 10 verification lists, then implement Phase 11.
+You are continuing the Svatah implementation. Phases 0 through 10 are merged on master. The spec on master is Draft 2.13; do not edit the four spec documents. You will apply the corrections the Phase 10 verification lists, then implement Phase 11.
 
 Read, in this order, and treat them as the source of truth:
 - docs/spec/requirements.md
@@ -23,9 +23,9 @@ DRAFT 2.10 AMENDMENTS (already on master, for reference; hold the code to them):
 - LLD §13.6: onServiceOpened is a one-way sixth preload entry; the packaged ADE carries a pnpm deploy of the CLI under Resources/svatah and ships no Node by default; the gate and the smoke check launch the packaged ADE through LaunchServices on macOS; every interactive control on the ADE's Project screen is named, and the desktop snapshot case reports an unnamed one as a defect.
 - LLD §15: `eval finetune corpus` and the corpus-only export (no --ref, no --project); `surface doctor` severities ok, skip, warn, FAIL.
 
-PHASE 10 CORRECTIONS (before any Phase 11 task): apply every finding docs/spec/progress/phase-10-verification.md lists under "Findings", in its order, each as its own commit, and add a "Post-verification corrections" section to docs/spec/progress/phase-10.md.
+PHASE 10 CORRECTIONS (before any other Phase 11 task; together they are T11.7): apply findings F1 through F7 of docs/spec/progress/phase-10-verification.md in order, each as its own commit, to Draft 2.13's rules in LLD §13.7 and §7.5. F1 first: reproduce the windowless packaged launch (`open -n` the packaged ADE a few times on an unlocked session; after the first launches the process runs with no AXWindows) and diagnose it with the new debug log before changing anything else; the live gate cannot pass until it is understood. Then apply the two changes F4 names to the Explorer and Data artboards (the owner approved the four with those changes) and build the secondary screens to them. Add a "Post-verification corrections" section to docs/spec/progress/phase-10.md.
 
-PHASE 11 SCOPE: tasks T11.1 through T11.6 in docs/spec/tasks.md, in order; T11.4 and T11.5 each contain an owner's action you prepare and do not perform; T11.6 only if a Windows host is available. Nothing beyond Phase 11.
+PHASE 11 SCOPE: T11.7 first (the corrections), then tasks T11.1 through T11.6 in docs/spec/tasks.md, in order; T11.4 and T11.5 each contain an owner's action you prepare and do not perform; T11.6 only if a Windows host is available. Nothing beyond Phase 11.
 
 Environment and fallbacks (state which applied in the progress file):
 - This host is macOS with the Accessibility permission granted to the terminal that runs Svatah. The Screen Recording grant depends on the terminal: the verifier's had it, yours may not; `svatah surface doctor` says which, and a screenshot you cannot take is recorded with the doctor line, not fabricated.
@@ -46,14 +46,14 @@ Working rules:
 4. Permissive licences only (REQ-PKG-3); Node 22 LTS and the current LTS; JDK 17.
 
 Evidence you must leave (the verification contract):
-- docs/spec/progress/phase-11.md with, per correction and per task T11.1..T11.6: status, the exact commands demonstrating each Validate item, observed results, which environment fallback applied; Deviations and Known gaps sections.
+- docs/spec/progress/phase-11.md with, per correction F1..F7 and per task T11.1..T11.7: status, the exact commands demonstrating each Validate item, observed results, which environment fallback applied; Deviations and Known gaps sections.
 - Everything runnable from a clean checkout with: pnpm install --frozen-lockfile && pnpm browsers && pnpm -r build && pnpm -r typecheck && pnpm -r test && pnpm lint, with no credential, on Node 22 and the current LTS.
 - reports/adapter-ax.md from three consecutive live runs with load figures, and the parallel-load run's outcome.
 - reports/eval-compiler.md at 300 or more entries with the three numbers REQ-COMP-9 names.
 - The live report's snapshot case asserting zero unnamed controls and the results case reading one real run.
 - docs/ci.md, and the registry quick-start script's tarball-mode output.
 
-When finished, print a summary table of the corrections and T11.1..T11.6 with status and commit hash, then stop.
+When finished, print a summary table of F1..F7 and T11.1..T11.7 with status and commit hash, then stop.
 ```
 
 ---
