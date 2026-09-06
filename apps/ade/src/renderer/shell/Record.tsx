@@ -125,7 +125,32 @@ export function RecordScreen(props: RecordProps): React.JSX.Element {
 
         <div className="sv-editor sv-split">
           <div className="sv-steps" id="record-session" aria-label="The session">
-            {inWorkspace ? <div className="sv-panel-head">{gateway}</div> : null}
+            {/*
+              Variant 2's move, into a panel that has something else in it
+              (T11.1, Draft 2.8 §16).
+
+              The gateway went into a `sv-panel-head` of its own, and a control
+              alone in a panel has *no neighbours* — so the relocalizer's
+              neighbour similarity was 0, and with the ancestry changed as well
+              the most a proposal could score was 0.66 against a threshold of
+              0.72. The case could not pass however good the healer was, which
+              is the trap this file already records about the inspector: "a
+              variant that no model-free repair can survive measures the variant
+              rather than the healer."
+
+              So the panel says what it is, beside the control. The move is
+              still a real move — a different landmark ancestor, a different
+              `controlPath`, a different box, a different sibling index — and it
+              is now one a model-free repair can be *measured* against.
+            */}
+            {inWorkspace ? (
+              <div className="sv-panel-head" id="record-session-head">
+                <span>The session</span>
+                {gateway}
+                <span className="sv-spacer" />
+                <span className="sv-dim">{state.subtitle}</span>
+              </div>
+            ) : null}
             {/*
               A fake-gateway session says so on its face (REQ-ADE-4, Draft 2.7)
               — as a note, not an `Alert`. `Alert` is `role="alert"`, and a

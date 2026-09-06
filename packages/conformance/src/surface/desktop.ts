@@ -89,7 +89,49 @@ async function openScreen(
   });
   if (item === undefined) return before;
   await context.surface.act("click", item.ref);
-  return (await context.surface.snapshot()).nodes as readonly Node[];
+  return await settled(context, railId);
+}
+
+/**
+ * Snapshot once the screen has finished arriving (T11.1).
+ *
+ * A rail click is a request the ADE answers with a `load()` over five or six
+ * endpoints, and a snapshot taken the instant after it is a snapshot of the
+ * screen that was there before — or of half the one that is coming. The live
+ * gate found `ade.inspector` missing `inspector-candidate-table` on a Bindings
+ * screen that had it a second later, intermittently, which is the worst way for
+ * a check to be wrong: it fails on a slow machine and passes on a fast one, and
+ * says nothing about either.
+ *
+ * "Finished arriving" is *the tree has stopped changing*: two consecutive reads
+ * with the same node count and the same set of ids. That needs no knowledge of
+ * which screen is coming, which is what keeps this in the suite rather than in
+ * a table of per-screen selectors.
+ */
+async function settled(
+  context: Parameters<ConformanceCase["run"]>[0],
+  what: string,
+): Promise<readonly Node[]> {
+  const shape = (nodes: readonly Node[]): string =>
+    `${nodes.length}:${nodes
+      .map((one) => one.native?.["automationId"] ?? "")
+      .filter((one) => one !== "")
+      .join(",")}`;
+
+  let nodes = (await context.surface.snapshot()).nodes as readonly Node[];
+  let before = shape(nodes);
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const again = (await context.surface.snapshot()).nodes as readonly Node[];
+    const now = shape(again);
+    nodes = again;
+    if (now === before) return nodes;
+    before = now;
+  }
+  context.check(`the ${what} screen stopped changing`, false, {
+    expected: "two consecutive reads of the same tree",
+    actual: `still changing after 20 reads (${nodes.length} nodes)`,
+  });
+  return nodes;
 }
 
 /**
@@ -133,7 +175,7 @@ async function openFromPalette(
   if (row === undefined) return open;
 
   await context.surface.act("click", row.ref);
-  return (await context.surface.snapshot()).nodes as readonly Node[];
+  return await settled(context, screen);
 }
 
 export const DESKTOP_CASES: readonly ConformanceCase[] = [

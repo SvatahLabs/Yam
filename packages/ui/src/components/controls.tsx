@@ -16,8 +16,9 @@
  * beneath the ones that need a primitive.
  */
 import * as Select from "@radix-ui/react-select";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { requireNamed, type Named } from "../named.js";
+import { portalHost } from "./portal.js";
 
 export interface ButtonProps extends Named {
   readonly variant?: "default" | "primary" | "danger" | "ghost";
@@ -158,6 +159,10 @@ export interface SelectProps extends Named {
 export function Chooser(props: SelectProps): React.JSX.Element {
   const label = requireNamed("Chooser", props);
   const current = props.options.find((one) => one.value === props.value);
+  const [host, setHost] = useState<HTMLElement | undefined>(() => portalHost());
+  useEffect(() => {
+    setHost((one) => one ?? portalHost());
+  }, []);
   return (
     <div className="sv-field">
       <label className="sv-field-label" htmlFor={props.id}>
@@ -182,7 +187,13 @@ export function Chooser(props: SelectProps): React.JSX.Element {
             ▾
           </Select.Icon>
         </Select.Trigger>
-        <Select.Portal>
+        {/*
+          Into the shared host, like every other overlay (P10-F2). A select that
+          portalled into `<body>` changed the accessibility ancestry of every
+          control in the application the first time it was opened — see
+          `portal.ts`.
+        */}
+        <Select.Portal {...(host === undefined ? {} : { container: host })}>
           <Select.Content className="sv-select-menu" position="popper">
             <Select.Viewport>
               {props.options.map((option) => (

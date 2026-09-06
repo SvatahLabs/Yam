@@ -115,8 +115,51 @@ describe("the desktop gate waits for the previous launch to go (P8-F1, LLD §7.5
   });
 
   it("polls until none remains rather than returning when the signal was sent", () => {
-    expect(source).toMatch(/while \(remaining\.length > 0 && Date\.now\(\) - startedAt </);
+    /*
+     * The clock is the *signal's*, not the whole teardown's (T11.1).
+     *
+     * Draft 2.13 puts a graceful quit route in front of the signal (P10-F1), so
+     * `stop()` has two phases with two budgets: ten seconds asking the ADE to
+     * quit, then thirty waiting for a `SIGTERM` it may still be unwinding from.
+     * Sharing one clock meant escalating to `SIGKILL` five seconds after
+     * `SIGTERM` — the defect P8-F1 is about, in a new place.
+     */
+    expect(source).toMatch(/while \(remaining\.length > 0 && Date\.now\(\) - signalledAt </);
     expect(source).toContain("TEARDOWN_TIMEOUT_MS");
+  });
+
+  it("asks the application to quit before it signals (Draft 2.13, P10-F1)", () => {
+    expect(source).toContain("function requestQuit()");
+    // The graceful route on each platform: an Apple-event quit, a
+    // `CloseMainWindow`. Both reach the ADE's `before-quit`, which stops the
+    // `svatah serve` it spawned; a bare signal used to leave one behind.
+    expect(source).toContain("to quit");
+    expect(source).toContain("CloseMainWindow");
+    expect(source).toContain("GRACEFUL_QUIT_MS");
+    // And the graceful phase comes first, with its own clock.
+    const graceful = source.indexOf("if (processIds().length > 0) requestQuit();");
+    const signal = source.indexOf('spawnSync("pkill", ["-f", app]');
+    expect(graceful).toBeGreaterThan(0);
+    expect(signal).toBeGreaterThan(graceful);
+  });
+
+  it("polls the accessibility API for a window, not System Events (P10-F1)", () => {
+    /*
+     * `count windows` over an Apple event asks System Events to do the same
+     * accessibility read, one process away, under a second permission — and it
+     * answers 0 for *every* application when that read is refused, which is
+     * indistinguishable from "the ADE has no window yet".
+     */
+    expect(source).toContain("REAL_WINDOW_SCRIPT");
+    expect(source).not.toContain("to count windows");
+    // The role is the test: a locked screen answers `AXWindows` with a
+    // one-element list holding the application itself.
+    expect(source).toContain("'AXWindow'");
+  });
+
+  it("names a cause only when the session check can name one (P10-F5)", () => {
+    expect(source).toContain("function sessionCheck()");
+    expect(source).toMatch(/state === "locked" \|\| .*state === "no-session"/s);
   });
 
   it("escalates to SIGKILL halfway through, and says so when one survives", () => {

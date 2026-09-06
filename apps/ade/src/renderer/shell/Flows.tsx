@@ -44,10 +44,6 @@ export interface FlowsProps {
 
 import { Toolbar } from "./parts.js";
 
-/** `flows/guards-and-compensation.flow` → an id a desktop adapter can bind to. */
-const rowId = (prefix: string, value: string): string =>
-  `${prefix}-${value.replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase()}`;
-
 export function FlowsScreen(props: FlowsProps): React.JSX.Element {
   const { state } = props;
 

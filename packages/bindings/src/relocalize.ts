@@ -161,17 +161,64 @@ export function neighbourSimilarity(
  * is; the ones near the root say where the page's chrome is, and a layout change
  * rewrites those without moving the element at all.
  */
+/**
+ * The roles that say nothing about *where* an element is (T11.1).
+ *
+ * A `<div>` is a `group`, and a page is made of them: the number of them above
+ * an element is a fact about somebody's stylesheet, not about the element. They
+ * are dropped before the paths are compared, so what is left is the landmark
+ * ancestry and the roles that mean something — which is the same reasoning LLD
+ * §13.6 gives for the ADE carrying landmark roles at all ("screen containers
+ * carry landmark roles so `controlPath` candidates are short and stable").
+ */
+const ANONYMOUS_ROLES: ReadonlySet<string> = new Set([
+  "group",
+  "generic",
+  "none",
+  "presentation",
+]);
+
+/** The path with the anonymous containers removed. */
+const significant = (path: readonly string[]): readonly string[] =>
+  path.filter((one) => !ANONYMOUS_ROLES.has(one));
+
+/**
+ * How alike two ancestries are: the longest common *suffix*, over the roles
+ * that mean something.
+ *
+ * A suffix and not a set, because the element's own role and the landmark
+ * immediately above it are what say "the same kind of place"; a shared `window`
+ * eleven levels up is true of everything on the screen.
+ *
+ * The anonymous containers are dropped first, and that is not a nicety
+ * (T11.1). A `<div>` inserted anywhere near the leaf used to take this measure
+ * from 1 to 0.08 — one shared role out of twelve — so wrapping a control in a
+ * panel looked exactly like moving it to another screen. Two things found it:
+ * Radix's portal, which permanently adds a level above the whole application
+ * the first time a menu opens, and LLD §16's variant 2, which moves the Record
+ * screen's gateway into a different panel and asks for it to be relocalized
+ * "with the same weights and threshold as the web healing eval". With the
+ * containers counted, that variant could score at most 0.66 against a threshold
+ * of 0.72 however good the healer was — a variant no model-free repair could
+ * survive, which measures the variant rather than the healer.
+ *
+ * It is still a *suffix* over significant roles, so it does not become
+ * generous: a button proposed for a combobox shares nothing, whatever its
+ * ancestry.
+ */
 export function rolePathSimilarity(a: readonly string[], b: readonly string[]): number {
-  if (a.length === 0 && b.length === 0) return 1;
+  const left = significant(a);
+  const right = significant(b);
+  if (left.length === 0 && right.length === 0) return a.length === 0 && b.length === 0 ? 1 : 1;
   let shared = 0;
   while (
-    shared < a.length &&
-    shared < b.length &&
-    a[a.length - 1 - shared] === b[b.length - 1 - shared]
+    shared < left.length &&
+    shared < right.length &&
+    left[left.length - 1 - shared] === right[right.length - 1 - shared]
   ) {
     shared += 1;
   }
-  return shared / Math.max(a.length, b.length);
+  return shared / Math.max(left.length, right.length);
 }
 
 /**

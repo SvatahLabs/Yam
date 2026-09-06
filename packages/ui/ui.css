@@ -173,6 +173,18 @@
 .sv-select {
   height: var(--control-h);
   min-width: 200px;
+  /*
+   * A control, not a paragraph (P10-F3, T11.1).
+   *
+   * An option label can be a sentence — "fake — committed answers from
+   * evals/grounding/cases" — and a select that grew to fit one was four hundred
+   * pixels of toolbar. Capping it everywhere rather than only in a toolbar also
+   * keeps the *same* control the same size in two panels, which matters to the
+   * desktop healing case that moves it between them: box proximity is one of
+   * the five similarity measures, and a control that changed width as well as
+   * place was measuring the stylesheet rather than the variant.
+   */
+  max-width: 260px;
   border: 1px solid var(--line2);
   border-radius: var(--r);
   background: var(--bg1);
