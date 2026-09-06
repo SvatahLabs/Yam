@@ -1897,7 +1897,7 @@ and passed:
 
 | Noun | What it is |
 |---|---|
-| `control` | every interactive role: button, link, textbox, checkbox, radio, combobox, listbox, menu item, tab, switch, slider, spin button, option |
+| `control` | every interactive role: button, link, textbox, checkbox, radio, combobox, listbox, menu item, tab, switch, slider, spin button. Not a `<select>`'s own options: those are reached through the select, and macOS publishes only the selected one, with no title of its own |
 | `button`, `link`, `tab`, `checkbox` | that role |
 | `field` | textbox, search box, combobox, spin button, slider |
 | `row`, `cell`, `heading`, `item` | that role and its siblings (`cell` includes column and row headers) |
@@ -1907,6 +1907,15 @@ and passed:
 **There is no `Some`.** An existential over a set is what `The x should be
 visible` already says about one element, and a quantifier nobody needs is one
 every adapter has to carry for ever.
+
+**Standard window chrome is not a member of any of these sets** except
+`element`. The window's close, minimise and zoom buttons are the *window
+manager's*, not the application's: macOS creates them, names them by subrole,
+and gives an application no way to put an identifier on them — so "every button
+on this screen has an id" would otherwise fail on every macOS window that has
+ever existed, which is a rule about the platform rather than about the
+application. It is the same closed list the desktop conformance suite exempts
+(P10-F2), deliberately shared rather than restated.
 
 **An empty set fails, whichever quantifier it is.** "Every button has an id" over
 a screen with no buttons is vacuously true and means nothing; so is "no control

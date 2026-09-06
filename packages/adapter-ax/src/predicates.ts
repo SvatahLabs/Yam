@@ -48,6 +48,33 @@ export interface AxCheckContext {
 
 const norm = (text: string | undefined): string => (text ?? "").replace(/\s+/g, " ").trim();
 
+/**
+ * The words an element puts on the screen, its descendants included (T12.7).
+ *
+ * `The where it may write panel should contain "anything outside it"` is a
+ * sentence about a *panel*, and a panel's own accessible name is its heading:
+ * the words are on the paragraphs inside it. A web adapter answers this the way
+ * a person reads it — Playwright's `toContainText` walks the subtree — and this
+ * one answered from the node alone, so the same sentence was true on one side
+ * of the parity gate and false on the other. That is a normalisation defect
+ * (REQ-SURF-4), not a difference between two platforms.
+ *
+ * A descendant is a node whose `path` starts with this node's, which is what
+ * `path` is: the child index at each level from the window down. Only
+ * `textContains` reads it — `text` is an *equality*, and "this element says
+ * exactly X" is a question about one element rather than about a subtree.
+ */
+function subtreeText(node: AxSnapshotNode, nodes: readonly AxSnapshotNode[]): string {
+  const inside = (one: AxSnapshotNode): boolean =>
+    one.path.length >= node.path.length &&
+    node.path.every((step, at) => one.path[at] === step);
+  return nodes
+    .filter(inside)
+    .map((one) => `${norm(one.name)} ${norm(one.value)}`.trim())
+    .filter((text) => text !== "")
+    .join(" ");
+}
+
 function result(ok: boolean, actual: unknown, expected: unknown, message?: string): CheckResult {
   const out: CheckResult = { ok, actual, expected };
   if (message !== undefined) out.message = message;
@@ -183,12 +210,17 @@ export function evaluateAxPredicate(
           "it on `AXSelectedChildren` and System Events does not expose it.",
         { adapter: "ax" },
       );
-    case "text":
-    case "textContains": {
+    case "text": {
       const expected = literalValue(predicate.value);
       const actual = norm(node.name) || norm(node.value);
-      const ok = predicate.kind === "text" ? actual === expected : actual.includes(expected);
-      return negated(result(ok, actual, expected), predicate.negate);
+      return negated(result(actual === expected, actual, expected), predicate.negate);
+    }
+    case "textContains": {
+      const expected = literalValue(predicate.value);
+      const own = norm(node.name) || norm(node.value);
+      // The node's own words first, so a leaf's answer is unchanged and cheap.
+      const actual = own.includes(expected) ? own : subtreeText(node, context.nodes);
+      return negated(result(actual.includes(expected), actual, expected), predicate.negate);
     }
     case "value": {
       const expected = literalValue(predicate.value);

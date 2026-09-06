@@ -121,19 +121,54 @@ export function CommandPalette(props: PaletteProps): React.JSX.Element {
             <Kbd aria-hidden>Esc</Kbd>
           </div>
 
-          <div className="sv-palette-rows" role="listbox" aria-label="Commands">
+          <div
+            className="sv-palette-rows"
+            id={`${id}-rows`}
+            role="listbox"
+            aria-label="Commands"
+          >
             {groups.length === 0 ? (
               <p className="sv-empty">No command matches “{query}”.</p>
             ) : (
               groups.map(([group, rows]) => (
-                <div key={group}>
-                  <p className="sv-palette-group">{group}</p>
+                /*
+                 * A `group`, said rather than implied (T12.3).
+                 *
+                 * A `listbox`'s children must be `option`s or `group`s of them.
+                 * These rows sat in a bare `<div>`, which breaks the ownership
+                 * — and Chromium then declines to publish them as options at
+                 * all: the macOS accessibility tree read forty rows as
+                 * `AXStaticText` with no name, so a screen reader announces
+                 * nothing and a flow cannot address one by name. The heading is
+                 * the group's own label, so it is not read twice.
+                 */
+                <div key={group} role="group" aria-labelledby={`${id}-group-${group.replace(/\s+/g, "-").toLowerCase()}`}>
+                  <p
+                    className="sv-palette-group"
+                    id={`${id}-group-${group.replace(/\s+/g, "-").toLowerCase()}`}
+                  >
+                    {group}
+                  </p>
                   {rows.map((row) => (
                     <button
                       key={row.id}
                       id={`palette-${row.id.replace(/\./g, "-")}`}
                       type="button"
                       role="option"
+                      /*
+                       * The row's name, said rather than computed (T12.3).
+                       *
+                       * A row's contents are an area chip, a label, a CLI
+                       * command and a `Kbd` marked `aria-hidden`, and macOS
+                       * published the whole thing as an `option` with **no
+                       * accessible name at all**: the desktop snapshot read
+                       * forty rows that a screen reader announces as nothing
+                       * and a flow cannot address by name. `aria-label` is the
+                       * label a person reads on the row, which is also what
+                       * makes "Go to Run" and "Go to Runs" two different names
+                       * rather than one being a substring of the other.
+                       */
+                      aria-label={row.label}
                       aria-selected={false}
                       className="sv-palette-row"
                       disabled={!row.available}

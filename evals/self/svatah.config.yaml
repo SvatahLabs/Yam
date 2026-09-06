@@ -40,7 +40,20 @@ app:
       # The window-lifecycle log, so a launch that goes wrong says so in the
       # application's own words rather than only in a probe's (Draft 2.13).
       SVATAH_ADE_DEBUG: "1"
+      # A secret that is genuinely set, and a credential that genuinely exists
+      # (T12.7, REQ-NFR-6). `data.yaml` holds the same two strings, so
+      # `No text on this screen should contain {data.injected.password}` is a
+      # question with an answer rather than a check over an unset variable.
+      # Neither is a credential: they are nonsense chosen to be unmistakable in
+      # a failure message, and the suite runs `--gateway fake` throughout.
+      SVATAH_SAMPLE_PASSWORD: "not-a-real-password-8f21c4"
+      ANTHROPIC_API_KEY: "sk-not-a-real-key-3d90ab"
     timeoutMs: 60000
+    # The window's size, so a toolbar measured at 1440 points is measured at
+    # 1440 points on somebody else's machine too (pattern 33, T12.7). The ADE
+    # remembers its own size between runs, and a suite that did not name one was
+    # reading whatever width the last person left it at.
+    size: [1440, 900]
   quit:
     bundleId: "com.electron.svatah-ade"
     gracefulMs: 10000

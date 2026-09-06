@@ -17,17 +17,33 @@
 #
 # It is never "this is hard". It is the sentence the flow language does not have
 # or the surface Svatah cannot open, said precisely enough that somebody could
-# implement it. Several of them are the same three gaps said in different
-# places, and that is worth seeing:
+# implement it.
+#
+# ## What Draft 2.15 closed, and what is left (T12.7)
+#
+# The Phase 11 list was thirty-six rows saying three things. Two of them are now
+# sentences and the list is nineteen:
 #
 #   * **an assertion over a set** — "every control has an id", "no secret is
-#     anywhere on this screen", "the inspector says each heading once". The
-#     language asserts about *one* element (patterns 23 and 24). A `check` step
-#     over a snapshot is what would close about a third of this list.
-#   * **a window Svatah cannot resize** — the toolbar rules are measured at
-#     several widths. `app.launch` has no size and there is no `resize` action.
-#   * **a run inside a run** — the ADE's Run button starts a Svatah run, and a
-#     flow has no way to wait for a *second* one and read its result.
+#     anywhere on this screen" — is **pattern 32**, and it closed eleven rows.
+#   * **a window Svatah cannot resize** is **pattern 33**, and it closed two.
+#     `app.launch.size` is the initial size, `Resize the window to <w> by <h>`
+#     the rest.
+#   * **a chord sent to the window** turned out to be a sentence the language
+#     already had (`Press "Meta+k"`, pattern 11 with no target) and an adapter
+#     that could not send one. Four screens reached through the command palette
+#     came back with it.
+#
+# What is left, and each row below says which it is:
+#
+#   * **a run inside a run** — the ADE's Run button starts a Svatah run, and
+#     pattern 19 can now wait on a service's answer, but the ADE's service
+#     listens on a port it chose at start-up and an `api/` request names a URL.
+#   * **a count** — pattern 32 quantifies (`Every`, `No`) and does not count, so
+#     "each heading appears once" has no sentence.
+#   * **geometry across elements** — pattern 24 asks about one element's box;
+#     comparing two elements' boxes has no sentence.
+#   * **a pseudo-terminal adapter**, which the surface kinds do not include.
 #
 # ## Three oracles stay external on purpose (REQ-SELF-3)
 #
@@ -123,7 +139,8 @@ checks:
   - id: "ade.every-interactive-control-on-the-flows-screen-is-named-and-i"
     says: "every interactive control on the Flows screen is named and id'd (P8-F3)"
     svatah:
-      unreachable: "a snapshot *invariant* \u2014 \"every control has an id\" \u2014 and the flow language has no sentence for one. The desktop conformance case `ade.snapshot` is where it lives; a `check` step over the whole snapshot is what Svatah would need."
+      source: "svatah"
+      name: "every interactive control on the Flows screen is named and id'd"
     external:
       source: "ade-playwright"
       name: "every interactive control on the Flows screen is named and id'd (P8-F3)"
@@ -137,7 +154,7 @@ checks:
   - id: "ade.run-on-the-flows-screen-starts-a-run-and-opens-the-run-scree"
     says: "Run on the Flows screen starts a run and opens the Run screen"
     svatah:
-      unreachable: "pressing Run starts a Svatah run from inside a Svatah run. Nothing stops the click; what is missing is a way to wait for a *second* run to finish and read its result, which is a `waitFor` over a service response the language has no sentence for."
+      unreachable: "pattern 19 now waits on a service's answer, so the *sentence* exists. What is missing is the request: the ADE's own service listens on a port it chose at start-up, and an `api/` request names a URL. A flow that could ask the ADE which port it is on would close this one."
     external:
       source: "ade-playwright"
       name: "Run on the Flows screen starts a run and opens the Run screen"
@@ -158,14 +175,14 @@ checks:
   - id: "ade.the-inspector-says-each-of-its-headings-once"
     says: "the inspector says each of its headings once"
     svatah:
-      unreachable: "counts repeated text across a panel. The language asserts about one element, not about a set."
+      unreachable: "pattern 32 quantifies over a set \u2014 `Every`, `No` \u2014 and this needs a *count*: \"each heading appears once\" is a uniqueness claim, and neither quantifier can say it. An `Exactly one \u2026` or a `\u2026 should be unique` is the sentence that would close it."
     external:
       source: "ade-playwright"
       name: "the inspector says each of its headings once"
   - id: "ade.the-audit-pane-renders-the-call-detail-the-model-carries"
     says: "the audit pane renders the call detail the model carries"
     svatah:
-      unreachable: "reads a list of rows and asserts a shape over all of them. The same missing sentence as above: an assertion over a set."
+      unreachable: "pattern 32 can now assert over the audit's rows, and what it cannot assert is their *shape*: the case matches each row against a regular expression, and the predicate set has no regex outside a scope guard (pattern 29's `matches`). The rows also only exist while a run is in flight, which is the second half of the same gap."
     external:
       source: "ade-playwright"
       name: "the audit pane renders the call detail the model carries"
@@ -186,7 +203,8 @@ checks:
   - id: "ade.the-command-palette-opens-on-k-and-lists-the-registry-s-acti"
     says: "the command palette opens on \u2318K and lists the registry's actions"
     svatah:
-      unreachable: "\u2318K is a keystroke to the *application*, and `Press` targets an element (pattern 11). A chord sent to the window with no target is a sentence the language does not have. The palette's own button is bound and its rows are reachable."
+      source: "svatah"
+      name: "the command palette opens on the chord and lists the registry's actions"
     external:
       source: "ade-playwright"
       name: "the command palette opens on \u2318K and lists the registry's actions"
@@ -257,126 +275,143 @@ checks:
   - id: "ade.record-opens-and-every-control-on-it-is-named-and-id-d"
     says: "record opens and every control on it is named and id'd"
     svatah:
-      unreachable: "the Record screen is reached through the command palette, and choosing a palette row needs the palette open \u2014 see \u2318K above. Its controls are bound and the desktop gate drives them."
+      source: "svatah"
+      name: "the Record review opens from the palette and chooses its gateway"
     external:
       source: "ade-playwright"
       name: "record opens and every control on it is named and id'd"
   - id: "ade.run-opens-and-every-control-on-it-is-named-and-id-d"
     says: "run opens and every control on it is named and id'd"
     svatah:
-      unreachable: "Reached through the command palette, which opens on a \u2318K sent to the *window*: `Press` targets an element (pattern 11), and a chord with no target is a sentence the language does not have. Every control on the screen is bound and the desktop gate drives them."
+      source: "svatah"
+      name: "the Run screen opens from the palette and shows its own controls"
     external:
       source: "ade-playwright"
       name: "run opens and every control on it is named and id'd"
   - id: "ade.heal-opens-and-every-control-on-it-is-named-and-id-d"
     says: "heal opens and every control on it is named and id'd"
     svatah:
-      unreachable: "Reached through the command palette, which opens on a \u2318K sent to the *window*: `Press` targets an element (pattern 11), and a chord with no target is a sentence the language does not have. Every control on the screen is bound and the desktop gate drives them."
+      source: "svatah"
+      name: "the Heal review opens from the palette and offers the runs worth healing"
     external:
       source: "ade-playwright"
       name: "heal opens and every control on it is named and id'd"
   - id: "ade.explorer-opens-and-every-control-on-it-is-named-and-id-d"
     says: "explorer opens and every control on it is named and id'd"
     svatah:
-      unreachable: "Reached through the command palette, which opens on a \u2318K sent to the *window*: `Press` targets an element (pattern 11), and a chord with no target is a sentence the language does not have. Every control on the screen is bound and the desktop gate drives them."
+      source: "svatah"
+      name: "the Surface explorer opens from the palette and refuses a call with no intent"
     external:
       source: "ade-playwright"
       name: "explorer opens and every control on it is named and id'd"
   - id: "ade.the-runs-screen-filters-and-its-inspector-shows-the-failing-"
     says: "the Runs screen filters, and its inspector shows the failing step's evidence"
     svatah:
-      unreachable: "the filters are chips that cycle a value on each press, and asserting the *cycle* needs reading a control's own label back and comparing it with the previous one \u2014 a captured value compared with a later one, which `Remember \u2026 as` can hold but no sentence can compare."
+      source: "svatah"
+      name: "the Runs screen filters, and its inspector shows the failing step's evidence"
     external:
       source: "ade-playwright"
       name: "the Runs screen filters, and its inspector shows the failing step's evidence"
   - id: "ade.the-bindings-screen-shows-the-store-and-one-element-s-resolv"
     says: "the Bindings screen shows the store and one element's resolver order"
     svatah:
-      unreachable: "asserts over the rows of a table, which is an assertion over a set."
+      source: "svatah"
+      name: "the Bindings screen shows the store and one element's resolver order"
     external:
       source: "ade-playwright"
       name: "the Bindings screen shows the store and one element's resolver order"
   - id: "ade.the-heal-review-offers-the-runs-worth-healing"
     says: "the Heal review offers the runs worth healing"
     svatah:
-      unreachable: "asserts over the rows of a list — that the runs offered are the ones worth healing. The language asserts about one element (patterns 23 and 24); an assertion over a set is the sentence it lacks."
+      source: "svatah"
+      name: "the Heal review opens from the palette and offers the runs worth healing"
     external:
       source: "ade-playwright"
       name: "the Heal review offers the runs worth healing"
   - id: "ade.the-record-review-chooses-its-gateway-and-says-what-a-fake-s"
     says: "the Record review chooses its gateway and says what a fake session is"
     svatah:
-      unreachable: "the Record screen is reached through the command palette, which opens on a \u2318K sent to the *window*: `Press` targets an element (pattern 11), and a chord with no target is a sentence the language does not have. Every control on the screen is bound and the desktop gate drives them."
+      source: "svatah"
+      name: "the Record review opens from the palette and chooses its gateway"
     external:
       source: "ade-playwright"
       name: "the Record review chooses its gateway and says what a fake session is"
   - id: "ade.the-api-screen-shows-a-saved-request-and-its-headers"
     says: "the API screen shows a saved request and its headers"
     svatah:
-      unreachable: "asserts over the rows of the headers table; an assertion over a set."
+      source: "svatah"
+      name: "the API screen shows a saved request and its headers"
     external:
       source: "ade-playwright"
       name: "the API screen shows a saved request and its headers"
   - id: "ade.the-data-screen-names-every-secret-and-shows-none-of-them"
     says: "the Data screen names every secret and shows none of them"
     svatah:
-      unreachable: "asserts that a value is *absent* from the whole screen \u2014 \"no secret is anywhere\" \u2014 which is a negative over a set rather than over one element."
+      source: "svatah"
+      name: "the Data screen names every secret and shows none of them"
     external:
       source: "ade-playwright"
       name: "the Data screen names every secret and shows none of them"
   - id: "ade.the-surface-explorer-refuses-a-call-with-no-intent"
     says: "the Surface explorer refuses a call with no intent"
     svatah:
-      unreachable: "the Surface explorer is reached through the command palette, which opens on a \u2318K sent to the *window*: `Press` targets an element (pattern 11), and a chord with no target is a sentence the language does not have. Every control on the screen is bound and the desktop gate drives them."
+      source: "svatah"
+      name: "the Surface explorer opens from the palette and refuses a call with no intent"
     external:
       source: "ade-playwright"
       name: "the Surface explorer refuses a call with no intent"
   - id: "ade.the-import-screen-previews-into-the-open-project-and-nowhere"
     says: "the Import screen previews into the open project and nowhere else"
     svatah:
-      unreachable: "asserts about the *filesystem* after a preview, which is outside any surface: no adapter reads a directory."
+      source: "svatah"
+      name: "the Import screen previews into the open project and nowhere else"
     external:
       source: "ade-playwright"
       name: "the Import screen previews into the open project and nowhere else"
   - id: "ade.the-settings-screen-shows-the-project-and-never-a-credential"
     says: "the Settings screen shows the project and never a credential"
     svatah:
-      unreachable: "asserts that a credential is *absent* from the whole screen, which is a negative over a set rather than about one element — the sentence the language lacks (patterns 23 and 24 assert about one target)."
+      source: "svatah"
+      name: "the Settings screen shows the project and never a credential"
     external:
       source: "ade-playwright"
       name: "the Settings screen shows the project and never a credential"
   - id: "ade.the-agents-screen-lists-what-an-agent-may-call"
     says: "the Agents screen lists what an agent may call"
     svatah:
-      unreachable: "asserts over the rows of a list — every tool an agent may call. The language asserts about one element (patterns 23 and 24); an assertion over a set is the sentence it lacks."
+      source: "svatah"
+      name: "the Agents screen lists what an agent may call"
     external:
       source: "ade-playwright"
       name: "the Agents screen lists what an agent may call"
   - id: "ade.the-legacy-screens-are-gone-t10-3"
     says: "the legacy screens are gone (T10.3)"
     svatah:
-      unreachable: "asserts that eleven ids are *absent*, which the language can say one at a time and not as a set \u2014 and a check that eleven things are missing is not a thing a flow is for."
+      source: "svatah"
+      name: "the legacy screens are gone"
     external:
       source: "ade-playwright"
       name: "the legacy screens are gone (T10.3)"
   - id: "ade.the-record-screen-s-toolbar-keeps-its-title-its-select-and-a"
     says: "the Record screen's toolbar keeps its title, its select and availableWhen (P10-F3)"
     svatah:
-      unreachable: "a geometry assertion at two window widths, and Svatah cannot resize a desktop window: `app.launch` has no size and no `resize` action exists."
+      source: "svatah"
+      name: "the Record toolbar keeps its title and its select at two widths"
     external:
       source: "ade-playwright"
       name: "the Record screen's toolbar keeps its title, its select and availableWhen (P10-F3)"
   - id: "ade.a-toolbar-that-runs-out-of-room-sheds-into-the-palette-and-s"
     says: "a toolbar that runs out of room sheds into the palette, and says so (P10-F3)"
     svatah:
-      unreachable: "the same missing thing, seven times over: it sweeps seven window widths, and Svatah cannot resize a desktop window — `app.launch` names no size and there is no `resize` action."
+      source: "svatah"
+      name: "a toolbar that runs out of room sheds into the palette"
     external:
       source: "ade-playwright"
       name: "a toolbar that runs out of room sheds into the palette, and says so (P10-F3)"
   - id: "ade.a-flow-is-edited-and-saved-through-the-ade-and-re-linted-k6"
     says: "a flow is edited and saved through the ADE, and re-linted (K6)"
     svatah:
-      unreachable: "typing a whole file into a text area needs `Type` to accept a multi-line value; the language's `Type \"\u2026\"` takes one line."
+      unreachable: "Draft 2.15 gave `Type` its multi-line value, which was the sentence this needed. What is left is the *restore*: the case rewrites a file in the committed fixtures project and puts it back, and a flow that failed between the two would leave the checkout modified. `onFailure: compensate:<flow>` is the mechanism (REQ-AUTO-4) and no compensating story is written, so this stays the external side's."
     external:
       source: "ade-playwright"
       name: "a flow is edited and saved through the ADE, and re-linted (K6)"

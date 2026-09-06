@@ -48,6 +48,29 @@ export interface UiaCheckContext {
 
 const norm = (text: string | undefined): string => (text ?? "").replace(/\s+/g, " ").trim();
 
+/**
+ * The words an element puts on the screen, its descendants included (T12.7).
+ *
+ * The same normalisation the AX adapter makes, and for the same reason
+ * (REQ-SURF-4): "the panel should contain X" is a sentence about a panel, and a
+ * panel's own name is its heading — the words are on what is inside it. A web
+ * adapter walks the subtree, so an adapter that answered from the node alone
+ * made one sentence true on one side of the parity gate and false on the other.
+ *
+ * A descendant is a node whose `path` starts with this node's. Only
+ * `textContains` reads it: `text` is an equality about one element.
+ */
+function subtreeText(node: UiaSnapshotNode, nodes: readonly UiaSnapshotNode[]): string {
+  const inside = (one: UiaSnapshotNode): boolean =>
+    one.path.length >= node.path.length &&
+    node.path.every((step, at) => one.path[at] === step);
+  return nodes
+    .filter(inside)
+    .map((one) => `${norm(one.name)} ${norm(one.value)}`.trim())
+    .filter((text) => text !== "")
+    .join(" ");
+}
+
 function result(ok: boolean, actual: unknown, expected: unknown, message?: string): CheckResult {
   const out: CheckResult = { ok, actual, expected };
   if (message !== undefined) out.message = message;
@@ -185,12 +208,16 @@ export function evaluateUiaPredicate(
           "per-element pattern call the snapshot walk does not make.",
         { adapter: "uia" },
       );
-    case "text":
-    case "textContains": {
+    case "text": {
       const expected = literalValue(predicate.value);
       const actual = norm(node.name) || norm(node.value);
-      const ok = predicate.kind === "text" ? actual === expected : actual.includes(expected);
-      return negated(result(ok, actual, expected), predicate.negate);
+      return negated(result(actual === expected, actual, expected), predicate.negate);
+    }
+    case "textContains": {
+      const expected = literalValue(predicate.value);
+      const own = norm(node.name) || norm(node.value);
+      const actual = own.includes(expected) ? own : subtreeText(node, context.nodes);
+      return negated(result(actual.includes(expected), actual, expected), predicate.negate);
     }
     case "value": {
       const expected = literalValue(predicate.value);

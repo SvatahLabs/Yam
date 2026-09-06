@@ -16,7 +16,8 @@
  * meaningless.
  */
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
 import { vitestCaseNames } from "@svatah/cli";
 import { fromRoot } from "../src/repo.js";
@@ -216,12 +217,21 @@ function vitestTitles(file: string): string[] {
   return out;
 }
 
-/** The story names one `.flow` file declares, which is what a `svatah` side names. */
-function storyNames(file: string): string[] {
-  const source = readFileSync(fromRoot(file), "utf8");
+/**
+ * Every story the self project declares, read from every flow it has.
+ *
+ * Read from the directory rather than from a list of file names: T12.7 added
+ * two flows, and a list would have to be edited for a third — which is the kind
+ * of check that goes quietly out of date and then passes for the wrong reason.
+ */
+function storyNames(): string[] {
+  const dir = fromRoot("evals/self/flows");
   const out: string[] = [];
-  for (const match of source.matchAll(/^\s*(?:story|scenario)\s*(?:\([^)]*\))?\s*:\s*(.+)$/gm)) {
-    out.push(match[1]!.trim());
+  for (const file of readdirSync(dir).filter((one) => one.endsWith(".flow"))) {
+    const source = readFileSync(join(dir, file), "utf8");
+    for (const match of source.matchAll(/^\s*(?:story|scenario)\s*(?:\([^)]*\))?\s*:\s*(.+)$/gm)) {
+      out.push(match[1]!.trim());
+    }
   }
   return out;
 }
@@ -254,11 +264,7 @@ describe("every external name is one its source reports (P11-F2)", () => {
   });
 
   it("names a story the self project has, on every `svatah` side", () => {
-    const stories = new Set([
-      ...storyNames("evals/self/flows/01-ade-screens.flow"),
-      ...storyNames("evals/self/flows/02-ade-screen.flow"),
-      ...storyNames("evals/self/flows/99-ade-lifecycle.flow"),
-    ]);
+    const stories = new Set(storyNames());
     const invented = checks
       .filter((one) => one.svatah?.source !== undefined)
       .map((one) => one.svatah!.name!)

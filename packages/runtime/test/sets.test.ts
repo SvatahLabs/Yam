@@ -132,7 +132,7 @@ describe("an assertion over a set (pattern 32, T12.7)", () => {
     );
     expect(results[0]!.status).toBe("failed");
     expect(results[0]!.failure?.message).toContain("1 of 2 text(s)");
-    expect(results[0]!.failure?.message).toContain("did textContains");
+    expect(results[0]!.failure?.message).toContain("matched textContains");
   });
 
   it("`No text …` passes when nothing on the screen says it", async () => {
@@ -316,5 +316,76 @@ describe("`Wait for the API to answer` (pattern 19 extended, T12.7)", () => {
       resolve: stubResolver(),
     } as RunOptions);
     expect(surface.actions).toContain("waitFor:ref:dashboard-link");
+  });
+});
+
+describe("`should be absent` means not there (T12.7)", () => {
+  /*
+   * The Surface explorer's alert is on the screen while the intent is empty and
+   * gone once it is not, and "the intent required alert should be absent"
+   * failed with "matched nothing" — which is the *answer*, reported as an
+   * error. The one predicate whose whole meaning is "I could not find it" could
+   * only pass when a stale reference happened to survive.
+   */
+  it("passes when the element cannot be resolved", async () => {
+    const results = await execute(
+      [
+        {
+          action: "expect",
+          text: "The intent required alert should be absent",
+          target: target("gone"),
+          expect: { subject: "target", predicate: { kind: "absent" } },
+        },
+      ],
+      { unresolvable: ["gone"] },
+    );
+    expect(results[0]!.status).toBe("passed");
+  });
+
+  it("does the same for `should be hidden`", async () => {
+    const results = await execute(
+      [
+        {
+          action: "expect",
+          text: "The alert should be hidden",
+          target: target("gone"),
+          expect: { subject: "target", predicate: { kind: "hidden" } },
+        },
+      ],
+      { unresolvable: ["gone"] },
+    );
+    expect(results[0]!.status).toBe("passed");
+  });
+
+  it("still fails a `should be visible` on an element nobody can find", async () => {
+    const results = await execute(
+      [
+        {
+          action: "expect",
+          text: "The sign in button should be visible",
+          target: target("gone"),
+          expect: { subject: "target", predicate: { kind: "visible" } },
+        },
+      ],
+      { unresolvable: ["gone"] },
+    );
+    expect(results[0]!.status).toBe("failed");
+    expect(results[0]!.failure?.class).toBe("locator");
+  });
+
+  it("still fails `should not be absent`, which is the opposite claim", async () => {
+    const results = await execute(
+      [
+        {
+          action: "expect",
+          text: "The alert should not be absent",
+          target: target("gone"),
+          expect: { subject: "target", predicate: { kind: "absent", negate: true } },
+        },
+      ],
+      { unresolvable: ["gone"] },
+    );
+    expect(results[0]!.status).toBe("failed");
+    expect(results[0]!.failure?.class).toBe("locator");
   });
 });

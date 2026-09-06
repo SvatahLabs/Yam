@@ -4,3 +4,21 @@
 project:
   name: "svatah-fixtures"
   flow: "guards-and-compensation.flow"
+
+# Two strings that are injected into the ADE and must never appear on its
+# screen (T12.7, REQ-NFR-6).
+#
+# `app.launch.env` in `svatah.config.yaml` gives the packaged ADE these exact
+# values for `SVATAH_SAMPLE_PASSWORD` and `ANTHROPIC_API_KEY`, so the Data
+# screen has a secret that is genuinely *set* and the Settings screen has a
+# credential that genuinely exists. The screens must then show the variable's
+# name and the word "set", and never the value — which is what
+# `No text on this screen should contain {data.injected.password}` asks.
+#
+# Neither is a credential. They are nonsense strings chosen to be unmistakable
+# in a failure message, and they are here in plain text on purpose: a check that
+# a screen never shows a value needs to know the value. Nothing signs in with
+# them and nothing reaches a model with them — the suite runs `--gateway fake`.
+injected:
+  password: "not-a-real-password-8f21c4"
+  modelKey: "sk-not-a-real-key-3d90ab"

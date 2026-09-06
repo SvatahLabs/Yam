@@ -29,7 +29,7 @@ import type {
   TargetRef,
 } from "@svatah/schema";
 import type { AgentSurface, SnapshotNode } from "@svatah/surface";
-import { CheckError } from "@svatah/surface";
+import { CheckError, isWindowChrome } from "@svatah/surface";
 import { GuardError, candidatesTried, classify, messageOf, stackOf } from "./failure.js";
 import { DataError, type Scope } from "./scope.js";
 
@@ -172,7 +172,17 @@ export async function runStep(step: Step, context: StepContext): Promise<StepOut
   let matched: StepResult["matched"] | undefined;
   try {
     if (step.target !== undefined) {
-      matched = await resolveTarget(context, step.target, surface);
+      /*
+       * A step that asserts an element is *not there* does not resolve it here
+       * (T12.7). `evaluate` does, and takes a `locator` failure as the answer;
+       * resolving up front would turn "…should be absent" into the one
+       * assertion that can never pass. See `meansAbsence`.
+       */
+      if (meansAbsence(step)) {
+        matched = await resolveTarget(context, step.target, surface).catch(() => undefined);
+      } else {
+        matched = await resolveTarget(context, step.target, surface);
+      }
     }
     const target2 =
       step.target2 === undefined ? undefined : await resolveTarget(context, step.target2, surface);
@@ -351,6 +361,28 @@ function capture(
   return { [step.capture.name]: value };
 }
 
+/**
+ * Does this predicate *mean* "not there"? (T12.7)
+ *
+ * `absent` and `hidden`, un-negated. `should not be absent` is the opposite
+ * claim and keeps the resolver's failure, because an element nobody can find is
+ * exactly what that sentence says must not be the case.
+ */
+function predicateMeansAbsence(predicate: Predicate): boolean {
+  const one = predicate as { kind: string; negate?: boolean };
+  return one.negate !== true && (one.kind === "absent" || one.kind === "hidden");
+}
+
+/** Is this step an expectation that its own target is not there? */
+function meansAbsence(step: Step): boolean {
+  return (
+    step.action === "expect" &&
+    step.expect?.subject === "target" &&
+    step.guard === undefined &&
+    predicateMeansAbsence(step.expect.predicate)
+  );
+}
+
 /* ── predicates ───────────────────────────────────────────────────────────── */
 
 /**
@@ -378,10 +410,32 @@ async function evaluate(
   }
 
   const element = about.target ?? step.target;
-  const ref =
-    subject === "target" && element !== undefined
-      ? (await resolveTarget(context, element, context.surface)).ref
-      : undefined;
+  /*
+   * "…should be absent" is the sentence for an element that is not there, and
+   * an element that is not there does not resolve (T12.7).
+   *
+   * Until now the resolver's `locator` failure came first, so the one predicate
+   * whose *whole meaning* is "I could not find it" could only pass when a stale
+   * reference happened to survive — which is to say, almost never. The Surface
+   * explorer's alert is the case that found it: it is on the screen while the
+   * intent is empty and gone once it is not, and the sentence that says so
+   * failed with "matched nothing", which is the answer rather than the error.
+   *
+   * Only for `absent` and `hidden`, and only when the *resolution* is what
+   * failed. Every other predicate keeps the old behaviour, because "the sign in
+   * button should be visible" against an element nobody can find is a locator
+   * failure and saying anything else would hide it.
+   */
+  const meansNotThere = subject === "target" && predicateMeansAbsence(predicate);
+  let ref: Ref | undefined;
+  if (subject === "target" && element !== undefined) {
+    try {
+      ref = (await resolveTarget(context, element, context.surface)).ref;
+    } catch (error) {
+      if (!meansNotThere || classify(error) !== "locator") throw error;
+      return true;
+    }
+  }
 
   const resolved = resolvePredicateValue(predicate, context.scope);
   const result = await context.surface.check(
@@ -404,10 +458,19 @@ async function evaluate(
  * means, and `element` is the whole tree.
  */
 const SET_ROLES: Readonly<Record<string, readonly string[]>> = {
+  /*
+   * `control` is what a person operates, and a `<select>`'s own options are
+   * not: they are reached through the select, and macOS publishes exactly one
+   * of them — the selected one, with no title of its own — so "every control
+   * has a name" failed on an artefact of the platform's pop-up button rather
+   * than on anything the application did. `item` is the noun for a row of a
+   * list, and it has `option` in it, so a sentence that really is about the
+   * command palette's rows still has one.
+   */
   control: [
     "button", "link", "textbox", "searchbox", "checkbox", "radio", "combobox",
     "listbox", "menuitem", "menuitemcheckbox", "menuitemradio", "tab", "switch",
-    "slider", "spinbutton", "option",
+    "slider", "spinbutton",
   ],
   button: ["button"],
   link: ["link"],
@@ -422,9 +485,25 @@ const SET_ROLES: Readonly<Record<string, readonly string[]>> = {
   element: [],
 };
 
-/** Is this node a member of the set the sentence named? */
+/**
+ * Is this node a member of the set the sentence named?
+ *
+ * **Standard window chrome is not**, and for the reason the desktop conformance
+ * case gives (P10-F2): the window's close, minimise and zoom buttons are the
+ * *window manager's*, not the application's. macOS creates them, names them by
+ * subrole, and gives an application no way to put an identifier on them — so
+ * "every button on this screen has an id" would fail on every macOS window that
+ * has ever existed, which is a rule about the platform rather than about the
+ * application. `isWindowChrome` is the same closed list the conformance case
+ * uses, deliberately shared rather than restated.
+ *
+ * `element` is the exception to the exception: it means every node in the
+ * snapshot, chrome included, because a sentence that says `element` is asking
+ * about the tree rather than about the application's own controls.
+ */
 function inSet(node: SnapshotNode, of: string): boolean {
   if (of === "element") return true;
+  if (isWindowChrome(node)) return false;
   if (of === "text") return textOf(node) !== "";
   return (SET_ROLES[of] ?? []).includes(node.role);
 }
@@ -581,9 +660,15 @@ async function evaluateSet(
   );
   if (offenders.length === 0) return true;
 
+  /*
+   * The message reads as the sentence does. `describePredicate` already says
+   * "not attribute …" for a negated predicate, so prefixing "did not" spelled
+   * a double negative at exactly the moment somebody is trying to work out what
+   * went wrong.
+   */
   throw new CheckError(
     `${offenders.length} of ${members.length} ${spec.of}(s) ${where} ` +
-      `${spec.quantifier === "every" ? "did not" : "did"} ${describePredicate(wanted)}: ` +
+      `${spec.quantifier === "every" ? "failed" : "matched"} ${describePredicate(wanted)}: ` +
       offenders.slice(0, 5).map(describeNode).join(", ") +
       (offenders.length > 5 ? `, and ${offenders.length - 5} more` : ""),
   );
