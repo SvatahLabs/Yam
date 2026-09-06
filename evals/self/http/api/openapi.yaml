@@ -1,0 +1,9 @@
+# The description the SDK and the generated clients are made from.
+name: "openapi"
+method: GET
+url: "{data.service.url}/openapi.json"
+headers:
+  accept: "application/json"
+  authorization: "Bearer {data.service.token}"
+followRedirects: true
+timeoutMs: 15000

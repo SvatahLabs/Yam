@@ -1,0 +1,13 @@
+# Where the service is, and how to be let in (T12.7).
+#
+# `scripts/self-http.mjs` starts `svatah serve`, reads `url=` and `token=` off
+# its first line of stdout, and puts both here through the environment. The
+# token is declared a secret, so it is redacted in results, audit lines and
+# anything a model could ever see (REQ-NFR-6) — which matters because every
+# request below carries it in an `Authorization` header.
+service:
+  url: "${SVATAH_SELF_SERVICE_URL}"
+  token: "${SVATAH_SELF_SERVICE_TOKEN}"
+
+secrets:
+  - service.token

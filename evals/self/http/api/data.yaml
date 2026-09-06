@@ -1,0 +1,9 @@
+# Run data, with every secret named and none of them valued (REQ-NFR-6).
+name: "data"
+method: GET
+url: "{data.service.url}/data"
+headers:
+  accept: "application/json"
+  authorization: "Bearer {data.service.token}"
+followRedirects: true
+timeoutMs: 15000

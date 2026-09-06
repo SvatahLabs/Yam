@@ -1,0 +1,74 @@
+# The local service, asked the questions the ADE asks it (T12.7, LLD §13.9).
+#
+# > flows … over the HTTP adapter against the local service, with JSON-path
+# > expectations
+#
+# Every assertion here is pattern 19's `Wait for the "<name>" API to answer
+# "<path>" to …`, which Draft 2.15 added. That is not decoration: the sentence
+# was written *because* the self suite needed to say things about a service's
+# answer, and a flow that used a capture and a guard instead would be saying the
+# same thing in two steps and asserting it in neither.
+#
+# ## What is deliberately not asserted
+#
+# The run history. `/runs` is whatever is in `evals/fixtures/runs`, which git
+# does not carry, so a clean checkout has none — and a check that reads better
+# on the machine that happens to have run something is not a check.
+
+story: the service says it is alive, and which project it is serving
+  Wait for the "health" API to answer "$.ok" to be "true"
+  Wait for the "health" API to answer "$.project" to contain "evals/fixtures"
+
+story: the service describes the project the ADE would open
+  Wait for the "project" API to answer "$.config.project" to be "svatah-fixtures"
+  Wait for the "project" API to answer "$.config.adapter" to be "playwright"
+  Wait for the "project" API to answer "$.root" to contain "evals/fixtures"
+
+story: the service compiles the project and answers with the plan
+  Wait for the "plan" API to answer "$.project" to be "svatah-fixtures"
+  Wait for the "plan" API to answer "$.schemaVersion" to be "1.0.0"
+  Wait for the "plan" API to answer "$.stories.0.name" to be "book a slot"
+  Wait for the "plan" API to answer "$.stories.0.steps.0.action" to be "click"
+
+story: the service reads the bindings store the Bindings screen shows
+  Wait for the "bindings" API to answer "$.0.id" to be "app.bookings-link"
+  Wait for the "bindings" API to answer "$.0.file" to contain "bindings/app/bookings-link.yaml"
+
+story: the service names every secret and values none of them
+  Wait for the "data" API to answer "$.values.user.email" to be "connected2atul@gmail.com"
+  Wait for the "data" API to answer "$.secrets.0" to be "user.password"
+  Wait for the "data" API to answer "$.values.user.password" to contain "redacted"
+  Wait for the "data" API to answer "$.secretSources['user.password'].reads" to be "SVATAH_SAMPLE_PASSWORD"
+
+# The fixtures project exposes no story as a tool, and the answer says so as two
+# empty lists rather than as an absence — which is the difference between "no
+# tools" and "the route did not answer".
+story: the service says which stories an agent may call
+  Wait for the "tools" API to answer "$.tools.tools" to be "[]"
+  Wait for the "tools" API to answer "$.tools.refused" to be "[]"
+  Call the "tools" API
+
+story: the service publishes the description its clients are generated from
+  Wait for the "openapi" API to answer "$.openapi" to contain "3."
+  Wait for the "openapi" API to answer "$.paths['/health'].get.summary" to contain "Liveness"
+
+# The one route that must *refuse*.
+#
+# Bound to loopback is not the same as safe: anything on the machine can reach
+# 127.0.0.1, so every route but `/health` and `/openapi.json` needs the bearer
+# token the service printed when it started (LLD §13.5). This request carries no
+# `authorization` header, and what it must get back is a refusal with a sentence
+# in it rather than a project.
+story: the service refuses a request with no token, and says why
+  Wait for the "unauthorised" API to answer "$.error" to be "unauthorised"
+  Wait for the "unauthorised" API to answer "$.message" to contain "bearer token"
+
+test: the local service over the HTTP adapter
+  the service says it is alive, and which project it is serving
+  the service describes the project the ADE would open
+  the service compiles the project and answers with the plan
+  the service reads the bindings store the Bindings screen shows
+  the service names every secret and values none of them
+  the service says which stories an agent may call
+  the service publishes the description its clients are generated from
+  the service refuses a request with no token, and says why

@@ -14,6 +14,7 @@
 import { registerPlaywrightAdapter } from "@svatah/adapter-playwright";
 import { registerBidiAdapter } from "@svatah/adapter-bidi";
 import { registerAppiumAdapter } from "@svatah/adapter-appium";
+import { registerHttpAdapter } from "@svatah/adapter-http";
 import { registerAxAdapter } from "@svatah/adapter-ax";
 import { registerUiaAdapter } from "@svatah/adapter-uia";
 
@@ -33,5 +34,17 @@ export function registerAllAdapters(): void {
    */
   registerAxAdapter();
   registerUiaAdapter();
+  /*
+   * The HTTP adapter as a *surface*, not only as the `api` runner (T12.7).
+   *
+   * `createSurface` has taken `http` since LLD §2.4 was written and nothing
+   * registered one, so `adapter: http` in a config answered "No adapter
+   * registered under \"http\"" — which reads like a missing install and is not.
+   * The self suite's HTTP side is the first project to open a session on it
+   * (LLD §13.9): a flow whose every step is `Call the "…" API` or `Wait for the
+   * "…" API to answer …` needs a session of some kind, and this is the one it
+   * needs.
+   */
+  registerHttpAdapter();
   registered = true;
 }

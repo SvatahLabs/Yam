@@ -1,0 +1,53 @@
+# The local service, through the HTTP adapter (T12.7, REQ-SELF-1, LLD §13.9).
+#
+# > flows … over the HTTP adapter against the local service
+#
+# This is the "D5" the Phase 11 verification carried: the self suite catalogued
+# an HTTP side and did not have one. It is written now, and it is written in the
+# language rather than in a script — every step below is a sentence, and every
+# assertion is pattern 19's `Wait for the "<name>" API to answer "<path>" …`,
+# which Draft 2.15 added for exactly this.
+#
+# ## Why the URL and the token come from the environment
+#
+# The service binds to loopback on a port it is given and prints a bearer token
+# it generated (LLD §13.5). Neither is knowable when this file is written, so
+# `scripts/self-http.mjs` starts one, reads both off its stdout, and puts them
+# in the environment this project's `data.yaml` reads. The token is a secret and
+# is declared as one, so it never reaches a result, an audit line or a
+# screenshot (REQ-NFR-6).
+#
+# ## Why it is not in the check catalogue
+#
+# LLD §13.9 Draft 2.15: "The HTTP and SDK sides of the self suite are written,
+# not catalogued." There is no second oracle for them yet — the service's own
+# tests are unit tests over the same functions, which would be one side twice.
+schemaVersion: "1.0.0"
+project: "svatah-self-http"
+environment: test
+adapter: http
+
+app: {}
+
+flows: { dir: flows }
+steps: { dir: ../steps }
+bindings:
+  dir: bindings
+  testIdAttributes: []
+data: { file: data.yaml }
+api: { dir: api }
+
+run:
+  workers: 1
+  headless: true
+  stepTimeoutMs: 30000
+  candidateTimeoutMs: 5000
+  screenshots: never
+  trace: false
+  outputDir: runs
+  checkpoints: false
+  audit: true
+
+compile: { confidenceThreshold: 0.8 }
+record: { model: "none", maxSnapshotTokens: 4000, visionFallback: false }
+heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }

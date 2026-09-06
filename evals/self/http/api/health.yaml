@@ -1,0 +1,9 @@
+# Liveness. The one route the service answers without a token (LLD §13.5).
+name: "health"
+method: GET
+url: "{data.service.url}/health"
+headers:
+  accept: "application/json"
+  authorization: "Bearer {data.service.token}"
+followRedirects: true
+timeoutMs: 15000

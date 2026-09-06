@@ -1,0 +1,9 @@
+# The compiled plan: the stories, their steps, and the plan hash.
+name: "plan"
+method: GET
+url: "{data.service.url}/plan"
+headers:
+  accept: "application/json"
+  authorization: "Bearer {data.service.token}"
+followRedirects: true
+timeoutMs: 15000

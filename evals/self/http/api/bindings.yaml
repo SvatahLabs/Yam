@@ -1,0 +1,9 @@
+# The bindings store, as the Bindings screen reads it.
+name: "bindings"
+method: GET
+url: "{data.service.url}/bindings"
+headers:
+  accept: "application/json"
+  authorization: "Bearer {data.service.token}"
+followRedirects: true
+timeoutMs: 15000

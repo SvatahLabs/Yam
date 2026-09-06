@@ -1,10 +1,10 @@
 # Desktop conformance — `ax`
 
-Run at 2026-09-06T10:21:09.903Z on darwin arm64, Node v25.6.1.
+Run at 2026-09-06T19:27:48.464Z on darwin arm64, Node v25.6.1.
 
 **Conformant.** 10 cases passed across ADE variants 0, 1 and 2 (REQ-SURF-3, REQ-ADE-6).
 
-Bridge (LLD §7.5): the largest window read was **1017 nodes in 1491 ms — 1.47 ms per node**, 16277 accessibility calls, 1 process invocation per snapshot, at **load average 4.19 over 8 CPUs**.
+Bridge (LLD §7.5): the largest window read was **1017 nodes in 1461 ms — 1.44 ms per node**, 16277 accessibility calls, 1 process invocation per snapshot, at **load average 3.88 over 8 CPUs**.
 
 No variant's window read exceeded the bridge's deadline, so nothing was retried.
 
@@ -18,10 +18,10 @@ No variant's window read exceeded the bridge's deadline, so nothing was retried.
 ## ADE variant 0
 
 
-Run at 2026-09-06T10:19:51.123Z · 38990 ms
+Run at 2026-09-06T19:26:38.655Z · 36859 ms
 
 
-Bridge: the largest window read was 1017 nodes in 1491 ms (1.47 ms per node, 16277 accessibility calls, 1 process invocation, load average 4.19 over 8 CPUs).
+Bridge: the largest window read was 1017 nodes in 1461 ms (1.44 ms per node, 16277 accessibility calls, 1 process invocation, load average 3.88 over 8 CPUs).
 
 **Conformant.** 8 cases passed, 2 skipped, 42 checks.
 
@@ -41,10 +41,10 @@ Bridge: the largest window read was 1017 nodes in 1491 ms (1.47 ms per node, 162
 ## ADE variant 1
 
 
-Run at 2026-09-06T10:20:32.648Z · 15651 ms
+Run at 2026-09-06T19:27:17.758Z · 13790 ms
 
 
-Bridge: the largest window read was 340 nodes in 1024 ms (3.01 ms per node, 5445 accessibility calls, 1 process invocation, load average 5.24 over 8 CPUs).
+Bridge: the largest window read was 340 nodes in 585 ms (1.72 ms per node, 5445 accessibility calls, 1 process invocation, load average 3.67 over 8 CPUs).
 
 **Conformant.** 1 cases passed, 9 skipped, 4 checks.
 
@@ -64,10 +64,10 @@ Bridge: the largest window read was 340 nodes in 1024 ms (3.01 ms per node, 5445
 ## ADE variant 2
 
 
-Run at 2026-09-06T10:20:50.829Z · 18551 ms
+Run at 2026-09-06T19:27:33.773Z · 14165 ms
 
 
-Bridge: the largest window read was 340 nodes in 1959 ms (5.76 ms per node, 5445 accessibility calls, 1 process invocation, load average 5.05 over 8 CPUs).
+Bridge: the largest window read was 340 nodes in 585 ms (1.72 ms per node, 5445 accessibility calls, 1 process invocation, load average 3.8 over 8 CPUs).
 
 **Conformant.** 1 cases passed, 9 skipped, 5 checks.
 

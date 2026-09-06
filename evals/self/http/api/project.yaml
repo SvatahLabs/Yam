@@ -1,0 +1,9 @@
+# Project discovery: the name, the root, and the adapter the config names.
+name: "project"
+method: GET
+url: "{data.service.url}/project"
+headers:
+  accept: "application/json"
+  authorization: "Bearer {data.service.token}"
+followRedirects: true
+timeoutMs: 15000

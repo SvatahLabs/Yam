@@ -1,0 +1,12 @@
+# The same route with no token: 401, and a sentence saying why (LLD §13.5).
+#
+# It carries no `authorization` header on purpose. A service that answered this
+# would be one anything on the machine could drive, which is the thing binding
+# to loopback does not protect against.
+name: "unauthorised"
+method: GET
+url: "{data.service.url}/project"
+headers:
+  accept: "application/json"
+followRedirects: true
+timeoutMs: 15000

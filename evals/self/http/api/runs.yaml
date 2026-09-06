@@ -1,0 +1,9 @@
+# The run history, newest first, as the Runs screen reads it.
+name: "runs"
+method: GET
+url: "{data.service.url}/runs"
+headers:
+  accept: "application/json"
+  authorization: "Bearer {data.service.token}"
+followRedirects: true
+timeoutMs: 15000

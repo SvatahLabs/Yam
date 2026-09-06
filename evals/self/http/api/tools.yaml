@@ -1,0 +1,9 @@
+# The stories an agent may call, and why the rest are refused.
+name: "tools"
+method: GET
+url: "{data.service.url}/tools"
+headers:
+  accept: "application/json"
+  authorization: "Bearer {data.service.token}"
+followRedirects: true
+timeoutMs: 15000
