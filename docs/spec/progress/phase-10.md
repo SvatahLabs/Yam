@@ -106,9 +106,14 @@ Both were in the ADE's Playwright cases and both turned out to be real:
    whole run with a 400 before it starts (REQ-AUTO-5), which is the right
    answer.
 
-And one in the tests only: `goTo` waited on `getByRole("heading", …)`, which the
-Runs screen's inspector satisfies with its own `<h3>Run 00mt…</h3>` while the
-workspace shows something else. It waits on the workspace's title now.
+And three in the tests only, each of which had cost a green run somewhere:
+`goTo` waited on `getByRole("heading", …)`, which the Runs screen's inspector
+satisfies with its own `<h3>Run 00mt…</h3>` while the workspace shows something
+else; the filter case's "click back to `all`" loop was unbounded and raced the
+re-render; and `stopLeftovers` sent a signal without waiting for the process to
+go, so a launch could attach to an ADE that was on its way out — the same thing
+the desktop gate learned in Phase 8 (P8-F1). All three are fixed and the
+packaged spec runs three times in a row with no manual cleanup.
 
 ## The Phase 9 corrections (P9-F1..F7, together T10.4's first half)
 
