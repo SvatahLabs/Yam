@@ -11,6 +11,7 @@
  * loading the compiler, and `yam --help` should not load anything at all.
  */
 import {
+  boolOption,
   EXIT,
   inputOptions,
   parseArgs,
@@ -382,7 +383,14 @@ async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Pro
     case "repl":
       return await (await import("./commands/repl.js")).replCommand(args, io);
     case "mcp":
-      return await (await import("./commands/mcp.js")).mcpCommand(args, io);
+      /*
+       * One command, two transports (T21, SF-08). `--http` is the same tool
+       * surface over Streamable HTTP, for a client that cannot spawn a process;
+       * without it, stdio, which stays independently usable.
+       */
+      return boolOption(args, "http")
+        ? await (await import("./commands/mcp-http.js")).httpMcpCommand(args, io)
+        : await (await import("./commands/mcp.js")).mcpCommand(args, io);
     case "workflow":
       return await (await import("./commands/workflow.js")).workflowCommand(args, io);
     case "tool":

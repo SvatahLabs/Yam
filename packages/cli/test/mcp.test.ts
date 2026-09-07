@@ -21,9 +21,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { startSampleApp, type SampleServer } from "sample-web";
 import { checkTrajectory, readTrajectory } from "@svatah/yam-trajectory";
 import { buildMcpServer } from "../src/commands/mcp.js";
+import { MCP_CORPUS } from "./mcp-corpus.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
@@ -548,6 +550,37 @@ describe("an agent binds and repairs (REQ-AGT-2, Draft 2.24)", () => {
       await session.close();
     }
   }, 240_000);
+});
+
+/**
+ * The conformance corpus, over the transport an ordinary MCP client uses to
+ * start a server it owns (T21, SF-07, SF-08).
+ *
+ * SF-07 asks for "the actual subprocess transport" and the reason is wave 3's
+ * second defect: an MCP server that had never been run as one, because every
+ * test used the in-memory pair. The corpus is the same list `mcp-http.test.ts`
+ * runs, imported rather than copied — the one property a second transport has
+ * to establish is that it is the *same* server, and two copies of a corpus
+ * cannot establish it for long.
+ */
+describe("the conformance corpus over stdio (SF-07, SF-08)", () => {
+  for (const one of MCP_CORPUS) {
+    it(one.name, async () => {
+      const transport = new StdioClientTransport({
+        command: process.execPath,
+        args: [join(ROOT, "packages", "cli", "dist", "bin.js"), "mcp"],
+        cwd: ROOT,
+        stderr: "ignore",
+      });
+      const client = new Client({ name: "corpus-stdio", version: "0" });
+      await client.connect(transport);
+      try {
+        await one.run(client, { sampleUrl: app.origin });
+      } finally {
+        await client.close().catch(() => undefined);
+      }
+    }, 180_000);
+  }
 });
 
 describe("an agent and the command line share one broker (T11, T16, SF-05, SF-13)", () => {

@@ -242,11 +242,38 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
     });
   };
 
-  const text = (value: unknown) => ({
-    content: [
-      { type: "text" as const, text: typeof value === "string" ? value : JSON.stringify(value, null, 2) },
-    ],
-  });
+  /**
+   * An envelope, as an MCP tool result — and a failed one as a tool *error*
+   * (T21, SF-07, design.md "One public contract").
+   *
+   * > MCP maps the envelope into `structuredContent` and compatible text;
+   * > failed/refused tool executions carry `isError: true`.
+   *
+   * The second half of that sentence was not kept. Every surface tool answered
+   * `isError: undefined` whatever the envelope said, so a client's own
+   * error handling — which is what `isError` exists for — never fired: a
+   * `CHECK_FAILED`, a `STALE_REFERENCE` and a `CONTROL_BUSY` all arrived as
+   * successful tool calls whose text happened to describe a refusal. An agent
+   * that trusted the protocol rather than parsing the body was told every call
+   * worked.
+   *
+   * Derived from the envelope's own `status`, so it cannot drift from the
+   * outcome vocabulary, and only for envelopes: a tool that answers something
+   * else is unaffected.
+   */
+  const text = (value: unknown) => {
+    const status = (value as { status?: unknown } | null)?.status;
+    const failed = status === "failed" || status === "refused";
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: typeof value === "string" ? value : JSON.stringify(value, null, 2),
+        },
+      ],
+      ...(failed ? { isError: true as const } : {}),
+    };
+  };
 
   /* ── the operation tools (LLD §15) ──────────────────────────────────────── */
 
@@ -608,15 +635,41 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
           .string()
           .optional()
           .describe("Join a browser that is already running, by its DevTools endpoint"),
-        adapter: z.string().optional().describe("Adapter to use (playwright, bidi, appium, uia, ax, http)"),
+        adapter: z
+          .string()
+          .optional()
+          .describe("Adapter to use (playwright, bidi, appium, uia, ax, http, process)"),
         headed: z.boolean().optional().describe("Run in headed mode"),
+        /*
+         * How to start the target, as the design's typed nested object (T22).
+         * Each adapter reads the fields that mean something to it: a bundle to a
+         * desktop adapter, arguments and a readable root to a terminal.
+         */
+        launch: z
+          .object({
+            bundle: z.string().min(1).optional(),
+            path: z
+              .string()
+              .min(1)
+              .optional()
+              .describe("Where it runs; for a terminal, the only directory that session may read"),
+            args: z.array(z.string()).optional().describe("The program's arguments"),
+            env: z.record(z.string().min(1), z.string()).optional(),
+            timeoutMs: z.number().int().positive().optional(),
+            size: z
+              .tuple([z.number().int().positive(), z.number().int().positive()])
+              .optional()
+              .describe("Window size, or a terminal's columns and rows"),
+          })
+          .optional()
+          .describe("How to start the target"),
         intent: OPTIONAL_INTENT,
       },
     },
     // `intent` is accepted and unused here: connect starts a session, and a
     // sentence describes a step. Taking it keeps one shape across the tools.
-    async ({ url, app, attach, adapter, headed }) => {
-      const result = await call("connect", { url, app, attach, adapter, headed });
+    async ({ url, app, attach, adapter, headed, launch }) => {
+      const result = await call("connect", { url, app, attach, adapter, headed, launch });
       io.err(`surface session opened: ${(result as { result?: { sessionId?: string } }).result?.sessionId}`);
       return text(result);
     },
