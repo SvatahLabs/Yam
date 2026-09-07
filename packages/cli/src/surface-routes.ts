@@ -10,13 +10,7 @@
  * HTTP client and a person at a terminal address the same sessions rather than
  * two parallel worlds.
  */
-import {
-  OPERATIONS,
-  brokerAlive,
-  callBroker,
-  discoverBroker,
-  type BrokerOperation,
-} from "@svatah/yam-surface-control";
+import { OPERATIONS, callBroker, type BrokerOperation } from "@svatah/yam-surface-control";
 
 /** One route the service can register, per catalogue operation. */
 export interface SurfaceRoute {
@@ -38,9 +32,22 @@ export function surfaceRoutes(start: () => Promise<{ url: string; token: string 
     method: operation.service.method,
     path: operation.service.path,
     async run(args: Record<string, unknown>): Promise<unknown> {
-      const found = discoverBroker();
-      const broker = found !== undefined && (await brokerAlive(found)) ? found : await start();
-      return await callBroker(broker, operation.name as BrokerOperation, args);
+      /*
+       * One place decides how a broker comes to exist (T00).
+       *
+       * This route used to make the decision a second time — discover, ask
+       * whether it is alive, and start one if the answer was no — with a
+       * two-second deadline standing in for "is it there". A broker launching
+       * a browser for somebody else answers no, and the service then started a
+       * *second* broker on the machine while the first still held every open
+       * session. That is the desktop half of the race that made the outer
+       * session disappear mid-run: the application's own service asking for a
+       * broker at the same moment as the command line driving it.
+       *
+       * `start` is `connectToBroker`, which discovers, distinguishes busy from
+       * gone, and takes an exclusive lock before starting anything.
+       */
+      return await callBroker(await start(), operation.name as BrokerOperation, args);
     },
   }));
 }

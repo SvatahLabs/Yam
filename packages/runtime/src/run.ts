@@ -648,6 +648,7 @@ function storyContext(
     ...(options.api === undefined ? {} : { api: options.api }),
     invoke,
     stepTimeoutMs: options.config.run.stepTimeoutMs,
+    expectTimeoutMs: options.config.run.expectTimeoutMs,
     screenshots: options.config.run.screenshots,
     ...(options.directory === undefined
       ? {}

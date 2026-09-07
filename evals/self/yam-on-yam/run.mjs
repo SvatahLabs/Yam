@@ -39,11 +39,24 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { startSampleApp } from "sample-web";
-import { ROOT, launchPackagedYam, packagedApp, awaitAxWindow, PROCESS_NAME } from "./launch.mjs";
+import {
+  ROOT,
+  launchPackagedYam,
+  packagedApp,
+  awaitAxWindow,
+  stagedContract,
+  PROCESS_NAME,
+} from "./launch.mjs";
 import { cliDriver, mcpDriver } from "./drivers.mjs";
 import { primaryJourney, JOURNEY_CHECKS } from "./journey.mjs";
-import { negativeCases } from "./negatives.mjs";
-import { windowOracles, fileHashes, changedFiles } from "./oracles.mjs";
+import { negativeCases, negativeChecks } from "./negatives.mjs";
+import { terminalCases, TERMINAL_CHECKS } from "./terminal.mjs";
+import {
+  windowOracles,
+  fileHashes,
+  changedFiles,
+  WINDOW_ORACLE_CHECKS,
+} from "./oracles.mjs";
 
 const OUT =
   process.env["YAM_ON_YAM_EVIDENCE_DIR"] === undefined
@@ -159,23 +172,79 @@ const NEEDS_THE_APP = [
   "oracles",
 ];
 
+/** The two checks the launch pass itself makes. */
+const LAUNCH_CHECKS = [
+  "the packaged application starts and publishes a window",
+  "the packaged application speaks this build's contract",
+];
+
+/**
+ * Every check this suite makes, per pass — the denominator, declared (SF-21,
+ * T00).
+ *
+ * A host that cannot launch the application used to report *one* blocked row
+ * per pass: seven rows where a healthy run reports ninety-two. So `attempted`
+ * meant "however far this host got", which is the one thing SF-21's vocabulary
+ * exists to prevent. The counts are now the same number on every host, and what
+ * differs between them is how many of those checks are `blocked` and with which
+ * of the host's own sentences.
+ */
+const CHECKS_OF = {
+  launch: LAUNCH_CHECKS,
+  "cli-browser": JOURNEY_CHECKS,
+  "mcp-browser": JOURNEY_CHECKS,
+  "cli-ax": JOURNEY_CHECKS,
+  "mcp-ax": JOURNEY_CHECKS,
+  "negative-cli": negativeChecks("cli"),
+  "negative-mcp": negativeChecks("mcp"),
+  oracles: WINDOW_ORACLE_CHECKS,
+  "cli-terminal": TERMINAL_CHECKS,
+  "mcp-terminal": TERMINAL_CHECKS,
+};
+
+/** Block every check of every pass that needs an application this host has not got. */
+const blockEverything = (reason) => {
+  for (const name of LAUNCH_CHECKS) blockPass("launch", name, reason);
+  for (const pass of NEEDS_THE_APP) {
+    for (const name of CHECKS_OF[pass]) blockPass(pass, name, reason);
+  }
+};
+
 try {
   if (!app.present) {
-    for (const pass of NEEDS_THE_APP) {
-      blockPass(pass, "the packaged application is driven", app.reason);
-    }
+    blockEverything(app.reason);
   } else {
     launched = await timed("app.launch-to-window", async () => await launchPackagedYam());
     if (!launched.launched) {
-      for (const pass of NEEDS_THE_APP) {
-        blockPass(pass, "the packaged application is driven", launched.reason);
-      }
+      blockEverything(launched.reason);
     } else {
       record({
         pass: "launch",
         name: "the packaged application starts and publishes a window",
         ok: true,
         detail: `${app.bundle} on ${launched.cdpUrl}`,
+      });
+
+      /*
+       * The application and the suite are the same Yam (T00, SF-03).
+       *
+       * The application's own service reaches the same broker through the same
+       * catalogue, using the copy of the command line staged inside the bundle.
+       * If that copy speaks a different contract the service will *stop* the
+       * broker this suite is driving through and start a replacement — and the
+       * outer session then answers `SESSION_NOT_FOUND` halfway through a pass,
+       * which reads exactly like a defect in Yam and is a stale build.
+       *
+       * A check rather than a guard, because it belongs in the denominator: a
+       * run on a mismatched bundle should say so in its counts, not quietly do
+       * something else.
+       */
+      const staged = await stagedContract();
+      record({
+        pass: "launch",
+        name: "the packaged application speaks this build's contract",
+        ok: staged.agrees === true,
+        detail: staged.agrees === true ? `contract ${staged.contract}` : staged.reason,
       });
 
       /*
@@ -321,6 +390,47 @@ try {
     }
   }
 
+  /* ── the terminal: Yam driving its own command line and cockpit (T22) ──── */
+  /*
+   * Outside the `if (app.present)` above on purpose. A terminal is a surface a
+   * host either can or cannot allocate, and that is a different question from
+   * whether a desktop bundle was built — so this pass runs on a host with no
+   * packaged application, and is blocked with the *pty probe's* own sentence on
+   * a host with no pseudo-terminal.
+   */
+  const { ptyReadiness } = await import("@svatah/yam-adapter-process");
+  const pty = ptyReadiness();
+  for (const pass of [
+    { label: "cli-terminal", interface: "CLI" },
+    { label: "mcp-terminal", interface: "MCP" },
+  ]) {
+    if (wanted !== undefined && !wanted.has(pass.label)) continue;
+    console.log(`\n── ${pass.label} (${pass.interface}, a pseudo-terminal) ──`);
+    const driver =
+      pass.interface === "CLI"
+        ? cliDriver({ transcript, holder: "yam cli" })
+        : await mcpDriver({ transcript, name: "yam-on-yam-agent" });
+    try {
+      await timed(pass.label, async () =>
+        await terminalCases({
+          driver,
+          record,
+          label: pass.label,
+          ...(pty.ready ? {} : { blockedReason: pty.reason }),
+        }),
+      );
+    } catch (error) {
+      record({
+        pass: pass.label,
+        name: "the pass runs to the end",
+        ok: false,
+        detail: error instanceof Error ? `${error.message}`.slice(0, 300) : String(error),
+      });
+    } finally {
+      await driver.close();
+    }
+  }
+
   /* ── the fixture project is byte-for-byte unchanged ───────────────────── */
   const fixtures = join(ROOT, "evals", "fixtures");
   const after = fileHashes(fixtures);
@@ -343,7 +453,15 @@ try {
    */
   if (wanted === undefined) {
     const ran = [...new Set(results.map((one) => one.pass))].filter((one) => one !== "launch");
-    const unaccounted = ran.filter((one) => !NEEDS_THE_APP.includes(one));
+    /*
+     * The terminal passes do not need the application and are blocked by their
+     * own probe, so they are accounted for here rather than in `NEEDS_THE_APP`
+     * — which is a list about the *bundle*, not about every pass.
+     */
+    const OWN_READINESS = ["cli-terminal", "mcp-terminal"];
+    const unaccounted = ran.filter(
+      (one) => !NEEDS_THE_APP.includes(one) && !OWN_READINESS.includes(one),
+    );
     record({
       pass: "oracles",
       name: "every pass that ran is one a host without the application would report as blocked",
@@ -406,4 +524,31 @@ console.log(
   `\n${passed} of ${reached} reached check(s) passed; ${blocked} blocked; ` +
     `${attempted} attempted → ${join(OUT, "yam-on-yam.json")}`,
 );
-process.exit(failed === 0 ? 0 : 1);
+
+/*
+ * Three exits, because "everything was blocked" is not "everything passed"
+ * (T00, SF-21).
+ *
+ * This suite is a gate now, and a gate that exits 0 on a host that could reach
+ * nothing is a green build that proved nothing — which is the failure the whole
+ * blocked/reached vocabulary exists to prevent. So:
+ *
+ *   1  a check failed. The product, or the harness, is wrong.
+ *   2  this host could not be asked: nothing was reached beyond the two
+ *      run-level oracles, which need neither an application nor a terminal.
+ *      A caller decides whether that is tolerable; CI tolerates it and says so.
+ *   0  something was reached and nothing failed.
+ *
+ * The same three the desktop conformance gate uses, for the same reason.
+ */
+const RUN_LEVEL = 2;
+if (failed > 0) process.exit(1);
+if (reached <= RUN_LEVEL) {
+  console.log(
+    `\nNothing was reached on this host: every check is blocked. ` +
+      `The reasons are in yam-on-yam.json; the first is:\n  ` +
+      `${results.find((one) => one.blocked !== undefined)?.blocked ?? "(none recorded)"}`,
+  );
+  process.exit(2);
+}
+process.exit(0);

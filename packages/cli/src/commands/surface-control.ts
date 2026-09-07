@@ -36,8 +36,8 @@ import {
 import {
   OPERATIONS,
   SURFACE_CLI_SUBCOMMANDS,
-  brokerAlive,
-  brokerHealth,
+  acquireStartLock,
+  brokerState,
   callBroker,
   createAdapterFactory,
   discoverBroker,
@@ -47,6 +47,7 @@ import {
   writeBrokerDescriptor,
   type BrokerDescriptor,
   type BrokerOperation,
+  type StartLock,
 } from "@svatah/yam-surface-control";
 import { createSurface, listAdapters } from "@svatah/yam-surface";
 import { registerAllAdapters } from "../adapters.js";
@@ -147,74 +148,210 @@ function exitFor(result: Record<string, unknown>): ExitCode {
 }
 
 /**
- * The broker this machine is using, started if there is not one.
+ * The broker this machine is using, started if there is not one — and exactly
+ * one of it (T00, SF-05, SF-13).
  *
  * Started detached and unref'd, because it must outlive the command that
  * needed it — that is the whole point of it.
+ *
+ * ## The two ways this used to hand back a broker that was not the one holding
+ * the caller's sessions
+ *
+ * **It started a second broker.** The body was "look for a descriptor; if there
+ * is none, spawn one and wait for a descriptor to appear", with nothing between
+ * the looking and the spawning. Two clients that look at the same instant both
+ * spawn, both brokers bind a port and write `broker.json`, and the second write
+ * wins — leaving a live broker that nothing can address, holding sessions
+ * nobody can reach. Two clients ask at the same moment on every run of the
+ * Yam-on-Yam suite: the command line driving the packaged application, and the
+ * application's own service, which reaches the same broker through the same
+ * catalogue. That is why the outer session used to disappear with
+ * `SESSION_NOT_FOUND` *around the moment the application opens its own inner
+ * session* — that moment is the first time the application's service needs a
+ * broker. `acquireStartLock` makes starting one exclusive: the winner starts it,
+ * the losers wait for the descriptor it publishes.
+ *
+ * **It replaced a broker that was merely busy.** `brokerAlive` answers a
+ * boolean over a two-second deadline, and a broker launching a browser for
+ * somebody else can take longer than that to answer a health check. The old
+ * body read the `false`, removed the descriptor, and started a second broker —
+ * orphaning the first with every session on it, without ever asking whether its
+ * process was still there. `brokerState` separates the three cases, and only
+ * one of them is a reason to replace anything.
  */
 export async function connectToBroker(io: CommandIo): Promise<BrokerDescriptor> {
-  const found = discoverBroker();
-  if (found !== undefined && (await brokerAlive(found))) return found;
-  /*
-   * A descriptor whose process is gone, which answers nothing, **or which
-   * speaks a different contract** is stale (T18, SF-03).
-   *
-   * The third case is the one that had to be added. The broker outlives the
-   * commands that use it, and a machine can easily have one that a different
-   * build started — the packaged application starts its own from the copy of
-   * the CLI staged inside the bundle. Talking to it looked like it worked:
-   * arguments the older build had never heard of were dropped and the
-   * operation answered `succeeded`, on a target the caller never named.
-   *
-   * A broker that cannot serve this contract is stopped rather than reasoned
-   * with. It closes its own sessions and removes its descriptor on the signal,
-   * which is the same tidy exit `yam surface broker` performs on Ctrl-C.
-   */
-  if (found !== undefined) {
-    const health = await brokerHealth(found);
-    if (health.alive) {
-      io.err(
-        `the surface broker on this machine was started from a different build of Yam; ` +
-          `stopping it and starting one that matches.`,
-      );
-      try {
-        process.kill(found.pid, "SIGTERM");
-      } catch {
-        /* Already gone, or somebody else's; the descriptor goes either way. */
-      }
-      for (let waited = 0; waited < 10_000; waited += 100) {
-        await new Promise((done) => setTimeout(done, 100));
-        if (!(await brokerHealth(found)).alive) break;
-      }
-    }
-    removeBrokerDescriptor();
-  }
+  const deadline = Date.now() + 60_000;
+  let announcedWait = false;
+  /** What the loop was waiting for, so the deadline's message says which. */
+  let waitingFor = "a broker to start";
 
-  io.err("starting the surface broker; it holds your sessions between commands.");
-  const child = spawn(process.execPath, [yamBin(), "surface", "broker"], {
-    detached: true,
-    stdio: "ignore",
-    env: process.env,
-  });
-  child.unref();
-
-  const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
-    await new Promise((done) => setTimeout(done, 100));
-    const descriptor = discoverBroker();
-    if (descriptor !== undefined && (await brokerAlive(descriptor))) return descriptor;
+    const found = discoverBroker();
+
+    if (found !== undefined) {
+      const { state } = await brokerState(found);
+      if (state === "serving") return found;
+
+      if (state === "busy") {
+        waitingFor = `the broker at ${found.url} to answer; its process is alive and busy`;
+        /*
+         * Alive, and working for somebody else. Waiting is the whole fix: the
+         * previous behaviour was to conclude it was gone and start a rival.
+         */
+        await new Promise((done) => setTimeout(done, 250));
+        continue;
+      }
+
+      if (state === "mismatched") {
+        /*
+         * It answers, and it speaks a different contract (T18, SF-03).
+         *
+         * The broker outlives the commands that use it, and a machine can
+         * easily have one a different build started — the packaged application
+         * starts its own from the copy of the CLI staged inside the bundle.
+         * Talking to it looked like it worked: arguments the older build had
+         * never heard of were dropped and the operation answered `succeeded`,
+         * on a target the caller never named.
+         *
+         * A broker that cannot serve this contract is stopped rather than
+         * reasoned with — but under the start lock, so that stopping it and
+         * starting its replacement is one indivisible act rather than a window
+         * in which a third client can start a third broker.
+         */
+        const lock = acquireStartLock();
+        if (lock === undefined) {
+          await new Promise((done) => setTimeout(done, 250));
+          continue;
+        }
+        try {
+          const still = discoverBroker();
+          if (still === undefined || (await brokerState(still)).state !== "mismatched") continue;
+          io.err(
+            "the surface broker on this machine was started from a different build of Yam; " +
+              "stopping it and starting one that matches. Sessions opened on it are closed.",
+          );
+          try {
+            process.kill(still.pid, "SIGTERM");
+          } catch {
+            /* Already gone, or somebody else's; the descriptor goes either way. */
+          }
+          for (let waited = 0; waited < 10_000; waited += 100) {
+            await new Promise((done) => setTimeout(done, 100));
+            if ((await brokerState(still)).state === "gone") break;
+          }
+          removeBrokerDescriptor();
+          return await startBrokerProcess(io, lock, deadline);
+        } finally {
+          lock.release();
+        }
+      }
+
+      // `gone`: the descriptor is about a process that is not answering and is
+      // not there. Fall through and start one.
+      removeBrokerDescriptor();
+    }
+
+    const lock = acquireStartLock();
+    if (lock === undefined) {
+      /*
+       * Somebody else is starting one right now. Wait for *their* descriptor
+       * rather than starting a rival — this is the branch that used to be a
+       * second `spawn`.
+       */
+      waitingFor = "the broker another command on this machine is starting";
+      if (!announcedWait) {
+        io.err("waiting for the surface broker another command is starting.");
+        announcedWait = true;
+      }
+      await new Promise((done) => setTimeout(done, 100));
+      continue;
+    }
+    try {
+      /*
+       * Under the lock, look again. Between failing to find a broker and taking
+       * the lock, the process that held it may have published a perfectly good
+       * one — and starting a second on top of it is the defect this whole
+       * function exists to remove.
+       */
+      const now = discoverBroker();
+      if (now !== undefined && (await brokerState(now)).state === "serving") return now;
+      return await startBrokerProcess(io, lock, deadline);
+    } finally {
+      lock.release();
+    }
   }
+
   throw new Error(
-    "The surface broker did not start within 30 s. Run `yam surface broker` in another " +
+    `Gave up after 60 s waiting for ${waitingFor}. Run \`yam surface broker\` in another ` +
       "terminal to see what it says.",
   );
 }
 
-/** Run the broker in the foreground; the spawned process is this. */
+/**
+ * Spawn the broker and wait for it to publish itself. Called only while holding
+ * the start lock, which is what makes "one broker per machine" true.
+ */
+async function startBrokerProcess(
+  io: CommandIo,
+  lock: StartLock,
+  deadline: number,
+): Promise<BrokerDescriptor> {
+  io.err("starting the surface broker; it holds your sessions between commands.");
+  const child = spawn(process.execPath, [yamBin(), "surface", "broker"], {
+    detached: true,
+    stdio: "ignore",
+    /*
+     * The child inherits the lock's identity through the environment, so the
+     * broker it becomes can keep the lock held until it has published its
+     * descriptor — the parent command may exit before then.
+     */
+    env: { ...process.env, YAM_BROKER_START_LOCK: "held" },
+  });
+  child.unref();
+
+  while (Date.now() < deadline) {
+    await new Promise((done) => setTimeout(done, 100));
+    const descriptor = discoverBroker();
+    if (descriptor !== undefined && (await brokerState(descriptor)).state === "serving") {
+      return descriptor;
+    }
+    if (child.exitCode !== null) {
+      lock.release();
+      throw new Error(
+        `The surface broker exited with ${child.exitCode} instead of starting. Run ` +
+          "`yam surface broker` in another terminal to see what it says.",
+      );
+    }
+  }
+  throw new Error(
+    "The surface broker did not start within 60 s. Run `yam surface broker` in another " +
+      "terminal to see what it says.",
+  );
+}
+
+/**
+ * Run the broker in the foreground; the spawned process is this.
+ *
+ * It takes the start lock for itself when a person runs `yam surface broker`
+ * directly, and does not when `connectToBroker` spawned it — that caller holds
+ * the lock on its behalf until this process has published its descriptor, which
+ * is the window the lock exists to close. Without the distinction the spawned
+ * broker would wait for a lock its own parent is holding.
+ */
 async function runBroker(io: CommandIo): Promise<ExitCode> {
+  const spawnedUnderLock = process.env["YAM_BROKER_START_LOCK"] === "held";
+  let lock: StartLock | undefined;
+  if (!spawnedUnderLock) {
+    lock = acquireStartLock();
+    if (lock === undefined) {
+      io.err("another command is starting the surface broker on this machine.");
+      return EXIT.ok;
+    }
+  }
   const existing = discoverBroker();
-  if (existing !== undefined && (await brokerAlive(existing))) {
+  if (existing !== undefined && (await brokerState(existing)).state !== "gone") {
     io.err(`a broker is already running at ${existing.url}`);
+    lock?.release();
     return EXIT.ok;
   }
   const token = generateToken();
@@ -242,6 +379,14 @@ async function runBroker(io: CommandIo): Promise<ExitCode> {
     pid: process.pid,
     startedAt: new Date().toISOString(),
   });
+  /*
+   * The lock covers the decision and the publication, not the lifetime. Until
+   * the descriptor exists there is nothing for another client to find, and that
+   * gap is the race; once it exists every client finds this broker the ordinary
+   * way, and holding the lock any longer would stop a legitimate replacement of
+   * a mismatched build for ever.
+   */
+  lock?.release();
   io.err(`surface broker listening ${broker.url}`);
 
   const stop = (): void => {
@@ -305,6 +450,14 @@ function operationFor(
           attach: stringOption(args, "attach"),
           adapter: stringOption(args, "adapter"),
           headed: boolOption(args, "headed") || undefined,
+          /*
+           * How to start it, as the design's typed nested object (T22).
+           *
+           * From `--launch <json>` or from `--input`, because a program's
+           * arguments and a directory path are exactly the values `--input`
+           * exists to carry "without shell quoting hazards" (SF-06).
+           */
+          launch: launchFor(args),
         }),
       };
 
@@ -431,6 +584,30 @@ function operationFor(
     default:
       throw new Error(`Unknown surface subcommand "${sub}".`);
   }
+}
+
+/**
+ * The launch object a connect was given, from its flag or from `--input`.
+ *
+ * A flag for a small one — `--launch '{"args":["--version"]}'` is a line a
+ * person types — and `--input` for a large one, which is the same choice every
+ * other structured argument of this command family offers.
+ */
+function launchFor(args: ParsedArgs): Record<string, unknown> | undefined {
+  const flag = stringOption(args, "launch");
+  if (flag !== undefined) {
+    try {
+      return JSON.parse(flag) as Record<string, unknown>;
+    } catch (error) {
+      throw new Error(
+        `--launch is a JSON object: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+  const input = inputFor(args);
+  if (input === undefined) return undefined;
+  const nested = input["launch"];
+  return (nested === undefined ? input : nested) as Record<string, unknown>;
 }
 
 /** `--input <file>` or `--input -`, parsed; read here because the file is here. */

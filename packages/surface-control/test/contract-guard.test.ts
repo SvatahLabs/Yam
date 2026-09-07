@@ -115,6 +115,39 @@ describe("connect names one target (SF-04, T18)", () => {
   });
 });
 
+describe("a session records who owns its target (SF-05, T00)", () => {
+  /*
+   * The defect: `connect` created every session with the store's default,
+   * `launch`, whatever it had actually done. A session opened with `--attach`
+   * on somebody's running application was listed and reported as one Yam had
+   * launched — and `mode` is the field SF-05 asks the broker to publish so a
+   * caller knows whether closing the session will close the target.
+   */
+  it("calls an attached endpoint an attachment, not a launch", async () => {
+    const ctx = context();
+    await dispatchConnect(ctx, {
+      attach: "http://127.0.0.1:9222",
+      adapterFactory: async () => ctx.surface,
+    });
+    expect(ctx.sessions.list()[0]?.mode).toBe("attach");
+  });
+
+  it("calls an application it was pointed at an attachment", async () => {
+    const ctx = context();
+    await dispatchConnect(ctx, { app: "Yam", adapterFactory: async () => ctx.surface });
+    expect(ctx.sessions.list()[0]?.mode).toBe("attach");
+  });
+
+  it("still calls a target it started a launch", async () => {
+    const ctx = context();
+    await dispatchConnect(ctx, {
+      url: "http://127.0.0.1:4173",
+      adapterFactory: async () => ctx.surface,
+    });
+    expect(ctx.sessions.list()[0]?.mode).toBe("launch");
+  });
+});
+
 describe("act validates its arguments before dispatch (SF-11, T18)", () => {
   it("refuses a missing required argument as invalid input, not as a timeout", async () => {
     /*

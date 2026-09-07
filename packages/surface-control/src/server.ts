@@ -44,6 +44,7 @@ import { createReferenceStore } from "./references.js";
 import { createCoordinationStore } from "./coordination.js";
 import { createEventStore } from "./events.js";
 import { createPromotionStore } from "./promotion.js";
+import { isProcessAlive } from "./broker.js";
 import { createRedactionPolicy, type RedactionPolicy } from "./redaction.js";
 import { failedEnvelope, makeRequestId } from "./envelope.js";
 import { catalogueFingerprint } from "./catalogue.js";
@@ -276,4 +277,64 @@ export async function brokerHealth(
 export async function brokerAlive(descriptor: { url: string; token: string }): Promise<boolean> {
   const health = await brokerHealth(descriptor);
   return health.alive && health.contract === catalogueFingerprint();
+}
+
+/**
+ * What the broker at a descriptor *is*, in the three answers that lead to three
+ * different actions (T00, SF-05).
+ *
+ * `brokerAlive` collapses them into a boolean, and the collapse is what made
+ * the Yam-on-Yam suite intermittent. "Did not answer within two seconds" and
+ * "is not there" are not the same fact: the first is a broker that is busy —
+ * launching a browser for somebody else, serving a snapshot of a thousand
+ * nodes — and the caller that treats it as absent removes its descriptor and
+ * starts a second broker, orphaning every session the first one holds. The
+ * caller that knows the difference waits.
+ *
+ * | Verdict | What it means | What the caller should do |
+ * |---|---|---|
+ * | `serving` | answers, and speaks this build's contract | use it |
+ * | `busy` | did not answer in time, and its process is alive | wait for it |
+ * | `mismatched` | answers, and speaks a different contract | stop it deliberately, then start one that matches |
+ * | `gone` | refused the connection, or its process is not there | start one |
+ */
+export type BrokerState = "serving" | "busy" | "mismatched" | "gone";
+
+export async function brokerState(
+  descriptor: { url: string; token: string; pid?: number },
+  { timeoutMs = 2000 }: { timeoutMs?: number } = {},
+): Promise<{ state: BrokerState; contract?: string }> {
+  let timedOut = false;
+  try {
+    const response = await fetch(`${descriptor.url}/health`, {
+      headers: { authorization: `Bearer ${descriptor.token}` },
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    /*
+     * A broker that answers something other than 200 is not one this caller can
+     * use — 401 means the descriptor's token is not the running broker's, which
+     * is a descriptor about a process that is gone and a port somebody else now
+     * holds. Treated as `gone` so the caller replaces it rather than waiting
+     * for a broker that will never say yes.
+     */
+    if (!response.ok) return { state: "gone" };
+    const body = (await response.json()) as { contract?: unknown };
+    const contract = typeof body.contract === "string" ? body.contract : undefined;
+    return contract === catalogueFingerprint()
+      ? { state: "serving", ...(contract === undefined ? {} : { contract }) }
+      : { state: "mismatched", ...(contract === undefined ? {} : { contract }) };
+  } catch (error) {
+    timedOut =
+      error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
+  }
+  /*
+   * It did not answer. Whether that is "busy" or "gone" is a question about the
+   * *process*, not about the socket — and the descriptor carries its pid
+   * precisely so this can be asked. No pid (an old descriptor) is treated as
+   * gone, which is what it was before this distinction existed.
+   */
+  if (timedOut && descriptor.pid !== undefined && isProcessAlive(descriptor.pid)) {
+    return { state: "busy" };
+  }
+  return { state: "gone" };
 }

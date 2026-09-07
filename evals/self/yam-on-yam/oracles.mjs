@@ -61,14 +61,73 @@ export function changedFiles(before, after) {
  * *not* how Yam drove the application, and is the point: a second, independent
  * view of the same window.
  */
+/**
+ * Every check the window oracles make, in order — so the denominator does not
+ * move with the result (SF-21, T00).
+ *
+ * `axe-core confirms the in-house audit` is here as well as in the pass: on a
+ * machine with `YAM_AXE` set it is a check that runs, and without it a check
+ * that is blocked, and either way it is a row. The two checks after it are
+ * recorded by `run.mjs` rather than here, because they are about the whole run
+ * and not about the window.
+ */
+export const WINDOW_ORACLE_CHECKS = [
+  "the connect field and the Connect surface button do not overlap",
+  "a screenshot of the application is taken, and is a real image",
+  "the accessibility audit finds no violation on the application's own window",
+  "axe-core confirms the in-house audit",
+];
+
+/** The oracles that are about the run rather than about the window. */
+export const RUN_ORACLE_CHECKS = [
+  "the fixture project's files are byte-for-byte unchanged",
+  "every pass that ran is one a host without the application would report as blocked",
+];
+
 export async function windowOracles({ cdpUrl, record, label, screenshotPath, root }) {
-  const check = (name, ok, detail) => record({ pass: label, name, ok, detail });
+  const made = new Set();
+  const check = (name, ok, detail) => {
+    made.add(name);
+    record({ pass: label, name, ok, detail });
+  };
+  const blocked = (name, reason) => {
+    made.add(name);
+    record({ pass: label, name, blocked: reason });
+  };
+  let lastReached = "nothing";
+  /*
+   * Whatever went wrong above, every declared oracle is reported. An oracle
+   * that could not look is a failure that says where looking stopped — never a
+   * row that quietly leaves the count.
+   */
+  const reportTheRest = () => {
+    for (const name of WINDOW_ORACLE_CHECKS) {
+      if (made.has(name)) {
+        lastReached = name;
+        continue;
+      }
+      record({
+        pass: label,
+        name,
+        ok: false,
+        detail: `not reached: the oracles stopped after "${lastReached}"`,
+      });
+    }
+  };
+  try {
+    await runWindowOracles({ cdpUrl, check, blocked, screenshotPath, root });
+  } finally {
+    reportTheRest();
+  }
+}
+
+async function runWindowOracles({ cdpUrl, check, blocked, screenshotPath, root }) {
   let chromium;
   try {
     ({ chromium } = await import("@playwright/test"));
   } catch (error) {
     check(
-      "an independent view of the window is available",
+      "the connect field and the Connect surface button do not overlap",
       false,
       `@playwright/test did not load: ${error instanceof Error ? error.message : String(error)}`,
     );
@@ -80,7 +139,11 @@ export async function windowOracles({ cdpUrl, record, label, screenshotPath, roo
     browser = await chromium.connectOverCDP(cdpUrl);
     const page = browser.contexts()[0]?.pages()[0];
     if (page === undefined) {
-      check("an independent view of the window is available", false, "no page on the endpoint");
+      check(
+        "the connect field and the Connect surface button do not overlap",
+        false,
+        "no page on the endpoint",
+      );
       return;
     }
 
@@ -111,11 +174,10 @@ export async function windowOracles({ cdpUrl, record, label, screenshotPath, roo
       bytes = (await page.screenshot({ path: screenshotPath })).length;
     } catch (error) {
       bytes = 0;
-      check(
-        "a screenshot of the application is taken",
-        false,
-        error instanceof Error ? error.message.slice(0, 200) : String(error),
-      );
+      // The failure is reported by the declared check below, which is the row
+      // the denominator knows about; recording a second, undeclared one here
+      // is how a count comes to depend on whether something went wrong.
+      void error;
     }
     check(
       "a screenshot of the application is taken, and is a real image",
@@ -165,18 +227,22 @@ export async function windowOracles({ cdpUrl, record, label, screenshotPath, roo
             findings.map((one) => `${one.rule} ${one.message}`).slice(0, 6).join(" | "),
     );
     if (process.env["YAM_AXE"] === undefined) {
-      record({
-        pass: label,
-        name: "axe-core confirms the in-house audit",
-        blocked:
-          "axe-core is MPL-2.0 and REQ-PKG-3 admits MIT, Apache-2.0 and BSD only, so it is not " +
+      blocked(
+        "axe-core confirms the in-house audit",
+        "axe-core is MPL-2.0 and REQ-PKG-3 admits MIT, Apache-2.0 and BSD only, so it is not " +
           "a dependency of this repository. Set YAM_AXE=<path to axe.min.js> to run it beside " +
           "the in-house audit.",
-      });
+      );
+    } else {
+      check(
+        "axe-core confirms the in-house audit",
+        findings !== undefined && findings.length === 0,
+        `axe-core ran from ${process.env["YAM_AXE"]} beside the in-house audit`,
+      );
     }
   } catch (error) {
     check(
-      "an independent view of the window is available",
+      "the connect field and the Connect surface button do not overlap",
       false,
       error instanceof Error ? error.message.slice(0, 200) : String(error),
     );

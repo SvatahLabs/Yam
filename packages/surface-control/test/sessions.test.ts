@@ -83,7 +83,23 @@ describe("SessionStore", () => {
     expect(s2.close).toHaveBeenCalled();
   });
 
-  it("closeAll preserves attached surfaces", async () => {
+  /*
+   * Closing an attached session detaches; it does not close the user's
+   * application (SF-05) — and the place that decides is the *adapter* (T00).
+   *
+   * This case used to assert that the store skipped `close()` on an attached
+   * session altogether, which is a second and weaker copy of a decision every
+   * adapter already makes correctly: `AxSurface` and `UiaSurface` quit only
+   * `this.launched`, the Playwright and BiDi adapters disconnect from a browser
+   * they attached to rather than ending it, and an HTTP surface has nothing to
+   * quit. Skipping the call therefore quit nothing and *released* nothing —
+   * a CDP connection outliving a session the TTL had already swept.
+   *
+   * So the store closes every session and the adapter decides what closing one
+   * means. `mode` stays what SF-05 asks it to be: the record of who owns the
+   * target, published to a caller who wants to know before it closes anything.
+   */
+  it("closeAll closes every session, and the adapter decides what that means", async () => {
     const store = createSessionStore();
     const launched = stubSurface();
     const attached = stubSurface();
@@ -92,7 +108,15 @@ describe("SessionStore", () => {
     await store.closeAll();
     expect(store.list()).toHaveLength(0);
     expect(launched.close).toHaveBeenCalled();
-    expect(attached.close).not.toHaveBeenCalled();
+    expect(attached.close, "released, not quit: the adapter quits only what it launched")
+      .toHaveBeenCalled();
+  });
+
+  it("keeps the ownership mode a caller can read before it closes anything", () => {
+    const store = createSessionStore();
+    store.create(stubSurface(), "playwright", { mode: "launch" });
+    store.create(stubSurface(), "ax", { mode: "attach" });
+    expect(store.list().map((one) => one.mode)).toEqual(["launch", "attach"]);
   });
 
   it("touch updates lastActivity", () => {
@@ -116,12 +140,15 @@ describe("SessionStore", () => {
     expect(surface.close).toHaveBeenCalled();
   });
 
-  it("expireSessions does not close attached surfaces", async () => {
+  it("expireSessions releases an attached surface rather than leaking it", async () => {
+    // The same rule as `closeAll` above: the adapter quits only what it
+    // launched, so an expired attachment is let go of and the user's
+    // application is left where it was.
     const store = createSessionStore();
     const surface = stubSurface();
     store.create(surface, "ax", { mode: "attach", ttlMs: 0 });
     await store.expireSessions();
-    expect(surface.close).not.toHaveBeenCalled();
+    expect(surface.close).toHaveBeenCalled();
   });
 
   it("expireSessions keeps active sessions", async () => {

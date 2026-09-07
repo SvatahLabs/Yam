@@ -317,6 +317,77 @@ jobs:
           path: apps/desktop/out/make/**
           if-no-files-found: error
 
+  # T00: Yam drives the packaged Yam, and the suite is a gate (SF-18, SF-21).
+  #
+  # Wave 4 left this suite passing without passing *every* time — the outer
+  # session would vanish with `SESSION_NOT_FOUND` around the moment the
+  # application opened its own inner session — so it could not be a gate. Wave 5
+  # root-caused that to two clients racing to start the machine's one session
+  # holder, fixed it with an exclusive start lock and a liveness answer that
+  # tells `busy` from `gone`, and then ran the suite ten times in a row: ten
+  # identical counts, no failures.
+  #
+  # It runs behind the packaged build, because the whole point is that it drives
+  # the thing a person installs rather than a renderer in a browser.
+  #
+  # **Exit 2 is tolerated and says so.** A hosted macOS runner cannot grant the
+  # Accessibility permission, so the two AX passes are `blocked` with the
+  # doctor's own sentence — and if the runner can reach nothing at all, the
+  # suite says so with 2 rather than reporting a green nothing. Exit 1 is a
+  # check that failed, and fails the leg. Never the other way round.
+  yam-on-yam:
+    name: Yam drives the packaged Yam
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Browsers
+        run: pnpm browsers
+
+      - name: Build the workspace
+        run: pnpm -r build
+
+      # The application under test, and the copy of the command line staged
+      # inside it. The suite checks that the staged copy speaks this build's
+      # contract, because a stale bundle makes the application's own service
+      # replace the session holder the suite is driving through — which reads
+      # exactly like a defect in Yam and is a build that was not remade.
+      - name: Package the app
+        run: pnpm --filter @svatah/yam-desktop package
+
+      - name: What this host can be asked
+        run: node packages/cli/dist/bin.js surface doctor || true
+
+      - name: Yam on Yam
+        shell: bash
+        run: |
+          set +e
+          YAM_ON_YAM_EVIDENCE_DIR=reports/yam-on-yam node evals/self/yam-on-yam/run.mjs
+          code=$?
+          set -e
+          if [ "$code" = "2" ]; then
+            echo "::warning::This runner could reach nothing (exit 2); the suite did not run."
+            exit 0
+          fi
+          exit "$code"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: yam-on-yam
+          path: reports/yam-on-yam/**
+          if-no-files-found: warn
+
   # T6.1, T6.2: the desktop adapters against the app (REQ-ADP-6, 7, REQ-ADE-6).
   #
   # The only place either adapter can be *run*: the AX one needs macOS with the

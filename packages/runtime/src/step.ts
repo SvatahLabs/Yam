@@ -78,6 +78,14 @@ export interface StepContext {
   readonly api?: ApiRunner;
   readonly invoke?: StoryRunner;
   readonly stepTimeoutMs: number;
+  /**
+   * How long an expectation is re-asked before it is a failure
+   * (`config.run.expectTimeoutMs`, T00).
+   *
+   * Undefined keeps the old behaviour — asked once — for a caller that has not
+   * been told; `run` passes the project's own value.
+   */
+  readonly expectTimeoutMs?: number;
   readonly signal?: AbortSignal;
   /** `config.run.screenshots`. */
   readonly screenshots?: "onFailure" | "always" | "never";
@@ -138,7 +146,7 @@ export async function runStep(step: Step, context: StepContext): Promise<StepOut
   if (step.guard !== undefined) {
     let holds: boolean;
     try {
-      holds = await evaluate(step.guard.subject, step.guard.predicate, step, context, {
+      holds = (await evaluate(step.guard.subject, step.guard.predicate, step, context, {
         /*
          * The guard's own element, when it has one (LLD §3.2, Draft 2.7).
          *
@@ -150,7 +158,7 @@ export async function runStep(step: Step, context: StepContext): Promise<StepOut
          * are different.
          */
         ...(step.guard.target === undefined ? {} : { target: step.guard.target }),
-      });
+      })).ok;
     } catch (error) {
       // The guard itself broke — an unresolved reference, a surface error. That
       // is `guard`, and it is a failure rather than a skip: a guard that cannot
@@ -231,12 +239,39 @@ async function perform(
       if (step.expect === undefined) {
         throw new DataError(`"${step.text}" is an expectation with no predicate.`);
       }
-      const ok = await evaluate(step.expect.subject, step.expect.predicate, step, context);
-      if (!ok) {
+      /*
+       * Asked until it holds, or until the budget runs out (T00, SF-11).
+       *
+       * An expectation used to be evaluated exactly once. Against a live
+       * application that is a coin flip, and the parity gate published the
+       * result of one for a whole wave as a disagreement between two oracles:
+       * clicking the desktop's Flows rail item makes that screen's own buttons
+       * visible **up to 200 ms before** the toolbar title beside them changes
+       * (measured), so a flow that waits by resolving one and then asserts the
+       * other is asking about a screen that has half arrived. The accessibility
+       * side agreed with the application only because a native tree read is
+       * slow enough that the frame has always landed.
+       *
+       * Only expectations. A *guard* is a question asked now — "only if the
+       * error is hidden, click sign in" — and one that waited would change what
+       * the sentence means and delay every step it guards.
+       *
+       * A predicate that is *supposed* not to hold costs the budget before it
+       * fails, which is the price of a green run meaning something; two seconds
+       * by default, and `expectTimeoutMs: 0` restores the single evaluation.
+       */
+      const budget = context.expectTimeoutMs ?? 0;
+      const deadline = Date.now() + budget;
+      let held = await evaluate(step.expect.subject, step.expect.predicate, step, context);
+      while (!held.ok && Date.now() < deadline) {
+        await new Promise((done) => setTimeout(done, 100));
+        held = await evaluate(step.expect.subject, step.expect.predicate, step, context);
+      }
+      if (!held.ok) {
         throw new CheckError(
           `Expected ${describePredicate(step.expect.predicate)}${
             step.target === undefined ? "" : ` of "${step.target.phrase}"`
-          }, and it was not so.`,
+          }, and it was not so${observed(held.actual)}.`,
         );
       }
       return undefined;
@@ -399,9 +434,9 @@ async function evaluate(
   context: StepContext,
   /** A guard's own target, which is not the step's (Draft 2.7). */
   about: { target?: TargetRef } = {},
-): Promise<boolean> {
-  if (subject === "scope") return evaluateExpression(predicate, context.scope);
-  if (subject === "set") return await evaluateSet(predicate, step, context);
+): Promise<Held> {
+  if (subject === "scope") return { ok: evaluateExpression(predicate, context.scope) };
+  if (subject === "set") return { ok: await evaluateSet(predicate, step, context) };
   if (subject === "api") {
     // `waitFor` polls the API itself, above; nothing else asks about one.
     throw new DataError(
@@ -433,7 +468,7 @@ async function evaluate(
       ref = (await resolveTarget(context, element, context.surface)).ref;
     } catch (error) {
       if (!meansNotThere || classify(error) !== "locator") throw error;
-      return true;
+      return { ok: true };
     }
   }
 
@@ -443,7 +478,23 @@ async function evaluate(
     subject === "target" ? "ref" : subject,
     ref,
   );
-  return result.ok;
+  /*
+   * The value the adapter actually read comes back with the verdict (SF-11).
+   *
+   * "Checks returning false … retain the actual observed value", and this
+   * discarded it: every failing expectation read *"and it was not so"* with
+   * nothing about what was there instead. The parity gate's
+   * `app.screen-through-two-adapters` disagreement survived a whole wave on
+   * that sentence — one oracle said the toolbar title contained "Flows" and the
+   * other said it did not, and neither said what it had read.
+   */
+  return { ok: result.ok, actual: result.actual };
+}
+
+/** A predicate's verdict, and what was observed when it did not hold. */
+interface Held {
+  readonly ok: boolean;
+  readonly actual?: unknown;
 }
 
 /* ── pattern 32: an assertion over a set (T12.7, LLD §13.9 Draft 2.15) ────── */
@@ -609,6 +660,21 @@ function holdsForNode(predicate: Predicate, node: SnapshotNode): boolean {
       );
   }
   return one.negate === true ? !held : held;
+}
+
+/**
+ * What was there instead, for a failure message a reader can act on (SF-11).
+ *
+ * Bounded, because a page's text is a page's text and a failure line is a line;
+ * and silent when the adapter did not say — a predicate like `visible` has no
+ * observed *value*, and inventing "false" for it would be noise.
+ */
+function observed(actual: unknown): string {
+  if (actual === undefined || actual === null) return "";
+  const said = typeof actual === "string" ? actual : JSON.stringify(actual);
+  if (said === "" || said === "true" || said === "false") return "";
+  const shown = said.replace(/\s+/g, " ").trim();
+  return `; what was there was ${JSON.stringify(shown.length > 300 ? `${shown.slice(0, 300)}…` : shown)}`;
 }
 
 /** How a member is named in a failure, so a reader can find it on the screen. */

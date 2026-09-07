@@ -82,6 +82,18 @@ run:
   headless: true
   stepTimeoutMs: 45000
   candidateTimeoutMs: 15000
+  # …and the same patience for an expectation (T00).
+  #
+  # An expectation used to be asked exactly once, which against a live
+  # application is a coin flip: clicking the Flows rail item makes that screen's
+  # own buttons visible up to 200 ms before the toolbar title beside them
+  # changes, measured on this host. `The toolbar title should contain "Flows"`
+  # was the parity gate's longest-lived disagreement for that reason — the
+  # accessibility side agreed with the application only because a native tree
+  # read is slow enough that the frame has always landed. This is the same
+  # fifteen seconds `candidateTimeoutMs` gives a resolution, for the same
+  # loaded-machine reason.
+  expectTimeoutMs: 15000
   screenshots: onFailure
   trace: false
   outputDir: runs

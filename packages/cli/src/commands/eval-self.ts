@@ -81,6 +81,17 @@ interface SourceAnswers {
   readonly byName: Map<string, SideResult>;
   /** Set when the source could not run at all; every check it holds is this. */
   readonly unreachable?: string;
+  /**
+   * Set when the *host* stopped this source part-way (T00, P10-F1).
+   *
+   * A source that was stopped by a locked display answers for the stories it
+   * reached and for none after them, and the checks that name those later
+   * stories used to be reported as *"the catalogue names something the source
+   * does not have"* — which blames the catalogue for what the machine did. The
+   * source has them; it never got to run them. When this is set, a name the
+   * source did not answer for is `unreachable` with the host's own sentence.
+   */
+  readonly hostStopped?: string;
   readonly wallMs: number;
   readonly command: string;
 }
@@ -229,6 +240,8 @@ function yamSource(project: string, options: { attach?: boolean } = {}): SourceS
             .at(-1)
         : undefined;
       const byName = new Map<string, SideResult>();
+      /** The host's own sentence, when the host is what stopped this run. */
+      let hostStopped: string | undefined;
       if (latest === undefined) {
         return {
           byName,
@@ -265,13 +278,20 @@ function yamSource(project: string, options: { attach?: boolean } = {}): SourceS
             const evidence = `${step.step?.text ?? "a step"}: ${message}`
               .split("\n")[0]!
               .slice(0, 300);
-            byName.set(story, hostStoppedIt(message) === undefined ? no(evidence) : cannot(evidence));
+            const host = hostStoppedIt(message);
+            if (host !== undefined) hostStopped ??= evidence;
+            byName.set(story, host === undefined ? no(evidence) : cannot(evidence));
           }
           continue;
         }
         if (already === undefined) byName.set(story, ok(`every step passed`));
       }
-      return { byName, wallMs: ran.wallMs, command: ran.line };
+      return {
+        byName,
+        wallMs: ran.wallMs,
+        command: ran.line,
+        ...(hostStopped === undefined ? {} : { hostStopped }),
+      };
     },
   };
 }
@@ -699,6 +719,22 @@ export async function evalSelfCommand(args: ParsedArgs, io: CommandIo): Promise<
     }
     const found = spec.name === undefined ? undefined : source.byName.get(spec.name);
     if (found === undefined) {
+      /*
+       * A name the source did not answer for is one of two different things,
+       * and saying the wrong one is how a gate comes to publish a defect that
+       * is not there (T00). If the *host* stopped the run, everything after the
+       * point it stopped is what this machine could not be asked; only when the
+       * run finished is a missing name a disagreement between the catalogue and
+       * the source.
+       */
+      if (source.hostStopped !== undefined) {
+        return {
+          verdict: "unreachable",
+          evidence:
+            `the run was stopped by this host before it reached ` +
+            `"${spec.name ?? "(unnamed)"}" — ${source.hostStopped}`,
+        };
+      }
       return {
         verdict: "unreachable",
         evidence:

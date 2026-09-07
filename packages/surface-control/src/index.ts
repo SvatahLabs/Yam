@@ -61,8 +61,18 @@ export {
   removeBrokerDescriptor,
   discoverBroker,
   isProcessAlive,
+  acquireStartLock,
+  startLockHeld,
   type BrokerDescriptor,
+  type StartLock,
 } from "./broker.js";
+
+export {
+  probeAdapter,
+  forgetProbes,
+  DRIVEN_RANGES,
+  type AdapterProbe,
+} from "./probes.js";
 
 export {
   createAdapterFactory,
@@ -73,6 +83,7 @@ export {
 export {
   discoverTargets,
   discoverAdapters,
+  probeAdapters,
   checkAdapterReadiness,
   type DiscoveredTarget,
   type AdapterReadiness,
@@ -175,6 +186,8 @@ export {
   callBroker,
   brokerAlive,
   brokerHealth,
+  brokerState,
+  type BrokerState,
   type BrokerOperation,
   type BrokerOptions,
   type RunningBroker,

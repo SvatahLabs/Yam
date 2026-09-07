@@ -1,6 +1,6 @@
 # Yam surface-first implementation tasks
 
-Status: **M0–M4 delivered; M5 not started.** Unchecked tasks are not implemented. Execute milestones in dependency order. P0 milestone completion is a release gate; P1/P2 work must not hide remaining P0 failures.
+Status: **M0–M4 delivered; M5 in progress (see [wave 5](progress/wave-5.md)).** Unchecked tasks are not implemented. Execute milestones in dependency order. P0 milestone completion is a release gate; P1/P2 work must not hide remaining P0 failures.
 
 T01–T05 and the narrow CLI/MCP slice landed in [wave 1](progress/wave-1.md), T06–T09 and T12–T13 in [wave 2](progress/wave-2.md), T14–T17 in [wave 3](progress/wave-3.md) and T18–T20 in [wave 4](progress/wave-4.md); each record carries the evidence and the deviations. Every box below was ticked in wave 4, because a file whose header says "unchecked tasks are not implemented" and whose boxes were all empty was asserting that none of it existed.
 
@@ -51,6 +51,7 @@ The release gate is reviewed in [release-review.md](release-review.md), which na
 
 ## M5 — Extend reach without weakening the core
 
+- [ ] **T00 · P0 · QA — Make the Yam-on-Yam suite dependable, and the parity gate conformant.** Requirements: SF-18, SF-21. Root-cause the intermittent `SESSION_NOT_FOUND` in `evals/self/yam-on-yam/`, fix the cause rather than the symptom, and run the suite ten times in a row unattended with the ten results published. Resolve the two disagreements in `reports/self-parity.md` by naming which oracle was wrong. Put the suite in CI behind the packaged build. **Done:** ten consecutive runs report the same attempted count and no failure; every pass declares its checks so the denominator does not move with the result; the parity report is conformant, or each remaining one-sided row names the oracle that was wrong. Depends: T18, T19. *(Not in the original plan: it came out of wave 4's verification, which left the suite passing without passing every time — see [progress/wave-4.md](progress/wave-4.md) "The reliability gap, stated rather than averaged".)*
 - [ ] **T21 · P1 · MCP/service — Add Streamable HTTP MCP.** Requirement: SF-08. Pin protocol/SDK versions, implement negotiated transport, authentication and version-specific cancellation semantics. **Done:** generic remote-capable client passes the same conformance corpus and isolation/reconnect tests as stdio; no accidental exposure beyond configured scope. Depends: T11, T12.
 - [ ] **T22 · P1 · Adapters — Deliver process/PTY.** Requirement: SF-22. Implement terminal snapshots, input, streams, signals, exit state and bounded artifact/filesystem access; incorporate existing planned `REQ-ADP-10` work. **Done:** Yam itself drives CLI/TUI smoke cases and checks exit/state; no undisclosed shell escape or out-of-root reads. Depends: T06–T09, T18.
 - [ ] **T23 · P2 · Adapters — Expand native/mobile coverage.** Requirement: SF-23. Implement AT-SPI and close discovery/capability gaps for Appium/UIA/BiDi against provisioned platform runners. **Done:** each newly supported capability has a reproducible conformance result, limitations and version range; support labels are evidence-derived. Depends: T06, T07, T19.
@@ -66,9 +67,9 @@ The release gate is reviewed in [release-review.md](release-review.md), which na
 | SF-09–SF-11 | T02, T06–T08, T12, T15, T19 |
 | SF-12 | T01, T04, T09, T11 |
 | SF-13–SF-15 | T05, T08, T09, T16 |
-| SF-16–SF-18 | T01, T03, T14–T16, T18, T19 |
+| SF-16–SF-18 | T00, T01, T03, T14–T16, T18, T19 |
 | SF-19 | T01, T12, T17 |
-| SF-20–SF-21 | T03, T09, T11, T13, T18–T20 |
+| SF-20–SF-21 | T00, T03, T09, T11, T13, T18–T20 |
 | SF-22–SF-23 | T06, T22, T23 |
 
 Suggested first implementation slice: T01–T05, then a narrow T10/T11 web journey and its failing-input cases. This produces a working public control path before investing in the full UI. Do not begin by renaming sidebar entries while leaving the session/API gaps intact.

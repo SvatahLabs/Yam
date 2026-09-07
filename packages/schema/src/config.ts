@@ -15,7 +15,7 @@ export const DEFAULT_IGNORE_ATTRIBUTES = ["data-yam-eval"];
 
 /** Project configuration, `yam.config.yaml` (LLD §3.5). */
 
-export const adapterNameSchema = z.enum(["playwright", "bidi", "appium", "uia", "ax", "http"]);
+export const adapterNameSchema = z.enum(["playwright", "bidi", "appium", "uia", "ax", "http", "process", "atspi"]);
 export type AdapterName = z.infer<typeof adapterNameSchema>;
 
 export const environmentSchema = z.enum(["test", "staging", "production"]);
@@ -185,6 +185,24 @@ export const configSchema = z
         viewport: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
         stepTimeoutMs: z.number().int().positive(),
         candidateTimeoutMs: z.number().int().positive(),
+        /**
+         * How long an expectation is re-asked before it is a failure (T00).
+         *
+         * An expectation used to be evaluated exactly once. Against a live
+         * application that is a coin flip: measured on the desktop, clicking a
+         * rail item makes the screen's own buttons visible up to 200 ms before
+         * the toolbar title beside them changes, so a suite that resolves one
+         * and then asserts the other is right about a screen that has half
+         * arrived. `evals/self`'s parity gate published that as a disagreement
+         * between two oracles for a whole wave; it was one oracle asking too
+         * soon.
+         *
+         * The *resolution* of a target already retries within
+         * `candidateTimeoutMs`; this is the same patience for the predicate.
+         * Zero restores the single evaluation, for a suite that wants an
+         * instantaneous answer.
+         */
+        expectTimeoutMs: z.number().int().nonnegative(),
         screenshots: z.enum(["onFailure", "always", "never"]),
         trace: z.boolean(),
         outputDir: z.string().min(1),
@@ -314,6 +332,7 @@ export const DEFAULT_CONFIG: Omit<Config, "project"> = {
     headless: true,
     stepTimeoutMs: 10_000,
     candidateTimeoutMs: 2_000,
+    expectTimeoutMs: 2_000,
     screenshots: "onFailure",
     trace: false,
     outputDir: "runs",

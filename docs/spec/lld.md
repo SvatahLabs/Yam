@@ -41,7 +41,7 @@ cli ─► everything ; conformance ─► surface, runtime, schema ; migrate �
 
 ```ts
 interface AgentSurface {
-  readonly kind: "web" | "mobile" | "desktop" | "http";
+  readonly kind: "web" | "mobile" | "desktop" | "http" | "process";   // `process` is a terminal (T22, SF-22)
   capabilities(): Capabilities;                       // which optional features exist
   open(session: SessionInit): Promise<void>;          // storageState | appPath | processName | baseUrl
   close(): Promise<void>;
@@ -219,6 +219,7 @@ interface Config {
   bindings: { dir: string; testIdAttributes: string[]; ignoreAttributes?: string[]; matchHost?: boolean };   // ignoreAttributes default ["data-yam-eval"]; matchHost false → urlPattern is path-only
   data: { file: string }; api: { dir: string };
   run: { workers: number; browser?: "chromium" | "firefox" | "webkit"; headless: boolean; viewport?: [number,number]; stepTimeoutMs: number; candidateTimeoutMs: number;
+         expectTimeoutMs: number;   // T00: how long an expectation is re-asked before it fails; 0 asks once. A guard is never re-asked.
          screenshots: "onFailure" | "always" | "never"; trace: boolean; outputDir: string; checkpoints: boolean; audit: boolean };
   compile: { tier2?: { provider: "ollama" | "llamacpp"; endpoint: string; model: string; digest?: string }; tier3?: { provider: "anthropic"; model: string; promptVersion: string }; confidenceThreshold: number };
   record: { model: string; maxSnapshotTokens: number; visionFallback: boolean };

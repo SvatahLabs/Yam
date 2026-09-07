@@ -13,7 +13,9 @@
             "appium",
             "uia",
             "ax",
-            "http"
+            "http",
+            "process",
+            "atspi"
           ],
           "type": "string"
         },
@@ -442,6 +444,10 @@
             "checkpoints": {
               "type": "boolean"
             },
+            "expectTimeoutMs": {
+              "minimum": 0,
+              "type": "integer"
+            },
             "headless": {
               "type": "boolean"
             },
@@ -489,6 +495,7 @@
             "headless",
             "stepTimeoutMs",
             "candidateTimeoutMs",
+            "expectTimeoutMs",
             "screenshots",
             "trace",
             "outputDir",

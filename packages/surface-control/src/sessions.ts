@@ -83,11 +83,22 @@ export function createSessionStore(): SessionStore {
       sessions.delete(sessionId);
     },
 
+    /*
+     * Close every session's surface, and let the adapter decide what closing
+     * one means (T00, SF-05).
+     *
+     * This used to close only the sessions whose mode was `launch`, on the
+     * reasoning that an attached application is the user's and must not be
+     * quit. The reasoning is right and the place was wrong: the adapter already
+     * makes that distinction — an attached browser is *disconnected from*, not
+     * closed — and skipping the entry here leaks whatever the session was
+     * holding instead. It did not show while `connect` recorded every session
+     * as `launch` whatever it had done, which is the defect beside this one.
+     */
     async closeAll(): Promise<void> {
       const entries = [...sessions.values()];
       sessions.clear();
-      const launched = entries.filter((e) => e.mode === "launch");
-      await Promise.allSettled(launched.map((e) => e.surface.close()));
+      await Promise.allSettled(entries.map((e) => e.surface.close()));
     },
 
     async expireSessions(): Promise<string[]> {
@@ -99,9 +110,10 @@ export function createSessionStore(): SessionStore {
         if (now - lastMs >= entry.ttlMs) {
           expired.push(id);
           sessions.delete(id);
-          if (entry.mode === "launch") {
-            await entry.surface.close().catch(() => {});
-          }
+          // The same rule as `closeAll`: close it, and let the adapter decide
+          // whether closing means quitting a target Yam started or letting go
+          // of one it only attached to.
+          await entry.surface.close().catch(() => {});
         }
       }
       return expired;

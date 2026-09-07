@@ -40,6 +40,7 @@ run:
   headless: true
   stepTimeoutMs: 10000
   candidateTimeoutMs: 2000
+  expectTimeoutMs: 2000
   screenshots: onFailure
   trace: false
   outputDir: runs

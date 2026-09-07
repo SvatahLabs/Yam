@@ -38,7 +38,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 export const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
@@ -68,6 +68,63 @@ export async function waitUntil(condition, { timeoutMs = 60_000, everyMs = 250, 
     ready: false,
     reason: `${what} was not ready within ${timeoutMs} ms${last === undefined ? "" : `: ${last}`}`,
   };
+}
+
+/**
+ * The CLI staged inside the bundle, which is the one the application's own
+ * service runs (T00, SF-03).
+ *
+ * `pnpm --filter @svatah/yam-desktop package` deploys the workspace CLI into
+ * `Resources/yam`, so a bundle packaged after the last build carries this
+ * build. A bundle packaged *before* it does not — and that is not a cosmetic
+ * difference. The broker refuses to serve a contract it does not speak, so the
+ * application's service, reaching for a broker mid-run, stops the one the suite
+ * is driving through and starts a replacement. The outer session then answers
+ * `SESSION_NOT_FOUND`, which is exactly the sentence wave 4 spent a
+ * verification pass failing to root-cause.
+ *
+ * It is a fact about the *build*, not about the product, so the suite states it
+ * as its own precondition rather than letting it arrive later disguised as a
+ * defect in Yam.
+ */
+export const STAGED_CLI = join(BUNDLE, "Contents", "Resources", "yam", "dist", "bin.js");
+
+export async function stagedContract() {
+  const staged = join(
+    BUNDLE,
+    "Contents",
+    "Resources",
+    "yam",
+    "node_modules",
+    "@svatah",
+    "yam-surface-control",
+    "dist",
+    "index.js",
+  );
+  if (!existsSync(staged)) {
+    return { known: false, reason: `the packaged application carries no CLI at ${STAGED_CLI}` };
+  }
+  const [inside, here] = await Promise.all([
+    import(pathToFileURL(staged).href),
+    import(
+      pathToFileURL(join(ROOT, "packages", "surface-control", "dist", "index.js")).href
+    ),
+  ]);
+  const theirs = inside.catalogueFingerprint();
+  const ours = here.catalogueFingerprint();
+  return theirs === ours
+    ? { known: true, agrees: true, contract: ours }
+    : {
+        known: true,
+        agrees: false,
+        contract: ours,
+        reason:
+          `the packaged application carries a copy of the command line that speaks contract ` +
+          `${theirs}, and this build speaks ${ours}. Re-run ` +
+          "`pnpm -r build && pnpm --filter @svatah/yam-desktop package` so the application and " +
+          "the suite are the same Yam; until then the application's own service will replace " +
+          "the session holder this suite is driving through.",
+      };
 }
 
 /** Is there a packaged application to drive at all, and where? */

@@ -75,13 +75,15 @@
     "docs:check": "node scripts/docs.mjs --check",
     "yam-on-yam": "node evals/self/yam-on-yam/run.mjs",
     "coverage": "node scripts/coverage-report.mjs",
-    "quick-start:surface": "node scripts/surface-quick-start.mjs"
+    "quick-start:surface": "node scripts/surface-quick-start.mjs",
+    "yam-on-yam:repeat": "node scripts/yam-on-yam-repeat.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
     "@modelcontextprotocol/sdk": "catalog:",
     "@playwright/test": "catalog:",
     "@svatah/yam-adapter-playwright": "workspace:*",
+    "@svatah/yam-adapter-process": "workspace:*",
     "@svatah/yam-bindings": "workspace:*",
     "@svatah/yam-compiler": "workspace:*",
     "@svatah/yam-migrate": "workspace:*",

@@ -15,17 +15,73 @@
  */
 import { findNode } from "./journey.mjs";
 
+/**
+ * Every check these cases make, in order — so the denominator is the same on
+ * every run and on every host (SF-21, T00).
+ *
+ * The same rule the journey follows, for the same reason: a pass that stopped
+ * early used to record only what it reached, so `attempted` shrank with the
+ * failure. The exit-code check is the command line's alone — an exit code is a
+ * thing only a command line has, and a wrong postcondition must exit nonzero so
+ * a script cannot miss it — so the list is a function of which interface is
+ * driving.
+ */
+export function negativeChecks(kind) {
+  return [
+    "a session opens for the negative cases",
+    "a postcondition that holds passes",
+    "a deliberately wrong postcondition fails, and is not reported as verified",
+    "the failing postcondition keeps the value it actually observed (SF-11)",
+    ...(kind === "cli" ? ["a wrong postcondition exits nonzero, so a script cannot miss it"] : []),
+    "a reference nothing issued is refused, not resolved to whatever holds its id",
+    "control can be taken explicitly",
+    "there is a control to contend over",
+    "a held target refuses the other client, and names who holds it (SF-13)",
+    "the holder can give it up",
+  ];
+}
+
 const failedWith = (answer, code) =>
   (answer?.envelope?.status === "failed" || answer?.envelope?.status === "refused") &&
   answer?.envelope?.error?.code === code;
 
 export async function negativeCases({ driver, connect, record, label }) {
-  const check = (name, ok, detail) => record({ pass: label, name, ok, detail });
+  const made = new Set();
+  const check = (name, ok, detail) => {
+    made.add(name);
+    record({ pass: label, name, ok, detail });
+  };
+  let lastReached = "nothing";
+  /*
+   * Whatever happens below, every declared check is reported — reached or not
+   * (SF-21). One that was never reached is a failure that says where the pass
+   * stopped, which is what a reader needs and what a shrinking `attempted`
+   * used to hide.
+   */
+  const reportTheRest = () => {
+    for (const name of negativeChecks(driver.kind)) {
+      if (made.has(name)) {
+        lastReached = name;
+        continue;
+      }
+      record({
+        pass: label,
+        name,
+        ok: false,
+        detail: `not reached: the pass stopped after "${lastReached}"`,
+      });
+    }
+  };
+
   const opened = await driver.call("connect", connect);
   const session = opened.envelope?.result?.sessionId;
+  check(
+    "a session opens for the negative cases",
+    session !== undefined,
+    session ?? JSON.stringify(opened.envelope?.error ?? {}).slice(0, 200),
+  );
   if (session === undefined) {
-    check("a session opens for the negative cases", false,
-      JSON.stringify(opened.envelope?.error ?? {}).slice(0, 200));
+    reportTheRest();
     return;
   }
 
@@ -140,5 +196,6 @@ export async function negativeCases({ driver, connect, record, label }) {
       JSON.stringify(released.envelope?.error ?? {}).slice(0, 160));
   } finally {
     await driver.call("close", { session });
+    reportTheRest();
   }
 }

@@ -5,7 +5,11 @@ import { ACTION_FORMS } from "@svatah/yam-schema";
 import { makeRequestId, successEnvelope, failedEnvelope, refusedEnvelope } from "./envelope.js";
 import type { SessionStore } from "./sessions.js";
 import type { ErrorCode } from "./catalogue.js";
-import { discoverTargets, discoverAdapters, checkAdapterReadiness } from "./discovery.js";
+import {
+  discoverTargets,
+  probeAdapters,
+  checkAdapterReadiness,
+} from "./discovery.js";
 import type { ReferenceStore } from "./references.js";
 import type { CoordinationStore } from "./coordination.js";
 import { hashInput } from "./coordination.js";
@@ -13,6 +17,32 @@ import type { EventStore } from "./events.js";
 import type { RedactionPolicy } from "./redaction.js";
 import type { PromotionStore } from "./promotion.js";
 import { addSecretLiteral, redactObject } from "./redaction.js";
+
+
+/**
+ * No such session — and the two things that mean (T00, SF-05, SF-14).
+ *
+ * A session id that nothing recognises is either one that has been closed, or
+ * one that was opened on a *different broker*. The second used to be invisible:
+ * a machine could end up with two brokers, the descriptor named one of them,
+ * and every command about a session on the other answered "Session s_… not
+ * found" with nothing to say which had happened. Wave 4 spent a verification
+ * pass on that sentence and could not root-cause it from the message.
+ *
+ * The message now names both, and `yam surface sessions` is the inspection
+ * route SF-14 asks a caller to be given rather than a retry.
+ */
+function sessionNotFound(requestId: string, session: string) {
+  return failedEnvelope(
+    requestId,
+    session,
+    "SESSION_NOT_FOUND",
+    `No session ${session} here. It has either been closed, or it was opened against a ` +
+      "different session holder than the one answering now. `yam surface sessions` lists the " +
+      "ones this holder has.",
+  );
+}
+
 
 export interface DispatchContext {
   sessions: SessionStore;
@@ -146,7 +176,16 @@ export async function dispatchTargets(
     url: input.url,
     adapter: input.adapter,
   });
-  const adapters = discoverAdapters(input.registeredAdapters);
+  /*
+   * Asked, not looked up (T23, SF-09).
+   *
+   * `discoverAdapters` answers from a platform table, which is a claim about a
+   * `Record<string, string[]>` — `appium: available` on a machine with no
+   * Appium server. `targets` is the operation a caller asks *before* it
+   * connects, so it is the one that should cost a probe and answer with the
+   * version the host said and the reason it could not be asked.
+   */
+  const adapters = await probeAdapters(input.registeredAdapters ?? []);
   const elapsed = Date.now() - start;
   return successEnvelope(requestId, undefined, { targets, adapters }, elapsed);
 }
@@ -157,6 +196,15 @@ export async function dispatchConnect(
     url?: string;
     app?: string;
     attach?: string;
+    /** Adapter-specific launch details (design.md; T22). */
+    launch?: {
+      bundle?: string;
+      path?: string;
+      args?: string[];
+      env?: Record<string, string>;
+      timeoutMs?: number;
+      size?: [number, number];
+    };
     adapter?: string;
     headed?: boolean;
     adapterFactory: (name: string, options?: { headed?: boolean }) => Promise<AgentSurface>;
@@ -202,7 +250,26 @@ export async function dispatchConnect(
       }
     }
     const surface = await input.adapterFactory(adapterName, { headed: input.headed });
-    const sessionId = ctx.sessions.create(surface, adapterName);
+    /*
+     * Who owns the target this session drives (T00, SF-05).
+     *
+     * "Closing an attached session detaches without closing the user's
+     * application; closing a launched target follows its documented ownership
+     * policy" — so the store has to be told which of the two this is, and it was
+     * not: every session was created with the default, `launch`. A session
+     * opened with `--attach <endpoint>` on somebody's running application was
+     * recorded, listed and reported as one Yam had launched, and both
+     * `closeAll` and the TTL sweep read that field to decide whether to close
+     * the target. The adapter's own `close` happens to detach rather than quit,
+     * so nothing had yet quit an application that was not ours — but the
+     * broker's record of what it owns was wrong, which is the fact SF-05 asks
+     * it to publish.
+     *
+     * `attach` is the mode whenever the caller named an endpoint or an
+     * application that already exists; `launch` is when Yam started the target.
+     */
+    const mode = input.attach !== undefined || input.app !== undefined ? "attach" : "launch";
+    const sessionId = ctx.sessions.create(surface, adapterName, { mode });
 
     /*
      * `SessionInit` already carried all three of these; nothing but the
@@ -216,6 +283,12 @@ export async function dispatchConnect(
       ...(input.url === undefined ? {} : { baseUrl: input.url }),
       ...(input.app === undefined ? {} : { processName: input.app }),
       ...(input.attach === undefined ? {} : { attach: { cdpUrl: input.attach } }),
+      /*
+       * How to start it, when the caller said (T22). The adapter decides what
+       * each field means for its own kind of target — a bundle to a desktop
+       * adapter, a program's arguments and its readable root to a terminal.
+       */
+      ...(input.launch === undefined ? {} : { launch: input.launch }),
     });
     /*
      * A session is not a page (LLD §8, Draft 2.4).
@@ -264,7 +337,7 @@ export async function dispatchSnapshot(
   const start = Date.now();
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
-    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+    return sessionNotFound(requestId, input.session);
   }
   try {
     const snap = await entry.surface.snapshot({
@@ -336,7 +409,7 @@ export async function dispatchAct(
   if (ctx.redaction) for (const secret of input.secrets ?? []) addSecretLiteral(ctx.redaction, secret);
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
-    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+    return sessionNotFound(requestId, input.session);
   }
 
   if (ctx.references && input.ref) {
@@ -527,7 +600,7 @@ export async function dispatchRead(
   const start = Date.now();
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
-    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+    return sessionNotFound(requestId, input.session);
   }
   try {
     const value = await entry.surface.read(
@@ -573,7 +646,7 @@ export async function dispatchCheck(
   const start = Date.now();
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
-    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+    return sessionNotFound(requestId, input.session);
   }
   try {
     const result = await entry.surface.check(
@@ -603,7 +676,7 @@ export async function dispatchClose(
   const start = Date.now();
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
-    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+    return sessionNotFound(requestId, input.session);
   }
   try {
     await entry.surface.close();
@@ -662,7 +735,7 @@ export async function dispatchEvents(
   const requestId = makeRequestId();
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
-    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+    return sessionNotFound(requestId, input.session);
   }
   const events = ctx.events?.list(input.session) ?? [];
   const steps = ctx.promotion?.list(input.session) ?? [];
@@ -677,7 +750,7 @@ export async function dispatchControl(
   const requestId = makeRequestId();
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
-    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+    return sessionNotFound(requestId, input.session);
   }
   if (!ctx.coordination) {
     return refusedEnvelope(requestId, input.session, "UNSUPPORTED_OPERATION", "This broker does not arbitrate control.");
@@ -751,7 +824,7 @@ export async function dispatchCapabilities(
   const requestId = makeRequestId();
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
-    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+    return sessionNotFound(requestId, input.session);
   }
   return successEnvelope(requestId, input.session, {
     capabilities: entry.surface.capabilities(),
@@ -768,7 +841,7 @@ export async function dispatchDescribe(
   const start = Date.now();
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
-    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+    return sessionNotFound(requestId, input.session);
   }
   if (ctx.references) {
     const check = ctx.references.validateRef(input.session, input.ref, input.snapshot);
@@ -806,7 +879,7 @@ export async function dispatchRequest(
   const start = Date.now();
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
-    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+    return sessionNotFound(requestId, input.session);
   }
   const surface = entry.surface as {
     request?: (req: unknown, options: unknown) => Promise<unknown>;
@@ -861,7 +934,7 @@ export async function dispatchScreenshot(
   const start = Date.now();
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
-    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+    return sessionNotFound(requestId, input.session);
   }
   try {
     const outPath = input.path ?? `screenshot-${Date.now()}.png`;
@@ -902,6 +975,14 @@ function surfaceErrorToCode(err: SurfaceError): ErrorCode {
       return "TIMEOUT";
     case "CheckError":
       return "CHECK_FAILED";
+    /*
+     * A `DataError` is by definition about what the caller supplied — a missing
+     * argument, a value the surface has no meaning for, a path outside the root
+     * it was told about. `OUTCOME_UNKNOWN` said "nobody can tell whether this
+     * took effect", which is the opposite of true: nothing was dispatched.
+     */
+    case "DataError":
+      return "INVALID_ARGUMENT";
     case "SessionError":
       return "SESSION_CLOSED";
     case "NavigationError":
