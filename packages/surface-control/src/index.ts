@@ -92,6 +92,7 @@ export {
   type IdempotencyRecord,
   type OperationRecord,
   type OperationOutcome,
+  type Control,
 } from "./coordination.js";
 
 export {
@@ -130,6 +131,7 @@ export {
   dispatchSessions,
   dispatchCapabilities,
   dispatchDescribe,
+  dispatchControl,
   dispatchRequest,
   dispatchScreenshot,
   type DispatchContext,

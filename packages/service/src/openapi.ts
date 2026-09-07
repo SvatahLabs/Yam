@@ -633,6 +633,15 @@ export function openApiDocument(version: string): Record<string, unknown> {
           responses: { 200: { description: "The element", ...json({ type: "object" }) } },
         },
       },
+      "/sessions/{session}/control": {
+        post: {
+          summary: "Take, release or report who holds a target (T16, SF-13)",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object" }),
+          responses: { 200: { description: "Who holds it", ...json({ type: "object" }) } },
+        },
+      },
       "/sessions/{session}/request": {
         post: {
           summary: "Send an HTTP request on an HTTP surface (T15, SF-04)",

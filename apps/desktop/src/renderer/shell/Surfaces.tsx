@@ -79,12 +79,27 @@ export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Ele
   ];
 
   const connect = props.actions.find((one) => one.id === "surface.connect");
-  // Connect is the connect *bar*'s primary, not a toolbar button (T14): a URL
-  // field is too wide for the 40px toolbar and overlapped the buttons there at
-  // 1440×1000.
-  const toolbarActions = props.actions.filter(
-    (one) => one.id !== "surface.connect" && one.id !== "surface.act" && one.id !== "surface.request",
-  );
+  /*
+   * The actions this screen places itself, so the toolbar does not also draw
+   * them (T16).
+   *
+   * `Toolbar` renders every action the screen offers, which is right for a
+   * screen whose actions all belong in the bar. Surfaces puts several beside
+   * the thing they act on — Connect in the connect bar, Act and Verify in the
+   * inspector, Take control beside the session, Test beside the agent's
+   * configuration — and a button drawn in both places is *two controls with one
+   * id*, which is the ambiguity the desktop suite rightly fails.
+   */
+  const PLACED_BY_THE_SCREEN = new Set([
+    "surface.connect",
+    "surface.act",
+    "surface.request",
+    "surface.take-control",
+    "surface.release-control",
+    "surface.test-agent",
+    "surface.read",
+  ]);
+  const toolbarActions = props.actions.filter((one) => !PLACED_BY_THE_SCREEN.has(one.id));
   const doConnect = (): void => props.onAction("surface.connect", { url, adapter });
 
   const connected = state.session !== undefined;
@@ -179,6 +194,18 @@ export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Ele
                 key: "status",
                 header: "status",
                 cell: (row) => <Pill tone={row.pill.tone} label={row.pill.label} />,
+              },
+              {
+                // Who is driving (SF-13, T16). A shared target is only safe to
+                // look at when a person can see who has it.
+                key: "control",
+                header: "control",
+                cell: (row) =>
+                  row.controller === undefined ? (
+                    <span className="sv-muted">{row.control}</span>
+                  ) : (
+                    <Pill tone={row.heldByYou ? "pass" : "info"} label={row.control} />
+                  ),
               },
             ]}
           />
@@ -425,10 +452,13 @@ export function SurfacesInspector(props: ScreenProps<SurfacesState>): React.JSX.
 
   if (session === undefined) {
     return (
-      <EmptyInspector id="inspector-empty" title="Inspector">
-        Choose an open session to inspect it, or connect a new surface. Nothing here needs a
-        project.
-      </EmptyInspector>
+      <>
+        <EmptyInspector id="inspector-empty" title="Inspector">
+          Choose an open session to inspect it, or connect a new surface. Nothing here needs a
+          project.
+        </EmptyInspector>
+        <AgentPanel {...props} />
+      </>
     );
   }
 
@@ -443,8 +473,34 @@ export function SurfacesInspector(props: ScreenProps<SurfacesState>): React.JSX.
             { key: "Adapter", value: <span className="sv-mono">{session.adapter}</span> },
             { key: "Kind", value: session.kind === "" ? "—" : session.kind },
             { key: "Status", value: <Pill tone={session.pill.tone} label={session.pill.label} /> },
+            {
+              key: "Control",
+              value: (
+                <Pill tone={session.heldByYou ? "pass" : session.controller === undefined ? "neutral" : "info"}
+                  label={session.control} />
+              ),
+            },
           ]}
         />
+        <div className="sv-inspector-actions">
+          {session.heldByYou ? (
+            <Button
+              id="action-surface-release-control"
+              label="Give up control"
+              onPress={() => props.onAction("surface.release-control")}
+            />
+          ) : (
+            <Button
+              id="action-surface-take-control"
+              label="Take control"
+              onPress={() => props.onAction("surface.take-control")}
+            />
+          )}
+        </div>
+        <p className="sv-card">
+          One session, whoever opened it — a person here or an agent over MCP. While a target is
+          held, an action from anyone else is refused and told who has it.
+        </p>
       </InspectorSection>
 
       {state.httpSurface ? null : state.element === undefined ? (
@@ -554,6 +610,60 @@ export function SurfacesInspector(props: ScreenProps<SurfacesState>): React.JSX.
       )}
 
       {state.httpSurface ? null : <LastResult {...props} />}
+      <AgentPanel {...props} />
     </>
+  );
+}
+
+/**
+ * Connect an agent (T16, SF-07).
+ *
+ * The copyable generic configuration, and a test of the thing that makes it
+ * true — the broker an agent would share. Nobody is asked to choose a story to
+ * connect an agent, and nothing here claims to have spoken MCP: the panel lists
+ * exactly what was checked.
+ */
+function AgentPanel(props: ScreenProps<SurfacesState>): React.JSX.Element {
+  const { agent } = props.state;
+  const [copied, setCopied] = useState(false);
+  return (
+    <InspectorSection id="inspector-agent" title="Connect an agent">
+      <p className="sv-card">
+        Any compatible MCP client reaches these same sessions with this configuration. An agent and
+        a person share one broker, so a session either opens is one both can see.
+      </p>
+      <pre className="sv-block" id="agent-mcp-config" aria-label="MCP configuration">
+        {agent.config}
+      </pre>
+      <div className="sv-inspector-actions">
+        <Button
+          id="agent-copy-config"
+          label={copied ? "Copied" : "Copy configuration"}
+          onPress={() => {
+            void navigator.clipboard?.writeText(agent.config).catch(() => undefined);
+            setCopied(true);
+          }}
+        />
+        <Button
+          id="action-surface-test-agent"
+          label="Test the connection"
+          onPress={() => props.onAction("surface.test-agent")}
+        />
+      </div>
+      <KeyValues
+        rows={[
+          {
+            key: "Broker",
+            value: (
+              <Pill
+                tone={agent.brokerReady ? "pass" : "abort"}
+                label={agent.brokerReady ? "reachable" : "not answering"}
+              />
+            ),
+          },
+          ...agent.checks.map((one, at) => ({ key: at === 0 ? "Checked" : " ", value: one })),
+        ]}
+      />
+    </InspectorSection>
   );
 }

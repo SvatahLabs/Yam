@@ -26,6 +26,7 @@ import {
   type CapabilityFlag,
   type SurfaceKind,
 } from "@svatah/yam-schema";
+import { DESKTOP_HOLDER } from "../holder.js";
 import { Sources, dotted, plural } from "../load.js";
 import { actionsForScreen } from "../registry.js";
 import type { Pill, Screen, ScreenParams, ScreenStateBase } from "../types.js";
@@ -90,6 +91,12 @@ export interface SurfaceSessionRow {
   readonly createdAt?: string;
   readonly pill: Pill;
   readonly selected: boolean;
+  /** Who holds this target, when anyone does (SF-13, T16). */
+  readonly controller?: string;
+  /** Whether that is this desktop. */
+  readonly heldByYou: boolean;
+  /** "You control" / "agent-1 controls" / "Nobody" — never a bare colour. */
+  readonly control: string;
 }
 
 /* ── T15: the connected surface ────────────────────────────────────────────── */
@@ -144,6 +151,20 @@ export interface SurfaceSessionView {
   readonly status: string;
   readonly pill: Pill;
   readonly capabilities: Readonly<Record<string, boolean>>;
+  /** Who holds this target (SF-13, T16). */
+  readonly controller?: string;
+  readonly heldByYou: boolean;
+  readonly control: string;
+}
+
+/** What a generic MCP client needs to reach the same sessions (SF-07, T16). */
+export interface SurfaceAgentSetup {
+  /** The configuration, ready to copy into a client. */
+  readonly config: string;
+  /** Whether the broker an agent would share answered just now. */
+  readonly brokerReady: boolean;
+  /** Exactly what a connection test checked, so the panel claims no more. */
+  readonly checks: readonly string[];
 }
 
 /**
@@ -230,6 +251,8 @@ export interface SurfacesState extends ScreenStateBase {
   readonly httpSurface: boolean;
   /** The SF-17 state, when the surface is in one. */
   readonly problem?: SurfaceProblem;
+  /** What a generic MCP client needs to share these sessions (SF-07, T16). */
+  readonly agent: SurfaceAgentSetup;
 }
 
 const NEUTRAL: Pill = { tone: "neutral", label: "—" };
@@ -397,6 +420,14 @@ function sessionRows(
       ...(typeof row["createdAt"] === "string" ? { createdAt: row["createdAt"] } : {}),
       pill: sessionPill(status),
       selected: sessionId === selected,
+      ...(typeof row["controller"] === "string" ? { controller: row["controller"] } : {}),
+      heldByYou: row["controller"] === DESKTOP_HOLDER,
+      control:
+        typeof row["controller"] !== "string"
+          ? "Nobody"
+          : row["controller"] === DESKTOP_HOLDER
+            ? "You control"
+            : `${row["controller"]} controls`,
     };
   });
 }
@@ -643,7 +674,23 @@ const surfacesScreen: Screen<SurfacesState> = {
         status: chosen.status,
         pill: chosen.pill,
         capabilities,
+        ...(chosen.controller === undefined ? {} : { controller: chosen.controller }),
+        heldByYou: chosen.heldByYou,
+        control: chosen.control,
       };
+      /*
+       * A target somebody else holds is the busy state (SF-13, SF-17): it names
+       * the holder and offers the handoff, rather than letting a person press
+       * Act and be refused.
+       */
+      if (chosen.controller !== undefined && !chosen.heldByYou) {
+        problem ??= {
+          kind: "busy",
+          message: `${chosen.controller} holds this target.`,
+          nextAction: "Take control to act on it",
+          nextActionId: "surface.take-control",
+        };
+      }
       problem ??= problemFor(envelopeCode(caps), envelopeError(caps) ?? "");
 
       /*
@@ -728,6 +775,24 @@ const surfacesScreen: Screen<SurfacesState> = {
       discovery,
       ...(discoveryError === undefined ? {} : { discoveryMessage: discoveryError }),
       anyConnectable,
+      agent: {
+        /*
+         * The generic configuration, not a Yam-specific one (SF-07): any
+         * compatible client takes this shape, and the command is the published
+         * package rather than a path out of this checkout.
+         */
+        config: JSON.stringify(
+          { mcpServers: { yam: { command: "npx", args: ["-y", "@svatah/yam", "mcp"] } } },
+          null,
+          2,
+        ),
+        brokerReady: discovery === "ready",
+        checks: [
+          discovery === "ready"
+            ? "The surface broker answered, so an agent using this configuration reaches the same sessions."
+            : "The surface broker did not answer; an agent would start one on its first call.",
+        ],
+      },
       ...(session === undefined ? {} : { session }),
       tree,
       ...(snapshotId === undefined ? {} : { snapshotId }),

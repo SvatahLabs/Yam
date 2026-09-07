@@ -290,6 +290,20 @@ function operationFor(
         operation: "describe",
         args: defined({ session, ref: stringOption(args, "ref") ?? "" }),
       };
+    case "control": {
+      const take = boolOption(args, "take");
+      const release = boolOption(args, "release");
+      return {
+        operation: "control",
+        args: defined({
+          session,
+          action: take ? "take" : release ? "release" : "status",
+          holder: stringOption(args, "holder"),
+          force: boolOption(args, "force") || undefined,
+        }),
+      };
+    }
+
     case "request": {
       /*
        * `--input` carries the whole `ApiRequest` — headers, a JSON body, auth —
@@ -311,6 +325,7 @@ function operationFor(
           session,
           request: { name: "request", ...input, method: method.toUpperCase(), url },
           withSessionCookies: boolOption(args, "with-session-cookies") || undefined,
+          holder: stringOption(args, "holder"),
         }),
       };
     }

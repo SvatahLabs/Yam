@@ -63,6 +63,7 @@ public class GeneratedClient {
       "POST /sessions",
       "POST /sessions/{session}/act",
       "POST /sessions/{session}/check",
+      "POST /sessions/{session}/control",
       "POST /sessions/{session}/describe",
       "POST /sessions/{session}/read",
       "POST /sessions/{session}/request",
@@ -341,6 +342,11 @@ public class GeneratedClient {
   /** {@code POST /sessions/{session}/check} — Check a predicate against the surface (SF-11) */
   public String postSessionsBySessionCheck(String session, String body) {
     return call("post", "/sessions/" + segment(session) + "/check", body, "application/json");
+  }
+
+  /** {@code POST /sessions/{session}/control} — Take, release or report who holds a target (T16, SF-13) */
+  public String postSessionsBySessionControl(String session, String body) {
+    return call("post", "/sessions/" + segment(session) + "/control", body, "application/json");
   }
 
   /** {@code POST /sessions/{session}/describe} — Describe a specific element on the surface (SF-10) */

@@ -42,6 +42,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `connectInputSchema` | variable | `connectInputSchema = z.object(` |  |
 | `ConnectOptions` | interface | `export interface ConnectOptions` |  |
 | `connectOutputSchema` | variable | `connectOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `Control` | interface | `export interface Control` | Who holds a target, until they give it up (SF-13, T16). |
 | `CoordinationStore` | interface | `export interface CoordinationStore` |  |
 | `createAdapterFactory` | function | `export function createAdapterFactory(` |  |
 | `createCoordinationStore` | function | `export function createCoordinationStore(): CoordinationStore` |  |
@@ -62,6 +63,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `dispatchClose` | function | `export async function dispatchClose(` |  |
 | `dispatchConnect` | function | `export async function dispatchConnect(` |  |
 | `DispatchContext` | interface | `export interface DispatchContext` |  |
+| `dispatchControl` | function | `export async function dispatchControl(` | Take, release, or report who holds a target (SF-13, T16). |
 | `dispatchDescribe` | function | `export async function dispatchDescribe(` |  |
 | `dispatchRead` | function | `export async function dispatchRead(` |  |
 | `dispatchRequest` | function | `export async function dispatchRequest(` | Send an HTTP request on an HTTP surface (T15, SF-04). |

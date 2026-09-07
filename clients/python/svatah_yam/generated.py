@@ -57,6 +57,7 @@ ENDPOINTS = [
     {"id": "postSessions", "verb": "post", "path": "/sessions"},
     {"id": "postSessionsBySessionAct", "verb": "post", "path": "/sessions/{session}/act"},
     {"id": "postSessionsBySessionCheck", "verb": "post", "path": "/sessions/{session}/check"},
+    {"id": "postSessionsBySessionControl", "verb": "post", "path": "/sessions/{session}/control"},
     {"id": "postSessionsBySessionDescribe", "verb": "post", "path": "/sessions/{session}/describe"},
     {"id": "postSessionsBySessionRead", "verb": "post", "path": "/sessions/{session}/read"},
     {"id": "postSessionsBySessionRequest", "verb": "post", "path": "/sessions/{session}/request"},
@@ -271,6 +272,10 @@ class GeneratedClient:
     def post_sessions_by_session_check(self, session, body: Any = None) -> Any:
         """`POST /sessions/{session}/check` — Check a predicate against the surface (SF-11)"""
         return self._call("post", f"/sessions/{session}/check", body=body)
+
+    def post_sessions_by_session_control(self, session, body: Any = None) -> Any:
+        """`POST /sessions/{session}/control` — Take, release or report who holds a target (T16, SF-13)"""
+        return self._call("post", f"/sessions/{session}/control", body=body)
 
     def post_sessions_by_session_describe(self, session, body: Any = None) -> Any:
         """`POST /sessions/{session}/describe` — Describe a specific element on the surface (SF-10)"""

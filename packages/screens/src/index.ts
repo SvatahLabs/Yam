@@ -52,6 +52,8 @@ export type {
   RunsState,
 } from "./screens/authoring.js";
 
+export { DESKTOP_HOLDER } from "./holder.js";
+
 export {
   SURFACES_SCREENS,
   TREE_MAX_NODES,
@@ -75,6 +77,7 @@ export type {
   SurfaceProblem,
   SurfaceProblemKind,
   SurfaceOutcomeView,
+  SurfaceAgentSetup,
 } from "./screens/surfaces.js";
 
 export {

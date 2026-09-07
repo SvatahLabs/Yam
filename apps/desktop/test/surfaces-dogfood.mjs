@@ -92,6 +92,14 @@ try {
       }
     } catch { /* the broker may not be up yet; nothing to close */ }
   };
+  /** An agent, in the only sense that matters: another client of the same broker. */
+  const asAgent = async (path, body) =>
+    await (await fetch(`${serviceUrl}${path}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${info.token}`, "content-type": "application/json" },
+      body: JSON.stringify(body),
+    })).json();
+
   await closeAllSessions();
 
   // 2) Serve the built renderer and proxy /service/* to the real service.
@@ -252,12 +260,73 @@ try {
     note(`[${label}] Details discloses the request and its answer`,
       raw.includes("requestId") && raw.includes("status"));
 
+    /* ── T16: shared control ─────────────────────────────────────────────── */
+
+    // Who is driving is on the session row, in words.
+    const sessionId = ((await row.locator(".sv-flow-name").textContent()) ?? "").trim();
+    note(`[${label}] the session row says who controls it`,
+      ((await row.textContent()) ?? "").includes("Nobody"), `session=${sessionId}`);
+
+    // An agent — another client of the same broker — takes the target.
+    await asAgent(`/sessions/${sessionId}/control`, { action: "take", holder: "agent-1" });
+    await page.locator("#action-surface-discover").click();
+    await page.waitForTimeout(800);
+    const heldText = (await page.locator("#surfaces-sessions").textContent()) ?? "";
+    note(`[${label}] an agent's hold shows in the desktop`, heldText.includes("agent-1 controls"),
+      heldText.replace(/\s+/g, " ").trim().slice(0, 80));
+
+    // …and the surface reads busy, naming the holder and offering the handoff.
+    const busy = await page.locator("#surfaces-problem-busy").isVisible().catch(() => false);
+    const busyText = busy ? ((await page.locator("#surfaces-problem-busy").textContent()) ?? "") : "";
+    note(`[${label}] a held target is the busy state, naming who has it`,
+      busy && busyText.includes("agent-1") && /Take control/i.test(busyText), busyText.trim().slice(0, 90));
+
+    // Acting while the agent holds it is refused with the holder's name (SF-13).
+    const refused = await asAgent(`/sessions/${sessionId}/act`, {
+      action: "click", ref: "r1", holder: "someone-else",
+    });
+    note(`[${label}] a mutation from anyone else is refused, not queued`,
+      refused?.status === "refused" && refused?.error?.code === "CONTROL_BUSY",
+      `${refused?.status} ${refused?.error?.code ?? ""}`);
+
+    // The explicit handoff.
+    await page.locator("#action-surface-take-control").click();
+    await page.waitForTimeout(900);
+    const afterText = (await page.locator("#surfaces-sessions").textContent()) ?? "";
+    note(`[${label}] taking control hands the target over explicitly`,
+      afterText.includes("You control"), afterText.replace(/\s+/g, " ").trim().slice(0, 80));
+
+    /* ── T16: connecting an agent ────────────────────────────────────────── */
+
+    const config = (await page.locator("#agent-mcp-config").textContent()) ?? "";
+    note(`[${label}] a generic MCP configuration is offered, ready to copy`,
+      config.includes("@svatah/yam") && config.includes("mcp"), config.replace(/\s+/g, " ").slice(0, 70));
+    await page.locator("#action-surface-test-agent").click();
+    await page.waitForTimeout(600);
+    const tested = (await page.locator("#status-context").textContent()) ?? "";
+    note(`[${label}] the connection test reports what it actually checked`,
+      /broker answered|reaches the same sessions/i.test(tested), tested.trim().slice(0, 80));
+
     // Disconnect closes it (SF-05); it is live now a session is selected.
     await page.locator("#action-surface-disconnect").waitFor({ state: "attached" });
     await page.locator("#action-surface-disconnect").click();
     await page.locator("#surfaces-sessions tbody tr.sv-row").first().waitFor({ state: "detached", timeout: 30000 }).catch(() => {});
     const after = (await page.locator("#surfaces-sessions").textContent()) ?? "";
     note(`[${label}] disconnect closes the session`, after.includes("Choose a browser"));
+
+    // A session an *agent* opens is one the desktop sees: one broker, one list.
+    const agentSession = await asAgent("/sessions", { url: targetUrl });
+    const agentId = agentSession?.result?.sessionId;
+    await page.locator("#action-surface-discover").click();
+    await page.waitForTimeout(900);
+    const listed = (await page.locator("#surfaces-sessions").textContent()) ?? "";
+    note(`[${label}] a session an agent opened appears in the desktop`,
+      typeof agentId === "string" && listed.includes(agentId), `agent session=${agentId}`);
+    if (typeof agentId === "string") {
+      await fetch(`${serviceUrl}/sessions/${encodeURIComponent(agentId)}`, {
+        method: "DELETE", headers: { Authorization: `Bearer ${info.token}` },
+      }).catch(() => {});
+    }
 
     await context.close();
   };

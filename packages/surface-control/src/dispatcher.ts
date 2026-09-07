@@ -25,6 +25,39 @@ function maybeRedact(ctx: DispatchContext, result: Record<string, unknown>): Rec
   return redactObject(ctx.redaction, result) as Record<string, unknown>;
 }
 
+/**
+ * Refuse a mutation on a target somebody else holds (SF-13, T16).
+ *
+ * Every mutation, not only `act`. Driving T16 found `request` going through
+ * while an agent held the target: the check lived in one dispatcher rather than
+ * in one place, which is how a rule with two callers gets applied by one.
+ * Refused and told who has it — never queued, never retried.
+ */
+function heldByAnother(
+  ctx: DispatchContext,
+  session: string,
+  holder: string | undefined,
+  requestId: string,
+  operationName: string,
+): Record<string, unknown> | undefined {
+  const held = ctx.coordination?.getControl(`${session}:target`);
+  const me = holder ?? requestId;
+  if (held === undefined || held.holder === me) return undefined;
+  ctx.events?.emit({
+    sessionId: session,
+    kind: "lease.refused",
+    operationName,
+    data: { holder: held.holder },
+  });
+  return refusedEnvelope(
+    requestId,
+    session,
+    "CONTROL_BUSY",
+    `"${held.holder}" holds this target. Take control to act on it.`,
+    { holder: held.holder, since: new Date(held.since).toISOString() },
+  );
+}
+
 export async function dispatchTargets(
   _ctx: DispatchContext,
   input: {
@@ -235,6 +268,8 @@ export async function dispatchAct(
 
   const targetKey = `${input.session}:target`;
   if (ctx.coordination) {
+    const refusal = heldByAnother(ctx, input.session, input.holder, requestId, input.action);
+    if (refusal !== undefined) return refusal;
     const leaseResult = ctx.coordination.acquireLease(
       input.session,
       targetKey,
@@ -432,8 +467,102 @@ export async function dispatchSessions(
   ctx: DispatchContext,
 ): Promise<Record<string, unknown>> {
   const requestId = makeRequestId();
-  const sessions = ctx.sessions.list();
+  /*
+   * Every session, with who holds it (SF-13, T16). Ownership is what makes a
+   * shared target safe to look at: a client that cannot see who is driving
+   * cannot hand over, and the desktop shows it beside each session.
+   */
+  const sessions = ctx.sessions.list().map((one) => {
+    const held = ctx.coordination?.getControl(`${one.sessionId}:target`);
+    return {
+      ...one,
+      ...(held === undefined
+        ? {}
+        : { controller: held.holder, controlledSince: new Date(held.since).toISOString() }),
+    };
+  });
   return successEnvelope(requestId, undefined, { sessions });
+}
+
+/**
+ * Take, release, or report who holds a target (SF-13, T16).
+ *
+ * The explicit handoff. `force` takes a target its holder has not given up —
+ * what a person does from the UI when an agent has walked away — and it is
+ * reported as the holder changing rather than as the target having been free.
+ */
+export async function dispatchControl(
+  ctx: DispatchContext,
+  input: { session: string; action?: "take" | "release" | "status"; holder?: string; force?: boolean },
+): Promise<Record<string, unknown>> {
+  const requestId = makeRequestId();
+  const entry = ctx.sessions.get(input.session);
+  if (!entry) {
+    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+  }
+  if (!ctx.coordination) {
+    return refusedEnvelope(requestId, input.session, "UNSUPPORTED_OPERATION", "This broker does not arbitrate control.");
+  }
+
+  const targetKey = `${input.session}:target`;
+  const me = input.holder ?? "this client";
+  const action = input.action ?? "status";
+
+  if (action === "take") {
+    const taken = ctx.coordination.takeControl(targetKey, me);
+    if (!taken.taken) {
+      if (input.force !== true) {
+        return refusedEnvelope(
+          requestId,
+          input.session,
+          "CONTROL_BUSY",
+          `"${taken.holder}" holds this target. Ask for a handoff, or take it explicitly.`,
+          { holder: taken.holder, since: new Date(taken.since).toISOString() },
+        );
+      }
+      // An explicit handoff: the previous holder is released and told so.
+      ctx.coordination.releaseControl(targetKey, taken.holder, true);
+      ctx.coordination.takeControl(targetKey, me);
+      ctx.events?.emit({
+        sessionId: input.session,
+        kind: "lease.acquired",
+        operationName: "control",
+        data: { holder: me, from: taken.holder, forced: true },
+      });
+    }
+    const held = ctx.coordination.getControl(targetKey)!;
+    return successEnvelope(requestId, input.session, {
+      holder: held.holder,
+      since: new Date(held.since).toISOString(),
+      heldByYou: held.holder === me,
+    });
+  }
+
+  if (action === "release") {
+    const released = ctx.coordination.releaseControl(targetKey, me, input.force);
+    if (!released.released && released.holder !== undefined) {
+      return refusedEnvelope(
+        requestId,
+        input.session,
+        "CONTROL_BUSY",
+        `"${released.holder}" holds this target; only its holder can give it up.`,
+        { holder: released.holder },
+      );
+    }
+    ctx.events?.emit({
+      sessionId: input.session,
+      kind: "lease.released",
+      operationName: "control",
+      data: { holder: me },
+    });
+    return successEnvelope(requestId, input.session, { heldByYou: false });
+  }
+
+  const held = ctx.coordination.getControl(targetKey);
+  return successEnvelope(requestId, input.session, {
+    ...(held === undefined ? {} : { holder: held.holder, since: new Date(held.since).toISOString() }),
+    heldByYou: held?.holder === me,
+  });
 }
 
 export async function dispatchCapabilities(
@@ -487,7 +616,12 @@ export async function dispatchDescribe(
  */
 export async function dispatchRequest(
   ctx: DispatchContext,
-  input: { session: string; request: Record<string, unknown>; withSessionCookies?: boolean },
+  input: {
+    session: string;
+    request: Record<string, unknown>;
+    withSessionCookies?: boolean;
+    holder?: string;
+  },
 ): Promise<Record<string, unknown>> {
   const requestId = makeRequestId();
   const start = Date.now();
@@ -495,6 +629,9 @@ export async function dispatchRequest(
   if (!entry) {
     return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
   }
+  // Sending a request is a mutation, so it waits for the target like any other.
+  const refusal = heldByAnother(ctx, input.session, input.holder, requestId, "request");
+  if (refusal !== undefined) return refusal;
   const surface = entry.surface as {
     request?: (req: unknown, options: unknown) => Promise<unknown>;
   };

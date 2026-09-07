@@ -441,3 +441,111 @@ describe("the act action sends a schema-valid request (T15, SF-11)", () => {
     expect(call.args[1]).toEqual({ request: { name: "request", method: "POST", url: "/things" } });
   });
 });
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * T16 — shared control, and the agent that shares it
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+describe("a person and an agent share one target (T16, SF-13)", () => {
+  const heldBy = (holder: string): unknown =>
+    ok({
+      sessions: [
+        { sessionId: "s_1", adapter: "playwright", kind: "web", status: "ready", controller: holder },
+      ],
+    });
+
+  it("says who holds a session, in words rather than a colour", async () => {
+    const mine = await load({ targets: ok({ adapters: ADAPTERS, targets: [] }), sessions: heldBy("Yam desktop") });
+    expect(mine.sessions[0]!.control).toBe("You control");
+    expect(mine.sessions[0]!.heldByYou).toBe(true);
+
+    const theirs = await load({ targets: ok({ adapters: ADAPTERS, targets: [] }), sessions: heldBy("agent-1") });
+    expect(theirs.sessions[0]!.control).toBe("agent-1 controls");
+    expect(theirs.sessions[0]!.heldByYou).toBe(false);
+
+    const nobody = await load({ targets: ok({ adapters: ADAPTERS, targets: [] }), sessions: ONE_SESSION });
+    expect(nobody.sessions[0]!.control).toBe("Nobody");
+  });
+
+  it("a target somebody else holds is the busy state, naming them and the handoff", async () => {
+    const state = await connected({ sessions: heldBy("agent-1"), capabilities: CAPS, snapshot: SNAP });
+    expect(state.problem?.kind).toBe("busy");
+    expect(state.problem?.message).toContain("agent-1");
+    expect(state.problem?.nextAction).toContain("Take control");
+    expect(state.problem?.nextActionId).toBe("surface.take-control");
+    expect(state.session?.control).toBe("agent-1 controls");
+  });
+
+  it("take control is offered only when someone else has it, and release only when you do", async () => {
+    const take = actionById("surface.take-control")!;
+    const release = actionById("surface.release-control")!;
+    const base = { screen: "surfaces", title: "", subtitle: "", status: "", sources: [] };
+
+    expect(take.availableWhen({ ...base, session: { heldByYou: false } } as never)).toBe(true);
+    expect(take.availableWhen({ ...base, session: { heldByYou: true } } as never)).toBe(false);
+    expect(release.availableWhen({ ...base, session: { heldByYou: true } } as never)).toBe(true);
+    expect(release.availableWhen({ ...base, session: { heldByYou: false } } as never)).toBe(false);
+    // With no session at all, neither is offered.
+    expect(take.availableWhen(base as never)).toBe(false);
+    expect(release.availableWhen(base as never)).toBe(false);
+  });
+
+  it("taking control is an explicit handoff, and says who is driving after it", async () => {
+    const service = fakeService({ surface: { control: ok({ holder: "Yam desktop", heldByYou: true }) } });
+    const outcome = await actionById("surface.take-control")!.run(service, { selected: "s_1" });
+    expect(outcome.ok).toBe(true);
+    const call = service.calls.find((one) => one.method === "postSessionsBySessionControl")!;
+    // `force` is what a person means by pressing Take control (SF-13).
+    expect(call.args[1]).toEqual({ action: "take", holder: "Yam desktop", force: true });
+  });
+
+  it("giving up control leaves the target free", async () => {
+    const service = fakeService({ surface: { control: ok({ heldByYou: false }) } });
+    const outcome = await actionById("surface.release-control")!.run(service, { selected: "s_1" });
+    expect(outcome.ok).toBe(true);
+    expect(outcome.message).toContain("Anyone can drive");
+    expect(service.calls.find((one) => one.method === "postSessionsBySessionControl")!.args[1])
+      .toEqual({ action: "release", holder: "Yam desktop" });
+  });
+});
+
+describe("connecting an agent (T16, SF-07)", () => {
+  it("offers a generic configuration, not a Yam-specific one, and no story to choose", async () => {
+    const state = await load({ targets: ok({ adapters: ADAPTERS, targets: [] }), sessions: ok({ sessions: [] }) });
+    const config = JSON.parse(state.agent.config) as {
+      mcpServers: { yam: { command: string; args: string[] } };
+    };
+    expect(config.mcpServers.yam.command).toBe("npx");
+    expect(config.mcpServers.yam.args).toContain("@svatah/yam");
+    expect(config.mcpServers.yam.args).toContain("mcp");
+    expect(state.agent.brokerReady).toBe(true);
+  });
+
+  it("claims only what it checked", async () => {
+    const reachable = await load({ targets: ok({ adapters: ADAPTERS, targets: [] }), sessions: ok({ sessions: [] }) });
+    expect(reachable.agent.checks.join(" ")).toContain("reaches the same sessions");
+
+    const down = await load({
+      targets: { schemaVersion: "1.0", requestId: "r", status: "refused", error: { message: "no broker", retryable: true } },
+      sessions: ok({ sessions: [] }),
+    });
+    expect(down.agent.brokerReady).toBe(false);
+    expect(down.agent.checks.join(" ")).toContain("did not answer");
+  });
+
+  it("the connection test reports the broker, and refuses honestly when it is down", async () => {
+    const up = fakeService({ surface: { targets: ok({ adapters: ADAPTERS, targets: [] }) } });
+    const good = await actionById("surface.test-agent")!.run(up, {});
+    expect(good.ok).toBe(true);
+    expect(good.message).toContain("3 adapters");
+
+    const down = fakeService({
+      surface: {
+        targets: { schemaVersion: "1.0", requestId: "r", status: "refused", error: { message: "no broker", retryable: true } },
+      },
+    });
+    const bad = await actionById("surface.test-agent")!.run(down, {});
+    expect(bad.ok).toBe(false);
+    expect(bad.message).toContain("no broker");
+  });
+});

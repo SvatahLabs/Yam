@@ -331,3 +331,98 @@ postcondition must show as failed, not as verified."* It is driven, not asserted
   buttons and are keyboard-reachable; the sessions and adapters *tables* still
   are not, so choosing among several sessions by keyboard remains a `Table`
   enhancement.
+
+---
+
+## T16 — Shared control and agent setup
+
+**Status:** complete.
+
+**Requirements:** SF-05, SF-07, SF-13, SF-14, SF-17.
+
+### Control is a thing a client holds, not a race
+
+Wave 2's lease existed for the duration of one mutation and was released with
+its outcome, so two clients could only collide *during* an act. A person and an
+agent sharing a target need to hand over between operations, so T16 adds an
+explicit **control lease**:
+
+- `packages/surface-control/src/coordination.ts`: `takeControl`,
+  `releaseControl`, `getControl`. Only the holder may give it up; `force` is the
+  explicit handoff a person performs, and the previous holder is released and
+  told rather than quietly displaced.
+- A new **`control` operation** in the catalogue — take, release, or ask —
+  which propagates to `yam surface control`, `surface_control` and
+  `POST /sessions/:session/control`.
+- `sessions` now reports each session's `controller` and `controlledSince`, so
+  ownership is visible wherever sessions are listed (SF-05, SF-13).
+
+**A defect the driving found:** the control check lived in `dispatchAct`, so a
+`request` — also a mutation — went through while an agent held the target. The
+check is now one helper (`heldByAnother`) that every mutation calls. A rule with
+two callers applied by one is exactly how this class of defect survives.
+
+### The desktop
+
+- Sessions carry "You control" / "agent-1 controls" / "Nobody" — a word, never a
+  bare colour — in the list and in the inspector.
+- A target somebody else holds is the **busy state**: it names the holder and
+  offers the handoff, so a person does not press Act and get refused.
+- **Connect an agent** is a panel on Surfaces: the copyable *generic* MCP
+  configuration (`npx -y @svatah/yam mcp`) and a connection test. Nobody is
+  asked to choose a story to connect an agent.
+- A second defect the driving found: `Toolbar` renders every action a screen
+  offers, and Surfaces places several beside the thing they act on — so
+  `action-surface-take-control` existed **twice**, two controls with one id. The
+  screen now declares which actions it places itself.
+
+### Validate
+
+Model: `packages/screens/test/surfaces.test.ts` — 35 tests, of which T16's cover
+who holds a session in words, the busy state naming the holder and the handoff,
+`take`/`release` availability, the explicit `force` handoff, the generic
+configuration, and a connection test that claims only what it checked.
+
+Broker, through the command line, against a real HTTP surface:
+
+```
+$ yam surface control --session s_… --take --holder agent-1     → holder agent-1, heldByYou true
+$ yam surface sessions --json                                    → "controller": "agent-1"
+$ yam surface request --session s_… --holder person              → refused CONTROL_BUSY, names agent-1
+$ yam surface request --session s_… --holder agent-1             → succeeded
+$ yam surface control --session s_… --take --holder person       → refused CONTROL_BUSY
+$ yam surface control --session s_… --take --holder person --force → holder person
+```
+
+Driven (`apps/desktop/test/surfaces-dogfood.mjs`), **46/46 checks** at 1440×1000
+and 1280×800 — T14's, T15's and:
+
+```
+[1440x1000] the session row says who controls it
+[1440x1000] an agent's hold shows in the desktop — "agent-1 controls"
+[1440x1000] a held target is the busy state, naming who has it — offers Take control
+[1440x1000] a mutation from anyone else is refused, not queued — refused CONTROL_BUSY
+[1440x1000] taking control hands the target over explicitly — "You control"
+[1440x1000] a generic MCP configuration is offered, ready to copy
+[1440x1000] the connection test reports what it actually checked
+[1440x1000] a session an agent opened appears in the desktop
+```
+
+The last is the verification contract's own step 5 — a session started outside
+the desktop, seen inside it — driven rather than argued.
+
+### Deviations
+
+- **The connection test does not speak MCP.** It checks the broker an agent
+  would share, which is what makes the copied configuration reach the same
+  sessions, and the panel lists exactly that. Actually completing an MCP
+  handshake needs a spawned process the renderer cannot start and the service
+  has no route for; adding one is a capability-gated decision (SF-15) rather
+  than something to slip in here.
+- **Unknown outcome and permission-denied are not driven.** Their mapping,
+  wording and next actions are covered by model tests (`problemFor`,
+  `surfaceOutcomeView`) and the dispatcher's own suite, and the *rule* that an
+  unknown outcome never offers a retry is asserted. Producing one from the UI
+  needs fault injection — a response lost mid-dispatch, or a revoked macOS
+  accessibility grant — that this harness does not have. Named rather than
+  claimed.

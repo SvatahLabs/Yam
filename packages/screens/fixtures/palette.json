@@ -69,6 +69,27 @@
       "cli": "yam surface snapshot --session <id>"
     },
     {
+      "id": "surface.take-control",
+      "label": "Take control",
+      "group": "Actions",
+      "screen": "surfaces",
+      "cli": "yam surface control --session <id> --take"
+    },
+    {
+      "id": "surface.release-control",
+      "label": "Give up control",
+      "group": "Actions",
+      "screen": "surfaces",
+      "cli": "yam surface control --session <id> --release"
+    },
+    {
+      "id": "surface.test-agent",
+      "label": "Test the connection",
+      "group": "Actions",
+      "screen": "surfaces",
+      "cli": "yam surface targets"
+    },
+    {
       "id": "surface.request",
       "label": "Send the request",
       "group": "Actions",

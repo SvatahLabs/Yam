@@ -1787,6 +1787,47 @@
         }
       }
     },
+    "/sessions/{session}/control": {
+      "post": {
+        "summary": "Take, release or report who holds a target (T16, SF-13)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Who holds it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sessions/{session}/request": {
       "post": {
         "summary": "Send an HTTP request on an HTTP surface (T15, SF-04)",

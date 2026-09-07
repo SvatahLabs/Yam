@@ -43,6 +43,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `DataRow` | interface | `export interface DataRow` |  |
 | `DataState` | interface | `export interface DataState extends ScreenStateBase` |  |
 | `defaultScreenOf` | function | `export function defaultScreenOf(section: SectionId): ScreenId` | The screen a section opens on: the first row of its sub-rail. |
+| `DESKTOP_HOLDER` | variable | `DESKTOP_HOLDER = "Yam desktop"` | How this desktop names itself when it takes a target (SF-13, T16). |
 | `Diagnostic` | interface | `export interface Diagnostic` |  |
 | `dotted` | variable | `dotted = (...parts: ReadonlyArray<string \| undefined>): string =>` | `["a", "b"]` → `"a · b"`, dropping the empties. The mockups' subtitle style. |
 | `envelopeError` | function | `export function envelopeError(value: unknown): string \| undefined` | The `error.message` of a failed/refused envelope, when it carries one. |
@@ -109,6 +110,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `SurfaceActionField` | interface | `export interface SurfaceActionField` | One field of an action's form, as the catalogue describes it. |
 | `SurfaceActionOffer` | interface | `export interface SurfaceActionOffer` | One action this surface can perform, with what it needs. |
 | `SurfaceAdapterRow` | interface | `export interface SurfaceAdapterRow` | One adapter the service reported, with its readiness and, when not, why. |
+| `SurfaceAgentSetup` | interface | `export interface SurfaceAgentSetup` | What a generic MCP client needs to reach the same sessions (SF-07, T16). |
 | `SurfaceElementView` | interface | `export interface SurfaceElementView` | What `describe` said about the selected control. |
 | `surfaceOutcomeView` | function | `export function surfaceOutcomeView(value: unknown): SurfaceOutcomeView \| undefined` | What an act and its postcondition came to (SF-11, T15). |
 | `SurfaceOutcomeView` | interface | `export interface SurfaceOutcomeView` | What an act (and its optional postcondition) came to (SF-11). |

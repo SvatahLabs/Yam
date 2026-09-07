@@ -48,6 +48,7 @@ OpenAPI 3.1.0, service version 0.1.0. The document itself is `openApiDocument()`
 | `POST` | `/sessions/{session}/read` | Read a value from the surface (SF-11) |
 | `POST` | `/sessions/{session}/check` | Check a predicate against the surface (SF-11) |
 | `POST` | `/sessions/{session}/describe` | Describe a specific element on the surface (SF-10) |
+| `POST` | `/sessions/{session}/control` | Take, release or report who holds a target (T16, SF-13) |
 | `POST` | `/sessions/{session}/request` | Send an HTTP request on an HTTP surface (T15, SF-04) |
 | `POST` | `/sessions/{session}/screenshot` | Take a screenshot of the current surface (SF-11) |
 | `GET` | `/events` | The event stream (WebSocket) |

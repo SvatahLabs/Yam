@@ -98,6 +98,7 @@ describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
     "surface_check",
     "surface_close",
     "surface_connect",
+    "surface_control",
     "surface_describe",
     "surface_read",
     "surface_request",

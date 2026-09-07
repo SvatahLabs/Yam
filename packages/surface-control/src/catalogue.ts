@@ -234,6 +234,9 @@ const sessionsOutputSchema = resultEnvelopeSchema.extend({
         status: z.enum(["connecting", "ready", "busy", "disconnected", "closed"]),
         targetId: z.string().optional(),
         createdAt: z.string(),
+        /** Who holds this target, when anyone does (SF-13, T16). */
+        controller: z.string().optional(),
+        controlledSince: z.string().optional(),
       }),
     ),
   }),
@@ -285,11 +288,36 @@ const requestInputSchema = z.object({
   session: sessionIdSchema,
   request: apiRequestSchema,
   withSessionCookies: z.boolean().optional(),
+  /** Who is sending it, so a held target refuses anyone else (SF-13). */
+  holder: z.string().optional(),
   intent: z.string().optional(),
 });
 
 const requestOutputSchema = resultEnvelopeSchema.extend({
   result: z.object({ response: apiResponseSchema }),
+});
+
+/**
+ * Take, release, or ask who holds a target (SF-13, T16).
+ *
+ * A person and an agent can drive the same session; this is how they hand over
+ * explicitly rather than racing each mutation. With no `action` it reports.
+ */
+const controlInputSchema = z.object({
+  session: sessionIdSchema,
+  action: z.enum(["take", "release", "status"]).optional(),
+  holder: z.string().optional(),
+  /** An explicit handoff: take a target its holder has not given up. */
+  force: z.boolean().optional(),
+  intent: z.string().optional(),
+});
+
+const controlOutputSchema = resultEnvelopeSchema.extend({
+  result: z.object({
+    holder: z.string().optional(),
+    since: z.string().optional(),
+    heldByYou: z.boolean(),
+  }),
 });
 
 const screenshotInputSchema = z.object({
@@ -557,6 +585,34 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
     outputSchema: describeOutputSchema,
   },
   {
+    name: "control",
+    description: "Take, release or report who holds control of a target",
+    mutation: false,
+    requiresSession: true,
+    cli: {
+      subcommand: "control",
+      flags: [
+        { name: "session", type: "string", required: true, description: "Session ID" },
+        { name: "take", type: "boolean", required: false, description: "Take control of the target" },
+        { name: "release", type: "boolean", required: false, description: "Give control up" },
+        { name: "holder", type: "string", required: false, description: "Who you are; defaults to this client" },
+        { name: "force", type: "boolean", required: false, description: "Take a target its holder has not given up" },
+      ],
+      exitCodes: [
+        { code: CLI_EXIT_CODES.OK, meaning: "Control reported, taken or released" },
+        { code: CLI_EXIT_CODES.FAILED, meaning: "Another client holds it" },
+        { code: CLI_EXIT_CODES.SESSION_ERROR, meaning: "Session not found" },
+      ],
+    },
+    mcp: {
+      toolName: "surface_control",
+      annotations: { title: "Take or release control", readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+    },
+    service: { method: "POST", path: "/sessions/:session/control" },
+    inputSchema: controlInputSchema,
+    outputSchema: controlOutputSchema,
+  },
+  {
     name: "request",
     description: "Send an HTTP request on an HTTP surface and return the response",
     mutation: true,
@@ -568,6 +624,7 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
         { name: "method", type: "string", required: false, description: "HTTP method (default GET)" },
         { name: "url", type: "string", required: false, description: "URL or path, joined to the session's base URL" },
         { name: "input", type: "file", required: false, description: "The full ApiRequest as a JSON file or stdin" },
+        { name: "holder", type: "string", required: false, description: "Who you are, when a target is held" },
       ],
       exitCodes: [
         { code: CLI_EXIT_CODES.OK, meaning: "Request sent" },
@@ -662,6 +719,8 @@ export {
   capabilitiesOutputSchema,
   describeInputSchema,
   describeOutputSchema,
+  controlInputSchema,
+  controlOutputSchema,
   requestInputSchema,
   requestOutputSchema,
   screenshotInputSchema,

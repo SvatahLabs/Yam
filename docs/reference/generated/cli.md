@@ -464,6 +464,23 @@ What this target supports: which actions, which reads, which checks, and why any
 Exit codes: 0 ok · 1 failed
 ```
 
+### `yam surface control`
+
+```text
+yam surface control --session <id> [--take] [--release] [--holder <name>] [--force] [--json]
+
+Take a target, give it up, or ask who holds it. A person and an agent can drive the same session; this is how they hand over instead of racing each other. While a target is held, an action from anyone else is refused and told who has it.
+
+  --session <id>   the session
+  --take           take control
+  --release        give it up
+  --holder <name>  who you are
+  --force          take a target its holder has not given up
+  --json           one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
 ### `yam surface request`
 
 ```text

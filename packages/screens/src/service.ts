@@ -136,6 +136,11 @@ export interface ScreenService {
   /** `POST /sessions/{session}/screenshot` — an artifact reference (SF-11). */
   postSessionsBySessionScreenshot(session: string, body?: unknown): Promise<unknown>;
   /**
+   * `POST /sessions/{session}/control` — take, release or report who holds a
+   * target (T16, SF-13).
+   */
+  postSessionsBySessionControl(session: string, body?: unknown): Promise<unknown>;
+  /**
    * `POST /sessions/{session}/request` — send an HTTP request (T15, SF-04).
    *
    * An HTTP surface has no elements: its tree is empty and `act` refuses, so

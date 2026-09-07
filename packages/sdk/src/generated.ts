@@ -56,6 +56,7 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "postSessions", verb: "post", path: "/sessions", summary: "Connect to a target and open a surface session (SF-04)" },
   { id: "postSessionsBySessionAct", verb: "post", path: "/sessions/{session}/act", summary: "Perform a validated action on the surface (SF-11)" },
   { id: "postSessionsBySessionCheck", verb: "post", path: "/sessions/{session}/check", summary: "Check a predicate against the surface (SF-11)" },
+  { id: "postSessionsBySessionControl", verb: "post", path: "/sessions/{session}/control", summary: "Take, release or report who holds a target (T16, SF-13)" },
   { id: "postSessionsBySessionDescribe", verb: "post", path: "/sessions/{session}/describe", summary: "Describe a specific element on the surface (SF-10)" },
   { id: "postSessionsBySessionRead", verb: "post", path: "/sessions/{session}/read", summary: "Read a value from the surface (SF-11)" },
   { id: "postSessionsBySessionRequest", verb: "post", path: "/sessions/{session}/request", summary: "Send an HTTP request on an HTTP surface (T15, SF-04)" },
@@ -298,6 +299,11 @@ export class GeneratedClient {
   /** `POST /sessions/{session}/check` — Check a predicate against the surface (SF-11) */
   async postSessionsBySessionCheck(session: string, body?: unknown): Promise<unknown> {
     return await this.call("post", `/sessions/${encodeURIComponent(session)}/check`, { body, });
+  }
+
+  /** `POST /sessions/{session}/control` — Take, release or report who holds a target (T16, SF-13) */
+  async postSessionsBySessionControl(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/sessions/${encodeURIComponent(session)}/control`, { body, });
   }
 
   /** `POST /sessions/{session}/describe` — Describe a specific element on the surface (SF-10) */

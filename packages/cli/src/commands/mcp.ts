@@ -10,7 +10,7 @@
  * **The surface tools** — `surface_targets`, `surface_connect`, `surface_snapshot`,
  * `surface_act`, `surface_read`, `surface_check`, `surface_close`,
  * `surface_sessions`, `surface_capabilities`, `surface_describe`,
- * `surface_request`, `surface_screenshot` — drive a
+ * `surface_control`, `surface_request`, `surface_screenshot` — drive a
  * live target through session IDs, with no project needed and intent optional.
  * Registered from the operation catalogue so one source of truth generates CLI,
  * MCP and service interfaces.
@@ -54,6 +54,7 @@ import {
   dispatchSessions,
   dispatchCapabilities,
   dispatchDescribe,
+  dispatchControl,
   dispatchRequest,
   dispatchScreenshot,
   dispatchTargets,
@@ -744,6 +745,33 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ session, ref }) => text(await dispatchDescribe(ctx, { session, ref })),
+  );
+
+  server.registerTool(
+    "surface_control",
+    {
+      title: "Take or release control",
+      description:
+        "Take a target, give it up, or ask who holds it. A person and an agent can drive the same " +
+        "session; while a target is held, an action from anyone else is refused and told who has it.",
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+      inputSchema: {
+        session: z.string().min(1).describe("Session ID"),
+        action: z.enum(["take", "release", "status"]).optional().describe("Defaults to status"),
+        holder: z.string().optional().describe("Who you are"),
+        force: z.boolean().optional().describe("Take a target its holder has not given up"),
+        intent: OPTIONAL_INTENT,
+      },
+    },
+    async ({ session, action, holder, force }) =>
+      text(
+        await dispatchControl(ctx, {
+          session,
+          ...(action === undefined ? {} : { action }),
+          ...(holder === undefined ? {} : { holder }),
+          ...(force === undefined ? {} : { force }),
+        }),
+      ),
   );
 
   server.registerTool(

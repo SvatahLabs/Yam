@@ -51,6 +51,7 @@ export interface FakeResponses {
     describe?: unknown;
     screenshot?: unknown;
     request?: unknown;
+    control?: unknown;
   };
 }
 
@@ -228,6 +229,10 @@ export function fakeService(responses: FakeResponses = {}): FakeService {
     async postSessionsBySessionScreenshot(session, body) {
       record("postSessionsBySessionScreenshot", session, body);
       return responses.surface?.screenshot ?? envelope({ path: "" });
+    },
+    async postSessionsBySessionControl(session, body) {
+      record("postSessionsBySessionControl", session, body);
+      return responses.surface?.control ?? envelope({ heldByYou: true, holder: "Yam desktop" });
     },
     async postSessionsBySessionRequest(session, body) {
       record("postSessionsBySessionRequest", session, body);

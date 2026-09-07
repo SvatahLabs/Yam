@@ -33,6 +33,7 @@
 import type { Action, ActionArgs, ActionOutcome, ScreenId, ScreenStateBase } from "./types.js";
 import { SCREEN_IDS } from "./types.js";
 import type { ScreenService } from "./service.js";
+import { DESKTOP_HOLDER } from "./holder.js";
 
 /** Most actions are available whenever their screen loaded at all. */
 const loaded = (state: ScreenStateBase): boolean => state.error === undefined;
@@ -298,6 +299,89 @@ const ACTIONS_ONLY: readonly Action[] = [
         goTo: "surfaces",
         params: { selected: typeof args.selected === "string" ? args.selected : undefined, ref: undefined },
       });
+    },
+  },
+  /* ── T16: shared control, and the agent that shares it (SF-05, SF-13) ────── */
+  {
+    id: "surface.take-control",
+    label: "Take control",
+    group: "Actions",
+    screen: "surfaces",
+    cli: "yam surface control --session <id> --take",
+    availableWhen: (state) =>
+      (state as { session?: { heldByYou?: boolean } }).session !== undefined &&
+      (state as { session?: { heldByYou?: boolean } }).session?.heldByYou !== true,
+    async run(service, args): Promise<ActionOutcome> {
+      const session = typeof args.selected === "string" ? args.selected : undefined;
+      if (session === undefined) return refused("Choose a surface first.");
+      /*
+       * `force` is the explicit handoff (SF-13): a person taking a target an
+       * agent has not given up. It is what a person means by pressing this, and
+       * the previous holder is told rather than quietly displaced.
+       */
+      const answer = await service.postSessionsBySessionControl(session, {
+        action: "take",
+        holder: DESKTOP_HOLDER,
+        force: true,
+      });
+      const { ok: succeeded, result, message } = envelopeOf(answer);
+      if (!succeeded) return refused(message ?? "Could not take control.");
+      return ok(`You control this target${result["holder"] === undefined ? "" : ""}.`, {
+        value: answer,
+        goTo: "surfaces",
+        params: { selected: session },
+      });
+    },
+  },
+  {
+    id: "surface.release-control",
+    label: "Give up control",
+    group: "Actions",
+    screen: "surfaces",
+    cli: "yam surface control --session <id> --release",
+    availableWhen: (state) =>
+      (state as { session?: { heldByYou?: boolean } }).session?.heldByYou === true,
+    async run(service, args): Promise<ActionOutcome> {
+      const session = typeof args.selected === "string" ? args.selected : undefined;
+      if (session === undefined) return refused("Choose a surface first.");
+      const answer = await service.postSessionsBySessionControl(session, {
+        action: "release",
+        holder: DESKTOP_HOLDER,
+      });
+      const { ok: succeeded, message } = envelopeOf(answer);
+      if (!succeeded) return refused(message ?? "Could not give up control.");
+      return ok("Anyone can drive this target now.", {
+        value: answer,
+        goTo: "surfaces",
+        params: { selected: session },
+      });
+    },
+  },
+  {
+    id: "surface.test-agent",
+    label: "Test the connection",
+    group: "Actions",
+    screen: "surfaces",
+    cli: "yam surface targets",
+    availableWhen: loaded,
+    async run(service): Promise<ActionOutcome> {
+      /*
+       * What this can honestly check is the broker an agent would share, which
+       * is what makes the copied configuration reach the same sessions. It does
+       * not speak MCP — that would need a process this renderer cannot spawn —
+       * and the panel says exactly that rather than showing a green tick for
+       * something it did not do.
+       */
+      const answer = await service.getTargets();
+      const { ok: succeeded, result, message } = envelopeOf(answer);
+      if (!succeeded) {
+        return refused(message ?? "The surface broker did not answer.");
+      }
+      const adapters = Array.isArray(result["adapters"]) ? result["adapters"] : [];
+      return ok(
+        `The broker answered with ${adapters.length} adapters. An agent using this configuration reaches the same sessions.`,
+        { value: answer },
+      );
     },
   },
   {

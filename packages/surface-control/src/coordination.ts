@@ -13,6 +13,22 @@ export interface Lease {
   completedAt?: number;
 }
 
+/**
+ * Who holds a target, until they give it up (SF-13, T16).
+ *
+ * Distinct from the per-operation `Lease` above, which exists for the duration
+ * of one mutation and is released with its outcome. This one a client *takes*,
+ * so a person and an agent driving the same target can hand over explicitly
+ * rather than racing each act. While it is held, a mutation from anyone else is
+ * refused `CONTROL_BUSY` naming the holder — never queued, and never silently
+ * retried (SF-14).
+ */
+export interface Control {
+  targetKey: string;
+  holder: string;
+  since: number;
+}
+
 export interface IdempotencyRecord {
   key: string;
   operationName: string;
@@ -43,6 +59,24 @@ export interface CoordinationStore {
   releaseLease(targetKey: string, outcome: OperationOutcome): void;
 
   getLease(targetKey: string): Lease | undefined;
+
+  /** Take a target, or say who already has it (SF-13). */
+  takeControl(
+    targetKey: string,
+    holder: string,
+  ): { taken: true; control: Control } | { taken: false; holder: string; since: number };
+
+  /**
+   * Give a target up.
+   *
+   * Only the holder may: a client that could release another's control could
+   * take a target out from under a mutation in flight, which is the thing the
+   * lease exists to prevent. `force` is the explicit handoff a person performs
+   * from the UI, and it is recorded as such by the caller.
+   */
+  releaseControl(targetKey: string, holder: string, force?: boolean): { released: boolean; holder?: string };
+
+  getControl(targetKey: string): Control | undefined;
 
   recordDispatch(sessionId: string, operationName: string): OperationRecord;
 
@@ -100,6 +134,7 @@ export { hashInput };
 
 export function createCoordinationStore(): CoordinationStore {
   const leases = new Map<string, Lease>();
+  const controls = new Map<string, Control>();
   const operations = new Map<string, OperationRecord>();
   const idempotency = new Map<string, IdempotencyRecord>();
 
@@ -137,6 +172,31 @@ export function createCoordinationStore(): CoordinationStore {
 
     getLease(targetKey) {
       return leases.get(targetKey);
+    },
+
+    takeControl(targetKey, holder) {
+      const held = controls.get(targetKey);
+      // Taking it again is not an error: a holder re-asserting is idempotent.
+      if (held !== undefined && held.holder !== holder) {
+        return { taken: false, holder: held.holder, since: held.since };
+      }
+      const control: Control = { targetKey, holder, since: held?.since ?? Date.now() };
+      controls.set(targetKey, control);
+      return { taken: true, control };
+    },
+
+    releaseControl(targetKey, holder, force) {
+      const held = controls.get(targetKey);
+      if (held === undefined) return { released: false };
+      if (held.holder !== holder && force !== true) {
+        return { released: false, holder: held.holder };
+      }
+      controls.delete(targetKey);
+      return { released: true, holder: held.holder };
+    },
+
+    getControl(targetKey) {
+      return controls.get(targetKey);
     },
 
     recordDispatch(sessionId, operationName) {
