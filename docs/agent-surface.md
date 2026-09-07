@@ -101,7 +101,9 @@ waiting — every adapter must support.
 
 `snapshot()` is the primary input to grounding (REQ-REC-2) and the source of the
 context hash (LLD §6.2). Its shape is identical whether the tree came from ARIA,
-UIA, AX, AT-SPI or an Appium page source (REQ-SURF-4).
+UIA, AX or an Appium page source (REQ-SURF-4) — and would be identical for
+AT-SPI, which the contract admits and no adapter implements yet (see the
+[support matrix](reference/generated/support-matrix.md)).
 
 ```ts
 interface Snapshot { ref: Ref; nodes: SnapshotNode[]; text: string; tokensEstimate: number; hash: string; }

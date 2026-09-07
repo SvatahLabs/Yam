@@ -418,6 +418,18 @@ export function Shell(props: ShellProps): React.JSX.Element {
    * workspace — which is not a project and must not read like one (T14, T17).
    * The main process says which it is; the renderer does not sniff the path.
    */
+  /*
+   * The recent projects, read once. `preferences()` is the same store the
+   * welcome screen read; nothing new is remembered.
+   */
+  const [recents, setRecents] = useState<readonly string[]>([]);
+  useEffect(() => {
+    void bridge()
+      .preferences()
+      .then((one) => setRecents(one.recentProjects ?? []))
+      .catch(() => undefined);
+  }, []);
+
   const projectLabel =
     props.projectless === true || props.project === ""
       ? undefined
@@ -586,6 +598,34 @@ export function Shell(props: ShellProps): React.JSX.Element {
             })();
           }}
         />
+        {/*
+          The projects you had open, while none is (T20).
+
+          Making Surfaces the landing screen retired the welcome screen, and the
+          list of recent projects went with it — so the *only* way to open one
+          became a native directory dialog. That is a worse experience for
+          anyone with two projects, and it took something else with it: a native
+          file dialog is not part of the application, so `evals/self`'s flows
+          could no longer open a project **through the app**, and Yam's
+          verification of its own project screens collapsed from thirty checks
+          to twelve. The parity gate said so the first time it was re-run.
+
+          So the recents come back, where a project is chosen: beside the
+          button, while nothing is open, and gone once something is. The ids are
+          the ones the bindings store already knows.
+        */}
+        {props.projectless === true
+          ? recents.slice(0, 3).map((directory, at) => (
+              <Button
+                key={directory}
+                id={`project-recent-${at}`}
+                label={directory.split("/").filter(Boolean).pop() ?? directory}
+                variant="ghost"
+                title={directory}
+                onPress={() => void props.onOpenProject?.(directory)}
+              />
+            ))
+          : null}
         <Button
           id="open-command-palette"
           label="Search or run a command"

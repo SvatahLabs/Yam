@@ -1,0 +1,39 @@
+schemaVersion: "1.0.0"
+# The top bar's project control (T20).
+#
+# Not `project-open`, which is the welcome screen's "Open a project…" button.
+# This is the one in the shell's top bar, which names the project that is open —
+# "Project: fixtures" — and is how a flow knows the open finished. The recents
+# beside it are offered only while none is open.
+id: "app.open-project"
+phrases:
+  - "the open project button"
+entries:
+  - candidates:
+      - by: "css"
+        value: "#open-project"
+        score: 0.99
+    context:
+      platform: "web"
+      pattern: "/"
+      hash: "25da5590b52a8019f790a9d2bda9910517f510cb7f7bc8feb5afbb5ae90055ec"
+    fingerprint:
+      tag: "button"
+      attrs:
+        id: "open-project"
+      text: "Open a project"
+      neighbours:
+        before: []
+        after: []
+      rolePath: []
+      box: [0, 0, 0, 0]
+      index: 0
+    provenance:
+      at: "2026-09-09T00:00:00.000Z"
+      model: "none"
+      promptVersion: "seeded"
+      tokensIn: 0
+      tokensOut: 0
+      costUsd: 0
+    recordedAt: "2026-09-09T00:00:00.000Z"
+    verified: false

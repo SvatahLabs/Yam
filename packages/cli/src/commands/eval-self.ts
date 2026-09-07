@@ -190,6 +190,7 @@ function yamSource(project: string, options: { attach?: boolean } = {}): SourceS
        * which is the one thing a parity gate must not do. So the gate starts
        * one, points `YAM_CDP_URL` at it, and stops it afterwards.
        */
+      const runs = join(directory, "runs");
       const desktopApp = options.attach === true ? startAppWithDebugging(root, io) : undefined;
       if (desktopApp?.error !== undefined) {
         return {
@@ -200,6 +201,20 @@ function yamSource(project: string, options: { attach?: boolean } = {}): SourceS
         };
       }
 
+      /*
+       * The runs that existed *before* this one (T20).
+       *
+       * What follows reads "the newest directory under `runs/`" for its
+       * verdicts — and did so whether or not this invocation produced one. So a
+       * `yam run` that never started (an invalid bindings file, a missing
+       * project, a build that had not been made) was scored with a **previous
+       * run's results**, and the gate published a verdict about something that
+       * had not happened. Measured: a binding file missing one field stopped
+       * the run before its first step, and the report showed the same six steps
+       * as the run half an hour earlier.
+       */
+      const before = existsSync(runs) ? new Set(readdirSync(runs)) : new Set<string>();
+
       io.err(`  running ${project}…`);
       const ran = shell(process.execPath, [cli, "run", directory, "--host", "none"], {
         cwd: root,
@@ -207,9 +222,9 @@ function yamSource(project: string, options: { attach?: boolean } = {}): SourceS
       });
       desktopApp?.stop();
 
-      const runs = join(directory, "runs");
       const latest = existsSync(runs)
         ? readdirSync(runs)
+            .filter((one) => !before.has(one))
             .sort()
             .at(-1)
         : undefined;
@@ -218,7 +233,7 @@ function yamSource(project: string, options: { attach?: boolean } = {}): SourceS
         return {
           byName,
           unreachable:
-            `\`yam run ${project}\` wrote no run directory (exit ${ran.status ?? "none"}): ` +
+            `\`yam run ${project}\` wrote no *new* run directory (exit ${ran.status ?? "none"}): ` +
             `${(ran.stderr || ran.stdout).trim().split("\n").slice(-3).join(" ")}`,
           wallMs: ran.wallMs,
           command: ran.line,
@@ -455,6 +470,70 @@ function vitestSource(packageDir: string, files: readonly string[], what: string
                 ? { verdict: "unreachable" as const, evidence: "the case was skipped" }
                 : no((one.failureMessages?.[0] ?? "failed").split("\n")[0]!.slice(0, 300));
           for (const name of names) byName.set(name, result);
+        }
+      }
+      return { byName, wallMs: ran.wallMs, command: ran.line };
+    },
+  };
+}
+
+/**
+ * The Yam-controls-Yam suite, mapped check name → verdict (T18, T20).
+ *
+ * This is the source that lets a Surfaces check have a **`yam` side at all**.
+ * The catalogue used to say, of driving Yam's own Surfaces screen: *"needs a
+ * second live surface session inside the one the self suite is already driving
+ * with — `app.launch` opens one session and there is no sentence for a nested
+ * one."* That was true of the *flow language* and it was read as true of the
+ * product. T18 opens exactly that nested session — Yam driving the packaged Yam
+ * while the packaged Yam drives the sample application — through `yam surface`
+ * and through the MCP tools, so the shortcoming is the language's and no longer
+ * Yam's.
+ *
+ * A `blocked` check is `unreachable` with its own reason, which is the same
+ * distinction the rest of this gate draws: a host that could not be asked is
+ * not an oracle that disagreed. A name that several passes answer about — the
+ * journey runs four times, once per interface and platform — passes only if
+ * every one of them passed.
+ */
+function yamOnYamSource(): SourceSpec {
+  return {
+    what: "Yam driving the packaged Yam through its own interfaces",
+    run({ root, io }): SourceAnswers {
+      const evidence = mkdtempSync(join(tmpdir(), "yam-on-yam-self-"));
+      io.err("  running the Yam-controls-Yam suite…");
+      const ran = shell(process.execPath, [join("evals", "self", "yam-on-yam", "run.mjs")], {
+        cwd: root,
+        env: { YAM_ON_YAM_EVIDENCE_DIR: evidence },
+      });
+      const report = join(evidence, "yam-on-yam.json");
+      if (!existsSync(report)) {
+        return {
+          byName: new Map(),
+          unreachable:
+            `the suite wrote no report (exit ${ran.status ?? "none"}): ` +
+            `${(ran.stderr || ran.stdout).trim().split("\n").slice(-3).join(" ")}`,
+          wallMs: ran.wallMs,
+          command: ran.line,
+        };
+      }
+      const checks = (
+        JSON.parse(readFileSync(report, "utf8")) as {
+          checks: Array<{ pass: string; name: string; ok?: boolean; blocked?: string; detail?: string }>;
+        }
+      ).checks;
+      const byName = new Map<string, SideResult>();
+      for (const one of checks) {
+        const already = byName.get(one.name);
+        const result =
+          one.blocked !== undefined
+            ? cannot(one.blocked)
+            : one.ok === true
+              ? ok(`${one.pass}: ${one.detail ?? "passed"}`.slice(0, 300))
+              : no(`${one.pass}: ${one.detail ?? "failed"}`.slice(0, 300));
+        // The worst answer wins: a name several passes reach passes only if all did.
+        if (already === undefined || (already.verdict === "pass" && result.verdict !== "pass")) {
+          byName.set(one.name, result);
         }
       }
       return { byName, wallMs: ran.wallMs, command: ran.line };
@@ -708,6 +787,8 @@ function sourcesFor(catalogue: Catalogue, reportsDir: string): Record<string, So
   return {
     /** The AX side: `evals/self` driven through the desktop adapter. */
     yam: yamSource("."),
+    /** Yam driving the *packaged* Yam through `yam surface` and the MCP tools. */
+    "yam-on-yam": yamOnYamSource(),
     /** The same flows through the Playwright adapter attached over CDP. */
     "yam-cdp": yamSource("cdp", { attach: true }),
     /** The app's own Playwright cases, over CDP against the packaged build. */

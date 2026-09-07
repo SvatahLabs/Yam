@@ -171,9 +171,9 @@ export function RecordScreen(props: RecordProps): React.JSX.Element {
             */}
             {state.gateway === "fake" ? (
               <p id="record-fake-gateway" className="sv-card">
-                <Pill tone="info" label="fake gateway" /> The groundings come from the committed
-                answers under <span className="sv-mono">evals/grounding/cases</span>, not from a
-                model. Nothing is sent anywhere and nothing is charged.
+                <Pill tone="info" label="fake gateway" /> The groundings come from answers
+                committed with Yam, not from a model. Nothing is sent anywhere and nothing is
+                charged.
               </p>
             ) : null}
 

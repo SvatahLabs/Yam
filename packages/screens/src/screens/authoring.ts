@@ -629,7 +629,15 @@ const recordScreen: Screen<RecordState> = {
         },
         {
           id: "fake",
-          label: "fake — committed answers from evals/grounding/cases",
+          /*
+           * No repository path in a user-facing string (T20, SF-20).
+           *
+           * This said "committed answers from evals/grounding/cases" — a
+           * directory inside Yam's own checkout, which means nothing to
+           * somebody running the installed package and is exactly the kind of
+           * path SF-20 keeps out of what a user reads.
+           */
+          label: "fake — committed answers, no model",
           available: true,
         },
       ],

@@ -170,7 +170,7 @@ describe("the catalogue and the suites agree (T11.4)", () => {
      */
     const gate = readFileSync(fromRoot("packages/cli/src/commands/eval-self.ts"), "utf8");
     const known = new Set(
-      [...gate.matchAll(/^\s{4}"?([a-z-]+)"?:\s*(?:yamSource|playwrightSource|vitestSource|commandSource)/gm)].map(
+      [...gate.matchAll(/^\s{4}"?([a-z-]+)"?:\s*(?:yamSource|yamOnYamSource|playwrightSource|vitestSource|commandSource)/gm)].map(
         (one) => one[1]!,
       ),
     );

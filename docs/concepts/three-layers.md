@@ -13,10 +13,14 @@
    model calls: compile residue · record grounding · heal · never at replay
 ```
 
-**The surface** is one published interface over every platform: take a
-snapshot with stable references, act by reference, read, check, hold session
-state. Adapters implement it for Playwright, WebDriver BiDi, Appium, Windows UI
-Automation, macOS Accessibility and HTTP. Nothing above the surface knows a
+**The surface** is one published interface, and each platform reaches it
+through an adapter: take a snapshot with stable references, act by reference,
+read, check, hold session state. Adapters exist for Playwright, WebDriver BiDi,
+Appium, Windows UI Automation, macOS Accessibility and HTTP; Linux AT-SPI and
+process/terminal surfaces are not implemented. What each adapter has actually
+been driven through is the
+[support matrix](../reference/generated/support-matrix.md) — an adapter's
+existence is not evidence that it works. Nothing above the surface knows a
 locator, a protocol or a platform.
 
 **The determinism layer** is the standard the project publishes: the step

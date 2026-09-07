@@ -88,8 +88,29 @@ export async function explore(options: ExploreOptions): Promise<Proposal | undef
   const built = await buildMcpServer({ root, io: options.io, trajectoryPath, sessionId });
   options.io.err(`yam explore — the agent's calls are recorded at ${relative(root, trajectoryPath)}`);
   await built.server.connect(options.transport);
+  /*
+   * Wait for the agent to go — and notice every way it can (T20, SF-07).
+   *
+   * The promise this command exists to keep is "when the agent disconnects,
+   * compiles what it did into a proposal". Over the SDK's **stdio** transport
+   * an ordinary client disconnects by closing the server's stdin, and
+   * `StdioServerTransport` does not report that as a close — so this promise
+   * never settled, the event loop emptied, and Node exited with *"Detected
+   * unsettled top-level await"* having compiled nothing. No trajectory, no
+   * proposal, no error: the command did nothing and said nothing.
+   *
+   * It was invisible because the only test of it used the SDK's in-memory
+   * transport, where `close()` does fire `onclose`. SF-07 asks for "the actual
+   * subprocess transport" for exactly this reason, and the first run of
+   * `front-door.an-exploration-becomes-a-proposal` through the parity gate is
+   * what found it.
+   *
+   * `once` on each, and `done` is idempotent because a promise resolves once.
+   */
   await new Promise<void>((done) => {
     options.transport.onclose = () => done();
+    process.stdin.once("end", () => done());
+    process.stdin.once("close", () => done());
     process.once("SIGINT", () => done());
     process.once("SIGTERM", () => done());
   });

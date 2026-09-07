@@ -130,22 +130,42 @@ checks:
       name: "tree"
   - id: "app.surfaces-offers-a-connect-form-and-no-prose-intent"
     says: "Surfaces offers a connect form and no prose intent (T15, SF-12)"
+    # Two-sided since T18. The reason this used to give — "driving Yam's own
+    # Surfaces screen needs a second live surface session inside the one the
+    # self suite is already driving with" — was true of the *flow language* and
+    # was read as true of the product. `evals/self/yam-on-yam` opens exactly
+    # that nested session, through `yam surface` and through the MCP tools.
     yam:
-      unreachable: "driving Yam's own Surfaces screen needs a second live surface session inside the one the self suite is already driving with: the flow would connect the app to something while the app is what is being driven. `app.launch` opens one session and there is no sentence for a nested one."
+      source: "yam-on-yam"
+      name: "the connect form offers a URL to fill"
     external:
       source: "app-playwright"
       name: "Surfaces offers a connect form and no prose intent (T15, SF-12)"
   - id: "app.opens-into-the-new-flows-screen-not-the-eleven-tabs"
-    # Surface-first (T14): the app opens into Surfaces, not Flows. The external
-    # case was renamed to match; the `yam` self-story that drives the same
-    # journey through Yam is updated when the self suite is revalidated (M4).
+    # Surface-first (T14): the app opens into Surfaces, not Flows. Both sides
+    # now drive the packaged application and ask the same question of it —
+    # Yam's through `yam surface` and the MCP tools against the accessibility
+    # tree and the renderer, Playwright's over CDP (T18, T20).
     says: "opens into Surfaces by default, with the four-section rail (T14, SF-02, SF-16)"
     yam:
-      source: "yam"
-      name: "the app opens a project and shows its flows"
+      source: "yam-on-yam"
+      name: "the packaged application opens into Surfaces"
     external:
       source: "app-playwright"
       name: "opens into Surfaces by default, with the four-section rail (T14, SF-02, SF-16)"
+  - id: "app.yam-drives-the-packaged-yam-end-to-end"
+    says: "Yam drives the packaged Yam through its own public interfaces: connect to the sample app, select a control, fill it, and disconnect (T18, SF-21)."
+    # The mission's own acceptance scenario 8. Its `yam` side is the journey
+    # run through `yam surface` and the MCP tools, against the packaged
+    # application's accessibility tree and its renderer; there is no external
+    # implementation because a Playwright case driving the renderer by selector
+    # is the thing this check exists to *not* be.
+    yam:
+      source: "yam-on-yam"
+      name: "disconnecting returns the application to its connect form"
+    external:
+      unreachable: "an external oracle for this would be a Playwright case driving the app's renderer by selector — which is precisely what \"Yam controls Yam\" must not be reduced to. The independent oracles for this run are the screenshot, the geometry, the accessibility audit and the fixture project's bytes, and they are separate rows."
+
   - id: "app.every-interactive-control-on-the-flows-screen-is-named-and-i"
     says: "every interactive control on the Flows screen is named and id'd (P8-F3)"
     yam:
@@ -333,8 +353,7 @@ checks:
   - id: "app.the-record-review-chooses-its-gateway-and-says-what-a-fake-s"
     says: "the Record review chooses its gateway and says what a fake session is"
     yam:
-      source: "yam"
-      name: "the Record review opens from the palette and chooses its gateway"
+      unreachable: "choosing this gateway means opening a `Chooser` and taking one of its options, and the AX adapter's `selectOption` cannot: it presses the control and then looks for a **menu item** the press opened, which is what a native macOS pop-up button produces. This one is Radix's select, whose options are a DOM listbox rendered into a portal — present in the accessibility tree, and not a menu. The step exists (pattern 15) and the adapter needs a second strategy: after pressing, look for an element with `role=\"option\"` and the wanted name anywhere in the window, not only among the menu items of the control that was pressed."
     external:
       source: "app-playwright"
       name: "the Record review chooses its gateway and says what a fake session is"

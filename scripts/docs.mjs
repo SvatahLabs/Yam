@@ -176,6 +176,88 @@ page(
     "\n",
 );
 
+/* ── 5. the support matrix, from the coverage report ─────────────────────── */
+
+/*
+ * **Derived, never written** (T20, SF-09, SF-21).
+ *
+ * The support matrix is the one page in this documentation set a reader makes a
+ * decision on: it is where they find out whether Yam can drive the thing in
+ * front of them. A matrix somebody typed is a matrix that says what was hoped
+ * for on the day it was typed.
+ *
+ * So this page is generated from `coverage.json`, which
+ * `scripts/coverage-report.mjs` generates from runs. `pnpm docs --check` is in
+ * the gate, so a coverage report that moves and a matrix that does not is a red
+ * build rather than a page that quietly rots.
+ */
+const coveragePath = join(ROOT, "docs", "spec", "surface-first", "evidence", "wave-4", "coverage.json");
+if (existsSync(coveragePath)) {
+  const coverage = JSON.parse(readFileSync(coveragePath, "utf8"));
+  const STATUS = {
+    validated: "**validated**",
+    unvalidated: "implemented, unvalidated here",
+    blocked: "not available on this host",
+  };
+  const bar = (text) => String(text ?? "—").replace(/\|/g, "\\|");
+  const lines = [
+    "# Support matrix",
+    "",
+    "**Generated. Do not edit.** `node scripts/docs.mjs` derives this page from",
+    "`docs/spec/surface-first/evidence/wave-4/coverage.json`, which",
+    "`node scripts/coverage-report.mjs` derives from runs. Nothing here is a plan.",
+    "",
+    `Last measured ${coverage.ranAt} on **${coverage.host.reference}**.`,
+    "",
+    "## What each word claims",
+    "",
+    "| Word | What it claims |",
+    "|---|---|",
+    "| **validated** | A session was opened through this adapter, and driven, in the run this page comes from. |",
+    "| implemented, unvalidated here | The adapter is built and registered, and nothing in that run drove it. The reason is given. It is not a claim that it works, and not a claim that it does not. |",
+    "| not available on this host | It could not be asked. The reason is the product's own sentence. |",
+    "| unimplemented | Absent, with no row below. Linux AT-SPI and process/terminal surfaces are unimplemented. |",
+    "",
+    "## Adapters",
+    "",
+    "| Adapter | Platforms | Status | Evidence, or the reason |",
+    "|---|---|---|---|",
+    ...coverage.adapters.map(
+      (one) =>
+        `| \`${one.adapter}\` | ${bar(one.platforms)} | ${STATUS[one.status] ?? one.status} | ${bar(one.reason)} |`,
+    ),
+    "",
+    "## Interfaces",
+    "",
+    "One journey, run through each. The counts are checks passed and reached beside",
+    "what was attempted, so a platform that could not be asked is visible rather",
+    "than absent (SF-21).",
+    "",
+    "| Interface | Platform | Passed | Reached | Blocked | Attempted |",
+    "|---|---|---|---|---|---|",
+    ...coverage.rows
+      .filter((one) => one.interface !== "adapter")
+      .map(
+        (one) =>
+          `| ${one.interface} | ${bar(one.platform)} | ${one.passed} | ${one.reached} | ${one.blocked} | ${one.attempted} |`,
+      ),
+    "",
+    "## Timing, on the machine above",
+    "",
+    "Proposed budgets being calibrated, not a promise. Every sample is a fresh",
+    "process, so cold start is included.",
+    "",
+    "| What | Budget | p95 | Samples |",
+    "|---|---|---|---|",
+    ...coverage.budgets.map(
+      (one) =>
+        `| ${one.what} | ${one.budgetMs} ms | ${one.p95Ms === undefined ? "not measured" : `${one.p95Ms} ms`} | ${one.samples} |`,
+    ),
+    "",
+  ];
+  page("support-matrix.md", `${lines.join("\n")}`);
+}
+
 /* ── write, or check ─────────────────────────────────────────────────────── */
 
 const stale = [];

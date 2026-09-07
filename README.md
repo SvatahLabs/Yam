@@ -4,13 +4,19 @@ Yam, from [Svatah Labs](https://github.com/SvatahLabs), is a **deterministic
 automation runtime with a standard agent surface**. Describe a
 behaviour once in plain language, compile it into a typed plan with element
 bindings by driving the real platform, then replay that plan deterministically —
-no model in the loop — on any platform an adapter exists for.
+no model in the loop.
+
+Which platforms that covers, and how far each has been driven, is in the
+[support matrix](docs/reference/generated/support-matrix.md). It is generated
+from measured runs, not written: "validated" there means a session was opened
+through that adapter and driven, and everything else says what would have to be
+true.
 
 Yam is built in three layers:
 
 | Layer | What it is |
 |---|---|
-| **Surface** | A published agent-native API — `snapshot` with stable references, `act` by reference, `read`, `check`, session state — implemented by adapters for Playwright, WebDriver BiDi, Appium, OS accessibility (UIA, AX, AT-SPI), HTTP and WebMCP. |
+| **Surface** | A published agent-native API — `snapshot` with stable references, `act` by reference, `read`, `check`, session state — implemented by adapters for Playwright, WebDriver BiDi, Appium, Windows UI Automation, macOS Accessibility, HTTP and WebMCP. Linux AT-SPI and process/terminal surfaces are **not implemented**. See the [support matrix](docs/reference/generated/support-matrix.md). |
 | **Determinism** | The step IR, the bindings store with fingerprints, the resolver, model-free relocalization, provenance, checkpoints and replay. This layer is the standard the project publishes. |
 | **Behavior** | One plan, three ways to run it: **test** (a pass/fail oracle), **workflow** (a typed function with guards and checkpoints) and **tool** (a deterministic MCP tool an agent calls). |
 

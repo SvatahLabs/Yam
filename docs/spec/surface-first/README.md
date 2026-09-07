@@ -6,6 +6,7 @@ Yam should make **connect → inspect → act → verify** its primary experienc
 - [Requirements](requirements.md): mission, 23 prioritized requirements, acceptance scenarios and existing-spec changes.
 - [Design](design.md): shared control architecture, session lifecycle, CLI/MCP/service contract, desktop experience and migration.
 - [Tasks](tasks.md): 23 implementation tasks, dependencies, completion criteria and release gates.
+- [Release review](release-review.md): what was measured, on what, and the open limitations by name. A review, not a release.
 - [Wave 4 progress](progress/wave-4.md): T18–T20 as they landed — Yam driving the packaged Yam, the coverage report and the release review.
 - [Wave 4 implementation prompt](wave-4-implementation.md): Yam controls the packaged Yam through its public interfaces, coverage with a denominator, and the docs and release review brought to what shipped.
 - [Wave 3 implementation prompt](wave-3-implementation.md): the Surfaces shell, the action inspector, shared control and agent setup, and the automations regrouped.

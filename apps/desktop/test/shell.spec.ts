@@ -1031,7 +1031,7 @@ test("the Record review chooses its gateway and says what a fake session is", as
   }
   await page.keyboard.press("Enter");
 
-  await expect(page.locator("#record-fake-gateway")).toContainText("not from a model");
+  await expect(page.locator("#record-fake-gateway")).toContainText("committed with Yam");
   await expect(page.locator("#record-flows")).toBeVisible();
 });
 

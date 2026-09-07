@@ -372,9 +372,13 @@ export async function dispatchAct(
   const form = ACTION_FORMS.find((one) => one.action === input.action);
   if (form !== undefined) {
     const supplied = (input.args ?? {}) as Record<string, unknown>;
+    const given = (field: (typeof form.fields)[number]): boolean =>
+      [field.name, ...(field.alsoAccepts ?? [])].some(
+        (name) => supplied[name] !== undefined && supplied[name] !== "",
+      );
     const missing = form.fields
       .filter((field) => field.required)
-      .filter((field) => supplied[field.name] === undefined || supplied[field.name] === "")
+      .filter((field) => !given(field))
       .map((field) => field.name);
     if (missing.length > 0) {
       ctx.events?.emit({

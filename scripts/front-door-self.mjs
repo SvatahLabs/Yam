@@ -86,14 +86,59 @@ switch (which) {
       const transport = new StdioClientTransport({ command: process.execPath, args: [BIN, "explore", dir, "--name", "Explored sign in"], cwd: dir, env: { ...process.env, CI: "true" } });
       const client = new Client({ name: "front-door-self", version: "0" });
       await client.connect(transport);
-      const snap = await client.callTool({ name: "surface_snapshot", arguments: { intent: "see what is on the home page", interactiveOnly: true } });
+      /*
+       * Connect first, as the server's own instructions say (T20).
+       *
+       * `yam explore` serves the surface tools and opens no session: the tools
+       * "drive a live target directly through session IDs — call
+       * `surface_connect` first". This check predated that and called
+       * `surface_snapshot` with no session, so once the MCP server became a
+       * client of the broker (wave 3) it answered *"Input validation error:
+       * Required at session"* and the check failed. It had not been re-run
+       * since. An agent doing what the instructions say is what this should
+       * have been driving all along.
+       */
+      const opened = await client.callTool({
+        name: "surface_connect",
+        arguments: { url: app.origin, intent: "open the sample application" },
+      });
+      const openedText = opened.content.find((one) => one.type === "text")?.text ?? "";
+      const session = JSON.parse(openedText)?.result?.sessionId;
+      if (typeof session !== "string") fail(`surface_connect opened no session: ${openedText.slice(0, 200)}`);
+      const snap = await client.callTool({ name: "surface_snapshot", arguments: { session, intent: "see what is on the home page", interactiveOnly: true } });
       const text = snap.content.find((one) => one.type === "text")?.text ?? "";
-      const ref = /link "Sign in"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(JSON.parse(text).text ?? text)?.[1];
-      if (ref === undefined) fail("no sign-in link in the snapshot");
-      await client.callTool({ name: "surface_act", arguments: { intent: "go to the sign-in page", action: "click", ref } });
+      /*
+       * The nodes, not a regular expression over the rendered text (T20).
+       *
+       * This used to match `link "Sign in" [ref=r6]` against
+       * `JSON.parse(text).text` — a field the *envelope* does not have; it is
+       * `result.text`. So the match ran against the whole JSON blob, found
+       * nothing, and the check failed. Reading the structured nodes is what an
+       * agent does with a snapshot and cannot drift with a rendering.
+       */
+      const nodes = JSON.parse(text)?.result?.nodes ?? [];
+      const ref = nodes.find((one) => one.role === "link" && one.name === "Sign in")?.ref;
+      if (ref === undefined) {
+        fail(`no sign-in link among ${nodes.length} node(s): ${nodes.map((one) => `${one.role} "${one.name ?? ""}"`).join(", ").slice(0, 400)}`);
+      }
+      await client.callTool({ name: "surface_act", arguments: { session, intent: "go to the sign-in page", action: "click", ref } });
+      await client.callTool({ name: "surface_close", arguments: { session } });
       await client.close();
-      await new Promise((done) => setTimeout(done, 1500));
-      const proposals = join(dir, "proposals");
+      /*
+       * Give the command time to notice and compile (T20).
+       *
+       * Closing the client kills the server process, and `yam explore` then has
+       * to notice, close its session and compile the trajectory into a
+       * proposal. A second and a half was not enough once the session became
+       * the broker's — closing it is a round trip to another process — so the
+       * check looked for `proposals/` before it existed and reported a
+       * shortcoming that was its own impatience. Waited for, not slept on.
+       */
+      const proposalsDir = join(dir, "proposals");
+      for (let waited = 0; waited < 30_000 && !existsSync(proposalsDir); waited += 250) {
+        await new Promise((done) => setTimeout(done, 250));
+      }
+      const proposals = proposalsDir;
       if (!existsSync(proposals)) fail("no proposals directory after the exploration");
       const { readdirSync } = await import("node:fs");
       const days = readdirSync(proposals);

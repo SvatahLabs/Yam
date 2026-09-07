@@ -562,7 +562,10 @@ export class UiaSurface implements AgentSurface {
       case "selectOption":
       case "deselectOption": {
         const node = need(ref);
-        const wanted = str("value");
+        // `value`, `values` or `label`, as every other adapter reads them (T20).
+        const wanted = str(
+          args["value"] !== undefined ? "value" : args["values"] !== undefined ? "values" : "label",
+        );
         /*
          * A combo box opens before its items exist in the tree, so the sequence
          * is expand, re-read, then select the item — the same shape the AX

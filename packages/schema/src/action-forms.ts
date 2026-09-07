@@ -33,6 +33,19 @@ export interface ActionField {
   /** What a person reads beside the input. */
   readonly label: string;
   readonly placeholder?: string;
+  /**
+   * Other keys that satisfy this field, where an adapter has long accepted
+   * more than one name for the same thing (T18).
+   *
+   * A form still offers **one** input — a person choosing an option types the
+   * option, and does not care that `selectOption` reads `value`, `values` or
+   * `label`. But a caller that used one of the older names is not a caller who
+   * left the argument out, and refusing them was a regression the moment
+   * arguments began to be validated before dispatch: the flow language's
+   * `Select "<label>" in the <target>` compiles to `label`, and every such step
+   * was refused as `INVALID_ARGUMENT`.
+   */
+  readonly alsoAccepts?: readonly string[];
 }
 
 export interface ActionForm {
@@ -115,7 +128,16 @@ export const ACTION_FORMS: readonly ActionForm[] = [
     needsRef: true,
     needsRef2: false,
     fields: [
-      { name: "value", type: "string", required: true, label: "Option", placeholder: "the option's value or label" },
+      {
+        name: "value",
+        type: "string",
+        required: true,
+        label: "Option",
+        placeholder: "the option's value or label",
+        // The adapter reads `value`, `values` or `label`; the flow language's
+        // `Select "<label>" in the <target>` compiles to the last of them.
+        alsoAccepts: ["values", "label"],
+      },
     ],
     kinds: ELEMENT_KINDS,
   },

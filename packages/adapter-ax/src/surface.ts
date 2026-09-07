@@ -710,7 +710,20 @@ export class AxSurface implements AgentSurface {
          * the menu did not exist before the press.
          */
         const node = need(ref);
-        const wanted = str("value");
+        /*
+         * `value`, `values` or `label` — the three names this action has always
+         * answered to (T20).
+         *
+         * The Playwright adapter reads all three; this one read `value` alone,
+         * and the flow language's `Select "<label>" in the <target>` compiles
+         * to `label`. So pattern 15 worked on the web and was refused on the
+         * desktop with *"the selectOption action needs an argument value"* — a
+         * sentence about an argument the caller had supplied under its other
+         * documented name.
+         */
+        const wanted = str(
+          args["value"] !== undefined ? "value" : args["values"] !== undefined ? "values" : "label",
+        );
         await this.press(node);
         await this.refresh();
         const option = this.nodes.find(
@@ -786,6 +799,17 @@ export class AxSurface implements AgentSurface {
    * `AXPress` if the element declares it, a click at the box centre if not
    * (LLD §7.5's "with a mouse/keyboard fallback at the element's box centre").
    */
+  /**
+   * How long a control is given to stop moving (T20).
+   *
+   * Opening a project starts a service and redraws the shell, which takes
+   * seconds — a couple of retries a quarter-second apart is not a window, it is
+   * a flinch. This is the same order as `candidateTimeoutMs`: long enough for a
+   * screen to settle, short enough that a control which is genuinely gone still
+   * fails while somebody is watching.
+   */
+  private static readonly STALE_PATH_BUDGET_MS = 6_000;
+
   private async press(node: AxSnapshotNode): Promise<void> {
     if (node.states.includes("disabled")) {
       throw new ActionabilityError(
@@ -793,11 +817,59 @@ export class AxSurface implements AgentSurface {
         { adapter: "ax" },
       );
     }
-    if (node.source.actions?.includes("AXPress") === true) {
-      await this.live().perform({ kind: "action", path: node.path, action: "AXPress" });
-      return;
+    /*
+     * A path is an address in a tree that can move under it (T20).
+     *
+     * `path` is the child index at each level from the window down, and the
+     * bridge answers `stale-path` when a level has fewer children than it did.
+     * Between locating an element and pressing it, a window that is re-rendering
+     * — opening a project starts a service and redraws the shell — changes
+     * exactly that. Measured: `Click the Flows rail item`, one step after the
+     * project was opened, failed with *"The accessibility action failed:
+     * stale-path"* while the element was on screen the whole time.
+     *
+     * The design already says what to do about it: "pre-dispatch revalidation
+     * remains mandatory". So a stale path is re-read rather than reported —
+     * refresh the tree, find the same control again by what identifies it, and
+     * press that. Bounded, because a control that is genuinely gone must still
+     * fail.
+     */
+    let target = node;
+    const until = Date.now() + AxSurface.STALE_PATH_BUDGET_MS;
+    for (;;) {
+      try {
+        if (target.source.actions?.includes("AXPress") === true) {
+          await this.live().perform({ kind: "action", path: target.path, action: "AXPress" });
+        } else {
+          await this.live().perform({ kind: "click", at: this.centreOf(target) });
+        }
+        return;
+      } catch (error) {
+        const stale = error instanceof Error && /stale-path/.test(error.message);
+        if (!stale || Date.now() >= until) throw error;
+        await new Promise((done) => setTimeout(done, 250));
+        await this.refresh();
+        const again = this.sameControl(target);
+        if (again === undefined) throw error;
+        target = again;
+      }
     }
-    await this.live().perform({ kind: "click", at: this.centreOf(node) });
+  }
+
+  /**
+   * The same control in the tree as it is now, by what identifies it rather
+   * than by where it was (T20).
+   *
+   * `automationId` first, because it is the thing the application put there on
+   * purpose; then role and name, which is what a person would use.
+   */
+  private sameControl(node: AxSnapshotNode): AxSnapshotNode | undefined {
+    const id = node.native?.["automationId"];
+    if (typeof id === "string" && id !== "") {
+      const byId = this.nodes.find((one) => one.native?.["automationId"] === id);
+      if (byId !== undefined) return byId;
+    }
+    return this.nodes.find((one) => one.role === node.role && one.name === node.name);
   }
 
   private centreOf(node: AxSnapshotNode): [number, number] {

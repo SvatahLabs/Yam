@@ -40,6 +40,14 @@ story: the command palette opens on the chord and lists the registry's actions
   Click the first recent project
   The Flows rail item should be visible
   Click the Flows rail item
+  # Waited for by *resolving* something the Flows screen only has with a project
+  # open (T20). Opening a project starts a service, which takes seconds, and an
+  # expectation is evaluated once — it is the *resolution* that retries. So the
+  # step that absorbs the wait has to be one that looks for an element, and
+  # `Save flow` is on no other screen. Without it the web adapter read the
+  # toolbar before the project had finished opening; the AX side passed only
+  # because it is slower.
+  The Save flow button should be visible
   The Flows heading should be visible
   Press "Meta+k"
   The command palette should be visible
@@ -57,7 +65,7 @@ story: the Record review opens from the palette and chooses its gateway
   The Accept button should be visible
   The Re-pick button should be visible
   The Reject button should be visible
-  The fake gateway note should contain "evals/grounding/cases"
+  The Gateway select should contain "—"
   The flows to record table should be visible
   Every control on this screen should have a name
   Every control on this screen should have an id
@@ -99,17 +107,14 @@ story: the Heal review opens from the palette and offers the runs worth healing
   Every control on this screen should have a name
   Every control on this screen should have an id
 
-story: the Surface explorer opens from the palette and refuses a call with no intent
-  Click the Flows rail item
-  Press "Meta+k"
-  Click the go to Explorer row
-  The toolbar title should contain "Surface explorer"
-  The intent required alert should be visible
-  Type "look at the booking page" into the intent field
-  The intent required alert should be absent
-  The Adapter select should be visible
-  Every control on this screen should have a name
-  Every control on this screen should have an id
+# The Surface explorer is gone (T15).
+#
+# Its story lived here and drove a screen that no longer exists: T15 replaced
+# the Explorer with the Surfaces screen and removed its four actions and its
+# `/surface/:session/*` routes. What it covered — driving a live target, and
+# refusing a call with no intent — is covered by the Surfaces screen, whose own
+# checks are driven by `evals/self/yam-on-yam` through `yam surface` and the MCP
+# tools against the packaged application.
 
 # Pattern 33: the same screen, measured at two widths.
 #
@@ -150,6 +155,5 @@ test: the app's palette and its window
   the Run screen opens from the palette and shows its own controls
   the audit pane renders the call detail the model carries
   the Heal review opens from the palette and offers the runs worth healing
-  the Surface explorer opens from the palette and refuses a call with no intent
   the Record toolbar keeps its title and its select at two widths
   a toolbar that runs out of room sheds into the palette

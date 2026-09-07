@@ -38,6 +38,14 @@ story: the Flows screen opens and shows its own controls
   Click the first recent project
   The Flows rail item should be visible
   Click the Flows rail item
+  # Waited for by *resolving* something the Flows screen only has with a project
+  # open (T20). Opening a project starts a service, which takes seconds, and an
+  # expectation is evaluated once — it is the *resolution* that retries. So the
+  # step that absorbs the wait has to be one that looks for an element, and
+  # `Save flow` is on no other screen. Without it the web adapter read the
+  # toolbar before the project had finished opening; the AX side passed only
+  # because it is slower.
+  The Save flow button should be visible
   The Flows heading should be visible
   The Save flow button should be visible
 

@@ -141,6 +141,27 @@ describe("act validates its arguments before dispatch (SF-11, T18)", () => {
     expect(ctx.surface.acted, "the adapter was never called").toEqual([]);
   });
 
+  it("accepts a documented alias for a required argument", async () => {
+    /*
+     * `selectOption` has read `value`, `values` or `label` for as long as it
+     * has existed, and the flow language's `Select "<label>" in the <target>`
+     * compiles to the last of them. When arguments began to be validated
+     * before dispatch, every such step was refused as `INVALID_ARGUMENT` — a
+     * caller that used a documented name being told it had sent nothing.
+     */
+    const ctx = context();
+    const connected = (await dispatchConnect(ctx, {
+      adapterFactory: async () => ctx.surface,
+    })) as { result: { sessionId: string } };
+    const answer = (await dispatchAct(ctx, {
+      session: connected.result.sessionId,
+      action: "selectOption",
+      args: { label: "fake — committed answers, no model" } as never,
+    })) as { status: string };
+    expect(answer.status).toBe("succeeded");
+    expect(ctx.surface.acted).toHaveLength(1);
+  });
+
   it("dispatches when the argument is there", async () => {
     const ctx = context();
     const connected = (await dispatchConnect(ctx, {

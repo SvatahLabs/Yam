@@ -34,7 +34,6 @@ import {
   mkdtempSync,
   openSync,
   readFileSync,
-  readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";

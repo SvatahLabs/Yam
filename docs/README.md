@@ -3,8 +3,10 @@
 Yam is a deterministic automation runtime with a standard agent surface, from
 [Svatah Labs](https://github.com/SvatahLabs). Describe a behaviour once in plain
 language, bind it to the real elements by driving the real platform, then replay
-that plan deterministically, with no model in the loop, on any platform an
-adapter exists for.
+that plan deterministically, with no model in the loop. The
+[support matrix](reference/generated/support-matrix.md) says which platforms
+that covers and how far each has been driven; it is generated from measured
+runs rather than written.
 
 The documentation is organised by what you are trying to do.
 
@@ -56,6 +58,7 @@ Written by hand:
 
 Generated from the code by `pnpm docs`, and checked in CI so they cannot drift:
 
+- [Support matrix](reference/generated/support-matrix.md) — which adapters have been driven, and how far
 - [The `yam` command line](reference/generated/cli.md)
 - [Packages and their exports](reference/generated/packages/README.md)
 - [JSON Schemas](reference/generated/schemas/README.md)
