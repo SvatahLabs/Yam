@@ -98,6 +98,45 @@ export interface ScreenService {
   postSurfaceBySessionAct(session: string, body?: unknown): Promise<unknown>;
   /** `POST /surface/{session}/close` */
   postSurfaceBySessionClose(session: string, body?: unknown): Promise<unknown>;
+
+  /* ── SF-03/T14: the surface operation catalogue, over the broker ─────────── */
+
+  /**
+   * The catalogue's operations, as the service publishes them (SF-03, T14).
+   *
+   * These are the routes wave 2 (T12) generated from
+   * `@svatah/yam-surface-control`'s one catalogue and served over the broker —
+   * the same sessions the CLI and a generic MCP client address. The desktop is
+   * a client of that broker, not a second session store, so a Surfaces screen
+   * reaches them through these methods and holds no operation list of its own.
+   *
+   * They take and return the catalogue's `ResultEnvelope`; a screen parses it
+   * with `@svatah/yam-schema` rather than trusting a shape. The older
+   * `postSurfaceBySession*` above stay for the Explorer until it is retired.
+   */
+  /** `GET /targets` — discover targets and adapter readiness (SF-04). */
+  getTargets(): Promise<unknown>;
+  /** `POST /sessions` — connect to a target and open a session (SF-04). */
+  postSessions(body?: unknown): Promise<unknown>;
+  /** `GET /sessions` — list active surface sessions (SF-05). */
+  getSessions(): Promise<unknown>;
+  /** `DELETE /sessions/{session}` — close a surface session (SF-05). */
+  deleteSessionsBySession(session: string): Promise<unknown>;
+  /** `GET /sessions/{session}/capabilities` — the adapter's capabilities (SF-09). */
+  getSessionsBySessionCapabilities(session: string): Promise<unknown>;
+  /** `POST /sessions/{session}/snapshot` — a semantic snapshot (SF-10). */
+  postSessionsBySessionSnapshot(session: string, body?: unknown): Promise<unknown>;
+  /** `POST /sessions/{session}/act` — a validated action (SF-11). */
+  postSessionsBySessionAct(session: string, body?: unknown): Promise<unknown>;
+  /** `POST /sessions/{session}/read` — read a value (SF-11). */
+  postSessionsBySessionRead(session: string, body?: unknown): Promise<unknown>;
+  /** `POST /sessions/{session}/check` — check a predicate (SF-11). */
+  postSessionsBySessionCheck(session: string, body?: unknown): Promise<unknown>;
+  /** `POST /sessions/{session}/describe` — describe an element (SF-10). */
+  postSessionsBySessionDescribe(session: string, body?: unknown): Promise<unknown>;
+  /** `POST /sessions/{session}/screenshot` — an artifact reference (SF-11). */
+  postSessionsBySessionScreenshot(session: string, body?: unknown): Promise<unknown>;
+
   /** The event stream, as `GET /events/sse` carries it. Returns an unsubscribe. */
   subscribe(listener: (event: ServiceEventLike) => void): () => void;
 }

@@ -21,6 +21,7 @@ from typing import Any, Iterator, Optional
 
 
 ENDPOINTS = [
+    {"id": "deleteSessionsBySession", "verb": "delete", "path": "/sessions/{session}"},
     {"id": "getApi", "verb": "get", "path": "/api"},
     {"id": "getBindings", "verb": "get", "path": "/bindings"},
     {"id": "getBindingsById", "verb": "get", "path": "/bindings/{id}"},
@@ -37,6 +38,9 @@ ENDPOINTS = [
     {"id": "getRunsByIdAudit", "verb": "get", "path": "/runs/{id}/audit"},
     {"id": "getRunsByIdResults", "verb": "get", "path": "/runs/{id}/results"},
     {"id": "getRunsByIdScreenshotsByName", "verb": "get", "path": "/runs/{id}/screenshots/{name}"},
+    {"id": "getSessions", "verb": "get", "path": "/sessions"},
+    {"id": "getSessionsBySessionCapabilities", "verb": "get", "path": "/sessions/{session}/capabilities"},
+    {"id": "getTargets", "verb": "get", "path": "/targets"},
     {"id": "getTools", "verb": "get", "path": "/tools"},
     {"id": "postApiRequest", "verb": "post", "path": "/api/request"},
     {"id": "postBindingsVerify", "verb": "post", "path": "/bindings/verify"},
@@ -50,6 +54,13 @@ ENDPOINTS = [
     {"id": "postRecordByIdStop", "verb": "post", "path": "/record/{id}/stop"},
     {"id": "postRun", "verb": "post", "path": "/run"},
     {"id": "postRunsByIdStop", "verb": "post", "path": "/runs/{id}/stop"},
+    {"id": "postSessions", "verb": "post", "path": "/sessions"},
+    {"id": "postSessionsBySessionAct", "verb": "post", "path": "/sessions/{session}/act"},
+    {"id": "postSessionsBySessionCheck", "verb": "post", "path": "/sessions/{session}/check"},
+    {"id": "postSessionsBySessionDescribe", "verb": "post", "path": "/sessions/{session}/describe"},
+    {"id": "postSessionsBySessionRead", "verb": "post", "path": "/sessions/{session}/read"},
+    {"id": "postSessionsBySessionScreenshot", "verb": "post", "path": "/sessions/{session}/screenshot"},
+    {"id": "postSessionsBySessionSnapshot", "verb": "post", "path": "/sessions/{session}/snapshot"},
     {"id": "postSurfaceBySessionAct", "verb": "post", "path": "/surface/{session}/act"},
     {"id": "postSurfaceBySessionCheck", "verb": "post", "path": "/surface/{session}/check"},
     {"id": "postSurfaceBySessionClose", "verb": "post", "path": "/surface/{session}/close"},
@@ -121,6 +132,10 @@ class GeneratedClient:
                 if decoded.startswith("data:"):
                     yield json.loads(decoded[5:].strip())
 
+    def delete_sessions_by_session(self, session) -> Any:
+        """`DELETE /sessions/{session}` — Close a surface session (SF-05)"""
+        return self._call("delete", f"/sessions/{session}")
+
     def get_api(self) -> Any:
         """`GET /api` — Named API requests"""
         return self._call("get", f"/api")
@@ -185,6 +200,18 @@ class GeneratedClient:
         """`GET /runs/{id}/screenshots/{name}` — A screenshot a run wrote"""
         return self._call("get", f"/runs/{id}/screenshots/{name}")
 
+    def get_sessions(self) -> Any:
+        """`GET /sessions` — List active surface sessions (SF-05)"""
+        return self._call("get", f"/sessions")
+
+    def get_sessions_by_session_capabilities(self, session) -> Any:
+        """`GET /sessions/{session}/capabilities` — A session's adapter capabilities (SF-09)"""
+        return self._call("get", f"/sessions/{session}/capabilities")
+
+    def get_targets(self) -> Any:
+        """`GET /targets` — Discover available targets and adapter readiness (SF-04)"""
+        return self._call("get", f"/targets")
+
     def get_tools(self) -> Any:
         """`GET /tools` — The tools this project exposes, and every invocation served"""
         return self._call("get", f"/tools")
@@ -236,6 +263,34 @@ class GeneratedClient:
     def post_runs_by_id_stop(self, id) -> Any:
         """`POST /runs/{id}/stop` — Stop a run that is going"""
         return self._call("post", f"/runs/{id}/stop")
+
+    def post_sessions(self, body: Any = None) -> Any:
+        """`POST /sessions` — Connect to a target and open a surface session (SF-04)"""
+        return self._call("post", f"/sessions", body=body)
+
+    def post_sessions_by_session_act(self, session, body: Any = None) -> Any:
+        """`POST /sessions/{session}/act` — Perform a validated action on the surface (SF-11)"""
+        return self._call("post", f"/sessions/{session}/act", body=body)
+
+    def post_sessions_by_session_check(self, session, body: Any = None) -> Any:
+        """`POST /sessions/{session}/check` — Check a predicate against the surface (SF-11)"""
+        return self._call("post", f"/sessions/{session}/check", body=body)
+
+    def post_sessions_by_session_describe(self, session, body: Any = None) -> Any:
+        """`POST /sessions/{session}/describe` — Describe a specific element on the surface (SF-10)"""
+        return self._call("post", f"/sessions/{session}/describe", body=body)
+
+    def post_sessions_by_session_read(self, session, body: Any = None) -> Any:
+        """`POST /sessions/{session}/read` — Read a value from the surface (SF-11)"""
+        return self._call("post", f"/sessions/{session}/read", body=body)
+
+    def post_sessions_by_session_screenshot(self, session, body: Any = None) -> Any:
+        """`POST /sessions/{session}/screenshot` — Take a screenshot of the current surface (SF-11)"""
+        return self._call("post", f"/sessions/{session}/screenshot", body=body)
+
+    def post_sessions_by_session_snapshot(self, session, body: Any = None) -> Any:
+        """`POST /sessions/{session}/snapshot` — A semantic snapshot of the surface (SF-10)"""
+        return self._call("post", f"/sessions/{session}/snapshot", body=body)
 
     def post_surface_by_session_act(self, session, body: Any = None) -> Any:
         """`POST /surface/{session}/act` — Act in the explored session; `intent` is required"""

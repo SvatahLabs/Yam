@@ -26,6 +26,7 @@ import type { ScreenService } from "./service.js";
  * with different actions, which the mockups draw as two artboards.
  */
 export const SCREEN_IDS = [
+  "surfaces",
   "flows",
   "record",
   "runs",

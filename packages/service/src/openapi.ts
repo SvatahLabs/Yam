@@ -569,6 +569,126 @@ export function openApiDocument(version: string): Record<string, unknown> {
           responses: { 200: { description: "Tools and invocations", ...json({ type: "object" }) } },
         },
       },
+
+      /*
+       * ── The surface operation catalogue, served for the desktop (SF-03, T14) ──
+       *
+       * Wave 2 (T12) already serves these routes at runtime from the catalogue
+       * `api.surfaceOperations` hands the service — but they were absent from
+       * this document, so the generated app client had no way to reach them and
+       * the desktop's only surface path was the older `/surface/:session/*` one.
+       *
+       * They are written out here rather than derived from the catalogue because
+       * the service may not import `@svatah/yam-surface-control` (LLD §1) and
+       * `contract.test.ts` pins the served document to `openApiDocument("0.1.0")`
+       * exactly. `tools/repo-checks/test/surface-catalogue-openapi.test.ts` reads
+       * the catalogue and this document together and fails when a served
+       * operation is missing or its method or path drifts — so the duplication is
+       * a red build rather than a place the two quietly disagree, which is what
+       * happened to the whole HTTP surface in wave 2.
+       *
+       * Bodies and results are generic `object`: the generated client returns
+       * `unknown` and the screens parse the envelope with `@svatah/yam-schema`,
+       * exactly as every other route here does.
+       */
+      "/targets": {
+        get: {
+          summary: "Discover available targets and adapter readiness (SF-04)",
+          security: bearer,
+          responses: { 200: { description: "Targets and adapters", ...json({ type: "object" }) } },
+        },
+      },
+      "/sessions": {
+        get: {
+          summary: "List active surface sessions (SF-05)",
+          security: bearer,
+          responses: { 200: { description: "Sessions", ...json({ type: "object" }) } },
+        },
+        post: {
+          summary: "Connect to a target and open a surface session (SF-04)",
+          security: bearer,
+          requestBody: json({
+            type: "object",
+            properties: {
+              url: { type: "string" },
+              adapter: { type: "string" },
+              headed: { type: "boolean" },
+              intent: { type: "string" },
+            },
+          }),
+          responses: { 200: { description: "The session and its effective adapter", ...json({ type: "object" }) } },
+        },
+      },
+      "/sessions/{session}": {
+        delete: {
+          summary: "Close a surface session (SF-05)",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          responses: { 200: { description: "Closed", ...json({ type: "object" }) } },
+        },
+      },
+      "/sessions/{session}/capabilities": {
+        get: {
+          summary: "A session's adapter capabilities (SF-09)",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          responses: { 200: { description: "Capabilities", ...json({ type: "object" }) } },
+        },
+      },
+      "/sessions/{session}/snapshot": {
+        post: {
+          summary: "A semantic snapshot of the surface (SF-10)",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object" }),
+          responses: { 200: { description: "Snapshot", ...json({ type: "object" }) } },
+        },
+      },
+      "/sessions/{session}/act": {
+        post: {
+          summary: "Perform a validated action on the surface (SF-11)",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object" }),
+          responses: { 200: { description: "The act result", ...json({ type: "object" }) } },
+        },
+      },
+      "/sessions/{session}/read": {
+        post: {
+          summary: "Read a value from the surface (SF-11)",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object" }),
+          responses: { 200: { description: "The value read", ...json({ type: "object" }) } },
+        },
+      },
+      "/sessions/{session}/check": {
+        post: {
+          summary: "Check a predicate against the surface (SF-11)",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object" }),
+          responses: { 200: { description: "The check result", ...json({ type: "object" }) } },
+        },
+      },
+      "/sessions/{session}/describe": {
+        post: {
+          summary: "Describe a specific element on the surface (SF-10)",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object" }),
+          responses: { 200: { description: "The element", ...json({ type: "object" }) } },
+        },
+      },
+      "/sessions/{session}/screenshot": {
+        post: {
+          summary: "Take a screenshot of the current surface (SF-11)",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object" }),
+          responses: { 200: { description: "The artifact metadata", ...json({ type: "object" }) } },
+        },
+      },
       /*
        * The stream's message kinds are *in* the description (Draft 2.11, §13.8).
        *

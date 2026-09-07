@@ -44,8 +44,11 @@ async function cli(...argv: string[]): Promise<{ code: number; out: string; err:
 }
 
 const silent = { out: () => undefined, err: () => undefined };
-const answer = (result: unknown): { text: string } =>
-  JSON.parse((result as { content: Array<{ text: string }> }).content[0]!.text) as { text: string };
+// The parsed structured content of a tool answer. `unknown`, because a surface
+// tool answers the catalogue's envelope (`{ status, result }`) since wave 2, and
+// each call site casts to the shape it expects (SF-03).
+const answer = (result: unknown): unknown =>
+  JSON.parse((result as { content: Array<{ text: string }> }).content[0]!.text) as unknown;
 
 describe("yam explore (REQ-AGT-5)", () => {
   it("an exploration over the MCP surface becomes a proposal the front door names", async () => {

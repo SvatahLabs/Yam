@@ -24,7 +24,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ACTIONS,
-  RAIL,
+  SECTIONS,
+  sectionOf,
+  defaultScreenOf,
   actionById,
   actionsForScreen,
   applyEvent,
@@ -52,7 +54,9 @@ import {
   type RunState,
   type RunsState,
   type SettingsState,
+  type SurfacesState,
 } from "@svatah/yam-screens";
+import { SurfacesScreen, SurfacesInspector } from "./Surfaces.js";
 import type { ServiceClient } from "../client.js";
 import { a11yVariant } from "../a11y-variant.js";
 import { FlowsInspector, FlowsScreen } from "./Flows.js";
@@ -95,7 +99,9 @@ export interface ShellProps {
 type Showing = ScreenId;
 
 export function Shell(props: ShellProps): React.JSX.Element {
-  const [showing, setShowing] = useState<Showing>("flows");
+  // Surfaces opens by default (SF-02, SF-16, T14): the app's first screen is
+  // "connect to something", not a project's flows.
+  const [showing, setShowing] = useState<Showing>("surfaces");
   const [params, setParams] = useState<ScreenParams>({});
   const [state, setState] = useState<ScreenStateBase | undefined>(undefined);
   const [tab, setTab] = useState<"editor" | "plan" | "history">("editor");
@@ -150,7 +156,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
    * A ref and not the state, for the same reason `paramsRef` is one: the
    * subscription is set up once and must not be torn down on every navigation.
    */
-  const showingRef = useRef<Showing>("flows");
+  const showingRef = useRef<Showing>("surfaces");
   useEffect(() => {
     showingRef.current = showing;
   }, [showing]);
@@ -371,6 +377,8 @@ export function Shell(props: ShellProps): React.JSX.Element {
     const evidenceProp = evidence === undefined ? {} : { evidence };
 
     switch (state.screen) {
+      case "surfaces":
+        return <SurfacesScreen state={state as SurfacesState} {...shared} />;
       case "run":
         return <RunScreen state={state as RunState} {...shared} {...evidenceProp} />;
       case "runs":
@@ -413,6 +421,8 @@ export function Shell(props: ShellProps): React.JSX.Element {
     const evidenceProp = evidence === undefined ? {} : { evidence };
 
     switch (state.screen) {
+      case "surfaces":
+        return <SurfacesInspector state={state as SurfacesState} {...shared} />;
       case "run":
         return <RunInspector state={state as RunState} {...shared} {...evidenceProp} />;
       case "runs":
@@ -450,18 +460,19 @@ export function Shell(props: ShellProps): React.JSX.Element {
           <span className="sv-brand-mark" aria-hidden="true" />
           Yam
         </span>
-        <nav className="sv-crumb" id="topbar-crumb" aria-label="Project">
+        <nav className="sv-crumb" id="topbar-crumb" aria-label="Location">
           {/*
+            Section then screen, surface-first (T14): "Surfaces", "Automations ·
+            Flows". The project is no longer the top crumb — it is one thing
+            Automations and Settings show, not the frame the whole app lives in.
             The separators are decoration and are hidden from the tree (T10.3).
-            A screen reader saying "slash" between the project and the screen is
-            noise, and two sibling nodes both named `/` gave two elements the
-            same `controlPath` — which the resolver drops as ambiguous, so a
-            binding on either was unresolvable (LLD §3.3, §7.5).
           */}
           <span className="sv-crumb-sep" aria-hidden="true">
             /
           </span>
-          <b id="crumb-project">{props.project.split(/[\\/]/).filter(Boolean).pop() ?? props.project}</b>
+          <b id="crumb-section">
+            {SECTIONS.find((one) => one.id === sectionOf(showing))?.label ?? "Surfaces"}
+          </b>
           <span className="sv-crumb-sep" aria-hidden="true">
             /
           </span>
@@ -482,27 +493,51 @@ export function Shell(props: ShellProps): React.JSX.Element {
       </header>
 
       {/* ── rail ──────────────────────────────────────────────────────────── */}
+      {/*
+        Primary navigation, surface-first (T14, SF-02, SF-16): Surfaces,
+        Automations, Activity, Settings, each a section header that goes to the
+        section's default screen, with the section's own screens beneath it. The
+        old Project/Resources/Bottom grouping (Draft 2.11) is gone; the screens
+        are the same, only regrouped and reached from here.
+      */}
       <nav className="sv-rail" id="rail" aria-label="Sections">
-        {(["Project", "Resources", "Bottom"] as const).map((group) => (
-          <div key={group} className={group === "Bottom" ? "sv-rail-group sv-rail-bottom" : "sv-rail-group"}>
-            {group === "Bottom" ? null : <p className="sv-rail-heading">{group}</p>}
-            {RAIL.filter((one) => one.group === group).map((one) => (
+        {SECTIONS.map((section) => (
+          <div
+            key={section.id}
+            className={section.id === "settings" ? "sv-rail-group sv-rail-bottom" : "sv-rail-group"}
+          >
+            <button
+              id={`section-${section.id}`}
+              type="button"
+              className={
+                sectionOf(showing) === section.id
+                  ? "sv-rail-heading sv-rail-section sv-rail-section-active"
+                  : "sv-rail-heading sv-rail-section"
+              }
+              {...(sectionOf(showing) === section.id ? { "aria-current": "page" as const } : {})}
+              onClick={() => {
+                setParams({});
+                setShowing(defaultScreenOf(section.id));
+              }}
+            >
+              {section.label}
+            </button>
+            {section.rail.map((one) => (
               <RailItem
-                key={one.screen}
-                id={`rail-${one.screen}`}
+                key={one}
+                id={`rail-${one}`}
                 /*
                  * Variant 1 renames one rail item and nothing else (Draft 2.8
-                 * §16, T7.1, T10.3): the id, the position and the neighbours
-                 * stay, so a binding that matched on the *name* stops matching
-                 * and relocalization has everything except the thing it matched
-                 * on. Renaming two would make it a different test.
+                 * §16, T7.1): the id, the position and the neighbours stay, so a
+                 * binding that matched on the *name* stops matching and
+                 * relocalization has everything except the thing it matched on.
                  */
-                label={a11yVariant() === 1 && one.screen === "flows" ? "Editor" : one.label}
-                active={showing === one.screen}
+                label={a11yVariant() === 1 && one === "flows" ? "Editor" : screenById(one).title}
+                active={showing === one}
                 onPress={() => {
                   // A rail click is a fresh screen, not the last one's selection.
                   setParams({});
-                  setShowing(one.screen);
+                  setShowing(one);
                 }}
               />
             ))}

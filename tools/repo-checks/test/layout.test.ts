@@ -70,7 +70,9 @@ describe("repository layout (HLD §12)", () => {
   it("HLD §12 lists the expected number of packages", () => {
     // 24 through Draft 2.2; Draft 2.3 splits `playwright-test` into the module
     // (a) `bind()` package, `bindings-cli`, and the module (b) `host-playwright`.
-    expect(fromHld.length).toBe(31);
+    // Draft 2.25 adds `surface-control` (the shared surface-control core), the
+    // 32nd — HLD §12's layout block lists it (line "surface-control/ …").
+    expect(fromHld.length).toBe(32);
   });
 
   it("names every Draft 2.11 package the LLD requires, with the section", () => {

@@ -11,7 +11,7 @@ The first release, and the first under the name **Yam** (Draft 2.18): the
 product was renamed before anything was published, so no package has ever
 existed under another name. Svatah is the brand and the npm organisation; every
 package is `@svatah/yam` or `@svatah/yam-<name>`. **Nothing is published to a registry until the owner triggers
-the pipeline** (T8.5): `node scripts/publish.mjs` prints the 30 exact
+the pipeline** (T8.5): `node scripts/publish.mjs` prints the 31 exact
 `npm publish` commands, one per package of the release set in
 `scripts/lib/release-packages.mjs`, and stops unless `--publish`, a GitHub
 `workflow_dispatch` and a publish identity (trusted publishing, or `NPM_TOKEN`)

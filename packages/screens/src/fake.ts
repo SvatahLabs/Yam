@@ -30,6 +30,27 @@ export interface FakeResponses {
   flows?: Record<string, string>;
   /** By run id: `summary`, `results`, `audit`. */
   runById?: Record<string, { summary?: unknown; results?: unknown; audit?: unknown }>;
+  /**
+   * The surface catalogue's answers (SF-03, T14).
+   *
+   * Each is the `ResultEnvelope` its route returns, recorded from a real
+   * broker the same way the rest of this bag is recorded from a real service.
+   * `sessions` defaults to an empty list — which is what a broker with no open
+   * session actually answers — so a Surfaces screen loads its empty state
+   * without a fixture having to say so.
+   */
+  surface?: {
+    targets?: unknown;
+    sessions?: unknown;
+    connect?: unknown;
+    capabilities?: unknown;
+    snapshot?: unknown;
+    act?: unknown;
+    read?: unknown;
+    check?: unknown;
+    describe?: unknown;
+    screenshot?: unknown;
+  };
 }
 
 /** What the fake was asked, in order. A test asserts on the screen rule with it. */
@@ -165,5 +186,55 @@ export function fakeService(responses: FakeResponses = {}): FakeService {
       wrote("postSurfaceBySessionSnapshot", session, body),
     postSurfaceBySessionAct: (session, body) => wrote("postSurfaceBySessionAct", session, body),
     postSurfaceBySessionClose: (session, body) => wrote("postSurfaceBySessionClose", session, body),
+
+    /* ── the surface catalogue (SF-03, T14) ─────────────────────────────────── */
+    getTargets: () => answer("getTargets", responses.surface?.targets, "GET /targets"),
+    getSessions: () =>
+      answer(
+        "getSessions",
+        responses.surface?.sessions ?? envelope({ sessions: [] }),
+        "GET /sessions",
+      ),
+    async postSessions(body) {
+      record("postSessions", body);
+      return responses.surface?.connect ?? envelope({ ok: true });
+    },
+    async deleteSessionsBySession(session) {
+      record("deleteSessionsBySession", session);
+      return envelope({ closed: true });
+    },
+    getSessionsBySessionCapabilities: (session) => {
+      record("getSessionsBySessionCapabilities", session);
+      return Promise.resolve(responses.surface?.capabilities ?? envelope({}));
+    },
+    async postSessionsBySessionSnapshot(session, body) {
+      record("postSessionsBySessionSnapshot", session, body);
+      return responses.surface?.snapshot ?? envelope({ nodes: [] });
+    },
+    async postSessionsBySessionAct(session, body) {
+      record("postSessionsBySessionAct", session, body);
+      return responses.surface?.act ?? envelope({ dispatched: true, verified: false });
+    },
+    async postSessionsBySessionRead(session, body) {
+      record("postSessionsBySessionRead", session, body);
+      return responses.surface?.read ?? envelope({ value: undefined });
+    },
+    async postSessionsBySessionCheck(session, body) {
+      record("postSessionsBySessionCheck", session, body);
+      return responses.surface?.check ?? envelope({ ok: true });
+    },
+    async postSessionsBySessionDescribe(session, body) {
+      record("postSessionsBySessionDescribe", session, body);
+      return responses.surface?.describe ?? envelope({});
+    },
+    async postSessionsBySessionScreenshot(session, body) {
+      record("postSessionsBySessionScreenshot", session, body);
+      return responses.surface?.screenshot ?? envelope({ path: "" });
+    },
   };
+}
+
+/** A succeeded `ResultEnvelope` around a result, the shape the broker returns. */
+function envelope(result: unknown): unknown {
+  return { schemaVersion: "1.0", requestId: "req_fake", status: "succeeded", result };
 }

@@ -16,6 +16,29 @@
   ],
   "actions": [
     {
+      "id": "surface.connect",
+      "label": "Connect surface",
+      "group": "Actions",
+      "screen": "surfaces",
+      "key": "C",
+      "cli": "yam surface connect --url <url>"
+    },
+    {
+      "id": "surface.disconnect",
+      "label": "Disconnect",
+      "group": "Actions",
+      "screen": "surfaces",
+      "cli": "yam surface close --session <id>"
+    },
+    {
+      "id": "surface.discover",
+      "label": "Recheck targets",
+      "group": "Actions",
+      "screen": "surfaces",
+      "key": "R",
+      "cli": "yam surface targets"
+    },
+    {
       "id": "flows.compile",
       "label": "Compile",
       "group": "Actions",
@@ -220,6 +243,12 @@
       "group": "Actions",
       "screen": "explorer",
       "cli": "yam trajectory compile <trajectory.jsonl>"
+    },
+    {
+      "id": "go.surfaces",
+      "label": "Go to Surfaces",
+      "group": "Go to",
+      "screen": "surfaces"
     },
     {
       "id": "go.flows",

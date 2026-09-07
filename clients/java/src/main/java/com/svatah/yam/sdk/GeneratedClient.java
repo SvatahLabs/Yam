@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 public class GeneratedClient {
   /** Every route, for the drift check and for a caller listing them. */
   public static final List<String> ENDPOINTS = List.of(
+      "DELETE /sessions/{session}",
       "GET /api",
       "GET /bindings",
       "GET /bindings/{id}",
@@ -43,6 +44,9 @@ public class GeneratedClient {
       "GET /runs/{id}/audit",
       "GET /runs/{id}/results",
       "GET /runs/{id}/screenshots/{name}",
+      "GET /sessions",
+      "GET /sessions/{session}/capabilities",
+      "GET /targets",
       "GET /tools",
       "POST /api/request",
       "POST /bindings/verify",
@@ -56,6 +60,13 @@ public class GeneratedClient {
       "POST /record/{id}/stop",
       "POST /run",
       "POST /runs/{id}/stop",
+      "POST /sessions",
+      "POST /sessions/{session}/act",
+      "POST /sessions/{session}/check",
+      "POST /sessions/{session}/describe",
+      "POST /sessions/{session}/read",
+      "POST /sessions/{session}/screenshot",
+      "POST /sessions/{session}/snapshot",
       "POST /surface/{session}/act",
       "POST /surface/{session}/check",
       "POST /surface/{session}/close",
@@ -156,6 +167,11 @@ public class GeneratedClient {
     return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
   }
 
+  /** {@code DELETE /sessions/{session}} — Close a surface session (SF-05) */
+  public String deleteSessionsBySession(String session) {
+    return call("delete", "/sessions/" + segment(session), null, "application/json");
+  }
+
   /** {@code GET /api} — Named API requests */
   public String getApi() {
     return call("get", "/api", null, "application/json");
@@ -236,6 +252,21 @@ public class GeneratedClient {
     return call("get", "/runs/" + segment(id) + "/screenshots/" + segment(name), null, "application/json");
   }
 
+  /** {@code GET /sessions} — List active surface sessions (SF-05) */
+  public String getSessions() {
+    return call("get", "/sessions", null, "application/json");
+  }
+
+  /** {@code GET /sessions/{session}/capabilities} — A session's adapter capabilities (SF-09) */
+  public String getSessionsBySessionCapabilities(String session) {
+    return call("get", "/sessions/" + segment(session) + "/capabilities", null, "application/json");
+  }
+
+  /** {@code GET /targets} — Discover available targets and adapter readiness (SF-04) */
+  public String getTargets() {
+    return call("get", "/targets", null, "application/json");
+  }
+
   /** {@code GET /tools} — The tools this project exposes, and every invocation served */
   public String getTools() {
     return call("get", "/tools", null, "application/json");
@@ -299,6 +330,41 @@ public class GeneratedClient {
   /** {@code POST /runs/{id}/stop} — Stop a run that is going */
   public String postRunsByIdStop(String id) {
     return call("post", "/runs/" + segment(id) + "/stop", null, "application/json");
+  }
+
+  /** {@code POST /sessions} — Connect to a target and open a surface session (SF-04) */
+  public String postSessions(String body) {
+    return call("post", "/sessions", body, "application/json");
+  }
+
+  /** {@code POST /sessions/{session}/act} — Perform a validated action on the surface (SF-11) */
+  public String postSessionsBySessionAct(String session, String body) {
+    return call("post", "/sessions/" + segment(session) + "/act", body, "application/json");
+  }
+
+  /** {@code POST /sessions/{session}/check} — Check a predicate against the surface (SF-11) */
+  public String postSessionsBySessionCheck(String session, String body) {
+    return call("post", "/sessions/" + segment(session) + "/check", body, "application/json");
+  }
+
+  /** {@code POST /sessions/{session}/describe} — Describe a specific element on the surface (SF-10) */
+  public String postSessionsBySessionDescribe(String session, String body) {
+    return call("post", "/sessions/" + segment(session) + "/describe", body, "application/json");
+  }
+
+  /** {@code POST /sessions/{session}/read} — Read a value from the surface (SF-11) */
+  public String postSessionsBySessionRead(String session, String body) {
+    return call("post", "/sessions/" + segment(session) + "/read", body, "application/json");
+  }
+
+  /** {@code POST /sessions/{session}/screenshot} — Take a screenshot of the current surface (SF-11) */
+  public String postSessionsBySessionScreenshot(String session, String body) {
+    return call("post", "/sessions/" + segment(session) + "/screenshot", body, "application/json");
+  }
+
+  /** {@code POST /sessions/{session}/snapshot} — A semantic snapshot of the surface (SF-10) */
+  public String postSessionsBySessionSnapshot(String session, String body) {
+    return call("post", "/sessions/" + segment(session) + "/snapshot", body, "application/json");
   }
 
   /** {@code POST /surface/{session}/act} — Act in the explored session; `intent` is required */

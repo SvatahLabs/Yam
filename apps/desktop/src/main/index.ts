@@ -26,7 +26,7 @@
  * accessibility tree exposes almost nothing to either.
  */
 import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import {
   DEFAULT_PREFERENCES,
@@ -116,8 +116,8 @@ function nodeRuntime(cli: string): NodeRuntime {
  */
 let opening: Promise<unknown> | undefined;
 
-async function openProject(directory: string): Promise<ServiceConnection> {
-  const attempt = openProjectNow(directory);
+async function openProject(directory: string, remember = true): Promise<ServiceConnection> {
+  const attempt = openProjectNow(directory, remember);
   opening = attempt;
   try {
     return await attempt;
@@ -126,7 +126,7 @@ async function openProject(directory: string): Promise<ServiceConnection> {
   }
 }
 
-async function openProjectNow(directory: string): Promise<ServiceConnection> {
+async function openProjectNow(directory: string, remember = true): Promise<ServiceConnection> {
   debug("project.opening", { directory, replacing: service !== undefined });
   await closeProject();
 
@@ -150,10 +150,32 @@ async function openProjectNow(directory: string): Promise<ServiceConnection> {
     // Never the URL: it is the token's other half (REQ-NFR-6).
     port: new URL(started.connection.url).port,
   });
-  preferences = withRecentProject(preferences, resolve(directory));
-  writePreferences(preferencesPath(app.getPath("userData")), preferences);
+  /*
+   * The private surfaces workspace is not a project (T14): it is where the
+   * service listens so Surfaces can reach the broker with no project open, and
+   * it must not land in the Recent list beside the projects a person chose.
+   */
+  if (remember) {
+    preferences = withRecentProject(preferences, resolve(directory));
+    writePreferences(preferencesPath(app.getPath("userData")), preferences);
+  }
 
   return started.connection;
+}
+
+/**
+ * Where the projectless service listens (T14, SF-01, SF-02).
+ *
+ * Surfaces opens with no project. The service still needs a working directory —
+ * it is where a project *would* be loaded from if one were opened — so it gets a
+ * private, empty one under the user-data directory. Surfaces reaches the broker
+ * through the catalogue routes only, so nothing is ever written here: an
+ * empty-directory connect leaves no project files behind (SF-01).
+ */
+function surfacesWorkspace(): string {
+  const dir = join(app.getPath("userData"), "workspace");
+  mkdirSync(dir, { recursive: true });
+  return dir;
 }
 
 async function closeProject(): Promise<void> {
@@ -392,26 +414,43 @@ void app.whenReady().then(() => {
    * window is created before this resolves and the renderer's own
    * `serviceInfo()` would otherwise race it.
    */
+  /*
+   * Held until the renderer has loaded. A `send` to a page that is still
+   * loading is dropped, and the service usually opens faster than the window
+   * paints — which would have made this work on a slow host and silently not
+   * on a fast one, the worst of the two.
+   */
+  const announce = (payload: { connection?: ServiceConnection; error?: string }): void => {
+    const target = window_;
+    if (target === undefined) return;
+    if (target.webContents.isLoading()) {
+      target.webContents.once("did-finish-load", () =>
+        target.webContents.send("service:opened", payload),
+      );
+    } else {
+      target.webContents.send("service:opened", payload);
+    }
+  };
+
   const startup = process.env["YAM_APP_PROJECT"];
   if (startup !== undefined && startup !== "") {
     /*
-     * Held until the renderer has loaded. A `send` to a page that is still
-     * loading is dropped, and the project usually opens faster than the window
-     * paints — which would have made this work on a slow host and silently not
-     * on a fast one, the worst of the two.
+     * `YAM_APP_PROJECT=<dir>` opens a project on ready (§13.6, T8.1): the
+     * desktop gate passes the fixtures project this way so its cases read a
+     * project screen rather than the welcome screen.
      */
-    const announce = (payload: { connection?: ServiceConnection; error?: string }): void => {
-      const target = window_;
-      if (target === undefined) return;
-      if (target.webContents.isLoading()) {
-        target.webContents.once("did-finish-load", () =>
-          target.webContents.send("service:opened", payload),
-        );
-      } else {
-        target.webContents.send("service:opened", payload);
-      }
-    };
     void openProject(startup).then(
+      (connection) => announce({ connection }),
+      (error: unknown) => announce({ error: error instanceof Error ? error.message : String(error) }),
+    );
+  } else {
+    /*
+     * No project named: open Surfaces on a projectless service (T14, SF-02).
+     * Yam's first screen is "connect to something", not a project chooser — so
+     * the app comes up on the private surfaces workspace, and a person opens a
+     * project only when they go to Automations. The workspace is not remembered.
+     */
+    void openProject(surfacesWorkspace(), false).then(
       (connection) => announce({ connection }),
       (error: unknown) => announce({ error: error instanceof Error ? error.message : String(error) }),
     );

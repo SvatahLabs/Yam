@@ -20,6 +20,7 @@ export interface ServiceEndpoint {
 }
 
 export const ENDPOINTS: readonly ServiceEndpoint[] = [
+  { id: "deleteSessionsBySession", verb: "delete", path: "/sessions/{session}", summary: "Close a surface session (SF-05)" },
   { id: "getApi", verb: "get", path: "/api", summary: "Named API requests" },
   { id: "getBindings", verb: "get", path: "/bindings", summary: "The bindings store" },
   { id: "getBindingsById", verb: "get", path: "/bindings/{id}", summary: "One binding" },
@@ -36,6 +37,9 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "getRunsByIdAudit", verb: "get", path: "/runs/{id}/audit", summary: "One run's audit log" },
   { id: "getRunsByIdResults", verb: "get", path: "/runs/{id}/results", summary: "One run's step results" },
   { id: "getRunsByIdScreenshotsByName", verb: "get", path: "/runs/{id}/screenshots/{name}", summary: "A screenshot a run wrote" },
+  { id: "getSessions", verb: "get", path: "/sessions", summary: "List active surface sessions (SF-05)" },
+  { id: "getSessionsBySessionCapabilities", verb: "get", path: "/sessions/{session}/capabilities", summary: "A session's adapter capabilities (SF-09)" },
+  { id: "getTargets", verb: "get", path: "/targets", summary: "Discover available targets and adapter readiness (SF-04)" },
   { id: "getTools", verb: "get", path: "/tools", summary: "The tools this project exposes, and every invocation served" },
   { id: "postApiRequest", verb: "post", path: "/api/request", summary: "Execute one API request ad hoc" },
   { id: "postBindingsVerify", verb: "post", path: "/bindings/verify", summary: "Dry-resolve the store, or one binding" },
@@ -49,6 +53,13 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "postRecordByIdStop", verb: "post", path: "/record/{id}/stop", summary: "Stop a recording session" },
   { id: "postRun", verb: "post", path: "/run", summary: "Start a run; step events arrive on the stream" },
   { id: "postRunsByIdStop", verb: "post", path: "/runs/{id}/stop", summary: "Stop a run that is going" },
+  { id: "postSessions", verb: "post", path: "/sessions", summary: "Connect to a target and open a surface session (SF-04)" },
+  { id: "postSessionsBySessionAct", verb: "post", path: "/sessions/{session}/act", summary: "Perform a validated action on the surface (SF-11)" },
+  { id: "postSessionsBySessionCheck", verb: "post", path: "/sessions/{session}/check", summary: "Check a predicate against the surface (SF-11)" },
+  { id: "postSessionsBySessionDescribe", verb: "post", path: "/sessions/{session}/describe", summary: "Describe a specific element on the surface (SF-10)" },
+  { id: "postSessionsBySessionRead", verb: "post", path: "/sessions/{session}/read", summary: "Read a value from the surface (SF-11)" },
+  { id: "postSessionsBySessionScreenshot", verb: "post", path: "/sessions/{session}/screenshot", summary: "Take a screenshot of the current surface (SF-11)" },
+  { id: "postSessionsBySessionSnapshot", verb: "post", path: "/sessions/{session}/snapshot", summary: "A semantic snapshot of the surface (SF-10)" },
   { id: "postSurfaceBySessionAct", verb: "post", path: "/surface/{session}/act", summary: "Act in the explored session; `intent` is required" },
   { id: "postSurfaceBySessionCheck", verb: "post", path: "/surface/{session}/check", summary: "Check in the explored session; `intent` is required" },
   { id: "postSurfaceBySessionClose", verb: "post", path: "/surface/{session}/close", summary: "Close an explored session" },
@@ -111,6 +122,11 @@ export class GeneratedClient {
     if (!response.ok) throw new ServiceError(response.status, path, raw);
     if (options.text === true) return raw;
     return raw === "" ? undefined : (JSON.parse(raw) as unknown);
+  }
+
+  /** `DELETE /sessions/{session}` — Close a surface session (SF-05) */
+  async deleteSessionsBySession(session: string): Promise<unknown> {
+    return await this.call("delete", `/sessions/${encodeURIComponent(session)}`, { });
   }
 
   /** `GET /api` — Named API requests */
@@ -193,6 +209,21 @@ export class GeneratedClient {
     return await this.call("get", `/runs/${encodeURIComponent(id)}/screenshots/${encodeURIComponent(name)}`, { });
   }
 
+  /** `GET /sessions` — List active surface sessions (SF-05) */
+  async getSessions(): Promise<unknown> {
+    return await this.call("get", `/sessions`, { });
+  }
+
+  /** `GET /sessions/{session}/capabilities` — A session's adapter capabilities (SF-09) */
+  async getSessionsBySessionCapabilities(session: string): Promise<unknown> {
+    return await this.call("get", `/sessions/${encodeURIComponent(session)}/capabilities`, { });
+  }
+
+  /** `GET /targets` — Discover available targets and adapter readiness (SF-04) */
+  async getTargets(): Promise<unknown> {
+    return await this.call("get", `/targets`, { });
+  }
+
   /** `GET /tools` — The tools this project exposes, and every invocation served */
   async getTools(): Promise<unknown> {
     return await this.call("get", `/tools`, { });
@@ -256,6 +287,41 @@ export class GeneratedClient {
   /** `POST /runs/{id}/stop` — Stop a run that is going */
   async postRunsByIdStop(id: string): Promise<unknown> {
     return await this.call("post", `/runs/${encodeURIComponent(id)}/stop`, { });
+  }
+
+  /** `POST /sessions` — Connect to a target and open a surface session (SF-04) */
+  async postSessions(body?: unknown): Promise<unknown> {
+    return await this.call("post", `/sessions`, { body, });
+  }
+
+  /** `POST /sessions/{session}/act` — Perform a validated action on the surface (SF-11) */
+  async postSessionsBySessionAct(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/sessions/${encodeURIComponent(session)}/act`, { body, });
+  }
+
+  /** `POST /sessions/{session}/check` — Check a predicate against the surface (SF-11) */
+  async postSessionsBySessionCheck(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/sessions/${encodeURIComponent(session)}/check`, { body, });
+  }
+
+  /** `POST /sessions/{session}/describe` — Describe a specific element on the surface (SF-10) */
+  async postSessionsBySessionDescribe(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/sessions/${encodeURIComponent(session)}/describe`, { body, });
+  }
+
+  /** `POST /sessions/{session}/read` — Read a value from the surface (SF-11) */
+  async postSessionsBySessionRead(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/sessions/${encodeURIComponent(session)}/read`, { body, });
+  }
+
+  /** `POST /sessions/{session}/screenshot` — Take a screenshot of the current surface (SF-11) */
+  async postSessionsBySessionScreenshot(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/sessions/${encodeURIComponent(session)}/screenshot`, { body, });
+  }
+
+  /** `POST /sessions/{session}/snapshot` — A semantic snapshot of the surface (SF-10) */
+  async postSessionsBySessionSnapshot(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/sessions/${encodeURIComponent(session)}/snapshot`, { body, });
   }
 
   /** `POST /surface/{session}/act` — Act in the explored session; `intent` is required */

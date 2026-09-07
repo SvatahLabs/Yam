@@ -43,6 +43,17 @@ OpenAPI 3.1.0, service version 0.1.0. The document itself is `openApiDocument()`
 | `POST` | `/surface/{session}/close` | Close an explored session |
 | `POST` | `/trajectory/compile` | Compile a captured trajectory into proposals/<date>/ |
 | `GET` | `/tools` | The tools this project exposes, and every invocation served |
+| `GET` | `/targets` | Discover available targets and adapter readiness (SF-04) |
+| `GET` | `/sessions` | List active surface sessions (SF-05) |
+| `POST` | `/sessions` | Connect to a target and open a surface session (SF-04) |
+| `DELETE` | `/sessions/{session}` | Close a surface session (SF-05) |
+| `GET` | `/sessions/{session}/capabilities` | A session's adapter capabilities (SF-09) |
+| `POST` | `/sessions/{session}/snapshot` | A semantic snapshot of the surface (SF-10) |
+| `POST` | `/sessions/{session}/act` | Perform a validated action on the surface (SF-11) |
+| `POST` | `/sessions/{session}/read` | Read a value from the surface (SF-11) |
+| `POST` | `/sessions/{session}/check` | Check a predicate against the surface (SF-11) |
+| `POST` | `/sessions/{session}/describe` | Describe a specific element on the surface (SF-10) |
+| `POST` | `/sessions/{session}/screenshot` | Take a screenshot of the current surface (SF-11) |
 | `GET` | `/events` | The event stream (WebSocket) |
 | `GET` | `/events/sse` | The event stream (server-sent events) |
 | `GET` | `/openapi.json` | This document |

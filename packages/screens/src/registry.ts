@@ -57,11 +57,107 @@ const runIdOf = (value: unknown): string | undefined => {
   return typeof id === "string" ? id : undefined;
 };
 
+/**
+ * A surface `ResultEnvelope`, unwrapped (SF-03).
+ *
+ * The catalogue's routes answer `{ status, result, error }`. An action reads
+ * the outcome from `status` — never from an HTTP code, which the service uses
+ * only to say whether it could answer at all — so a refusal reads as a refusal
+ * here rather than as a success (the wave-2 defect where refusals exited 0).
+ */
+const envelopeOf = (
+  value: unknown,
+): { ok: boolean; result: Record<string, unknown>; message?: string } => {
+  const env = (typeof value === "object" && value !== null ? value : {}) as Record<string, unknown>;
+  const result =
+    typeof env["result"] === "object" && env["result"] !== null
+      ? (env["result"] as Record<string, unknown>)
+      : {};
+  const error = env["error"] as { message?: unknown } | undefined;
+  return {
+    ok: env["status"] === "succeeded",
+    result,
+    ...(typeof error?.message === "string" ? { message: error.message } : {}),
+  };
+};
+
 /* ────────────────────────────────────────────────────────────────────────────
  * Actions
  * ──────────────────────────────────────────────────────────────────────────── */
 
 const ACTIONS_ONLY: readonly Action[] = [
+  /* ── surfaces: connect, disconnect, recheck (T14, SF-02, SF-04, SF-05) ───── */
+  {
+    id: "surface.connect",
+    label: "Connect surface",
+    group: "Actions",
+    screen: "surfaces",
+    key: "C",
+    cli: "yam surface connect --url <url>",
+    availableWhen: loaded,
+    async run(service, args): Promise<ActionOutcome> {
+      const url = typeof args.url === "string" ? args.url.trim() : "";
+      if (url === "") {
+        return refused("Enter a URL to connect to — a browser, app, device or API.");
+      }
+      const adapter = typeof args.adapter === "string" && args.adapter !== "" ? args.adapter : undefined;
+      const answer = await service.postSessions({
+        url,
+        ...(adapter === undefined ? {} : { adapter }),
+      });
+      const { ok: succeeded, result, message } = envelopeOf(answer);
+      if (!succeeded) {
+        // The service's own reason, not one invented here (SF-04, SF-17): a
+        // missing adapter, an unreachable host, a refused connection.
+        return refused(message ?? "Could not connect.");
+      }
+      const sessionId = typeof result["sessionId"] === "string" ? result["sessionId"] : undefined;
+      // The adapter the service *used*, never the one asked for (SF-04).
+      const used = typeof result["adapter"] === "string" ? result["adapter"] : (adapter ?? "the default adapter");
+      return ok(`Connected with the ${used} adapter.`, {
+        value: answer,
+        goTo: "surfaces",
+        ...(sessionId === undefined ? {} : { params: { selected: sessionId } }),
+      });
+    },
+  },
+  {
+    id: "surface.disconnect",
+    label: "Disconnect",
+    group: "Actions",
+    screen: "surfaces",
+    cli: "yam surface close --session <id>",
+    // Only when a session is selected; `has("selected")` is the model saying so.
+    availableWhen: has("selected"),
+    async run(service, args): Promise<ActionOutcome> {
+      const session = typeof args.selected === "string" ? args.selected : undefined;
+      if (session === undefined) return refused("Choose a session to disconnect.");
+      const answer = await service.deleteSessionsBySession(session);
+      const { ok: succeeded, message } = envelopeOf(answer);
+      if (!succeeded) return refused(message ?? "Could not disconnect.");
+      // Back to Surfaces with nothing selected: the session is gone.
+      return ok("Disconnected.", { value: answer, goTo: "surfaces", params: { selected: undefined } });
+    },
+  },
+  {
+    id: "surface.discover",
+    label: "Recheck targets",
+    group: "Actions",
+    screen: "surfaces",
+    key: "R",
+    cli: "yam surface targets",
+    availableWhen: loaded,
+    async run(service): Promise<ActionOutcome> {
+      // Reads discovery again; the reload the shell does after an action is
+      // what refreshes the screen, so this only reports what it found.
+      const answer = await service.getTargets();
+      const { ok: succeeded, result, message } = envelopeOf(answer);
+      if (!succeeded) return refused(message ?? "Could not reach the surface broker.");
+      const adapters = Array.isArray(result["adapters"]) ? result["adapters"] : [];
+      const ready = adapters.filter((one) => (one as { available?: unknown }).available === true).length;
+      return ok(`${ready} of ${adapters.length} adapters ready.`, { value: answer, goTo: "surfaces" });
+    },
+  },
   {
     id: "flows.compile",
     label: "Compile",
@@ -597,6 +693,7 @@ const ACTIONS_ONLY: readonly Action[] = [
  * labels are the rail's, which is what the mockups show.
  */
 const GO_TO_LABEL: Readonly<Record<ScreenId, string>> = {
+  surfaces: "Surfaces",
   flows: "Flows",
   record: "Record review",
   runs: "Runs",

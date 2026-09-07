@@ -477,6 +477,7 @@ describe("an agent binds and repairs (REQ-AGT-2, Draft 2.24)", () => {
         complete: boolean;
         totals: Record<string, number>;
         steps: Array<{ status: string }>;
+        written: string[];
       };
 
       // REQ-PKG-4: a report says what decided, and the fixture says it is one.

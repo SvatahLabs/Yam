@@ -509,9 +509,9 @@ describe("the panes are sized to the terminal (T10.4, P9-F4)", () => {
  * controls … in `yam ui` under a pseudo-terminal". The pseudo-terminal half
  * is `tools/repo-checks/test/tui-pty.test.ts`, which needs a real service; this
  * is the half that runs everywhere, against the recorded fixtures, and it is
- * what says the cockpit has twelve screens rather than two.
+ * what says the cockpit has all thirteen screens rather than two.
  */
-describe("all twelve screens draw in the cockpit (T10.1, T10.2)", () => {
+describe("all thirteen screens draw in the cockpit (T10.1, T10.2, T14)", () => {
   const service = () => fakeService(FIXTURES);
 
   it.each(SCREEN_IDS)("%s draws four numbered panes with titles", async (id) => {
@@ -617,10 +617,16 @@ describe("all twelve screens draw in the cockpit (T10.1, T10.2)", () => {
     );
     await until(() => seen.at(-1), "the first load");
 
+    /*
+     * The rail order is surface-first now (T14): `RAIL` is the four sections
+     * flattened — surfaces, then flows and the rest of Automations, then runs
+     * under Activity, then settings — so the item after `flows` is `bindings`,
+     * not `runs`.
+     */
     instance.stdin.write("]");
     expect(
-      await until(() => (seen.at(-1)?.screen === "runs" ? "runs" : undefined), "`]`"),
-    ).toBe("runs");
+      await until(() => (seen.at(-1)?.screen === "bindings" ? "bindings" : undefined), "`]`"),
+    ).toBe("bindings");
 
     instance.stdin.write("[");
     expect(

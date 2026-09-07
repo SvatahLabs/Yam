@@ -1226,9 +1226,15 @@ importers:
       '@svatah/yam-sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
+      '@svatah/yam-service':
+        specifier: workspace:*
+        version: link:../../packages/service
       '@svatah/yam-spec':
         specifier: workspace:*
         version: link:../../packages/spec
+      '@svatah/yam-surface-control':
+        specifier: workspace:*
+        version: link:../../packages/surface-control
       '@svatah/yam-ui-tokens':
         specifier: workspace:*
         version: link:../../packages/ui-tokens

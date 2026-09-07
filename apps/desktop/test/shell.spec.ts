@@ -398,9 +398,14 @@ test.beforeEach(async () => {
   page = await livePage();
 });
 
-test("opens into the new Flows screen, not the eleven tabs", async () => {
-  // The rail (LLD §13.7's information architecture), by its own ids.
+test("opens into Surfaces by default, with the four-section rail (T14, SF-02, SF-16)", async () => {
+  // Surface-first navigation (T14): the four sections, and the screens under them.
   for (const id of [
+    "section-surfaces",
+    "section-automations",
+    "section-activity",
+    "section-settings",
+    "rail-surfaces",
     "rail-flows",
     "rail-runs",
     "rail-bindings",
@@ -413,18 +418,20 @@ test("opens into the new Flows screen, not the eleven tabs", async () => {
     await expect(page.locator(`#${id}`), `${id} is missing from the rail`).toBeVisible();
   }
 
-  // The toolbar says what the mockup's says, from the model.
-  await expect(page.getByRole("heading", { name: "Flows" })).toBeVisible();
-  await expect(page.locator(".sv-toolbar-sub")).toContainText("7 files");
-  await expect(page.locator(".sv-toolbar-sub")).toContainText("22 stories");
-
-  // The flow list, and the editor beside it.
-  await expect(page.getByText("guards-and-compensation.flow").first()).toBeVisible();
-  await expect(page.locator("#flows-list")).toBeVisible();
-  await expect(page.locator("#flows-tabs")).toBeVisible();
+  // Surfaces is the default: the toolbar says Surfaces and the connect bar is on
+  // the screen — no project was needed to reach it (SF-02).
+  await expect(page.locator("#toolbar-title")).toHaveText("Surfaces");
+  await expect(page.locator("#surfaces-url")).toBeVisible();
+  await expect(page.locator("#action-surface-connect")).toBeVisible();
+  await expect(page.locator("#surfaces-discovery")).toBeVisible();
 
   // And the eleven tabs are not anywhere: T10.3 deleted them.
   await expect(page.locator("#screen-project")).toHaveCount(0);
+
+  // Flows still exists, one click away under Automations.
+  await page.locator("#rail-flows").click();
+  await expect(page.getByRole("heading", { name: "Flows" })).toBeVisible();
+  await expect(page.locator("#flows-list")).toBeVisible();
 });
 
 test("every interactive control on the Flows screen is named and id'd (P8-F3)", async () => {

@@ -43,8 +43,10 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `DataResponse` | interface | `export interface DataResponse` |  |
 | `DataRow` | interface | `export interface DataRow` |  |
 | `DataState` | interface | `export interface DataState extends ScreenStateBase` |  |
+| `defaultScreenOf` | function | `export function defaultScreenOf(section: SectionId): ScreenId` | The screen a section opens on: the first row of its sub-rail. |
 | `Diagnostic` | interface | `export interface Diagnostic` |  |
 | `dotted` | variable | `dotted = (...parts: ReadonlyArray<string \| undefined>): string =>` | `["a", "b"]` → `"a · b"`, dropping the empties. The mockups' subtitle style. |
+| `envelopeError` | function | `export function envelopeError(value: unknown): string \| undefined` | The `error.message` of a failed/refused envelope, when it carries one. |
 | `EVERY_SCREEN_IS_MODELLED` | variable | `EVERY_SCREEN_IS_MODELLED: boolean = SCREEN_IDS.every((id) =>` | Every screen id has exactly one screen. The renderers rely on it; so does `--json`. |
 | `ExplorerState` | interface | `export interface ExplorerState extends ScreenStateBase` |  |
 | `FakeCall` | interface | `export interface FakeCall` | What the fake was asked, in order. A test asserts on the screen rule with it. |
@@ -66,10 +68,11 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `PlanResponse` | interface | `export interface PlanResponse` |  |
 | `PlanStep` | interface | `export interface PlanStep` | One compiled step, as the Plan tab and the editor's gutter read it. |
 | `PlanStory` | interface | `export interface PlanStory` |  |
+| `platformGroups` | function | `export function platformGroups(` | Adapters and targets → the platform-family groups the screen draws. |
 | `plural` | variable | `plural = (n: number, one: string, many = `${one}s`): string =>` | `1`/`2` → `"1 story"`/`"2 stories"`. |
 | `policyText` | function | `export function policyText(policy: string \| { compensate?: string } \| undefined): string \| undefined` | An `onFailure` policy as one phrase (REQ-AUTO-4). |
 | `ProjectResponse` | interface | `export interface ProjectResponse` | What the service's answers look like, as far as a screen reads them. |
-| `RAIL` | variable | `RAIL: ReadonlyArray<` | The rail, as both renderers draw it (LLD §13.7). |
+| `RAIL` | variable | `RAIL: ReadonlyArray<` |  |
 | `RecordDecision` | interface | `export interface RecordDecision` | One grounding waiting on a reviewer (REQ-ADE-4, the `record.decision` event). |
 | `RecordState` | interface | `export interface RecordState extends ScreenStateBase` |  |
 | `RunInspector` | interface | `export interface RunInspector` |  |
@@ -91,6 +94,10 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `ScreenService` | interface | `export interface ScreenService` | A screen asks for what it renders and gets `unknown`; it parses with `@svatah/yam-schema`. |
 | `ScreenStateBase` | interface | `export interface ScreenStateBase` | Every screen's state carries these, so a renderer's chrome is written once. |
 | `SECONDARY_SCREENS` | variable | `SECONDARY_SCREENS = [` |  |
+| `Section` | interface | `export interface Section` |  |
+| `SectionId` | typealias | `export type SectionId = "surfaces" \| "automations" \| "activity" \| "settings";` | Primary navigation, surface-first (T14, SF-02, SF-16). |
+| `sectionOf` | function | `export function sectionOf(screen: ScreenId): SectionId` |  |
+| `SECTIONS` | variable | `SECTIONS: readonly Section[] = [` |  |
 | `ServiceConnectionInfo` | interface | `export interface ServiceConnectionInfo` | Where the connection is, for the renderers' chrome and for `--json`. |
 | `ServiceEventLike` | interface | `export interface ServiceEventLike` | One line of the event stream, as far as a screen cares. |
 | `SettingsState` | interface | `export interface SettingsState extends ScreenStateBase` |  |
@@ -102,5 +109,11 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `StepInspector` | interface | `export interface StepInspector` | What the inspector shows about the selected step. |
 | `StepResultResponse` | interface | `export interface StepResultResponse` |  |
 | `SummaryResponse` | interface | `export interface SummaryResponse` |  |
+| `SurfaceAdapterRow` | interface | `export interface SurfaceAdapterRow` | One adapter the service reported, with its readiness and, when not, why. |
+| `SurfacePlatformGroup` | interface | `export interface SurfacePlatformGroup` | A platform family, with its adapters and any targets discovered under it. |
+| `SURFACES_SCREENS` | variable | `SURFACES_SCREENS = [surfacesScreen] as const satisfies readonly Screen[]` |  |
+| `SurfaceSessionRow` | interface | `export interface SurfaceSessionRow` | One open session, an agent's or a person's (SF-05, SF-13). |
+| `SurfacesState` | interface | `export interface SurfacesState extends ScreenStateBase` |  |
+| `SurfaceTargetRow` | interface | `export interface SurfaceTargetRow` | One target the service discovered — an adapter, or a URL through one. |
 | `ToolsResponse` | interface | `export interface ToolsResponse` | `GET /tools` — `{ tools: { tools, refused }, invocations }`. |
 | `TrajectoryCall` | interface | `export interface TrajectoryCall` | One call the explorer made, as `trajectory.jsonl` records it (REQ-BEH-4). |

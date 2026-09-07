@@ -685,14 +685,29 @@ describe("the surface explorer (T5.8, REQ-ADE-8)", () => {
     }
   }, 300_000);
 
-  it("refuses a call with no intent, because a log is not a trajectory", async () => {
+  /*
+   * Intent is optional for direct control (SF-12, Draft 2.25).
+   *
+   * This case asserted the opposite through Phase 5: a surface call with no
+   * intent was refused, "because a log is not a trajectory". The surface-first
+   * mission superseded that — "direct operations must not require a prose
+   * intent" — so a no-intent call now *succeeds*; the trajectory records the
+   * step it can, without an intent, and compiling it is where a missing intent
+   * becomes a review step (Draft 2.25). The `/surface/:session/*` explorer
+   * routes are themselves transitional and are retired with the Explorer in T15;
+   * this keeps the intent-optional contract honest in the meantime.
+   */
+  it("accepts a call with no intent (SF-12)", async () => {
     const project = scaffold();
     const { service, client } = await serve(project);
     try {
       await client.postSurfaceBySessionOpen("explorer", {});
-      await expect(
-        client.postSurfaceBySessionAct("explorer", { action: "click", ref: "r1" }),
-      ).rejects.toThrow(/intent/i);
+      // No intent, and it is not refused: intent is metadata, not a gate (SF-12).
+      const result = (await client.postSurfaceBySessionAct("explorer", {
+        action: "click",
+        ref: "r1",
+      })) as { value?: { ok?: boolean } };
+      expect(result.value?.ok).toBe(true);
       await client.postSurfaceBySessionClose("explorer");
     } finally {
       await service.close();

@@ -129,13 +129,16 @@ checks:
       source: "tree-agreement"
       name: "tree"
   - id: "app.opens-into-the-new-flows-screen-not-the-eleven-tabs"
-    says: "opens into the new Flows screen, not the eleven tabs"
+    # Surface-first (T14): the app opens into Surfaces, not Flows. The external
+    # case was renamed to match; the `yam` self-story that drives the same
+    # journey through Yam is updated when the self suite is revalidated (M4).
+    says: "opens into Surfaces by default, with the four-section rail (T14, SF-02, SF-16)"
     yam:
       source: "yam"
       name: "the app opens a project and shows its flows"
     external:
       source: "app-playwright"
-      name: "opens into the new Flows screen, not the eleven tabs"
+      name: "opens into Surfaces by default, with the four-section rail (T14, SF-02, SF-16)"
   - id: "app.every-interactive-control-on-the-flows-screen-is-named-and-i"
     says: "every interactive control on the Flows screen is named and id'd (P8-F3)"
     yam:
