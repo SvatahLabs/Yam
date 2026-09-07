@@ -47,6 +47,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `createAdapterFactory` | function | `export function createAdapterFactory(` |  |
 | `createCoordinationStore` | function | `export function createCoordinationStore(): CoordinationStore` |  |
 | `createEventStore` | function | `export function createEventStore(): EventStore` |  |
+| `createPromotionStore` | function | `export function createPromotionStore(): PromotionStore` |  |
 | `createRedactionPolicy` | function | `export function createRedactionPolicy(): RedactionPolicy` |  |
 | `createReferenceStore` | function | `export function createReferenceStore(): ReferenceStore` |  |
 | `createSessionStore` | function | `export function createSessionStore(): SessionStore` |  |
@@ -63,8 +64,9 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `dispatchClose` | function | `export async function dispatchClose(` |  |
 | `dispatchConnect` | function | `export async function dispatchConnect(` |  |
 | `DispatchContext` | interface | `export interface DispatchContext` |  |
-| `dispatchControl` | function | `export async function dispatchControl(` | Take, release, or report who holds a target (SF-13, T16). |
+| `dispatchControl` | function | `export async function dispatchControl(` |  |
 | `dispatchDescribe` | function | `export async function dispatchDescribe(` |  |
+| `dispatchEvents` | function | `export async function dispatchEvents(` | What this session did, and what of it would compile (T17, SF-19). |
 | `dispatchRead` | function | `export async function dispatchRead(` |  |
 | `dispatchRequest` | function | `export async function dispatchRequest(` | Send an HTTP request on an HTTP surface (T15, SF-04). |
 | `dispatchScreenshot` | function | `export async function dispatchScreenshot(` |  |
@@ -97,6 +99,8 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `OperationOutcome` | typealias | `export type OperationOutcome = "succeeded" \| "failed" \| "refused" \| "cancelled" \| "unknown";` |  |
 | `OperationRecord` | interface | `export interface OperationRecord` |  |
 | `OPERATIONS` | variable | `OPERATIONS: readonly OperationDescriptor[] = [` |  |
+| `PromotionStep` | interface | `export interface PromotionStep` | One recorded step, shaped as `@svatah/yam-trajectory`'s `TrajectoryLine`. |
+| `PromotionStore` | interface | `export interface PromotionStore` |  |
 | `readBrokerDescriptor` | function | `export function readBrokerDescriptor(stateDir?: string): BrokerDescriptor \| undefined` |  |
 | `readInputSchema` | variable | `readInputSchema = z.object(` |  |
 | `readOutputSchema` | variable | `readOutputSchema = resultEnvelopeSchema.extend(` |  |

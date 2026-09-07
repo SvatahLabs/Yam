@@ -505,8 +505,12 @@ export function openApiDocument(version: string): Record<string, unknown> {
       "/trajectory/compile": {
         post: {
           summary: "Compile a captured trajectory into proposals/<date>/",
+          description:
+            "Takes either a `path` to a trajectory the agent wrote, or `lines` — a sequence read " +
+            "from a live session with `GET /sessions/:session/events`, which is what the desktop's " +
+            "Save as automation promotes (T17, SF-19). Every binding in the proposal is unverified.",
           security: bearer,
-          requestBody: json({ type: "object", properties: { path: { type: "string" }, name: { type: "string" } }, required: ["path"] }),
+          requestBody: json({ type: "object", properties: { path: { type: "string" }, lines: { type: "array" }, name: { type: "string" } } }),
           responses: { 200: { description: "Where the proposal went, and the rate", ...json({ type: "object" }) } },
         },
       },
@@ -631,6 +635,14 @@ export function openApiDocument(version: string): Record<string, unknown> {
           parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
           requestBody: json({ type: "object" }),
           responses: { 200: { description: "The element", ...json({ type: "object" }) } },
+        },
+      },
+      "/sessions/{session}/events": {
+        get: {
+          summary: "What this session did, and the steps a proposal compiles from (T17, SF-19)",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          responses: { 200: { description: "Events and steps", ...json({ type: "object" }) } },
         },
       },
       "/sessions/{session}/control": {

@@ -46,6 +46,7 @@ public class GeneratedClient {
       "GET /runs/{id}/screenshots/{name}",
       "GET /sessions",
       "GET /sessions/{session}/capabilities",
+      "GET /sessions/{session}/events",
       "GET /targets",
       "GET /tools",
       "POST /api/request",
@@ -257,6 +258,11 @@ public class GeneratedClient {
   /** {@code GET /sessions/{session}/capabilities} — A session's adapter capabilities (SF-09) */
   public String getSessionsBySessionCapabilities(String session) {
     return call("get", "/sessions/" + segment(session) + "/capabilities", null, "application/json");
+  }
+
+  /** {@code GET /sessions/{session}/events} — What this session did, and the steps a proposal compiles from (T17, SF-19) */
+  public String getSessionsBySessionEvents(String session) {
+    return call("get", "/sessions/" + segment(session) + "/events", null, "application/json");
   }
 
   /** {@code GET /targets} — Discover available targets and adapter readiness (SF-04) */

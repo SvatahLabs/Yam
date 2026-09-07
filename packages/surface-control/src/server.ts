@@ -29,6 +29,7 @@ import {
   dispatchConnect,
   dispatchDescribe,
   dispatchControl,
+  dispatchEvents,
   dispatchRequest,
   dispatchRead,
   dispatchScreenshot,
@@ -42,6 +43,7 @@ import { createSessionStore } from "./sessions.js";
 import { createReferenceStore } from "./references.js";
 import { createCoordinationStore } from "./coordination.js";
 import { createEventStore } from "./events.js";
+import { createPromotionStore } from "./promotion.js";
 import { createRedactionPolicy, type RedactionPolicy } from "./redaction.js";
 import { failedEnvelope, makeRequestId } from "./envelope.js";
 
@@ -58,6 +60,7 @@ export type BrokerOperation =
   | "capabilities"
   | "describe"
   | "control"
+  | "events"
   | "request"
   | "screenshot";
 
@@ -93,6 +96,7 @@ const DISPATCH: Record<BrokerOperation, DispatchFn> = {
   capabilities: (context, args) => dispatchCapabilities(context, args as never),
   describe: (context, args) => dispatchDescribe(context, args as never),
   control: (context, args) => dispatchControl(context, args as never),
+  events: (context, args) => dispatchEvents(context, args as never),
   request: (context, args) => dispatchRequest(context, args as never),
   screenshot: (context, args) => dispatchScreenshot(context, args as never),
 };
@@ -121,8 +125,9 @@ export async function startBroker(options: BrokerOptions): Promise<RunningBroker
   const references = createReferenceStore();
   const coordination = createCoordinationStore();
   const events = createEventStore();
+  const promotion = createPromotionStore();
   const redaction: RedactionPolicy = createRedactionPolicy();
-  const context: DispatchContext = { sessions, references, coordination, events, redaction };
+  const context: DispatchContext = { sessions, references, coordination, events, redaction, promotion };
   const withAdapterInfo = (args: Record<string, unknown>): Record<string, unknown> => ({
     ...args,
     adapterFactory: options.factory,

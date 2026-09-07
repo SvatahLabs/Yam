@@ -136,6 +136,11 @@ export interface ScreenService {
   /** `POST /sessions/{session}/screenshot` — an artifact reference (SF-11). */
   postSessionsBySessionScreenshot(session: string, body?: unknown): Promise<unknown>;
   /**
+   * `GET /sessions/{session}/events` — what this session did, and the steps a
+   * proposal compiles from (T17, SF-19).
+   */
+  getSessionsBySessionEvents(session: string): Promise<unknown>;
+  /**
    * `POST /sessions/{session}/control` — take, release or report who holds a
    * target (T16, SF-13).
    */

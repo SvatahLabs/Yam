@@ -549,3 +549,48 @@ describe("connecting an agent (T16, SF-07)", () => {
     expect(bad.message).toContain("no broker");
   });
 });
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * T17 — Save as automation
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+describe("promoting a session into a proposal (T17, SF-19)", () => {
+  const STEPS = [
+    { seq: 1, at: "2026-09-08T00:00:00Z", call: "act", args: { action: "type", value: "ada" }, ref: "r1" },
+    { seq: 2, at: "2026-09-08T00:00:01Z", call: "act", args: { action: "click" }, ref: "r2" },
+  ];
+
+  it("promotes what the session did, and says the bindings are unverified", async () => {
+    const service = fakeService({
+      surface: { events: ok({ events: [], steps: STEPS }) },
+    });
+    const outcome = await actionById("surface.save-automation")!.run(service, { selected: "s_1" });
+    expect(outcome.ok).toBe(true);
+    expect(outcome.message).toContain("2 step(s)");
+    // SF-19: promotion creates unverified proposals only.
+    expect(outcome.message).toContain("unverified");
+
+    // It reads what happened from the broker, then compiles those lines — it
+    // does not replay what this client believes it asked for.
+    expect(service.calls.some((one) => one.method === "getSessionsBySessionEvents")).toBe(true);
+    const compile = service.calls.find((one) => one.method === "postTrajectoryCompile")!;
+    expect((compile.args[0] as { lines?: unknown[] }).lines).toEqual(STEPS);
+  });
+
+  it("refuses a session that has only been looked at, rather than writing an empty proposal", async () => {
+    const service = fakeService({ surface: { events: ok({ events: [], steps: [] }) } });
+    const outcome = await actionById("surface.save-automation")!.run(service, { selected: "s_1" });
+    expect(outcome.ok).toBe(false);
+    expect(outcome.message).toContain("looked at, not acted on");
+    expect(service.calls.some((one) => one.method === "postTrajectoryCompile")).toBe(false);
+  });
+
+  it("forces neither a flow nor a run: it compiles a trajectory and nothing else", async () => {
+    const service = fakeService({ surface: { events: ok({ events: [], steps: STEPS }) } });
+    await actionById("surface.save-automation")!.run(service, { selected: "s_1" });
+    const called = service.calls.map((one) => one.method);
+    expect(called).not.toContain("postRun");
+    expect(called).not.toContain("postCompile");
+    expect(called).not.toContain("putFlowsByFile");
+  });
+});

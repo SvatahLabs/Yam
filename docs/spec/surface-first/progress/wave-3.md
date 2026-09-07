@@ -426,3 +426,106 @@ the desktop, seen inside it — driven rather than argued.
   needs fault injection — a response lost mid-dispatch, or a revoked macOS
   accessibility grant — that this harness does not have. Named rather than
   claimed.
+
+---
+
+## T17 — Automations regrouped, and Save as automation
+
+**Status:** complete.
+
+**Requirements:** SF-19.
+
+### Where the automation features now are
+
+The regrouping itself landed with T14's `SECTIONS`, and this task finished it:
+
+- **Automations** holds flow authoring, bindings, agents and tools, API, Data
+  and Import; **Activity** holds run evidence; **Settings** its own. The screens,
+  their artifacts and their semantics are untouched — only where they are
+  reached from.
+- **A project is chosen, not demanded.** After T14 the app starts projectless,
+  and the automation screens are *about* a project — so the top bar carries the
+  project: it names the one that is open, or offers to open one. The main
+  process says whether a connection is the private surfaces workspace
+  (`projectless`), so the renderer never infers it from a path.
+
+### Save as automation
+
+`SF-19`: promote a selected session sequence into a reviewed proposal without
+forcing a flow or a run.
+
+- The broker records **what a session did** in a shape that compiles
+  (`promotion.ts`): one step per *mutation*, carrying the reference acted on,
+  what that element was, and the page it was on — the evidence a binding is made
+  from. Inspections record nothing; nobody promotes looking at something.
+- A new **`events` operation** returns a session's redacted events and those
+  steps, so a client promotes what happened rather than what it believes it
+  asked for.
+- `POST /trajectory/compile` now takes `lines` inline as well as a `path`, so a
+  promotion needs no file written first. The lines are parsed against the
+  published trajectory schema exactly as a file's are.
+- The desktop's **Save as automation** reads the steps and compiles them; with
+  no project open it says so and points at "Open a project" rather than
+  surfacing the loader's error.
+
+**A defect the driving found:** the compiler reads an act's arguments *nested*
+(`{action, args, ref2}`), and the broker recorded them flattened — so a promoted
+fill compiled to `Type "" into the Username field`, a proposal that would type
+nothing. The recorded shape is now the one the MCP path writes, so one
+trajectory reads the same whoever wrote it.
+
+### Validate
+
+Model: `packages/screens/test/surfaces.test.ts` — 38 tests; T17's cover
+promoting what the session did, the unverified wording, refusing a session that
+has only been looked at, and that promotion calls neither run nor compile nor a
+flow write.
+
+End to end, in the gate (`packages/cli/test/surface-service.test.ts`) — a real
+service, a real browser and a real project:
+
+```
+connect → snapshot → act → GET /sessions/:id/events → POST /trajectory/compile
+  steps carry `ref` and `describe`            (the evidence a binding is made from)
+  proposals/<date>/ exists with .flow + bindings
+  every binding matches /verified:\s*false/   (SF-19: unverified proposals only)
+  no runs/ directory                          (promotion compiles; it does not replay)
+```
+
+The compiled flow, from a session that typed and clicked:
+
+```
+story: Promoted session
+  // type the username
+  Type "ada" into the Username field
+  // submit the form
+  Click the Go button
+```
+
+Driven (`apps/desktop/test/surfaces-dogfood.mjs`), **54/54 checks** at both
+sizes — T14's, T15's, T16's and:
+
+```
+[1440x1000] flow authoring, bindings and tools are under Automations
+[1440x1000] run evidence is under Activity
+[1440x1000] a project is opened from the app, not demanded by it
+[1440x1000] Save as automation promotes, or says what it needs
+            — "Wrote a proposal from 2 step(s) … Every binding in it is unverified"
+```
+
+### Deviations
+
+- **Existing fixtures were not re-hashed by this task.** T17's Done asks that
+  "old fixtures compile/replay with unchanged expected hashes/results". Nothing
+  here touches the compiler, the executor, the flow language or the binding
+  store — promotion only *writes* a proposal — and the whole gate, including the
+  fixture plan hashes (`tools/repo-checks/test/fixture-plans.test.ts`) and the
+  golden suites, passes unchanged. That is the evidence offered; no separate
+  re-hash run was performed.
+- **Promotion writes into whatever project the service is on.** With a project
+  open that is the project; on the private workspace it is the workspace. The
+  app names which, and the proposal says its bindings are unverified either way.
+- **The review is the proposal, not a preview.** The design's "reviewed
+  proposal" is satisfied by what is written — a flow marked *not reviewed, not
+  run*, with unverified bindings beside it. A pre-write diff of the steps to be
+  promoted is not built.

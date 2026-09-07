@@ -39,6 +39,14 @@ export interface ServiceConnection {
   readonly project: string;
   /** True when the app connected to a service it did not start. */
   readonly adopted: boolean;
+  /**
+   * True when that directory is the private surfaces workspace rather than a
+   * project somebody chose (T14, T17).
+   *
+   * Said by the main process, which knows, rather than inferred from the path
+   * by the renderer, which would be guessing.
+   */
+  readonly projectless?: boolean;
 }
 
 /** The one line `yam serve` prints when it is listening. */

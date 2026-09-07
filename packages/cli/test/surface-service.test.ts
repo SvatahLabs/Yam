@@ -21,6 +21,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { startSampleApp, type SampleServer } from "sample-web";
 
 const YAM = join(dirname(fileURLToPath(import.meta.url)), "..", "dist", "bin.js");
@@ -28,10 +29,12 @@ const YAM = join(dirname(fileURLToPath(import.meta.url)), "..", "dist", "bin.js"
 let app: SampleServer;
 let service: ChildProcess;
 let connection: { url: string; token: string };
+let project: string;
 
 beforeAll(async () => {
   app = await startSampleApp(0);
   const dir = mkdtempSync(join(tmpdir(), "yam-surface-svc-"));
+  project = dir;
   mkdirSync(join(dir, "flows"), { recursive: true });
   writeFileSync(
     join(dir, "yam.config.yaml"),
@@ -72,6 +75,13 @@ async function connect(body: Record<string, unknown> = {}): Promise<{ status: nu
   const answer = await post("/sessions", { url: app.origin, ...body });
   const parsed = JSON.parse(answer.body) as { result?: { sessionId?: string } };
   return { ...answer, ...(parsed.result?.sessionId === undefined ? {} : { session: parsed.result.sessionId }) };
+}
+
+async function get(path: string): Promise<{ status: number; body: string }> {
+  const response = await fetch(`${connection.url}${path}`, {
+    headers: { authorization: `Bearer ${connection.token}` },
+  });
+  return { status: response.status, body: await response.text() };
 }
 
 async function close(session: string): Promise<void> {
@@ -148,4 +158,70 @@ describe("the service's surface routes (SF-03, SF-04, SF-12)", () => {
       await close(session);
     }
   }, 180_000);
+});
+
+/**
+ * T17 — a session becomes a reviewed proposal, without a flow and without a run
+ * (SF-19).
+ *
+ * The whole path, against a real browser and a real project: connect, act, read
+ * what the session did back from the broker, and compile it. What this checks
+ * that a unit test could not is that the steps the broker recorded carry the
+ * evidence a *binding* is made from — wave 1 shipped a promotion that produced
+ * proposals with no bindings and steps that could not name what they touched.
+ */
+describe("promoting a session into an automation (T17, SF-19)", () => {
+  it("writes an unverified proposal with bindings, and runs nothing", async () => {
+    const opened = await connect();
+    const session = opened.session!;
+    expect(session, opened.body).toBeDefined();
+    try {
+      const snapshot = await post(`/sessions/${session}/snapshot`, {
+        interactiveOnly: true,
+        maxNodes: 60,
+      });
+      const nodes = (JSON.parse(snapshot.body) as { result: { nodes: Array<{ ref: string; role: string; name?: string }> } })
+        .result.nodes;
+      const link = nodes.find((one) => one.role === "link" || one.role === "button");
+      expect(link, JSON.stringify(nodes.slice(0, 8))).toBeDefined();
+
+      const acted = await post(`/sessions/${session}/act`, {
+        action: "click",
+        ref: link!.ref,
+        intent: "open the page the link points at",
+      });
+      expect(JSON.parse(acted.body).status, acted.body).toBe("succeeded");
+
+      // What the session did, from the broker — not what this client asked for.
+      const events = await get(`/sessions/${session}/events`);
+      const steps = (JSON.parse(events.body) as { result: { steps: Array<Record<string, unknown>> } }).result.steps;
+      expect(steps.length, events.body).toBeGreaterThan(0);
+      // The evidence a binding is made from, captured at the moment of the call.
+      expect(steps[0]!["ref"], "a step must name what it acted on").toBeDefined();
+      expect(steps[0]!["describe"], "a step must carry what that element was").toBeDefined();
+
+      const compiled = await post("/trajectory/compile", { lines: steps, name: "Promoted" });
+      expect(compiled.status, compiled.body).toBe(200);
+      const proposal = JSON.parse(compiled.body) as {
+        dir: string;
+        files: string[];
+        flow: string;
+      };
+
+      // A proposal on disk, with bindings beside the flow.
+      expect(existsSync(proposal.dir), proposal.dir).toBe(true);
+      expect(readdirSync(proposal.dir).length).toBeGreaterThan(0);
+      const bindings = proposal.files.filter((one) => one.endsWith(".yaml"));
+      expect(bindings.length, `no bindings in ${proposal.files.join(", ")}`).toBeGreaterThan(0);
+
+      // SF-19: every binding it proposes is unverified until somebody verifies it.
+      for (const file of bindings) {
+        expect(readFileSync(file, "utf8"), file).toMatch(/verified:\s*false/);
+      }
+      // And nothing was run: promotion compiles, it does not replay.
+      expect(existsSync(join(project, "runs"))).toBe(false);
+    } finally {
+      await close(session);
+    }
+  }, 240_000);
 });

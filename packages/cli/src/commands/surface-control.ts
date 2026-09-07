@@ -285,6 +285,8 @@ function operationFor(
       return { operation: "sessions", args: {} };
     case "capabilities":
       return { operation: "capabilities", args: { session } };
+    case "events":
+      return { operation: "events", args: { session } };
     case "describe":
       return {
         operation: "describe",

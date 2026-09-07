@@ -1359,6 +1359,7 @@
     "/trajectory/compile": {
       "post": {
         "summary": "Compile a captured trajectory into proposals/<date>/",
+        "description": "Takes either a `path` to a trajectory the agent wrote, or `lines` — a sequence read from a live session with `GET /sessions/:session/events`, which is what the desktop's Save as automation promotes (T17, SF-19). Every binding in the proposal is unverified.",
         "security": [
           {
             "bearerAuth": []
@@ -1373,13 +1374,13 @@
                   "path": {
                     "type": "string"
                   },
+                  "lines": {
+                    "type": "array"
+                  },
                   "name": {
                     "type": "string"
                   }
-                },
-                "required": [
-                  "path"
-                ]
+                }
               }
             }
           }
@@ -1776,6 +1777,38 @@
         "responses": {
           "200": {
             "description": "The element",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{session}/events": {
+      "get": {
+        "summary": "What this session did, and the steps a proposal compiles from (T17, SF-19)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Events and steps",
             "content": {
               "application/json": {
                 "schema": {

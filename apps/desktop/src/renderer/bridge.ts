@@ -11,6 +11,8 @@ export interface ServiceInfo {
   readonly token: string;
   readonly project: string;
   readonly adopted: boolean;
+  /** True when this is the private surfaces workspace, not a chosen project. */
+  readonly projectless?: boolean;
 }
 
 export interface Preferences {

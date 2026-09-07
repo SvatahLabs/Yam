@@ -385,6 +385,59 @@ const ACTIONS_ONLY: readonly Action[] = [
     },
   },
   {
+    id: "surface.save-automation",
+    label: "Save as automation",
+    group: "Actions",
+    screen: "surfaces",
+    cli: "yam trajectory compile <trajectory.jsonl>",
+    availableWhen: has("session"),
+    async run(service, args): Promise<ActionOutcome> {
+      const session = typeof args.selected === "string" ? args.selected : undefined;
+      if (session === undefined) return refused("Choose a surface first.");
+
+      /*
+       * Promote what the session *did*, read from the broker (SF-19).
+       *
+       * Not what this client believes it asked for: the steps come back with
+       * the element each action touched and the page it was on, which is what a
+       * binding is made from. A session that has only been looked at has no
+       * steps, and says so rather than writing an empty proposal.
+       */
+      const answer = await service.getSessionsBySessionEvents(session);
+      const { ok: succeeded, result, message } = envelopeOf(answer);
+      if (!succeeded) return refused(message ?? "Could not read what this session did.");
+      const steps = Array.isArray(result["steps"]) ? result["steps"] : [];
+      if (steps.length === 0) {
+        return refused(
+          "Nothing to promote yet: this session has been looked at, not acted on. Perform an action first.",
+        );
+      }
+
+      /*
+       * A proposal is written into a *project* — `proposals/` lives in one —
+       * and Surfaces works without one. So a promotion with no project open
+       * says which thing is missing and where to fix it, rather than surfacing
+       * the loader's error (SF-17: every state names its next action).
+       */
+      let compiled: unknown;
+      try {
+        compiled = await service.postTrajectoryCompile({
+          lines: steps,
+          ...(typeof args["name"] === "string" ? { name: args["name"] } : {}),
+        });
+      } catch {
+        return refused(
+          "A proposal is written into a project, and none is open. Choose one with “Open a project”, then save again.",
+        );
+      }
+      const dir = (compiled as { dir?: unknown })?.dir;
+      return ok(
+        `Wrote a proposal from ${steps.length} step(s)${typeof dir === "string" ? ` to ${dir}` : ""}. Every binding in it is unverified until you review it.`,
+        { value: compiled },
+      );
+    },
+  },
+  {
     id: "surface.request",
     label: "Send the request",
     group: "Actions",

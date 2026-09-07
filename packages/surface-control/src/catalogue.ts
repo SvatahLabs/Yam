@@ -320,6 +320,24 @@ const controlOutputSchema = resultEnvelopeSchema.extend({
   }),
 });
 
+/**
+ * What a session did (T17, SF-19, SF-21).
+ *
+ * `events` is the redacted record; `steps` is the same session in the shape a
+ * proposal compiles from, so "Save as automation" promotes what happened.
+ */
+const eventsInputSchema = z.object({
+  session: sessionIdSchema,
+  intent: z.string().optional(),
+});
+
+const eventsOutputSchema = resultEnvelopeSchema.extend({
+  result: z.object({
+    events: z.array(z.record(z.unknown())),
+    steps: z.array(z.record(z.unknown())),
+  }),
+});
+
 const screenshotInputSchema = z.object({
   session: sessionIdSchema,
   path: z.string().optional(),
@@ -585,6 +603,27 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
     outputSchema: describeOutputSchema,
   },
   {
+    name: "events",
+    description: "What this session did: its redacted events, and the steps a proposal compiles from",
+    mutation: false,
+    requiresSession: true,
+    cli: {
+      subcommand: "events",
+      flags: [{ name: "session", type: "string", required: true, description: "Session ID" }],
+      exitCodes: [
+        { code: CLI_EXIT_CODES.OK, meaning: "Events listed" },
+        { code: CLI_EXIT_CODES.SESSION_ERROR, meaning: "Session not found" },
+      ],
+    },
+    mcp: {
+      toolName: "surface_events",
+      annotations: { title: "What this session did", readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    },
+    service: { method: "GET", path: "/sessions/:session/events" },
+    inputSchema: eventsInputSchema,
+    outputSchema: eventsOutputSchema,
+  },
+  {
     name: "control",
     description: "Take, release or report who holds control of a target",
     mutation: false,
@@ -721,6 +760,8 @@ export {
   describeOutputSchema,
   controlInputSchema,
   controlOutputSchema,
+  eventsInputSchema,
+  eventsOutputSchema,
   requestInputSchema,
   requestOutputSchema,
   screenshotInputSchema,

@@ -946,18 +946,26 @@ export async function createService(options: ServeOptions): Promise<RunningServi
 
 
 
-  fastify.post<{ Body?: { path?: string; name?: string } }>(
+  fastify.post<{ Body?: { path?: string; lines?: unknown[]; name?: string } }>(
     "/trajectory/compile",
     async (request, reply) => {
       if (api.compileTrajectory === undefined) {
         return reply.code(501).send({ error: "not-available" });
       }
       const body = request.body ?? {};
-      if (body.path === undefined) {
-        return reply.code(400).send({ error: "missing-path" });
+      /*
+       * A trajectory on disk, or a sequence promoted from a live session
+       * (T17, SF-19): "Save as automation" has lines and no file.
+       */
+      if (body.path === undefined && body.lines === undefined) {
+        return reply.code(400).send({
+          error: "missing-trajectory",
+          message: "Give either `path` to a trajectory file or `lines` from a session.",
+        });
       }
       return await api.compileTrajectory(await load(), {
-        path: body.path,
+        ...(body.path === undefined ? {} : { path: body.path }),
+        ...(body.lines === undefined ? {} : { lines: body.lines }),
         ...(body.name === undefined ? {} : { name: body.name }),
       });
     },

@@ -79,5 +79,13 @@ export function App(): React.JSX.Element {
     return <Welcome onOpen={open} log={log} {...(error === undefined ? {} : { error })} />;
   }
 
-  return <Shell client={client} project={info.project} serviceUrl={info.url} />;
+  return (
+    <Shell
+      client={client}
+      project={info.project}
+      projectless={info.projectless === true}
+      serviceUrl={info.url}
+      onOpenProject={open}
+    />
+  );
 }

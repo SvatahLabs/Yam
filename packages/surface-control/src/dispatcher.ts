@@ -10,6 +10,7 @@ import type { CoordinationStore } from "./coordination.js";
 import { hashInput } from "./coordination.js";
 import type { EventStore } from "./events.js";
 import type { RedactionPolicy } from "./redaction.js";
+import type { PromotionStore } from "./promotion.js";
 import { addSecretLiteral, redactObject } from "./redaction.js";
 
 export interface DispatchContext {
@@ -18,6 +19,8 @@ export interface DispatchContext {
   coordination?: CoordinationStore;
   events?: EventStore;
   redaction?: RedactionPolicy;
+  /** What a session did, in a shape that compiles into a proposal (T17). */
+  promotion?: PromotionStore;
 }
 
 function maybeRedact(ctx: DispatchContext, result: Record<string, unknown>): Record<string, unknown> {
@@ -214,6 +217,8 @@ export async function dispatchAct(
     idempotencyKey?: string;
     holder?: string;
     deadlineMs?: number;
+    /** Optional metadata, never a gate (SF-12); it becomes the step's sentence. */
+    intent?: string;
     /**
      * Values that must never be echoed back (SF-15).
      *
@@ -308,6 +313,26 @@ export async function dispatchAct(
     data: { ref: input.ref, action: input.action },
   });
 
+  /*
+   * The evidence a promotion needs, read *before* the call (T17, SF-19).
+   *
+   * After a click that navigates there is nothing left to describe, which is
+   * exactly when the step is worth recording. One element and one URL — not the
+   * page read wave 1 rightly removed — and only for a mutation.
+   */
+  let evidence: { url?: string; describe?: unknown } = {};
+  if (ctx.promotion) {
+    const url = await entry.surface.read("url").catch(() => undefined);
+    const described =
+      input.ref === undefined
+        ? undefined
+        : await entry.surface.describe(input.ref as Ref).catch(() => undefined);
+    evidence = {
+      ...(typeof url === "string" ? { url } : {}),
+      ...(described === undefined ? {} : { describe: described }),
+    };
+  }
+
   try {
     const result = await entry.surface.act(
       input.action as Parameters<AgentSurface["act"]>[0],
@@ -326,6 +351,26 @@ export async function dispatchAct(
       ctx.coordination.releaseLease(targetKey, "succeeded");
       if (opRecord) ctx.coordination.completeOperation(opRecord.operationId, "succeeded");
     }
+
+    /*
+     * The shape the compiler reads (T17): `{ action, args, ref2 }`, with the
+     * action's own arguments *nested*. Flattening them cost the typed value —
+     * a promoted "type" step compiled to `Type "" into the Username field`,
+     * which is a proposal that would type nothing. The MCP path records the
+     * same shape, so one trajectory reads the same whoever wrote it.
+     */
+    ctx.promotion?.record(input.session, {
+      call: "act",
+      ...(input.intent === undefined ? {} : { intent: input.intent }),
+      args: {
+        action: input.action,
+        ...(input.args === undefined ? {} : { args: input.args }),
+        ...(input.ref2 === undefined ? {} : { ref2: input.ref2 }),
+      },
+      ...(input.ref === undefined ? {} : { ref: input.ref }),
+      ...evidence,
+      result,
+    });
 
     const envelope = successEnvelope(requestId, input.session, result, elapsed);
     if (ctx.coordination && input.idempotencyKey) {
@@ -455,6 +500,7 @@ export async function dispatchClose(
     ctx.sessions.remove(input.session);
     ctx.references?.invalidateSession(input.session);
     const elapsed = Date.now() - start;
+    ctx.promotion?.clear(input.session);
     return successEnvelope(requestId, input.session, { closed: true }, elapsed);
   } catch (err) {
     ctx.sessions.remove(input.session);
@@ -491,6 +537,29 @@ export async function dispatchSessions(
  * what a person does from the UI when an agent has walked away — and it is
  * reported as the holder changing rather than as the target having been free.
  */
+/**
+ * What this session did, and what of it would compile (T17, SF-19).
+ *
+ * `events` is the redacted record a person reads in Activity; `steps` is the
+ * same session in the shape a proposal is compiled from. Both are the broker's,
+ * so a client promotes what actually happened rather than what it believes it
+ * asked for.
+ */
+export async function dispatchEvents(
+  ctx: DispatchContext,
+  input: { session: string },
+): Promise<Record<string, unknown>> {
+  const requestId = makeRequestId();
+  const entry = ctx.sessions.get(input.session);
+  if (!entry) {
+    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+  }
+  const events = ctx.events?.list(input.session) ?? [];
+  const steps = ctx.promotion?.list(input.session) ?? [];
+  const envelope = successEnvelope(requestId, input.session, { events, steps }, 0);
+  return maybeRedact(ctx, envelope);
+}
+
 export async function dispatchControl(
   ctx: DispatchContext,
   input: { session: string; action?: "take" | "release" | "status"; holder?: string; force?: boolean },

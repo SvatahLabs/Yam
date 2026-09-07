@@ -30,6 +30,7 @@ import { toolsFor as deriveTools } from "@svatah/yam-tool";
 import {
   compileTrajectory,
   readTrajectory,
+  trajectoryLineSchema,
   writeProposal,
 } from "@svatah/yam-trajectory";
 import type { Config } from "@svatah/yam-schema";
@@ -374,10 +375,23 @@ export async function serviceHeal(
 /** Compile a captured trajectory into `proposals/<date>/` (T5.5). */
 export async function serviceCompileTrajectory(
   loaded: Loaded,
-  options: { path: string; name?: string },
+  options: { path?: string; lines?: readonly unknown[]; name?: string },
 ): Promise<unknown> {
-  const compiled = compileTrajectory(readTrajectory(resolve(loaded.root, options.path)), {
-    sourceTrajectory: options.path,
+  /*
+   * A trajectory on disk, or a sequence read from a live session (T17, SF-19).
+   *
+   * "Save as automation" promotes what a session did without anyone having
+   * written a file first, so the lines arrive inline. They are parsed against
+   * the published schema exactly as a file's are — a caller cannot talk the
+   * compiler into a shape it does not accept — and what comes out is a proposal
+   * whose bindings are unverified, like every other proposal's.
+   */
+  const lines =
+    options.lines !== undefined
+      ? options.lines.map((one) => trajectoryLineSchema.parse(one))
+      : readTrajectory(resolve(loaded.root, options.path ?? ""));
+  const compiled = compileTrajectory(lines, {
+    ...(options.path === undefined ? {} : { sourceTrajectory: options.path }),
     ...(options.name === undefined ? {} : { storyName: options.name }),
   });
   const { dir, files } = writeProposal(join(loaded.root, "proposals"), compiled);

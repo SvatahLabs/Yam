@@ -55,6 +55,12 @@ let preferences: Preferences = DEFAULT_PREFERENCES;
 /** The runtime the last `openProject` chose, for the smoke check's line. */
 let runtime_: NodeRuntime | undefined;
 /**
+ * Whether what is open is the private surfaces workspace rather than a project
+ * (T14, T17). Kept beside the service so `serviceInfo` answers with it too — a
+ * renderer that had to infer it from the path would be guessing.
+ */
+let projectless_ = false;
+/**
  * The window-lifecycle log (Draft 2.13 §13.6, P10-F1).
  *
  * Off until `whenReady` has a user-data directory to put it in, and off
@@ -160,7 +166,10 @@ async function openProjectNow(directory: string, remember = true): Promise<Servi
     writePreferences(preferencesPath(app.getPath("userData")), preferences);
   }
 
-  return started.connection;
+  // `remember` is false exactly for the private surfaces workspace, which is
+  // what makes it not a project (T17).
+  projectless_ = !remember;
+  return { ...started.connection, projectless: projectless_ };
 }
 
 /**
@@ -310,7 +319,9 @@ ipcMain.handle("app:openProject", async (_event, directory: unknown) => {
   return await openProject(directory);
 });
 
-ipcMain.handle("app:serviceInfo", () => service?.connection ?? null);
+ipcMain.handle("app:serviceInfo", () =>
+  service === undefined ? null : { ...service.connection, projectless: projectless_ },
+);
 
 ipcMain.handle("app:pickFile", async (_event, kind: unknown) => {
   const directory = kind === "directory";

@@ -10,7 +10,7 @@
  * **The surface tools** — `surface_targets`, `surface_connect`, `surface_snapshot`,
  * `surface_act`, `surface_read`, `surface_check`, `surface_close`,
  * `surface_sessions`, `surface_capabilities`, `surface_describe`,
- * `surface_control`, `surface_request`, `surface_screenshot` — drive a
+ * `surface_control`, `surface_events`, `surface_request`, `surface_screenshot` — drive a
  * live target through session IDs, with no project needed and intent optional.
  * Registered from the operation catalogue so one source of truth generates CLI,
  * MCP and service interfaces.
@@ -55,6 +55,7 @@ import {
   dispatchCapabilities,
   dispatchDescribe,
   dispatchControl,
+  dispatchEvents,
   dispatchRequest,
   dispatchScreenshot,
   dispatchTargets,
@@ -745,6 +746,20 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ session, ref }) => text(await dispatchDescribe(ctx, { session, ref })),
+  );
+
+  server.registerTool(
+    "surface_events",
+    {
+      title: "What this session did",
+      description:
+        "The session's redacted events, and the steps a proposal compiles from. Promoting an " +
+        "exploration into an automation reads this rather than replaying what a client believes " +
+        "it asked for.",
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+      inputSchema: { session: z.string().min(1).describe("Session ID") },
+    },
+    async ({ session }) => text(await dispatchEvents(ctx, { session })),
   );
 
   server.registerTool(

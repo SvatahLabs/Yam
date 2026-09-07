@@ -96,6 +96,12 @@ export {
 } from "./coordination.js";
 
 export {
+  createPromotionStore,
+  type PromotionStore,
+  type PromotionStep,
+} from "./promotion.js";
+
+export {
   createEventStore,
   type EventStore,
   type SessionEvent,
@@ -132,6 +138,7 @@ export {
   dispatchCapabilities,
   dispatchDescribe,
   dispatchControl,
+  dispatchEvents,
   dispatchRequest,
   dispatchScreenshot,
   type DispatchContext,

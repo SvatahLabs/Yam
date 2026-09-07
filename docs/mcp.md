@@ -50,6 +50,7 @@ the trajectory so the exploration can be compiled into a flow.
 | `surface_sessions` | List all active sessions |
 | `surface_capabilities` | What the session's adapter can do |
 | `surface_describe` | Describe a specific element by reference |
+| `surface_events` | What this session did: its events, and the steps a proposal compiles from |
 | `surface_control` | Take a target, give it up, or ask who holds it |
 | `surface_request` | Send an HTTP request on an HTTP surface and return the response |
 | `surface_screenshot` | Take a screenshot of the current surface |

@@ -307,6 +307,38 @@ try {
     note(`[${label}] the connection test reports what it actually checked`,
       /broker answered|reaches the same sessions/i.test(tested), tested.trim().slice(0, 80));
 
+    /* ── T17: automations regrouped, and Save as automation ──────────────── */
+
+    // The automation features are under Automations; run evidence under Activity.
+    const railIds = await page.evaluate(() =>
+      [...document.querySelectorAll("#rail .sv-rail-group")].map((group) => ({
+        section: group.querySelector(".sv-rail-section")?.id ?? "",
+        screens: [...group.querySelectorAll(".sv-rail-item")].map((one) => one.id),
+      })),
+    );
+    const automations = railIds.find((one) => one.section === "section-automations");
+    const activity = railIds.find((one) => one.section === "section-activity");
+    note(`[${label}] flow authoring, bindings and tools are under Automations`,
+      ["rail-flows", "rail-bindings", "rail-agents", "rail-api", "rail-data", "rail-import"]
+        .every((one) => automations?.screens.includes(one) === true),
+      JSON.stringify(automations));
+    note(`[${label}] run evidence is under Activity`,
+      activity?.screens.includes("rail-runs") === true, JSON.stringify(activity));
+
+    // A project is chosen here, not required to start: Surfaces needed none.
+    note(`[${label}] a project is opened from the app, not demanded by it`,
+      await page.locator("#open-project").isVisible(),
+      (await page.locator("#open-project").textContent()) ?? "");
+
+    // Save as automation promotes what the session did — and says honestly that
+    // a proposal needs a project when none is open.
+    await page.locator("#action-surface-save-automation").click();
+    await page.waitForTimeout(1200);
+    const promoted = (await page.locator("#status-context").textContent()) ?? "";
+    note(`[${label}] Save as automation promotes, or says what it needs`,
+      /unverified|needs a project|Open a project|looked at, not acted on/i.test(promoted),
+      promoted.trim().slice(0, 110));
+
     // Disconnect closes it (SF-05); it is live now a session is selected.
     await page.locator("#action-surface-disconnect").waitFor({ state: "attached" });
     await page.locator("#action-surface-disconnect").click();

@@ -39,6 +39,7 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "getRunsByIdScreenshotsByName", verb: "get", path: "/runs/{id}/screenshots/{name}", summary: "A screenshot a run wrote" },
   { id: "getSessions", verb: "get", path: "/sessions", summary: "List active surface sessions (SF-05)" },
   { id: "getSessionsBySessionCapabilities", verb: "get", path: "/sessions/{session}/capabilities", summary: "A session's adapter capabilities (SF-09)" },
+  { id: "getSessionsBySessionEvents", verb: "get", path: "/sessions/{session}/events", summary: "What this session did, and the steps a proposal compiles from (T17, SF-19)" },
   { id: "getTargets", verb: "get", path: "/targets", summary: "Discover available targets and adapter readiness (SF-04)" },
   { id: "getTools", verb: "get", path: "/tools", summary: "The tools this project exposes, and every invocation served" },
   { id: "postApiRequest", verb: "post", path: "/api/request", summary: "Execute one API request ad hoc" },
@@ -214,6 +215,11 @@ export class GeneratedClient {
   /** `GET /sessions/{session}/capabilities` — A session's adapter capabilities (SF-09) */
   async getSessionsBySessionCapabilities(session: string): Promise<unknown> {
     return await this.call("get", `/sessions/${encodeURIComponent(session)}/capabilities`, { });
+  }
+
+  /** `GET /sessions/{session}/events` — What this session did, and the steps a proposal compiles from (T17, SF-19) */
+  async getSessionsBySessionEvents(session: string): Promise<unknown> {
+    return await this.call("get", `/sessions/${encodeURIComponent(session)}/events`, { });
   }
 
   /** `GET /targets` — Discover available targets and adapter readiness (SF-04) */

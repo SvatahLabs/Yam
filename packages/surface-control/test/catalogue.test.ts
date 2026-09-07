@@ -12,10 +12,11 @@ import {
 } from "../src/catalogue.js";
 
 describe("OPERATIONS catalogue", () => {
-  it("has exactly 13 operations", () => {
+  it("has exactly 14 operations", () => {
     // Eleven through wave 2; T15 adds `request` so an HTTP surface can be driven
-    // at all, and T16 adds `control` so a person and an agent can hand over.
-    expect(OPERATIONS).toHaveLength(13);
+    // at all, T16 adds `control` so a person and an agent can hand over, and T17
+    // adds `events` so a session can be promoted into a proposal.
+    expect(OPERATIONS).toHaveLength(14);
   });
 
   it("every operation has unique name, subcommand, toolName, and service path", () => {

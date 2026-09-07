@@ -98,6 +98,7 @@ export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Ele
     "surface.release-control",
     "surface.test-agent",
     "surface.read",
+    "surface.save-automation",
   ]);
   const toolbarActions = props.actions.filter((one) => !PLACED_BY_THE_SCREEN.has(one.id));
   const doConnect = (): void => props.onAction("surface.connect", { url, adapter });
@@ -610,6 +611,27 @@ export function SurfacesInspector(props: ScreenProps<SurfacesState>): React.JSX.
       )}
 
       {state.httpSurface ? null : <LastResult {...props} />}
+
+      {/*
+        Save as automation (T17, SF-19): promote what this session did into a
+        reviewed proposal, without a flow and without a run. It is the optional
+        automation layer built on the direct journey — never a step in it.
+      */}
+      <InspectorSection id="inspector-promote" title="Save as automation">
+        <p className="sv-card">
+          Turns what you have done in this session into a proposal under{" "}
+          <span className="sv-mono">proposals/</span> for review. No flow is written and nothing is
+          run. Every binding it proposes is <b>unverified</b> until you verify it.
+        </p>
+        <div className="sv-inspector-actions">
+          <Button
+            id="action-surface-save-automation"
+            label="Save as automation"
+            onPress={() => props.onAction("surface.save-automation")}
+          />
+        </div>
+      </InspectorSection>
+
       <AgentPanel {...props} />
     </>
   );

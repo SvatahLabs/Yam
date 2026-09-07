@@ -52,6 +52,7 @@ export interface FakeResponses {
     screenshot?: unknown;
     request?: unknown;
     control?: unknown;
+    events?: unknown;
   };
 }
 
@@ -229,6 +230,10 @@ export function fakeService(responses: FakeResponses = {}): FakeService {
     async postSessionsBySessionScreenshot(session, body) {
       record("postSessionsBySessionScreenshot", session, body);
       return responses.surface?.screenshot ?? envelope({ path: "" });
+    },
+    getSessionsBySessionEvents: (session) => {
+      record("getSessionsBySessionEvents", session);
+      return Promise.resolve(responses.surface?.events ?? envelope({ events: [], steps: [] }));
     },
     async postSessionsBySessionControl(session, body) {
       record("postSessionsBySessionControl", session, body);

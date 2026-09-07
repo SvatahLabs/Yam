@@ -57,6 +57,7 @@ import {
 import { SurfacesScreen, SurfacesInspector } from "./Surfaces.js";
 import type { ServiceClient } from "../client.js";
 import { a11yVariant } from "../a11y-variant.js";
+import { bridge } from "../bridge.js";
 import { FlowsInspector, FlowsScreen } from "./Flows.js";
 import { RunInspector, RunScreen } from "./Run.js";
 import { RunsInspector, RunsScreen } from "./Runs.js";
@@ -89,7 +90,18 @@ export const RENDERED: readonly ScreenId[] = SCREEN_IDS;
 export interface ShellProps {
   readonly client: ServiceClient;
   readonly project: string;
+  /** Whether that directory is the private surfaces workspace, not a project. */
+  readonly projectless?: boolean;
   readonly serviceUrl: string;
+  /**
+   * Open a project (T17).
+   *
+   * Surfaces needs none — the app starts projectless and connects to things.
+   * Automations and Activity are *about* a project: its flows, its bindings,
+   * its runs and the proposals a promotion writes. So the project is chosen
+   * here rather than being the frame the whole application lives in.
+   */
+  readonly onOpenProject?: (directory: string) => void | Promise<void>;
 }
 
 type Showing = ScreenId;
@@ -378,6 +390,16 @@ export function Shell(props: ShellProps): React.JSX.Element {
 
   const actions = actionsForScreen(screen);
 
+  /*
+   * The project's name, or nothing when the app is on its private surfaces
+   * workspace — which is not a project and must not read like one (T14, T17).
+   * The main process says which it is; the renderer does not sniff the path.
+   */
+  const projectLabel =
+    props.projectless === true || props.project === ""
+      ? undefined
+      : (props.project.split(/[\\/]/).filter(Boolean).pop() ?? props.project);
+
   /**
    * The twelve screens, by id (T10.1, T10.2).
    *
@@ -499,6 +521,22 @@ export function Shell(props: ShellProps): React.JSX.Element {
           <span id="crumb-screen">{state?.title ?? ""}</span>
         </nav>
         <span className="sv-spacer" />
+        {/*
+          The project, where Automations and Activity need one (T17). Surfaces
+          works without it, so this says what is open rather than gating the app.
+        */}
+        <Button
+          id="open-project"
+          label={projectLabel === undefined ? "Open a project" : `Project: ${projectLabel}`}
+          variant="ghost"
+          title="Choose the project whose flows, bindings and runs Automations and Activity show"
+          onPress={() => {
+            void (async () => {
+              const chosen = await bridge().pickFile("directory");
+              if (chosen !== null) await props.onOpenProject?.(chosen);
+            })();
+          }}
+        />
         <Button
           id="open-command-palette"
           label="Search or run a command"

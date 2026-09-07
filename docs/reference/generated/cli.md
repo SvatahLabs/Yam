@@ -464,6 +464,19 @@ What this target supports: which actions, which reads, which checks, and why any
 Exit codes: 0 ok · 1 failed
 ```
 
+### `yam surface events`
+
+```text
+yam surface events --session <id> [--json]
+
+What this session did: its redacted events, and the steps a proposal would compile from. This is what `Save as automation` promotes.
+
+  --session <id>  the session
+  --json          one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
 ### `yam surface control`
 
 ```text

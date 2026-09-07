@@ -40,6 +40,7 @@ ENDPOINTS = [
     {"id": "getRunsByIdScreenshotsByName", "verb": "get", "path": "/runs/{id}/screenshots/{name}"},
     {"id": "getSessions", "verb": "get", "path": "/sessions"},
     {"id": "getSessionsBySessionCapabilities", "verb": "get", "path": "/sessions/{session}/capabilities"},
+    {"id": "getSessionsBySessionEvents", "verb": "get", "path": "/sessions/{session}/events"},
     {"id": "getTargets", "verb": "get", "path": "/targets"},
     {"id": "getTools", "verb": "get", "path": "/tools"},
     {"id": "postApiRequest", "verb": "post", "path": "/api/request"},
@@ -204,6 +205,10 @@ class GeneratedClient:
     def get_sessions_by_session_capabilities(self, session) -> Any:
         """`GET /sessions/{session}/capabilities` — A session's adapter capabilities (SF-09)"""
         return self._call("get", f"/sessions/{session}/capabilities")
+
+    def get_sessions_by_session_events(self, session) -> Any:
+        """`GET /sessions/{session}/events` — What this session did, and the steps a proposal compiles from (T17, SF-19)"""
+        return self._call("get", f"/sessions/{session}/events")
 
     def get_targets(self) -> Any:
         """`GET /targets` — Discover available targets and adapter readiness (SF-04)"""

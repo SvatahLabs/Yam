@@ -90,6 +90,13 @@
       "cli": "yam surface targets"
     },
     {
+      "id": "surface.save-automation",
+      "label": "Save as automation",
+      "group": "Actions",
+      "screen": "surfaces",
+      "cli": "yam trajectory compile <trajectory.jsonl>"
+    },
+    {
       "id": "surface.request",
       "label": "Send the request",
       "group": "Actions",

@@ -213,7 +213,7 @@ export interface ServiceApi {
   /** Compile a captured trajectory into `proposals/<date>/` (T5.5). */
   compileTrajectory?(
     loaded: ProjectHandle,
-    options: { path: string; name?: string },
+    options: { path?: string; lines?: readonly unknown[]; name?: string },
   ): Promise<unknown>;
 
   /** The tools a project would expose, and the invocations one has served. */
