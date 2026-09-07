@@ -61,7 +61,6 @@ The yam CLI and MCP server
 | `serviceCompileTrajectory` | function | `export async function serviceCompileTrajectory(` | Compile a captured trajectory into `proposals/<date>/` (T5.5). |
 | `serviceHeal` | function | `export async function serviceHeal(` | Heal a run, streaming each proposal as it is decided. |
 | `serviceMigrateFromPrototype` | function | `export async function serviceMigrateFromPrototype(` | `POST /migrate`, which is `yam migrate <dest> --from-prototype <src>`. |
-| `serviceOpenSurfaceSession` | function | `export async function serviceOpenSurfaceSession(` | A session the explorer drives call by call, writing `trajectory.jsonl`. |
 | `serviceRecord` | function | `export async function serviceRecord(` |  |
 | `serviceToolsFor` | function | `export async function serviceToolsFor(` | The tools a project would expose, and the reasons for the ones it would not. |
 | `serviceVerifyBindings` | function | `export async function serviceVerifyBindings(` | Dry-resolve the store, one binding at a time. |

@@ -1315,52 +1315,6 @@
         }
       }
     },
-    "/surface/{session}/open": {
-      "post": {
-        "summary": "Open a surface session the explorer drives",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "session",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "headed": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The session and its trajectory file",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/surface/{session}/snapshot": {
       "post": {
         "summary": "The driven session's snapshot, for the picker and the explorer",
@@ -1395,220 +1349,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "https://yam.svatah.com/schema/surface.snapshot.schema.json"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/surface/{session}/act": {
-      "post": {
-        "summary": "Act in the explored session; `intent` is required",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "session",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "intent": {
-                    "type": "string"
-                  },
-                  "action": {
-                    "type": "string"
-                  },
-                  "ref": {
-                    "type": "string"
-                  },
-                  "args": {
-                    "type": "object"
-                  }
-                },
-                "required": [
-                  "intent",
-                  "action"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The act result",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "No intent was given",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/surface/{session}/read": {
-      "post": {
-        "summary": "Read in the explored session; `intent` is required",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "session",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "intent": {
-                    "type": "string"
-                  },
-                  "kind": {
-                    "type": "string"
-                  },
-                  "ref": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "intent"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The value read",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/surface/{session}/check": {
-      "post": {
-        "summary": "Check in the explored session; `intent` is required",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "session",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "intent": {
-                    "type": "string"
-                  },
-                  "predicate": {
-                    "type": "object"
-                  },
-                  "subject": {
-                    "type": "string"
-                  },
-                  "ref": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "intent"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The check result",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/surface/{session}/close": {
-      "post": {
-        "summary": "Close an explored session",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "session",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "Closed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
                 }
               }
             }
@@ -2036,6 +1776,47 @@
         "responses": {
           "200": {
             "description": "The element",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{session}/request": {
+      "post": {
+        "summary": "Send an HTTP request on an HTTP surface (T15, SF-04)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The response",
             "content": {
               "application/json": {
                 "schema": {

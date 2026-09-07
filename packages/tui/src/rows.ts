@@ -21,7 +21,6 @@ import {
   type ApiState,
   type BindingsState,
   type DataState,
-  type ExplorerState,
   type FlowsState,
   type HealState,
   type ImportState,
@@ -31,6 +30,7 @@ import {
   type ScreenParams,
   type ScreenStateBase,
   type SettingsState,
+  type SurfacesState,
 } from "@svatah/yam-screens";
 
 /** One column of a line. `grow` takes whatever width is left over. */
@@ -111,8 +111,8 @@ export function paneModel(state: ScreenStateBase, now: number = Date.now()): Pan
       return api(state as ApiState);
     case "data":
       return data(state as DataState);
-    case "explorer":
-      return explorer(state as ExplorerState);
+    case "surfaces":
+      return surfaces(state as SurfacesState);
     case "import":
       return importing(state as ImportState);
     case "settings":
@@ -931,96 +931,95 @@ function data(state: DataState): PaneModel {
   };
 }
 
-function explorer(state: ExplorerState): PaneModel {
+/**
+ * Surfaces: what can be connected, what is open, and the selected control (T15).
+ *
+ * The cockpit's rendering of the same model the app draws — discovery and the
+ * sessions with nothing chosen; the semantic tree, the selected control and the
+ * action's form once a session is. The action and its fields come from the
+ * catalogue through the model, so the two renderers cannot disagree about what
+ * an action needs.
+ */
+function surfaces(state: SurfacesState): PaneModel {
+  const session = state.session;
+  const offer = state.offers.find((one) => one.chosen);
   return {
     tree: {
-      title: state.sessionId === undefined ? "Adapters" : "Snapshot",
-      empty: state.sessionId === undefined ? "no session" : "press S to take a snapshot",
+      title: session === undefined ? "What you can connect to" : "Current surface",
+      empty:
+        session === undefined
+          ? "no adapter is installed"
+          : state.httpSurface
+            ? "an HTTP surface has no controls"
+            : "press S to take a fresh snapshot",
       lines:
-        state.sessionId === undefined
-          ? state.adapters.map((one) => ({
-              key: one,
-              cells: [text(one === state.adapter ? `▸ ${one}` : `  ${one}`, { grow: true })],
-              select: { adapter: one },
-            }))
-          : state.snapshot.map((line, at) => ({
-              key: `node-${at}`,
+        session === undefined
+          ? state.groups.flatMap((group) => [
+              heading(group.family),
+              ...group.adapters.map((one) => ({
+                key: `adapter-${one.adapter}`,
+                cells: [
+                  text(one.adapter, { width: 12 }),
+                  pill(one.pill, 13),
+                  dim(one.available ? "" : (one.reason ?? one.prerequisites.join(", ")), { grow: true }),
+                ],
+              })),
+            ])
+          : state.tree.map((line) => ({
+              key: `node-${line.ref}`,
               cells: [
                 text(
-                  `${"  ".repeat(line.depth)}${line.role}${line.name === undefined ? "" : ` "${line.name}"`}`,
+                  `${"  ".repeat(Math.min(line.depth, 8))}${line.role}${line.name === undefined ? "" : ` "${line.name}"`}`,
                   { grow: true, ...(line.selected ? { tone: "info" as const } : {}) },
                 ),
-                dim(line.ref ?? "", { width: 6 }),
+                dim(line.ref, { width: 6 }),
               ],
-              ...(line.ref === undefined ? {} : { select: { selected: line.ref } }),
+              select: { ref: line.ref },
             })),
     },
     main: {
-      title:
-        state.sessionId === undefined
-          ? `Surface explorer · ${state.adapter}`
-          : `Session ${state.sessionId}`,
-      empty:
-        state.sessionId === undefined
-          ? "press O to open a session"
-          : "every call records an intent",
-      lines: state.calls.map((one) => ({
-        key: `call-${one.seq}`,
+      title: session === undefined ? "Sessions" : `Session ${session.sessionId}`,
+      empty: "choose a browser, app, device or API to control",
+      lines: state.sessions.map((one) => ({
+        key: `session-${one.sessionId}`,
         cells: [
-          dim(String(one.seq), { width: 3 }),
-          text(one.call, { width: 10 }),
-          dim(one.intent, { grow: true }),
-          {
-            text: one.ok ? "ok" : "failed",
-            tone: one.ok ? ("pass" as const) : ("fail" as const),
-            width: 7,
-          },
-          dim(one.durationMs === undefined ? "" : `${one.durationMs} ms`, { width: 8 }),
+          text(one.selected ? `▸ ${one.sessionId}` : `  ${one.sessionId}`, { width: 20 }),
+          text(one.adapter, { width: 12 }),
+          dim(one.kind, { width: 8 }),
+          pill(one.pill, 14),
         ],
+        select: { selected: one.sessionId, ref: undefined },
       })),
-      ...(state.proposal === undefined
+      ...(state.problem === undefined
         ? {}
-        : { footer: { text: `wrote ${state.proposal}`, tone: "pass" as const } }),
+        : { footer: { text: `${state.problem.message} ${state.problem.nextAction}`, tone: "abort" as const } }),
     },
     inspector: {
-      title: "Next call",
-      empty: "no session",
-      lines: [
-        kv("adapter", state.adapter),
-        kv("base url", state.baseUrl ?? "—"),
-        kv("session", state.sessionId ?? "—"),
-        kv("trajectory", state.trajectory ?? "—"),
-        heading("intent"),
-        {
-          key: "intent",
-          cells:
-            state.intent === undefined || state.intent.trim() === ""
-              ? [
-                  {
-                    text: "required — every surface call records why it was made",
-                    grow: true,
-                    tone: "abort" as const,
-                  },
-                ]
-              : [text(state.intent, { grow: true })],
-        },
-      ],
+      title: state.element === undefined ? "Selected" : (state.element.name ?? state.element.ref),
+      empty: session === undefined ? "no session" : "click a control in the tree",
+      lines:
+        state.element === undefined
+          ? session === undefined
+            ? []
+            : [kv("adapter", session.adapter), kv("kind", session.kind)]
+          : [
+              kv("what", state.element.summary),
+              kv("reference", state.element.ref),
+              ...(state.element.value === undefined ? [] : [kv("value", state.element.value)]),
+              heading("action"),
+              kv("does", offer?.label ?? "—"),
+              ...(offer?.fields ?? []).map((field) => kv(field.label.toLowerCase(), field.required ? "required" : "optional")),
+            ],
     },
     audit: {
-      title: "trajectory.jsonl",
-      empty: "no call yet",
-      lines: state.calls.map((one) => ({
-        key: `tail-${one.seq}`,
-        cells: [
-          dim(String(one.seq), { width: 3 }),
-          dim(one.call, { width: 10 }),
-          {
-            text: one.detail === "" ? one.intent : one.detail,
-            grow: true,
-            ...(one.ok ? {} : { tone: "fail" as const }),
-          },
-        ],
-      })),
+      title: "Adapters",
+      empty: "none reported",
+      lines: state.groups.flatMap((group) =>
+        group.adapters.map((one) => ({
+          key: `cap-${one.adapter}`,
+          cells: [dim(group.family, { width: 12 }), text(one.adapter, { width: 12 }), pill(one.pill, 13)],
+        })),
+      ),
     },
   };
 }

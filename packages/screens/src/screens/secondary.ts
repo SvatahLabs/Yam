@@ -1,22 +1,20 @@
 /**
- * Agents and tools, API, Data, Surface explorer, Import, Settings (T10.2,
+ * Agents and tools, API, Data, Import, Settings (T10.2,
  * LLD §13.7).
  *
  * The six screens the `Agents` artboard and the four full artboards added in
- * this phase (`Api`, `Data`, `Explorer`, `Import`) describe. Everything on them
+ * this phase (`Api`, `Data`, `Import`) describe. Everything on them
  * is a service answer or a project file: `GET /tools`, `GET /api`,
  * `POST /api/request`, `GET /data`, `POST /surface/:session/*`, `POST /migrate`,
  * `GET /project`.
  *
- * Two of them are about a *session* rather than a file — the explorer and the
- * import's preview — so they load their static half and fill the rest from what
- * an action answered, through `applyExplorerEvent` and the states' own
- * `result` fields. There is no `GET /explorer`, and inventing one would put
- * state in the service the CLI cannot produce.
+ * The import's preview is about a *session* rather than a file, so it loads its
+ * static half and fills the rest from what an action answered. The surface
+ * explorer that used to live here was replaced by the Surfaces action inspector
+ * in T15.
  */
 import { Sources, dotted, plural } from "../load.js";
 import { actionsForScreen } from "../registry.js";
-import type { ServiceEventLike } from "../service.js";
 import type { Pill, Screen, ScreenParams, ScreenStateBase } from "../types.js";
 import type {
   ApiRequestResponse,
@@ -344,140 +342,6 @@ const dataScreen: Screen<DataState> = {
 };
 
 /* ────────────────────────────────────────────────────────────────────────────
- * explorer — the surface, call by call (the `Explorer` artboard)
- * ──────────────────────────────────────────────────────────────────────────── */
-
-/** One line of the snapshot tree, as the screen draws it. */
-export interface SnapshotLine {
-  readonly depth: number;
-  readonly role: string;
-  readonly name?: string;
-  readonly ref?: string;
-  readonly selected: boolean;
-}
-
-/** One call the explorer made, as `trajectory.jsonl` records it (REQ-BEH-4). */
-export interface TrajectoryCall {
-  readonly seq: number;
-  readonly call: string;
-  readonly intent: string;
-  readonly detail: string;
-  readonly ok: boolean;
-  readonly durationMs?: number;
-}
-
-export interface ExplorerState extends ScreenStateBase {
-  readonly screen: "explorer";
-  readonly sessionId?: string;
-  readonly adapter: string;
-  readonly baseUrl?: string;
-  /** Every adapter this build registers, for the session picker. */
-  readonly adapters: readonly string[];
-  /** Every call needs an intent (REQ-BEH-4); the screen carries the next one. */
-  readonly intent?: string;
-  /** The surface action selected for the next explorer.act call. */
-  readonly action?: string;
-  readonly trajectory?: string;
-  readonly snapshot: readonly SnapshotLine[];
-  readonly calls: readonly TrajectoryCall[];
-  /** What was written when `trajectory.compile` last ran here. */
-  readonly proposal?: string;
-}
-
-/** A `Snapshot` → the lines the tree pane draws. */
-export function snapshotLines(value: unknown, selectedRef?: string): SnapshotLine[] {
-  const lines: SnapshotLine[] = [];
-  const walk = (node: unknown, depth: number): void => {
-    if (typeof node !== "object" || node === null) return;
-    const one = node as Record<string, unknown>;
-    const ref = typeof one["ref"] === "string" ? one["ref"] : undefined;
-    lines.push({
-      depth,
-      role: String(one["role"] ?? "node"),
-      ...(typeof one["name"] === "string" && one["name"] !== "" ? { name: one["name"] } : {}),
-      ...(ref === undefined ? {} : { ref }),
-      selected: ref !== undefined && ref === selectedRef,
-    });
-    const children = one["children"];
-    if (Array.isArray(children)) for (const child of children) walk(child, depth + 1);
-  };
-  const root = (value as { root?: unknown; tree?: unknown } | null)?.root ?? (value as { tree?: unknown } | null)?.tree ?? value;
-  walk(root, 0);
-  return lines;
-}
-
-const explorerScreen: Screen<ExplorerState> = {
-  id: "explorer",
-  title: "Surface explorer",
-  actions: actionsForScreen("explorer"),
-  keys: [
-    { action: "explorer.snapshot", key: "S", terminal: "s", description: "Snapshot the session" },
-    { action: "explorer.open", key: "O", terminal: "o", description: "Open a session" },
-    {
-      action: "trajectory.compile",
-      key: "C",
-      terminal: "c",
-      description: "Compile the trajectory to a proposal",
-    },
-  ],
-  async load(service, params: ScreenParams = {}): Promise<ExplorerState> {
-    const sources = new Sources();
-    const project = await sources.get<ProjectResponse>("GET /project", () => service.getProject(), {});
-    const adapter =
-      typeof params.adapter === "string" ? params.adapter : (project.config?.adapter ?? "playwright");
-    return {
-      ...sources.base(
-        "explorer",
-        "Surface explorer",
-        dotted(
-          adapter,
-          project.config?.app?.baseUrl,
-          params.sessionId === undefined ? "no session" : `session ${params.sessionId}`,
-        ),
-        "every call records an intent",
-      ),
-      screen: "explorer",
-      ...(params.sessionId === undefined ? {} : { sessionId: params.sessionId }),
-      adapter,
-      adapters: ["playwright", "bidi", "appium", "http", "ax", "uia"],
-      ...(project.config?.app?.baseUrl === undefined
-        ? {}
-        : { baseUrl: project.config.app.baseUrl }),
-      ...(typeof params.intent === "string" ? { intent: params.intent } : {}),
-      snapshot: [],
-      calls: [],
-    };
-  },
-};
-
-/** Fold one explorer answer into its state. */
-export function applyExplorerEvent(state: ExplorerState, event: ServiceEventLike): ExplorerState {
-  if (event.kind === "surface.snapshot") {
-    return { ...state, snapshot: snapshotLines(event["snapshot"], state.snapshot.find((one) => one.selected)?.ref) };
-  }
-  if (event.kind === "surface.call") {
-    return {
-      ...state,
-      calls: [
-        ...state.calls,
-        {
-          seq: state.calls.length + 1,
-          call: String(event["call"] ?? ""),
-          intent: String(event["intent"] ?? ""),
-          detail: String(event["detail"] ?? ""),
-          ok: event["ok"] !== false,
-          ...(typeof event["durationMs"] === "number"
-            ? { durationMs: event["durationMs"] }
-            : {}),
-        },
-      ],
-      ...(typeof event["trajectory"] === "string" ? { trajectory: event["trajectory"] } : {}),
-    };
-  }
-  return state;
-}
-
-/* ────────────────────────────────────────────────────────────────────────────
  * import — a prototype database, previewed then written (the `Import` artboard)
  * ──────────────────────────────────────────────────────────────────────────── */
 
@@ -629,7 +493,6 @@ export const SECONDARY_SCREENS = [
   agentsScreen,
   apiScreen,
   dataScreen,
-  explorerScreen,
   importScreen,
   settingsScreen,
 ] as const satisfies readonly Screen[];

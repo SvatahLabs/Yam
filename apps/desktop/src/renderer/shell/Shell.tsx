@@ -38,7 +38,6 @@ import {
 } from "@svatah/yam-screens";
 import { Alert, Button, CommandPalette, Kbd, RailItem, type PaletteRow } from "@svatah/yam-ui";
 import {
-  applyExplorerEvent,
   applyHealEvent,
   applyRecordEvent,
   SCREEN_IDS,
@@ -46,7 +45,6 @@ import {
   type ApiState,
   type BindingsState,
   type DataState,
-  type ExplorerState,
   type FlowsState,
   type HealState,
   type ImportState,
@@ -72,8 +70,6 @@ import {
   ApiScreen,
   DataInspector,
   DataScreen,
-  ExplorerInspector,
-  ExplorerScreen,
   ImportInspector,
   ImportScreen,
   SettingsInspector,
@@ -107,6 +103,21 @@ export function Shell(props: ShellProps): React.JSX.Element {
   const [tab, setTab] = useState<"editor" | "plan" | "history">("editor");
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [message, setMessage] = useState<string | undefined>(undefined);
+  /**
+   * What the last action answered (T15).
+   *
+   * The status bar shows an action's *sentence*; a screen often has to show its
+   * *result* — Surfaces draws dispatch and verification separately, and neither
+   * is re-readable afterwards because a mutation's outcome is not a route. So
+   * the shell keeps the last outcome and hands it to the screen, which turns it
+   * into a view with a function from the model.
+   *
+   * This is the thing whose absence left `apiResponseView` exported and unused:
+   * a shape the model knew and nothing could feed.
+   */
+  const [lastOutcome, setLastOutcome] = useState<
+    { readonly id: string; readonly ok: boolean; readonly value: unknown } | undefined
+  >(undefined);
   const [evidence, setEvidence] = useState<string | undefined>(undefined);
   const latest = useRef(0);
 
@@ -176,7 +187,6 @@ export function Shell(props: ShellProps): React.JSX.Element {
         if (before.screen === "run") return applyEvent(before as RunState, event);
         if (before.screen === "record") return applyRecordEvent(before as RecordState, event);
         if (before.screen === "heal") return applyHealEvent(before as HealState, event);
-        if (before.screen === "explorer") return applyExplorerEvent(before as ExplorerState, event);
         return before;
       });
       /*
@@ -273,6 +283,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
          */
         const outcome = await action.run(props.client, { ...params, ...extra });
         setMessage(outcome.message);
+        setLastOutcome({ id, ok: outcome.ok, value: outcome.value });
         const goTo = outcome.goTo;
         if (goTo !== undefined) {
           setParams({ ...params, ...outcome.params });
@@ -300,7 +311,18 @@ export function Shell(props: ShellProps): React.JSX.Element {
       if (paletteOpen || state === undefined) return;
       if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
         event.preventDefault();
-        const primary = actionsForScreen(screen).find((one) => one.key === "⌘↵");
+        /*
+         * The first *available* primary, not the first declared one (T15).
+         *
+         * A screen can offer two primaries for two moods of the same subject —
+         * Surfaces has `surface.act` for an element surface and
+         * `surface.request` for an HTTP one — and only one of them is available
+         * at a time. Taking the first declared would press the one that is
+         * greyed out, which is the dead end this task removes.
+         */
+        const primary = actionsForScreen(screen).find(
+          (one) => one.key === "⌘↵" && one.availableWhen(state),
+        );
         if (primary !== undefined) void runAction(primary.id);
         return;
       }
@@ -373,6 +395,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
       onAction: (id: string, args?: Readonly<Record<string, unknown>>) =>
         void runAction(id, args),
       onParams: setParams,
+      ...(lastOutcome === undefined ? {} : { lastOutcome }),
     } as const;
     const evidenceProp = evidence === undefined ? {} : { evidence };
 
@@ -395,8 +418,6 @@ export function Shell(props: ShellProps): React.JSX.Element {
         return <ApiScreen state={state as ApiState} {...shared} />;
       case "data":
         return <DataScreen state={state as DataState} {...shared} />;
-      case "explorer":
-        return <ExplorerScreen state={state as ExplorerState} {...shared} />;
       case "import":
         return <ImportScreen state={state as ImportState} {...shared} />;
       case "settings":
@@ -417,6 +438,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
       onAction: (id: string, args?: Readonly<Record<string, unknown>>) =>
         void runAction(id, args),
       onParams: setParams,
+      ...(lastOutcome === undefined ? {} : { lastOutcome }),
     } as const;
     const evidenceProp = evidence === undefined ? {} : { evidence };
 
@@ -439,8 +461,6 @@ export function Shell(props: ShellProps): React.JSX.Element {
         return <ApiInspector state={state as ApiState} {...shared} />;
       case "data":
         return <DataInspector state={state as DataState} {...shared} />;
-      case "explorer":
-        return <ExplorerInspector state={state as ExplorerState} {...shared} />;
       case "import":
         return <ImportInspector state={state as ImportState} {...shared} />;
       case "settings":
@@ -517,6 +537,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
               {...(sectionOf(showing) === section.id ? { "aria-current": "page" as const } : {})}
               onClick={() => {
                 setParams({});
+                setLastOutcome(undefined);
                 setShowing(defaultScreenOf(section.id));
               }}
             >
@@ -537,6 +558,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
                 onPress={() => {
                   // A rail click is a fresh screen, not the last one's selection.
                   setParams({});
+                  setLastOutcome(undefined);
                   setShowing(one);
                 }}
               />

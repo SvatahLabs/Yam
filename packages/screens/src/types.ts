@@ -19,7 +19,7 @@ import type { ScreenService } from "./service.js";
  * > Screens: `flows` (list, editor with lint, plan), `record` (session and
  * > decisions), `runs` (list and evidence), `run` (one run, live), `heal`
  * > (proposals), `bindings`, `agents` (tool server, invocations, trajectories),
- * > `api`, `data`, `explorer`, `import`, `settings`.
+ * > `api`, `data`, `import`, `settings`, and `surfaces` (T14).
  *
  * The eleven tabs of the old app map onto these; `runs` and `run` are two
  * screens because a list of runs and one run happening are different subjects
@@ -36,7 +36,6 @@ export const SCREEN_IDS = [
   "agents",
   "api",
   "data",
-  "explorer",
   "import",
   "settings",
 ] as const;
@@ -77,22 +76,31 @@ export interface ScreenParams {
   readonly status?: string;
   /** `record`: which gateway the session would use (REQ-ADE-4, Draft 2.7). */
   readonly gateway?: string;
-  /** `explorer`: which adapter a session opens on. */
+  /** `record`: which adapter a session opens on. */
   readonly adapter?: string;
   /**
-   * `explorer`: the surface action the next call performs (SF-11, SF-17).
+   * `surfaces`: the control the action inspector is about (T15, SF-10).
    *
-   * A screen parameter rather than renderer state, for the reason `intent` is
-   * one: the action is what the screen re-loads with, and `explorer.act` reads
-   * it from the parameters. Without it here the Act button had nothing to send
-   * and refused every press with "Choose an action."
+   * A parameter, because it is what the screen re-loads with: choosing a
+   * control re-describes it and rebuilds the action form. The reference is
+   * opaque and scoped to its snapshot; the broker validates it before any
+   * mutation, so a stale one is refused rather than acted on.
+   */
+  readonly ref?: string;
+  /**
+   * `surfaces`: the action the inspector's form is showing (T15, SF-11).
+   *
+   * A screen parameter and not renderer state: choosing an action rebuilds the
+   * form from what the catalogue says that action needs, so it is what the
+   * screen re-loads with.
    */
   readonly action?: string;
   /**
-   * `explorer`: what the next surface call is *for* (REQ-BEH-4).
+   * What a call is *for*, when a caller says (REQ-BEH-4, SF-12).
    *
-   * A parameter rather than renderer state, because the model refuses a call
-   * without one and `yam ui --json` has to be able to show that refusal.
+   * Optional everywhere: direct control never requires a prose sentence. When
+   * one is given it is recorded as the caller supplied it and compiles into a
+   * step.
    */
   readonly intent?: string;
   /** `import`: the prototype's electron-db directory somebody chose. */

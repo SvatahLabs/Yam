@@ -493,15 +493,6 @@ export function openApiDocument(version: string): Record<string, unknown> {
       },
 
       /* ── T5.8: the surface explorer and the tool panel (REQ-ADE-8) ──────── */
-      "/surface/{session}/open": {
-        post: {
-          summary: "Open a surface session the explorer drives",
-          security: bearer,
-          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
-          requestBody: json({ type: "object", properties: { headed: { type: "boolean" } } }),
-          responses: { 200: { description: "The session and its trajectory file", ...json({ type: "object" }) } },
-        },
-      },
       "/surface/{session}/snapshot": {
         post: {
           summary: "The driven session's snapshot, for the picker and the explorer",
@@ -509,44 +500,6 @@ export function openApiDocument(version: string): Record<string, unknown> {
           parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
           requestBody: json({ type: "object" }),
           responses: { 200: { description: "Snapshot", ...json(ref("surface.snapshot")) } },
-        },
-      },
-      "/surface/{session}/act": {
-        post: {
-          summary: "Act in the explored session; `intent` is required",
-          security: bearer,
-          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
-          requestBody: json({ type: "object", properties: { intent: { type: "string" }, action: { type: "string" }, ref: { type: "string" }, args: { type: "object" } }, required: ["intent", "action"] }),
-          responses: {
-            200: { description: "The act result", ...json({ type: "object" }) },
-            400: { description: "No intent was given", ...json({ type: "object" }) },
-          },
-        },
-      },
-      "/surface/{session}/read": {
-        post: {
-          summary: "Read in the explored session; `intent` is required",
-          security: bearer,
-          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
-          requestBody: json({ type: "object", properties: { intent: { type: "string" }, kind: { type: "string" }, ref: { type: "string" } }, required: ["intent"] }),
-          responses: { 200: { description: "The value read", ...json({ type: "object" }) } },
-        },
-      },
-      "/surface/{session}/check": {
-        post: {
-          summary: "Check in the explored session; `intent` is required",
-          security: bearer,
-          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
-          requestBody: json({ type: "object", properties: { intent: { type: "string" }, predicate: { type: "object" }, subject: { type: "string" }, ref: { type: "string" } }, required: ["intent"] }),
-          responses: { 200: { description: "The check result", ...json({ type: "object" }) } },
-        },
-      },
-      "/surface/{session}/close": {
-        post: {
-          summary: "Close an explored session",
-          security: bearer,
-          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
-          responses: { 202: { description: "Closed", ...json({ type: "object" }) } },
         },
       },
       "/trajectory/compile": {
@@ -678,6 +631,15 @@ export function openApiDocument(version: string): Record<string, unknown> {
           parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
           requestBody: json({ type: "object" }),
           responses: { 200: { description: "The element", ...json({ type: "object" }) } },
+        },
+      },
+      "/sessions/{session}/request": {
+        post: {
+          summary: "Send an HTTP request on an HTTP surface (T15, SF-04)",
+          security: bearer,
+          parameters: [{ name: "session", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: json({ type: "object" }),
+          responses: { 200: { description: "The response", ...json({ type: "object" }) } },
         },
       },
       "/sessions/{session}/screenshot": {

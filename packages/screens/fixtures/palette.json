@@ -39,6 +39,44 @@
       "cli": "yam surface targets"
     },
     {
+      "id": "surface.act",
+      "label": "Perform the action",
+      "group": "Actions",
+      "screen": "surfaces",
+      "key": "⌘↵",
+      "cli": "yam surface act --session <id> --action <action> --ref <ref>"
+    },
+    {
+      "id": "surface.check",
+      "label": "Check the surface",
+      "group": "Actions",
+      "screen": "surfaces",
+      "cli": "yam surface check --session <id> --input <file.json>"
+    },
+    {
+      "id": "surface.read",
+      "label": "Read a value",
+      "group": "Actions",
+      "screen": "surfaces",
+      "cli": "yam surface read --session <id> --kind text --ref <ref>"
+    },
+    {
+      "id": "surface.refresh",
+      "label": "Refresh and select again",
+      "group": "Actions",
+      "screen": "surfaces",
+      "key": "S",
+      "cli": "yam surface snapshot --session <id>"
+    },
+    {
+      "id": "surface.request",
+      "label": "Send the request",
+      "group": "Actions",
+      "screen": "surfaces",
+      "key": "⌘↵",
+      "cli": "yam surface request --session <id> --url <url>"
+    },
+    {
       "id": "flows.compile",
       "label": "Compile",
       "group": "Actions",
@@ -203,34 +241,6 @@
       "cli": "yam tool serve"
     },
     {
-      "id": "explorer.open",
-      "label": "Open a session",
-      "group": "Actions",
-      "screen": "explorer",
-      "key": "O",
-      "cli": "yam surface snapshot"
-    },
-    {
-      "id": "explorer.close",
-      "label": "Close the session",
-      "group": "Actions",
-      "screen": "explorer"
-    },
-    {
-      "id": "explorer.act",
-      "label": "Act on the element",
-      "group": "Actions",
-      "screen": "explorer",
-      "cli": "yam surface act"
-    },
-    {
-      "id": "explorer.snapshot",
-      "label": "Snapshot the session",
-      "group": "Actions",
-      "screen": "explorer",
-      "cli": "yam surface snapshot"
-    },
-    {
       "id": "import.prototype",
       "label": "Import the database",
       "group": "Actions",
@@ -241,7 +251,7 @@
       "id": "trajectory.compile",
       "label": "Compile a trajectory",
       "group": "Actions",
-      "screen": "explorer",
+      "screen": "agents",
       "cli": "yam trajectory compile <trajectory.jsonl>"
     },
     {
@@ -303,12 +313,6 @@
       "label": "Go to Data",
       "group": "Go to",
       "screen": "data"
-    },
-    {
-      "id": "go.explorer",
-      "label": "Go to Surface explorer",
-      "group": "Go to",
-      "screen": "explorer"
     },
     {
       "id": "go.import",

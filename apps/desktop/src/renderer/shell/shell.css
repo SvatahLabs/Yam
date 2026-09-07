@@ -145,6 +145,19 @@
   flex: none;
 }
 
+/*
+ * The last action's result (T15): dispatch and verification, side by side.
+ *
+ * Two pills and never one: an action that reached the target and was not
+ * checked is dispatched and unverified, and conflating them would be the
+ * screen claiming an outcome the runtime never observed.
+ */
+.sv-surfaces-result {
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
 /* A platform family on Surfaces: a heading and the adapters under it. */
 .sv-surface-group {
   margin-bottom: 14px;

@@ -6,7 +6,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 
 | Package | Exports | What it is |
 |---|---|---|
-| [`@svatah/yam`](cli.md) | 64 | The yam CLI and MCP server |
+| [`@svatah/yam`](cli.md) | 63 | The yam CLI and MCP server |
 | [`@svatah/yam-adapter-appium`](adapter-appium.md) | 43 | Appium adapter: Android Chrome and native |
 | [`@svatah/yam-adapter-ax`](adapter-ax.md) | 44 | macOS Accessibility adapter: the Yam agent surface over AXUIElement |
 | [`@svatah/yam-adapter-bidi`](adapter-bidi.md) | 40 | WebDriver BiDi adapter (independence proof) |
@@ -24,14 +24,14 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-playwright-test`](playwright-test.md) | 23 | The bind() fixture for an existing Playwright Test project |
 | [`@svatah/yam-recorder`](recorder.md) | 51 | Grounding, record session and report |
 | [`@svatah/yam-runtime`](runtime.md) | 50 | Runner-agnostic executor core: scope, guards, checkpoints, policies, results, audit |
-| [`@svatah/yam-schema`](schema.md) | 177 | Zod definitions and generated JSON Schemas for the Yam artifact contracts |
-| [`@svatah/yam-screens`](screens.md) | 105 | The headless screen model: one set of screens, actions and keys behind the app, `yam ui`, the SDK and the CLI |
+| [`@svatah/yam-schema`](schema.md) | 185 | Zod definitions and generated JSON Schemas for the Yam artifact contracts |
+| [`@svatah/yam-screens`](screens.md) | 112 | The headless screen model: one set of screens, actions and keys behind the app, `yam ui`, the SDK and the CLI |
 | [`@svatah/yam-sdk`](sdk.md) | 17 | The typed TypeScript client for the Yam local service, generated from its OpenAPI description (REQ-SDK-1) |
 | [`@svatah/yam-service`](service.md) | 17 | Local HTTP and event-stream service (yam serve) |
 | [`@svatah/yam-spec`](spec.md) | 54 | Flow reader, grammar, target dictionary, signatures |
 | [`@svatah/yam-steps`](steps.md) | 30 | defineStep API and the Tier 0 matcher |
 | [`@svatah/yam-surface`](surface.md) | 100 | The published AgentSurface interface, adapter registry and wire schemas |
-| [`@svatah/yam-surface-control`](surface-control.md) | 106 | Shared surface operation dispatcher, session lifecycle and operation catalogue |
+| [`@svatah/yam-surface-control`](surface-control.md) | 115 | Shared surface operation dispatcher, session lifecycle and operation catalogue |
 | [`@svatah/yam-tool`](tool.md) | 17 | MCP tool server exposing stories as deterministic tools |
 | [`@svatah/yam-trajectory`](trajectory.md) | 19 | Trajectory capture and compile to proposals |
 | [`@svatah/yam-tui`](tui.md) | 34 | `yam ui` — the terminal cockpit, a second renderer of the screen model (REQ-TUI-1) |

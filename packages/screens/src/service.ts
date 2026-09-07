@@ -90,14 +90,14 @@ export interface ScreenService {
   postMigrate(body?: unknown): Promise<unknown>;
   /** `POST /trajectory/compile` */
   postTrajectoryCompile(body?: unknown): Promise<unknown>;
-  /** `POST /surface/{session}/open` */
-  postSurfaceBySessionOpen(session: string, body?: unknown): Promise<unknown>;
-  /** `POST /surface/{session}/snapshot` */
+  /**
+   * `POST /surface/{session}/snapshot` — the driven session's tree, so a
+   * reviewer can re-pick by clicking (REQ-ADE-4).
+   *
+   * The record review's, not the Explorer's: T15 replaced the Explorer with the
+   * Surfaces action inspector, which reads the broker's own snapshot route.
+   */
   postSurfaceBySessionSnapshot(session: string, body?: unknown): Promise<unknown>;
-  /** `POST /surface/{session}/act` */
-  postSurfaceBySessionAct(session: string, body?: unknown): Promise<unknown>;
-  /** `POST /surface/{session}/close` */
-  postSurfaceBySessionClose(session: string, body?: unknown): Promise<unknown>;
 
   /* ── SF-03/T14: the surface operation catalogue, over the broker ─────────── */
 
@@ -111,8 +111,7 @@ export interface ScreenService {
    * reaches them through these methods and holds no operation list of its own.
    *
    * They take and return the catalogue's `ResultEnvelope`; a screen parses it
-   * with `@svatah/yam-schema` rather than trusting a shape. The older
-   * `postSurfaceBySession*` above stay for the Explorer until it is retired.
+   * with `@svatah/yam-schema` rather than trusting a shape.
    */
   /** `GET /targets` — discover targets and adapter readiness (SF-04). */
   getTargets(): Promise<unknown>;
@@ -136,6 +135,13 @@ export interface ScreenService {
   postSessionsBySessionDescribe(session: string, body?: unknown): Promise<unknown>;
   /** `POST /sessions/{session}/screenshot` — an artifact reference (SF-11). */
   postSessionsBySessionScreenshot(session: string, body?: unknown): Promise<unknown>;
+  /**
+   * `POST /sessions/{session}/request` — send an HTTP request (T15, SF-04).
+   *
+   * An HTTP surface has no elements: its tree is empty and `act` refuses, so
+   * this is the only way to drive one.
+   */
+  postSessionsBySessionRequest(session: string, body?: unknown): Promise<unknown>;
 
   /** The event stream, as `GET /events/sse` carries it. Returns an unsubscribe. */
   subscribe(listener: (event: ServiceEventLike) => void): () => void;

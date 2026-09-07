@@ -52,21 +52,35 @@ export type {
   RunsState,
 } from "./screens/authoring.js";
 
-export { SURFACES_SCREENS, envelopeError, platformGroups } from "./screens/surfaces.js";
+export {
+  SURFACES_SCREENS,
+  TREE_MAX_NODES,
+  envelopeError,
+  platformGroups,
+  problemFor,
+  surfaceOutcomeView,
+  treeLines,
+} from "./screens/surfaces.js";
 export type {
   SurfacesState,
   SurfaceAdapterRow,
   SurfaceTargetRow,
   SurfacePlatformGroup,
   SurfaceSessionRow,
+  SurfaceTreeLine,
+  SurfaceElementView,
+  SurfaceActionField,
+  SurfaceActionOffer,
+  SurfaceSessionView,
+  SurfaceProblem,
+  SurfaceProblemKind,
+  SurfaceOutcomeView,
 } from "./screens/surfaces.js";
 
 export {
   SECONDARY_SCREENS,
   apiResponseView,
-  applyExplorerEvent,
   importResultView,
-  snapshotLines,
 } from "./screens/secondary.js";
 export type {
   AgentsState,
@@ -75,11 +89,8 @@ export type {
   ApiState,
   DataRow,
   DataState,
-  ExplorerState,
   ImportState,
   SettingsState,
-  SnapshotLine,
-  TrajectoryCall,
 } from "./screens/secondary.js";
 
 export { fakeService, FakeNotFound } from "./fake.js";
@@ -101,11 +112,11 @@ import { SCREEN_IDS, type Screen, type ScreenId, type ScreenStateBase } from "./
 /**
  * Every screen, in rail order (LLD §13.7's information architecture).
  *
- * Flows, Runs, Bindings, Agents and tools; Resources: API, Data; bottom: Import,
- * Settings — plus the three that are reached from another screen rather than
- * from the rail: `run` (from Runs or from starting one), `record` and `heal`
- * (from Flows and Run). `SCREENS` is the order the palette's "Go to" group and
- * the TUI's tree use.
+ * Surfaces first (T14), then the automation screens, Activity's runs and
+ * Settings — plus the three reached from another screen rather than from the
+ * rail: `run` (from Runs or from starting one), `record` and `heal` (from Flows
+ * and Run). `SCREENS` is the order the palette's "Go to" group and the TUI's
+ * tree use.
  */
 export const SCREENS: readonly Screen<ScreenStateBase>[] = [
   ...(SURFACES_SCREENS as readonly Screen<ScreenStateBase>[]),
@@ -133,8 +144,8 @@ export function screenById(id: ScreenId): Screen<ScreenStateBase> {
  * opens on. This supersedes the flat Flows/Runs/Bindings… rail of Draft 2.11
  * (LLD §13.7); the screens themselves are unchanged, only where they are
  * reached from. The three screens reached from another screen rather than a
- * rail — `record`, `run`, `heal` — and the transitional `explorer` are not on
- * any sub-rail and stay reachable through the palette's Go-to rows.
+ * rail — `record`, `run`, `heal` — are not on any sub-rail and stay reachable
+ * through the palette's Go-to rows.
  */
 export type SectionId = "surfaces" | "automations" | "activity" | "settings";
 
@@ -156,7 +167,6 @@ export const SECTIONS: readonly Section[] = [
 const SECTION_OF_EXTRA: Readonly<Record<string, SectionId>> = {
   record: "automations",
   heal: "automations",
-  explorer: "automations",
   run: "activity",
 };
 
@@ -190,7 +200,6 @@ const RAIL_LABEL: Readonly<Record<ScreenId, string>> = {
   record: "Record review",
   run: "Run",
   heal: "Heal review",
-  explorer: "Surface explorer",
 };
 
 export const RAIL: ReadonlyArray<{

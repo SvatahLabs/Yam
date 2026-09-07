@@ -158,6 +158,172 @@ const ACTIONS_ONLY: readonly Action[] = [
       return ok(`${ready} of ${adapters.length} adapters ready.`, { value: answer, goTo: "surfaces" });
     },
   },
+  /* ── T15: the selected-target action inspector (SF-09, SF-10, SF-11) ────── */
+  {
+    id: "surface.act",
+    label: "Perform the action",
+    group: "Actions",
+    screen: "surfaces",
+    key: "⌘↵",
+    cli: "yam surface act --session <id> --action <action> --ref <ref>",
+    // Not on an HTTP surface: its `act` refuses everything, so offering it
+    // would be the dead end T15 exists to remove. That surface has `request`.
+    availableWhen: (state) =>
+      (state as { session?: unknown }).session !== undefined &&
+      (state as { httpSurface?: boolean }).httpSurface !== true,
+    async run(service, args): Promise<ActionOutcome> {
+      const session = typeof args.selected === "string" ? args.selected : undefined;
+      if (session === undefined) return refused("Choose a surface first.");
+      const action = typeof args.action === "string" ? args.action : undefined;
+      if (action === undefined) return refused("Choose an action.");
+
+      /*
+       * Dispatch and verification are two phases (SF-11).
+       *
+       * The act says the action reached the target. It does *not* say the
+       * intended outcome happened — only an explicit postcondition can, so
+       * `verified` comes from a separate `check` and is false without one.
+       */
+      const act = await service.postSessionsBySessionAct(session, {
+        action,
+        ...(typeof args.ref === "string" ? { ref: args.ref } : {}),
+        ...(typeof args["ref2"] === "string" ? { ref2: args["ref2"] } : {}),
+        ...(typeof args["snapshot"] === "string" ? { snapshot: args["snapshot"] } : {}),
+        ...(args["args"] === undefined ? {} : { args: args["args"] }),
+      });
+      const dispatched = envelopeOf(act);
+      if (!dispatched.ok) {
+        // The service's own reason and its domain code, so the screen can put
+        // the inspector into the right SF-17 state with the right way out.
+        return { ok: false, message: dispatched.message ?? "The action was refused.", value: { act } };
+      }
+
+      const verify = args["verify"];
+      let check: unknown;
+      if (typeof verify === "object" && verify !== null) {
+        const predicate = verify as { kind?: unknown; value?: unknown; name?: unknown };
+        if (typeof predicate.kind === "string" && predicate.kind !== "") {
+          check = await service.postSessionsBySessionCheck(session, {
+            predicate: {
+              kind: predicate.kind,
+              ...(predicate.value === undefined ? {} : { value: String(predicate.value) }),
+              ...(predicate.name === undefined ? {} : { name: String(predicate.name) }),
+            },
+            subject: typeof args.ref === "string" ? "ref" : "page",
+            ...(typeof args.ref === "string" ? { ref: args.ref } : {}),
+          });
+        }
+      }
+
+      const verified = check !== undefined && envelopeOf(check).ok && envelopeOf(check).result["ok"] === true;
+      const message =
+        check === undefined
+          ? "Dispatched. Not verified — no postcondition was given."
+          : verified
+            ? "Dispatched and verified."
+            : "Dispatched, but the postcondition did not hold.";
+      return ok(message, { value: { act, ...(check === undefined ? {} : { check }) } });
+    },
+  },
+  {
+    id: "surface.check",
+    label: "Check the surface",
+    group: "Actions",
+    screen: "surfaces",
+    cli: "yam surface check --session <id> --input <file.json>",
+    availableWhen: has("session"),
+    async run(service, args): Promise<ActionOutcome> {
+      const session = typeof args.selected === "string" ? args.selected : undefined;
+      if (session === undefined) return refused("Choose a surface first.");
+      const verify = args["verify"];
+      const predicate = (typeof verify === "object" && verify !== null ? verify : {}) as {
+        kind?: unknown;
+        value?: unknown;
+      };
+      if (typeof predicate.kind !== "string" || predicate.kind === "") {
+        return refused("Choose what to check.");
+      }
+      const check = await service.postSessionsBySessionCheck(session, {
+        predicate: {
+          kind: predicate.kind,
+          ...(predicate.value === undefined ? {} : { value: String(predicate.value) }),
+        },
+        subject: typeof args.ref === "string" ? "ref" : "page",
+        ...(typeof args.ref === "string" ? { ref: args.ref } : {}),
+      });
+      const answer = envelopeOf(check);
+      if (!answer.ok) return { ok: false, message: answer.message ?? "The check could not run.", value: { act: check } };
+      const held = answer.result["ok"] === true;
+      return ok(held ? "The postcondition holds." : "The postcondition does not hold.", {
+        // Shaped like an act outcome so one view renders both (SF-11).
+        value: { act: check, check },
+      });
+    },
+  },
+  {
+    id: "surface.read",
+    label: "Read a value",
+    group: "Actions",
+    screen: "surfaces",
+    cli: "yam surface read --session <id> --kind text --ref <ref>",
+    availableWhen: has("session"),
+    async run(service, args): Promise<ActionOutcome> {
+      const session = typeof args.selected === "string" ? args.selected : undefined;
+      if (session === undefined) return refused("Choose a surface first.");
+      const kind = typeof args["kind"] === "string" ? args["kind"] : "text";
+      const answer = await service.postSessionsBySessionRead(session, {
+        kind,
+        ...(typeof args.ref === "string" ? { ref: args.ref } : {}),
+      });
+      const read = envelopeOf(answer);
+      if (!read.ok) return { ok: false, message: read.message ?? "Nothing could be read.", value: { act: answer } };
+      return ok(`${kind}: ${String(read.result["value"] ?? "")}`, { value: { act: answer } });
+    },
+  },
+  {
+    id: "surface.refresh",
+    label: "Refresh and select again",
+    group: "Actions",
+    screen: "surfaces",
+    key: "S",
+    cli: "yam surface snapshot --session <id>",
+    availableWhen: has("session"),
+    async run(_service, args): Promise<ActionOutcome> {
+      /*
+       * The way out of a stale reference (SF-17). The screen re-loads with the
+       * selection cleared, which takes a fresh bounded snapshot — so the tree is
+       * what is there now and nothing is holding a reference to what was.
+       */
+      return ok("Took a fresh snapshot; choose a control.", {
+        goTo: "surfaces",
+        params: { selected: typeof args.selected === "string" ? args.selected : undefined, ref: undefined },
+      });
+    },
+  },
+  {
+    id: "surface.request",
+    label: "Send the request",
+    group: "Actions",
+    screen: "surfaces",
+    key: "⌘↵",
+    cli: "yam surface request --session <id> --url <url>",
+    // Only an HTTP surface has this form; the model says which is which.
+    availableWhen: (state) => (state as { httpSurface?: boolean }).httpSurface === true,
+    async run(service, args): Promise<ActionOutcome> {
+      const session = typeof args.selected === "string" ? args.selected : undefined;
+      if (session === undefined) return refused("Choose a surface first.");
+      const url = typeof args["url"] === "string" ? args["url"].trim() : "";
+      if (url === "") return refused("Enter a URL or a path to request.");
+      const method = (typeof args["method"] === "string" ? args["method"] : "GET").toUpperCase();
+      const answer = await service.postSessionsBySessionRequest(session, {
+        request: { name: "request", method, url },
+      });
+      const sent = envelopeOf(answer);
+      if (!sent.ok) return { ok: false, message: sent.message ?? "The request could not be sent.", value: { act: answer } };
+      const response = sent.result["response"] as { status?: unknown } | undefined;
+      return ok(`${method} ${url} → ${String(response?.status ?? "?")}`, { value: { act: answer } });
+    },
+  },
   {
     id: "flows.compile",
     label: "Compile",
@@ -559,92 +725,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     },
   },
   {
-    id: "explorer.open",
-    label: "Open a session",
-    group: "Actions",
-    screen: "explorer",
-    key: "O",
-    cli: "yam surface snapshot",
-    // A session that is already open is not opened twice; `explorer.close`
-    // is what ends one.
-    availableWhen: (state) => (state as { sessionId?: string }).sessionId === undefined,
-    async run(service, args): Promise<ActionOutcome> {
-      /*
-       * The session id is the *caller's* (LLD §13.5's `POST
-       * /surface/:sessionId/open`): the route is keyed by it, so a client that
-       * waited for the service to name one could not address the session it had
-       * just asked for.
-       */
-      const sessionId =
-        typeof args.sessionId === "string" && args.sessionId !== ""
-          ? args.sessionId
-          : `ex-${Date.now().toString(36)}`;
-      const value = await service.postSurfaceBySessionOpen(sessionId, {
-        ...(typeof args.adapter === "string" ? { adapter: args.adapter } : {}),
-      });
-      return ok(`Opened surface session ${sessionId}.`, {
-        value,
-        goTo: "explorer",
-        params: { sessionId },
-      });
-    },
-  },
-  {
-    id: "explorer.close",
-    label: "Close the session",
-    group: "Actions",
-    screen: "explorer",
-    availableWhen: has("sessionId"),
-    async run(service, args): Promise<ActionOutcome> {
-      if (typeof args.sessionId !== "string") return refused("No surface session is open.");
-      const value = await service.postSurfaceBySessionClose(args.sessionId);
-      return ok("Closed the surface session.", { value, goTo: "explorer", params: {} });
-    },
-  },
-  {
-    id: "explorer.act",
-    label: "Act on the element",
-    group: "Actions",
-    screen: "explorer",
-    cli: "yam surface act",
-    availableWhen: has("sessionId"),
-    async run(service, args): Promise<ActionOutcome> {
-      if (typeof args.sessionId !== "string") return refused("No surface session is open.");
-      const intent = args.intent;
-      if (typeof intent !== "string" || intent.trim() === "") {
-        // REQ-BEH-4 and LLD §8: every raw surface call records why it was made.
-        return refused("Say what you are doing: every surface call records an intent.");
-      }
-      const action = args["action"];
-      if (typeof action !== "string") return refused("Choose an action.");
-      const value = await service.postSurfaceBySessionAct(args.sessionId, {
-        intent,
-        action,
-        ...(typeof args["ref"] === "string" ? { ref: args["ref"] } : {}),
-        ...(args["args"] === undefined ? {} : { args: args["args"] }),
-      });
-      return ok(`Performed ${action}.`, { value });
-    },
-  },
-  {
-    id: "explorer.snapshot",
-    label: "Snapshot the session",
-    group: "Actions",
-    screen: "explorer",
-    cli: "yam surface snapshot",
-    availableWhen: has("sessionId"),
-    async run(service, args): Promise<ActionOutcome> {
-      if (typeof args.sessionId !== "string") return refused("No surface session is open.");
-      const intent = args.intent;
-      if (typeof intent !== "string" || intent.trim() === "") {
-        // REQ-BEH-4 and LLD §8: every raw surface call records why it was made.
-        return refused("Say what you are looking for: every surface call records an intent.");
-      }
-      const value = await service.postSurfaceBySessionSnapshot(args.sessionId, { intent });
-      return ok("Read the session's snapshot.", { value });
-    },
-  },
-  {
     id: "import.prototype",
     /*
      * "Import the database", not "Import prototype database" (T11.4).
@@ -672,7 +752,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     id: "trajectory.compile",
     label: "Compile a trajectory",
     group: "Actions",
-    screen: "explorer",
+    screen: "agents",
     cli: "yam trajectory compile <trajectory.jsonl>",
     availableWhen: has("trajectory"),
     async run(service, args): Promise<ActionOutcome> {
@@ -703,7 +783,6 @@ const GO_TO_LABEL: Readonly<Record<ScreenId, string>> = {
   agents: "Agents and tools",
   api: "API",
   data: "Data",
-  explorer: "Surface explorer",
   import: "Import prototype database",
   settings: "Settings",
 };

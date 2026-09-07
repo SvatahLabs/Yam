@@ -99,7 +99,6 @@ export {
   serviceCompileTrajectory,
   serviceHeal,
   serviceMigrateFromPrototype,
-  serviceOpenSurfaceSession,
   serviceRecord,
   serviceToolsFor,
   serviceVerifyBindings,

@@ -128,6 +128,13 @@ checks:
     external:
       source: "tree-agreement"
       name: "tree"
+  - id: "app.surfaces-offers-a-connect-form-and-no-prose-intent"
+    says: "Surfaces offers a connect form and no prose intent (T15, SF-12)"
+    yam:
+      unreachable: "driving Yam's own Surfaces screen needs a second live surface session inside the one the self suite is already driving with: the flow would connect the app to something while the app is what is being driven. `app.launch` opens one session and there is no sentence for a nested one."
+    external:
+      source: "app-playwright"
+      name: "Surfaces offers a connect form and no prose intent (T15, SF-12)"
   - id: "app.opens-into-the-new-flows-screen-not-the-eleven-tabs"
     # Surface-first (T14): the app opens into Surfaces, not Flows. The external
     # case was renamed to match; the `yam` self-story that drives the same
@@ -300,14 +307,6 @@ checks:
     external:
       source: "app-playwright"
       name: "heal opens and every control on it is named and id'd"
-  - id: "app.explorer-opens-and-every-control-on-it-is-named-and-id-d"
-    says: "explorer opens and every control on it is named and id'd"
-    yam:
-      source: "yam"
-      name: "the Surface explorer opens from the palette and refuses a call with no intent"
-    external:
-      source: "app-playwright"
-      name: "explorer opens and every control on it is named and id'd"
   - id: "app.the-runs-screen-filters-and-its-inspector-shows-the-failing-"
     says: "the Runs screen filters, and its inspector shows the failing step's evidence"
     yam:
@@ -355,14 +354,6 @@ checks:
     external:
       source: "app-playwright"
       name: "the Data screen names every secret and shows none of them"
-  - id: "app.the-surface-explorer-refuses-a-call-with-no-intent"
-    says: "the Surface explorer refuses a call with no intent"
-    yam:
-      source: "yam"
-      name: "the Surface explorer opens from the palette and refuses a call with no intent"
-    external:
-      source: "app-playwright"
-      name: "the Surface explorer refuses a call with no intent"
   - id: "app.the-import-screen-previews-into-the-open-project-and-nowhere"
     says: "the Import screen previews into the open project and nowhere else"
     yam:

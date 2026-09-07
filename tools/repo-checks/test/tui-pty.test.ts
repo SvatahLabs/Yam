@@ -371,7 +371,7 @@ describe.runIf(hasScript)("`yam ui` draws in a pseudo-terminal (T9.4)", () => {
     ["agents", "Agents and tools"],
     ["api", "API"],
     ["data", "Data"],
-    ["explorer", "Surface explorer"],
+    ["surfaces", "Surfaces"],
     ["import", "Import prototype database"],
     ["settings", "Settings"],
   ] as const)("draws the %s screen in a real terminal (T10.1, T10.2)", (screen, title) => {

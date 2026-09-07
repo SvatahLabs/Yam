@@ -1,24 +1,31 @@
 /**
- * Surfaces — connect to something, and see what is connected (T14, SF-02, SF-04,
- * SF-05, SF-16, SF-17).
+ * Surfaces — connect to something, then inspect and act on it (T14, T15).
  *
- * This is the screen the desktop opens into. It is the connect flow the design's
- * "Desktop interaction design" specifies: one primary **Connect surface**
- * action, discovery grouped by platform with the exact prerequisite shown for
- * anything unavailable, and the sessions that are open now — an agent's as much
- * as a person's.
+ * This is the screen the desktop opens into, and it has two moods. With no
+ * session chosen it is the connect flow of T14: discovery grouped by platform
+ * with the exact prerequisite shown for anything unavailable, and the sessions
+ * that are open now — an agent's as much as a person's.
  *
- * It is a client of the broker and of nothing else. Everything on it is a
- * `GET /targets` and `GET /sessions` answer — the catalogue's own routes, the
- * same sessions the CLI and a generic MCP client address (SF-03). The screen
- * holds no session store, no adapter list and no idea of what connecting needs
- * beyond what the service returned; the platform families below are a display
- * grouping of the adapters the service reported, not a second source of truth.
+ * With a session chosen it is T15's **action inspector**: the surface's semantic
+ * tree, a selected control, and a form built from what the *catalogue* says that
+ * action needs (`ACTION_FORMS`). Fill takes a value, click takes the control,
+ * drag takes two, navigate takes a URL — and an HTTP surface, whose `act`
+ * refuses everything and whose tree is empty, gets the request form instead.
  *
- * The adapter a row shows is the one the service reported ready, and after a
- * connect the session row shows the adapter the service actually used
- * (`result.adapter`) — never the one that was asked for (SF-04, SF-17).
+ * It is a client of the broker and of nothing else. Everything here is a
+ * `GET /targets`, `GET /sessions`, `…/capabilities`, `…/snapshot` or
+ * `…/describe` answer — the catalogue's own routes, the same sessions the CLI
+ * and a generic MCP client address (SF-03). The screen holds no session store,
+ * no operation list, and no idea of what an action needs beyond what the
+ * contract publishes.
  */
+import {
+  offeredActions,
+  defaultActionForRole,
+  type ActionForm,
+  type CapabilityFlag,
+  type SurfaceKind,
+} from "@svatah/yam-schema";
 import { Sources, dotted, plural } from "../load.js";
 import { actionsForScreen } from "../registry.js";
 import type { Pill, Screen, ScreenParams, ScreenStateBase } from "../types.js";
@@ -36,6 +43,9 @@ const OTHER_FAMILY = "Other";
 
 /** The order the families are drawn in, so a browser is always the first offer. */
 const FAMILY_ORDER = ["Browser", "API", "Native app", "Device", OTHER_FAMILY];
+
+/** How many nodes the inspector's tree asks for. Bounded, and it says when it truncated. */
+export const TREE_MAX_NODES = 200;
 
 /** One adapter the service reported, with its readiness and, when not, why. */
 export interface SurfaceAdapterRow {
@@ -82,13 +92,109 @@ export interface SurfaceSessionRow {
   readonly selected: boolean;
 }
 
+/* ── T15: the connected surface ────────────────────────────────────────────── */
+
+/** One line of the semantic tree, as the inspector draws it. */
+export interface SurfaceTreeLine {
+  readonly ref: string;
+  readonly role: string;
+  readonly name?: string;
+  readonly value?: string;
+  readonly depth: number;
+  readonly states: readonly string[];
+  readonly selected: boolean;
+}
+
+/** What `describe` said about the selected control. */
+export interface SurfaceElementView {
+  readonly ref: string;
+  readonly role: string;
+  readonly name?: string;
+  readonly value?: string;
+  readonly description?: string;
+  readonly states: readonly string[];
+  /** "Text field · Enabled", the subtitle the mockup puts under the name. */
+  readonly summary: string;
+}
+
+/** One field of an action's form, as the catalogue describes it. */
+export interface SurfaceActionField {
+  readonly name: string;
+  readonly type: string;
+  readonly required: boolean;
+  readonly label: string;
+  readonly placeholder?: string;
+}
+
+/** One action this surface can perform, with what it needs. */
+export interface SurfaceActionOffer {
+  readonly action: string;
+  readonly label: string;
+  readonly needsRef: boolean;
+  readonly needsRef2: boolean;
+  readonly fields: readonly SurfaceActionField[];
+  readonly chosen: boolean;
+}
+
+/** The session the inspector is about. */
+export interface SurfaceSessionView {
+  readonly sessionId: string;
+  readonly adapter: string;
+  readonly kind: string;
+  readonly status: string;
+  readonly pill: Pill;
+  readonly capabilities: Readonly<Record<string, boolean>>;
+}
+
+/**
+ * A state the inspector is in that is not "ready" (SF-17).
+ *
+ * Every one names what to do next, because a state with no next action is the
+ * dead end this task exists to remove.
+ */
+export type SurfaceProblemKind =
+  | "stale"
+  | "busy"
+  | "unsupported"
+  | "permission"
+  | "unknown"
+  | "disconnected";
+
+export interface SurfaceProblem {
+  readonly kind: SurfaceProblemKind;
+  /** The service's own words. */
+  readonly message: string;
+  /** What a person does about it. */
+  readonly nextAction: string;
+  /** The action id that does it, when an action does. */
+  readonly nextActionId?: string;
+}
+
+/** What an act (and its optional postcondition) came to (SF-11). */
+export interface SurfaceOutcomeView {
+  /** The action reached the target. Never "it worked". */
+  readonly dispatched: boolean;
+  /** True only when an explicit postcondition passed (SF-11). */
+  readonly verified: boolean;
+  readonly verification: "none" | "passed" | "failed";
+  /** One line for a person: "Field filled · Value verified". */
+  readonly summary: string;
+  readonly actual?: string;
+  readonly expected?: string;
+  readonly requestId?: string;
+  readonly errorCode?: string;
+  readonly problem?: SurfaceProblem;
+  /** The envelopes, for the Details disclosure. */
+  readonly raw: string;
+}
+
 export interface SurfacesState extends ScreenStateBase {
   readonly screen: "surfaces";
   /** Discovery, grouped by platform family (SF-04). */
   readonly groups: readonly SurfacePlatformGroup[];
   /** The sessions the broker holds (SF-05). */
   readonly sessions: readonly SurfaceSessionRow[];
-  /** The selected session, when one is chosen; T15's inspector reads it. */
+  /** The selected session, when one is chosen. */
   readonly selected?: string;
   /** Whether discovery itself answered, or the broker could not be reached. */
   readonly discovery: "ready" | "error";
@@ -97,12 +203,33 @@ export interface SurfacesState extends ScreenStateBase {
    *
    * Inline, not the base `error`: a broker that is briefly unreachable must not
    * blank the whole screen — the connect form still works and starts the broker
-   * lazily — so this is drawn as an alert *within* Surfaces with a Recheck, the
-   * "disconnected → offer inspection, never a blank" shape the design asks for.
+   * lazily — so this is drawn as an alert *within* Surfaces with a Recheck.
    */
   readonly discoveryMessage?: string;
   /** Whether anything can be connected to at all — false is the empty state. */
   readonly anyConnectable: boolean;
+
+  /* ── the connected surface (T15), present when a session is chosen ───────── */
+
+  readonly session?: SurfaceSessionView;
+  /** The semantic tree. Always available, including where screenshots are not. */
+  readonly tree: readonly SurfaceTreeLine[];
+  readonly snapshotId?: string;
+  /** The tree was cut off at `TREE_MAX_NODES`; the screen says so. */
+  readonly truncated: boolean;
+  /** The selected control. */
+  readonly ref?: string;
+  readonly element?: SurfaceElementView;
+  /** The actions this surface can perform, from the catalogue (SF-09). */
+  readonly offers: readonly SurfaceActionOffer[];
+  /** The action the form is showing. Never undefined once a surface is chosen. */
+  readonly action?: string;
+  /**
+   * An HTTP surface has no elements: its form is `request`, not `act`.
+   */
+  readonly httpSurface: boolean;
+  /** The SF-17 state, when the surface is in one. */
+  readonly problem?: SurfaceProblem;
 }
 
 const NEUTRAL: Pill = { tone: "neutral", label: "—" };
@@ -154,6 +281,62 @@ export function envelopeError(value: unknown): string | undefined {
     if (typeof message === "string") return message;
   }
   return undefined;
+}
+
+/** The `error.code` of a failed/refused envelope. */
+function envelopeCode(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const error = (value as Record<string, unknown>)["error"];
+  if (typeof error === "object" && error !== null) {
+    const code = (error as Record<string, unknown>)["code"];
+    if (typeof code === "string") return code;
+  }
+  return undefined;
+}
+
+/**
+ * A domain error code → the state it puts the inspector in, and the way out.
+ *
+ * This is SF-17's table. Every row names a next action; none of them is an
+ * unqualified Retry, because a mutation whose outcome is unknown must never be
+ * repeated on a guess (SF-14).
+ */
+export function problemFor(code: string | undefined, message: string): SurfaceProblem | undefined {
+  switch (code) {
+    case "STALE_REFERENCE":
+      return {
+        kind: "stale",
+        message,
+        nextAction: "Refresh and select again",
+        nextActionId: "surface.refresh",
+      };
+    case "CONTROL_BUSY":
+      return {
+        kind: "busy",
+        message,
+        nextAction: "Another client holds control of this target",
+      };
+    case "UNSUPPORTED_OPERATION":
+    case "ADAPTER_UNAVAILABLE":
+    case "ADAPTER_NOT_REGISTERED":
+      return { kind: "unsupported", message, nextAction: "Choose an action this surface supports" };
+    case "PERMISSION_REQUIRED":
+      return { kind: "permission", message, nextAction: "Grant the permission, then Recheck", nextActionId: "surface.discover" };
+    case "OUTCOME_UNKNOWN":
+    case "TIMEOUT":
+      return {
+        kind: "unknown",
+        message,
+        // Never "Retry": the mutation may have reached the target (SF-14).
+        nextAction: "Inspect the current state before doing anything again",
+        nextActionId: "surface.refresh",
+      };
+    case "SESSION_NOT_FOUND":
+    case "SESSION_CLOSED":
+      return { kind: "disconnected", message, nextAction: "The session is gone; connect again" };
+    default:
+      return undefined;
+  }
 }
 
 function adapterRows(result: Record<string, unknown> | undefined): SurfaceAdapterRow[] {
@@ -218,6 +401,148 @@ function sessionRows(
   });
 }
 
+/** A snapshot's flat nodes → the indented lines the tree pane draws. */
+export function treeLines(
+  result: Record<string, unknown> | undefined,
+  selectedRef?: string,
+): SurfaceTreeLine[] {
+  const nodes = result?.["nodes"];
+  if (!Array.isArray(nodes)) return [];
+  return nodes.map((one) => {
+    const node = (typeof one === "object" && one !== null ? one : {}) as Record<string, unknown>;
+    const ref = String(node["ref"] ?? "");
+    return {
+      ref,
+      role: String(node["role"] ?? "node"),
+      ...(typeof node["name"] === "string" && node["name"] !== "" ? { name: node["name"] } : {}),
+      ...(typeof node["value"] === "string" && node["value"] !== "" ? { value: node["value"] } : {}),
+      depth: typeof node["depth"] === "number" ? node["depth"] : 0,
+      states: Array.isArray(node["states"]) ? (node["states"] as string[]) : [],
+      selected: ref === selectedRef,
+    };
+  });
+}
+
+/** "Text field · Enabled" — the role and states in the words the mockup uses. */
+function elementSummary(role: string, states: readonly string[]): string {
+  const ROLE_WORDS: Readonly<Record<string, string>> = {
+    textbox: "Text field",
+    searchbox: "Search field",
+    button: "Button",
+    link: "Link",
+    checkbox: "Checkbox",
+    radio: "Radio button",
+    combobox: "Dropdown",
+    heading: "Heading",
+  };
+  const word = ROLE_WORDS[role] ?? role;
+  const state = states.includes("disabled") ? "Disabled" : "Enabled";
+  return dotted(word, state);
+}
+
+function elementView(
+  result: Record<string, unknown> | undefined,
+): SurfaceElementView | undefined {
+  if (result === undefined) return undefined;
+  const ref = typeof result["ref"] === "string" ? result["ref"] : undefined;
+  if (ref === undefined) return undefined;
+  const role = String(result["role"] ?? "");
+  const states = Array.isArray(result["states"]) ? (result["states"] as string[]) : [];
+  return {
+    ref,
+    role,
+    ...(typeof result["name"] === "string" ? { name: result["name"] } : {}),
+    ...(typeof result["value"] === "string" ? { value: result["value"] } : {}),
+    ...(typeof result["description"] === "string" ? { description: result["description"] } : {}),
+    states,
+    summary: elementSummary(role, states),
+  };
+}
+
+/** The catalogue's action forms → what the inspector offers, with one chosen. */
+function offerViews(
+  forms: readonly ActionForm[],
+  chosen: string | undefined,
+): SurfaceActionOffer[] {
+  return forms.map((form) => ({
+    action: form.action,
+    label: form.label,
+    needsRef: form.needsRef,
+    needsRef2: form.needsRef2,
+    fields: form.fields.map((field) => ({
+      name: field.name,
+      type: field.type,
+      required: field.required,
+      label: field.label,
+      ...(field.placeholder === undefined ? {} : { placeholder: field.placeholder }),
+    })),
+    chosen: form.action === chosen,
+  }));
+}
+
+/**
+ * What an act and its postcondition came to (SF-11, T15).
+ *
+ * The value an action hands back is `{ act, check? }` — two envelopes, because
+ * dispatch and verification are two things. **`verified` is true only when an
+ * explicit postcondition passed**: an action that reached the target and was
+ * never checked is dispatched and unverified, and the screen says exactly that
+ * rather than drawing a tick.
+ */
+export function surfaceOutcomeView(value: unknown): SurfaceOutcomeView | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const both = value as { act?: unknown; check?: unknown };
+  if (both.act === undefined) return undefined;
+
+  const act = both.act;
+  const actResult = succeededResult(act);
+  const dispatched = actResult !== undefined && actResult["ok"] !== false;
+  const actCode = envelopeCode(act);
+  const actMessage = envelopeError(act);
+
+  const check = both.check;
+  const checkResult = check === undefined ? undefined : succeededResult(check);
+  const checkRan = check !== undefined;
+  // A check that answered `ok: false` is a *failed verification*, not an error:
+  // the postcondition did not hold, and that is information (SF-11).
+  const checkOk = checkResult !== undefined && checkResult["ok"] === true;
+  const verification: SurfaceOutcomeView["verification"] = !checkRan
+    ? "none"
+    : checkOk
+      ? "passed"
+      : "failed";
+
+  const problem =
+    actCode === undefined ? undefined : problemFor(actCode, actMessage ?? "The action was refused.");
+
+  const summary = !dispatched
+    ? (actMessage ?? "The action was refused.")
+    : verification === "none"
+      ? "Dispatched. Not verified — no postcondition was given."
+      : verification === "passed"
+        ? "Dispatched and verified."
+        : "Dispatched, but the postcondition did not hold.";
+
+  const actual = checkResult?.["actual"];
+  const expected = checkResult?.["expected"];
+
+  return {
+    dispatched,
+    // The whole point: only a postcondition that passed makes this true.
+    verified: verification === "passed",
+    verification,
+    summary,
+    ...(actual === undefined ? {} : { actual: String(actual) }),
+    ...(expected === undefined ? {} : { expected: String(expected) }),
+    ...(typeof (act as Record<string, unknown>)["requestId"] === "string"
+      ? { requestId: (act as Record<string, unknown>)["requestId"] as string }
+      : {}),
+    ...(actCode === undefined ? {} : { errorCode: actCode }),
+    ...(problem === undefined ? {} : { problem }),
+    raw: JSON.stringify(value, null, 2),
+  };
+}
+
 /** Adapters and targets → the platform-family groups the screen draws. */
 export function platformGroups(
   adapters: readonly SurfaceAdapterRow[],
@@ -250,6 +575,7 @@ const surfacesScreen: Screen<SurfacesState> = {
   actions: actionsForScreen("surfaces"),
   keys: [
     { action: "surface.connect", key: "C", terminal: "c", description: "Connect a surface" },
+    { action: "surface.refresh", key: "S", terminal: "s", description: "Refresh the surface tree" },
     { action: "surface.discover", key: "R", terminal: "r", description: "Recheck available targets" },
   ],
   async load(service, params: ScreenParams = {}): Promise<SurfacesState> {
@@ -283,17 +609,117 @@ const surfacesScreen: Screen<SurfacesState> = {
           "Could not reach the surface broker. `yam surface targets` shows the same list from a terminal.")
         : undefined;
 
+    /* ── the connected surface (T15) ─────────────────────────────────────── */
+
+    const chosen = rows.find((one) => one.selected);
+    let session: SurfaceSessionView | undefined;
+    let tree: SurfaceTreeLine[] = [];
+    let snapshotId: string | undefined;
+    let truncated = false;
+    let element: SurfaceElementView | undefined;
+    let offers: SurfaceActionOffer[] = [];
+    let action: string | undefined;
+    let httpSurface = false;
+    let problem: SurfaceProblem | undefined;
+
+    if (params.selected !== undefined && chosen !== undefined) {
+      const caps = await sources.optional<unknown>(
+        "GET /sessions/:session/capabilities",
+        () => service.getSessionsBySessionCapabilities(params.selected!),
+        undefined,
+      );
+      const capsResult = succeededResult(caps);
+      const capabilities =
+        typeof capsResult?.["capabilities"] === "object" && capsResult["capabilities"] !== null
+          ? (capsResult["capabilities"] as Record<string, boolean>)
+          : {};
+      const kind = String(capsResult?.["kind"] ?? chosen.kind);
+      httpSurface = kind === "http";
+
+      session = {
+        sessionId: chosen.sessionId,
+        adapter: String(capsResult?.["adapter"] ?? chosen.adapter),
+        kind,
+        status: chosen.status,
+        pill: chosen.pill,
+        capabilities,
+      };
+      problem ??= problemFor(envelopeCode(caps), envelopeError(caps) ?? "");
+
+      /*
+       * A bounded snapshot on open (the design's "Open automatically takes a
+       * bounded initial snapshot"). An HTTP surface has an empty tree by
+       * definition, so it is not asked for one.
+       */
+      if (!httpSurface) {
+        const snap = await sources.optional<unknown>(
+          "POST /sessions/:session/snapshot",
+          () =>
+            service.postSessionsBySessionSnapshot(params.selected!, {
+              maxNodes: TREE_MAX_NODES,
+              interactiveOnly: true,
+            }),
+          undefined,
+        );
+        const snapResult = succeededResult(snap);
+        tree = treeLines(snapResult, params.ref);
+        snapshotId =
+          typeof snapResult?.["snapshotId"] === "string" ? snapResult["snapshotId"] : undefined;
+        truncated = snapResult?.["truncated"] === true;
+        problem ??= problemFor(envelopeCode(snap), envelopeError(snap) ?? "");
+      }
+
+      if (params.ref !== undefined && !httpSurface) {
+        const described = await sources.optional<unknown>(
+          "POST /sessions/:session/describe",
+          () => service.postSessionsBySessionDescribe(params.selected!, { ref: params.ref }),
+          undefined,
+        );
+        element = elementView(succeededResult(described));
+        // A ref that no longer describes is the stale state, and it says so
+        // with the way out rather than showing an empty inspector (SF-17).
+        problem ??= problemFor(envelopeCode(described), envelopeError(described) ?? "");
+        if (element === undefined && problem === undefined && params.ref !== "") {
+          problem = {
+            kind: "stale",
+            message: `The control ${params.ref} is not on the surface any more.`,
+            nextAction: "Refresh and select again",
+            nextActionId: "surface.refresh",
+          };
+        }
+      }
+
+      const forms = httpSurface
+        ? []
+        : offeredActions(kind as SurfaceKind, capabilities as Partial<Record<CapabilityFlag, boolean>>);
+      // The chosen action: what was asked for, else what suits the selected
+      // control. Never undefined — "Choose an action" is not a state (T15).
+      action =
+        typeof params.action === "string" && forms.some((one) => one.action === params.action)
+          ? params.action
+          : (forms.find((one) => one.action === defaultActionForRole(element?.role))?.action ??
+            forms[0]?.action);
+      offers = offerViews(forms, action);
+    }
+
+    const subtitle =
+      session === undefined
+        ? dotted(
+            plural(rows.length, "session"),
+            `${adapters.filter((one) => one.available).length} of ${adapters.length} adapters ready`,
+          )
+        : dotted(session.adapter, session.kind, `${tree.length} controls`);
+
     return {
       ...sources.base(
         "surfaces",
         "Surfaces",
-        dotted(
-          plural(rows.length, "session"),
-          `${adapters.filter((one) => one.available).length} of ${adapters.length} adapters ready`,
-        ),
-        rows.length === 0
-          ? "Choose a browser, app, device or API to control."
-          : `${plural(rows.length, "open session")}`,
+        subtitle,
+        session === undefined
+          ? rows.length === 0
+            ? "Choose a browser, app, device or API to control."
+            : `${plural(rows.length, "open session")}`
+          : (element?.name ?? "Click a control, or search its name."),
       ),
       screen: "surfaces",
       groups,
@@ -302,6 +728,16 @@ const surfacesScreen: Screen<SurfacesState> = {
       discovery,
       ...(discoveryError === undefined ? {} : { discoveryMessage: discoveryError }),
       anyConnectable,
+      ...(session === undefined ? {} : { session }),
+      tree,
+      ...(snapshotId === undefined ? {} : { snapshotId }),
+      truncated,
+      ...(params.ref === undefined ? {} : { ref: params.ref }),
+      ...(element === undefined ? {} : { element }),
+      offers,
+      ...(action === undefined ? {} : { action }),
+      httpSurface,
+      ...(problem === undefined ? {} : { problem }),
     };
   },
 };

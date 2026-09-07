@@ -81,10 +81,11 @@ describe("the catalogue and the suites agree (T11.4)", () => {
      */
     const titles = new Set([
       ...playwrightTitles(),
-      // `test.each` expansions: twelve screens, one title each.
+      // `test.each` expansions: one title per screen the app spec walks. T15
+      // removed the Surface explorer; Surfaces is walked by its own cases.
       ...[
-        "flows", "runs", "bindings", "agents", "api", "data", "import",
-        "settings", "record", "run", "heal", "explorer",
+        "surfaces", "flows", "runs", "bindings", "agents", "api", "data", "import",
+        "settings", "record", "run", "heal",
       ].map((one) => `${one} opens and every control on it is named and id'd`),
     ]);
     const invented = checks

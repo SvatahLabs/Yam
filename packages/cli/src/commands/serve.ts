@@ -21,7 +21,6 @@ import {
   serviceCompileTrajectory,
   serviceHeal,
   serviceMigrateFromPrototype,
-  serviceOpenSurfaceSession,
   serviceRecord,
   serviceCapture,
   serviceToolsFor,
@@ -105,7 +104,6 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
       capture: serviceCapture,
       verifyBindings: serviceVerifyBindings,
       heal: serviceHeal,
-      openSurfaceSession: serviceOpenSurfaceSession,
       /*
        * The surface operations, from the catalogue (T12). The service registers
        * whatever is in this list; it knows nothing about any single operation.

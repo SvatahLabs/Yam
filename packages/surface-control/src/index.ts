@@ -130,9 +130,28 @@ export {
   dispatchSessions,
   dispatchCapabilities,
   dispatchDescribe,
+  dispatchRequest,
   dispatchScreenshot,
   type DispatchContext,
 } from "./dispatcher.js";
+
+/**
+ * What each action needs (T15, SF-09, SF-11).
+ *
+ * The catalogue validates an action's arguments; this says which arguments it
+ * takes, so a client can draw a form without knowing anything the catalogue
+ * does not.
+ */
+export {
+  ACTION_FORMS,
+  CAPABILITIES,
+  actionFormFor,
+  offeredActions,
+  defaultActionForRole,
+  type ActionForm,
+  type ActionField,
+  type ActionFieldType,
+} from "@svatah/yam-schema";
 
 /**
  * The broker: the process that owns the sessions (SF-05).

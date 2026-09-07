@@ -26,7 +26,6 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `ApiResponseView` | interface | `export interface ApiResponseView` | What `POST /api/request` answered, when one has been sent on this screen. |
 | `ApiState` | interface | `export interface ApiState extends ScreenStateBase` |  |
 | `applyEvent` | function | `export function applyEvent(state: RunState, event: ServiceEventLike): RunState` | Fold one event into a run's state (LLD §13.5's stream, §13.7's live screen). |
-| `applyExplorerEvent` | function | `export function applyExplorerEvent(state: ExplorerState, event: ServiceEventLike): ExplorerState` | Fold one explorer answer into its state. |
 | `applyHealEvent` | function | `export function applyHealEvent(state: HealState, event: ServiceEventLike): HealState` | Fold one event into the Heal screen's state (LLD §13.5's stream). |
 | `applyRecordEvent` | function | `export function applyRecordEvent(state: RecordState, event: ServiceEventLike): RecordState` | Fold one event into the Record screen's state (LLD §13.5's stream). |
 | `AuditResponse` | interface | `export interface AuditResponse` | One `audit.jsonl` line (LLD §3.4, REQ-AUTO-6). |
@@ -48,7 +47,6 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `dotted` | variable | `dotted = (...parts: ReadonlyArray<string \| undefined>): string =>` | `["a", "b"]` → `"a · b"`, dropping the empties. The mockups' subtitle style. |
 | `envelopeError` | function | `export function envelopeError(value: unknown): string \| undefined` | The `error.message` of a failed/refused envelope, when it carries one. |
 | `EVERY_SCREEN_IS_MODELLED` | variable | `EVERY_SCREEN_IS_MODELLED: boolean = SCREEN_IDS.every((id) =>` | Every screen id has exactly one screen. The renderers rely on it; so does `--json`. |
-| `ExplorerState` | interface | `export interface ExplorerState extends ScreenStateBase` |  |
 | `FakeCall` | interface | `export interface FakeCall` | What the fake was asked, in order. A test asserts on the screen rule with it. |
 | `FakeNotFound` | class | `export class FakeNotFound extends Error` | A route the fixtures have no answer for. Screens treat it as an empty screen. |
 | `FakeResponses` | interface | `export interface FakeResponses` | Every response the fake can give, keyed the way the fixtures file is. |
@@ -71,6 +69,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `platformGroups` | function | `export function platformGroups(` | Adapters and targets → the platform-family groups the screen draws. |
 | `plural` | variable | `plural = (n: number, one: string, many = `${one}s`): string =>` | `1`/`2` → `"1 story"`/`"2 stories"`. |
 | `policyText` | function | `export function policyText(policy: string \| { compensate?: string } \| undefined): string \| undefined` | An `onFailure` policy as one phrase (REQ-AUTO-4). |
+| `problemFor` | function | `export function problemFor(code: string \| undefined, message: string): SurfaceProblem \| undefined` | A domain error code → the state it puts the inspector in, and the way out. |
 | `ProjectResponse` | interface | `export interface ProjectResponse` | What the service's answers look like, as far as a screen reads them. |
 | `RAIL` | variable | `RAIL: ReadonlyArray<` |  |
 | `RecordDecision` | interface | `export interface RecordDecision` | One grounding waiting on a reviewer (REQ-ADE-4, the `record.decision` event). |
@@ -101,19 +100,27 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `ServiceConnectionInfo` | interface | `export interface ServiceConnectionInfo` | Where the connection is, for the renderers' chrome and for `--json`. |
 | `ServiceEventLike` | interface | `export interface ServiceEventLike` | One line of the event stream, as far as a screen cares. |
 | `SettingsState` | interface | `export interface SettingsState extends ScreenStateBase` |  |
-| `SnapshotLine` | interface | `export interface SnapshotLine` | One line of the snapshot tree, as the screen draws it. |
-| `snapshotLines` | function | `export function snapshotLines(value: unknown, selectedRef?: string): SnapshotLine[]` | A `Snapshot` → the lines the tree pane draws. |
 | `Sources` | class | `export class Sources` | Collects the endpoints a load touched and the first thing that went wrong. |
 | `stamp` | function | `export function stamp(at: string \| undefined, startedAt: string \| undefined): string` | `2026-09-05T09:13:42.896Z` and the run's start → `08.451`, the mockup's stamp. |
 | `StatusTone` | typealias | `export type StatusTone = "pass" \| "fail" \| "skip" \| "healed" \| "abort" \| "info" \| "neutral";` | A status word with the colour token beside it (LLD §13.7: never colour alone). |
 | `StepInspector` | interface | `export interface StepInspector` | What the inspector shows about the selected step. |
 | `StepResultResponse` | interface | `export interface StepResultResponse` |  |
 | `SummaryResponse` | interface | `export interface SummaryResponse` |  |
+| `SurfaceActionField` | interface | `export interface SurfaceActionField` | One field of an action's form, as the catalogue describes it. |
+| `SurfaceActionOffer` | interface | `export interface SurfaceActionOffer` | One action this surface can perform, with what it needs. |
 | `SurfaceAdapterRow` | interface | `export interface SurfaceAdapterRow` | One adapter the service reported, with its readiness and, when not, why. |
+| `SurfaceElementView` | interface | `export interface SurfaceElementView` | What `describe` said about the selected control. |
+| `surfaceOutcomeView` | function | `export function surfaceOutcomeView(value: unknown): SurfaceOutcomeView \| undefined` | What an act and its postcondition came to (SF-11, T15). |
+| `SurfaceOutcomeView` | interface | `export interface SurfaceOutcomeView` | What an act (and its optional postcondition) came to (SF-11). |
 | `SurfacePlatformGroup` | interface | `export interface SurfacePlatformGroup` | A platform family, with its adapters and any targets discovered under it. |
+| `SurfaceProblem` | interface | `export interface SurfaceProblem` |  |
+| `SurfaceProblemKind` | typealias | `export type SurfaceProblemKind ` | A state the inspector is in that is not "ready" (SF-17). |
 | `SURFACES_SCREENS` | variable | `SURFACES_SCREENS = [surfacesScreen] as const satisfies readonly Screen[]` |  |
 | `SurfaceSessionRow` | interface | `export interface SurfaceSessionRow` | One open session, an agent's or a person's (SF-05, SF-13). |
+| `SurfaceSessionView` | interface | `export interface SurfaceSessionView` | The session the inspector is about. |
 | `SurfacesState` | interface | `export interface SurfacesState extends ScreenStateBase` |  |
 | `SurfaceTargetRow` | interface | `export interface SurfaceTargetRow` | One target the service discovered — an adapter, or a URL through one. |
+| `SurfaceTreeLine` | interface | `export interface SurfaceTreeLine` | One line of the semantic tree, as the inspector draws it. |
 | `ToolsResponse` | interface | `export interface ToolsResponse` | `GET /tools` — `{ tools: { tools, refused }, invocations }`. |
-| `TrajectoryCall` | interface | `export interface TrajectoryCall` | One call the explorer made, as `trajectory.jsonl` records it (REQ-BEH-4). |
+| `TREE_MAX_NODES` | variable | `TREE_MAX_NODES = 200` | How many nodes the inspector's tree asks for. Bounded, and it says when it truncated. |
+| `treeLines` | function | `export function treeLines(` | A snapshot's flat nodes → the indented lines the tree pane draws. |

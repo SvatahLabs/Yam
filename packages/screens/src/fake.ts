@@ -50,6 +50,7 @@ export interface FakeResponses {
     check?: unknown;
     describe?: unknown;
     screenshot?: unknown;
+    request?: unknown;
   };
 }
 
@@ -181,11 +182,8 @@ export function fakeService(responses: FakeResponses = {}): FakeService {
     putData: (body) => wrote("putData", body),
     postMigrate: (body) => wrote("postMigrate", body),
     postTrajectoryCompile: (body) => wrote("postTrajectoryCompile", body),
-    postSurfaceBySessionOpen: (session, body) => wrote("postSurfaceBySessionOpen", session, body),
     postSurfaceBySessionSnapshot: (session, body) =>
       wrote("postSurfaceBySessionSnapshot", session, body),
-    postSurfaceBySessionAct: (session, body) => wrote("postSurfaceBySessionAct", session, body),
-    postSurfaceBySessionClose: (session, body) => wrote("postSurfaceBySessionClose", session, body),
 
     /* ── the surface catalogue (SF-03, T14) ─────────────────────────────────── */
     getTargets: () => answer("getTargets", responses.surface?.targets, "GET /targets"),
@@ -230,6 +228,10 @@ export function fakeService(responses: FakeResponses = {}): FakeService {
     async postSessionsBySessionScreenshot(session, body) {
       record("postSessionsBySessionScreenshot", session, body);
       return responses.surface?.screenshot ?? envelope({ path: "" });
+    },
+    async postSessionsBySessionRequest(session, body) {
+      record("postSessionsBySessionRequest", session, body);
+      return responses.surface?.request ?? envelope({ response: { status: 200 } });
     },
   };
 }

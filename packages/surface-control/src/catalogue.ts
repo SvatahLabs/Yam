@@ -9,6 +9,8 @@ import {
   actResultSchema,
   checkResultSchema,
   capabilitiesSchema,
+  apiRequestSchema,
+  apiResponseSchema,
   } from "@svatah/yam-schema";
 import { SURFACE_ACTIONS } from "@svatah/yam-schema";
 
@@ -265,6 +267,29 @@ const describeOutputSchema = resultEnvelopeSchema.extend({
     states: z.array(z.string()),
     box: z.tuple([z.number(), z.number(), z.number(), z.number()]).optional(),
   }),
+});
+
+/**
+ * An HTTP request, on a surface that is one (T15, SF-04).
+ *
+ * An HTTP surface is not an element surface: its `act` refuses everything, its
+ * tree is empty, and the only thing a person can do to it is send a request and
+ * read the response. Without this operation the desktop's HTTP form had nothing
+ * to send and `yam surface` could drive a browser and not an API — which is
+ * half of a surface the support matrix calls validated.
+ *
+ * The request is the published `ApiRequest`, so an `api` step in a flow and this
+ * send the same shape through the same adapter.
+ */
+const requestInputSchema = z.object({
+  session: sessionIdSchema,
+  request: apiRequestSchema,
+  withSessionCookies: z.boolean().optional(),
+  intent: z.string().optional(),
+});
+
+const requestOutputSchema = resultEnvelopeSchema.extend({
+  result: z.object({ response: apiResponseSchema }),
 });
 
 const screenshotInputSchema = z.object({
@@ -532,6 +557,34 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
     outputSchema: describeOutputSchema,
   },
   {
+    name: "request",
+    description: "Send an HTTP request on an HTTP surface and return the response",
+    mutation: true,
+    requiresSession: true,
+    cli: {
+      subcommand: "request",
+      flags: [
+        { name: "session", type: "string", required: true, description: "Session ID" },
+        { name: "method", type: "string", required: false, description: "HTTP method (default GET)" },
+        { name: "url", type: "string", required: false, description: "URL or path, joined to the session's base URL" },
+        { name: "input", type: "file", required: false, description: "The full ApiRequest as a JSON file or stdin" },
+      ],
+      exitCodes: [
+        { code: CLI_EXIT_CODES.OK, meaning: "Request sent" },
+        { code: CLI_EXIT_CODES.FAILED, meaning: "The request could not be sent" },
+        { code: CLI_EXIT_CODES.SESSION_ERROR, meaning: "Session not found or closed" },
+        { code: CLI_EXIT_CODES.INVALID_INPUT, meaning: "Invalid request" },
+      ],
+    },
+    mcp: {
+      toolName: "surface_request",
+      annotations: { title: "Send an HTTP request", readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+    },
+    service: { method: "POST", path: "/sessions/:session/request" },
+    inputSchema: requestInputSchema,
+    outputSchema: requestOutputSchema,
+  },
+  {
     name: "screenshot",
     description: "Take a screenshot of the current surface",
     mutation: false,
@@ -609,6 +662,8 @@ export {
   capabilitiesOutputSchema,
   describeInputSchema,
   describeOutputSchema,
+  requestInputSchema,
+  requestOutputSchema,
   screenshotInputSchema,
   screenshotOutputSchema,
 };

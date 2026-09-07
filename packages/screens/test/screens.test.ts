@@ -67,7 +67,9 @@ describe("the model covers every screen (LLD §13.7)", () => {
       Data: "data",
       "Record review": "record",
       Bindings: "bindings",
-      "Surface explorer": "explorer",
+      // T15 replaced the Surface explorer — an adapter chooser and an intent box
+      // over a protocol form — with the Surfaces action inspector.
+      "Surface explorer": "surfaces",
       "Tool panel": "agents",
     };
     for (const [old, home] of Object.entries(homes)) {
@@ -434,8 +436,10 @@ describe("the other ten screens against the fixtures project", () => {
     expect(["available", "none"]).toContain(byLabel["Model credential"]);
   });
 
-  it("Agents, Explorer and Import load and name what they need", async () => {
-    for (const id of ["agents", "explorer", "import"] as const) {
+  // T15 replaced the Surface explorer with the Surfaces action inspector, which
+  // has its own suite in `surfaces.test.ts` (it needs a broker, not a project).
+  it("Agents and Import load and name what they need", async () => {
+    for (const id of ["agents", "import"] as const) {
       const state = await screenById(id).load(service(), {});
       expect(state.error, id).toBeUndefined();
       expect(state.title, id).not.toBe("");

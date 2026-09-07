@@ -10,7 +10,7 @@
  * **The surface tools** — `surface_targets`, `surface_connect`, `surface_snapshot`,
  * `surface_act`, `surface_read`, `surface_check`, `surface_close`,
  * `surface_sessions`, `surface_capabilities`, `surface_describe`,
- * `surface_screenshot` — drive a
+ * `surface_request`, `surface_screenshot` — drive a
  * live target through session IDs, with no project needed and intent optional.
  * Registered from the operation catalogue so one source of truth generates CLI,
  * MCP and service interfaces.
@@ -54,6 +54,7 @@ import {
   dispatchSessions,
   dispatchCapabilities,
   dispatchDescribe,
+  dispatchRequest,
   dispatchScreenshot,
   dispatchTargets,
   type DispatchContext,
@@ -743,6 +744,44 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ session, ref }) => text(await dispatchDescribe(ctx, { session, ref })),
+  );
+
+  server.registerTool(
+    "surface_request",
+    {
+      title: "Send an HTTP request",
+      description:
+        "Send an HTTP request on an HTTP surface and return the response. An HTTP target has no " +
+        "elements to click — its tree is empty and `surface_act` refuses — so this is how one is " +
+        "driven. The request is the published ApiRequest shape.",
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+      inputSchema: {
+        session: z.string().min(1).describe("Session ID"),
+        request: z
+          .object({
+            name: z.string().min(1).optional().describe("A name for the request"),
+            method: z
+              .enum(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"])
+              .describe("HTTP method"),
+            url: z.string().min(1).describe("URL, or a path joined to the session's base URL"),
+            headers: z.record(z.string(), z.string()).optional(),
+            query: z.record(z.string(), z.string()).optional(),
+            json: z.unknown().optional().describe("A JSON body"),
+            body: z.string().optional().describe("A raw body"),
+          })
+          .describe("The request to send"),
+        withSessionCookies: z.boolean().optional(),
+        intent: OPTIONAL_INTENT,
+      },
+    },
+    async ({ session, request, withSessionCookies }) =>
+      text(
+        await dispatchRequest(ctx, {
+          session,
+          request: { name: "request", ...request } as Record<string, unknown>,
+          ...(withSessionCookies === undefined ? {} : { withSessionCookies }),
+        }),
+      ),
   );
 
   server.registerTool(

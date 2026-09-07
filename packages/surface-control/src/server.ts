@@ -28,6 +28,7 @@ import {
   dispatchClose,
   dispatchConnect,
   dispatchDescribe,
+  dispatchRequest,
   dispatchRead,
   dispatchScreenshot,
   dispatchSessions,
@@ -55,6 +56,7 @@ export type BrokerOperation =
   | "sessions"
   | "capabilities"
   | "describe"
+  | "request"
   | "screenshot";
 
 export interface BrokerOptions {
@@ -88,6 +90,7 @@ const DISPATCH: Record<BrokerOperation, DispatchFn> = {
   sessions: (context) => dispatchSessions(context),
   capabilities: (context, args) => dispatchCapabilities(context, args as never),
   describe: (context, args) => dispatchDescribe(context, args as never),
+  request: (context, args) => dispatchRequest(context, args as never),
   screenshot: (context, args) => dispatchScreenshot(context, args as never),
 };
 

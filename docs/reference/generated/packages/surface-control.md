@@ -13,6 +13,11 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | Export | Kind | Signature | |
 |---|---|---|---|
 | `actInputSchema` | variable | `actInputSchema = z.object(` |  |
+| `ACTION_FORMS` | variable | `ACTION_FORMS: readonly ActionForm[]` | The forms, in the order an inspector offers them: the common ones first. |
+| `ActionField` | interface | `interface ActionField` |  |
+| `ActionFieldType` | typealias | `type ActionFieldType = "string" \| "number" \| "boolean" \| "url" \| "key";` | How a field is collected, and how it is typed on the way to `args`. |
+| `ActionForm` | interface | `interface ActionForm` |  |
+| `actionFormFor` | function | `declare function actionFormFor(action: string): ActionForm \| undefined;` | One form by action name. |
 | `actOutputSchema` | variable | `actOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `AdapterFactoryFn` | typealias | `export type AdapterFactoryFn ` |  |
 | `AdapterReadiness` | interface | `export interface AdapterReadiness` |  |
@@ -24,6 +29,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `BrokerOptions` | interface | `export interface BrokerOptions` |  |
 | `brokerStateDir` | function | `export function brokerStateDir(): string` |  |
 | `callBroker` | function | `export async function callBroker(` | Ask a running broker to perform one operation. |
+| `CAPABILITIES` | variable | `CAPABILITIES: readonly CapabilityFlag[]` | Every capability flag, so a client can render a readiness list. |
 | `capabilitiesInputSchema` | variable | `capabilitiesInputSchema = z.object(` |  |
 | `capabilitiesOutputSchema` | variable | `capabilitiesOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `checkAdapterReadiness` | function | `export function checkAdapterReadiness(` |  |
@@ -43,6 +49,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `createRedactionPolicy` | function | `export function createRedactionPolicy(): RedactionPolicy` |  |
 | `createReferenceStore` | function | `export function createReferenceStore(): ReferenceStore` |  |
 | `createSessionStore` | function | `export function createSessionStore(): SessionStore` |  |
+| `defaultActionForRole` | function | `declare function defaultActionForRole(role: string \| undefined): string;` | The action an inspector opens on for an element of this role. |
 | `describeInputSchema` | variable | `describeInputSchema = z.object(` |  |
 | `describeOutputSchema` | variable | `describeOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `discoverAdapters` | function | `export function discoverAdapters(registeredAdapters: string[]): AdapterReadiness[]` |  |
@@ -57,6 +64,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `DispatchContext` | interface | `export interface DispatchContext` |  |
 | `dispatchDescribe` | function | `export async function dispatchDescribe(` |  |
 | `dispatchRead` | function | `export async function dispatchRead(` |  |
+| `dispatchRequest` | function | `export async function dispatchRequest(` | Send an HTTP request on an HTTP surface (T15, SF-04). |
 | `dispatchScreenshot` | function | `export async function dispatchScreenshot(` |  |
 | `dispatchSessions` | function | `export async function dispatchSessions(` |  |
 | `dispatchSnapshot` | function | `export async function dispatchSnapshot(` |  |
@@ -78,6 +86,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `isProcessAlive` | function | `export function isProcessAlive(pid: number): boolean` |  |
 | `Lease` | interface | `export interface Lease` |  |
 | `makeRequestId` | function | `export function makeRequestId(): string` |  |
+| `offeredActions` | function | `declare function offeredActions(kind: SurfaceKind, capabilities?: Partial<Record<CapabilityFlag, boolean>>): readonly ActionForm[];` | The actions this surface can actually perform, in offer order (SF-09). |
 | `operationByCliSubcommand` | function | `export function operationByCliSubcommand(sub: string): OperationDescriptor \| undefined` |  |
 | `operationByMcpTool` | function | `export function operationByMcpTool(toolName: string): OperationDescriptor \| undefined` |  |
 | `operationByName` | function | `export function operationByName(name: string): OperationDescriptor \| undefined` |  |

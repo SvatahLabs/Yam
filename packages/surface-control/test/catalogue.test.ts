@@ -12,8 +12,10 @@ import {
 } from "../src/catalogue.js";
 
 describe("OPERATIONS catalogue", () => {
-  it("has exactly 11 operations", () => {
-    expect(OPERATIONS).toHaveLength(11);
+  it("has exactly 12 operations", () => {
+    // Eleven through wave 2; T15 adds `request`, so an HTTP surface — whose
+    // `act` refuses everything and whose tree is empty — can be driven at all.
+    expect(OPERATIONS).toHaveLength(12);
   });
 
   it("every operation has unique name, subcommand, toolName, and service path", () => {

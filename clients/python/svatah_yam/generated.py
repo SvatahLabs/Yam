@@ -59,13 +59,9 @@ ENDPOINTS = [
     {"id": "postSessionsBySessionCheck", "verb": "post", "path": "/sessions/{session}/check"},
     {"id": "postSessionsBySessionDescribe", "verb": "post", "path": "/sessions/{session}/describe"},
     {"id": "postSessionsBySessionRead", "verb": "post", "path": "/sessions/{session}/read"},
+    {"id": "postSessionsBySessionRequest", "verb": "post", "path": "/sessions/{session}/request"},
     {"id": "postSessionsBySessionScreenshot", "verb": "post", "path": "/sessions/{session}/screenshot"},
     {"id": "postSessionsBySessionSnapshot", "verb": "post", "path": "/sessions/{session}/snapshot"},
-    {"id": "postSurfaceBySessionAct", "verb": "post", "path": "/surface/{session}/act"},
-    {"id": "postSurfaceBySessionCheck", "verb": "post", "path": "/surface/{session}/check"},
-    {"id": "postSurfaceBySessionClose", "verb": "post", "path": "/surface/{session}/close"},
-    {"id": "postSurfaceBySessionOpen", "verb": "post", "path": "/surface/{session}/open"},
-    {"id": "postSurfaceBySessionRead", "verb": "post", "path": "/surface/{session}/read"},
     {"id": "postSurfaceBySessionSnapshot", "verb": "post", "path": "/surface/{session}/snapshot"},
     {"id": "postTrajectoryCompile", "verb": "post", "path": "/trajectory/compile"},
     {"id": "putApiByName", "verb": "put", "path": "/api/{name}"},
@@ -284,6 +280,10 @@ class GeneratedClient:
         """`POST /sessions/{session}/read` — Read a value from the surface (SF-11)"""
         return self._call("post", f"/sessions/{session}/read", body=body)
 
+    def post_sessions_by_session_request(self, session, body: Any = None) -> Any:
+        """`POST /sessions/{session}/request` — Send an HTTP request on an HTTP surface (T15, SF-04)"""
+        return self._call("post", f"/sessions/{session}/request", body=body)
+
     def post_sessions_by_session_screenshot(self, session, body: Any = None) -> Any:
         """`POST /sessions/{session}/screenshot` — Take a screenshot of the current surface (SF-11)"""
         return self._call("post", f"/sessions/{session}/screenshot", body=body)
@@ -291,26 +291,6 @@ class GeneratedClient:
     def post_sessions_by_session_snapshot(self, session, body: Any = None) -> Any:
         """`POST /sessions/{session}/snapshot` — A semantic snapshot of the surface (SF-10)"""
         return self._call("post", f"/sessions/{session}/snapshot", body=body)
-
-    def post_surface_by_session_act(self, session, body: Any = None) -> Any:
-        """`POST /surface/{session}/act` — Act in the explored session; `intent` is required"""
-        return self._call("post", f"/surface/{session}/act", body=body)
-
-    def post_surface_by_session_check(self, session, body: Any = None) -> Any:
-        """`POST /surface/{session}/check` — Check in the explored session; `intent` is required"""
-        return self._call("post", f"/surface/{session}/check", body=body)
-
-    def post_surface_by_session_close(self, session) -> Any:
-        """`POST /surface/{session}/close` — Close an explored session"""
-        return self._call("post", f"/surface/{session}/close")
-
-    def post_surface_by_session_open(self, session, body: Any = None) -> Any:
-        """`POST /surface/{session}/open` — Open a surface session the explorer drives"""
-        return self._call("post", f"/surface/{session}/open", body=body)
-
-    def post_surface_by_session_read(self, session, body: Any = None) -> Any:
-        """`POST /surface/{session}/read` — Read in the explored session; `intent` is required"""
-        return self._call("post", f"/surface/{session}/read", body=body)
 
     def post_surface_by_session_snapshot(self, session, body: Any = None) -> Any:
         """`POST /surface/{session}/snapshot` — The driven session's snapshot, for the picker and the explorer"""

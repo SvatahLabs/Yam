@@ -61,24 +61,44 @@ describe("G02: surface subcommands exist (SF-03, SF-06)", () => {
  * Regression: the Explorer renderer source must provide an action selector
  * to the explorer.act action handler.
  */
-describe("G03: explorer provides action to explorer.act (SF-11, SF-17)", () => {
-  it("Explorer renderer source includes a surface action selector", () => {
-    const source = readFileSync(
-      join(ROOT, "apps", "desktop", "src", "renderer", "shell", "Secondary.tsx"),
-      "utf8",
+describe("G03: an action is always offered, and always completable (SF-11, SF-17)", () => {
+  /*
+   * The defect was the Explorer's Act button refusing every press with "Choose
+   * an action": the renderer never collected one. T15 removed that screen, and
+   * the contract is now stronger and is *data* rather than a string in a
+   * renderer — so this asserts the behaviour instead of grepping a source file,
+   * which is what let the original defect through.
+   */
+  it("a text field opens on an action that can be completed", async () => {
+    const { defaultActionForRole, offeredActions, actionFormFor } = await import(
+      "@svatah/yam-schema"
     );
-    // The renderer must collect a specific surface action (click, type, hover,
-    // etc.) and pass it as args.action to explorer.act. On baseline, it never
-    // does — onAction("explorer.act") is called but the args object has no
-    // "action" key, so the registry handler always refuses with "Choose an action."
-    // After fix, the renderer should have a control that sets a surface action value.
-    const hasSurfaceActionControl =
-      /SurfaceAction|SURFACE_ACTIONS|action.*selector|actionSelect/i.test(source) ||
-      /["']click["'].*["']type["']|["']hover["']/i.test(source);
-    expect(
-      hasSurfaceActionControl,
-      "Explorer renderer must have a surface action selector for explorer.act",
-    ).toBe(true);
+    const web = offeredActions("web", { drag: true });
+    expect(web.length, "a web surface must offer actions").toBeGreaterThan(0);
+
+    // Selecting a text field offers to fill it, and the form says what that needs.
+    const chosen = defaultActionForRole("textbox");
+    expect(chosen).toBe("type");
+    expect(web.some((one) => one.action === chosen)).toBe(true);
+    expect(actionFormFor(chosen)!.fields.map((one) => one.name)).toEqual(["value"]);
+  });
+
+  it("never offers an action whose arguments it cannot collect", async () => {
+    const { offeredActions, actionFormFor } = await import("@svatah/yam-schema");
+    // Every offered action is described, and every required field is named — a
+    // form that could not be completed is the dead end this defect was.
+    for (const kind of ["web", "desktop", "mobile"] as const) {
+      for (const offer of offeredActions(kind, { drag: true, upload: true, dialogs: true, frames: true, windows: true })) {
+        const form = actionFormFor(offer.action);
+        expect(form, offer.action).toBeDefined();
+        for (const field of form!.fields) {
+          expect(field.name.length, `${offer.action}.${field.name}`).toBeGreaterThan(0);
+          expect(field.label.length, `${offer.action}.${field.name}`).toBeGreaterThan(0);
+        }
+      }
+    }
+    // An HTTP surface is not an element surface and offers none; it has `request`.
+    expect(offeredActions("http", {})).toEqual([]);
   });
 });
 
@@ -112,26 +132,20 @@ describe("G04: adapter selection is real (SF-03, SF-04, SF-09)", () => {
     expect((result as Record<string, unknown>).status).toBe("failed");
   });
 
-  it("service open endpoint source accepts adapter in the request body", () => {
-    const source = readFileSync(
-      join(ROOT, "packages", "service", "src", "server.ts"),
-      "utf8",
-    );
-    // The service's /surface/:session/open route should forward the adapter
-    // from the request body, not just headed.
-    // On baseline: Body type is { headed?: boolean } — no adapter field.
-    const openRoute = source.match(
-      /["']\/surface\/:session\/open["'][\s\S]*?(?=fastify\.|\/\*\*|\n {2}\}\);)/,
-    );
-    expect(openRoute).toBeTruthy();
-    // After fix, the route body type should include adapter
-    const routeSource = openRoute![0];
-    const hasAdapter =
-      /adapter/.test(routeSource) && !/drops?\s+.*adapter/i.test(routeSource);
-    expect(
-      hasAdapter,
-      "service /surface/:session/open must accept adapter in request body",
-    ).toBe(true);
+  it("the catalogue's connect takes an adapter, and the dispatcher validates it", async () => {
+    /*
+     * G04 was "`POST /surface/:session/open` drops `adapter`". T15 removed that
+     * route with the Explorer that was its only caller, so the contract this
+     * defect is about is now the catalogue's `connect`: it declares `adapter`,
+     * and `dispatchConnect` refuses one this host cannot run *before* launching
+     * anything (the case above). Asserting on the removed route would be
+     * asserting about code nothing serves.
+     */
+    const { operationByName } = await import("../src/catalogue.js");
+    const connect = operationByName("connect")!;
+    expect(connect.service).toEqual({ method: "POST", path: "/sessions" });
+    const shape = connect.inputSchema.safeParse({ url: "http://127.0.0.1:1", adapter: "uia" });
+    expect(shape.success, "connect must accept an adapter").toBe(true);
   });
 });
 
@@ -290,22 +304,28 @@ describe("G07: ref2, name, and snapshot options are not dropped (SF-03, SF-06, S
     expect(receivedName).toBe("aria-label");
   });
 
-  it("service surface dispatch source forwards ref2 and name", () => {
-    const source = readFileSync(
-      join(ROOT, "packages", "cli", "src", "service-api.ts"),
-      "utf8",
-    );
-    // The dispatch block where act/read/check calls are made must forward
-    // ref2 for act and name for read. Scan a window around each call site.
-    const actIdx = source.indexOf("surface.act(", source.indexOf("call === \"act\""));
-    expect(actIdx, "must find the dispatch surface.act call").toBeGreaterThan(-1);
-    const actWindow = source.slice(actIdx, actIdx + 200);
-    expect(actWindow, "dispatch surface.act must forward ref2").toContain("ref2");
+  it("the catalogue carries ref2, attribute name and the snapshot options", async () => {
+    /*
+     * The defect was an argument forwarded one layer and dropped the next. The
+     * old service dispatch it was found in went with the Explorer (T15), so
+     * this asserts the *contract* every interface is generated from: if the
+     * catalogue accepts them, CLI, MCP and HTTP all carry them.
+     */
+    const { operationByName } = await import("../src/catalogue.js");
+    const act = operationByName("act")!;
+    expect(act.inputSchema.safeParse({
+      session: "s", action: "dragTo", ref: "r1", ref2: "r2", snapshot: "snap_1",
+    }).success, "act must carry ref2 and snapshot").toBe(true);
 
-    const readIdx = source.indexOf("surface.read(", source.indexOf("call === \"read\""));
-    expect(readIdx, "must find the dispatch surface.read call").toBeGreaterThan(-1);
-    const readWindow = source.slice(readIdx, readIdx + 200);
-    expect(readWindow, "dispatch surface.read must forward name").toContain("name");
+    const read = operationByName("read")!;
+    expect(read.inputSchema.safeParse({
+      session: "s", kind: "attribute", ref: "r1", name: "data-testid",
+    }).success, "read must carry the attribute name").toBe(true);
+
+    const snapshot = operationByName("snapshot")!;
+    expect(snapshot.inputSchema.safeParse({
+      session: "s", maxNodes: 50, root: "r1", interactiveOnly: true,
+    }).success, "snapshot must carry its limits").toBe(true);
   });
 });
 

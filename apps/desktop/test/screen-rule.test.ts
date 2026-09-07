@@ -179,15 +179,16 @@ describe("the endpoints the screens exercise (REQ-ADE-3, LLD §13.6)", () => {
     "postRecord",
     "postRecordByIdDecision",
     "postRecordByIdStop",
-    "postSurfaceBySessionSnapshot",
     "getBindings",
     "getBindingsById",
     "postBindingsVerify",
     "postHeal",
-    /* T5.8 — the surface explorer and the tool panel. */
-    "postSurfaceBySessionOpen",
-    "postSurfaceBySessionAct",
-    "postSurfaceBySessionClose",
+    /*
+     * T5.8's tool panel. The surface explorer's routes went with the Explorer
+     * in T15 — Surfaces reaches the broker's own catalogue routes instead. The
+     * record review's `postSurfaceBySessionSnapshot` is still served for the
+     * re-pick picker, but no screen reaches it yet, so it is not required here.
+     */
     "postTrajectoryCompile",
     "getTools",
     /* T6.6 — the prototype database import (REQ-ADE-9). */

@@ -477,6 +477,57 @@ export async function dispatchDescribe(
   }
 }
 
+/**
+ * Send an HTTP request on an HTTP surface (T15, SF-04).
+ *
+ * `AgentSurface.request` is optional — a browser does not have one — so an
+ * adapter without it is refused with `UNSUPPORTED_OPERATION` rather than
+ * failing somewhere inside. The response is returned whole; a caller reads a
+ * field from it with `read`, exactly as an `api` step does.
+ */
+export async function dispatchRequest(
+  ctx: DispatchContext,
+  input: { session: string; request: Record<string, unknown>; withSessionCookies?: boolean },
+): Promise<Record<string, unknown>> {
+  const requestId = makeRequestId();
+  const start = Date.now();
+  const entry = ctx.sessions.get(input.session);
+  if (!entry) {
+    return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
+  }
+  const surface = entry.surface as {
+    request?: (req: unknown, options: unknown) => Promise<unknown>;
+  };
+  if (typeof surface.request !== "function") {
+    return refusedEnvelope(
+      requestId,
+      input.session,
+      "UNSUPPORTED_OPERATION",
+      `The ${entry.adapter} adapter does not send HTTP requests.`,
+      { adapter: entry.adapter },
+    );
+  }
+  try {
+    const response = await surface.request(input.request, {
+      withSessionCookies: input.withSessionCookies === true,
+      scope: { read: () => undefined },
+    });
+    const elapsed = Date.now() - start;
+    ctx.events?.emit({
+      sessionId: input.session,
+      kind: "operation.succeeded",
+      operationName: "request",
+      data: { method: input.request["method"], url: input.request["url"] },
+    });
+    // Redacted like every other result: a response body is page text, and a
+    // declared secret must not come back in one (SF-15).
+    const envelope = successEnvelope(requestId, input.session, { response }, elapsed);
+    return maybeRedact(ctx, envelope);
+  } catch (err) {
+    return handleError(requestId, input.session, err, Date.now() - start);
+  }
+}
+
 export async function dispatchScreenshot(
   ctx: DispatchContext,
   input: { session: string; path?: string },

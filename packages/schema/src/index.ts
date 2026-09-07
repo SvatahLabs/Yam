@@ -208,3 +208,22 @@ export { proposalSchema, type Proposal } from "./proposal.js";
 export { PUBLISHED_SCHEMAS, publishedSchema, type PublishedSchema } from "./registry.js";
 
 export { generateJsonSchemas, schemaFileName, type GeneratedSchemas } from "./generate.js";
+
+/**
+ * What each action needs, as data (T15, SF-09, SF-11).
+ *
+ * The vocabulary above says which actions exist and validates their arguments;
+ * this says which arguments each one takes, so any client — the desktop's
+ * action inspector, a CLI, an agent — can offer a form without knowing anything
+ * the contract does not.
+ */
+export {
+  ACTION_FORMS,
+  CAPABILITIES,
+  actionFormFor,
+  offeredActions,
+  defaultActionForRole,
+  type ActionForm,
+  type ActionField,
+  type ActionFieldType,
+} from "./action-forms.js";

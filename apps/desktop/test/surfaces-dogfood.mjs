@@ -40,9 +40,18 @@ const note = (label, ok, detail) => {
 const emptyProject = mkdtempSync(join(tmpdir(), "yam-surfaces-projectless-"));
 
 // A tiny target page for the connect flow to drive.
-const target = createServer((_req, res) => {
-  res.setHeader("Content-Type", "text/html");
-  res.end('<!doctype html><title>Surfaces target</title><h1>Target</h1><button data-testid="go">Go</button>');
+const target = createServer((req, res) => {
+  if (req.url.startsWith("/api")) {
+    res.setHeader("content-type", "application/json");
+    res.end(JSON.stringify({ path: req.url, method: req.method }));
+    return;
+  }
+  res.setHeader("content-type", "text/html");
+  res.end(
+    '<!doctype html><title>Surfaces target</title><h1>Target</h1>' +
+      '<label for="u">Username</label><input id="u" name="u">' +
+      '<button data-testid="go">Go</button>',
+  );
 });
 await new Promise((r) => target.listen(0, "127.0.0.1", r));
 const targetUrl = `http://127.0.0.1:${target.address().port}/`;
@@ -106,6 +115,13 @@ try {
   const bridgeInfo = { url: `${appOrigin}/service`, token: info.token, project: emptyProject, adopted: false };
 
   browser = await chromium.launch({ headless: true });
+
+
+  /** Radix's select: click the trigger, then the option by its words. */
+  const choose = async (page, triggerId, label) => {
+    await page.locator(`#${triggerId}`).click();
+    await page.locator('[role="option"]', { hasText: label }).first().click();
+  };
 
   const drive = async (width, height, label) => {
     const context = await browser.newContext({ viewport: { width, height } });
@@ -184,6 +200,57 @@ try {
     const inspector = await page.locator("#inspector-session").isVisible().catch(() => false);
     note(`[${label}] the connected session is selectable and inspectable`, selected === "true" && inspector,
       `aria-selected=${selected} inspector=${inspector}`);
+
+    /* ── T15: the action inspector ───────────────────────────────────────── */
+
+    // The semantic tree is what the inspector selects from — always available,
+    // including where a screenshot is not.
+    await page.locator("#surfaces-tree").waitFor({ timeout: 30000 });
+    const treeText = (await page.locator("#surfaces-tree").textContent()) ?? "";
+    note(`[${label}] the surface's semantic tree is on screen`, /textbox|button/.test(treeText),
+      treeText.replace(/\s+/g, " ").trim().slice(0, 90));
+
+    // Choose the text field. The form that appears comes from the catalogue.
+    const textbox = page.locator("#surfaces-tree button", { hasText: "textbox" }).first();
+    await textbox.click();
+    await page.locator("#inspector-element").waitFor({ timeout: 20000 });
+    const chosenAction = await page.locator("#surfaces-action").textContent();
+    note(`[${label}] selecting a text field opens on Fill field, not "Choose an action"`,
+      (chosenAction ?? "").includes("Fill"), `action=${(chosenAction ?? "").trim()}`);
+    // The form asks for exactly what `type` needs: a value.
+    await page.locator("#surfaces-field-value").waitFor({ timeout: 10000 });
+    note(`[${label}] the fill form asks for a value`, true);
+
+    // Fill it, and verify with a postcondition that is TRUE.
+    await page.locator("#surfaces-field-value").fill("ada");
+    await choose(page, "surfaces-verify", "Value equals");
+    await page.locator("#surfaces-verify-value").fill("ada");
+    await page.locator("#action-surface-act").click();
+    await page.locator("#surfaces-last-result").waitFor({ timeout: 30000 });
+    let summary = (await page.locator("#surfaces-result-summary").textContent()) ?? "";
+    let pills = (await page.locator("#surfaces-last-result .sv-pill").allTextContents()).join(",");
+    note(`[${label}] a true postcondition reads dispatched AND verified`,
+      /dispatched/.test(pills) && /(^|,)verified/.test(pills) && summary.includes("verified"),
+      `pills=${pills} summary=${summary.trim()}`);
+
+    // Now the case the gate insists on: a DELIBERATELY WRONG postcondition must
+    // read failed, never verified (SF-11).
+    await page.locator("#surfaces-field-value").fill("ada");
+    await choose(page, "surfaces-verify", "Value equals");
+    await page.locator("#surfaces-verify-value").fill("not-what-was-typed");
+    await page.locator("#action-surface-act").click();
+    await page.waitForTimeout(600);
+    summary = (await page.locator("#surfaces-result-summary").textContent()) ?? "";
+    pills = (await page.locator("#surfaces-last-result .sv-pill").allTextContents()).join(",");
+    note(`[${label}] a deliberately wrong postcondition reads NOT verified`,
+      /not verified/.test(pills) && /did not hold/.test(summary),
+      `pills=${pills} summary=${summary.trim()}`);
+
+    // Details discloses the envelopes rather than putting them on the first screen.
+    await page.locator("#surfaces-result-details").click();
+    const raw = (await page.locator("#surfaces-result-raw").textContent()) ?? "";
+    note(`[${label}] Details discloses the request and its answer`,
+      raw.includes("requestId") && raw.includes("status"));
 
     // Disconnect closes it (SF-05); it is live now a session is selected.
     await page.locator("#action-surface-disconnect").waitFor({ state: "attached" });

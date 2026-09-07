@@ -58,13 +58,9 @@ export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "postSessionsBySessionCheck", verb: "post", path: "/sessions/{session}/check", summary: "Check a predicate against the surface (SF-11)" },
   { id: "postSessionsBySessionDescribe", verb: "post", path: "/sessions/{session}/describe", summary: "Describe a specific element on the surface (SF-10)" },
   { id: "postSessionsBySessionRead", verb: "post", path: "/sessions/{session}/read", summary: "Read a value from the surface (SF-11)" },
+  { id: "postSessionsBySessionRequest", verb: "post", path: "/sessions/{session}/request", summary: "Send an HTTP request on an HTTP surface (T15, SF-04)" },
   { id: "postSessionsBySessionScreenshot", verb: "post", path: "/sessions/{session}/screenshot", summary: "Take a screenshot of the current surface (SF-11)" },
   { id: "postSessionsBySessionSnapshot", verb: "post", path: "/sessions/{session}/snapshot", summary: "A semantic snapshot of the surface (SF-10)" },
-  { id: "postSurfaceBySessionAct", verb: "post", path: "/surface/{session}/act", summary: "Act in the explored session; `intent` is required" },
-  { id: "postSurfaceBySessionCheck", verb: "post", path: "/surface/{session}/check", summary: "Check in the explored session; `intent` is required" },
-  { id: "postSurfaceBySessionClose", verb: "post", path: "/surface/{session}/close", summary: "Close an explored session" },
-  { id: "postSurfaceBySessionOpen", verb: "post", path: "/surface/{session}/open", summary: "Open a surface session the explorer drives" },
-  { id: "postSurfaceBySessionRead", verb: "post", path: "/surface/{session}/read", summary: "Read in the explored session; `intent` is required" },
   { id: "postSurfaceBySessionSnapshot", verb: "post", path: "/surface/{session}/snapshot", summary: "The driven session's snapshot, for the picker and the explorer" },
   { id: "postTrajectoryCompile", verb: "post", path: "/trajectory/compile", summary: "Compile a captured trajectory into proposals/<date>/" },
   { id: "putApiByName", verb: "put", path: "/api/{name}", summary: "Save a named request under api/<name>.yaml" },
@@ -314,6 +310,11 @@ export class GeneratedClient {
     return await this.call("post", `/sessions/${encodeURIComponent(session)}/read`, { body, });
   }
 
+  /** `POST /sessions/{session}/request` — Send an HTTP request on an HTTP surface (T15, SF-04) */
+  async postSessionsBySessionRequest(session: string, body?: unknown): Promise<unknown> {
+    return await this.call("post", `/sessions/${encodeURIComponent(session)}/request`, { body, });
+  }
+
   /** `POST /sessions/{session}/screenshot` — Take a screenshot of the current surface (SF-11) */
   async postSessionsBySessionScreenshot(session: string, body?: unknown): Promise<unknown> {
     return await this.call("post", `/sessions/${encodeURIComponent(session)}/screenshot`, { body, });
@@ -322,31 +323,6 @@ export class GeneratedClient {
   /** `POST /sessions/{session}/snapshot` — A semantic snapshot of the surface (SF-10) */
   async postSessionsBySessionSnapshot(session: string, body?: unknown): Promise<unknown> {
     return await this.call("post", `/sessions/${encodeURIComponent(session)}/snapshot`, { body, });
-  }
-
-  /** `POST /surface/{session}/act` — Act in the explored session; `intent` is required */
-  async postSurfaceBySessionAct(session: string, body?: unknown): Promise<unknown> {
-    return await this.call("post", `/surface/${encodeURIComponent(session)}/act`, { body, });
-  }
-
-  /** `POST /surface/{session}/check` — Check in the explored session; `intent` is required */
-  async postSurfaceBySessionCheck(session: string, body?: unknown): Promise<unknown> {
-    return await this.call("post", `/surface/${encodeURIComponent(session)}/check`, { body, });
-  }
-
-  /** `POST /surface/{session}/close` — Close an explored session */
-  async postSurfaceBySessionClose(session: string): Promise<unknown> {
-    return await this.call("post", `/surface/${encodeURIComponent(session)}/close`, { });
-  }
-
-  /** `POST /surface/{session}/open` — Open a surface session the explorer drives */
-  async postSurfaceBySessionOpen(session: string, body?: unknown): Promise<unknown> {
-    return await this.call("post", `/surface/${encodeURIComponent(session)}/open`, { body, });
-  }
-
-  /** `POST /surface/{session}/read` — Read in the explored session; `intent` is required */
-  async postSurfaceBySessionRead(session: string, body?: unknown): Promise<unknown> {
-    return await this.call("post", `/surface/${encodeURIComponent(session)}/read`, { body, });
   }
 
   /** `POST /surface/{session}/snapshot` — The driven session's snapshot, for the picker and the explorer */

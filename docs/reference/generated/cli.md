@@ -464,6 +464,22 @@ What this target supports: which actions, which reads, which checks, and why any
 Exit codes: 0 ok · 1 failed
 ```
 
+### `yam surface request`
+
+```text
+yam surface request --session <id> --url <url> [--method GET] [--input <file.json>] [--json]
+
+Send an HTTP request on an HTTP surface and return the response. An HTTP target has no elements to click; this is how one is driven.
+
+  --session <id>       the session
+  --url <url>          the URL, or a path joined to the session's base URL
+  --method <verb>      GET by default
+  --input <file.json>  the whole request — headers, body, auth — or `-` for stdin
+  --json               one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
 ### `yam surface screenshot`
 
 ```text

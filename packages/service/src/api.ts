@@ -188,10 +188,6 @@ export interface ServiceApi {
   /* ── T5.8: the surface explorer and the tool panel (REQ-ADE-8) ─────────── */
 
   /**
-   * Open a surface session an agent — or the app's explorer — drives call by
-   * call, writing `trajectory.jsonl` (LLD §13.5's `POST /surface/:sessionId/*`).
-   */
-  /**
    * The surface operations, as the catalogue defines them (SF-03, T12).
    *
    * The service may not import `surface-control` — it may import the CLI's
@@ -213,17 +209,6 @@ export interface ServiceApi {
     readonly run: (args: Record<string, unknown>) => Promise<unknown>;
   }>;
 
-  openSurfaceSession?(
-    loaded: ProjectHandle,
-    options: { sessionId: string; headed?: boolean },
-  ): Promise<{
-    call(
-      call: "snapshot" | "act" | "read" | "check",
-      args: Record<string, unknown>,
-    ): Promise<unknown>;
-    trajectoryPath: string;
-    close(): Promise<void>;
-  }>;
 
   /** Compile a captured trajectory into `proposals/<date>/` (T5.5). */
   compileTrajectory?(

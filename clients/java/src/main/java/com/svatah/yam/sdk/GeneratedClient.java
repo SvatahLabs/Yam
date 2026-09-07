@@ -65,13 +65,9 @@ public class GeneratedClient {
       "POST /sessions/{session}/check",
       "POST /sessions/{session}/describe",
       "POST /sessions/{session}/read",
+      "POST /sessions/{session}/request",
       "POST /sessions/{session}/screenshot",
       "POST /sessions/{session}/snapshot",
-      "POST /surface/{session}/act",
-      "POST /surface/{session}/check",
-      "POST /surface/{session}/close",
-      "POST /surface/{session}/open",
-      "POST /surface/{session}/read",
       "POST /surface/{session}/snapshot",
       "POST /trajectory/compile",
       "PUT /api/{name}",
@@ -357,6 +353,11 @@ public class GeneratedClient {
     return call("post", "/sessions/" + segment(session) + "/read", body, "application/json");
   }
 
+  /** {@code POST /sessions/{session}/request} — Send an HTTP request on an HTTP surface (T15, SF-04) */
+  public String postSessionsBySessionRequest(String session, String body) {
+    return call("post", "/sessions/" + segment(session) + "/request", body, "application/json");
+  }
+
   /** {@code POST /sessions/{session}/screenshot} — Take a screenshot of the current surface (SF-11) */
   public String postSessionsBySessionScreenshot(String session, String body) {
     return call("post", "/sessions/" + segment(session) + "/screenshot", body, "application/json");
@@ -365,31 +366,6 @@ public class GeneratedClient {
   /** {@code POST /sessions/{session}/snapshot} — A semantic snapshot of the surface (SF-10) */
   public String postSessionsBySessionSnapshot(String session, String body) {
     return call("post", "/sessions/" + segment(session) + "/snapshot", body, "application/json");
-  }
-
-  /** {@code POST /surface/{session}/act} — Act in the explored session; `intent` is required */
-  public String postSurfaceBySessionAct(String session, String body) {
-    return call("post", "/surface/" + segment(session) + "/act", body, "application/json");
-  }
-
-  /** {@code POST /surface/{session}/check} — Check in the explored session; `intent` is required */
-  public String postSurfaceBySessionCheck(String session, String body) {
-    return call("post", "/surface/" + segment(session) + "/check", body, "application/json");
-  }
-
-  /** {@code POST /surface/{session}/close} — Close an explored session */
-  public String postSurfaceBySessionClose(String session) {
-    return call("post", "/surface/" + segment(session) + "/close", null, "application/json");
-  }
-
-  /** {@code POST /surface/{session}/open} — Open a surface session the explorer drives */
-  public String postSurfaceBySessionOpen(String session, String body) {
-    return call("post", "/surface/" + segment(session) + "/open", body, "application/json");
-  }
-
-  /** {@code POST /surface/{session}/read} — Read in the explored session; `intent` is required */
-  public String postSurfaceBySessionRead(String session, String body) {
-    return call("post", "/surface/" + segment(session) + "/read", body, "application/json");
   }
 
   /** {@code POST /surface/{session}/snapshot} — The driven session's snapshot, for the picker and the explorer */

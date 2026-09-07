@@ -290,6 +290,31 @@ function operationFor(
         operation: "describe",
         args: defined({ session, ref: stringOption(args, "ref") ?? "" }),
       };
+    case "request": {
+      /*
+       * `--input` carries the whole `ApiRequest` — headers, a JSON body, auth —
+       * without shell quoting hazards; `--method`/`--url` are the short form for
+       * the common case. The two compose: the flags win over the file, so a
+       * saved request can be re-sent against another path.
+       */
+      const input = (inputFor(args) ?? {}) as Record<string, unknown>;
+      const method = stringOption(args, "method") ?? (input["method"] as string | undefined) ?? "GET";
+      const url = stringOption(args, "url") ?? (input["url"] as string | undefined);
+      if (url === undefined) {
+        throw new Error(
+          "`yam surface request` needs --url <url-or-path>, or an --input file with one.",
+        );
+      }
+      return {
+        operation: "request",
+        args: defined({
+          session,
+          request: { name: "request", ...input, method: method.toUpperCase(), url },
+          withSessionCookies: boolOption(args, "with-session-cookies") || undefined,
+        }),
+      };
+    }
+
     case "screenshot":
       return {
         operation: "screenshot",

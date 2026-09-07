@@ -8,6 +8,12 @@
  * `{"adapter":"does-not-exist"}` still answered 200. A grep cannot see either.
  *
  * So this starts a real service and asks it.
+ *
+ * T15 moved these routes: the older `/surface/:session/*` shape went with the
+ * Explorer that was its only caller, and the catalogue's own routes — `POST
+ * /sessions`, `/sessions/:id/{snapshot,read}`, `DELETE /sessions/:id` — are what
+ * a caller uses now. The three properties are unchanged, so the cases are the
+ * same questions asked of the routes that exist.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { spawn, type ChildProcess } from "node:child_process";
@@ -61,53 +67,85 @@ async function post(path: string, body: unknown): Promise<{ status: number; body
   return { status: response.status, body: await response.text() };
 }
 
+/** Open a session through the catalogue's connect, and answer with its id. */
+async function connect(body: Record<string, unknown> = {}): Promise<{ status: number; body: string; session?: string }> {
+  const answer = await post("/sessions", { url: app.origin, ...body });
+  const parsed = JSON.parse(answer.body) as { result?: { sessionId?: string } };
+  return { ...answer, ...(parsed.result?.sessionId === undefined ? {} : { session: parsed.result.sessionId }) };
+}
+
+async function close(session: string): Promise<void> {
+  await fetch(`${connection.url}/sessions/${encodeURIComponent(session)}`, {
+    method: "DELETE",
+    headers: { authorization: `Bearer ${connection.token}` },
+  });
+}
+
 describe("the service's surface routes (SF-03, SF-04, SF-12)", () => {
-  it("refuses an adapter this host does not have, with a 400 and a reason", async () => {
-    const refused = await post("/surface/bad-adapter/open", { adapter: "does-not-exist" });
-    // Not 200 (the audit's finding) and not 500 (a caller's mistake is not ours).
-    expect(refused.status).toBe(400);
-    expect(refused.body).toMatch(/not registered/i);
-    expect(refused.body).toMatch(/playwright/);
+  it("refuses an adapter this host does not have, with a reason and no session", async () => {
+    const refused = await connect({ adapter: "does-not-exist" });
+    /*
+     * The envelope carries the outcome; the status carries whether the service
+     * could answer at all (T12). So this is a 200 whose `status` is `refused` —
+     * not the audit's 200-that-succeeded, and not a 500, because a caller's
+     * mistake is not the service's fault.
+     */
+    expect(refused.status).toBe(200);
+    const envelope = JSON.parse(refused.body) as { status: string; error?: { code?: string; message?: string } };
+    expect(envelope.status).toBe("refused");
+    expect(envelope.error?.code).toMatch(/ADAPTER_NOT_REGISTERED|ADAPTER_UNAVAILABLE/);
+    expect(envelope.error?.message ?? "").toMatch(/not registered|not available|requires/i);
+    // And nothing was launched: a refusal opens no session.
+    expect(refused.session).toBeUndefined();
   }, 120_000);
 
   it("inspects without an intent, and says what it saw", async () => {
-    expect((await post("/surface/no-intent/open", {})).status).toBe(200);
+    const opened = await connect();
+    expect(opened.session, opened.body).toBeDefined();
+    const session = opened.session!;
+    try {
+      // Direct control owes nobody a sentence (SF-12). Before wave 1 this was a
+      // 400; after the gate came off but before the schema followed, a 500.
+      const read = await post(`/sessions/${session}/read`, { kind: "title" });
+      expect(read.status, read.body).toBe(200);
+      expect(read.body).toContain("Yam Sample");
 
-    // Direct control owes nobody a sentence (SF-12). Before wave 1 this was a
-    // 400; after the gate came off but before the schema followed, a 500.
-    const read = await post("/surface/no-intent/read", { kind: "title" });
-    expect(read.status, read.body).toBe(200);
-    expect(read.body).toContain("Yam Sample");
-
-    const snapshot = await post("/surface/no-intent/snapshot", {});
-    expect(snapshot.status, snapshot.body).toBe(200);
-
-    await post("/surface/no-intent/close", {});
+      const snapshot = await post(`/sessions/${session}/snapshot`, {});
+      expect(snapshot.status, snapshot.body).toBe(200);
+      expect(JSON.parse(snapshot.body).status).toBe("succeeded");
+    } finally {
+      await close(session);
+    }
   }, 120_000);
 
   it("forwards the arguments it used to drop: a second ref, an attribute name, a node budget", async () => {
-    expect((await post("/surface/args/open", {})).status).toBe(200);
+    const opened = await connect();
+    expect(opened.session, opened.body).toBeDefined();
+    const session = opened.session!;
     try {
       /*
        * `maxNodes` was dropped, so a caller asking for a bounded snapshot got
        * the whole page. Two budgets, two sizes: the argument arrives.
        */
-      const small = await post("/surface/args/snapshot", { maxNodes: 3, interactiveOnly: true });
-      const large = await post("/surface/args/snapshot", { maxNodes: 60, interactiveOnly: true });
+      const small = await post(`/sessions/${session}/snapshot`, { maxNodes: 3, interactiveOnly: true });
+      const large = await post(`/sessions/${session}/snapshot`, { maxNodes: 60, interactiveOnly: true });
       expect(small.status).toBe(200);
       const nodesIn = (body: string): number =>
-        ((JSON.parse(body) as { nodes?: unknown[] }).nodes ?? []).length;
+        ((JSON.parse(body) as { result?: { nodes?: unknown[] } }).result?.nodes ?? []).length;
       expect(nodesIn(small.body)).toBeLessThanOrEqual(3);
       expect(nodesIn(large.body)).toBeGreaterThan(nodesIn(small.body));
 
       // `name` was dropped, so an attribute read had nothing to name.
-      const shot = await post("/surface/args/snapshot", { interactiveOnly: true, maxNodes: 40 });
-      const first = ((JSON.parse(shot.body) as { nodes: Array<{ ref: string }> }).nodes ?? [])[0];
+      const shot = await post(`/sessions/${session}/snapshot`, { interactiveOnly: true, maxNodes: 40 });
+      const first = ((JSON.parse(shot.body) as { result: { nodes: Array<{ ref: string }> } }).result.nodes ?? [])[0];
       expect(first, shot.body).toBeDefined();
-      const attribute = await post("/surface/args/read", { kind: "attribute", ref: first!.ref, name: "id" });
+      const attribute = await post(`/sessions/${session}/read`, {
+        kind: "attribute", ref: first!.ref, name: "id",
+      });
       expect(attribute.status, attribute.body).toBe(200);
+      expect(JSON.parse(attribute.body).status).toBe("succeeded");
     } finally {
-      await post("/surface/args/close", {});
+      await close(session);
     }
   }, 180_000);
 });

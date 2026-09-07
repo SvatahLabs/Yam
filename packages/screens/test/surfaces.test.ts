@@ -12,7 +12,16 @@
  * (busy, stale, unknown outcome) are T15's, on the selected session.
  */
 import { describe, expect, it } from "vitest";
-import { actionById, fakeService, screenById, type FakeResponses, type SurfacesState } from "../src/index.js";
+import {
+  actionById,
+  fakeService,
+  problemFor,
+  screenById,
+  surfaceOutcomeView,
+  type FakeResponses,
+  type SurfaceActionOffer,
+  type SurfacesState,
+} from "../src/index.js";
 
 /** A succeeded envelope around a result, as the broker returns it. */
 const ok = (result: unknown): unknown => ({
@@ -179,5 +188,256 @@ describe("Surfaces actions run against the broker (SF-04, SF-05)", () => {
     expect(outcome.ok).toBe(true);
     expect(outcome.message).toBe("2 of 3 adapters ready.");
     expect(outcome.goTo).toBe("surfaces");
+  });
+});
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * T15 — the selected-target action inspector
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+const CAPS = ok({
+  adapter: "playwright",
+  kind: "web",
+  capabilities: { drag: true, upload: false, dialogs: false, frames: false, windows: true, screenshot: true },
+});
+
+const SNAP = ok({
+  snapshotId: "snap_1",
+  generation: 0,
+  truncated: false,
+  nodes: [
+    { ref: "r0", role: "form", depth: 0, states: [] },
+    { ref: "r1", role: "textbox", name: "Username", depth: 1, states: [], value: "" },
+    { ref: "r2", role: "button", name: "Sign in", depth: 1, states: [] },
+  ],
+});
+
+const ONE_SESSION = ok({
+  sessions: [{ sessionId: "s_1", adapter: "playwright", kind: "web", status: "ready" }],
+});
+
+const connected = async (
+  extra: Partial<NonNullable<FakeResponses["surface"]>> = {},
+  params: Record<string, unknown> = {},
+): Promise<SurfacesState> =>
+  (await screenById("surfaces").load(
+    fakeService({
+      surface: {
+        targets: ok({ adapters: ADAPTERS, targets: [] }),
+        sessions: ONE_SESSION,
+        capabilities: CAPS,
+        snapshot: SNAP,
+        ...extra,
+      },
+    }),
+    { selected: "s_1", ...params },
+  )) as SurfacesState;
+
+describe("the connected surface: a tree to select from (T15, SF-10)", () => {
+  it("draws the semantic tree, which is available where a screenshot is not", async () => {
+    const state = await connected();
+    expect(state.session?.adapter).toBe("playwright");
+    expect(state.tree.map((one) => one.ref)).toEqual(["r0", "r1", "r2"]);
+    expect(state.tree[1]).toMatchObject({ role: "textbox", name: "Username", depth: 1 });
+    expect(state.snapshotId).toBe("snap_1");
+  });
+
+  it("describes the selected control and says what it is", async () => {
+    const state = await connected(
+      { describe: ok({ ref: "r1", role: "textbox", name: "Username", states: [], value: "" }) },
+      { ref: "r1" },
+    );
+    expect(state.element?.name).toBe("Username");
+    // "Text field · Enabled", the mockup's own line.
+    expect(state.element?.summary).toBe("Text field · Enabled");
+    expect(state.tree.find((one) => one.selected)?.ref).toBe("r1");
+  });
+
+  it("a reference that no longer describes is the stale state, with the way out", async () => {
+    const state = await connected(
+      {
+        describe: {
+          schemaVersion: "1.0", requestId: "r", status: "refused",
+          error: { code: "STALE_REFERENCE", message: "Reference \"r9\" was not in snapshot snap_1.", retryable: false },
+        },
+      },
+      { ref: "r9" },
+    );
+    expect(state.problem?.kind).toBe("stale");
+    expect(state.problem?.nextAction).toBe("Refresh and select again");
+    expect(state.problem?.nextActionId).toBe("surface.refresh");
+  });
+});
+
+describe("the action form comes from the catalogue (T15, SF-09, SF-11)", () => {
+  it("offers only what the adapter can do, and never an action it cannot", async () => {
+    const state = await connected();
+    const offered = state.offers.map((one) => one.action);
+    // `drag` is a capability this adapter has; `upload` and `dialog` are not.
+    expect(offered).toContain("dragTo");
+    expect(offered).not.toContain("upload");
+    expect(offered).not.toContain("dialog");
+  });
+
+  it("gives fill a value, click the control, drag two, navigate a URL", async () => {
+    const state = await connected();
+    const form = (action: string): SurfaceActionOffer =>
+      state.offers.find((one) => one.action === action)!;
+
+    expect(form("type").fields.map((f) => f.name)).toEqual(["value"]);
+    expect(form("type").needsRef).toBe(true);
+
+    expect(form("click").fields).toEqual([]);
+    expect(form("click").needsRef).toBe(true);
+
+    expect(form("dragTo").needsRef).toBe(true);
+    expect(form("dragTo").needsRef2).toBe(true);
+
+    expect(form("navigate").fields.map((f) => f.name)).toEqual(["url"]);
+    expect(form("navigate").needsRef).toBe(false);
+  });
+
+  it("opens on the action that suits the control, so 'Choose an action' is never a dead end", async () => {
+    const onText = await connected(
+      { describe: ok({ ref: "r1", role: "textbox", name: "Username", states: [] }) },
+      { ref: "r1" },
+    );
+    expect(onText.action).toBe("type");
+
+    const onButton = await connected(
+      { describe: ok({ ref: "r2", role: "button", name: "Sign in", states: [] }) },
+      { ref: "r2" },
+    );
+    expect(onButton.action).toBe("click");
+
+    // And an action is always chosen, even with nothing selected.
+    const nothing = await connected();
+    expect(nothing.action).toBeDefined();
+    expect(nothing.offers.some((one) => one.chosen)).toBe(true);
+  });
+
+  it("an HTTP surface has no element form; it has the request form", async () => {
+    const state = await connected({
+      capabilities: ok({ adapter: "http", kind: "http", capabilities: {} }),
+      sessions: ok({ sessions: [{ sessionId: "s_1", adapter: "http", kind: "http", status: "ready" }] }),
+    });
+    expect(state.httpSurface).toBe(true);
+    expect(state.offers).toEqual([]);
+    expect(state.tree).toEqual([]);
+  });
+});
+
+describe("dispatch and verification are two things (T15, SF-11)", () => {
+  const actOk = ok({ ok: true, ref: "r1" });
+
+  it("an act with no postcondition is dispatched and NOT verified", async () => {
+    const view = surfaceOutcomeView({ act: actOk })!;
+    expect(view.dispatched).toBe(true);
+    expect(view.verified).toBe(false);
+    expect(view.verification).toBe("none");
+    expect(view.summary).toContain("Not verified");
+  });
+
+  it("a postcondition that passed is the only thing that makes it verified", async () => {
+    const view = surfaceOutcomeView({ act: actOk, check: ok({ ok: true, actual: "ada", expected: "ada" }) })!;
+    expect(view.verified).toBe(true);
+    expect(view.verification).toBe("passed");
+  });
+
+  it("a deliberately wrong postcondition reads FAILED, never verified", async () => {
+    // The gate's own case: a check that does not hold must not report success.
+    const view = surfaceOutcomeView({
+      act: actOk,
+      check: ok({ ok: false, actual: "ada", expected: "not-what-was-typed" }),
+    })!;
+    expect(view.dispatched).toBe(true);
+    expect(view.verified).toBe(false);
+    expect(view.verification).toBe("failed");
+    expect(view.actual).toBe("ada");
+    expect(view.expected).toBe("not-what-was-typed");
+    expect(view.summary).toContain("did not hold");
+  });
+
+  it("a refused act is not dispatched, and carries the state it put the surface in", async () => {
+    const view = surfaceOutcomeView({
+      act: {
+        schemaVersion: "1.0", requestId: "r", status: "refused",
+        error: { code: "CONTROL_BUSY", message: "Another client holds the lease.", retryable: true },
+      },
+    })!;
+    expect(view.dispatched).toBe(false);
+    expect(view.verified).toBe(false);
+    expect(view.problem?.kind).toBe("busy");
+  });
+
+  it("never offers an unqualified retry for an unknown outcome (SF-14)", () => {
+    const problem = problemFor("OUTCOME_UNKNOWN", "The response was lost.")!;
+    expect(problem.kind).toBe("unknown");
+    expect(problem.nextAction).toContain("Inspect the current state");
+    expect(problem.nextAction.toLowerCase()).not.toContain("retry");
+  });
+});
+
+describe("the act action sends a schema-valid request (T15, SF-11)", () => {
+  it("sends the action, the ref, the snapshot and the typed args", async () => {
+    const service = fakeService({ surface: { act: ok({ ok: true, ref: "r1" }) } });
+    const outcome = await actionById("surface.act")!.run(service, {
+      selected: "s_1",
+      ref: "r1",
+      action: "type",
+      snapshot: "snap_1",
+      args: { value: "ada" },
+    });
+    expect(outcome.ok).toBe(true);
+    const call = service.calls.find((one) => one.method === "postSessionsBySessionAct")!;
+    expect(call.args[0]).toBe("s_1");
+    expect(call.args[1]).toEqual({ action: "type", ref: "r1", snapshot: "snap_1", args: { value: "ada" } });
+    // No postcondition was asked for, so no check ran and nothing is verified.
+    expect(service.calls.some((one) => one.method === "postSessionsBySessionCheck")).toBe(false);
+    expect(outcome.message).toContain("Not verified");
+  });
+
+  it("runs the postcondition when one is given, and reports it failing", async () => {
+    const service = fakeService({
+      surface: { act: ok({ ok: true, ref: "r1" }), check: ok({ ok: false, actual: "ada", expected: "zoe" }) },
+    });
+    const outcome = await actionById("surface.act")!.run(service, {
+      selected: "s_1", ref: "r1", action: "type", args: { value: "ada" },
+      verify: { kind: "value", value: "zoe" },
+    });
+    const check = service.calls.find((one) => one.method === "postSessionsBySessionCheck")!;
+    expect(check.args[1]).toEqual({ predicate: { kind: "value", value: "zoe" }, subject: "ref", ref: "r1" });
+    expect(outcome.message).toContain("did not hold");
+    expect(surfaceOutcomeView(outcome.value)!.verified).toBe(false);
+  });
+
+  it("carries the service's refusal reason rather than one of its own", async () => {
+    const service = fakeService({
+      surface: {
+        act: {
+          schemaVersion: "1.0", requestId: "r", status: "refused",
+          error: { code: "STALE_REFERENCE", message: "The target has changed. Take a new snapshot.", retryable: false },
+        },
+      },
+    });
+    const outcome = await actionById("surface.act")!.run(service, {
+      selected: "s_1", ref: "r1", action: "click",
+    });
+    expect(outcome.ok).toBe(false);
+    expect(outcome.message).toContain("Take a new snapshot");
+    expect(surfaceOutcomeView(outcome.value)!.problem?.kind).toBe("stale");
+  });
+
+  it("an HTTP request sends method and path, and reports the status", async () => {
+    const service = fakeService({
+      surface: { request: ok({ response: { status: 201, statusText: "Created", headers: {}, body: "{}", durationMs: 3 } }) },
+    });
+    const outcome = await actionById("surface.request")!.run(service, {
+      selected: "s_1", method: "post", url: "/things",
+    });
+    expect(outcome.ok).toBe(true);
+    expect(outcome.message).toBe("POST /things → 201");
+    const call = service.calls.find((one) => one.method === "postSessionsBySessionRequest")!;
+    expect(call.args[1]).toEqual({ request: { name: "request", method: "POST", url: "/things" } });
   });
 });

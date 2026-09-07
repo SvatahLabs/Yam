@@ -1,5 +1,5 @@
 /**
- * Agents and tools, API, Data, Surface explorer, Import, Settings (T10.2,
+ * Agents and tools, API, Data, Import, Settings (T10.2,
  * REQ-ADE-11, LLD §13.7).
  *
  * The six screens the `Agents` artboard and the four artboards this phase added
@@ -8,8 +8,8 @@
  * shapes in it would be five opportunities for them to drift.
  *
  * Every value is the model's (`@svatah/yam-screens`'s `AgentsState`, `ApiState`,
- * `DataState`, `ExplorerState`, `ImportState`, `SettingsState`). What this file
- * decides is where each goes on a page.
+ * `DataState`, `ImportState`, `SettingsState`). What this file decides is where
+ * each goes on a page.
  */
 import { useEffect, useState } from "react";
 import { Alert, Button, Chooser, Field, InspectorSection, KeyValues, Pill, Table } from "@svatah/yam-ui";
@@ -18,12 +18,10 @@ import type {
   AgentsState,
   ApiState,
   DataState,
-  ExplorerState,
   ImportState,
   ScreenParams,
   SettingsState,
 } from "@svatah/yam-screens";
-import { SURFACE_ACTIONS } from "@svatah/yam-schema";
 import { Code, Counts, EmptyInspector, Toolbar } from "./parts.js";
 
 /** What every one of these six takes. */
@@ -43,6 +41,15 @@ export interface ScreenProps<S> {
    */
   readonly onAction: (id: string, args?: Readonly<Record<string, unknown>>) => void;
   readonly onParams: (params: ScreenParams) => void;
+  /**
+   * What the last action answered, when one has run on this screen (T15).
+   *
+   * A mutation's outcome is not a route — nothing can re-read it — so the shell
+   * keeps it and hands it here, and the screen turns it into a view with a
+   * function from the model. Surfaces uses it to draw dispatch and verification
+   * separately; a screen that does not need it ignores it.
+   */
+  readonly lastOutcome?: { readonly id: string; readonly ok: boolean; readonly value: unknown };
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -494,156 +501,6 @@ export function DataInspector(props: ScreenProps<DataState>): React.JSX.Element 
         </p>
       ) : null}
     </InspectorSection>
-  );
-}
-
-/* ────────────────────────────────────────────────────────────────────────────
- * Surface explorer (the `Explorer` artboard)
- * ──────────────────────────────────────────────────────────────────────────── */
-
-export function ExplorerScreen(props: ScreenProps<ExplorerState>): React.JSX.Element {
-  const { state } = props;
-  const intent = state.intent ?? "";
-  return (
-    <>
-      <Toolbar
-        state={state}
-        actions={props.actions}
-        onAction={props.onAction}
-        primary="explorer.snapshot"
-      >
-        <Chooser
-          id="explorer-adapter"
-          label="Adapter"
-          value={state.adapter}
-          options={state.adapters.map((one) => ({ value: one, label: one }))}
-          onChange={(adapter) => props.onParams({ ...props.params, adapter })}
-        />
-      </Toolbar>
-
-      <div className="sv-main">
-        <aside className="sv-list" id="explorer-snapshot-pane" aria-label="Snapshot">
-          {state.snapshot.length === 0 ? (
-            <p className="sv-empty">
-              {state.sessionId === undefined
-                ? "Open a session to read its accessibility tree."
-                : "Take a snapshot to see what is on the screen."}
-            </p>
-          ) : (
-            <div className="sv-code" id="explorer-snapshot" aria-label="Snapshot tree">
-              {state.snapshot.map((line, at) => (
-                <button
-                  key={at}
-                  id={`snapshot-node-${at}`}
-                  type="button"
-                  className={line.selected ? "sv-code-line sv-code-current" : "sv-code-line"}
-                  onClick={() =>
-                    line.ref === undefined
-                      ? undefined
-                      : props.onParams({ ...props.params, selected: line.ref })
-                  }
-                >
-                  <span className="sv-code-text">
-                    {"  ".repeat(line.depth)}
-                    {line.role}
-                    {line.name === undefined ? "" : ` "${line.name}"`}
-                  </span>
-                  <span className="sv-code-note">{line.ref ?? ""}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </aside>
-
-        <div className="sv-editor">
-          <div className="sv-toolbar">
-            <Field
-              id="explorer-intent"
-              label="Intent"
-              value={intent}
-              placeholder="what this call is for"
-              onChange={(value) => props.onParams({ ...props.params, intent: value })}
-              onSubmit={() => props.onAction("explorer.snapshot")}
-            />
-            <Chooser
-              id="explorer-action"
-              label="Action"
-              value={state.action ?? "click"}
-              options={SURFACE_ACTIONS.map((a) => ({ value: a, label: a }))}
-              onChange={(action) => props.onParams({ ...props.params, action })}
-            />
-          </div>
-
-          {intent.trim() === "" ? (
-            <Alert id="explorer-intent-required" tone="abort">
-              <b>Every call records an intent.</b> A surface call is refused without one: the intent
-              is what <span className="sv-mono">trajectory compile</span> turns into a step, and a
-              call without it is a line the compiler has to throw away (REQ-BEH-4).
-            </Alert>
-          ) : null}
-
-          <Table<ExplorerState["calls"][number]>
-            id="explorer-calls"
-            label="Trajectory"
-            rows={[...state.calls]}
-            rowKey={(row) => String(row.seq)}
-            empty="No call yet. Each one is written to trajectory.jsonl with its intent."
-            columns={[
-              { key: "seq", header: "#", align: "right", cell: (row) => row.seq },
-              { key: "call", header: "call", monospace: true, cell: (row) => row.call },
-              { key: "intent", header: "intent", cell: (row) => row.intent },
-              {
-                key: "ok",
-                header: "outcome",
-                cell: (row) =>
-                  row.ok ? <Pill tone="pass" label="ok" /> : <Pill tone="fail" label="failed" />,
-              },
-              {
-                key: "duration",
-                header: "time",
-                align: "right",
-                cell: (row) => (row.durationMs === undefined ? "—" : `${row.durationMs} ms`),
-              },
-            ]}
-          />
-        </div>
-      </div>
-    </>
-  );
-}
-
-export function ExplorerInspector(props: ScreenProps<ExplorerState>): React.JSX.Element {
-  const { state } = props;
-  return (
-    <>
-      <InspectorSection id="inspector-session" title="Session">
-        <KeyValues
-          rows={[
-            { key: "Adapter", value: <span className="sv-mono">{state.adapter}</span> },
-            { key: "Base URL", value: <span className="sv-mono">{state.baseUrl ?? "—"}</span> },
-            { key: "Session", value: <span className="sv-mono">{state.sessionId ?? "none"}</span> },
-            {
-              key: "Trajectory",
-              value: <span className="sv-mono">{state.trajectory ?? "—"}</span>,
-            },
-            { key: "Calls", value: String(state.calls.length) },
-          ]}
-        />
-      </InspectorSection>
-
-      <InspectorSection id="inspector-compile" title="Compile to proposal">
-        <p className="sv-card">
-          Writes a story draft, a plan and a seed bindings store under{" "}
-          <span className="sv-mono">proposals/</span>, every binding marked unverified. It writes
-          nowhere else, and it keeps the calls that failed: a trajectory is an account of what an
-          agent did, and dropping the mistakes would make the proposal a story of a session that
-          never happened.
-        </p>
-        {state.proposal === undefined ? null : (
-          <p className="sv-inspector-subject sv-mono">{state.proposal}</p>
-        )}
-      </InspectorSection>
-    </>
   );
 }
 

@@ -207,8 +207,127 @@ and cross-checks, each updated to the new information architecture:
 ### Known gaps
 
 - The Explorer (`explorer` screen and `/surface/:session/*` routes) is still
-  present, transitional; T15 replaces it. Two "surface" screens coexist until then.
+  present at the end of T14, transitional; **T15 removes it.**
 - Projectless main-process startup is verified by the renderer harness over a real
   service and by the main-process unit tests; a packaged-app launch-into-Surfaces
-  case is added in `apps/desktop/test/surfaces.spec.ts` for the verifier to run
-  when the app is packaged (it skips otherwise, as `shell.spec.ts` does).
+  case awaits packaging (`shell.spec.ts` skips without a packaged build).
+
+---
+
+## T15 — The selected-target action inspector
+
+**Status:** complete.
+
+**Requirements:** SF-09, SF-10, SF-11, SF-16, SF-17, SF-18.
+
+### What an action needs is in the contract, not the screen
+
+The working rule is "the desktop must not grow its own idea of what an action
+needs". The catalogue validated an action's arguments but never said *which*
+arguments each action takes — so any client drawing a form had to know. That is
+now data:
+
+- `packages/schema/src/action-forms.ts` (new): `ACTION_FORMS` — per action, its
+  human label, whether it needs a reference (and a second one), and its typed
+  fields. Plus `offeredActions(kind, capabilities)`, which filters by the
+  surface's kind and the adapter's own capability flags, and
+  `defaultActionForRole`. It lives in `@svatah/yam-schema` because that is what
+  already owns the action vocabulary and is the one package the screen model may
+  depend on; `surface-control` re-exports it, so the catalogue story holds.
+- Only actions that can be *completed* are offered, which is what stops "Choose
+  an action" being a dead end: `drag` appears only with the `drag` capability,
+  `upload` only with `upload`, and an HTTP surface offers none.
+
+### An HTTP surface can be driven at all
+
+`HttpSurface.act()` refuses everything and its tree is empty, and the wave-2
+catalogue had no request operation — so an HTTP target, one of the three
+platforms initial release validation must cover, could not be driven. T15 adds
+the **`request` operation** to the catalogue, which propagates by construction:
+`yam surface request`, the `surface_request` MCP tool, `POST
+/sessions/:session/request`, and the desktop's method-and-path form. Proven
+against a real HTTP surface:
+
+```
+$ yam surface connect --adapter http --url http://127.0.0.1:PORT --json   → s_…, kind http
+$ yam surface request --session s_… --url "/things?q=1" --json
+  { "status": "succeeded", "result": { "response": { "status": 200,
+      "json": { "path": "/things?q=1", "method": "GET" } } } }
+```
+
+### The screen and the renderer
+
+- `packages/screens/src/screens/surfaces.ts`: with a session chosen the screen
+  loads capabilities, a **bounded** snapshot (`TREE_MAX_NODES`, interactive
+  nodes) and — when a control is chosen — `describe`. It exposes the tree, the
+  element, the offered actions with their fields, and `problemFor` /
+  `surfaceOutcomeView`, the two pure functions that turn a domain error code and
+  an action's envelopes into a state and a result.
+- `apps/desktop/src/renderer/shell/Surfaces.tsx`: the tree on the left, the
+  selected control and its form on the right, the HTTP form for an HTTP surface,
+  and the last result with **dispatch and verification as two separate pills**.
+  Protocol detail (request ids, both envelopes) is behind **Details**.
+- The shell now keeps the last action's outcome and hands it to the screen. This
+  is the mechanism whose absence left `apiResponseView` exported and unused
+  since Phase 10 — a shape the model knew and nothing could feed. Surfaces is
+  fed by it.
+
+**`verified` is true only when a postcondition passed.** An act that reached the
+target and was not checked reads "Dispatched. Not verified — no postcondition
+was given."; a check that did not hold reads "Dispatched, but the postcondition
+did not hold." and keeps the observed and expected values.
+
+### The Explorer is replaced, not extended
+
+The `explorer` screen, its four actions, its TUI renderer and its
+`/surface/:session/{open,act,read,check,close}` routes are **removed** — wave 3
+changes routes in place, with no compatibility window, and those routes had no
+other caller. `/surface/:session/snapshot` stays: the record review's re-pick
+reads the driven session through it. What the Explorer's cases covered is
+covered elsewhere — driving a live target by the Surfaces suites below, and
+compiling an exploration into a proposal by `packages/cli/test/explore.test.ts`
+through MCP. `trajectory.compile` moved to Agents and tools, under Automations.
+
+### Validate
+
+Model, against a fake broker: `pnpm --filter @svatah/yam-screens test` — 77
+tests, of which `test/surfaces.test.ts` is 27, covering the tree, the element
+summary, offers filtered by capability, fill/click/drag/navigate field shapes,
+the default action per role, a stale reference, and every outcome case including
+a refusal carrying the service's own reason.
+
+Driven — the real renderer over a real projectless service, broker and Playwright
+adapter (`apps/desktop/test/surfaces-dogfood.mjs`), at **1440×1000 and
+1280×800**: **30/30 checks**.
+
+```
+[1440x1000] the surface's semantic tree is on screen — textbox "Username" r0 button "Go" r1
+[1440x1000] selecting a text field opens on Fill field, not "Choose an action" — action=Fill field
+[1440x1000] the fill form asks for a value
+[1440x1000] a true postcondition reads dispatched AND verified — pills=dispatched,verified
+[1440x1000] a deliberately wrong postcondition reads NOT verified
+            — pills=dispatched,not verified · "Dispatched, but the postcondition did not hold."
+[1440x1000] Details discloses the request and its answer
+… and the same at 1280x800.
+```
+
+The wrong-postcondition case is the gate's own: *"A deliberately wrong
+postcondition must show as failed, not as verified."* It is driven, not asserted.
+
+### Deviations
+
+- **Pixel actions and the screenshot preview.** The design offers a screenshot
+  preview beside the tree with hit-testing onto a semantic ref, and pixel actions
+  as an explicit lower-assurance mode. T15 ships the tree only — it is the half
+  that is "always available, including when screenshots are unsupported", and
+  hit-testing needs a coordinate→ref mapping no adapter exposes today. Recorded
+  rather than claimed.
+- **Copy CLI / Copy MCP.** Not built. The equivalents exist as data (each action
+  carries its `cli`), but generating an executable line with real session and ref
+  values, marking expiring refs and routing secrets through a file, is its own
+  piece of work; it sits with T16's agent setup, where the copyable
+  configuration lives.
+- **Keyboard row selection (carried from T14).** The tree's nodes are real
+  buttons and are keyboard-reachable; the sessions and adapters *tables* still
+  are not, so choosing among several sessions by keyboard remains a `Table`
+  enhancement.

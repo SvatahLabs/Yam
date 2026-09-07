@@ -356,9 +356,21 @@ describe("the palette (^K) is the app's list (T9.4, REQ-ADE-10)", () => {
     await settle();
     const frame = lastFrame() ?? "";
     expect(frame).toContain("same list as the app");
-    // The rows are the registry's, by label and by command.
-    expect(frame).toContain("Compile");
-    expect(frame).toContain("yam compile");
+    /*
+     * The rows are the registry's, by label and by command. Surface-first (T14,
+     * T15): the registry now opens with the Surfaces actions, so those are the
+     * first page — which is what the palette should show first when connecting
+     * to something is the primary journey.
+     */
+    expect(frame).toContain("Connect surface");
+    expect(frame).toContain("yam surface connect");
+
+    // And a row further down is still there, one filter away.
+    stdin.write("compile");
+    await settle();
+    const filtered = lastFrame() ?? "";
+    expect(filtered).toContain("Compile");
+    expect(filtered).toContain("yam compile");
   });
 
   it("filters as it is typed, over labels and CLI commands", async () => {

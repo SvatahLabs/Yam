@@ -25,15 +25,14 @@ import {
   type HealResult,
 } from "@svatah/yam-healer";
 import { record, type GroundingProposal, type ReviewDecision } from "@svatah/yam-recorder";
-import { listAdapters, createSurface, type AgentSurface } from "@svatah/yam-surface";
+import { createSurface, type AgentSurface } from "@svatah/yam-surface";
 import { toolsFor as deriveTools } from "@svatah/yam-tool";
 import {
   compileTrajectory,
   readTrajectory,
-  TrajectoryWriter,
   writeProposal,
 } from "@svatah/yam-trajectory";
-import type { Config, Ref } from "@svatah/yam-schema";
+import type { Config } from "@svatah/yam-schema";
 import { registerAllAdapters } from "./adapters.js";
 import { compileProject } from "./project.js";
 import type { loadProject } from "./project.js";
@@ -371,131 +370,6 @@ export async function serviceHeal(
 
 /* ── the surface explorer (REQ-ADE-8) ─────────────────────────────────────── */
 
-/**
- * A session the explorer drives call by call, writing `trajectory.jsonl`.
- *
- * The same thing `yam mcp`'s raw-surface tools do, and for the same reason:
- * an intent per call is what turns an exploration into something T5.5 can
- * compile (LLD §13.4). The service refuses a call without one; this records what
- * it is given.
- */
-export async function serviceOpenSurfaceSession(
-  loaded: Loaded,
-  options: { sessionId: string; headed?: boolean; adapter?: string },
-): Promise<{
-  call(call: "snapshot" | "act" | "read" | "check", args: Record<string, unknown>): Promise<unknown>;
-  trajectoryPath: string;
-  close(): Promise<void>;
-}> {
-  /*
-   * The adapter the caller asked for, refused when it is not one (SF-04, G04).
-   *
-   * The route used to forward `adapter` into a function that dropped it, so
-   * `{"adapter": "does-not-exist"}` answered 200 and opened the project's
-   * configured Playwright surface. A person cannot trust a choice the service
-   * silently overrules, so an unregistered name is refused before anything is
-   * launched, naming what this host actually has.
-   */
-  if (options.adapter !== undefined && options.adapter !== loaded.config.adapter) {
-    registerAllAdapters();
-    const known = listAdapters();
-    if (!known.includes(options.adapter)) {
-      /*
-       * A `code` the service reads structurally, so a caller's mistake is a
-       * 400 rather than a 500 and no package imports another to say so.
-       */
-      throw Object.assign(
-        new Error(
-          `Adapter "${options.adapter}" is not registered on this host. Available: ` +
-            `${known.length === 0 ? "(none)" : known.join(", ")}.`,
-        ),
-        { code: "UNSUPPORTED_ADAPTER" },
-      );
-    }
-  }
-  const { surface } = await open(loaded, {
-    ...(options.adapter === undefined ? {} : { adapter: options.adapter }),
-    ...(options.headed === undefined ? {} : { headed: options.headed }),
-  });
-  const trajectoryPath = join(
-    loaded.root,
-    loaded.config.run.outputDir,
-    options.sessionId,
-    "trajectory.jsonl",
-  );
-  const trajectory = new TrajectoryWriter(trajectoryPath);
-
-  return {
-    trajectoryPath,
-    async call(call, args) {
-      // Absent, not empty: the schema now permits a call nobody narrated.
-      const intent = typeof args["intent"] === "string" && args["intent"].trim() !== ""
-        ? args["intent"]
-        : undefined;
-      const ref = args["ref"] === undefined ? undefined : (String(args["ref"]) as Ref);
-      const { intent: _i, ...rest } = args;
-      void _i;
-
-      const snapshotHash = await surface
-        .snapshot({ interactiveOnly: true })
-        .then((one) => one.hash)
-        .catch(() => undefined);
-      const url = (await surface.state().catch(() => undefined))?.url;
-      const describe = ref === undefined ? undefined : await surface.describe(ref).catch(() => undefined);
-
-      const record_ = (result: unknown, error?: string): void => {
-        trajectory.write({
-          ...(intent === undefined ? {} : { intent }),
-          call,
-          ...(Object.keys(rest).length === 0 ? {} : { args: rest }),
-          ...(snapshotHash === undefined ? {} : { snapshotHash }),
-          ...(url === undefined ? {} : { url }),
-          ...(ref === undefined ? {} : { ref }),
-          ...(describe === undefined ? {} : { describe }),
-          ...(error === undefined ? { ...(result === undefined ? {} : { result }) } : { error }),
-        });
-      };
-
-      try {
-        const result =
-          call === "snapshot"
-            ? await surface.snapshot({
-                ...(rest["interactiveOnly"] === undefined
-                  ? {}
-                  : { interactiveOnly: rest["interactiveOnly"] === true }),
-                // Dropped until Draft 2.25 (G07): a caller asking for a bounded
-                // or scoped snapshot got the whole page instead.
-                ...(typeof rest["maxNodes"] === "number" ? { maxNodes: rest["maxNodes"] } : {}),
-                ...(typeof rest["root"] === "string" ? { root: rest["root"] as Ref } : {}),
-              })
-            : call === "act"
-              ? await surface.act(
-                  rest["action"] as never,
-                  ref,
-                  (rest["args"] ?? {}) as never,
-                  rest["ref2"] as string | undefined,
-                )
-              : call === "read"
-                ? await surface.read((rest["kind"] ?? "text") as never, ref, rest["name"] as string | undefined)
-                : await surface.check(
-                    rest["predicate"] as never,
-                    (rest["subject"] ?? "ref") as never,
-                    ref,
-                  );
-        // A snapshot's own text is the answer; recording it in the trajectory
-        // would put a page in every line of the file.
-        record_(call === "snapshot" ? undefined : result);
-        return result;
-      } catch (error) {
-        record_(undefined, error instanceof Error ? error.message.split("\n")[0] : String(error));
-        throw error;
-      }
-    },
-    async close() {
-      await surface.close().catch(() => undefined);
-    },
-  };
-}
 
 /** Compile a captured trajectory into `proposals/<date>/` (T5.5). */
 export async function serviceCompileTrajectory(

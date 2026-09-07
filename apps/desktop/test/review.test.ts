@@ -44,7 +44,6 @@ import {
   serviceCompileTrajectory,
   serviceHeal,
   serviceMigrateFromPrototype,
-  serviceOpenSurfaceSession,
   serviceRecord,
   serviceToolsFor,
   serviceVerifyBindings,
@@ -144,7 +143,6 @@ async function serve(
       record: serviceRecord,
       verifyBindings: serviceVerifyBindings,
       heal: serviceHeal,
-      openSurfaceSession: serviceOpenSurfaceSession,
       compileTrajectory: serviceCompileTrajectory,
       toolsFor: serviceToolsFor,
     } as never,
@@ -614,106 +612,17 @@ describe("the bindings browser and the heal review (T5.7, REQ-ADE-5)", () => {
   }, 300_000);
 });
 
-describe("the surface explorer (T5.8, REQ-ADE-8)", () => {
-  it("compiles a six-call exploration to a proposal in proposals/", async () => {
-    const project = scaffold();
-    const { service, client } = await serve(project);
-    try {
-      const opened = (await client.postSurfaceBySessionOpen("explorer", {})) as {
-        trajectory: string;
-      };
-
-      const home = (await client.postSurfaceBySessionSnapshot("explorer", {
-        intent: "see what is on the home page",
-        interactiveOnly: true,
-      })) as { nodes: Array<{ ref: string; role: string; name?: string }> };
-      const signIn = home.nodes.find((node) => node.name === "Sign in");
-      expect(signIn, home.nodes.map((n) => `${n.role} ${n.name}`).join(" | ")).toBeDefined();
-
-      await client.postSurfaceBySessionAct("explorer", {
-        intent: "go to the sign-in page",
-        action: "click",
-        ref: signIn!.ref,
-      });
-
-      const login = (await client.postSurfaceBySessionSnapshot("explorer", {
-        intent: "see the sign-in form",
-        interactiveOnly: true,
-      })) as { nodes: Array<{ ref: string; role: string; name?: string }> };
-      const username = login.nodes.find((node) => node.name === "Username");
-      expect(username).toBeDefined();
-
-      await client.postSurfaceBySessionAct("explorer", {
-        intent: "type the enterprise user's email into the username field",
-        action: "type",
-        ref: username!.ref,
-        args: { value: "connected2atul@gmail.com" },
-      });
-      const read = (await client.postSurfaceBySessionRead("explorer", {
-        intent: "check what the username field now holds",
-        kind: "value",
-        ref: username!.ref,
-      })) as { value: unknown };
-      expect(read.value).toBe("connected2atul@gmail.com");
-      await client.postSurfaceBySessionCheck("explorer", {
-        intent: "confirm the sign-in button is ready",
-        predicate: { kind: "visible" },
-        subject: "ref",
-        ref: login.nodes.find((node) => node.name === "Sign In")?.ref,
-      });
-
-      const before = readdirSync(project).sort();
-
-      const report = (await client.postTrajectoryCompile({ path: opened.trajectory })) as {
-        dir: string;
-        files: string[];
-        steps: { total: number; compiled: number; rate: number };
-        flow: string;
-      };
-
-      expect(report.steps.total).toBeGreaterThanOrEqual(4);
-      expect(report.steps.rate).toBeGreaterThanOrEqual(0.8);
-      expect(report.flow).toContain("Click the Sign in link");
-
-      // In `proposals/`, and nowhere else.
-      expect(report.files.every((file) => file.includes(`${join("", "proposals")}`))).toBe(true);
-      expect(readdirSync(project).sort()).toEqual([...before, "proposals"].sort());
-
-      await client.postSurfaceBySessionClose("explorer");
-    } finally {
-      await service.close();
-    }
-  }, 300_000);
-
-  /*
-   * Intent is optional for direct control (SF-12, Draft 2.25).
-   *
-   * This case asserted the opposite through Phase 5: a surface call with no
-   * intent was refused, "because a log is not a trajectory". The surface-first
-   * mission superseded that — "direct operations must not require a prose
-   * intent" — so a no-intent call now *succeeds*; the trajectory records the
-   * step it can, without an intent, and compiling it is where a missing intent
-   * becomes a review step (Draft 2.25). The `/surface/:session/*` explorer
-   * routes are themselves transitional and are retired with the Explorer in T15;
-   * this keeps the intent-optional contract honest in the meantime.
-   */
-  it("accepts a call with no intent (SF-12)", async () => {
-    const project = scaffold();
-    const { service, client } = await serve(project);
-    try {
-      await client.postSurfaceBySessionOpen("explorer", {});
-      // No intent, and it is not refused: intent is metadata, not a gate (SF-12).
-      const result = (await client.postSurfaceBySessionAct("explorer", {
-        action: "click",
-        ref: "r1",
-      })) as { value?: { ok?: boolean } };
-      expect(result.value?.ok).toBe(true);
-      await client.postSurfaceBySessionClose("explorer");
-    } finally {
-      await service.close();
-    }
-  }, 240_000);
-});
+/*
+ * The surface explorer's cases went with the Explorer (T15).
+ *
+ * It drove `POST /surface/:session/{open,act,read,check,close}`, which were its
+ * only callers and were removed with it — wave 3 changes routes in place, with
+ * no compatibility window. What they covered is covered elsewhere: driving a
+ * live target is the Surfaces action inspector over the broker's catalogue
+ * routes (`packages/screens/test/surfaces.test.ts` and the driven
+ * `apps/desktop/test/surfaces-dogfood.mjs`), and compiling an exploration into a
+ * proposal is `packages/cli/test/explore.test.ts` through MCP.
+ */
 
 describe("the tool panel (T5.8, REQ-ADE-8, REQ-BEH-3)", () => {
   it("lists the tools a project exposes, and why the others are not", async () => {

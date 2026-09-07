@@ -865,6 +865,7 @@ async function goTo(screen: string, label: string): Promise<void> {
 
 test.describe("every screen (T10.1, T10.2)", () => {
   const SCREENS: ReadonlyArray<[string, string]> = [
+    ["surfaces", "Surfaces"],
     ["flows", "Flows"],
     ["runs", "Runs"],
     ["bindings", "Bindings"],
@@ -876,7 +877,6 @@ test.describe("every screen (T10.1, T10.2)", () => {
     ["record", "Record review"],
     ["run", "Run"],
     ["heal", "Heal review"],
-    ["explorer", "Surface explorer"],
   ];
 
   for (const [screen, label] of SCREENS) {
@@ -1004,13 +1004,22 @@ test("the Data screen names every secret and shows none of them", async () => {
   await expect(page.locator("#inspector-value")).toBeVisible();
 });
 
-test("the Surface explorer refuses a call with no intent", async () => {
-  await goTo("explorer", "Surface explorer");
-  // The alert is on the screen while the intent is empty (REQ-BEH-4).
-  await expect(page.locator("#explorer-intent-required")).toBeVisible();
-  await page.getByLabel("Intent").fill("look at the booking page");
+/**
+ * T15 — the action inspector, in place of the Explorer.
+ *
+ * The Explorer asked for an adapter and a prose intent before it would do
+ * anything, and its Act button refused every press with "Choose an action".
+ * Surfaces asks for neither: it opens on the connect flow with no project, and
+ * once a surface is connected the form comes from the catalogue.
+ */
+test("Surfaces offers a connect form and no prose intent (T15, SF-12)", async () => {
+  await goTo("surfaces", "Surfaces");
+  await expect(page.locator("#surfaces-url")).toBeVisible();
+  await expect(page.locator("#action-surface-connect")).toBeVisible();
+  await expect(page.locator("#surfaces-discovery")).toBeVisible();
+  // Nothing anywhere asks for an intent before it will look at something.
   await expect(page.locator("#explorer-intent-required")).toHaveCount(0);
-  await expect(page.locator("#explorer-adapter")).toBeVisible();
+  await expect(page.locator("#explorer-adapter")).toHaveCount(0);
 });
 
 test("the Import screen previews into the open project and nowhere else", async () => {

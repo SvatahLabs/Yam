@@ -733,8 +733,6 @@ export async function createService(options: ServeOptions): Promise<RunningServi
       if (recorder?.surface !== undefined) {
         return await recorder.surface.snapshot(request.body ?? {});
       }
-      const explorer = exploring.get(request.params.session);
-      if (explorer !== undefined) return await explorer.call("snapshot", request.body ?? {});
       return reply.code(404).send({ error: "no-session", message: "No session by that id." });
     },
   );
@@ -901,10 +899,6 @@ export async function createService(options: ServeOptions): Promise<RunningServi
   /* ── T5.8: the surface explorer and the tool panel (REQ-ADE-8) ───────────── */
 
   /** Open surface sessions the explorer drives, keyed by the id it chose. */
-  const exploring = new Map<
-    string,
-    Awaited<ReturnType<NonNullable<ServiceApi["openSurfaceSession"]>>>
-  >();
 
   /*
    * The catalogue's operations, served exactly as it defines them (T12).
@@ -914,8 +908,10 @@ export async function createService(options: ServeOptions): Promise<RunningServi
    * catalogue appears here with no edit to this file, which is the property
    * "one source" actually means.
    *
-   * The `/surface/:session/*` routes below are the older shape and stay for the
-   * app's Explorer until it moves; both reach the same dispatcher.
+   * T15 removed the older `/surface/:session/{open,act,read,check,close}`
+   * shape with the Explorer that was its only caller; `/surface/:session/snapshot`
+   * remains because the record review's re-pick reads the driven session
+   * through it (REQ-ADE-4).
    */
   for (const operation of api.surfaceOperations ?? []) {
     const route = operation.path.replace(/:session\b/g, ":session");
@@ -947,62 +943,8 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     });
   }
 
-  fastify.post<{ Params: { session: string }; Body?: { headed?: boolean; adapter?: string } }>(
-    "/surface/:session/open",
-    async (request, reply) => {
-      if (api.openSurfaceSession === undefined) {
-        return reply.code(501).send({ error: "not-available" });
-      }
-      const id = request.params.session;
-      const existing = exploring.get(id);
-      if (existing !== undefined) return { sessionId: id, trajectory: existing.trajectoryPath };
 
-      /*
-       * An adapter this host does not have is the caller's mistake, not the
-       * service's fault: 400 with the domain code, never a 500 (SF-04, G04).
-       */
-      let session;
-      try {
-        session = await api.openSurfaceSession(await load(), {
-          sessionId: id,
-          ...(request.body?.headed === undefined ? {} : { headed: request.body.headed }),
-          ...(request.body?.adapter === undefined ? {} : { adapter: request.body.adapter }),
-        });
-      } catch (error) {
-        if ((error as { code?: string }).code === "UNSUPPORTED_ADAPTER") {
-          return reply.code(400).send({
-            error: "unsupported-adapter",
-            message: error instanceof Error ? error.message : String(error),
-          });
-        }
-        throw error;
-      }
-      exploring.set(id, session);
-      return { sessionId: id, trajectory: session.trajectoryPath };
-    },
-  );
 
-  for (const call of ["act", "read", "check"] as const) {
-    fastify.post<{ Params: { session: string }; Body?: Record<string, unknown> }>(
-      `/surface/:session/${call}`,
-      async (request, reply) => {
-        const session = exploring.get(request.params.session);
-        if (session === undefined) {
-          return reply.code(404).send({ error: "no-session", message: "Open the session first." });
-        }
-        const body = request.body ?? {};
-        return { value: await session.call(call, body) };
-      },
-    );
-  }
-
-  fastify.post<{ Params: { session: string } }>("/surface/:session/close", async (request, reply) => {
-    const session = exploring.get(request.params.session);
-    if (session === undefined) return reply.code(404).send({ error: "no-session" });
-    exploring.delete(request.params.session);
-    await session.close();
-    return reply.code(202).send({ ok: true });
-  });
 
   fastify.post<{ Body?: { path?: string; name?: string } }>(
     "/trajectory/compile",

@@ -15,6 +15,11 @@ Zod definitions and generated JSON Schemas for the Yam artifact contracts
 | `ActArgs` | typealias | `export type ActArgs = z.infer<typeof actArgsSchema>;` |  |
 | `actArgsSchema` | variable | `actArgsSchema = z.record(` |  |
 | `Action` | typealias | `export type Action = z.infer<typeof actionSchema>;` |  |
+| `ACTION_FORMS` | variable | `ACTION_FORMS: readonly ActionForm[] = [` | The forms, in the order an inspector offers them: the common ones first. |
+| `ActionField` | interface | `export interface ActionField` |  |
+| `ActionFieldType` | typealias | `export type ActionFieldType = "string" \| "number" \| "boolean" \| "url" \| "key";` | How a field is collected, and how it is typed on the way to `args`. |
+| `ActionForm` | interface | `export interface ActionForm` |  |
+| `actionFormFor` | function | `export function actionFormFor(action: string): ActionForm \| undefined` | One form by action name. |
 | `ACTIONS` | variable | `ACTIONS = [` | Every action a compiled step can carry. Order follows LLD §3.2 exactly. |
 | `actionSchema` | variable | `actionSchema = z.enum(ACTIONS)` |  |
 | `ActResult` | typealias | `export type ActResult = z.infer<typeof actResultSchema>;` |  |
@@ -55,6 +60,7 @@ Zod definitions and generated JSON Schemas for the Yam artifact contracts
 | `canonicalJsonCompact` | function | `export function canonicalJsonCompact(value: unknown): string` | Deterministic JSON with no whitespace — the form hashes are taken over. |
 | `canonicalYaml` | function | `export function canonicalYaml(value: unknown): string` | Deterministic YAML: sorted keys, block style, no line folding. |
 | `Capabilities` | typealias | `export type Capabilities = z.infer<typeof capabilitiesSchema>;` |  |
+| `CAPABILITIES` | variable | `CAPABILITIES: readonly CapabilityFlag[] = CAPABILITY_FLAGS` | Every capability flag, so a client can render a readiness list. |
 | `capabilitiesSchema` | variable | `capabilitiesSchema = z` |  |
 | `CAPABILITY_FLAGS` | variable | `CAPABILITY_FLAGS = [` |  |
 | `CapabilityFlag` | typealias | `export type CapabilityFlag = (typeof CAPABILITY_FLAGS)[number];` |  |
@@ -72,6 +78,7 @@ Zod definitions and generated JSON Schemas for the Yam artifact contracts
 | `COORDS_CANDIDATE_KIND` | variable | `COORDS_CANDIDATE_KIND = "coords" as const` | Last resort: the element's box centre. |
 | `DEFAULT_CONFIG` | variable | `DEFAULT_CONFIG: Omit<Config, "project"> ` | The default configuration `yam init` writes; also the base a partial config merges onto. |
 | `DEFAULT_IGNORE_ATTRIBUTES` | variable | `DEFAULT_IGNORE_ATTRIBUTES = ["data-yam-eval"]` | The default of `bindings.ignoreAttributes` (LLD §3.5, §16, Draft 2.3). |
+| `defaultActionForRole` | function | `export function defaultActionForRole(role: string \| undefined): string` | The action an inspector opens on for an element of this role. |
 | `DESKTOP_CANDIDATE_KINDS` | variable | `DESKTOP_CANDIDATE_KINDS = ["automationId", "controlPath"] as const` | Desktop candidate kinds (Windows UIA, macOS AX). |
 | `ElementDescription` | typealias | `export type ElementDescription = z.infer<typeof elementDescriptionSchema>;` |  |
 | `elementDescriptionSchema` | variable | `elementDescriptionSchema = z` | What `describe(ref)` returns: everything candidate synthesis and fingerprinting |
@@ -104,6 +111,7 @@ Zod definitions and generated JSON Schemas for the Yam artifact contracts
 | `NODE_STATES` | variable | `NODE_STATES = [` |  |
 | `NodeState` | typealias | `export type NodeState = z.infer<typeof nodeStateSchema>;` |  |
 | `nodeStateSchema` | variable | `nodeStateSchema = z.enum(NODE_STATES)` |  |
+| `offeredActions` | function | `export function offeredActions(` | The actions this surface can actually perform, in offer order (SF-09). |
 | `OnFailure` | typealias | `export type OnFailure = z.infer<typeof onFailureSchema>;` |  |
 | `onFailureSchema` | variable | `onFailureSchema = z.union([` | `stop` (default), `continue`, or run a named compensating story then stop. |
 | `Origin` | typealias | `export type Origin = z.infer<typeof originSchema>;` |  |
