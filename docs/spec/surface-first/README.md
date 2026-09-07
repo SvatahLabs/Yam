@@ -8,6 +8,7 @@ Yam should make **connect → inspect → act → verify** its primary experienc
 - [Tasks](tasks.md): 23 implementation tasks, dependencies, completion criteria and release gates.
 - [Release review](release-review.md): what was measured, on what, and the open limitations by name. A review, not a release.
 - [Wave 4 progress](progress/wave-4.md): T18–T20 as they landed — Yam driving the packaged Yam, the coverage report and the release review.
+- [Wave 5 implementation prompt](wave-5-implementation.md): a dependable Yam-on-Yam suite and a conformant parity gate first, then Streamable HTTP MCP, process/PTY and AT-SPI.
 - [Wave 4 implementation prompt](wave-4-implementation.md): Yam controls the packaged Yam through its public interfaces, coverage with a denominator, and the docs and release review brought to what shipped.
 - [Wave 3 implementation prompt](wave-3-implementation.md): the Surfaces shell, the action inspector, shared control and agent setup, and the automations regrouped.
 - [Wave 2 implementation prompt](wave-2-implementation.md): discovery, reference scope, coordination, evidence, transport parity and clean installation.
