@@ -40,8 +40,16 @@ import {
   synthesise,
   synthesiseSiteTool,
 } from "@svatah/yam-bindings";
-import type { BindingEntry, Candidate, Provenance, Ref, Snapshot } from "@svatah/yam-schema";
+import type {
+  BindingEntry,
+  Candidate,
+  Provenance,
+  Ref,
+  Snapshot,
+  SurfaceKind,
+} from "@svatah/yam-schema";
 import type { AgentSurface } from "@svatah/yam-surface";
+import { DataError } from "@svatah/yam-runtime";
 import {
   GatewayRefusal,
   type Gateway,
@@ -51,6 +59,33 @@ import { groundingAnswerSchema, PROMPT_VERSION, question, SYSTEM } from "./promp
 import { prune } from "./prune.js";
 
 /** What the recorder wants grounded: a phrase, and the id it compiled to. */
+
+/**
+ * Which platform a binding grounded against this surface is filed under (T22).
+ *
+ * `http` is `web`: an HTTP request against an application is about the same
+ * application a web binding is. `process` never reaches here — recording a
+ * terminal session is refused in `session.ts`, because a binding finds an
+ * element and a terminal has lines of text — and this says so rather than
+ * silently filing one under `desktop`, which no resolver would ever match.
+ */
+function bindingPlatformOf(kind: SurfaceKind): "web" | "mobile" | "desktop" {
+  switch (kind) {
+    case "http":
+    case "web":
+      return "web";
+    case "mobile":
+      return "mobile";
+    case "desktop":
+      return "desktop";
+    default:
+      throw new DataError(
+        `A ${kind} surface has no elements to bind, so nothing grounded against it can be filed ` +
+          "in the bindings store.",
+      );
+  }
+}
+
 export interface GroundingTarget {
   /** The element id, e.g. `login.username-field`. */
   readonly id: string;
@@ -468,7 +503,7 @@ export async function ground(
         ...(options.matchHost === undefined ? {} : { matchHost: options.matchHost }),
       }),
       hash,
-      platform: surface.kind === "http" ? "web" : surface.kind,
+      platform: bindingPlatformOf(surface.kind),
     },
     candidates,
     fingerprint: fingerprintOf(description, {
@@ -535,7 +570,7 @@ export async function entryFor(
         ...(options.matchHost === undefined ? {} : { matchHost: options.matchHost }),
       }),
       hash,
-      platform: surface.kind === "http" ? "web" : surface.kind,
+      platform: bindingPlatformOf(surface.kind),
     },
     candidates,
     fingerprint: fingerprintOf(description, {
@@ -685,7 +720,7 @@ export async function groundSiteTool(
         ...(options.matchHost === undefined ? {} : { matchHost: options.matchHost }),
       }),
       hash: contextHash(snapshot).hash,
-      platform: surface.kind === "http" ? "web" : surface.kind,
+      platform: bindingPlatformOf(surface.kind),
     },
     candidates: [candidate],
     fingerprint: {

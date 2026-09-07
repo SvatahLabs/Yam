@@ -95,7 +95,8 @@
                 "web",
                 "mobile",
                 "desktop",
-                "http"
+                "http",
+                "process"
               ],
               "type": "string"
             },

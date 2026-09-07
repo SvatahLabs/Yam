@@ -99,7 +99,16 @@ export type Capabilities = z.infer<typeof capabilitiesSchema>;
 
 /* ── Sessions and state (LLD §2.1) ────────────────────────────────────────── */
 
-export const surfaceKindSchema = z.enum(["web", "mobile", "desktop", "http"]);
+/**
+ * `process` is a terminal (T22, SF-22).
+ *
+ * A fifth kind rather than a flavour of `desktop`, because what a caller may ask
+ * of it is different in kind: it has no window, no elements to click and no
+ * pixels, and it has an exit status, which none of the others has. An
+ * `ACTION_FORMS` entry keyed by surface kind is what stops a screen offering
+ * `click` on one.
+ */
+export const surfaceKindSchema = z.enum(["web", "mobile", "desktop", "http", "process"]);
 export type SurfaceKind = z.infer<typeof surfaceKindSchema>;
 
 export const sessionInitSchema = z

@@ -37,10 +37,12 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:",
     "@svatah/yam-adapter-appium": "workspace:*",
+    "@svatah/yam-adapter-atspi": "workspace:*",
     "@svatah/yam-adapter-ax": "workspace:*",
     "@svatah/yam-adapter-bidi": "workspace:*",
     "@svatah/yam-adapter-http": "workspace:*",
     "@svatah/yam-adapter-playwright": "workspace:*",
+    "@svatah/yam-adapter-process": "workspace:*",
     "@svatah/yam-adapter-uia": "workspace:*",
     "@svatah/yam-bindings": "workspace:*",
     "@svatah/yam-bindings-cli": "workspace:*",
@@ -54,6 +56,7 @@
     "@svatah/yam-recorder": "workspace:*",
     "@svatah/yam-runtime": "workspace:*",
     "@svatah/yam-schema": "workspace:*",
+    "@svatah/yam-sdk": "workspace:*",
     "@svatah/yam-service": "workspace:*",
     "@svatah/yam-spec": "workspace:*",
     "@svatah/yam-steps": "workspace:*",
@@ -61,10 +64,9 @@
     "@svatah/yam-surface-control": "workspace:*",
     "@svatah/yam-tool": "workspace:*",
     "@svatah/yam-trajectory": "workspace:*",
-    "@svatah/yam-workflow": "workspace:*",
-    "yaml": "catalog:",
     "@svatah/yam-tui": "workspace:*",
-    "@svatah/yam-sdk": "workspace:*"
+    "@svatah/yam-workflow": "workspace:*",
+    "yaml": "catalog:"
   },
   "devDependencies": {
     "@playwright/test": "catalog:",

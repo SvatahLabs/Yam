@@ -61,6 +61,7 @@ import type {
 import type { Gateway } from "@svatah/yam-gateway";
 import type { AgentSurface } from "@svatah/yam-surface";
 import {
+  DataError,
   runStep,
   Scope,
   type ApiRunner,
@@ -210,6 +211,23 @@ export async function record(options: RecordSessionOptions): Promise<RecordRepor
   });
 
   const { plan, surface, store, gateway } = options;
+  /*
+   * Which platform a binding recorded here is filed under (T22).
+   *
+   * `http` is filed as `web` because an HTTP request against an application is
+   * the same application a web binding is about. A **terminal** is not: a
+   * binding is a way of finding an *element*, and a terminal has lines of text
+   * rather than elements — there is nothing to ground and nothing to heal. So
+   * recording one is refused by name rather than filed under a platform it does
+   * not belong to, which would put entries in the store that no resolver could
+   * ever match.
+   */
+  if (surface.kind === "process") {
+    throw new DataError(
+      "A terminal session cannot be recorded: a binding finds an element, and a terminal has " +
+        "lines of text. Drive it with `yam surface` and save what worked as a flow.",
+    );
+  }
   const platform = surface.kind === "http" ? "web" : surface.kind;
   const order = storyOrder(plan, options);
   const byName = new Map(plan.stories.map((story) => [story.name, story]));

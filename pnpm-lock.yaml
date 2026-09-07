@@ -89,6 +89,9 @@ importers:
       '@svatah/yam-adapter-playwright':
         specifier: workspace:*
         version: link:packages/adapter-playwright
+      '@svatah/yam-adapter-process':
+        specifier: workspace:*
+        version: link:packages/adapter-process
       '@svatah/yam-bindings':
         specifier: workspace:*
         version: link:packages/bindings
@@ -326,6 +329,25 @@ importers:
         specifier: 'catalog:'
         version: 2.1.9(@types/node@26.4.1)(jsdom@30.0.1)(terser@5.51.2)
 
+  packages/adapter-atspi:
+    dependencies:
+      '@svatah/yam-schema':
+        specifier: workspace:*
+        version: link:../schema
+      '@svatah/yam-surface':
+        specifier: workspace:*
+        version: link:../surface
+    devDependencies:
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 2.1.9(@types/node@26.4.1)(jsdom@30.0.1)(terser@5.51.2)
+
   packages/adapter-ax:
     dependencies:
       '@svatah/yam-schema':
@@ -413,6 +435,25 @@ importers:
       sample-web:
         specifier: workspace:*
         version: link:../../apps/sample-web
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 2.1.9(@types/node@26.4.1)(jsdom@30.0.1)(terser@5.51.2)
+
+  packages/adapter-process:
+    dependencies:
+      '@svatah/yam-schema':
+        specifier: workspace:*
+        version: link:../schema
+      '@svatah/yam-surface':
+        specifier: workspace:*
+        version: link:../surface
+    devDependencies:
       tsup:
         specifier: 'catalog:'
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)
@@ -515,6 +556,9 @@ importers:
       '@svatah/yam-adapter-appium':
         specifier: workspace:*
         version: link:../adapter-appium
+      '@svatah/yam-adapter-atspi':
+        specifier: workspace:*
+        version: link:../adapter-atspi
       '@svatah/yam-adapter-ax':
         specifier: workspace:*
         version: link:../adapter-ax
@@ -527,6 +571,9 @@ importers:
       '@svatah/yam-adapter-playwright':
         specifier: workspace:*
         version: link:../adapter-playwright
+      '@svatah/yam-adapter-process':
+        specifier: workspace:*
+        version: link:../adapter-process
       '@svatah/yam-adapter-uia':
         specifier: workspace:*
         version: link:../adapter-uia

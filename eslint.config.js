@@ -59,6 +59,8 @@ const ADAPTERS = [
   "adapter-appium",
   "adapter-uia",
   "adapter-ax",
+  "adapter-process",
+  "adapter-atspi",
 ];
 
 const ALL_PACKAGES = [

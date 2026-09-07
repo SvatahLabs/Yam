@@ -76,17 +76,28 @@ checks:
     external:
       source: "desktop-gate"
       name: "gate"
+  # Two-sided since T22 (SF-22). The reason it was one-sided was that "driving a
+  # terminal needs a pseudo-terminal adapter, and Yam has none" — which was true
+  # of every wave up to this one. `packages/adapter-process` is that adapter, and
+  # the Yam-on-Yam suite drives `yam ui --capture` through it and asserts the
+  # Flows pane is on the screen. Ink asks whether its output is a terminal and
+  # draws nothing when it is not, so a pane on the screen *is* the pseudo-terminal.
   - id: "cockpit.pseudo-terminal"
     says: "`yam ui` draws its panes in a real pseudo-terminal and its `--json` equals the model's state."
     yam:
-      unreachable: "driving a terminal needs a pseudo-terminal adapter, and Yam has none: the surface kinds are `web`, `desktop`, `mobile` and `http` (LLD \u00a72.4). `script(1)` and `ink-testing-library` are the external side."
+      source: "yam-on-yam"
+      name: "the cockpit draws its panes in the terminal"
     external:
       source: "tui-pty"
       name: "`yam ui` draws in a pseudo-terminal (T9.4) > opens on the `comp` run and draws its four panes"
   - id: "cockpit.json-is-the-model"
     says: "`yam ui --json` prints exactly what the screen model loads, ten times without a diff."
     yam:
-      unreachable: "the same missing adapter: a flow cannot run a command and read its stdout. `yam ui --json` is the SDK's own answer and comparing it with the model is a program, not a flow."
+      # Still one-sided, and for a reason T22 does *not* remove. Yam can now run
+      # a command in a terminal and read its screen — but comparing `--json`
+      # with the screen model ten times and diffing them is a program, not a
+      # flow, and no sentence of the language says "run this twice and compare".
+      unreachable: "Yam can drive a terminal since T22, and this still is not a flow: `yam ui --json` is the SDK's own answer and comparing it with the screen model ten times over is a program. What is missing is a sentence, not an adapter."
     external:
       source: "tui-pty"
       name: "`yam ui --json` is the model's state (T9.4, REQ-ADE-13) > prints the same Flows state ten times running (T10.4, P9-F4)"

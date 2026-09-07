@@ -17,6 +17,8 @@ import { registerAppiumAdapter } from "@svatah/yam-adapter-appium";
 import { registerHttpAdapter } from "@svatah/yam-adapter-http";
 import { registerAxAdapter } from "@svatah/yam-adapter-ax";
 import { registerUiaAdapter } from "@svatah/yam-adapter-uia";
+import { registerProcessAdapter } from "@svatah/yam-adapter-process";
+import { registerAtspiAdapter } from "@svatah/yam-adapter-atspi";
 
 let registered = false;
 
@@ -46,5 +48,21 @@ export function registerAllAdapters(): void {
    * needs.
    */
   registerHttpAdapter();
+  /*
+   * The terminal, as a surface (T22, SF-22).
+   *
+   * Registered on every platform for the same reason the desktop adapters are:
+   * `yam surface doctor` has to be able to say *why* this host cannot run one —
+   * that neither `expect` nor a `python3` with its `pty` module is here — rather
+   * than "no such adapter", which sends a reader looking for a missing install
+   * of Yam instead of a missing install of a pty allocator.
+   */
+  registerProcessAdapter();
+  /*
+   * The Linux desktop (T23, SF-23). Registered everywhere for the same reason
+   * as `ax` and `uia`: on a host that is not Linux the adapter's own sentence
+   * is the useful answer, and "no such adapter" is not.
+   */
+  registerAtspiAdapter();
   registered = true;
 }

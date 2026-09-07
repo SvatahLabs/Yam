@@ -167,6 +167,30 @@ const connectInputSchema = z
     attach: z.string().min(1).optional(),
     adapter: z.string().optional(),
     headed: z.boolean().optional(),
+    /**
+     * Adapter-specific launch details, as the design's own nested object
+     * (design.md, "One public contract"; T22).
+     *
+     * > Adapter-specific launch details live in a typed nested options object
+     * > or config file.
+     *
+     * There was no way to give any: `connect` could name a target and nothing
+     * about how to start it, so a desktop adapter could not be told the bundle
+     * and a terminal could not be told the program's arguments. One typed
+     * object for every adapter rather than a flag each — `path` is where it
+     * runs and, for a terminal, the only directory that session may read.
+     */
+    launch: z
+      .object({
+        bundle: z.string().min(1).optional(),
+        path: z.string().min(1).optional(),
+        args: z.array(z.string()).optional(),
+        env: z.record(z.string().min(1), z.string()).optional(),
+        timeoutMs: z.number().int().positive().optional(),
+        size: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
+      })
+      .strict()
+      .optional(),
     intent: z.string().optional(),
   })
   .refine(
@@ -429,8 +453,10 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
         { name: "url", type: "string", required: false, description: "URL to connect to" },
         { name: "app", type: "string", required: false, description: "Drive an application that is already running, by process name" },
         { name: "attach", type: "string", required: false, description: "Join a browser that is already running, by its DevTools endpoint" },
-        { name: "adapter", type: "string", required: false, description: "Adapter to use (playwright, bidi, appium, uia, ax, http)" },
+        { name: "adapter", type: "string", required: false, description: "Adapter to use (playwright, bidi, appium, uia, ax, http, process)" },
         { name: "headed", type: "boolean", required: false, description: "Run in headed mode" },
+        { name: "launch", type: "string", required: false, description: "How to start the target, as JSON: {\"args\":[…],\"path\":\"…\",\"env\":{…},\"size\":[w,h]}" },
+        { name: "input", type: "file", required: false, description: "The same launch object as a JSON file or stdin, for one with a secret in it" },
       ],
       exitCodes: [
         { code: CLI_EXIT_CODES.OK, meaning: "Connected" },

@@ -43,6 +43,13 @@ const CLI_INPUT = {
   act: (args) => args.args,
   check: (args) => ({ predicate: args.predicate, subject: args.subject ?? "ref" }),
   request: (args) => args.request,
+  /*
+   * `connect`'s launch object goes through `--input` too (T22). It carries a
+   * program's arguments and a directory path, which are exactly the values
+   * `--input` exists to carry "without shell quoting hazards" (SF-06) — and it
+   * is only there when the caller supplied one.
+   */
+  connect: (args) => (args.launch === undefined ? undefined : { launch: args.launch }),
 };
 
 /**
@@ -82,7 +89,7 @@ export function cliDriver({ transcript, holder }) {
       let stdin;
       const spelled = CLI_ARGS[operation]?.(args) ?? args;
       const body = CLI_INPUT[operation]?.(args);
-      const structured = new Set(["args", "predicate", "subject", "request"]);
+      const structured = new Set(["args", "predicate", "subject", "request", "launch"]);
       for (const [name, value] of Object.entries(spelled)) {
         if (value === undefined) continue;
         if (body !== undefined && structured.has(name)) continue;
