@@ -757,6 +757,18 @@
   outline-offset: -2px;
 }
 
+/* The screen's title, when focus lands on it after a control went away (SF-18). */
+.sv-toolbar-title:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* A row reached by keyboard shows where focus is (SF-18). */
+.sv-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 /*
  * The API screen's headers, editable (K7, T11.1).
  *
@@ -768,3 +780,43 @@
 .sv-header-row { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; }
 .sv-header-row .sv-field { min-width: 0; }
 .sv-header-row .sv-input { min-width: 0; width: 100%; }
+
+/*
+ * Narrow windows and 200% zoom (SF-18).
+ *
+ * Driving the desktop at 1440×1000 and 1280×800 at 200% — 720 and 640 CSS
+ * pixels across — found the fixed rail and inspector leaving the screen 124
+ * and 44 pixels wide, the connect form's field, chooser and button on top of
+ * each other, and the main pane pushed below the window with no height. So
+ * below 960 pixels the rail and the inspector give up width before the screen
+ * does, the connect form wraps, and a list-and-editor screen stacks its list
+ * above its editor rather than squeezing both into a column too narrow to
+ * read. Nothing is hidden and nothing overlaps; things get shorter, not gone.
+ */
+@media (max-width: 960px) {
+  .sv-app {
+    --rail-w: 150px;
+    --inspector-w: 250px;
+  }
+  .sv-surfaces-connect {
+    flex-wrap: wrap;
+  }
+  /* The toolbar's actions wrap rather than being clipped off the right. */
+  .sv-toolbar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 40px;
+    padding: 4px 16px;
+    overflow: visible;
+  }
+  .sv-main {
+    flex-direction: column;
+    min-height: 160px;
+  }
+  .sv-list {
+    width: auto;
+    max-height: 40%;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+}

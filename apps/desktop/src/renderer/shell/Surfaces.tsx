@@ -104,6 +104,14 @@ export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Ele
   const doConnect = (): void => props.onAction("surface.connect", { url, adapter });
 
   const connected = state.session !== undefined;
+  /*
+   * The state the surface is in: what loading it found (a held target, a
+   * stale control), or else what the last action came to (a timed-out
+   * navigation, a refusal). The model computed the second and the first cut
+   * never drew it, so an unknown outcome showed a raw adapter message and no
+   * way out — the dead end SF-17 exists to forbid. One alert, one id.
+   */
+  const problem = state.problem ?? surfaceOutcomeView(props.lastOutcome?.value)?.problem;
 
   return (
     <>
@@ -150,17 +158,17 @@ export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Ele
         colour and never a dead end: every one names its next action, and an
         unknown outcome offers inspection rather than a Retry.
       */}
-      {state.problem === undefined ? null : (
-        <Alert id={`surfaces-problem-${state.problem.kind}`} tone="abort">
-          <b>{state.problem.message}</b> {state.problem.nextAction}.
-          {state.problem.nextActionId === undefined ? null : (
+      {problem === undefined ? null : (
+        <Alert id={`surfaces-problem-${problem.kind}`} tone="abort">
+          <b>{problem.message}</b> {problem.nextAction}.
+          {problem.nextActionId === undefined ? null : (
             <>
               {" "}
               <Button
                 id={`surfaces-problem-action`}
-                label={state.problem.nextAction}
+                label={problem.nextAction}
                 variant="ghost"
-                onPress={() => props.onAction(state.problem!.nextActionId!)}
+                onPress={() => props.onAction(problem.nextActionId!)}
               />
             </>
           )}
@@ -175,7 +183,9 @@ export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Ele
             rows={[...state.sessions]}
             rowKey={(row) => row.sessionId}
             selected={state.selected ?? ""}
-            onSelect={(selected) => props.onParams({ ...props.params, selected, ref: undefined })}
+            onSelect={(selected) =>
+              props.onParams({ ...props.params, selected, ref: undefined, snapshot: undefined })
+            }
             empty="Choose a browser, app, device or API to control. Enter a URL above and press Connect surface."
             columns={[
               {
@@ -304,7 +314,10 @@ function SurfaceBody(props: ScreenProps<SurfacesState>): React.JSX.Element {
               type="button"
               className={line.selected ? "sv-code-line sv-code-current" : "sv-code-line"}
               aria-pressed={line.selected}
-              onClick={() => props.onParams({ ...props.params, ref: line.ref })}
+              onClick={() =>
+                // The control, and the snapshot it was chosen from (SF-10).
+                props.onParams({ ...props.params, ref: line.ref, snapshot: state.snapshotId })
+              }
             >
               <span className="sv-code-text">
                 {"  ".repeat(Math.min(line.depth, 8))}
@@ -388,8 +401,8 @@ function LastResult(props: ScreenProps<SurfacesState>): React.JSX.Element | null
         <span>Last action</span>
         <span className="sv-spacer" />
         <Pill
-          tone={view.dispatched ? "pass" : "fail"}
-          label={view.dispatched ? "dispatched" : "refused"}
+          tone={view.dispatched ? "pass" : view.outcome === "unknown" ? "abort" : "fail"}
+          label={view.dispatched ? "dispatched" : view.outcome}
         />
         <Pill
           tone={
@@ -592,7 +605,9 @@ export function SurfacesInspector(props: ScreenProps<SurfacesState>): React.JSX.
                   props.onAction("surface.act", {
                     action: state.action,
                     args: values,
-                    ...(state.snapshotId === undefined ? {} : { snapshot: state.snapshotId }),
+                    ...((props.params.snapshot ?? state.snapshotId) === undefined
+                      ? {}
+                      : { snapshot: props.params.snapshot ?? state.snapshotId }),
                     ...(ref2 === "" ? {} : { ref2 }),
                     ...(verifyKind === ""
                       ? {}

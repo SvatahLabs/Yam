@@ -29,6 +29,76 @@ function maybeRedact(ctx: DispatchContext, result: Record<string, unknown>): Rec
 }
 
 /**
+ * Who a caller is when it does not say (SF-13).
+ *
+ * One default for taking control and for acting on it. The first cut used this
+ * name when control was taken and the request id when a mutation came in, so a
+ * client that took a target without naming itself was refused by its own hold
+ * on its very next action — `yam surface control --take` followed by `yam
+ * surface act` answered CONTROL_BUSY naming "this client". Every transport
+ * supplies a name of its own by default (the terminal, the agent, the desktop);
+ * this is what the broker assumes when none of them did.
+ */
+export const DEFAULT_HOLDER = "this client";
+
+/**
+ * Take the target for one mutation (SF-13, SF-14).
+ *
+ * Every mutation goes through here — `act` and `request` alike — so the rules
+ * are applied once: refused while somebody else holds control, refused while
+ * another mutation is in flight, and on the operation record from dispatch to
+ * outcome so a caller that lost its connection can ask what became of it. The
+ * first cut had `request` check control and nothing else, which left the lease
+ * and the record to `act` alone.
+ */
+function beginMutation(
+  ctx: DispatchContext,
+  input: { session: string; holder?: string; deadlineMs?: number },
+  requestId: string,
+  operationName: string,
+): { refusal: Record<string, unknown> } | { mutation: { end(outcome: "succeeded" | "failed"): void } } {
+  const coordination = ctx.coordination;
+  if (!coordination) return { mutation: { end: () => undefined } };
+  const targetKey = `${input.session}:target`;
+  const me = input.holder ?? DEFAULT_HOLDER;
+  const held = heldByAnother(ctx, input.session, input.holder, requestId, operationName);
+  if (held !== undefined) return { refusal: held };
+  const lease = coordination.acquireLease(input.session, targetKey, me, input.deadlineMs);
+  if (!lease.acquired) {
+    ctx.events?.emit({
+      sessionId: input.session,
+      kind: "lease.refused",
+      operationName,
+      data: { holder: lease.holder, operationId: lease.operationId },
+    });
+    return {
+      refusal: refusedEnvelope(
+        requestId,
+        input.session,
+        "CONTROL_BUSY",
+        `Target is held by "${lease.holder}" (operation ${lease.operationId}). Wait or request handoff.`,
+        { holder: lease.holder, operationId: lease.operationId },
+      ),
+    };
+  }
+  ctx.events?.emit({
+    sessionId: input.session,
+    kind: "lease.acquired",
+    operationName,
+    data: { holder: me, targetKey },
+  });
+  const record = coordination.recordDispatch(input.session, operationName);
+  return {
+    mutation: {
+      end(outcome) {
+        coordination.releaseLease(targetKey, outcome);
+        coordination.completeOperation(record.operationId, outcome);
+      },
+    },
+  };
+}
+
+/**
  * Refuse a mutation on a target somebody else holds (SF-13, T16).
  *
  * Every mutation, not only `act`. Driving T16 found `request` going through
@@ -44,7 +114,7 @@ function heldByAnother(
   operationName: string,
 ): Record<string, unknown> | undefined {
   const held = ctx.coordination?.getControl(`${session}:target`);
-  const me = holder ?? requestId;
+  const me = holder ?? DEFAULT_HOLDER;
   if (held === undefined || held.holder === me) return undefined;
   ctx.events?.emit({
     sessionId: session,
@@ -271,40 +341,9 @@ export async function dispatchAct(
     }
   }
 
-  const targetKey = `${input.session}:target`;
-  if (ctx.coordination) {
-    const refusal = heldByAnother(ctx, input.session, input.holder, requestId, input.action);
-    if (refusal !== undefined) return refusal;
-    const leaseResult = ctx.coordination.acquireLease(
-      input.session,
-      targetKey,
-      input.holder ?? requestId,
-      input.deadlineMs,
-    );
-    if (!leaseResult.acquired) {
-      ctx.events?.emit({
-        sessionId: input.session,
-        kind: "lease.refused",
-        operationName: input.action,
-        data: { holder: leaseResult.holder, operationId: leaseResult.operationId },
-      });
-      return refusedEnvelope(requestId, input.session, "CONTROL_BUSY", `Target is held by "${leaseResult.holder}" (operation ${leaseResult.operationId}). Wait or request handoff.`, {
-        holder: leaseResult.holder,
-        operationId: leaseResult.operationId,
-      });
-    }
-    ctx.events?.emit({
-      sessionId: input.session,
-      kind: "lease.acquired",
-      operationName: input.action,
-      data: { holder: input.holder ?? requestId, targetKey },
-    });
-  }
-
-  let opRecord: ReturnType<CoordinationStore["recordDispatch"]> | undefined;
-  if (ctx.coordination) {
-    opRecord = ctx.coordination.recordDispatch(input.session, input.action);
-  }
+  const begun = beginMutation(ctx, input, requestId, input.action);
+  if ("refusal" in begun) return begun.refusal;
+  const { mutation } = begun;
 
   ctx.events?.emit({
     sessionId: input.session,
@@ -347,10 +386,7 @@ export async function dispatchAct(
       ctx.references.incrementGeneration(input.session);
     }
 
-    if (ctx.coordination) {
-      ctx.coordination.releaseLease(targetKey, "succeeded");
-      if (opRecord) ctx.coordination.completeOperation(opRecord.operationId, "succeeded");
-    }
+    mutation.end("succeeded");
 
     /*
      * The shape the compiler reads (T17): `{ action, args, ref2 }`, with the
@@ -390,10 +426,7 @@ export async function dispatchAct(
     });
     return maybeRedact(ctx, envelope);
   } catch (err) {
-    if (ctx.coordination) {
-      ctx.coordination.releaseLease(targetKey, "failed");
-      if (opRecord) ctx.coordination.completeOperation(opRecord.operationId, "failed");
-    }
+    mutation.end("failed");
     ctx.events?.emit({
       sessionId: input.session,
       kind: "operation.failed",
@@ -574,7 +607,7 @@ export async function dispatchControl(
   }
 
   const targetKey = `${input.session}:target`;
-  const me = input.holder ?? "this client";
+  const me = input.holder ?? DEFAULT_HOLDER;
   const action = input.action ?? "status";
 
   if (action === "take") {
@@ -698,9 +731,6 @@ export async function dispatchRequest(
   if (!entry) {
     return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);
   }
-  // Sending a request is a mutation, so it waits for the target like any other.
-  const refusal = heldByAnother(ctx, input.session, input.holder, requestId, "request");
-  if (refusal !== undefined) return refusal;
   const surface = entry.surface as {
     request?: (req: unknown, options: unknown) => Promise<unknown>;
   };
@@ -713,12 +743,17 @@ export async function dispatchRequest(
       { adapter: entry.adapter },
     );
   }
+  // A request is a mutation, and takes the target like one (SF-13, SF-14).
+  const begun = beginMutation(ctx, input, requestId, "request");
+  if ("refusal" in begun) return begun.refusal;
+  const { mutation } = begun;
   try {
     const response = await surface.request(input.request, {
       withSessionCookies: input.withSessionCookies === true,
       scope: { read: () => undefined },
     });
     const elapsed = Date.now() - start;
+    mutation.end("succeeded");
     ctx.events?.emit({
       sessionId: input.session,
       kind: "operation.succeeded",
@@ -730,6 +765,13 @@ export async function dispatchRequest(
     const envelope = successEnvelope(requestId, input.session, { response }, elapsed);
     return maybeRedact(ctx, envelope);
   } catch (err) {
+    mutation.end("failed");
+    ctx.events?.emit({
+      sessionId: input.session,
+      kind: "operation.failed",
+      operationName: "request",
+      data: { error: err instanceof Error ? err.message : String(err) },
+    });
     return handleError(requestId, input.session, err, Date.now() - start);
   }
 }

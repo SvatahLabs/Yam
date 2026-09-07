@@ -195,7 +195,7 @@ and cross-checks, each updated to the new information architecture:
   `targetId` on the `connect` operation the wave-2 catalogue does not carry. Left
   for reconciliation (extend the catalogue, or T16's shared-control work), not
   silently marked done.
-- **Keyboard row selection (SF-18).** Keyboard-only *connect → close* works (focus
+- **Keyboard row selection (SF-18)** — *done in verification (defect 6 below).* Keyboard-only *connect → close* works (focus
   the URL, type, Enter; the new session is auto-selected; Disconnect is live). But
   the sessions/adapters tables are `@svatah/yam-ui`'s `Table`, whose rows are not
   yet keyboard-focusable, so *choosing among several sessions* by keyboard rides
@@ -327,7 +327,7 @@ postcondition must show as failed, not as verified."* It is driven, not asserted
   values, marking expiring refs and routing secrets through a file, is its own
   piece of work; it sits with T16's agent setup, where the copyable
   configuration lives.
-- **Keyboard row selection (carried from T14).** The tree's nodes are real
+- **Keyboard row selection (carried from T14)** — *done in verification (defect 6 below).* The tree's nodes are real
   buttons and are keyboard-reachable; the sessions and adapters *tables* still
   are not, so choosing among several sessions by keyboard remains a `Table`
   enhancement.
@@ -419,7 +419,7 @@ the desktop, seen inside it — driven rather than argued.
   handshake needs a spawned process the renderer cannot start and the service
   has no route for; adding one is a capability-gated decision (SF-15) rather
   than something to slip in here.
-- **Unknown outcome and permission-denied are not driven.** Their mapping,
+- **Unknown outcome and permission-denied are not driven** — *the unknown outcome is driven in verification (defect 4 below); permission-denied still is not.* Their mapping,
   wording and next actions are covered by model tests (`problemFor`,
   `surfaceOutcomeView`) and the dispatcher's own suite, and the *rule* that an
   unknown outcome never offers a retry is asserted. Producing one from the UI
@@ -522,10 +522,97 @@ sizes — T14's, T15's, T16's and:
   fixture plan hashes (`tools/repo-checks/test/fixture-plans.test.ts`) and the
   golden suites, passes unchanged. That is the evidence offered; no separate
   re-hash run was performed.
-- **Promotion writes into whatever project the service is on.** With a project
+- **Promotion writes into whatever project the service is on** — *superseded in verification (defect 7 below): on the private workspace it now refuses and points at Open a project.* With a project
   open that is the project; on the private workspace it is the workspace. The
   app names which, and the proposal says its bindings are unverified either way.
 - **The review is the proposal, not a preview.** The design's "reviewed
   proposal" is satisfied by what is written — a flow marked *not reviewed, not
   run*, with unverified bindings beside it. A pre-write diff of the steps to be
   promoted is not built.
+
+---
+
+## Verification of wave 3
+
+Done in a clean worktree of `surface-first-wave-3` against the verification
+contract in [wave-3-implementation.md](../wave-3-implementation.md). The gate
+was green on arrival — build, typecheck, tests, lint, `docs:check` — and
+**nine defects** were behind it. As in waves 1 and 2, every one survived
+because a claim had been made about the code rather than the product: the
+driven checks never *acted after taking control*, never ran at 200%, never
+took the keyboard past the connect field, and used an HTTP client where the
+requirement said "agent".
+
+### The defects, and what now proves each
+
+| # | Defect | Found by | Fix | Now proved by |
+|---|---|---|---|---|
+| 1 | **Control was taken under one name and acted on under another.** `dispatchControl` defaulted the holder to `"this client"`; `heldByAnother` defaulted it to the request id. `yam surface control --take` followed by `yam surface act` answered `CONTROL_BUSY` — refused by its own hold. The desktop had the same shape (take-control sent `"Yam desktop"`, act and request sent nothing) and so did MCP (`surface_act` sent no holder at all). | Driving the built CLI: take, then act. | One `DEFAULT_HOLDER` in the dispatcher for both paths; every transport names itself by default — `yam cli`, the MCP client's own name from initialization, `Yam desktop` — and the desktop sends its name on act and request. | `surface-transport.test.ts` (take then act over HTTP; the terminal and an HTTP caller each told the other's name), `mutations.test.ts`, `surfaces.test.ts`, and the harness acting after "Take control". |
+| 2 | **The MCP server was not a client of the broker.** It built its own `{ sessions }` context — no coordination, references, events or promotion. A session an agent opened was one `yam surface sessions` could not list and the desktop could not show; `surface_control` answered *"This broker does not arbitrate control"*. T16's "a session an agent opened appears in the desktop" had been demonstrated with an HTTP client standing in for the agent. | A real `yam mcp` subprocess, then `yam surface sessions`. | `mcp.ts` calls the broker like the CLI and the service do (`connectToBroker` + `callBroker`), rediscovering it after a failure; its evidence reads go through `read`/`describe`; `close()` no longer closes anything, because the sessions are the broker's (SF-05). One consequence: through the broker an act on a reference nobody snapshotted is *refused* rather than *failed*, and the trajectory writer recorded only failures — so a refused call compiled as a step with no sentence instead of one that failed. Refusals are recorded as errors now. | `mcp.test.ts`: an MCP-opened session listed by the CLI; the agent takes control under its client name `test-agent`; the terminal is refused and told so; the agent acts; the terminal takes over with `--force` and the agent is refused. |
+| 3 | **`request` was a mutation that took no lease.** It checked control and nothing else, so it ran beside an `act` in flight and was on no operation record. | Reading the two dispatchers side by side, then a test. | `beginMutation()` — one helper every mutation goes through: control check, lease, record, and the `lease.*`/`operation.*` events. | `mutations.test.ts`: a request during a stalled act is `CONTROL_BUSY` and the surface is never called; a failed request frees the target. |
+| 4 | **A timed-out action read as "refused".** `surfaceOutcomeView` computed the SF-17 problem for a failed act and the renderer never drew it; the pill said *refused* for every non-success. A navigation to a host that does not answer showed `page.goto: Timeout 10000ms exceeded.` and no way out. | Driving the desktop at a slow host (12 s against the adapter's 10 s). | The view carries the envelope's own word (`succeeded`/`failed`/`refused`/`unknown`/`cancelled`); the screen draws one alert — the loaded state's problem, else the last action's — so the unknown state offers **Inspect the current state** and nothing offers Retry. | Harness: *a timed-out action is the unknown-outcome state: inspection offered, no Retry* at every size; `surfaces.test.ts`. |
+| 5 | **The stale state could not occur.** The screen re-snapshots on every reload and the ids come back the same, so a control chosen before a navigation described successfully afterwards — as whatever held its id on the new page. The broker already scoped a reference to its snapshot when told which one; `describe` had no `snapshot` argument and the desktop remembered none. | Driving the desktop: select, navigate, look. | `snapshot` on `describe` in the catalogue (so `--snapshot`, the MCP tool and the route all gained it); the selection carries the snapshot it was chosen from; refreshing forgets both. | Harness: *a reference from before a navigation is the stale state, with the way out*, then *refreshing clears it*; `surfaces.test.ts`. |
+| 6 | **Rows were click-only.** The sessions list — the one thing on Surfaces a person chooses among — could not be reached without a mouse; the record called this a `Table` enhancement and left it. | The keyboard journey. | `Table` rows with `onSelect` are tab stops; Enter/Space choose, the arrows walk; a focus ring. | `table-keyboard.test.tsx`; harness: *Tab reaches a session row*, *the arrows and Enter choose the agent's session*. |
+| 7 | **A projectless promotion wrote into the app's private workspace.** The workspace loads like a project, so "Save as automation" with none open succeeded into a directory under the app's own data that nobody chose; the registry's "needs a project" branch was unreachable. Automations and Activity likewise showed the workspace as if it were a project, with a "New flow" that would write there. | The harness's own empty-directory check, once it ran. | The shell tells every action whether the service is projectless; promotion refuses with **Open a project**; the project sections say what they need instead of rendering the workspace. | Harness: *Save as automation … says what it needs*, *Automations without a project says so*, *with a project open … writes an unverified proposal into it* (by modification time, since a day's proposals share a directory), and *the projectless workspace is left empty*. |
+| 8 | **200% zoom broke the primary controls.** The rail (220px) and inspector (360px) are fixed, so at 1440×1000 and 1280×800 at 200% the screen was 124px and 44px wide, the URL field, adapter chooser and Connect button sat on top of each other, and the toolbar clipped **Recheck targets** off the right. SF-18 names both zoom levels; the record tested one. | Driving at 720×500 and 640×400 CSS pixels with a device scale of 2. | Below 960px: rail 150px, inspector 250px, the connect form and the toolbar wrap, list-and-editor screens stack. | Harness at `1440x1000@200%` and `1280x800@200%`: the same checks as at 100%, including the overlap assertion. |
+| 9 | **Focus was lost to the document twice.** After choosing a postcondition the chooser's trigger was re-rendered and Radix had nothing to return focus to; after Disconnect the button under the keyboard was removed. Both times the next Tab started over from the top of the window. | The keyboard transcript. | The chooser refocuses its trigger by id after a choice; after any render that leaves nothing focused, the screen's title (`tabIndex={-1}`) takes focus. | Harness: *focus returns to the chooser after the choice*, *focus is not lost to the document body*, *every Tab stop showed visible focus*. |
+
+### What the record claimed as not doable, and is done
+
+- **Unknown outcome — "needs fault injection the harness lacks."** It needs a
+  host that answers after the adapter has given up; the harness now has one.
+  Driven at every size.
+- **Keyboard selection of table rows.** Done (defect 6).
+- **Permission-denied** remains undriven: it needs a revoked accessibility grant
+  on a native adapter, which no CI host and no headless run can produce. Its
+  mapping and wording stay covered by `problemFor`'s tests.
+
+### Evidence left
+
+`docs/spec/surface-first/evidence/wave-3/`: `surfaces-dogfood.json` (every
+check, at every size), `keyboard-transcript.txt` (every key, what had focus
+after it, and whether the focus was visible), and the screenshots of Surfaces
+empty, connected, acting, busy, stale and unknown at 1440×1000 and 1280×800, and
+empty and acting at both sizes at 200%.
+Regenerate with:
+
+```
+pnpm -r build
+SURFACES_EVIDENCE_DIR=docs/spec/surface-first/evidence/wave-3 \
+  pnpm --filter @svatah/yam-desktop exec node test/surfaces-dogfood.mjs
+```
+
+`SURFACES_PASSES=keyboard` (or any comma-separated list of pass labels) runs one
+pass. A pass that cannot finish is one failed check now, not a lost run.
+
+### Results
+
+`pnpm --filter @svatah/yam-desktop exec node test/surfaces-dogfood.mjs`, after the
+fixes above — the real renderer over a real projectless service, its broker and
+the Playwright adapter, with a second service on the fixtures project for
+"Open a project":
+
+| Pass | Checks |
+|---|---|
+| `1440x1000` | 34/34 |
+| `1280x800` | 34/34 |
+| `1440x1000@200%` | 34/34 |
+| `1280x800@200%` | 34/34 |
+| `keyboard` | 17/17 |
+| `(run)` | 1/1 |
+
+**154/154 checks.** Keyboard transcript: 62 Tab stops, 0 without visible focus.
+Unit suites touched by the fixes: `surface-control` 125, `screens` 95, `ui` 46,
+and the CLI’s `surface-transport`, `mcp` and `explore` suites through the
+built binary, a real service and a real MCP server against the real broker.
+
+### Known gaps after verification
+
+- Permission-denied is not driven (above).
+- The screenshot preview, pixel actions and Copy CLI / Copy MCP remain unbuilt,
+  as the T15 deviations say.
+- The connection test still checks the broker rather than completing an MCP
+  handshake; but the MCP server now *is* a broker client, so what it checks is
+  what an agent would use.
+- `reports/self-parity.md` still lists the Explorer's two cases; it is
+  regenerated by `yam eval self` in M4.

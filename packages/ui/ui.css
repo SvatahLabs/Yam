@@ -671,3 +671,13 @@
   display: inline-block;
   flex: none;
 }
+
+/* The chooser's scroll affordances, shown by Radix only when there is more. */
+.sv-select-scroll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  color: var(--dim);
+  cursor: default;
+}

@@ -154,6 +154,33 @@ export function Table<Row>(props: TableProps<Row>): React.JSX.Element {
                   : {
                       onClick: () => props.onSelect!(key),
                       "aria-selected": key === props.selected,
+                      /*
+                       * A selectable row is a keyboard target (SF-18): Tab
+                       * reaches it, Enter or Space chooses it, and the arrows
+                       * walk the rows. Click-only rows left the sessions list
+                       * — the one thing on Surfaces a person chooses among —
+                       * unreachable without a mouse.
+                       */
+                      tabIndex: 0,
+                      onKeyDown: (event: {
+                        key: string;
+                        currentTarget: HTMLTableRowElement;
+                        preventDefault(): void;
+                      }) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          props.onSelect!(key);
+                          return;
+                        }
+                        if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+                        const row = event.currentTarget;
+                        const next =
+                          event.key === "ArrowDown" ? row.nextElementSibling : row.previousElementSibling;
+                        if (next instanceof HTMLElement) {
+                          event.preventDefault();
+                          next.focus();
+                        }
+                      },
                     })}
               >
                 {props.columns.map((column) => (

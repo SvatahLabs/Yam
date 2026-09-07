@@ -51,6 +51,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `createRedactionPolicy` | function | `export function createRedactionPolicy(): RedactionPolicy` |  |
 | `createReferenceStore` | function | `export function createReferenceStore(): ReferenceStore` |  |
 | `createSessionStore` | function | `export function createSessionStore(): SessionStore` |  |
+| `DEFAULT_HOLDER` | variable | `DEFAULT_HOLDER = "this client"` | Who a caller is when it does not say (SF-13). |
 | `defaultActionForRole` | function | `declare function defaultActionForRole(role: string \| undefined): string;` | The action an inspector opens on for an element of this role. |
 | `describeInputSchema` | variable | `describeInputSchema = z.object(` |  |
 | `describeOutputSchema` | variable | `describeOutputSchema = resultEnvelopeSchema.extend(` |  |

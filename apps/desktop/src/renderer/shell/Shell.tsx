@@ -293,7 +293,14 @@ export function Shell(props: ShellProps): React.JSX.Element {
          * what a screen re-loads with — so the screen passes it here and every
          * other action is unaffected.
          */
-        const outcome = await action.run(props.client, { ...params, ...extra });
+        const outcome = await action.run(props.client, {
+          ...params,
+          ...extra,
+          // Whether the service is on the app's private workspace rather than
+          // a project (T14, T17): an action that writes into a project needs
+          // to know, and the main process is the one that knows.
+          projectless: props.projectless === true,
+        });
         setMessage(outcome.message);
         setLastOutcome({ id, ok: outcome.ok, value: outcome.value });
         const goTo = outcome.goTo;
@@ -310,6 +317,22 @@ export function Shell(props: ShellProps): React.JSX.Element {
     },
     [load, params, props.client, screen, state],
   );
+
+  /*
+   * Focus returns somewhere predictable when the control it was on goes away
+   * (SF-18). Disconnect closes the session and the action that closed it is
+   * no longer offered, so the button under the keyboard is removed and focus
+   * fell to the document — the next Tab started over from the top of the
+   * window. After every render that leaves nothing focused, the screen's own
+   * title takes it: the start of the screen, one Tab from its first control.
+   */
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const active = document.activeElement;
+    if (active === null || active === document.body) {
+      document.getElementById("toolbar-title")?.focus();
+    }
+  }, [state]);
 
   /* ── keys (LLD §13.7: ⌘K, and the accelerators on the buttons) ─────────── */
 
@@ -409,6 +432,12 @@ export function Shell(props: ShellProps): React.JSX.Element {
    * because a screen that needed a sixth would be a screen the shell knows
    * something about.
    */
+  /** Whether a screen is about a project rather than a surface (T17). */
+  const needsProject = (screen: string): boolean => {
+    const section = sectionOf(screen as Parameters<typeof sectionOf>[0]);
+    return section === "automations" || section === "activity";
+  };
+
   function screenBody(): React.ReactNode {
     if (state === undefined) return null;
     const shared = {
@@ -420,6 +449,24 @@ export function Shell(props: ShellProps): React.JSX.Element {
       ...(lastOutcome === undefined ? {} : { lastOutcome }),
     } as const;
     const evidenceProp = evidence === undefined ? {} : { evidence };
+
+    /*
+     * Automations and Activity are about a project (T17). With none open they
+     * would show the app's private workspace: an empty Flows list whose
+     * "New flow" writes into a directory nobody chose. Say what is needed
+     * instead, and where to get it. Surfaces and Settings need no project.
+     */
+    if (props.projectless === true && needsProject(state.screen)) {
+      return (
+        <div className="sv-editor" id="project-needed" aria-label="A project is needed">
+          <p className="sv-empty">
+            {SECTIONS.find((one) => one.id === sectionOf(state.screen))?.label ?? "This section"} is
+            about a project — its flows, bindings, runs and proposals — and none is open. Choose one
+            with <b>Open a project</b> in the top bar. Surfaces needs no project.
+          </p>
+        </div>
+      );
+    }
 
     switch (state.screen) {
       case "surfaces":
@@ -454,6 +501,8 @@ export function Shell(props: ShellProps): React.JSX.Element {
   /** The right inspector, per screen. Same table, same rule. */
   function inspectorBody(): React.ReactNode {
     if (state === undefined) return null;
+    // A project screen with no project has nothing to inspect (T17).
+    if (props.projectless === true && needsProject(state.screen)) return null;
     const shared = {
       params,
       actions,

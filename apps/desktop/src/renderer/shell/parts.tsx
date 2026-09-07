@@ -145,7 +145,7 @@ export function Toolbar(props: ToolbarProps): React.JSX.Element {
         renamed. Not an interactive control, so the snapshot case's id rule does
         not reach it; it is here because something has to read it.
       */}
-      <h1 className="sv-toolbar-title" id="toolbar-title">
+      <h1 className="sv-toolbar-title" id="toolbar-title" tabIndex={-1}>
         {props.title ?? props.state.title}
       </h1>
       {props.beside}

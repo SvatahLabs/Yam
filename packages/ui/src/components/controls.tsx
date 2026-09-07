@@ -170,7 +170,19 @@ export function Chooser(props: SelectProps): React.JSX.Element {
       </label>
       <Select.Root
         value={props.value ?? ""}
-        onValueChange={(value) => props.onChange?.(value)}
+        onValueChange={(value) => {
+          props.onChange?.(value);
+          /*
+           * Focus comes back to the chooser after a choice (SF-18). Radix
+           * returns it to the trigger it opened from; when the choice makes
+           * the screen re-render around the chooser — Surfaces shows an
+           * "Expected" field once a postcondition is chosen — that trigger is
+           * a new element and focus fell to the document, so the next Tab
+           * started over from the top of the window. By id, so the trigger
+           * that exists after the render is the one that gets it.
+           */
+          requestAnimationFrame(() => document.getElementById(props.id)?.focus());
+        }}
         disabled={props.disabled === true}
       >
         {/*
@@ -195,6 +207,15 @@ export function Chooser(props: SelectProps): React.JSX.Element {
         */}
         <Select.Portal {...(host === undefined ? {} : { container: host })}>
           <Select.Content className="sv-select-menu" position="popper">
+            {/*
+              The scroll affordances (SF-18). A short window — 200% zoom on
+              a laptop — cannot show every action, and without these the
+              options past the fold were reachable by wheel and by arrow key
+              only: nothing on screen said there were more.
+            */}
+            <Select.ScrollUpButton className="sv-select-scroll" aria-label="More options above">
+              ▴
+            </Select.ScrollUpButton>
             <Select.Viewport>
               {props.options.map((option) => (
                 <Select.Item
@@ -207,6 +228,9 @@ export function Chooser(props: SelectProps): React.JSX.Element {
                 </Select.Item>
               ))}
             </Select.Viewport>
+            <Select.ScrollDownButton className="sv-select-scroll" aria-label="More options below">
+              ▾
+            </Select.ScrollDownButton>
           </Select.Content>
         </Select.Portal>
       </Select.Root>

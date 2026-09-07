@@ -170,3 +170,64 @@ describe("the help offers every operation the catalogue defines", () => {
     }
   });
 });
+
+describe("one name per client, across transports (SF-13, T16)", () => {
+  /**
+   * Verification of wave 3. Taking control defaulted the holder to one name and
+   * acting defaulted it to another, so `yam surface control --take` followed by
+   * `yam surface act` was refused CONTROL_BUSY — by its own hold. Nothing had
+   * acted *after* taking control, in any test or in the driven desktop.
+   */
+  it("a client that takes control without naming itself can still act", async () => {
+    const opened = await call("POST", "/sessions", { url: app.origin });
+    const session = String(resultOf(opened.envelope)["sessionId"]);
+    try {
+      const taken = await call("POST", `/sessions/${session}/control`, { action: "take" });
+      expect(taken.envelope["status"]).toBe("succeeded");
+
+      const snapshot = await call("POST", `/sessions/${session}/snapshot`, { interactiveOnly: true, maxNodes: 5 });
+      const first = (resultOf(snapshot.envelope)["nodes"] as Array<{ ref: string }>)[0]!;
+      const acted = await call("POST", `/sessions/${session}/act`, { action: "click", ref: first.ref });
+      expect(acted.envelope["status"], JSON.stringify(acted.envelope["error"])).toBe("succeeded");
+    } finally {
+      await call("DELETE", `/sessions/${session}`);
+    }
+  }, 240_000);
+
+  it("the command line is one client, an HTTP caller another, and each is told the other's name", async () => {
+    const opened = await call("POST", "/sessions", { url: app.origin });
+    const session = String(resultOf(opened.envelope)["sessionId"]);
+    const cli = (...args: string[]) =>
+      spawnSync(process.execPath, [YAM, "surface", ...args, "--json"], {
+        encoding: "utf8",
+        env: { ...process.env, CI: "true" },
+      });
+    try {
+      const taken = JSON.parse(cli("control", "--session", session, "--take").stdout) as {
+        result: { holder: string };
+      };
+      expect(taken.result.holder).toBe("yam cli");
+
+      // Anyone else is refused, and told who has it (SF-13). A key press: a
+      // mutation that loads no page, so the suite's load cannot time it out.
+      const refused = await call("POST", `/sessions/${session}/act`, { action: "press", args: { key: "Tab" } });
+      expect(refused.envelope["status"]).toBe("refused");
+      expect((refused.envelope["error"] as { code: string; message: string }).code).toBe("CONTROL_BUSY");
+      expect((refused.envelope["error"] as { message: string }).message).toContain("yam cli");
+
+      // The terminal itself is not: its next command is the same client.
+      const input = join(tmpdir(), `yam-press-${process.pid}.json`);
+      writeFileSync(input, JSON.stringify({ key: "Tab" }), "utf8");
+      const acted = cli("act", "--session", session, "--action", "press", "--input", input);
+      expect(acted.status, acted.stdout + acted.stderr).toBe(0);
+
+      // Every list says who holds it.
+      const listed = await call("GET", "/sessions");
+      const mine = (resultOf(listed.envelope)["sessions"] as Array<{ sessionId: string; controller?: string }>)
+        .find((one) => one.sessionId === session);
+      expect(mine?.controller).toBe("yam cli");
+    } finally {
+      await call("DELETE", `/sessions/${session}`);
+    }
+  }, 240_000);
+});

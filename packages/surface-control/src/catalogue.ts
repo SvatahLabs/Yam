@@ -257,6 +257,14 @@ const capabilitiesOutputSchema = resultEnvelopeSchema.extend({
 const describeInputSchema = z.object({
   session: sessionIdSchema,
   ref: refSchema,
+  /**
+   * The snapshot the reference came from (SF-10). With it, a reference chosen
+   * before a navigation is refused as stale rather than resolved to whatever
+   * holds the same id on the page that came after — which is what happened to
+   * the desktop's selection, because it re-snapshots on every reload and the
+   * ids come back the same.
+   */
+  snapshot: z.string().optional(),
   intent: z.string().optional(),
 });
 
@@ -587,6 +595,7 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
       flags: [
         { name: "session", type: "string", required: true, description: "Session ID" },
         { name: "ref", type: "string", required: true, description: "Element reference" },
+        { name: "snapshot", type: "string", required: false, description: "The snapshot the reference came from; refused if the surface has changed since" },
       ],
       exitCodes: [
         { code: CLI_EXIT_CODES.OK, meaning: "Element described" },
@@ -634,7 +643,7 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
         { name: "session", type: "string", required: true, description: "Session ID" },
         { name: "take", type: "boolean", required: false, description: "Take control of the target" },
         { name: "release", type: "boolean", required: false, description: "Give control up" },
-        { name: "holder", type: "string", required: false, description: "Who you are; defaults to this client" },
+        { name: "holder", type: "string", required: false, description: "Who you are; defaults to a name for this client (the terminal, the agent or the desktop)" },
         { name: "force", type: "boolean", required: false, description: "Take a target its holder has not given up" },
       ],
       exitCodes: [
@@ -663,7 +672,7 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
         { name: "method", type: "string", required: false, description: "HTTP method (default GET)" },
         { name: "url", type: "string", required: false, description: "URL or path, joined to the session's base URL" },
         { name: "input", type: "file", required: false, description: "The full ApiRequest as a JSON file or stdin" },
-        { name: "holder", type: "string", required: false, description: "Who you are, when a target is held" },
+        { name: "holder", type: "string", required: false, description: "Who you are; defaults to a name for this client" },
       ],
       exitCodes: [
         { code: CLI_EXIT_CODES.OK, meaning: "Request sent" },

@@ -12,6 +12,7 @@
  * (busy, stale, unknown outcome) are T15's, on the selected session.
  */
 import { describe, expect, it } from "vitest";
+import { DESKTOP_HOLDER } from "../src/holder.js";
 import {
   actionById,
   fakeService,
@@ -391,7 +392,13 @@ describe("the act action sends a schema-valid request (T15, SF-11)", () => {
     expect(outcome.ok).toBe(true);
     const call = service.calls.find((one) => one.method === "postSessionsBySessionAct")!;
     expect(call.args[0]).toBe("s_1");
-    expect(call.args[1]).toEqual({ action: "type", ref: "r1", snapshot: "snap_1", args: { value: "ada" } });
+    expect(call.args[1]).toEqual({
+      action: "type",
+      holder: DESKTOP_HOLDER,
+      ref: "r1",
+      snapshot: "snap_1",
+      args: { value: "ada" },
+    });
     // No postcondition was asked for, so no check ran and nothing is verified.
     expect(service.calls.some((one) => one.method === "postSessionsBySessionCheck")).toBe(false);
     expect(outcome.message).toContain("Not verified");
@@ -438,7 +445,10 @@ describe("the act action sends a schema-valid request (T15, SF-11)", () => {
     expect(outcome.ok).toBe(true);
     expect(outcome.message).toBe("POST /things → 201");
     const call = service.calls.find((one) => one.method === "postSessionsBySessionRequest")!;
-    expect(call.args[1]).toEqual({ request: { name: "request", method: "POST", url: "/things" } });
+    expect(call.args[1]).toEqual({
+      request: { name: "request", method: "POST", url: "/things" },
+      holder: DESKTOP_HOLDER,
+    });
   });
 });
 
@@ -592,5 +602,104 @@ describe("promoting a session into a proposal (T17, SF-19)", () => {
     expect(called).not.toContain("postRun");
     expect(called).not.toContain("postCompile");
     expect(called).not.toContain("putFlowsByFile");
+  });
+});
+
+/*
+ * Verification of wave 3 (SF-11, SF-13, SF-17).
+ *
+ * Two defects the driven checks missed because nothing acted *after* taking
+ * control, and nothing read the pill after a failure: the desktop named itself
+ * when it took a target and not when it acted on it, so the broker refused its
+ * next action as held by "Yam desktop"; and a timed-out navigation read as
+ * "refused" — never sent — when its outcome was unknown.
+ */
+describe("the desktop names itself on every mutation, and says what an outcome was", () => {
+
+  it("act carries the desktop's own name, the one take-control used", async () => {
+    const service = fakeService({});
+    const act = actionById("surface.act")!;
+    await act.run(service, { selected: "s_1", action: "click", ref: "r1" });
+    const sent = service.calls.find((one) => one.method === "postSessionsBySessionAct");
+    expect((sent?.args[1] as { holder?: string }).holder).toBe(DESKTOP_HOLDER);
+  });
+
+  it("request carries it too — a request is a mutation", async () => {
+    const service = fakeService({});
+    const request = actionById("surface.request")!;
+    await request.run(service, { selected: "s_1", url: "/things", method: "get" });
+    const sent = service.calls.find((one) => one.method === "postSessionsBySessionRequest");
+    expect((sent?.args[1] as { holder?: string }).holder).toBe(DESKTOP_HOLDER);
+  });
+
+  it("a timed-out act is an UNKNOWN outcome with inspection as the way out, never 'refused'", () => {
+    const view = surfaceOutcomeView({
+      act: {
+        status: "failed",
+        error: { code: "TIMEOUT", message: "page.goto: Timeout 10000ms exceeded." },
+      },
+    })!;
+    expect(view.dispatched).toBe(false);
+    expect(view.outcome).toBe("unknown");
+    expect(view.problem?.kind).toBe("unknown");
+    expect(view.problem?.nextAction).toMatch(/inspect/i);
+    expect(view.problem?.nextAction).not.toMatch(/retry/i);
+  });
+
+  it("a failed act is 'failed', a refused one 'refused', a dispatched one 'succeeded'", () => {
+    const failed = surfaceOutcomeView({
+      act: { status: "failed", error: { code: "CHECK_FAILED", message: "no" } },
+    })!;
+    const refused = surfaceOutcomeView({
+      act: { status: "refused", error: { code: "STALE_REFERENCE", message: "gone" } },
+    })!;
+    const fine = surfaceOutcomeView({ act: { status: "succeeded", result: { ok: true } } })!;
+    expect([failed.outcome, refused.outcome, fine.outcome]).toEqual(["failed", "refused", "succeeded"]);
+  });
+});
+
+describe("a selected control belongs to the snapshot it was chosen from (SF-10)", () => {
+  /**
+   * Verification of wave 3. The screen re-snapshots on every reload and the
+   * ids come back the same, so a control chosen before a navigation described
+   * successfully afterwards — as whatever held its id on the new page. The
+   * stale state could not occur. Now the selection carries its snapshot and
+   * the broker decides.
+   */
+  it("passes the snapshot the control came from to describe", async () => {
+    const service = fakeService({
+      surface: {
+        sessions: ok({ sessions: [{ sessionId: "s_1", adapter: "playwright", kind: "web", status: "ready", createdAt: "now" }] }),
+        capabilities: ok({ adapter: "playwright", kind: "web", capabilities: {} }),
+        snapshot: ok({ snapshotId: "snap_2", nodes: [{ ref: "r0", role: "textbox", name: "Username", depth: 0 }] }),
+        describe: ok({ ref: "r0", role: "textbox", name: "Username" }),
+      },
+    });
+    await screenById("surfaces").load(service, { selected: "s_1", ref: "r0", snapshot: "snap_1" });
+    const described = service.calls.find((one) => one.method === "postSessionsBySessionDescribe")!;
+    expect((described.args[1] as { snapshot?: string }).snapshot).toBe("snap_1");
+  });
+
+  it("refreshing forgets the control and its snapshot together", async () => {
+    const outcome = await actionById("surface.refresh")!.run(fakeService({}), { selected: "s_1" });
+    expect(outcome.params).toEqual({ selected: "s_1", ref: undefined, snapshot: undefined });
+  });
+});
+
+describe("a proposal needs a project (T14, T17)", () => {
+  /**
+   * Verification of wave 3. The app's private surfaces workspace loads like a
+   * project, so a promotion with none open "succeeded" — into a directory
+   * under the app's own data that nobody chose and nobody would find. The
+   * registry's own "needs a project" branch was unreachable.
+   */
+  it("refuses to promote when the app is on its private workspace, and says where to get one", async () => {
+    const service = fakeService({
+      surface: { events: ok({ events: [], steps: [{ seq: 1, at: "now", call: "act", args: { action: "click" }, ref: "r1" }] }) },
+    });
+    const outcome = await actionById("surface.save-automation")!.run(service, { selected: "s_1", projectless: true });
+    expect(outcome.ok).toBe(false);
+    expect(outcome.message).toContain("Open a project");
+    expect(service.calls.some((one) => one.method === "postTrajectoryCompile")).toBe(false);
   });
 });

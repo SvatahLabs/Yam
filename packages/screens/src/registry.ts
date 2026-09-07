@@ -187,6 +187,9 @@ const ACTIONS_ONLY: readonly Action[] = [
        */
       const act = await service.postSessionsBySessionAct(session, {
         action,
+        // Named, so a target this desktop took is one it can still act on: the
+        // broker refuses a mutation from anyone but the holder (SF-13).
+        holder: DESKTOP_HOLDER,
         ...(typeof args.ref === "string" ? { ref: args.ref } : {}),
         ...(typeof args["ref2"] === "string" ? { ref2: args["ref2"] } : {}),
         ...(typeof args["snapshot"] === "string" ? { snapshot: args["snapshot"] } : {}),
@@ -297,7 +300,11 @@ const ACTIONS_ONLY: readonly Action[] = [
        */
       return ok("Took a fresh snapshot; choose a control.", {
         goTo: "surfaces",
-        params: { selected: typeof args.selected === "string" ? args.selected : undefined, ref: undefined },
+        params: {
+          selected: typeof args.selected === "string" ? args.selected : undefined,
+          ref: undefined,
+          snapshot: undefined,
+        },
       });
     },
   },
@@ -412,6 +419,19 @@ const ACTIONS_ONLY: readonly Action[] = [
           "Nothing to promote yet: this session has been looked at, not acted on. Perform an action first.",
         );
       }
+      /*
+       * No project, no proposal (T14, T17). The app's private workspace loads
+       * like a project — it is an empty directory the service can compile
+       * into — so without this the promotion "succeeded" into a directory
+       * under the app's own data that nobody chose and nobody would find.
+       * The shell says whether a project is open; the desktop is the only
+       * client that can be projectless.
+       */
+      if (args["projectless"] === true) {
+        return refused(
+          "A proposal is written into a project, and none is open. Choose one with “Open a project”, then save again.",
+        );
+      }
 
       /*
        * A proposal is written into a *project* — `proposals/` lives in one —
@@ -454,6 +474,7 @@ const ACTIONS_ONLY: readonly Action[] = [
       const method = (typeof args["method"] === "string" ? args["method"] : "GET").toUpperCase();
       const answer = await service.postSessionsBySessionRequest(session, {
         request: { name: "request", method, url },
+        holder: DESKTOP_HOLDER,
       });
       const sent = envelopeOf(answer);
       if (!sent.ok) return { ok: false, message: sent.message ?? "The request could not be sent.", value: { act: answer } };

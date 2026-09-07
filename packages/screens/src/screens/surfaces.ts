@@ -195,6 +195,13 @@ export interface SurfaceProblem {
 export interface SurfaceOutcomeView {
   /** The action reached the target. Never "it worked". */
   readonly dispatched: boolean;
+  /**
+   * The envelope's own word for what happened (SF-11). `unknown` is the one
+   * that matters: a mutation that timed out may have reached the target, and
+   * calling it "refused" — as the first cut's pill did — told a person it had
+   * not been sent at all.
+   */
+  readonly outcome: "succeeded" | "failed" | "refused" | "unknown" | "cancelled";
   /** True only when an explicit postcondition passed (SF-11). */
   readonly verified: boolean;
   readonly verification: "none" | "passed" | "failed";
@@ -545,6 +552,16 @@ export function surfaceOutcomeView(value: unknown): SurfaceOutcomeView | undefin
 
   const problem =
     actCode === undefined ? undefined : problemFor(actCode, actMessage ?? "The action was refused.");
+  const status = String((act as Record<string, unknown>)["status"] ?? "");
+  const outcome: SurfaceOutcomeView["outcome"] = dispatched
+    ? "succeeded"
+    : actCode === "OUTCOME_UNKNOWN" || actCode === "TIMEOUT"
+      ? "unknown"
+      : status === "refused"
+        ? "refused"
+        : status === "cancelled"
+          ? "cancelled"
+          : "failed";
 
   const summary = !dispatched
     ? (actMessage ?? "The action was refused.")
@@ -559,6 +576,7 @@ export function surfaceOutcomeView(value: unknown): SurfaceOutcomeView | undefin
 
   return {
     dispatched,
+    outcome,
     // The whole point: only a postcondition that passed makes this true.
     verified: verification === "passed",
     verification,
@@ -719,7 +737,13 @@ const surfacesScreen: Screen<SurfacesState> = {
       if (params.ref !== undefined && !httpSurface) {
         const described = await sources.optional<unknown>(
           "POST /sessions/:session/describe",
-          () => service.postSessionsBySessionDescribe(params.selected!, { ref: params.ref }),
+          () =>
+            service.postSessionsBySessionDescribe(params.selected!, {
+              ref: params.ref,
+              // Scoped to the snapshot it was chosen from, so a navigation
+              // since makes it stale rather than somebody else's control.
+              ...(params.snapshot === undefined ? {} : { snapshot: params.snapshot }),
+            }),
           undefined,
         );
         element = elementView(succeededResult(described));

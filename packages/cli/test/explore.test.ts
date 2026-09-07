@@ -3,6 +3,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,6 +26,9 @@ beforeAll(async () => {
 afterAll(async () => {
   await app.close();
   for (const dir of projects) rmSync(dir, { recursive: true, force: true });
+  // The sessions are the broker's now, and the broker outlives the suite by
+  // design; it must not outlive the test run.
+  spawnSync("pkill", ["-f", "surface broker"]);
 });
 
 function scaffold(): string {

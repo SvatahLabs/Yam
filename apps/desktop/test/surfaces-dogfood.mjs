@@ -7,7 +7,7 @@
 // stubs the Node `crypto` hash the Surfaces path never calls, so a browser
 // bundle links) and drives it at 1440×1000 and 1280×800.
 import { spawn, spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, extname } from "node:path";
 import { createServer, request as proxyRequest } from "node:http";
@@ -16,8 +16,11 @@ import { chromium } from "@playwright/test";
 const APP_DIR = process.cwd();
 const ROOT = join(APP_DIR, "..", "..");
 const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
-const OUT = mkdtempSync(join(tmpdir(), "yam-surfaces-evidence-"));
-const RENDERER = join(OUT, "renderer");
+// Where the evidence goes: a directory named by SURFACES_EVIDENCE_DIR, so a
+// verifier can keep it beside the spec, else a temporary one.
+const OUT = process.env.SURFACES_EVIDENCE_DIR ?? mkdtempSync(join(tmpdir(), "yam-surfaces-evidence-"));
+mkdirSync(OUT, { recursive: true });
+const RENDERER = mkdtempSync(join(tmpdir(), "yam-surfaces-renderer-"));
 
 // Build the real renderer with the harness config (browser stub for crypto).
 console.log("building the renderer…");
@@ -32,12 +35,28 @@ if (built.status !== 0) {
 }
 mkdirSync(OUT, { recursive: true });
 const results = [];
+/** The keyboard journey's transcript, written however far it got. */
+const transcript = [];
 const note = (label, ok, detail) => {
   results.push({ label, ok, ...(detail === undefined ? {} : { detail }) });
   console.log(`${ok ? "ok  " : "FAIL"} ${label}${detail ? ` — ${detail}` : ""}`);
 };
 
 const emptyProject = mkdtempSync(join(tmpdir(), "yam-surfaces-projectless-"));
+
+/**
+ * The newest file under a directory, so a write is a time that moved. A count
+ * would not do: proposals go into a directory named for the day, and a second
+ * promotion the same day overwrites the same files.
+ */
+const newestWrite = (dir) =>
+  existsSync(dir)
+    ? readdirSync(dir, { withFileTypes: true }).reduce(
+        (latest, one) =>
+          Math.max(latest, one.isDirectory() ? newestWrite(join(dir, one.name)) : statSync(join(dir, one.name)).mtimeMs),
+        0,
+      )
+    : 0;
 
 // A tiny target page for the connect flow to drive.
 const target = createServer((req, res) => {
@@ -56,7 +75,32 @@ const target = createServer((req, res) => {
 await new Promise((r) => target.listen(0, "127.0.0.1", r));
 const targetUrl = `http://127.0.0.1:${target.address().port}/`;
 
-let service, web, browser;
+// A host that answers only after the adapter has given up (12 s against its
+// 10 s limit): what makes an outcome genuinely unknown without a fault
+// injector. The navigation may or may not have reached the target.
+const slow = createServer((req, res) => {
+  setTimeout(() => {
+    res.setHeader("content-type", "text/html");
+    res.end('<!doctype html><title>Slow</title><h1>Late</h1><button>Late</button>');
+  }, 12000);
+});
+await new Promise((r) => slow.listen(0, "127.0.0.1", r));
+const hangUrl = `http://127.0.0.1:${slow.address().port}/`;
+
+// A project, for the one thing on Surfaces that needs one: writing a proposal
+// (T17, SF-19). The fixtures project, pointed at the target above.
+const PROJECT = mkdtempSync(join(tmpdir(), "yam-surfaces-project-"));
+for (const entry of ["bindings", "flows", "api"]) {
+  cpSync(join(ROOT, "evals", "fixtures", entry), join(PROJECT, entry), { recursive: true });
+}
+cpSync(join(ROOT, "evals", "fixtures", "data.yaml"), join(PROJECT, "data.yaml"));
+writeFileSync(
+  join(PROJECT, "yam.config.yaml"),
+  readFileSync(join(ROOT, "evals", "fixtures", "yam.config.yaml"), "utf8").replace(/baseUrl: ".*"/, `baseUrl: "${targetUrl}"`),
+  "utf8",
+);
+
+let service, projectService, web, browser;
 try {
   // 1) A real, projectless service on an empty directory. It starts the broker
   //    lazily on the first catalogue call; nothing is written to the directory.
@@ -74,6 +118,21 @@ try {
     service.on("exit", (c) => rej(new Error("serve exited " + c)));
   });
   const serviceUrl = info.url;
+
+  // A second service, on the project, which "Open a project" connects to.
+  projectService = spawn(process.execPath, [CLI, "serve", PROJECT, "--port", "0"], {
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  const projectInfo = await new Promise((res, rej) => {
+    let s = "";
+    const t = setTimeout(() => rej(new Error("project serve startup timeout")), 30000);
+    projectService.stdout.on("data", (b) => {
+      s += b;
+      const m = /url=(\S+) token=(\S+)/.exec(s);
+      if (m) { clearTimeout(t); res({ url: m[1], token: m[2], project: PROJECT }); }
+    });
+    projectService.on("exit", (c) => rej(new Error("project serve exited " + c)));
+  });
 
   // The broker is machine-global and persists sessions across processes (that is
   // the design — every client sees the same sessions). For an isolated run,
@@ -104,8 +163,9 @@ try {
 
   // 2) Serve the built renderer and proxy /service/* to the real service.
   web = createServer((req, res) => {
-    if (req.url.startsWith("/service/")) {
-      const p = proxyRequest(serviceUrl + req.url.slice(8), { method: req.method, headers: req.headers }, (r) => {
+    const upstream = req.url.startsWith("/service/") ? serviceUrl : req.url.startsWith("/project/") ? projectInfo.url : undefined;
+    if (upstream !== undefined) {
+      const p = proxyRequest(upstream + req.url.slice(8), { method: req.method, headers: req.headers }, (r) => {
         res.writeHead(r.statusCode, r.headers); r.pipe(res);
       });
       req.pipe(p); return;
@@ -120,29 +180,55 @@ try {
   await new Promise((r) => web.listen(0, "127.0.0.1", r));
   const appOrigin = `http://127.0.0.1:${web.address().port}`;
   // The renderer reaches the service through the proxy, which CSP loopback allows.
-  const bridgeInfo = { url: `${appOrigin}/service`, token: info.token, project: emptyProject, adopted: false };
-
-  browser = await chromium.launch({ headless: true });
-
-
-  /** Radix's select: click the trigger, then the option by its words. */
-  const choose = async (page, triggerId, label) => {
-    await page.locator(`#${triggerId}`).click();
-    await page.locator('[role="option"]', { hasText: label }).first().click();
-  };
-
-  const drive = async (width, height, label) => {
-    const context = await browser.newContext({ viewport: { width, height } });
-    await context.addInitScript((i) => {
+  const bridgeInfo = { url: `${appOrigin}/service`, token: info.token, project: emptyProject, adopted: false, projectless: true };
+  const projectBridge = { url: `${appOrigin}/project`, token: projectInfo.token, project: PROJECT, adopted: false, projectless: false };
+  /** The preload bridge, stubbed: the projectless service first, the project when one is opened. */
+  const stubBridge = [
+    (setup) => {
       window.yam = {
-        serviceInfo: async () => i,
-        openProject: async () => i,
-        pickFile: async () => null,
+        serviceInfo: async () => setup.surfaces,
+        openProject: async (dir) => (dir === setup.project.project ? setup.project : setup.surfaces),
+        pickFile: async () => setup.project.project,
         preferences: async () => ({ theme: "light", window: { width: 1440, height: 1000 }, recentProjects: [] }),
         onServiceLog: () => () => {},
         onServiceOpened: () => () => {},
       };
-    }, bridgeInfo);
+    },
+    { surfaces: bridgeInfo, project: projectBridge },
+  ];
+
+  browser = await chromium.launch({ headless: true });
+
+
+  /**
+   * Radix's select, by keyboard: focus the trigger, open it, walk to the option
+   * by its words, choose it. A click on the option would need it on screen,
+   * and at 200% zoom the list is taller than the window.
+   */
+  const choose = async (page, triggerId, label) => {
+    await page.locator(`#${triggerId}`).focus();
+    await page.keyboard.press("Enter");
+    await page.locator('[role="listbox"]').waitFor({ timeout: 10000 });
+    const seen = [];
+    for (let i = 0; i < 30; i += 1) {
+      await page.waitForTimeout(50);
+      const highlighted =
+        (await page.locator('[role="option"][data-highlighted], [role="option"]:focus').first().textContent().catch(() => "")) ?? "";
+      seen.push(highlighted.trim());
+      if (highlighted.includes(label)) {
+        await page.keyboard.press("Enter");
+        await page.locator('[role="listbox"]').waitFor({ state: "detached", timeout: 10000 }).catch(() => {});
+        return;
+      }
+      await page.keyboard.press("ArrowDown");
+    }
+    throw new Error(`no option "${label}" in #${triggerId}; highlighted: ${JSON.stringify(seen)}; options: ${JSON.stringify(await page.locator('[role="option"]').allTextContents())}`);
+  };
+
+  const drive = async (width, height, label, scale = 1) => {
+    // `scale` 2 is 200% zoom: the same window with half the CSS pixels (SF-18).
+    const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: scale });
+    await context.addInitScript(...stubBridge);
     const page = await context.newPage();
     page.on("pageerror", (e) => console.log("  [pageerror]", e.message));
     await page.goto(appOrigin);
@@ -280,6 +366,7 @@ try {
     const busyText = busy ? ((await page.locator("#surfaces-problem-busy").textContent()) ?? "") : "";
     note(`[${label}] a held target is the busy state, naming who has it`,
       busy && busyText.includes("agent-1") && /Take control/i.test(busyText), busyText.trim().slice(0, 90));
+    await page.screenshot({ path: join(OUT, `surfaces-busy-${label}.png`) });
 
     // Acting while the agent holds it is refused with the holder's name (SF-13).
     const refused = await asAgent(`/sessions/${sessionId}/act`, {
@@ -295,6 +382,65 @@ try {
     const afterText = (await page.locator("#surfaces-sessions").textContent()) ?? "";
     note(`[${label}] taking control hands the target over explicitly`,
       afterText.includes("You control"), afterText.replace(/\s+/g, " ").trim().slice(0, 80));
+
+    // …and having taken it, the desktop can still act: the hold is its own.
+    // The first cut named itself when taking control and not when acting, so
+    // this exact step was refused CONTROL_BUSY — by "Yam desktop".
+    await page.locator("#surfaces-tree button", { hasText: "textbox" }).first().click();
+    await page.locator("#surfaces-field-value").waitFor({ timeout: 20000 });
+    await page.locator("#surfaces-field-value").fill("after-handoff");
+    await page.locator("#action-surface-act").click();
+    await page.waitForTimeout(900);
+    pills = (await page.locator("#surfaces-last-result .sv-pill").allTextContents()).join(",");
+    summary = (await page.locator("#surfaces-result-summary").textContent()) ?? "";
+    note(`[${label}] the desktop can act on a target it took control of`,
+      /dispatched/.test(pills) && !/holds this target/.test(summary), `pills=${pills} ${summary.trim().slice(0, 60)}`);
+    await page.screenshot({ path: join(OUT, `surfaces-acting-${label}.png`) });
+
+    /* ── SF-17: stale and unknown outcome, driven rather than asserted ────── */
+
+    // Stale: navigate with a control selected. Its reference is from the
+    // generation before, so the inspector must say so and offer the way out —
+    // never resolve it to whatever is there now (SF-10, SF-17).
+    await choose(page, "surfaces-action", "Go to URL");
+    await page.locator("#surfaces-field-url").waitFor({ timeout: 10000 });
+    await page.locator("#surfaces-field-url").fill(`${targetUrl}second`);
+    await page.locator("#action-surface-act").click();
+    await page.locator("#surfaces-problem-stale").waitFor({ timeout: 30000 }).catch(() => {});
+    const stale = await page.locator("#surfaces-problem-stale").isVisible().catch(() => false);
+    const staleText = stale ? ((await page.locator("#surfaces-problem-stale").textContent()) ?? "") : "";
+    note(`[${label}] a reference from before a navigation is the stale state, with the way out`,
+      stale && /Refresh and select again/.test(staleText), staleText.replace(/\s+/g, " ").trim().slice(0, 90));
+    await page.screenshot({ path: join(OUT, `surfaces-stale-${label}.png`) });
+    await page.locator("#surfaces-problem-action").click();
+    await page.locator("#surfaces-problem-stale").waitFor({ state: "detached", timeout: 20000 }).catch(() => {});
+    await page.locator("#surfaces-tree button").first().waitFor({ timeout: 30000 });
+    note(`[${label}] refreshing takes a fresh snapshot and clears the stale state`,
+      !(await page.locator("#surfaces-problem-stale").isVisible().catch(() => false)));
+
+    // Unknown outcome: a navigation to a host that answers after the adapter
+    // has given up. The action may or may not have reached the target, so the
+    // outcome is UNKNOWN, the way out is inspection, and nothing offers an
+    // unqualified Retry (SF-11, SF-14, SF-17).
+    await page.locator("#surfaces-tree button", { hasText: "textbox" }).first().click();
+    await page.locator("#inspector-element").waitFor({ timeout: 20000 });
+    await choose(page, "surfaces-action", "Go to URL");
+    await page.locator("#surfaces-field-url").waitFor({ timeout: 10000 });
+    await page.locator("#surfaces-field-url").fill(hangUrl);
+    await page.locator("#action-surface-act").click();
+    await page.locator("#surfaces-problem-unknown").waitFor({ timeout: 45000 }).catch(() => {});
+    const unknown = await page.locator("#surfaces-problem-unknown").isVisible().catch(() => false);
+    const unknownText = unknown ? ((await page.locator("#surfaces-problem-unknown").textContent()) ?? "") : "";
+    pills = (await page.locator("#surfaces-last-result .sv-pill").allTextContents()).join(",");
+    const offered = (await page.locator("button").allTextContents()).map((one) => one.trim().toLowerCase());
+    note(`[${label}] a timed-out action is the unknown-outcome state: inspection offered, no Retry`,
+      unknown && /Inspect the current state/.test(unknownText) && /(^|,)unknown/.test(pills) && !offered.includes("retry"),
+      `pills=${pills} ${unknownText.replace(/\s+/g, " ").trim().slice(0, 80)}`);
+    await page.screenshot({ path: join(OUT, `surfaces-unknown-${label}.png`) });
+    await page.locator("#surfaces-problem-action").click();
+    await page.locator("#surfaces-tree button").first().waitFor({ timeout: 30000 });
+    note(`[${label}] inspecting after an unknown outcome shows what is there now`,
+      !(await page.locator("#surfaces-problem-unknown").isVisible().catch(() => false)));
 
     /* ── T16: connecting an agent ────────────────────────────────────────── */
 
@@ -339,6 +485,37 @@ try {
       /unverified|needs a project|Open a project|looked at, not acted on/i.test(promoted),
       promoted.trim().slice(0, 110));
 
+    // Without a project, the project screens say so rather than showing the
+    // app's private workspace as if it were one (T17).
+    await page.locator("#section-automations").click();
+    await page.locator("#project-needed").waitFor({ timeout: 15000 }).catch(() => {});
+    note(`[${label}] Automations without a project says so and points at Open a project`,
+      await page.locator("#project-needed").isVisible().catch(() => false));
+    await page.locator("#section-surfaces").click();
+    await page.locator("#surfaces-discovery").waitFor({ timeout: 15000 });
+
+    // Then with a project open: the same session, promoted into that project.
+    // The session is the broker's, so opening a project does not lose it.
+    await page.locator("#open-project").click();
+    await page.locator("#open-project", { hasText: "Project:" }).waitFor({ timeout: 30000 });
+    const rowAgain = page.locator("#surfaces-sessions tbody tr.sv-row").first();
+    await rowAgain.waitFor({ timeout: 30000 });
+    await rowAgain.click();
+    await page.locator("#action-surface-save-automation").waitFor({ timeout: 30000 });
+    const statusBefore = (await page.locator("#status-context").textContent()) ?? "";
+    const clickedAt = Date.now();
+    await page.locator("#action-surface-save-automation").click();
+    let wrote = statusBefore;
+    let written = 0;
+    for (let i = 0; i < 60 && (wrote === statusBefore || written < clickedAt); i += 1) {
+      await page.waitForTimeout(500);
+      wrote = (await page.locator("#status-context").textContent()) ?? "";
+      written = newestWrite(join(PROJECT, "proposals"));
+    }
+    note(`[${label}] with a project open, Save as automation writes an unverified proposal into it`,
+      /Wrote a proposal/.test(wrote) && /unverified/.test(wrote) && written >= clickedAt,
+      `${wrote.trim().slice(0, 90)} written ${written >= clickedAt ? "after" : "before"} the click`);
+
     // Disconnect closes it (SF-05); it is live now a session is selected.
     await page.locator("#action-surface-disconnect").waitFor({ state: "attached" });
     await page.locator("#action-surface-disconnect").click();
@@ -363,9 +540,132 @@ try {
     await context.close();
   };
 
-  await drive(1440, 1000, "1440x1000");
-  await closeAllSessions();
-  await drive(1280, 800, "1280x800");
+  /* ── SF-18: the journey with no mouse at all ──────────────────────────── */
+  const lines = transcript;
+  lines.push("# Keyboard-only journey at 1440x1000: connect, select, act, check, close (SF-18)", "");
+  const keyboardJourney = async () => {
+    const label = "keyboard";
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    await context.addInitScript(...stubBridge);
+    const page = await context.newPage();
+    await page.goto(appOrigin);
+    await page.locator("#surfaces-url").waitFor({ timeout: 30000 });
+    const focused = () =>
+      page.evaluate(() => {
+        const el = document.activeElement;
+        const style = el ? getComputedStyle(el) : undefined;
+        return {
+          id: el?.id ?? "",
+          tag: (el?.tagName ?? "").toLowerCase(),
+          text: (el?.textContent ?? "").trim().replace(/\s+/g, " ").slice(0, 40),
+          visible: style !== undefined && (style.outlineStyle !== "none" || style.boxShadow !== "none"),
+          row: el?.tagName === "TR" && el.closest("#surfaces-sessions") !== null,
+        };
+      });
+    let stops = 0;
+    let invisible = 0;
+    const press = async (key, why) => {
+      await page.keyboard.press(key);
+      const f = await focused();
+      // The body is where the browser rests between the last control and the
+      // first; it is not a stop and has no ring to show.
+      if (key === "Tab" && f.tag !== "body") { stops += 1; if (!f.visible) invisible += 1; }
+      lines.push(`${key.padEnd(10)} focus: ${f.tag}${f.id ? `#${f.id}` : ""}${f.text ? ` "${f.text}"` : ""}${f.visible || f.tag === "body" ? "" : "   [no visible focus]"}${why ? `   — ${why}` : ""}`);
+      return f;
+    };
+    const type = async (text) => { await page.keyboard.type(text); lines.push(`type       "${text}"`); };
+    const tabTo = async (want, limit = 80) => {
+      for (let i = 0; i < limit; i += 1) if (want(await press("Tab"))) return true;
+      return false;
+    };
+
+    note(`[${label}] Tab reaches the URL field`, await tabTo((f) => f.id === "surfaces-url"));
+    await type(targetUrl);
+    await press("Enter", "connect");
+    const row = page.locator("#surfaces-sessions tbody tr.sv-row").first();
+    await row.waitFor({ timeout: 60000 });
+    await page.locator("#surfaces-tree button").first().waitFor({ timeout: 30000 });
+    note(`[${label}] Enter connects, and the new session is selected`, (await row.getAttribute("aria-selected")) === "true");
+
+    note(`[${label}] Tab reaches a control in the tree`, await tabTo((f) => f.tag === "button" && /textbox/.test(f.text)));
+    await press("Enter", "select the control");
+    await page.locator("#surfaces-field-value").waitFor({ timeout: 20000 });
+    note(`[${label}] Tab reaches the value field the fill form opened`, await tabTo((f) => f.id === "surfaces-field-value"));
+    await type("ada");
+    note(`[${label}] Tab reaches the verify chooser`, await tabTo((f) => f.id === "surfaces-verify"));
+    await press("Enter", "open the chooser");
+    const listbox = await page.locator('[role="listbox"]').count();
+    lines.push(`           listbox open: ${listbox > 0}; options: ${(await page.locator('[role="option"]').allTextContents()).join(" | ")}`);
+    let chosen = false;
+    for (let i = 0; i < 8 && !chosen; i += 1) {
+      await press("ArrowDown");
+      const highlighted =
+        (await page.locator('[role="option"][data-highlighted], [role="option"]:focus').first().textContent().catch(() => "")) ?? "";
+      lines.push(`           highlighted: "${highlighted.trim()}"`);
+      if (/Value equals/.test(highlighted)) { await press("Enter", "choose Value equals"); chosen = true; }
+    }
+    note(`[${label}] the postcondition is chosen with the arrows and Enter`, chosen);
+    await page.waitForTimeout(300);
+    const back = await focused();
+    lines.push(`(after)    focus: ${back.tag}${back.id ? `#${back.id}` : ""}`);
+    note(`[${label}] focus returns to the chooser after the choice`, back.id === "surfaces-verify", `${back.tag}#${back.id}`);
+    note(`[${label}] Tab reaches the expected value`, await tabTo((f) => f.id === "surfaces-verify-value"));
+    await type("ada");
+    note(`[${label}] Tab reaches the primary action`, await tabTo((f) => f.id === "action-surface-act"));
+    await press("Enter", "act");
+    await page.locator("#surfaces-last-result").waitFor({ timeout: 30000 });
+    const pills = (await page.locator("#surfaces-last-result .sv-pill").allTextContents()).join(",");
+    note(`[${label}] the action is dispatched and verified`, /dispatched/.test(pills) && /(^|,)verified/.test(pills), pills);
+
+    // Choosing among sessions: an agent opens a second one, and the rows are
+    // reached by Tab and walked with the arrows.
+    const agentSession = await asAgent("/sessions", { url: targetUrl });
+    const agentId = agentSession?.result?.sessionId;
+    note(`[${label}] Tab reaches Recheck targets`, await tabTo((f) => f.id === "action-surface-discover"));
+    await press("Enter", "recheck, which reloads the sessions");
+    await page.locator("#surfaces-sessions tbody tr.sv-row").nth(1).waitFor({ timeout: 30000 });
+    note(`[${label}] Tab reaches a session row`, await tabTo((f) => f.row));
+    await press("ArrowDown", "the next session");
+    await press("Enter", "choose it");
+    await page.waitForTimeout(900);
+    const selectedRow = (await page.locator('#surfaces-sessions tr[aria-selected="true"]').textContent().catch(() => "")) ?? "";
+    note(`[${label}] the arrows and Enter choose the agent's session`,
+      typeof agentId === "string" && selectedRow.includes(agentId), selectedRow.replace(/\s+/g, " ").trim().slice(0, 60));
+
+    note(`[${label}] Tab reaches Disconnect`, await tabTo((f) => f.id === "action-surface-disconnect"));
+    await press("Enter", "close the selected session");
+    await page.waitForTimeout(900);
+    const remaining = (await page.locator("#surfaces-sessions").textContent()) ?? "";
+    note(`[${label}] Enter on Disconnect closes it`, typeof agentId === "string" && !remaining.includes(agentId));
+    const after = await focused();
+    lines.push(`(after)    focus: ${after.tag}${after.id ? `#${after.id}` : ""}`);
+    note(`[${label}] focus is not lost to the document body after the control it was on went away`, after.tag !== "body", `${after.tag}#${after.id}`);
+    note(`[${label}] every Tab stop showed visible focus`, invisible === 0, `${stops} stops, ${invisible} without`);
+    lines.push("", `# ${stops} Tab stops, ${invisible} without visible focus`);
+    await context.close();
+  };
+
+  /** One pass; a pass that cannot finish is one failed check, not a lost run. */
+  const wanted = process.env.SURFACES_PASSES?.split(",");
+  const pass = async (label, run) => {
+    if (wanted !== undefined && !wanted.includes(label)) return;
+    try {
+      await run();
+    } catch (e) {
+      const lines = String(e.message).split("\n");
+      const waiting = lines.find((one) => /waiting for|locator\(/.test(one)) ?? "";
+      note(`[${label}] the pass could not finish`, false, `${lines[0]} ${waiting.trim()}`.trim());
+    }
+    await closeAllSessions();
+  };
+  await pass("1440x1000", () => drive(1440, 1000, "1440x1000"));
+  await pass("1280x800", () => drive(1280, 800, "1280x800"));
+  // 200% zoom: the same window sizes with half the CSS pixels (SF-18).
+  await pass("1440x1000@200%", () => drive(720, 500, "1440x1000@200%", 2));
+  await pass("1280x800@200%", () => drive(640, 400, "1280x800@200%", 2));
+  await pass("keyboard", keyboardJourney);
+  note("the projectless workspace is left empty: connecting created no project files (SF-01)",
+    readdirSync(emptyProject).length === 0, readdirSync(emptyProject).join(",") || "empty");
 } catch (e) {
   note("harness", false, `${e.message}\n${e.stack}`);
   process.exitCode = 1;
@@ -373,8 +673,12 @@ try {
   await browser?.close().catch(() => {});
   web?.close();
   target.close();
+  slow.close();
   service?.kill("SIGTERM");
+  projectService?.kill("SIGTERM");
   writeFileSync(join(OUT, "surfaces-dogfood.json"), JSON.stringify(results, null, 2) + "\n");
+  // The transcript, however far the keyboard journey got.
+  if (transcript.length > 2) writeFileSync(join(OUT, "keyboard-transcript.txt"), transcript.join("\n") + "\n");
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} checks passed`);
   if (failed.length > 0) process.exitCode = 1;

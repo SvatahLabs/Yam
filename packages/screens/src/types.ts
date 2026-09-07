@@ -65,6 +65,13 @@ export interface ScreenParams {
   readonly capturing?: boolean;
   /** Which row the inspector is describing, when a screen has rows. */
   readonly selected?: string;
+  /**
+   * `surfaces`: the snapshot the selected control (`ref`) was chosen from
+   * (SF-10). The broker refuses the reference once the surface has moved on,
+   * which is how a control picked before a navigation reads as stale rather
+   * than as whatever holds the same id afterwards.
+   */
+  readonly snapshot?: string;
 
   /* ── the filters and choices the screens of T10.1 and T10.2 carry ───────── */
 

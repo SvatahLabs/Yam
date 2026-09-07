@@ -15,6 +15,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -89,6 +90,9 @@ beforeAll(async () => {
 afterAll(async () => {
   await app.close();
   for (const dir of projects) rmSync(dir, { recursive: true, force: true });
+  // The sessions are the broker's now, and the broker outlives the suite by
+  // design; it must not outlive the test run.
+  spawnSync("pkill", ["-f", "surface broker"]);
 });
 
 describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
@@ -541,6 +545,82 @@ describe("an agent binds and repairs (REQ-AGT-2, Draft 2.24)", () => {
         expect(readFileSync(file, "utf8")).not.toContain("gone-away");
       }
     } finally {
+      await session.close();
+    }
+  }, 240_000);
+});
+
+describe("an agent and the command line share one broker (T11, T16, SF-05, SF-13)", () => {
+  /**
+   * Verification of wave 3. The server had a session store of its own, so a
+   * session an agent opened was one `yam surface sessions` could not list and
+   * the desktop could not show, and the agent's `surface_control` was refused
+   * as "this broker does not arbitrate control". T16's demonstration used an
+   * HTTP client as the agent, which is why it passed.
+   */
+  const cli = (...args: string[]) =>
+    spawnSync(process.execPath, [join(ROOT, "packages", "cli", "dist", "bin.js"), "surface", ...args, "--json"], {
+      encoding: "utf8",
+      env: { ...process.env, CI: "true" },
+    });
+
+  it("a session opened over MCP is one the command line lists, and control is arbitrated between them", async () => {
+    const session = await connect(scaffold(), join(tmpdir(), `yam-mcp-shared-${process.pid}.jsonl`));
+    let sid: string | undefined;
+    try {
+      const opened = answer(
+        await session.client.callTool({ name: "surface_connect", arguments: { url: app.origin } }),
+      ) as { status: string; result: { sessionId: string } };
+      expect(opened.status).toBe("succeeded");
+      sid = opened.result.sessionId;
+
+      // One broker: the terminal sees what the agent opened.
+      const listed = JSON.parse(cli("sessions").stdout) as { result: { sessions: Array<{ sessionId: string }> } };
+      expect(listed.result.sessions.map((one) => one.sessionId)).toContain(sid);
+
+      // The agent takes the target under the name its client gave at initialization.
+      const taken = answer(
+        await session.client.callTool({ name: "surface_control", arguments: { session: sid, action: "take" } }),
+      ) as { status: string; result: { holder: string } };
+      expect(taken.status).toBe("succeeded");
+      expect(taken.result.holder).toBe("test-agent");
+
+      // The terminal is refused, and told who has it; the agent is not.
+      const input = join(tmpdir(), `yam-mcp-nav-${process.pid}.json`);
+      writeFileSync(input, JSON.stringify({ url: "/" }), "utf8");
+      const refused = JSON.parse(cli("act", "--session", sid, "--action", "navigate", "--input", input).stdout) as {
+        status: string;
+        error?: { code: string; message: string };
+      };
+      expect(refused.status).toBe("refused");
+      expect(refused.error?.code).toBe("CONTROL_BUSY");
+      expect(refused.error?.message).toContain("test-agent");
+
+      const acted = answer(
+        await session.client.callTool({
+          name: "surface_act",
+          arguments: { session: sid, action: "navigate", args: { url: "/" } },
+        }),
+      ) as { status: string; error?: { code: string } };
+      expect(acted.status, JSON.stringify(acted.error)).toBe("succeeded");
+
+      // The explicit handoff from the terminal, after which the agent is the one refused.
+      const handed = JSON.parse(cli("control", "--session", sid, "--take", "--force").stdout) as {
+        result: { holder: string };
+      };
+      expect(handed.result.holder).toBe("yam cli");
+      const agentRefused = answer(
+        await session.client.callTool({
+          name: "surface_act",
+          arguments: { session: sid, action: "navigate", args: { url: "/" } },
+        }),
+      ) as { status: string; error?: { code: string; message: string } };
+      expect(agentRefused.status).toBe("refused");
+      expect(agentRefused.error?.message).toContain("yam cli");
+    } finally {
+      if (sid !== undefined) {
+        await session.client.callTool({ name: "surface_close", arguments: { session: sid } }).catch(() => undefined);
+      }
       await session.close();
     }
   }, 240_000);

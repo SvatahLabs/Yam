@@ -52,6 +52,16 @@ import { yamBin } from "./ui.js";
 
 const IDLE_MS = 15 * 60 * 1000;
 
+/**
+ * Who the command line is when nobody says (SF-13, T16).
+ *
+ * A holder is a name a person reads beside a session — "yam cli controls" in
+ * the desktop — and it has to be the same name across the commands of one
+ * terminal, or `control --take` followed by `act` is refused by its own hold.
+ * `--holder` names a specific client, an agent driving the CLI included.
+ */
+export const CLI_HOLDER = "yam cli";
+
 export const SURFACE_CONTROL_SUBCOMMANDS = new Set([
   ...SURFACE_CLI_SUBCOMMANDS.filter((one) => one !== "conform" && one !== "doctor"),
   "broker",
@@ -241,7 +251,7 @@ function operationFor(
           snapshot: stringOption(args, "snapshot"),
           args: inputFor(args),
           idempotencyKey: stringOption(args, "idempotency-key"),
-          holder: stringOption(args, "holder"),
+          holder: stringOption(args, "holder") ?? CLI_HOLDER,
           // `--secret <value>`, repeatable: what must not come back in a result,
           // an event or a trajectory line (SF-15).
           secrets: stringOptions(args, "secret").length === 0 ? undefined : stringOptions(args, "secret"),
@@ -290,7 +300,7 @@ function operationFor(
     case "describe":
       return {
         operation: "describe",
-        args: defined({ session, ref: stringOption(args, "ref") ?? "" }),
+        args: defined({ session, ref: stringOption(args, "ref") ?? "", snapshot: stringOption(args, "snapshot") }),
       };
     case "control": {
       const take = boolOption(args, "take");
@@ -300,7 +310,7 @@ function operationFor(
         args: defined({
           session,
           action: take ? "take" : release ? "release" : "status",
-          holder: stringOption(args, "holder"),
+          holder: stringOption(args, "holder") ?? CLI_HOLDER,
           force: boolOption(args, "force") || undefined,
         }),
       };
@@ -327,7 +337,7 @@ function operationFor(
           session,
           request: { name: "request", ...input, method: method.toUpperCase(), url },
           withSessionCookies: boolOption(args, "with-session-cookies") || undefined,
-          holder: stringOption(args, "holder"),
+          holder: stringOption(args, "holder") ?? CLI_HOLDER,
         }),
       };
     }

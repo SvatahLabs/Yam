@@ -29,8 +29,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { lintPlan, renderPlan } from "@svatah/yam-compiler";
 import { TrajectoryWriter } from "@svatah/yam-trajectory";
-import { createSurface, listAdapters } from "@svatah/yam-surface";
-import type { ElementDescription, ActArgs, ReadKind, Ref } from "@svatah/yam-schema";
+
+import type { ElementDescription, ReadKind, Ref } from "@svatah/yam-schema";
 import { SURFACE_ACTIONS } from "@svatah/yam-schema";
 import { formatDiagnostic } from "@svatah/yam-spec";
 import {
@@ -43,25 +43,12 @@ import {
 } from "@svatah/yam-bindings-cli";
 import { credentialInEnvironment } from "@svatah/yam-gateway";
 import {
-  createSessionStore,
-  createAdapterFactory,
-  dispatchConnect,
-  dispatchSnapshot,
-  dispatchAct,
-  dispatchRead,
-  dispatchCheck,
-  dispatchClose,
-  dispatchSessions,
-  dispatchCapabilities,
-  dispatchDescribe,
-  dispatchControl,
-  dispatchEvents,
-  dispatchRequest,
-  dispatchScreenshot,
-  dispatchTargets,
-  type DispatchContext,
+  callBroker,
+  type BrokerDescriptor,
+  type BrokerOperation,
 } from "@svatah/yam-surface-control";
 import { registerAllAdapters } from "../adapters.js";
+import { connectToBroker } from "./surface-control.js";
 import { compileProject, loadProject, type LoadedProject } from "../project.js";
 
 const OPTIONAL_INTENT = z
@@ -122,12 +109,44 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
 
   /* ── surface session management via surface-control ─────────────────────── */
 
-  const store = createSessionStore();
-  const factory = createAdapterFactory(
-    (name, config) => createSurface(config),
-    listAdapters,
-  );
-  const ctx: DispatchContext = { sessions: store };
+  /*
+   * A client of the broker, like the command line and the service (SF-05,
+   * SF-13, T11, T16).
+   *
+   * The first cut gave this server a session store of its own — no
+   * coordination, no references, no events, no promotion — so a session an
+   * agent opened over MCP was one `yam surface sessions` could not list and
+   * the desktop could not see, and the agent's `surface_control` was refused
+   * as "this broker does not arbitrate control". The whole point of T16 is a
+   * person and an agent sharing one target; that needs one broker.
+   *
+   * Discovered lazily and re-discovered after a failure, so a broker that idled
+   * out between two calls is started again rather than reported dead.
+   */
+  let broker: Promise<BrokerDescriptor> | undefined;
+  const call = async (
+    operation: BrokerOperation,
+    args: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> => {
+    broker ??= connectToBroker(io);
+    try {
+      return (await callBroker(await broker, operation, args)) as Record<string, unknown>;
+    } catch (first) {
+      broker = connectToBroker(io);
+      try {
+        return (await callBroker(await broker, operation, args)) as Record<string, unknown>;
+      } catch {
+        broker = undefined;
+        throw first;
+      }
+    }
+  };
+  /**
+   * Who this agent is to the broker (SF-13): the name its client gave at
+   * initialization, so the desktop reads "claude-code controls" rather than an
+   * id — and so the agent's own next action is not refused by its own hold.
+   */
+  const holderName = (): string => server.server.getClientVersion()?.name ?? "an agent";
 
   let loaded: LoadedProject | undefined;
 
@@ -168,11 +187,16 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
     ref: string | undefined,
   ): Promise<{ url?: string; describe?: ElementDescription }> => {
     if (trajectory === undefined || intent === undefined || session === undefined) return {};
-    const surface = ctx.sessions.get(session)?.surface;
-    if (surface === undefined) return {};
-    const url = (await surface.state().catch(() => undefined))?.url;
+    const answered = async (operation: BrokerOperation, args: Record<string, unknown>) => {
+      const result = await call(operation, args).catch(() => undefined);
+      return result?.["status"] === "succeeded" ? (result["result"] as Record<string, unknown>) : undefined;
+    };
+    const read = await answered("read", { session, kind: "url" });
+    const url = typeof read?.["value"] === "string" ? read["value"] : undefined;
     const describe =
-      ref === undefined ? undefined : await surface.describe(ref as Ref).catch(() => undefined);
+      ref === undefined
+        ? undefined
+        : ((await answered("describe", { session, ref })) as ElementDescription | undefined);
     return {
       ...(url === undefined ? {} : { url }),
       ...(describe === undefined ? {} : { describe }),
@@ -193,7 +217,16 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       call === "snapshot"
         ? ((result as { result?: { hash?: string } }).result?.hash ?? undefined)
         : undefined;
-    const isError = (result as { status?: string }).status === "failed";
+    /*
+     * A refusal is recorded as an error too. Through the broker a reference
+     * nobody snapshotted is *refused* (STALE_REFERENCE) where the in-process
+     * store of the first cut let the adapter *fail* on it; either way the call
+     * did not happen, and a trajectory line with neither result nor error
+     * compiled as a step that "had no sentence pattern" rather than one that
+     * failed (REQ-BEH-4).
+     */
+    const status = (result as { status?: string }).status;
+    const isError = status === "failed" || status === "refused";
     const errorMsg = isError
       ? ((result as { error?: { message?: string } }).error?.message ?? "unknown error")
       : undefined;
@@ -538,7 +571,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
 
   /* ── the surface tools, driven from the operation catalogue ──────────── */
 
-  const registeredAdapters = listAdapters();
+
 
   server.registerTool(
     "surface_targets",
@@ -554,7 +587,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ url, adapter }) =>
-      text(await dispatchTargets(ctx, { url, adapter, registeredAdapters })),
+      text(await call("targets", { url, adapter })),
   );
 
   server.registerTool(
@@ -575,10 +608,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
     // `intent` is accepted and unused here: connect starts a session, and a
     // sentence describes a step. Taking it keeps one shape across the tools.
     async ({ url, adapter, headed }) => {
-      const result = await dispatchConnect(ctx, {
-        url, adapter, headed,
-        adapterFactory: factory,
-      });
+      const result = await call("connect", { url, adapter, headed });
       io.err(`surface session opened: ${(result as { result?: { sessionId?: string } }).result?.sessionId}`);
       return text(result);
     },
@@ -604,7 +634,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
     },
     async ({ session, interactiveOnly, maxNodes, root, intent }) => {
       const before = await evidenceBefore(intent, session, undefined);
-      const result = await dispatchSnapshot(ctx, { session, interactiveOnly, maxNodes, root });
+      const result = await call("snapshot", { session, interactiveOnly, maxNodes, root });
       await captureToTrajectory("snapshot", intent, { interactiveOnly, maxNodes }, undefined, result, before);
       return text(result);
     },
@@ -627,13 +657,14 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
           .optional()
           .describe('Arguments: {"url": "/login"}, {"value": "hello"}, {"key": "Enter"}.'),
         ref2: z.string().optional().describe("The second element, for dragTo."),
+        holder: z.string().optional().describe("Who you are; defaults to this client's name."),
         intent: OPTIONAL_INTENT,
       },
     },
-    async ({ session, action, ref, args, ref2, intent }) => {
+    async ({ session, action, ref, args, ref2, holder, intent }) => {
       const before = await evidenceBefore(intent, session, ref);
-      const result = await dispatchAct(ctx, {
-        session, action, ref, args: args as ActArgs | undefined, ref2,
+      const result = await call("act", {
+        session, action, ref, args, ref2, holder: holder ?? holderName(),
       });
       await captureToTrajectory("act", intent, { action, args, ref2 }, ref, result, before);
       return text(result);
@@ -656,7 +687,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
     },
     async ({ session, kind, ref, name, intent }) => {
       const before = await evidenceBefore(intent, session, ref);
-      const result = await dispatchRead(ctx, {
+      const result = await call("read", {
         session, kind: kind as ReadKind, ref, name,
       });
       await captureToTrajectory("read", intent, { kind, name }, ref, result, before);
@@ -684,7 +715,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
     },
     async ({ session, predicate, subject, ref, intent }) => {
       const before = await evidenceBefore(intent, session, ref);
-      const result = await dispatchCheck(ctx, {
+      const result = await call("check", {
         session,
         predicate: predicate as { kind: string; value?: string; name?: string; negate?: boolean },
         subject,
@@ -706,7 +737,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
         intent: OPTIONAL_INTENT,
       },
     },
-    async ({ session }) => text(await dispatchClose(ctx, { session })),
+    async ({ session }) => text(await call("close", { session })),
   );
 
   server.registerTool(
@@ -717,7 +748,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
       inputSchema: {},
     },
-    async () => text(await dispatchSessions(ctx)),
+    async () => text(await call("sessions", {})),
   );
 
   server.registerTool(
@@ -730,7 +761,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
         session: z.string().min(1).describe("Session ID"),
       },
     },
-    async ({ session }) => text(await dispatchCapabilities(ctx, { session })),
+    async ({ session }) => text(await call("capabilities", { session })),
   );
 
   server.registerTool(
@@ -742,10 +773,11 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       inputSchema: {
         session: z.string().min(1).describe("Session ID"),
         ref: z.string().min(1).describe("Element reference"),
+        snapshot: z.string().optional().describe("The snapshot the reference came from; refused if the surface has changed since."),
         intent: OPTIONAL_INTENT,
       },
     },
-    async ({ session, ref }) => text(await dispatchDescribe(ctx, { session, ref })),
+    async ({ session, ref, snapshot }) => text(await call("describe", { session, ref, snapshot })),
   );
 
   server.registerTool(
@@ -759,7 +791,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
       inputSchema: { session: z.string().min(1).describe("Session ID") },
     },
-    async ({ session }) => text(await dispatchEvents(ctx, { session })),
+    async ({ session }) => text(await call("events", { session })),
   );
 
   server.registerTool(
@@ -780,10 +812,10 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
     },
     async ({ session, action, holder, force }) =>
       text(
-        await dispatchControl(ctx, {
+        await call("control", {
           session,
           ...(action === undefined ? {} : { action }),
-          ...(holder === undefined ? {} : { holder }),
+          holder: holder ?? holderName(),
           ...(force === undefined ? {} : { force }),
         }),
       ),
@@ -814,15 +846,17 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
           })
           .describe("The request to send"),
         withSessionCookies: z.boolean().optional(),
+        holder: z.string().optional().describe("Who you are; defaults to this client's name."),
         intent: OPTIONAL_INTENT,
       },
     },
-    async ({ session, request, withSessionCookies }) =>
+    async ({ session, request, withSessionCookies, holder }) =>
       text(
-        await dispatchRequest(ctx, {
+        await call("request", {
           session,
           request: { name: "request", ...request } as Record<string, unknown>,
           ...(withSessionCookies === undefined ? {} : { withSessionCookies }),
+          holder: holder ?? holderName(),
         }),
       ),
   );
@@ -839,7 +873,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
         intent: OPTIONAL_INTENT,
       },
     },
-    async ({ session, path }) => text(await dispatchScreenshot(ctx, { session, path })),
+    async ({ session, path }) => text(await call("screenshot", { session, path })),
   );
 
   if (trajectory) {
@@ -860,7 +894,8 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
     server,
     trajectory,
     close: async () => {
-      await store.closeAll();
+      // Sessions are the broker's, not this process's (SF-05): an agent that
+      // disconnects leaves what it opened for the person to see and close.
     },
   };
 }

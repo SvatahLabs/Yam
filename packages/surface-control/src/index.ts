@@ -138,6 +138,7 @@ export {
   dispatchCapabilities,
   dispatchDescribe,
   dispatchControl,
+  DEFAULT_HOLDER,
   dispatchEvents,
   dispatchRequest,
   dispatchScreenshot,
