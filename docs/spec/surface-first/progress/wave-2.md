@@ -111,7 +111,12 @@
 - 11 operations × 3 interfaces × unique keys
 - Generated clients compile and cover every operation
 
-**Deviations:** The old `/surface/:session/*` routes in `packages/service/src/server.ts` are not replaced in this wave; they remain as legacy routes. The catalogue-generated routes exist as a parallel generated API document. Full replacement is a T12 subtask that requires coordinating with the desktop client and is deferred to avoid breaking existing flows.
+**Deviations:** the first cut generated an OpenAPI document beside a service
+that still served hand-written routes, which is the thing T12 exists to prevent.
+Corrected in verification: `ServiceApi.surfaceOperations` carries the catalogue's
+descriptors, the CLI builds them (`packages/cli/src/surface-routes.ts`) and the
+server registers them in one loop. The older `/surface/:session/*` routes remain
+for the app's Explorer; both reach the same broker.
 
 ---
 
@@ -151,3 +156,45 @@
 
 120 tests in `packages/surface-control` (13 test files, all pass).
 Full `pnpm -r build` succeeds with no errors.
+
+---
+
+## Verification, 2026-09-08
+
+Verified against the wave-2 prompt's contract. Five defects were found in the
+delivered branch; all five are fixed here.
+
+| # | What was wrong | Where |
+|---|---|---|
+| 1 | **T12 was not done.** The catalogue generated an OpenAPI document that was tested against itself, while the service served hand-written routes. An argument added to the catalogue reached the CLI and MCP and not HTTP — the exact failure the prompt named as "the wave failed". | `packages/service/src/api.ts`, `packages/service/src/server.ts`, `packages/cli/src/surface-routes.ts` |
+| 2 | **Refusals exited 0.** Wave 2 gave operations five outcomes and mapped one. A stale reference, a busy target and an unsupported operation all looked like success to a script. | `packages/cli/src/commands/surface-control.ts` |
+| 3 | **Idempotency could not tell two mutations apart.** `hashInput` passed an array to `JSON.stringify`, which is a replacer applied at every depth, so `args` lost its contents. Navigating to two different pages hashed identically: the second was swallowed as a duplicate and reported as succeeded while the browser had not moved. | `packages/surface-control/src/coordination.ts` |
+| 4 | **Redaction was inert.** The policy was created and threaded through every result, and nothing could put a secret in it: no flag, no argument, no option. | `packages/surface-control/src/dispatcher.ts`, `packages/cli/src/commands/surface-control.ts` |
+| 5 | `describe`, `capabilities` and `screenshot` worked and were absent from `yam surface --help`, so the only way to find them was to read the source. | `packages/cli/src/help.ts` |
+
+**What held up.** Reference scope, target discovery, lease contention and the
+event stream were real and wired into the dispatcher and the broker, and the
+tests for them exercise behaviour rather than reading source. That is a marked
+improvement on wave 1.
+
+**Evidence.**
+
+```
+# The catalogue is the source: move one path and the served route moves.
+$ (change snapshot's service path to /sessions/:session/probe-changed, rebuild)
+POST /sessions/<id>/probe-changed  → 200
+POST /sessions/<id>/snapshot       → 404
+
+# Refusals, through the command line.
+same key, other input : exit 64  refused  INVALID_ARGUMENT
+stale reference       : exit 1   refused  STALE_REFERENCE
+two clients, one target: one succeeded, one refused CONTROL_BUSY
+
+# A declared secret does not come back.
+$ yam surface act … --secret hunter2-s3cr3t --json     → not present in any output
+```
+
+New behavioural tests: `packages/cli/test/surface-transport.test.ts` — the
+service answers on every catalogue path, an undeclared path 404s, a refusal
+crosses HTTP as a refusal, the session an HTTP client opens is one the command
+line lists, and the help names every catalogue subcommand.

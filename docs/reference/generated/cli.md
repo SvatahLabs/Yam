@@ -408,6 +408,20 @@ Find bindings no flow or test names any more; --apply removes them.
 Exit codes: 0 ok · 1 failed
 ```
 
+### `yam surface targets`
+
+```text
+yam surface targets [--url <url>] [--adapter <name>] [--json]
+
+Discover available targets and adapter readiness on this machine.
+
+  --url <url>       filter targets that can drive this URL
+  --adapter <name>  filter to a specific adapter
+  --json            one JSON document on stdout, nothing else
+
+Exit codes: 0 ok
+```
+
 ### `yam surface connect`
 
 ```text
@@ -419,6 +433,47 @@ Connect to a target and open a surface session. Prints the session ID on stdout.
   --adapter <name>  which adapter to use (default: playwright)
   --headed          show the browser
   --json            one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam surface describe`
+
+```text
+yam surface describe --session <id> --ref <ref> [--json]
+
+Everything the surface knows about one element: its role, name, attributes, text and box.
+
+  --session <id>  the session
+  --ref <ref>     the element, from a snapshot
+  --json          one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam surface capabilities`
+
+```text
+yam surface capabilities --session <id> [--json]
+
+What this target supports: which actions, which reads, which checks, and why anything is unavailable.
+
+  --session <id>  the session
+  --json          one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam surface screenshot`
+
+```text
+yam surface screenshot --session <id> [--path <file.png>] [--json]
+
+A picture of the target, when the adapter can take one.
+
+  --session <id>     the session
+  --path <file.png>  where to write it
+  --json             one JSON document on stdout, nothing else
 
 Exit codes: 0 ok · 1 failed
 ```

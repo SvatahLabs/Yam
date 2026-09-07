@@ -191,6 +191,28 @@ export interface ServiceApi {
    * Open a surface session an agent — or the app's explorer — drives call by
    * call, writing `trajectory.jsonl` (LLD §13.5's `POST /surface/:sessionId/*`).
    */
+  /**
+   * The surface operations, as the catalogue defines them (SF-03, T12).
+   *
+   * The service may not import `surface-control` — it may import the CLI's
+   * command functions and `schema`, and nothing else (LLD §1) — so the
+   * catalogue is *handed* to it, one descriptor per operation, and the routes
+   * are registered from that list rather than written out here.
+   *
+   * That is what makes one source true rather than aspirational. Wave 2's first
+   * cut generated an OpenAPI document from the catalogue and left the service
+   * serving hand-written routes beside it, so an argument added to the
+   * catalogue reached the CLI and MCP and not the HTTP API, and the generated
+   * document described an API nobody served.
+   */
+  surfaceOperations?: ReadonlyArray<{
+    readonly name: string;
+    readonly method: "GET" | "POST" | "DELETE";
+    /** As the catalogue writes it, with `:session` for the path parameter. */
+    readonly path: string;
+    readonly run: (args: Record<string, unknown>) => Promise<unknown>;
+  }>;
+
   openSurfaceSession?(
     loaded: ProjectHandle,
     options: { sessionId: string; headed?: boolean },

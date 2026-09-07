@@ -906,6 +906,47 @@ export async function createService(options: ServeOptions): Promise<RunningServi
     Awaited<ReturnType<NonNullable<ServiceApi["openSurfaceSession"]>>>
   >();
 
+  /*
+   * The catalogue's operations, served exactly as it defines them (T12).
+   *
+   * One loop, no per-operation knowledge: the method, the path and the handler
+   * all come from the descriptor the CLI injected. An operation added to the
+   * catalogue appears here with no edit to this file, which is the property
+   * "one source" actually means.
+   *
+   * The `/surface/:session/*` routes below are the older shape and stay for the
+   * app's Explorer until it moves; both reach the same dispatcher.
+   */
+  for (const operation of api.surfaceOperations ?? []) {
+    const route = operation.path.replace(/:session\b/g, ":session");
+    fastify.route({
+      method: operation.method,
+      url: route,
+      handler: async (request, reply) => {
+        const params = (request.params ?? {}) as Record<string, unknown>;
+        const body = (request.body ?? {}) as Record<string, unknown>;
+        const query = (request.query ?? {}) as Record<string, unknown>;
+        try {
+          const result = await operation.run({ ...query, ...body, ...params });
+          /*
+           * The envelope carries the outcome; the status code carries whether
+           * the service could answer at all. A refusal is a 200 with
+           * `status: "refused"`, because the service did its job by refusing.
+           */
+          return await reply.code(200).send(result);
+        } catch (error) {
+          if ((error as { code?: string }).code === "UNSUPPORTED_ADAPTER") {
+            return await reply.code(400).send({
+              error: "unsupported-adapter",
+              message: error instanceof Error ? error.message : String(error),
+            });
+          }
+          throw error;
+        }
+      },
+    });
+  }
+
   fastify.post<{ Params: { session: string }; Body?: { headed?: boolean; adapter?: string } }>(
     "/surface/:session/open",
     async (request, reply) => {

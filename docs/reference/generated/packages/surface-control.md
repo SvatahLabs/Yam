@@ -15,6 +15,9 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `actInputSchema` | variable | `actInputSchema = z.object(` |  |
 | `actOutputSchema` | variable | `actOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `AdapterFactoryFn` | typealias | `export type AdapterFactoryFn ` |  |
+| `AdapterReadiness` | interface | `export interface AdapterReadiness` |  |
+| `addSecretLiteral` | function | `export function addSecretLiteral(policy: RedactionPolicy, literal: string): void` |  |
+| `addSecretPattern` | function | `export function addSecretPattern(policy: RedactionPolicy, pattern: RegExp): void` |  |
 | `brokerAlive` | function | `export async function brokerAlive(descriptor: { url: string; token: string }): Promise<boolean>` | Whether a broker is answering at this descriptor. |
 | `BrokerDescriptor` | interface | `export interface BrokerDescriptor` |  |
 | `BrokerOperation` | typealias | `export type BrokerOperation ` | One operation, by the name the catalogue gives it. |
@@ -23,6 +26,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `callBroker` | function | `export async function callBroker(` | Ask a running broker to perform one operation. |
 | `capabilitiesInputSchema` | variable | `capabilitiesInputSchema = z.object(` |  |
 | `capabilitiesOutputSchema` | variable | `capabilitiesOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `checkAdapterReadiness` | function | `export function checkAdapterReadiness(` |  |
 | `checkInputSchema` | variable | `checkInputSchema = z.object(` |  |
 | `checkOutputSchema` | variable | `checkOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `CLI_EXIT_CODES` | variable | `CLI_EXIT_CODES ` |  |
@@ -32,11 +36,19 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `connectInputSchema` | variable | `connectInputSchema = z.object(` |  |
 | `ConnectOptions` | interface | `export interface ConnectOptions` |  |
 | `connectOutputSchema` | variable | `connectOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `CoordinationStore` | interface | `export interface CoordinationStore` |  |
 | `createAdapterFactory` | function | `export function createAdapterFactory(` |  |
+| `createCoordinationStore` | function | `export function createCoordinationStore(): CoordinationStore` |  |
+| `createEventStore` | function | `export function createEventStore(): EventStore` |  |
+| `createRedactionPolicy` | function | `export function createRedactionPolicy(): RedactionPolicy` |  |
+| `createReferenceStore` | function | `export function createReferenceStore(): ReferenceStore` |  |
 | `createSessionStore` | function | `export function createSessionStore(): SessionStore` |  |
 | `describeInputSchema` | variable | `describeInputSchema = z.object(` |  |
 | `describeOutputSchema` | variable | `describeOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `discoverAdapters` | function | `export function discoverAdapters(registeredAdapters: string[]): AdapterReadiness[]` |  |
 | `discoverBroker` | function | `export function discoverBroker(stateDir?: string): BrokerDescriptor \| undefined` |  |
+| `DiscoveredTarget` | interface | `export interface DiscoveredTarget` |  |
+| `discoverTargets` | function | `export function discoverTargets(` |  |
 | `dispatchAct` | function | `export async function dispatchAct(` |  |
 | `dispatchCapabilities` | function | `export async function dispatchCapabilities(` |  |
 | `dispatchCheck` | function | `export async function dispatchCheck(` |  |
@@ -48,21 +60,40 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `dispatchScreenshot` | function | `export async function dispatchScreenshot(` |  |
 | `dispatchSessions` | function | `export async function dispatchSessions(` |  |
 | `dispatchSnapshot` | function | `export async function dispatchSnapshot(` |  |
+| `dispatchTargets` | function | `export async function dispatchTargets(` |  |
 | `ERROR_CODES` | variable | `ERROR_CODES = [` |  |
 | `ErrorCode` | typealias | `export type ErrorCode = (typeof ERROR_CODES)[number];` |  |
+| `EventKind` | typealias | `export type EventKind ` |  |
+| `EventStore` | interface | `export interface EventStore` |  |
 | `failedEnvelope` | function | `export function failedEnvelope(` |  |
+| `generateJavaClient` | function | `export function generateJavaClient(): string` |  |
+| `generateOpenApiDocument` | function | `export function generateOpenApiDocument(version: string): Record<string, unknown>` |  |
+| `generateOpenApiPaths` | function | `export function generateOpenApiPaths(): Record<string, Record<string, unknown>>` |  |
+| `generatePythonClient` | function | `export function generatePythonClient(): string` |  |
 | `generateToken` | function | `export function generateToken(): string` |  |
+| `generateTypeScriptClient` | function | `export function generateTypeScriptClient(): string` |  |
+| `hashInput` | function | `function hashInput(input: unknown): string` |  |
+| `hasSecret` | function | `export function hasSecret(policy: RedactionPolicy, value: string): boolean` |  |
+| `IdempotencyRecord` | interface | `export interface IdempotencyRecord` |  |
 | `isProcessAlive` | function | `export function isProcessAlive(pid: number): boolean` |  |
+| `Lease` | interface | `export interface Lease` |  |
 | `makeRequestId` | function | `export function makeRequestId(): string` |  |
 | `operationByCliSubcommand` | function | `export function operationByCliSubcommand(sub: string): OperationDescriptor \| undefined` |  |
 | `operationByMcpTool` | function | `export function operationByMcpTool(toolName: string): OperationDescriptor \| undefined` |  |
 | `operationByName` | function | `export function operationByName(name: string): OperationDescriptor \| undefined` |  |
 | `operationByServicePath` | function | `export function operationByServicePath(method: string, path: string): OperationDescriptor \| undefined` |  |
 | `OperationDescriptor` | interface | `export interface OperationDescriptor` |  |
+| `OperationOutcome` | typealias | `export type OperationOutcome = "succeeded" \| "failed" \| "refused" \| "cancelled" \| "unknown";` |  |
+| `OperationRecord` | interface | `export interface OperationRecord` |  |
 | `OPERATIONS` | variable | `OPERATIONS: readonly OperationDescriptor[] = [` |  |
 | `readBrokerDescriptor` | function | `export function readBrokerDescriptor(stateDir?: string): BrokerDescriptor \| undefined` |  |
 | `readInputSchema` | variable | `readInputSchema = z.object(` |  |
 | `readOutputSchema` | variable | `readOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `RedactionPolicy` | interface | `export interface RedactionPolicy` |  |
+| `redactObject` | function | `export function redactObject(policy: RedactionPolicy, obj: unknown): unknown` |  |
+| `redactString` | function | `export function redactString(policy: RedactionPolicy, value: string): string` |  |
+| `ReferenceStore` | interface | `export interface ReferenceStore` |  |
+| `RefScope` | interface | `export interface RefScope` |  |
 | `refusedEnvelope` | function | `export function refusedEnvelope(` |  |
 | `removeBrokerDescriptor` | function | `export function removeBrokerDescriptor(stateDir?: string): void` |  |
 | `ResultEnvelope` | typealias | `export type ResultEnvelope = z.infer<typeof resultEnvelopeSchema>;` |  |
@@ -71,6 +102,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `screenshotInputSchema` | variable | `screenshotInputSchema = z.object(` |  |
 | `screenshotOutputSchema` | variable | `screenshotOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `SessionEntry` | interface | `export interface SessionEntry` |  |
+| `SessionEvent` | interface | `export interface SessionEvent` |  |
 | `SessionMode` | typealias | `export type SessionMode = "launch" \| "attach";` |  |
 | `sessionsInputSchema` | variable | `sessionsInputSchema = z.object({})` |  |
 | `sessionsOutputSchema` | variable | `sessionsOutputSchema = resultEnvelopeSchema.extend(` |  |
@@ -78,8 +110,11 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `SessionStore` | interface | `export interface SessionStore` |  |
 | `snapshotInputSchema` | variable | `snapshotInputSchema = z.object(` |  |
 | `snapshotOutputSchema` | variable | `snapshotOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `SnapshotRecord` | interface | `export interface SnapshotRecord` |  |
 | `startBroker` | function | `export async function startBroker(options: BrokerOptions): Promise<RunningBroker>` | Start the broker on loopback, on a port the OS picks. |
 | `successEnvelope` | function | `export function successEnvelope(` |  |
 | `SURFACE_CLI_SUBCOMMANDS` | variable | `SURFACE_CLI_SUBCOMMANDS = OPERATIONS.map((op) => op.cli.subcommand)` |  |
 | `SURFACE_TOOL_NAMES` | variable | `SURFACE_TOOL_NAMES = OPERATIONS.map((op) => op.mcp.toolName)` |  |
+| `targetsInputSchema` | variable | `targetsInputSchema = z.object(` |  |
+| `targetsOutputSchema` | variable | `targetsOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `writeBrokerDescriptor` | function | `export function writeBrokerDescriptor(` |  |

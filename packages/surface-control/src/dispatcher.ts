@@ -10,7 +10,7 @@ import type { CoordinationStore } from "./coordination.js";
 import { hashInput } from "./coordination.js";
 import type { EventStore } from "./events.js";
 import type { RedactionPolicy } from "./redaction.js";
-import { redactObject } from "./redaction.js";
+import { addSecretLiteral, redactObject } from "./redaction.js";
 
 export interface DispatchContext {
   sessions: SessionStore;
@@ -181,10 +181,20 @@ export async function dispatchAct(
     idempotencyKey?: string;
     holder?: string;
     deadlineMs?: number;
+    /**
+     * Values that must never be echoed back (SF-15).
+     *
+     * The redaction policy existed and was wired into every result, and nothing
+     * could put anything in it: no flag, no argument, no option. A password
+     * typed through `act` came back in the result, the event and the trajectory
+     * because there was no way for the caller to say it was one.
+     */
+    secrets?: readonly string[];
   },
 ): Promise<Record<string, unknown>> {
   const requestId = makeRequestId();
   const start = Date.now();
+  if (ctx.redaction) for (const secret of input.secrets ?? []) addSecretLiteral(ctx.redaction, secret);
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
     return failedEnvelope(requestId, input.session, "SESSION_NOT_FOUND", `Session ${input.session} not found`);

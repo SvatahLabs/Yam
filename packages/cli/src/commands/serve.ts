@@ -27,6 +27,8 @@ import {
   serviceToolsFor,
   serviceVerifyBindings,
 } from "../service-api.js";
+import { surfaceRoutes } from "../surface-routes.js";
+import { connectToBroker } from "./surface-control.js";
 import { runProject } from "./run.js";
 import { newRunId } from "@svatah/yam-runtime";
 import { EXIT, type ExitCode } from "@svatah/yam-bindings-cli";
@@ -104,6 +106,13 @@ export async function serveCommand(args: ParsedArgs, io: CommandIo): Promise<Exi
       verifyBindings: serviceVerifyBindings,
       heal: serviceHeal,
       openSurfaceSession: serviceOpenSurfaceSession,
+      /*
+       * The surface operations, from the catalogue (T12). The service registers
+       * whatever is in this list; it knows nothing about any single operation.
+       */
+      surfaceOperations: surfaceRoutes(async () =>
+        await connectToBroker({ out: () => undefined, err: () => undefined }),
+      ),
       compileTrajectory: serviceCompileTrajectory,
       toolsFor: serviceToolsFor,
       migrateFromPrototype: serviceMigrateFromPrototype,

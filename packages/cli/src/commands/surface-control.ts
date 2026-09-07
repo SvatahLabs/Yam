@@ -27,6 +27,7 @@ import { resolve } from "node:path";
 import {
   EXIT,
   stringOption,
+  stringOptions,
   boolOption,
   type ParsedArgs,
   type ExitCode,
@@ -89,7 +90,16 @@ export async function surfaceControlCommand(args: ParsedArgs, io: CommandIo): Pr
 
 /** The exit code a result envelope means (SF-06). */
 function exitFor(result: Record<string, unknown>): ExitCode {
-  if (result["status"] !== "failed") return EXIT.ok;
+  /*
+   * `refused` is not `succeeded` (SF-11).
+   *
+   * Wave 2 gave operations five outcomes and mapped one of them. A stale
+   * reference, a busy target and an unsupported operation all exited 0, so a
+   * script could not tell them from a success — which is the whole reason the
+   * outcome vocabulary exists.
+   */
+  const status = result["status"];
+  if (status !== "failed" && status !== "refused") return EXIT.ok;
   const code = (result as { error?: { code?: string } }).error?.code;
   if (code === "CHECK_FAILED") return 20 as ExitCode;
   if (code === "SESSION_NOT_FOUND" || code === "SESSION_CLOSED") return 21 as ExitCode;
@@ -106,7 +116,7 @@ function exitFor(result: Record<string, unknown>): ExitCode {
  * Started detached and unref'd, because it must outlive the command that
  * needed it — that is the whole point of it.
  */
-async function connectToBroker(io: CommandIo): Promise<BrokerDescriptor> {
+export async function connectToBroker(io: CommandIo): Promise<BrokerDescriptor> {
   const found = discoverBroker();
   if (found !== undefined && (await brokerAlive(found))) return found;
   // A descriptor whose process is gone, or which answers nothing, is stale.
@@ -232,6 +242,9 @@ function operationFor(
           args: inputFor(args),
           idempotencyKey: stringOption(args, "idempotency-key"),
           holder: stringOption(args, "holder"),
+          // `--secret <value>`, repeatable: what must not come back in a result,
+          // an event or a trajectory line (SF-15).
+          secrets: stringOptions(args, "secret").length === 0 ? undefined : stringOptions(args, "secret"),
         }),
       };
 

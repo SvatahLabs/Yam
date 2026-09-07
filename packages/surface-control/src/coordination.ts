@@ -64,8 +64,31 @@ export interface CoordinationStore {
 const DEFAULT_DEADLINE_MS = 30_000;
 const IDEMPOTENCY_TTL_MS = 10 * 60 * 1000;
 
+/**
+ * A stable hash of a request, for idempotency (SF-14).
+ *
+ * The keys are sorted so that argument order cannot change the hash. It is
+ * done by *building* a sorted structure rather than by passing an array to
+ * `JSON.stringify`: that array is a replacer, and a replacer array is an
+ * allowlist applied at **every** depth. With the top-level keys as the list,
+ * `args: { url: … }` lost its `url`, so navigating to two different pages
+ * hashed identically — a key reused with different input was accepted as a
+ * duplicate, the second navigation was swallowed, and the caller was told it
+ * succeeded while the browser had not moved.
+ */
+function sortedForHash(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortedForHash);
+  if (value !== null && typeof value === "object") {
+    const source = value as Record<string, unknown>;
+    const out: Record<string, unknown> = {};
+    for (const key of Object.keys(source).sort()) out[key] = sortedForHash(source[key]);
+    return out;
+  }
+  return value;
+}
+
 function hashInput(input: unknown): string {
-  const json = JSON.stringify(input, Object.keys(input as Record<string, unknown>).sort());
+  const json = JSON.stringify(sortedForHash(input));
   let h = 0;
   for (let i = 0; i < json.length; i++) {
     h = ((h << 5) - h + json.charCodeAt(i)) | 0;
