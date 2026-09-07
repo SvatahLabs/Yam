@@ -19,13 +19,18 @@
  * no operation list, and no idea of what an action needs beyond what the
  * contract publishes.
  */
-import {
-  offeredActions,
-  defaultActionForRole,
-  type ActionForm,
-  type CapabilityFlag,
-  type SurfaceKind,
-} from "@svatah/yam-schema";
+/*
+ * The action vocabulary from the browser-safe entry (T18).
+ *
+ * `@svatah/yam-schema`'s barrel is one bundled file that carries
+ * `canonical.ts`'s `node:crypto` import, so a renderer that pulled
+ * `offeredActions` from it could not be built at all — the shipped desktop
+ * bundle failed on `"createHash" is not exported by "__vite-browser-external"`.
+ * The names are identical and the barrel still re-exports them; this import
+ * only says which *file* the browser gets.
+ */
+import { offeredActions, defaultActionForRole, type ActionForm } from "@svatah/yam-schema/action-forms";
+import type { CapabilityFlag, SurfaceKind } from "@svatah/yam-schema";
 import { DESKTOP_HOLDER } from "../holder.js";
 import { Sources, dotted, plural } from "../load.js";
 import { actionsForScreen } from "../registry.js";

@@ -425,14 +425,16 @@ Exit codes: 0 ok
 ### `yam surface connect`
 
 ```text
-yam surface connect [--url <url>] [--adapter <name>] [--headed] [--json]
+yam surface connect [--url <url> | --app <name> | --attach <endpoint>] [--adapter <name>] [--headed] [--json]
 
-Connect to a target and open a surface session. Prints the session ID on stdout.
+Connect to a target and open a surface session. Prints the session ID on stdout. Name one target: a URL launches a browser, --attach joins one that is already running, --app drives an application that is already running.
 
-  --url <url>       the URL to connect to
-  --adapter <name>  which adapter to use (default: playwright)
-  --headed          show the browser
-  --json            one JSON document on stdout, nothing else
+  --url <url>          the URL to connect to; launches a browser
+  --app <name>         an application that is already running, by process name
+  --attach <endpoint>  a browser that is already running, by its DevTools endpoint
+  --adapter <name>     which adapter to use (default: playwright)
+  --headed             show the browser
+  --json               one JSON document on stdout, nothing else
 
 Exit codes: 0 ok · 1 failed
 ```

@@ -12,7 +12,7 @@ import {
   apiRequestSchema,
   apiResponseSchema,
   } from "@svatah/yam-schema";
-import { SURFACE_ACTIONS } from "@svatah/yam-schema";
+import { SURFACE_ACTIONS, canonicalHash } from "@svatah/yam-schema";
 
 const sessionIdSchema = z.string().min(1);
 
@@ -137,12 +137,46 @@ const targetsOutputSchema = resultEnvelopeSchema.extend({
   }),
 });
 
-const connectInputSchema = z.object({
-  url: z.string().url().optional(),
-  adapter: z.string().optional(),
-  headed: z.boolean().optional(),
-  intent: z.string().optional(),
-});
+/**
+ * What `connect` may be pointed at (SF-04, T18).
+ *
+ * Wave 2 gave it a URL and nothing else, and wave 3 recorded the consequence as
+ * a deviation: "attach to a discovered target is not expressible through it
+ * yet". Two things could not be said, and both are the primary journey of a
+ * *native* surface:
+ *
+ *   * `app` — an application that is already running, by the name of its
+ *     process. Native adapters address a window that way (`SessionInit.
+ *     processName`); without it the AX and UIA adapters could be selected and
+ *     never told what to drive, and answered by refusing.
+ *   * `attach` — a browser that is already running, by its DevTools endpoint
+ *     (`SessionInit.attach.cdpUrl`). A URL *launches* one; this joins the one
+ *     somebody else started, which is how a packaged application's renderer is
+ *     reached.
+ *
+ * They are mutually exclusive with each other and with `url`: a request that
+ * named two connection modes would leave the caller unable to say which target
+ * the session is on, and SF-04 forbids a silent choice between them.
+ */
+const connectInputSchema = z
+  .object({
+    url: z.string().url().optional(),
+    /** An already-running application to drive, by process name (native adapters). */
+    app: z.string().min(1).optional(),
+    /** An already-running browser to join, by DevTools endpoint (web adapters). */
+    attach: z.string().min(1).optional(),
+    adapter: z.string().optional(),
+    headed: z.boolean().optional(),
+    intent: z.string().optional(),
+  })
+  .refine(
+    (one) => [one.url, one.app, one.attach].filter((v) => v !== undefined).length <= 1,
+    {
+      message:
+        "Name one target: --url launches a browser, --attach joins one that is already " +
+        "running, --app drives an application that is already running.",
+    },
+  );
 
 const connectOutputSchema = resultEnvelopeSchema.extend({
   result: z.object({
@@ -393,6 +427,8 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
       subcommand: "connect",
       flags: [
         { name: "url", type: "string", required: false, description: "URL to connect to" },
+        { name: "app", type: "string", required: false, description: "Drive an application that is already running, by process name" },
+        { name: "attach", type: "string", required: false, description: "Join a browser that is already running, by its DevTools endpoint" },
         { name: "adapter", type: "string", required: false, description: "Adapter to use (playwright, bidi, appium, uia, ax, http)" },
         { name: "headed", type: "boolean", required: false, description: "Run in headed mode" },
       ],
@@ -451,6 +487,16 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
         { name: "ref2", type: "string", required: false, description: "Second reference (for dragTo)" },
         { name: "input", type: "file", required: false, description: "Action arguments as JSON file or stdin" },
         { name: "snapshot", type: "string", required: false, description: "Snapshot ID for reference validation" },
+        /*
+         * Three the command line already read and the catalogue never declared
+         * (T18). The catalogue is what generates help and what a command line
+         * is now validated against, so a flag missing from here is one
+         * `yam surface act --help` never mentions and the unknown-flag check
+         * would reject — an argument that works and is not written down.
+         */
+        { name: "idempotency-key", type: "string", required: false, description: "Deduplicate this mutation within the retention period" },
+        { name: "holder", type: "string", required: false, description: "Who you are; defaults to a name for this client" },
+        { name: "secret", type: "string", required: false, description: "A value that must never come back in a result, event or trajectory; repeatable" },
       ],
       exitCodes: [
         { code: CLI_EXIT_CODES.OK, meaning: "Action performed" },
@@ -673,6 +719,7 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
         { name: "url", type: "string", required: false, description: "URL or path, joined to the session's base URL" },
         { name: "input", type: "file", required: false, description: "The full ApiRequest as a JSON file or stdin" },
         { name: "holder", type: "string", required: false, description: "Who you are; defaults to a name for this client" },
+        { name: "with-session-cookies", type: "boolean", required: false, description: "Send the browser session's cookies with the request" },
       ],
       exitCodes: [
         { code: CLI_EXIT_CODES.OK, meaning: "Request sent" },
@@ -740,6 +787,45 @@ function pathMatches(pattern: string, actual: string): boolean {
   return patternParts.every(
     (p, i) => p.startsWith(":") || p === actualParts[i],
   );
+}
+
+/**
+ * A fingerprint of the contract this build serves (T18, SF-03).
+ *
+ * The broker is one process per machine, it outlives the commands that use it,
+ * and it is discovered through a descriptor that says only where it is. Nothing
+ * said *what it speaks* — so a client built from a newer catalogue could send an
+ * argument an older broker had never heard of, and the older broker would drop
+ * it and answer `succeeded`.
+ *
+ * That is not hypothetical either. `yam surface connect --attach <endpoint>`
+ * reached a broker the packaged application had started from its own staged
+ * copy of the CLI, built before `attach` existed. The argument vanished, the
+ * adapter launched a fresh blank browser instead of joining the application's,
+ * and the session came back healthy — pointing at the wrong target, which is
+ * the one thing SF-04 forbids ("no silent switch to another adapter, tab or
+ * foreground application"). Every snapshot after it was empty and every one
+ * said `succeeded`.
+ *
+ * So the contract carries a fingerprint, and a client that does not recognise a
+ * broker's fingerprint does not talk to it. It is *derived*, not declared:
+ * every operation name, every CLI flag, every tool name and every service path.
+ * Nobody has to remember to bump it, which is the only kind of version marker
+ * that stays true.
+ */
+export function catalogueFingerprint(): string {
+  const shape = OPERATIONS.map((op) => ({
+    name: op.name,
+    mutation: op.mutation,
+    requiresSession: op.requiresSession,
+    cli: {
+      subcommand: op.cli.subcommand,
+      flags: op.cli.flags.map((flag) => `${flag.name}:${flag.type}${flag.required ? "!" : ""}`).sort(),
+    },
+    mcp: op.mcp.toolName,
+    service: `${op.service.method} ${op.service.path}`,
+  }));
+  return canonicalHash(shape).slice(0, 16);
 }
 
 export const SURFACE_TOOL_NAMES = OPERATIONS.map((op) => op.mcp.toolName);

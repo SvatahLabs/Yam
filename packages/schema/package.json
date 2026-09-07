@@ -21,6 +21,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./action-forms": {
+      "types": "./dist/action-forms.d.ts",
+      "import": "./dist/action-forms.js"
+    },
     "./json/*": "./json/*",
     "./conformance/*": "./conformance/*"
   },
@@ -35,7 +39,7 @@
   },
   "scripts": {
     "generate": "node scripts/write-json-schemas.mjs && node scripts/copy-conformance-fixture.mjs",
-    "build": "tsup --config ../../tsup.config.ts && pnpm run generate",
+    "build": "tsup --config ./tsup.config.ts && pnpm run generate",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

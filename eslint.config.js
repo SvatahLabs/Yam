@@ -352,6 +352,10 @@ export default tseslint.config(
         Response: "readonly",
         Blob: "readonly",
         AbortController: "readonly",
+        // `AbortSignal.timeout` bounds a fetch that would otherwise hang: the
+        // broker's health probe and the packaged application's readiness
+        // helpers both use it (T18).
+        AbortSignal: "readonly",
         TextDecoderStream: "readonly",
       },
     },
@@ -367,7 +371,18 @@ export default tseslint.config(
   ...specifierBlocks,
   {
     // Repo tooling and tests are outside the package graph.
-    files: ["scripts/**/*.mjs", "tools/**/*.ts", "**/test/**/*.ts", "**/*.config.ts"],
+    // `evals/**/*.mjs` is the Yam-controls-Yam suite (T18): it drives the built
+    // binary and speaks MCP to a subprocess, so it is tooling like the rest of
+    // this list — and the import boundary that matters for it, "it may not
+    // import the renderer", is a boundary no rule here would have caught
+    // anyway, because the renderer is not a package it could name.
+    files: [
+      "scripts/**/*.mjs",
+      "evals/**/*.mjs",
+      "tools/**/*.ts",
+      "**/test/**/*.ts",
+      "**/*.config.ts",
+    ],
     rules: {
       "import/no-restricted-paths": "off",
       "no-restricted-imports": "off",

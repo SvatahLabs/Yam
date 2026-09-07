@@ -1,0 +1,720 @@
+[
+  {
+    "label": "[1440x1000] opens into Surfaces by default",
+    "ok": true,
+    "detail": "title=Surfaces"
+  },
+  {
+    "label": "[1440x1000] the Surfaces section is current",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000] empty state invites a connection",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000] discovery lists a Browser adapter",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000] an unavailable adapter shows an honest reason",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000] connect field and button are usable, no overlap",
+    "ok": true,
+    "detail": "url={\"x\":244,\"y\":123.21875,\"width\":278,\"height\":30} connect={\"x\":916.8125,\"y\":125.21875,\"width\":139.1875,\"height\":28}"
+  },
+  {
+    "label": "[1440x1000] the session shows the adapter the service used",
+    "ok": true,
+    "detail": "s_e15b3bca492eplaywright · webreadyNobody"
+  },
+  {
+    "label": "[1440x1000] the connected session is selectable and inspectable",
+    "ok": true,
+    "detail": "aria-selected=true inspector=true"
+  },
+  {
+    "label": "[1440x1000] the surface's semantic tree is on screen",
+    "ok": true,
+    "detail": "textbox \"Username\"r0button \"Go\"r1"
+  },
+  {
+    "label": "[1440x1000] selecting a text field opens on Fill field, not \"Choose an action\"",
+    "ok": true,
+    "detail": "action=Fill field▾"
+  },
+  {
+    "label": "[1440x1000] the fill form asks for a value",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000] a true postcondition reads dispatched AND verified",
+    "ok": true,
+    "detail": "pills=dispatched,verified summary=Dispatched and verified."
+  },
+  {
+    "label": "[1440x1000] a deliberately wrong postcondition reads NOT verified",
+    "ok": true,
+    "detail": "pills=dispatched,not verified summary=Dispatched, but the postcondition did not hold."
+  },
+  {
+    "label": "[1440x1000] Details discloses the request and its answer",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000] the session row says who controls it",
+    "ok": true,
+    "detail": "session=s_e15b3bca492e"
+  },
+  {
+    "label": "[1440x1000] an agent's hold shows in the desktop",
+    "ok": true,
+    "detail": "Open sessionssessionstatuscontrols_e15b3bca492eplaywright · webreadyagent-1 cont"
+  },
+  {
+    "label": "[1440x1000] a held target is the busy state, naming who has it",
+    "ok": true,
+    "detail": "!agent-1 holds this target. Take control to act on it. Take control to act on it"
+  },
+  {
+    "label": "[1440x1000] a mutation from anyone else is refused, not queued",
+    "ok": true,
+    "detail": "refused CONTROL_BUSY"
+  },
+  {
+    "label": "[1440x1000] taking control hands the target over explicitly",
+    "ok": true,
+    "detail": "Open sessionssessionstatuscontrols_e15b3bca492eplaywright · webreadyYou control"
+  },
+  {
+    "label": "[1440x1000] the desktop can act on a target it took control of",
+    "ok": true,
+    "detail": "pills=dispatched,not verified Dispatched, but the postcondition did not hold."
+  },
+  {
+    "label": "[1440x1000] a reference from before a navigation is the stale state, with the way out",
+    "ok": true,
+    "detail": "!Reference is from generation 0; current is 1. The target has changed (navigation, reload "
+  },
+  {
+    "label": "[1440x1000] refreshing takes a fresh snapshot and clears the stale state",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000] a timed-out action is the unknown-outcome state: inspection offered, no Retry",
+    "ok": true,
+    "detail": "pills=unknown,unverified !page.goto: Timeout 10000ms exceeded. Call log: \u001b[2m - navigating to \"http://127"
+  },
+  {
+    "label": "[1440x1000] inspecting after an unknown outcome shows what is there now",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000] a generic MCP configuration is offered, ready to copy",
+    "ok": true,
+    "detail": "{ \"mcpServers\": { \"yam\": { \"command\": \"npx\", \"args\": [ \"-y\", \"@svatah/"
+  },
+  {
+    "label": "[1440x1000] the connection test reports what it actually checked",
+    "ok": true,
+    "detail": "The broker answered with 6 adapters. An agent using this configuration reaches t"
+  },
+  {
+    "label": "[1440x1000] flow authoring, bindings and tools are under Automations",
+    "ok": true,
+    "detail": "{\"section\":\"section-automations\",\"screens\":[\"rail-flows\",\"rail-bindings\",\"rail-agents\",\"rail-api\",\"rail-data\",\"rail-import\"]}"
+  },
+  {
+    "label": "[1440x1000] run evidence is under Activity",
+    "ok": true,
+    "detail": "{\"section\":\"section-activity\",\"screens\":[\"rail-runs\"]}"
+  },
+  {
+    "label": "[1440x1000] a project is opened from the app, not demanded by it",
+    "ok": true,
+    "detail": "Open a project"
+  },
+  {
+    "label": "[1440x1000] Save as automation promotes, or says what it needs",
+    "ok": true,
+    "detail": "A proposal is written into a project, and none is open. Choose one with “Open a project”, then save again."
+  },
+  {
+    "label": "[1440x1000] Automations without a project says so and points at Open a project",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000] with a project open, Save as automation writes an unverified proposal into it",
+    "ok": true,
+    "detail": "Wrote a proposal from 4 step(s) to /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-su written after the click"
+  },
+  {
+    "label": "[1440x1000] disconnect closes the session",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000] a session an agent opened appears in the desktop",
+    "ok": true,
+    "detail": "agent session=s_24dad43c95df"
+  },
+  {
+    "label": "[1280x800] opens into Surfaces by default",
+    "ok": true,
+    "detail": "title=Surfaces"
+  },
+  {
+    "label": "[1280x800] the Surfaces section is current",
+    "ok": true
+  },
+  {
+    "label": "[1280x800] empty state invites a connection",
+    "ok": true
+  },
+  {
+    "label": "[1280x800] discovery lists a Browser adapter",
+    "ok": true
+  },
+  {
+    "label": "[1280x800] an unavailable adapter shows an honest reason",
+    "ok": true
+  },
+  {
+    "label": "[1280x800] connect field and button are usable, no overlap",
+    "ok": true,
+    "detail": "url={\"x\":244,\"y\":123.21875,\"width\":278,\"height\":30} connect={\"x\":756.8125,\"y\":125.21875,\"width\":139.1875,\"height\":28}"
+  },
+  {
+    "label": "[1280x800] the session shows the adapter the service used",
+    "ok": true,
+    "detail": "s_c0c5893c3146playwright · webreadyNobody"
+  },
+  {
+    "label": "[1280x800] the connected session is selectable and inspectable",
+    "ok": true,
+    "detail": "aria-selected=true inspector=true"
+  },
+  {
+    "label": "[1280x800] the surface's semantic tree is on screen",
+    "ok": true,
+    "detail": "textbox \"Username\"r0button \"Go\"r1"
+  },
+  {
+    "label": "[1280x800] selecting a text field opens on Fill field, not \"Choose an action\"",
+    "ok": true,
+    "detail": "action=Fill field▾"
+  },
+  {
+    "label": "[1280x800] the fill form asks for a value",
+    "ok": true
+  },
+  {
+    "label": "[1280x800] a true postcondition reads dispatched AND verified",
+    "ok": true,
+    "detail": "pills=dispatched,verified summary=Dispatched and verified."
+  },
+  {
+    "label": "[1280x800] a deliberately wrong postcondition reads NOT verified",
+    "ok": true,
+    "detail": "pills=dispatched,not verified summary=Dispatched, but the postcondition did not hold."
+  },
+  {
+    "label": "[1280x800] Details discloses the request and its answer",
+    "ok": true
+  },
+  {
+    "label": "[1280x800] the session row says who controls it",
+    "ok": true,
+    "detail": "session=s_c0c5893c3146"
+  },
+  {
+    "label": "[1280x800] an agent's hold shows in the desktop",
+    "ok": true,
+    "detail": "Open sessionssessionstatuscontrols_c0c5893c3146playwright · webreadyagent-1 cont"
+  },
+  {
+    "label": "[1280x800] a held target is the busy state, naming who has it",
+    "ok": true,
+    "detail": "!agent-1 holds this target. Take control to act on it. Take control to act on it"
+  },
+  {
+    "label": "[1280x800] a mutation from anyone else is refused, not queued",
+    "ok": true,
+    "detail": "refused CONTROL_BUSY"
+  },
+  {
+    "label": "[1280x800] taking control hands the target over explicitly",
+    "ok": true,
+    "detail": "Open sessionssessionstatuscontrols_c0c5893c3146playwright · webreadyYou control"
+  },
+  {
+    "label": "[1280x800] the desktop can act on a target it took control of",
+    "ok": true,
+    "detail": "pills=dispatched,not verified Dispatched, but the postcondition did not hold."
+  },
+  {
+    "label": "[1280x800] a reference from before a navigation is the stale state, with the way out",
+    "ok": true,
+    "detail": "!Reference is from generation 0; current is 1. The target has changed (navigation, reload "
+  },
+  {
+    "label": "[1280x800] refreshing takes a fresh snapshot and clears the stale state",
+    "ok": true
+  },
+  {
+    "label": "[1280x800] a timed-out action is the unknown-outcome state: inspection offered, no Retry",
+    "ok": true,
+    "detail": "pills=unknown,unverified !page.goto: Timeout 10000ms exceeded. Call log: \u001b[2m - navigating to \"http://127"
+  },
+  {
+    "label": "[1280x800] inspecting after an unknown outcome shows what is there now",
+    "ok": true
+  },
+  {
+    "label": "[1280x800] a generic MCP configuration is offered, ready to copy",
+    "ok": true,
+    "detail": "{ \"mcpServers\": { \"yam\": { \"command\": \"npx\", \"args\": [ \"-y\", \"@svatah/"
+  },
+  {
+    "label": "[1280x800] the connection test reports what it actually checked",
+    "ok": true,
+    "detail": "The broker answered with 6 adapters. An agent using this configuration reaches t"
+  },
+  {
+    "label": "[1280x800] flow authoring, bindings and tools are under Automations",
+    "ok": true,
+    "detail": "{\"section\":\"section-automations\",\"screens\":[\"rail-flows\",\"rail-bindings\",\"rail-agents\",\"rail-api\",\"rail-data\",\"rail-import\"]}"
+  },
+  {
+    "label": "[1280x800] run evidence is under Activity",
+    "ok": true,
+    "detail": "{\"section\":\"section-activity\",\"screens\":[\"rail-runs\"]}"
+  },
+  {
+    "label": "[1280x800] a project is opened from the app, not demanded by it",
+    "ok": true,
+    "detail": "Open a project"
+  },
+  {
+    "label": "[1280x800] Save as automation promotes, or says what it needs",
+    "ok": true,
+    "detail": "A proposal is written into a project, and none is open. Choose one with “Open a project”, then save again."
+  },
+  {
+    "label": "[1280x800] Automations without a project says so and points at Open a project",
+    "ok": true
+  },
+  {
+    "label": "[1280x800] with a project open, Save as automation writes an unverified proposal into it",
+    "ok": true,
+    "detail": "Wrote a proposal from 4 step(s) to /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-su written after the click"
+  },
+  {
+    "label": "[1280x800] disconnect closes the session",
+    "ok": true
+  },
+  {
+    "label": "[1280x800] a session an agent opened appears in the desktop",
+    "ok": true,
+    "detail": "agent session=s_6e4588a66abe"
+  },
+  {
+    "label": "[1440x1000@200%] opens into Surfaces by default",
+    "ok": true,
+    "detail": "title=Surfaces"
+  },
+  {
+    "label": "[1440x1000@200%] the Surfaces section is current",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000@200%] empty state invites a connection",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000@200%] discovery lists a Browser adapter",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000@200%] an unavailable adapter shows an honest reason",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000@200%] connect field and button are usable, no overlap",
+    "ok": true,
+    "detail": "url={\"x\":174,\"y\":244.90625,\"width\":272,\"height\":30} connect={\"x\":174,\"y\":345.125,\"width\":139.1875,\"height\":28}"
+  },
+  {
+    "label": "[1440x1000@200%] the session shows the adapter the service used",
+    "ok": true,
+    "detail": "s_77741aad73e1playwright · webreadyNobody"
+  },
+  {
+    "label": "[1440x1000@200%] the connected session is selectable and inspectable",
+    "ok": true,
+    "detail": "aria-selected=true inspector=true"
+  },
+  {
+    "label": "[1440x1000@200%] the surface's semantic tree is on screen",
+    "ok": true,
+    "detail": "textbox \"Username\"r0button \"Go\"r1"
+  },
+  {
+    "label": "[1440x1000@200%] selecting a text field opens on Fill field, not \"Choose an action\"",
+    "ok": true,
+    "detail": "action=Fill field▾"
+  },
+  {
+    "label": "[1440x1000@200%] the fill form asks for a value",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000@200%] a true postcondition reads dispatched AND verified",
+    "ok": true,
+    "detail": "pills=dispatched,verified summary=Dispatched and verified."
+  },
+  {
+    "label": "[1440x1000@200%] a deliberately wrong postcondition reads NOT verified",
+    "ok": true,
+    "detail": "pills=dispatched,not verified summary=Dispatched, but the postcondition did not hold."
+  },
+  {
+    "label": "[1440x1000@200%] Details discloses the request and its answer",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000@200%] the session row says who controls it",
+    "ok": true,
+    "detail": "session=s_77741aad73e1"
+  },
+  {
+    "label": "[1440x1000@200%] an agent's hold shows in the desktop",
+    "ok": true,
+    "detail": "Open sessionssessionstatuscontrols_77741aad73e1playwright · webreadyagent-1 cont"
+  },
+  {
+    "label": "[1440x1000@200%] a held target is the busy state, naming who has it",
+    "ok": true,
+    "detail": "!agent-1 holds this target. Take control to act on it. Take control to act on it"
+  },
+  {
+    "label": "[1440x1000@200%] a mutation from anyone else is refused, not queued",
+    "ok": true,
+    "detail": "refused CONTROL_BUSY"
+  },
+  {
+    "label": "[1440x1000@200%] taking control hands the target over explicitly",
+    "ok": true,
+    "detail": "Open sessionssessionstatuscontrols_77741aad73e1playwright · webreadyYou control"
+  },
+  {
+    "label": "[1440x1000@200%] the desktop can act on a target it took control of",
+    "ok": true,
+    "detail": "pills=dispatched,not verified Dispatched, but the postcondition did not hold."
+  },
+  {
+    "label": "[1440x1000@200%] a reference from before a navigation is the stale state, with the way out",
+    "ok": true,
+    "detail": "!Reference is from generation 0; current is 1. The target has changed (navigation, reload "
+  },
+  {
+    "label": "[1440x1000@200%] refreshing takes a fresh snapshot and clears the stale state",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000@200%] a timed-out action is the unknown-outcome state: inspection offered, no Retry",
+    "ok": true,
+    "detail": "pills=unknown,unverified !page.goto: Timeout 10000ms exceeded. Call log: \u001b[2m - navigating to \"http://127"
+  },
+  {
+    "label": "[1440x1000@200%] inspecting after an unknown outcome shows what is there now",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000@200%] a generic MCP configuration is offered, ready to copy",
+    "ok": true,
+    "detail": "{ \"mcpServers\": { \"yam\": { \"command\": \"npx\", \"args\": [ \"-y\", \"@svatah/"
+  },
+  {
+    "label": "[1440x1000@200%] the connection test reports what it actually checked",
+    "ok": true,
+    "detail": "The broker answered with 6 adapters. An agent using this configuration reaches t"
+  },
+  {
+    "label": "[1440x1000@200%] flow authoring, bindings and tools are under Automations",
+    "ok": true,
+    "detail": "{\"section\":\"section-automations\",\"screens\":[\"rail-flows\",\"rail-bindings\",\"rail-agents\",\"rail-api\",\"rail-data\",\"rail-import\"]}"
+  },
+  {
+    "label": "[1440x1000@200%] run evidence is under Activity",
+    "ok": true,
+    "detail": "{\"section\":\"section-activity\",\"screens\":[\"rail-runs\"]}"
+  },
+  {
+    "label": "[1440x1000@200%] a project is opened from the app, not demanded by it",
+    "ok": true,
+    "detail": "Open a project"
+  },
+  {
+    "label": "[1440x1000@200%] Save as automation promotes, or says what it needs",
+    "ok": true,
+    "detail": "A proposal is written into a project, and none is open. Choose one with “Open a project”, then save again."
+  },
+  {
+    "label": "[1440x1000@200%] Automations without a project says so and points at Open a project",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000@200%] with a project open, Save as automation writes an unverified proposal into it",
+    "ok": true,
+    "detail": "Wrote a proposal from 4 step(s) to /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-su written after the click"
+  },
+  {
+    "label": "[1440x1000@200%] disconnect closes the session",
+    "ok": true
+  },
+  {
+    "label": "[1440x1000@200%] a session an agent opened appears in the desktop",
+    "ok": true,
+    "detail": "agent session=s_30072ee85104"
+  },
+  {
+    "label": "[1280x800@200%] opens into Surfaces by default",
+    "ok": true,
+    "detail": "title=Surfaces"
+  },
+  {
+    "label": "[1280x800@200%] the Surfaces section is current",
+    "ok": true
+  },
+  {
+    "label": "[1280x800@200%] empty state invites a connection",
+    "ok": true
+  },
+  {
+    "label": "[1280x800@200%] discovery lists a Browser adapter",
+    "ok": true
+  },
+  {
+    "label": "[1280x800@200%] an unavailable adapter shows an honest reason",
+    "ok": true
+  },
+  {
+    "label": "[1280x800@200%] connect field and button are usable, no overlap",
+    "ok": true,
+    "detail": "url={\"x\":174,\"y\":304.84375,\"width\":218,\"height\":30} connect={\"x\":174,\"y\":405.0625,\"width\":139.1875,\"height\":28}"
+  },
+  {
+    "label": "[1280x800@200%] the session shows the adapter the service used",
+    "ok": true,
+    "detail": "s_906456734af2playwright · webreadyNobody"
+  },
+  {
+    "label": "[1280x800@200%] the connected session is selectable and inspectable",
+    "ok": true,
+    "detail": "aria-selected=true inspector=true"
+  },
+  {
+    "label": "[1280x800@200%] the surface's semantic tree is on screen",
+    "ok": true,
+    "detail": "textbox \"Username\"r0button \"Go\"r1"
+  },
+  {
+    "label": "[1280x800@200%] selecting a text field opens on Fill field, not \"Choose an action\"",
+    "ok": true,
+    "detail": "action=Fill field▾"
+  },
+  {
+    "label": "[1280x800@200%] the fill form asks for a value",
+    "ok": true
+  },
+  {
+    "label": "[1280x800@200%] a true postcondition reads dispatched AND verified",
+    "ok": true,
+    "detail": "pills=dispatched,verified summary=Dispatched and verified."
+  },
+  {
+    "label": "[1280x800@200%] a deliberately wrong postcondition reads NOT verified",
+    "ok": true,
+    "detail": "pills=dispatched,not verified summary=Dispatched, but the postcondition did not hold."
+  },
+  {
+    "label": "[1280x800@200%] Details discloses the request and its answer",
+    "ok": true
+  },
+  {
+    "label": "[1280x800@200%] the session row says who controls it",
+    "ok": true,
+    "detail": "session=s_906456734af2"
+  },
+  {
+    "label": "[1280x800@200%] an agent's hold shows in the desktop",
+    "ok": true,
+    "detail": "Open sessionssessionstatuscontrols_906456734af2playwright · webreadyagent-1 cont"
+  },
+  {
+    "label": "[1280x800@200%] a held target is the busy state, naming who has it",
+    "ok": true,
+    "detail": "!agent-1 holds this target. Take control to act on it. Take control to act on it"
+  },
+  {
+    "label": "[1280x800@200%] a mutation from anyone else is refused, not queued",
+    "ok": true,
+    "detail": "refused CONTROL_BUSY"
+  },
+  {
+    "label": "[1280x800@200%] taking control hands the target over explicitly",
+    "ok": true,
+    "detail": "Open sessionssessionstatuscontrols_906456734af2playwright · webreadyYou control"
+  },
+  {
+    "label": "[1280x800@200%] the desktop can act on a target it took control of",
+    "ok": true,
+    "detail": "pills=dispatched,not verified Dispatched, but the postcondition did not hold."
+  },
+  {
+    "label": "[1280x800@200%] a reference from before a navigation is the stale state, with the way out",
+    "ok": true,
+    "detail": "!Reference is from generation 0; current is 1. The target has changed (navigation, reload "
+  },
+  {
+    "label": "[1280x800@200%] refreshing takes a fresh snapshot and clears the stale state",
+    "ok": true
+  },
+  {
+    "label": "[1280x800@200%] a timed-out action is the unknown-outcome state: inspection offered, no Retry",
+    "ok": true,
+    "detail": "pills=unknown,unverified !page.goto: Timeout 10000ms exceeded. Call log: \u001b[2m - navigating to \"http://127"
+  },
+  {
+    "label": "[1280x800@200%] inspecting after an unknown outcome shows what is there now",
+    "ok": true
+  },
+  {
+    "label": "[1280x800@200%] a generic MCP configuration is offered, ready to copy",
+    "ok": true,
+    "detail": "{ \"mcpServers\": { \"yam\": { \"command\": \"npx\", \"args\": [ \"-y\", \"@svatah/"
+  },
+  {
+    "label": "[1280x800@200%] the connection test reports what it actually checked",
+    "ok": true,
+    "detail": "The broker answered with 6 adapters. An agent using this configuration reaches t"
+  },
+  {
+    "label": "[1280x800@200%] flow authoring, bindings and tools are under Automations",
+    "ok": true,
+    "detail": "{\"section\":\"section-automations\",\"screens\":[\"rail-flows\",\"rail-bindings\",\"rail-agents\",\"rail-api\",\"rail-data\",\"rail-import\"]}"
+  },
+  {
+    "label": "[1280x800@200%] run evidence is under Activity",
+    "ok": true,
+    "detail": "{\"section\":\"section-activity\",\"screens\":[\"rail-runs\"]}"
+  },
+  {
+    "label": "[1280x800@200%] a project is opened from the app, not demanded by it",
+    "ok": true,
+    "detail": "Open a project"
+  },
+  {
+    "label": "[1280x800@200%] Save as automation promotes, or says what it needs",
+    "ok": true,
+    "detail": "A proposal is written into a project, and none is open. Choose one with “Open a project”, then save again."
+  },
+  {
+    "label": "[1280x800@200%] Automations without a project says so and points at Open a project",
+    "ok": true
+  },
+  {
+    "label": "[1280x800@200%] with a project open, Save as automation writes an unverified proposal into it",
+    "ok": true,
+    "detail": "Wrote a proposal from 4 step(s) to /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-su written after the click"
+  },
+  {
+    "label": "[1280x800@200%] disconnect closes the session",
+    "ok": true
+  },
+  {
+    "label": "[1280x800@200%] a session an agent opened appears in the desktop",
+    "ok": true,
+    "detail": "agent session=s_9ee6af8941fa"
+  },
+  {
+    "label": "[keyboard] Tab reaches the URL field",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] Enter connects, and the new session is selected",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] Tab reaches a control in the tree",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] Tab reaches the value field the fill form opened",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] Tab reaches the verify chooser",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] the postcondition is chosen with the arrows and Enter",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] focus returns to the chooser after the choice",
+    "ok": true,
+    "detail": "button#surfaces-verify"
+  },
+  {
+    "label": "[keyboard] Tab reaches the expected value",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] Tab reaches the primary action",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] the action is dispatched and verified",
+    "ok": true,
+    "detail": "dispatched,verified"
+  },
+  {
+    "label": "[keyboard] Tab reaches Recheck targets",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] Tab reaches a session row",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] the arrows and Enter choose the agent's session",
+    "ok": true,
+    "detail": "s_0dd894db2a23playwright · webreadyNobody"
+  },
+  {
+    "label": "[keyboard] Tab reaches Disconnect",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] Enter on Disconnect closes it",
+    "ok": true
+  },
+  {
+    "label": "[keyboard] focus is not lost to the document body after the control it was on went away",
+    "ok": true,
+    "detail": "h1#toolbar-title"
+  },
+  {
+    "label": "[keyboard] every Tab stop showed visible focus",
+    "ok": true,
+    "detail": "62 stops, 0 without"
+  },
+  {
+    "label": "the projectless workspace is left empty: connecting created no project files (SF-01)",
+    "ok": true,
+    "detail": "empty"
+  }
+]

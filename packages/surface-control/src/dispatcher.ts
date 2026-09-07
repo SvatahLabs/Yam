@@ -1,6 +1,7 @@
 import type { AgentSurface } from "@svatah/yam-surface";
 import type { ReadKind, CheckSubject, Ref, ActArgs } from "@svatah/yam-schema";
 import { SurfaceError } from "@svatah/yam-surface";
+import { ACTION_FORMS } from "@svatah/yam-schema";
 import { makeRequestId, successEnvelope, failedEnvelope, refusedEnvelope } from "./envelope.js";
 import type { SessionStore } from "./sessions.js";
 import type { ErrorCode } from "./catalogue.js";
@@ -154,6 +155,8 @@ export async function dispatchConnect(
   ctx: DispatchContext,
   input: {
     url?: string;
+    app?: string;
+    attach?: string;
     adapter?: string;
     headed?: boolean;
     adapterFactory: (name: string, options?: { headed?: boolean }) => Promise<AgentSurface>;
@@ -163,6 +166,24 @@ export async function dispatchConnect(
   const requestId = makeRequestId();
   const start = Date.now();
   try {
+    /*
+     * One target, named once (SF-04, T18).
+     *
+     * The catalogue's schema refuses two of these together, and so does this:
+     * the broker is reached over HTTP by clients the catalogue does not
+     * validate for, and "no silent switch to another adapter, tab or foreground
+     * application" has to hold at the place the session is actually made.
+     */
+    const named = [input.url, input.app, input.attach].filter((one) => one !== undefined);
+    if (named.length > 1) {
+      return refusedEnvelope(
+        requestId,
+        undefined,
+        "INVALID_ARGUMENT",
+        "Name one target: a URL launches a browser, an endpoint joins one that is already " +
+          "running, and an application name drives an application that is already running.",
+      );
+    }
     const adapterName = input.adapter ?? "playwright";
     if (input.registeredAdapters) {
       const readiness = checkAdapterReadiness(adapterName, input.registeredAdapters);
@@ -183,8 +204,18 @@ export async function dispatchConnect(
     const surface = await input.adapterFactory(adapterName, { headed: input.headed });
     const sessionId = ctx.sessions.create(surface, adapterName);
 
+    /*
+     * `SessionInit` already carried all three of these; nothing but the
+     * catalogue's own vocabulary was missing (T18). `processName` is how a
+     * native adapter addresses a window that exists, and `attach.cdpUrl` how a
+     * web adapter joins a browser somebody else started — which is what makes
+     * a packaged application's renderer reachable through the same operation
+     * as any other web target.
+     */
     await surface.open({
       ...(input.url === undefined ? {} : { baseUrl: input.url }),
+      ...(input.app === undefined ? {} : { processName: input.app }),
+      ...(input.attach === undefined ? {} : { attach: { cdpUrl: input.attach } }),
     });
     /*
      * A session is not a page (LLD §8, Draft 2.4).
@@ -205,7 +236,7 @@ export async function dispatchConnect(
       sessionId,
       kind: "session.created",
       operationName: "connect",
-      data: { adapter: adapterName, url: input.url },
+      data: { adapter: adapterName, url: input.url, app: input.app, attach: input.attach },
     });
     const envelope = successEnvelope(requestId, sessionId, {
       sessionId,
@@ -318,6 +349,48 @@ export async function dispatchAct(
         data: { code: check.code, ref: input.ref },
       });
       return refusedEnvelope(requestId, input.session, check.code as ErrorCode, check.message);
+    }
+  }
+
+  /*
+   * The action's own arguments, checked before dispatch (SF-11, T18).
+   *
+   * > Act validates an action-specific schema, reference scope, capability and
+   * > precondition **before dispatch**.
+   *
+   * Reference scope was checked here and the arguments were not, so a missing
+   * one reached the adapter — which threw `ActionabilityError`, which this file
+   * maps to `TIMEOUT`. `yam surface act --action type` with no value therefore
+   * answered *"the type action needs an argument value"* under the code for a
+   * deadline, and exited 75. An agent reads `TIMEOUT` as "try it again", and no
+   * number of retries supplies an argument nobody sent.
+   *
+   * `ACTION_FORMS` already says which arguments each action takes — T15 put it
+   * beside the catalogue precisely so no client would have to know — so the
+   * check is the table, not a second list that could disagree with it.
+   */
+  const form = ACTION_FORMS.find((one) => one.action === input.action);
+  if (form !== undefined) {
+    const supplied = (input.args ?? {}) as Record<string, unknown>;
+    const missing = form.fields
+      .filter((field) => field.required)
+      .filter((field) => supplied[field.name] === undefined || supplied[field.name] === "")
+      .map((field) => field.name);
+    if (missing.length > 0) {
+      ctx.events?.emit({
+        sessionId: input.session,
+        kind: "operation.refused",
+        operationName: input.action,
+        data: { code: "INVALID_ARGUMENT", missing },
+      });
+      return refusedEnvelope(
+        requestId,
+        input.session,
+        "INVALID_ARGUMENT",
+        `The "${input.action}" action needs ${missing.map((one) => `"${one}"`).join(" and ")}. ` +
+          `Nothing was dispatched.`,
+        { action: input.action, missing },
+      );
     }
   }
 

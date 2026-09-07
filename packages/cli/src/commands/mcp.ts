@@ -599,7 +599,15 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
         "No project needed.",
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
       inputSchema: {
-        url: z.string().optional().describe("URL to connect to"),
+        url: z.string().optional().describe("URL to connect to; launches a browser"),
+        app: z
+          .string()
+          .optional()
+          .describe("Drive an application that is already running, by process name"),
+        attach: z
+          .string()
+          .optional()
+          .describe("Join a browser that is already running, by its DevTools endpoint"),
         adapter: z.string().optional().describe("Adapter to use (playwright, bidi, appium, uia, ax, http)"),
         headed: z.boolean().optional().describe("Run in headed mode"),
         intent: OPTIONAL_INTENT,
@@ -607,8 +615,8 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
     },
     // `intent` is accepted and unused here: connect starts a session, and a
     // sentence describes a step. Taking it keeps one shape across the tools.
-    async ({ url, adapter, headed }) => {
-      const result = await call("connect", { url, adapter, headed });
+    async ({ url, app, attach, adapter, headed }) => {
+      const result = await call("connect", { url, app, attach, adapter, headed });
       io.err(`surface session opened: ${(result as { result?: { sessionId?: string } }).result?.sessionId}`);
       return text(result);
     },

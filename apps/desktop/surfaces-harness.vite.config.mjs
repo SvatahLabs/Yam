@@ -1,24 +1,23 @@
 /**
- * The renderer build for `test/surfaces-dogfood.mjs` (T14 driven verification).
+ * The renderer build for `test/surfaces-dogfood.mjs` (the browser-hosted
+ * evidence, T14–T17).
  *
- * Identical to `vite.renderer.config.ts`, plus one alias: the Node `crypto`
- * `createHash` that `@svatah/yam-schema`'s canonical hashing imports is stubbed
- * for the browser bundle. The Surfaces path never hashes — it only reads
- * `GET /targets` and `GET /sessions` and posts a connect — so the stub is never
- * called; it exists so a standalone browser build links without electron-forge.
- * This config is for the evidence harness only; the shipped renderer is built by
- * electron-forge from `vite.renderer.config.ts`.
+ * **Identical to `vite.renderer.config.ts`.** It exists only so a standalone
+ * browser build can be produced without electron-forge, and it must stay
+ * identical: it once carried an alias stubbing the Node `crypto` that
+ * `@svatah/yam-schema`'s bundled barrel imports, and that alias is exactly what
+ * hid a shipped renderer which could not be built at all (see
+ * `packages/schema/tsup.config.ts`). A harness that links a bundle the product
+ * does not is a harness reporting on something nobody runs.
+ *
+ * `tools/repo-checks/test/renderer-bundle.test.ts` keeps the two the same.
  */
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
 
-const here = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [react()],
   resolve: {
     dedupe: ["react", "react-dom", "react/jsx-runtime"],
-    alias: [{ find: /^crypto$/, replacement: join(here, "test", "harness-crypto-stub.mjs") }],
   },
 });

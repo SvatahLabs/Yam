@@ -46,6 +46,7 @@ import { createEventStore } from "./events.js";
 import { createPromotionStore } from "./promotion.js";
 import { createRedactionPolicy, type RedactionPolicy } from "./redaction.js";
 import { failedEnvelope, makeRequestId } from "./envelope.js";
+import { catalogueFingerprint } from "./catalogue.js";
 
 /** One operation, by the name the catalogue gives it. */
 export type BrokerOperation =
@@ -160,7 +161,13 @@ export async function startBroker(options: BrokerOptions): Promise<RunningBroker
         return;
       }
       if (request.method === "GET" && request.url === "/health") {
-        send(200, { ok: true, sessions: sessions.list().length });
+        /*
+         * What this broker *speaks*, not just that it is alive (T18, SF-03).
+         * A client compares it with its own and refuses a broker it does not
+         * recognise, because a dropped argument that answers `succeeded` is
+         * worse than no broker at all. See `catalogueFingerprint`.
+         */
+        send(200, { ok: true, sessions: sessions.list().length, contract: catalogueFingerprint() });
         return;
       }
       if (request.method !== "POST" || request.url !== "/op") {
@@ -239,15 +246,34 @@ export async function callBroker(
   return (await response.json()) as unknown;
 }
 
-/** Whether a broker is answering at this descriptor. */
-export async function brokerAlive(descriptor: { url: string; token: string }): Promise<boolean> {
+/**
+ * What a broker at this descriptor is: alive, and what contract it speaks.
+ *
+ * `contract` is `undefined` for a broker old enough not to publish one, which
+ * is itself a mismatch — that build predates the fingerprint and so predates
+ * whatever made it necessary.
+ */
+export async function brokerHealth(
+  descriptor: { url: string; token: string },
+): Promise<{ alive: boolean; contract?: string }> {
   try {
     const response = await fetch(`${descriptor.url}/health`, {
       headers: { authorization: `Bearer ${descriptor.token}` },
       signal: AbortSignal.timeout(2000),
     });
-    return response.ok;
+    if (!response.ok) return { alive: false };
+    const body = (await response.json()) as { contract?: unknown };
+    return {
+      alive: true,
+      ...(typeof body.contract === "string" ? { contract: body.contract } : {}),
+    };
   } catch {
-    return false;
+    return { alive: false };
   }
+}
+
+/** Whether a broker is answering at this descriptor *and* speaks this contract. */
+export async function brokerAlive(descriptor: { url: string; token: string }): Promise<boolean> {
+  const health = await brokerHealth(descriptor);
+  return health.alive && health.contract === catalogueFingerprint();
 }

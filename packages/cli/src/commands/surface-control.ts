@@ -34,8 +34,10 @@ import {
   type CommandIo,
 } from "@svatah/yam-bindings-cli";
 import {
+  OPERATIONS,
   SURFACE_CLI_SUBCOMMANDS,
   brokerAlive,
+  brokerHealth,
   callBroker,
   createAdapterFactory,
   discoverBroker,
@@ -84,6 +86,30 @@ export async function surfaceControlCommand(args: ParsedArgs, io: CommandIo): Pr
 
   const json = boolOption(args, "json");
   try {
+    /*
+     * A flag the catalogue does not declare is a usage error (T18, SF-06).
+     *
+     * `yam surface control --action take` used to parse, ignore `--action`
+     * entirely — the command line spells that operation `--take`/`--release` —
+     * report the *status* of the lease, and exit 0. A caller who meant to take
+     * control was told nobody held it, which is true and is not the answer to
+     * the question asked.
+     *
+     * SF-06 says invalid flags produce structured errors, and the catalogue
+     * already knows every flag of every subcommand, so the check is the
+     * catalogue rather than a second list beside it. Adding a flag to an
+     * operation is still one edit in one file.
+     */
+    const unknown = unknownFlags(sub, args);
+    if (unknown.length > 0) {
+      const operation = OPERATIONS.find((one) => one.cli.subcommand === sub);
+      const known = (operation?.cli.flags ?? []).map((one) => `--${one.name}`).join(", ");
+      io.err(
+        `${unknown.map((one) => `--${one}`).join(", ")} ${unknown.length === 1 ? "is not a flag" : "are not flags"} ` +
+          `of \`yam surface ${sub}\`. It takes: ${known === "" ? "no flags" : known}${known === "" ? "" : ", --json"}.`,
+      );
+      return EXIT.usage;
+    }
     const request = operationFor(sub, args);
     const broker = await connectToBroker(io);
     const result = (await callBroker(broker, request.operation, request.args)) as Record<
@@ -129,8 +155,40 @@ function exitFor(result: Record<string, unknown>): ExitCode {
 export async function connectToBroker(io: CommandIo): Promise<BrokerDescriptor> {
   const found = discoverBroker();
   if (found !== undefined && (await brokerAlive(found))) return found;
-  // A descriptor whose process is gone, or which answers nothing, is stale.
-  if (found !== undefined) removeBrokerDescriptor();
+  /*
+   * A descriptor whose process is gone, which answers nothing, **or which
+   * speaks a different contract** is stale (T18, SF-03).
+   *
+   * The third case is the one that had to be added. The broker outlives the
+   * commands that use it, and a machine can easily have one that a different
+   * build started — the packaged application starts its own from the copy of
+   * the CLI staged inside the bundle. Talking to it looked like it worked:
+   * arguments the older build had never heard of were dropped and the
+   * operation answered `succeeded`, on a target the caller never named.
+   *
+   * A broker that cannot serve this contract is stopped rather than reasoned
+   * with. It closes its own sessions and removes its descriptor on the signal,
+   * which is the same tidy exit `yam surface broker` performs on Ctrl-C.
+   */
+  if (found !== undefined) {
+    const health = await brokerHealth(found);
+    if (health.alive) {
+      io.err(
+        `the surface broker on this machine was started from a different build of Yam; ` +
+          `stopping it and starting one that matches.`,
+      );
+      try {
+        process.kill(found.pid, "SIGTERM");
+      } catch {
+        /* Already gone, or somebody else's; the descriptor goes either way. */
+      }
+      for (let waited = 0; waited < 10_000; waited += 100) {
+        await new Promise((done) => setTimeout(done, 100));
+        if (!(await brokerHealth(found)).alive) break;
+      }
+    }
+    removeBrokerDescriptor();
+  }
 
   io.err("starting the surface broker; it holds your sessions between commands.");
   const child = spawn(process.execPath, [yamBin(), "surface", "broker"], {
@@ -199,6 +257,24 @@ async function runBroker(io: CommandIo): Promise<ExitCode> {
   return EXIT.ok;
 }
 
+/**
+ * Flags on this command line that the catalogue does not declare (T18, SF-06).
+ *
+ * `--json` is every operation's, and `--help` is the shell's; everything else
+ * has to be written down in the catalogue to be accepted.
+ */
+const UNIVERSAL_FLAGS = new Set(["json", "help"]);
+
+export function unknownFlags(sub: string, args: ParsedArgs): string[] {
+  const operation = OPERATIONS.find((one) => one.cli.subcommand === sub);
+  if (operation === undefined) return [];
+  const declared = new Set(operation.cli.flags.map((one) => one.name));
+  return Object.keys(args.options)
+    .filter((name) => !UNIVERSAL_FLAGS.has(name))
+    .filter((name) => !declared.has(name))
+    .sort();
+}
+
 /** The operation and arguments a command line means. */
 function operationFor(
   sub: string,
@@ -223,6 +299,10 @@ function operationFor(
         operation: "connect",
         args: defined({
           url: stringOption(args, "url"),
+          // An application that is already running, and a browser that is
+          // already running (T18, SF-04). The broker refuses more than one.
+          app: stringOption(args, "app"),
+          attach: stringOption(args, "attach"),
           adapter: stringOption(args, "adapter"),
           headed: boolOption(args, "headed") || undefined,
         }),

@@ -187,9 +187,29 @@ export class AxSurface implements AgentSurface {
      */
     const permission = await this.bridge.permission();
     if (permission.state !== "granted") {
+      /*
+       * Name the program the grant is actually about (T18, SF-17).
+       *
+       * macOS gives the Accessibility permission to a *program*, and the
+       * program asking here is whichever one started the session — which, for
+       * a `yam surface` command, is the **broker**, and the broker is started
+       * by the first client that needs one. On a machine where the desktop
+       * application got there first, that program is the copy of the CLI staged
+       * inside `Yam.app`, and the grant a person gave their terminal does not
+       * apply to it.
+       *
+       * Measured while writing T18: `yam surface doctor` in a terminal said
+       * **granted** and `yam surface connect --adapter ax` said **denied**, on
+       * the same machine, a second apart. Both were true. Without the path
+       * below there is no way to tell that from a bug, and nothing a person can
+       * usefully do about it.
+       */
+      const program = process.argv[1] ?? process.execPath;
       throw new SessionError(
-        `The macOS Accessibility permission is not granted (${permission.state}). ` +
-          `${permission.advice} Run \`yam surface doctor\` to check it.`,
+        `The macOS Accessibility permission is not granted (${permission.state}) to the ` +
+          `program that is driving: ${program}. ${permission.advice} ` +
+          "Grant it to that program — `yam surface doctor` reports the permission of whatever " +
+          "program *it* runs as, which is not always this one.",
         { adapter: "ax" },
       );
     }

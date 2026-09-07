@@ -481,7 +481,15 @@ test("Record on the Flows screen starts a session with the fake gateway", async 
 
   const record = page.locator("#action-record-start");
   await expect(record).toBeVisible();
-  await expect(record).toContainText("Record");
+  /*
+   * The button's label is the registry's, and the registry calls this action
+   * **Bind targets** — recording is what binding a flow's targets *is*, and the
+   * word a person reads should say what happens rather than name the mechanism.
+   * The assertion used to be the literal "Record" and had not been re-run since
+   * the rename, because this whole suite skips without a packaged build (T18's
+   * first defect).
+   */
+  await expect(record).toContainText("Bind targets");
 
   await record.click();
 
@@ -981,8 +989,49 @@ test("the Record review chooses its gateway and says what a fake session is", as
   await goTo("record", "Record review");
   const gateway = page.locator("#record-gateway");
   await expect(gateway).toBeVisible();
-  // No credential on this service, so the screen offers what it can do.
-  await expect(page.locator("#record-fake-gateway")).toContainText("evals/grounding/cases");
+
+  /*
+   * The gateway is *chosen*, and the note belongs to the choice (T18).
+   *
+   * This case used to assert `#record-fake-gateway` unconditionally, on the
+   * reasoning that a service with no model credential falls back to the fake
+   * gateway. It does not: the order is credential → `anthropic`, else a display
+   * → `human`, else `fake`, and a machine with a display lands on `human`. So
+   * the note was absent and the case failed — and had failed silently since,
+   * because the packaged build this suite needs could not be produced (T18's
+   * first defect) and every case here skipped.
+   *
+   * What is asserted now is the rule rather than one machine's default: every
+   * gateway says whether it is available and why, and *choosing* the fake one
+   * makes the screen say what a fake session is.
+   */
+  await expect(gateway).toContainText(/human|anthropic|fake/);
+
+  /*
+   * Chosen by keyboard, which is how `Chooser` is chosen from.
+   *
+   * It is Radix's select: the options live in a portal above the screen, so a
+   * click on one is intercepted by whatever the trigger happens to be under.
+   * Focus the trigger, open it, walk to the option by its words, take it — the
+   * same gesture `surfaces-dogfood.mjs` uses, and the same one SF-18 requires
+   * to work.
+   */
+  await gateway.focus();
+  await page.keyboard.press("Enter");
+  await page.locator('[role="listbox"]').waitFor({ timeout: 10_000 });
+  for (let step = 0; step < 12; step += 1) {
+    const highlighted =
+      (await page
+        .locator('[role="option"][data-highlighted], [role="option"]:focus')
+        .first()
+        .textContent()
+        .catch(() => "")) ?? "";
+    if (highlighted.trim().startsWith("fake")) break;
+    await page.keyboard.press("ArrowDown");
+  }
+  await page.keyboard.press("Enter");
+
+  await expect(page.locator("#record-fake-gateway")).toContainText("not from a model");
   await expect(page.locator("#record-flows")).toBeVisible();
 });
 
@@ -1266,8 +1315,32 @@ test("a toolbar that runs out of room sheds into the palette, and says so (P10-F
       expect(one.overflow, `${one.width}px: the toolbar overflows by ${one.overflow}px`)
         .toBeLessThanOrEqual(1);
     }
-    expect(one.height, `${one.width}px: the toolbar wrapped to ${one.height}px`)
-      .toBeLessThanOrEqual(48);
+    /*
+     * One row above the responsive breakpoint; below it, wrapping is the fix
+     * and not the failure (T18, SF-18).
+     *
+     * Wave 3's eighth defect was that at 200% zoom — 1440×1000 and 1280×800
+     * have 720 and 640 CSS pixels there — the rail, the inspector and the
+     * toolbar's own controls sat on top of each other and **Recheck targets**
+     * was clipped off the right. The fix was `@media (max-width: 960px)` in
+     * `shell.css`: below that width the toolbar wraps instead of clipping.
+     *
+     * This assertion is older than that fix and said "one row at every width",
+     * which is the Draft 2.12 rule reaching past its own floor. It was never
+     * re-run against the change, because the packaged build the suite needs
+     * could not be produced (see T18's first defect) and every case here
+     * skipped. So it is stated as the rule now is: one row while there is room
+     * for one, and a bar that grows rather than one that hides its controls.
+     */
+    if (one.width > 960) {
+      expect(one.height, `${one.width}px: the toolbar wrapped to ${one.height}px`)
+        .toBeLessThanOrEqual(48);
+    } else {
+      expect(
+        one.overflow,
+        `${one.width}px: the toolbar clipped by ${one.overflow}px instead of wrapping`,
+      ).toBeLessThanOrEqual(1);
+    }
     expect(one.titleWidth, `${one.width}px: the title is under its floor`)
       .toBeGreaterThanOrEqual(one.titleFloor - 1);
     expect(one.shedText, `${one.width}px: the hint does not count what went`).toBe(
@@ -1282,17 +1355,36 @@ test("a toolbar that runs out of room sheds into the palette, and says so (P10-F
     }
   }
 
-  // The sweep has to actually bite, or it says nothing.
-  const widest = seen.find((one) => one.hidden.length === 0);
-  expect(widest, `every width shed something: ${JSON.stringify(seen.map((o) => [o.width, o.barWidth, o.hidden.length]))}`).toBeDefined();
-  const narrowest = seen.at(-1)!;
-  expect(narrowest.hidden.length, "nothing was ever shed").toBeGreaterThan(0);
+  /*
+   * The sweep has to actually bite, or it says nothing — and it bites *where
+   * the bar is one row* (T18, SF-18).
+   *
+   * Shedding is what a bar does when it runs out of room. Below 960px it no
+   * longer runs out: `shell.css` wraps it, which is wave 3's fix for the
+   * controls that sat on top of each other at 200% zoom. So the narrowest width
+   * in this sweep now sheds *nothing*, and that is the better behaviour — every
+   * control is on the bar and reachable. The claim that has to hold is the one
+   * P10-F3 makes: somewhere in the range where the bar is a single row, it runs
+   * out of room, sheds, and says how many went.
+   */
+  const oneRow = seen.filter((one) => one.width > 960);
+  const roomy = oneRow.find((one) => one.hidden.length === 0);
+  expect(
+    roomy,
+    `every one-row width shed something: ${JSON.stringify(seen.map((o) => [o.width, o.barWidth, o.hidden.length]))}`,
+  ).toBeDefined();
+  const tightest = oneRow.at(-1)!;
+  expect(
+    tightest.hidden.length,
+    `nothing was ever shed while the bar was one row: ${JSON.stringify(oneRow.map((o) => [o.width, o.hidden.length]))}`,
+  ).toBeGreaterThan(0);
 
   // And what went is in the palette, which is where the bar said it was.
+  await atWidth(tightest.width, async () => undefined);
   await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
   const palette = page.getByRole("dialog", { name: "Command palette" });
   await expect(palette).toBeVisible();
-  for (const id of narrowest.hidden) {
+  for (const id of tightest.hidden) {
     await expect(palette.locator(`#palette-${id.replace(/^action-/, "")}`)).toHaveCount(1);
   }
   await page.keyboard.press("Escape");

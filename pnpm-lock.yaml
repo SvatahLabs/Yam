@@ -80,6 +80,12 @@ importers:
       '@eslint/js':
         specifier: 'catalog:'
         version: 9.39.5
+      '@modelcontextprotocol/sdk':
+        specifier: 'catalog:'
+        version: 1.30.0(zod@3.25.76)
+      '@playwright/test':
+        specifier: 'catalog:'
+        version: 1.62.1
       '@svatah/yam-adapter-playwright':
         specifier: workspace:*
         version: link:packages/adapter-playwright

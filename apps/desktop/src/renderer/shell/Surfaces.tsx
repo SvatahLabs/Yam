@@ -238,12 +238,21 @@ export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Ele
                   id={`surfaces-group-${slug(group.family)}`}
                   aria-labelledby={`surfaces-group-${slug(group.family)}-heading`}
                 >
-                  <h3
+                  {/*
+                    * `h2`, not `h3` (SF-18).
+                    *
+                    * The toolbar title is the window's `h1`, so a group heading
+                    * at level three leaves a hole in the outline a screen
+                    * reader reads. Found by the accessibility oracle running
+                    * over the packaged application's own window in T18 — not by
+                    * reading this file, which is why it survived three waves.
+                    */}
+                  <h2
                     className="sv-inspector-heading"
                     id={`surfaces-group-${slug(group.family)}-heading`}
                   >
                     {group.family}
-                  </h3>
+                  </h2>
                   <Table<SurfaceAdapterRow>
                     id={`surfaces-adapters-${slug(group.family)}`}
                     label={`${group.family} adapters`}

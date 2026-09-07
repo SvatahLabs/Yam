@@ -655,7 +655,15 @@ export function Shell(props: ShellProps): React.JSX.Element {
       </nav>
 
       {/* ── workspace ─────────────────────────────────────────────────────── */}
-      <section className="sv-workspace" id="workspace" aria-label="Workspace">
+      {/*
+        * `main`, not `section` (SF-18).
+        *
+        * Every window needs one main landmark, and the workspace is it: a
+        * screen-reader user's "skip to the content" lands here. It was a
+        * generic section with a label, which is a region and not the main one.
+        * Found by the accessibility oracle over the packaged window in T18.
+        */}
+      <main className="sv-workspace" id="workspace" aria-label="Workspace">
         {state === undefined ? (
           <p className="sv-empty">Loading…</p>
         ) : state.error !== undefined ? (
@@ -667,7 +675,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
         ) : (
           screenBody()
         )}
-      </section>
+      </main>
 
       {/* ── inspector ─────────────────────────────────────────────────────── */}
       <aside className="sv-inspector" id="inspector" aria-label="Inspector">

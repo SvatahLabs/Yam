@@ -23,8 +23,9 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `AdapterReadiness` | interface | `export interface AdapterReadiness` |  |
 | `addSecretLiteral` | function | `export function addSecretLiteral(policy: RedactionPolicy, literal: string): void` |  |
 | `addSecretPattern` | function | `export function addSecretPattern(policy: RedactionPolicy, pattern: RegExp): void` |  |
-| `brokerAlive` | function | `export async function brokerAlive(descriptor: { url: string; token: string }): Promise<boolean>` | Whether a broker is answering at this descriptor. |
+| `brokerAlive` | function | `export async function brokerAlive(descriptor: { url: string; token: string }): Promise<boolean>` | Whether a broker is answering at this descriptor *and* speaks this contract. |
 | `BrokerDescriptor` | interface | `export interface BrokerDescriptor` |  |
+| `brokerHealth` | function | `export async function brokerHealth(` | What a broker at this descriptor is: alive, and what contract it speaks. |
 | `BrokerOperation` | typealias | `export type BrokerOperation ` | One operation, by the name the catalogue gives it. |
 | `BrokerOptions` | interface | `export interface BrokerOptions` |  |
 | `brokerStateDir` | function | `export function brokerStateDir(): string` |  |
@@ -32,6 +33,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `CAPABILITIES` | variable | `CAPABILITIES: readonly CapabilityFlag[]` | Every capability flag, so a client can render a readiness list. |
 | `capabilitiesInputSchema` | variable | `capabilitiesInputSchema = z.object(` |  |
 | `capabilitiesOutputSchema` | variable | `capabilitiesOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `catalogueFingerprint` | function | `export function catalogueFingerprint(): string` | A fingerprint of the contract this build serves (T18, SF-03). |
 | `checkAdapterReadiness` | function | `export function checkAdapterReadiness(` |  |
 | `checkInputSchema` | variable | `checkInputSchema = z.object(` |  |
 | `checkOutputSchema` | variable | `checkOutputSchema = resultEnvelopeSchema.extend(` |  |
@@ -39,7 +41,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `CliFlag` | interface | `export interface CliFlag` |  |
 | `closeInputSchema` | variable | `closeInputSchema = z.object(` |  |
 | `closeOutputSchema` | variable | `closeOutputSchema = resultEnvelopeSchema.extend(` |  |
-| `connectInputSchema` | variable | `connectInputSchema = z.object(` |  |
+| `connectInputSchema` | variable | `connectInputSchema = z` | What `connect` may be pointed at (SF-04, T18). |
 | `ConnectOptions` | interface | `export interface ConnectOptions` |  |
 | `connectOutputSchema` | variable | `connectOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `Control` | interface | `export interface Control` | Who holds a target, until they give it up (SF-13, T16). |

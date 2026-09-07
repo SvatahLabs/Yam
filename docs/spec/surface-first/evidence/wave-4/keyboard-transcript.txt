@@ -1,0 +1,85 @@
+# Keyboard-only journey at 1440x1000: connect, select, act, check, close (SF-18)
+
+Tab        focus: button#action-surface-discover "Recheck targetsR"
+Tab        focus: input#surfaces-url
+type       "http://127.0.0.1:64925/"
+Enter      focus: input#surfaces-url   — connect
+Tab        focus: button#action-surface-disconnect "Disconnect"
+Tab        focus: button#action-surface-discover "Recheck targetsR"
+Tab        focus: button#action-surface-check "Check the surface"
+Tab        focus: button#action-surface-refresh "Refresh and select againS"
+Tab        focus: tr "s_bacbc8221c1aplaywright · webreadyNobod"
+Tab        focus: button#surfaces-node-r0 "textbox "Username"r0"
+Enter      focus: button#surfaces-node-r0 "textbox "Username"r0"   — select the control
+Tab        focus: button#surfaces-node-r1 "button "Go"r1"
+Tab        focus: button#action-surface-take-control "Take control"
+Tab        focus: button#surfaces-action "Fill field▾"
+Tab        focus: input#surfaces-field-value
+type       "ada"
+Tab        focus: button#surfaces-verify "Choose…▾"
+Enter      focus: div "Nothing — dispatch only"   [no visible focus]   — open the chooser
+           listbox open: true; options: Nothing — dispatch only | Value equals | Text equals | Text contains | Is visible | Is checked | URL contains
+ArrowDown  focus: div "Value equals"   [no visible focus]
+           highlighted: "Value equals"
+Enter      focus: body "Yam/Surfaces/SurfacesOpen a projectSearc"   — choose Value equals
+(after)    focus: button#surfaces-verify
+Tab        focus: input#surfaces-verify-value
+type       "ada"
+Tab        focus: button#action-surface-act "Fill field⌘↵"
+Enter      focus: button#action-surface-act "Fill field⌘↵"   — act
+Tab        focus: button#action-surface-read "Read a value"
+Tab        focus: button#surfaces-result-details "Details"
+Tab        focus: button#action-surface-save-automation "Save as automation"
+Tab        focus: button#agent-copy-config "Copy configuration"
+Tab        focus: button#action-surface-test-agent "Test the connection"
+Tab        focus: body "Yam/Surfaces/SurfacesOpen a projectSearc"
+Tab        focus: button#open-project "Open a project"
+Tab        focus: button#open-command-palette "Search or run a command⌘K"
+Tab        focus: button#section-surfaces "Surfaces"
+Tab        focus: button#rail-surfaces "Surfaces"
+Tab        focus: button#section-automations "Automations"
+Tab        focus: button#rail-flows "Flows"
+Tab        focus: button#rail-bindings "Bindings"
+Tab        focus: button#rail-agents "Agents and tools"
+Tab        focus: button#rail-api "API"
+Tab        focus: button#rail-data "Data"
+Tab        focus: button#rail-import "Import prototype database"
+Tab        focus: button#section-activity "Activity"
+Tab        focus: button#rail-runs "Runs"
+Tab        focus: button#section-settings "Settings"
+Tab        focus: button#rail-settings "Settings"
+Tab        focus: button#action-surface-disconnect "Disconnect"
+Tab        focus: button#action-surface-discover "Recheck targetsR"
+Enter      focus: button#action-surface-discover "Recheck targetsR"   — recheck, which reloads the sessions
+Tab        focus: button#action-surface-check "Check the surface"
+Tab        focus: button#action-surface-refresh "Refresh and select againS"
+Tab        focus: tr "s_bacbc8221c1aplaywright · webreadyNobod"
+ArrowDown  focus: tr "s_0dd894db2a23playwright · webreadyNobod"   — the next session
+Enter      focus: tr "s_0dd894db2a23playwright · webreadyNobod"   — choose it
+Tab        focus: button#surfaces-node-r0 "textbox "Username"r0"
+Tab        focus: button#surfaces-node-r1 "button "Go"r1"
+Tab        focus: button#action-surface-take-control "Take control"
+Tab        focus: button#action-surface-save-automation "Save as automation"
+Tab        focus: button#agent-copy-config "Copy configuration"
+Tab        focus: button#action-surface-test-agent "Test the connection"
+Tab        focus: body "Yam/Surfaces/SurfacesOpen a projectSearc"
+Tab        focus: button#open-project "Open a project"
+Tab        focus: button#open-command-palette "Search or run a command⌘K"
+Tab        focus: button#section-surfaces "Surfaces"
+Tab        focus: button#rail-surfaces "Surfaces"
+Tab        focus: button#section-automations "Automations"
+Tab        focus: button#rail-flows "Flows"
+Tab        focus: button#rail-bindings "Bindings"
+Tab        focus: button#rail-agents "Agents and tools"
+Tab        focus: button#rail-api "API"
+Tab        focus: button#rail-data "Data"
+Tab        focus: button#rail-import "Import prototype database"
+Tab        focus: button#section-activity "Activity"
+Tab        focus: button#rail-runs "Runs"
+Tab        focus: button#section-settings "Settings"
+Tab        focus: button#rail-settings "Settings"
+Tab        focus: button#action-surface-disconnect "Disconnect"
+Enter      focus: button#action-surface-disconnect "Disconnect"   — close the selected session
+(after)    focus: h1#toolbar-title
+
+# 62 Tab stops, 0 without visible focus

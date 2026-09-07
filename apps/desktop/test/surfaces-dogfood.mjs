@@ -9,7 +9,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, extname } from "node:path";
+import { join, extname, resolve } from "node:path";
 import { createServer, request as proxyRequest } from "node:http";
 import { chromium } from "@playwright/test";
 
@@ -18,7 +18,19 @@ const ROOT = join(APP_DIR, "..", "..");
 const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
 // Where the evidence goes: a directory named by SURFACES_EVIDENCE_DIR, so a
 // verifier can keep it beside the spec, else a temporary one.
-const OUT = process.env.SURFACES_EVIDENCE_DIR ?? mkdtempSync(join(tmpdir(), "yam-surfaces-evidence-"));
+/*
+ * Resolved against the *repository*, not against `apps/desktop` (T18).
+ *
+ * The command this harness documents is run through `pnpm --filter`, which puts
+ * the working directory in `apps/desktop` — so a relative
+ * `SURFACES_EVIDENCE_DIR=docs/spec/surface-first/evidence/wave-4` wrote its
+ * screenshots to `apps/desktop/docs/spec/…`, a directory nobody asked for and
+ * nobody would look in. An absolute path is unchanged by `resolve`.
+ */
+const OUT =
+  process.env.SURFACES_EVIDENCE_DIR === undefined
+    ? mkdtempSync(join(tmpdir(), "yam-surfaces-evidence-"))
+    : resolve(ROOT, process.env.SURFACES_EVIDENCE_DIR);
 mkdirSync(OUT, { recursive: true });
 const RENDERER = mkdtempSync(join(tmpdir(), "yam-surfaces-renderer-"));
 
@@ -598,6 +610,18 @@ try {
     lines.push(`           listbox open: ${listbox > 0}; options: ${(await page.locator('[role="option"]').allTextContents()).join(" | ")}`);
     let chosen = false;
     for (let i = 0; i < 8 && !chosen; i += 1) {
+      /*
+       * Let the list settle before the first arrow (T18).
+       *
+       * Radix mounts the listbox in a portal and positions it before it takes
+       * keys; an arrow that arrives during that never moves the highlight, and
+       * every arrow after it lands on a list that thinks it is still at the
+       * top. `choose()` above never hit this because it *reads* first and
+       * arrows second, which gives the same fifty milliseconds by accident.
+       * Measured: without this the highlight stayed on "Nothing — dispatch
+       * only" for all eight presses, on this machine and on `master`.
+       */
+      await page.waitForTimeout(50);
       await press("ArrowDown");
       const highlighted =
         (await page.locator('[role="option"][data-highlighted], [role="option"]:focus').first().textContent().catch(() => "")) ?? "";
