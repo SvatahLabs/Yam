@@ -222,7 +222,16 @@ describe("the Record screen's gateway choice (P5-F2, REQ-ADE-4, LLD §13.6)", ()
 
   it("says when a session is running against the committed answers", () => {
     expect(record).toContain("record-fake-gateway");
-    expect(record).toContain("evals/grounding/cases");
+    expect(record).toContain("committed with Yam");
+    /*
+     * And says it without naming a directory inside Yam's own checkout (T20,
+     * SF-20). This used to assert the presence of `evals/grounding/cases`,
+     * which is the repository path the requirement keeps out of what a user
+     * reads: meaningless to anyone running the installed package. Asserting the
+     * rule rather than the sentence means the next rewording is free and the
+     * next repository path is a red build.
+     */
+    expect(record).not.toMatch(/evals\//);
   });
 
   it("renders a failed session as an alert", () => {

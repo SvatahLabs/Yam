@@ -48,7 +48,7 @@ Exit codes: 0 ok · 64 usage
 ```text
 yam explore [dir] [--name <story>] [--trajectory <path.jsonl>]
 
-Let an agent write the first draft. Serves the MCP surface for one exploration of the application and, when the agent disconnects, compiles what it did into a proposal under proposals/<date>/ for you to review. --trajectory compiles one yam mcp or the app's Explorer wrote.
+Let an agent write the first draft. Serves the MCP surface for one exploration and, when the agent disconnects, compiles what it did into a proposal under proposals/<date>/ for you to review. The agent opens its own target with `surface_connect`; this command records what it does, it does not choose what it drives. --trajectory compiles one yam mcp or the app's Explorer wrote.
 
   --name <story>             the proposed story's name
   --trajectory <path.jsonl>  compile an existing trajectory instead of serving a session

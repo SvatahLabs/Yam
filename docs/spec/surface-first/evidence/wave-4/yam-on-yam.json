@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "suite": "yam-on-yam",
-  "ranAt": "2026-09-09T00:45:03.035Z",
+  "ranAt": "2026-09-09T03:02:11.289Z",
   "host": {
     "platform": "darwin",
     "arch": "arm64",
@@ -9,40 +9,40 @@
   },
   "packaged": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01HQSwfPtVBdAYCpAmoF2Pjq/apps/desktop/out/Yam-darwin-arm64/Yam.app",
   "counts": {
-    "attempted": 91,
-    "reached": 90,
-    "passed": 90,
+    "attempted": 92,
+    "reached": 91,
+    "passed": 91,
     "failed": 0,
     "blocked": 1
   },
   "timings": [
     {
       "what": "app.launch-to-window",
-      "ms": 1141
+      "ms": 1219
     },
     {
       "what": "cli-browser",
-      "ms": 20473
+      "ms": 21985
     },
     {
       "what": "mcp-browser",
-      "ms": 13015
+      "ms": 13035
     },
     {
       "what": "negative-cli",
-      "ms": 4540
+      "ms": 4607
     },
     {
       "what": "negative-mcp",
-      "ms": 90
+      "ms": 87
     },
     {
       "what": "cli-ax",
-      "ms": 21521
+      "ms": 24388
     },
     {
       "what": "mcp-ax",
-      "ms": 13225
+      "ms": 14955
     }
   ],
   "checks": [
@@ -50,7 +50,7 @@
       "pass": "launch",
       "name": "the packaged application starts and publishes a window",
       "ok": true,
-      "detail": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01HQSwfPtVBdAYCpAmoF2Pjq/apps/desktop/out/Yam-darwin-arm64/Yam.app on http://127.0.0.1:9441"
+      "detail": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01HQSwfPtVBdAYCpAmoF2Pjq/apps/desktop/out/Yam-darwin-arm64/Yam.app on http://127.0.0.1:9490"
     },
     {
       "pass": "oracles",
@@ -62,13 +62,13 @@
       "pass": "oracles",
       "name": "a screenshot of the application is taken, and is a real image",
       "ok": true,
-      "detail": "320645 bytes at /Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01HQSwfPtVBdAYCpAmoF2Pjq/docs/spec/surface-first/evidence/wave-4/packaged-surfaces.png"
+      "detail": "326178 bytes at /Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_01HQSwfPtVBdAYCpAmoF2Pjq/docs/spec/surface-first/evidence/wave-4/packaged-surfaces.png"
     },
     {
       "pass": "oracles",
       "name": "the accessibility audit finds no violation on the application's own window",
       "ok": true,
-      "detail": "0 violations over the live DOM (11823 bytes)"
+      "detail": "0 violations over the live DOM (12472 bytes)"
     },
     {
       "pass": "oracles",
@@ -79,43 +79,43 @@
       "pass": "cli-browser",
       "name": "a session opens on the packaged application",
       "ok": true,
-      "detail": "s_c10e12b728f0"
+      "detail": "s_f4af3b8a330c"
     },
     {
       "pass": "cli-browser",
       "name": "the packaged application opens into Surfaces",
       "ok": true,
-      "detail": "ref=e21"
+      "detail": "rail=e27 connect form=e69"
     },
     {
       "pass": "cli-browser",
       "name": "the connect form offers a URL to fill",
       "ok": true,
-      "detail": "ref=e63"
+      "detail": "ref=e69"
     },
     {
       "pass": "cli-browser",
       "name": "the sample application's URL is typed into it",
       "ok": true,
-      "detail": "{\"ok\":true,\"ref\":\"e63\"}"
+      "detail": "{\"ok\":true,\"ref\":\"e69\"}"
     },
     {
       "pass": "cli-browser",
       "name": "Connect surface is offered",
       "ok": true,
-      "detail": "ref=e68"
+      "detail": "ref=e74"
     },
     {
       "pass": "cli-browser",
       "name": "Connect surface is pressed",
       "ok": true,
-      "detail": "{\"ok\":true,\"ref\":\"e68\"}"
+      "detail": "{\"ok\":true,\"ref\":\"e74\"}"
     },
     {
       "pass": "cli-browser",
       "name": "the packaged application connects to the sample app and shows its tree",
       "ok": true,
-      "detail": "ref=e218"
+      "detail": "ref=e224"
     },
     {
       "pass": "cli-browser",
@@ -127,13 +127,13 @@
       "pass": "cli-browser",
       "name": "selecting a text field opens on Fill field, not a dead end",
       "ok": true,
-      "detail": "ref=e304"
+      "detail": "ref=e310"
     },
     {
       "pass": "cli-browser",
       "name": "the fill form asks for a value",
       "ok": true,
-      "detail": "ref=e298"
+      "detail": "ref=e304"
     },
     {
       "pass": "cli-browser",
@@ -151,25 +151,25 @@
       "pass": "cli-browser",
       "name": "the application reports the action as dispatched",
       "ok": true,
-      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectSearch or run a command⌘Kservice 127.0.0.1:50308SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivity"
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-QMED1xyam-shell-qn599QSearch or run a command⌘Kservice 127.0.0.1:57122SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
     },
     {
       "pass": "cli-browser",
       "name": "an action with no postcondition is reported as not verified (SF-11)",
       "ok": true,
-      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectSearch or run a command⌘Kservice 127.0.0.1:50308SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivity"
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-QMED1xyam-shell-qn599QSearch or run a command⌘Kservice 127.0.0.1:57122SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
     },
     {
       "pass": "cli-browser",
       "name": "Disconnect is offered while a surface is connected",
       "ok": true,
-      "detail": "ref=e50"
+      "detail": "ref=e56"
     },
     {
       "pass": "cli-browser",
       "name": "disconnecting returns the application to its connect form",
       "ok": true,
-      "detail": "ref=e329"
+      "detail": "ref=e335"
     },
     {
       "pass": "cli-browser",
@@ -181,43 +181,43 @@
       "pass": "mcp-browser",
       "name": "a session opens on the packaged application",
       "ok": true,
-      "detail": "s_7a9ac1a6a303"
+      "detail": "s_6878247dfb34"
     },
     {
       "pass": "mcp-browser",
       "name": "the packaged application opens into Surfaces",
       "ok": true,
-      "detail": "ref=e21"
+      "detail": "rail=e27 connect form=e69"
     },
     {
       "pass": "mcp-browser",
       "name": "the connect form offers a URL to fill",
       "ok": true,
-      "detail": "ref=e63"
+      "detail": "ref=e69"
     },
     {
       "pass": "mcp-browser",
       "name": "the sample application's URL is typed into it",
       "ok": true,
-      "detail": "{\"ok\":true,\"ref\":\"e63\"}"
+      "detail": "{\"ok\":true,\"ref\":\"e69\"}"
     },
     {
       "pass": "mcp-browser",
       "name": "Connect surface is offered",
       "ok": true,
-      "detail": "ref=e68"
+      "detail": "ref=e74"
     },
     {
       "pass": "mcp-browser",
       "name": "Connect surface is pressed",
       "ok": true,
-      "detail": "{\"ok\":true,\"ref\":\"e68\"}"
+      "detail": "{\"ok\":true,\"ref\":\"e74\"}"
     },
     {
       "pass": "mcp-browser",
       "name": "the packaged application connects to the sample app and shows its tree",
       "ok": true,
-      "detail": "ref=e229"
+      "detail": "ref=e235"
     },
     {
       "pass": "mcp-browser",
@@ -229,13 +229,13 @@
       "pass": "mcp-browser",
       "name": "selecting a text field opens on Fill field, not a dead end",
       "ok": true,
-      "detail": "ref=e315"
+      "detail": "ref=e321"
     },
     {
       "pass": "mcp-browser",
       "name": "the fill form asks for a value",
       "ok": true,
-      "detail": "ref=e309"
+      "detail": "ref=e315"
     },
     {
       "pass": "mcp-browser",
@@ -253,25 +253,25 @@
       "pass": "mcp-browser",
       "name": "the application reports the action as dispatched",
       "ok": true,
-      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectSearch or run a command⌘Kservice 127.0.0.1:50308SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivity"
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-QMED1xyam-shell-qn599QSearch or run a command⌘Kservice 127.0.0.1:57122SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
     },
     {
       "pass": "mcp-browser",
       "name": "an action with no postcondition is reported as not verified (SF-11)",
       "ok": true,
-      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectSearch or run a command⌘Kservice 127.0.0.1:50308SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivity"
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-QMED1xyam-shell-qn599QSearch or run a command⌘Kservice 127.0.0.1:57122SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
     },
     {
       "pass": "mcp-browser",
       "name": "Disconnect is offered while a surface is connected",
       "ok": true,
-      "detail": "ref=e50"
+      "detail": "ref=e56"
     },
     {
       "pass": "mcp-browser",
       "name": "disconnecting returns the application to its connect form",
       "ok": true,
-      "detail": "ref=e340"
+      "detail": "ref=e346"
     },
     {
       "pass": "mcp-browser",
@@ -283,7 +283,7 @@
       "pass": "negative-cli",
       "name": "a postcondition that holds passes",
       "ok": true,
-      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectSearch or run a command⌘Kservice 127.0.0.1:50308SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivity"
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-QMED1xyam-shell-qn599QSearch or run a command⌘Kservice 127.0.0.1:57122SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
     },
     {
       "pass": "negative-cli",
@@ -295,7 +295,7 @@
       "pass": "negative-cli",
       "name": "the failing postcondition keeps the value it actually observed (SF-11)",
       "ok": true,
-      "detail": "{\"ok\":false,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectSearch or run a command⌘Kservice 127.0.0.1:50308SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivit"
+      "detail": "{\"ok\":false,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-QMED1xyam-shell-qn599QSearch or run a command⌘Kservice 127.0.0.1:57122SurfacesSurfacesAutomationsFlowsBindingsAgents and tool"
     },
     {
       "pass": "negative-cli",
@@ -307,13 +307,13 @@
       "pass": "negative-cli",
       "name": "a reference nothing issued is refused, not resolved to whatever holds its id",
       "ok": true,
-      "detail": "status=refused code=STALE_REFERENCE: Reference \"e999999\" was not in snapshot snap_ad60a1925d07."
+      "detail": "status=refused code=STALE_REFERENCE: Reference \"e999999\" was not in snapshot snap_1f5c06b75e30."
     },
     {
       "pass": "negative-cli",
       "name": "control can be taken explicitly",
       "ok": true,
-      "detail": "{\"holder\":\"yam-on-yam-agent\",\"since\":\"2026-09-09T00:44:08.249Z\",\"heldByYou\":true}"
+      "detail": "{\"holder\":\"yam-on-yam-agent\",\"since\":\"2026-09-09T03:01:11.336Z\",\"heldByYou\":true}"
     },
     {
       "pass": "negative-cli",
@@ -337,7 +337,7 @@
       "pass": "negative-mcp",
       "name": "a postcondition that holds passes",
       "ok": true,
-      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectSearch or run a command⌘Kservice 127.0.0.1:50308SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivity"
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-QMED1xyam-shell-qn599QSearch or run a command⌘Kservice 127.0.0.1:57122SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
     },
     {
       "pass": "negative-mcp",
@@ -349,19 +349,19 @@
       "pass": "negative-mcp",
       "name": "the failing postcondition keeps the value it actually observed (SF-11)",
       "ok": true,
-      "detail": "{\"ok\":false,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectSearch or run a command⌘Kservice 127.0.0.1:50308SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivit"
+      "detail": "{\"ok\":false,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-QMED1xyam-shell-qn599QSearch or run a command⌘Kservice 127.0.0.1:57122SurfacesSurfacesAutomationsFlowsBindingsAgents and tool"
     },
     {
       "pass": "negative-mcp",
       "name": "a reference nothing issued is refused, not resolved to whatever holds its id",
       "ok": true,
-      "detail": "status=refused code=STALE_REFERENCE: Reference \"e999999\" was not in snapshot snap_bd2861c28969."
+      "detail": "status=refused code=STALE_REFERENCE: Reference \"e999999\" was not in snapshot snap_8219cde3187d."
     },
     {
       "pass": "negative-mcp",
       "name": "control can be taken explicitly",
       "ok": true,
-      "detail": "{\"holder\":\"yam-on-yam-agent\",\"since\":\"2026-09-09T00:44:10.412Z\",\"heldByYou\":true}"
+      "detail": "{\"holder\":\"yam-on-yam-agent\",\"since\":\"2026-09-09T03:01:13.472Z\",\"heldByYou\":true}"
     },
     {
       "pass": "negative-mcp",
@@ -385,19 +385,19 @@
       "pass": "cli-ax",
       "name": "a session opens on the packaged application",
       "ok": true,
-      "detail": "s_923d25fadf04"
+      "detail": "s_b0990d7786e1"
     },
     {
       "pass": "cli-ax",
       "name": "the packaged application opens into Surfaces",
       "ok": true,
-      "detail": "ref=r19"
+      "detail": "rail=r22 connect form=r64"
     },
     {
       "pass": "cli-ax",
       "name": "the connect form offers a URL to fill",
       "ok": true,
-      "detail": "ref=r61"
+      "detail": "ref=r64"
     },
     {
       "pass": "cli-ax",
@@ -409,7 +409,7 @@
       "pass": "cli-ax",
       "name": "Connect surface is offered",
       "ok": true,
-      "detail": "ref=r64"
+      "detail": "ref=r67"
     },
     {
       "pass": "cli-ax",
@@ -421,7 +421,7 @@
       "pass": "cli-ax",
       "name": "the packaged application connects to the sample app and shows its tree",
       "ok": true,
-      "detail": "ref=r104"
+      "detail": "ref=r107"
     },
     {
       "pass": "cli-ax",
@@ -433,13 +433,13 @@
       "pass": "cli-ax",
       "name": "selecting a text field opens on Fill field, not a dead end",
       "ok": true,
-      "detail": "ref=r78"
+      "detail": "ref=r81"
     },
     {
       "pass": "cli-ax",
       "name": "the fill form asks for a value",
       "ok": true,
-      "detail": "ref=r132"
+      "detail": "ref=r135"
     },
     {
       "pass": "cli-ax",
@@ -457,25 +457,25 @@
       "pass": "cli-ax",
       "name": "the application reports the action as dispatched",
       "ok": true,
-      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project Search or run a command SURFACES Surfaces AUT"
+      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-QMED1x yam-shell-qn599Q Se"
     },
     {
       "pass": "cli-ax",
       "name": "an action with no postcondition is reported as not verified (SF-11)",
       "ok": true,
-      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project Search or run a command SURFACES Surfaces AUT"
+      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-QMED1x yam-shell-qn599Q Se"
     },
     {
       "pass": "cli-ax",
       "name": "Disconnect is offered while a surface is connected",
       "ok": true,
-      "detail": "ref=r41"
+      "detail": "ref=r44"
     },
     {
       "pass": "cli-ax",
       "name": "disconnecting returns the application to its connect form",
       "ok": true,
-      "detail": "ref=r64"
+      "detail": "ref=r67"
     },
     {
       "pass": "cli-ax",
@@ -487,19 +487,19 @@
       "pass": "mcp-ax",
       "name": "a session opens on the packaged application",
       "ok": true,
-      "detail": "s_282cd4088735"
+      "detail": "s_9582d701a77d"
     },
     {
       "pass": "mcp-ax",
       "name": "the packaged application opens into Surfaces",
       "ok": true,
-      "detail": "ref=r19"
+      "detail": "rail=r22 connect form=r64"
     },
     {
       "pass": "mcp-ax",
       "name": "the connect form offers a URL to fill",
       "ok": true,
-      "detail": "ref=r61"
+      "detail": "ref=r64"
     },
     {
       "pass": "mcp-ax",
@@ -511,7 +511,7 @@
       "pass": "mcp-ax",
       "name": "Connect surface is offered",
       "ok": true,
-      "detail": "ref=r64"
+      "detail": "ref=r67"
     },
     {
       "pass": "mcp-ax",
@@ -523,7 +523,7 @@
       "pass": "mcp-ax",
       "name": "the packaged application connects to the sample app and shows its tree",
       "ok": true,
-      "detail": "ref=r104"
+      "detail": "ref=r107"
     },
     {
       "pass": "mcp-ax",
@@ -535,13 +535,13 @@
       "pass": "mcp-ax",
       "name": "selecting a text field opens on Fill field, not a dead end",
       "ok": true,
-      "detail": "ref=r78"
+      "detail": "ref=r81"
     },
     {
       "pass": "mcp-ax",
       "name": "the fill form asks for a value",
       "ok": true,
-      "detail": "ref=r132"
+      "detail": "ref=r135"
     },
     {
       "pass": "mcp-ax",
@@ -559,25 +559,25 @@
       "pass": "mcp-ax",
       "name": "the application reports the action as dispatched",
       "ok": true,
-      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project Search or run a command SURFACES Surfaces AUT"
+      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-QMED1x yam-shell-qn599Q Se"
     },
     {
       "pass": "mcp-ax",
       "name": "an action with no postcondition is reported as not verified (SF-11)",
       "ok": true,
-      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project Search or run a command SURFACES Surfaces AUT"
+      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-QMED1x yam-shell-qn599Q Se"
     },
     {
       "pass": "mcp-ax",
       "name": "Disconnect is offered while a surface is connected",
       "ok": true,
-      "detail": "ref=r41"
+      "detail": "ref=r44"
     },
     {
       "pass": "mcp-ax",
       "name": "disconnecting returns the application to its connect form",
       "ok": true,
-      "detail": "ref=r64"
+      "detail": "ref=r67"
     },
     {
       "pass": "mcp-ax",
@@ -589,7 +589,13 @@
       "pass": "oracles",
       "name": "the fixture project's files are byte-for-byte unchanged",
       "ok": true,
-      "detail": "76 file(s) unchanged"
+      "detail": "105 file(s) unchanged"
+    },
+    {
+      "pass": "oracles",
+      "name": "every pass that ran is one a host without the application would report as blocked",
+      "ok": true,
+      "detail": "7 pass(es) accounted for"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "ranAt": "2026-09-09T00:50:37.472Z",
+  "ranAt": "2026-09-09T03:02:55.128Z",
   "host": {
     "platform": "darwin",
     "arch": "arm64",
@@ -8,9 +8,9 @@
     "reference": "darwin arm64, Node v25.6.1"
   },
   "totals": {
-    "attempted": 276,
-    "reached": 271,
-    "passed": 271,
+    "attempted": 277,
+    "reached": 272,
+    "passed": 272,
     "failed": 0,
     "blocked": 5
   },
@@ -30,9 +30,9 @@
       "interface": "external",
       "platform": "packaged app",
       "suite": "yam-on-yam",
-      "attempted": 5,
-      "reached": 4,
-      "passed": 4,
+      "attempted": 6,
+      "reached": 5,
+      "passed": 5,
       "failed": 0,
       "blocked": 1,
       "externallyVerified": true,
@@ -230,8 +230,8 @@
       "budgetMs": 5000,
       "note": "first connect to a target (SF-21's 5 s)",
       "samples": 5,
-      "p95Ms": 912,
-      "medianMs": 626,
+      "p95Ms": 926,
+      "medianMs": 545,
       "within": true
     },
     {
@@ -239,8 +239,8 @@
       "budgetMs": 5000,
       "note": "a useful first snapshot",
       "samples": 5,
-      "p95Ms": 823,
-      "medianMs": 477,
+      "p95Ms": 503,
+      "medianMs": 423,
       "within": true
     },
     {
@@ -248,8 +248,8 @@
       "budgetMs": 5000,
       "note": "one dispatched action, typing into a real field",
       "samples": 5,
-      "p95Ms": 576,
-      "medianMs": 533,
+      "p95Ms": 476,
+      "medianMs": 441,
       "within": true
     },
     {
@@ -257,14 +257,14 @@
       "budgetMs": 60000,
       "note": "launch to Surfaces on screen",
       "samples": 1,
-      "p95Ms": 1141,
-      "medianMs": 1141,
+      "p95Ms": 1219,
+      "medianMs": 1219,
       "within": true
     }
   ],
   "quickStart": {
     "source": "examples/surface-control/README.md",
-    "directory": "/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-surface-quick-start-00Pe7N",
+    "directory": "/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-surface-quick-start-jObKRg",
     "tarball": "31 packed tarball(s)",
     "commands": [
       {
@@ -277,7 +277,7 @@
         "command": "npm install <31 packed tarball(s)>",
         "source": "examples/surface-control/README.md",
         "ok": true,
-        "detail": "installed outside the workspace, from /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-surface-quick-start-pack-6uVmB6"
+        "detail": "installed outside the workspace, from /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-surface-quick-start-pack-TZGTbF"
       },
       {
         "command": "yam surface targets --json",
@@ -290,7 +290,7 @@
         "source": "examples/surface-control/README.md",
         "ok": true,
         "substitutions": [
-          "http://localhost:3000 → http://127.0.0.1:51363 (the reader's own application)"
+          "http://localhost:3000 → http://127.0.0.1:57517 (the reader's own application)"
         ],
         "detail": "exit 0, answered in the result envelope"
       },
@@ -299,7 +299,7 @@
         "source": "examples/surface-control/README.md",
         "ok": true,
         "substitutions": [
-          "s_... → s_1a566d92bcce (what the previous command printed)"
+          "s_... → s_3e7c99077963 (what the previous command printed)"
         ],
         "detail": "exit 0, answered in the result envelope"
       },
@@ -308,7 +308,7 @@
         "source": "examples/surface-control/README.md",
         "ok": true,
         "substitutions": [
-          "s_... → s_1a566d92bcce (what the previous command printed)"
+          "s_... → s_3e7c99077963 (what the previous command printed)"
         ],
         "detail": "exit 0, answered in the result envelope"
       },
@@ -323,7 +323,7 @@
         "source": "examples/surface-control/README.md",
         "ok": true,
         "substitutions": [
-          "s_... → s_1a566d92bcce (what the previous command printed)"
+          "s_... → s_3e7c99077963 (what the previous command printed)"
         ],
         "detail": "exit 0, answered in the result envelope"
       },
@@ -332,7 +332,7 @@
         "source": "examples/surface-control/README.md",
         "ok": true,
         "substitutions": [
-          "s_... → s_1a566d92bcce (what the previous command printed)"
+          "s_... → s_3e7c99077963 (what the previous command printed)"
         ],
         "detail": "exit 0, answered in the result envelope"
       },

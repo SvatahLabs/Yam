@@ -367,7 +367,16 @@ describe("the Record screen chooses the gateway (P5-F2, REQ-ADE-4, LLD §13.5, �
     expect(offered.map((one) => one.id)).toEqual(["human", "anthropic", "fake"]);
     expect(offered.find((one) => one.id === "human")?.available).toBe(false);
     expect(offered.find((one) => one.id === "anthropic")!.available).toBe(false);
-    expect(offered.find((one) => one.id === "fake")!.label).toContain("evals/grounding/cases");
+    /*
+     * The fake gateway says what it is, without naming a directory inside
+     * Yam's own checkout (T20, SF-20). The label used to read "committed
+     * answers from evals/grounding/cases" — a path that means nothing to
+     * anyone running the installed package, and the exact thing the
+     * requirement keeps out of what a user reads.
+     */
+    const fake = offered.find((one) => one.id === "fake")!.label;
+    expect(fake).toContain("committed answers");
+    expect(fake).not.toMatch(/evals\//);
 
     // The screen draws that choice as a control the desktop adapters can find.
     const source = readFileSync(join(APP_DIR, "src", "renderer", "shell", "Record.tsx"), "utf8");

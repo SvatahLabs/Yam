@@ -41,7 +41,7 @@ import { spawnSync } from "node:child_process";
 import { startSampleApp } from "sample-web";
 import { ROOT, launchPackagedYam, packagedApp, awaitAxWindow, PROCESS_NAME } from "./launch.mjs";
 import { cliDriver, mcpDriver } from "./drivers.mjs";
-import { primaryJourney } from "./journey.mjs";
+import { primaryJourney, JOURNEY_CHECKS } from "./journey.mjs";
 import { negativeCases } from "./negatives.mjs";
 import { windowOracles, fileHashes, changedFiles } from "./oracles.mjs";
 
@@ -90,6 +90,23 @@ console.log("Yam controls the packaged Yam (T18)\n");
 spawnSync("pkill", ["-f", "surface broker"], { encoding: "utf8" });
 
 /*
+ * …and no service left by a previous run either.
+ *
+ * The application starts a service for the workspace it opens, and **adopts one
+ * already serving that directory** rather than starting a second (the lock in
+ * the user-data directory). Quitting the application does not stop the service
+ * it started, so the next run's application adopts the last run's orphan — and
+ * an orphan whose parent is gone is a service nobody will stop.
+ *
+ * Measured: a run that followed another without this line got eleven checks in
+ * and then answered `SESSION_CLOSED — the session has no open page`, with every
+ * later pass failing on a CDP protocol error and both AX passes blocked,
+ * because the window had gone. None of it was a defect in Yam and all of it
+ * looked like one, which is the failure this suite exists to not commit.
+ */
+spawnSync("pkill", ["-f", "bin.js serve"], { encoding: "utf8" });
+
+/*
  * …and this build's CLI starts it, before the application is launched (T18).
  *
  * The broker is one process per machine and whichever client needs one first
@@ -121,15 +138,36 @@ const sample = await startSampleApp(0);
 const before = fileHashes(join(ROOT, "evals", "fixtures"));
 let launched = { launched: false, reason: "not attempted" };
 
+/**
+ * Every pass that needs the packaged application, named once.
+ *
+ * It used to be two literal lists, and `negative-mcp` was in neither — so on a
+ * host that could not launch the application, that pass was not blocked, not
+ * attempted and not reported: it left the denominator entirely. SF-21 asks for
+ * "attempted, reached, passed, failed, blocked" precisely so a thing that did
+ * not run stays visible, and a count that silently shrinks is the failure this
+ * wave exists to stop. One list, read by both branches, so a pass added below
+ * cannot be forgotten here.
+ */
+const NEEDS_THE_APP = [
+  "cli-browser",
+  "mcp-browser",
+  "cli-ax",
+  "mcp-ax",
+  "negative-cli",
+  "negative-mcp",
+  "oracles",
+];
+
 try {
   if (!app.present) {
-    for (const pass of ["cli-browser", "mcp-browser", "cli-ax", "mcp-ax", "negative-cli", "oracles"]) {
+    for (const pass of NEEDS_THE_APP) {
       blockPass(pass, "the packaged application is driven", app.reason);
     }
   } else {
     launched = await timed("app.launch-to-window", async () => await launchPackagedYam());
     if (!launched.launched) {
-      for (const pass of ["cli-browser", "mcp-browser", "cli-ax", "mcp-ax", "negative-cli", "oracles"]) {
+      for (const pass of NEEDS_THE_APP) {
         blockPass(pass, "the packaged application is driven", launched.reason);
       }
     } else {
@@ -230,7 +268,14 @@ try {
       }
 
       /* ── the native target: the application's accessibility tree ────────── */
-      const ax = await awaitAxWindow({ timeoutMs: 20_000 });
+      /*
+       * The helper's own default, not a shorter one. macOS registers a freshly
+       * launched application's windows with the accessibility API on its own
+       * schedule, and 20 s was short enough that a run following another
+       * reported both AX passes `blocked` for want of a window that arrived a
+       * few seconds later — a host reason invented by the harness's impatience.
+       */
+      const ax = await awaitAxWindow();
       for (const pass of [
         { label: "cli-ax", interface: "CLI" },
         { label: "mcp-ax", interface: "MCP" },
@@ -238,11 +283,13 @@ try {
         if (wanted !== undefined && !wanted.has(pass.label)) continue;
         console.log(`\n── ${pass.label} (${pass.interface}, macOS AX) ──`);
         if (!ax.ready) {
-          blockPass(
-            pass.label,
-            "the primary journey runs against the application's accessibility tree",
-            ax.reason,
-          );
+          /*
+           * One blocked row per check the pass would have made, not one for the
+           * pass (SF-21). Collapsing a 17-check pass into a single row made the
+           * run's `attempted` depend on whether the host could be asked, so the
+           * denominator moved for the very reason it exists to record.
+           */
+          for (const name of JOURNEY_CHECKS) blockPass(pass.label, name, ax.reason);
           continue;
         }
         const driver =
@@ -284,10 +331,39 @@ try {
     ok: changes.length === 0,
     detail: changes.length === 0 ? `${Object.keys(after).length} file(s) unchanged` : changes.join(", "),
   });
+
+  /*
+   * …and the report accounts for every pass that ran (SF-21).
+   *
+   * `NEEDS_THE_APP` is what a host that cannot launch the application blocks,
+   * so a pass that runs here and is missing from that list would simply vanish
+   * on such a host — reported nowhere, in no denominator. That is how
+   * `negative-mcp` went unnoticed. Checking it here means the omission shows up
+   * on a *healthy* run, which is the run somebody actually looks at.
+   */
+  if (wanted === undefined) {
+    const ran = [...new Set(results.map((one) => one.pass))].filter((one) => one !== "launch");
+    const unaccounted = ran.filter((one) => !NEEDS_THE_APP.includes(one));
+    record({
+      pass: "oracles",
+      name: "every pass that ran is one a host without the application would report as blocked",
+      ok: unaccounted.length === 0,
+      detail:
+        unaccounted.length === 0
+          ? `${ran.length} pass(es) accounted for`
+          : `missing from NEEDS_THE_APP, so they would leave the denominator: ${unaccounted.join(", ")}`,
+    });
+  }
 } finally {
   await sample.close();
   launched.stop?.();
+  /*
+   * Leave the machine as the run found it. The application is quit above; the
+   * service it started and the broker outlive it, and a leftover of either is
+   * what the next run would drive by mistake.
+   */
   spawnSync("pkill", ["-f", "surface broker"], { encoding: "utf8" });
+  spawnSync("pkill", ["-f", "bin.js serve"], { encoding: "utf8" });
 }
 
 /* ── what the run found ───────────────────────────────────────────────────── */

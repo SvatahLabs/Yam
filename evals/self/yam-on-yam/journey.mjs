@@ -62,13 +62,107 @@ export function nodeSummary(snapshot, limit = 40) {
 
 const succeeded = (answer) => answer?.envelope?.status === "succeeded";
 
+/** The codes that mean "the thing you named has been replaced since you looked". */
+const REDRAWN = new Set(["STALE_REFERENCE", "CONNECT_FAILED"]);
+
+/**
+ * Wait for a control to be on screen, and answer with it and the snapshot it
+ * came from.
+ *
+ * Bounded polling, never a sleep: the condition is that the application shows
+ * the thing, and the reason it has to be a condition is peculiar to this suite.
+ * **Yam attaching to Yam changes what Yam is showing.** Opening a session puts a
+ * row in the broker's session list, and the Surfaces screen draws that list — so
+ * the act of connecting makes the window under test re-render, and a snapshot
+ * taken a moment before the re-render describes elements that no longer exist.
+ */
+async function waitFor(driver, session, want, { tries = 20, everyMs = 500, maxNodes = 600 } = {}) {
+  let snapshot;
+  for (let attempt = 0; attempt < tries; attempt += 1) {
+    snapshot = await driver.call("snapshot", { session, maxNodes });
+    const node = findNode(snapshot.envelope, want);
+    if (node !== undefined) return { node, snapshot };
+    await new Promise((done) => setTimeout(done, everyMs));
+  }
+  return { node: undefined, snapshot };
+}
+
+/**
+ * Act on a control, finding it as late as possible and once more if the
+ * application redrew underneath.
+ *
+ * A reference is only meaningful while the surface still holds the element it
+ * names, and this surface is an application that redraws when the caller
+ * connects to it. Taking the snapshot immediately before the act narrows the
+ * window; retrying once when the answer is `STALE_REFERENCE` or the adapter's
+ * "no longer resolves" closes it. Nothing is weakened: the act still has to
+ * succeed, and it still has to be the control this asked for. It is the same
+ * thing the product tells a person to do — *Refresh and select again* (SF-17).
+ */
+async function actOn(driver, session, want, action, args) {
+  let last;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const { node, snapshot } = await waitFor(driver, session, want, attempt === 0 ? {} : { tries: 4 });
+    if (node === undefined) return { answer: last, node: undefined, snapshot };
+    last = await driver.call("act", {
+      session,
+      action,
+      ref: node.ref,
+      ...(args === undefined ? {} : { args }),
+    });
+    if (succeeded(last) || !REDRAWN.has(last.envelope?.error?.code)) {
+      return { answer: last, node, snapshot };
+    }
+  }
+  return { answer: last, node: undefined };
+}
+
 /**
  * Run the journey. `record` takes one check at a time so a pass that stops
  * early still publishes everything it reached — a run that cannot finish is a
  * set of failed checks, never a lost run.
  */
+/**
+ * Every check this journey makes, in order — so the denominator is the same on
+ * every run (SF-21).
+ *
+ * A pass that stopped early used to record only what it reached, so the run's
+ * `attempted` shrank with it: three runs of the same suite on the same machine
+ * reported 92, 60 and 65 attempted checks. A count that moves because the
+ * subject failed is not a denominator, and "attempted, reached, passed, failed,
+ * blocked" is worth nothing if `attempted` means "however far it got".
+ *
+ * So the list is declared, and whatever is not reached is reported as a failure
+ * that says where the pass stopped.
+ */
+export const JOURNEY_CHECKS = [
+  "a session opens on the packaged application",
+  "the packaged application opens into Surfaces",
+  "the connect form offers a URL to fill",
+  "the sample application's URL is typed into it",
+  "Connect surface is offered",
+  "Connect surface is pressed",
+  "the packaged application connects to the sample app and shows its tree",
+  "a control of the sample app is selected",
+  "selecting a text field opens on Fill field, not a dead end",
+  "the fill form asks for a value",
+  "a value is typed into the fill form",
+  "Fill field is pressed",
+  "the application reports the action as dispatched",
+  "an action with no postcondition is reported as not verified (SF-11)",
+  "Disconnect is offered while a surface is connected",
+  "disconnecting returns the application to its connect form",
+  "the session closes",
+];
+
 export async function primaryJourney({ driver, connect, sampleUrl, record, label }) {
-  const check = (name, ok, detail) => record({ pass: label, name, ok, detail });
+  const made = new Set();
+  const check = (name, ok, detail) => {
+    made.add(name);
+    record({ pass: label, name, ok, detail });
+  };
+  /** The check the pass got to, for the ones it never reached. */
+  let lastReached = "nothing";
   let session;
 
   try {
@@ -82,48 +176,60 @@ export async function primaryJourney({ driver, connect, sampleUrl, record, label
     );
     if (session === undefined) return { reached: false, session };
 
-    /* 2 — the application opened into Surfaces (SF-02, SF-16). */
-    const first = await driver.call("snapshot", { session, interactiveOnly: true, maxNodes: 200 });
-    const surfacesRail = findNode(first.envelope, { role: "button", name: "Surfaces" });
+    /*
+     * 2 — the application opened into Surfaces (SF-02, SF-16).
+     *
+     * Asserted by something **only the Surfaces screen has**, not by the rail.
+     * The rail carries a button called "Surfaces" on every screen in the
+     * application, so a check that looked for one passed while the window was
+     * showing Automations — which is how a run in which the connect form was
+     * never on screen still reported "opens into Surfaces".
+     */
+    const rail = await driver.call("snapshot", { session, interactiveOnly: true, maxNodes: 200 });
+    const surfacesRail = findNode(rail.envelope, { role: "button", name: "Surfaces" });
+    const { node: urlField, snapshot: full } = await waitFor(driver, session, {
+      role: "textbox",
+      contains: "URL",
+    });
     check(
       "the packaged application opens into Surfaces",
-      succeeded(first) && surfacesRail !== undefined,
-      surfacesRail === undefined ? nodeSummary(first.envelope, 12) : `ref=${surfacesRail.ref}`,
+      succeeded(rail) && surfacesRail !== undefined && urlField !== undefined,
+      urlField === undefined
+        ? `the rail is there and the connect form is not: ${nodeSummary(full?.envelope, 20)}`
+        : `rail=${surfacesRail?.ref} connect form=${urlField.ref}`,
     );
 
     /* 3 — fill the connect form's URL with the sample application. */
-    const full = await driver.call("snapshot", { session, maxNodes: 600 });
-    const urlField = findNode(full.envelope, { role: "textbox", contains: "URL" });
     check(
       "the connect form offers a URL to fill",
       urlField !== undefined,
-      urlField === undefined ? nodeSummary(full.envelope, 30) : `ref=${urlField.ref}`,
+      urlField === undefined ? nodeSummary(full?.envelope, 30) : `ref=${urlField.ref}`,
     );
     if (urlField === undefined) return { reached: false, session };
 
-    const filledUrl = await driver.call("act", {
-      session,
-      action: "type",
-      ref: urlField.ref,
-      args: { value: sampleUrl },
+    const typed = await actOn(driver, session, { role: "textbox", contains: "URL" }, "type", {
+      value: sampleUrl,
     });
-    check("the sample application's URL is typed into it", succeeded(filledUrl),
-      JSON.stringify(filledUrl.envelope?.result ?? filledUrl.envelope?.error ?? {}).slice(0, 200));
+    check("the sample application's URL is typed into it", succeeded(typed.answer),
+      JSON.stringify(typed.answer?.envelope?.result ?? typed.answer?.envelope?.error ?? {}).slice(0, 200));
 
     /* 4 — press Connect surface, and wait for the inner session to appear. */
-    const afterType = await driver.call("snapshot", { session, maxNodes: 600 });
-    const connectButton = findNode(afterType.envelope, { role: "button", name: "Connect surface" });
-    check("Connect surface is offered", connectButton !== undefined,
-      connectButton === undefined ? nodeSummary(afterType.envelope, 30) : `ref=${connectButton.ref}`);
-    if (connectButton === undefined) return { reached: false, session };
-
-    const pressed = await driver.call("act", {
+    const pressedConnect = await actOn(
+      driver,
       session,
-      action: "click",
-      ref: connectButton.ref,
-    });
-    check("Connect surface is pressed", succeeded(pressed),
-      JSON.stringify(pressed.envelope?.result ?? pressed.envelope?.error ?? {}).slice(0, 200));
+      { role: "button", name: "Connect surface" },
+      "click",
+    );
+    check("Connect surface is offered", pressedConnect.node !== undefined,
+      pressedConnect.node === undefined
+        ? nodeSummary(pressedConnect.snapshot?.envelope, 30)
+        : `ref=${pressedConnect.node.ref}`);
+    if (pressedConnect.node === undefined) return { reached: false, session };
+
+    check("Connect surface is pressed", succeeded(pressedConnect.answer),
+      JSON.stringify(
+        pressedConnect.answer?.envelope?.result ?? pressedConnect.answer?.envelope?.error ?? {},
+      ).slice(0, 200));
 
     /*
      * The inner connect launches a browser, which takes seconds. Waited for by
@@ -186,18 +292,19 @@ export async function primaryJourney({ driver, connect, sampleUrl, record, label
     if (valueField === undefined) return { reached: false, session };
 
     const TYPED = "ada";
-    const typedValue = await driver.call("act", {
+    const typedValue = await actOn(
+      driver,
       session,
-      action: "type",
-      ref: valueField.ref,
-      args: { value: TYPED },
-    });
-    check("a value is typed into the fill form", succeeded(typedValue),
-      JSON.stringify(typedValue.envelope?.error ?? {}).slice(0, 200));
+      { role: "textbox", contains: "Value" },
+      "type",
+      { value: TYPED },
+    );
+    check("a value is typed into the fill form", succeeded(typedValue.answer),
+      JSON.stringify(typedValue.answer?.envelope?.error ?? {}).slice(0, 200));
 
-    const acted = await driver.call("act", { session, action: "click", ref: fillButton.ref });
-    check("Fill field is pressed", succeeded(acted),
-      JSON.stringify(acted.envelope?.error ?? {}).slice(0, 200));
+    const acted = await actOn(driver, session, { role: "button", name: "Fill field" }, "click");
+    check("Fill field is pressed", succeeded(acted.answer),
+      JSON.stringify(acted.answer?.envelope?.error ?? {}).slice(0, 200));
 
     /* 7 — verify, through the contract's own `check` (SF-11). */
     /*
@@ -292,6 +399,25 @@ export async function primaryJourney({ driver, connect, sampleUrl, record, label
       const closed = await driver.call("close", { session });
       check("the session closes", succeeded(closed),
         JSON.stringify(closed.envelope?.error ?? {}).slice(0, 160));
+    }
+
+    /*
+     * …and every check this journey declares is reported, reached or not, so
+     * the denominator is the same on every run (SF-21). One that was never
+     * reached is a failure — the pass did not establish it — and it says where
+     * the pass stopped, which is the thing a reader needs.
+     */
+    for (const name of JOURNEY_CHECKS) {
+      if (made.has(name)) {
+        lastReached = name;
+        continue;
+      }
+      record({
+        pass: label,
+        name,
+        ok: false,
+        detail: `not reached: the pass stopped after "${lastReached}"`,
+      });
     }
   }
 }
