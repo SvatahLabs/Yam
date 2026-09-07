@@ -1,0 +1,426 @@
+{
+  "schemaVersion": "1.0.0",
+  "ranAt": "2026-09-09T06:02:20.386Z",
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v25.6.1",
+    "reference": "darwin arm64, Node v25.6.1"
+  },
+  "totals": {
+    "attempted": 306,
+    "reached": 300,
+    "passed": 300,
+    "failed": 0,
+    "blocked": 6
+  },
+  "rows": [
+    {
+      "interface": "desktop",
+      "platform": "packaged app",
+      "suite": "yam-on-yam",
+      "attempted": 2,
+      "reached": 2,
+      "passed": 2,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "external",
+      "platform": "packaged app",
+      "suite": "yam-on-yam",
+      "attempted": 6,
+      "reached": 5,
+      "passed": 5,
+      "failed": 0,
+      "blocked": 1,
+      "externallyVerified": true,
+      "reason": "axe-core is MPL-2.0 and REQ-PKG-3 admits MIT, Apache-2.0 and BSD only, so it is not a dependency of this repository. Set YAM_AXE=<path to axe.min.js> to run it beside the in-house audit."
+    },
+    {
+      "interface": "CLI",
+      "platform": "browser",
+      "suite": "yam-on-yam",
+      "attempted": 27,
+      "reached": 27,
+      "passed": 27,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "MCP",
+      "platform": "browser",
+      "suite": "yam-on-yam",
+      "attempted": 26,
+      "reached": 26,
+      "passed": 26,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "CLI",
+      "platform": "macOS AX",
+      "suite": "yam-on-yam",
+      "attempted": 17,
+      "reached": 17,
+      "passed": 17,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "MCP",
+      "platform": "macOS AX",
+      "suite": "yam-on-yam",
+      "attempted": 17,
+      "reached": 17,
+      "passed": 17,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "CLI",
+      "platform": "a pseudo-terminal",
+      "suite": "yam-on-yam",
+      "attempted": 12,
+      "reached": 12,
+      "passed": 12,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "MCP",
+      "platform": "a pseudo-terminal",
+      "suite": "yam-on-yam",
+      "attempted": 12,
+      "reached": 12,
+      "passed": 12,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "desktop",
+      "platform": "browser-hosted",
+      "suite": "surfaces-dogfood",
+      "attempted": 154,
+      "reached": 154,
+      "passed": 154,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "HTTP",
+      "platform": "service /v1",
+      "suite": "catalogue-to-openapi",
+      "attempted": 14,
+      "reached": 14,
+      "passed": 14,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "adapter",
+      "platform": "appium",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 0,
+      "passed": 0,
+      "failed": 0,
+      "blocked": 1,
+      "externallyVerified": false,
+      "reason": "blocked: no Appium server answered at http://127.0.0.1:4723. Start one (`appium`) and attach a device or emulator; set YAM_APPIUM_URL for a server elsewhere. — needs an Appium server and a device or emulator; neither is present on this host, and no device runner is provisioned — Appium server; target device/emulator"
+    },
+    {
+      "interface": "adapter",
+      "platform": "atspi",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 0,
+      "passed": 0,
+      "failed": 0,
+      "blocked": 1,
+      "externallyVerified": false,
+      "reason": "blocked: AT-SPI is Linux's accessibility bus; this host is darwin. — needs a Linux host with a session bus, toolkit accessibility on, `at-spi2-registryd` running and `python3` with `pyatspi`; no Linux runner is provisioned. Its tree mapping, reference scope, state inversion, action selection and refusals are driven by `packages/adapter-atspi/test/tree.test.ts`; its conversation with a real registry is not — a Linux session bus; at-spi2-registryd running with toolkit accessibility on; gdbus (GLib)"
+    },
+    {
+      "interface": "adapter",
+      "platform": "ax",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 1,
+      "passed": 1,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "adapter",
+      "platform": "bidi",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 0,
+      "passed": 0,
+      "failed": 0,
+      "blocked": 1,
+      "externallyVerified": false,
+      "reason": "blocked: no BiDi endpoint is named. Start Chrome or Firefox with a WebDriver BiDi endpoint and set YAM_BIDI_URL to it. — needs a Chrome or Firefox started with a BiDi endpoint; `pnpm bidi:independence` is the suite that drives it and it is not part of this run — Chrome or Firefox with BiDi support"
+    },
+    {
+      "interface": "adapter",
+      "platform": "http",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 0,
+      "passed": 0,
+      "failed": 0,
+      "blocked": 1,
+      "externallyVerified": false,
+      "reason": "unvalidated: driven by `packages/cli/test/surface-transport.test.ts` in the gate rather than by this suite, which drives the packaged desktop"
+    },
+    {
+      "interface": "adapter",
+      "platform": "playwright",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 1,
+      "passed": 1,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "adapter",
+      "platform": "process",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 1,
+      "passed": 1,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "adapter",
+      "platform": "uia",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 0,
+      "passed": 0,
+      "failed": 0,
+      "blocked": 1,
+      "externallyVerified": false,
+      "reason": "blocked: UI Automation is Windows'; this host is darwin. — needs Windows; no Windows runner is available — Windows UI Automation runtime"
+    },
+    {
+      "interface": "packaging",
+      "platform": "clean install",
+      "suite": "quick-start",
+      "attempted": 11,
+      "reached": 11,
+      "passed": 11,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    }
+  ],
+  "adapters": [
+    {
+      "adapter": "appium",
+      "platforms": "darwin, linux, win32",
+      "status": "blocked",
+      "reason": "no Appium server answered at http://127.0.0.1:4723. Start one (`appium`) and attach a device or emulator; set YAM_APPIUM_URL for a server elsewhere. — needs an Appium server and a device or emulator; neither is present on this host, and no device runner is provisioned — Appium server; target device/emulator",
+      "version": "—",
+      "range": "Appium 2.x, over the W3C WebDriver protocol"
+    },
+    {
+      "adapter": "atspi",
+      "platforms": "linux",
+      "status": "blocked",
+      "reason": "AT-SPI is Linux's accessibility bus; this host is darwin. — needs a Linux host with a session bus, toolkit accessibility on, `at-spi2-registryd` running and `python3` with `pyatspi`; no Linux runner is provisioned. Its tree mapping, reference scope, state inversion, action selection and refusals are driven by `packages/adapter-atspi/test/tree.test.ts`; its conversation with a real registry is not — a Linux session bus; at-spi2-registryd running with toolkit accessibility on; gdbus (GLib)",
+      "version": "—",
+      "range": "AT-SPI2 over D-Bus, as GNOME 40+ and GTK 3.24+ publish it"
+    },
+    {
+      "adapter": "ax",
+      "platforms": "darwin",
+      "status": "validated",
+      "reason": "a session of kind `desktop` opened through it in this run",
+      "version": "macOS 26.3",
+      "range": "macOS 13+ (the AXUIElement API and System Events)"
+    },
+    {
+      "adapter": "bidi",
+      "platforms": "darwin, linux, win32",
+      "status": "blocked",
+      "reason": "no BiDi endpoint is named. Start Chrome or Firefox with a WebDriver BiDi endpoint and set YAM_BIDI_URL to it. — needs a Chrome or Firefox started with a BiDi endpoint; `pnpm bidi:independence` is the suite that drives it and it is not part of this run — Chrome or Firefox with BiDi support",
+      "version": "—",
+      "range": "WebDriver BiDi as Chrome 130+ and Firefox 130+ speak it"
+    },
+    {
+      "adapter": "http",
+      "platforms": "darwin, linux, win32",
+      "status": "unvalidated",
+      "reason": "driven by `packages/cli/test/surface-transport.test.ts` in the gate rather than by this suite, which drives the packaged desktop",
+      "version": "v25.6.1",
+      "range": "any HTTP/1.1 or HTTP/2 endpoint"
+    },
+    {
+      "adapter": "playwright",
+      "platforms": "darwin, linux, win32",
+      "status": "validated",
+      "reason": "a session of kind `web` opened through it in this run",
+      "version": "Version 1.62.1",
+      "range": "Playwright 1.5x, Chromium and Firefox as it bundles them"
+    },
+    {
+      "adapter": "process",
+      "platforms": "darwin, linux",
+      "status": "validated",
+      "reason": "a session of kind `process` opened through it in this run",
+      "version": "expect version 5.45",
+      "range": "a pseudo-terminal from expect(1) or python3's pty module"
+    },
+    {
+      "adapter": "uia",
+      "platforms": "win32",
+      "status": "blocked",
+      "reason": "UI Automation is Windows'; this host is darwin. — needs Windows; no Windows runner is available — Windows UI Automation runtime",
+      "version": "—",
+      "range": "Windows 10 1809+ (UI Automation)"
+    }
+  ],
+  "budgets": [
+    {
+      "what": "connect",
+      "budgetMs": 5000,
+      "note": "first connect to a target (SF-21's 5 s)",
+      "samples": 5,
+      "p95Ms": 566,
+      "medianMs": 545,
+      "within": true
+    },
+    {
+      "what": "snapshot",
+      "budgetMs": 5000,
+      "note": "a useful first snapshot",
+      "samples": 5,
+      "p95Ms": 437,
+      "medianMs": 433,
+      "within": true
+    },
+    {
+      "what": "act",
+      "budgetMs": 5000,
+      "note": "one dispatched action, typing into a real field",
+      "samples": 5,
+      "p95Ms": 447,
+      "medianMs": 445,
+      "within": true
+    },
+    {
+      "what": "desktop first paint",
+      "budgetMs": 60000,
+      "note": "launch to Surfaces on screen",
+      "samples": 1,
+      "p95Ms": 2208,
+      "medianMs": 2208,
+      "within": true
+    }
+  ],
+  "quickStart": {
+    "source": "examples/surface-control/README.md",
+    "directory": "/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-surface-quick-start-flV7Wj",
+    "tarball": "33 packed tarball(s)",
+    "commands": [
+      {
+        "command": "npm install @svatah/yam",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "the scoped package, which is what SF-20 asks the docs to say"
+      },
+      {
+        "command": "npm install <33 packed tarball(s)>",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "installed outside the workspace, from /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-surface-quick-start-pack-rq0akR"
+      },
+      {
+        "command": "yam surface targets --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "yam surface connect --url http://localhost:3000 --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "substitutions": [
+          "http://localhost:3000 → http://127.0.0.1:55815 (the reader's own application)"
+        ],
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "yam surface snapshot --session s_... --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "substitutions": [
+          "s_... → s_4a5ede80bc9b (what the previous command printed)"
+        ],
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "yam surface read --session s_... --kind title --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "substitutions": [
+          "s_... → s_4a5ede80bc9b (what the previous command printed)"
+        ],
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "echo '{\"predicate\":{\"kind\":\"titleContains\",\"value\":\"Home\"},\"subject\":\"page\"}' > check.json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "exit 0"
+      },
+      {
+        "command": "yam surface check --session s_... --input check.json --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "substitutions": [
+          "s_... → s_4a5ede80bc9b (what the previous command printed)"
+        ],
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "yam surface close --session s_... --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "substitutions": [
+          "s_... → s_4a5ede80bc9b (what the previous command printed)"
+        ],
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "npx @svatah/yam mcp",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "generic: the scoped package and the `mcp` subcommand, no client-specific plugin"
+      },
+      {
+        "command": "an MCP client initialises against the installed package and lists its tools",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "21 tool(s), including 14 surface tools"
+      }
+    ]
+  }
+}

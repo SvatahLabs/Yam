@@ -56,6 +56,8 @@ describe("the CI workflow (T0.2, T13.2)", () => {
       "quick-start",
       "runtime-conformance",
       "workspace",
+      // T00: Yam drives the packaged Yam, behind the packaged build (SF-18, SF-21).
+      "yam-on-yam",
     ]);
   });
 

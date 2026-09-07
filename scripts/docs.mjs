@@ -191,7 +191,21 @@ page(
  * the gate, so a coverage report that moves and a matrix that does not is a red
  * build rather than a page that quietly rots.
  */
-const coveragePath = join(ROOT, "docs", "spec", "surface-first", "evidence", "wave-4", "coverage.json");
+/*
+ * The newest wave's coverage, not a wave written down here (T23).
+ *
+ * `evidence/wave-4/coverage.json` was a path that had to be edited every wave,
+ * and the failure it invites is the one this project has met most often: a page
+ * that keeps rendering a previous wave's runs while the code beneath it moves.
+ */
+const evidenceRoot = join(ROOT, "docs", "spec", "surface-first", "evidence");
+const newestWave = existsSync(evidenceRoot)
+  ? readdirSync(evidenceRoot)
+      .filter((one) => /^wave-\d+$/u.test(one))
+      .sort((a, b) => Number(a.slice(5)) - Number(b.slice(5)))
+      .at(-1)
+  : undefined;
+const coveragePath = join(evidenceRoot, newestWave ?? "wave-4", "coverage.json");
 if (existsSync(coveragePath)) {
   const coverage = JSON.parse(readFileSync(coveragePath, "utf8"));
   const STATUS = {
@@ -204,7 +218,7 @@ if (existsSync(coveragePath)) {
     "# Support matrix",
     "",
     "**Generated. Do not edit.** `node scripts/docs.mjs` derives this page from",
-    "`docs/spec/surface-first/evidence/wave-4/coverage.json`, which",
+    `\`docs/spec/surface-first/evidence/${newestWave ?? "wave-4"}/coverage.json\`, which`,
     "`node scripts/coverage-report.mjs` derives from runs. Nothing here is a plan.",
     "",
     `Last measured ${coverage.ranAt} on **${coverage.host.reference}**.`,
@@ -216,15 +230,16 @@ if (existsSync(coveragePath)) {
     "| **validated** | A session was opened through this adapter, and driven, in the run this page comes from. |",
     "| implemented, unvalidated here | The adapter is built and registered, and nothing in that run drove it. The reason is given. It is not a claim that it works, and not a claim that it does not. |",
     "| not available on this host | It could not be asked. The reason is the product's own sentence. |",
-    "| unimplemented | Absent, with no row below. Linux AT-SPI and process/terminal surfaces are unimplemented. |",
+    "| unimplemented | Absent, with no row below. |",
     "",
     "## Adapters",
     "",
-    "| Adapter | Platforms | Status | Evidence, or the reason |",
-    "|---|---|---|---|",
+    "| Adapter | Platforms | Status | Version here | Driven range | Evidence, or the reason |",
+    "|---|---|---|---|---|---|",
     ...coverage.adapters.map(
       (one) =>
-        `| \`${one.adapter}\` | ${bar(one.platforms)} | ${STATUS[one.status] ?? one.status} | ${bar(one.reason)} |`,
+        `| \`${one.adapter}\` | ${bar(one.platforms)} | ${STATUS[one.status] ?? one.status} | ` +
+        `${bar(one.version)} | ${bar(one.range)} | ${bar(one.reason)} |`,
     ),
     "",
     "## Interfaces",

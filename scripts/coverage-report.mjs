@@ -2,7 +2,7 @@
  * What was reached, per interface and per platform (T19, SF-09, SF-18, SF-21).
  *
  *   node scripts/coverage-report.mjs
- *   node scripts/coverage-report.mjs --out docs/spec/surface-first/evidence/wave-4
+ *   node scripts/coverage-report.mjs --out docs/spec/surface-first/evidence/wave-5
  *   node scripts/coverage-report.mjs --skip-quick-start     # the slow half
  *
  * SF-21: "Evidence reports distinguish attempted, reached, passed, failed,
@@ -33,12 +33,13 @@ import {
   mkdirSync,
   mkdtempSync,
   openSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -48,7 +49,25 @@ const option = (name) => {
   const at = argv.indexOf(`--${name}`);
   return at < 0 ? undefined : argv[at + 1];
 };
-const OUT = resolve(ROOT, option("out") ?? join("docs", "spec", "surface-first", "evidence", "wave-4"));
+/**
+ * Where the evidence for the current wave lives.
+ *
+ * The newest `evidence/wave-N` directory rather than a name written down here,
+ * because a path that has to be edited every wave is a path that will be
+ * forgotten — and a coverage report that silently kept reading the previous
+ * wave's runs would be the "artefact trusted after the code beneath it moved"
+ * defect in its purest form. `--out` overrides it.
+ */
+export function newestWave(root) {
+  const evidence = join(root, "docs", "spec", "surface-first", "evidence");
+  if (!existsSync(evidence)) return join(evidence, "wave-1");
+  const waves = readdirSync(evidence)
+    .filter((one) => /^wave-\d+$/u.test(one))
+    .sort((a, b) => Number(a.slice(5)) - Number(b.slice(5)));
+  return join(evidence, waves.at(-1) ?? "wave-1");
+}
+
+const OUT = resolve(ROOT, option("out") ?? newestWave(ROOT));
 mkdirSync(OUT, { recursive: true });
 
 /** One line of the report: a set of checks, whose interface and platform are known. */
@@ -81,6 +100,8 @@ const PASS_SHAPE = {
   "negative-mcp": { interface: "MCP", platform: "browser" },
   "cli-ax": { interface: "CLI", platform: "macOS AX" },
   "mcp-ax": { interface: "MCP", platform: "macOS AX" },
+  "cli-terminal": { interface: "CLI", platform: "a pseudo-terminal" },
+  "mcp-terminal": { interface: "MCP", platform: "a pseudo-terminal" },
   launch: { interface: "desktop", platform: "packaged app" },
   oracles: { interface: "external", platform: "packaged app" },
 };
@@ -89,7 +110,7 @@ const yamOnYamPath = join(OUT, "yam-on-yam.json");
 if (!existsSync(yamOnYamPath)) {
   console.error(
     `No ${yamOnYamPath}. Run the T18 suite first:\n` +
-      `  YAM_ON_YAM_EVIDENCE_DIR=${option("out") ?? "docs/spec/surface-first/evidence/wave-4"} ` +
+      `  YAM_ON_YAM_EVIDENCE_DIR=${option("out") ?? relative(ROOT, OUT)} ` +
       "node evals/self/yam-on-yam/run.mjs",
   );
   process.exit(2);
@@ -314,6 +335,14 @@ function adapters() {
     http:
       "driven by `packages/cli/test/surface-transport.test.ts` in the gate rather than by this " +
       "suite, which drives the packaged desktop",
+    atspi:
+      "needs a Linux host with a session bus, toolkit accessibility on, `at-spi2-registryd` " +
+      "running and `python3` with `pyatspi`; no Linux runner is provisioned. Its tree mapping, " +
+      "reference scope, state inversion, action selection and refusals are driven by " +
+      "`packages/adapter-atspi/test/tree.test.ts`; its conversation with a real registry is not",
+    process:
+      "driven by the `cli-terminal` and `mcp-terminal` passes of this suite and by " +
+      "`packages/adapter-process/test/surface.test.ts`",
   };
 
   const out = [];
@@ -323,12 +352,35 @@ function adapters() {
     const eligible = adapter.available === true;
     const drivenHere = validated.get(name);
     const status = drivenHere !== undefined ? "validated" : eligible ? "unvalidated" : "blocked";
+    /*
+     * Both halves, when there are two (T23).
+     *
+     * A blocked row used to carry only the host's sentence — "AT-SPI is Linux's
+     * accessibility bus; this host is darwin" — and lose the more important
+     * one: that its bridge has been driven against no live registry *anywhere*.
+     * A reader on Linux would have been told it was available and nothing else.
+     * So the host's reason and what would have to be true are joined, and a row
+     * says both.
+     */
     const reason =
       drivenHere ??
-      adapter.reason ??
-      NOT_DRIVEN[name] ??
-      (adapter.prerequisites ?? []).join("; ");
-    out.push({ adapter: name, platforms, status, reason });
+      [adapter.reason, NOT_DRIVEN[name], (adapter.prerequisites ?? []).join("; ")]
+        .filter((one) => one !== undefined && one !== "")
+        .join(" — ");
+    out.push({
+      adapter: name,
+      platforms,
+      status,
+      reason,
+      /*
+       * What the host said its version is, and the versions this repository has
+       * driven (T23). "Each newly supported capability gets a reproducible
+       * conformance result, its limitations and its version range" — the first
+       * is the run, and these two are the other half of the sentence.
+       */
+      version: adapter.probe?.version ?? "—",
+      range: adapter.range ?? "—",
+    });
     addRow({
       interface: "adapter",
       platform: name,
@@ -618,15 +670,15 @@ An adapter's presence in a list is not evidence of support (SF-09).
 nothing here drove it — which is not the same claim. \`blocked\` means it could
 not be asked, and says what would have to be true.
 
-| Adapter | Platforms | Status | Evidence, or why not |
-|---|---|---|---|
+| Adapter | Platforms | Status | Version here | Driven range | Evidence, or why not |
+|---|---|---|---|---|---|
 ${
   one.adapters.length === 0
-    ? "| — | — | — | discovery returned no adapters |"
+    ? "| — | — | — | — | — | discovery returned no adapters |"
     : one.adapters
         .map(
           (a) =>
-            `| \`${a.adapter}\` | ${a.platforms} | ${a.status === "validated" ? "**validated**" : a.status} | ${(a.reason ?? "—").replace(/\|/g, "\\|")} |`,
+            `| \`${a.adapter}\` | ${a.platforms} | ${a.status === "validated" ? "**validated**" : a.status} | ${a.version ?? "—"} | ${a.range ?? "—"} | ${(a.reason ?? "—").replace(/\|/g, "\\|")} |`,
         )
         .join("\n")
 }

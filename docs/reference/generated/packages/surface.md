@@ -23,6 +23,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `ApiRequest` | typealias | `type ApiRequest = z.infer<typeof apiRequestSchema>;` |  |
 | `ApiResponse` | typealias | `type ApiResponse = z.infer<typeof apiResponseSchema>;` |  |
 | `APPIUM_ANDROID_ROLE_MAP` | variable | `APPIUM_ANDROID_ROLE_MAP: Readonly<Record<string, string>> ` | Appium native Android class → ARIA role (REQ-ADP-5). |
+| `ATSPI_ROLE_MAP` | variable | `ATSPI_ROLE_MAP: Readonly<Record<string, string>> ` | AT-SPI role names, onto the same vocabulary (T23, SF-23). |
 | `AX_ROLE_MAP` | variable | `AX_ROLE_MAP: Readonly<Record<string, string>> ` | macOS Accessibility `AXRole` → ARIA role (REQ-ADP-7). |
 | `AX_WINDOW_CHROME_SUBROLES` | variable | `AX_WINDOW_CHROME_SUBROLES: ReadonlySet<string> = new Set([` | The window's own buttons — close, minimise, zoom, full screen, collapse. |
 | `buildSnapshot` | function | `export function buildSnapshot(` | Assemble a `Snapshot` from its nodes: renders the text and fills in the estimate. |
@@ -78,7 +79,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `RenderOptions` | interface | `export interface RenderOptions` |  |
 | `renderSnapshot` | function | `export function renderSnapshot(` | Render a whole snapshot. Nodes are emitted in the order the adapter produced |
 | `REQUIRED_SURFACE_METHODS` | variable | `REQUIRED_SURFACE_METHODS = SURFACE_METHODS.filter(` | The methods every adapter must implement; `trace`, `request`, `pick` and `observe` are optional. |
-| `ROLE_MAPS` | variable | `ROLE_MAPS ` | The three published mapping tables, keyed by the adapter family they belong to. |
+| `ROLE_MAPS` | variable | `ROLE_MAPS ` | The published mapping tables, keyed by the adapter family they belong to. |
 | `RoleMapName` | typealias | `export type RoleMapName = keyof typeof ROLE_MAPS;` |  |
 | `Runner` | interface | `export interface Runner` | The commands this module runs. Injected, so every path above is testable. |
 | `ScriptError` | class | `export class ScriptError extends SurfaceError` | An `evaluate` or an injected script threw. |

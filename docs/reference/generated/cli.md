@@ -267,10 +267,14 @@ Exit codes: 0 ok · 64 usage
 ### `yam mcp`
 
 ```text
-yam mcp [dir] [--trajectory <path.jsonl>] [--session <id>]
+yam mcp [dir] [--http [--port <n>] [--token <t>] [--allow-origin <o,o>]] [--trajectory <path.jsonl>] [--session <id>]
 
-An MCP server over stdio with the operations and the raw surface, for an agent that explores; every call is recorded as a trajectory.
+An MCP server with the operations and the raw surface, for an agent that explores; every call is recorded as a trajectory. Over stdio by default, which is how a client that can start a program connects. --http serves the same tools over Streamable HTTP on 127.0.0.1 behind a bearer token, for a client that cannot start one; it prints its URL and token once on stdout.
 
+  --http                     serve over Streamable HTTP instead of stdio
+  --port <n>                 the port for --http (default: one the system chooses)
+  --token <t>                the bearer token for --http (default: generated)
+  --allow-origin <o,o>       browser origins allowed to reach --http (default: none)
   --trajectory <path.jsonl>  where the trajectory is written
   --session <id>             attach to a session
 

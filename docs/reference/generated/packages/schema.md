@@ -25,7 +25,7 @@ Zod definitions and generated JSON Schemas for the Yam artifact contracts
 | `ActResult` | typealias | `export type ActResult = z.infer<typeof actResultSchema>;` |  |
 | `actResultSchema` | variable | `actResultSchema = z` |  |
 | `AdapterName` | typealias | `export type AdapterName = z.infer<typeof adapterNameSchema>;` |  |
-| `adapterNameSchema` | variable | `adapterNameSchema = z.enum(["playwright", "bidi", "appium", "uia", "ax", "http"])` | Project configuration, `yam.config.yaml` (LLD §3.5). |
+| `adapterNameSchema` | variable | `adapterNameSchema = z.enum(["playwright", "bidi", "appium", "uia", "ax", "http", "process", "atspi"])` | Project configuration, `yam.config.yaml` (LLD §3.5). |
 | `ApiRequest` | typealias | `export type ApiRequest = z.infer<typeof apiRequestSchema>;` |  |
 | `apiRequestSchema` | variable | `apiRequestSchema = z` |  |
 | `ApiResponse` | typealias | `export type ApiResponse = z.infer<typeof apiResponseSchema>;` |  |
@@ -177,7 +177,7 @@ Zod definitions and generated JSON Schemas for the Yam artifact contracts
 | `SurfaceCheckMessage` | typealias | `export type SurfaceCheckMessage = z.infer<typeof surfaceCheckMessageSchema>;` |  |
 | `surfaceCheckMessageSchema` | variable | `surfaceCheckMessageSchema = z` | `surface.check.schema.json` — request and response of `check()`. |
 | `SurfaceKind` | typealias | `export type SurfaceKind = z.infer<typeof surfaceKindSchema>;` |  |
-| `surfaceKindSchema` | variable | `surfaceKindSchema = z.enum(["web", "mobile", "desktop", "http"])` |  |
+| `surfaceKindSchema` | variable | `surfaceKindSchema = z.enum(["web", "mobile", "desktop", "http", "process"])` | `process` is a terminal (T22, SF-22). |
 | `SurfaceLocateMessage` | typealias | `export type SurfaceLocateMessage = z.infer<typeof surfaceLocateMessageSchema>;` |  |
 | `surfaceLocateMessageSchema` | variable | `surfaceLocateMessageSchema = z` | `surface.locate.schema.json` — candidate in, references out (used by the resolver). |
 | `SurfaceReadMessage` | typealias | `export type SurfaceReadMessage = z.infer<typeof surfaceReadMessageSchema>;` |  |

@@ -1,0 +1,563 @@
+$ yam surface connect --adapter playwright --attach http://127.0.0.1:9547 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_105f5dfacaeb","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"sessionId":"s_66b9c07491ce","adapter":"playwright","kind":"web","capabilities":{"dialogs":true,"frames":true,"windows":true,"upload":true,"drag":true,"trace":true,"webmcp":true,"pick":true,"observe":true,"screenshot":true,"restore":true}},"timing":{"totalMs":62}}
+
+$ yam surface snapshot --session s_66b9c07491ce --interactive-only --max-nodes 200 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_9dfeb364deef","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ref":"e12","nodes":[{"ref":"e12","role":"button","states":[],"depth":2,"name":"Open a project","parent":"e4"},{"ref":"e14","role":"button","states":[],"depth":2,"name":"fixtures","parent":"e4"},{"ref":"e16","role":"button","states":[],"depth":2,"name":"yam-shell-FTm2k8","parent":"e4"},{"ref":"e18","role":"button","states":[],"depth":2,"name":"yam-shell-8pzTnq","parent":"e4"},{"ref":"e20","role":"button","states":[],"depth":2,"name":"Search or run a command","parent":"e4"},{"ref":"
+
+$ yam surface snapshot --session s_66b9c07491ce --max-nodes 600 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_70e485e636ec","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface snapshot --session s_66b9c07491ce --max-nodes 600 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_3671cbceec28","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface act --session s_66b9c07491ce --action type --ref e69 --input - --holder yam cli --json  <<< {"value":"http://127.0.0.1:53869/login"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_a77430aa8fc6","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ok":true,"ref":"e69"},"timing":{"totalMs":23}}
+
+$ yam surface snapshot --session s_66b9c07491ce --max-nodes 600 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_8c9e0f84be00","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface act --session s_66b9c07491ce --action click --ref e74 --holder yam cli --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_2abe62fce505","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ok":true,"ref":"e74"},"timing":{"totalMs":46}}
+
+$ yam surface snapshot --session s_66b9c07491ce --max-nodes 900 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_a981618a7d32","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface act --session s_66b9c07491ce --action click --ref e244 --holder yam cli --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_0b33e9ba5a86","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ok":true,"ref":"e244"},"timing":{"totalMs":40}}
+
+$ yam surface snapshot --session s_66b9c07491ce --max-nodes 900 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_21094413f187","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface snapshot --session s_66b9c07491ce --max-nodes 600 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_3ed134a2a3c5","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface act --session s_66b9c07491ce --action type --ref e324 --input - --holder yam cli --json  <<< {"value":"ada"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_de2fe840d17a","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ok":true,"ref":"e324"},"timing":{"totalMs":18}}
+
+$ yam surface snapshot --session s_66b9c07491ce --max-nodes 600 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_0efacb3649ef","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface act --session s_66b9c07491ce --action click --ref e330 --holder yam cli --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_52022cd370ca","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ok":true,"ref":"e330"},"timing":{"totalMs":27}}
+
+$ yam surface check --session s_66b9c07491ce --input - --json  <<< {"predicate":{"kind":"textContains","value":"Dispatched"},"subject":"page"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_1891a497c659","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ok":true,"actual":"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53878SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivityRunsSettingsSettingsSurfacesplaywright · web · 10 controlsDisconnectRecheck targetsRCheck the surfaceRefresh and select againS⌘K +0Open sessionssessionstatuscontrols_66b9c07491ceplaywright · webreadyNobodys_f9dfd0134699playwright · webreadyNobodyC
+
+$ yam surface check --session s_66b9c07491ce --input - --json  <<< {"predicate":{"kind":"textContains","value":"Not verified — no postcondition was given"},"subject":"page"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_8daca73d1bdf","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ok":true,"actual":"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53878SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivityRunsSettingsSettingsSurfacesplaywright · web · 10 controlsDisconnectRecheck targetsRCheck the surfaceRefresh and select againS⌘K +0Open sessionssessionstatuscontrols_66b9c07491ceplaywright · webreadyNobodys_f9dfd0134699playwright · webreadyNobodyC
+
+$ yam surface snapshot --session s_66b9c07491ce --max-nodes 900 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_8c32205c5967","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface act --session s_66b9c07491ce --action click --ref e56 --holder yam cli --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_9d81574231f2","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ok":true,"ref":"e56"},"timing":{"totalMs":45}}
+
+$ yam surface snapshot --session s_66b9c07491ce --max-nodes 900 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_04cb71d0a015","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface snapshot --session s_66b9c07491ce --max-nodes 900 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_2d77f7c359c7","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface act --session s_66b9c07491ce --action click --ref e56 --holder yam cli --json
+  exit 75  {"schemaVersion":"1.0","requestId":"req_a0f8b2cb518c","sessionId":"s_66b9c07491ce","status":"failed","error":{"code":"TIMEOUT","message":"elementHandle.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u
+
+$ yam surface close --session s_66b9c07491ce --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_0c80ff173180","sessionId":"s_66b9c07491ce","status":"succeeded","result":{"closed":true},"timing":{"totalMs":3}}
+
+→ surface_connect {"adapter":"playwright","attach":"http://127.0.0.1:9547"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_e2c93057f9ed","sessionId":"s_1196d02811c1","status":"succeeded","result":{"sessionId":"s_1196d02811c1","adapter":"playwright","kind":"web","capabilities":{"dialogs":true,"frames":true,"windows":true,"upload":true,"drag":true,"trace":true,"webmcp":true,"pick":true,"observe":true,"screenshot":true,"restore":true}},"timing":{"totalMs":31}}
+
+→ surface_snapshot {"session":"s_1196d02811c1","interactiveOnly":true,"maxNodes":200}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_37646f9be678","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ref":"e12","nodes":[{"ref":"e12","role":"button","states":[],"depth":2,"name":"Open a project","parent":"e4"},{"ref":"e14","role":"button","states":[],"depth":2,"name":"fixtures","parent":"e4"},{"ref":"e16","role":"button","states":[],"depth":2,"name":"yam-shell-FTm2k8","parent":"e4"},{"ref":"e18","role":"button","states":[],"depth":2,"name":"yam-shell-8pzTnq","parent":"e4"},{"ref":"e20","role":"button","states":[],"depth":2,"name":"Search or run a command","parent":"e4"},{"ref":"
+
+→ surface_snapshot {"session":"s_1196d02811c1","maxNodes":600}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_258a6fc0e855","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_snapshot {"session":"s_1196d02811c1","maxNodes":600}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_bfd0c2faad00","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_act {"session":"s_1196d02811c1","action":"type","ref":"e69","args":{"value":"http://127.0.0.1:53869/login"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_f2f926158677","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ok":true,"ref":"e69"},"timing":{"totalMs":7}}
+
+→ surface_snapshot {"session":"s_1196d02811c1","maxNodes":600}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_dac75c0112c8","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_act {"session":"s_1196d02811c1","action":"click","ref":"e74"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_1993933c942f","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ok":true,"ref":"e74"},"timing":{"totalMs":40}}
+
+→ surface_snapshot {"session":"s_1196d02811c1","maxNodes":900}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_7bb6dbe92829","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_act {"session":"s_1196d02811c1","action":"click","ref":"e255"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_af8d445f3bb0","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ok":true,"ref":"e255"},"timing":{"totalMs":36}}
+
+→ surface_snapshot {"session":"s_1196d02811c1","maxNodes":900}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_1ddc3ab1b417","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_snapshot {"session":"s_1196d02811c1","maxNodes":600}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_748f12dcde40","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_act {"session":"s_1196d02811c1","action":"type","ref":"e335","args":{"value":"ada"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_1055c67ddb6c","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ok":true,"ref":"e335"},"timing":{"totalMs":11}}
+
+→ surface_snapshot {"session":"s_1196d02811c1","maxNodes":600}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_02a38cc4c1bd","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_act {"session":"s_1196d02811c1","action":"click","ref":"e341"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_532c69110498","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ok":true,"ref":"e341"},"timing":{"totalMs":42}}
+
+→ surface_check {"session":"s_1196d02811c1","predicate":{"kind":"textContains","value":"Dispatched"},"subject":"page"}
+  isError=true  {"schemaVersion":"1.0","requestId":"req_9296be2467b8","sessionId":"s_1196d02811c1","status":"failed","error":{"code":"CHECK_FAILED","message":"Check failed","retryable":false},"result":{"ok":false,"actual":"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53878SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivityRunsSettingsSettingsSurfacesplaywright · web · 10 controlsDisconnectRecheck targetsRCheck the surfaceRefresh and select againS⌘K +0Open sessionssessionstatuscontrols_1196d028
+
+→ surface_check {"session":"s_1196d02811c1","predicate":{"kind":"textContains","value":"Dispatched"},"subject":"page"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_a8422211a603","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ok":true,"actual":"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53878SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivityRunsSettingsSettingsSurfacesplaywright · web · 10 controlsDisconnectRecheck targetsRCheck the surfaceRefresh and select againS⌘K +0Open sessionssessionstatuscontrols_1196d02811c1playwright · webreadyNobodys_d8bbf22c4822playwright · webreadyNobodyC
+
+→ surface_check {"session":"s_1196d02811c1","predicate":{"kind":"textContains","value":"Not verified — no postcondition was given"},"subject":"page"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_f7cb2f76d881","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ok":true,"actual":"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53878SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivityRunsSettingsSettingsSurfacesplaywright · web · 10 controlsDisconnectRecheck targetsRCheck the surfaceRefresh and select againS⌘K +0Open sessionssessionstatuscontrols_1196d02811c1playwright · webreadyNobodys_d8bbf22c4822playwright · webreadyNobodyC
+
+→ surface_snapshot {"session":"s_1196d02811c1","maxNodes":900}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_2c548fe993b5","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_act {"session":"s_1196d02811c1","action":"click","ref":"e56"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_7c9cd8dbecaa","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ok":true,"ref":"e56"},"timing":{"totalMs":33}}
+
+→ surface_snapshot {"session":"s_1196d02811c1","maxNodes":900}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_f2c8031d3170","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_snapshot {"session":"s_1196d02811c1","maxNodes":900}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_da26af646dba","sessionId":"s_1196d02811c1","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_act {"session":"s_1196d02811c1","action":"click","ref":"e56"}
+  isError=true  {"schemaVersion":"1.0","requestId":"req_68070fc5e48a","sessionId":"s_1196d02811c1","status":"failed","error":{"code":"TIMEOUT","message":"elementHandle.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u
+
+→ surface_close {"session":"s_1196d02811c1"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_332ffc08ea91","sessionId":"s_1196d02811c1","status":"succeeded","result":{"closed":true},"timing":{"totalMs":2}}
+
+$ yam surface connect --adapter playwright --attach http://127.0.0.1:9547 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_e6512b7036ab","sessionId":"s_99788c9d894e","status":"succeeded","result":{"sessionId":"s_99788c9d894e","adapter":"playwright","kind":"web","capabilities":{"dialogs":true,"frames":true,"windows":true,"upload":true,"drag":true,"trace":true,"webmcp":true,"pick":true,"observe":true,"screenshot":true,"restore":true}},"timing":{"totalMs":31}}
+
+$ yam surface snapshot --session s_99788c9d894e --max-nodes 600 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_7efaaee6012f","sessionId":"s_99788c9d894e","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface check --session s_99788c9d894e --input - --json  <<< {"predicate":{"kind":"textContains","value":"Surfaces"},"subject":"page"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_1096d6ff1dc6","sessionId":"s_99788c9d894e","status":"succeeded","result":{"ok":true,"actual":"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53878SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivityRunsSettingsSettingsSurfaces1 session · 4 of 8 adapters readyDisconnectRecheck targetsRCheck the surfaceRefresh and select againS⌘K +0URLAdapterChoose…▾Connect surfaceCOpen sessionssessionstatuscontrols_1196d02811c1playwright · webreadyNobodyBrows
+
+$ yam surface check --session s_99788c9d894e --input - --json  <<< {"predicate":{"kind":"textContains","value":"this text is not on the Surfaces screen"},"subject":"page"}
+  exit 20  {"schemaVersion":"1.0","requestId":"req_25e6f36424ba","sessionId":"s_99788c9d894e","status":"failed","error":{"code":"CHECK_FAILED","message":"Check failed","retryable":false},"result":{"ok":false,"actual":"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53878SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivityRunsSettingsSettingsSurfaces1 session · 4 of 8 adapters readyDisconnectRecheck targetsRCheck the surfaceRefresh and select againS⌘K +0URLAdapterChoose…▾Connect surfaceCOpen s
+
+$ yam surface snapshot --session s_99788c9d894e --max-nodes 20 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_89f95430b48c","sessionId":"s_99788c9d894e","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface describe --session s_99788c9d894e --ref e999999 --snapshot snap_fb61dc281daf --json
+  exit 1  {"schemaVersion":"1.0","requestId":"req_488860557114","sessionId":"s_99788c9d894e","status":"refused","error":{"code":"STALE_REFERENCE","message":"Reference \"e999999\" was not in snapshot snap_fb61dc281daf.","retryable":false}}
+
+$ yam surface control --session s_99788c9d894e --holder yam-on-yam-agent --take --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_706ba0c2bfa3","sessionId":"s_99788c9d894e","status":"succeeded","result":{"holder":"yam-on-yam-agent","since":"2026-09-09T05:53:03.892Z","heldByYou":true}}
+
+$ yam surface snapshot --session s_99788c9d894e --max-nodes 300 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_ab2c992d8031","sessionId":"s_99788c9d894e","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+$ yam surface act --session s_99788c9d894e --action click --ref e12 --holder somebody-else --json
+  exit 1  {"schemaVersion":"1.0","requestId":"req_c1c9bcf68bc3","sessionId":"s_99788c9d894e","status":"refused","error":{"code":"CONTROL_BUSY","message":"\"yam-on-yam-agent\" holds this target. Take control to act on it.","retryable":false,"details":{"holder":"yam-on-yam-agent","since":"2026-09-09T05:53:03.892Z"}}}
+
+$ yam surface control --session s_99788c9d894e --holder yam-on-yam-agent --release --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_427378af8e9c","sessionId":"s_99788c9d894e","status":"succeeded","result":{"heldByYou":false}}
+
+$ yam surface close --session s_99788c9d894e --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_07b8baa4426d","sessionId":"s_99788c9d894e","status":"succeeded","result":{"closed":true},"timing":{"totalMs":1}}
+
+→ surface_connect {"adapter":"playwright","attach":"http://127.0.0.1:9547"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_d20dcfce3e07","sessionId":"s_d1b417d8c56a","status":"succeeded","result":{"sessionId":"s_d1b417d8c56a","adapter":"playwright","kind":"web","capabilities":{"dialogs":true,"frames":true,"windows":true,"upload":true,"drag":true,"trace":true,"webmcp":true,"pick":true,"observe":true,"screenshot":true,"restore":true}},"timing":{"totalMs":28}}
+
+→ surface_snapshot {"session":"s_d1b417d8c56a","maxNodes":600}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_6b49f1355d01","sessionId":"s_d1b417d8c56a","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_check {"session":"s_d1b417d8c56a","predicate":{"kind":"textContains","value":"Surfaces"},"subject":"page"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_82b0374bf2f0","sessionId":"s_d1b417d8c56a","status":"succeeded","result":{"ok":true,"actual":"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53878SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivityRunsSettingsSettingsSurfaces1 session · 4 of 8 adapters readyDisconnectRecheck targetsRCheck the surfaceRefresh and select againS⌘K +0URLAdapterChoose…▾Connect surfaceCOpen sessionssessionstatuscontrols_1196d02811c1playwright · webreadyNobodyBrows
+
+→ surface_check {"session":"s_d1b417d8c56a","predicate":{"kind":"textContains","value":"this text is not on the Surfaces screen"},"subject":"page"}
+  isError=true  {"schemaVersion":"1.0","requestId":"req_f17134587fbd","sessionId":"s_d1b417d8c56a","status":"failed","error":{"code":"CHECK_FAILED","message":"Check failed","retryable":false},"result":{"ok":false,"actual":"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53878SurfacesSurfacesAutomationsFlowsBindingsAgents and toolsAPIDataImport prototype databaseActivityRunsSettingsSettingsSurfaces1 session · 4 of 8 adapters readyDisconnectRecheck targetsRCheck the surfaceRefresh and select againS⌘K +0URLAdapterChoose…▾Connect surfaceCOpen s
+
+→ surface_snapshot {"session":"s_d1b417d8c56a","maxNodes":20}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_080961c91007","sessionId":"s_d1b417d8c56a","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_describe {"session":"s_d1b417d8c56a","ref":"e999999","snapshot":"snap_17da6e70939f"}
+  isError=true  {"schemaVersion":"1.0","requestId":"req_3222b3cdb9b7","sessionId":"s_d1b417d8c56a","status":"refused","error":{"code":"STALE_REFERENCE","message":"Reference \"e999999\" was not in snapshot snap_17da6e70939f.","retryable":false}}
+
+→ surface_control {"session":"s_d1b417d8c56a","action":"take","holder":"yam-on-yam-agent"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_5788580313ec","sessionId":"s_d1b417d8c56a","status":"succeeded","result":{"holder":"yam-on-yam-agent","since":"2026-09-09T05:53:06.074Z","heldByYou":true}}
+
+→ surface_snapshot {"session":"s_d1b417d8c56a","maxNodes":300}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_aaf40f3e3c77","sessionId":"s_d1b417d8c56a","status":"succeeded","result":{"ref":"e3","nodes":[{"ref":"e3","role":"generic","states":[],"depth":0},{"ref":"e4","role":"banner","states":[],"depth":1,"parent":"e3"},{"ref":"e5","role":"generic","states":[],"depth":2,"parent":"e4"},{"ref":"e7","role":"navigation","states":[],"depth":2,"name":"Location","parent":"e4"},{"ref":"e8","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e9","role":"generic","states":[],"depth":3,"parent":"e7"},{"ref":"e10","role":"generic","states":[],"depth":3,"parent":"e7
+
+→ surface_act {"session":"s_d1b417d8c56a","action":"click","ref":"e12","holder":"somebody-else"}
+  isError=true  {"schemaVersion":"1.0","requestId":"req_b85f4225c85d","sessionId":"s_d1b417d8c56a","status":"refused","error":{"code":"CONTROL_BUSY","message":"\"yam-on-yam-agent\" holds this target. Take control to act on it.","retryable":false,"details":{"holder":"yam-on-yam-agent","since":"2026-09-09T05:53:06.074Z"}}}
+
+→ surface_control {"session":"s_d1b417d8c56a","action":"release","holder":"yam-on-yam-agent"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_be75c156cfae","sessionId":"s_d1b417d8c56a","status":"succeeded","result":{"heldByYou":false}}
+
+→ surface_close {"session":"s_d1b417d8c56a"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_bc2cc6342a59","sessionId":"s_d1b417d8c56a","status":"succeeded","result":{"closed":true},"timing":{"totalMs":1}}
+
+$ yam surface connect --adapter ax --app Yam --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_45d97421e789","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"sessionId":"s_d4752b10bf47","adapter":"ax","kind":"desktop","capabilities":{"dialogs":false,"frames":false,"windows":true,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":true}},"timing":{"totalMs":894}}
+
+$ yam surface snapshot --session s_d4752b10bf47 --interactive-only --max-nodes 200 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_6c69d8efc738","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+$ yam surface snapshot --session s_d4752b10bf47 --max-nodes 600 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_5d3127ac7137","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+$ yam surface snapshot --session s_d4752b10bf47 --max-nodes 600 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_63097ae9b3d8","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+$ yam surface act --session s_d4752b10bf47 --action type --ref r64 --input - --holder yam cli --json  <<< {"value":"http://127.0.0.1:53869/login"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_99bfa0ec8309","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ok":true},"timing":{"totalMs":1429}}
+
+$ yam surface snapshot --session s_d4752b10bf47 --max-nodes 600 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_c82e159cc65a","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+$ yam surface act --session s_d4752b10bf47 --action click --ref r67 --holder yam cli --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_a97aab5032f7","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ok":true},"timing":{"totalMs":992}}
+
+$ yam surface snapshot --session s_d4752b10bf47 --max-nodes 900 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_d6278a30c546","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+$ yam surface act --session s_d4752b10bf47 --action click --ref r107 --holder yam cli --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_13c5b9cbf666","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ok":true},"timing":{"totalMs":780}}
+
+$ yam surface snapshot --session s_d4752b10bf47 --max-nodes 900 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_b497dae5bd28","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+$ yam surface snapshot --session s_d4752b10bf47 --max-nodes 600 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_d7d396b4997a","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+$ yam surface act --session s_d4752b10bf47 --action type --ref r135 --input - --holder yam cli --json  <<< {"value":"ada"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_469b6e39af83","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ok":true},"timing":{"totalMs":950}}
+
+$ yam surface snapshot --session s_d4752b10bf47 --max-nodes 600 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_663352475a5b","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+$ yam surface act --session s_d4752b10bf47 --action click --ref r81 --holder yam cli --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_15330e4aaf21","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ok":true},"timing":{"totalMs":829}}
+
+$ yam surface check --session s_d4752b10bf47 --input - --json  <<< {"predicate":{"kind":"textContains","value":"Dispatched"},"subject":"page"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_83f1f55e8ecb","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ok":true,"actual":"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-FTm2k8 yam-shell-8pzTnq Search or run a command SURFACES Surfaces AUTOMATIONS Flows Bindings Agents and tools API Data Import prototype database ACTIVITY Runs SETTINGS Settings Surfaces 1 playwright · web · 10 controls Disconnect Recheck targets Check the surface Refresh and select again Open sessions Current su
+
+$ yam surface check --session s_d4752b10bf47 --input - --json  <<< {"predicate":{"kind":"textContains","value":"Not verified — no postcondition was given"},"subject":"page"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_7c565d7e085a","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ok":true,"actual":"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-FTm2k8 yam-shell-8pzTnq Search or run a command SURFACES Surfaces AUTOMATIONS Flows Bindings Agents and tools API Data Import prototype database ACTIVITY Runs SETTINGS Settings Surfaces 1 playwright · web · 10 controls Disconnect Recheck targets Check the surface Refresh and select again Open sessions Current su
+
+$ yam surface snapshot --session s_d4752b10bf47 --max-nodes 900 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_61e660935daa","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+$ yam surface act --session s_d4752b10bf47 --action click --ref r44 --holder yam cli --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_f408d8fcb7eb","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ok":true},"timing":{"totalMs":988}}
+
+$ yam surface snapshot --session s_d4752b10bf47 --max-nodes 900 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_f72dca886b96","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+$ yam surface snapshot --session s_d4752b10bf47 --max-nodes 900 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_a6399bef05d5","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+$ yam surface act --session s_d4752b10bf47 --action click --ref r44 --holder yam cli --json
+  exit 75  {"schemaVersion":"1.0","requestId":"req_538dc3514c43","sessionId":"s_d4752b10bf47","status":"failed","error":{"code":"TIMEOUT","message":"button \"Disconnect\" is disabled.","retryable":false},"timing":{"totalMs":1}}
+
+$ yam surface close --session s_d4752b10bf47 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_d75197086c42","sessionId":"s_d4752b10bf47","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+→ surface_connect {"adapter":"ax","app":"Yam"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_fec3aa979546","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"sessionId":"s_d39d10fa77aa","adapter":"ax","kind":"desktop","capabilities":{"dialogs":false,"frames":false,"windows":true,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":true}},"timing":{"totalMs":922}}
+
+→ surface_snapshot {"session":"s_d39d10fa77aa","interactiveOnly":true,"maxNodes":200}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_a448a7d6bc2a","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+→ surface_snapshot {"session":"s_d39d10fa77aa","maxNodes":600}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_9983e26a8113","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+→ surface_snapshot {"session":"s_d39d10fa77aa","maxNodes":600}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_825d0f8bd391","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+→ surface_act {"session":"s_d39d10fa77aa","action":"type","ref":"r64","args":{"value":"http://127.0.0.1:53869/login"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_105c66ffd0d7","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ok":true},"timing":{"totalMs":1385}}
+
+→ surface_snapshot {"session":"s_d39d10fa77aa","maxNodes":600}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_9d332c989138","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+→ surface_act {"session":"s_d39d10fa77aa","action":"click","ref":"r67"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_8ccaf758dd37","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ok":true},"timing":{"totalMs":828}}
+
+→ surface_snapshot {"session":"s_d39d10fa77aa","maxNodes":900}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_184ec6a06efe","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+→ surface_act {"session":"s_d39d10fa77aa","action":"click","ref":"r107"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_6adc3df43d21","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ok":true},"timing":{"totalMs":785}}
+
+→ surface_snapshot {"session":"s_d39d10fa77aa","maxNodes":900}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_7cbd48826e4b","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+→ surface_snapshot {"session":"s_d39d10fa77aa","maxNodes":600}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_f19cd48684e6","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+→ surface_act {"session":"s_d39d10fa77aa","action":"type","ref":"r135","args":{"value":"ada"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_f035843678b3","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ok":true},"timing":{"totalMs":955}}
+
+→ surface_snapshot {"session":"s_d39d10fa77aa","maxNodes":600}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_4fc3b379f8a8","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+→ surface_act {"session":"s_d39d10fa77aa","action":"click","ref":"r81"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_8a03b26e7828","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ok":true},"timing":{"totalMs":818}}
+
+→ surface_check {"session":"s_d39d10fa77aa","predicate":{"kind":"textContains","value":"Dispatched"},"subject":"page"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_e6e8992b3fe2","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ok":true,"actual":"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-FTm2k8 yam-shell-8pzTnq Search or run a command SURFACES Surfaces AUTOMATIONS Flows Bindings Agents and tools API Data Import prototype database ACTIVITY Runs SETTINGS Settings Surfaces 1 playwright · web · 10 controls Disconnect Recheck targets Check the surface Refresh and select again Open sessions Current su
+
+→ surface_check {"session":"s_d39d10fa77aa","predicate":{"kind":"textContains","value":"Not verified — no postcondition was given"},"subject":"page"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_1744479c2cc5","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ok":true,"actual":"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-FTm2k8 yam-shell-8pzTnq Search or run a command SURFACES Surfaces AUTOMATIONS Flows Bindings Agents and tools API Data Import prototype database ACTIVITY Runs SETTINGS Settings Surfaces 1 playwright · web · 10 controls Disconnect Recheck targets Check the surface Refresh and select again Open sessions Current su
+
+→ surface_snapshot {"session":"s_d39d10fa77aa","maxNodes":900}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_abf8b0066482","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+→ surface_act {"session":"s_d39d10fa77aa","action":"click","ref":"r44"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_57c3abc42c42","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ok":true},"timing":{"totalMs":978}}
+
+→ surface_snapshot {"session":"s_d39d10fa77aa","maxNodes":900}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_612051581b4f","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+→ surface_snapshot {"session":"s_d39d10fa77aa","maxNodes":900}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_018a021959f4","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"ref":"r0","nodes":[{"ref":"r0","role":"window","name":"Yam","states":[],"box":[0,33,1470,847],"depth":0,"native":{"axRole":"AXWindow","axSubrole":"AXStandardWindow"}},{"ref":"r1","role":"group","name":"Yam","states":[],"box":[0,65,1470,815],"depth":1,"parent":"r0","native":{"axRole":"AXGroup"}},{"ref":"r2","role":"button","name":"close","states":[],"box":[8,41,16,16],"depth":1,"parent":"r0","native":{"axRole":"AXButton","axSubrole":"AXCloseButton"}},{"ref":"r3","role":"button","na
+
+→ surface_act {"session":"s_d39d10fa77aa","action":"click","ref":"r44"}
+  isError=true  {"schemaVersion":"1.0","requestId":"req_ea054d1e71d5","sessionId":"s_d39d10fa77aa","status":"failed","error":{"code":"TIMEOUT","message":"button \"Disconnect\" is disabled.","retryable":false},"timing":{"totalMs":0}}
+
+→ surface_close {"session":"s_d39d10fa77aa"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_f9efec59ab88","sessionId":"s_d39d10fa77aa","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+$ yam surface connect --adapter process --app /opt/homebrew/Cellar/node/25.6.1_1/bin/node --input - --json  <<< {"launch":{"args":["/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/packages/cli/dist/bin.js","--version"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-eBJEug"}}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_1c9ea7c3a570","sessionId":"s_a21e9f9f2576","status":"succeeded","result":{"sessionId":"s_a21e9f9f2576","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":20}}
+
+$ yam surface read --session s_a21e9f9f2576 --kind text --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_01b79c331ea8","sessionId":"s_a21e9f9f2576","status":"succeeded","result":{"value":"No Yam project here.\n\n  yam init      start one in this directory"},"timing":{"totalMs":0}}
+
+$ yam surface snapshot --session s_a21e9f9f2576 --max-nodes 200 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_a8b5e49159f2","sessionId":"s_a21e9f9f2576","status":"succeeded","result":{"ref":"t1_0","nodes":[{"ref":"t1_0","role":"terminal","name":"/opt/homebrew/Cellar/node/25.6.1_1/bin/node /Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/packages/cli/dist/bin.js --version","value":"exited 0","states":["disabled"],"depth":0},{"ref":"t1_1","role":"text","name":"No Yam project here.","states":[],"depth":1},{"ref":"t1_3","role":"text","name":"  yam init      start one in this directory","states":[],"depth":1},{"ref":"t1_4",
+
+$ yam surface read --session s_a21e9f9f2576 --kind result --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_b048c8090c89","sessionId":"s_a21e9f9f2576","status":"succeeded","result":{"value":{"running":false,"pid":18941,"exitCode":0,"signal":null,"cursor":{"row":4,"column":1},"size":{"columns":100,"rows":30},"allocator":"expect"}},"timing":{"totalMs":0}}
+
+$ yam surface close --session s_a21e9f9f2576 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_47732a270d9e","sessionId":"s_a21e9f9f2576","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+$ yam surface connect --adapter process --app /opt/homebrew/Cellar/node/25.6.1_1/bin/node --input - --json  <<< {"launch":{"args":["/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/packages/cli/dist/bin.js","surface","act","--session","s_nothing","--action","type"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-eBJEug"}}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_105f483007b9","sessionId":"s_27b2542f3d17","status":"succeeded","result":{"sessionId":"s_27b2542f3d17","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":18}}
+
+$ yam surface read --session s_27b2542f3d17 --kind result --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_66c15d3cfc53","sessionId":"s_27b2542f3d17","status":"succeeded","result":{"value":{"running":false,"pid":19095,"exitCode":21,"signal":null,"cursor":{"row":5,"column":1},"size":{"columns":100,"rows":30},"allocator":"expect"}},"timing":{"totalMs":0}}
+
+$ yam surface check --session s_27b2542f3d17 --input - --json  <<< {"predicate":{"kind":"value","value":"21"},"subject":"page"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_061755411fd8","sessionId":"s_27b2542f3d17","status":"succeeded","result":{"ok":true,"actual":21},"timing":{"totalMs":1}}
+
+$ yam surface close --session s_27b2542f3d17 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_3ddf943f7a4e","sessionId":"s_27b2542f3d17","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+$ yam surface connect --adapter process --app /opt/homebrew/Cellar/node/25.6.1_1/bin/node --input - --json  <<< {"launch":{"args":["/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-eBJEug/ask.mjs"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-eBJEug"}}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_69490f58a450","sessionId":"s_21e468de17de","status":"succeeded","result":{"sessionId":"s_21e468de17de","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":20}}
+
+$ yam surface read --session s_21e468de17de --kind text --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_d1b1791f18aa","sessionId":"s_21e468de17de","status":"succeeded","result":{"value":"name?"},"timing":{"totalMs":0}}
+
+$ yam surface act --session s_21e468de17de --action type --input - --holder yam cli --json  <<< {"value":"ada"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_97821b6589bd","sessionId":"s_21e468de17de","status":"succeeded","result":{"ok":true},"timing":{"totalMs":0}}
+
+$ yam surface act --session s_21e468de17de --action press --input - --holder yam cli --json  <<< {"key":"Enter"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_eb59fe1290bd","sessionId":"s_21e468de17de","status":"succeeded","result":{"ok":true},"timing":{"totalMs":0}}
+
+$ yam surface read --session s_21e468de17de --kind text --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_600d945cc356","sessionId":"s_21e468de17de","status":"succeeded","result":{"value":"name? ada\n\nhello ada"},"timing":{"totalMs":0}}
+
+$ yam surface close --session s_21e468de17de --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_454d4f5b6eea","sessionId":"s_21e468de17de","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+$ yam surface connect --adapter process --app /bin/sh --input - --json  <<< {"launch":{"args":["-c","trap 'echo CAUGHT; exit 42' INT; echo waiting; while true; do sleep 0.2; done"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-eBJEug"}}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_12dc67632dde","sessionId":"s_6a71bb658ee7","status":"succeeded","result":{"sessionId":"s_6a71bb658ee7","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":20}}
+
+$ yam surface read --session s_6a71bb658ee7 --kind text --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_19af6d45391f","sessionId":"s_6a71bb658ee7","status":"succeeded","result":{"value":"waiting"},"timing":{"totalMs":0}}
+
+$ yam surface act --session s_6a71bb658ee7 --action press --input - --holder yam cli --json  <<< {"key":"Control+C"}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_b175508f5a07","sessionId":"s_6a71bb658ee7","status":"succeeded","result":{"ok":true},"timing":{"totalMs":0}}
+
+$ yam surface read --session s_6a71bb658ee7 --kind result --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_5449c9d273b4","sessionId":"s_6a71bb658ee7","status":"succeeded","result":{"value":{"running":false,"pid":19411,"exitCode":42,"signal":null,"cursor":{"row":3,"column":1},"size":{"columns":100,"rows":30},"allocator":"expect"}},"timing":{"totalMs":0}}
+
+$ yam surface read --session s_6a71bb658ee7 --kind text --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_272cfb8d409b","sessionId":"s_6a71bb658ee7","status":"succeeded","result":{"value":"waiting\n^CCAUGHT"},"timing":{"totalMs":0}}
+
+$ yam surface close --session s_6a71bb658ee7 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_20ec670cea89","sessionId":"s_6a71bb658ee7","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+$ yam surface connect --adapter process --app /opt/homebrew/Cellar/node/25.6.1_1/bin/node --input - --json  <<< {"launch":{"args":["/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/packages/cli/dist/bin.js","ui","/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/evals/fixtures","--capture","4000"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-eBJEug","size":[160,48]}}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_af1f557c2a7b","sessionId":"s_7cdd4dbedf82","status":"succeeded","result":{"sessionId":"s_7cdd4dbedf82","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":18}}
+
+$ yam surface read --session s_7cdd4dbedf82 --kind text --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_8fc7ce186f61","sessionId":"s_7cdd4dbedf82","status":"succeeded","result":{"value":""},"timing":{"totalMs":0}}
+
+$ yam surface read --session s_7cdd4dbedf82 --kind text --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_d2ed0c4cfbc1","sessionId":"s_7cdd4dbedf82","status":"succeeded","result":{"value":"loading…"},"timing":{"totalMs":0}}
+
+$ yam surface read --session s_7cdd4dbedf82 --kind text --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_2e0198fc497e","sessionId":"s_7cdd4dbedf82","status":"succeeded","result":{"value":"yam ui 160×48  /Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/evals/fixtures   http://127.0.0.1:54227   Flows · 7…\n┌────────────────────────────────┐┌──────────────────────────────────────────────────────────────────────────────┐┌────────────────────────────────────────────┐\n│ 1 Flows                        ││ 2 flows/booking-compensation.flow                                            ││ 3 Inspect                            
+
+$ yam surface act --session s_7cdd4dbedf82 --action quit --holder yam cli --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_1d8b3668a0cb","sessionId":"s_7cdd4dbedf82","status":"succeeded","result":{"ok":true,"value":143},"timing":{"totalMs":1}}
+
+$ yam surface close --session s_7cdd4dbedf82 --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_d11f37163d8f","sessionId":"s_7cdd4dbedf82","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+$ yam surface connect --adapter process --app /bin/sh --input - --json  <<< {"launch":{"args":["-c","sleep 30"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-eBJEug"}}
+  exit 0  {"schemaVersion":"1.0","requestId":"req_649617b9020d","sessionId":"s_f8f7784d423c","status":"succeeded","result":{"sessionId":"s_f8f7784d423c","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":20}}
+
+$ yam surface read --session s_f8f7784d423c --kind attribute --name file:inside/note.txt --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_4f6887f1ae3a","sessionId":"s_f8f7784d423c","status":"succeeded","result":{"value":"a file the session may read\n"},"timing":{"totalMs":1}}
+
+$ yam surface read --session s_f8f7784d423c --kind attribute --name file:../yam-terminal-outside-H6O53C/secret.txt --json
+  exit 64  {"schemaVersion":"1.0","requestId":"req_53a1a697e044","sessionId":"s_f8f7784d423c","status":"failed","error":{"code":"INVALID_ARGUMENT","message":"This session reads files under /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-eBJEug only, and \"../yam-terminal-outside-H6O53C/secret.txt\" resolves outside it. A link that leaves the root leaves it.","retryable":false},"timing":{"totalMs":1}}
+
+$ yam surface read --session s_f8f7784d423c --kind attribute --name file:escape.txt --json
+  exit 64  {"schemaVersion":"1.0","requestId":"req_7b450f521ff4","sessionId":"s_f8f7784d423c","status":"failed","error":{"code":"INVALID_ARGUMENT","message":"This session reads files under /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-eBJEug only, and \"escape.txt\" resolves outside it. A link that leaves the root leaves it.","retryable":false},"timing":{"totalMs":1}}
+
+$ yam surface act --session s_f8f7784d423c --action click --holder yam cli --json
+  exit 64  {"schemaVersion":"1.0","requestId":"req_08ce112964ad","sessionId":"s_f8f7784d423c","status":"failed","error":{"code":"INVALID_ARGUMENT","message":"A terminal has no \"click\". It takes type, press, clear, waitFor, sleep, screenshot and quit. A flow that clicks, hovers or navigates needs a web, mobile or desktop adapter (REQ-SURF-5).","retryable":false},"timing":{"totalMs":0}}
+
+$ yam surface close --session s_f8f7784d423c --json
+  exit 0  {"schemaVersion":"1.0","requestId":"req_d7026e67019b","sessionId":"s_f8f7784d423c","status":"succeeded","result":{"closed":true},"timing":{"totalMs":1}}
+
+→ surface_connect {"adapter":"process","app":"/opt/homebrew/Cellar/node/25.6.1_1/bin/node","launch":{"args":["/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/packages/cli/dist/bin.js","--version"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-Wx8A1F"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_3ba9e2b88436","sessionId":"s_00fa3d90a031","status":"succeeded","result":{"sessionId":"s_00fa3d90a031","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":17}}
+
+→ surface_read {"session":"s_00fa3d90a031","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_2386ccc0e37f","sessionId":"s_00fa3d90a031","status":"succeeded","result":{"value":""},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_00fa3d90a031","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_0feb833e350c","sessionId":"s_00fa3d90a031","status":"succeeded","result":{"value":""},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_00fa3d90a031","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_bedecae6c91b","sessionId":"s_00fa3d90a031","status":"succeeded","result":{"value":"No Yam project here.\n\n  yam init      start one in this directory"},"timing":{"totalMs":0}}
+
+→ surface_snapshot {"session":"s_00fa3d90a031","maxNodes":200}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_75fca897704d","sessionId":"s_00fa3d90a031","status":"succeeded","result":{"ref":"t1_0","nodes":[{"ref":"t1_0","role":"terminal","name":"/opt/homebrew/Cellar/node/25.6.1_1/bin/node /Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/packages/cli/dist/bin.js --version","value":"exited 0","states":["disabled"],"depth":0},{"ref":"t1_1","role":"text","name":"No Yam project here.","states":[],"depth":1},{"ref":"t1_3","role":"text","name":"  yam init      start one in this directory","states":[],"depth":1},{"ref":"t1_4",
+
+→ surface_read {"session":"s_00fa3d90a031","kind":"result"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_fd135cf5bac8","sessionId":"s_00fa3d90a031","status":"succeeded","result":{"value":{"running":false,"pid":20081,"exitCode":0,"signal":null,"cursor":{"row":4,"column":1},"size":{"columns":100,"rows":30},"allocator":"expect"}},"timing":{"totalMs":0}}
+
+→ surface_close {"session":"s_00fa3d90a031"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_618a53694134","sessionId":"s_00fa3d90a031","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+→ surface_connect {"adapter":"process","app":"/opt/homebrew/Cellar/node/25.6.1_1/bin/node","launch":{"args":["/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/packages/cli/dist/bin.js","surface","act","--session","s_nothing","--action","type"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-Wx8A1F"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_bf96e9fd415c","sessionId":"s_ecb84c24e53b","status":"succeeded","result":{"sessionId":"s_ecb84c24e53b","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":20}}
+
+→ surface_read {"session":"s_ecb84c24e53b","kind":"result"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_524b813a9377","sessionId":"s_ecb84c24e53b","status":"succeeded","result":{"value":{"running":true,"pid":20147,"exitCode":null,"signal":null,"cursor":{"row":1,"column":1},"size":{"columns":100,"rows":30},"allocator":"expect"}},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_ecb84c24e53b","kind":"result"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_32d645adfdd7","sessionId":"s_ecb84c24e53b","status":"succeeded","result":{"value":{"running":true,"pid":20147,"exitCode":null,"signal":null,"cursor":{"row":1,"column":1},"size":{"columns":100,"rows":30},"allocator":"expect"}},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_ecb84c24e53b","kind":"result"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_fa1886217d40","sessionId":"s_ecb84c24e53b","status":"succeeded","result":{"value":{"running":false,"pid":20147,"exitCode":21,"signal":null,"cursor":{"row":5,"column":1},"size":{"columns":100,"rows":30},"allocator":"expect"}},"timing":{"totalMs":0}}
+
+→ surface_check {"session":"s_ecb84c24e53b","predicate":{"kind":"value","value":"21"},"subject":"page"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_98ca6d073685","sessionId":"s_ecb84c24e53b","status":"succeeded","result":{"ok":true,"actual":21},"timing":{"totalMs":0}}
+
+→ surface_close {"session":"s_ecb84c24e53b"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_d89591f5fec2","sessionId":"s_ecb84c24e53b","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+→ surface_connect {"adapter":"process","app":"/opt/homebrew/Cellar/node/25.6.1_1/bin/node","launch":{"args":["/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-Wx8A1F/ask.mjs"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-Wx8A1F"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_aaa1b68b0319","sessionId":"s_020441f311f3","status":"succeeded","result":{"sessionId":"s_020441f311f3","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":16}}
+
+→ surface_read {"session":"s_020441f311f3","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_fda4a5710366","sessionId":"s_020441f311f3","status":"succeeded","result":{"value":""},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_020441f311f3","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_909c1ea505ab","sessionId":"s_020441f311f3","status":"succeeded","result":{"value":"name?"},"timing":{"totalMs":0}}
+
+→ surface_act {"session":"s_020441f311f3","action":"type","args":{"value":"ada"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_a69796e0733d","sessionId":"s_020441f311f3","status":"succeeded","result":{"ok":true},"timing":{"totalMs":0}}
+
+→ surface_act {"session":"s_020441f311f3","action":"press","args":{"key":"Enter"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_9e4329c67e84","sessionId":"s_020441f311f3","status":"succeeded","result":{"ok":true},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_020441f311f3","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_71edbd058573","sessionId":"s_020441f311f3","status":"succeeded","result":{"value":"name? ada"},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_020441f311f3","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_1bbdd1d0a37e","sessionId":"s_020441f311f3","status":"succeeded","result":{"value":"name? ada\n\nhello ada"},"timing":{"totalMs":0}}
+
+→ surface_close {"session":"s_020441f311f3"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_19c61bb379c4","sessionId":"s_020441f311f3","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+→ surface_connect {"adapter":"process","app":"/bin/sh","launch":{"args":["-c","trap 'echo CAUGHT; exit 42' INT; echo waiting; while true; do sleep 0.2; done"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-Wx8A1F"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_2da11a8553e8","sessionId":"s_ba4e1d9dba40","status":"succeeded","result":{"sessionId":"s_ba4e1d9dba40","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":38}}
+
+→ surface_read {"session":"s_ba4e1d9dba40","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_665e4060df8b","sessionId":"s_ba4e1d9dba40","status":"succeeded","result":{"value":""},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_ba4e1d9dba40","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_95b97ef31758","sessionId":"s_ba4e1d9dba40","status":"succeeded","result":{"value":"waiting"},"timing":{"totalMs":0}}
+
+→ surface_act {"session":"s_ba4e1d9dba40","action":"press","args":{"key":"Control+C"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_4c3db16fdd6d","sessionId":"s_ba4e1d9dba40","status":"succeeded","result":{"ok":true},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_ba4e1d9dba40","kind":"result"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_c8c9bf0a5489","sessionId":"s_ba4e1d9dba40","status":"succeeded","result":{"value":{"running":true,"pid":20273,"exitCode":null,"signal":null,"cursor":{"row":3,"column":1},"size":{"columns":100,"rows":30},"allocator":"expect"}},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_ba4e1d9dba40","kind":"result"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_cf9ef51518f2","sessionId":"s_ba4e1d9dba40","status":"succeeded","result":{"value":{"running":false,"pid":20273,"exitCode":42,"signal":null,"cursor":{"row":3,"column":1},"size":{"columns":100,"rows":30},"allocator":"expect"}},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_ba4e1d9dba40","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_7f5cb946dc61","sessionId":"s_ba4e1d9dba40","status":"succeeded","result":{"value":"waiting\n^CCAUGHT"},"timing":{"totalMs":0}}
+
+→ surface_close {"session":"s_ba4e1d9dba40"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_6afb7fd8b847","sessionId":"s_ba4e1d9dba40","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+→ surface_connect {"adapter":"process","app":"/opt/homebrew/Cellar/node/25.6.1_1/bin/node","launch":{"args":["/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/packages/cli/dist/bin.js","ui","/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/evals/fixtures","--capture","4000"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-Wx8A1F","size":[160,48]}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_692312b85783","sessionId":"s_999c8092b1bb","status":"succeeded","result":{"sessionId":"s_999c8092b1bb","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":24}}
+
+→ surface_read {"session":"s_999c8092b1bb","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_87252d6aadce","sessionId":"s_999c8092b1bb","status":"succeeded","result":{"value":""},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_999c8092b1bb","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_4dc33e7b66cb","sessionId":"s_999c8092b1bb","status":"succeeded","result":{"value":""},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_999c8092b1bb","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_7d24e387e3ad","sessionId":"s_999c8092b1bb","status":"succeeded","result":{"value":""},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_999c8092b1bb","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_40c54588af81","sessionId":"s_999c8092b1bb","status":"succeeded","result":{"value":""},"timing":{"totalMs":1}}
+
+→ surface_read {"session":"s_999c8092b1bb","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_f064fe8b6598","sessionId":"s_999c8092b1bb","status":"succeeded","result":{"value":"loading…"},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_999c8092b1bb","kind":"text"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_31a77d966024","sessionId":"s_999c8092b1bb","status":"succeeded","result":{"value":"yam ui 160×48  /Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/evals/fixtures   http://127.0.0.1:54267   Flows · 7…\n┌────────────────────────────────┐┌──────────────────────────────────────────────────────────────────────────────┐┌────────────────────────────────────────────┐\n│ 1 Flows                        ││ 2 flows/booking-compensation.flow                                            ││ 3 Inspect                            
+
+→ surface_act {"session":"s_999c8092b1bb","action":"quit"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_967d7b6bb3e0","sessionId":"s_999c8092b1bb","status":"succeeded","result":{"ok":true,"value":143},"timing":{"totalMs":1}}
+
+→ surface_close {"session":"s_999c8092b1bb"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_88fae172af24","sessionId":"s_999c8092b1bb","status":"succeeded","result":{"closed":true},"timing":{"totalMs":0}}
+
+→ surface_connect {"adapter":"process","app":"/bin/sh","launch":{"args":["-c","sleep 30"],"path":"/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-Wx8A1F"}}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_b2ef79ab3fc3","sessionId":"s_a8e30faf38f4","status":"succeeded","result":{"sessionId":"s_a8e30faf38f4","adapter":"process","kind":"process","capabilities":{"dialogs":false,"frames":false,"windows":false,"upload":false,"drag":false,"trace":false,"webmcp":false,"pick":false,"observe":false,"screenshot":true,"restore":false}},"timing":{"totalMs":24}}
+
+→ surface_read {"session":"s_a8e30faf38f4","kind":"attribute","name":"file:inside/note.txt"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_6140d51248f1","sessionId":"s_a8e30faf38f4","status":"succeeded","result":{"value":"a file the session may read\n"},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_a8e30faf38f4","kind":"attribute","name":"file:../yam-terminal-outside-FPb1YN/secret.txt"}
+  isError=true  {"schemaVersion":"1.0","requestId":"req_816ec4caef5e","sessionId":"s_a8e30faf38f4","status":"failed","error":{"code":"INVALID_ARGUMENT","message":"This session reads files under /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-Wx8A1F only, and \"../yam-terminal-outside-FPb1YN/secret.txt\" resolves outside it. A link that leaves the root leaves it.","retryable":false},"timing":{"totalMs":0}}
+
+→ surface_read {"session":"s_a8e30faf38f4","kind":"attribute","name":"file:escape.txt"}
+  isError=true  {"schemaVersion":"1.0","requestId":"req_b1907feb070f","sessionId":"s_a8e30faf38f4","status":"failed","error":{"code":"INVALID_ARGUMENT","message":"This session reads files under /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-Wx8A1F only, and \"escape.txt\" resolves outside it. A link that leaves the root leaves it.","retryable":false},"timing":{"totalMs":0}}
+
+→ surface_act {"session":"s_a8e30faf38f4","action":"click"}
+  isError=true  {"schemaVersion":"1.0","requestId":"req_ce7ec715b603","sessionId":"s_a8e30faf38f4","status":"failed","error":{"code":"INVALID_ARGUMENT","message":"A terminal has no \"click\". It takes type, press, clear, waitFor, sleep, screenshot and quit. A flow that clicks, hovers or navigates needs a web, mobile or desktop adapter (REQ-SURF-5).","retryable":false},"timing":{"totalMs":0}}
+
+→ surface_close {"session":"s_a8e30faf38f4"}
+  isError=false  {"schemaVersion":"1.0","requestId":"req_18ee55d30039","sessionId":"s_a8e30faf38f4","status":"succeeded","result":{"closed":true},"timing":{"totalMs":1}}

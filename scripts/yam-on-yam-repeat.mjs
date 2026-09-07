@@ -37,12 +37,17 @@ const out = resolve(
   ROOT,
   option("out") ?? join("docs", "spec", "surface-first", "evidence", "wave-5"),
 );
-mkdirSync(join(out, "runs"), { recursive: true });
+/*
+ * `per-run/`, not `runs/`. A path segment called `runs` is what a Yam *project*
+ * writes its run artifacts into, and `tools/repo-checks` refuses to let one be
+ * committed (LLD §16) — rightly, and this evidence is not that.
+ */
+mkdirSync(join(out, "per-run"), { recursive: true });
 
 const rows = [];
 for (let n = 1; n <= times; n += 1) {
   const id = String(n).padStart(2, "0");
-  const dir = join(out, "runs", `run-${id}`);
+  const dir = join(out, "per-run", `run-${id}`);
   const startedAt = new Date().toISOString();
   const ran = spawnSync(process.execPath, [join(ROOT, "evals", "self", "yam-on-yam", "run.mjs")], {
     cwd: ROOT,
@@ -50,7 +55,7 @@ for (let n = 1; n <= times; n += 1) {
     env: { ...process.env, YAM_ON_YAM_EVIDENCE_DIR: dir },
     maxBuffer: 128 * 1024 * 1024,
   });
-  writeFileSync(join(out, "runs", `run-${id}.log`), `${ran.stdout ?? ""}${ran.stderr ?? ""}`, "utf8");
+  writeFileSync(join(out, "per-run", `run-${id}.log`), `${ran.stdout ?? ""}${ran.stderr ?? ""}`, "utf8");
 
   const evidence = join(dir, "yam-on-yam.json");
   const report = existsSync(evidence) ? JSON.parse(readFileSync(evidence, "utf8")) : undefined;
@@ -117,7 +122,7 @@ writeFileSync(
  * run. Copying it here rather than asking somebody to remember to is what stops
  * a coverage report being generated from a run nobody can point at.
  */
-const last = join(out, "runs", `run-${String(times).padStart(2, "0")}`);
+const last = join(out, "per-run", `run-${String(times).padStart(2, "0")}`);
 if (existsSync(last)) {
   for (const name of readdirSync(last)) {
     copyFileSync(join(last, name), join(out, name));

@@ -10,6 +10,6 @@
 | Property | Type | Required |
 |---|---|---|
 | `capabilities` | object | yes |
-| `kind` | `"web"` \| `"mobile"` \| `"desktop"` \| `"http"` | yes |
+| `kind` | `"web"` \| `"mobile"` \| `"desktop"` \| `"http"` \| `"process"` | yes |
 
 The file itself: [`packages/schema/json/surface.capabilities.schema.json`](../../../../packages/schema/json/surface.capabilities.schema.json).

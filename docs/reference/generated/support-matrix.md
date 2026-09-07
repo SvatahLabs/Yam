@@ -3,10 +3,10 @@
 # Support matrix
 
 **Generated. Do not edit.** `node scripts/docs.mjs` derives this page from
-`docs/spec/surface-first/evidence/wave-4/coverage.json`, which
+`docs/spec/surface-first/evidence/wave-5/coverage.json`, which
 `node scripts/coverage-report.mjs` derives from runs. Nothing here is a plan.
 
-Last measured 2026-09-09T03:02:55.128Z on **darwin arm64, Node v25.6.1**.
+Last measured 2026-09-09T06:02:20.386Z on **darwin arm64, Node v25.6.1**.
 
 ## What each word claims
 
@@ -15,18 +15,20 @@ Last measured 2026-09-09T03:02:55.128Z on **darwin arm64, Node v25.6.1**.
 | **validated** | A session was opened through this adapter, and driven, in the run this page comes from. |
 | implemented, unvalidated here | The adapter is built and registered, and nothing in that run drove it. The reason is given. It is not a claim that it works, and not a claim that it does not. |
 | not available on this host | It could not be asked. The reason is the product's own sentence. |
-| unimplemented | Absent, with no row below. Linux AT-SPI and process/terminal surfaces are unimplemented. |
+| unimplemented | Absent, with no row below. |
 
 ## Adapters
 
-| Adapter | Platforms | Status | Evidence, or the reason |
-|---|---|---|---|
-| `appium` | darwin, linux, win32 | implemented, unvalidated here | needs an Appium server and a device or emulator; neither is present on this host, and no device runner is provisioned |
-| `ax` | darwin | **validated** | a session of kind `desktop` opened through it in this run |
-| `bidi` | darwin, linux, win32 | implemented, unvalidated here | needs a Chrome or Firefox started with a BiDi endpoint; `pnpm bidi:independence` is the suite that drives it and it is not part of this run |
-| `http` | darwin, linux, win32 | implemented, unvalidated here | driven by `packages/cli/test/surface-transport.test.ts` in the gate rather than by this suite, which drives the packaged desktop |
-| `playwright` | darwin, linux, win32 | **validated** | a session of kind `web` opened through it in this run |
-| `uia` | win32 | not available on this host | Adapter "uia" requires win32; this host is darwin. |
+| Adapter | Platforms | Status | Version here | Driven range | Evidence, or the reason |
+|---|---|---|---|---|---|
+| `appium` | darwin, linux, win32 | not available on this host | — | Appium 2.x, over the W3C WebDriver protocol | no Appium server answered at http://127.0.0.1:4723. Start one (`appium`) and attach a device or emulator; set YAM_APPIUM_URL for a server elsewhere. — needs an Appium server and a device or emulator; neither is present on this host, and no device runner is provisioned — Appium server; target device/emulator |
+| `atspi` | linux | not available on this host | — | AT-SPI2 over D-Bus, as GNOME 40+ and GTK 3.24+ publish it | AT-SPI is Linux's accessibility bus; this host is darwin. — needs a Linux host with a session bus, toolkit accessibility on, `at-spi2-registryd` running and `python3` with `pyatspi`; no Linux runner is provisioned. Its tree mapping, reference scope, state inversion, action selection and refusals are driven by `packages/adapter-atspi/test/tree.test.ts`; its conversation with a real registry is not — a Linux session bus; at-spi2-registryd running with toolkit accessibility on; gdbus (GLib) |
+| `ax` | darwin | **validated** | macOS 26.3 | macOS 13+ (the AXUIElement API and System Events) | a session of kind `desktop` opened through it in this run |
+| `bidi` | darwin, linux, win32 | not available on this host | — | WebDriver BiDi as Chrome 130+ and Firefox 130+ speak it | no BiDi endpoint is named. Start Chrome or Firefox with a WebDriver BiDi endpoint and set YAM_BIDI_URL to it. — needs a Chrome or Firefox started with a BiDi endpoint; `pnpm bidi:independence` is the suite that drives it and it is not part of this run — Chrome or Firefox with BiDi support |
+| `http` | darwin, linux, win32 | implemented, unvalidated here | v25.6.1 | any HTTP/1.1 or HTTP/2 endpoint | driven by `packages/cli/test/surface-transport.test.ts` in the gate rather than by this suite, which drives the packaged desktop |
+| `playwright` | darwin, linux, win32 | **validated** | Version 1.62.1 | Playwright 1.5x, Chromium and Firefox as it bundles them | a session of kind `web` opened through it in this run |
+| `process` | darwin, linux | **validated** | expect version 5.45 | a pseudo-terminal from expect(1) or python3's pty module | a session of kind `process` opened through it in this run |
+| `uia` | win32 | not available on this host | — | Windows 10 1809+ (UI Automation) | UI Automation is Windows'; this host is darwin. — needs Windows; no Windows runner is available — Windows UI Automation runtime |
 
 ## Interfaces
 
@@ -36,12 +38,14 @@ than absent (SF-21).
 
 | Interface | Platform | Passed | Reached | Blocked | Attempted |
 |---|---|---|---|---|---|
-| desktop | packaged app | 1 | 1 | 0 | 1 |
+| desktop | packaged app | 2 | 2 | 0 | 2 |
 | external | packaged app | 5 | 5 | 1 | 6 |
-| CLI | browser | 26 | 26 | 0 | 26 |
-| MCP | browser | 25 | 25 | 0 | 25 |
+| CLI | browser | 27 | 27 | 0 | 27 |
+| MCP | browser | 26 | 26 | 0 | 26 |
 | CLI | macOS AX | 17 | 17 | 0 | 17 |
 | MCP | macOS AX | 17 | 17 | 0 | 17 |
+| CLI | a pseudo-terminal | 12 | 12 | 0 | 12 |
+| MCP | a pseudo-terminal | 12 | 12 | 0 | 12 |
 | desktop | browser-hosted | 154 | 154 | 0 | 154 |
 | HTTP | service /v1 | 14 | 14 | 0 | 14 |
 | packaging | clean install | 11 | 11 | 0 | 11 |
@@ -53,7 +57,7 @@ process, so cold start is included.
 
 | What | Budget | p95 | Samples |
 |---|---|---|---|
-| connect | 5000 ms | 926 ms | 5 |
-| snapshot | 5000 ms | 503 ms | 5 |
-| act | 5000 ms | 476 ms | 5 |
-| desktop first paint | 60000 ms | 1219 ms | 1 |
+| connect | 5000 ms | 566 ms | 5 |
+| snapshot | 5000 ms | 437 ms | 5 |
+| act | 5000 ms | 447 ms | 5 |
+| desktop first paint | 60000 ms | 2208 ms | 1 |

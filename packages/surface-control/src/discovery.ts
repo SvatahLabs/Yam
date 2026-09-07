@@ -1,4 +1,5 @@
 import { platform } from "node:os";
+import { probeAdapter, DRIVEN_RANGES, type AdapterProbe } from "./probes.js";
 
 export interface DiscoveredTarget {
   id: string;
@@ -18,6 +19,18 @@ export interface AdapterReadiness {
   platform: string[];
   reason?: string;
   prerequisites?: string[];
+  /**
+   * What the host said when it was asked (T23, SF-09).
+   *
+   * `available` used to mean "registered, and the platform table matches",
+   * which is a claim about a `Record<string, string[]>` rather than about this
+   * machine — `appium: available` with no Appium server anywhere. When a probe
+   * has been run, `available` means the thing is actually reachable and
+   * `version` is what it said its version was.
+   */
+  probe?: AdapterProbe;
+  /** The versions this repository has driven. Not a claim about others. */
+  range?: string;
 }
 
 const ADAPTER_PLATFORMS: Record<string, string[]> = {
@@ -27,15 +40,19 @@ const ADAPTER_PLATFORMS: Record<string, string[]> = {
   ax: ["darwin"],
   uia: ["win32"],
   http: ["darwin", "linux", "win32"],
+  process: ["darwin", "linux"],
+  atspi: ["linux"],
 };
 
-const ADAPTER_KINDS: Record<string, "browser" | "http" | "native"> = {
+const ADAPTER_KINDS: Record<string, "browser" | "http" | "native" | "process"> = {
   playwright: "browser",
   bidi: "browser",
   appium: "native",
   ax: "native",
   uia: "native",
+  atspi: "native",
   http: "http",
+  process: "process",
 };
 
 const ADAPTER_PREREQUISITES: Record<string, string[]> = {
@@ -44,6 +61,12 @@ const ADAPTER_PREREQUISITES: Record<string, string[]> = {
   appium: ["Appium server", "target device/emulator"],
   ax: ["Accessibility permission (macOS System Settings > Privacy & Security > Accessibility)"],
   uia: ["Windows UI Automation runtime"],
+  atspi: [
+    "a Linux session bus",
+    "at-spi2-registryd running with toolkit accessibility on",
+    "gdbus (GLib)",
+  ],
+  process: ["expect(1), or a python3 with its pty module"],
   http: [],
 };
 
@@ -76,6 +99,37 @@ export function checkAdapterReadiness(
 export function discoverAdapters(registeredAdapters: string[]): AdapterReadiness[] {
   const known = new Set([...Object.keys(ADAPTER_PLATFORMS), ...registeredAdapters]);
   return [...known].sort().map((name) => checkAdapterReadiness(name, registeredAdapters));
+}
+
+/**
+ * Readiness with the host actually asked (T23, SF-09, SF-23).
+ *
+ * The asynchronous twin of `checkAdapterReadiness`, kept separate because the
+ * synchronous one is on the path of every `connect` and a probe costs a process
+ * spawn or an HTTP round trip. `doctor`, `targets` and the coverage report ask
+ * for this one; a connect asks for the cheap one and then lets the adapter
+ * refuse with its own sentence.
+ */
+export async function probeAdapters(registeredAdapters: string[]): Promise<AdapterReadiness[]> {
+  const known = new Set([...Object.keys(ADAPTER_PLATFORMS), ...registeredAdapters]);
+  return await Promise.all(
+    [...known].sort().map(async (name) => {
+      const table = checkAdapterReadiness(name, registeredAdapters);
+      const probe = await probeAdapter(name);
+      return {
+        ...table,
+        probe,
+        /*
+         * The probe has the last word: a table can say a platform matches and
+         * a probe can say the program is not installed, and the second is the
+         * one a caller is about to find out the hard way.
+         */
+        available: table.registered && probe.present,
+        ...(probe.present ? {} : { reason: probe.reason ?? table.reason }),
+        ...(DRIVEN_RANGES[name] === undefined ? {} : { range: DRIVEN_RANGES[name] }),
+      } satisfies AdapterReadiness;
+    }),
+  );
 }
 
 export function selectAdapter(

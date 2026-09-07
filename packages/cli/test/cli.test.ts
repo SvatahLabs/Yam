@@ -7,7 +7,12 @@
  * spawning a process.
  */
 import { describe, expect, it } from "vitest";
+import { readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { boolOption, EXIT, main, parseArgs, stringOption, type CommandIo } from "../src/index.js";
+
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
 function capture(): CommandIo & { stdout: string[]; stderr: string[] } {
   const stdout: string[] = [];
@@ -101,11 +106,18 @@ describe("the command table (LLD §15)", () => {
   });
 
   it("names what is registered when the adapter is not", async () => {
-    // `atspi` is HLD §12's Linux adapter, which is P3 and unscheduled; a command
-    // line that just said "unknown" would leave the reader guessing whether they
-    // had a typo or a missing phase.
+    /*
+     * A command line that just said "unknown" would leave the reader guessing
+     * whether they had a typo or a missing install, so the refusal lists what
+     * *is* there.
+     *
+     * The name used to be `atspi`, which was HLD §12's unscheduled Linux
+     * adapter. T23 built it, so this case had to find a name that is genuinely
+     * not registered — and one that no future wave will quietly turn into a
+     * real adapter and leave this passing for the wrong reason.
+     */
     const io = capture();
-    expect(await main(["surface", "conform", "--adapter", "atspi"], io)).toBe(EXIT.usage);
+    expect(await main(["surface", "conform", "--adapter", "not-an-adapter"], io)).toBe(EXIT.usage);
     expect(io.stderr.join("\n")).toContain("playwright");
   });
 
@@ -118,7 +130,7 @@ describe("the command table (LLD §15)", () => {
      * `yam-bindings` stays module (a).
      */
     const io = capture();
-    await main(["surface", "conform", "--adapter", "atspi"], io);
+    await main(["surface", "conform", "--adapter", "not-an-adapter"], io);
     const { listAdapters } = await import("@svatah/yam-surface");
     /*
      * The HTTP adapter is here too, since T12.7.
@@ -131,7 +143,21 @@ describe("the command table (LLD §15)", () => {
      * was written; nothing registered one, so `adapter: http` answered "No
      * adapter registered under \"http\"" — which reads like a missing install.
      */
-    expect(listAdapters().sort()).toEqual(["appium", "ax", "bidi", "http", "playwright", "uia"]);
+    /*
+     * Derived from the packages that exist, not written down here (T22, T23).
+     *
+     * This was a literal list of six, and adding `packages/adapter-process` and
+     * `packages/adapter-atspi` made it red — which is the right kind of red, and
+     * also the kind somebody fixes by editing the list and moving on. What the
+     * case is *about* is that `@svatah/yam` registers every adapter this build
+     * ships, so the expectation is now that same sentence: one directory, one
+     * registration, none missing and none invented.
+     */
+    const shipped = readdirSync(join(REPO_ROOT, "packages"))
+      .filter((one) => one.startsWith("adapter-"))
+      .map((one) => one.replace("adapter-", ""))
+      .sort();
+    expect(listAdapters().sort()).toEqual(shipped);
   });
 
   it("fails a desktop adapter on the wrong host with the host's reason, not `no such adapter`", async () => {

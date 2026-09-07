@@ -16,9 +16,10 @@
 **The surface** is one published interface, and each platform reaches it
 through an adapter: take a snapshot with stable references, act by reference,
 read, check, hold session state. Adapters exist for Playwright, WebDriver BiDi,
-Appium, Windows UI Automation, macOS Accessibility and HTTP; Linux AT-SPI and
-process/terminal surfaces are not implemented. What each adapter has actually
-been driven through is the
+Appium, Windows UI Automation, macOS Accessibility, HTTP, a process/terminal
+and Linux AT-SPI. An adapter existing is not evidence that it works: AT-SPI is
+implemented and **unvalidated** — nothing here has driven it against a live
+accessibility bus. What each adapter has actually been driven through is the
 [support matrix](../reference/generated/support-matrix.md) — an adapter's
 existence is not evidence that it works. Nothing above the surface knows a
 locator, a protocol or a platform.

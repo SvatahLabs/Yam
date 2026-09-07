@@ -37,6 +37,7 @@
         "headless": true,
         "stepTimeoutMs": 10000,
         "candidateTimeoutMs": 2000,
+        "expectTimeoutMs": 2000,
         "screenshots": "onFailure",
         "trace": false,
         "outputDir": "runs",
@@ -3249,8 +3250,8 @@
     {
       "behavior": "test",
       "bindingsHash": "551b0a87e3d8f6aa9d560ed1f2969e165bfe2b3b52cec72a7707b0a6085bfb19",
-      "configHash": "03bc7ef3222286b0233f0a637352cae8727383f44d07c1ac8d83c1ac7bd27ca4",
-      "endedAt": "2026-09-07T11:57:08.341Z",
+      "configHash": "56e3c008a5d0e833b1b796745177291bc4ca3fe5d9ea7a8258caa54a1f9c1f64",
+      "endedAt": "2026-09-09T06:35:15.135Z",
       "exitCode": 11,
       "flows": {
         "(selected)": {
@@ -3268,7 +3269,7 @@
       "planHash": "7a56729f1c9526f1f9f5418d7f1e75e797cb90335686e82654682497c00b1202",
       "runId": "comp",
       "schemaVersion": "1.0.0",
-      "startedAt": "2026-09-07T11:56:58.669Z",
+      "startedAt": "2026-09-09T06:35:05.844Z",
       "totals": {
         "aborted": 0,
         "failed": 1,
@@ -3500,8 +3501,8 @@
       "summary": {
         "behavior": "test",
         "bindingsHash": "551b0a87e3d8f6aa9d560ed1f2969e165bfe2b3b52cec72a7707b0a6085bfb19",
-        "configHash": "03bc7ef3222286b0233f0a637352cae8727383f44d07c1ac8d83c1ac7bd27ca4",
-        "endedAt": "2026-09-07T11:57:08.341Z",
+        "configHash": "56e3c008a5d0e833b1b796745177291bc4ca3fe5d9ea7a8258caa54a1f9c1f64",
+        "endedAt": "2026-09-09T06:35:15.135Z",
         "exitCode": 11,
         "flows": {
           "(selected)": {
@@ -3519,7 +3520,7 @@
         "planHash": "7a56729f1c9526f1f9f5418d7f1e75e797cb90335686e82654682497c00b1202",
         "runId": "comp",
         "schemaVersion": "1.0.0",
-        "startedAt": "2026-09-07T11:56:58.669Z",
+        "startedAt": "2026-09-09T06:35:05.844Z",
         "totals": {
           "aborted": 0,
           "failed": 1,
@@ -3538,9 +3539,9 @@
           "line": 39,
           "text": "Click the Book a slot link",
           "status": "passed",
-          "startedAt": "2026-09-07T11:56:59.141Z",
-          "endedAt": "2026-09-07T11:56:59.239Z",
-          "durationMs": 98,
+          "startedAt": "2026-09-09T06:35:06.005Z",
+          "endedAt": "2026-09-09T06:35:06.056Z",
+          "durationMs": 51,
           "matched": {
             "ref": "h0",
             "candidateIndex": 0,
@@ -3556,9 +3557,9 @@
           "line": 40,
           "text": "Type \"Indiranagar\" into the location field",
           "status": "passed",
-          "startedAt": "2026-09-07T11:56:59.240Z",
-          "endedAt": "2026-09-07T11:56:59.270Z",
-          "durationMs": 30,
+          "startedAt": "2026-09-09T06:35:06.056Z",
+          "endedAt": "2026-09-09T06:35:06.084Z",
+          "durationMs": 28,
           "matched": {
             "ref": "h0",
             "candidateIndex": 0,
@@ -3574,9 +3575,9 @@
           "line": 41,
           "text": "Click the Book now button",
           "status": "passed",
-          "startedAt": "2026-09-07T11:56:59.271Z",
-          "endedAt": "2026-09-07T11:56:59.312Z",
-          "durationMs": 41,
+          "startedAt": "2026-09-09T06:35:06.084Z",
+          "endedAt": "2026-09-09T06:35:06.111Z",
+          "durationMs": 27,
           "matched": {
             "ref": "h1",
             "candidateIndex": 0,
@@ -3592,8 +3593,8 @@
           "line": 42,
           "text": "Remember the text of the booking reference as reference",
           "status": "passed",
-          "startedAt": "2026-09-07T11:56:59.312Z",
-          "endedAt": "2026-09-07T11:56:59.315Z",
+          "startedAt": "2026-09-09T06:35:06.111Z",
+          "endedAt": "2026-09-09T06:35:06.114Z",
           "durationMs": 3,
           "matched": {
             "ref": "h2",
@@ -3613,12 +3614,12 @@
           "line": 45,
           "text": "Click the pay button",
           "status": "failed",
-          "startedAt": "2026-09-07T11:56:59.315Z",
-          "endedAt": "2026-09-07T11:57:08.285Z",
-          "durationMs": 8970,
+          "startedAt": "2026-09-09T06:35:06.115Z",
+          "endedAt": "2026-09-09T06:35:15.080Z",
+          "durationMs": 8965,
           "failure": {
             "class": "locator",
-            "message": "Could not resolve \"checkout.pay-button\" (the pay button): 5 candidates tried, none matched exactly one element.\n  testid \"pay\" — matched nothing (1775 ms)\n  role button \"Pay\" — matched nothing (1788 ms)\n  text \"Pay\" — matched nothing (1802 ms)\n  css \"[data-testid=\\\"pay\\\"]\" — matched nothing (1771 ms)\n  xpath \"//*[@data-testid='pay']\" — matched nothing (1780 ms)\n  session at http://127.0.0.1:PORT/booking",
+            "message": "Could not resolve \"checkout.pay-button\" (the pay button): 5 candidates tried, none matched exactly one element.\n  testid \"pay\" — matched nothing (1781 ms)\n  role button \"Pay\" — matched nothing (1792 ms)\n  text \"Pay\" — matched nothing (1784 ms)\n  css \"[data-testid=\\\"pay\\\"]\" — matched nothing (1785 ms)\n  xpath \"//*[@data-testid='pay']\" — matched nothing (1775 ms)\n  session at http://127.0.0.1:PORT/booking",
             "candidatesTried": [
               {
                 "by": "testid",
@@ -3672,9 +3673,9 @@
           "line": 48,
           "text": "Click the cancel booking button",
           "status": "passed",
-          "startedAt": "2026-09-07T11:57:08.286Z",
-          "endedAt": "2026-09-07T11:57:08.310Z",
-          "durationMs": 24,
+          "startedAt": "2026-09-09T06:35:15.080Z",
+          "endedAt": "2026-09-09T06:35:15.111Z",
+          "durationMs": 31,
           "matched": {
             "ref": "h3",
             "candidateIndex": 0,
@@ -3690,9 +3691,9 @@
           "line": 51,
           "text": "The booking reference should say {I want to book and then fail.reference}",
           "status": "passed",
-          "startedAt": "2026-09-07T11:57:08.310Z",
-          "endedAt": "2026-09-07T11:57:08.315Z",
-          "durationMs": 5,
+          "startedAt": "2026-09-09T06:35:15.111Z",
+          "endedAt": "2026-09-09T06:35:15.117Z",
+          "durationMs": 6,
           "matched": {
             "ref": "h4",
             "candidateIndex": 0,
@@ -3703,7 +3704,7 @@
       "audit": [
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:58.670Z",
+          "at": "2026-09-09T06:35:05.844Z",
           "seq": 0,
           "kind": "run",
           "detail": {
@@ -3717,7 +3718,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.141Z",
+          "at": "2026-09-09T06:35:06.005Z",
           "seq": 1,
           "kind": "story",
           "story": "I want to book and then fail",
@@ -3727,7 +3728,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.142Z",
+          "at": "2026-09-09T06:35:06.007Z",
           "seq": 2,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3736,11 +3737,11 @@
             "method": "state"
           },
           "outcome": "ok",
-          "durationMs": 1
+          "durationMs": 2
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.153Z",
+          "at": "2026-09-09T06:35:06.016Z",
           "seq": 3,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3759,11 +3760,11 @@
             "matched": 1
           },
           "outcome": "ok",
-          "durationMs": 11
+          "durationMs": 9
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.239Z",
+          "at": "2026-09-09T06:35:06.056Z",
           "seq": 4,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3778,11 +3779,11 @@
             ]
           },
           "outcome": "ok",
-          "durationMs": 86
+          "durationMs": 40
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.243Z",
+          "at": "2026-09-09T06:35:06.067Z",
           "seq": 5,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3791,11 +3792,11 @@
             "method": "state"
           },
           "outcome": "ok",
-          "durationMs": 3
+          "durationMs": 11
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.258Z",
+          "at": "2026-09-09T06:35:06.077Z",
           "seq": 6,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3814,11 +3815,11 @@
             "matched": 1
           },
           "outcome": "ok",
-          "durationMs": 15
+          "durationMs": 10
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.270Z",
+          "at": "2026-09-09T06:35:06.084Z",
           "seq": 7,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3835,11 +3836,11 @@
             ]
           },
           "outcome": "ok",
-          "durationMs": 12
+          "durationMs": 7
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.271Z",
+          "at": "2026-09-09T06:35:06.085Z",
           "seq": 8,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3852,7 +3853,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.274Z",
+          "at": "2026-09-09T06:35:06.087Z",
           "seq": 9,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3871,11 +3872,11 @@
             "matched": 1
           },
           "outcome": "ok",
-          "durationMs": 3
+          "durationMs": 2
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.312Z",
+          "at": "2026-09-09T06:35:06.111Z",
           "seq": 10,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3890,11 +3891,11 @@
             ]
           },
           "outcome": "ok",
-          "durationMs": 37
+          "durationMs": 24
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.312Z",
+          "at": "2026-09-09T06:35:06.111Z",
           "seq": 11,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3907,7 +3908,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.314Z",
+          "at": "2026-09-09T06:35:06.113Z",
           "seq": 12,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3930,7 +3931,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.315Z",
+          "at": "2026-09-09T06:35:06.114Z",
           "seq": 13,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3947,7 +3948,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:56:59.315Z",
+          "at": "2026-09-09T06:35:06.115Z",
           "seq": 14,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3960,7 +3961,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:01.090Z",
+          "at": "2026-09-09T06:35:07.896Z",
           "seq": 15,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -3979,11 +3980,11 @@
             "matched": 0
           },
           "outcome": "ok",
-          "durationMs": 1775
+          "durationMs": 1781
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:02.878Z",
+          "at": "2026-09-09T06:35:09.688Z",
           "seq": 16,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -4003,11 +4004,11 @@
             "matched": 0
           },
           "outcome": "ok",
-          "durationMs": 1788
+          "durationMs": 1792
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:04.680Z",
+          "at": "2026-09-09T06:35:11.472Z",
           "seq": 17,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -4026,11 +4027,11 @@
             "matched": 0
           },
           "outcome": "ok",
-          "durationMs": 1802
+          "durationMs": 1785
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:06.451Z",
+          "at": "2026-09-09T06:35:13.257Z",
           "seq": 18,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -4049,11 +4050,11 @@
             "matched": 0
           },
           "outcome": "ok",
-          "durationMs": 1771
+          "durationMs": 1784
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.231Z",
+          "at": "2026-09-09T06:35:15.031Z",
           "seq": 19,
           "kind": "surface",
           "story": "I want to book and then fail",
@@ -4072,12 +4073,38 @@
             "matched": 0
           },
           "outcome": "ok",
-          "durationMs": 1780
+          "durationMs": 1775
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.232Z",
+          "at": "2026-09-09T06:35:15.034Z",
           "seq": 20,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "call": {
+            "method": "state"
+          },
+          "outcome": "ok",
+          "durationMs": 2
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-09T06:35:15.079Z",
+          "seq": 21,
+          "kind": "surface",
+          "story": "I want to book and then fail",
+          "stepId": "I want to book and then fail#5",
+          "call": {
+            "method": "screenshot"
+          },
+          "outcome": "ok",
+          "durationMs": 44
+        },
+        {
+          "runId": "comp",
+          "at": "2026-09-09T06:35:15.080Z",
+          "seq": 22,
           "kind": "surface",
           "story": "I want to book and then fail",
           "stepId": "I want to book and then fail#5",
@@ -4089,33 +4116,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.284Z",
-          "seq": 21,
-          "kind": "surface",
-          "story": "I want to book and then fail",
-          "stepId": "I want to book and then fail#5",
-          "call": {
-            "method": "screenshot"
-          },
-          "outcome": "ok",
-          "durationMs": 51
-        },
-        {
-          "runId": "comp",
-          "at": "2026-09-07T11:57:08.285Z",
-          "seq": 22,
-          "kind": "surface",
-          "story": "I want to book and then fail",
-          "stepId": "I want to book and then fail#5",
-          "call": {
-            "method": "state"
-          },
-          "outcome": "ok",
-          "durationMs": 0
-        },
-        {
-          "runId": "comp",
-          "at": "2026-09-07T11:57:08.285Z",
+          "at": "2026-09-09T06:35:15.080Z",
           "seq": 23,
           "kind": "policy",
           "story": "I want to book and then fail",
@@ -4128,7 +4129,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.286Z",
+          "at": "2026-09-09T06:35:15.080Z",
           "seq": 24,
           "kind": "story",
           "story": "cancel a booking",
@@ -4138,7 +4139,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.286Z",
+          "at": "2026-09-09T06:35:15.081Z",
           "seq": 25,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4151,7 +4152,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.288Z",
+          "at": "2026-09-09T06:35:15.083Z",
           "seq": 26,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4174,7 +4175,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.310Z",
+          "at": "2026-09-09T06:35:15.111Z",
           "seq": 27,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4189,11 +4190,11 @@
             ]
           },
           "outcome": "ok",
-          "durationMs": 22
+          "durationMs": 27
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.311Z",
+          "at": "2026-09-09T06:35:15.111Z",
           "seq": 28,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4206,7 +4207,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.312Z",
+          "at": "2026-09-09T06:35:15.113Z",
           "seq": 29,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4229,7 +4230,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.312Z",
+          "at": "2026-09-09T06:35:15.114Z",
           "seq": 30,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4242,7 +4243,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.314Z",
+          "at": "2026-09-09T06:35:15.116Z",
           "seq": 31,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4261,11 +4262,11 @@
             "matched": 1
           },
           "outcome": "ok",
-          "durationMs": 1
+          "durationMs": 2
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.315Z",
+          "at": "2026-09-09T06:35:15.117Z",
           "seq": 32,
           "kind": "surface",
           "story": "cancel a booking",
@@ -4282,7 +4283,7 @@
         },
         {
           "runId": "comp",
-          "at": "2026-09-07T11:57:08.315Z",
+          "at": "2026-09-09T06:35:15.117Z",
           "seq": 33,
           "kind": "output",
           "story": "cancel a booking",

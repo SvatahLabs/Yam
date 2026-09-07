@@ -16,7 +16,7 @@ Yam is built in three layers:
 
 | Layer | What it is |
 |---|---|
-| **Surface** | A published agent-native API — `snapshot` with stable references, `act` by reference, `read`, `check`, session state — implemented by adapters for Playwright, WebDriver BiDi, Appium, Windows UI Automation, macOS Accessibility, HTTP and WebMCP. Linux AT-SPI and process/terminal surfaces are **not implemented**. See the [support matrix](docs/reference/generated/support-matrix.md). |
+| **Surface** | A published agent-native API — `snapshot` with stable references, `act` by reference, `read`, `check`, session state — implemented by adapters for Playwright, WebDriver BiDi, Appium, Windows UI Automation, macOS Accessibility, HTTP, WebMCP, a **process/terminal** (a real pseudo-terminal: snapshot, input, signals, exit state) and **Linux AT-SPI**. An adapter existing is not evidence that it works — AT-SPI is implemented and **unvalidated**, having been driven against no live accessibility bus. See the [support matrix](docs/reference/generated/support-matrix.md) for how far each has actually been driven. |
 | **Determinism** | The step IR, the bindings store with fingerprints, the resolver, model-free relocalization, provenance, checkpoints and replay. This layer is the standard the project publishes. |
 | **Behavior** | One plan, three ways to run it: **test** (a pass/fail oracle), **workflow** (a typed function with guards and checkpoints) and **tool** (a deterministic MCP tool an agent calls). |
 

@@ -149,11 +149,80 @@ export const APPIUM_ANDROID_ROLE_MAP: Readonly<Record<string, string>> = {
   "androidx.recyclerview.widget.RecyclerView": "list",
 };
 
-/** The three published mapping tables, keyed by the adapter family they belong to. */
+/**
+ * AT-SPI role names, onto the same vocabulary (T23, SF-23).
+ *
+ * AT-SPI publishes a role as a lower-case phrase — `push button`, `page tab` —
+ * rather than a camel-cased identifier, and the phrases are the ones
+ * `Accessible.getRoleName()` returns. Mapping them here rather than in the
+ * adapter is what keeps "one published interface, and each platform reaches it
+ * through an adapter" true: a binding written against `button` finds a button
+ * on macOS, on Windows and on Linux, because all three tables land on the same
+ * word.
+ */
+export const ATSPI_ROLE_MAP: Readonly<Record<string, string>> = {
+  application: "application",
+  "check box": "checkbox",
+  "check menu item": "menuitemcheckbox",
+  "column header": "columnheader",
+  "combo box": "combobox",
+  dialog: "dialog",
+  document: "document",
+  "document frame": "document",
+  "document web": "document",
+  entry: "textbox",
+  filler: "generic",
+  frame: "window",
+  heading: "heading",
+  icon: "img",
+  image: "img",
+  label: "text",
+  link: "link",
+  list: "list",
+  "list box": "listbox",
+  "list item": "listitem",
+  menu: "menu",
+  "menu bar": "menubar",
+  "menu item": "menuitem",
+  "page tab": "tab",
+  "page tab list": "tablist",
+  panel: "group",
+  "password text": "textbox",
+  "progress bar": "progressbar",
+  "push button": "button",
+  "radio button": "radio",
+  "radio menu item": "menuitemradio",
+  "row header": "rowheader",
+  "scroll bar": "scrollbar",
+  "scroll pane": "group",
+  section: "group",
+  separator: "separator",
+  slider: "slider",
+  "spin button": "spinbutton",
+  "split pane": "group",
+  statusbar: "status",
+  table: "table",
+  "table cell": "cell",
+  "table column header": "columnheader",
+  "table row": "row",
+  "table row header": "rowheader",
+  text: "text",
+  "toggle button": "button",
+  "tool bar": "toolbar",
+  "tool tip": "tooltip",
+  tree: "tree",
+  "tree item": "treeitem",
+  "tree table": "treegrid",
+  viewport: "group",
+  window: "window",
+};
+
+/** The published mapping tables, keyed by the adapter family they belong to. */
 export const ROLE_MAPS = {
   uia: UIA_ROLE_MAP,
   ax: AX_ROLE_MAP,
   appium: APPIUM_ANDROID_ROLE_MAP,
+  atspi: ATSPI_ROLE_MAP,
 } as const;
 
 export type RoleMapName = keyof typeof ROLE_MAPS;

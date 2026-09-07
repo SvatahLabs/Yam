@@ -1,0 +1,49 @@
+{
+  "name": "@svatah/yam-adapter-atspi",
+  "version": "0.1.0",
+  "description": "Linux AT-SPI accessibility adapter",
+  "license": "Apache-2.0",
+  "homepage": "https://yam.svatah.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SvatahLabs/yam.git",
+    "directory": "packages/adapter-atspi"
+  },
+  "bugs": {
+    "url": "https://github.com/SvatahLabs/yam/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsup --config ../../tsup.config.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@svatah/yam-schema": "workspace:*",
+    "@svatah/yam-surface": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

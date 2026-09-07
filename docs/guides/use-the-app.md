@@ -28,7 +28,7 @@ rather than pretending it is one.
 
 ## Surfaces
 
-![Surfaces with nothing connected](../spec/surface-first/evidence/wave-4/surfaces-empty-1440x1000.png)
+![Surfaces with nothing connected](../spec/surface-first/evidence/wave-5/surfaces-empty-1440x1000.png)
 
 Type a URL, press **Connect surface**, and the session appears in the list with
 the adapter the service actually used — not the one you asked for. Discovery
@@ -36,7 +36,7 @@ below it is grouped by what a thing *is* — a browser, an app, a device, an API
 and anything unavailable shows the exact prerequisite it is missing rather than
 being hidden.
 
-![A connected surface, with its tree and the action inspector](../spec/surface-first/evidence/wave-4/surfaces-connected-1440x1000.png)
+![A connected surface, with its tree and the action inspector](../spec/surface-first/evidence/wave-5/surfaces-connected-1440x1000.png)
 
 Connected, the screen is the surface's semantic tree on the left and the
 selected control on the right. Choosing a control opens the form for what you
@@ -44,7 +44,7 @@ can do to it — a fill takes a value, a click takes nothing, a drag takes a
 second reference — and only actions the adapter can actually complete are
 offered, so "choose an action" is never a dead end.
 
-![An action that was dispatched and verified](../spec/surface-first/evidence/wave-4/surfaces-acting-1440x1000.png)
+![An action that was dispatched and verified](../spec/surface-first/evidence/wave-5/surfaces-acting-1440x1000.png)
 
 **Dispatch and verification are two separate answers.** An action that reached
 the control but was not checked reads *"Dispatched. Not verified — no
@@ -57,7 +57,7 @@ The screenshots above are the ones the verification harness takes, at
 1440×1000. Regenerate them, and the ones at 1280×800 and at 200% zoom, with:
 
 ```bash
-SURFACES_EVIDENCE_DIR=docs/spec/surface-first/evidence/wave-4 \
+SURFACES_EVIDENCE_DIR=docs/spec/surface-first/evidence/wave-5 \
   pnpm --filter @svatah/yam-desktop exec node test/surfaces-dogfood.mjs
 ```
 

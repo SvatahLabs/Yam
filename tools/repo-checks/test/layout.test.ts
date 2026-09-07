@@ -72,7 +72,9 @@ describe("repository layout (HLD §12)", () => {
     // (a) `bind()` package, `bindings-cli`, and the module (b) `host-playwright`.
     // Draft 2.25 adds `surface-control` (the shared surface-control core), the
     // 32nd — HLD §12's layout block lists it (line "surface-control/ …").
-    expect(fromHld.length).toBe(32);
+    // Wave 5 adds `adapter-process` (T22, a terminal) and `adapter-atspi`
+    // (T23, the Linux accessibility bus): 34.
+    expect(fromHld.length).toBe(34);
   });
 
   it("names every Draft 2.11 package the LLD requires, with the section", () => {

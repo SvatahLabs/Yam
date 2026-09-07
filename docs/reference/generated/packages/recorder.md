@@ -33,7 +33,7 @@ Grounding, record session and report
 | `GroundingProposal` | interface | `export interface GroundingProposal` | What a reviewer is shown for one target (REQ-ADE-4). |
 | `GroundingQuestionParts` | interface | `export interface GroundingQuestionParts` |  |
 | `GroundingResult` | interface | `export interface GroundingResult` |  |
-| `GroundingTarget` | interface | `export interface GroundingTarget` | What the recorder wants grounded: a phrase, and the id it compiled to. |
+| `GroundingTarget` | interface | `export interface GroundingTarget` |  |
 | `GroundOptions` | interface | `export interface GroundOptions` |  |
 | `groundSiteTool` | function | `export async function groundSiteTool(` | The binding for a target the page declares as a site tool. |
 | `inputNameFor` | function | `export function inputNameFor(phrase: string): string` | An input name for a phrase: `the password field` → `password`. |

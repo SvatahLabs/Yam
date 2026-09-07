@@ -96,6 +96,7 @@ const TABLE_HEADERS: Record<RoleMapName, string> = {
   uia: "UIA `ControlType`",
   ax: "macOS `AXRole`",
   appium: "Android class",
+  atspi: "AT-SPI role name",
 };
 
 describe("the role tables in the doc match src/roles.ts (REQ-SURF-4)", () => {

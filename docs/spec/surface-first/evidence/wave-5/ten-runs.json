@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "1.0.0",
+  "ranAt": "2026-09-09T05:58:25.781Z",
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v25.6.1"
+  },
+  "times": 10,
+  "runs": [
+    {
+      "run": "01",
+      "startedAt": "2026-09-09T05:38:00.033Z",
+      "exit": 0,
+      "counts": {
+        "attempted": 119,
+        "reached": 118,
+        "passed": 118,
+        "failed": 0,
+        "blocked": 1
+      }
+    },
+    {
+      "run": "02",
+      "startedAt": "2026-09-09T05:40:12.827Z",
+      "exit": 0,
+      "counts": {
+        "attempted": 119,
+        "reached": 118,
+        "passed": 118,
+        "failed": 0,
+        "blocked": 1
+      }
+    },
+    {
+      "run": "03",
+      "startedAt": "2026-09-09T05:42:14.644Z",
+      "exit": 0,
+      "counts": {
+        "attempted": 119,
+        "reached": 118,
+        "passed": 118,
+        "failed": 0,
+        "blocked": 1
+      }
+    },
+    {
+      "run": "04",
+      "startedAt": "2026-09-09T05:44:20.879Z",
+      "exit": 0,
+      "counts": {
+        "attempted": 119,
+        "reached": 118,
+        "passed": 118,
+        "failed": 0,
+        "blocked": 1
+      }
+    },
+    {
+      "run": "05",
+      "startedAt": "2026-09-09T05:46:20.956Z",
+      "exit": 0,
+      "counts": {
+        "attempted": 119,
+        "reached": 118,
+        "passed": 118,
+        "failed": 0,
+        "blocked": 1
+      }
+    },
+    {
+      "run": "06",
+      "startedAt": "2026-09-09T05:48:21.079Z",
+      "exit": 0,
+      "counts": {
+        "attempted": 119,
+        "reached": 118,
+        "passed": 118,
+        "failed": 0,
+        "blocked": 1
+      }
+    },
+    {
+      "run": "07",
+      "startedAt": "2026-09-09T05:50:21.146Z",
+      "exit": 0,
+      "counts": {
+        "attempted": 119,
+        "reached": 118,
+        "passed": 118,
+        "failed": 0,
+        "blocked": 1
+      }
+    },
+    {
+      "run": "08",
+      "startedAt": "2026-09-09T05:52:21.769Z",
+      "exit": 0,
+      "counts": {
+        "attempted": 119,
+        "reached": 118,
+        "passed": 118,
+        "failed": 0,
+        "blocked": 1
+      }
+    },
+    {
+      "run": "09",
+      "startedAt": "2026-09-09T05:54:22.644Z",
+      "exit": 0,
+      "counts": {
+        "attempted": 119,
+        "reached": 118,
+        "passed": 118,
+        "failed": 0,
+        "blocked": 1
+      }
+    },
+    {
+      "run": "10",
+      "startedAt": "2026-09-09T05:56:24.186Z",
+      "exit": 0,
+      "counts": {
+        "attempted": 119,
+        "reached": 118,
+        "passed": 118,
+        "failed": 0,
+        "blocked": 1
+      }
+    }
+  ],
+  "sameAttemptedEveryRun": true,
+  "attempted": [
+    119
+  ],
+  "runsWithAFailure": []
+}

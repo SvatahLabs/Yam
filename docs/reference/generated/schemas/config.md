@@ -9,7 +9,7 @@
 
 | Property | Type | Required |
 |---|---|---|
-| `adapter` | `"playwright"` \| `"bidi"` \| `"appium"` \| `"uia"` \| `"ax"` \| `"http"` | yes |
+| `adapter` | `"playwright"` \| `"bidi"` \| `"appium"` \| `"uia"` \| `"ax"` \| `"http"` \| `"process"` \| `"atspi"` | yes |
 | `allowSideEffects` | boolean |  |
 | `api` | object | yes |
 | `app` | object | yes |

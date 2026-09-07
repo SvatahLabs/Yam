@@ -11,7 +11,7 @@
 |---|---|---|
 | `dialog` | one of 2 shapes |  |
 | `frame` | string |  |
-| `kind` | `"web"` \| `"mobile"` \| `"desktop"` \| `"http"` | yes |
+| `kind` | `"web"` \| `"mobile"` \| `"desktop"` \| `"http"` \| `"process"` | yes |
 | `storageState` | string |  |
 | `url` | string |  |
 | `windowIndex` | integer |  |

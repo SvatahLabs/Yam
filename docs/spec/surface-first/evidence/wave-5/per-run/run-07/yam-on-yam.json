@@ -1,0 +1,771 @@
+{
+  "schemaVersion": "1.0.0",
+  "suite": "yam-on-yam",
+  "ranAt": "2026-09-09T05:52:21.743Z",
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v25.6.1"
+  },
+  "packaged": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/apps/desktop/out/Yam-darwin-arm64/Yam.app",
+  "counts": {
+    "attempted": 119,
+    "reached": 118,
+    "passed": 118,
+    "failed": 0,
+    "blocked": 1
+  },
+  "timings": [
+    {
+      "what": "app.launch-to-window",
+      "ms": 1640
+    },
+    {
+      "what": "cli-browser",
+      "ms": 21855
+    },
+    {
+      "what": "mcp-browser",
+      "ms": 12961
+    },
+    {
+      "what": "negative-cli",
+      "ms": 4669
+    },
+    {
+      "what": "negative-mcp",
+      "ms": 87
+    },
+    {
+      "what": "cli-ax",
+      "ms": 24805
+    },
+    {
+      "what": "mcp-ax",
+      "ms": 15228
+    },
+    {
+      "what": "cli-terminal",
+      "ms": 15157
+    },
+    {
+      "what": "mcp-terminal",
+      "ms": 3240
+    }
+  ],
+  "checks": [
+    {
+      "pass": "launch",
+      "name": "the packaged application starts and publishes a window",
+      "ok": true,
+      "detail": "/Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/apps/desktop/out/Yam-darwin-arm64/Yam.app on http://127.0.0.1:9521"
+    },
+    {
+      "pass": "launch",
+      "name": "the packaged application speaks this build's contract",
+      "ok": true,
+      "detail": "contract 4efddf7e75a5dccb"
+    },
+    {
+      "pass": "oracles",
+      "name": "the connect field and the Connect surface button do not overlap",
+      "ok": true,
+      "detail": "url.right=522 connect.x=947"
+    },
+    {
+      "pass": "oracles",
+      "name": "a screenshot of the application is taken, and is a real image",
+      "ok": true,
+      "detail": "338464 bytes at /Users/atul/Workspace/Svatah/automator/.claude/worktrees/bridge-cse_0143x498am8TYnb5Fkvj1VgF/docs/spec/surface-first/evidence/wave-5/runs/run-07/packaged-surfaces.png"
+    },
+    {
+      "pass": "oracles",
+      "name": "the accessibility audit finds no violation on the application's own window",
+      "ok": true,
+      "detail": "0 violations over the live DOM (13586 bytes)"
+    },
+    {
+      "pass": "oracles",
+      "name": "axe-core confirms the in-house audit",
+      "blocked": "axe-core is MPL-2.0 and REQ-PKG-3 admits MIT, Apache-2.0 and BSD only, so it is not a dependency of this repository. Set YAM_AXE=<path to axe.min.js> to run it beside the in-house audit."
+    },
+    {
+      "pass": "cli-browser",
+      "name": "a session opens on the packaged application",
+      "ok": true,
+      "detail": "s_860a00688297"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "the packaged application opens into Surfaces",
+      "ok": true,
+      "detail": "rail=e27 connect form=e69"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "the connect form offers a URL to fill",
+      "ok": true,
+      "detail": "ref=e69"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "the sample application's URL is typed into it",
+      "ok": true,
+      "detail": "{\"ok\":true,\"ref\":\"e69\"}"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "Connect surface is offered",
+      "ok": true,
+      "detail": "ref=e74"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "Connect surface is pressed",
+      "ok": true,
+      "detail": "{\"ok\":true,\"ref\":\"e74\"}"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "the packaged application connects to the sample app and shows its tree",
+      "ok": true,
+      "detail": "ref=e244"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "a control of the sample app is selected",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "selecting a text field opens on Fill field, not a dead end",
+      "ok": true,
+      "detail": "ref=e330"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "the fill form asks for a value",
+      "ok": true,
+      "detail": "ref=e324"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "a value is typed into the fill form",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "Fill field is pressed",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "the application reports the action as dispatched",
+      "ok": true,
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53451SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "an action with no postcondition is reported as not verified (SF-11)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53451SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "Disconnect is offered while a surface is connected",
+      "ok": true,
+      "detail": "ref=e56"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "disconnecting returns the application to its connect form",
+      "ok": true,
+      "detail": "ref=e355"
+    },
+    {
+      "pass": "cli-browser",
+      "name": "the session closes",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "a session opens on the packaged application",
+      "ok": true,
+      "detail": "s_6d779d6754c1"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "the packaged application opens into Surfaces",
+      "ok": true,
+      "detail": "rail=e27 connect form=e69"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "the connect form offers a URL to fill",
+      "ok": true,
+      "detail": "ref=e69"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "the sample application's URL is typed into it",
+      "ok": true,
+      "detail": "{\"ok\":true,\"ref\":\"e69\"}"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "Connect surface is offered",
+      "ok": true,
+      "detail": "ref=e74"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "Connect surface is pressed",
+      "ok": true,
+      "detail": "{\"ok\":true,\"ref\":\"e74\"}"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "the packaged application connects to the sample app and shows its tree",
+      "ok": true,
+      "detail": "ref=e255"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "a control of the sample app is selected",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "selecting a text field opens on Fill field, not a dead end",
+      "ok": true,
+      "detail": "ref=e341"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "the fill form asks for a value",
+      "ok": true,
+      "detail": "ref=e335"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "a value is typed into the fill form",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "Fill field is pressed",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "the application reports the action as dispatched",
+      "ok": true,
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53451SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "an action with no postcondition is reported as not verified (SF-11)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53451SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "Disconnect is offered while a surface is connected",
+      "ok": true,
+      "detail": "ref=e56"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "disconnecting returns the application to its connect form",
+      "ok": true,
+      "detail": "ref=e366"
+    },
+    {
+      "pass": "mcp-browser",
+      "name": "the session closes",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "negative-cli",
+      "name": "a session opens for the negative cases",
+      "ok": true,
+      "detail": "s_0c0dc39afed3"
+    },
+    {
+      "pass": "negative-cli",
+      "name": "a postcondition that holds passes",
+      "ok": true,
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53451SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
+    },
+    {
+      "pass": "negative-cli",
+      "name": "a deliberately wrong postcondition fails, and is not reported as verified",
+      "ok": true,
+      "detail": "status=failed code=CHECK_FAILED exit=20"
+    },
+    {
+      "pass": "negative-cli",
+      "name": "the failing postcondition keeps the value it actually observed (SF-11)",
+      "ok": true,
+      "detail": "{\"ok\":false,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53451SurfacesSurfacesAutomationsFlowsBindingsAgents and tool"
+    },
+    {
+      "pass": "negative-cli",
+      "name": "a wrong postcondition exits nonzero, so a script cannot miss it",
+      "ok": true,
+      "detail": "exit=20"
+    },
+    {
+      "pass": "negative-cli",
+      "name": "a reference nothing issued is refused, not resolved to whatever holds its id",
+      "ok": true,
+      "detail": "status=refused code=STALE_REFERENCE: Reference \"e999999\" was not in snapshot snap_6b73cf071ffb."
+    },
+    {
+      "pass": "negative-cli",
+      "name": "control can be taken explicitly",
+      "ok": true,
+      "detail": "{\"holder\":\"yam-on-yam-agent\",\"since\":\"2026-09-09T05:51:02.724Z\",\"heldByYou\":true}"
+    },
+    {
+      "pass": "negative-cli",
+      "name": "there is a control to contend over",
+      "ok": true,
+      "detail": "ref=e12"
+    },
+    {
+      "pass": "negative-cli",
+      "name": "a held target refuses the other client, and names who holds it (SF-13)",
+      "ok": true,
+      "detail": "refused/CONTROL_BUSY: \"yam-on-yam-agent\" holds this target. Take control to act on it."
+    },
+    {
+      "pass": "negative-cli",
+      "name": "the holder can give it up",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "negative-mcp",
+      "name": "a session opens for the negative cases",
+      "ok": true,
+      "detail": "s_bd1be7a19752"
+    },
+    {
+      "pass": "negative-mcp",
+      "name": "a postcondition that holds passes",
+      "ok": true,
+      "detail": "{\"ok\":true,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53451SurfacesSurfacesAutomationsFlowsBindingsAgents and tools"
+    },
+    {
+      "pass": "negative-mcp",
+      "name": "a deliberately wrong postcondition fails, and is not reported as verified",
+      "ok": true,
+      "detail": "status=failed code=CHECK_FAILED exit=1"
+    },
+    {
+      "pass": "negative-mcp",
+      "name": "the failing postcondition keeps the value it actually observed (SF-11)",
+      "ok": true,
+      "detail": "{\"ok\":false,\"actual\":\"Yam/Surfaces/SurfacesOpen a projectfixturesyam-shell-FTm2k8yam-shell-8pzTnqSearch or run a command⌘Kservice 127.0.0.1:53451SurfacesSurfacesAutomationsFlowsBindingsAgents and tool"
+    },
+    {
+      "pass": "negative-mcp",
+      "name": "a reference nothing issued is refused, not resolved to whatever holds its id",
+      "ok": true,
+      "detail": "status=refused code=STALE_REFERENCE: Reference \"e999999\" was not in snapshot snap_679634ad5dea."
+    },
+    {
+      "pass": "negative-mcp",
+      "name": "control can be taken explicitly",
+      "ok": true,
+      "detail": "{\"holder\":\"yam-on-yam-agent\",\"since\":\"2026-09-09T05:51:04.907Z\",\"heldByYou\":true}"
+    },
+    {
+      "pass": "negative-mcp",
+      "name": "there is a control to contend over",
+      "ok": true,
+      "detail": "ref=e12"
+    },
+    {
+      "pass": "negative-mcp",
+      "name": "a held target refuses the other client, and names who holds it (SF-13)",
+      "ok": true,
+      "detail": "refused/CONTROL_BUSY: \"yam-on-yam-agent\" holds this target. Take control to act on it."
+    },
+    {
+      "pass": "negative-mcp",
+      "name": "the holder can give it up",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "a session opens on the packaged application",
+      "ok": true,
+      "detail": "s_af31aac6aeaa"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "the packaged application opens into Surfaces",
+      "ok": true,
+      "detail": "rail=r22 connect form=r64"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "the connect form offers a URL to fill",
+      "ok": true,
+      "detail": "ref=r64"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "the sample application's URL is typed into it",
+      "ok": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "Connect surface is offered",
+      "ok": true,
+      "detail": "ref=r67"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "Connect surface is pressed",
+      "ok": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "the packaged application connects to the sample app and shows its tree",
+      "ok": true,
+      "detail": "ref=r107"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "a control of the sample app is selected",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "selecting a text field opens on Fill field, not a dead end",
+      "ok": true,
+      "detail": "ref=r81"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "the fill form asks for a value",
+      "ok": true,
+      "detail": "ref=r135"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "a value is typed into the fill form",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "Fill field is pressed",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "the application reports the action as dispatched",
+      "ok": true,
+      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-FTm2k8 yam-shell-8pzTnq Se"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "an action with no postcondition is reported as not verified (SF-11)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-FTm2k8 yam-shell-8pzTnq Se"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "Disconnect is offered while a surface is connected",
+      "ok": true,
+      "detail": "ref=r44"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "disconnecting returns the application to its connect form",
+      "ok": true,
+      "detail": "ref=r67"
+    },
+    {
+      "pass": "cli-ax",
+      "name": "the session closes",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "a session opens on the packaged application",
+      "ok": true,
+      "detail": "s_519ce0f3cb7a"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "the packaged application opens into Surfaces",
+      "ok": true,
+      "detail": "rail=r22 connect form=r64"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "the connect form offers a URL to fill",
+      "ok": true,
+      "detail": "ref=r64"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "the sample application's URL is typed into it",
+      "ok": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "Connect surface is offered",
+      "ok": true,
+      "detail": "ref=r67"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "Connect surface is pressed",
+      "ok": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "the packaged application connects to the sample app and shows its tree",
+      "ok": true,
+      "detail": "ref=r107"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "a control of the sample app is selected",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "selecting a text field opens on Fill field, not a dead end",
+      "ok": true,
+      "detail": "ref=r81"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "the fill form asks for a value",
+      "ok": true,
+      "detail": "ref=r135"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "a value is typed into the fill form",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "Fill field is pressed",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "the application reports the action as dispatched",
+      "ok": true,
+      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-FTm2k8 yam-shell-8pzTnq Se"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "an action with no postcondition is reported as not verified (SF-11)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"actual\":\"Yam Yam close this button also has an action to zoom the window minimise Yam Sections Workspace Inspector Yam Location Open a project fixtures yam-shell-FTm2k8 yam-shell-8pzTnq Se"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "Disconnect is offered while a surface is connected",
+      "ok": true,
+      "detail": "ref=r44"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "disconnecting returns the application to its connect form",
+      "ok": true,
+      "detail": "ref=r67"
+    },
+    {
+      "pass": "mcp-ax",
+      "name": "the session closes",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "a terminal session opens on Yam's own command line",
+      "ok": true,
+      "detail": "s_961ca5bc0f58"
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "the terminal snapshot is the screen, not the stream",
+      "ok": true,
+      "detail": "root=t1_0 lines=3 screen=\"No Yam project here.\\n  yam init      start one in this directory\\n\" said=true"
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "a command that succeeds exits 0, and the session says so",
+      "ok": true,
+      "detail": "{\"running\":false,\"pid\":9451,\"exitCode\":0,\"signal\":null,\"cursor\":{\"row\":4,\"column\":1},\"size\":{\"columns\":100,\"rows\":30},\"allocator\":\"expect\"}"
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "a command that fails exits nonzero, and the session says so",
+      "ok": true,
+      "detail": "exitCode=21 check=succeeded"
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "a program that reads from stdin is typed into and answers",
+      "ok": true,
+      "detail": "\"name? ada\\n\\nhello ada\""
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "a program is signalled by pressing Control+C, and says which signal ended it",
+      "ok": true,
+      "detail": "exitCode=42 signal=null screen=\"waiting\\n^CCAUGHT\""
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "the cockpit draws its panes in the terminal",
+      "ok": true,
+      "detail": "the Flows pane is on the screen"
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "a file under the declared root can be read",
+      "ok": true,
+      "detail": "{\"value\":\"a file the session may read\\n\"}"
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "a file outside the declared root is refused",
+      "ok": true,
+      "detail": "failed/INVALID_ARGUMENT: This session reads files under /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-oatTjK only, and \"../yam-terminal-outside-"
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "a symbolic link that leaves the root is refused",
+      "ok": true,
+      "detail": "failed/INVALID_ARGUMENT: This session reads files under /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-oatTjK only, and \"escape.txt\" resolves out"
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "the terminal refuses an action a terminal does not have",
+      "ok": true,
+      "detail": "failed/INVALID_ARGUMENT: A terminal has no \"click\". It takes type, press, clear, waitFor, sleep, screenshot and quit. A flow that clicks, hovers or navigates needs a"
+    },
+    {
+      "pass": "cli-terminal",
+      "name": "the session closes",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "a terminal session opens on Yam's own command line",
+      "ok": true,
+      "detail": "s_172e418d1e64"
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "the terminal snapshot is the screen, not the stream",
+      "ok": true,
+      "detail": "root=t1_0 lines=3 screen=\"No Yam project here.\\n  yam init      start one in this directory\\n\" said=true"
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "a command that succeeds exits 0, and the session says so",
+      "ok": true,
+      "detail": "{\"running\":false,\"pid\":10603,\"exitCode\":0,\"signal\":null,\"cursor\":{\"row\":4,\"column\":1},\"size\":{\"columns\":100,\"rows\":30},\"allocator\":\"expect\"}"
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "a command that fails exits nonzero, and the session says so",
+      "ok": true,
+      "detail": "exitCode=21 check=succeeded"
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "a program that reads from stdin is typed into and answers",
+      "ok": true,
+      "detail": "\"name? ada\\n\\nhello ada\""
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "a program is signalled by pressing Control+C, and says which signal ended it",
+      "ok": true,
+      "detail": "exitCode=42 signal=null screen=\"waiting\\n^CCAUGHT\""
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "the cockpit draws its panes in the terminal",
+      "ok": true,
+      "detail": "the Flows pane is on the screen"
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "a file under the declared root can be read",
+      "ok": true,
+      "detail": "{\"value\":\"a file the session may read\\n\"}"
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "a file outside the declared root is refused",
+      "ok": true,
+      "detail": "failed/INVALID_ARGUMENT: This session reads files under /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-Zbehfw only, and \"../yam-terminal-outside-"
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "a symbolic link that leaves the root is refused",
+      "ok": true,
+      "detail": "failed/INVALID_ARGUMENT: This session reads files under /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-terminal-root-Zbehfw only, and \"escape.txt\" resolves out"
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "the terminal refuses an action a terminal does not have",
+      "ok": true,
+      "detail": "failed/INVALID_ARGUMENT: A terminal has no \"click\". It takes type, press, clear, waitFor, sleep, screenshot and quit. A flow that clicks, hovers or navigates needs a"
+    },
+    {
+      "pass": "mcp-terminal",
+      "name": "the session closes",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "pass": "oracles",
+      "name": "the fixture project's files are byte-for-byte unchanged",
+      "ok": true,
+      "detail": "72 file(s) unchanged"
+    },
+    {
+      "pass": "oracles",
+      "name": "every pass that ran is one a host without the application would report as blocked",
+      "ok": true,
+      "detail": "9 pass(es) accounted for"
+    }
+  ]
+}

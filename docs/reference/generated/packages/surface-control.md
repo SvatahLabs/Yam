@@ -12,6 +12,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 
 | Export | Kind | Signature | |
 |---|---|---|---|
+| `acquireStartLock` | function | `export function acquireStartLock(stateDir?: string): StartLock \| undefined` | Take the exclusive right to start a broker, or answer that somebody else has |
 | `actInputSchema` | variable | `actInputSchema = z.object(` |  |
 | `ACTION_FORMS` | variable | `ACTION_FORMS: readonly ActionForm[]` | The forms, in the order an inspector offers them: the common ones first. |
 | `ActionField` | interface | `interface ActionField` |  |
@@ -20,6 +21,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `actionFormFor` | function | `declare function actionFormFor(action: string): ActionForm \| undefined;` | One form by action name. |
 | `actOutputSchema` | variable | `actOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `AdapterFactoryFn` | typealias | `export type AdapterFactoryFn ` |  |
+| `AdapterProbe` | interface | `export interface AdapterProbe` |  |
 | `AdapterReadiness` | interface | `export interface AdapterReadiness` |  |
 | `addSecretLiteral` | function | `export function addSecretLiteral(policy: RedactionPolicy, literal: string): void` |  |
 | `addSecretPattern` | function | `export function addSecretPattern(policy: RedactionPolicy, pattern: RegExp): void` |  |
@@ -28,6 +30,8 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `brokerHealth` | function | `export async function brokerHealth(` | What a broker at this descriptor is: alive, and what contract it speaks. |
 | `BrokerOperation` | typealias | `export type BrokerOperation ` | One operation, by the name the catalogue gives it. |
 | `BrokerOptions` | interface | `export interface BrokerOptions` |  |
+| `brokerState` | function | `export async function brokerState(` |  |
+| `BrokerState` | typealias | `export type BrokerState = "serving" \| "busy" \| "mismatched" \| "gone";` | What the broker at a descriptor *is*, in the three answers that lead to three |
 | `brokerStateDir` | function | `export function brokerStateDir(): string` |  |
 | `callBroker` | function | `export async function callBroker(` | Ask a running broker to perform one operation. |
 | `CAPABILITIES` | variable | `CAPABILITIES: readonly CapabilityFlag[]` | Every capability flag, so a client can render a readiness list. |
@@ -76,11 +80,13 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `dispatchSessions` | function | `export async function dispatchSessions(` |  |
 | `dispatchSnapshot` | function | `export async function dispatchSnapshot(` |  |
 | `dispatchTargets` | function | `export async function dispatchTargets(` |  |
+| `DRIVEN_RANGES` | variable | `DRIVEN_RANGES: Readonly<Record<string, string>> ` | The version ranges this repository has driven. |
 | `ERROR_CODES` | variable | `ERROR_CODES = [` |  |
 | `ErrorCode` | typealias | `export type ErrorCode = (typeof ERROR_CODES)[number];` |  |
 | `EventKind` | typealias | `export type EventKind ` |  |
 | `EventStore` | interface | `export interface EventStore` |  |
 | `failedEnvelope` | function | `export function failedEnvelope(` |  |
+| `forgetProbes` | function | `export function forgetProbes(): void` | For a test that wants a fresh answer. |
 | `generateJavaClient` | function | `export function generateJavaClient(): string` |  |
 | `generateOpenApiDocument` | function | `export function generateOpenApiDocument(version: string): Record<string, unknown>` |  |
 | `generateOpenApiPaths` | function | `export function generateOpenApiPaths(): Record<string, Record<string, unknown>>` |  |
@@ -102,6 +108,8 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `OperationOutcome` | typealias | `export type OperationOutcome = "succeeded" \| "failed" \| "refused" \| "cancelled" \| "unknown";` |  |
 | `OperationRecord` | interface | `export interface OperationRecord` |  |
 | `OPERATIONS` | variable | `OPERATIONS: readonly OperationDescriptor[] = [` |  |
+| `probeAdapter` | function | `export async function probeAdapter(adapter: string): Promise<AdapterProbe>` | Probe one adapter. Cached: `doctor` asks for all of them at once. |
+| `probeAdapters` | function | `export async function probeAdapters(registeredAdapters: string[]): Promise<AdapterReadiness[]>` | Readiness with the host actually asked (T23, SF-09, SF-23). |
 | `PromotionStep` | interface | `export interface PromotionStep` | One recorded step, shaped as `@svatah/yam-trajectory`'s `TrajectoryLine`. |
 | `PromotionStore` | interface | `export interface PromotionStore` |  |
 | `readBrokerDescriptor` | function | `export function readBrokerDescriptor(stateDir?: string): BrokerDescriptor \| undefined` |  |
@@ -130,6 +138,8 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `snapshotOutputSchema` | variable | `snapshotOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `SnapshotRecord` | interface | `export interface SnapshotRecord` |  |
 | `startBroker` | function | `export async function startBroker(options: BrokerOptions): Promise<RunningBroker>` | Start the broker on loopback, on a port the OS picks. |
+| `StartLock` | interface | `export interface StartLock` | One broker to a machine, enforced rather than hoped for (T00, SF-05, SF-13). |
+| `startLockHeld` | function | `export function startLockHeld(stateDir?: string): boolean` | Whether a broker start is in progress in some other process. |
 | `successEnvelope` | function | `export function successEnvelope(` |  |
 | `SURFACE_CLI_SUBCOMMANDS` | variable | `SURFACE_CLI_SUBCOMMANDS = OPERATIONS.map((op) => op.cli.subcommand)` |  |
 | `SURFACE_TOOL_NAMES` | variable | `SURFACE_TOOL_NAMES = OPERATIONS.map((op) => op.mcp.toolName)` |  |

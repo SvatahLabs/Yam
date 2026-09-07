@@ -307,6 +307,83 @@ Names come from `content-desc`, falling back to `text`; boxes come from `bounds`
 Candidate kinds: `accessibilityId`, `resourceId`, `xpath`. iOS is not scheduled and
 has no table yet.
 
+### 3.4 AT-SPI, the Linux desktop (REQ-ADP-7, SF-23)
+
+AT-SPI2 publishes an application's tree on a D-Bus of its own; the role is the
+phrase `Accessible.getRoleName()` returns.
+
+<!-- generated:atspi -->
+| AT-SPI role name | Surface role |
+|---|---|
+| `application` | `application` |
+| `check box` | `checkbox` |
+| `check menu item` | `menuitemcheckbox` |
+| `column header` | `columnheader` |
+| `combo box` | `combobox` |
+| `dialog` | `dialog` |
+| `document` | `document` |
+| `document frame` | `document` |
+| `document web` | `document` |
+| `entry` | `textbox` |
+| `filler` | `generic` |
+| `frame` | `window` |
+| `heading` | `heading` |
+| `icon` | `img` |
+| `image` | `img` |
+| `label` | `text` |
+| `link` | `link` |
+| `list` | `list` |
+| `list box` | `listbox` |
+| `list item` | `listitem` |
+| `menu` | `menu` |
+| `menu bar` | `menubar` |
+| `menu item` | `menuitem` |
+| `page tab` | `tab` |
+| `page tab list` | `tablist` |
+| `panel` | `group` |
+| `password text` | `textbox` |
+| `progress bar` | `progressbar` |
+| `push button` | `button` |
+| `radio button` | `radio` |
+| `radio menu item` | `menuitemradio` |
+| `row header` | `rowheader` |
+| `scroll bar` | `scrollbar` |
+| `scroll pane` | `group` |
+| `section` | `group` |
+| `separator` | `separator` |
+| `slider` | `slider` |
+| `spin button` | `spinbutton` |
+| `split pane` | `group` |
+| `statusbar` | `status` |
+| `table` | `table` |
+| `table cell` | `cell` |
+| `table column header` | `columnheader` |
+| `table row` | `row` |
+| `table row header` | `rowheader` |
+| `text` | `text` |
+| `toggle button` | `button` |
+| `tool bar` | `toolbar` |
+| `tool tip` | `tooltip` |
+| `tree` | `tree` |
+| `tree item` | `treeitem` |
+| `tree table` | `treegrid` |
+| `viewport` | `group` |
+| `window` | `window` |
+<!-- /generated:atspi -->
+
+Names come from `Accessible.Name`, falling back to the description and then to
+the element's text; the `automationId` comes from the `accessible-id` object
+attribute (GTK) or `id` (Qt), which is the same fact `AXIdentifier` carries on
+macOS and `AutomationId` on Windows. Boxes come from `Component.GetExtents`.
+Candidate kinds: `automationId`, `role`, `name`, `text`, `label`.
+
+The adapter is **implemented and unvalidated here**: its tree mapping,
+reference scope, state inversion, action selection and refusals are driven by
+`packages/adapter-atspi/test/tree.test.ts` against recorded trees, and its
+conversation with a live registry is not, because no Linux runner is
+provisioned. The generated support matrix says the same thing with what would
+have to be true beside it.
+
 ---
 
 ## 4. Actions

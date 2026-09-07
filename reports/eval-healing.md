@@ -1,6 +1,6 @@
 # Yam eval report — healing
 
-Generated: 2026-09-09T02:38:42.036Z
+Generated: 2026-09-09T06:08:04.618Z
 
 **Relocalize-only recovery: 92.6%**, against REQ-HEAL-5's 60.0% threshold. Met.
 
