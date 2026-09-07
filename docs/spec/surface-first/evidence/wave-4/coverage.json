@@ -1,0 +1,353 @@
+{
+  "schemaVersion": "1.0.0",
+  "ranAt": "2026-09-09T00:50:37.472Z",
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v25.6.1",
+    "reference": "darwin arm64, Node v25.6.1"
+  },
+  "totals": {
+    "attempted": 276,
+    "reached": 271,
+    "passed": 271,
+    "failed": 0,
+    "blocked": 5
+  },
+  "rows": [
+    {
+      "interface": "desktop",
+      "platform": "packaged app",
+      "suite": "yam-on-yam",
+      "attempted": 1,
+      "reached": 1,
+      "passed": 1,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "external",
+      "platform": "packaged app",
+      "suite": "yam-on-yam",
+      "attempted": 5,
+      "reached": 4,
+      "passed": 4,
+      "failed": 0,
+      "blocked": 1,
+      "externallyVerified": true,
+      "reason": "axe-core is MPL-2.0 and REQ-PKG-3 admits MIT, Apache-2.0 and BSD only, so it is not a dependency of this repository. Set YAM_AXE=<path to axe.min.js> to run it beside the in-house audit."
+    },
+    {
+      "interface": "CLI",
+      "platform": "browser",
+      "suite": "yam-on-yam",
+      "attempted": 26,
+      "reached": 26,
+      "passed": 26,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "MCP",
+      "platform": "browser",
+      "suite": "yam-on-yam",
+      "attempted": 25,
+      "reached": 25,
+      "passed": 25,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "CLI",
+      "platform": "macOS AX",
+      "suite": "yam-on-yam",
+      "attempted": 17,
+      "reached": 17,
+      "passed": 17,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "MCP",
+      "platform": "macOS AX",
+      "suite": "yam-on-yam",
+      "attempted": 17,
+      "reached": 17,
+      "passed": 17,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "desktop",
+      "platform": "browser-hosted",
+      "suite": "surfaces-dogfood",
+      "attempted": 154,
+      "reached": 154,
+      "passed": 154,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "HTTP",
+      "platform": "service /v1",
+      "suite": "catalogue-to-openapi",
+      "attempted": 14,
+      "reached": 14,
+      "passed": 14,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "adapter",
+      "platform": "appium",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 0,
+      "passed": 0,
+      "failed": 0,
+      "blocked": 1,
+      "externallyVerified": false,
+      "reason": "unvalidated: needs an Appium server and a device or emulator; neither is present on this host, and no device runner is provisioned"
+    },
+    {
+      "interface": "adapter",
+      "platform": "ax",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 1,
+      "passed": 1,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "adapter",
+      "platform": "bidi",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 0,
+      "passed": 0,
+      "failed": 0,
+      "blocked": 1,
+      "externallyVerified": false,
+      "reason": "unvalidated: needs a Chrome or Firefox started with a BiDi endpoint; `pnpm bidi:independence` is the suite that drives it and it is not part of this run"
+    },
+    {
+      "interface": "adapter",
+      "platform": "http",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 0,
+      "passed": 0,
+      "failed": 0,
+      "blocked": 1,
+      "externallyVerified": false,
+      "reason": "unvalidated: driven by `packages/cli/test/surface-transport.test.ts` in the gate rather than by this suite, which drives the packaged desktop"
+    },
+    {
+      "interface": "adapter",
+      "platform": "playwright",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 1,
+      "passed": 1,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    },
+    {
+      "interface": "adapter",
+      "platform": "uia",
+      "suite": "readiness",
+      "attempted": 1,
+      "reached": 0,
+      "passed": 0,
+      "failed": 0,
+      "blocked": 1,
+      "externallyVerified": false,
+      "reason": "blocked: Adapter \"uia\" requires win32; this host is darwin."
+    },
+    {
+      "interface": "packaging",
+      "platform": "clean install",
+      "suite": "quick-start",
+      "attempted": 11,
+      "reached": 11,
+      "passed": 11,
+      "failed": 0,
+      "blocked": 0,
+      "externallyVerified": false
+    }
+  ],
+  "adapters": [
+    {
+      "adapter": "appium",
+      "platforms": "darwin, linux, win32",
+      "status": "unvalidated",
+      "reason": "needs an Appium server and a device or emulator; neither is present on this host, and no device runner is provisioned"
+    },
+    {
+      "adapter": "ax",
+      "platforms": "darwin",
+      "status": "validated",
+      "reason": "a session of kind `desktop` opened through it in this run"
+    },
+    {
+      "adapter": "bidi",
+      "platforms": "darwin, linux, win32",
+      "status": "unvalidated",
+      "reason": "needs a Chrome or Firefox started with a BiDi endpoint; `pnpm bidi:independence` is the suite that drives it and it is not part of this run"
+    },
+    {
+      "adapter": "http",
+      "platforms": "darwin, linux, win32",
+      "status": "unvalidated",
+      "reason": "driven by `packages/cli/test/surface-transport.test.ts` in the gate rather than by this suite, which drives the packaged desktop"
+    },
+    {
+      "adapter": "playwright",
+      "platforms": "darwin, linux, win32",
+      "status": "validated",
+      "reason": "a session of kind `web` opened through it in this run"
+    },
+    {
+      "adapter": "uia",
+      "platforms": "win32",
+      "status": "blocked",
+      "reason": "Adapter \"uia\" requires win32; this host is darwin."
+    }
+  ],
+  "budgets": [
+    {
+      "what": "connect",
+      "budgetMs": 5000,
+      "note": "first connect to a target (SF-21's 5 s)",
+      "samples": 5,
+      "p95Ms": 912,
+      "medianMs": 626,
+      "within": true
+    },
+    {
+      "what": "snapshot",
+      "budgetMs": 5000,
+      "note": "a useful first snapshot",
+      "samples": 5,
+      "p95Ms": 823,
+      "medianMs": 477,
+      "within": true
+    },
+    {
+      "what": "act",
+      "budgetMs": 5000,
+      "note": "one dispatched action, typing into a real field",
+      "samples": 5,
+      "p95Ms": 576,
+      "medianMs": 533,
+      "within": true
+    },
+    {
+      "what": "desktop first paint",
+      "budgetMs": 60000,
+      "note": "launch to Surfaces on screen",
+      "samples": 1,
+      "p95Ms": 1141,
+      "medianMs": 1141,
+      "within": true
+    }
+  ],
+  "quickStart": {
+    "source": "examples/surface-control/README.md",
+    "directory": "/var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-surface-quick-start-00Pe7N",
+    "tarball": "31 packed tarball(s)",
+    "commands": [
+      {
+        "command": "npm install @svatah/yam",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "the scoped package, which is what SF-20 asks the docs to say"
+      },
+      {
+        "command": "npm install <31 packed tarball(s)>",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "installed outside the workspace, from /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-surface-quick-start-pack-6uVmB6"
+      },
+      {
+        "command": "yam surface targets --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "yam surface connect --url http://localhost:3000 --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "substitutions": [
+          "http://localhost:3000 → http://127.0.0.1:51363 (the reader's own application)"
+        ],
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "yam surface snapshot --session s_... --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "substitutions": [
+          "s_... → s_1a566d92bcce (what the previous command printed)"
+        ],
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "yam surface read --session s_... --kind title --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "substitutions": [
+          "s_... → s_1a566d92bcce (what the previous command printed)"
+        ],
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "echo '{\"predicate\":{\"kind\":\"titleContains\",\"value\":\"Home\"},\"subject\":\"page\"}' > check.json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "exit 0"
+      },
+      {
+        "command": "yam surface check --session s_... --input check.json --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "substitutions": [
+          "s_... → s_1a566d92bcce (what the previous command printed)"
+        ],
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "yam surface close --session s_... --json",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "substitutions": [
+          "s_... → s_1a566d92bcce (what the previous command printed)"
+        ],
+        "detail": "exit 0, answered in the result envelope"
+      },
+      {
+        "command": "npx @svatah/yam mcp",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "generic: the scoped package and the `mcp` subcommand, no client-specific plugin"
+      },
+      {
+        "command": "an MCP client initialises against the installed package and lists its tools",
+        "source": "examples/surface-control/README.md",
+        "ok": true,
+        "detail": "21 tool(s), including 14 surface tools"
+      }
+    ]
+  }
+}

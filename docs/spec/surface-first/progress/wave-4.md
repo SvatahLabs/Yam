@@ -176,3 +176,146 @@ Evidence in `docs/spec/surface-first/evidence/wave-4/`:
   needs the grant revoked mid-run, which no unattended host can produce.
 - Windows UIA, Appium and BiDi are not revalidated here; T19 records what each
   says about itself and why.
+
+---
+
+## T19 — Publish coverage and performance
+
+**Status:** complete. **271 of 271 reached checks pass; 5 are blocked; 276 were
+attempted.**
+
+**Requirements:** SF-09, SF-18, SF-20, SF-21.
+
+### The report is generated, and the denominator is the headline
+
+`node scripts/coverage-report.mjs` (`pnpm coverage`) writes
+`docs/spec/surface-first/evidence/wave-4/coverage.md` and `coverage.json`.
+Nothing in it is typed in: the suite results are read from the JSON their
+runners wrote, adapter readiness is asked of the product, the timings are
+measured in the process that reports them, and the quick starts are run from a
+packed tarball outside the workspace.
+
+SF-21: *"A high agreement percentage on a small reachable subset cannot satisfy
+release coverage."* So every row reads **passed, failed, reached, blocked,
+attempted**, and the headline is the three totals rather than a percentage. A
+blocked row always carries the sentence that would have to become false for it
+to be reached.
+
+| Interface | Platform | Reached | Passed | Blocked |
+|---|---|---|---|---|
+| CLI | browser (the packaged renderer) | 26 | 26 | 0 |
+| MCP | browser (the packaged renderer) | 25 | 25 | 0 |
+| CLI | macOS AX (the packaged window) | 17 | 17 | 0 |
+| MCP | macOS AX (the packaged window) | 17 | 17 | 0 |
+| desktop | the packaged application | 1 | 1 | 0 |
+| desktop | **browser-hosted** (the built renderer) | 154 | 154 | 0 |
+| HTTP | the service's `/v1` routes | 14 | 14 | 0 |
+| external | independent oracles | 4 | 4 | 1 |
+| packaging | a clean install from the packed tarball | 11 | 11 | 0 |
+| adapter | readiness, one row each | 2 | 2 | 4 |
+
+The `desktop / browser-hosted` row keeps its label. It is
+`apps/desktop/test/surfaces-dogfood.mjs`, which builds the renderer and drives
+it in a browser; it is not the packaged application, and counting it as if it
+were is the thing this wave exists to stop.
+
+### Adapters: validated, unvalidated, blocked — and the difference
+
+SF-09: *"An adapter's presence in a dropdown is insufficient evidence of
+support."* Neither is `available: true`, which means registered and on a
+matching platform — a claim about this machine, not about the adapter. So the
+report reads the T18 transcript for adapters a session was actually **opened
+through**, and everything else says why not, in the words of what would have to
+be true.
+
+| Adapter | Status | Evidence, or the reason |
+|---|---|---|
+| `playwright` | **validated** | a session of kind `web` opened through it in this run |
+| `ax` | **validated** | a session of kind `desktop` opened through it in this run |
+| `http` | unvalidated here | driven by `packages/cli/test/surface-transport.test.ts` in the gate rather than by this suite, which drives the packaged desktop |
+| `bidi` | unvalidated | needs a Chrome or Firefox started with a BiDi endpoint; `pnpm bidi:independence` is the suite that drives it and it is not part of this run |
+| `appium` | unvalidated | needs an Appium server and a device or emulator; neither is present on this host, and no device runner is provisioned |
+| `uia` | **blocked** | `Adapter "uia" requires win32; this host is darwin.` — the product's own sentence; no Windows runner is available |
+
+### Clean-package quick starts, from the docs, verbatim
+
+`node scripts/surface-quick-start.mjs` (`pnpm quick-start:surface`) packs the
+CLI and its closure with `pnpm pack`, installs the tarballs into a directory
+under the OS temporary directory — **outside** this workspace, so nothing
+resolves through pnpm's links — and runs **every command extracted from
+`examples/surface-control/README.md`**. The commands are not written in the
+script; they are read out of the document, so a doc that drifts is a failing
+check rather than a stale page.
+
+**11 of 11 commands pass**, including `npm install @svatah/yam` being the
+scoped name SF-20 requires, the six `yam surface` lines of the journey, and an
+ordinary MCP client initialising against the installed package and listing
+**21 tools, 14 of them surface tools**.
+
+A reader replaces exactly two things when they copy this quick start, and so
+does the script — `http://localhost:3000` for their own application and `s_...`
+for what the previous command printed, which is what the document's own comment
+tells them to do. Both substitutions are recorded beside the command in
+`coverage.json`, so "verbatim" does not have to be taken on trust.
+
+**A defect the running found.** The first draft of this runner hosted the
+sample application *in its own process* while running the commands under
+`spawnSync`, which blocks the event loop — so the server could not answer the
+browser, and every connect reported `TIMEOUT` after ten seconds. A harness that
+publishes its own blocked event loop as a product timeout is worse than no
+harness; the application now runs in a child process. The same mistake, and the
+same fix, appears in the timing measurement below.
+
+### Timing budgets: defined here, measured here
+
+`requirements.md` calls these *"proposed product budgets to calibrate, not
+measured current performance"*. This is the calibration, on a named machine.
+Each sample is a **fresh process**, so cold start is included — which is what a
+person at a terminal actually pays.
+
+Reference machine: `darwin arm64, Node v25.6.1`.
+
+| What | Budget | p95 | Median | Samples | Within |
+|---|---|---|---|---|---|
+| connect (a browser to the sample app) | 5000 ms | 912 ms | — | 5 | yes |
+| snapshot (bounded, interactive only) | 5000 ms | 823 ms | — | 5 | yes |
+| act (typing into a real field) | 5000 ms | 576 ms | — | 5 | yes |
+| the desktop's first paint (launch to Surfaces on screen) | 60000 ms | 1141 ms | — | 1 | yes |
+
+The exact numbers are in `coverage.json`; they will differ per machine and the
+report always names the one it ran on.
+
+**`act` measures an act.** An earlier draft timed an HTTP session's
+`capabilities` call and labelled it `act`, because an HTTP surface refuses
+`act` — a budget measured on a different operation than the one it names is
+worse than no budget. It now drives the sample application and types into a
+field of it.
+
+### Validate
+
+| T19 Validate item | Shown by |
+|---|---|
+| Attempted / reached / passed / failed / blocked by platform and interface | `coverage.md`'s first table, generated. |
+| Externally verified checks distinguished | The `Externally verified` column; the `external` row is the independent oracles. |
+| Clean-package quick starts run | `pnpm quick-start:surface` — 11 of 11, from a packed tarball outside the workspace. |
+| Timing budgets defined and measured | The budgets table, measured in the same run, on a named machine. |
+| BiDi / Appium / UIA revalidated or marked unvalidated with exact host reasons | The adapters table: each unvalidated row names what would have to be true; `uia` carries the product's own refusal sentence. |
+| No headline percentage without its denominator | The report's headline is three counts and says why. |
+
+### Deviations
+
+- **BiDi and Appium are marked unvalidated rather than revalidated.** T19
+  permits either. Driving BiDi needs a browser started with a BiDi endpoint and
+  Appium needs a server and a device; neither is provisioned here, and inventing
+  a pass for them is precisely what SF-09 forbids.
+- **`http` is validated by the gate, not by this suite.** Its row says so. The
+  suite's subject is the packaged desktop; the HTTP interface is covered by its
+  own row (`catalogue-to-openapi`, 14 of 14) and by `surface-transport.test.ts`.
+- **One sample for the desktop's first paint.** It is the T18 run's own launch
+  measurement, and that run launches the application once.
+
+### Known gaps
+
+- No Windows, device or BiDi runner on this host, so three adapters carry a
+  reason instead of a result.
+- The budgets are one machine's. They are calibration, and the report says so.

@@ -72,7 +72,10 @@
     "self:sdk": "node scripts/self-sdk.mjs",
     "quick-start:registry": "node scripts/quick-start-registry.mjs",
     "docs": "node scripts/docs.mjs",
-    "docs:check": "node scripts/docs.mjs --check"
+    "docs:check": "node scripts/docs.mjs --check",
+    "yam-on-yam": "node evals/self/yam-on-yam/run.mjs",
+    "coverage": "node scripts/coverage-report.mjs",
+    "quick-start:surface": "node scripts/surface-quick-start.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
