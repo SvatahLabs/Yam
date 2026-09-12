@@ -40,6 +40,14 @@ export interface UiState {
   readonly cursor: Readonly<Record<Pane, number>>;
   readonly paletteOpen: boolean;
   readonly paletteQuery: string;
+  /**
+   * What is being typed, when something is (TV-07's modes).
+   *
+   * A cockpit whose keys are single letters cannot also accept a sentence
+   * without saying which it is doing. `typing` is that mode: while it holds a
+   * string, letters are letters and `esc` gives them back.
+   */
+  readonly typing?: { readonly where: "say"; readonly text: string };
   /** Which row the palette's selection is on. It moves (TV-08). */
   readonly paletteAt: number;
   /** Action ids, most recently run first: what the palette offers on no query. */

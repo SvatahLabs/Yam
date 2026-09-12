@@ -107,8 +107,14 @@ on Flows while the app opened on Session, two drafts after the decision, and
 * **The `yam mcp --http` client name is a placeholder.** A client that names
   itself at initialize should be recorded by that name; the transport has the
   handshake and the plumbing to read it is not written.
-* **The say mode grounds nothing yet.** The model carries the sentences and the
-  flow being written; `yam repl`'s grounding is not wired into the Session
-  screen, so `say` shows what a capture wrote rather than accepting a new
-  sentence. That is the next piece of work, and it is the one the mocks promise
-  most loudly.
+* **The say mode takes a sentence and does not run it.** `i` opens the line,
+  letters are letters while it is open, and `esc` gives the keys back — that
+  half is done and tested. What is not done is grounding and performing the
+  sentence against the *connected* session, because the runtime builds its own
+  surface through `createSurface` rather than taking a broker session. That is
+  the join this specification's own "Not in scope" section names as a runtime
+  change, and it is the same one that stops a run being watched on the surface
+  a person has selected. TV-T07c is marked partly done for exactly this clause.
+
+  It is the piece the mocks promise most loudly, and it is one runtime change
+  away rather than a view-layer one.

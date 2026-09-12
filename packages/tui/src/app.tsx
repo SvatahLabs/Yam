@@ -358,6 +358,50 @@ export function App(props: AppProps): React.JSX.Element {
       return;
     }
 
+    /*
+     * Typing a sentence (TV-15, TV-07).
+     *
+     * While the say line holds text, a letter is a letter: `r` does not run the
+     * flow and `q` does not quit. That is what a mode is for, and a cockpit
+     * whose keys are single letters cannot accept a sentence without one.
+     */
+    if (ui.typing !== undefined) {
+      if (key.escape) {
+        setUi({ ...ui, typing: undefined });
+        return;
+      }
+      if (key.backspace || key.delete) {
+        setUi({ ...ui, typing: { ...ui.typing, text: ui.typing.text.slice(0, -1) } });
+        return;
+      }
+      if (key.return) {
+        /*
+         * Said, and not yet run.
+         *
+         * Grounding a sentence against the *connected* session needs the runtime
+         * to take a broker session, which is the join `docs/spec/view-layers`
+         * puts out of scope and names as a runtime change. So the sentence is
+         * held, the offer is drawn, and nothing pretends to have executed.
+         */
+        setUi({
+          ...ui,
+          typing: undefined,
+          message: `"${ui.typing.text}" is not bound yet: point at it with p, or leave it unbound.`,
+        });
+        return;
+      }
+      if (input !== "" && !key.ctrl && !key.meta) {
+        setUi({ ...ui, typing: { ...ui.typing, text: ui.typing.text + input } });
+      }
+      return;
+    }
+
+    /* `i` opens the say line, on the screen that has one. */
+    if (input === "i" && ui.screen === "session" && modeFrom(ui.params["mode"]) === "say") {
+      setUi({ ...ui, typing: { where: "say", text: "" } });
+      return;
+    }
+
     if (key.ctrl && input === "k") {
       setUi({ ...ui, paletteOpen: true, paletteQuery: "", paletteAt: 0 });
       return;
@@ -519,6 +563,7 @@ export function App(props: AppProps): React.JSX.Element {
    * the regions — which fill it, rather than being as tall as they happen to be.
    */
   const messageRows = ui.message === undefined && !busy ? 0 : 1;
+  const typingRows = ui.typing === undefined ? 0 : 1;
   /*
    * The palette takes its rows from the body, not from beyond the bottom of the
    * terminal: a frame that is exactly the terminal has no "beyond" (TV-04).
@@ -531,7 +576,7 @@ export function App(props: AppProps): React.JSX.Element {
    * terminal's either way, because that is the fact a capture is read with.
    */
   const drawnRows = ui.layout.rows - (props.inline === true ? 1 : 0);
-  const bodyRows = Math.max(3, drawnRows - 2 - messageRows - paletteRowCount - helpRowCount);
+  const bodyRows = Math.max(3, drawnRows - 2 - messageRows - typingRows - paletteRowCount - helpRowCount);
 
   return (
     <Box flexDirection="column" width={ui.layout.columns} height={drawnRows}>
@@ -568,6 +613,14 @@ export function App(props: AppProps): React.JSX.Element {
           boxes.current = drawn;
         }}
       />
+
+      {ui.typing === undefined ? null : (
+        <Text>
+          <Text color="magenta">› </Text>
+          {ui.typing.text}
+          <Text inverse> </Text>
+        </Text>
+      )}
 
       {messageRows === 0 ? null : (
         <Text color={busy ? colourOf("info") : colourOf("neutral")} wrap="truncate-end">

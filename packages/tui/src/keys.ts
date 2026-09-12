@@ -79,6 +79,7 @@ export const COMMAND_KEYS: readonly CommandKey[] = [
    * and the mode cycles on a key that collides with nothing.
    */
   { key: "m", command: "mode.next", label: "record · say · do" },
+  { key: "i", command: "say.open", label: "type a sentence (say mode)" },
   { key: "q", command: "quit", label: "quit" },
 ];
 

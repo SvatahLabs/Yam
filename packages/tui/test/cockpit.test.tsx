@@ -166,6 +166,57 @@ const track = <T extends { unmount: () => void }>(one: T): T => {
   return one;
 };
 
+describe("typing a sentence is a mode (TV-15, TV-07)", () => {
+  it("takes letters as letters once the line is open", async () => {
+    /*
+     * A cockpit whose keys are single letters cannot also accept a sentence
+     * without saying which it is doing: `r` would run the flow halfway through
+     * the word "receipt".
+     */
+    const instance = track(
+      renderApp(
+        <App
+          service={fakeService(FIXTURES)}
+          connection={CONNECTION}
+          screen="session"
+          params={{ mode: "say" }}
+        />,
+      ),
+    );
+    await settle();
+    instance.stdin.write("i");
+    await settle();
+    for (const letter of "run") {
+      instance.stdin.write(letter);
+      await settle();
+    }
+    expect(instance.lastFrame() ?? "").toContain("run");
+  });
+
+  it("gives the keys back on escape", async () => {
+    const instance = track(
+      renderApp(
+        <App
+          service={fakeService(FIXTURES)}
+          connection={CONNECTION}
+          screen="session"
+          params={{ mode: "say" }}
+        />,
+      ),
+    );
+    await settle();
+    instance.stdin.write("i");
+    await settle();
+    instance.stdin.write("x");
+    await settle();
+    instance.stdin.write("\u001b");
+    await settle();
+    /* The line is gone, and the frame is still exactly the terminal. */
+    const lines = (instance.lastFrame() ?? "").split("\n");
+    expect(lines.length).toBe(40);
+  });
+});
+
 describe("the cockpit is live (TV-09, TV-T14)", () => {
   it("says the stream is arriving, without anyone pressing a key", async () => {
     const { lastFrame } = track(await cockpit("run", { runId: "comp" }));
