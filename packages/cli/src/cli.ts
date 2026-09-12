@@ -200,6 +200,19 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
    * Help (T14.3): one screen for `yam help`, one topic for `yam help <topic>`,
    * one command for `yam <command> --help`, and a noun's verbs for `yam <noun>`.
    */
+  /*
+   * `yam completion` — the command table's third reader (TV-C01, TV-17).
+   *
+   * Beside `help` rather than in the dispatch table below, because it is about
+   * the table rather than about a project: it needs no directory and reads no
+   * configuration.
+   */
+  if (command === "completion") {
+    const { completionScript } = await import("./help.js");
+    io.out(completionScript(args.command[1] === "zsh" ? "zsh" : "bash"));
+    return EXIT.ok;
+  }
+
   if (command === "help") {
     const { TOP_LEVEL, topic } = await import("./help.js");
     const name = args.command[1];
