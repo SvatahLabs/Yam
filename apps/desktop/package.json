@@ -25,10 +25,11 @@
     "package": "node ../../scripts/package-app.mjs",
     "package:test": "node ../../scripts/package-app.mjs --test",
     "smoke": "pnpm run ensure-electron && node ../../scripts/app-smoke.mjs",
+    "smoke:windowed": "pnpm run ensure-electron && node ../../scripts/app-smoke.mjs --windowed-path",
+    "stage-cli": "node ../../scripts/stage-app-cli.mjs",
     "start": "pnpm run ensure-electron && electron-forge start",
     "test": "vitest run && playwright test",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "stage-cli": "node ../../scripts/stage-app-cli.mjs"
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "@svatah/yam-schema": "workspace:*",

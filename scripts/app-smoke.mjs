@@ -35,7 +35,29 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const APP_DIR = join(ROOT, "apps", "desktop");
-const project = resolve(ROOT, process.argv[2] ?? "evals/fixtures");
+const args = process.argv.slice(2);
+/*
+ * `--windowed-path`: launch with the environment a *window* gets, not a shell.
+ *
+ * On macOS an app started from Finder inherits `launchd`'s, where `PATH` is
+ * `/usr/bin:/bin:/usr/sbin:/sbin`. Homebrew's Node is not on that, nor is any
+ * version manager's — so the first packaged launch reported no Node on a machine
+ * that had one, while this check, which inherits the developer's shell, passed.
+ *
+ * A check that cannot fail the way the product fails is not a check; that is the
+ * sentence at the top of this file, and this is the second time it applied.
+ */
+const windowed = args.includes("--windowed-path");
+const project = resolve(ROOT, args.find((one) => !one.startsWith("--")) ?? "evals/fixtures");
+
+/** The environment the app is launched with, minus what a window would not have. */
+function launchEnvironment() {
+  if (!windowed) return process.env;
+  const kept = { ...process.env };
+  /* `SHELL` stays: recovering the login shell's PATH is the thing under test. */
+  delete kept["YAM_NODE"];
+  return { ...kept, PATH: process.platform === "win32" ? kept["PATH"] : "/usr/bin:/bin:/usr/sbin:/sbin" };
+}
 
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
 if (!existsSync(cli)) {
@@ -95,8 +117,8 @@ if (packaged === undefined && !existsSync(entry)) {
 
 process.stdout.write(
   packaged === undefined
-    ? `yam smoke target=unpackaged (${entry})\n`
-    : `yam smoke target=packaged (${packaged})\n`,
+    ? `yam smoke target=unpackaged (${entry})${windowed ? " path=windowed" : ""}\n`
+    : `yam smoke target=packaged (${packaged})${windowed ? " path=windowed" : ""}\n`,
 );
 
 const child =
@@ -105,7 +127,7 @@ const child =
         cwd: APP_DIR,
         stdio: ["inherit", "pipe", "pipe"],
         env: {
-          ...process.env,
+          ...launchEnvironment(),
           YAM_APP_SMOKE: project,
           YAM_CLI: cli,
           YAM_A11Y: "1",
@@ -116,7 +138,7 @@ const child =
         cwd: APP_DIR,
         stdio: ["inherit", "pipe", "pipe"],
         env: {
-          ...process.env,
+          ...launchEnvironment(),
           YAM_APP_SMOKE: project,
           // No `YAM_CLI`, and no `YAM_NODE`: a packaged app has to find
           // its own CLI under `resources/` and its own Node on `PATH` (§13.6).
