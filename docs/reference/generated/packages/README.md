@@ -37,6 +37,6 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-tool`](tool.md) | 17 | MCP tool server exposing stories as deterministic tools |
 | [`@svatah/yam-trajectory`](trajectory.md) | 19 | Trajectory capture and compile to proposals |
 | [`@svatah/yam-tui`](tui.md) | 78 | `yam ui` — the terminal cockpit, a second renderer of the screen model (REQ-TUI-1) |
-| [`@svatah/yam-ui`](ui.md) | 33 | The Yam design system: React components on Radix primitives, every one of them named and id'd (REQ-ADE-12) |
+| [`@svatah/yam-ui`](ui.md) | 42 | The Yam design system: React components on Radix primitives, every one of them named and id'd (REQ-ADE-12) |
 | [`@svatah/yam-ui-tokens`](ui-tokens.md) | 26 | The Yam design tokens: two themes, one type ramp, one status set (REQ-ADE-12) |
 | [`@svatah/yam-workflow`](workflow.md) | 8 | Story-as-function runner and resume |

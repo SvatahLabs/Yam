@@ -27,10 +27,14 @@ The Yam design system: React components on Radix primitives, every one of them n
 | `InspectorSection` | function | `export function InspectorSection(` | One section of the right inspector: a heading and its rows. |
 | `Kbd` | function | `export function Kbd(` | A key, drawn the way the mockups draw one. Decorative by default. |
 | `KeyValues` | function | `export function KeyValues(` | The inspector's key–value grid: `Compiles at`, `Target`, `Binding`. |
+| `Log` | function | `export function Log(props:` | A tail that follows, and says when it has stopped following. |
+| `LogLine` | interface | `export interface LogLine` |  |
+| `ModeStrip` | function | `export function ModeStrip<Mode extends string>(props:` | The mode strip (REQ-ADE-14). |
 | `Named` | interface | `export interface Named` | Everything interactive takes these two, and neither is optional. |
 | `NAMED_COMPONENTS` | variable | `NAMED_COMPONENTS = [` | Every component that takes a `label` and an `id`, by name. |
 | `PaletteProps` | interface | `export interface PaletteProps` |  |
 | `PaletteRow` | interface | `export interface PaletteRow` | One row of the palette, as the app and `yam ui` both build it. |
+| `PickerOverlay` | function | `export function PickerOverlay(props:` | "Point at it in the application", as a state rather than a mode of the app. |
 | `Pill` | function | `export function Pill(props: PillProps): React.JSX.Element` | A status pill: a word, in a colour, with the colour's glyph if asked. |
 | `PillProps` | interface | `export interface PillProps` |  |
 | `PORTAL_HOST_ID` | variable | `PORTAL_HOST_ID = "sv-portal-host"` | The id of the element every overlay in the app is portalled into. |
@@ -40,8 +44,13 @@ The Yam design system: React components on Radix primitives, every one of them n
 | `requireNamed` | function | `export function requireNamed(component: string, named: Partial<Named>): string` | Throw, in development, when a control has no name or no id. |
 | `SelectOption` | interface | `export interface SelectOption` |  |
 | `SelectProps` | interface | `export interface SelectProps extends Named` |  |
+| `Split` | function | `export function Split(props:` | Two panes and a handle between them. |
 | `Table` | function | `export function Table<Row>(props: TableProps<Row>): React.JSX.Element` | A table with a caption that is its accessible name. |
 | `TableProps` | interface | `export interface TableProps<Row> extends Named` |  |
 | `TabsProps` | interface | `export interface TabsProps extends Named` |  |
 | `TabStrip` | function | `export function TabStrip(props: TabsProps): React.JSX.Element` | A tab strip, on Radix's `Tabs`: roving focus, arrow keys, the right roles. |
+| `Toast` | function | `export function Toast(props:` | What just happened, over the frame rather than pushing it (TV-A03). |
+| `Tree` | function | `export function Tree(props: TreeProps): React.JSX.Element` | A semantic tree, which is what a snapshot is. |
+| `TreeNode` | interface | `export interface TreeNode` |  |
+| `TreeProps` | interface | `export interface TreeProps` |  |
 | `UnnamedControlError` | class | `export class UnnamedControlError extends Error` |  |

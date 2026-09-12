@@ -18,6 +18,7 @@
  * It is a component rather than a static page so that it cannot drift: a
  * component whose props changed and whose sheet entry did not would not compile.
  */
+import { Log, ModeStrip, Toast, Tree } from "./components/session.js";
 import { useState } from "react";
 import { STATUS_TONES, THEMES, TYPE, type Theme } from "@svatah/yam-ui-tokens";
 import { Button, Chooser, Field, Kbd } from "./components/controls.js";
@@ -264,6 +265,43 @@ function Half({ theme }: { readonly theme: Theme }): React.JSX.Element {
             </li>
           ))}
         </ul>
+      </InspectorSection>
+
+      {/* The primitives Session needs (TV-A03), on the sheet the axe pass reads. */}
+      <InspectorSection id={`sheet-session${suffix}`} title={`Session${theme === "dark" ? "" : " · light"}`}>
+        <ModeStrip
+          id={`sheet-modes${suffix}`}
+          label="Session mode"
+          modes={[
+            { id: "record", label: "Record" },
+            { id: "say", label: "Say" },
+            { id: "do", label: "Do" },
+          ]}
+          mode="say"
+          onMode={() => undefined}
+        />
+        <Tree
+          id={`sheet-tree${suffix}`}
+          label="Snapshot"
+          selected="e12"
+          nodes={[
+            { id: "e1", label: "Booking — sample-web", kind: "document", depth: 0 },
+            { id: "e11", label: "Book a slot", kind: "heading", depth: 1 },
+            { id: "e12", label: "Location", kind: "textbox", depth: 2, states: ["focusable"] },
+            { id: "e17", label: "Book now", kind: "button", depth: 2, states: ["enabled"] },
+          ]}
+        />
+        <Log
+          id={`sheet-log${suffix}`}
+          label="This session"
+          lines={[
+            { id: "1", at: "41.140", kind: "act", text: 'fill e12 "Indiranagar"', tone: "pass" },
+            { id: "2", at: "41.143", kind: "check", text: "value of e12 · passed", tone: "pass" },
+          ]}
+        />
+        <Toast id={`sheet-toast${suffix}`} tone="pass" label="verified">
+          value = &ldquo;Indiranagar&rdquo;
+        </Toast>
       </InspectorSection>
     </section>
   );
