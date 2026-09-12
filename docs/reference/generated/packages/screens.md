@@ -61,6 +61,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `HealState` | interface | `export interface HealState extends ScreenStateBase` |  |
 | `importResultView` | function | `export function importResultView(value: unknown): ImportState["result"]` | `POST /migrate`'s answer → the rows the screen shows. |
 | `ImportState` | interface | `export interface ImportState extends ScreenStateBase` |  |
+| `modeFrom` | function | `export function modeFrom(value: unknown): SessionMode` | `--mode`, validated against the model's own list; `do` when unsaid. |
 | `outcomeOf` | function | `export function outcomeOf(summary: SummaryResponse): Pill` | How a summary's outcome reads, in one place (T10.4 added `stopped`). |
 | `parseBinding` | function | `export function parseBinding(text: string): BindingFileResponse \| undefined` | One binding file's YAML → the shape a screen reads, or `undefined`. |
 | `Pill` | interface | `export interface Pill` | A pill: a word, and the tone that colours it. The word is never omitted. |
@@ -75,6 +76,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `RAIL` | variable | `RAIL: ReadonlyArray<` |  |
 | `RecordDecision` | interface | `export interface RecordDecision` | One grounding waiting on a reviewer (REQ-ADE-4, the `record.decision` event). |
 | `RecordState` | interface | `export interface RecordState extends ScreenStateBase` |  |
+| `RecordView` | typealias | `export type RecordView = Omit<RecordState, keyof ScreenStateBase>;` |  |
 | `RunInspector` | interface | `export interface RunInspector` |  |
 | `runScreen` | variable | `runScreen: Screen<RunState> ` |  |
 | `RunsFilters` | interface | `export interface RunsFilters` | The filter chips the artboard shows. `all` is not a filter. |
@@ -85,6 +87,8 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `runStateFrom` | function | `export function runStateFrom(` | Build the whole state from a summary, its results and its audit. |
 | `RunStepRow` | interface | `export interface RunStepRow` |  |
 | `RunStoryRow` | interface | `export interface RunStoryRow` |  |
+| `SaidSentence` | interface | `export interface SaidSentence` | One sentence the person said, and what became of it. |
+| `SayView` | interface | `export interface SayView` | The **say** mode's own state (TV-15). |
 | `Screen` | interface | `export interface Screen<S extends ScreenStateBase = ScreenStateBase>` | One screen (LLD §13.7). |
 | `SCREEN_IDS` | variable | `SCREEN_IDS = [` | The twelve screens (LLD §13.7). |
 | `screenById` | function | `export function screenById(id: ScreenId): Screen<ScreenStateBase>` | One screen by id. Throws rather than answering `undefined`: ids are a union. |
@@ -100,6 +104,10 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `SECTIONS` | variable | `SECTIONS: readonly Section[] = [` |  |
 | `ServiceConnectionInfo` | interface | `export interface ServiceConnectionInfo` | Where the connection is, for the renderers' chrome and for `--json`. |
 | `ServiceEventLike` | interface | `export interface ServiceEventLike` | One line of the event stream, as far as a screen cares. |
+| `SESSION_MODES` | variable | `SESSION_MODES = ["record", "say", "do"] as const` | The three ways of driving one session (REQ-ADE-14). |
+| `SessionMode` | typealias | `export type SessionMode = (typeof SESSION_MODES)[number];` |  |
+| `sessionScreen` | variable | `sessionScreen: Screen<SessionState> ` |  |
+| `SessionState` | interface | `export interface SessionState extends ScreenStateBase` |  |
 | `SettingsState` | interface | `export interface SettingsState extends ScreenStateBase` |  |
 | `Sources` | class | `export class Sources` | Collects the endpoints a load touched and the first thing that went wrong. |
 | `stamp` | function | `export function stamp(at: string \| undefined, startedAt: string \| undefined): string` | `2026-09-05T09:13:42.896Z` and the run's start → `08.451`, the mockup's stamp. |
@@ -123,6 +131,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `SurfacesState` | interface | `export interface SurfacesState extends ScreenStateBase` |  |
 | `SurfaceTargetRow` | interface | `export interface SurfaceTargetRow` | One target the service discovered — an adapter, or a URL through one. |
 | `SurfaceTreeLine` | interface | `export interface SurfaceTreeLine` | One line of the semantic tree, as the inspector draws it. |
+| `SurfaceView` | typealias | `export type SurfaceView = Omit<SurfacesState, keyof ScreenStateBase>;` | The field shapes, without the screen envelope. |
 | `ToolsResponse` | interface | `export interface ToolsResponse` | `GET /tools` — `{ tools: { tools, refused }, invocations }`. |
 | `TREE_MAX_NODES` | variable | `TREE_MAX_NODES = 200` | How many nodes the inspector's tree asks for. Bounded, and it says when it truncated. |
 | `treeLines` | function | `export function treeLines(` | A snapshot's flat nodes → the indented lines the tree pane draws. |

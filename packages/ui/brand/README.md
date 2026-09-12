@@ -1,8 +1,8 @@
 # The mark
 
-Vendored from `Svatah/Portal/brand/yam/` on 2026-09-09. The Portal is the
-source; this directory is a copy so that a build of this repository does not
-depend on a checkout of another one. When the mark changes there, it is copied
+Vendored from the brand repository (`Portal/brand/yam/`) on 2026-09-09. That
+repository is the source; this directory is a copy so that a build of this one
+does not depend on a checkout of another. When the mark changes there, it is copied
 here deliberately — `TV-A08`.
 
 | File | For |
