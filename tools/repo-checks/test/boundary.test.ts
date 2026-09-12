@@ -138,3 +138,38 @@ describe("every rule bites (TV-T10)", () => {
     expect(code(`// the colour is #4fc48a\nconst x = 1;`)).not.toContain("#4fc48a");
   });
 });
+
+/**
+ * The rail is one rail (TV-A01, REQ-ADE-11, SF-16).
+ *
+ * `macros.mjs` drew the Flows-first rail of Draft 2.11 on every app artboard
+ * until TV-A01 — two drafts after the product stopped having one. An artboard is
+ * a claim about what the product looks like, and one describing navigation
+ * nobody can reach is a claim that came untrue quietly. So the model's sections,
+ * the app's rail and the design source are read together.
+ */
+describe("the rail the model declares is the rail that is drawn (TV-A01)", () => {
+  it("draws the model's sections in the design source", async () => {
+    const { SECTIONS } = (await import("@svatah/yam-screens")) as {
+      SECTIONS: ReadonlyArray<{ id: string; label: string }>;
+    };
+    const macros = readFileSync(fromRoot("docs/spec/design/macros.mjs"), "utf8");
+    const sidebar = macros.slice(macros.indexOf("const sidebar"), macros.indexOf("const topbar"));
+    for (const section of SECTIONS) {
+      expect(sidebar, `the artboards' rail has no ${section.label}`).toContain(`"${section.label}"`);
+    }
+  });
+
+  it("names nothing in the design source the model has abandoned", () => {
+    const macros = readFileSync(fromRoot("docs/spec/design/macros.mjs"), "utf8");
+    const sidebar = macros.slice(macros.indexOf("const sidebar"), macros.indexOf("const topbar"));
+    for (const gone of ["Bindings", "Agents and tools", "API", "Data", "Import prototype database"]) {
+      expect(sidebar, `the artboards' rail still offers ${gone}`).not.toContain(`"${gone}"`);
+    }
+  });
+
+  it("builds the app's rail from the model rather than from a list of its own", () => {
+    const shell = readFileSync(fromRoot("apps/desktop/src/renderer/shell/Shell.tsx"), "utf8");
+    expect(shell).toMatch(/SECTIONS\.map\(/);
+  });
+});

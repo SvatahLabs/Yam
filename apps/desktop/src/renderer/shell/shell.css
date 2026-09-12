@@ -9,6 +9,17 @@
  * with a 44 px top bar and a 28 px status bar across all three.
  */
 
+.sv-root {
+  /*
+   * The mark as a mask, so it takes the accent (TV-A08).
+   *
+   * A mask rather than an image: the mono lockup is the shape, and colouring it
+   * with the accent means the one file works on both themes and cannot drift
+   * from the palette the way a second copy of the artwork would.
+   */
+  --brand-mark: url("@svatah/yam-ui/brand/yam-white.svg");
+}
+
 .sv-app {
   display: grid;
   grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--inspector-w);
@@ -42,12 +53,21 @@
   font-weight: 600;
 }
 
+/*
+ * The mark (TV-A08, TV-20).
+ *
+ * An accent-coloured square stood in for a logo here and in every artboard. The
+ * mark exists — four variants on a 48 grid, two colour and two mono — and the
+ * theme picks the one that reads on the background it is on, which is what
+ * having both was for.
+ */
 .sv-brand-mark {
   width: 18px;
   height: 18px;
-  border-radius: var(--r);
-  background: var(--accent);
   display: inline-block;
+  background: var(--accent);
+  -webkit-mask: var(--brand-mark) center / contain no-repeat;
+  mask: var(--brand-mark) center / contain no-repeat;
 }
 
 .sv-crumb {

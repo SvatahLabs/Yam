@@ -17,7 +17,15 @@ a { color: var(--accent); text-decoration: none; } a:hover { color: #d2c3ff; tex
 .app.no-inspector { grid-template-columns: 220px minmax(0, 1fr); }
 .topbar { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 16px; border-bottom: 1px solid var(--line); background: var(--bg1); }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: 0.01em; }
-.brand .mark { width: 18px; height: 18px; border-radius: 4px; background: var(--accent); display: inline-block; }
+/*
+ * The mark (TV-A08, TV-20). An accent square stood in for a logo on every
+ * artboard; the mono lockup is masked with the accent so one file reads on both
+ * themes. `docs/spec/design` is rendered from this directory, so the path is
+ * relative to it.
+ */
+.brand .mark { width: 18px; height: 18px; background: var(--accent); display: inline-block;
+  -webkit-mask: url("../../../packages/ui/brand/yam-white.svg") center / contain no-repeat;
+  mask: url("../../../packages/ui/brand/yam-white.svg") center / contain no-repeat; }
 .crumb { color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .crumb b { color: var(--fg); font-weight: 500; }
 .crumb .sep { color: var(--dim); }

@@ -42,6 +42,14 @@ export interface AppBridge {
   pickFile(kind: "directory" | "file"): Promise<string | null>;
   /** Read preferences, or merge a change and read them back. */
   preferences(next?: Partial<Preferences>): Promise<Preferences>;
+  /**
+   * The appearance to draw in, now and whenever it changes (TV-18).
+   *
+   * A callback rather than a value, because `system` means the operating
+   * system's setting *and its changes while the app is open* — sampling it at
+   * launch is what the stored preference did for nothing.
+   */
+  onTheme(listener: (theme: "light" | "dark") => void): () => void;
   /** Lines the service wrote to stderr while starting. */
   onServiceLog(listener: (line: string) => void): () => void;
   /**
@@ -66,6 +74,13 @@ const bridge: AppBridge = {
   serviceInfo: () => ipcRenderer.invoke("app:serviceInfo") as Promise<ServiceInfo | null>,
   pickFile: (kind) => ipcRenderer.invoke("app:pickFile", kind) as Promise<string | null>,
   preferences: (next) => ipcRenderer.invoke("app:preferences", next ?? null) as Promise<Preferences>,
+  onTheme: (listener) => {
+    const on = (_event: unknown, theme: "light" | "dark"): void => listener(theme);
+    ipcRenderer.on("app:theme", on);
+    return () => {
+      ipcRenderer.off("app:theme", on);
+    };
+  },
   onServiceLog: (listener) => {
     const handler = (_event: unknown, line: string): void => listener(line);
     ipcRenderer.on("service:log", handler);

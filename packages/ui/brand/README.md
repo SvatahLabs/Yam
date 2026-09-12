@@ -12,6 +12,7 @@ here deliberately — `TV-A08`.
 | `yam-white.svg` | the mono lockup on dark, and anywhere colour is not available |
 | `yam-black.svg` | the mono lockup on light |
 | `app-icon-512.png` | the source for the packaged application's icon set |
+| `app-icon.png` | what `forge.config.ts` points at; the packager appends each platform's extension |
 
 All four SVGs are one system: a 48 grid, `stroke-width: 2`, round caps and
 joins, transparent background. Everything at 24 px and above uses this artwork

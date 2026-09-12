@@ -21,12 +21,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./ui.css": "./ui.css"
+    "./ui.css": "./ui.css",
+    "./brand/*": "./brand/*"
   },
   "files": [
     "dist",
     "ui.css",
-    "README.md"
+    "README.md",
+    "brand"
   ],
   "engines": {
     "node": ">=22.0.0"

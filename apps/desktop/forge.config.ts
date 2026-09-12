@@ -13,6 +13,8 @@
  * forget. `RunAsNode` off is the important one: with it on, the packaged app can
  * be re-launched as a plain Node process with the app's own privileges.
  */
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerSquirrel } from "@electron-forge/maker-squirrel";
 import { MakerZIP } from "@electron-forge/maker-zip";
@@ -46,6 +48,18 @@ const config: ForgeConfig = {
   packagerConfig: {
     name: productName,
     appBundleId: testBuild ? "com.svatah.yam.test" : "com.svatah.yam",
+    /*
+     * The app's own icon (TV-A08, TV-20).
+     *
+     * There was none, so every packaged build shipped Electron's default — the
+     * one thing about the product a person sees before they have opened it. The
+     * mark is vendored in `packages/ui/brand/`, from the brand repository, so a
+     * build here does not depend on a checkout of another one.
+     *
+     * No extension: the packager appends the one each platform wants, and
+     * naming `.icns` here would build on macOS and fail on Windows.
+     */
+    icon: resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "packages", "ui", "brand", "app-icon"),
     // The project directory is the only source of truth (REQ-ADE-2), so there is
     // nothing to sign a manifest of and nothing to bundle but the app.
     asar: true,

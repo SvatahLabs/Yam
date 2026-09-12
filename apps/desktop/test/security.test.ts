@@ -122,13 +122,14 @@ describe("the preload bridge is four functions and two listeners (LLD §13.6)", 
    * `YAM_APP_PROJECT` opened before the renderer was there to open it.
    * Recorded as a deviation in `docs/spec/progress/phase-8.md`.
    */
-  it("exposes exactly openProject, serviceInfo, pickFile and preferences", () => {
+  it("exposes exactly the four calls and the three listeners", () => {
     const exposed = [...preload.matchAll(/^\s{2}(\w+):/gm)].map((match) => match[1]);
     expect(exposed).toEqual([
       "openProject",
       "serviceInfo",
       "pickFile",
       "preferences",
+      "onTheme",
       "onServiceLog",
       "onServiceOpened",
     ]);

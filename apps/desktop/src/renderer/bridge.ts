@@ -27,6 +27,8 @@ export interface AppBridge {
   pickFile(kind: "directory" | "file"): Promise<string | null>;
   preferences(next?: Partial<Preferences>): Promise<Preferences>;
   onServiceLog(listener: (line: string) => void): () => void;
+  /** The appearance to draw in, now and whenever the OS changes it (TV-18). */
+  onTheme(listener: (theme: "light" | "dark") => void): () => void;
   /** A project the main process opened from `YAM_APP_PROJECT` (T8.1). */
   onServiceOpened(
     listener: (event: { connection?: ServiceInfo; error?: string }) => void,

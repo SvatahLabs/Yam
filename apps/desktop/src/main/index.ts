@@ -25,7 +25,7 @@
  * (REQ-ADP-6, 7), and an Electron app that has not been told to expose its
  * accessibility tree exposes almost nothing to either.
  */
-import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
+import { app, nativeTheme, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import { existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import {
@@ -196,6 +196,29 @@ async function closeProject(): Promise<void> {
   debug("project.closed");
 }
 
+/**
+ * Follow the appearance the preference asks for (TV-18, TV-A06).
+ *
+ * `preferences.theme` has been stored since the app had preferences and applied
+ * to nothing: `data-theme` appeared nowhere outside the component sheet and
+ * `nativeTheme` was never read. `system` means the operating system's setting
+ * *and its changes while the app is open*, not its value at launch — which is
+ * the difference between following the OS and sampling it once.
+ */
+function applyTheme(): void {
+  nativeTheme.themeSource = preferences.theme;
+  const dark = nativeTheme.shouldUseDarkColors;
+  window_?.webContents.send("app:theme", dark ? "dark" : "light");
+}
+
+/* The OS changed its appearance while the app was open: follow it (TV-18). */
+nativeTheme.on("updated", () => {
+  window_?.webContents.send(
+    "app:theme",
+    nativeTheme.shouldUseDarkColors ? "dark" : "light",
+  );
+});
+
 function createWindow(): void {
   debug("window.creating", {
     width: preferences.window.width,
@@ -336,6 +359,7 @@ ipcMain.handle("app:preferences", (_event, next: unknown) => {
   if (next !== undefined && next !== null) {
     preferences = { ...preferences, ...(next as Partial<Preferences>) };
     writePreferences(preferencesPath(app.getPath("userData")), preferences);
+    applyTheme();
   }
   return preferences;
 });

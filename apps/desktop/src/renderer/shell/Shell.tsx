@@ -391,6 +391,24 @@ export function Shell(props: ShellProps): React.JSX.Element {
     return () => window.removeEventListener("keydown", onKey);
   }, [paletteOpen, runAction, screen, state]);
 
+  /*
+   * The appearance to draw in (TV-18, TV-A06).
+   *
+   * The preference has been stored since the app had preferences and applied to
+   * nothing — `data-theme` appeared nowhere outside the component sheet. It is
+   * on the root now, and it follows the operating system while the app is open
+   * rather than sampling it at launch.
+   */
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  useEffect(() => {
+    /* In a browser harness there is no bridge, and dark is the default. */
+    try {
+      return bridge().onTheme((next: "light" | "dark") => setTheme(next));
+    } catch {
+      return undefined;
+    }
+  }, []);
+
   /* ── the palette's rows: the registry, filtered by this state ──────────── */
 
   const paletteRows = useMemo<PaletteRow[]>(
@@ -562,7 +580,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
   }
 
   return (
-    <div className="sv-app sv-root">
+    <div className="sv-app sv-root" data-theme={theme}>
       {/* ── top bar ───────────────────────────────────────────────────────── */}
       <header className="sv-topbar">
         <span className="sv-brand">
@@ -580,7 +598,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
             /
           </span>
           <b id="crumb-section">
-            {SECTIONS.find((one) => one.id === sectionOf(showing))?.label ?? "Surfaces"}
+            {SECTIONS.find((one) => one.id === sectionOf(showing))?.label ?? "Session"}
           </b>
           <span className="sv-crumb-sep" aria-hidden="true">
             /

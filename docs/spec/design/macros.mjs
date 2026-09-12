@@ -15,6 +15,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 export const baseCss = readFileSync(join(HERE, "base.css"), "utf8");
 
 const I = {
+  session: '<svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h6M5 9.5h4"/></svg>',
   flows: '<svg viewBox="0 0 16 16"><path d="M3 2.5h7l3 3v8H3z"/><path d="M10 2.5v3h3"/><path d="M5.5 8h5M5.5 10.5h5"/></svg>',
   runs: '<svg viewBox="0 0 16 16"><path d="M5 3l8 5-8 5z"/></svg>',
   bindings: '<svg viewBox="0 0 16 16"><path d="M6.5 9.5l3-3"/><path d="M7 4.5l1.2-1.2a2.5 2.5 0 013.5 3.5L10.5 8"/><path d="M9 11.5l-1.2 1.2a2.5 2.5 0 01-3.5-3.5L5.5 8"/></svg>',
@@ -26,17 +27,21 @@ const I = {
   search: '<svg viewBox="0 0 16 16" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>',
 };
 const nav = (id, label, count, active) => `<div class="nav${active === id ? " active" : ""}" role="link" aria-label="${label}">${I[id]}<span>${label}</span>${count ? `<span class="count">${count}</span>` : ""}</div>`;
+/*
+ * The rail (`REQ-ADE-11`, `SF-16`, Draft 2.27).
+ *
+ * Four destinations — Session, Automations, Activity, Settings — and this macro
+ * drew the Flows-first rail of Draft 2.11 on every app artboard until TV-A01,
+ * two drafts after the product stopped having one. An artboard is a claim about
+ * what the product looks like; one that describes navigation nobody can reach is
+ * a claim that has come untrue quietly.
+ */
 const sidebar = (active) => `<nav class="sidebar" aria-label="Sections">
-<div class="section">Project</div>
-${nav("flows", "Flows", "7", active)}
-${nav("runs", "Runs", "12", active)}
-${nav("bindings", "Bindings", "41", active)}
-${nav("agents", "Agents and tools", "", active)}
-<div class="section">Resources</div>
-${nav("api", "API", "3", active)}
-${nav("data", "Data", "", active)}
+<div class="section">Work</div>
+${nav("session", "Session", "live", active)}
+${nav("flows", "Automations", "9", active)}
+${nav("runs", "Activity", "12", active)}
 <div class="grow"></div>
-${nav("import", "Import prototype database", "", active)}
 ${nav("settings", "Settings", "", active)}
 </nav>`;
 const topbar = (crumb) => `<header class="topbar"><div class="brand"><span class="mark"></span>Yam</div><div class="crumb"><span class="sep">/</span><b>yam-fixtures</b><span class="sep">/</span><span>${crumb}</span></div><div class="spacer"></div><div class="palette-hint" role="button" aria-label="Command palette">${I.search}<span>Search or run a command</span><kbd>⌘K</kbd></div><span class="env"><span class="dot"></span>service 127.0.0.1:55702</span><span class="env">test · playwright</span></header>`;
