@@ -335,10 +335,22 @@ export async function primaryJourney({ driver, connect, sampleUrl, record, label
       if (saidDispatched.envelope?.status === "succeeded") break;
       await new Promise((done) => setTimeout(done, 500));
     }
+    /*
+     * A failure keeps enough of the text to be read (P-W2-F12).
+     *
+     * Two hundred characters of a window's whole text is the window's title bar
+     * and nothing else, so a failure here said only that the check failed — not
+     * whether the word was absent, or present and spelled differently, or
+     * present beyond where the reader stopped. A diagnostic that hides its own
+     * evidence costs a run to re-gather it.
+     */
     check(
       "the application reports the action as dispatched",
       saidDispatched?.envelope?.status === "succeeded",
-      JSON.stringify(saidDispatched?.envelope?.result ?? saidDispatched?.envelope?.error ?? {}).slice(0, 200),
+      JSON.stringify(saidDispatched?.envelope?.result ?? saidDispatched?.envelope?.error ?? {}).slice(
+        0,
+        saidDispatched?.envelope?.status === "succeeded" ? 200 : 4_000,
+      ),
     );
 
     /*

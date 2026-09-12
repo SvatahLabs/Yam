@@ -732,9 +732,45 @@ export class AxSurface implements AgentSurface {
         const node = need(ref);
         const value = str("value", "");
         await bridge.perform({ kind: "focus", path: node.path });
-        if (node.source.actions?.includes("AXSetValue") === true || node.value !== undefined) {
+        /*
+         * Web content is typed into, never assigned to (P-W2-F13).
+         *
+         * `AXSetValue` puts the text in the element and tells nobody. A native
+         * control is fine with that — it reads its own value when asked. A
+         * framework-rendered one is not: React, Vue and Angular all keep the
+         * value in their own state and update it from *events*, so an assigned
+         * value leaves the page showing "ada" and the application still holding
+         * "". The adapter then reports success, which is the worst of both.
+         *
+         * This is not hypothetical. Yam drives the packaged Yam in
+         * `evals/self/yam-on-yam`, typed into that application's own fill form
+         * over AX, and the application dispatched with no value at all: "The
+         * `type` action needs `value`. Nothing was dispatched." The browser
+         * passes, which type through CDP and therefore produce real key events,
+         * did the same journey without trouble.
+         *
+         * So inside an `AXWebArea` the keys are pressed, which is what a person
+         * does and what every framework is listening for. Select-all first, so
+         * typing replaces rather than appends — `setValue` replaced, and this
+         * has to mean the same thing.
+         */
+        const webContent = node.controlPath.includes("AXWebArea");
+        const assignable =
+          node.source.actions?.includes("AXSetValue") === true || node.value !== undefined;
+        if (assignable && !webContent) {
           await bridge.perform({ kind: "setValue", path: node.path, value });
         } else {
+          /*
+           * Frontmost first. `keystroke` is System Events typing into whatever
+           * application is active — focusing a node inside a background window
+           * does not make that window the one receiving keys, and the text goes
+           * wherever the person was last. `setValue` needed no such thing, which
+           * is half of why it was reached for.
+           */
+          await bridge.perform({ kind: "activate" });
+          await bridge.perform({ kind: "focus", path: node.path });
+          /* ⌘A, then the text: replace, as assignment would have. */
+          await bridge.perform({ kind: "keystroke", text: "a", using: ["command down"] });
           await bridge.perform({ kind: "keystroke", text: value });
         }
         await this.refresh();

@@ -171,6 +171,9 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
   const screenshots: string[] = [];
   /** `screen:pathIndex` → the value set on it. */
   const values = new Map<string, string>();
+  /* Which field the keys go to, and whether ⌘A has selected what is in it. */
+  let focused: number | undefined;
+  let selectedAll = false;
   /** The window's size, once a `setSize` a resizable window obeyed changed it. */
   let size: readonly [number, number] | undefined;
 
@@ -218,10 +221,36 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
       return { ...window, nodes, truncated: nodes.length < window.nodes.length };
     },
     async perform(command): Promise<void> {
+      const recordedValue = (which: AppScreen, at: number): string | undefined => {
+        const node = recordedWindow(which).nodes[at];
+        return typeof node?.value === "string" ? node.value : undefined;
+      };
       commands.push(command);
+      if (command.kind === "focus") {
+        focused = indexOfPath(recordedWindow(screen).nodes, command.path);
+      }
       if (command.kind === "setValue") {
         const at = indexOfPath(recordedWindow(screen).nodes, command.path);
         if (at !== undefined) values.set(`${screen}:${at}`, command.value);
+      }
+      /*
+       * Typing changes the focused field, as typing does (P-W2-F13).
+       *
+       * The fixture modelled `setValue` and not keystrokes, so a test that typed
+       * and then read the value only worked while the adapter *assigned*. That
+       * is exactly the assumption that made the real defect invisible: inside a
+       * web area an assigned value never reaches the application, and nothing
+       * here could tell the difference. ⌘A selects, so the next text replaces.
+       */
+      if (command.kind === "keystroke" && focused !== undefined) {
+        const key = `${screen}:${focused}`;
+        if (command.using?.includes("command down") === true) {
+          if (command.text === "a") selectedAll = true;
+        } else {
+          const before = selectedAll ? "" : (values.get(key) ?? recordedValue(screen, focused) ?? "");
+          values.set(key, `${before}${command.text}`);
+          selectedAll = false;
+        }
       }
       if (command.kind === "setSize" && options.resizable !== false) {
         size = [command.size[0], command.size[1]];

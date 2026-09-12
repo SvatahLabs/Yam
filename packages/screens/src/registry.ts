@@ -210,6 +210,8 @@ const ACTIONS_ONLY: readonly Action[] = [
         name: "target",
         label: "URL, application name, or endpoint",
         placeholder: "https://example.com",
+        /* The three the CLI has and the app's form already sends. */
+        satisfiedBy: ["url", "app", "attach"],
       },
     ],
     availableWhen: loaded,

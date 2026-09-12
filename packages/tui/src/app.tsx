@@ -303,10 +303,11 @@ export function App(props: AppProps): React.JSX.Element {
        * every time. The action declares the field; the cockpit opens a line for
        * it; neither invents the other's half.
        */
+      const given = { ...(ui.params as Record<string, unknown>), ...answers };
+      const has = (name: string): boolean =>
+        given[name] !== undefined && String(given[name]).trim() !== "";
       const missing = (action.needs ?? []).find(
-        (one) =>
-          answers[one.name] === undefined &&
-          typeof (ui.params as Record<string, unknown>)[one.name] !== "string",
+        (one) => !has(one.name) && !(one.satisfiedBy ?? []).some(has),
       );
       if (missing !== undefined) {
         setUi({

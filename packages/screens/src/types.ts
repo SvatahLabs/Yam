@@ -258,6 +258,17 @@ export interface ActionInput {
   readonly label: string;
   /** An example, shown dim where the text will go. */
   readonly placeholder?: string;
+  /**
+   * Other argument names that already answer this, so nothing asks twice.
+   *
+   * `surface.connect` needs a target and takes it as `url`, `app` or `attach` —
+   * the CLI's three flags, and what the app's connect form has always sent. A
+   * renderer that only looked for `target` found it missing however full the
+   * form was, so pressing Connect opened a prompt and discarded the URL beside
+   * it. The form became decorative and the `yam-on-yam` journey, which types
+   * into that form, stopped connecting at all.
+   */
+  readonly satisfiedBy?: readonly string[];
 }
 
 /** One screen (LLD §13.7). */

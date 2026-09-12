@@ -1731,3 +1731,36 @@ test("a live session says so where every mode can see it (P-W2-F7)", async () =>
   await expect(page.locator("#session-recording")).toHaveCount(0);
   await expect(page.locator("#session-connected")).toHaveCount(0);
 });
+
+test("a filled connect form connects, and does not ask again (P-W2-F11)", async () => {
+  /*
+   * `surface.connect` declares that it needs a target, and the app's form has
+   * sent one as `url` since the screen was written. A check that looked only for
+   * the declared name found it missing however full the form was — so pressing
+   * Connect opened a prompt and threw the URL beside it away, the form became
+   * decorative, and `yam-on-yam`, which types into that form, stopped connecting
+   * at all. Its tree case had passed on 2026-09-09 and failed from then on.
+   */
+  await goToMode("do");
+  await page.locator("#surfaces-url").fill("http://127.0.0.1:65535/nothing-here");
+  await page.locator("#action-surface-connect").click();
+  /*
+   * The connect will fail — nothing is listening on that port — and that is the
+   * point: a *refusal* proves the action ran with what the form had. A prompt
+   * would prove it never did.
+   */
+  await expect(page.locator("#sv-ask")).toHaveCount(0);
+  await expect(page.locator("#status-context")).not.toContainText("URL, application name", {
+    timeout: 15_000,
+  });
+});
+
+test("an empty connect form asks for the target (TV-06)", async () => {
+  /* The other half: with nothing to go on, it asks rather than refusing. */
+  await goToMode("do");
+  await page.locator("#surfaces-url").fill("");
+  await page.locator("#action-surface-connect").click();
+  await expect(page.locator("#sv-ask")).toBeVisible();
+  await expect(page.locator("#sv-ask")).toContainText("URL, application name, or endpoint");
+  await page.keyboard.press("Escape");
+});

@@ -306,10 +306,11 @@ export function Shell(props: ShellProps): React.JSX.Element {
        * had a field for one; the action names it now, and neither view invents
        * the other's half.
        */
+      const given = { ...(params as Record<string, unknown>), ...extra };
+      const has = (name: string): boolean =>
+        given[name] !== undefined && String(given[name]).trim() !== "";
       const missing = (action.needs ?? []).find(
-        (one) =>
-          extra[one.name] === undefined &&
-          typeof (params as Record<string, unknown>)[one.name] !== "string",
+        (one) => !has(one.name) && !(one.satisfiedBy ?? []).some(has),
       );
       if (missing !== undefined) {
         setAsking({ action: id, field: missing.name, label: missing.label, ...(missing.placeholder === undefined ? {} : { placeholder: missing.placeholder }) });

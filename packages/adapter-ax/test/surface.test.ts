@@ -235,19 +235,24 @@ describe("act (LLD §7.5)", () => {
     expect(snapshot.nodes.some((node) => node.states.includes("disabled"))).toBe(true);
   });
 
-  it("types by setting the value, and falls back to keystrokes", async () => {
+  it("focuses first, then types, and the field holds what was typed", async () => {
     /*
      * The Surface explorer's intent field (T10.3): the one text field the app
      * has that a person types a sentence into, and the control REQ-BEH-4's
      * "every call records an intent" is about.
+     *
+     * This asserted a `setValue`, which is what the adapter did until P-W2-F13.
+     * The field is Chromium's, and an assigned value never reaches the
+     * application behind it — so the assertion described the defect. What must
+     * hold either way is that the field ends up holding the text.
      */
     const { surface, bridge } = await open({ screen: "explorer" });
     const [ref] = await surface.locate({ by: "automationId", value: "explorer-intent", score: 1 });
     await surface.act("type", ref, { value: "look at the booking page" });
     expect(bridge.commands.map((one) => one.kind)).toContain("focus");
-    expect(bridge.commands).toContainEqual(
-      expect.objectContaining({ kind: "setValue", value: "look at the booking page" }),
-    );
+    const [again] = await surface.locate({ by: "automationId", value: "explorer-intent", score: 1 });
+    const after = (await surface.describe(again!)).value;
+    expect(after).toBe("look at the booking page");
   });
 
   it("sends named keys as key codes and characters as keystrokes", () => {
@@ -478,5 +483,43 @@ describe("an action that cannot be confirmed is not a success (native-feedback D
     const { surface } = await open({ identity: null });
     await expect(surface.act("quit")).rejects.toThrow(SessionError);
     await expect(surface.act("quit")).rejects.toThrow(/could not be identified/);
+  });
+});
+
+/**
+ * Web content is typed into, never assigned to (P-W2-F13).
+ *
+ * `AXSetValue` puts text in the element and tells nobody. A native control reads
+ * its own value when asked; a framework-rendered one keeps the value in its own
+ * state and updates it from *events*, so an assigned value leaves the page
+ * showing the text and the application still holding nothing — and the adapter
+ * reports success, which is the worst of both.
+ *
+ * Found by Yam driving the packaged Yam: typed into that application's own fill
+ * form over AX, and the application dispatched with no value — "The `type`
+ * action needs `value`. Nothing was dispatched." The CDP passes, which produce
+ * real key events, did the same journey without trouble.
+ */
+describe("typing into a framework-rendered field (P-W2-F13)", () => {
+  it("presses keys inside a web area rather than assigning", async () => {
+    const { surface, bridge } = await open({ screen: "explorer" });
+    /* Every node of this recorded application is inside Chromium's web area. */
+    const [field] = await surface.locate({ by: "automationId", value: "explorer-intent", score: 1 });
+    await surface.act("type", field!, { value: "ada" });
+    const kinds = bridge.commands.map((one) => one.kind);
+    expect(kinds, JSON.stringify(bridge.commands.slice(-4))).toContain("keystroke");
+    expect(kinds, "assigned to a web field instead of typing into it").not.toContain("setValue");
+  });
+
+  /*
+   * And the keys replace rather than append, which is what assignment did.
+   */
+  it("selects all before typing, so the field is replaced", async () => {
+    const { surface, bridge } = await open({ screen: "explorer" });
+    const [field] = await surface.locate({ by: "automationId", value: "explorer-intent", score: 1 });
+    await surface.act("type", field!, { value: "ada" });
+    const typed = bridge.commands.filter((one) => one.kind === "keystroke");
+    expect(typed[0]).toMatchObject({ text: "a", using: ["command down"] });
+    expect(typed[1]).toMatchObject({ text: "ada" });
   });
 });

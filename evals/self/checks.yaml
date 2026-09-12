@@ -179,6 +179,25 @@ checks:
     external:
       source: "app-playwright"
       name: "a live session says so where every mode can see it (P-W2-F7)"
+  - id: "app.a-filled-connect-form-connects"
+    says: "A connect form with a URL in it connects, rather than asking again for what it already has."
+    yam:
+      source: "yam-on-yam"
+      name: "the packaged application connects to the sample app and shows its tree"
+    external:
+      source: "app-playwright"
+      name: "a filled connect form connects, and does not ask again (P-W2-F11)"
+  - id: "app.an-empty-connect-form-asks"
+    says: "A connect form with nothing in it asks for the target rather than refusing."
+    yam:
+      # The other half of the same control, and the half Yam cannot reach: the
+      # journey always has a URL to type. Asking for what is missing is a state
+      # this suite never enters, and driving it would mean clearing a field to
+      # prove a prompt — a test of the prompt, not of the product.
+      unreachable: "The journey always has a URL to type, so the empty-form state is one it never reaches. What is missing is a reason to be in it, not an adapter."
+    external:
+      source: "app-playwright"
+      name: "an empty connect form asks for the target (TV-06)"
   - id: "app.opens-into-the-new-flows-screen-not-the-eleven-tabs"
     # Surface-first (T14): the app opens into Session, not Flows — Draft 2.27
     # merged Surfaces into it. Both sides
