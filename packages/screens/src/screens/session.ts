@@ -24,8 +24,8 @@
  * screen parameter, which is what makes it a deep link in both renderers and
  * `--screen session --mode say` on the command line.
  */
-import { recordScreen, type RecordState } from "./authoring.js";
-import { surfacesScreen, type SurfacesState } from "./surfaces.js";
+import { loadRecord, type RecordView } from "./authoring.js";
+import { loadSurface, type SurfaceView } from "./surfaces.js";
 import { Sources } from "../load.js";
 import type {
   Pill,
@@ -41,14 +41,13 @@ export const SESSION_MODES = ["record", "say", "do"] as const;
 export type SessionMode = (typeof SESSION_MODES)[number];
 
 /**
- * The field shapes, without the screen envelope.
+ * The field shapes are the loaders' own (TV-M04).
  *
- * `Omit<…, keyof ScreenStateBase>` rather than a second copy of forty fields:
- * when the surface loader grows a field, this grows with it, and a merge that
- * had transcribed them would be a merge that drifts.
+ * They were `Omit<SurfacesState, keyof ScreenStateBase>` while those were
+ * screens; now that they are halves, each loader defines the shape it returns
+ * and this re-exports it, so a merge cannot transcribe a field and drift.
  */
-export type SurfaceView = Omit<SurfacesState, keyof ScreenStateBase>;
-export type RecordView = Omit<RecordState, keyof ScreenStateBase>;
+export type { SurfaceView, RecordView };
 
 /** One sentence the person said, and what became of it. */
 export interface SaidSentence {
@@ -102,9 +101,12 @@ export function modeFrom(value: unknown): SessionMode {
   return SESSION_MODES.find((one) => one === value) ?? "do";
 }
 
-const strip = <T extends ScreenStateBase>(state: T): Omit<T, keyof ScreenStateBase> => {
-  const { screen, title, subtitle, status, sources, error, ...rest } = state;
-  void screen, title, subtitle, status, sources, error;
+/** The half, without the envelope its loader put round it. */
+const strip = <T extends Omit<ScreenStateBase, "screen">>(
+  load: T,
+): Omit<T, keyof ScreenStateBase> => {
+  const { title, subtitle, status, sources, error, ...rest } = load;
+  void title, subtitle, status, sources, error;
   return rest as Omit<T, keyof ScreenStateBase>;
 };
 
@@ -160,8 +162,8 @@ export const sessionScreen: Screen<SessionState> = {
   async load(service: ScreenService, params: ScreenParams = {}): Promise<SessionState> {
     const mode = modeFrom(params.mode);
     const [surface, record] = await Promise.all([
-      surfacesScreen.load(service, params),
-      recordScreen.load(service, params),
+      loadSurface(service, params),
+      loadRecord(service, params),
     ]);
 
     /*

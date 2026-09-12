@@ -19,9 +19,9 @@
  */
 import { Alert, Pill, Table } from "@svatah/yam-ui";
 import type { SessionMode, SessionState } from "@svatah/yam-screens";
-import type { RecordState, SurfacesState } from "@svatah/yam-screens";
-import { RecordInspector, RecordScreen } from "./Record.js";
-import { SurfacesInspector, SurfacesScreen } from "./Surfaces.js";
+import type { RecordLoad, SurfaceLoad } from "@svatah/yam-screens";
+import { RecordInspector, RecordScreen, type DrawnRecordLoad } from "./Record.js";
+import { SurfacesInspector, SurfacesScreen, type DrawnSurfaceLoad } from "./Surfaces.js";
 import type { ScreenProps } from "./Secondary.js";
 
 /** The screen envelope, put back around a half for the component that wants it. */
@@ -36,10 +36,10 @@ const envelope = <T,>(state: SessionState, half: T, screen: string): T =>
     ...(state.error === undefined ? {} : { error: state.error }),
   }) as T;
 
-const surfaceOf = (state: SessionState): SurfacesState =>
-  envelope(state, state.surface, "surfaces") as SurfacesState;
-const recordOf = (state: SessionState): RecordState =>
-  envelope(state, state.record, "record") as RecordState;
+const surfaceOf = (state: SessionState): DrawnSurfaceLoad =>
+  envelope(state, state.surface, "session") as DrawnSurfaceLoad;
+const recordOf = (state: SessionState): DrawnRecordLoad =>
+  envelope(state, state.record, "session") as DrawnRecordLoad;
 
 /** The three modes, as the artboard's strip draws them. */
 export function ModeStrip(props: {

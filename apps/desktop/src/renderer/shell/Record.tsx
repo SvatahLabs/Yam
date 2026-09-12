@@ -23,9 +23,18 @@
  *     looking at it, never a CLI flag.
  */
 import { Alert, Chooser, InspectorSection, KeyValues, Pill, Table } from "@svatah/yam-ui";
-import type { Action, RecordState, ScreenParams } from "@svatah/yam-screens";
+import type { Action, RecordLoad, ScreenParams, ScreenStateBase } from "@svatah/yam-screens";
 import { a11yVariant } from "../a11y-variant.js";
 import { Code, EmptyInspector, GLYPH, Toolbar } from "./parts.js";
+
+/**
+ * A half, with the screen it is being drawn on (TV-M04).
+ *
+ * The loader does not produce a `screen` — it is not a screen — and the toolbar
+ * needs one, because a toolbar names what it is the toolbar of. Session supplies
+ * it when it hands a half to the component that draws it.
+ */
+export type DrawnRecordLoad = RecordLoad & Pick<ScreenStateBase, "screen">;
 
 /** The two gateways a record session can run against (LLD §13.5, §13.6). */
 export type GatewayChoice = "human" | "anthropic" | "fake";
@@ -50,7 +59,7 @@ export function adviseOnFailure(message: string, gateway: GatewayChoice): string
 }
 
 export interface RecordProps {
-  readonly state: RecordState;
+  readonly state: DrawnRecordLoad;
   readonly params: ScreenParams;
   readonly actions: readonly Action[];
   /**

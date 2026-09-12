@@ -362,8 +362,8 @@ describe.runIf(hasScript)("`yam ui` draws in a pseudo-terminal (T9.4)", () => {
    * four numbered panes, on a project a person could open.
    */
   it.each([
+    ["session", "Session"],
     ["flows", "Flows"],
-    ["record", "Record review"],
     ["runs", "Runs"],
     ["run", "Run"],
     ["heal", "Heal review"],
@@ -371,7 +371,6 @@ describe.runIf(hasScript)("`yam ui` draws in a pseudo-terminal (T9.4)", () => {
     ["agents", "Agents and tools"],
     ["api", "API"],
     ["data", "Data"],
-    ["surfaces", "Surfaces"],
     ["import", "Import prototype database"],
     ["settings", "Settings"],
   ] as const)("draws the %s screen in a real terminal (T10.1, T10.2)", (screen, title) => {

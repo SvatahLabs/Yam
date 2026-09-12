@@ -22,6 +22,7 @@
  * renderers subscribe; neither of them decides what an event means.
  */
 import { Sources, dotted, plural } from "../load.js";
+import type { ScreenService } from "../service.js";
 import { actionsForScreen } from "../registry.js";
 import type { ServiceEventLike } from "../service.js";
 import type { Pill, Screen, ScreenParams, ScreenStateBase } from "../types.js";
@@ -506,8 +507,13 @@ export interface RecordDecision {
   readonly expiresAt?: string;
 }
 
-export interface RecordState extends ScreenStateBase {
-  readonly screen: "record";
+/**
+ * What the **record** mode of Session is about (TV-M04).
+ *
+ * `RecordView` while Record was a screen; a view now, because Draft 2.27 made
+ * it a mode and Draft 2.28 removed the id.
+ */
+export interface RecordView {
   readonly sessionId?: string;
   /**
    * The gateways this service can actually reach (REQ-ADE-4, Draft 2.7).
@@ -575,24 +581,26 @@ function rowsOf(value: unknown, keys: readonly string[]): Array<{ key: string; v
   }));
 }
 
-export const recordScreen: Screen<RecordState> = {
-  id: "record",
-  title: "Record review",
-  /*
-   * The actions moved to `session` in TV-M02 and kept their ids; this screen is
-   * deleted in TV-M04. Until then it offers the same list rather than an empty
-   * one, so nothing that still opens it loses its buttons.
-   */
-  actions: actionsForScreen("session"),
-  async load(service, params: ScreenParams = {}): Promise<RecordState> {
+/** The view, plus the provenance the loader collected for it. */
+export type RecordLoad = RecordView & Omit<ScreenStateBase, "screen">;
+
+/**
+ * Load the **record** mode's half of a Session (TV-M04).
+ *
+ * The capture semantics are `REQ-REC-13`'s and unchanged: what moved is where
+ * the result is drawn.
+ */
+export async function loadRecord(
+  service: ScreenService,
+  params: ScreenParams = {},
+): Promise<RecordLoad> {
     const sources = new Sources();
     const project = await sources.get<ProjectResponse>("GET /project", () => service.getProject(), {});
     const credential = project.gateway?.credential === true;
     const display = project.gateway?.display === true;
     const file = params.file ?? project.flows?.[0];
     return {
-      ...sources.base(
-        "record",
+      ...sources.envelope(
         "Record review",
         params.sessionId === undefined
           ? dotted("No session", file === undefined ? undefined : `would bind ${file.split("/").pop()}`)
@@ -601,7 +609,6 @@ export const recordScreen: Screen<RecordState> = {
             : `session ${params.sessionId}`,
         credential ? "a model credential is available" : "no model credential on this service",
       ),
-      screen: "record",
       ...(params.sessionId === undefined ? {} : { sessionId: params.sessionId }),
       gateways: [
         {
@@ -647,8 +654,7 @@ export const recordScreen: Screen<RecordState> = {
       capturing: params.capturing === true,
       sentences: [],
     };
-  },
-};
+}
 
 /**
  * Fold one event into the Record screen's state (LLD §13.5's stream).
@@ -658,7 +664,7 @@ export const recordScreen: Screen<RecordState> = {
  * a screen that could disagree with the other renderer about what the model
  * chose.
  */
-export function applyRecordEvent(state: RecordState, event: ServiceEventLike): RecordState {
+export function applyRecordEvent<T extends RecordView>(state: T, event: ServiceEventLike): T {
   if (event["sessionId"] !== undefined && event["sessionId"] !== state.sessionId) {
     // A session id we do not have yet is this session starting.
     if (state.sessionId !== undefined) return state;
@@ -973,6 +979,5 @@ export function applyHealEvent(state: HealState, event: ServiceEventLike): HealS
 export const AUTHORING_SCREENS = [
   runsScreen,
   bindingsScreen,
-  recordScreen,
   healScreen,
 ] as const satisfies readonly Screen[];

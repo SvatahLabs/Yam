@@ -110,12 +110,17 @@ describe("the app renders the model and nothing else (T3.7, T10.1, T10.2)", () =
     it(`${screen.name} draws a state type from the model`, () => {
       /*
        * The imports, not the whole file: what is checked is where a screen's
-       * `…State` types *come from*, and every one of them has to come from
+       * state types *come from*, and every one of them has to come from
        * `@svatah/yam-screens`. A screen with a state type of its own would be a
        * screen with a value the other renderer cannot show.
+       *
+       * `…View` and `…Load` as well as `…State` (TV-M04): Session's two halves
+       * are loaded by functions rather than by screens, so their shapes are a
+       * view and the loader's envelope round it. The rule is unchanged — the
+       * type comes from the model — and only the model's nouns moved.
        */
       const imported = screen.source.slice(0, screen.source.indexOf("export function"));
-      const states = [...imported.matchAll(/\b(\w+State)\b/g)].map((one) => one[1]!);
+      const states = [...imported.matchAll(/\b(\w+(?:State|View|Load))\b/g)].map((one) => one[1]!);
       expect(states.length, `${screen.name} imports no screen state`).toBeGreaterThan(0);
       expect(imported, `${screen.name} does not import from the model`).toContain(
         'from "@svatah/yam-screens"',

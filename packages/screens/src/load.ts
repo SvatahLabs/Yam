@@ -67,6 +67,19 @@ export class Sources {
     this.failure ??= message;
   }
 
+  /**
+   * The base a *loader* fills in, without the screen it belongs to (TV-M04).
+   *
+   * Session's two halves are loaded by functions rather than by screens now —
+   * `surfaces` and `record` are not ids any more — and a function that had to
+   * name a screen to describe its own provenance would be naming one it is not.
+   */
+  envelope(title: string, subtitle: string, status: string): Omit<ScreenStateBase, "screen"> {
+    const { screen, ...rest } = this.base("session", title, subtitle, status);
+    void screen;
+    return rest;
+  }
+
   base(
     screen: ScreenStateBase["screen"],
     title: string,

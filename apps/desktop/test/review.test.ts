@@ -50,7 +50,7 @@ import {
 } from "@svatah/yam";
 import { ServiceClient, type StreamedEvent } from "../src/renderer/client.js";
 import { adviseOnFailure } from "../src/renderer/shell/Record.js";
-import type { RecordState } from "@svatah/yam-screens";
+import { loadRecord, type RecordLoad } from "@svatah/yam-screens";
 
 const APP_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT = join(APP_DIR, "..", "..");
@@ -348,11 +348,11 @@ describe("the Record screen chooses the gateway (P5-F2, REQ-ADE-4, LLD ยง13.5, ย
      * because both renderers get the same answer from it.
      */
     const { fakeService, screenById } = await import("@svatah/yam-screens");
-    const load = async (credential: boolean): Promise<RecordState> =>
-      (await screenById("record").load(
+    const load = async (credential: boolean): Promise<RecordLoad> =>
+      (await loadRecord(
         fakeService({ project: { gateway: { credential }, flows: [] } }),
         {},
-      )) as unknown as RecordState;
+      )) as unknown as RecordLoad;
 
     const withKey = await load(true);
     const without = await load(false);

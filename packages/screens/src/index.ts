@@ -35,7 +35,7 @@ export type { FlowsState, FlowRow, FlowLine, StepInspector } from "./screens/flo
 export { runScreen, applyEvent, runStateFrom, stamp, policyText } from "./screens/run.js";
 export type { RunState, RunStepRow, RunStoryRow, AuditRow, RunInspector } from "./screens/run.js";
 
-export { AUTHORING_SCREENS, applyHealEvent, applyRecordEvent, outcomeOf } from "./screens/authoring.js";
+export { AUTHORING_SCREENS, applyHealEvent, applyRecordEvent, loadRecord, outcomeOf } from "./screens/authoring.js";
 export type {
   BindingCandidate,
   BindingInspector,
@@ -44,7 +44,7 @@ export type {
   HealProposal,
   HealState,
   RecordDecision,
-  RecordState,
+  RecordView,
   RunsFilters,
   RunsInspector,
   RunsRow,
@@ -55,16 +55,16 @@ export { sessionScreen, modeFrom, SESSION_MODES } from "./screens/session.js";
 export type {
   SessionState,
   SessionMode,
-  SurfaceView,
-  RecordView,
   SayView,
   SaidSentence,
 } from "./screens/session.js";
+export type { SurfaceLoad } from "./screens/surfaces.js";
+export type { RecordLoad } from "./screens/authoring.js";
 
 export { DESKTOP_HOLDER } from "./holder.js";
 
 export {
-  SURFACES_SCREENS,
+  loadSurface,
   TREE_MAX_NODES,
   envelopeError,
   platformGroups,
@@ -73,7 +73,7 @@ export {
   treeLines,
 } from "./screens/surfaces.js";
 export type {
-  SurfacesState,
+  SurfaceView,
   SurfaceAdapterRow,
   SurfaceTargetRow,
   SurfacePlatformGroup,
@@ -118,7 +118,6 @@ import { flowsScreen } from "./screens/flows.js";
 import { runScreen } from "./screens/run.js";
 import { AUTHORING_SCREENS } from "./screens/authoring.js";
 import { SECONDARY_SCREENS } from "./screens/secondary.js";
-import { SURFACES_SCREENS } from "./screens/surfaces.js";
 import { sessionScreen } from "./screens/session.js";
 import { SCREEN_IDS, type Screen, type ScreenId, type ScreenStateBase } from "./types.js";
 
@@ -133,7 +132,6 @@ import { SCREEN_IDS, type Screen, type ScreenId, type ScreenStateBase } from "./
  */
 export const SCREENS: readonly Screen<ScreenStateBase>[] = [
   sessionScreen as unknown as Screen<ScreenStateBase>,
-  ...(SURFACES_SCREENS as readonly Screen<ScreenStateBase>[]),
   flowsScreen as Screen<ScreenStateBase>,
   runScreen as Screen<ScreenStateBase>,
   ...(AUTHORING_SCREENS as readonly Screen<ScreenStateBase>[]),
@@ -161,7 +159,14 @@ export function screenById(id: ScreenId): Screen<ScreenStateBase> {
  * rail — `record`, `run`, `heal` — are not on any sub-rail and stay reachable
  * through the palette's Go-to rows.
  */
-export type SectionId = "surfaces" | "automations" | "activity" | "settings";
+/**
+ * The four destinations (`SF-16`, `REQ-ADE-11`).
+ *
+ * Draft 2.27 renamed the first: Surfaces became **Session**, one screen over one
+ * broker session with record, say and do modes, because the three ways of
+ * writing a flow disagree about who is driving and not about what is made.
+ */
+export type SectionId = "session" | "automations" | "activity" | "settings";
 
 export interface Section {
   readonly id: SectionId;
@@ -171,7 +176,7 @@ export interface Section {
 }
 
 export const SECTIONS: readonly Section[] = [
-  { id: "surfaces", label: "Surfaces", rail: ["surfaces"] },
+  { id: "session", label: "Session", rail: ["session"] },
   { id: "automations", label: "Automations", rail: ["flows", "bindings", "agents", "api", "data", "import"] },
   { id: "activity", label: "Activity", rail: ["runs"] },
   { id: "settings", label: "Settings", rail: ["settings"] },
@@ -179,19 +184,18 @@ export const SECTIONS: readonly Section[] = [
 
 /** The section a screen belongs to, including the palette-only screens. */
 const SECTION_OF_EXTRA: Readonly<Record<string, SectionId>> = {
-  record: "automations",
   heal: "automations",
   run: "activity",
 };
 
 export function sectionOf(screen: ScreenId): SectionId {
   for (const section of SECTIONS) if (section.rail.includes(screen)) return section.id;
-  return SECTION_OF_EXTRA[screen] ?? "surfaces";
+  return SECTION_OF_EXTRA[screen] ?? "session";
 }
 
 /** The screen a section opens on: the first row of its sub-rail. */
 export function defaultScreenOf(section: SectionId): ScreenId {
-  return SECTIONS.find((one) => one.id === section)?.rail[0] ?? "surfaces";
+  return SECTIONS.find((one) => one.id === section)?.rail[0] ?? "session";
 }
 
 /**
@@ -203,7 +207,6 @@ export function defaultScreenOf(section: SectionId): ScreenId {
  */
 const RAIL_LABEL: Readonly<Record<ScreenId, string>> = {
   session: "Session",
-  surfaces: "Surfaces",
   flows: "Flows",
   runs: "Runs",
   bindings: "Bindings",
@@ -212,7 +215,6 @@ const RAIL_LABEL: Readonly<Record<ScreenId, string>> = {
   data: "Data",
   import: "Import prototype database",
   settings: "Settings",
-  record: "Record review",
   run: "Run",
   heal: "Heal review",
 };

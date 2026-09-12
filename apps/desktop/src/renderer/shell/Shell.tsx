@@ -48,12 +48,11 @@ import {
   type FlowsState,
   type HealState,
   type ImportState,
-  type RecordState,
   type RunState,
   type RunsState,
   type SettingsState,
   type SessionState,
-  type SurfacesState,
+  type SurfaceView,
 } from "@svatah/yam-screens";
 import { acceleratorFor, keysFor as appKeysFor } from "./keys.js";
 import { SessionInspector, SessionScreen } from "./Session.js";
@@ -112,7 +111,7 @@ type Showing = ScreenId;
 export function Shell(props: ShellProps): React.JSX.Element {
   // Surfaces opens by default (SF-02, SF-16, T14): the app's first screen is
   // "connect to something", not a project's flows.
-  const [showing, setShowing] = useState<Showing>("surfaces");
+  const [showing, setShowing] = useState<Showing>("session");
   const [params, setParams] = useState<ScreenParams>({});
   const [state, setState] = useState<ScreenStateBase | undefined>(undefined);
   const [tab, setTab] = useState<"editor" | "plan" | "history">("editor");
@@ -182,7 +181,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
    * A ref and not the state, for the same reason `paramsRef` is one: the
    * subscription is set up once and must not be torn down on every navigation.
    */
-  const showingRef = useRef<Showing>("surfaces");
+  const showingRef = useRef<Showing>("session");
   useEffect(() => {
     showingRef.current = showing;
   }, [showing]);
@@ -200,7 +199,15 @@ export function Shell(props: ShellProps): React.JSX.Element {
       setState((before) => {
         if (before === undefined) return before;
         if (before.screen === "run") return applyEvent(before as RunState, event);
-        if (before.screen === "record") return applyRecordEvent(before as RecordState, event);
+        /*
+         * A capture's sentences arrive while Session is showing them, and the
+         * half they belong to is `record` (REQ-ADE-14). Folding into the whole
+         * state would put a sentence where the snapshot lives.
+         */
+        if (before.screen === "session") {
+          const session = before as SessionState;
+          return { ...session, record: applyRecordEvent(session.record, event) };
+        }
         if (before.screen === "heal") return applyHealEvent(before as HealState, event);
         return before;
       });
@@ -486,16 +493,12 @@ export function Shell(props: ShellProps): React.JSX.Element {
     switch (state.screen) {
       case "session":
         return <SessionScreen state={state as SessionState} {...shared} />;
-      case "surfaces":
-        return <SurfacesScreen state={state as SurfacesState} {...shared} />;
       case "run":
         return <RunScreen state={state as RunState} {...shared} {...evidenceProp} />;
       case "runs":
         return <RunsScreen state={state as RunsState} {...shared} {...evidenceProp} />;
       case "bindings":
         return <BindingsScreen state={state as BindingsState} {...shared} />;
-      case "record":
-        return <RecordScreen state={state as RecordState} {...shared} />;
       case "heal":
         return <HealScreen state={state as HealState} {...shared} />;
       case "agents":
@@ -533,16 +536,12 @@ export function Shell(props: ShellProps): React.JSX.Element {
     switch (state.screen) {
       case "session":
         return <SessionInspector state={state as SessionState} {...shared} />;
-      case "surfaces":
-        return <SurfacesInspector state={state as SurfacesState} {...shared} />;
       case "run":
         return <RunInspector state={state as RunState} {...shared} {...evidenceProp} />;
       case "runs":
         return <RunsInspector state={state as RunsState} {...shared} {...evidenceProp} />;
       case "bindings":
         return <BindingsInspector state={state as BindingsState} {...shared} />;
-      case "record":
-        return <RecordInspector state={state as RecordState} {...shared} />;
       case "heal":
         return <HealInspector state={state as HealState} {...shared} />;
       case "agents":

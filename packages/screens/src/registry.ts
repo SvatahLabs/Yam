@@ -164,7 +164,7 @@ const ACTIONS_ONLY: readonly Action[] = [
       const used = typeof result["adapter"] === "string" ? result["adapter"] : (adapter ?? "the default adapter");
       return ok(`Connected with the ${used} adapter.`, {
         value: answer,
-        goTo: "surfaces",
+        goTo: "session",
         ...(sessionId === undefined ? {} : { params: { selected: sessionId } }),
       });
     },
@@ -184,7 +184,7 @@ const ACTIONS_ONLY: readonly Action[] = [
       const { ok: succeeded, message } = envelopeOf(answer);
       if (!succeeded) return refused(message ?? "Could not disconnect.");
       // Back to Surfaces with nothing selected: the session is gone.
-      return ok("Disconnected.", { value: answer, goTo: "surfaces", params: { selected: undefined } });
+      return ok("Disconnected.", { value: answer, goTo: "session", params: { selected: undefined } });
     },
   },
   {
@@ -202,7 +202,7 @@ const ACTIONS_ONLY: readonly Action[] = [
       if (!succeeded) return refused(message ?? "Could not reach the surface broker.");
       const adapters = Array.isArray(result["adapters"]) ? result["adapters"] : [];
       const ready = adapters.filter((one) => (one as { available?: unknown }).available === true).length;
-      return ok(`${ready} of ${adapters.length} adapters ready.`, { value: answer, goTo: "surfaces" });
+      return ok(`${ready} of ${adapters.length} adapters ready.`, { value: answer, goTo: "session" });
     },
   },
   /* ── T15: the selected-target action inspector (SF-09, SF-10, SF-11) ────── */
@@ -344,7 +344,7 @@ const ACTIONS_ONLY: readonly Action[] = [
        * what is there now and nothing is holding a reference to what was.
        */
       return ok("Took a fresh snapshot; choose a control.", {
-        goTo: "surfaces",
+        goTo: "session",
         params: {
           selected: typeof args.selected === "string" ? args.selected : undefined,
           ref: undefined,
@@ -381,7 +381,7 @@ const ACTIONS_ONLY: readonly Action[] = [
       if (!succeeded) return refused(message ?? "Could not take control.");
       return ok(`You control this target${result["holder"] === undefined ? "" : ""}.`, {
         value: answer,
-        goTo: "surfaces",
+        goTo: "session",
         params: { selected: session },
       });
     },
@@ -405,7 +405,7 @@ const ACTIONS_ONLY: readonly Action[] = [
       if (!succeeded) return refused(message ?? "Could not give up control.");
       return ok("Anyone can drive this target now.", {
         value: answer,
-        goTo: "surfaces",
+        goTo: "session",
         params: { selected: session },
       });
     },
@@ -660,8 +660,16 @@ const ACTIONS_ONLY: readonly Action[] = [
       const sessionId = (value as { sessionId?: unknown }).sessionId;
       return ok("Recording what you do. Drive the application, then press Stop.", {
         value,
-        goTo: "record",
-        ...(typeof sessionId === "string" ? { params: { sessionId, capturing: true } } : {}),
+        goTo: "session",
+        /*
+         * The mode with the session (REQ-ADE-14). Session opens in `do`, and a
+         * capture that landed there would be recording into a screen showing a
+         * snapshot tree — the right session, the wrong subject.
+         */
+        params: {
+          mode: "record",
+          ...(typeof sessionId === "string" ? { sessionId, capturing: true } : {}),
+        },
       });
     },
   },
@@ -694,8 +702,9 @@ const ACTIONS_ONLY: readonly Action[] = [
       const sessionId = (value as { sessionId?: unknown }).sessionId;
       return ok(`Recording session ${String(sessionId ?? "?")} started.`, {
         value,
-        goTo: "record",
-        ...(typeof sessionId === "string" ? { params: { sessionId } } : {}),
+        goTo: "session",
+        /* Binding a written flow is the record mode's other half (REQ-REC-13). */
+        params: { mode: "record", ...(typeof sessionId === "string" ? { sessionId } : {}) },
       });
     },
   },
@@ -963,9 +972,7 @@ const ACTIONS_ONLY: readonly Action[] = [
  */
 const GO_TO_LABEL: Readonly<Record<ScreenId, string>> = {
   session: "Session",
-  surfaces: "Surfaces",
   flows: "Flows",
-  record: "Record review",
   runs: "Runs",
   run: "Run",
   heal: "Heal review",

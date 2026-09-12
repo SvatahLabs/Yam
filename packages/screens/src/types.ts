@@ -21,10 +21,14 @@ import type { ScreenService } from "./service.js";
 /**
  * The twelve screens (LLD §13.7).
  *
- * > Screens: `flows` (list, editor with lint, plan), `record` (session and
- * > decisions), `runs` (list and evidence), `run` (one run, live), `heal`
- * > (proposals), `bindings`, `agents` (tool server, invocations, trajectories),
- * > `api`, `data`, `import`, `settings`, and `surfaces` (T14).
+ * > Screens: `flows` (list, editor with lint, plan), `runs` (list and evidence),
+ * > `run` (one run, live), `heal` (proposals), `bindings`, `agents` (tool
+ * > server, invocations, trajectories), `api`, `data`, `import`, `settings`.
+ *
+ * And `session` (Draft 2.27), which is one screen over one broker session with
+ * record, say and do modes. It replaced `surfaces` and `record`, whose ids
+ * Draft 2.28 removed outright rather than aliasing: nothing had shipped, and a
+ * deprecation path for users who do not exist is code with nobody to serve.
  *
  * The eleven tabs of the old app map onto these; `runs` and `run` are two
  * screens because a list of runs and one run happening are different subjects
@@ -32,9 +36,7 @@ import type { ScreenService } from "./service.js";
  */
 export const SCREEN_IDS = [
   "session",
-  "surfaces",
   "flows",
-  "record",
   "runs",
   "run",
   "heal",

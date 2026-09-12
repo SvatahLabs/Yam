@@ -27,7 +27,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `ApiState` | interface | `export interface ApiState extends ScreenStateBase` |  |
 | `applyEvent` | function | `export function applyEvent(state: RunState, event: ServiceEventLike): RunState` | Fold one event into a run's state (LLD §13.5's stream, §13.7's live screen). |
 | `applyHealEvent` | function | `export function applyHealEvent(state: HealState, event: ServiceEventLike): HealState` | Fold one event into the Heal screen's state (LLD §13.5's stream). |
-| `applyRecordEvent` | function | `export function applyRecordEvent(state: RecordState, event: ServiceEventLike): RecordState` | Fold one event into the Record screen's state (LLD §13.5's stream). |
+| `applyRecordEvent` | function | `export function applyRecordEvent<T extends RecordView>(state: T, event: ServiceEventLike): T` | Fold one event into the Record screen's state (LLD §13.5's stream). |
 | `AuditResponse` | interface | `export interface AuditResponse` | One `audit.jsonl` line (LLD §3.4, REQ-AUTO-6). |
 | `AuditRow` | interface | `export interface AuditRow` |  |
 | `AUTHORING_SCREENS` | variable | `AUTHORING_SCREENS = [` |  |
@@ -60,6 +60,8 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `HealState` | interface | `export interface HealState extends ScreenStateBase` |  |
 | `importResultView` | function | `export function importResultView(value: unknown): ImportState["result"]` | `POST /migrate`'s answer → the rows the screen shows. |
 | `ImportState` | interface | `export interface ImportState extends ScreenStateBase` |  |
+| `loadRecord` | function | `export async function loadRecord(` | Load the **record** mode's half of a Session (TV-M04). |
+| `loadSurface` | function | `export async function loadSurface(` | Load the **do** mode's half of a Session (TV-M04). |
 | `modeFrom` | function | `export function modeFrom(value: unknown): SessionMode` | `--mode`, validated against the model's own list; `do` when unsaid. |
 | `outcomeOf` | function | `export function outcomeOf(summary: SummaryResponse): Pill` | How a summary's outcome reads, in one place (T10.4 added `stopped`). |
 | `parseBinding` | function | `export function parseBinding(text: string): BindingFileResponse \| undefined` | One binding file's YAML → the shape a screen reads, or `undefined`. |
@@ -74,8 +76,8 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `ProjectResponse` | interface | `export interface ProjectResponse` | What the service's answers look like, as far as a screen reads them. |
 | `RAIL` | variable | `RAIL: ReadonlyArray<` |  |
 | `RecordDecision` | interface | `export interface RecordDecision` | One grounding waiting on a reviewer (REQ-ADE-4, the `record.decision` event). |
-| `RecordState` | interface | `export interface RecordState extends ScreenStateBase` |  |
-| `RecordView` | typealias | `export type RecordView = Omit<RecordState, keyof ScreenStateBase>;` |  |
+| `RecordLoad` | typealias | `export type RecordLoad = RecordView & Omit<ScreenStateBase, "screen">;` | The view, plus the provenance the loader collected for it. |
+| `RecordView` | interface | `export interface RecordView` | What the **record** mode of Session is about (TV-M04). |
 | `RunInspector` | interface | `export interface RunInspector` |  |
 | `runScreen` | variable | `runScreen: Screen<RunState> ` |  |
 | `RunsFilters` | interface | `export interface RunsFilters` | The filter chips the artboard shows. `all` is not a filter. |
@@ -98,7 +100,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `ScreenStateBase` | interface | `export interface ScreenStateBase` | Every screen's state carries these, so a renderer's chrome is written once. |
 | `SECONDARY_SCREENS` | variable | `SECONDARY_SCREENS = [` |  |
 | `Section` | interface | `export interface Section` |  |
-| `SectionId` | typealias | `export type SectionId = "surfaces" \| "automations" \| "activity" \| "settings";` | Primary navigation, surface-first (T14, SF-02, SF-16). |
+| `SectionId` | typealias | `export type SectionId = "session" \| "automations" \| "activity" \| "settings";` | The four destinations (`SF-16`, `REQ-ADE-11`). |
 | `sectionOf` | function | `export function sectionOf(screen: ScreenId): SectionId` |  |
 | `SECTIONS` | variable | `SECTIONS: readonly Section[] = [` |  |
 | `ServiceConnectionInfo` | interface | `export interface ServiceConnectionInfo` | Where the connection is, for the renderers' chrome and for `--json`. |
@@ -119,18 +121,17 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `SurfaceAdapterRow` | interface | `export interface SurfaceAdapterRow` | One adapter the service reported, with its readiness and, when not, why. |
 | `SurfaceAgentSetup` | interface | `export interface SurfaceAgentSetup` | What a generic MCP client needs to reach the same sessions (SF-07, T16). |
 | `SurfaceElementView` | interface | `export interface SurfaceElementView` | What `describe` said about the selected control. |
+| `SurfaceLoad` | typealias | `export type SurfaceLoad = SurfaceView & Omit<ScreenStateBase, "screen">;` | The view, plus the provenance the loader collected for it. |
 | `surfaceOutcomeView` | function | `export function surfaceOutcomeView(value: unknown): SurfaceOutcomeView \| undefined` | What an act and its postcondition came to (SF-11, T15). |
 | `SurfaceOutcomeView` | interface | `export interface SurfaceOutcomeView` | What an act (and its optional postcondition) came to (SF-11). |
 | `SurfacePlatformGroup` | interface | `export interface SurfacePlatformGroup` | A platform family, with its adapters and any targets discovered under it. |
 | `SurfaceProblem` | interface | `export interface SurfaceProblem` |  |
 | `SurfaceProblemKind` | typealias | `export type SurfaceProblemKind ` | A state the inspector is in that is not "ready" (SF-17). |
-| `SURFACES_SCREENS` | variable | `SURFACES_SCREENS = [surfacesScreen] as const satisfies readonly Screen[]` |  |
 | `SurfaceSessionRow` | interface | `export interface SurfaceSessionRow` | One open session, an agent's or a person's (SF-05, SF-13). |
 | `SurfaceSessionView` | interface | `export interface SurfaceSessionView` | The session the inspector is about. |
-| `SurfacesState` | interface | `export interface SurfacesState extends ScreenStateBase` |  |
 | `SurfaceTargetRow` | interface | `export interface SurfaceTargetRow` | One target the service discovered — an adapter, or a URL through one. |
 | `SurfaceTreeLine` | interface | `export interface SurfaceTreeLine` | One line of the semantic tree, as the inspector draws it. |
-| `SurfaceView` | typealias | `export type SurfaceView = Omit<SurfacesState, keyof ScreenStateBase>;` | The field shapes, without the screen envelope. |
+| `SurfaceView` | interface | `export interface SurfaceView` | What the **do** mode of Session is about (TV-M04). |
 | `ToolsResponse` | interface | `export interface ToolsResponse` | `GET /tools` — `{ tools: { tools, refused }, invocations }`. |
 | `TREE_MAX_NODES` | variable | `TREE_MAX_NODES = 200` | How many nodes the inspector's tree asks for. Bounded, and it says when it truncated. |
 | `treeLines` | function | `export function treeLines(` | A snapshot's flat nodes → the indented lines the tree pane draws. |

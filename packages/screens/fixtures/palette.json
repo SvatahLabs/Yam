@@ -275,22 +275,10 @@
       "screen": "session"
     },
     {
-      "id": "go.surfaces",
-      "label": "Go to Surfaces",
-      "group": "Go to",
-      "screen": "surfaces"
-    },
-    {
       "id": "go.flows",
       "label": "Go to Flows",
       "group": "Go to",
       "screen": "flows"
-    },
-    {
-      "id": "go.record",
-      "label": "Go to Record review",
-      "group": "Go to",
-      "screen": "record"
     },
     {
       "id": "go.runs",

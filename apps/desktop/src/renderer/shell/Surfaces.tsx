@@ -9,7 +9,7 @@
  * needs — fill takes a value, click takes the control, drag takes two, navigate
  * takes a URL, and an HTTP surface gets method and path instead.
  *
- * Everything here is the model's (`@svatah/yam-screens`'s `SurfacesState` and
+ * Everything here is the model's (`@svatah/yam-screens`'s `SurfaceLoad` and
  * `surfaceOutcomeView`); this file decides only where each thing goes. In
  * particular it never decides whether something was *verified*: that is the
  * model reading a postcondition's result, and it is false without one.
@@ -27,13 +27,23 @@ import {
 } from "@svatah/yam-ui";
 import {
   surfaceOutcomeView,
-  type SurfacesState,
+  type ScreenStateBase,
+  type SurfaceLoad,
   type SurfaceAdapterRow,
   type SurfaceActionOffer,
 } from "@svatah/yam-screens";
 import { Toolbar, EmptyInspector } from "./parts.js";
 import type { ScreenProps } from "./Secondary.js";
 import { acceleratorFor } from "./keys.js";
+
+/**
+ * A half, with the screen it is being drawn on (TV-M04).
+ *
+ * The loader does not produce a `screen` — it is not a screen — and the toolbar
+ * needs one, because a toolbar names what it is the toolbar of. Session supplies
+ * it when it hands a half to the component that draws it.
+ */
+export type DrawnSurfaceLoad = SurfaceLoad & Pick<ScreenStateBase, "screen">;
 
 /** `Browser` → `browser`, for an `automationId` a desktop flow can address. */
 const slug = (text: string): string => text.replace(/[^a-zA-Z0-9]+/g, "-").toLowerCase();
@@ -55,7 +65,7 @@ const VERIFY_KINDS: ReadonlyArray<{ kind: string; label: string; needsValue: boo
   { kind: "urlContains", label: "URL contains", needsValue: true },
 ];
 
-export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Element {
+export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
   const { state } = props;
 
   /*
@@ -178,7 +188,7 @@ export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Ele
 
       <div className="sv-main">
         <aside className="sv-list" id="surfaces-sessions-pane" aria-label="Open sessions">
-          <Table<SurfacesState["sessions"][number]>
+          <Table<SurfaceLoad["sessions"][number]>
             id="surfaces-sessions"
             label="Open sessions"
             rows={[...state.sessions]}
@@ -305,7 +315,7 @@ export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Ele
  * The tree is always available, including where a screenshot is not — which is
  * why it, and not a picture, is what the inspector selects from.
  */
-function SurfaceBody(props: ScreenProps<SurfacesState>): React.JSX.Element {
+function SurfaceBody(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
   const { state } = props;
 
   if (state.httpSurface) return <HttpForm {...props} />;
@@ -353,7 +363,7 @@ function SurfaceBody(props: ScreenProps<SurfacesState>): React.JSX.Element {
 }
 
 /** An HTTP surface has no elements: method and path are its form (T15, SF-04). */
-function HttpForm(props: ScreenProps<SurfacesState>): React.JSX.Element {
+function HttpForm(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
   const [method, setMethod] = useState("GET");
   const [path, setPath] = useState("");
   const send = (): void => props.onAction("surface.request", { method, url: path });
@@ -408,7 +418,7 @@ function HttpForm(props: ScreenProps<SurfacesState>): React.JSX.Element {
  * An action that reached the target and was never checked reads "dispatched,
  * not verified" — not a tick.
  */
-function LastResult(props: ScreenProps<SurfacesState>): React.JSX.Element | null {
+function LastResult(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element | null {
   const [details, setDetails] = useState(false);
   const view = surfaceOutcomeView(props.lastOutcome?.value);
   if (view === undefined) return null;
@@ -465,7 +475,7 @@ function LastResult(props: ScreenProps<SurfacesState>): React.JSX.Element | null
   );
 }
 
-export function SurfacesInspector(props: ScreenProps<SurfacesState>): React.JSX.Element {
+export function SurfacesInspector(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
   const { state } = props;
   const session = state.sessions.find((one) => one.selected);
 
@@ -678,7 +688,7 @@ export function SurfacesInspector(props: ScreenProps<SurfacesState>): React.JSX.
  * connect an agent, and nothing here claims to have spoken MCP: the panel lists
  * exactly what was checked.
  */
-function AgentPanel(props: ScreenProps<SurfacesState>): React.JSX.Element {
+function AgentPanel(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
   const { agent } = props.state;
   const [copied, setCopied] = useState(false);
   return (

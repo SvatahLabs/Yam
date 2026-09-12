@@ -32,7 +32,9 @@ import {
   type FlowsState,
   type ScreenId,
   type RunState,
-  type RecordState,
+  loadRecord,
+  type RecordLoad,
+  type RecordView,
 } from "../src/index.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -65,11 +67,11 @@ describe("the model covers every screen (LLD §13.7)", () => {
       Results: "runs",
       "API client": "api",
       Data: "data",
-      "Record review": "record",
+      "Record review": "session",
       Bindings: "bindings",
       // T15 replaced the Surface explorer — an adapter chooser and an intent box
       // over a protocol form — with the Surfaces action inspector.
-      "Surface explorer": "surfaces",
+      "Surface explorer": "session",
       "Tool panel": "agents",
     };
     for (const [old, home] of Object.entries(homes)) {
@@ -381,7 +383,7 @@ describe("the other ten screens against the fixtures project", () => {
   });
 
   it("Record offers only the gateway the service can reach (REQ-ADE-4)", async () => {
-    const state = (await screenById("record").load(service(), {})) as unknown as {
+    const state = (await loadRecord(service(), {})) as unknown as {
       gateways: Array<{ id: string; available: boolean; label: string }>;
       gateway: string;
     };
@@ -620,8 +622,8 @@ describe("a capture happening (REQ-REC-13, Draft 2.23)", () => {
    * the flow is written from what they did. The screen shows the sentences as
    * they arrive, and says where the flow went when the session ends.
    */
-  const capture = async (): Promise<RecordState> =>
-    (await screenById("record")!.load(service(), { sessionId: "cap-1", capturing: true })) as RecordState;
+  const capture = async (): Promise<RecordLoad> =>
+    await loadRecord(service(), { sessionId: "cap-1", capturing: true });
 
   it("starts empty, collects the sentences, and reports what was written", async () => {
     let state = await capture();
@@ -696,12 +698,13 @@ describe("a capture happening (REQ-REC-13, Draft 2.23)", () => {
     expect(ACTIONS.find((one) => one.id === "capture.stop")!.screen).toBe("session");
   });
 
-  it("starts a capture through the service and lands on the Record screen", async () => {
+  it("starts a capture through the service and lands on Session, in record mode", async () => {
     const fake = service();
     const outcome = await ACTIONS.find((one) => one.id === "capture.start")!.run(fake, { name: "Sign in" });
     expect(outcome.ok).toBe(true);
-    expect(outcome.goTo).toBe("record");
-    expect(outcome.params).toEqual({ sessionId: "cap-1", capturing: true });
+    expect(outcome.goTo).toBe("session");
+    expect(outcome.params?.mode, "a capture lands in the mode that shows it").toBe("record");
+    expect(outcome.params).toEqual({ mode: "record", sessionId: "cap-1", capturing: true });
 
     const stop = await ACTIONS.find((one) => one.id === "capture.stop")!.run(fake, { sessionId: "cap-1" });
     expect(stop.ok).toBe(true);

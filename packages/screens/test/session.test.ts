@@ -13,13 +13,15 @@
  */
 import { describe, expect, it } from "vitest";
 import {
+  ACTIONS,
   SESSION_MODES,
   fakeService,
+  loadRecord,
+  loadSurface,
   modeFrom,
   screenById,
   type FakeResponses,
   type SessionState,
-  type SurfacesState,
 } from "../src/index.js";
 
 const ok = (result: unknown): unknown => ({
@@ -71,10 +73,10 @@ describe("the mode is a screen parameter (REQ-ADE-14)", () => {
 describe("the halves are the states their loaders already produced (TV-M01)", () => {
   it("carries the surface half unchanged, field for field", async () => {
     const service = fakeService({ surface: SURFACE });
-    const alone = (await screenById("surfaces").load(service, {})) as SurfacesState;
+    const alone = await loadSurface(service, {});
     const merged = await load();
-    const { screen, title, subtitle, status, sources, error, ...rest } = alone;
-    void screen, title, subtitle, status, sources, error;
+    const { title, subtitle, status, sources, error, ...rest } = alone;
+    void title, subtitle, status, sources, error;
     expect(merged.surface).toEqual(rest);
   });
 
@@ -96,10 +98,10 @@ describe("the halves are the states their loaders already produced (TV-M01)", ()
 describe("one screen, one provenance (TV-M01)", () => {
   it("joins both halves' sources in call order, without losing any", async () => {
     const service = fakeService({ surface: SURFACE });
-    const surfaces = await screenById("surfaces").load(service, {});
-    const record = await screenById("record").load(service, {});
+    const surface = await loadSurface(service, {});
+    const record = await loadRecord(service, {});
     const merged = await load();
-    expect(merged.sources).toEqual([...surfaces.sources, ...record.sources]);
+    expect(merged.sources).toEqual([...surface.sources, ...record.sources]);
   });
 });
 
@@ -113,12 +115,13 @@ describe("the actions keep their ids (TV-M02)", () => {
   });
 
   it("invents no action of its own", () => {
-    const session = screenById("session");
-    const known = new Set([
-      ...screenById("surfaces").actions.map((one) => one.id),
-      ...screenById("record").actions.map((one) => one.id),
-    ]);
-    for (const action of session.actions) expect(known.has(action.id)).toBe(true);
+    /*
+     * Every action Session offers is one the registry declares, and the ids are
+     * the ones the two screens declared before the merge — which is what makes
+     * `yam surface act` and the palette's row the same thing (TV-M02).
+     */
+    const known = new Set(ACTIONS.map((one) => one.id));
+    for (const action of screenById("session").actions) expect(known.has(action.id)).toBe(true);
   });
 
   it("gates an action by the mode it belongs to (TV-15)", () => {

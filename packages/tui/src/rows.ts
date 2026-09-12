@@ -24,13 +24,14 @@ import {
   type FlowsState,
   type HealState,
   type ImportState,
-  type RecordState,
+  type RecordView,
   type RunState,
   type RunsState,
   type ScreenParams,
   type ScreenStateBase,
   type SettingsState,
-  type SurfacesState,
+  type SessionState,
+  type SurfaceView,
 } from "@svatah/yam-screens";
 
 /** One column of a line. `grow` takes whatever width is left over. */
@@ -101,8 +102,7 @@ export function paneModel(state: ScreenStateBase, now: number = Date.now()): Pan
       return runs(state as RunsState, now);
     case "bindings":
       return bindings(state as BindingsState);
-    case "record":
-      return record(state as RecordState);
+
     case "heal":
       return heal(state as HealState, now);
     case "agents":
@@ -111,8 +111,8 @@ export function paneModel(state: ScreenStateBase, now: number = Date.now()): Pan
       return api(state as ApiState);
     case "data":
       return data(state as DataState);
-    case "surfaces":
-      return surfaces(state as SurfacesState);
+    case "session":
+      return session(state as SessionState);
     case "import":
       return importing(state as ImportState);
     case "settings":
@@ -479,7 +479,7 @@ function bindings(state: BindingsState): PaneModel {
   };
 }
 
-function record(state: RecordState): PaneModel {
+function record(state: RecordView): PaneModel {
   const decision = state.decision;
   return {
     tree: {
@@ -940,7 +940,70 @@ function data(state: DataState): PaneModel {
  * catalogue through the model, so the two renderers cannot disagree about what
  * an action needs.
  */
-function surfaces(state: SurfacesState): PaneModel {
+/**
+ * Session, by mode (REQ-ADE-14, Draft 2.27).
+ *
+ * One screen with three subjects. `do` and `record` draw what those screens
+ * drew — the merge is of destinations, not of rows — and `say` is the sentences
+ * said beside the flow they are writing.
+ */
+function session(state: SessionState): PaneModel {
+  if (state.mode === "record") return record(state.record);
+  if (state.mode === "do") return surfaces(state.surface);
+
+  const say = state.say;
+  return {
+    tree: {
+      title: "Session",
+      empty: "nothing connected",
+      lines: state.surface.sessions.map((one) => ({
+        key: one.sessionId,
+        cells: [text(one.sessionId, { width: 10 }), dim(one.adapter, { grow: true }), pill(one.pill)],
+        select: { selected: one.sessionId },
+      })),
+    },
+    main: {
+      title: "Say · one sentence at a time",
+      empty: "nothing said yet; a sentence is grounded against the open session and appended",
+      lines: say.sentences.map((one, at) => ({
+        key: `${at}:${one.text}`,
+        cells: [
+          pill(one.outcome, 3),
+          text(one.text, { grow: true }),
+          ...(one.target === undefined ? [] : [dim(one.target, { width: 24 })]),
+        ],
+      })),
+      ...(say.unbound === undefined
+        ? {}
+        : {
+            footer: {
+              text: `nothing is bound to "${say.unbound.phrase}" — ${say.unbound.reason}`,
+              tone: "abort" as const,
+            },
+          }),
+    },
+    inspector: {
+      title: "Will be written",
+      empty: "nothing yet",
+      lines: [
+        kv("flow", say.file ?? "not yet named"),
+        kv("lines", String(say.flow.length)),
+        kv("bindings", `${say.bindings}${say.unverified > 0 ? `, ${say.unverified} unverified` : ""}`),
+        kv("on disk", say.written ? "written" : "nothing yet", say.written ? "pass" : "neutral"),
+      ],
+    },
+    audit: {
+      title: "The flow so far",
+      empty: "no lines yet",
+      lines: say.flow.map((line, at) => ({
+        key: `line:${at}`,
+        cells: [dim(String(at + 1).padStart(3), { width: 3 }), text(line, { grow: true })],
+      })),
+    },
+  };
+}
+
+function surfaces(state: SurfaceView): PaneModel {
   const session = state.session;
   const offer = state.offers.find((one) => one.chosen);
   return {

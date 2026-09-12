@@ -21,7 +21,8 @@ import {
   surfaceOutcomeView,
   type FakeResponses,
   type SurfaceActionOffer,
-  type SurfacesState,
+  loadSurface,
+  type SurfaceLoad,
 } from "../src/index.js";
 
 /** A succeeded envelope around a result, as the broker returns it. */
@@ -57,11 +58,13 @@ const ADAPTERS = [
   },
 ];
 
-const load = async (responses: FakeResponses["surface"], selected?: string): Promise<SurfacesState> =>
-  (await screenById("surfaces").load(
-    fakeService({ surface: responses }),
-    selected === undefined ? {} : { selected },
-  )) as SurfacesState;
+/*
+ * TV-M04: Surfaces is the **do** mode of Session and its id is gone, so what is
+ * loaded here is the half — the same function `session.ts` calls, so these cases
+ * still exercise the thing the product runs.
+ */
+const load = async (responses: FakeResponses["surface"], selected?: string): Promise<SurfaceLoad> =>
+  await loadSurface(fakeService({ surface: responses }), selected === undefined ? {} : { selected });
 
 describe("Surfaces discovery, grouped by platform with honest states (SF-04, SF-17)", () => {
   it("groups adapters by family and reports how many are ready", async () => {
@@ -181,7 +184,7 @@ describe("Surfaces actions run against the broker (SF-04, SF-05)", () => {
     const outcome = await actionById("surface.connect")!.run(service, { url: "http://127.0.0.1:4173" });
     expect(outcome.ok).toBe(true);
     expect(outcome.message).toBe("Connected with the bidi adapter.");
-    expect(outcome.goTo).toBe("surfaces");
+    expect(outcome.goTo).toBe("session");
     expect(outcome.params?.selected).toBe("s_new");
     const call = service.calls.find((one) => one.method === "postSessions");
     expect(call?.args[0]).toEqual({ url: "http://127.0.0.1:4173" });
@@ -206,9 +209,9 @@ describe("Surfaces actions run against the broker (SF-04, SF-05)", () => {
   it("disconnect is only offered with a session selected, and closes it", async () => {
     const connectAction = actionById("surface.disconnect")!;
     // availableWhen needs a selected session.
-    expect(connectAction.availableWhen({ screen: "surfaces", title: "", subtitle: "", status: "", sources: [] })).toBe(false);
+    expect(connectAction.availableWhen({ screen: "session", title: "", subtitle: "", status: "", sources: [] })).toBe(false);
     expect(
-      connectAction.availableWhen({ screen: "surfaces", title: "", subtitle: "", status: "", sources: [], selected: "s_1" } as never),
+      connectAction.availableWhen({ screen: "session", title: "", subtitle: "", status: "", sources: [], selected: "s_1" } as never),
     ).toBe(true);
 
     const service = fakeService({});
@@ -223,7 +226,7 @@ describe("Surfaces actions run against the broker (SF-04, SF-05)", () => {
     const outcome = await actionById("surface.discover")!.run(service, {});
     expect(outcome.ok).toBe(true);
     expect(outcome.message).toBe("2 of 3 adapters ready.");
-    expect(outcome.goTo).toBe("surfaces");
+    expect(outcome.goTo).toBe("session");
   });
 });
 
@@ -255,8 +258,8 @@ const ONE_SESSION = ok({
 const connected = async (
   extra: Partial<NonNullable<FakeResponses["surface"]>> = {},
   params: Record<string, unknown> = {},
-): Promise<SurfacesState> =>
-  (await screenById("surfaces").load(
+): Promise<SurfaceLoad> =>
+  (await loadSurface(
     fakeService({
       surface: {
         targets: ok({ adapters: ADAPTERS, targets: [] }),
@@ -267,7 +270,7 @@ const connected = async (
       },
     }),
     { selected: "s_1", ...params },
-  )) as SurfacesState;
+  )) as SurfaceLoad;
 
 describe("the connected surface: a tree to select from (T15, SF-10)", () => {
   it("draws the semantic tree, which is available where a screenshot is not", async () => {
@@ -524,7 +527,7 @@ describe("a person and an agent share one target (T16, SF-13)", () => {
   it("take control is offered only when someone else has it, and release only when you do", async () => {
     const take = actionById("surface.take-control")!;
     const release = actionById("surface.release-control")!;
-    const base = { screen: "surfaces", title: "", subtitle: "", status: "", sources: [] };
+    const base = { screen: "session", title: "", subtitle: "", status: "", sources: [] };
 
     expect(take.availableWhen({ ...base, session: { heldByYou: false } } as never)).toBe(true);
     expect(take.availableWhen({ ...base, session: { heldByYou: true } } as never)).toBe(false);
@@ -710,7 +713,7 @@ describe("a selected control belongs to the snapshot it was chosen from (SF-10)"
         describe: ok({ ref: "r0", role: "textbox", name: "Username" }),
       },
     });
-    await screenById("surfaces").load(service, { selected: "s_1", ref: "r0", snapshot: "snap_1" });
+    await loadSurface(service, { selected: "s_1", ref: "r0", snapshot: "snap_1" });
     const described = service.calls.find((one) => one.method === "postSessionsBySessionDescribe")!;
     expect((described.args[1] as { snapshot?: string }).snapshot).toBe("snap_1");
   });

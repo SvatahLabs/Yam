@@ -35,6 +35,7 @@ import { DESKTOP_HOLDER } from "../holder.js";
 import { Sources, dotted, plural } from "../load.js";
 import { actionsForScreen } from "../registry.js";
 import type { Pill, Screen, ScreenParams, ScreenStateBase } from "../types.js";
+import type { ScreenService } from "../service.js";
 
 /** How a person reads an adapter's home: "a browser, an app, a device or an API". */
 const FAMILY: Readonly<Record<string, string>> = {
@@ -221,8 +222,14 @@ export interface SurfaceOutcomeView {
   readonly raw: string;
 }
 
-export interface SurfacesState extends ScreenStateBase {
-  readonly screen: "surfaces";
+/**
+ * What the **do** mode of Session is about (TV-M04).
+ *
+ * This was `SurfaceView` while Surfaces was a screen. Draft 2.27 made it a
+ * mode and Draft 2.28 removed the id, so the shape is a *view* — the fields —
+ * and `session.ts` puts the screen envelope round it.
+ */
+export interface SurfaceView {
   /** Discovery, grouped by platform family (SF-04). */
   readonly groups: readonly SurfacePlatformGroup[];
   /** The sessions the broker holds (SF-05). */
@@ -638,16 +645,20 @@ export function platformGroups(
     .map(([family, { adapters: as, targets: ts }]) => ({ family, adapters: as, targets: ts }));
 }
 
-export const surfacesScreen: Screen<SurfacesState> = {
-  id: "surfaces",
-  title: "Surfaces",
-  /*
-   * The actions moved to `session` in TV-M02 and kept their ids; this screen is
-   * deleted in TV-M04. Until then it offers the same list rather than an empty
-   * one, so nothing that still opens it loses its buttons.
-   */
-  actions: actionsForScreen("session"),
-  async load(service, params: ScreenParams = {}): Promise<SurfacesState> {
+/** The view, plus the provenance the loader collected for it. */
+export type SurfaceLoad = SurfaceView & Omit<ScreenStateBase, "screen">;
+
+/**
+ * Load the **do** mode's half of a Session (TV-M04).
+ *
+ * A function rather than a screen: Draft 2.28 removed the `surfaces` id, and
+ * this is one of the two halves `session.ts` joins. Everything it does it did
+ * before — the same endpoints, the same optional calls, the same honest states.
+ */
+export async function loadSurface(
+  service: ScreenService,
+  params: ScreenParams = {},
+): Promise<SurfaceLoad> {
     const sources = new Sources();
     // Both are `optional`: a broker that is briefly unreachable is a state the
     // screen draws inline and recovers from, not a thrown load that blanks it.
@@ -664,7 +675,7 @@ export const surfacesScreen: Screen<SurfacesState> = {
     );
 
     const targetsResult = succeededResult(targets);
-    const discovery: SurfacesState["discovery"] =
+    const discovery: SurfaceView["discovery"] =
       targets === undefined || targetsResult === undefined ? "error" : "ready";
     const adapters = adapterRows(targetsResult);
     const found = targetRows(targetsResult);
@@ -811,8 +822,7 @@ export const surfacesScreen: Screen<SurfacesState> = {
         : dotted(session.adapter, session.kind, `${tree.length} controls`);
 
     return {
-      ...sources.base(
-        "surfaces",
+      ...sources.envelope(
         "Surfaces",
         subtitle,
         session === undefined
@@ -821,7 +831,6 @@ export const surfacesScreen: Screen<SurfacesState> = {
             : `${plural(rows.length, "open session")}`
           : (element?.name ?? "Click a control, or search its name."),
       ),
-      screen: "surfaces",
       groups,
       sessions: rows,
       ...(params.selected === undefined ? {} : { selected: params.selected }),
@@ -858,7 +867,4 @@ export const surfacesScreen: Screen<SurfacesState> = {
       httpSurface,
       ...(problem === undefined ? {} : { problem }),
     };
-  },
-};
-
-export const SURFACES_SCREENS = [surfacesScreen] as const satisfies readonly Screen[];
+}
