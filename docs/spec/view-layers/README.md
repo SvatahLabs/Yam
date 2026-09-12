@@ -1,6 +1,6 @@
 # Yam view layers
 
-Status: proposed implementation specification, from the owner's decisions of 2026-09-09: `yam ui` **shares the model and the action registry and owns its own view layer**; direct control and authoring become one **Session** screen with three modes (Draft 2.27); and the same reasoning is applied to the other two surfaces a person meets — the command line and the app.
+Status: **delivered**; see [the record](progress/wave-1.md). Written from the owner's decisions of 2026-09-09: `yam ui` **shares the model and the action registry and owns its own view layer**; direct control and authoring become one **Session** screen with three modes (Draft 2.27); and the same reasoning is applied to the other two surfaces a person meets — the command line and the app.
 
 Requirement ids keep the `TV-` prefix they were written with. §0 of the requirements says ids do not renumber, and Draft 2.19 kept `REQ-ADE-*` through a product rename for the same reason; a prefix that has outgrown its first meaning is cheaper than a specification whose ids move. This document defines future behavior; command examples are not claims about the current release.
 
