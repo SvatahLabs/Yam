@@ -52,6 +52,7 @@ import { INSPECTOR_MIN_COLUMNS, footerFor, sizeOf } from "./layout.js";
 import { Regions, viewFor } from "./views.js";
 import { StatusBar } from "./widgets.js";
 import { COMMAND_KEYS, DEFAULT_SCREEN, actionForKey, keysFor } from "./keys.js";
+import { moveSelection, rowsFor, type PaletteRow } from "./palette.js";
 
 export interface AppProps {
   readonly service: ScreenService;
@@ -72,21 +73,9 @@ export interface AppProps {
   readonly onState?: (ui: UiState) => void;
 }
 
-/** The palette's rows, from the registry — the same list the app's ⌘K shows. */
-function paletteRows(ui: UiState): Array<{ id: string; label: string; area: string; cli?: string }> {
-  const query = ui.paletteQuery.trim().toLowerCase();
-  return ACTIONS.filter((action) => {
-    if (query === "") return true;
-    return [action.id, action.label, action.cli ?? ""].some((one) =>
-      one.toLowerCase().includes(query),
-    );
-  }).map((action) => ({
-    id: action.id,
-    label: action.label,
-    area: action.id.split(".")[0]!,
-    ...(action.cli === undefined ? {} : { cli: action.cli }),
-  }));
-}
+/** The palette's rows: the registry, scored and ordered for what was typed. */
+const paletteRows = (ui: UiState): PaletteRow[] =>
+  rowsFor(ACTIONS, { query: ui.paletteQuery, state: ui.state, recents: ui.recents });
 
 export function App(props: AppProps): React.JSX.Element {
   const { exit } = useApp();
@@ -264,6 +253,12 @@ export function App(props: AppProps): React.JSX.Element {
         return;
       }
       setBusy(true);
+      /* What was just run is what a person reaches for next (TV-08). */
+      setUi((before) =>
+        before === undefined
+          ? before
+          : { ...before, recents: [actionId, ...before.recents.filter((one) => one !== actionId)].slice(0, 8) },
+      );
       try {
         const outcome = await action.run(props.service, { ...ui.params });
         await reload(outcome.goTo ?? ui.screen, { ...ui.params, ...outcome.params }, outcome.message);
@@ -290,26 +285,35 @@ export function App(props: AppProps): React.JSX.Element {
     /* ── the palette (`^K`, LLD §13.7) ───────────────────────────────────── */
     if (ui.paletteOpen) {
       if (key.escape) {
-        setUi({ ...ui, paletteOpen: false, paletteQuery: "" });
+        setUi({ ...ui, paletteOpen: false, paletteQuery: "", paletteAt: 0 });
+        return;
+      }
+      /* The selection moves (TV-08): `Enter` used to run the first row, always. */
+      if (key.downArrow || (key.ctrl && input === "n")) {
+        setUi({ ...ui, paletteAt: moveSelection(ui.paletteAt, 1, paletteRows(ui).length) });
+        return;
+      }
+      if (key.upArrow || (key.ctrl && input === "p")) {
+        setUi({ ...ui, paletteAt: moveSelection(ui.paletteAt, -1, paletteRows(ui).length) });
         return;
       }
       if (key.return) {
-        const first = paletteRows(ui)[0];
-        if (first !== undefined) void run(first.id);
+        const chosen = paletteRows(ui)[ui.paletteAt];
+        if (chosen !== undefined) void run(chosen.id);
         return;
       }
       if (key.backspace || key.delete) {
-        setUi({ ...ui, paletteQuery: ui.paletteQuery.slice(0, -1) });
+        setUi({ ...ui, paletteQuery: ui.paletteQuery.slice(0, -1), paletteAt: 0 });
         return;
       }
       if (input !== "" && !key.ctrl && !key.meta) {
-        setUi({ ...ui, paletteQuery: ui.paletteQuery + input });
+        setUi({ ...ui, paletteQuery: ui.paletteQuery + input, paletteAt: 0 });
       }
       return;
     }
 
     if (key.ctrl && input === "k") {
-      setUi({ ...ui, paletteOpen: true, paletteQuery: "" });
+      setUi({ ...ui, paletteOpen: true, paletteQuery: "", paletteAt: 0 });
       return;
     }
     /* The key map, drawn from the table the footer is drawn from (TV-07). */
@@ -552,15 +556,24 @@ export function App(props: AppProps): React.JSX.Element {
             <Text inverse> </Text>
           </Text>
           {paletteRows(ui)
-            .slice(0, 8)
-            .map((row, at) => (
-              <Text key={row.id} inverse={at === 0} wrap="truncate-end">
-                {row.area.padEnd(10)}
-                {row.label.padEnd(34)}
-                <Text color="gray">{row.cli ?? ""}</Text>
-              </Text>
-            ))}
-          <Text color="gray">same list as the app&apos;s ⌘K and the SDK&apos;s actions</Text>
+            .slice(Math.max(0, ui.paletteAt - 6), Math.max(0, ui.paletteAt - 6) + 8)
+            .map((row, at) => {
+              const chosen = Math.max(0, ui.paletteAt - 6) + at === ui.paletteAt;
+              return (
+                <Text
+                  key={row.id}
+                  {...(chosen ? { backgroundColor: "#231d3a", bold: true } : {})}
+                  wrap="truncate-end"
+                >
+                  <Text color={row.available ? "gray" : "#5f6a78"}>{row.area.padEnd(10)}</Text>
+                  <Text color={row.available ? undefined : "#5f6a78"}>{row.label.padEnd(34)}</Text>
+                  <Text color={row.available ? "gray" : "yellow"}>{row.why ?? row.cli ?? ""}</Text>
+                </Text>
+              );
+            })}
+          <Text color="gray">
+            ↑↓ move · ↵ run · esc close · greyed rows say why
+          </Text>
         </Box>
       ) : null}
     </Box>

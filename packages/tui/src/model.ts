@@ -40,6 +40,10 @@ export interface UiState {
   readonly cursor: Readonly<Record<Pane, number>>;
   readonly paletteOpen: boolean;
   readonly paletteQuery: string;
+  /** Which row the palette's selection is on. It moves (TV-08). */
+  readonly paletteAt: number;
+  /** Action ids, most recently run first: what the palette offers on no query. */
+  readonly recents: readonly string[];
   /** What the last action said, shown on the footer until the next one. */
   readonly message?: string;
   /** The project and service, for the header. */
@@ -71,6 +75,8 @@ export async function loadUi(
     cursor: { tree: 0, main: 0, inspector: 0, audit: 0 },
     paletteOpen: false,
     paletteQuery: "",
+    paletteAt: 0,
+    recents: [],
     connection,
     layout: layoutFor(size.columns, size.rows),
   };

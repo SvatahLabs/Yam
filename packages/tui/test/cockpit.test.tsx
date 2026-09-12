@@ -386,7 +386,7 @@ describe("the palette (^K) is the app's list (T9.4, REQ-ADE-10)", () => {
     stdin.write("\u000b"); // ^K
     await settle();
     const frame = lastFrame() ?? "";
-    expect(frame).toContain("same list as the app");
+    expect(frame).toContain("greyed rows say why");
     /*
      * The rows are the registry's, by label and by command. Surface-first (T14,
      * T15): the registry now opens with the Surfaces actions, so those are the
@@ -421,10 +421,10 @@ describe("the palette (^K) is the app's list (T9.4, REQ-ADE-10)", () => {
     const { stdin, lastFrame } = track(await cockpit("run", { runId: "comp" }));
     stdin.write("\u000b");
     await settle();
-    expect(lastFrame()).toContain("same list as the app");
+    expect(lastFrame()).toContain("greyed rows say why");
     stdin.write("\u001b");
     await settle();
-    expect(lastFrame()).not.toContain("same list as the app");
+    expect(lastFrame()).not.toContain("greyed rows say why");
   });
 
   it("offers every action the registry has, so neither palette is a subset", async () => {
@@ -438,7 +438,7 @@ describe("the palette (^K) is the app's list (T9.4, REQ-ADE-10)", () => {
      * palette, this one, the SDK and the CLI to it.
      */
     expect(ACTIONS.length).toBeGreaterThan(20);
-    expect(lastFrame()).toContain("same list as the app");
+    expect(lastFrame()).toContain("greyed rows say why");
   });
 });
 
