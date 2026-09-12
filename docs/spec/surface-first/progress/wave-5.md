@@ -810,11 +810,17 @@ only lists the product's defects is not the record this project keeps.
   it is `design.md`'s own "typed nested options object". Without it the terminal
   surface could run no program with arguments and the desktop adapters could not
   be told a bundle.
-- **The accessibility side of everything is blocked on this host.** The display
-  is locked for the whole wave. Every AX row of the Yam-on-Yam suite and the
-  whole `yam` source of the parity gate are `blocked`/`unreachable` with the
-  doctor's own sentence and the Finder cross-check. The counts include them; no
-  row is omitted and none is counted as passing.
+- **The accessibility side was blocked for most of this wave, and is not blocked
+  in the artefacts.** The display was locked while the work was done, and while
+  it was, every AX row of the Yam-on-Yam suite and the whole `yam` source of the
+  parity gate were `blocked`/`unreachable` with the doctor's own sentence and
+  the Finder cross-check — counted, never omitted, never counted as passing.
+  **The ten runs and the parity report committed here were made with it
+  unlocked**, so their accessibility rows are real results: `cli-ax` and
+  `mcp-ax` pass seventeen checks each in all ten, and the one blocked check on a
+  healthy run is axe-core's licence. This bullet claimed the opposite until
+  verification read the evidence against it. The header of this record had it
+  right; the deviation was left over from the locked half of the wave.
 
 ## Known gaps
 
@@ -827,3 +833,71 @@ only lists the product's defects is not the record this project keeps.
 - **Windows UIA, Appium and BiDi remain unvalidated**, each now with a probe's
   reason and a driven version range rather than a platform table's silence.
 - `permission-denied` in the desktop is still undriven, as since wave 3.
+
+---
+
+## Verification of wave 5
+
+Done against the verification contract in
+[wave-5-implementation.md](../wave-5-implementation.md). **Two defects**, both
+in the record and its artefacts rather than in the product — which is the first
+time in five waves that verification has not found a defect in the code, and is
+worth saying plainly rather than leaving to be inferred from a short list.
+
+| # | Defect | Found by | Fix |
+|---|---|---|---|
+| 1 | **A deviation contradicted the evidence.** *"The accessibility side of everything is blocked on this host. The display is locked for the whole wave. Every AX row … `blocked`"* — while the header of the same record says the ten runs were made with it unlocked, and all ten evidence files show `cli-ax` and `mcp-ax` passing seventeen checks each with one blocked check in total. The bullet was left over from the locked half of the wave. | Reading the deviations against `per-run/run-01/yam-on-yam.json`. | Rewritten to say both halves: blocked while the work was done, unlocked for the artefacts, and which of the two the committed numbers are. |
+| 2 | **Forty of the forty-five megabytes of evidence were redundant.** Each run leaves a 4 MB machine-readable transcript, and ten of them went into a repository whose whole history is sixty-six — for content the record does not list among a run's artefacts and that is byte-for-byte the same calls with different session ids. Committed evidence is forever. | `git diff --numstat`: eleven files of 160 000 lines each, 1.76 M of the branch's 1.79 M inserted lines. | The per-run machine transcripts are removed and `yam-on-yam-repeat.mjs` no longer keeps them, so it does not recur. Each run still has every check with its outcome, the transcript in the form a person reads, the screenshot and the DOM — the four the record names — and the last run's machine-readable transcript stays at the top of the wave directory, which is the one the coverage report reads. Evidence: **53 MB → 13 MB**. |
+
+### The claim this wave exists to make, re-measured
+
+T00's whole subject is that one green run proves nothing. So the suite was run
+here, on this machine, with **nothing cleaned between runs** and nothing cleaned
+before the first beyond what the suite does itself:
+
+| Run | Passed | Failed | Blocked | Attempted | Exit |
+|---|---|---|---|---|---|
+| 1 | 118 | 0 | 1 | **119** | 0 |
+| 2 | 118 | 0 | 1 | **119** | 0 |
+| 3 | 118 | 0 | 1 | **119** | 0 |
+| 4 | 118 | 0 | 1 | **119** | 0 |
+| 5 | 118 | 0 | 1 | **119** | 0 |
+| 6 | 118 | 0 | 1 | **119** | 0 |
+
+The sixth is the single run used to check that the evidence trim above behaves.
+Six for six, the same denominator every time, on a machine that had just built,
+packaged and run the whole gate. Wave 4's runs of the same suite on the same
+machine gave 24 of 33, 36 of 41, 91 of 91, 20 of 25, 29 of 76 and 12 of 42.
+
+### What was verified, and how
+
+| Contract step | Result |
+|---|---|
+| The gate with no credential; tree clean; `pnpm docs --check` | Green. 32 packages, lint, 71 generated pages current. |
+| **Five consecutive unattended runs, same attempted count, no failures** | Six, above. |
+| `reports/self-parity.md` conformant, and the wrong oracle named | **100 percent agreement over 32 checks** both sides reached, none disagreeing — against master's *not conformant, 4 disagreements over 14*. Both resolved oracles are named in T00. |
+| Streamable HTTP driven by a client the repository does not own | The SDK's own `Client` over a real listener, 28 cases in the gate. Driven again by hand here: `/health` publishes `2025-11-25` before any token, no token is `401` with `WWW-Authenticate: Bearer realm="yam"`, and `GET /v1/sessions` on that port is `404`. |
+| A real terminal: nonzero exit, stdin, a signal, no read outside the root | Driven by hand through `yam surface`: `--app /bin/sh --launch '{"args":["-c","echo hello; exit 21"]}'` reads back `exitCode: 21`, the screen says `hello`, and `file:/etc/hosts` is refused `INVALID_ARGUMENT`. The signal and stdin cases are the suite's `cli-terminal` pass, in all six runs above. |
+| The support matrix read against the runs it came from | Every adapter's label derived; `ax`, `playwright` and `process` **validated** with the session kind each opened; `appium`, `atspi`, `bidi` and `uia` carry the probe's own sentence and what would have to be true. |
+| The fixture project unchanged | The suite's own oracle, in all six runs. |
+| Packed artifacts, copied commands verbatim | 11 of 11, and the coverage report **reproduced independently here**: re-running it gave the same 300 of 300 reached, 6 blocked, 306 attempted, differing only in a timestamp, the temporary directory's name and timing jitter of a few milliseconds. The wave's own copy is what is committed, because it was generated in the order this record sets out. |
+| The desktop's dormant Playwright cases | 38 passed against the packaged build — the cases T18's first defect had been hiding, which this wave is why anyone can see. |
+
+### Known gaps after verification
+
+Unchanged from the wave's own list, and none of them is newly discovered:
+
+- **AT-SPI is implemented and unvalidated**, with the four conditions a Linux
+  runner would have to meet. The support matrix says so and nothing counts it as
+  passing.
+- **Twenty of the parity gate's fifty-two checks are one-sided**, each naming
+  what Yam lacks.
+- **Windows UIA, Appium and BiDi are unvalidated**, each with a probe's reason
+  and a driven version range.
+- `permission-denied` in the desktop is still undriven, as since wave 3.
+- The generated support matrix's *"Evidence, or the reason"* column joins the
+  probe's sentence, the coverage reason and the prerequisite list with dashes,
+  which reads as a run-on and repeats itself for the four unvalidated adapters.
+  It is a rendering nit in a page a person choosing a platform reads; recorded
+  rather than fixed here, because changing it changes a generated page and this
+  verification's job was to test what the wave shipped.

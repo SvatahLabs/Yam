@@ -22,6 +22,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
@@ -128,6 +129,27 @@ if (existsSync(last)) {
     copyFileSync(join(last, name), join(out, name));
   }
   console.log(`\nthe last run's evidence is also at ${relative(ROOT, out)}/`);
+}
+
+/*
+ * One machine-readable transcript, not N — the evidence, without its weight.
+ *
+ * Each run also leaves `yam-on-yam-transcript.json`: four megabytes of the same
+ * calls with different session ids and timings. Ten of them are forty megabytes
+ * committed into a repository whose entire history is sixty-six, and committed
+ * evidence is forever. So the question is what a reader or a re-checker needs
+ * from a run, and it is the four things this record already names for each one:
+ * every check with its outcome (`yam-on-yam.json`), every command line and tool
+ * call in the form a person reads (`…-transcript.txt`), and the window's
+ * screenshot and DOM.
+ *
+ * The machine-readable transcript of the **last** run stays at the top of the
+ * wave directory — the run the coverage report reads and the record points at.
+ * Any of the others is one re-run away.
+ */
+for (const run of readdirSync(join(out, "per-run"))) {
+  const bulky = join(out, "per-run", run, "yam-on-yam-transcript.json");
+  if (existsSync(bulky)) rmSync(bulky);
 }
 
 console.log(
