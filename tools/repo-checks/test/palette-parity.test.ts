@@ -91,11 +91,23 @@ describe("both palettes are the one registry (T9.4)", () => {
     }
   });
 
-  it("binds its single-letter keys from the screen's own table", () => {
-    // Not from a list in the renderer: `screenById(screen).keys` is the one
-    // place a key is attached to an action (§13.7's "the same actions and keys").
-    for (const source of [APP_DIR, TUI]) {
-      expect(source).toMatch(/screenById\([\w.]+\)\.keys/);
+  it("binds its keys from its own table, and names actions from the one registry", () => {
+    /*
+     * TV-M03 reversed this check's premise, deliberately. A key used to be
+     * attached to an action in the shared model, and both renderers read that
+     * one table — which meant a terminal was reading the app's `⌘↵`, a
+     * keystroke it cannot be sent. Each renderer decides its own keys now, so
+     * what is required is the opposite: neither may reach into the model for a
+     * key table, and both must bind actions the registry declares.
+     */
+    for (const [name, source] of [
+      ["the app", APP_DIR],
+      ["the cockpit", TUI],
+    ] as const) {
+      expect(source, `${name} still reads a key table off the model`).not.toMatch(
+        /screenById\([\w.]+\)\.keys/,
+      );
+      expect(source, `${name} does not use its own key table`).toMatch(/from "\.\/keys\.js"/);
     }
   });
 });

@@ -24,7 +24,7 @@
 import { Sources, dotted, plural } from "../load.js";
 import { actionsForScreen } from "../registry.js";
 import type { ScreenService, ServiceEventLike } from "../service.js";
-import type { Binding, Pill, Screen, ScreenParams, ScreenStateBase } from "../types.js";
+import type { Pill, Screen, ScreenParams, ScreenStateBase } from "../types.js";
 import type {
   AuditResponse,
   StepResultResponse,
@@ -483,12 +483,6 @@ export const runScreen: Screen<RunState> = {
   id: "run",
   title: "Run",
   actions: actionsForScreen("run"),
-  keys: [
-    { action: "run.again", key: "⌘↵", terminal: "r", description: "Run the same thing again" },
-    { action: "run.resume", key: "⇧R", terminal: "R", description: "Resume from the failing step" },
-    { action: "run.stop", key: "S", terminal: "s", description: "Stop this run between steps" },
-    { action: "heal.run", key: "H", terminal: "h", description: "Heal this run" },
-  ] satisfies readonly Binding[],
   async load(service: ScreenService, params: ScreenParams = {}): Promise<RunState> {
     const sources = new Sources();
 

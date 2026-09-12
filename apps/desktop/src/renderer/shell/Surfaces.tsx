@@ -33,6 +33,7 @@ import {
 } from "@svatah/yam-screens";
 import { Toolbar, EmptyInspector } from "./parts.js";
 import type { ScreenProps } from "./Secondary.js";
+import { acceleratorFor } from "./keys.js";
 
 /** `Browser` → `browser`, for an `automationId` a desktop flow can address. */
 const slug = (text: string): string => text.replace(/[^a-zA-Z0-9]+/g, "-").toLowerCase();
@@ -139,7 +140,7 @@ export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Ele
             id="action-surface-connect"
             label="Connect surface"
             variant="primary"
-            {...(connect?.key === undefined ? {} : { accelerator: connect.key })}
+            {...(connect === undefined || acceleratorFor(connect.id) === undefined ? {} : { accelerator: acceleratorFor(connect.id)! })}
             disabled={connect === undefined ? false : !connect.availableWhen(state as never)}
             onPress={doConnect}
           />

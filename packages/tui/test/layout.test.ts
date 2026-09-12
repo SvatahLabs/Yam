@@ -164,7 +164,12 @@ describe("the footer fits the terminal (P10-F9)", () => {
     { key: "L", label: "Lint the project" },
     { key: "V", label: "Verify bindings" },
     { key: "H", label: "Heal from the last run" },
-    { key: undefined, label: "no key at all" },
+    /*
+     * TV-M03: every row of the cockpit's own table has a key — an entry without
+     * one is not a binding. What the footer still has to drop is a key too long
+     * to print as a single letter, which is the row below.
+     */
+    { key: "⇧R", label: "resume from the failing step" },
   ];
 
   it("never asks for more than the terminal has, at any width", () => {

@@ -78,7 +78,6 @@ interface PaletteRow {
   label: string;
   group: string;
   screen: string;
-  key?: string;
   cli?: string;
 }
 
@@ -95,7 +94,12 @@ const shapeOf = (one: Action | PaletteRow): string =>
     label: one.label,
     group: one.group,
     screen: one.screen,
-    key: one.key ?? null,
+    /*
+     * No `key` (TV-M03). A keystroke left the registry with the key tables: the
+     * app's `shell/keys.ts` and the cockpit's `packages/tui/src/keys.ts` each
+     * decide their own, because a terminal cannot be sent a `⌘↵`. What the three
+     * sources agree about is the action.
+     */
     cli: one.cli ?? null,
   });
 
@@ -129,7 +133,7 @@ export function parityFailures(
 }
 
 describe("the action registry, the palette fixture and the CLI agree (T9.1)", () => {
-  it("has the same actions, with the same ids, labels, keys and CLI commands", () => {
+  it("has the same actions, with the same ids, labels and CLI commands", () => {
     expect(parityFailures(ACTIONS, PALETTE)).toEqual([]);
   });
 

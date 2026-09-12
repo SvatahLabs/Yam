@@ -13,6 +13,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { Button, Chip, InspectorSection } from "@svatah/yam-ui";
 import type { Action, ScreenStateBase } from "@svatah/yam-screens";
+import { acceleratorFor } from "./keys.js";
 
 /** `run.stop` → `action-run-stop`: the id a desktop adapter binds to. */
 export const actionId = (id: string): string => `action-${id.replace(/[^a-zA-Z0-9]+/g, "-")}`;
@@ -164,7 +165,7 @@ export function Toolbar(props: ToolbarProps): React.JSX.Element {
                 ? "primary"
                 : "default"
           }
-          {...(one.key === undefined ? {} : { accelerator: one.key })}
+          {...(acceleratorFor(one.id) === undefined ? {} : { accelerator: acceleratorFor(one.id)! })}
           disabled={!one.availableWhen(props.state)}
           onPress={() => props.onAction(one.id)}
           data={{

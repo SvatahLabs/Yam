@@ -1,0 +1,124 @@
+/**
+ * The cockpit's key map (TV-M03, TV-07, LLD §13.7).
+ *
+ * Keys left the model in TV-M03. `@svatah/yam-screens` says which actions a screen
+ * has; *which key runs which action* is a property of the terminal, and the app
+ * answers it differently — `⌘↵` is not a keystroke a terminal can be sent.
+ * Two tables over one registry, which is what "the model shares, the view owns"
+ * means when it is written down rather than asserted.
+ *
+ * The table is data so that three things are generated from it and cannot
+ * disagree: the footer, the `?` overlay, and `yam ui --keys --json`. A key that
+ * is advertised and unbound is not a mistake this file can make.
+ */
+import { SCREEN_IDS, actionById, type ScreenId, type SessionMode } from "@svatah/yam-screens";
+
+/** One key, and the action it runs. */
+export interface KeyBinding {
+  /** As a person presses it and as the footer prints it. */
+  readonly key: string;
+  /** The registry's action id. Never a label; never a second name for one. */
+  readonly action: string;
+  /** What the `?` overlay says it does. */
+  readonly label: string;
+  /**
+   * The Session modes this key belongs to (REQ-ADE-14, TV-15).
+   *
+   * Absent means every mode. The merge of Surfaces and Record put `s` on two
+   * actions — refresh the snapshot, and stop recording — which were unambiguous
+   * only while they lived on two screens. A mode-scoped table is how one screen
+   * keeps both without asking a person which `s` they meant.
+   */
+  readonly modes?: readonly SessionMode[];
+}
+
+/**
+ * The screen-specific keys. The keys every screen has — `^K`, `?`, `1`–`4`,
+ * `Tab`, `j`/`k`, `q` — are the cockpit's own and live with the input layer that
+ * owns them (TV-T11), because they run commands rather than actions.
+ */
+const SCREEN_KEYS: Partial<Record<ScreenId, readonly KeyBinding[]>> = {
+  session: [
+    { key: "c", action: "surface.connect", label: "Connect a surface" },
+    { key: "s", action: "surface.refresh", label: "Refresh the surface tree", modes: ["do", "say"] },
+    { key: "r", action: "surface.discover", label: "Recheck available targets" },
+    { key: "a", action: "record.accept", label: "Accept the grounding", modes: ["record"] },
+    { key: "p", action: "record.repick", label: "Re-pick in the session", modes: ["record"] },
+    { key: "x", action: "record.reject", label: "Reject the grounding", modes: ["record"] },
+    /*
+     * `Q`, not `q`. The cockpit quits on `q` and always has, so the model's
+     * `record.stop` binding was a key the terminal could never deliver — an
+     * action reachable in the app and not here, which is the defect TV-02 is
+     * about. Shifted, it works.
+     */
+    { key: "Q", action: "record.stop", label: "Stop the session", modes: ["record"] },
+    { key: "s", action: "capture.stop", label: "Stop recording and write the flow", modes: ["record"] },
+  ],
+  flows: [
+    { key: "r", action: "run.flow", label: "Run the selected flow" },
+    { key: "R", action: "capture.start", label: "Record a flow from what you do" },
+    { key: "b", action: "record.start", label: "Bind the selected flow's targets" },
+    { key: "h", action: "heal.run", label: "Heal the last run" },
+    { key: "e", action: "flows.save", label: "Edit the open flow" },
+    { key: "c", action: "flows.compile", label: "Compile and lint" },
+  ],
+  run: [
+    { key: "r", action: "run.again", label: "Run the same thing again" },
+    { key: "R", action: "run.resume", label: "Resume from the failing step" },
+    { key: "s", action: "run.stop", label: "Stop this run between steps" },
+    { key: "h", action: "heal.run", label: "Heal this run" },
+  ],
+  runs: [
+    { key: "\r", action: "go.run", label: "Open the selected run" },
+    { key: "h", action: "heal.run", label: "Heal the selected run" },
+  ],
+  bindings: [
+    { key: "v", action: "bindings.verify", label: "Dry-resolve every binding" },
+  ],
+  heal: [
+    { key: "a", action: "heal.apply", label: "Apply the proposal" },
+    { key: "h", action: "heal.run", label: "Heal the selected run" },
+  ],
+  agents: [
+    { key: "\r", action: "go.run", label: "Open the invocation's run" },
+  ],
+  api: [
+    { key: "\r", action: "api.send", label: "Send the request" },
+  ],
+  data: [
+    { key: "^s", action: "data.save", label: "Save data.yaml" },
+  ],
+};
+
+/**
+ * The keys this screen binds in this mode, in the order the footer prints them.
+ *
+ * A screen with no modes ignores the argument; a mode-scoped key is dropped when
+ * its mode is not the one showing, which is what stops one letter meaning two
+ * things on the one screen that has three modes.
+ */
+export const keysFor = (screen: ScreenId, mode?: SessionMode): readonly KeyBinding[] =>
+  (SCREEN_KEYS[screen] ?? []).filter(
+    (one) => one.modes === undefined || mode === undefined || one.modes.includes(mode),
+  );
+
+/** The action a key runs on this screen in this mode, if any binds it. */
+export const actionForKey = (
+  screen: ScreenId,
+  pressed: string,
+  mode?: SessionMode,
+): string | undefined => keysFor(screen, mode).find((one) => one.key === pressed)?.action;
+
+/**
+ * Every binding, for `yam ui --keys --json` and for the check that no key names
+ * an action the registry does not have (TV-T12).
+ */
+export const ALL_KEYS: ReadonlyArray<KeyBinding & { readonly screen: ScreenId }> = SCREEN_IDS.flatMap(
+  (screen) => keysFor(screen).map((one) => ({ ...one, screen })),
+);
+
+/** Every key that names an action nobody declared. Empty, and checked. */
+export const unknownBindings = (): readonly string[] =>
+  ALL_KEYS.filter((one) => actionById(one.action) === undefined).map(
+    (one) => `${one.screen} binds ${one.key} to ${one.action}, which is not an action`,
+  );

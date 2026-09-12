@@ -17,7 +17,6 @@ export type {
   Action,
   ActionArgs,
   ActionOutcome,
-  Binding,
   Pill,
   Screen,
   ScreenId,

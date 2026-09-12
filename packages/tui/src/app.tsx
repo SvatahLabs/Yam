@@ -22,7 +22,7 @@ import {
   ACTIONS,
   RAIL,
   actionById,
-  actionsForScreen,
+  modeFrom,
   screenById,
   type ScreenId,
   type ScreenParams,
@@ -48,6 +48,7 @@ import {
   type UiState,
 } from "./model.js";
 import { INSPECTOR_MIN_COLUMNS, footerFor, sizeOf } from "./layout.js";
+import { actionForKey, keysFor } from "./keys.js";
 
 export interface AppProps {
   readonly service: ScreenService;
@@ -347,10 +348,9 @@ export function App(props: AppProps): React.JSX.Element {
      * and only one of them could run it.
      */
     const pressed = key.ctrl ? `^${input}` : input;
-    const binding = screenById(ui.screen).keys.find(
-      (one) => (one.terminal ?? one.key.toLowerCase()) === pressed,
-    );
-    if (binding === undefined) return;
+    /* The mode is a screen parameter, so the key map is scoped by it (TV-15). */
+    const bound = actionForKey(ui.screen, pressed, modeFrom(ui.params["mode"]));
+    if (bound === undefined) return;
     /*
      * `flows.save` in a terminal means "open this in my editor" (K6, T11.1).
      *
@@ -359,11 +359,11 @@ export function App(props: AppProps): React.JSX.Element {
      * from. A cockpit that built a modal text editor inside Ink would be a
      * worse `vi` that nobody asked this project to write.
      */
-    if (binding.action === "flows.save") {
+    if (bound === "flows.save") {
       void editOpenFlow();
       return;
     }
-    void run(binding.action);
+    void run(bound);
   });
 
   if (ui === undefined) {
@@ -374,7 +374,7 @@ export function App(props: AppProps): React.JSX.Element {
     );
   }
 
-  const actions = actionsForScreen(ui.screen);
+  const keys = keysFor(ui.screen, modeFrom(ui.params["mode"]));
 
   return (
     <Box flexDirection="column" width={ui.layout.columns}>
@@ -452,7 +452,7 @@ export function App(props: AppProps): React.JSX.Element {
       */}
       <Box width={ui.layout.columns}>
         <Text color="gray" wrap="truncate-end">
-          {footerFor(ui.layout.columns, actions).map((one, at) => (
+          {footerFor(ui.layout.columns, keys).map((one, at) => (
             <Text key={one.key}>
               {at === 0 ? "" : "  "}
               <Text color="white">{one.key}</Text> {one.label}

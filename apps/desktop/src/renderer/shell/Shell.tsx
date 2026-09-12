@@ -52,8 +52,11 @@ import {
   type RunState,
   type RunsState,
   type SettingsState,
+  type SessionState,
   type SurfacesState,
 } from "@svatah/yam-screens";
+import { acceleratorFor, keysFor as appKeysFor } from "./keys.js";
+import { SessionInspector, SessionScreen } from "./Session.js";
 import { SurfacesScreen, SurfacesInspector } from "./Surfaces.js";
 import type { ServiceClient } from "../client.js";
 import { a11yVariant } from "../a11y-variant.js";
@@ -356,7 +359,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
          * greyed out, which is the dead end this task removes.
          */
         const primary = actionsForScreen(screen).find(
-          (one) => one.key === "⌘↵" && one.availableWhen(state),
+          (one) => acceleratorFor(one.id) === "⌘↵" && one.availableWhen(state),
         );
         if (primary !== undefined) void runAction(primary.id);
         return;
@@ -369,7 +372,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
       const target = event.target as HTMLElement | null;
       if (target !== null && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
       if (event.metaKey || event.ctrlKey || event.altKey || event.key.length !== 1) return;
-      const binding = screenById(screen).keys.find(
+      const binding = appKeysFor(screen).find(
         (one) => one.key.toLowerCase() === event.key.toLowerCase() && one.key.length === 1,
       );
       if (binding !== undefined) {
@@ -390,7 +393,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
         label: action.label,
         group: action.group,
         area: action.id.split(".")[0]!,
-        ...(action.key === undefined ? {} : { key: action.key }),
+        ...(acceleratorFor(action.id) === undefined ? {} : { key: acceleratorFor(action.id)! }),
         ...(action.cli === undefined ? {} : { cli: action.cli }),
         available: state === undefined ? action.group === "Go to" : action.availableWhen(state),
       })),
@@ -481,6 +484,8 @@ export function Shell(props: ShellProps): React.JSX.Element {
     }
 
     switch (state.screen) {
+      case "session":
+        return <SessionScreen state={state as SessionState} {...shared} />;
       case "surfaces":
         return <SurfacesScreen state={state as SurfacesState} {...shared} />;
       case "run":
@@ -526,6 +531,8 @@ export function Shell(props: ShellProps): React.JSX.Element {
     const evidenceProp = evidence === undefined ? {} : { evidence };
 
     switch (state.screen) {
+      case "session":
+        return <SessionInspector state={state as SessionState} {...shared} />;
       case "surfaces":
         return <SurfacesInspector state={state as SurfacesState} {...shared} />;
       case "run":

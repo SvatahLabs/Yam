@@ -1,11 +1,16 @@
 /**
  * The screen model's types (T9.1, LLD §13.7).
  *
- * > A screen is `{ id, title, load(service): State, actions: Action[], keys:
- * > Binding[] }`; an `Action` is `{ id, label, run(service, args),
- * > availableWhen(state), cli? }` and the same list is what the command palette
- * > shows, what the SDK exposes as `actions`, and what the CLI has a command
- * > for; the repository check asserts the three agree by id.
+ * > A screen is `{ id, title, load(service): State, actions: Action[] }`; an
+ * > `Action` is `{ id, label, run(service, args), availableWhen(state), cli? }`
+ * > and the same list is what the command palette shows, what the SDK exposes
+ * > as `actions`, and what the CLI has a command for; the repository check
+ * > asserts the three agree by id.
+ *
+ * Draft 2.26 took the key tables out (TV-M03). A screen said which key ran which
+ * action, in one table both renderers read — and a terminal cannot be sent a
+ * `⌘↵`, so one of them was always reading the other's convention. Each renderer
+ * keeps its own now: `packages/tui/src/keys.ts` and the app's `shell/keys.ts`.
  *
  * No DOM, no terminal, no `process`: this file and everything under `screens/`
  * is what both renderers agree about, and a type that mentioned an element or a
@@ -154,24 +159,6 @@ export interface Pill {
   readonly label: string;
 }
 
-/**
- * One key binding, as both renderers read it (LLD §13.7).
- *
- * `key` is written the way the mockups write it — `⌘↵`, `R`, `^K` — and each
- * renderer maps it to its own event. The app reads `mac`/`win`; the TUI reads
- * `terminal`, because a terminal has no ⌘.
- */
-export interface Binding {
-  /** The action this key runs, or a navigation intent for `Go to` rows. */
-  readonly action: string;
-  /** How the app prints it: `⌘↵`, `R`, `⌘K`. */
-  readonly key: string;
-  /** How the terminal prints it: `^K`, `r`. Defaults to `key` lower-cased. */
-  readonly terminal?: string;
-  /** What it does, for the `?` sheet both renderers show. */
-  readonly description: string;
-}
-
 /** What an action was given: the screen's params, plus whatever the row supplied. */
 export interface ActionArgs extends ScreenParams {
   readonly [key: string]: unknown;
@@ -208,8 +195,6 @@ export interface Action {
   readonly group: "Actions" | "Go to";
   /** The screen this action belongs to; the palette shows it in the left column. */
   readonly screen: ScreenId;
-  /** The accelerator shown on the button and in the palette row, when it has one. */
-  readonly key?: string;
   /**
    * The CLI command that does the same thing, as the palette prints it.
    *
@@ -230,5 +215,4 @@ export interface Screen<S extends ScreenStateBase = ScreenStateBase> {
   load(service: ScreenService, params?: ScreenParams): Promise<S>;
   /** The registry entries this screen offers, resolved rather than copied. */
   readonly actions: readonly Action[];
-  readonly keys: readonly Binding[];
 }

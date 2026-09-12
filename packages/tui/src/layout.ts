@@ -278,14 +278,15 @@ const widthOf = (one: FooterKey): number => one.key.length + 1 + one.label.lengt
  * The footer's keys for a terminal this wide (P10-F9).
  *
  * The core six and `q` always; then as many of the screen's own single-letter
- * accelerators as still fit, in the registry's order. A screen with eight
+ * keys as still fit, in the cockpit's own table's order (TV-M03: the registry
+ * has no accelerators; `keys.ts` is where a keystroke is decided). A screen with eight
  * actions on a hundred-column terminal used to wrap its footer onto a second
  * line and push a pane off the top of the terminal, which is the same defect as
  * the 104-character row one line lower down.
  */
 export function footerFor(
   columns: number,
-  actions: ReadonlyArray<{ key?: string; label: string }>,
+  bound: ReadonlyArray<{ key: string; label: string }>,
 ): FooterKey[] {
   const gap = 2;
   const fixed = [...CORE_KEYS, QUIT_KEY].reduce(
@@ -295,8 +296,8 @@ export function footerFor(
   let left = Math.max(0, Math.floor(columns) - fixed);
 
   const extra: FooterKey[] = [];
-  for (const action of actions) {
-    if (action.key === undefined || action.key.length !== 1) continue;
+  for (const action of bound) {
+    if (action.key.length !== 1) continue;
     const one: FooterKey = {
       key: action.key.toLowerCase(),
       label: action.label.toLowerCase(),

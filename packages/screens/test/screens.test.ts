@@ -91,12 +91,11 @@ describe("the model covers every screen (LLD §13.7)", () => {
       for (const action of screen.actions) {
         expect(ACTIONS, `${screen.id}/${action.id}`).toContain(action);
       }
-      for (const key of screen.keys) {
-        expect(
-          ACTIONS.some((one) => one.id === key.action),
-          `${screen.id} binds ${key.key} to unknown action ${key.action}`,
-        ).toBe(true);
-      }
+      /*
+       * The key half of this check moved with the keys (TV-M03): "a screen
+       * binds no unknown action" is now each renderer's to answer about its own
+       * table, in `packages/tui/test/keys.test.ts` and the app's.
+       */
     }
   });
 });
@@ -687,10 +686,8 @@ describe("a capture happening (REQ-REC-13, Draft 2.23)", () => {
     const bind = ACTIONS.find((one) => one.id === "record.start")!;
     expect(record.label).toBe("Record");
     expect(record.cli).toBe("yam record");
-    expect(record.key).toBe("R");
     expect(bind.label).toBe("Bind targets");
     expect(bind.cli).toBe("yam record --flow <file>");
-    expect(bind.key).toBe("B");
     /*
      * Draft 2.27: both are still two actions with two keys, and the screen they
      * are declared on is now `session` — Record is a mode of it rather than a
@@ -719,39 +716,20 @@ describe("a screen's keys and the action registry agree (T9.1, Draft 2.24)", () 
    * action-parity check compares the registry, the palette fixture and the CLI;
    * a screen's own key list was in none of them.
    */
-  it("names an action that exists, on the key the registry gives it", () => {
-    const byId = new Map(ACTIONS.map((one) => [one.id, one]));
+  it("declares no key at all: that is each renderer's table now (TV-M03)", () => {
+    /*
+     * The model said which key ran which action, in one table both renderers
+     * read — and a terminal cannot be sent a `⌘↵`, so one of them was always
+     * reading the other's convention. What is asserted here is the absence: a
+     * screen has actions, and nothing about keystrokes.
+     */
     for (const screen of SCREENS) {
-      for (const binding of screen.keys ?? []) {
-        const action = byId.get(binding.action);
-        expect(action, `${screen.id}: no action ${binding.action}`).toBeDefined();
-        // The registry gives a key only to the actions the palette accelerates;
-        // where it does, the screen must not invent a different one.
-        if (action!.key !== undefined) {
-          expect(action!.key, `${screen.id}: ${binding.action}`).toBe(binding.key);
-        }
-      }
+      expect(screen, `${screen.id} still carries a key table`).not.toHaveProperty("keys");
+    }
+    for (const action of ACTIONS) {
+      expect(action, `${action.id} still carries an accelerator`).not.toHaveProperty("key");
     }
   });
 
-  it("declares terminal keys the cockpit can actually match", () => {
-    // One character, or `^` and one: what a keypress can be. `^s` was declared
-    // and unreachable until the cockpit learned to read the caret (Draft 2.24).
-    for (const screen of SCREENS) {
-      for (const binding of screen.keys ?? []) {
-        const terminal = binding.terminal ?? binding.key.toLowerCase();
-        expect(terminal, `${screen.id}: ${binding.action}`).toMatch(/^\^?[\s\S]$/u);
-      }
-    }
-  });
 
-  it("offers both recordings on the Flows screen, on different keys", () => {
-    const keys = screenById("flows").keys;
-    const record = keys.find((one) => one.action === "capture.start")!;
-    const bind = keys.find((one) => one.action === "record.start")!;
-    expect(record.terminal).toBe("R");
-    expect(record.description).toMatch(/what you do/);
-    expect(bind.terminal).toBe("b");
-    expect(bind.description).toMatch(/[Bb]ind/);
-  });
 });

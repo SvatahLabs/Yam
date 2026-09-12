@@ -141,7 +141,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Connect surface",
     group: "Actions",
     screen: "session",
-    key: "C",
     cli: "yam surface connect --url <url>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
@@ -193,7 +192,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Recheck targets",
     group: "Actions",
     screen: "session",
-    key: "R",
     cli: "yam surface targets",
     availableWhen: loaded,
     async run(service): Promise<ActionOutcome> {
@@ -213,7 +211,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Perform the action",
     group: "Actions",
     screen: "session",
-    key: "⌘↵",
     cli: "yam surface act --session <id> --action <action> --ref <ref>",
     // Not on an HTTP surface: its `act` refuses everything, so offering it
     // would be the dead end T15 exists to remove. That surface has `request`.
@@ -338,7 +335,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Refresh and select again",
     group: "Actions",
     screen: "session",
-    key: "S",
     cli: "yam surface snapshot --session <id>",
     availableWhen: hasIn("surface", "session"),
     async run(_service, args): Promise<ActionOutcome> {
@@ -512,7 +508,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Send the request",
     group: "Actions",
     screen: "session",
-    key: "⌘↵",
     cli: "yam surface request --session <id> --url <url>",
     // Only an HTTP surface has this form; the model says which is which.
     availableWhen: both(inMode("do"), (state) => half(state, "surface")["httpSurface"] === true),
@@ -551,7 +546,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Save flow",
     group: "Actions",
     screen: "flows",
-    key: "⌘S",
     // `PUT /flows/:file` writes the file the CLI reads; from a terminal you
     // would use an editor, which is what `yam ui`'s `e` key opens.
     availableWhen: has("file"),
@@ -578,7 +572,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Run",
     group: "Actions",
     screen: "flows",
-    key: "⌘↵",
     cli: "yam run --flow <file>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
@@ -616,7 +609,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Run again",
     group: "Actions",
     screen: "run",
-    key: "⌘↵",
     cli: "yam run --flow <file>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
@@ -659,7 +651,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Record",
     group: "Actions",
     screen: "flows",
-    key: "R",
     cli: "yam record",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
@@ -679,7 +670,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Stop recording",
     group: "Actions",
     screen: "session",
-    key: "S",
     // No `cli`: at a terminal a capture ends with Enter, which is not a command.
     availableWhen: both(inMode("record"), hasIn("record", "sessionId")),
     async run(service, args): Promise<ActionOutcome> {
@@ -694,7 +684,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Bind targets",
     group: "Actions",
     screen: "flows",
-    key: "B",
     cli: "yam record --flow <file>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
@@ -715,7 +704,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Accept",
     group: "Actions",
     screen: "session",
-    key: "A",
     availableWhen: both(inMode("record"), hasIn("record", "decision")),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No recording session is open.");
@@ -731,7 +719,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Re-pick",
     group: "Actions",
     screen: "session",
-    key: "P",
     availableWhen: both(inMode("record"), hasIn("record", "decision")),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No recording session is open.");
@@ -746,7 +733,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Reject",
     group: "Actions",
     screen: "session",
-    key: "X",
     availableWhen: both(inMode("record"), hasIn("record", "decision")),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No recording session is open.");
@@ -774,7 +760,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Stop",
     group: "Actions",
     screen: "run",
-    key: "S",
     /*
      * No CLI command (Draft 2.12 §13.5, T10.4).
      *
@@ -798,7 +783,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Heal",
     group: "Actions",
     screen: "run",
-    key: "H",
     cli: "yam heal --run <id>",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
@@ -836,7 +820,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Verify all bindings",
     group: "Actions",
     screen: "bindings",
-    key: "V",
     cli: "yam bindings verify",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
@@ -865,7 +848,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Send request",
     group: "Actions",
     screen: "api",
-    key: "⌘↵",
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
       const request = args["request"];
@@ -879,7 +861,6 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Save request",
     group: "Actions",
     screen: "api",
-    key: "⌘S",
     /*
      * `PUT /api/:name` writes `api/<name>.yaml`, which is the file the CLI's
      * `api` step reads (K7, T11.1). The Phase 10 verification: "a release

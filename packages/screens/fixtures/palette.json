@@ -12,7 +12,12 @@
     "",
     "Regenerate it deliberately, never automatically:",
     "  node -e \"import('./packages/screens/dist/index.js').then(m => console.log(JSON.stringify(m.ACTIONS.map(a => ({id:a.id,label:a.label,group:a.group,screen:a.screen,...(a.key?{key:a.key}:{}),...(a.cli?{cli:a.cli}:{})})), null, 2)))\"",
-    "and read the diff before committing it."
+    "and read the diff before committing it.",
+    "",
+    "Draft 2.26, TV-M03: no `key` column. A keystroke is a renderer's word \u2014 the",
+    "app's `shell/keys.ts` and the cockpit's `packages/tui/src/keys.ts` each decide",
+    "their own, because a terminal cannot be sent a Command key. What the three",
+    "sources still agree about is the action: its id, label, group, screen and CLI."
   ],
   "actions": [
     {
@@ -20,7 +25,6 @@
       "label": "Connect surface",
       "group": "Actions",
       "screen": "session",
-      "key": "C",
       "cli": "yam surface connect --url <url>"
     },
     {
@@ -35,7 +39,6 @@
       "label": "Recheck targets",
       "group": "Actions",
       "screen": "session",
-      "key": "R",
       "cli": "yam surface targets"
     },
     {
@@ -43,7 +46,6 @@
       "label": "Perform the action",
       "group": "Actions",
       "screen": "session",
-      "key": "\u2318\u21b5",
       "cli": "yam surface act --session <id> --action <action> --ref <ref>"
     },
     {
@@ -65,7 +67,6 @@
       "label": "Refresh and select again",
       "group": "Actions",
       "screen": "session",
-      "key": "S",
       "cli": "yam surface snapshot --session <id>"
     },
     {
@@ -101,7 +102,6 @@
       "label": "Send the request",
       "group": "Actions",
       "screen": "session",
-      "key": "\u2318\u21b5",
       "cli": "yam surface request --session <id> --url <url>"
     },
     {
@@ -115,15 +115,13 @@
       "id": "flows.save",
       "label": "Save flow",
       "group": "Actions",
-      "screen": "flows",
-      "key": "\u2318S"
+      "screen": "flows"
     },
     {
       "id": "run.flow",
       "label": "Run",
       "group": "Actions",
       "screen": "flows",
-      "key": "\u2318\u21b5",
       "cli": "yam run --flow <file>"
     },
     {
@@ -138,7 +136,6 @@
       "label": "Run again",
       "group": "Actions",
       "screen": "run",
-      "key": "\u2318\u21b5",
       "cli": "yam run --flow <file>"
     },
     {
@@ -153,44 +150,38 @@
       "label": "Record",
       "group": "Actions",
       "screen": "flows",
-      "key": "R",
       "cli": "yam record"
     },
     {
       "id": "capture.stop",
       "label": "Stop recording",
       "group": "Actions",
-      "screen": "session",
-      "key": "S"
+      "screen": "session"
     },
     {
       "id": "record.start",
       "label": "Bind targets",
       "group": "Actions",
       "screen": "flows",
-      "key": "B",
       "cli": "yam record --flow <file>"
     },
     {
       "id": "record.accept",
       "label": "Accept",
       "group": "Actions",
-      "screen": "session",
-      "key": "A"
+      "screen": "session"
     },
     {
       "id": "record.repick",
       "label": "Re-pick",
       "group": "Actions",
-      "screen": "session",
-      "key": "P"
+      "screen": "session"
     },
     {
       "id": "record.reject",
       "label": "Reject",
       "group": "Actions",
-      "screen": "session",
-      "key": "X"
+      "screen": "session"
     },
     {
       "id": "record.stop",
@@ -202,15 +193,13 @@
       "id": "run.stop",
       "label": "Stop",
       "group": "Actions",
-      "screen": "run",
-      "key": "S"
+      "screen": "run"
     },
     {
       "id": "heal.run",
       "label": "Heal",
       "group": "Actions",
       "screen": "run",
-      "key": "H",
       "cli": "yam heal --run <id>"
     },
     {
@@ -231,7 +220,6 @@
       "label": "Verify all bindings",
       "group": "Actions",
       "screen": "bindings",
-      "key": "V",
       "cli": "yam bindings verify"
     },
     {
@@ -245,15 +233,13 @@
       "id": "api.send",
       "label": "Send request",
       "group": "Actions",
-      "screen": "api",
-      "key": "\u2318\u21b5"
+      "screen": "api"
     },
     {
       "id": "api.save",
       "label": "Save request",
       "group": "Actions",
-      "screen": "api",
-      "key": "\u2318S"
+      "screen": "api"
     },
     {
       "id": "data.save",

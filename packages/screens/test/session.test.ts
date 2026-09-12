@@ -152,9 +152,7 @@ describe("the actions keep their ids (TV-M02)", () => {
     }
   });
 
-  it("keeps both screens' keys, so neither half loses its accelerators", () => {
-    const keys = screenById("session").keys.map((one) => one.action);
-    expect(keys).toContain("surface.connect");
-    expect(keys).toContain("record.accept");
+  it("declares no keys: the cockpit and the app each keep their own (TV-M03)", () => {
+    expect(screenById("session")).not.toHaveProperty("keys");
   });
 });

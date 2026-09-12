@@ -137,10 +137,6 @@ const runsScreen: Screen<RunsState> = {
   id: "runs",
   title: "Runs",
   actions: actionsForScreen("runs"),
-  keys: [
-    { action: "go.run", key: "↵", terminal: "\r", description: "Open the selected run" },
-    { action: "heal.run", key: "H", terminal: "h", description: "Heal the selected run" },
-  ],
   async load(service, params: ScreenParams = {}): Promise<RunsState> {
     const sources = new Sources();
     const summaries = await sources.optional<SummaryResponse[]>(
@@ -373,9 +369,6 @@ const bindingsScreen: Screen<BindingsState> = {
   id: "bindings",
   title: "Bindings",
   actions: actionsForScreen("bindings"),
-  keys: [
-    { action: "bindings.verify", key: "V", terminal: "v", description: "Dry-resolve every binding" },
-  ],
   async load(service, params: ScreenParams = {}): Promise<BindingsState> {
     const sources = new Sources();
     const list = await sources.optional<BindingListRow[]>(
@@ -591,13 +584,6 @@ export const recordScreen: Screen<RecordState> = {
    * one, so nothing that still opens it loses its buttons.
    */
   actions: actionsForScreen("session"),
-  keys: [
-    { action: "record.accept", key: "A", terminal: "a", description: "Accept the grounding" },
-    { action: "record.repick", key: "P", terminal: "p", description: "Re-pick in the session" },
-    { action: "record.reject", key: "X", terminal: "x", description: "Reject the grounding" },
-    { action: "record.stop", key: "Q", terminal: "q", description: "Stop the session" },
-    { action: "capture.stop", key: "S", terminal: "s", description: "Stop recording and write the flow" },
-  ],
   async load(service, params: ScreenParams = {}): Promise<RecordState> {
     const sources = new Sources();
     const project = await sources.get<ProjectResponse>("GET /project", () => service.getProject(), {});
@@ -876,10 +862,6 @@ const healScreen: Screen<HealState> = {
   id: "heal",
   title: "Heal review",
   actions: actionsForScreen("heal"),
-  keys: [
-    { action: "heal.apply", key: "A", terminal: "a", description: "Apply the proposal" },
-    { action: "heal.run", key: "H", terminal: "h", description: "Heal the selected run" },
-  ],
   async load(service, params: ScreenParams = {}): Promise<HealState> {
     const sources = new Sources();
     const summaries = await sources.optional<SummaryResponse[]>(

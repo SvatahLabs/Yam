@@ -647,11 +647,6 @@ export const surfacesScreen: Screen<SurfacesState> = {
    * one, so nothing that still opens it loses its buttons.
    */
   actions: actionsForScreen("session"),
-  keys: [
-    { action: "surface.connect", key: "C", terminal: "c", description: "Connect a surface" },
-    { action: "surface.refresh", key: "S", terminal: "s", description: "Refresh the surface tree" },
-    { action: "surface.discover", key: "R", terminal: "r", description: "Recheck available targets" },
-  ],
   async load(service, params: ScreenParams = {}): Promise<SurfacesState> {
     const sources = new Sources();
     // Both are `optional`: a broker that is briefly unreachable is a state the

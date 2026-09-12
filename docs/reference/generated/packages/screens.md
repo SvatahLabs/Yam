@@ -31,7 +31,6 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `AuditResponse` | interface | `export interface AuditResponse` | One `audit.jsonl` line (LLD §3.4, REQ-AUTO-6). |
 | `AuditRow` | interface | `export interface AuditRow` |  |
 | `AUTHORING_SCREENS` | variable | `AUTHORING_SCREENS = [` |  |
-| `Binding` | interface | `export interface Binding` | One key binding, as both renderers read it (LLD §13.7). |
 | `BindingCandidate` | interface | `export interface BindingCandidate` |  |
 | `BindingFileResponse` | interface | `export interface BindingFileResponse` | `GET /bindings/:id`, parsed: the YAML `yam bindings show` prints. |
 | `BindingInspector` | interface | `export interface BindingInspector` | What the inspector shows about the selected binding (the `Bindings` artboard). |

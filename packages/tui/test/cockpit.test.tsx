@@ -593,27 +593,6 @@ describe("all thirteen screens draw in the cockpit (T10.1, T10.2, T14)", () => {
     }
   });
 
-  it("the authoring screens' keys name registry actions (T10.1)", () => {
-    for (const id of ["record", "runs", "heal", "bindings"] as const) {
-      for (const binding of screenById(id).keys) {
-        expect(
-          ACTIONS.some((one) => one.id === binding.action),
-          `${id} binds ${binding.key} to unknown action ${binding.action}`,
-        ).toBe(true);
-      }
-    }
-    /*
-     * Three of the four own actions; `runs` owns none, and that is right rather
-     * than missing. Its two keys are `go.run` — navigation, which the palette's
-     * second group carries — and `heal.run`, which belongs to the Run screen
-     * (Draft 2.12's D6). An action invented so a screen would have one would be
-     * a palette row nothing answers.
-     */
-    for (const id of ["record", "heal", "bindings"] as const) {
-      expect(actionsForScreen(id).length, `${id} has no action of its own`).toBeGreaterThan(0);
-    }
-    expect(actionsForScreen("runs")).toEqual([]);
-  });
 
   it("`[` and `]` walk the rail", async () => {
     const seen: UiState[] = [];

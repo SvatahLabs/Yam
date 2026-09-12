@@ -58,11 +58,13 @@ const CALLABLE = new Set([
 describe("the app renders the model and nothing else (T3.7, T10.1, T10.2)", () => {
   it("has a file for each screen the model has", () => {
     /*
-     * Eight files for thirteen screens: `Secondary.tsx` carries the six of T10.2,
-     * `Surfaces.tsx` is the surface-first landing (T14), and the rest are one
-     * file each — because they are one *kind* of screen — a table, an editor, an
-     * inspector — and a file per screen would be a chance for them to drift. What
-     * the next case checks is that every *id* has a body.
+     * Nine files for fourteen screens: `Secondary.tsx` carries the six of T10.2,
+     * `Session.tsx` is the landing screen Draft 2.27 merged out of Surfaces and
+     * Record — it draws the say mode itself and hands the other two to the
+     * components that already drew them — and the rest are one file each,
+     * because they are one *kind* of screen: a table, an editor, an inspector.
+     * A file per screen would be a chance for them to drift. What the next case
+     * checks is that every *id* has a body.
      */
     expect(screens.map((one) => one.name).sort()).toEqual([
       "Bindings.tsx",
@@ -72,6 +74,7 @@ describe("the app renders the model and nothing else (T3.7, T10.1, T10.2)", () =
       "Run.tsx",
       "Runs.tsx",
       "Secondary.tsx",
+      "Session.tsx",
       "Surfaces.tsx",
     ]);
   });

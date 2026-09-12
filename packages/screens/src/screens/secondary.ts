@@ -66,7 +66,6 @@ const agentsScreen: Screen<AgentsState> = {
   id: "agents",
   title: "Agents and tools",
   actions: actionsForScreen("agents"),
-  keys: [{ action: "go.run", key: "↵", terminal: "\r", description: "Open the invocation's run" }],
   async load(service, params: ScreenParams = {}): Promise<AgentsState> {
     const sources = new Sources();
     const tools = await sources.optional<ToolsResponse>("GET /tools", () => service.getTools(), {});
@@ -196,7 +195,6 @@ const apiScreen: Screen<ApiState> = {
   id: "api",
   title: "API",
   actions: actionsForScreen("api"),
-  keys: [{ action: "api.send", key: "⌘↵", terminal: "\r", description: "Send the request" }],
   async load(service, params: ScreenParams = {}): Promise<ApiState> {
     const sources = new Sources();
     const requests = await sources.optional<ApiRequestResponse[]>(
@@ -276,7 +274,6 @@ const dataScreen: Screen<DataState> = {
   id: "data",
   title: "Data",
   actions: actionsForScreen("data"),
-  keys: [{ action: "data.save", key: "⌘S", terminal: "^s", description: "Save data.yaml" }],
   async load(service, params: ScreenParams = {}): Promise<DataState> {
     const sources = new Sources();
     const data = await sources.optional<DataResponse>("GET /data", () => service.getData(), {});
@@ -409,7 +406,6 @@ const importScreen: Screen<ImportState> = {
   id: "import",
   title: "Import prototype database",
   actions: actionsForScreen("import"),
-  keys: [],
   async load(service, params: ScreenParams = {}): Promise<ImportState> {
     const sources = new Sources();
     const project = await sources.get<ProjectResponse>("GET /project", () => service.getProject(), {});
@@ -442,7 +438,6 @@ const settingsScreen: Screen<SettingsState> = {
   id: "settings",
   title: "Settings",
   actions: actionsForScreen("settings"),
-  keys: [],
   async load(service): Promise<SettingsState> {
     const sources = new Sources();
     const project = await sources.get<ProjectResponse>("GET /project", () => service.getProject(), {});

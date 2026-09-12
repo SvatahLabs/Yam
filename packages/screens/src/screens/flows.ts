@@ -24,7 +24,7 @@
 import { Sources, dotted, plural } from "../load.js";
 import { actionsForScreen } from "../registry.js";
 import type { ScreenService } from "../service.js";
-import type { Binding, Pill, Screen, ScreenParams, ScreenStateBase } from "../types.js";
+import type { Pill, Screen, ScreenParams, ScreenStateBase } from "../types.js";
 import type {
   BindingListRow,
   CompileResponse,
@@ -172,7 +172,6 @@ export const flowsScreen: Screen<FlowsState> = {
   id: "flows",
   title: "Flows",
   actions: actionsForScreen("flows"),
-  keys: FLOW_KEYS(),
   async load(service: ScreenService, params: ScreenParams = {}): Promise<FlowsState> {
     const sources = new Sources();
 
@@ -466,33 +465,3 @@ export const flowsScreen: Screen<FlowsState> = {
   },
 };
 
-/** The keys the Flows screen binds (LLD §13.7's "conventional keys throughout"). */
-function FLOW_KEYS(): readonly Binding[] {
-  return [
-    { action: "run.flow", key: "⌘↵", terminal: "r", description: "Run the selected flow" },
-    /*
-     * Two recordings, two keys (Draft 2.23, REQ-REC-13).
-     *
-     * `R` records a flow from what a person does; `b` binds the targets of a
-     * flow that already exists. Draft 2.23 split the action registry in two and
-     * left this table alone, so `R` ran the binding session under a label that
-     * said it recorded — the exact confusion the split existed to remove.
-     */
-    { action: "capture.start", key: "R", terminal: "R", description: "Record a flow from what you do" },
-    { action: "record.start", key: "B", terminal: "b", description: "Bind the selected flow's targets" },
-    { action: "heal.run", key: "H", terminal: "h", description: "Heal the last run" },
-    /*
-     * `e` in the terminal, `⌘S` in the app (K6, T11.1).
-     *
-     * The two renderers edit a file the way their own medium does. The app has
-     * a text area and a Save button; a terminal has `$EDITOR`, and a cockpit
-     * that built its own modal editor inside Ink would be a worse `vi` nobody
-     * asked for. `yam ui` opens the file in the editor a person already has,
-     * and saves what comes back through the same `flows.save` action and the
-     * same `PUT /flows/:file` — which is what makes it one action rather than
-     * two features.
-     */
-    { action: "flows.save", key: "⌘S", terminal: "e", description: "Edit the open flow" },
-    { action: "flows.compile", key: "⌘B", terminal: "c", description: "Compile and lint" },
-  ];
-}
