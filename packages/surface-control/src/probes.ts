@@ -34,6 +34,8 @@
  * promise nobody here can keep.
  */
 import { spawnSync } from "node:child_process";
+import { createRequire } from "node:module";
+import { existsSync } from "node:fs";
 import { platform } from "node:os";
 
 export interface AdapterProbe {
@@ -114,38 +116,65 @@ async function runProbe(adapter: string): Promise<AdapterProbe> {
 
     case "playwright": {
       /*
-       * A registered Playwright adapter without an installed browser is the
-       * commonest way a first run fails, and the platform table could never
-       * see it. `playwright --version` answers from the package; the browser
-       * is what `pnpm browsers` installs.
+       * Resolved, not shelled out to (P-W2-F5).
        *
-       * Three outcomes and not two (P-W2-F2). The old version reported one
-       * reason — "run `playwright install chromium` so a browser is installed" —
-       * for every way this could fail, including the one that actually happened:
-       * a windowed app on macOS has launchd's `PATH`, which has no `npx` on it,
-       * so the probe could not run at all and the answer blamed a missing
-       * browser on a machine that had Playwright 1.62.1 and its browsers. A
-       * diagnostic that names the wrong cause is worse than none: it sends
-       * somebody to install what they already have.
+       * This ran `npx --no-install playwright --version`, which asks whether a
+       * *binary* is reachable from the current working directory — and the
+       * service's working directory is the person's project, not this package.
+       * In a packaged application that answer is always no, however well
+       * installed Playwright is: the app reported the adapter unavailable and
+       * told a person to install what was already inside its own bundle, four
+       * directories away under `node_modules/.pnpm/playwright@1.62.1`.
+       *
+       * What the adapter does is `import "playwright"`, so that is what is
+       * checked: Node's own resolution, from this module, which is the same
+       * resolution the adapter gets. A working directory cannot change it and a
+       * missing `npx` cannot break it.
+       *
+       * The browser is a second question with a second answer. `playwright`
+       * resolving means the package is there; `chromium.executablePath()`
+       * existing means there is something to drive. They fail for different
+       * reasons and send a person to different commands, so they are reported
+       * apart.
        */
-      if (ask("npx", ["--version"], 20_000) === undefined) {
+      const require_ = createRequire(import.meta.url);
+      let version: string;
+      try {
+        const manifest = require_("playwright/package.json") as { version?: unknown };
+        if (typeof manifest.version !== "string") throw new Error("no version");
+        version = manifest.version;
+      } catch {
         return {
           present: false,
           reason:
-            "`npx` could not be run from here, so Playwright could not be asked its version. " +
-            "This is usually a windowed application's environment rather than a missing " +
-            "install: a Node on PATH is what `npx` needs.",
+            "Playwright is not installed where Yam can load it. `npm i -D playwright` in the " +
+            "project, or use the ax adapter, which needs no browser package.",
         };
       }
-      const version = ask("npx", ["--no-install", "playwright", "--version"], 20_000);
-      return version === undefined
-        ? {
+      try {
+        const { chromium } = (await import("playwright")) as {
+          chromium: { executablePath(): string };
+        };
+        const browser = chromium.executablePath();
+        if (browser === "" || !existsSync(browser)) {
+          return {
             present: false,
+            version,
             reason:
-              "Playwright answered no version here. Run `npm i -D @playwright/test` if it is " +
-              "not installed, then `npx playwright install chromium` for a browser to drive.",
-          }
-        : { present: true, version };
+              `Playwright ${version} is installed but has no browser to drive. Run ` +
+              "`npx playwright install chromium`.",
+          };
+        }
+      } catch {
+        return {
+          present: false,
+          version,
+          reason:
+            `Playwright ${version} is installed but could not say where its browser is. Run ` +
+            "`npx playwright install chromium`.",
+        };
+      }
+      return { present: true, version };
     }
 
     case "bidi": {

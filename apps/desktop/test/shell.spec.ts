@@ -1330,11 +1330,20 @@ test("the Record screen's toolbar keeps its title, its select and availableWhen 
       );
     }
 
-    // 2. Twelve characters of title, at least.
+    /*
+     * 2. The title is not squeezed: shown whole, or twelve characters at least.
+     *
+     * The rule was a flat twelve, which was a proxy for "not truncated" written
+     * when this screen's title was "Record review". Draft 2.27 made it
+     * "Session", and seven characters of room for a seven-character title is the
+     * rule being *kept* — a threshold calibrated to one string is a threshold
+     * that fails on the next one. P10-F3's concern is a long title squeezed to
+     * nothing, which `min` still catches.
+     */
     expect(
       measured.titleFits,
       `${width}px: the title "${measured.titleText}" has room for ${measured.titleFits} characters`,
-    ).toBeGreaterThanOrEqual(12);
+    ).toBeGreaterThanOrEqual(Math.min(12, measured.titleText.length));
 
     // 3. The gateway select is one line, inside the bar.
     expect(measured.select, `${width}px: the Record toolbar has no gateway select`).not.toBeNull();

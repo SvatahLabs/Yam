@@ -8,6 +8,17 @@ import { defineConfig } from "tsup";
  */
 export default defineConfig({
   entry: ["src/index.ts"],
+  /*
+   * The drivers are never bundled (P-W2-F5).
+   *
+   * A package that asks Playwright its version — which is how adapter readiness
+   * is checked, since asking `npx` asks about the working directory rather than
+   * about the install — makes esbuild try to *inline* Playwright, and
+   * `playwright-core` has a conditional `require` of `chromium-bidi` that cannot
+   * be resolved at bundle time. These are host drivers resolved at run time by
+   * whoever has them installed; they are dependencies, not contents.
+   */
+  external: ["playwright", "playwright-core", "@playwright/test", "chromium-bidi"],
   format: ["esm"],
   target: "node22",
   platform: "node",
