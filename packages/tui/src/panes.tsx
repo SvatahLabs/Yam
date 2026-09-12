@@ -19,6 +19,8 @@
  */
 import { Box, Text } from "ink";
 import { STATUS, type StatusTone } from "@svatah/yam-ui-tokens";
+import { capabilitiesOf } from "./terminal.js";
+import { depthFor, inkColour, type ColourDepth } from "./theme.js";
 import { budget } from "./layout.js";
 import type { Pane, UiState } from "./model.js";
 import { paneModel, type Cell, type Line, type PaneContent } from "./rows.js";
@@ -26,8 +28,25 @@ import { paneModel, type Cell, type Line, type PaneContent } from "./rows.js";
 export { paneModel, GLYPH } from "./rows.js";
 export type { Cell, Line, PaneContent, PaneModel } from "./rows.js";
 
-/** A tone's ANSI colour, from the one table both renderers read. */
-export const colourOf = (tone: StatusTone): string => STATUS[tone].ansi;
+/**
+ * A tone's colour, at the depth this terminal admits to (TV-05, TV-T04).
+ *
+ * It was `STATUS[tone].ansi` — one of eight names — while the app drew the same
+ * tone from a hexadecimal. Both read the one table now, and the cockpit sends
+ * the token where the terminal can take it.
+ */
+export const colourOf = (tone: StatusTone, depth: ColourDepth = DEPTH): string =>
+  inkColour(tone, depth) ?? STATUS[tone].ansi;
+
+/**
+ * The depth, measured once.
+ *
+ * A module-level constant rather than a prop threaded through every pane: the
+ * terminal does not change its mind about 24-bit colour while the cockpit is
+ * running, and a colour argument on every cell would be a colour argument
+ * somebody forgets.
+ */
+const DEPTH: ColourDepth = depthFor(capabilitiesOf(), process.env["YAM_COLOR"]);
 export const glyphOf = (tone: StatusTone): string => STATUS[tone].glyph;
 
 /** A bordered pane with its number in the title, as the artboard draws it. */

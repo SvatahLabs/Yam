@@ -13,6 +13,7 @@
  * ```
  */
 import { render } from "ink";
+import { own } from "./terminal.js";
 import { createElement } from "react";
 import { SCREEN_IDS, screenById, type ScreenId, type ScreenParams } from "@svatah/yam-screens";
 import type { ScreenService } from "@svatah/yam-screens";
@@ -38,6 +39,12 @@ export {
 } from "./panes.js";
 export type { Cell, Line, PaneContent, PaneModel } from "./panes.js";
 export { layoutFor, sizeOf, INSPECTOR_MIN_COLUMNS } from "./layout.js";
+export { own, capabilitiesOf } from "./terminal.js";
+export { depthFor, foreground, hexOf, inkColour, tone, ansi256Of, rgbOf } from "./theme.js";
+export type { ColourDepth } from "./theme.js";
+export type { Capabilities, Owned } from "./terminal.js";
+export { keysFor, actionForKey, ALL_KEYS, unknownBindings } from "./keys.js";
+export type { KeyBinding } from "./keys.js";
 export type { Layout } from "./layout.js";
 
 export interface UiOptions {
@@ -95,6 +102,13 @@ export async function runUi(options: UiOptions): Promise<void> {
     return;
   }
 
+  /*
+   * The cockpit owns the terminal while it runs (TV-03). Not for `--capture`,
+   * which exists so that a frame can be *read* afterwards — a capture into the
+   * alternate screen is a capture of a buffer the shell discards.
+   */
+  const owned = options.captureMs === undefined ? own({ ...(options.stdout === undefined ? {} : { stdout: options.stdout }) }) : undefined;
+
   const instance = render(
     createElement(App, {
       service: options.service,
@@ -118,6 +132,7 @@ export async function runUi(options: UiOptions): Promise<void> {
     await instance.waitUntilExit();
   } finally {
     if (capture !== undefined) clearTimeout(capture);
+    owned?.restore();
   }
 }
 

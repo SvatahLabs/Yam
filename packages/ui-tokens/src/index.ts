@@ -174,18 +174,27 @@ export interface StatusStyle {
   readonly soft: TokenName | "bg3";
   /** The glyph the terminal and the editor gutter use, beside the word. */
   readonly glyph: string;
-  /** The ANSI colour `yam ui` renders it in; the terminal has no tokens. */
+  /**
+   * The ANSI colour name, for a terminal that has only eight (TV-05).
+   *
+   * The floor, not the intent. `hex` is what a terminal that admits to 24-bit
+   * colour is sent, and `@svatah/yam-tui`'s `theme.ts` chooses between them by
+   * capability — so the cockpit and the app draw a tone from the same table
+   * rather than from a flattened copy of it.
+   */
   readonly ansi: "green" | "red" | "gray" | "cyan" | "yellow" | "blue" | "white";
+  /** The token's own colour, for a terminal that can be sent one. */
+  readonly hex: string;
 }
 
 export const STATUS: Readonly<Record<StatusTone, StatusStyle>> = {
-  pass: { token: "pass", soft: "pass-soft", glyph: "✓", ansi: "green" },
-  fail: { token: "fail", soft: "fail-soft", glyph: "✗", ansi: "red" },
-  skip: { token: "skip", soft: "skip-soft", glyph: "–", ansi: "gray" },
-  healed: { token: "healed", soft: "healed-soft", glyph: "~", ansi: "cyan" },
-  abort: { token: "abort", soft: "abort-soft", glyph: "!", ansi: "yellow" },
-  info: { token: "info", soft: "info-soft", glyph: "•", ansi: "blue" },
-  neutral: { token: "fg2", soft: "bg3", glyph: "·", ansi: "white" },
+  pass: { token: "pass", soft: "pass-soft", hex: DARK["pass"], glyph: "✓", ansi: "green" },
+  fail: { token: "fail", soft: "fail-soft", hex: DARK["fail"], glyph: "✗", ansi: "red" },
+  skip: { token: "skip", soft: "skip-soft", hex: DARK["skip"], glyph: "–", ansi: "gray" },
+  healed: { token: "healed", soft: "healed-soft", hex: DARK["healed"], glyph: "~", ansi: "cyan" },
+  abort: { token: "abort", soft: "abort-soft", hex: DARK["abort"], glyph: "!", ansi: "yellow" },
+  info: { token: "info", soft: "info-soft", hex: DARK["info"], glyph: "•", ansi: "blue" },
+  neutral: { token: "fg2", soft: "bg3", hex: DARK.fg2, glyph: "·", ansi: "white" },
 };
 
 /**
