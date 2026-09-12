@@ -346,3 +346,15 @@ export function stylesheet(): string {
     "",
   ].join("\n");
 }
+
+export {
+  capabilitiesOf,
+  depthFor,
+  foreground,
+  tone,
+  hexOf,
+  ansi256Of,
+  rgbOf,
+  RESET,
+} from "./terminal.js";
+export type { Capabilities, ColourDepth } from "./terminal.js";

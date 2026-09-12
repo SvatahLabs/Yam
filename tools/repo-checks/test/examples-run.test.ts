@@ -124,3 +124,38 @@ describe("the examples that touch nothing actually run (TV-C02)", () => {
     expect(source).toContain("needs a browser and a person");
   });
 });
+
+/**
+ * A pipe reads exactly one JSON document (TV-C03, SF-06).
+ *
+ * `--json` on stdout and progress on stderr is the contract a script depends on,
+ * and the way it breaks is a stray line — a warning, a banner, a second
+ * document — that a person never sees because their terminal is not a pipe.
+ */
+describe("a piped command emits one JSON document and nothing else (TV-C03)", () => {
+  const commands = [["ui", "--keys"], ["lint", "--json"]];
+
+  for (const argv of commands) {
+    it(`yam ${argv.join(" ")} | jq`, () => {
+      const project = mkdtempSync(join(tmpdir(), "yam-json-"));
+      try {
+        cpSync(fromRoot("evals/fixtures"), project, {
+          recursive: true,
+          filter: (from) => !from.includes("node_modules") && !from.includes("runs"),
+        });
+        const ran = spawnSync(process.execPath, [CLI, ...argv], {
+          encoding: "utf8",
+          cwd: project,
+          timeout: 120_000,
+          env: { ...process.env, NO_COLOR: "1" },
+        });
+        /* Parses, whole: not "starts with a brace". */
+        expect(() => JSON.parse(ran.stdout), `stdout was not one document:\n${ran.stdout.slice(0, 400)}`).not.toThrow();
+        /* And nothing after it: a second document would parse the first and lose the rest. */
+        expect(ran.stdout.trimEnd().split(/\n\}\s*\n/).length, "more than one document on stdout").toBe(1);
+      } finally {
+        rmSync(project, { recursive: true, force: true });
+      }
+    });
+  }
+});

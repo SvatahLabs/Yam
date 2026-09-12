@@ -640,6 +640,9 @@ importers:
       '@svatah/yam-tui':
         specifier: workspace:*
         version: link:../tui
+      '@svatah/yam-ui-tokens':
+        specifier: workspace:*
+        version: link:../ui-tokens
       '@svatah/yam-workflow':
         specifier: workspace:*
         version: link:../workflow

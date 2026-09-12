@@ -19,6 +19,7 @@ The yam CLI and MCP server
 | `compileProject` | function | `export function compileProject(` | Compile a loaded project with the grammar alone. Offline, always. |
 | `CONFIG_FILES` | variable | `CONFIG_FILES: string[]` |  |
 | `defaultCasesPath` | function | `export function defaultCasesPath(): string` | Where the cases live, relative to the repository this package is built in. |
+| `depthOf` | function | `export function depthOf(` | How much colour this process should send. Measured once, per process. |
 | `diagnostic` | function | `export function diagnostic<C extends DiagnosticCode>(code: C, ...params: Parameters<(typeof CATALOGUE)[C]>): Diagnostic` | A row of the catalogue, with its parameters filled in. |
 | `DiagnosticCode` | typealias | `export type DiagnosticCode = keyof typeof CATALOGUE;` |  |
 | `DIAGNOSTICS` | variable | `DIAGNOSTICS: readonly Diagnostic[] = [` | Every row with example parameters, for the vocabulary check and the docs. |
@@ -46,6 +47,7 @@ The yam CLI and MCP server
 | `newRunId` | function | `declare function newRunId(now?: Date, random?: () => number): string;` | A lexicographically sortable id, which is what a run directory wants. |
 | `NOUNS` | variable | `NOUNS: ReadonlyArray<readonly [string, string]> = [` | The nouns, and the verbs under each, for `yam <noun>` alone. |
 | `numberOption` | function | `declare function numberOption(args: ParsedArgs, name: string): number \| undefined;` | A numeric option, or `undefined` when absent or unparseable. |
+| `paint` | function | `export function paint(what: StatusTone, text: string): string` | A status word, in the colour the design system gives that tone. |
 | `parseArgs` | function | `declare function parseArgs(argv: readonly string[]): ParsedArgs;` |  |
 | `ParsedArgs` | interface | `interface ParsedArgs` | A small argument reader for the CLI (LLD §15). |
 | `ProjectRunnerOptions` | interface | `export interface ProjectRunnerOptions` |  |
@@ -75,3 +77,4 @@ The yam CLI and MCP server
 | `uninstallModelGrounding` | function | `export function uninstallModelGrounding(): void` | Put module (a)'s picker-only default back. |
 | `userFacingHelpText` | function | `export function userFacingHelpText(): string` | Every string a person can read from the help, for the vocabulary check (REQ-CLI-9). |
 | `vitestCaseNames` | function | `export function vitestCaseNames(one:` | Every name a catalogue may call one vitest case by (P11-F2). |
+| `withDepth` | function | `export function withDepth(next: ColourDepth \| undefined): void` | For a test that wants to state a terminal rather than be run in one. |

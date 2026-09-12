@@ -66,7 +66,8 @@
     "@svatah/yam-trajectory": "workspace:*",
     "@svatah/yam-tui": "workspace:*",
     "@svatah/yam-workflow": "workspace:*",
-    "yaml": "catalog:"
+    "yaml": "catalog:",
+    "@svatah/yam-ui-tokens": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "catalog:",

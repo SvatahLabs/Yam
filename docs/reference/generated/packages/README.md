@@ -6,7 +6,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 
 | Package | Exports | What it is |
 |---|---|---|
-| [`@svatah/yam`](cli.md) | 63 | The yam CLI and MCP server |
+| [`@svatah/yam`](cli.md) | 66 | The yam CLI and MCP server |
 | [`@svatah/yam-adapter-appium`](adapter-appium.md) | 43 | Appium adapter: Android Chrome and native |
 | [`@svatah/yam-adapter-atspi`](adapter-atspi.md) | 28 | Linux AT-SPI accessibility adapter |
 | [`@svatah/yam-adapter-ax`](adapter-ax.md) | 54 | macOS Accessibility adapter: the Yam agent surface over AXUIElement |
@@ -38,5 +38,5 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-trajectory`](trajectory.md) | 19 | Trajectory capture and compile to proposals |
 | [`@svatah/yam-tui`](tui.md) | 78 | `yam ui` — the terminal cockpit, a second renderer of the screen model (REQ-TUI-1) |
 | [`@svatah/yam-ui`](ui.md) | 33 | The Yam design system: React components on Radix primitives, every one of them named and id'd (REQ-ADE-12) |
-| [`@svatah/yam-ui-tokens`](ui-tokens.md) | 16 | The Yam design tokens: two themes, one type ramp, one status set (REQ-ADE-12) |
+| [`@svatah/yam-ui-tokens`](ui-tokens.md) | 26 | The Yam design tokens: two themes, one type ramp, one status set (REQ-ADE-12) |
 | [`@svatah/yam-workflow`](workflow.md) | 8 | Story-as-function runner and resume |
