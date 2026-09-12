@@ -115,6 +115,7 @@ export async function runUi(options: UiOptions): Promise<void> {
       connection: options.connection,
       ...(options.screen === undefined ? {} : { screen: options.screen }),
       ...(options.params === undefined ? {} : { params: options.params }),
+      ...(options.captureMs === undefined ? {} : { inline: true }),
     }),
     {
       ...(options.stdin === undefined ? {} : { stdin: options.stdin }),

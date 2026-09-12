@@ -179,6 +179,25 @@ describe("a zero state names its next action (TV-06)", () => {
 });
 
 describe("the status bar is one line, whatever is in it", () => {
+  it("never cuts the size, whatever else is on the line (T10.4)", () => {
+    /*
+     * The old header put a long project path before the size and let it push the
+     * size off the end — so a capture could not say what it was taken at, which
+     * is the one fact a capture cannot be read without.
+     */
+    const lines = draw(
+      <StatusBar
+        width={60}
+        left={["yam", "/Users/somebody/a/very/long/path/to/a/project", "Run comp"]}
+        right={["6 passed 1 failed", "100x30"]}
+      />,
+      60,
+      1,
+    );
+    expect(lines[0]).toContain("100x30");
+    expect(lines[0]!.length).toBeLessThanOrEqual(60);
+  });
+
   it("puts the right-hand side on the right, and stays inside the terminal", () => {
     for (const width of [40, 80, 120]) {
       const lines = draw(

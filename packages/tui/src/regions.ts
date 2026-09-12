@@ -259,6 +259,76 @@ export function solve(tree: Region, columns: number, rows: number): Solved {
   return { boxes, collapsed };
 }
 
+/** A region and the box it was given, with its children beside it. */
+export interface Placed {
+  readonly region: Region;
+  readonly box: Box;
+  readonly children: readonly Placed[];
+}
+
+/**
+ * The same solve, as a tree rather than a lookup (TV-T07).
+ *
+ * A renderer needs the box of every *split* as well as every pane: a split
+ * drawn without a width is a split whose children lay themselves out at their
+ * natural size, and on a real terminal that is a 189-character line on a
+ * hundred columns — which is what the pseudo-terminal check caught the first
+ * time this was drawn from `boxes` alone.
+ */
+export function place(tree: Region, columns: number, rows: number): Placed {
+  const { boxes } = solve(tree, columns, rows);
+  const walk = (region: Region, box: Box): Placed => {
+    if (!isSplit(region)) return { region, box: boxes.get(region.id) ?? box, children: [] };
+    const children: Placed[] = [];
+    let at = region.split === "columns" ? box.x : box.y;
+    let along = 0;
+    for (const child of region.children) {
+      const first = firstPane(child);
+      const found = first === undefined ? undefined : boxes.get(first);
+      if (found === undefined) continue;
+      const size = region.split === "columns" ? found.width : found.height;
+      const childBox: Box =
+        region.split === "columns"
+          ? { x: at, y: box.y, width: sizeOfSplit(child, boxes, "columns", size), height: box.height }
+          : { x: box.x, y: at, width: box.width, height: sizeOfSplit(child, boxes, "rows", size) };
+      children.push(walk(child, childBox));
+      const taken = region.split === "columns" ? childBox.width : childBox.height;
+      at += taken;
+      along += taken;
+    }
+    return { region, box: { ...box, ...(region.split === "columns" ? { width: along } : { height: along }) }, children };
+  };
+  return walk(tree, { x: 0, y: 0, width: Math.max(1, Math.floor(columns)), height: Math.max(1, Math.floor(rows)) });
+}
+
+/** The first pane a region draws, which is where its box starts. */
+function firstPane(region: Region): string | undefined {
+  if (!isSplit(region)) return region.id;
+  for (const child of region.children) {
+    const found = firstPane(child);
+    if (found !== undefined) return found;
+  }
+  return undefined;
+}
+
+/** How much of an axis a region takes: its own, or the sum of what it holds. */
+function sizeOfSplit(
+  region: Region,
+  boxes: ReadonlyMap<string, Box>,
+  axis: "rows" | "columns",
+  fallback: number,
+): number {
+  if (!isSplit(region)) {
+    const box = boxes.get(region.id);
+    return box === undefined ? fallback : axis === "columns" ? box.width : box.height;
+  }
+  const along = region.children
+    .map((child) => (boxes.has(firstPane(child) ?? "") ? sizeOfSplit(child, boxes, axis, 0) : 0))
+    .filter((one) => one > 0);
+  if (along.length === 0) return fallback;
+  return region.split === axis ? along.reduce((sum, one) => sum + one, 0) : Math.max(...along);
+}
+
 /** Every pane id in a tree, in the order it is laid out. */
 export function panesOf(region: Region): string[] {
   return isSplit(region) ? region.children.flatMap(panesOf) : [region.id];

@@ -48,10 +48,22 @@ import {
   type UiState,
 } from "./model.js";
 import { INSPECTOR_MIN_COLUMNS, footerFor, sizeOf } from "./layout.js";
+import { Regions, viewFor } from "./views.js";
+import { StatusBar } from "./widgets.js";
 import { actionForKey, keysFor } from "./keys.js";
 
 export interface AppProps {
   readonly service: ScreenService;
+  /**
+   * Drawing into the normal buffer rather than the alternate screen (TV-03).
+   *
+   * `--capture` does not take the screen, because a capture of the alternate
+   * buffer is a capture of something the shell discards — and a frame that is
+   * exactly as tall as the terminal, plus the newline every frame ends with,
+   * scrolls it by one. So an inline cockpit leaves the last row to the newline.
+   * On the alternate screen it fills every row, which is what TV-04 asks for.
+   */
+  readonly inline?: boolean;
   readonly connection: { url: string; project: string };
   readonly screen?: ScreenId;
   readonly params?: ScreenParams;
@@ -375,81 +387,55 @@ export function App(props: AppProps): React.JSX.Element {
   }
 
   const keys = keysFor(ui.screen, modeFrom(ui.params["mode"]));
+  const view = viewFor(ui.state);
+
+  /*
+   * The frame is exactly the terminal (TV-04). One row for the status bar, one
+   * for the footer, one for a message when there is one, and everything else is
+   * the regions — which fill it, rather than being as tall as they happen to be.
+   */
+  const messageRows = ui.message === undefined && !busy ? 0 : 1;
+  /*
+   * The palette takes its rows from the body, not from beyond the bottom of the
+   * terminal: a frame that is exactly the terminal has no "beyond" (TV-04).
+   */
+  const paletteRowCount = ui.paletteOpen ? Math.min(12, Math.max(6, Math.floor(ui.layout.rows / 3))) : 0;
+  /*
+   * Inline, the last row belongs to the newline every frame ends with; on the
+   * alternate screen there is no newline to make room for. The *size* is the
+   * terminal's either way, because that is the fact a capture is read with.
+   */
+  const drawnRows = ui.layout.rows - (props.inline === true ? 1 : 0);
+  const bodyRows = Math.max(3, drawnRows - 2 - messageRows - paletteRowCount);
 
   return (
-    <Box flexDirection="column" width={ui.layout.columns}>
-      {/*
-        The header: what this is, how big the terminal is, and what the screen is
-        about (T10.4: "a capture records the size it was taken at").
-        `100×40` sits immediately after the name rather than at the end of the
-        line, because a title long enough to fill an eighty-column terminal
-        would otherwise push the one fact a capture cannot be read without off
-        the right-hand edge.
-      */}
-      <Box width={ui.layout.columns}>
-        {/*
-          `flexShrink={0}`: Ink shrinks a row's children to fit, and a header
-          whose first words are "yam ui 160×40" must not become "yam 160×4"
-          on a busy line. What may be cut is the subtitle, which pane 2 repeats.
-        */}
-        <Box flexShrink={0}>
-          <Text color="magenta">yam ui</Text>
-          <Text color="white"> {sizeOf(ui.layout)}</Text>
-        </Box>
-        <Box flexShrink={1} overflow="hidden">
-          <Text color="gray" wrap="truncate-end">
-            {"  "}
-            {ui.connection.project} {"  "}
-            {ui.connection.url} {"  "}
-            {ui.state.title} · {ui.state.subtitle}
-          </Text>
-        </Box>
-      </Box>
+    <Box flexDirection="column" width={ui.layout.columns} height={drawnRows}>
+      <StatusBar
+        width={ui.layout.columns}
+        /*
+         * The screen's title before the project's path: the left is what gets
+         * cut when a terminal is narrow, and a hundred-column capture that had
+         * dropped "Agents and tools" for a temporary directory's name is a
+         * capture of a screen nobody can identify.
+         */
+        left={["yam", ui.state.title, ui.connection.project, ui.connection.url]}
+        right={[ui.state.subtitle, sizeOf(ui.layout)]}
+      />
 
-      <Box width={ui.layout.columns}>
-        <Box width={ui.layout.tree} flexShrink={0} flexDirection="column">
-          <TreePane ui={ui} />
-        </Box>
-        <Box width={ui.layout.main} flexShrink={0} flexDirection="column">
-          <MainPane ui={ui} />
-        </Box>
-        {ui.layout.inspector === undefined ? null : (
-          <Box width={ui.layout.inspector} flexShrink={0} flexDirection="column">
-            <InspectorPane ui={ui} />
-          </Box>
-        )}
-      </Box>
+      <Regions
+        view={view}
+        columns={ui.layout.columns}
+        rows={bodyRows}
+        focus={ui.focus}
+        cursor={ui.cursor}
+      />
 
-      {/*
-        Why there are three panes and not four, on its own line (T10.4, P9-F4).
-        Not in the header: at a hundred columns the sentence would push the
-        project and the screen's own subtitle off the end, which is the same
-        defect this correction is about, one row higher.
-      */}
-      {ui.layout.inspectorCollapsed ? (
-        <Text color="gray" wrap="truncate-end">
-          {` inspector collapsed at ${ui.layout.columns} cols ` +
-            `(${INSPECTOR_MIN_COLUMNS} to sit beside) · press 3 to open it below`}
+      {messageRows === 0 ? null : (
+        <Text color={busy ? colourOf("info") : colourOf("neutral")} wrap="truncate-end">
+          {busy ? "working…" : ui.message}
         </Text>
-      ) : null}
+      )}
 
-      {/* Collapsed, and asked for: full width, under the main pane. */}
-      {ui.layout.inspectorCollapsed && ui.focus === "inspector" ? (
-        <InspectorPane ui={ui} />
-      ) : null}
-
-      <AuditPane ui={ui} />
-
-      {/*
-        The footer: the keys, exactly as the artboard prints them — and inside
-        the terminal, whatever the screen's own actions are called (P10-F9).
-
-        `footerFor` keeps the six keys a person needs to get anywhere and `q`,
-        and takes as many of the screen's single-letter accelerators as still
-        fit. Wrapping instead would push the panes above it up on a short
-        terminal, and truncating the whole line would take `q quit` off a
-        cockpit a person is trying to leave.
-      */}
       <Box width={ui.layout.columns}>
         <Text color="gray" wrap="truncate-end">
           {footerFor(ui.layout.columns, keys).map((one, at) => (
@@ -460,14 +446,6 @@ export function App(props: AppProps): React.JSX.Element {
           ))}
         </Text>
       </Box>
-      {ui.message === undefined && !busy ? null : (
-        <Text
-          color={busy ? colourOf("info") : colourOf("neutral")}
-          wrap="truncate-end"
-        >
-          {busy ? "working…" : ui.message}
-        </Text>
-      )}
 
       {/* the palette: the same rows the app's ⌘K shows */}
       {ui.paletteOpen ? (

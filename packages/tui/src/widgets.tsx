@@ -155,20 +155,32 @@ export function Frame(props: FrameProps): React.JSX.Element {
   );
 }
 
-/** One line of the status bar: what this is, where, and what it is doing. */
+/**
+ * One line: what this is, where, and what it is doing.
+ *
+ * The right-hand side is never what gets cut. It carries the size the frame was
+ * drawn at, and T10.4 wants a capture to say that whatever else is on the line —
+ * the old header put the size after the name for the same reason, and then let a
+ * long project path push it off the end anyway. So the right is measured first
+ * and the left takes what is left over.
+ */
 export function StatusBar(props: {
   readonly width: number;
   readonly left: readonly string[];
   readonly right: readonly string[];
 }): React.JSX.Element {
   const right = props.right.join("  ");
-  const left = props.left.join("  ");
-  const gap = Math.max(1, props.width - left.length - right.length - 2);
+  const name = props.left[0] ?? "";
+  const rest = props.left.slice(1).join("  ");
+  /* One space each side, two between the halves, and one after the name. */
+  const room = Math.max(0, props.width - right.length - name.length - 4);
+  const shown = rest.length <= room ? rest : `${rest.slice(0, Math.max(0, room - 1))}…`;
+  const gap = Math.max(1, props.width - name.length - shown.length - right.length - 3);
   return (
     <Text backgroundColor="#1b2128" color="gray">
       {" "}
-      <Text color="magenta">{left.split(" ")[0]}</Text>
-      {left.slice((left.split(" ")[0] ?? "").length)}
+      <Text color="magenta">{name}</Text>
+      {shown === "" ? "" : ` ${shown}`}
       {" ".repeat(gap)}
       {right}{" "}
     </Text>
