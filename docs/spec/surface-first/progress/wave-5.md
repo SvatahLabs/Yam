@@ -748,6 +748,46 @@ scripts take the newest `evidence/wave-N` directory, because a path that has to
 be edited every wave is a path that will be forgotten, and the failure it invites
 is a page that keeps rendering a previous wave's runs.
 
+## A defect the wave's own gate found, in the gate
+
+`pnpm -r test` was red at the end of this wave, on
+`apps/desktop/test/shell.spec.ts` — *"the Record review chooses its gateway and
+says what a fake session is"*, failing because `#record-fake-gateway` was not on
+the screen. It passed run on its own and failed run after another.
+
+**It is not this wave's defect, and this wave is why it is visible.** Those
+thirty-eight Playwright cases *skip without a packaged build*, which is T18's
+first defect still doing its work: a tree with no packaged build is what
+`pnpm -r test` runs in, so they had been dormant. Wave 5 packages the
+application because the Yam-on-Yam suite needs one — and they ran. Checked
+against `master` in a worktree of its own:
+
+```
+master, no packaged build:   Test Files 7 passed; Tests 123 passed; 38 skipped
+master, packaged:            1 failed, 37 passed
+                             ✘ the Record review chooses its gateway …
+```
+
+The same case, the same way, on the code this branch started from.
+
+The cause is in the case. It walks Radix's select by keyboard, and it walked
+straight from `waitFor` on the listbox into `ArrowDown` — the listbox *existing*
+is not the listbox *listening*, so the presses made while the portal was still
+mounting went nowhere, `Enter` took whatever was under it (`human`, the current
+value), and the failure surfaced three lines later on the note, saying only that
+an element was not found. It now waits for something to be highlighted, walks by
+re-reading the highlight after each press, and **asserts what was chosen before
+asserting what the choice makes the screen say** — so a mis-selection fails at
+the selection. Three consecutive runs of the whole desktop suite: 38 passed,
+38 passed, 38 passed.
+
+**And a mistake of mine, on the way to finding it.** I read `pnpm -r test`'s
+result from a compound shell command whose exit status was a `grep`'s, and said
+the suite was green when it had stopped at `packages/cli`. It is the same error
+in the same family as the ones this wave exists to remove — a harness's own
+state read as a product result — and it is written here because a record that
+only lists the product's defects is not the record this project keeps.
+
 ## Deviations
 
 - **T23's AT-SPI is implemented, not delivered.** SF-23 says "Deliver Linux

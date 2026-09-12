@@ -1018,19 +1018,40 @@ test("the Record review chooses its gateway and says what a fake session is", as
    */
   await gateway.focus();
   await page.keyboard.press("Enter");
-  await page.locator('[role="listbox"]').waitFor({ timeout: 10_000 });
+  const listbox = page.locator('[role="listbox"]');
+  await listbox.waitFor({ timeout: 10_000 });
+  /*
+   * The listbox existing is not the listbox listening (wave 5).
+   *
+   * This walked straight from `waitFor` into `ArrowDown`, and the keys pressed
+   * while Radix was still mounting the portal went nowhere: the highlight never
+   * moved, `Enter` took whatever was under it — `human`, the current value —
+   * and the case then failed on the *note*, three lines later, saying only that
+   * `#record-fake-gateway` was not found. It passed run on its own and failed
+   * run after another, which is the shape of every flake worth removing.
+   *
+   * It had never been seen because this whole suite skips without a packaged
+   * build (T18's first defect), and a tree with no packaged build is what
+   * `pnpm -r test` runs in. Wave 5 packages the application for the Yam-on-Yam
+   * suite, so these thirty-eight cases run — and this one failed on master too,
+   * once packaged.
+   *
+   * So: wait for something to be highlighted, which is Radix saying the listbox
+   * is ready; walk by re-reading the highlight after each press; and assert
+   * what was *chosen* before asserting what the choice makes the screen say.
+   */
+  const highlighted = page.locator('[role="option"][data-highlighted]').first();
+  await highlighted.waitFor({ timeout: 10_000 });
   for (let step = 0; step < 12; step += 1) {
-    const highlighted =
-      (await page
-        .locator('[role="option"][data-highlighted], [role="option"]:focus')
-        .first()
-        .textContent()
-        .catch(() => "")) ?? "";
-    if (highlighted.trim().startsWith("fake")) break;
+    const said = ((await highlighted.textContent().catch(() => "")) ?? "").trim();
+    if (said.startsWith("fake")) break;
     await page.keyboard.press("ArrowDown");
+    await expect(highlighted).not.toHaveText(said, { timeout: 5_000 });
   }
+  await expect(highlighted, "the walk never reached the fake gateway").toContainText("fake");
   await page.keyboard.press("Enter");
 
+  await expect(gateway, "the gateway that was chosen").toContainText("fake");
   await expect(page.locator("#record-fake-gateway")).toContainText("committed with Yam");
   await expect(page.locator("#record-flows")).toBeVisible();
 });
