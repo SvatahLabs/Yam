@@ -17,21 +17,29 @@
 | `ansi256Of` | function | `export function ansi256Of(hex: string): number` | The nearest xterm-256 index, computed. |
 | `App` | function | `export function App(props: AppProps): React.JSX.Element` |  |
 | `asJson` | function | `export function asJson(ui: UiState): Record<string, unknown>` | What `--json` prints, and what the model produces on its own. |
+| `Box` | interface | `export interface Box` | Where a pane ended up. Zero-based, in character cells. |
 | `Capabilities` | interface | `export interface Capabilities` | What a terminal can do, as far as it will admit. |
 | `capabilitiesOf` | function | `export function capabilitiesOf(` | What this terminal can do (TV-05). |
 | `Cell` | interface | `export interface Cell` | One column of a line. `grow` takes whatever width is left over. |
+| `classicTree` | function | `export function classicTree(): Region` | The four numbered panes, as a tree (T9.4's artboard). |
 | `ColourDepth` | typealias | `export type ColourDepth = "truecolor" \| "ansi256" \| "none";` | How much colour to send. |
 | `COMMAND_KEYS` | variable | `COMMAND_KEYS: readonly CommandKey[] = [` |  |
 | `CommandKey` | interface | `export interface CommandKey` | The keys the cockpit itself has, which run commands rather than actions. |
+| `decodeMouse` | function | `export function decodeMouse(chunk: string): MouseEvent[]` | Every mouse event in a chunk of input, in the order they happened. |
 | `DEFAULT_SCREEN` | variable | `DEFAULT_SCREEN: ScreenId = "session"` | Where the cockpit opens (TV-14, `REQ-ADE-11`). |
 | `depthFor` | function | `export function depthFor(capabilities: Capabilities, asked?: string): ColourDepth` | `--color`, and what the terminal says when nobody passed it. |
+| `Empty` | function | `export function Empty(props:` | A zero state that names its next action (TV-06). |
 | `fit` | variable | `fit = (text: string, width: number): string =>` | `"a string"` cut to `width`, so a narrow terminal does not wrap a table. |
+| `flowsTree` | function | `export function flowsTree(): Region` | Flows: the files, the text, what the cursor is on, and the lint. |
 | `focusPane` | function | `export function focusPane(ui: UiState, pane: Pane): UiState` | `1`–`4` and `Tab`: which pane the keys go to (LLD §13.7). |
 | `foreground` | function | `export function foreground(hex: string, depth: ColourDepth): string` | The escape that colours the foreground, for this depth. |
+| `Frame` | function | `export function Frame(props: FrameProps): React.JSX.Element` | A bordered region that fills its box exactly. |
 | `GLYPH` | variable | `GLYPH: Readonly<Record<StatusTone, string>> ` | The gutter glyph per tone. The word is always beside it (LLD §13.7). |
 | `hexOf` | variable | `hexOf = (what: StatusTone): string => STATUS[what].hex` | The hexadecimal a tone is, for a renderer that colours its own way. |
+| `hitTest` | function | `export function hitTest(` | Which region was clicked, and which of its rows. |
 | `inkColour` | function | `export function inkColour(what: StatusTone, depth: ColourDepth): string \| undefined` | What Ink is told, which is a hexadecimal or a name. |
 | `INSPECTOR_MIN_COLUMNS` | variable | `INSPECTOR_MIN_COLUMNS = 120` | The width at which the inspector still has room to be read (Draft 2.12 §13.7). |
+| `isMouse` | variable | `isMouse = (chunk: string): boolean => /\u001b\[</.test(chunk)` | Whether a chunk of input is mouse reporting rather than something typed. |
 | `KeyBinding` | interface | `export interface KeyBinding` | One key, and the action it runs. |
 | `keyMap` | function | `export function keyMap():` | The whole key map, as `yam ui --keys --json` prints it and the `?` overlay |
 | `keysFor` | variable | `keysFor = (screen: ScreenId, mode?: SessionMode): readonly KeyBinding[] =>` | The keys this screen binds in this mode, in the order the footer prints them. |
@@ -41,26 +49,44 @@
 | `listWindow` | function | `export function window(cursor: number, total: number, height: number): number` | Which slice of a list to draw so the cursor is on screen. |
 | `loadUi` | function | `export async function loadUi(` | Load a screen and build the state around it. |
 | `mainRows` | variable | `mainRows = (state: UiState["state"], now?: number): number =>` | How many rows the main pane has. |
+| `MouseEvent` | interface | `export interface MouseEvent` | One thing a person did with the mouse, in character cells, one-based as the terminal counts. |
 | `moveCursor` | function | `export function moveCursor(ui: UiState, by: number, rows: number): UiState` | `j`/`k` and the arrows, clamped to what the focused pane actually has. |
+| `moveSelection` | variable | `moveSelection = (at: number, by: number, total: number): number =>` | Where the selection goes, clamped, with nothing to wrap around to. |
 | `nextPane` | function | `export function nextPane(ui: UiState): UiState` |  |
 | `own` | function | `export function own(options: OwnOptions = {}): Owned` | Take the terminal, and answer with the way back. |
 | `Owned` | interface | `export interface Owned` | A terminal the cockpit has taken, and the one call that gives it back. |
+| `PaletteRow` | interface | `export interface PaletteRow` |  |
 | `Pane` | typealias | `export type Pane = (typeof PANES)[number];` |  |
 | `PaneContent` | interface | `export interface PaneContent` |  |
 | `paneModel` | function | `export function paneModel(state: ScreenStateBase, now: number = Date.now()): PaneModel` |  |
 | `PaneModel` | interface | `export interface PaneModel` |  |
 | `PANES` | variable | `PANES = ["tree", "main", "inspector", "audit"] as const` | The four numbered panes of the `TUI` artboard. |
+| `panesOf` | function | `export function panesOf(region: Region): string[]` | Every pane id in a tree, in the order it is laid out. |
+| `place` | function | `export function place(tree: Region, columns: number, rows: number): Placed` | The same solve, as a tree rather than a lookup (TV-T07). |
+| `Placed` | interface | `export interface Placed` | A region and the box it was given, with its children beside it. |
 | `printJson` | function | `export async function printJson(options: UiOptions): Promise<void>` | `--json`: the model's state, and the audit lines, as JSON. |
 | `printKeys` | function | `export function printKeys(out: (text: string) => void = (text) => process.stdout.write(`${text}\n`)): void` | `--keys --json`: the key map, printed and drawn nothing (TV-07). |
+| `Region` | typealias | `export type Region = Pane \| Split;` |  |
+| `Regions` | function | `export function Regions(props: RegionsProps): React.JSX.Element` | Draw a solved tree. |
 | `resize` | function | `export function resize(ui: UiState, columns: number, rows: number): UiState` | The terminal was resized: the panes follow it (T10.4). |
 | `rgbOf` | function | `export function rgbOf(hex: string): readonly [number, number, number]` | `#4fc48a` → `[79, 196, 138]`. |
+| `rowsFor` | function | `export function rowsFor(actions: readonly Action[], options: PaletteOptions): PaletteRow[]` | The rows to draw, in the order to draw them. |
 | `rowsIn` | function | `export function rowsIn(ui: UiState, pane: Pane): number` | How many rows the focused pane has, so `j`/`k` can be clamped. |
+| `runTree` | function | `export function runTree(): Region` | A run: a wide step list over the events arriving under it. |
 | `runUi` | function | `export async function runUi(options: UiOptions): Promise<void>` | Draw the cockpit, and answer when it exits. |
+| `score` | function | `export function score(query: string, text: string): { score: number; hits: number[] } \| undefined` | Score one candidate against a query, subsequence-wise. |
 | `screenFrom` | function | `export function screenFrom(value: string \| undefined): ScreenId \| undefined` | `--screen <id>`, validated against the model's own list. |
+| `scrollbar` | function | `export function scrollbar(start: number, shown: number, total: number, height: number): string[]` | Where the view is, in a list too long to draw: `▓` over `░`, one column wide. |
 | `selectionAt` | function | `export function selectionAt(ui: UiState, pane: Pane): Line["select"]` | What `Enter` on the focused pane's current row re-loads with, if anything. |
+| `sessionTree` | function | `export function sessionTree(): Region` | Session: the target list, the subject, and what will be written (REQ-ADE-14). |
 | `sizeOf` | variable | `sizeOf = (layout: Layout): string => `${layout.columns}×${layout.rows}`` | `100×40`, as the header prints it and a capture therefore records. |
+| `solve` | function | `export function solve(tree: Region, columns: number, rows: number): Solved` | Fit a tree to a terminal. |
+| `Solved` | interface | `export interface Solved` |  |
+| `StatusBar` | function | `export function StatusBar(props:` | One line: what this is, where, and what it is doing. |
 | `tone` | function | `export function tone(what: StatusTone, text: string, depth: ColourDepth): string` | A tone, drawn. |
 | `treeRows` | variable | `treeRows = (state: UiState["state"], now?: number): readonly Line[] =>` | The rows the tree pane lists, kept for the tests that read them directly. |
 | `UiOptions` | interface | `export interface UiOptions` |  |
 | `UiState` | interface | `export interface UiState` |  |
 | `unknownBindings` | variable | `unknownBindings = (): readonly string[] =>` | Every key that names an action nobody declared. Empty, and checked. |
+| `View` | interface | `export interface View` | A screen's regions: the tree, what is in each, and the order `Tab` walks. |
+| `viewFor` | function | `export function viewFor(state: ScreenStateBase, now?: number): View` | The regions this screen is, and what is in them. |

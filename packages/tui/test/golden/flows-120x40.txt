@@ -4,7 +4,7 @@
 │ booking-compe… not run    │┃ ▌  1   // Guards and compensation, end to end (T5…▓ ┃│ no step selected                 │
 │ booking-workf… not run    │┃   2   //                                          ▓ ┃│                                  │
 │ execution.flow not run    │┃   3   // `booking-compensation.flow` beside this …▓ ┃│                                  │
-│ … aborted    run 24 h ago │┃   4   // faithful sibling of `execution.flow`. Th…▓ ┃│                                  │
+│ … aborted    run 12 h ago │┃   4   // faithful sibling of `execution.flow`. Th…▓ ┃│                                  │
 │ natural_langu… not run    │┃   5   // the two guarantees T5.4 is about, on the…▓ ┃│                                  │
 │ simple.flow    not run    │┃   6   //                                          ▓ ┃│                                  │
 │ svatah.flow    not run    │┃   7   //   * a guard whose predicate is false nev…▓ ┃│                                  │

@@ -1,7 +1,7 @@
  yam Runs  yam-fixtures  http://127.0.0.1:55702                                                     1 run  live  120×40
 ┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
 │ 1 Filters · 1 of 1          │┃ 2 Runs                                     ┃│ 3 Run comp                              │
-│ BEHAVIOR                    │┃ ▌comp     test    aborted 6 · 1 … 24 h a…  ┃│ outcome       aborted                   │
+│ BEHAVIOR                    │┃ ▌comp     test    aborted 6 · 1 … 12 h a…  ┃│ outcome       aborted                   │
 │ ▸ all                       │┃                                            ┃│ behavior      test                      │
 │   test                      │┃                                            ┃│ invoker       user · local · cli        │
 │ INVOKER                     │┃                                            ┃│ duration      9.29 s                    │
@@ -33,7 +33,7 @@
 └─────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└─────────────────────────────────────────┘
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ 4 Runs · newest first                                                                                                │
-│ 24 h ago     comp           I want to book and then fail · cancel a booking                                          │
+│ 12 h ago     comp           I want to book and then fail · cancel a booking                                          │
 │                                                                                                                      │
 │                                                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘

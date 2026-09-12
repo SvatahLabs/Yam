@@ -15,7 +15,7 @@
  * diff before committing it: a golden updated without being read is a golden
  * that has stopped checking anything.
  */
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -100,6 +100,22 @@ const COLOUR = new RegExp(String.fromCharCode(27) + "\\[[0-9;]*m", "g");
 
 describe("every screen, at every size, is the frame that was reviewed (TV-11)", () => {
   if (!existsSync(GOLDEN)) mkdirSync(GOLDEN, { recursive: true });
+
+  /*
+   * The clock is pinned, because a frame says "run 24 h ago".
+   *
+   * The model keeps an instant and the renderer says how long ago it was —
+   * which is right, and P9-F4 is the finding that made it so — but it means a
+   * golden written at one hour fails at the next. The instant the fixtures were
+   * recorded at is the one they are read against.
+   */
+  beforeAll(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date("2026-09-09T18:41:00.000Z"));
+  });
+  afterAll(() => {
+    vi.useRealTimers();
+  });
 
   for (const screen of SCREEN_IDS) {
     for (const [columns, rows] of SIZES) {

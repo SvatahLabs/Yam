@@ -10,7 +10,7 @@
  * becomes Ink. What each region *contains* is `rows.ts`'s, unchanged.
  */
 import { Box as InkBox, Text } from "ink";
-import { isSplit, place, solve, type Placed, type Region } from "./regions.js";
+import { isSplit, place, solve, type Box, type Placed, type Region } from "./regions.js";
 import { paneModel, type PaneContent, type PaneModel } from "./rows.js";
 import { Frame } from "./widgets.js";
 import { actionById, type ScreenId, type ScreenStateBase } from "@svatah/yam-screens";
@@ -134,8 +134,14 @@ export interface RegionsProps {
   readonly cursor: Readonly<Record<string, number>>;
   /** Which screen this is, so a zero state can name the key that changes it. */
   readonly screen: ScreenId;
-  /** Told what left the row, so the footer can say so. */
-  readonly onCollapsed?: (ids: readonly string[]) => void;
+  /**
+   * Where the regions ended up, so a click can be given to one (TV-10).
+   *
+   * Reported rather than recomputed: the boxes a person clicked on are the boxes
+   * that were drawn, and solving them twice is how a click lands one row off
+   * after somebody changes a minimum.
+   */
+  readonly onBoxes?: (boxes: ReadonlyMap<string, Box>) => void;
 }
 
 /**
@@ -159,6 +165,8 @@ export function Regions(props: RegionsProps): React.JSX.Element {
   const noticeRows = collapsed.length > 0 && !showsCollapsed ? 1 : 0;
   const bodyRows = Math.max(3, props.rows - openHeight - noticeRows);
   const placed = place(props.view.tree, props.columns, bodyRows);
+  const drawnBoxes = solve(props.view.tree, props.columns, bodyRows).boxes;
+  props.onBoxes?.(drawnBoxes);
 
   const drawRegion = (node: Placed, key: string): React.JSX.Element | null => {
     const { region, box } = node;

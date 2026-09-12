@@ -4,7 +4,7 @@
 │ booking-compensa… not run    │┃ ▌  1   // Guards and compensation, end to end (T5.4, REQ-LANG-14, REQ-AUTO-1, 4).                                        ▓ ┃│ no step selected                       │
 │ booking-workflow… not run    │┃   2   //                                                                                                                 ▓ ┃│                                        │
 │ execution.flow    not run    │┃   3   // `booking-compensation.flow` beside this one is the *policy* showcase and is a                                   ▓ ┃│                                        │
-│ gua… aborted    run 24 h ago │┃   4   // faithful sibling of `execution.flow`. This file is the one that demonstrates                                    ▓ ┃│                                        │
+│ gua… aborted    run 12 h ago │┃   4   // faithful sibling of `execution.flow`. This file is the one that demonstrates                                    ▓ ┃│                                        │
 │ natural_language… not run    │┃   5   // the two guarantees T5.4 is about, on the smallest thing that can show them:                                     ▓ ┃│                                        │
 │ simple.flow       not run    │┃   6   //                                                                                                                 ▓ ┃│                                        │
 │ svatah.flow       not run    │┃   7   //   * a guard whose predicate is false never performs its step, and the audit                                     ▓ ┃│                                        │

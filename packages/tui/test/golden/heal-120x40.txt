@@ -1,7 +1,7 @@
  yam Heal review  yam-fixtures  http://127.0.0.1:55702                               1 run with a failure  live  120×40
 ┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
 │ 1 Runs with a failure       │┃ 2 Heal comp                                ┃│ 3 Proposal                              │
-│ ▸ co… 1 failed   24 h ago   │┃ press H to heal the selected run           ┃│ no proposal yet                         │
+│ ▸ co… 1 failed   12 h ago   │┃ press H to heal the selected run           ┃│ no proposal yet                         │
 │                             │┃                                            ┃│                                         │
 │                             │┃                                            ┃│                                         │
 │                             │┃                                            ┃│                                         │

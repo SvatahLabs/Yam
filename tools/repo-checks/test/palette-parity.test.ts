@@ -21,13 +21,27 @@ import { EVENT_KINDS } from "@svatah/yam-sdk";
 import { fromRoot } from "../src/repo.js";
 
 const APP_DIR = readFileSync(fromRoot("apps/desktop/src/renderer/shell/Shell.tsx"), "utf8");
-const TUI = readFileSync(fromRoot("packages/tui/src/app.tsx"), "utf8");
+/*
+ * The cockpit's palette is `palette.ts` now (TV-T13): the scoring and the
+ * ordering are arithmetic, tested without a terminal, and `app.tsx` draws what
+ * they return. Both files are read, because the claim is about the renderer and
+ * not about which of its files holds a line.
+ */
+const TUI = [
+  readFileSync(fromRoot("packages/tui/src/app.tsx"), "utf8"),
+  readFileSync(fromRoot("packages/tui/src/palette.ts"), "utf8"),
+].join("\n");
 
 describe("both palettes are the one registry (T9.4)", () => {
   it("builds its rows from ACTIONS, in each renderer", () => {
     // The app maps the whole list; the TUI filters it by the typed query only.
     expect(APP_DIR).toMatch(/ACTIONS\.map\(/);
-    expect(TUI).toMatch(/ACTIONS\.filter\(/);
+    /*
+     * The cockpit scores the whole registry rather than filtering it, which is
+     * the stronger form of the same claim: nothing is dropped before a person
+     * sees it, and what cannot run is greyed with a reason (TV-08).
+     */
+    expect(TUI).toMatch(/rowsFor\(ACTIONS/);
   });
 
   it("neither renderer writes an action id of its own", () => {
@@ -62,8 +76,19 @@ describe("both palettes are the one registry (T9.4)", () => {
      * palette.
      */
     expect(APP_DIR).toContain("group: action.group");
-    expect(TUI).not.toMatch(/\.group\s*[=!]==?\s*"(Actions|Go to)"/);
-    expect(TUI).toMatch(/ACTIONS\.filter\(\(action\) => \{\s*if \(query === ""\) return true;/);
+    /*
+     * *Dropping* a row by its group, which is what hiding is. Comparing against
+     * one is not: both renderers decide availability before a screen has loaded
+     * with `group === "Go to"`, because navigation is the only thing that can
+     * run when there is no state to ask about — and the app has the same line.
+     */
+    expect(TUI).not.toMatch(/\.filter\([^)]*\.group\s*[=!]==?/);
+    expect(APP_DIR).not.toMatch(/\.filter\([^)]*\.group\s*[=!]==?/);
+    /* And availability is the registry's question, asked of the state. */
+    expect(TUI).toMatch(/availableWhen\(/);
+    expect(TUI).toMatch(/for \(const action of actions\)/);
+    /* And it says so rather than hiding it. */
+    expect(TUI).toMatch(/available/);
   });
 
   it("shows the CLI command beside a CLI-backed row, in both", () => {

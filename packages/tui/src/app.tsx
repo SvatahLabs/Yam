@@ -20,7 +20,7 @@ import { spawn } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ACTIONS,
   RAIL,
@@ -53,6 +53,8 @@ import { Regions, viewFor } from "./views.js";
 import { StatusBar } from "./widgets.js";
 import { COMMAND_KEYS, DEFAULT_SCREEN, actionForKey, keysFor } from "./keys.js";
 import { moveSelection, rowsFor, type PaletteRow } from "./palette.js";
+import { decodeMouse, hitTest, isMouse } from "./mouse.js";
+import type { Box as RegionBox } from "./regions.js";
 
 export interface AppProps {
   readonly service: ScreenService;
@@ -91,6 +93,8 @@ export function App(props: AppProps): React.JSX.Element {
    * model rather than the cockpit's connection.
    */
   const [stream, setStream] = useState<"live" | "reconnecting" | "offline">("offline");
+  /** The boxes the last frame drew, for the mouse to aim at. */
+  const boxes = useRef<ReadonlyMap<string, RegionBox>>(new Map());
 
   /**
    * The terminal, as it is now (T10.4, P9-F4).
@@ -166,6 +170,48 @@ export function App(props: AppProps): React.JSX.Element {
       unsubscribe?.();
     };
   }, [props.service, retries]);
+
+  /*
+   * The mouse (TV-10, TV-T15).
+   *
+   * Read off `stdin` and not through `useInput`: the spike established that the
+   * SGR bytes arrive intact and that Ink drops them, because it maps known keys
+   * and discards what it does not recognise. Clicking focuses a region and puts
+   * the cursor on the row under the pointer; the wheel scrolls the region it is
+   * over. Every one of those has a key that does the same thing — the keyboard
+   * is complete without a mouse, which is what TV-10 requires.
+   */
+  useEffect(() => {
+    const stdin = process.stdin;
+    if (stdin.isTTY !== true) return undefined;
+    const onData = (data: Buffer | string): void => {
+      const chunk = typeof data === "string" ? data : data.toString("utf8");
+      if (!isMouse(chunk)) return;
+      for (const event of decodeMouse(chunk)) {
+        setUi((before) => {
+          if (before === undefined) return before;
+          const hit = hitTest(boxes.current, event, 1);
+          if (hit === undefined) return before;
+          if (event.kind === "down") {
+            return {
+              ...focusPane(before, hit.id as Pane),
+              cursor: { ...before.cursor, [hit.id]: hit.row },
+            };
+          }
+          if (event.kind === "wheel-up" || event.kind === "wheel-down") {
+            const by = event.kind === "wheel-up" ? -3 : 3;
+            const at = before.cursor[hit.id as Pane] ?? 0;
+            return { ...before, cursor: { ...before.cursor, [hit.id]: Math.max(0, at + by) } };
+          }
+          return before;
+        });
+      }
+    };
+    stdin.on("data", onData);
+    return () => {
+      stdin.off("data", onData);
+    };
+  }, []);
 
   /** Re-load the current screen, keeping where the cursor is. */
   const reload = useCallback(
@@ -506,6 +552,9 @@ export function App(props: AppProps): React.JSX.Element {
         rows={bodyRows}
         focus={ui.focus}
         cursor={ui.cursor}
+        onBoxes={(drawn) => {
+          boxes.current = drawn;
+        }}
       />
 
       {messageRows === 0 ? null : (
