@@ -36,7 +36,7 @@ import {
   type ScreenParams,
   type ScreenStateBase,
 } from "@svatah/yam-screens";
-import { Alert, Button, CommandPalette, Kbd, RailItem, type PaletteRow } from "@svatah/yam-ui";
+import { Alert, AskOverlay, Button, CommandPalette, Kbd, RailItem, type PaletteRow } from "@svatah/yam-ui";
 import {
   applyHealEvent,
   applyRecordEvent,
@@ -116,6 +116,10 @@ export function Shell(props: ShellProps): React.JSX.Element {
   const [state, setState] = useState<ScreenStateBase | undefined>(undefined);
   const [tab, setTab] = useState<"editor" | "plan" | "history">("editor");
   const [paletteOpen, setPaletteOpen] = useState(false);
+  /** An action waiting on something it declared it `needs` (TV-06). */
+  const [asking, setAsking] = useState<
+    { action: string; field: string; label: string; placeholder?: string } | undefined
+  >(undefined);
   const [message, setMessage] = useState<string | undefined>(undefined);
   /**
    * What the last action answered (T15).
@@ -294,6 +298,24 @@ export function Shell(props: ShellProps): React.JSX.Element {
       const action = actionById(id);
       if (action === undefined || state === undefined) return;
       setPaletteOpen(false);
+      /*
+       * What the action said it needs, asked for before it runs (TV-06).
+       *
+       * The same declaration the cockpit opens a line for. `surface.connect`
+       * refused with "Enter a URL to connect to" in both renderers and neither
+       * had a field for one; the action names it now, and neither view invents
+       * the other's half.
+       */
+      const missing = (action.needs ?? []).find(
+        (one) =>
+          extra[one.name] === undefined &&
+          typeof (params as Record<string, unknown>)[one.name] !== "string",
+      );
+      if (missing !== undefined) {
+        setAsking({ action: id, field: missing.name, label: missing.label, ...(missing.placeholder === undefined ? {} : { placeholder: missing.placeholder }) });
+        return;
+      }
+      setAsking(undefined);
       try {
         /*
          * The screen's own argument, over the parameters (K6, K7).
@@ -757,6 +779,20 @@ export function Shell(props: ShellProps): React.JSX.Element {
           <Kbd>?</Kbd> keys
         </span>
       </footer>
+
+      {asking === undefined ? null : (
+        <AskOverlay
+          id="sv-ask"
+          label={asking.label}
+          {...(asking.placeholder === undefined ? {} : { placeholder: asking.placeholder })}
+          onCancel={() => setAsking(undefined)}
+          onSubmit={(value) => {
+            const pending = asking;
+            setAsking(undefined);
+            void runAction(pending.action, { [pending.field]: value });
+          }}
+        />
+      )}
 
       <CommandPalette
         open={paletteOpen}

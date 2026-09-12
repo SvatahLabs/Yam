@@ -246,3 +246,57 @@ export function Split(props: {
     </div>
   );
 }
+
+/**
+ * An action asking for the one thing it declared it needs (TV-06).
+ *
+ * `surface.connect` refused with "Enter a URL to connect to" in both renderers
+ * and neither had anywhere to enter one. The action names the field; this draws
+ * it; the cockpit opens a line for the same declaration.
+ *
+ * A form and not a free-floating input: `Enter` submits because the browser
+ * submits forms, and `Escape` cancels because a dialog does.
+ */
+export function AskOverlay(props: {
+  readonly id: string;
+  readonly label: string;
+  readonly placeholder?: string;
+  readonly onSubmit: (value: string) => void;
+  readonly onCancel: () => void;
+}): React.JSX.Element {
+  return (
+    <div
+      className="sv-picker"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={`${props.id}-title`}
+      id={props.id}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") props.onCancel();
+      }}
+    >
+      <h2 id={`${props.id}-title`}>{props.label}</h2>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          const value = new FormData(event.currentTarget).get("value");
+          if (typeof value === "string" && value.trim() !== "") props.onSubmit(value.trim());
+        }}
+      >
+        <input
+          className="sv-input"
+          name="value"
+          aria-label={props.label}
+          autoFocus
+          {...(props.placeholder === undefined ? {} : { placeholder: props.placeholder })}
+        />
+        <button type="submit" className="sv-btn sv-btn-primary">
+          Connect
+        </button>
+        <button type="button" className="sv-btn" onClick={props.onCancel}>
+          Cancel
+        </button>
+      </form>
+    </div>
+  );
+}

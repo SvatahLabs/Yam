@@ -130,6 +130,40 @@ const envelopeOf = (
   };
 };
 
+/**
+ * Which of the three targets a typed string is (SF-04).
+ *
+ * The CLI has `--url`, `--app` and `--attach`; a person typing one line has one
+ * line, so the shape decides. A scheme means a URL; `host:port` or a WebSocket
+ * means an endpoint to join; anything else is an application's name.
+ *
+ * The runtime refuses two at once and says why, so a wrong guess here is a
+ * refusal with a reason rather than a silent switch — which is what SF-04
+ * requires of the broker and therefore of this.
+ */
+function namedTarget(
+  typed: string,
+  url: string,
+  args: ActionArgs,
+): { url: string } | { app: string } | { attach: string } | undefined {
+  const explicit = ["url", "app", "attach"] as const;
+  for (const name of explicit) {
+    const value = args[name];
+    if (typeof value === "string" && value.trim() !== "") {
+      return { [name]: value.trim() } as { url: string } | { app: string } | { attach: string };
+    }
+  }
+  const text = typed !== "" ? typed : url;
+  if (text === "") return undefined;
+  if (/^wss?:\/\//i.test(text)) return { attach: text };
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(text)) return { url: text };
+  if (/^[^\s/]+:\d+(\/\S*)?$/.test(text)) return { attach: text };
+  if (/^(localhost|(\d{1,3}\.){3}\d{1,3}|[a-z0-9-]+(\.[a-z0-9-]+)+)(\/\S*)?$/i.test(text)) {
+    return { url: `https://${text}` };
+  }
+  return { app: text };
+}
+
 /* ────────────────────────────────────────────────────────────────────────────
  * Actions
  * ──────────────────────────────────────────────────────────────────────────── */
@@ -141,16 +175,42 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Connect surface",
     group: "Actions",
     screen: "session",
-    cli: "yam surface connect --url <url>",
+    cli: "yam surface connect [--url <url> | --app <name> | --attach <endpoint>]",
+    /*
+     * The target, asked for rather than assumed (SF-04).
+     *
+     * This refused with "Enter a URL to connect to" and no renderer had anywhere
+     * to enter one: the cockpit's only typing line belonged to say mode, so `c`
+     * produced that refusal every time. The parity checks passed the whole while
+     * — a key that reliably refuses is still reachable.
+     *
+     * And a URL was never the only answer. The runtime takes exactly one of
+     * three (`surface-control/src/dispatcher.ts`): a URL launches a browser, an
+     * endpoint joins one already running, a name drives an application already
+     * running. The old copy promised "a browser, app, device or API" for a field
+     * that accepted the first only.
+     */
+    needs: [
+      {
+        name: "target",
+        label: "URL, application name, or endpoint",
+        placeholder: "https://example.com",
+      },
+    ],
     availableWhen: loaded,
     async run(service, args): Promise<ActionOutcome> {
+      const target = typeof args["target"] === "string" ? args["target"].trim() : "";
       const url = typeof args.url === "string" ? args.url.trim() : "";
-      if (url === "") {
-        return refused("Enter a URL to connect to — a browser, app, device or API.");
+      const named = namedTarget(target, url, args);
+      if (named === undefined) {
+        return refused(
+          "Name a target: a URL launches a browser, an endpoint joins one already " +
+            "running, an application name drives one already running.",
+        );
       }
       const adapter = typeof args.adapter === "string" && args.adapter !== "" ? args.adapter : undefined;
       const answer = await service.postSessions({
-        url,
+        ...named,
         ...(adapter === undefined ? {} : { adapter }),
       });
       const { ok: succeeded, result, message } = envelopeOf(answer);

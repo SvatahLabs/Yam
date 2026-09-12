@@ -68,5 +68,5 @@ export const NAMED_COMPONENTS = [
 ] as const;
 
 /* The primitives Session needs (TV-A03). */
-export { Tree, Log, ModeStrip, PickerOverlay, Toast, Split } from "./components/session.js";
+export { Tree, Log, ModeStrip, PickerOverlay, AskOverlay, Toast, Split } from "./components/session.js";
 export type { TreeNode, TreeProps, LogLine } from "./components/session.js";

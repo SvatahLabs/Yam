@@ -125,6 +125,18 @@ async function pressed(
   await settle();
   stdin.write(bytesFor(key));
   await settle();
+  /*
+   * An action that declared what it `needs` opens a line instead of running, so
+   * the key is followed through to the end: type something, press Enter. That is
+   * the whole path a person takes, and the half that was missing — `c` refused
+   * with "Enter a URL to connect to" and there was nowhere to enter one.
+   */
+  if ((action.needs ?? []).length > 0) {
+    stdin.write("example.com");
+    await settle();
+    stdin.write("\r");
+    await settle();
+  }
   instance.unmount();
   const ran = spy.mock.calls.length > 0;
   spy.mockRestore();

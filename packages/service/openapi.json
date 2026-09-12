@@ -1510,8 +1510,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "description": "Name one target. A URL launches a browser, `attach` joins one that is already running by its DevTools endpoint, and `app` drives an application that is already running, by process name. The broker refuses two at once.",
                 "properties": {
                   "url": {
+                    "type": "string"
+                  },
+                  "app": {
+                    "type": "string"
+                  },
+                  "attach": {
                     "type": "string"
                   },
                   "adapter": {

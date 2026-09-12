@@ -205,9 +205,33 @@ export interface Action {
    * no one can type.
    */
   readonly cli?: string;
+  /**
+   * What a person must supply before this action can do anything.
+   *
+   * `surface.connect` refused with "Enter a URL to connect to" and the cockpit
+   * had nowhere to enter one — the only typing line it owned belonged to say
+   * mode — so `c` produced that refusal every time and could never do anything
+   * else. The parity checks passed throughout: they assert an action is
+   * *reachable*, and a key that reliably refuses is reachable.
+   *
+   * Declared on the action because both renderers need it and neither may
+   * invent it: the app draws a field, the cockpit opens a line, and the CLI
+   * already has the flag.
+   */
+  readonly needs?: readonly ActionInput[];
   /** Whether this action can run against this state. The palette greys the rest. */
   availableWhen(state: ScreenStateBase): boolean;
   run(service: ScreenService, args: ActionArgs): Promise<ActionOutcome>;
+}
+
+/** One thing an action must be given before it runs. */
+export interface ActionInput {
+  /** The `args` key it arrives as. */
+  readonly name: string;
+  /** The prompt: "URL, application name, or endpoint". */
+  readonly label: string;
+  /** An example, shown dim where the text will go. */
+  readonly placeholder?: string;
 }
 
 /** One screen (LLD §13.7). */

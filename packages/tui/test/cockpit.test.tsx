@@ -28,6 +28,7 @@ import {
   screenById,
   type FakeResponses,
 } from "@svatah/yam-screens";
+import type { ScreenId } from "@svatah/yam-screens";
 import { App } from "../src/app.js";
 import type { UiState } from "../src/model.js";
 import { INSPECTOR_MIN_COLUMNS, layoutFor } from "../src/layout.js";
@@ -124,7 +125,7 @@ function renderApp(
 
 /** Render the cockpit into a terminal of `size` and wait for its first load. */
 async function cockpit(
-  screen: "flows" | "run",
+  screen: ScreenId,
   params: Record<string, string> = {},
   size: { columns: number; rows: number } = WIDE,
 ) {
@@ -849,4 +850,46 @@ describe("`e` edits the open flow through $EDITOR (K6)", () => {
     // mtime on a file nobody touched.
     expect(wrote).toEqual([]);
   }, 60_000);
+});
+
+
+describe("an action that needs something asks for it (TV-06)", () => {
+  /*
+   * `c` used to run `surface.connect` with the screen's params, which never held
+   * a URL — so it refused with "Enter a URL to connect to" and the cockpit had
+   * nowhere to enter one. Every press produced that same line.
+   */
+  it("opens a line naming what it wants, rather than refusing", async () => {
+    const instance = await cockpit("session");
+    instance.stdin.write("c");
+    await settle();
+    expect(instance.lastFrame()).toContain("URL, application name, or endpoint");
+    expect(instance.lastFrame()).not.toContain("Enter a URL to connect to");
+    instance.unmount();
+  });
+
+  it("takes letters as letters while the line is open", async () => {
+    const instance = await cockpit("session");
+    instance.stdin.write("c");
+    await settle();
+    for (const letter of "shop.example") {
+      instance.stdin.write(letter);
+      await settle();
+    }
+    const frame = instance.lastFrame();
+    expect(frame).toContain("shop.example");
+    /* `s` would have refreshed the surface tree and `p` re-picked, without this. */
+    expect(frame).toContain("URL, application name, or endpoint");
+    instance.unmount();
+  });
+
+  it("gives the line back on escape", async () => {
+    const instance = await cockpit("session");
+    instance.stdin.write("c");
+    await settle();
+    instance.stdin.write("\u001b");
+    await settle();
+    expect(instance.lastFrame()).not.toContain("URL, application name, or endpoint");
+    instance.unmount();
+  });
 });

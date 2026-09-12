@@ -47,7 +47,18 @@ export interface UiState {
    * without saying which it is doing. `typing` is that mode: while it holds a
    * string, letters are letters and `esc` gives them back.
    */
-  readonly typing?: { readonly where: "say"; readonly text: string };
+  readonly typing?: {
+    /**
+     * `say` is the sentence line; an action id is that action asking for what it
+     * declared it `needs`.
+     *
+     * The line was say-mode's alone, which is why `surface.connect` refused with
+     * "Enter a URL to connect to" and gave nobody anywhere to enter one.
+     */
+    readonly where: "say" | { readonly action: string; readonly field: string };
+    readonly label: string;
+    readonly text: string;
+  };
   /** Which row the palette's selection is on. It moves (TV-08). */
   readonly paletteAt: number;
   /** Action ids, most recently run first: what the palette offers on no query. */

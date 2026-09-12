@@ -578,8 +578,20 @@ export function openApiDocument(version: string): Record<string, unknown> {
           security: bearer,
           requestBody: json({
             type: "object",
+            description:
+              "Name one target. A URL launches a browser, `attach` joins one that is " +
+              "already running by its DevTools endpoint, and `app` drives an application " +
+              "that is already running, by process name. The broker refuses two at once.",
             properties: {
+              /*
+               * `app` and `attach` were absent, so the generated clients had no
+               * way to send them and the app and the cockpit could reach one of
+               * the runtime's three targets. The dispatcher has taken all three
+               * since SF-04; only this document was narrow.
+               */
               url: { type: "string" },
+              app: { type: "string" },
+              attach: { type: "string" },
               adapter: { type: "string" },
               headed: { type: "boolean" },
               intent: { type: "string" },

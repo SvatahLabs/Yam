@@ -16,6 +16,7 @@ export { SCREEN_IDS } from "./types.js";
 export type {
   Action,
   ActionArgs,
+  ActionInput,
   ActionOutcome,
   Pill,
   Screen,

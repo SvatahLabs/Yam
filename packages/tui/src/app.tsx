@@ -289,10 +289,31 @@ export function App(props: AppProps): React.JSX.Element {
 
   /** Run one action by id, then show the screen it points at. */
   const run = useCallback(
-    async (actionId: string): Promise<void> => {
+    async (actionId: string, answers: Record<string, string> = {}): Promise<void> => {
       if (ui === undefined) return;
       const action = actionById(actionId);
       if (action === undefined) return;
+      /*
+       * What the action said it needs, asked for before it is run (TV-06).
+       *
+       * `surface.connect` refused with "Enter a URL to connect to" and there was
+       * nowhere to enter one, so `c` produced that refusal and nothing else,
+       * every time. The action declares the field; the cockpit opens a line for
+       * it; neither invents the other's half.
+       */
+      const missing = (action.needs ?? []).find(
+        (one) =>
+          answers[one.name] === undefined &&
+          typeof (ui.params as Record<string, unknown>)[one.name] !== "string",
+      );
+      if (missing !== undefined) {
+        setUi({
+          ...ui,
+          paletteOpen: false,
+          typing: { where: { action: actionId, field: missing.name }, label: missing.label, text: "" },
+        });
+        return;
+      }
       if (!action.availableWhen(ui.state)) {
         setUi((before) =>
           before === undefined
@@ -309,7 +330,7 @@ export function App(props: AppProps): React.JSX.Element {
           : { ...before, recents: [actionId, ...before.recents.filter((one) => one !== actionId)].slice(0, 8) },
       );
       try {
-        const outcome = await action.run(props.service, { ...ui.params });
+        const outcome = await action.run(props.service, { ...ui.params, ...answers });
         await reload(outcome.goTo ?? ui.screen, { ...ui.params, ...outcome.params }, outcome.message);
       } catch (cause) {
         setUi((before) =>
@@ -378,19 +399,27 @@ export function App(props: AppProps): React.JSX.Element {
         return;
       }
       if (key.return) {
-        /*
-         * Said, and not yet run.
-         *
-         * Grounding a sentence against the *connected* session needs the runtime
-         * to take a broker session, which is the join `docs/spec/view-layers`
-         * puts out of scope and names as a runtime change. So the sentence is
-         * held, the offer is drawn, and nothing pretends to have executed.
-         */
-        setUi({
-          ...ui,
-          typing: undefined,
-          message: `"${ui.typing.text}" is not bound yet: point at it with p, or leave it unbound.`,
-        });
+        const { where, text } = ui.typing;
+        if (where === "say") {
+          /*
+           * Said, and not yet run.
+           *
+           * Grounding a sentence against the *connected* session needs the
+           * runtime to take a broker session, which is the join
+           * `docs/spec/view-layers` puts out of scope and names as a runtime
+           * change. So the sentence is held, the offer is drawn, and nothing
+           * pretends to have executed.
+           */
+          setUi({
+            ...ui,
+            typing: undefined,
+            message: `"${text}" is not bound yet: point at it with p, or leave it unbound.`,
+          });
+          return;
+        }
+        /* An action asked for something and has been given it. */
+        setUi({ ...ui, typing: undefined });
+        if (text.trim() !== "") void run(where.action, { [where.field]: text.trim() });
         return;
       }
       if (input !== "" && !key.ctrl && !key.meta) {
@@ -458,7 +487,7 @@ export function App(props: AppProps): React.JSX.Element {
 
     /* `i` opens the say line, on the screen that has one. */
     if (input === "i" && ui.screen === "session" && modeFrom(ui.params["mode"]) === "say") {
-      setUi({ ...ui, typing: { where: "say", text: "" } });
+      setUi({ ...ui, typing: { where: "say", label: "Say what to do", text: "" } });
       return;
     }
 
@@ -654,9 +683,11 @@ export function App(props: AppProps): React.JSX.Element {
 
       {ui.typing === undefined ? null : (
         <Text>
+          <Text color="gray">{`${ui.typing.label}  `}</Text>
           <Text color="magenta">› </Text>
           {ui.typing.text}
           <Text inverse> </Text>
+          <Text color="gray">{ui.typing.text === "" ? "  esc cancels" : ""}</Text>
         </Text>
       )}
 

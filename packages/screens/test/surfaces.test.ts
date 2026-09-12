@@ -168,11 +168,19 @@ describe("Surfaces sessions — an agent's as much as a person's (SF-05, SF-13)"
 });
 
 describe("Surfaces actions run against the broker (SF-04, SF-05)", () => {
-  it("connect refuses with no URL, and never touches the broker", async () => {
+  /*
+   * The refusal stands; its wording does not.
+   *
+   * This asserted "Enter a URL", which was the copy over-promising: it went on
+   * to say "a browser, app, device or API" for a field that took the first only,
+   * while the runtime has taken three named targets since SF-04. The test was
+   * holding the wrong sentence in place, so it is the sentence that changed.
+   */
+  it("connect refuses with no target, and never touches the broker", async () => {
     const service = fakeService({ surface: { targets: ok({ adapters: ADAPTERS, targets: [] }) } });
     const outcome = await actionById("surface.connect")!.run(service, {});
     expect(outcome.ok).toBe(false);
-    expect(outcome.message).toContain("Enter a URL");
+    expect(outcome.message).toContain("Name a target");
     expect(service.calls.some((one) => one.method === "postSessions")).toBe(false);
   });
 
