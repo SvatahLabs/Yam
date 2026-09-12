@@ -893,3 +893,40 @@ describe("an action that needs something asks for it (TV-06)", () => {
     instance.unmount();
   });
 });
+
+
+describe("an outcome says which of the four it was (TV-06)", () => {
+  /*
+   * Every outcome printed in one grey with no mark: an action that ran, one that
+   * refused, one not available here, and a thrown error looked identical. In a
+   * cockpit whose keys are single letters that is the difference between "I
+   * pressed the wrong key" and "it worked" — and a person had no way to tell.
+   *
+   * A glyph as well as a tone, because a terminal may have no colour at all
+   * (`REQ-ADE-12`), and these frames have the colour stripped out of them.
+   */
+  const glyphOf = (frame: string): string => {
+    const line = frame.split("\n").find((one) => /^[✓✗–!•·]/.test(one.trim()));
+    return line?.trim()[0] ?? "";
+  };
+
+  it("marks an action that is not available here differently from one that ran", async () => {
+    const notHere = await cockpit("session");
+    /* `t` takes control, and no session is selected in the fixtures. */
+    notHere.stdin.write("t");
+    await settle();
+    expect(notHere.lastFrame()).toContain("is not available here");
+    const skipped = glyphOf(notHere.lastFrame());
+    notHere.unmount();
+
+    const ran = await cockpit("session");
+    ran.stdin.write("r");
+    await settle();
+    const passed = glyphOf(ran.lastFrame());
+    ran.unmount();
+
+    expect(skipped).not.toBe("");
+    expect(passed).not.toBe("");
+    expect(skipped).not.toBe(passed);
+  });
+});

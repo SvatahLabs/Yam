@@ -25,7 +25,7 @@
       "label": "Connect surface",
       "group": "Actions",
       "screen": "session",
-      "cli": "yam surface connect --url <url>"
+      "cli": "yam surface connect [--url <url> | --app <name> | --attach <endpoint>]"
     },
     {
       "id": "surface.disconnect",

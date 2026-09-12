@@ -23,6 +23,7 @@ import {
   type ScreenStateBase,
   type ServiceEventLike,
   type SessionState,
+  type StatusTone,
 } from "@svatah/yam-screens";
 import type { ScreenService } from "@svatah/yam-screens";
 import { layoutFor, type Layout } from "./layout.js";
@@ -65,6 +66,18 @@ export interface UiState {
   readonly recents: readonly string[];
   /** What the last action said, shown on the footer until the next one. */
   readonly message?: string;
+  /**
+   * What kind of thing the message is (TV-06, `REQ-ADE-12`).
+   *
+   * Every outcome printed in one grey: an action that ran, one that refused, one
+   * that is not available here, and a thrown error all looked identical. A
+   * cockpit whose keys are single letters cannot afford that — pressing a key
+   * that did nothing has to *look* different from pressing one that worked.
+   *
+   * A tone and a glyph, never colour alone: the glyph is what carries it when
+   * the terminal has no colour.
+   */
+  readonly messageTone?: StatusTone;
   /** The project and service, for the header. */
   readonly connection: { readonly url: string; readonly project: string };
   /**

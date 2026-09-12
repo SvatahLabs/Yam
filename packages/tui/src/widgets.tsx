@@ -17,17 +17,7 @@ import type { Box } from "./regions.js";
 import type { Cell, Line, PaneContent } from "./rows.js";
 import type { RailEntry } from "./rail.js";
 import { colourOf } from "./panes.js";
-import { chrome, capabilitiesOf, depthFor } from "./theme.js";
-
-/*
- * The chrome, resolved once (TV-05).
- *
- * `borderColor="magenta"` and `"gray"` were literals here — Ink's eight names,
- * not the tokens — so the focused border drew the terminal's magenta instead of
- * the lavender `accent` (`#b8a1ff`) the artboards use, and the one surface the
- * token pipeline exists for was the one bypassing it.
- */
-const CHROME = chrome(depthFor(capabilitiesOf(process.stdout, process.env)));
+import { CHROME } from "./theme.js";
 
 /** `"a string"` cut to `width`, padded to it, so a line is exactly as wide as it claims. */
 export const fit = (text: string, width: number): string =>

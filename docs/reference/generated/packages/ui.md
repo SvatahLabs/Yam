@@ -14,6 +14,7 @@ The Yam design system: React components on Radix primitives, every one of them n
 |---|---|---|---|
 | `Alert` | function | `export function Alert(props: AlertProps): React.JSX.Element` | The alert the mockups draw for a failed load or a missing runtime. |
 | `AlertProps` | interface | `export interface AlertProps` |  |
+| `AskOverlay` | function | `export function AskOverlay(props:` | An action asking for the one thing it declared it needs (TV-06). |
 | `AUTOMATION_ID_FORM` | variable | `AUTOMATION_ID_FORM = ID_FORM` | The id form, exported so the app and the TUI can check their own ids. |
 | `Button` | function | `export function Button(props: ButtonProps): React.JSX.Element` | A button. |
 | `ButtonProps` | interface | `export interface ButtonProps extends Named` |  |

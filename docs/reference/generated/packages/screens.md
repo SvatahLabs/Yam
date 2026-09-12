@@ -15,6 +15,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `Action` | interface | `export interface Action` | One action (LLD §13.7). |
 | `ActionArgs` | interface | `export interface ActionArgs extends ScreenParams` | What an action was given: the screen's params, plus whatever the row supplied. |
 | `actionById` | function | `export function actionById(id: string): Action \| undefined` | One action by id, or `undefined`. The renderers and the SDK both use this. |
+| `ActionInput` | interface | `export interface ActionInput` | One thing an action must be given before it runs. |
 | `ActionOutcome` | interface | `export interface ActionOutcome` | What an action answered with. Renderers show `message`; agents read the rest. |
 | `ACTIONS` | variable | `ACTIONS: readonly Action[] = [...ACTIONS_ONLY, ...GO_TO]` | Every action, in palette order: Actions first, then Go to (LLD §13.7). |
 | `actionsForScreen` | function | `export function actionsForScreen(screen: ScreenId): readonly Action[]` | The actions a screen offers, in registry order. |

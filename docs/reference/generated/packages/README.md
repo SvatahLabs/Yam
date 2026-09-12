@@ -27,7 +27,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-recorder`](recorder.md) | 51 | Grounding, record session and report |
 | [`@svatah/yam-runtime`](runtime.md) | 50 | Runner-agnostic executor core: scope, guards, checkpoints, policies, results, audit |
 | [`@svatah/yam-schema`](schema.md) | 185 | Zod definitions and generated JSON Schemas for the Yam artifact contracts |
-| [`@svatah/yam-screens`](screens.md) | 123 | The headless screen model: one set of screens, actions and keys behind the app, `yam ui`, the SDK and the CLI |
+| [`@svatah/yam-screens`](screens.md) | 124 | The headless screen model: one set of screens, actions and keys behind the app, `yam ui`, the SDK and the CLI |
 | [`@svatah/yam-sdk`](sdk.md) | 17 | The typed TypeScript client for the Yam local service, generated from its OpenAPI description (REQ-SDK-1) |
 | [`@svatah/yam-service`](service.md) | 17 | Local HTTP and event-stream service (yam serve) |
 | [`@svatah/yam-spec`](spec.md) | 54 | Flow reader, grammar, target dictionary, signatures |
@@ -37,6 +37,6 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-tool`](tool.md) | 17 | MCP tool server exposing stories as deterministic tools |
 | [`@svatah/yam-trajectory`](trajectory.md) | 19 | Trajectory capture and compile to proposals |
 | [`@svatah/yam-tui`](tui.md) | 78 | `yam ui` — the terminal cockpit, a second renderer of the screen model (REQ-TUI-1) |
-| [`@svatah/yam-ui`](ui.md) | 42 | The Yam design system: React components on Radix primitives, every one of them named and id'd (REQ-ADE-12) |
+| [`@svatah/yam-ui`](ui.md) | 43 | The Yam design system: React components on Radix primitives, every one of them named and id'd (REQ-ADE-12) |
 | [`@svatah/yam-ui-tokens`](ui-tokens.md) | 26 | The Yam design tokens: two themes, one type ramp, one status set (REQ-ADE-12) |
 | [`@svatah/yam-workflow`](workflow.md) | 8 | Story-as-function runner and resume |

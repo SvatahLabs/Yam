@@ -37,7 +37,7 @@ import {
  * green "passed" would be absurd. What stays here is the half that is about
  * Ink.
  */
-export { capabilitiesOf, depthFor, foreground, hexOf, tone, ansi256Of, rgbOf, RESET };
+export { capabilitiesOf, depthFor, foreground, hexOf, tone, ansi256Of, rgbOf, RESET, STATUS };
 export type { ColourDepth };
 
 /**
@@ -80,3 +80,13 @@ export function chrome(depth: ColourDepth): {
     barFg: of("muted", "gray"),
   };
 }
+
+/**
+ * The chrome, resolved once for this terminal (TV-05).
+ *
+ * `borderColor="magenta"` and `"gray"` were literals in `widgets.tsx` — Ink's
+ * eight names, not the tokens — so the focused border drew the terminal's
+ * magenta instead of the lavender `accent` (`#b8a1ff`) the artboards use, and
+ * the one surface the token pipeline exists for was the one bypassing it.
+ */
+export const CHROME = chrome(depthFor(capabilitiesOf(process.stdout, process.env)));
