@@ -585,7 +585,12 @@ function rowsOf(value: unknown, keys: readonly string[]): Array<{ key: string; v
 export const recordScreen: Screen<RecordState> = {
   id: "record",
   title: "Record review",
-  actions: actionsForScreen("record"),
+  /*
+   * The actions moved to `session` in TV-M02 and kept their ids; this screen is
+   * deleted in TV-M04. Until then it offers the same list rather than an empty
+   * one, so nothing that still opens it loses its buttons.
+   */
+  actions: actionsForScreen("session"),
   keys: [
     { action: "record.accept", key: "A", terminal: "a", description: "Accept the grounding" },
     { action: "record.repick", key: "P", terminal: "p", description: "Re-pick in the session" },

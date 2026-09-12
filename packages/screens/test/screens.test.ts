@@ -691,7 +691,12 @@ describe("a capture happening (REQ-REC-13, Draft 2.23)", () => {
     expect(bind.label).toBe("Bind targets");
     expect(bind.cli).toBe("yam record --flow <file>");
     expect(bind.key).toBe("B");
-    expect(ACTIONS.find((one) => one.id === "capture.stop")!.screen).toBe("record");
+    /*
+     * Draft 2.27: both are still two actions with two keys, and the screen they
+     * are declared on is now `session` — Record is a mode of it rather than a
+     * destination of its own (TV-M02). The ids did not move; the home did.
+     */
+    expect(ACTIONS.find((one) => one.id === "capture.stop")!.screen).toBe("session");
   });
 
   it("starts a capture through the service and lands on the Record screen", async () => {

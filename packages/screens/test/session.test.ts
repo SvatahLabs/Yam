@@ -121,6 +121,37 @@ describe("the actions keep their ids (TV-M02)", () => {
     for (const action of session.actions) expect(known.has(action.id)).toBe(true);
   });
 
+  it("gates an action by the mode it belongs to (TV-15)", () => {
+    const act = screenById("session").actions.find((one) => one.id === "surface.act")!;
+    const accept = screenById("session").actions.find((one) => one.id === "record.accept")!;
+    const base = { screen: "session", title: "", subtitle: "", status: "", sources: ["x"] } as const;
+    const connected = { ...base, surface: { session: {} }, record: { decision: {} } };
+
+    expect(act.availableWhen({ ...connected, mode: "do" } as never)).toBe(true);
+    expect(act.availableWhen({ ...connected, mode: "record" } as never)).toBe(false);
+    expect(accept.availableWhen({ ...connected, mode: "record" } as never)).toBe(true);
+    expect(accept.availableWhen({ ...connected, mode: "do" } as never)).toBe(false);
+  });
+
+  it("asks the mode question only of a screen that has modes", () => {
+    /*
+     * A screen with no `mode` is not a screen with modes: the gate says which
+     * modes an action belongs to, and must never make an action unavailable by
+     * answering a question nobody asked.
+     */
+    const act = screenById("session").actions.find((one) => one.id === "surface.act")!;
+    const flat = { screen: "surfaces", title: "", subtitle: "", status: "", sources: ["x"], session: {} };
+    expect(act.availableWhen(flat as never)).toBe(true);
+  });
+
+  it("does not gate connecting, which every mode needs first", () => {
+    const connect = screenById("session").actions.find((one) => one.id === "surface.connect")!;
+    const base = { screen: "session", title: "", subtitle: "", status: "", sources: ["x"], surface: {} };
+    for (const mode of SESSION_MODES) {
+      expect(connect.availableWhen({ ...base, mode } as never), mode).toBe(true);
+    }
+  });
+
   it("keeps both screens' keys, so neither half loses its accelerators", () => {
     const keys = screenById("session").keys.map((one) => one.action);
     expect(keys).toContain("surface.connect");

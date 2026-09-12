@@ -156,7 +156,7 @@ export const sessionScreen: Screen<SessionState> = {
    * and an action that changed id here would be an action the CLI and the SDK
    * could no longer name.
    */
-  actions: [...actionsForScreen("surfaces"), ...actionsForScreen("record")],
+  actions: actionsForScreen("session"),
   keys: [...surfacesScreen.keys, ...recordScreen.keys],
   async load(service: ScreenService, params: ScreenParams = {}): Promise<SessionState> {
     const mode = modeFrom(params.mode);

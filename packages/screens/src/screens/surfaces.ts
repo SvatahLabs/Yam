@@ -641,7 +641,12 @@ export function platformGroups(
 export const surfacesScreen: Screen<SurfacesState> = {
   id: "surfaces",
   title: "Surfaces",
-  actions: actionsForScreen("surfaces"),
+  /*
+   * The actions moved to `session` in TV-M02 and kept their ids; this screen is
+   * deleted in TV-M04. Until then it offers the same list rather than an empty
+   * one, so nothing that still opens it loses its buttons.
+   */
+  actions: actionsForScreen("session"),
   keys: [
     { action: "surface.connect", key: "C", terminal: "c", description: "Connect a surface" },
     { action: "surface.refresh", key: "S", terminal: "s", description: "Refresh the surface tree" },

@@ -1,10 +1,10 @@
 {
   "$comment": [
-    "The palette fixture (T9.1, LLD §13.7).",
+    "The palette fixture (T9.1, LLD \u00a713.7).",
     "",
     "What the command palette shows: every action's id, label, key and CLI command,",
     "in palette order. This file is maintained by hand and is one of the three",
-    "things `tools/repo-checks/test/action-parity.test.ts` compares — the other two",
+    "things `tools/repo-checks/test/action-parity.test.ts` compares \u2014 the other two",
     "being `@svatah/yam-screens`'s registry and the CLI's own command table. A check",
     "that generated this from the registry would compare the registry with itself,",
     "so renaming an action here without renaming it there (or the other way round)",
@@ -19,7 +19,7 @@
       "id": "surface.connect",
       "label": "Connect surface",
       "group": "Actions",
-      "screen": "surfaces",
+      "screen": "session",
       "key": "C",
       "cli": "yam surface connect --url <url>"
     },
@@ -27,14 +27,14 @@
       "id": "surface.disconnect",
       "label": "Disconnect",
       "group": "Actions",
-      "screen": "surfaces",
+      "screen": "session",
       "cli": "yam surface close --session <id>"
     },
     {
       "id": "surface.discover",
       "label": "Recheck targets",
       "group": "Actions",
-      "screen": "surfaces",
+      "screen": "session",
       "key": "R",
       "cli": "yam surface targets"
     },
@@ -42,29 +42,29 @@
       "id": "surface.act",
       "label": "Perform the action",
       "group": "Actions",
-      "screen": "surfaces",
-      "key": "⌘↵",
+      "screen": "session",
+      "key": "\u2318\u21b5",
       "cli": "yam surface act --session <id> --action <action> --ref <ref>"
     },
     {
       "id": "surface.check",
       "label": "Check the surface",
       "group": "Actions",
-      "screen": "surfaces",
+      "screen": "session",
       "cli": "yam surface check --session <id> --input <file.json>"
     },
     {
       "id": "surface.read",
       "label": "Read a value",
       "group": "Actions",
-      "screen": "surfaces",
+      "screen": "session",
       "cli": "yam surface read --session <id> --kind text --ref <ref>"
     },
     {
       "id": "surface.refresh",
       "label": "Refresh and select again",
       "group": "Actions",
-      "screen": "surfaces",
+      "screen": "session",
       "key": "S",
       "cli": "yam surface snapshot --session <id>"
     },
@@ -72,36 +72,36 @@
       "id": "surface.take-control",
       "label": "Take control",
       "group": "Actions",
-      "screen": "surfaces",
+      "screen": "session",
       "cli": "yam surface control --session <id> --take"
     },
     {
       "id": "surface.release-control",
       "label": "Give up control",
       "group": "Actions",
-      "screen": "surfaces",
+      "screen": "session",
       "cli": "yam surface control --session <id> --release"
     },
     {
       "id": "surface.test-agent",
       "label": "Test the connection",
       "group": "Actions",
-      "screen": "surfaces",
+      "screen": "session",
       "cli": "yam surface targets"
     },
     {
       "id": "surface.save-automation",
       "label": "Save as automation",
       "group": "Actions",
-      "screen": "surfaces",
+      "screen": "session",
       "cli": "yam trajectory compile <trajectory.jsonl>"
     },
     {
       "id": "surface.request",
       "label": "Send the request",
       "group": "Actions",
-      "screen": "surfaces",
-      "key": "⌘↵",
+      "screen": "session",
+      "key": "\u2318\u21b5",
       "cli": "yam surface request --session <id> --url <url>"
     },
     {
@@ -116,14 +116,14 @@
       "label": "Save flow",
       "group": "Actions",
       "screen": "flows",
-      "key": "⌘S"
+      "key": "\u2318S"
     },
     {
       "id": "run.flow",
       "label": "Run",
       "group": "Actions",
       "screen": "flows",
-      "key": "⌘↵",
+      "key": "\u2318\u21b5",
       "cli": "yam run --flow <file>"
     },
     {
@@ -138,7 +138,7 @@
       "label": "Run again",
       "group": "Actions",
       "screen": "run",
-      "key": "⌘↵",
+      "key": "\u2318\u21b5",
       "cli": "yam run --flow <file>"
     },
     {
@@ -160,7 +160,7 @@
       "id": "capture.stop",
       "label": "Stop recording",
       "group": "Actions",
-      "screen": "record",
+      "screen": "session",
       "key": "S"
     },
     {
@@ -175,28 +175,28 @@
       "id": "record.accept",
       "label": "Accept",
       "group": "Actions",
-      "screen": "record",
+      "screen": "session",
       "key": "A"
     },
     {
       "id": "record.repick",
       "label": "Re-pick",
       "group": "Actions",
-      "screen": "record",
+      "screen": "session",
       "key": "P"
     },
     {
       "id": "record.reject",
       "label": "Reject",
       "group": "Actions",
-      "screen": "record",
+      "screen": "session",
       "key": "X"
     },
     {
       "id": "record.stop",
       "label": "Stop recording",
       "group": "Actions",
-      "screen": "record"
+      "screen": "session"
     },
     {
       "id": "run.stop",
@@ -246,14 +246,14 @@
       "label": "Send request",
       "group": "Actions",
       "screen": "api",
-      "key": "⌘↵"
+      "key": "\u2318\u21b5"
     },
     {
       "id": "api.save",
       "label": "Save request",
       "group": "Actions",
       "screen": "api",
-      "key": "⌘S"
+      "key": "\u2318S"
     },
     {
       "id": "data.save",
@@ -281,6 +281,12 @@
       "group": "Actions",
       "screen": "agents",
       "cli": "yam trajectory compile <trajectory.jsonl>"
+    },
+    {
+      "id": "go.session",
+      "label": "Go to Session",
+      "group": "Go to",
+      "screen": "session"
     },
     {
       "id": "go.surfaces",
