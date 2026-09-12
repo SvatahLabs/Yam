@@ -21,6 +21,7 @@ export interface ServiceEndpoint {
 
 export const ENDPOINTS: readonly ServiceEndpoint[] = [
   { id: "deleteSessionsBySession", verb: "delete", path: "/sessions/{session}", summary: "Close a surface session (SF-05)" },
+  { id: "getAgentsClients", verb: "get", path: "/agents/clients", summary: "Who is connected over MCP right now" },
   { id: "getApi", verb: "get", path: "/api", summary: "Named API requests" },
   { id: "getBindings", verb: "get", path: "/bindings", summary: "The bindings store" },
   { id: "getBindingsById", verb: "get", path: "/bindings/{id}", summary: "One binding" },
@@ -111,6 +112,11 @@ export class GeneratedServiceClient {
   /** `DELETE /sessions/{session}` — Close a surface session (SF-05) */
   async deleteSessionsBySession(session: string): Promise<unknown> {
     return await this.call("delete", `/sessions/${encodeURIComponent(session)}`, { });
+  }
+
+  /** `GET /agents/clients` — Who is connected over MCP right now */
+  async getAgentsClients(): Promise<unknown> {
+    return await this.call("get", `/agents/clients`, { });
   }
 
   /** `GET /api` — Named API requests */

@@ -192,3 +192,6 @@ export {
   type BrokerOptions,
   type RunningBroker,
 } from "./server.js";
+
+export { writeClient, removeClient, readClients, CLIENT_STALE_MS } from "./clients.js";
+export type { AgentClient } from "./clients.js";

@@ -16,6 +16,8 @@ import type { ScreenService, ServiceEventLike } from "./service.js";
 
 /** Every response the fake can give, keyed the way the fixtures file is. */
 export interface FakeResponses {
+  /** `GET /agents/clients` — who is connected over MCP (TV-M05). */
+  readonly agentClients?: unknown;
   project?: unknown;
   plan?: unknown;
   compile?: unknown;
@@ -112,6 +114,7 @@ export function fakeService(responses: FakeResponses = {}): FakeService {
       return () => listeners.delete(listener);
     },
 
+    getAgentsClients: () => answer("getAgentsClients", responses.agentClients ?? {}, "GET /agents/clients"),
     getProject: () => answer("getProject", responses.project, "GET /project"),
     getPlan: () => answer("getPlan", responses.plan, "GET /plan"),
     postCompile: () => answer("postCompile", responses.compile, "POST /compile"),

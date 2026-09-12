@@ -52,6 +52,24 @@ export interface AgentsState extends ScreenStateBase {
    * that lists what an agent can call has to say what it deliberately cannot.
    */
   readonly refused: ReadonlyArray<{ story: string; reason: string }>;
+  /**
+   * Who is connected over MCP right now (TV-M05, SF-13).
+   *
+   * The screen knew what was exposed and what had been called, and nothing about
+   * who was connected — so neither renderer could say that an agent was driving,
+   * which is what SF-13 requires to be visible before a handoff means anything.
+   */
+  readonly clients: ReadonlyArray<{
+    readonly id: string;
+    readonly name: string;
+    readonly transport: string;
+    readonly profile: string;
+    readonly protocol?: string;
+    readonly since: string;
+    /** The session it holds, when it holds one. */
+    readonly holds?: string;
+    readonly pill: Pill;
+  }>;
   readonly invocations: ReadonlyArray<{
     at: string;
     tool: string;
@@ -69,6 +87,28 @@ const agentsScreen: Screen<AgentsState> = {
   async load(service, params: ScreenParams = {}): Promise<AgentsState> {
     const sources = new Sources();
     const tools = await sources.optional<ToolsResponse>("GET /tools", () => service.getTools(), {});
+    const connected = await sources.optional<{ clients?: unknown[] }>(
+      "GET /agents/clients",
+      async () => (service.getAgentsClients === undefined ? {} : await service.getAgentsClients()),
+      {},
+    );
+    const clients = (Array.isArray(connected.clients) ? connected.clients : []).map((one) => {
+      const row = one as Record<string, unknown>;
+      const holds = typeof row["holds"] === "string" ? row["holds"] : undefined;
+      return {
+        id: String(row["id"] ?? ""),
+        name: String(row["name"] ?? row["id"] ?? ""),
+        transport: String(row["transport"] ?? ""),
+        profile: String(row["profile"] ?? ""),
+        ...(typeof row["protocol"] === "string" ? { protocol: row["protocol"] } : {}),
+        since: String(row["since"] ?? ""),
+        ...(holds === undefined ? {} : { holds }),
+        /* Holding a target is the fact worth colouring: it is what a handoff is about. */
+        pill: (holds === undefined
+          ? { tone: "info", label: "connected" }
+          : { tone: "abort", label: "driving" }) as Pill,
+      };
+    });
     const exposed = tools.tools?.tools ?? [];
     const selected = params.selected ?? exposed[0]?.name;
     return {
@@ -94,6 +134,7 @@ const agentsScreen: Screen<AgentsState> = {
         story: one.story ?? "",
         reason: one.reason ?? "",
       })),
+      clients,
       invocations: (tools.invocations ?? []).map((one) => ({
         at: one.at ?? "",
         tool: one.tool ?? "",

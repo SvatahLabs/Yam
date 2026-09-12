@@ -28,6 +28,7 @@ public class GeneratedClient {
   /** Every route, for the drift check and for a caller listing them. */
   public static final List<String> ENDPOINTS = List.of(
       "DELETE /sessions/{session}",
+      "GET /agents/clients",
       "GET /api",
       "GET /bindings",
       "GET /bindings/{id}",
@@ -168,6 +169,11 @@ public class GeneratedClient {
   /** {@code DELETE /sessions/{session}} — Close a surface session (SF-05) */
   public String deleteSessionsBySession(String session) {
     return call("delete", "/sessions/" + segment(session), null, "application/json");
+  }
+
+  /** {@code GET /agents/clients} — Who is connected over MCP right now */
+  public String getAgentsClients() {
+    return call("get", "/agents/clients", null, "application/json");
   }
 
   /** {@code GET /api} — Named API requests */

@@ -506,6 +506,12 @@ export function App(props: AppProps): React.JSX.Element {
 
   const keys = keysFor(ui.screen, modeFrom(ui.params["mode"]));
   const view = viewFor(ui.state);
+  /*
+   * The holder is the session's, and the session is Session's half — so this
+   * reads the model rather than deciding anything (TV-01).
+   */
+  const holder = ((ui.state as { surface?: { session?: { control?: string } } }).surface?.session ?? {})
+    .control;
 
   /*
    * The frame is exactly the terminal (TV-04). One row for the status bar, one
@@ -539,6 +545,12 @@ export function App(props: AppProps): React.JSX.Element {
          */
         left={["yam", ui.state.title, ui.connection.project, ui.connection.url]}
         right={[
+          /*
+           * Who holds the target, on every screen (TV-13). An agent taking a
+           * session must be visible without changing screen: that is what makes
+           * a handoff a handoff rather than a surprise.
+           */
+          ...(holder === undefined ? [] : [holder]),
           ui.state.subtitle,
           stream === "live" ? "live" : stream === "reconnecting" ? "reconnecting…" : "offline · R",
           sizeOf(ui.layout),

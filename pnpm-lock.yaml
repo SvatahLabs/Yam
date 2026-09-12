@@ -992,6 +992,9 @@ importers:
       '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema
+      '@svatah/yam-surface-control':
+        specifier: workspace:*
+        version: link:../surface-control
       fastify:
         specifier: 'catalog:'
         version: 5.12.1

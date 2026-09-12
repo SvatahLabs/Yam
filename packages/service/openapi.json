@@ -1399,6 +1399,29 @@
         }
       }
     },
+    "/agents/clients": {
+      "get": {
+        "summary": "Who is connected over MCP right now",
+        "description": "An MCP server is its own process — `yam mcp` over stdio, `yam mcp --http` over Streamable HTTP — so a connection is recorded in the user's state directory and read from there. A record that has gone quiet is dropped, so this never reports an agent nobody can hand control to (TV-M05, SF-07, SF-08, SF-13).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The connected clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools": {
       "get": {
         "summary": "The tools this project exposes, and every invocation served",

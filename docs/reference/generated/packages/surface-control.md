@@ -25,6 +25,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `AdapterReadiness` | interface | `export interface AdapterReadiness` |  |
 | `addSecretLiteral` | function | `export function addSecretLiteral(policy: RedactionPolicy, literal: string): void` |  |
 | `addSecretPattern` | function | `export function addSecretPattern(policy: RedactionPolicy, pattern: RegExp): void` |  |
+| `AgentClient` | interface | `export interface AgentClient` | One connected MCP client, as a person reads it. |
 | `brokerAlive` | function | `export async function brokerAlive(descriptor: { url: string; token: string }): Promise<boolean>` | Whether a broker is answering at this descriptor *and* speaks this contract. |
 | `BrokerDescriptor` | interface | `export interface BrokerDescriptor` |  |
 | `brokerHealth` | function | `export async function brokerHealth(` | What a broker at this descriptor is: alive, and what contract it speaks. |
@@ -42,6 +43,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `checkInputSchema` | variable | `checkInputSchema = z.object(` |  |
 | `checkOutputSchema` | variable | `checkOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `CLI_EXIT_CODES` | variable | `CLI_EXIT_CODES ` |  |
+| `CLIENT_STALE_MS` | variable | `CLIENT_STALE_MS = 30_000` | How long a record may go unrefreshed before a reader stops believing it. |
 | `CliFlag` | interface | `export interface CliFlag` |  |
 | `closeInputSchema` | variable | `closeInputSchema = z.object(` |  |
 | `closeOutputSchema` | variable | `closeOutputSchema = resultEnvelopeSchema.extend(` |  |
@@ -113,6 +115,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `PromotionStep` | interface | `export interface PromotionStep` | One recorded step, shaped as `@svatah/yam-trajectory`'s `TrajectoryLine`. |
 | `PromotionStore` | interface | `export interface PromotionStore` |  |
 | `readBrokerDescriptor` | function | `export function readBrokerDescriptor(stateDir?: string): BrokerDescriptor \| undefined` |  |
+| `readClients` | function | `export function readClients(stateDir?: string, now: number = Date.now()): AgentClient[]` | Everyone connected, newest first, without the ones that have gone quiet. |
 | `readInputSchema` | variable | `readInputSchema = z.object(` |  |
 | `readOutputSchema` | variable | `readOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `RedactionPolicy` | interface | `export interface RedactionPolicy` |  |
@@ -122,6 +125,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `RefScope` | interface | `export interface RefScope` |  |
 | `refusedEnvelope` | function | `export function refusedEnvelope(` |  |
 | `removeBrokerDescriptor` | function | `export function removeBrokerDescriptor(stateDir?: string): void` |  |
+| `removeClient` | function | `export function removeClient(id: string, stateDir?: string): void` | Forget a client. Missing is not an error: a second disconnect is a disconnect. |
 | `ResultEnvelope` | typealias | `export type ResultEnvelope = z.infer<typeof resultEnvelopeSchema>;` |  |
 | `resultEnvelopeSchema` | variable | `resultEnvelopeSchema = z.object(` |  |
 | `RunningBroker` | interface | `export interface RunningBroker` |  |
@@ -146,3 +150,4 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `targetsInputSchema` | variable | `targetsInputSchema = z.object(` |  |
 | `targetsOutputSchema` | variable | `targetsOutputSchema = resultEnvelopeSchema.extend(` |  |
 | `writeBrokerDescriptor` | function | `export function writeBrokerDescriptor(` |  |
+| `writeClient` | function | `export function writeClient(client: AgentClient, stateDir?: string): string` | Record a client, or refresh one. Returns the path, for the caller to remove. |

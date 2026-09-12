@@ -37,6 +37,7 @@ OpenAPI 3.1.0, service version 0.1.0. The document itself is `openApiDocument()`
 | `POST` | `/heal` | Heal a run; proposals arrive on the stream |
 | `POST` | `/surface/{session}/snapshot` | The driven session's snapshot, for the picker and the explorer |
 | `POST` | `/trajectory/compile` | Compile a captured trajectory into proposals/<date>/ |
+| `GET` | `/agents/clients` | Who is connected over MCP right now |
 | `GET` | `/tools` | The tools this project exposes, and every invocation served |
 | `GET` | `/targets` | Discover available targets and adapter readiness (SF-04) |
 | `GET` | `/sessions` | List active surface sessions (SF-05) |

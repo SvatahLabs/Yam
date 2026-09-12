@@ -732,11 +732,30 @@ function heal(state: HealState, now: number): PaneModel {
 
 function agents(state: AgentsState): PaneModel {
   const chosen = state.tools.find((one) => one.selected);
+  const driving = state.clients.filter((one) => one.holds !== undefined);
   return {
     tree: {
-      title: `Tools · ${state.tools.length}`,
+      /*
+       * Who is connected, above what they may call (TV-M05, TV-13). An agent
+       * driving a target is the fact a person needs before a handoff means
+       * anything, and it was in neither renderer.
+       */
+      title:
+        state.clients.length === 0
+          ? `Tools · ${state.tools.length}`
+          : `${state.clients.length} connected · ${state.tools.length} tools`,
       empty: "no story is exposed as a tool",
-      lines: state.tools.map((one) => ({
+      lines: [
+        ...state.clients.map((one) => ({
+          key: `client:${one.id}`,
+          cells: [
+            text(one.name, { grow: true }),
+            dim(one.transport, { width: 6 }),
+            pill(one.pill, 10),
+          ],
+          select: { selected: one.id },
+        })),
+        ...state.tools.map((one) => ({
         key: one.name,
         cells: [
           text(one.selected ? `▸ ${one.name}` : `  ${one.name}`, { grow: true }),
@@ -746,11 +765,15 @@ function agents(state: AgentsState): PaneModel {
             width: 13,
           },
         ],
-        select: { selected: one.name },
-      })),
+          select: { selected: one.name },
+        })),
+      ],
     },
     main: {
-      title: "Invocations",
+      title:
+        driving.length === 0
+          ? "Invocations"
+          : `Invocations · ${driving[0]!.name} is driving ${driving[0]!.holds ?? ""}`,
       empty: "no agent has called a tool yet",
       lines: state.invocations.map((one, at) => ({
         key: `invocation-${at}`,

@@ -33,7 +33,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-spec`](spec.md) | 54 | Flow reader, grammar, target dictionary, signatures |
 | [`@svatah/yam-steps`](steps.md) | 30 | defineStep API and the Tier 0 matcher |
 | [`@svatah/yam-surface`](surface.md) | 101 | The published AgentSurface interface, adapter registry and wire schemas |
-| [`@svatah/yam-surface-control`](surface-control.md) | 134 | Shared surface operation dispatcher, session lifecycle and operation catalogue |
+| [`@svatah/yam-surface-control`](surface-control.md) | 139 | Shared surface operation dispatcher, session lifecycle and operation catalogue |
 | [`@svatah/yam-tool`](tool.md) | 17 | MCP tool server exposing stories as deterministic tools |
 | [`@svatah/yam-trajectory`](trajectory.md) | 19 | Trajectory capture and compile to proposals |
 | [`@svatah/yam-tui`](tui.md) | 78 | `yam ui` — the terminal cockpit, a second renderer of the screen model (REQ-TUI-1) |

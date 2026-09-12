@@ -31,6 +31,7 @@ import {
   type FakeResponses,
   type FlowsState,
   type ScreenId,
+  type AgentsState,
   type RunState,
   loadRecord,
   type RecordLoad,
@@ -43,6 +44,41 @@ const FIXTURES = JSON.parse(
 ) as FakeResponses;
 
 const service = (): ReturnType<typeof fakeService> => fakeService(FIXTURES);
+
+describe("who is connected over MCP (TV-M05, TV-13)", () => {
+  it("has an empty list when the service does not answer", async () => {
+    const state = (await screenById("agents").load(service(), {})) as AgentsState;
+    expect(state.clients).toEqual([]);
+  });
+
+  it("says an agent is driving when it holds a target", async () => {
+    /*
+     * The screen knew what was exposed and what had been called, and nothing
+     * about who was connected — so neither renderer could say an agent was
+     * driving, which SF-13 requires before a handoff means anything.
+     */
+    const fake = fakeService({
+      ...FIXTURES,
+      agentClients: {
+        clients: [
+          {
+            id: "claude-code",
+            name: "claude-code",
+            transport: "stdio",
+            profile: "surface",
+            since: "2026-09-09T18:41:00.000Z",
+            holds: "sf-33b8",
+          },
+          { id: "cursor", name: "cursor", transport: "http", profile: "automation", since: "2026-09-09T18:30:00.000Z" },
+        ],
+      },
+    } as FakeResponses);
+    const state = (await screenById("agents").load(fake, {})) as AgentsState;
+    expect(state.clients.map((one) => one.name)).toEqual(["claude-code", "cursor"]);
+    expect(state.clients[0]!.pill.label).toBe("driving");
+    expect(state.clients[1]!.pill.label).toBe("connected");
+  });
+});
 
 describe("the model covers every screen (LLD §13.7)", () => {
   it("has one screen per id, and no more", () => {

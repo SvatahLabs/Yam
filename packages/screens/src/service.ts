@@ -155,6 +155,8 @@ export interface ScreenService {
 
   /** The event stream, as `GET /events/sse` carries it. Returns an unsubscribe. */
   subscribe(listener: (event: ServiceEventLike) => void): () => void;
+  /** Who is connected over MCP (TV-M05, SF-13). Optional: an older service has none. */
+  getAgentsClients?(): Promise<unknown>;
 }
 
 /**

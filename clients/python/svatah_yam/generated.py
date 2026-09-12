@@ -22,6 +22,7 @@ from typing import Any, Iterator, Optional
 
 ENDPOINTS = [
     {"id": "deleteSessionsBySession", "verb": "delete", "path": "/sessions/{session}"},
+    {"id": "getAgentsClients", "verb": "get", "path": "/agents/clients"},
     {"id": "getApi", "verb": "get", "path": "/api"},
     {"id": "getBindings", "verb": "get", "path": "/bindings"},
     {"id": "getBindingsById", "verb": "get", "path": "/bindings/{id}"},
@@ -133,6 +134,10 @@ class GeneratedClient:
     def delete_sessions_by_session(self, session) -> Any:
         """`DELETE /sessions/{session}` — Close a surface session (SF-05)"""
         return self._call("delete", f"/sessions/{session}")
+
+    def get_agents_clients(self) -> Any:
+        """`GET /agents/clients` — Who is connected over MCP right now"""
+        return self._call("get", f"/agents/clients")
 
     def get_api(self) -> Any:
         """`GET /api` — Named API requests"""

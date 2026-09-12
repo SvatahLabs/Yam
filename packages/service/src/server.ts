@@ -30,6 +30,7 @@ import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest }
 import websocket from "@fastify/websocket";
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 import type { ProjectHandle, ServiceApi } from "./api.js";
+import { readClients } from "@svatah/yam-surface-control";
 import { EventBus, type ServiceEvent } from "./events.js";
 import { openApiDocument } from "./openapi.js";
 
@@ -980,6 +981,17 @@ export async function createService(options: ServeOptions): Promise<RunningServi
    * them means the panel shows invocations served by a `yam tool serve`
    * running in another terminal too (REQ-ADE-2).
    */
+  /**
+   * Who is connected over MCP right now (TV-M05, SF-07, SF-08, SF-13).
+   *
+   * Read from the state directory rather than held here, because an MCP server
+   * is its own process: `yam mcp` speaks stdio to one client and `yam mcp
+   * --http` holds several, and neither of them is this. A record that has gone
+   * quiet is dropped by the reader, so this never reports an agent nobody can
+   * hand control to.
+   */
+  fastify.get("/agents/clients", async () => ({ clients: readClients() }));
+
   fastify.get<{ Querystring: { expose?: string } }>("/tools", async (request) => {
     const loaded = await load();
     const tools =

@@ -47,7 +47,8 @@
     "@fastify/websocket": "catalog:",
     "@svatah/yam-schema": "workspace:*",
     "fastify": "catalog:",
-    "yaml": "catalog:"
+    "yaml": "catalog:",
+    "@svatah/yam-surface-control": "workspace:*"
   },
   "devDependencies": {
     "tsup": "catalog:",
