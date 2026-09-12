@@ -17,6 +17,7 @@
  *     monochrome a rendering rather than a loss.
  */
 import {
+  DARK,
   STATUS,
   capabilitiesOf,
   depthFor,
@@ -50,4 +51,32 @@ export function inkColour(what: StatusTone, depth: ColourDepth): string | undefi
   if (depth === "none") return undefined;
   if (depth === "truecolor") return STATUS[what].hex;
   return STATUS[what].ansi;
+}
+
+/**
+ * The chrome, from the tokens rather than from Ink's eight names (TV-05).
+ *
+ * The borders and the status bar were `"magenta"` and `"gray"` written as
+ * literals — so the one thing the token pipeline was built for was the one thing
+ * bypassing it, and the focused border came out as the terminal's magenta, which
+ * is hot pink beside the lavender the artboards draw.
+ *
+ * `accent` is `#b8a1ff`; at 256 colours it is the nearest cube entry, computed
+ * from the token; at `none` it is absent, and the bold border style is what
+ * carries focus instead. Focus is never colour alone.
+ */
+export function chrome(depth: ColourDepth): {
+  readonly accent: string | undefined;
+  readonly line: string | undefined;
+  readonly barBg: string | undefined;
+  readonly barFg: string | undefined;
+} {
+  const of = (token: keyof typeof DARK, fallback: string): string | undefined =>
+    depth === "none" ? undefined : depth === "truecolor" ? DARK[token] : fallback;
+  return {
+    accent: of("accent", "magenta"),
+    line: of("line2", "gray"),
+    barBg: of("bg2", "black"),
+    barFg: of("muted", "gray"),
+  };
 }

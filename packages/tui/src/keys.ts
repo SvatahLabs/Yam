@@ -80,8 +80,23 @@ export const COMMAND_KEYS: readonly CommandKey[] = [
    */
   { key: "m", command: "mode.next", label: "record · say · do" },
   { key: "i", command: "say.open", label: "type a sentence (say mode)" },
+  { key: "^r", command: "stream.retry", label: "retry the event stream" },
   { key: "q", command: "quit", label: "quit" },
 ];
+
+/**
+ * The keys a screen may not bind, expanded from `COMMAND_KEYS`.
+ *
+ * `1-4` and `j k` are one row in the footer and several keys in the terminal, so
+ * the footer's spelling is not the collision test. This is.
+ *
+ * A screen *may* bind a key on this list where the cockpit's use of it is scoped
+ * — `i` and `m` are Session's alone, `Enter` opens a row only where no screen
+ * claims it — and the input handler consults the screen's table first, so the
+ * screen wins. What no screen may bind is a key the cockpit spends
+ * unconditionally, because that binding could never run.
+ */
+export const COCKPIT_ONLY: readonly string[] = ["^k", "?", "1", "2", "3", "4", "\t", "j", "k", "[", "]", "^r", "q"];
 
 const SCREEN_KEYS: Partial<Record<ScreenId, readonly KeyBinding[]>> = {
   session: [

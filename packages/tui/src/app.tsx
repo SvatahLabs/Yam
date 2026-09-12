@@ -396,6 +396,50 @@ export function App(props: AppProps): React.JSX.Element {
       return;
     }
 
+
+    /*
+     * The help overlay is modal: the keys under it are not live while it is up,
+     * and `?` closes it as it opened it.
+     */
+    if (helpOpen) {
+      if (key.escape || input === "q" || input === "?") setHelpOpen(false);
+      return;
+    }
+
+    /*
+     * ── the screen's own keys, before the cockpit's own (TV-02) ────────────
+     *
+     * This block used to sit last, and three actions were unreachable because of
+     * it: `capture.start` and `run.resume` on `R`, eaten by an undeclared
+     * reconnect handler, and `api.send` on `Enter`, eaten by the row opener. All
+     * three work in the app, which is exactly the divergence TV-02 exists to
+     * prevent — and the check written for that class passed, because it compared
+     * two tables and none of those keys was in either.
+     *
+     * `^s` is a binding, not two characters: a screen writes the Data screen's
+     * save as `^s` and Ink delivers it as `input === "s"` with `key.ctrl`.
+     * `Enter` is `\r` for the same reason.
+     */
+    const pressed = key.return ? "\r" : key.ctrl ? `^${input}` : input;
+    /* The mode is a screen parameter, so the key map is scoped by it (TV-15). */
+    const bound = actionForKey(ui.screen, pressed, modeFrom(ui.params["mode"]));
+    if (bound !== undefined) {
+      /*
+       * `flows.save` in a terminal means "open this in my editor" (K6, T11.1).
+       *
+       * The action is the same one the app's Save button runs and it writes
+       * through the same `PUT /flows/:file`; what differs is where the text
+       * comes from. A cockpit that built a modal text editor inside Ink would be
+       * a worse `vi` that nobody asked this project to write.
+       */
+      if (bound === "flows.save") {
+        void editOpenFlow();
+        return;
+      }
+      void run(bound);
+      return;
+    }
+
     /* `i` opens the say line, on the screen that has one. */
     if (input === "i" && ui.screen === "session" && modeFrom(ui.params["mode"]) === "say") {
       setUi({ ...ui, typing: { where: "say", text: "" } });
@@ -406,9 +450,16 @@ export function App(props: AppProps): React.JSX.Element {
       setUi({ ...ui, paletteOpen: true, paletteQuery: "", paletteAt: 0 });
       return;
     }
-    /* The key map, drawn from the table the footer is drawn from (TV-07). */
-    /* `R` retries a dropped stream: a stated state with a way back (TV-09). */
-    if (input === "R") {
+    /*
+     * `^r` retries a dropped stream: a stated state with a way back (TV-09).
+     *
+     * It was `R`, handled here and declared nowhere — which ate `capture.start`
+     * on Flows and `run.resume` on Run, because an inline `if` above the key
+     * table is a key the table cannot see. Every key the cockpit spends is in
+     * `COMMAND_KEYS` now, and this one is shifted out of the letters screens
+     * bind.
+     */
+    if (key.ctrl && input === "r") {
       setRetries((was) => was + 1);
       setStream("reconnecting");
       setUi({ ...ui, message: "Reconnecting to the event stream…" });
@@ -416,10 +467,6 @@ export function App(props: AppProps): React.JSX.Element {
     }
     if (input === "?") {
       setHelpOpen((was) => !was);
-      return;
-    }
-    if (helpOpen) {
-      if (key.escape || input === "q") setHelpOpen(false);
       return;
     }
     /*
@@ -506,38 +553,6 @@ export function App(props: AppProps): React.JSX.Element {
       return;
     }
 
-    /*
-     * Single letters run actions, and *which* letter is the screen's own key
-     * binding — the same table the app draws on its buttons (LLD §13.7's
-     * "single-letter accelerators shown on buttons"). A letter defined here
-     * rather than in the model would be a key the two renderers disagreed on.
-     */
-    /*
-     * `^s` is a binding, not two characters.
-     *
-     * A screen writes a control key as `^s` (the Data screen's save), and Ink
-     * delivers it as `input === "s"` with `key.ctrl`. Comparing the declaration
-     * against `input` alone could never match, so that action was unreachable
-     * from the cockpit while the app's ⌘S worked — one action, two renderers,
-     * and only one of them could run it.
-     */
-    const pressed = key.ctrl ? `^${input}` : input;
-    /* The mode is a screen parameter, so the key map is scoped by it (TV-15). */
-    const bound = actionForKey(ui.screen, pressed, modeFrom(ui.params["mode"]));
-    if (bound === undefined) return;
-    /*
-     * `flows.save` in a terminal means "open this in my editor" (K6, T11.1).
-     *
-     * The action is the same one the app's Save button runs and it writes
-     * through the same `PUT /flows/:file`; what differs is where the text comes
-     * from. A cockpit that built a modal text editor inside Ink would be a
-     * worse `vi` that nobody asked this project to write.
-     */
-    if (bound === "flows.save") {
-      void editOpenFlow();
-      return;
-    }
-    void run(bound);
   });
 
   if (ui === undefined) {

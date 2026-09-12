@@ -16,6 +16,17 @@ import { budget } from "./layout.js";
 import type { Box } from "./regions.js";
 import type { Cell, Line, PaneContent } from "./rows.js";
 import { colourOf } from "./panes.js";
+import { chrome, capabilitiesOf, depthFor } from "./theme.js";
+
+/*
+ * The chrome, resolved once (TV-05).
+ *
+ * `borderColor="magenta"` and `"gray"` were literals here — Ink's eight names,
+ * not the tokens — so the focused border drew the terminal's magenta instead of
+ * the lavender `accent` (`#b8a1ff`) the artboards use, and the one surface the
+ * token pipeline exists for was the one bypassing it.
+ */
+const CHROME = chrome(depthFor(capabilitiesOf(process.stdout, process.env)));
 
 /** `"a string"` cut to `width`, padded to it, so a line is exactly as wide as it claims. */
 export const fit = (text: string, width: number): string =>
@@ -118,7 +129,7 @@ export function Frame(props: FrameProps): React.JSX.Element {
     for (const one of props.next ?? []) {
       drawn.push(
         <Text key={`next-${one.key}`}>
-          <Text backgroundColor="magenta" color="black">{` ${one.key} `}</Text>
+          <Text {...(CHROME.accent === undefined ? {} : { backgroundColor: CHROME.accent })} color="black">{` ${one.key} `}</Text>
           <Text color="cyan">{fit(`  ${one.label}`, Math.max(0, inner - one.key.length - 2))}</Text>
         </Text>,
       );
@@ -144,7 +155,9 @@ export function Frame(props: FrameProps): React.JSX.Element {
     <InkBox
       flexDirection="column"
       borderStyle={props.focused ? "bold" : "single"}
-      borderColor={props.focused ? "magenta" : "gray"}
+      {...(CHROME.accent === undefined
+        ? {}
+        : { borderColor: props.focused ? CHROME.accent : CHROME.line })}
       paddingX={1}
       width={box.width}
       height={box.height}
@@ -153,7 +166,9 @@ export function Frame(props: FrameProps): React.JSX.Element {
       overflow="hidden"
     >
       <Text color="gray">
-        {props.number === undefined ? null : <Text color="magenta">{props.number} </Text>}
+        {props.number === undefined ? null : (
+          <Text {...(CHROME.accent === undefined ? {} : { color: CHROME.accent })}>{props.number} </Text>
+        )}
         {fit(props.title, inner - (props.number === undefined ? 0 : 2)).trimEnd()}
       </Text>
       {drawn.slice(0, Math.max(0, rows - 1))}
@@ -192,9 +207,12 @@ export function StatusBar(props: {
   const shown = rest.length <= room ? rest : `${rest.slice(0, Math.max(0, room - 1))}…`;
   const gap = Math.max(1, props.width - name.length - shown.length - right.length - 3);
   return (
-    <Text backgroundColor="#1b2128" color="gray">
+    <Text
+      {...(CHROME.barBg === undefined ? {} : { backgroundColor: CHROME.barBg })}
+      {...(CHROME.barFg === undefined ? {} : { color: CHROME.barFg })}
+    >
       {" "}
-      <Text color="magenta">{name}</Text>
+      <Text {...(CHROME.accent === undefined ? {} : { color: CHROME.accent })}>{name}</Text>
       {shown === "" ? "" : ` ${shown}`}
       {" ".repeat(gap)}
       {right}{" "}
@@ -229,7 +247,7 @@ export function Empty(props: {
     <Text key="s-gap"> </Text>,
     ...props.actions.map((one) => (
       <Text key={one.key}>
-        <Text backgroundColor="magenta" color="black">
+        <Text {...(CHROME.accent === undefined ? {} : { backgroundColor: CHROME.accent })} color="black">
           {` ${one.key} `}
         </Text>
         <Text color="cyan">{`  ${one.label}`}</Text>
