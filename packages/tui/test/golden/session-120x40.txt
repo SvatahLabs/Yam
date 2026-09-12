@@ -1,8 +1,8 @@
  yam Session  yam-fixtures  http://127.0.0.1:55702                                 nothing connected · do  live  120×40
+ s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌───────────────────────────────────┐
 │ 1 What you can connect to    │┃ 2 Sessions                                      ┃│ 3 Selected                        │
 │ Nothing could be listed, be… │┃ choose a browser, app, device or API to control ┃│ no session                        │
-│                              │┃                                                 ┃│                                   │
 │                              │┃                                                 ┃│                                   │
 │                              │┃                                                 ┃│                                   │
 │                              │┃                                                 ┃│                                   │

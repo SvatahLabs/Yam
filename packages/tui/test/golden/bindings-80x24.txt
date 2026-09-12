@@ -1,4 +1,5 @@
  yam Bindings  yam-fixtures  http://12… 30 elements · 0 unverified  live  80×24
+‹b Bindings  a Agents and tools  p API  d Data  i Import prototype database  ›
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Elements · 0 unverified    │┃ 2 Bindings                                   ┃
 │ app.bookings-l… verified   ▓ │┃ ▌app.booki… /dashboard testid #0 verified ▓  ┃
@@ -6,13 +7,12 @@
 │ app.logout-link verified   ▓ │┃ app.logou… /schedule… testid #0  verified ▓  ┃
 │ app.schedule-b… verified   ▓ │┃ app.sched… /dashboard testid #0  verified ▓  ┃
 │ app.sidebar-to… verified   ▓ │┃ app.sideb… /dashboard testid #0  verified ▓  ┃
-│ booking.09-00-… verified   ▓ │┃ booking.0… /booking   role #0    verified ▓  ┃
+│ booking.09-00-… verified   ░ │┃ booking.0… /booking   role #0    verified ░  ┃
 │ booking.18-00-… verified   ░ │┃ booking.1… /booking   role #0    verified ░  ┃
 │ booking.book-n… verified   ░ │┃ booking.b… /booking   testid #0  verified ░  ┃
 │ booking.bookin… verified   ░ │┃ booking.b… /booking   testid #0  verified ░  ┃
 │ booking.bookin… verified   ░ │┃ booking.b… /booking   testid #0  verified ░  ┃
 │ booking.bookin… verified   ░ │┃ booking.b… /booking   testid #0  verified ░  ┃
-│ booking.cancel… verified   ░ │┃ booking.c… /booking   testid #0  verified ░  ┃
 └──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ 4 Store                                                                      │

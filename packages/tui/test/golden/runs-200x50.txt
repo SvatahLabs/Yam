@@ -1,4 +1,5 @@
  yam Runs  yam-fixtures  http://127.0.0.1:55702                                                                                                                                     1 run  live  200×50
+ s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌────────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────────────┐
 │ 1 Filters · 1 of 1             │┃ 2 Runs                                                                                                               ┃│ 3 Run comp                                 │
 │ BEHAVIOR                       │┃ ▌comp           I want to book and then fail · cancel a booking       test      aborted    6 · 1 · 0    12 h ago     ┃│ outcome       aborted                      │
@@ -17,7 +18,6 @@
 │                                │┃                                                                                                                      ┃│ 7 results · results.jsonl                  │
 │                                │┃                                                                                                                      ┃│ audit.jsonl                                │
 │                                │┃                                                                                                                      ┃│ 1 screenshot                               │
-│                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │

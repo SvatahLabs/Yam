@@ -1,4 +1,5 @@
  yam Settings  yam-fixtures  htt… yam-fixtures · test · playwright  live  80×24
+‹p API  d Data  i Import prototype database  r Runs  t Settings
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Settings                   │┃ 2 Settings                                   ┃
 │ Project                      │┃ ▌PROJECT▓                                    ┃
@@ -11,8 +12,7 @@
 │                              │┃ adapter       playwright                   ▓ ┃
 │                              │┃ base url      http://127.0.0.1:PORT        ▓ ┃
 │                              │┃ workers       1                            ▓ ┃
-│                              │┃ headless      true                         ▓ ┃
-│                              │┃ output        runs                         ░ ┃
+│                              │┃ headless      true                         ░ ┃
 └──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ 4 Diagnostics · 3                                                            │

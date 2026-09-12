@@ -50,7 +50,8 @@ import {
 } from "./model.js";
 import { INSPECTOR_MIN_COLUMNS, footerFor, sizeOf } from "./layout.js";
 import { Regions, viewFor } from "./views.js";
-import { StatusBar } from "./widgets.js";
+import { RailStrip, StatusBar } from "./widgets.js";
+import { railRow, screenForJump, walk } from "./rail.js";
 import { COMMAND_KEYS, DEFAULT_SCREEN, actionForKey, keysFor } from "./keys.js";
 import { moveSelection, rowsFor, type PaletteRow } from "./palette.js";
 import { decodeMouse, hitTest, isMouse } from "./mouse.js";
@@ -85,6 +86,8 @@ export function App(props: AppProps): React.JSX.Element {
   const [ui, setUi] = useState<UiState | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  /* `g` has been pressed and the strip is waiting for its digit (TV-14). */
+  const [jumping, setJumping] = useState(false);
   /** Bumped by the retry key, which is what re-runs the subscription. */
   const [retries, setRetries] = useState(0);
   /*
@@ -407,6 +410,19 @@ export function App(props: AppProps): React.JSX.Element {
     }
 
     /*
+     * `g` is a prefix, so it is modal: it sits above the screen's keys, or `g`
+     * then `r` on Flows would run the flow rather than being an unknown
+     * destination. A digit that names nothing cancels, and says so.
+     */
+    if (jumping) {
+      setJumping(false);
+      const to = screenForJump(input);
+      if (to !== undefined) void reload(to, {});
+      else setUi({ ...ui, message: `No screen answers to ${input === "" ? "that" : `g ${input}`}. The strip above prints the letters.` });
+      return;
+    }
+
+    /*
      * ── the screen's own keys, before the cockpit's own (TV-02) ────────────
      *
      * This block used to sit last, and three actions were unreachable because of
@@ -446,6 +462,15 @@ export function App(props: AppProps): React.JSX.Element {
       return;
     }
 
+    /*
+     * `g` then a letter, and the letter is printed on the strip (TV-14).
+     *
+     * The strip is the legend, so nothing here has to be remembered.
+     */
+    if (input === "g") {
+      setJumping(true);
+      return;
+    }
     if (key.ctrl && input === "k") {
       setUi({ ...ui, paletteOpen: true, paletteQuery: "", paletteAt: 0 });
       return;
@@ -543,13 +568,7 @@ export function App(props: AppProps): React.JSX.Element {
      * conventional, and one keystroke rather than four.
      */
     if (input === "[" || input === "]") {
-      const order = RAIL.map((one) => one.screen);
-      const at = order.indexOf(ui.screen);
-      const next =
-        at < 0
-          ? order[0]
-          : order[(at + (input === "]" ? 1 : order.length - 1)) % order.length];
-      if (next !== undefined) void reload(next, {});
+      void reload(walk(ui.screen, input === "]" ? 1 : -1), {});
       return;
     }
 
@@ -591,7 +610,9 @@ export function App(props: AppProps): React.JSX.Element {
    * terminal's either way, because that is the fact a capture is read with.
    */
   const drawnRows = ui.layout.rows - (props.inline === true ? 1 : 0);
-  const bodyRows = Math.max(3, drawnRows - 2 - messageRows - typingRows - paletteRowCount - helpRowCount);
+  /* The rail costs one row, and says so here rather than in the layout maths. */
+  const railRows = 1;
+  const bodyRows = Math.max(3, drawnRows - 2 - railRows - messageRows - typingRows - paletteRowCount - helpRowCount);
 
   return (
     <Box flexDirection="column" width={ui.layout.columns} height={drawnRows}>
@@ -616,6 +637,8 @@ export function App(props: AppProps): React.JSX.Element {
           sizeOf(ui.layout),
         ]}
       />
+
+      <RailStrip width={ui.layout.columns} {...railRow(ui.screen, ui.layout.columns)} />
 
       <Regions
         view={view}

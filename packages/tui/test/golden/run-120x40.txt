@@ -1,4 +1,5 @@
  yam Run comp  yam-fixtures  http://127.0.0.1:55702         test behavior · invoker user via cli · 9.29 s  live  120×40
+ s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Stories                    │┃ 2 Run comp · aborted                                                                 ┃
 │ I want to book a… failed     │┃ ▌✓  1 Click the Book a slot link                               testid #0    51 ms    ┃
@@ -26,14 +27,13 @@
 │ 00.240 act        type · h0 · value "Indiranagar" · ok · 7 ms                                                      ▓ │
 │ 00.241 state      ok · 0 ms                                                                                        ▓ │
 │ 00.243 locate     booking.book-now-button · testid "book-now" · matched 1 · ok · 2 ms                              ▓ │
-│ 00.267 act        click · h1 · ok · 24 ms                                                                          ▓ │
+│ 00.267 act        click · h1 · ok · 24 ms                                                                          ░ │
 │ 00.267 state      ok · 0 ms                                                                                        ░ │
 │ 00.269 locate     booking.booking-reference · testid "booking-reference" · matched 1 · ok · 2 ms                   ░ │
 │ 00.270 read       h2 · ok · 1 ms                                                                                   ░ │
 │ 00.271 state      ok · 0 ms                                                                                        ░ │
 │ 02.052 locate     checkout.pay-button · testid "pay" · matched nothing · ok · 1781 ms                              ░ │
 │ 03.844 locate     checkout.pay-button · role button "Pay" · matched nothing · ok · 1792 ms                         ░ │
-│ 05.628 locate     checkout.pay-button · text "Pay" · matched nothing · ok · 1785 ms                                ░ │
 │ yam ui --json streams these same lines to stdout for an agent                                                        │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  inspector collapsed at 120 cols · press its number to open it below

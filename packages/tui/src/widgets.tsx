@@ -15,6 +15,7 @@ import { Box as InkBox, Text } from "ink";
 import { budget } from "./layout.js";
 import type { Box } from "./regions.js";
 import type { Cell, Line, PaneContent } from "./rows.js";
+import type { RailEntry } from "./rail.js";
 import { colourOf } from "./panes.js";
 import { chrome, capabilitiesOf, depthFor } from "./theme.js";
 
@@ -259,5 +260,45 @@ export function Empty(props: {
     <InkBox flexDirection="column" width={props.box.width} height={props.box.height} paddingX={2}>
       {lines}
     </InkBox>
+  );
+}
+
+/**
+ * The rail, on one row (TV-14).
+ *
+ * The current screen is the accent and bold; the rest are dim. Bold as well as
+ * coloured, because `chrome()` returns nothing at all in monochrome and "where
+ * am I" may not depend on colour (`REQ-ADE-12`).
+ */
+export function RailStrip(props: {
+  readonly width: number;
+  readonly entries: readonly RailEntry[];
+  readonly more: { left: boolean; right: boolean };
+}): React.JSX.Element {
+  return (
+    <Text>
+      {props.more.left ? <Text color="gray">‹</Text> : " "}
+      {props.entries.map((one) => (
+        <Text key={one.screen}>
+          <Text
+            bold={one.current}
+            {...(one.current && CHROME.accent !== undefined ? { color: CHROME.accent } : { color: "gray" })}
+          >
+            {one.key}
+          </Text>
+          <Text
+            bold={one.current}
+            {...(one.current
+              ? CHROME.accent === undefined
+                ? {}
+                : { color: CHROME.accent }
+              : { color: "gray" })}
+          >
+            {` ${one.label}  `}
+          </Text>
+        </Text>
+      ))}
+      {props.more.right ? <Text color="gray">›</Text> : ""}
+    </Text>
   );
 }

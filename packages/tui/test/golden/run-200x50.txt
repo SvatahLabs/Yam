@@ -1,4 +1,5 @@
  yam Run comp  yam-fixtures  http://127.0.0.1:55702                                                                                         test behavior · invoker user via cli · 9.29 s  live  200×50
+ s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────┐
 │ 1 Stories                    │┃ 2 Run comp · aborted                                                                                                           ┃│ 3 Step 5 · Click the pay button    │
 │ I want to book a… failed     │┃ ▌✓  1 Click the Book a slot link                                                                         testid #0    51 ms    ┃│ failure       locator              │
@@ -15,7 +16,6 @@
 │                              │┃                                                                                                                                ┃│ screenshot    I-want-to-book-and-… │
 │                              │┃                                                                                                                                ┃│ WHAT TO DO                         │
 │                              │┃                                                                                                                                ┃│ Could not resolve "checkout.pay-b… │
-│                              │┃                                                                                                                                ┃│                                    │
 │                              │┃                                                                                                                                ┃│                                    │
 │                              │┃                                                                                                                                ┃│                                    │
 │                              │┃ flow aborted · exit 11                                                                                                         ┃│                                    │

@@ -58,16 +58,25 @@ export interface CommandKey {
   readonly key: string;
   readonly command: string;
   readonly label: string;
+  /**
+   * The word the footer prints, for the keys the footer always draws.
+   *
+   * The footer kept its own list of these in `layout.ts` — a third copy of this
+   * table, free to drift from it, and it did: `g` was spent and advertised
+   * nowhere. One flag here, and the footer is derived rather than maintained.
+   */
+  readonly footer?: string;
 }
 
 export const COMMAND_KEYS: readonly CommandKey[] = [
-  { key: "^K", command: "palette.open", label: "every action" },
+  { key: "^K", command: "palette.open", label: "every action" , footer: "commands" },
   { key: "?", command: "help.open", label: "this list" },
-  { key: "1-4", command: "region.focus", label: "focus a region" },
-  { key: "Tab", command: "region.next", label: "next region" },
-  { key: "j k", command: "cursor.move", label: "row down / up" },
-  { key: "Enter", command: "row.open", label: "open what the cursor is on" },
-  { key: "[ ]", command: "screen.walk", label: "previous / next screen" },
+  { key: "1-4", command: "region.focus", label: "focus a region" , footer: "pane" },
+  { key: "Tab", command: "region.next", label: "next region" , footer: "next" },
+  { key: "j k", command: "cursor.move", label: "row down / up" , footer: "move" },
+  { key: "Enter", command: "row.open", label: "open what the cursor is on" , footer: "open" },
+  { key: "[ ]", command: "screen.walk", label: "previous / next screen" , footer: "screen" },
+  { key: "g", command: "screen.jump", label: "go to a screen by its rail letter" },
   /*
    * `m`, and not `1`/`2`/`3` — a deviation from the `TUI-Session` board, on
    * purpose (TV-15).
@@ -81,7 +90,7 @@ export const COMMAND_KEYS: readonly CommandKey[] = [
   { key: "m", command: "mode.next", label: "record · say · do" },
   { key: "i", command: "say.open", label: "type a sentence (say mode)" },
   { key: "^r", command: "stream.retry", label: "retry the event stream" },
-  { key: "q", command: "quit", label: "quit" },
+  { key: "q", command: "quit", label: "quit" , footer: "quit" },
 ];
 
 /**
@@ -96,7 +105,7 @@ export const COMMAND_KEYS: readonly CommandKey[] = [
  * screen wins. What no screen may bind is a key the cockpit spends
  * unconditionally, because that binding could never run.
  */
-export const COCKPIT_ONLY: readonly string[] = ["^k", "?", "1", "2", "3", "4", "\t", "j", "k", "[", "]", "^r", "q"];
+export const COCKPIT_ONLY: readonly string[] = ["^k", "?", "1", "2", "3", "4", "\t", "j", "k", "[", "]", "g", "^r", "q"];
 
 const SCREEN_KEYS: Partial<Record<ScreenId, readonly KeyBinding[]>> = {
   session: [
@@ -209,3 +218,13 @@ export const unknownBindings = (): readonly string[] =>
   ALL_KEYS.filter((one) => actionById(one.action) === undefined).map(
     (one) => `${one.screen} binds ${one.key} to ${one.action}, which is not an action`,
   );
+
+/**
+ * The keys the footer always draws, in the order the `TUI` artboard prints them.
+ *
+ * Always drawn: a cockpit whose `q` scrolled off is a cockpit a person cannot
+ * leave. Everything else competes for the room that is left.
+ */
+export const FOOTER_KEYS: ReadonlyArray<{ key: string; label: string }> = COMMAND_KEYS.filter(
+  (one) => one.footer !== undefined,
+).map((one) => ({ key: one.key, label: one.footer as string }));

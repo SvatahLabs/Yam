@@ -1,4 +1,5 @@
  yam Settings  yam-fixtures  http://127.0.0.1:55702                                                                                                      yam-fixtures · test · playwright  live  200×50
+ s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌────────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────────────┐
 │ 1 Settings                     │┃ 2 Settings                                                                                                           ┃│ 3 Sources                                  │
 │ Project                        │┃ ▌PROJECT                                                                                                             ┃│ GET /project                               │
@@ -16,7 +17,6 @@
 │                                │┃ SERVICE                                                                                                              ┃│                                            │
 │                                │┃ model creden… none                                                                                                   ┃│                                            │
 │                                │┃ custom steps  0 definitions                                                                                          ┃│                                            │
-│                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │

@@ -1,4 +1,5 @@
  yam Bindings  yam-fixtures  http://127.0.0.1:55702                                                                                                            30 elements · 0 unverified  live  200×50
+ s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌────────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────────────┐
 │ 1 Elements · 0 unverified      │┃ 2 Bindings                                                                                                           ┃│ phrases       the Bookings link            │
 │ app.bookings-link  verified    │┃ ▌app.bookings-link                the Bookings link                          /dashboard     testid #0    verified    ┃│ context       /dashboard · 691ed483        │
@@ -31,7 +32,6 @@
 │ nav.dashboard-link verified    │┃ nav.dashboard-link               the dashboard link                          /              testid #0    verified    ┃│                                            │
 │ nav.nav-toggle     verified    │┃ nav.nav-toggle                   the nav toggle                              /              testid #0    verified    ┃│                                            │
 │ schedule.schedule… verified    │┃ schedule.schedule-heading        the schedule heading                        /schedule-bui… testid #0    verified    ┃│                                            │
-│                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │

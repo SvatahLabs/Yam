@@ -23,6 +23,7 @@
  * No Ink here and no `process`: this is arithmetic, so
  * `packages/tui/test/layout.test.ts` can check every width without a terminal.
  */
+import { FOOTER_KEYS } from "./keys.js";
 
 /**
  * The width at which the inspector still has room to be read (Draft 2.12 §13.7).
@@ -255,21 +256,13 @@ export interface FooterKey {
   readonly label: string;
 }
 
-/**
- * The six keys that reach everything, in the order the `TUI` artboard prints
- * them. Always drawn: a cockpit whose `q` scrolled off is a cockpit a person
- * cannot leave.
+/*
+ * The footer's own copy of the cockpit's keys used to live here — six entries
+ * and a `q`, maintained by hand beside `COMMAND_KEYS` and free to drift from it.
+ * It did: `g` was spent by the input handler and advertised by neither.
  */
-const CORE_KEYS: readonly FooterKey[] = [
-  { key: "^K", label: "commands" },
-  { key: "1-4", label: "pane" },
-  { key: "Tab", label: "next" },
-  { key: "j k", label: "move" },
-  { key: "Enter", label: "open" },
-  { key: "[ ]", label: "screen" },
-];
-
-const QUIT_KEY: FooterKey = { key: "q", label: "quit" };
+const CORE_KEYS: readonly FooterKey[] = FOOTER_KEYS.filter((one) => one.key !== "q");
+const QUIT_KEY: FooterKey = FOOTER_KEYS.find((one) => one.key === "q") as FooterKey;
 
 /** `^K commands` is four characters plus the two that separate it from the next. */
 const widthOf = (one: FooterKey): number => one.key.length + 1 + one.label.length;

@@ -1,4 +1,5 @@
  yam Flows  yam-fixtures  http://127.0.0.1:55702         7 files · 22 stories · 30 bindings, 1 unverified  live  120×40
+ s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌───────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌──────────────────────────────────┐
 │ 1 Flows                   │┃ 2 flows/guards-and-compensation.flow                ┃│ 3 Inspect                        │
 │ booking-compe… not run    │┃ ▌  1   // Guards and compensation, end to end (T5…▓ ┃│ no step selected                 │
@@ -17,7 +18,7 @@
 │                           │┃  14   // Three guards, one of each subject the IR…▓ ┃│                                  │
 │                           │┃  15   // step's own element. The two that are fal…▓ ┃│                                  │
 │                           │┃  16   // application at all.                      ▓ ┃│                                  │
-│                           │┃  17                                               ▓ ┃│                                  │
+│                           │┃  17                                               ░ ┃│                                  │
 │                           │┃  18   story: I want to see guards decide          ░ ┃│                                  │
 │                           │┃  19     Click the Book a slot li… tier 1 · bound  ░ ┃│                                  │
 │                           │┃  20     Remember the text of the… tier 1 · bound  ░ ┃│                                  │
@@ -29,7 +30,6 @@
 │                           │┃  26     Unless {status} is "Conf… tier 1 · bound  ░ ┃│                                  │
 │                           │┃  27     // True: the element the step acts on is …░ ┃│                                  │
 │                           │┃  28     Only if the Book now but… tier 1 · bound  ░ ┃│                                  │
-│                           │┃  29     The booking result shoul… tier 1 · bound  ░ ┃│                                  │
 │                           │┃ lint: 3 — W_SECRET_UNSET user.password reads ${YAM… ┃│                                  │
 └───────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└──────────────────────────────────┘
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐

@@ -1,4 +1,5 @@
  yam Data  yam-fixture… 8 values · 3 secret(s), redacted · 3 unset  live  80×24
+‹p API  d Data  i Import prototype database  r Runs  t Settings
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Keys · 8                   │┃ 2 data.yaml                                  ┃
 │ ▸ user.email                 │┃ ▌user.email               c… string          ┃
@@ -9,7 +10,6 @@
 │   baseUrl                    │┃ baseUrl                  ht… string          ┃
 │   date                       │┃ date                     20… string          ┃
 │   reportPath                 │┃ reportPath               re… string          ┃
-│                              │┃                                              ┃
 │                              │┃                                              ┃
 │                              │┃                                              ┃
 │                              │┃ 3 secret(s), 3 unset                         ┃

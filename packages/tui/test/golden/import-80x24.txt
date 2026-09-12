@@ -1,9 +1,9 @@
  yam Im… Reads a Yam prototype's electron-db into the open project  live  80×24
+‹p API  d Data  i Import prototype database  r Runs  t Settings
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Import                     │┃ 2 Import prototype database                  ┃
 │ from          choose a fold… │┃ choose the prototype's electron-db directory ┃
 │ into          <repo>/evals/… │┃                                              ┃
-│                              │┃                                              ┃
 │                              │┃                                              ┃
 │                              │┃                                              ┃
 │                              │┃                                              ┃

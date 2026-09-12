@@ -1,4 +1,5 @@
  yam Flows  yam-fixtures  http://127.0.0.1:55702                                                                                         7 files · 22 stories · 30 bindings, 1 unverified  live  200×50
+ s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────────┐
 │ 1 Flows                      │┃ 2 flows/guards-and-compensation.flow                                                                                       ┃│ 3 Inspect                              │
 │ booking-compensa… not run    │┃ ▌  1   // Guards and compensation, end to end (T5.4, REQ-LANG-14, REQ-AUTO-1, 4).                                        ▓ ┃│ no step selected                       │
@@ -29,8 +30,8 @@
 │                              │┃  26     Unless {status} is "Confirmed", Click the cancel booking button                                  tier 1 · bound  ▓ ┃│                                        │
 │                              │┃  27     // True: the element the step acts on is there.                                                                  ▓ ┃│                                        │
 │                              │┃  28     Only if the Book now button is visible, Click the Book now button                                tier 1 · bound  ▓ ┃│                                        │
-│                              │┃  29     The booking result should say "Slot booked."                                                     tier 1 · bound  ▓ ┃│                                        │
-│                              │┃  30                                                                                                                      ▓ ┃│                                        │
+│                              │┃  29     The booking result should say "Slot booked."                                                     tier 1 · bound  ░ ┃│                                        │
+│                              │┃  30                                                                                                                      ░ ┃│                                        │
 │                              │┃  31   // ── compensation ──────────────────────────────────────────────────────────────                                  ░ ┃│                                        │
 │                              │┃  32   //                                                                                                                 ░ ┃│                                        │
 │                              │┃  33   // The booking is made, its reference is remembered, and then a step fails. The                                    ░ ┃│                                        │
@@ -39,7 +40,6 @@
 │                              │┃  36   // (REQ-AUTO-4) — and the flow stops.                                                                              ░ ┃│                                        │
 │                              │┃  37                                                                                                                      ░ ┃│                                        │
 │                              │┃  38   scenario (onFailure=compensate:cancel a booking): I want to book and then fail                                     ░ ┃│                                        │
-│                              │┃  39 ✓   Click the Book a slot link                                                                       tier 1 · bound  ░ ┃│                                        │
 │                              │┃ lint: 3 — W_SECRET_UNSET user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value;… ┃│                                        │
 └──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└────────────────────────────────────────┘
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐

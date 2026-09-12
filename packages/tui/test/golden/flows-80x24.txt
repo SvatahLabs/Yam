@@ -1,4 +1,5 @@
  yam Flows  yam-… 7 files · 22 stories · 30 bindings, 1 unverified  live  80×24
+ s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  ›
 ┌──────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Flows                  │┃ 2 flows/guards-and-compensation.flow             ┃
 │ booking-comp… not run    │┃ ▌  1   // Guards and compensation, end to end …▓ ┃
@@ -12,7 +13,6 @@
 │                          │┃   9   //   * a failing story runs its compensa…░ ┃
 │                          │┃  10   //     scope, and the run ends `aborted`…░ ┃
 │                          │┃  11                                            ░ ┃
-│                          │┃  12   // ── guards ───────────────────────────…░ ┃
 │                          │┃ lint: 3 — W_SECRET_UNSET user.password reads ${… ┃
 └──────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ┌──────────────────────────────────────────────────────────────────────────────┐

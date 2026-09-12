@@ -1,8 +1,8 @@
  yam Agents and tools  yam-fixtures  http://127.0.0.1:55702                                                                                         0 exposed · 0 refused · 0 invocations  live  200×50
+ s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌────────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────────────┐
 │ 1 Tools · 0                    │┃ 2 Invocations                                                                                                        ┃│ 3 Tool                                     │
 │ no story is exposed as a tool  │┃ no agent has called a tool yet                                                                                       ┃│ no tool selected                           │
-│                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │
 │                                │┃                                                                                                                      ┃│                                            │

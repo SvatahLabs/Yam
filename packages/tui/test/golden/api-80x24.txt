@@ -1,10 +1,10 @@
  yam API  yam-fixtures  http://127.0… 1 named request · api/*.yaml  live  80×24
+‹p API  d Data  i Import prototype database  r Runs  t Settings
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Requests · 1               │┃ 2 GET active count                           ┃
 │ GET     ▸ active count       │┃ ▌url           {data.baseUrl}/api/active-co… ┃
 │                              │┃ HEADERS                                      ┃
 │                              │┃ accept        application/json               ┃
-│                              │┃                                              ┃
 │                              │┃                                              ┃
 │                              │┃                                              ┃
 │                              │┃                                              ┃

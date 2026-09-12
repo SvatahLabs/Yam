@@ -1,10 +1,10 @@
  yam API  yam-fixtures  http://127.0.0.1:55702                               1 named request · api/*.yaml  live  120×40
+ s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
 │ 1 Requests · 1              │┃ 2 GET active count                         ┃│ 3 Response                              │
 │ GET     ▸ active count      │┃ ▌url           {data.baseUrl}/api/active-… ┃│ press Enter to send it                  │
 │                             │┃ HEADERS                                    ┃│                                         │
 │                             │┃ accept        application/json             ┃│                                         │
-│                             │┃                                            ┃│                                         │
 │                             │┃                                            ┃│                                         │
 │                             │┃                                            ┃│                                         │
 │                             │┃                                            ┃│                                         │
