@@ -25,10 +25,6 @@ export { App } from "./app.js";
 export { PANES, asJson, loadUi, focusPane, moveCursor, nextPane, resize } from "./model.js";
 export type { Pane, UiState } from "./model.js";
 export {
-  AuditPane,
-  InspectorPane,
-  MainPane,
-  TreePane,
   treeRows,
   mainRows,
   rowsIn,

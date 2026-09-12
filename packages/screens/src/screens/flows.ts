@@ -93,6 +93,15 @@ export interface StepInspector {
   readonly binding?: {
     readonly elementId: string;
     readonly verified: boolean;
+    /**
+     * The same fact as a word, for whoever is drawing it (TV-01).
+     *
+     * `verified` is a boolean and a renderer that turned it into "unverified"
+     * would be a renderer deciding a word a person reads — which is how the app
+     * and the cockpit came to disagree about the capital letter. The model says
+     * the word once.
+     */
+    readonly status: Pill;
     readonly candidates: ReadonlyArray<{ by: string; value: string; score?: number }>;
     readonly context?: string;
     readonly provenance?: {
@@ -410,6 +419,10 @@ export const flowsScreen: Screen<FlowsState> = {
               binding: {
                 elementId: binding.id ?? elementId ?? "",
                 verified: entry.verified === true,
+                status:
+                  entry.verified === true
+                    ? { tone: "pass" as const, label: "verified" }
+                    : { tone: "abort" as const, label: "unverified" },
                 candidates: (entry.candidates ?? []).map((candidate) => ({
                   by: candidate.by ?? "",
                   value:

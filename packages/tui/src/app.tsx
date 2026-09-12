@@ -30,10 +30,6 @@ import {
   type ScreenService,
 } from "@svatah/yam-screens";
 import {
-  AuditPane,
-  InspectorPane,
-  MainPane,
-  TreePane,
   colourOf,
   rowsIn,
   selectionAt,

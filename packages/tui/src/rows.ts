@@ -173,12 +173,8 @@ function flows(state: FlowsState, now: number): PaneModel {
               kv("target", state.inspector.target ?? "—"),
               kv(
                 "binding",
-                state.inspector.binding === undefined
-                  ? "—"
-                  : state.inspector.binding.verified
-                    ? "verified"
-                    : "unverified",
-                state.inspector.binding?.verified === true ? "pass" : "abort",
+                state.inspector.binding?.status.label ?? "—",
+                state.inspector.binding?.status.tone,
               ),
               kv("guard", state.inspector.guard ?? "—"),
               kv("last run", state.inspector.lastRun ?? "—"),
@@ -465,11 +461,12 @@ function bindings(state: BindingsState): PaneModel {
       title: "Store",
       empty: "no bindings yet",
       lines: state.rows
-        .filter((one) => one.verified.label !== "verified")
+        /* The tone, not the word: which word means verified is the model's. */
+        .filter((one) => one.verified.tone !== "pass")
         .map((row) => ({
           key: `unverified-${row.elementId}`,
           cells: [
-            dim("unverified", { width: 12 }),
+            dim(row.verified.label, { width: 12 }),
             { text: row.elementId, grow: true, tone: "abort" as const },
             dim(row.file ?? "", { width: 40 }),
           ],
