@@ -55,12 +55,19 @@
   --abort-soft: rgba(229,176,76,0.14);
   --info-soft: rgba(110,168,254,0.14);
   --scrim: rgba(10,12,16,0.62);
+  --motion-quick: 120ms;
+  --motion-settle: 220ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
   --r: 4px;
   --r2: 6px;
   --control-h: 28px;
   --row-pad: 7px;
-  --rail-w: 220px;
-  --inspector-w: 360px;
+  --rail-w: 15vw;
+  --rail-min: 150px;
+  --rail-max: 220px;
+  --inspector-w: 24vw;
+  --inspector-min: 250px;
+  --inspector-max: 360px;
   --topbar-h: 44px;
   --statusbar-h: 28px;
   --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
@@ -94,4 +101,7 @@
   --abort-soft: rgba(138,95,16,0.12);
   --info-soft: rgba(47,91,215,0.12);
   --scrim: rgba(23,27,33,0.38);
+  --motion-quick: 120ms;
+  --motion-settle: 220ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
 }

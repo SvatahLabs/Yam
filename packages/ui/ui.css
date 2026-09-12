@@ -681,3 +681,66 @@
   color: var(--dim);
   cursor: default;
 }
+
+/* ── motion (TV-A04, TV-16) ────────────────────────────────────────────────── */
+
+/*
+ * There was none. Not "a little": `grep -c transition` over this file and the
+ * app's returned nought and nought, so in an app that receives events while a
+ * person watches, an arriving row and a changing status were silent instant
+ * jumps — indistinguishable from something that had always been there.
+ *
+ * Two durations, because there are two kinds of change: one a person caused,
+ * which should feel like the click, and one they did not, which needs long
+ * enough to be seen arriving.
+ */
+.sv-btn,
+.sv-pill,
+.sv-chip,
+.sv-row,
+.sv-rail-item,
+.sv-tab {
+  transition:
+    background-color var(--motion-quick) var(--motion-ease),
+    border-color var(--motion-quick) var(--motion-ease),
+    color var(--motion-quick) var(--motion-ease);
+}
+
+@keyframes sv-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A row that arrived rather than one that was always there. */
+.sv-arrived {
+  animation: sv-arrive var(--motion-settle) var(--motion-ease);
+}
+
+/*
+ * And none of it for a person who asked for none (TV-16).
+ *
+ * Replaced rather than merely removed: with motion off, an arrival is announced
+ * instead — the information was never the movement, it was that something
+ * happened.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .sv-btn,
+  .sv-pill,
+  .sv-chip,
+  .sv-row,
+  .sv-rail-item,
+  .sv-tab {
+    transition: none;
+  }
+
+  .sv-arrived {
+    animation: none;
+    outline: 1px solid var(--accent);
+  }
+}

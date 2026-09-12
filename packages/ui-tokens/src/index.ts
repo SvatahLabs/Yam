@@ -63,6 +63,18 @@ export const TOKEN_NAMES = [
    * dimming, and over a light one it is a blackout.
    */
   "scrim",
+  /*
+   * Motion (TV-18… TV-A04).
+   *
+   * There were no transitions and no keyframes in either stylesheet — nought and
+   * nought — so in an app that receives events while a person watches, arriving
+   * rows and changing statuses were silent instant jumps. Durations are tokens
+   * because a duration is a design decision: "quick" has to mean the same in two
+   * places or the app feels assembled rather than made.
+   */
+  "motion-quick",
+  "motion-settle",
+  "motion-ease",
 ] as const;
 
 export type TokenName = (typeof TOKEN_NAMES)[number];
@@ -101,6 +113,11 @@ export const DARK: Readonly<Record<TokenName, string>> = {
   "abort-soft": "rgba(229,176,76,0.14)",
   "info-soft": "rgba(110,168,254,0.14)",
   scrim: "rgba(10,12,16,0.62)",
+  /* A state change a person caused: fast enough to feel like the click. */
+  "motion-quick": "120ms",
+  /* One they did not: long enough to be seen arriving. */
+  "motion-settle": "220ms",
+  "motion-ease": "cubic-bezier(0.2, 0, 0, 1)",
 };
 
 /**
@@ -147,6 +164,11 @@ export const LIGHT: Readonly<Record<TokenName, string>> = {
   "abort-soft": "rgba(138,95,16,0.12)",
   "info-soft": "rgba(47,91,215,0.12)",
   scrim: "rgba(23,27,33,0.38)",
+  /* A state change a person caused: fast enough to feel like the click. */
+  "motion-quick": "120ms",
+  /* One they did not: long enough to be seen arriving. */
+  "motion-settle": "220ms",
+  "motion-ease": "cubic-bezier(0.2, 0, 0, 1)",
 };
 
 export const THEMES: Readonly<Record<Theme, Readonly<Record<TokenName, string>>>> = {
@@ -282,8 +304,20 @@ export function stylesheet(): string {
     `  --r2: ${METRICS.radiusLarge}px;`,
     `  --control-h: ${METRICS.controlHeight}px;`,
     `  --row-pad: ${METRICS.rowPadding}px;`,
-    `  --rail-w: ${METRICS.railWidth}px;`,
-    `  --inspector-w: ${METRICS.inspectorWidth}px;`,
+    /*
+     * A share of the window, with stated bounds (TV-19, TV-A07).
+     *
+     * These were fixed pixels, so above the app's single breakpoint the rail and
+     * the inspector were 580 px of any window — forty-five per cent of a 1280
+     * one. The preferred size is a share; the minimum keeps a row readable and
+     * the maximum stops a wide monitor giving the chrome half of itself.
+     */
+    `  --rail-w: 15vw;`,
+    `  --rail-min: 150px;`,
+    `  --rail-max: ${METRICS.railWidth}px;`,
+    `  --inspector-w: 24vw;`,
+    `  --inspector-min: 250px;`,
+    `  --inspector-max: ${METRICS.inspectorWidth}px;`,
     `  --topbar-h: ${METRICS.topBarHeight}px;`,
     `  --statusbar-h: ${METRICS.statusBarHeight}px;`,
     `  --sans: ${FONTS.sans};`,

@@ -22,7 +22,19 @@
 
 .sv-app {
   display: grid;
-  grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--inspector-w);
+  /*
+   * Fluid, with stated minima (TV-19, TV-A07).
+   *
+   * The rail and the inspector were a fixed 220 and 360 above the single
+   * breakpoint — 580 px of any window, which is forty-five per cent of a 1280
+   * one. They are a share of the window now, held between a minimum that keeps
+   * a row readable and a maximum that stops a wide monitor giving the chrome
+   * half of itself.
+   */
+  grid-template-columns:
+    clamp(var(--rail-min), var(--rail-w), var(--rail-max))
+    minmax(0, 1fr)
+    clamp(var(--inspector-min), var(--inspector-w), var(--inspector-max));
   grid-template-rows: var(--topbar-h) minmax(0, 1fr) var(--statusbar-h);
   height: 100vh;
   overflow: hidden;
@@ -813,6 +825,21 @@
  * above its editor rather than squeezing both into a column too narrow to
  * read. Nothing is hidden and nothing overlaps; things get shorter, not gone.
  */
+/*
+ * More than one breakpoint (TV-19).
+ *
+ * There was exactly one, at 960, and above it nothing moved at all. `SF-18`
+ * names 1280x800 and 1440x1000 at 100 % and 200 % zoom, and a layout with a
+ * single step between 960 and infinity cannot be said to have been designed for
+ * either of them.
+ */
+@media (max-width: 1100px) {
+  .sv-app {
+    --rail-w: 16vw;
+    --inspector-w: 26vw;
+  }
+}
+
 @media (max-width: 960px) {
   .sv-app {
     --rail-w: 150px;

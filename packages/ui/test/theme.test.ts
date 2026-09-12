@@ -76,6 +76,34 @@ describe("the component stylesheet is theme-free (T9.2)", () => {
   });
 });
 
+describe("state changes are seen rather than jumped (TV-A04, TV-16)", () => {
+  it("has motion at all, which it did not", () => {
+    /*
+     * `grep -c transition` over this stylesheet and the app's returned nought
+     * and nought. In an app that receives events while a person watches, an
+     * arriving row and a changing status were silent instant jumps —
+     * indistinguishable from something that had always been there.
+     */
+    expect(UI_CSS).toMatch(/transition:/);
+    expect(UI_CSS).toMatch(/@keyframes/);
+  });
+
+  it("takes its durations from tokens, so quick means one thing", () => {
+    expect(UI_CSS).toMatch(/var\(--motion-quick\)/);
+    expect(UI_CSS).toMatch(/var\(--motion-settle\)/);
+  });
+
+  it("replaces motion rather than removing it, for whoever asked for none", () => {
+    /*
+     * The information was never the movement: it was that something happened. So
+     * with reduced motion an arrival is announced instead of animated.
+     */
+    const reduced = UI_CSS.slice(UI_CSS.indexOf("prefers-reduced-motion"));
+    expect(reduced).toMatch(/animation: none/);
+    expect(reduced).toMatch(/outline:/);
+  });
+});
+
 describe("the two themes define the same tokens (T9.2)", () => {
   it("has every token in both", () => {
     expect(Object.keys(DARK).sort()).toEqual(Object.keys(LIGHT).sort());
@@ -91,7 +119,15 @@ describe("the two themes define the same tokens (T9.2)", () => {
      * token copied from the dark table into the light one unchanged is almost
      * always a token nobody looked at.
      */
-    const identical = TOKEN_NAMES.filter((name) => DARK[name] === LIGHT[name]);
+    /*
+     * Motion is the same in both, deliberately (TV-A04). A duration is not a
+     * colour: how long a row takes to arrive is a property of the interaction,
+     * and a light theme in which things moved faster would be a different
+     * product wearing the same components. Named, so that a *colour* which
+     * turned up here still fails.
+     */
+    const shared = new Set(["motion-quick", "motion-settle", "motion-ease"]);
+    const identical = TOKEN_NAMES.filter((name) => DARK[name] === LIGHT[name] && !shared.has(name));
     expect(identical).toEqual([]);
   });
 
