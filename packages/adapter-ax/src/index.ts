@@ -43,6 +43,16 @@ export {
   type AxSnapshotNode,
   type ConvertOptions,
 } from "./tree.js";
+export {
+  accessibilityGranted,
+  nameFor,
+  requestAccessibility,
+  requestScreenRecording,
+  responsibleProgram,
+  screenRecordingGranted,
+  type GrantRunner,
+  type ResponsibleProgram,
+} from "./grant.js";
 export { matchNodes, synthesise } from "./locate.js";
 export { evaluateAxPredicate, literalValue, type AxCheckContext } from "./predicates.js";
 export {

@@ -12,6 +12,7 @@ macOS Accessibility adapter: the Yam agent surface over AXUIElement
 
 | Export | Kind | Signature | |
 |---|---|---|---|
+| `accessibilityGranted` | function | `export function accessibilityGranted(options: { runner?: GrantRunner; platform?: string } = {}):` | Whether Accessibility is granted, without showing anything. |
 | `automationIdOf` | function | `export function automationIdOf(node: AxNode): string \| undefined` | The `automationId` candidate's value (LLD §3.3, §7.5). |
 | `AX_ADAPTER_NAME` | variable | `AX_ADAPTER_NAME = "ax"` | The name this adapter is selected by in `yam.config.yaml` (LLD §2.4). |
 | `AX_CAPABILITIES` | variable | `AX_CAPABILITIES: Capabilities ` | What this adapter can do (LLD §2.4). |
@@ -37,6 +38,7 @@ macOS Accessibility adapter: the Yam agent surface over AXUIElement
 | `convertTree` | function | `export function convertTree(nodes: readonly AxNode[], options: ConvertOptions): AxSnapshotNode[]` | Flatten one window's tree into snapshot nodes. |
 | `createAxSurface` | function | `export function createAxSurface(config:` | The factory the registry calls (LLD §2.4). |
 | `evaluateAxPredicate` | function | `export function evaluateAxPredicate(` |  |
+| `GrantRunner` | interface | `export interface GrantRunner` | How this module reaches the host; replaced in tests. |
 | `insideList` | function | `export function insideList(nodes: readonly AxNode[], index: number): boolean` | Whether this node is inside a list (see `roleOf`). |
 | `insidePopUp` | function | `export function insidePopUp(nodes: readonly AxNode[], index: number): boolean` | Whether this node is inside a pop-up button's menu (see `roleOf`). |
 | `isTextual` | function | `export function isTextual(node: AxNode): boolean` |  |
@@ -45,6 +47,7 @@ macOS Accessibility adapter: the Yam agent surface over AXUIElement
 | `LOGIN_WINDOW` | variable | `LOGIN_WINDOW = "loginwindow"` | The process that owns the screen when nobody is at it. |
 | `machineLoad` | function | `export function machineLoad(): { loadAverage1m: number; cpus: number }` | What the machine was doing when a read finished (Draft 2.10 §7.5, P8-F2). |
 | `matchNodes` | function | `export function matchNodes(` | Every node the candidate matches, in snapshot order. |
+| `nameFor` | function | `export function nameFor(who: ResponsibleProgram): string` | How to say "add this program" when the program has a name. |
 | `nameOf` | function | `export function nameOf(node: AxNode): string` | The accessible name (REQ-SURF-4). |
 | `osascriptBridge` | function | `export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge` | The real bridge: `osascript`, System Events, and this machine. |
 | `OsascriptBridgeOptions` | interface | `export interface OsascriptBridgeOptions` |  |
@@ -52,9 +55,14 @@ macOS Accessibility adapter: the Yam agent surface over AXUIElement
 | `parseWindow` | function | `export function parseWindow(stdout: string):` | Read `WINDOW_SCRIPT`'s answer. |
 | `PERFORM_SCRIPT` | variable | `PERFORM_SCRIPT = `function processWithWindow(se, name)` |  |
 | `registerAxAdapter` | function | `export function registerAxAdapter(): void` | Register the adapter. Idempotent, because the registry refuses a silent |
+| `requestAccessibility` | function | `export function requestAccessibility(options: { runner?: GrantRunner; platform?: string } = {}):` | Ask macOS to show the Accessibility prompt, and answer whether it is granted. |
+| `requestScreenRecording` | function | `export function requestScreenRecording(options: { runner?: GrantRunner; platform?: string } = {}):` | The same, for Screen Recording. Also once per application, forever. |
+| `responsibleProgram` | function | `export function responsibleProgram(` | The application that owns this process, by walking `ps` to launchd. |
+| `ResponsibleProgram` | interface | `export interface ResponsibleProgram` | The application a macOS permission would be attached to. |
 | `roleOf` | function | `export function roleOf(` | `AXRole` → an ARIA role, with the subrole consulted first. |
 | `runOsascript` | function | `export async function runOsascript(` | Run one JXA script, with a hard deadline. |
 | `saidBy` | function | `export function saidBy(node:` | The words an element itself puts on the screen (native-feedback D3). |
+| `screenRecordingGranted` | function | `export function screenRecordingGranted(options: { runner?: GrantRunner; platform?: string } = {}):` | Is Screen Recording granted? |
 | `statesOf` | function | `export function statesOf(node: AxNode): NodeState[]` | The states LLD §2.2 lists, from the attributes macOS exposes. |
 | `synthesise` | function | `export function synthesise(` | The candidate bundle for one element, best first (REQ-REC-3, LLD §3.3). |
 | `valueOf` | function | `export function valueOf(node: AxNode): string \| undefined` | The value a `read("value")` and a `value` predicate see. |

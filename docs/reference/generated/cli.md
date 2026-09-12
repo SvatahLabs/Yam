@@ -639,12 +639,25 @@ Exit codes: 0 ok · 1 failed
 ### `yam surface doctor`
 
 ```text
-yam surface doctor [--adapter ax|uia] [--json]
+yam surface doctor [--adapter <name>] [--json]
 
-Whether this host can run a desktop adapter: the permission, the session, screen recording.
+Whether this host can reach each adapter: the browser, the pty, the server, the permission, the session, screen recording.
 
-  --adapter ax|uia  which adapter
+  --adapter <name>  one of playwright, bidi, ax, uia, atspi, process, http, appium
   --json            one JSON document on stdout, nothing else
+
+Exit codes: 0 ok · 1 failed
+```
+
+### `yam surface grant`
+
+```text
+yam surface grant [--dry-run] [--json]
+
+Ask macOS for Accessibility and Screen Recording, naming the program they attach to.
+
+  --dry-run  report what would be asked, and ask nothing
+  --json     one JSON document on stdout, nothing else
 
 Exit codes: 0 ok · 1 failed
 ```

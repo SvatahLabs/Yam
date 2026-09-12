@@ -325,6 +325,14 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
     return await (await import("./commands/surface-doctor.js")).surfaceDoctorCommand(args, io);
   }
 
+  /*
+   * And `surface grant`, for the same reason: it reaches the AX adapter's TCC
+   * calls, which module (a) does not have.
+   */
+  if (command === "surface" && args.command[1] === "grant") {
+    return await (await import("./commands/surface-grant.js")).surfaceGrantCommand(args, io);
+  }
+
   if (command === "surface") {
     const { surfaceControlCommand, SURFACE_CONTROL_SUBCOMMANDS } = await import("./commands/surface-control.js");
     if (args.command[1] !== undefined && SURFACE_CONTROL_SUBCOMMANDS.has(args.command[1])) {

@@ -77,9 +77,13 @@ describe("the permission check (REQ-ADP-7, `yam surface doctor`)", () => {
     const permission = await osascriptBridge({ process: "Yam", run }).permission();
     expect(permission.state).toBe("prompt-pending");
     expect(permission.advice).toContain("System Settings → Privacy & Security → Accessibility");
-    // The part people get wrong: the grant is per program, so one granted to
-    // Terminal does not carry to a test runner or a CI agent.
-    expect(permission.advice).toContain("per program");
+    // The part people get wrong: the grant is per application, so one granted
+    // to Terminal does not carry to a test runner or a CI agent — and it is the
+    // program that *starts* Yam that is granted, never Yam.
+    expect(permission.advice).toContain("per application");
+    expect(permission.advice).toContain("never Yam itself");
+    // And it names the way to be asked rather than only the settings pane.
+    expect(permission.advice).toContain("yam surface grant");
   });
 
   it("uses a short deadline, because a blocked prompt takes two minutes", async () => {

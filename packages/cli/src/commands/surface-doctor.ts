@@ -4,12 +4,22 @@
  * > AX: […] documents the accessibility permission prompt and provides a
  * > `yam surface doctor` check.
  *
- * The desktop adapters are the only ones with a **host requirement that is not
- * a dependency**. A browser is installed by `pnpm browsers`; an Appium server is
- * a URL. macOS's Accessibility permission and Windows's UI Automation are
- * granted, or present, on the machine — and when they are not, everything above
- * them fails as a `locator` failure for an element that was there all along.
- * This is the command that says so before a run does.
+ * Every adapter has a **host requirement that is not a dependency**: installing
+ * Yam installs all eight drivers and none of what they drive. A browser binary
+ * is `npx playwright install`; an Appium server is a URL that has to answer; a
+ * pseudo-terminal is `expect` or a `python3` with its `pty` module; macOS's
+ * Accessibility permission and Windows's UI Automation are granted, or present,
+ * on the machine. When any of them is missing, everything above it fails as a
+ * `locator` failure for an element that was there all along. This is the
+ * command that says so before a run does.
+ *
+ * It asks about **all eight**, not the two desktop ones. Readiness for the
+ * other six lived only in `probeAdapter` — which `surface targets` and the
+ * support matrix read — so there were two readiness reporters with different
+ * coverage, and the diagnostics pointed a stuck reader at the narrower one. The
+ * probe is still the single source of "can this host reach it": this command
+ * asks it, and adds the permission and session checks that only the desktop
+ * adapters have.
  *
  * It lives in `@svatah/yam` rather than in `@svatah/yam-bindings-cli`, where the
  * rest of `surface` lives, because it has to reach the desktop adapters and
@@ -22,9 +32,7 @@
 import { boolOption, stringOption, EXIT, type CommandIo, type ExitCode, type ParsedArgs } from "@svatah/yam-bindings-cli";
 import { describeRuntime, resolveNodeRuntime, SUPPORTED_NODE_MAJOR } from "@svatah/yam-service/runtime";
 import { fileURLToPath } from "node:url";
-import { spawnSync } from "node:child_process";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { probeAdapter } from "@svatah/yam-surface-control";
 
 export interface SurfaceCheck {
   readonly adapter: string;
@@ -56,12 +64,37 @@ export interface SurfaceCheck {
   readonly state?: string;
 }
 
+/**
+ * Every adapter Yam ships, in the order `surface targets` lists them.
+ *
+ * Named here rather than derived from `listAdapters()` so that `--adapter foo`
+ * can be refused with the list, and so the order a person reads is stable.
+ */
+export const ADAPTERS = ["playwright", "bidi", "ax", "uia", "atspi", "process", "http", "appium"] as const;
+
+/** The adapters whose own checks follow their `reachable` line. */
+const DEEPER_CHECKS = new Set(["ax", "uia"]);
+
+/** Whether an adapter is simply for another operating system. */
+function forAnotherPlatform(adapter: string): boolean {
+  if (adapter === "ax") return process.platform !== "darwin";
+  if (adapter === "uia") return process.platform !== "win32";
+  if (adapter === "atspi") return process.platform !== "linux";
+  if (adapter === "process") return process.platform === "win32";
+  return false;
+}
+
 export async function surfaceDoctorCommand(
   args: ParsedArgs,
   io: CommandIo,
 ): Promise<ExitCode> {
   const only = stringOption(args, "adapter");
   const checks: SurfaceCheck[] = [];
+
+  if (only !== undefined && !(ADAPTERS as readonly string[]).includes(only)) {
+    io.err(`"${only}" is not an adapter. Yam ships: ${ADAPTERS.join(", ")}.`);
+    return EXIT.usage;
+  }
 
   checks.push({
     adapter: "-",
@@ -72,8 +105,50 @@ export async function surfaceDoctorCommand(
 
   checks.push(runtimeCheck());
 
-  if (only === undefined || only === "ax") checks.push(...(await axChecks()));
-  if (only === undefined || only === "uia") checks.push(...(await uiaChecks()));
+  /*
+   * One `reachable` line per adapter, then that adapter's own checks — grouped,
+   * so everything about `ax` is read in one place rather than in two halves at
+   * opposite ends of the output.
+   *
+   * `skipped` when the adapter is for another operating system: a macOS host is
+   * not misconfigured for having no UI Automation, and an exit code that said
+   * so would fail every CI job on every platform.
+   *
+   * **Advisory unless it was asked for by name.** Installing Yam installs all
+   * eight drivers and none of what they drive, so "no Appium server answered"
+   * is the ordinary state of a laptop and not a fault: a bare `yam surface
+   * doctor` that exited 1 on a perfectly good machine would teach everyone to
+   * ignore its exit code. `--adapter appium` is a declaration of intent, and
+   * there it is fatal — which is what `scripts/desktop-conformance.mjs` gates
+   * on.
+   */
+  for (const adapter of ADAPTERS) {
+    if (only !== undefined && only !== adapter) continue;
+    const probe = await probeAdapter(adapter);
+    checks.push({
+      adapter,
+      name: "reachable",
+      ok: probe.present,
+      ...(probe.present ? {} : { skipped: forAnotherPlatform(adapter) }),
+      ...(probe.present || only !== undefined ? {} : { advisory: true }),
+      /*
+       * The probe's `reason` is dropped for an adapter whose own checks follow:
+       * `ax`'s says the permission is asked about separately, and the next line
+       * is that answer. The `fix` carries the driven range and not the reason
+       * again — the reason is already the detail two lines up.
+       */
+      detail: probe.present
+        ? `${probe.version ?? "present"}${
+            probe.reason === undefined || DEEPER_CHECKS.has(adapter) ? "" : ` — ${probe.reason}`
+          }`
+        : (probe.reason ?? "not reachable on this host"),
+      ...(probe.present || probe.range === undefined
+        ? {}
+        : { fix: `Driven here against ${probe.range}.` }),
+    });
+    if (adapter === "ax" && probe.present) checks.push(...(await axChecks()));
+    if (adapter === "uia" && probe.present) checks.push(...(await uiaChecks()));
+  }
 
   if (boolOption(args, "json")) {
     io.out(JSON.stringify({ checks }, null, 2));
@@ -125,18 +200,8 @@ function runtimeCheck(): SurfaceCheck {
 
 /** The macOS Accessibility permission (REQ-ADP-7). */
 async function axChecks(): Promise<SurfaceCheck[]> {
-  if (process.platform !== "darwin") {
-    return [
-      {
-        adapter: "ax",
-        name: "platform",
-        ok: false,
-        skipped: true,
-        detail: "not macOS",
-      },
-    ];
-  }
-
+  // Only reached when `ax/reachable` said this is macOS and the API answered,
+  // so there is no platform row here: it would repeat the line above it.
   const { osascriptBridge } = await import("@svatah/yam-adapter-ax");
   const bridge = osascriptBridge({ process: "System Events" });
   const permission = await bridge.permission();
@@ -173,7 +238,7 @@ async function axChecks(): Promise<SurfaceCheck[]> {
       detail: session.detail,
       fix: session.advice,
     },
-    screenRecordingCheck(),
+    await screenRecordingCheck(),
   ];
 }
 
@@ -186,38 +251,35 @@ async function axChecks(): Promise<SurfaceCheck[]> {
  * accessibility tree is unaffected, so this is advisory: a run keeps its
  * results and loses its pictures, and this is the line that says which.
  */
-function screenRecordingCheck(): SurfaceCheck {
-  const probe = spawnSync("screencapture", ["-x", "-R", "0,0,1,1", devNull()], {
-    encoding: "utf8",
-    timeout: 20_000,
-  });
-  const ok = probe.status === 0;
-  const detail = (probe.stderr ?? "").trim();
+async function screenRecordingCheck(): Promise<SurfaceCheck> {
+  const { screenRecordingGranted, responsibleProgram, nameFor } = await import(
+    "@svatah/yam-adapter-ax"
+  );
+  const granted = screenRecordingGranted();
+  const who = responsibleProgram();
   return {
     adapter: "ax",
     name: "screen-recording",
-    ok,
+    // `undefined` is "could not ask", which is not the same as "refused" and
+    // must not be reported as one.
+    ok: granted === true,
     advisory: true,
-    detail: ok ? "granted" : `refused — ${detail === "" ? "screencapture exited non-zero" : detail}`,
+    detail:
+      granted === true ? "granted" : granted === false ? "not granted" : "could not be asked",
     fix:
-      "Screenshots come from `screencapture`, which needs Screen Recording — a different grant " +
-      "from Accessibility. Open System Settings → Privacy & Security → Screen & System Audio " +
-      "Recording, switch it on for the program running Yam, and restart it. Without it the " +
-      "adapter still reads the accessibility tree; a run simply has no screenshots.",
+      `Screenshots come from \`screencapture\`, which needs Screen Recording — a different ` +
+      `grant from Accessibility, and one macOS attaches to ${nameFor(who)} rather than to Yam. ` +
+      "Run `yam surface grant` to be asked for it, or open System Settings → Privacy & Security " +
+      `→ Screen & System Audio Recording, switch it on for ` +
+      `${who.isApplication ? who.name : "the program running Yam"}, and restart it. Without it ` +
+      "the adapter still reads the accessibility tree; a run simply has no screenshots, and " +
+      "`surface screenshot` refuses rather than reporting one it did not take."
   };
-}
-
-/** A path `screencapture` can write to and nobody has to clean up. */
-function devNull(): string {
-  return join(tmpdir(), `yam-screencapture-probe-${process.pid}.png`);
 }
 
 /** Windows UI Automation (REQ-ADP-6). */
 async function uiaChecks(): Promise<SurfaceCheck[]> {
-  if (process.platform !== "win32") {
-    return [{ adapter: "uia", name: "platform", ok: false, skipped: true, detail: "not Windows" }];
-  }
-
+  // As with `ax`: `uia/reachable` has already said whether this is Windows.
   const { powershellBridge } = await import("@svatah/yam-adapter-uia");
   const availability = await powershellBridge({ process: "" }).availability();
   return [

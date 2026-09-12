@@ -12,7 +12,8 @@ The documentation is organised by what you are trying to do.
 
 | If you want to… | Read |
 |---|---|
-| get something running in ten minutes | [Getting started](getting-started/playwright-quick-start.md) |
+| install Yam and control something | [Install and first control](getting-started/install-and-first-control.md) |
+| get bindings into an existing Playwright suite | [Playwright quick start](getting-started/playwright-quick-start.md) |
 | do one specific task | [Guides](#guides) |
 | understand how and why it works | [Concepts](#concepts) |
 | look something up | [Reference](#reference) |
@@ -20,9 +21,10 @@ The documentation is organised by what you are trying to do.
 
 ## Getting started
 
-1. [Bindings in a plain Playwright project](getting-started/playwright-quick-start.md), the ten-minute quick start and the piece you can adopt on its own.
-2. [Your first flow](getting-started/first-flow.md), from `yam init` to a replayed plan.
-3. [One plan, three ways to run it](getting-started/one-plan-three-ways.md), as a test, a workflow and an agent tool.
+1. [Install Yam and control something](getting-started/install-and-first-control.md), from `npm install` to a browser and a native application driven by hand — including which permissions macOS wants and, more importantly, *which program* it grants them to.
+2. [Bindings in a plain Playwright project](getting-started/playwright-quick-start.md), the smaller thing to adopt if you already have a Playwright suite.
+3. [Your first flow](getting-started/first-flow.md), from `yam init` to a replayed plan.
+4. [One plan, three ways to run it](getting-started/one-plan-three-ways.md), as a test, a workflow and an agent tool.
 
 ## Guides
 

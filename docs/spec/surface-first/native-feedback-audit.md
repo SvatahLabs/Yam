@@ -27,6 +27,33 @@ because nothing downstream can detect it.
 | D4 | Valid, fixed | `quit` could not be satisfied at runtime. It needed `app.launch.bundle`/`path`, which can only be named in `yam.config.yaml` before the session opens, so an application attached to by process name could never be quit. The refusal's reasoning — a quit by name alone would reach somebody else's copy — was sound but unanswerable. | A new optional `AxBridge.identify()` asks System Events which bundle the *attached* process was started from (`bundle identifier`, `application file`, pid). That resolves the ambiguity from the running process rather than guessing. When identity cannot be had, the honest refusal remains. |
 | D5 | Not a defect in this code | Calculator's result display is absent from the AX tree, so `7 × 6 =` could not be confirmed. Calculator publishes only the small expression line; the main display is not an accessibility element. | Not fixable here — the application does not expose it. D1's fix restores the second route the assessment lacked: a screenshot now either works or says why. |
 
+## Two more, found in answering "how does a user install and grant this?"
+
+Neither was in the assessment. Both came out of walking the install and
+permission path as a newcomer would.
+
+| ID | Defect | Fix |
+|---|---|---|
+| D6 | The permission advice said "add the terminal (or the test runner) you are running from", which is correct and unusable: macOS attaches Accessibility and Screen Recording to the **responsible process**, and a reader who did not already know that cannot tell which of the programs on their screen it is. Nothing named it, and nothing could raise the prompt either — the only route offered was a settings pane. | `grant.ts` walks the process tree to the outermost application ancestor and names it, so the sentence became "add **iTerm** (`/Applications/iTerm.app`)". `yam surface grant` raises the real prompts through `AXIsProcessTrustedWithOptions` and `CGRequestScreenCaptureAccess`, reached with the JXA machinery `bridge.ts` already uses — no native module. `--dry-run` reports without spending the one prompt macOS allows. |
+| D7 | `yam surface doctor` asked about `ax` and `uia` only, while `probeAdapter` — which `surface targets` and the support matrix read — asked about all eight. Two readiness reporters with different coverage, and every diagnostic pointed a stuck reader at the narrower one: someone whose first run failed for want of a browser was sent to a command with nothing to say about browsers. | The doctor now asks the probe for every adapter and groups each adapter's own checks beneath its `reachable` line. Reachability is **advisory** unless an adapter is named with `--adapter`, because a laptop with no Appium server is an ordinary laptop and a bare run that exited 1 on it would teach everyone to ignore the exit code. `--adapter` remains fatal, which is what `scripts/desktop-conformance.mjs` gates on. |
+
+### Why there is no install-time prompt
+
+The obvious request — prompt during `npm install` — cannot be met, and building
+it would make things worse. TCC binds the grant to the application that owns the
+process tree, so a prompt fired from a postinstall script grants whatever ran
+`npm`: usually a terminal, and usually not the program that will later run
+`yam mcp`. The grant would not transfer, and whoever clicked it would believe
+they had already answered. `npm install --ignore-scripts` skips postinstall
+outright, installs run headless in CI where a dialog can only hang, and each
+prompt is shown once per application *forever* — so a dialog raised at the wrong
+moment spends the only chance that application had.
+
+The earliest moment the question can be asked correctly is the first time Yam
+runs from the program that will drive the desktop, which is what `yam surface
+grant` is for. The one place an install-time prompt does work is the signed
+desktop app, where `Yam.app` is itself the responsible process.
+
 ## One correction to the report
 
 The report states that "`surface_check` offers no way to assert against `value`". A `value` predicate does
@@ -57,3 +84,11 @@ describes and is now raised rather than swallowed.
 Not verified: the UIA half of D2 and D3 has no Windows host here and rests on the parity suite; and no
 application was quit, so D4's fix is proven up to the point of addressing the right process, not through
 termination.
+
+For D6 and D7: both TCC scripts were run against this host through `osascript`, returning `true` for
+Accessibility and `false` for Screen Recording — which matches what the doctor and the assessment both
+say about this machine. `yam surface grant` was **not** run without `--dry-run`, deliberately: the prompt
+it raises is a once-per-application event that cannot be given back, so the prompting path is covered by
+tests with an injected runner rather than by spending this machine's remaining prompt. Every command in
+[the getting-started guide](../../getting-started/install-and-first-control.md) was executed as written,
+against a local page, and its output is what that page produced.

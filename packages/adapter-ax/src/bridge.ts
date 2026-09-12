@@ -61,6 +61,7 @@
  */
 import { spawn } from "node:child_process";
 import { statSync, unlinkSync } from "node:fs";
+import { nameFor, responsibleProgram } from "./grant.js";
 import { availableParallelism, loadavg } from "node:os";
 
 /**
@@ -1250,7 +1251,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
       const result = await run(PERMISSION_SCRIPT, {}, PERMISSION_TIMEOUT_MS);
       if (result.timedOut) {
         lastPermission = "prompt-pending";
-        return { state: "prompt-pending", advice: PROMPT_ADVICE };
+        return { state: "prompt-pending", advice: promptAdvice() };
       }
       if (result.code === 0 && result.stdout.includes('"ok":true')) {
         lastPermission = "granted";
@@ -1273,7 +1274,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
       lastPermission = denied ? "denied" : "prompt-pending";
       return {
         state: lastPermission,
-        advice: denied ? DENIED_ADVICE : PROMPT_ADVICE,
+        advice: denied ? deniedAdvice() : promptAdvice(),
         ...(detail === "" ? {} : { detail }),
       };
     },
@@ -1648,12 +1649,26 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
   return bridge;
 }
 
-const PROMPT_ADVICE =
-  "The Accessibility permission has not been granted to the program running Yam. " +
-  "Open System Settings → Privacy & Security → Accessibility, add the terminal (or the " +
-  "test runner) you are running from, and switch it on. macOS asks once and remembers " +
-  "the answer per program, so a permission granted to Terminal does not carry to iTerm, " +
-  "to VS Code, or to a CI agent.";
+/**
+ * The advice, with the program that actually needs the grant named.
+ *
+ * "Add the terminal you are running from" is true and unusable: macOS attaches
+ * the permission to the *responsible* application, and a reader who did not
+ * already know that cannot tell which of the programs on their screen it is.
+ * `responsibleProgram` answers it, so the sentence names a bundle a person can
+ * find (see `grant.ts`).
+ */
+function promptAdvice(): string {
+  const who = responsibleProgram();
+  return (
+    `The Accessibility permission has not been granted to ${nameFor(who)}. ` +
+    `Run \`yam surface grant\` to be asked for it, or open System Settings → Privacy & ` +
+    `Security → Accessibility, add ${who.isApplication ? who.name : "the program running Yam"}, ` +
+    "and switch it on. macOS asks once and remembers the answer per application, so a " +
+    "permission granted to Terminal does not carry to iTerm, to VS Code, or to a CI agent — " +
+    "it is the program that *starts* Yam that is granted, never Yam itself."
+  );
+}
 
 const SCREEN_RECORDING_ADVICE =
   "Screenshots come from `screencapture`, which needs the Screen Recording permission — a " +
@@ -1662,7 +1677,20 @@ const SCREEN_RECORDING_ADVICE =
   "`yam surface doctor --adapter ax` reports this grant on its own line. Without it the " +
   "adapter still reads the accessibility tree; it simply cannot see the screen.";
 
-const DENIED_ADVICE =
-  "The Accessibility permission was refused for the program running Yam. Open System " +
-  "Settings → Privacy & Security → Accessibility, switch it on for that program, and " +
-  "restart it — macOS does not re-read the setting for a process that is already running.";
+/**
+ * And the refusal, which is a different screen and a different sentence.
+ *
+ * There is no asking again: macOS shows each prompt once per application per
+ * service, so a program that was refused can only be fixed in System Settings.
+ * `yam surface grant` is deliberately not offered here.
+ */
+function deniedAdvice(): string {
+  const who = responsibleProgram();
+  return (
+    `The Accessibility permission was refused for ${nameFor(who)}. macOS shows that prompt ` +
+    "once per application and will not show it again, so this cannot be re-asked: open System " +
+    `Settings → Privacy & Security → Accessibility, switch it on for ` +
+    `${who.isApplication ? who.name : "that program"}, and restart it — macOS does not re-read ` +
+    "the setting for a process that is already running."
+  );
+}
