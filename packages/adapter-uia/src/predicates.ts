@@ -12,7 +12,7 @@
  */
 import type { CheckResult, CheckSubject, Predicate, Ref, ValueRef } from "@svatah/yam-schema";
 import { CheckError, DataError, NavigationError } from "@svatah/yam-surface";
-import type { UiaSnapshotNode } from "./tree.js";
+import { saidBy, type UiaSnapshotNode } from "./tree.js";
 
 /** The literal a `ValueRef` names; an unresolved one is a caller mistake (LLD §8.2). */
 export function literalValue(ref: ValueRef): string {
@@ -210,12 +210,12 @@ export function evaluateUiaPredicate(
       );
     case "text": {
       const expected = literalValue(predicate.value);
-      const actual = norm(node.name) || norm(node.value);
+      const actual = norm(saidBy(node));
       return negated(result(actual === expected, actual, expected), predicate.negate);
     }
     case "textContains": {
       const expected = literalValue(predicate.value);
-      const own = norm(node.name) || norm(node.value);
+      const own = norm(saidBy(node));
       const actual = own.includes(expected) ? own : subtreeText(node, context.nodes);
       return negated(result(actual.includes(expected), actual, expected), predicate.negate);
     }

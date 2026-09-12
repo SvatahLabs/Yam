@@ -69,9 +69,16 @@ import {
 } from "./bridge.js";
 import { matchNodes, synthesise } from "./locate.js";
 import { evaluateUiaPredicate } from "./predicates.js";
-import { convertTree, nameOf, type UiaSnapshotNode } from "./tree.js";
+import { convertTree, nameOf, saidBy, type UiaSnapshotNode } from "./tree.js";
 
 const DEFAULT_MAX_NODES = 1_500;
+
+/**
+ * How far a window's measured size may sit from the one asked for and still
+ * count as obeyed. A pixel, for a rectangle a scaled display rounds; anything
+ * wider is the window declining.
+ */
+const SIZE_TOLERANCE = 1;
 
 /**
  * What this adapter can do (LLD §2.4).
@@ -397,6 +404,19 @@ export class UiaSurface implements AgentSurface {
     return synthesise(this.nodeFor(ref), this.nodes);
   }
 
+  /**
+   * The window's own size, as the tree it was just read from publishes it.
+   *
+   * The root of a UIA window tree *is* the window, so its bounding rectangle is
+   * the window's frame. `undefined` when the root carries none, which is a
+   * window that cannot be measured rather than one of size zero.
+   */
+  private windowSize(): readonly [number, number] | undefined {
+    const root = this.nodes.find((one) => one.depth === 0);
+    if (root?.box === undefined) return undefined;
+    return [root.box[2], root.box[3]];
+  }
+
   private nodeFor(ref: Ref): UiaSnapshotNode {
     const node = this.nodes.find((one) => one.ref === ref);
     if (node === undefined) {
@@ -624,9 +644,46 @@ export class UiaSurface implements AgentSurface {
             { adapter: "uia" },
           );
         }
+        /*
+         * Read back, because setting a window's size is a *request* (native-feedback D2).
+         *
+         * A window with a fixed size, a maximised one, or one whose provider
+         * clamps to a minimum takes the call without error and stays where it
+         * was — so `{ok: true}` on the strength of the call returning is a
+         * claim about a resize that a snapshot one step later contradicts. The
+         * AX adapter had the same hole and closed it the same way; the write is
+         * not the evidence, the size afterwards is.
+         */
+        const before = this.windowSize();
         await bridge.perform({ kind: "setSize", size: [width, height] });
         await this.refresh();
-        return { ok: true };
+        const after = this.windowSize();
+
+        if (after === undefined) {
+          throw new ActionabilityError(
+            `The window of "${this.processName ?? "the application"}" publishes no bounding ` +
+              `rectangle, so a resize to ${width} by ${height} cannot be confirmed.`,
+            { adapter: "uia" },
+          );
+        }
+        if (
+          Math.abs(after[0] - width) > SIZE_TOLERANCE ||
+          Math.abs(after[1] - height) > SIZE_TOLERANCE
+        ) {
+          const stayed = before !== undefined && before[0] === after[0] && before[1] === after[1];
+          throw new ActionabilityError(
+            `The window would not take that size: it was asked for ${width} by ${height} and ` +
+              `is ${after[0]} by ${after[1]}` +
+              (stayed
+                ? ", unchanged — the window is not resizable, or it is maximised."
+                : ` (it was ${before?.[0] ?? "?"} by ${before?.[1] ?? "?"}) — the window clamped ` +
+                  "the request to its own minimum or maximum."),
+            { adapter: "uia" },
+          );
+        }
+        // The size that was actually taken, so the record shows a measurement
+        // rather than the request echoed back at whoever made it.
+        return { ok: true, value: { width: after[0], height: after[1] } };
       }
 
       case "sleep": {
@@ -749,7 +806,9 @@ export class UiaSurface implements AgentSurface {
           throw new LocateError(`Reading "${kind}" needs a reference.`, { adapter: "uia" });
         }
         const node = this.nodeFor(ref);
-        if (kind === "text") return node.name ?? node.value ?? "";
+        // `saidBy`, not the name: on an edit the words on the screen are the
+        // value and the name is its label (see `saidBy`).
+        if (kind === "text") return saidBy(node);
         if (kind === "value") return node.value ?? "";
         if (name === undefined) {
           throw new ScriptError("Reading an attribute needs its name.", { adapter: "uia" });

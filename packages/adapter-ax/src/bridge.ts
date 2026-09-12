@@ -60,6 +60,7 @@
  * written in and the situation CI is in.
  */
 import { spawn } from "node:child_process";
+import { statSync, unlinkSync } from "node:fs";
 import { availableParallelism, loadavg } from "node:os";
 
 /**
@@ -168,6 +169,23 @@ export interface AxWindow {
   /** True when the walk stopped at `maxNodes` rather than at the leaves. */
   readonly truncated: boolean;
   readonly cost: AxSnapshotCost;
+}
+
+/**
+ * Who a running application actually is (native-feedback D4).
+ *
+ * A session that attached to an application by process name knows what to read
+ * and what to click, and — until this existed — nothing about *which copy* of
+ * that application it had attached to. `quit` needs exactly that: a bundle
+ * identifier to ask politely, and the bundle path a signal can be addressed by
+ * without reaching somebody else's build of the same product.
+ */
+export interface AxIdentity {
+  /** `com.apple.TextEdit`, for `tell application id … to quit`. */
+  readonly bundleId?: string;
+  /** `/System/Applications/TextEdit.app` — the bundle, not the executable. */
+  readonly bundlePath?: string;
+  readonly pid?: number;
 }
 
 /** Why an accessibility call could not be made. */
@@ -285,6 +303,15 @@ export interface AxBridge {
   perform(command: AxCommand): Promise<void>;
   /** A PNG of the screen (or of one rectangle), written to `path`. */
   screenshot(path: string, box?: readonly [number, number, number, number]): Promise<void>;
+  /**
+   * Which application the named process is, when the bridge can tell.
+   *
+   * Optional: a bridge that replays a recording has no process to ask, and the
+   * one caller — `quit` on a session that was never given a launch
+   * configuration — refuses honestly rather than guessing when the answer is
+   * `undefined`.
+   */
+  identify?(process: string): Promise<AxIdentity | undefined>;
 }
 
 export class AxBridgeError extends Error {
@@ -943,6 +970,32 @@ export const PERFORM_ADJUDICATION_PAUSE_MS = 500;
  * only ever runs on a machine with a granted permission is otherwise tested
  * nowhere.
  */
+/**
+ * The bundle identifier, bundle path and pid of a named process (native-feedback D4).
+ *
+ * System Events answers all three from `application file` and `bundle
+ * identifier`, which are properties of the process rather than reads of its
+ * accessibility tree — so this works on a host where the tree does not, and a
+ * failure here says the application is gone rather than that a permission is
+ * missing.
+ *
+ * The *first* match, not the one with a window: helpers of an Electron
+ * application share their parent's bundle, which is the only thing this asks
+ * about, and a quit is about the application rather than about one window.
+ */
+const IDENTIFY_SCRIPT = `function run(argv) {
+  const input = JSON.parse(argv[0]);
+  const se = Application("System Events");
+  const matches = se.applicationProcesses.whose({ name: input.process })();
+  if (matches.length === 0) return JSON.stringify({ ok: false, error: "no-process" });
+  const proc = matches[0];
+  const out = { ok: true };
+  try { out.bundleId = proc.bundleIdentifier(); } catch (e) { /* not every process has one */ }
+  try { out.pid = proc.unixId(); } catch (e) { /* nor a readable pid */ }
+  try { out.bundlePath = proc.applicationFile().posixPath(); } catch (e) { /* nor a file */ }
+  return JSON.stringify(out);
+}`;
+
 export const PERFORM_SCRIPT = `/**
  * The application process that owns a window, when several share the name
  * (Draft 2.10 §7.5, P8-F1).
@@ -1071,6 +1124,7 @@ const PERMISSION_TIMEOUT_MS = 5_000;
  * comes back while a person is looking at it.
  */
 const SESSION_TIMEOUT_MS = 15_000;
+const IDENTIFY_TIMEOUT_MS = 10_000;
 /** LLD §7.5: "the surface's default deadline of 10 s". */
 const WINDOW_DEADLINE_MS = 10_000;
 /**
@@ -1490,26 +1544,104 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
       }
     },
 
+    async identify(name): Promise<AxIdentity | undefined> {
+      /*
+       * Never throws. The only caller is `quit`, which has a refusal ready for
+       * "could not tell" — and turning a failed lookup into an exception would
+       * replace that sentence with one about osascript.
+       */
+      let answer: { ok?: boolean; bundleId?: string; bundlePath?: string; pid?: number };
+      try {
+        answer = (await call(IDENTIFY_SCRIPT, { process: name }, IDENTIFY_TIMEOUT_MS)) as typeof answer;
+      } catch {
+        return undefined;
+      }
+      if (answer.ok !== true) return undefined;
+      return {
+        ...(answer.bundleId === undefined ? {} : { bundleId: answer.bundleId }),
+        ...(answer.bundlePath === undefined ? {} : { bundlePath: answer.bundlePath }),
+        ...(answer.pid === undefined ? {} : { pid: answer.pid }),
+      };
+    },
+
     async screenshot(path, box): Promise<void> {
       /*
        * `screencapture` rather than an accessibility call: AX has no way to
        * render an element, and the Screen Recording permission is a separate
        * grant from the Accessibility one, so a failure here must not be read as
        * an accessibility failure.
+       *
+       * The exit code **and** the file are both checked, because this call used
+       * to check neither: it resolved on `close` or on `error` alike, so a host
+       * without the Screen Recording grant — where `screencapture` prints
+       * "could not create image from display", exits non-zero and writes
+       * nothing — reported a screenshot it had not taken. `yam surface doctor`
+       * named that host honestly while the adapter told the caller it could see
+       * the screen, which is the worst of the two answers to be wrong: an agent
+       * driving a native application was blind and did not know it.
+       *
+       * The file is checked separately from the code because the deadline can
+       * kill `screencapture` mid-write, which leaves a truncated or empty PNG
+       * that exists but is not an image. An empty one is removed rather than
+       * left to be found by whoever reads the artefacts later.
        */
       const args = ["-x", ...(box === undefined ? [] : ["-R", box.join(",")]), path];
-      await new Promise<void>((resolve) => {
-        const child = spawn("screencapture", args, { stdio: "ignore" });
-        const timer = setTimeout(() => child.kill("SIGKILL"), timeoutMs);
-        child.on("error", () => {
-          clearTimeout(timer);
-          resolve();
+      let killed = false;
+      const outcome = await new Promise<{
+        readonly code: number | null;
+        readonly stderr: string;
+        readonly spawnFailure?: string;
+      }>((resolve) => {
+        const child = spawn("screencapture", args, { stdio: ["ignore", "ignore", "pipe"] });
+        let stderr = "";
+        child.stderr?.on("data", (chunk: Buffer | string) => {
+          stderr += String(chunk);
         });
-        child.on("close", () => {
+        const timer = setTimeout(() => {
+          killed = true;
+          child.kill("SIGKILL");
+        }, timeoutMs);
+        child.on("error", (error: Error) => {
           clearTimeout(timer);
-          resolve();
+          resolve({ code: null, stderr, spawnFailure: error.message });
+        });
+        child.on("close", (code) => {
+          clearTimeout(timer);
+          resolve({ code, stderr });
         });
       });
+
+      const size = ((): number | undefined => {
+        try {
+          return statSync(path).size;
+        } catch {
+          return undefined;
+        }
+      })();
+      if (size === 0) {
+        try {
+          unlinkSync(path);
+        } catch {
+          /* Nothing to report: the file being gone is the point. */
+        }
+      }
+
+      if (outcome.spawnFailure !== undefined || outcome.code !== 0 || size === undefined || size === 0) {
+        const why =
+          outcome.spawnFailure !== undefined
+            ? `\`screencapture\` could not be run (${outcome.spawnFailure})`
+            : killed
+              ? `\`screencapture\` did not finish within ${timeoutMs} ms`
+              : outcome.code !== 0
+                ? `\`screencapture\` exited ${outcome.code}`
+                : size === undefined
+                  ? "`screencapture` exited 0 and wrote no file"
+                  : "`screencapture` exited 0 and wrote an empty file";
+        throw new AxBridgeError(
+          `No screenshot was written to "${path}": ${why}. ${SCREEN_RECORDING_ADVICE}`,
+          outcome.stderr.trim() === "" ? undefined : outcome.stderr.trim(),
+        );
+      }
     },
   };
 
@@ -1522,6 +1654,13 @@ const PROMPT_ADVICE =
   "test runner) you are running from, and switch it on. macOS asks once and remembers " +
   "the answer per program, so a permission granted to Terminal does not carry to iTerm, " +
   "to VS Code, or to a CI agent.";
+
+const SCREEN_RECORDING_ADVICE =
+  "Screenshots come from `screencapture`, which needs the Screen Recording permission — a " +
+  "different grant from Accessibility. Open System Settings → Privacy & Security → Screen & " +
+  "System Audio Recording, switch it on for the program running Yam, and restart it. " +
+  "`yam surface doctor --adapter ax` reports this grant on its own line. Without it the " +
+  "adapter still reads the accessibility tree; it simply cannot see the screen.";
 
 const DENIED_ADVICE =
   "The Accessibility permission was refused for the program running Yam. Open System " +

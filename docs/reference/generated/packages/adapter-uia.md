@@ -33,6 +33,7 @@ Windows UI Automation adapter: the Yam agent surface over UIAutomationClient
 | `registerUiaAdapter` | function | `export function registerUiaAdapter(): void` | Register the adapter. Idempotent, like every other registration. |
 | `roleOf` | function | `export function roleOf(` | `ControlType` → an ARIA role, with `LocalizedControlType` consulted first. |
 | `runPowershell` | function | `export async function runPowershell(` | Run one PowerShell script, with a hard deadline. |
+| `saidBy` | function | `export function saidBy(node:` | The words an element itself puts on the screen (native-feedback D3). |
 | `sendKeysFor` | function | `export function sendKeysFor(key: string): string` | A key name → a `SendKeys` sequence. |
 | `statesOf` | function | `export function statesOf(node: UiaNode): NodeState[]` | The states LLD §2.2 lists, from the properties UIA exposes. |
 | `synthesise` | function | `export function synthesise(` | The candidate bundle for one element, best first (REQ-REC-3, LLD §3.3). |

@@ -187,6 +187,27 @@ export function isTextual(node: UiaNode): boolean {
 }
 
 /**
+ * The words an element itself puts on the screen (native-feedback D3).
+ *
+ * The AX adapter's `saidBy`, for the same reason and with the same rule: a
+ * `read("text")` asks what an element *says*, which is its name for a button
+ * and its value for an edit — where the name is the label beside the box
+ * rather than the words inside it. Kept in step with `adapter-ax/src/tree.ts`
+ * because `test/parity.test.ts` compares the two answers, and a fix on one
+ * platform only would move the disagreement rather than close it.
+ */
+export function saidBy(node: {
+  readonly name?: string;
+  readonly value?: string;
+  readonly source: UiaNode;
+}): string {
+  const [first, second] = isTextual(node.source)
+    ? [node.value, node.name]
+    : [node.name, node.value];
+  return first ?? second ?? "";
+}
+
+/**
  * The value a `read("value")` and a `value` predicate see.
  *
  * A checkbox's state is in `toggleState` and is already a state; repeating it

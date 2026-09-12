@@ -7,6 +7,7 @@ Yam should make **connect → inspect → act → verify** its primary experienc
 - [Design](design.md): shared control architecture, session lifecycle, CLI/MCP/service contract, desktop experience and migration.
 - [Tasks](tasks.md): 24 implementation tasks, dependencies, completion criteria and release gates.
 - [Release review](release-review.md): what was measured, on what, and the open limitations by name. A review, not a release.
+- [Native feedback audit](native-feedback-audit.md): an external computer-control assessment of the shipped MCP surface, and the four native-adapter defects it found — a screenshot, a resize and a text read that each reported success without establishing it, and a `quit` that could not be satisfied at runtime.
 - [Wave 5 progress](progress/wave-5.md): T00 and T21–T23 as they landed — the suite made dependable and put in CI, Streamable HTTP MCP, the terminal surface, and adapter readiness derived from probes rather than a table.
 - [Wave 4 progress](progress/wave-4.md): T18–T20 as they landed — Yam driving the packaged Yam, the coverage report and the release review.
 - [Wave 5 implementation prompt](wave-5-implementation.md): a dependable Yam-on-Yam suite and a conformant parity gate first, then Streamable HTTP MCP, process/PTY and AT-SPI.

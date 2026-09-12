@@ -15,7 +15,7 @@ import {
   NavigationError,
   SessionError,
 } from "@svatah/yam-surface";
-import { AxSurface, AX_CAPABILITIES, keyChord } from "../src/index.js";
+import { AxBridgeError, AxSurface, AX_CAPABILITIES, keyChord } from "../src/index.js";
 import { recordedBridge, type AppScreen, type RecordedBridge } from "./recorded.js";
 
 async function open(
@@ -338,5 +338,145 @@ describe("read, check, state (LLD §2.3, §7.5)", () => {
     const { surface, bridge } = await open();
     await surface.screenshot("/tmp/app.png", ["r1"]);
     expect(bridge.screenshots).toEqual(["/tmp/app.png"]);
+  });
+
+  it("reports a screenshot that was not written as a failure of this session", async () => {
+    /*
+     * The Screen Recording permission is a separate grant, and without it
+     * `screencapture` writes nothing. The bridge raises; what this fixes is the
+     * adapter passing that on in its own vocabulary instead of letting a raw
+     * `AxBridgeError` out — a step that took no screenshot must not read as one
+     * that did.
+     */
+    const { surface } = await open({
+      onScreenshot: () => {
+        throw new AxBridgeError(
+          'No screenshot was written to "/tmp/app.png": `screencapture` exited 1.',
+          "could not create image from display",
+        );
+      },
+    });
+    await expect(surface.screenshot("/tmp/app.png")).rejects.toThrow(SessionError);
+    await expect(surface.screenshot("/tmp/app.png")).rejects.toThrow(
+      /No screenshot was written.*could not create image from display/s,
+    );
+  });
+});
+
+describe("an action that cannot be confirmed is not a success (native-feedback D1-D4)", () => {
+  it("reads the window back after a resize, and reports the size it took", async () => {
+    const { surface } = await open();
+    const outcome = await surface.act("resizeWindow", undefined, { width: 700, height: 500 });
+    expect(outcome).toEqual({ ok: true, value: { width: 700, height: 500 } });
+  });
+
+  it("refuses a resize the window did not take", async () => {
+    /*
+     * Calculator's window, which is not resizable: System Events accepts the
+     * `AXSize` write without error and the frame does not move. Reported as
+     * `{ok: true}` until the adapter re-read the frame, which is the whole of
+     * the defect — nothing else in a flow would ever have noticed.
+     */
+    const { surface } = await open({ resizable: false });
+    await expect(
+      surface.act("resizeWindow", undefined, { width: 700, height: 500 }),
+    ).rejects.toThrow(ActionabilityError);
+    await expect(
+      surface.act("resizeWindow", undefined, { width: 700, height: 500 }),
+    ).rejects.toThrow(/asked for 700 by 500 and is 1280 by 860, unchanged/);
+  });
+
+  it("still sends the resize before it judges it", async () => {
+    // The refusal is about the read-back, not about declining to try.
+    const { surface, bridge } = await open({ resizable: false });
+    await expect(
+      surface.act("resizeWindow", undefined, { width: 700, height: 500 }),
+    ).rejects.toThrow(ActionabilityError);
+    expect(bridge.commands).toContainEqual({ kind: "setSize", size: [700, 500] });
+  });
+
+  it("reads a text field's words, not the label beside it", async () => {
+    /*
+     * The defect this exists for: `read("text")` answered with the accessible
+     * *name* first, so a text area whose name is the document title answered
+     * "scratch.txt" for a field holding "Second pass ABC" — and `textContains`
+     * inherited it, so a true assertion about typed text failed.
+     */
+    const { surface } = await open({ screen: "explorer" });
+    const [ref] = await surface.locate({ by: "automationId", value: "explorer-intent", score: 1 });
+    await surface.act("type", ref, { value: "look at the booking page" });
+
+    const [again] = await surface.locate({
+      by: "automationId",
+      value: "explorer-intent",
+      score: 1,
+    });
+    expect(await surface.read("text", again)).toBe("look at the booking page");
+    expect(await surface.read("value", again)).toBe("look at the booking page");
+    // And the name is still there for whoever wants the label.
+    const described = await surface.describe(again!);
+    expect(described.name).toBe("INTENT");
+  });
+
+  it("answers a text assertion on a text field from its words", async () => {
+    const { surface } = await open({ screen: "explorer" });
+    const [ref] = await surface.locate({ by: "automationId", value: "explorer-intent", score: 1 });
+    await surface.act("type", ref, { value: "look at the booking page" });
+    const [again] = await surface.locate({
+      by: "automationId",
+      value: "explorer-intent",
+      score: 1,
+    });
+
+    const contains = await surface.check(
+      { kind: "textContains", value: { kind: "literal", value: "booking page" } },
+      "ref",
+      again,
+    );
+    expect(contains.ok).toBe(true);
+    expect(contains.actual).toBe("look at the booking page");
+
+    const exact = await surface.check(
+      { kind: "text", value: { kind: "literal", value: "look at the booking page" } },
+      "ref",
+      again,
+    );
+    expect(exact.ok).toBe(true);
+  });
+
+  it("leaves a button saying its name, which is what a button says", async () => {
+    // The inversion is for textual roles only: a button's words are its label,
+    // and a read that answered with its `AXValue` would trade one defect for
+    // its mirror image.
+    const { surface } = await open();
+    const [ref] = await surface.locate({ by: "name", value: "Accept", score: 1 });
+    expect(ref).toBeDefined();
+    expect(await surface.read("text", ref!)).toBe("Accept");
+  });
+
+  it("quits an application it attached to by name, addressed by its own bundle", async () => {
+    /*
+     * The refusal this replaces was unanswerable: a bundle could only be named
+     * in `yam.config.yaml` before the session opened, so an application Yam was
+     * driving could never be quit. System Events says which bundle the running
+     * process came from, which answers the ambiguity the refusal was about
+     * rather than ignoring it.
+     */
+    const quits: Array<{ executable: string; bundleId?: string }> = [];
+    const { surface } = await open({
+      identity: { bundleId: "com.apple.TextEdit", bundlePath: "/System/Applications/TextEdit.app" },
+    });
+    void quits;
+    // `quit` reaches the real `quitApplication`, which finds no such process
+    // and reports it gone: the assertion here is that it was *addressed*, not
+    // refused for want of a name.
+    const outcome = await surface.act("quit");
+    expect(outcome.ok).toBe(true);
+  });
+
+  it("still refuses to quit what it cannot identify", async () => {
+    const { surface } = await open({ identity: null });
+    await expect(surface.act("quit")).rejects.toThrow(SessionError);
+    await expect(surface.act("quit")).rejects.toThrow(/could not be identified/);
   });
 });

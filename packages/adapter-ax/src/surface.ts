@@ -74,9 +74,19 @@ import {
 } from "./bridge.js";
 import { matchNodes, synthesise } from "./locate.js";
 import { evaluateAxPredicate } from "./predicates.js";
-import { convertTree, nameOf, type AxSnapshotNode } from "./tree.js";
+import { convertTree, nameOf, saidBy, type AxSnapshotNode } from "./tree.js";
 
 const DEFAULT_MAX_NODES = 1_500;
+
+/**
+ * How far a window's measured size may sit from the one asked for and still
+ * count as obeyed.
+ *
+ * A point, because `AXSize` is written in points and read back through a frame
+ * that a scaled display rounds. Anything wider than rounding is the window
+ * declining, which is the thing worth reporting.
+ */
+const SIZE_TOLERANCE = 1;
 
 /**
  * What this adapter can do (LLD §2.4).
@@ -310,17 +320,51 @@ export class AxSurface implements AgentSurface {
    */
   private async quitTheApplication(): Promise<string> {
     const launch = this.launched ?? this.options.launch;
-    const executable = launch === undefined ? undefined : executableOf(launch, process.platform);
+    let executable = launch === undefined ? undefined : executableOf(launch, process.platform);
+    let quit = this.options.quit ?? {};
+
+    /*
+     * A session that attached by process name asks the process who it is
+     * (native-feedback D4).
+     *
+     * The refusal below is about *ambiguity* — "a quit addressed by process
+     * name alone would reach somebody else's copy" — and it used to be
+     * unanswerable at runtime, because the only place a bundle could be named
+     * was `yam.config.yaml` before the session opened. So an application Yam
+     * had attached to, was driving, and could read the whole tree of, could
+     * never be quit. System Events knows which bundle that process was started
+     * from; asking it resolves the ambiguity from the running process itself
+     * rather than dissolving it by guessing, and the identity used is the one
+     * belonging to the process this session is actually driving.
+     */
+    if (executable === undefined && this.processName !== undefined) {
+      const identity = await this.bridge?.identify?.(this.processName);
+      const bundlePath = identity?.bundlePath;
+      if (bundlePath !== undefined) {
+        // `.app` goes in as a bundle, so `executableOf` builds the same
+        // `Contents/MacOS/…` command line `pgrep -f` matches; anything else is
+        // already the executable.
+        executable = bundlePath.endsWith(".app")
+          ? executableOf({ bundle: bundlePath }, process.platform)
+          : bundlePath;
+      }
+      if (quit.bundleId === undefined && identity?.bundleId !== undefined) {
+        quit = { ...quit, bundleId: identity.bundleId };
+      }
+    }
+
     if (executable === undefined) {
       throw new SessionError(
-        "`Quit the app` needs to know which application to quit. Set `app.launch.bundle` " +
-          "(macOS) or `app.launch.path` in `yam.config.yaml`: a quit addressed by process " +
-          "name alone would reach somebody else's copy of the same application.",
+        `"${this.processName ?? "the application"}" could not be identified: System Events ` +
+          "does not say which bundle it was started from, so there is nothing to address a " +
+          "quit to. Set `app.launch.bundle` (macOS) or `app.launch.path` in " +
+          "`yam.config.yaml`: a quit addressed by process name alone would reach somebody " +
+          "else's copy of the same application.",
         { adapter: "ax" },
       );
     }
 
-    const outcome = await quitApplication(executable, this.options.quit ?? {});
+    const outcome = await quitApplication(executable, quit);
     /*
      * The session is over whether or not the process went: every ref points
      * into a tree that is gone, and a step after this one must fail as a step
@@ -602,9 +646,47 @@ export class AxSurface implements AgentSurface {
             { adapter: "ax" },
           );
         }
+        /*
+         * Read back, because writing `AXSize` is a *request* (native-feedback D2).
+         *
+         * A window declares a minimum and a maximum size, a full-screen or
+         * zoomed window declines to be sized at all, and a window that is not
+         * resizable — Calculator's is the everyday one — takes the write
+         * without error and stays exactly as it was. System Events reports none
+         * of that: the assignment succeeds, so `perform` returns, so this said
+         * `{ok: true}` about a window whose box the very next snapshot showed
+         * unchanged. The write is not the evidence; the size afterwards is.
+         */
+        const before = this.windowSize();
         await bridge.perform({ kind: "setSize", size: [width, height] });
         await this.refresh();
-        return { ok: true };
+        const after = this.windowSize();
+
+        if (after === undefined) {
+          throw new ActionabilityError(
+            `The window of "${this.processName ?? "the application"}" publishes no size, so a ` +
+              "resize to " +
+              `${width} by ${height} cannot be confirmed. Nothing here can tell a window that ` +
+              "refused from one that obeyed.",
+            { adapter: "ax" },
+          );
+        }
+        if (Math.abs(after[0] - width) > SIZE_TOLERANCE || Math.abs(after[1] - height) > SIZE_TOLERANCE) {
+          const stayed =
+            before !== undefined && before[0] === after[0] && before[1] === after[1];
+          throw new ActionabilityError(
+            `The window would not take that size: it was asked for ${width} by ${height} and ` +
+              `is ${after[0]} by ${after[1]}` +
+              (stayed
+                ? ", unchanged — the window is not resizable, or it is zoomed or full-screen."
+                : ` (it was ${before?.[0] ?? "?"} by ${before?.[1] ?? "?"}) — the window clamped ` +
+                  "the request to its own minimum or maximum."),
+            { adapter: "ax" },
+          );
+        }
+        // The size that was actually taken, so the record shows a measurement
+        // rather than the request echoed back at whoever made it.
+        return { ok: true, value: { width: after[0], height: after[1] } };
       }
 
       case "click":
@@ -872,6 +954,20 @@ export class AxSurface implements AgentSurface {
     return this.nodes.find((one) => one.role === node.role && one.name === node.name);
   }
 
+  /**
+   * The window's own size, as the tree it was just read from publishes it.
+   *
+   * The root of an AX window tree *is* the window, so its box is the window's
+   * frame — no second bridge call is needed to learn what a resize achieved.
+   * `undefined` when the root carries no box, which is a window that cannot be
+   * measured rather than one of size zero, and the two must not be confused.
+   */
+  private windowSize(): readonly [number, number] | undefined {
+    const root = this.nodes.find((one) => one.depth === 0);
+    if (root?.box === undefined) return undefined;
+    return [root.box[2], root.box[3]];
+  }
+
   private centreOf(node: AxSnapshotNode): [number, number] {
     if (node.box === undefined) {
       throw new ActionabilityError(
@@ -903,7 +999,9 @@ export class AxSurface implements AgentSurface {
           throw new LocateError(`Reading "${kind}" needs a reference.`, { adapter: "ax" });
         }
         const node = this.nodeFor(ref);
-        if (kind === "text") return node.name ?? node.value ?? "";
+        // `saidBy`, not the name: on a text field the words on the screen are
+        // the value and the name is its label (see `saidBy`).
+        if (kind === "text") return saidBy(node);
         if (kind === "value") return node.value ?? "";
         // `attribute`: the native attributes, which is what a desktop element has.
         if (name === undefined) {
@@ -965,8 +1063,24 @@ export class AxSurface implements AgentSurface {
      * adapter does not do, and would be a false promise if it half-did.
      * REQ-NFR-6's masking is honoured by not screenshotting a secret-injecting
      * step at all, which the executor decides.
+     *
+     * A failure is raised, not swallowed. The bridge now proves the file was
+     * written before it returns, and the caller is told in the same typed
+     * vocabulary the rest of the adapter speaks — a screenshot that did not
+     * happen is an infrastructure failure of this session, not a step that
+     * passed.
      */
-    await this.live().screenshot(path);
+    try {
+      await this.live().screenshot(path);
+    } catch (error) {
+      if (error instanceof AxBridgeError) {
+        throw new SessionError(
+          `${error.message}${error.detail === undefined ? "" : ` (${error.detail})`}`,
+          { adapter: "ax", cause: error },
+        );
+      }
+      throw error;
+    }
   }
 
   /** Whether the accessibility permission is granted, for `surface doctor`. */

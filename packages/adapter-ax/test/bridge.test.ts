@@ -12,6 +12,9 @@
  * needed, so the deadline is short and a timeout is *an answer about the
  * permission* rather than an error.
  */
+import { existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
   AxBridgeError,
@@ -810,5 +813,36 @@ describe("the login-session check (P9-F7, Draft 2.12 §7.5, Draft 2.13)", () => 
     const session = await osascriptBridge({ process: "Yam", run }).session();
     expect(session.usable).toBe(false);
     expect(session.detail).toBe("not macOS");
+  });
+});
+
+/**
+ * The screenshot that was not taken (native-feedback D1).
+ *
+ * `screencapture` was spawned and the promise resolved on `close` *or* on
+ * `error`, with neither the exit code nor the file looked at — so on a host
+ * without the Screen Recording grant, where it prints "could not create image
+ * from display" and writes nothing, `surface_screenshot` answered `status:
+ * "succeeded"` with a path to a file that did not exist. `yam surface doctor`
+ * named that host honestly on the line above. An agent driving a native
+ * application was blind and was told it was not, which is the one failure a
+ * screenshot must never have.
+ */
+describe("screenshots are proved, not assumed (native-feedback D1)", () => {
+  const macOnly = process.platform === "darwin";
+
+  it.runIf(macOnly)("raises when `screencapture` writes no file", async () => {
+    /*
+     * An unwritable path, so the assertion holds on either kind of host:
+     * without the permission `screencapture` fails at the image, with it at the
+     * write, and both are the case this is about — no file, non-zero exit.
+     */
+    const bridge = osascriptBridge({ process: "Yam" });
+    const path = join(tmpdir(), "yam-no-such-directory", "shot.png");
+    await expect(bridge.screenshot(path)).rejects.toThrow(AxBridgeError);
+    await expect(bridge.screenshot(path)).rejects.toThrow(/No screenshot was written/);
+    // And it says which permission, because that is the usual cause.
+    await expect(bridge.screenshot(path)).rejects.toThrow(/Screen Recording/);
+    expect(existsSync(path)).toBe(false);
   });
 });

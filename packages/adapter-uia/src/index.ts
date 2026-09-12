@@ -28,6 +28,7 @@ export {
   insideChooser,
   insideRow,
   isTextual,
+  saidBy,
   nameOf,
   roleOf,
   statesOf,

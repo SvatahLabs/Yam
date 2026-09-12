@@ -256,6 +256,34 @@ export function isTextual(node: AxNode): boolean {
 }
 
 /**
+ * The words an element itself puts on the screen (native-feedback D3).
+ *
+ * A `read("text")` and a `text` predicate ask what an element *says*, and for
+ * most controls that is its accessible name: a button says "All Clear". For a
+ * text field it is the opposite — the name is the label the field was given
+ * ("scratch.txt" on TextEdit's document area, which is the window's own title)
+ * and the words on the screen are the `AXValue`. Preferring the name there
+ * answered a typing assertion with the label of the box that had been typed
+ * into, so `should contain "Second pass"` failed against `actual
+ * "scratch.txt"` on a field that held exactly those words.
+ *
+ * Only the textual roles are inverted, and deliberately so. A checkbox's value
+ * is already withheld by `valueOf`, but a slider's is a number and a button's
+ * is whatever the application put there, and answering "what does it say" with
+ * either would trade this defect for its mirror image.
+ */
+export function saidBy(node: {
+  readonly name?: string;
+  readonly value?: string;
+  readonly source: AxNode;
+}): string {
+  const [first, second] = isTextual(node.source)
+    ? [node.value, node.name]
+    : [node.name, node.value];
+  return first ?? second ?? "";
+}
+
+/**
  * The value a `read("value")` and a `value` predicate see.
  *
  * A checkbox's `AXValue` is a number that `checked` already carries, and

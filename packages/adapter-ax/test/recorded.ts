@@ -26,6 +26,7 @@ import { fileURLToPath } from "node:url";
 import type {
   AxBridge,
   AxCommand,
+  AxIdentity,
   AxNode,
   AxPermission,
   AxSession,
@@ -103,6 +104,19 @@ export interface RecordedBridgeOptions {
    * application.
    */
   readonly onCommand?: (command: AxCommand, current: AppScreen) => AppScreen | void;
+  /**
+   * Whether a `setSize` moves the window.
+   *
+   * The default is a window that obeys, because that is what a resizable one
+   * does. `false` is Calculator: the write succeeds and the frame does not
+   * change, which is the case the adapter has to notice rather than report as
+   * a resize.
+   */
+  readonly resizable?: boolean;
+  /** What `identify()` answers; `null` is a bridge that cannot tell. */
+  readonly identity?: AxIdentity | null;
+  /** What `screenshot()` does; the default writes nothing and says so. */
+  readonly onScreenshot?: (path: string) => void;
 }
 
 export interface RecordedBridge extends AxBridge {
@@ -157,6 +171,8 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
   const screenshots: string[] = [];
   /** `screen:pathIndex` → the value set on it. */
   const values = new Map<string, string>();
+  /** The window's size, once a `setSize` a resizable window obeyed changed it. */
+  let size: readonly [number, number] | undefined;
 
   return {
     commands,
@@ -188,7 +204,16 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
       const window = recordedWindow(screen);
       const nodes: AxNode[] = window.nodes.slice(0, maxNodes).map((node, index) => {
         const set = values.get(`${screen}:${index}`);
-        return set === undefined ? node : { ...node, value: set };
+        const withValue = set === undefined ? node : { ...node, value: set };
+        /*
+         * The window's own box follows a resize it accepted, for the same
+         * reason a set value is remembered: the adapter proves a resize by
+         * re-reading the frame, and a bridge whose frame never moved could not
+         * tell the proof from the defect it was written for.
+         */
+        if (index !== 0 || size === undefined || withValue.box === undefined) return withValue;
+        const [x, y] = withValue.box;
+        return { ...withValue, box: [x, y, size[0], size[1]] as const };
       });
       return { ...window, nodes, truncated: nodes.length < window.nodes.length };
     },
@@ -198,11 +223,20 @@ export function recordedBridge(options: RecordedBridgeOptions = {}): RecordedBri
         const at = indexOfPath(recordedWindow(screen).nodes, command.path);
         if (at !== undefined) values.set(`${screen}:${at}`, command.value);
       }
+      if (command.kind === "setSize" && options.resizable !== false) {
+        size = [command.size[0], command.size[1]];
+      }
       const next = options.onCommand?.(command, screen);
       if (next !== undefined) screen = next;
     },
     async screenshot(path): Promise<void> {
       screenshots.push(path);
+      options.onScreenshot?.(path);
+    },
+    async identify(): Promise<AxIdentity | undefined> {
+      const answer = options.identity;
+      if (answer === null) return undefined;
+      return answer ?? { bundleId: "com.svatah.yam", bundlePath: "/Applications/Yam.app", pid: 4242 };
     },
   };
 }

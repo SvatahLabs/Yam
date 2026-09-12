@@ -9,12 +9,12 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam`](cli.md) | 63 | The yam CLI and MCP server |
 | [`@svatah/yam-adapter-appium`](adapter-appium.md) | 43 | Appium adapter: Android Chrome and native |
 | [`@svatah/yam-adapter-atspi`](adapter-atspi.md) | 28 | Linux AT-SPI accessibility adapter |
-| [`@svatah/yam-adapter-ax`](adapter-ax.md) | 44 | macOS Accessibility adapter: the Yam agent surface over AXUIElement |
+| [`@svatah/yam-adapter-ax`](adapter-ax.md) | 46 | macOS Accessibility adapter: the Yam agent surface over AXUIElement |
 | [`@svatah/yam-adapter-bidi`](adapter-bidi.md) | 40 | WebDriver BiDi adapter (independence proof) |
 | [`@svatah/yam-adapter-http`](adapter-http.md) | 14 | HTTP/API adapter |
 | [`@svatah/yam-adapter-playwright`](adapter-playwright.md) | 41 | Default web adapter: AgentSurface on Playwright |
 | [`@svatah/yam-adapter-process`](adapter-process.md) | 12 | Process and pseudo-terminal adapter |
-| [`@svatah/yam-adapter-uia`](adapter-uia.md) | 39 | Windows UI Automation adapter: the Yam agent surface over UIAutomationClient |
+| [`@svatah/yam-adapter-uia`](adapter-uia.md) | 40 | Windows UI Automation adapter: the Yam agent surface over UIAutomationClient |
 | [`@svatah/yam-bindings`](bindings.md) | 53 | Bindings store, context hash, resolver, synthesis, fingerprint, relocalization |
 | [`@svatah/yam-bindings-cli`](bindings-cli.md) | 28 | The yam-bindings command line: bindings, heal, surface conform and the healing eval for module (a) |
 | [`@svatah/yam-compiler`](compiler.md) | 51 | Compiler tiers, validation, lint and plan writer |

@@ -22,6 +22,7 @@ macOS Accessibility adapter: the Yam agent surface over AXUIElement
 | `AxBridgeError` | class | `export class AxBridgeError extends Error` |  |
 | `AxCheckContext` | interface | `export interface AxCheckContext` |  |
 | `AxCommand` | typealias | `export type AxCommand ` | An action the bridge performs on one element, addressed by its path. |
+| `AxIdentity` | interface | `export interface AxIdentity` | Who a running application actually is (native-feedback D4). |
 | `AxNode` | interface | `export interface AxNode` | One accessibility element, flattened (LLD §7.5). |
 | `AxPermission` | interface | `export interface AxPermission` |  |
 | `AxPermissionState` | typealias | `export type AxPermissionState ` | Why an accessibility call could not be made. |
@@ -49,10 +50,11 @@ macOS Accessibility adapter: the Yam agent surface over AXUIElement
 | `OsascriptBridgeOptions` | interface | `export interface OsascriptBridgeOptions` |  |
 | `OsascriptLanguage` | typealias | `export type OsascriptLanguage = "JavaScript" \| "AppleScript";` | Which `osascript` dialect a script is written in. |
 | `parseWindow` | function | `export function parseWindow(stdout: string):` | Read `WINDOW_SCRIPT`'s answer. |
-| `PERFORM_SCRIPT` | variable | `PERFORM_SCRIPT = `function processWithWindow(se, name)` | One command. |
+| `PERFORM_SCRIPT` | variable | `PERFORM_SCRIPT = `function processWithWindow(se, name)` |  |
 | `registerAxAdapter` | function | `export function registerAxAdapter(): void` | Register the adapter. Idempotent, because the registry refuses a silent |
 | `roleOf` | function | `export function roleOf(` | `AXRole` → an ARIA role, with the subrole consulted first. |
 | `runOsascript` | function | `export async function runOsascript(` | Run one JXA script, with a hard deadline. |
+| `saidBy` | function | `export function saidBy(node:` | The words an element itself puts on the screen (native-feedback D3). |
 | `statesOf` | function | `export function statesOf(node: AxNode): NodeState[]` | The states LLD §2.2 lists, from the attributes macOS exposes. |
 | `synthesise` | function | `export function synthesise(` | The candidate bundle for one element, best first (REQ-REC-3, LLD §3.3). |
 | `valueOf` | function | `export function valueOf(node: AxNode): string \| undefined` | The value a `read("value")` and a `value` predicate see. |

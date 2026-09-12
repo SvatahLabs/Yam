@@ -12,7 +12,7 @@
  */
 import type { CheckResult, CheckSubject, Predicate, Ref, ValueRef } from "@svatah/yam-schema";
 import { CheckError, DataError, NavigationError } from "@svatah/yam-surface";
-import type { AxSnapshotNode } from "./tree.js";
+import { saidBy, type AxSnapshotNode } from "./tree.js";
 
 /** The literal a `ValueRef` names; an unresolved one is a caller mistake (LLD §8.2). */
 export function literalValue(ref: ValueRef): string {
@@ -212,12 +212,12 @@ export function evaluateAxPredicate(
       );
     case "text": {
       const expected = literalValue(predicate.value);
-      const actual = norm(node.name) || norm(node.value);
+      const actual = norm(saidBy(node));
       return negated(result(actual === expected, actual, expected), predicate.negate);
     }
     case "textContains": {
       const expected = literalValue(predicate.value);
-      const own = norm(node.name) || norm(node.value);
+      const own = norm(saidBy(node));
       // The node's own words first, so a leaf's answer is unchanged and cheap.
       const actual = own.includes(expected) ? own : subtreeText(node, context.nodes);
       return negated(result(actual.includes(expected), actual, expected), predicate.negate);
