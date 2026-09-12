@@ -252,3 +252,45 @@ export function Kbd({
     </kbd>
   );
 }
+
+export interface CheckboxProps extends Named {
+  readonly checked: boolean;
+  readonly hint?: string;
+  readonly disabled?: boolean;
+  readonly onChange?: (checked: boolean) => void;
+}
+
+/**
+ * A labelled checkbox.
+ *
+ * Same contract as `Field`: a real `<label for>`, so the accessible name is the
+ * visible text and the words are part of the hit area. `hint` is a sentence
+ * beside it, referenced by `aria-describedby` rather than folded into the name —
+ * a flow sentence says "Show the browser", not "Show the browser, the window
+ * opens where you can see it".
+ */
+export function Checkbox(props: CheckboxProps): React.JSX.Element {
+  const label = requireNamed("Checkbox", props);
+  const hintId = `${props.id}-hint`;
+  return (
+    <div className="sv-check">
+      <input
+        id={props.id}
+        className="sv-check-box"
+        type="checkbox"
+        checked={props.checked}
+        disabled={props.disabled === true}
+        {...(props.hint === undefined ? {} : { "aria-describedby": hintId })}
+        onChange={(event) => props.onChange?.(event.target.checked)}
+      />
+      <label className="sv-check-label" htmlFor={props.id}>
+        {label}
+      </label>
+      {props.hint === undefined ? null : (
+        <span className="sv-check-hint" id={hintId}>
+          {props.hint}
+        </span>
+      )}
+    </div>
+  );
+}

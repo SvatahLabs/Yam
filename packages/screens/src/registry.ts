@@ -209,8 +209,20 @@ const ACTIONS_ONLY: readonly Action[] = [
         );
       }
       const adapter = typeof args.adapter === "string" && args.adapter !== "" ? args.adapter : undefined;
+      /*
+       * Visible unless asked otherwise (SF-04, TV-A09).
+       *
+       * The runtime has taken `headed` since the adapter factory was written —
+       * `headless: options?.headed !== true` — and neither renderer offered it,
+       * so a person driving a browser from the Session screen was driving one
+       * they could not see. Headless is right for `yam run` in CI, which is a
+       * different code path with its own `--headed`; it is the wrong default for
+       * the one screen whose whole subject is watching.
+       */
+      const headed = args["headed"] === undefined ? true : args["headed"] === true || args["headed"] === "true";
       const answer = await service.postSessions({
         ...named,
+        headed,
         ...(adapter === undefined ? {} : { adapter }),
       });
       const { ok: succeeded, result, message } = envelopeOf(answer);
@@ -222,7 +234,7 @@ const ACTIONS_ONLY: readonly Action[] = [
       const sessionId = typeof result["sessionId"] === "string" ? result["sessionId"] : undefined;
       // The adapter the service *used*, never the one asked for (SF-04).
       const used = typeof result["adapter"] === "string" ? result["adapter"] : (adapter ?? "the default adapter");
-      return ok(`Connected with the ${used} adapter.`, {
+      return ok(`Connected with the ${used} adapter${headed ? ", and the window is visible" : " (no window)"}.`, {
         value: answer,
         goTo: "session",
         ...(sessionId === undefined ? {} : { params: { selected: sessionId } }),

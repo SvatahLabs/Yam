@@ -18,6 +18,7 @@ The Yam design system: React components on Radix primitives, every one of them n
 | `AUTOMATION_ID_FORM` | variable | `AUTOMATION_ID_FORM = ID_FORM` | The id form, exported so the app and the TUI can check their own ids. |
 | `Button` | function | `export function Button(props: ButtonProps): React.JSX.Element` | A button. |
 | `ButtonProps` | interface | `export interface ButtonProps extends Named` |  |
+| `Checkbox` | function | `export function Checkbox(props: CheckboxProps): React.JSX.Element` | A labelled checkbox. |
 | `Chip` | function | `export function Chip(` | A neutral chip: a fact, not a status. "page: all", "step 5 only". |
 | `Chooser` | function | `export function Chooser(props: SelectProps): React.JSX.Element` | A chooser, on Radix's `Select`. |
 | `Column` | interface | `export interface Column<Row>` |  |

@@ -22,7 +22,7 @@
  */
 export { requireNamed, UnnamedControlError, AUTOMATION_ID_FORM, type Named } from "./named.js";
 
-export { Button, Field, Chooser, Kbd } from "./components/controls.js";
+export { Button, Field, Chooser, Checkbox, Kbd } from "./components/controls.js";
 export type { ButtonProps, FieldProps, SelectProps, SelectOption } from "./components/controls.js";
 
 export {

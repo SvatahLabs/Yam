@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import {
   Alert,
   Button,
+  Checkbox,
   Chooser,
   Field,
   InspectorSection,
@@ -77,6 +78,14 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
    */
   const [url, setUrl] = useState("");
   const [adapter, setAdapter] = useState("");
+  /*
+   * Visible by default (TV-A09).
+   *
+   * The runtime has taken `headed` all along and nothing offered it, so
+   * connecting from this screen drove a browser nobody could see — on the one
+   * screen whose subject is watching what happens.
+   */
+  const [headed, setHeaded] = useState(true);
 
   const adapterOptions = [
     { value: "", label: "Automatic" },
@@ -112,7 +121,7 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
     "surface.save-automation",
   ]);
   const toolbarActions = props.actions.filter((one) => !PLACED_BY_THE_SCREEN.has(one.id));
-  const doConnect = (): void => props.onAction("surface.connect", { url, adapter });
+  const doConnect = (): void => props.onAction("surface.connect", { url, adapter, headed });
 
   const connected = state.session !== undefined;
   /*
@@ -145,6 +154,13 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
             value={adapter}
             options={adapterOptions}
             onChange={setAdapter}
+          />
+          <Checkbox
+            id="surfaces-headed"
+            label="Show the browser"
+            hint="Off runs it hidden, as a scheduled run does."
+            checked={headed}
+            onChange={setHeaded}
           />
           <Button
             id="action-surface-connect"

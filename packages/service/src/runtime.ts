@@ -70,6 +70,21 @@ export interface RuntimeAttempt {
 export interface RuntimeResolution {
   readonly runtime?: NodeRuntime;
   readonly attempts: readonly RuntimeAttempt[];
+  /**
+   * The `PATH` a child of this app should be given (P-W2-F2).
+   *
+   * Finding a Node is not the whole of the problem a windowed app has. The
+   * service it spawns shells out too — `npx playwright --version` is how adapter
+   * readiness is probed — and on launchd's `PATH` there is no `npx` either. So
+   * the Session screen reported Playwright "unavailable", blaming a missing
+   * browser, on a machine where Playwright 1.62.1 and its browsers were both
+   * installed.
+   *
+   * Present when the `PATH` the process has is not the one that found Node: the
+   * login shell's, with the chosen runtime's own directory ahead of it. Absent
+   * when `PATH` was already enough, so nothing is rewritten that was working.
+   */
+  readonly childPath?: string;
 }
 
 export interface ResolveOptions {
@@ -267,7 +282,7 @@ export function resolveNodeRuntime(options: ResolveOptions = {}): RuntimeResolut
       if (!existsSync(candidate)) continue;
       found = true;
       const chosen = consider("login-shell", `${loginWhere} (${directory})`, candidate);
-      if (chosen !== undefined) return { runtime: chosen, attempts };
+      if (chosen !== undefined) return { runtime: chosen, attempts, childPath: login };
     }
     if (!found) {
       attempts.push({ source: "login-shell", where: loginWhere, rejected: `no ${exe} there either` });
@@ -280,7 +295,9 @@ export function resolveNodeRuntime(options: ResolveOptions = {}): RuntimeResolut
     if (!existsSync(candidate)) continue;
     knownFound = true;
     const chosen = consider("well-known", `a Node where ${candidate.includes("homebrew") || candidate.startsWith("/usr/local") ? "an installer" : "a version manager"} puts one`, candidate);
-    if (chosen !== undefined) return { runtime: chosen, attempts };
+    if (chosen !== undefined) {
+      return { runtime: chosen, attempts, childPath: [dirname(candidate), ...directories].join(delimiter) };
+    }
   }
   if (!knownFound) {
     attempts.push({
@@ -332,4 +349,22 @@ export function describeRuntime(resolution: RuntimeResolution): string {
   const { runtime } = resolution;
   if (runtime === undefined) return "runtime: none found (YAM_NODE, PATH, resources/)";
   return `runtime: ${runtime.path} (${runtime.version}, from ${runtime.source})`;
+}
+
+/**
+ * The environment to spawn a child of the app with (P-W2-F2).
+ *
+ * `PATH` is the recovered one when there was one, with the chosen runtime's own
+ * directory first so the child uses the same Node this did. Everything else is
+ * the caller's. A resolution that found Node on `PATH` changes nothing.
+ */
+export function childEnvironment(
+  resolution: RuntimeResolution,
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): Record<string, string | undefined> {
+  const { runtime, childPath } = resolution;
+  if (runtime === undefined || childPath === undefined) return { ...env };
+  const here = dirname(runtime.path);
+  const parts = childPath.split(delimiter).filter((one) => one !== "" && one !== here);
+  return { ...env, PATH: [here, ...parts].join(delimiter) };
 }

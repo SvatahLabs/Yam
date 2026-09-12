@@ -118,14 +118,32 @@ async function runProbe(adapter: string): Promise<AdapterProbe> {
        * commonest way a first run fails, and the platform table could never
        * see it. `playwright --version` answers from the package; the browser
        * is what `pnpm browsers` installs.
+       *
+       * Three outcomes and not two (P-W2-F2). The old version reported one
+       * reason — "run `playwright install chromium` so a browser is installed" —
+       * for every way this could fail, including the one that actually happened:
+       * a windowed app on macOS has launchd's `PATH`, which has no `npx` on it,
+       * so the probe could not run at all and the answer blamed a missing
+       * browser on a machine that had Playwright 1.62.1 and its browsers. A
+       * diagnostic that names the wrong cause is worse than none: it sends
+       * somebody to install what they already have.
        */
+      if (ask("npx", ["--version"], 20_000) === undefined) {
+        return {
+          present: false,
+          reason:
+            "`npx` could not be run from here, so Playwright could not be asked its version. " +
+            "This is usually a windowed application's environment rather than a missing " +
+            "install: a Node on PATH is what `npx` needs.",
+        };
+      }
       const version = ask("npx", ["--no-install", "playwright", "--version"], 20_000);
       return version === undefined
         ? {
             present: false,
             reason:
-              "Playwright answered no version here. Run `npx playwright install chromium` so " +
-              "a browser is installed.",
+              "Playwright answered no version here. Run `npm i -D @playwright/test` if it is " +
+              "not installed, then `npx playwright install chromium` for a browser to drive.",
           }
         : { present: true, version };
     }

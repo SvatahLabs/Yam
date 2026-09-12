@@ -117,6 +117,14 @@ export interface StartOptions {
    * function `spawn`, and lets the caller show the resolution's own alert.
    */
   readonly runtime: string;
+  /**
+   * The environment to spawn with, `PATH` included (P-W2-F2).
+   *
+   * `process.env` on a windowed macOS app is launchd's, which has no `npx` on
+   * it — so every readiness probe the service runs answered "not installed" on a
+   * machine where the thing was installed.
+   */
+  readonly env?: Readonly<Record<string, string | undefined>>;
   readonly onLog?: (line: string) => void;
   /** How long the handshake may take before the spawn is abandoned. */
   readonly timeoutMs?: number;
@@ -154,7 +162,7 @@ export async function startOrAdopt(options: StartOptions): Promise<RunningServic
   const child = spawn(options.runtime, [options.cli, "serve", options.project, "--port", "0"], {
     stdio: ["ignore", "pipe", "pipe"],
     env: {
-      ...process.env,
+      ...(options.env ?? process.env),
       // The service must not inherit a credential from the app's environment: it
       // compiles and runs, and neither needs a model (REQ-RUN-1).
       ANTHROPIC_API_KEY: "",

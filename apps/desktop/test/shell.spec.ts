@@ -355,7 +355,15 @@ test.afterAll(async () => {
  * again until one answers is what a person looking at the application does.
  */
 async function livePage(): Promise<Page> {
-  const until = Date.now() + 60_000;
+  /*
+   * Ten seconds, not sixty (P-W2-F3).
+   *
+   * This runs in `beforeEach`, and a hook's time comes out of the test's — so a
+   * sixty-second ceiling here forced the global timeout above it whatever the
+   * tests themselves needed. It polls every 250 ms and the app settles in well
+   * under a second in practice; forty attempts is a retry policy, not a wait.
+   */
+  const until = Date.now() + 10_000;
   let last: unknown;
   for (;;) {
     try {
@@ -398,14 +406,20 @@ test.beforeEach(async () => {
   page = await livePage();
 });
 
-test("opens into Surfaces by default, with the four-section rail (T14, SF-02, SF-16)", async () => {
-  // Surface-first navigation (T14): the four sections, and the screens under them.
+test("opens into Session by default, with the four-section rail (T14, SF-02, SF-16, REQ-ADE-14)", async () => {
+  /*
+   * Surface-first navigation (T14), after Draft 2.27 merged Surfaces and Record.
+   *
+   * The section and its screen are both `session` now; this asked for
+   * `section-surfaces` and `rail-surfaces` for a wave, while the suite skipped
+   * itself for want of a packaged build.
+   */
   for (const id of [
-    "section-surfaces",
+    "section-session",
     "section-automations",
     "section-activity",
     "section-settings",
-    "rail-surfaces",
+    "rail-session",
     "rail-flows",
     "rail-runs",
     "rail-bindings",
@@ -418,9 +432,12 @@ test("opens into Surfaces by default, with the four-section rail (T14, SF-02, SF
     await expect(page.locator(`#${id}`), `${id} is missing from the rail`).toBeVisible();
   }
 
-  // Surfaces is the default: the toolbar says Surfaces and the connect bar is on
-  // the screen — no project was needed to reach it (SF-02).
-  await expect(page.locator("#toolbar-title")).toHaveText("Surfaces");
+  /*
+   * Session is the default, and it opens in `do` — the mode that draws what
+   * Surfaces drew. The connect bar is on the screen with no project (SF-02).
+   */
+  await expect(page.locator("#toolbar-title")).toHaveText("Session");
+  await expect(page.locator("#session-mode-do")).toHaveAttribute("aria-selected", "true");
   await expect(page.locator("#surfaces-url")).toBeVisible();
   await expect(page.locator("#action-surface-connect")).toBeVisible();
   await expect(page.locator("#surfaces-discovery")).toBeVisible();
@@ -467,6 +484,12 @@ test("every interactive control on the Flows screen is named and id'd (P8-F3)", 
 
 test("Record on the Flows screen starts a session with the fake gateway", async () => {
   /*
+   * This one executes a flow in the packaged app — a spawned `yam serve`, a real
+   * browser, steps arriving — so it is minutes rather than milliseconds, and
+   * says so here rather than making every other test pay for it.
+   */
+  test.setTimeout(240_000);
+  /*
    * One flow, chosen first.
    *
    * `record.start` records what the Flows screen has open, and the screen opens
@@ -499,11 +522,16 @@ test("Record on the Flows screen starts a session with the fake gateway", async 
   });
 
   /*
-   * `record.start` goes to the Record review, which T10.1 built — so the shell
-   * shows it rather than falling back to anything. Back to Flows for the run.
+   * `record.start` goes to Session in `record` mode (Draft 2.27), which is where
+   * the Record review went — so the shell shows it rather than falling back to
+   * anything. This asked for a "Record review" heading, which stopped existing
+   * with the merge. Back to Flows for the run.
    */
   page = await livePage();
-  await expect(page.getByRole("heading", { name: "Record review" })).toBeVisible({
+  await expect(page.locator("#session-mode-record")).toHaveAttribute("aria-selected", "true", {
+    timeout: 60_000,
+  });
+  await expect(page.getByRole("heading", { name: "Session" })).toBeVisible({
     timeout: 60_000,
   });
   await page.locator("#rail-flows").click();
@@ -511,6 +539,12 @@ test("Record on the Flows screen starts a session with the fake gateway", async 
 });
 
 test("Run on the Flows screen starts a run and opens the Run screen", async () => {
+  /*
+   * This one executes a flow in the packaged app — a spawned `yam serve`, a real
+   * browser, steps arriving — so it is minutes rather than milliseconds, and
+   * says so here rather than making every other test pay for it.
+   */
+  test.setTimeout(240_000);
   await page.locator("#flows-list").getByText("guards-and-compensation.flow").click();
 
   const run = page.locator("#action-run-flow");
@@ -527,6 +561,13 @@ test("Run on the Flows screen starts a run and opens the Run screen", async () =
 });
 
 test("the Run screen shows the run's steps, audit and inspector", async () => {
+  /*
+   * `showRunScreen` starts a run when one is not already showing — usually it is,
+   * left by the test before, and this finishes in milliseconds. The slow path is
+   * real though, and a conditional minutes-long path under a thirty-second
+   * global is a flake waiting for the order to change.
+   */
+  test.setTimeout(240_000);
   /*
    * Still on the Run screen the previous test navigated to, or back on it. The
    * rail's `Runs` item goes to the *Legacy* screens in Phase 9 — `runs` is one
@@ -555,6 +596,13 @@ test("the Run screen shows the run's steps, audit and inspector", async () => {
  * this screen, each checked on the packaged application.
  */
 test("the Run toolbar keeps its buttons on one line, however long the title", async () => {
+  /*
+   * `showRunScreen` starts a run when one is not already showing — usually it is,
+   * left by the test before, and this finishes in milliseconds. The slow path is
+   * real though, and a conditional minutes-long path under a thirty-second
+   * global is a flake waiting for the order to change.
+   */
+  test.setTimeout(240_000);
   await showRunScreen();
 
   /*
@@ -646,6 +694,13 @@ test("the Run toolbar keeps its buttons on one line, however long the title", as
 });
 
 test("the inspector says each of its headings once", async () => {
+  /*
+   * `showRunScreen` starts a run when one is not already showing — usually it is,
+   * left by the test before, and this finishes in milliseconds. The slow path is
+   * real though, and a conditional minutes-long path under a thirty-second
+   * global is a flake waiting for the order to change.
+   */
+  test.setTimeout(240_000);
   await showRunScreen();
   await page.locator(".sv-step").first().click();
   await expect(page.locator("#inspector-step")).toBeVisible();
@@ -668,6 +723,13 @@ test("the inspector says each of its headings once", async () => {
 });
 
 test("the audit pane renders the call detail the model carries", async () => {
+  /*
+   * `showRunScreen` starts a run when one is not already showing — usually it is,
+   * left by the test before, and this finishes in milliseconds. The slow path is
+   * real though, and a conditional minutes-long path under a thirty-second
+   * global is a flake waiting for the order to change.
+   */
+  test.setTimeout(240_000);
   await showRunScreen();
   /*
    * Polled until the audit has filled, not until its first row appears (T11.1).
@@ -703,6 +765,12 @@ test("the audit pane renders the call detail the model carries", async () => {
 });
 
 test("Run again is a button on the Run screen, and it starts another run", async () => {
+  /*
+   * This one executes a flow in the packaged app — a spawned `yam serve`, a real
+   * browser, steps arriving — so it is minutes rather than milliseconds, and
+   * says so here rather than making every other test pay for it.
+   */
+  test.setTimeout(240_000);
   await showRunScreen();
   const again = page.locator("#action-run-again");
   await expect(again).toBeVisible();
@@ -828,6 +896,21 @@ async function unnamedControls(): Promise<string[]> {
   });
 }
 
+/**
+ * Reach one of Session's three modes (REQ-ADE-14).
+ *
+ * Draft 2.27 merged Surfaces and Record into one screen with a mode strip, so
+ * `goTo("surfaces", …)` and `goTo("record", …)` stopped naming anything. They
+ * stayed in this file for a wave, because the whole suite skips without a
+ * packaged build and nobody had packaged one — a case that cannot run is a case
+ * that cannot fail.
+ */
+async function goToMode(mode: "record" | "say" | "do"): Promise<void> {
+  await goTo("session", "Session");
+  await page.locator(`#session-mode-${mode}`).click();
+  await expect(page.locator(`#session-mode-${mode}`)).toHaveAttribute("aria-selected", "true");
+}
+
 /** Reach a screen the way a person does: the rail, or the palette's Go-to row. */
 async function goTo(screen: string, label: string): Promise<void> {
   page = await livePage();
@@ -873,7 +956,7 @@ async function goTo(screen: string, label: string): Promise<void> {
 
 test.describe("every screen (T10.1, T10.2)", () => {
   const SCREENS: ReadonlyArray<[string, string]> = [
-    ["surfaces", "Surfaces"],
+    ["session", "Session"],
     ["flows", "Flows"],
     ["runs", "Runs"],
     ["bindings", "Bindings"],
@@ -882,7 +965,6 @@ test.describe("every screen (T10.1, T10.2)", () => {
     ["data", "Data"],
     ["import", "Import prototype database"],
     ["settings", "Settings"],
-    ["record", "Record review"],
     ["run", "Run"],
     ["heal", "Heal review"],
   ];
@@ -986,7 +1068,7 @@ test("the Heal review offers the runs worth healing", async () => {
 });
 
 test("the Record review chooses its gateway and says what a fake session is", async () => {
-  await goTo("record", "Record review");
+  await goToMode("record");
   const gateway = page.locator("#record-gateway");
   await expect(gateway).toBeVisible();
 
@@ -1083,7 +1165,7 @@ test("the Data screen names every secret and shows none of them", async () => {
  * once a surface is connected the form comes from the catalogue.
  */
 test("Surfaces offers a connect form and no prose intent (T15, SF-12)", async () => {
-  await goTo("surfaces", "Surfaces");
+  await goToMode("do");
   await expect(page.locator("#surfaces-url")).toBeVisible();
   await expect(page.locator("#action-surface-connect")).toBeVisible();
   await expect(page.locator("#surfaces-discovery")).toBeVisible();
@@ -1194,10 +1276,7 @@ async function atWidth<T>(px: number, read: () => Promise<T>): Promise<T> {
 }
 
 test("the Record screen's toolbar keeps its title, its select and availableWhen (P10-F3)", async () => {
-  page = await livePage();
-  await page.locator("#rail-flows").click();
-  await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
-  await page.locator("#palette-go-record").click();
+  await goToMode("record");
   await expect(page.locator("#record-gateway")).toBeVisible({ timeout: 60_000 });
 
   for (const width of [1440, 1100]) {
@@ -1282,10 +1361,7 @@ test("the Record screen's toolbar keeps its title, its select and availableWhen 
 });
 
 test("a toolbar that runs out of room sheds into the palette, and says so (P10-F3)", async () => {
-  page = await livePage();
-  await page.locator("#rail-flows").click();
-  await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
-  await page.locator("#palette-go-record").click();
+  await goToMode("record");
   await expect(page.locator("#record-gateway")).toBeVisible({ timeout: 60_000 });
 
   const read = async () =>

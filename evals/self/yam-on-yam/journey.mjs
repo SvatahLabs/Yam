@@ -137,7 +137,7 @@ async function actOn(driver, session, want, action, args) {
  */
 export const JOURNEY_CHECKS = [
   "a session opens on the packaged application",
-  "the packaged application opens into Surfaces",
+  "the packaged application opens into Session",
   "the connect form offers a URL to fill",
   "the sample application's URL is typed into it",
   "Connect surface is offered",
@@ -177,22 +177,25 @@ export async function primaryJourney({ driver, connect, sampleUrl, record, label
     if (session === undefined) return { reached: false, session };
 
     /*
-     * 2 — the application opened into Surfaces (SF-02, SF-16).
+     * 2 — the application opened into Session (SF-02, SF-16, REQ-ADE-14).
      *
-     * Asserted by something **only the Surfaces screen has**, not by the rail.
-     * The rail carries a button called "Surfaces" on every screen in the
-     * application, so a check that looked for one passed while the window was
-     * showing Automations — which is how a run in which the connect form was
-     * never on screen still reported "opens into Surfaces".
+     * Asserted by something **only that screen has**, not by the rail. The rail
+     * carries the button on every screen in the application, so a check that
+     * looked for one passed while the window was showing Automations — which is
+     * how a run in which the connect form was never on screen still reported
+     * "opens into Surfaces".
+     *
+     * Draft 2.27 merged Surfaces into Session, and this went on asking for a
+     * button called "Surfaces" — one of three suites that did.
      */
     const rail = await driver.call("snapshot", { session, interactiveOnly: true, maxNodes: 200 });
-    const surfacesRail = findNode(rail.envelope, { role: "button", name: "Surfaces" });
+    const surfacesRail = findNode(rail.envelope, { role: "button", name: "Session" });
     const { node: urlField, snapshot: full } = await waitFor(driver, session, {
       role: "textbox",
       contains: "URL",
     });
     check(
-      "the packaged application opens into Surfaces",
+      "the packaged application opens into Session",
       succeeded(rail) && surfacesRail !== undefined && urlField !== undefined,
       urlField === undefined
         ? `the rail is there and the connect form is not: ${nodeSummary(full?.envelope, 20)}`

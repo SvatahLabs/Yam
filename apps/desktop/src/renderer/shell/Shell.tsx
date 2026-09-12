@@ -696,6 +696,19 @@ export function Shell(props: ShellProps): React.JSX.Element {
                   : "sv-rail-heading sv-rail-section"
               }
               {...(sectionOf(showing) === section.id ? { "aria-current": "page" as const } : {})}
+              /*
+               * The section says it is a section (P-W2-F4).
+               *
+               * Session is a section *and* the screen under it, so the rail
+               * carried two buttons both called "Session" — `yam surface
+               * snapshot` of the app's own tree shows them adjacent:
+               * `button "Session" [e27], button "Session" [e28]`. Two controls
+               * with one name is a control a flow sentence cannot address and a
+               * screen reader cannot distinguish, and it is the kind of defect
+               * only something reading the accessibility tree can see: the
+               * suite that checks names here looks for *missing* ones.
+               */
+              aria-label={`${section.label} section`}
               onClick={() => {
                 setParams({});
                 setLastOutcome(undefined);

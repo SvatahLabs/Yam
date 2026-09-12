@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import {
   describeRuntime,
   majorOf,
+  childEnvironment,
   resolveNodeRuntime,
   runtimeNotFoundMessage,
   SUPPORTED_NODE_MAJOR,
@@ -213,5 +214,52 @@ describe("a windowed app does not have the shell's PATH", () => {
     });
     expect(resolution.runtime).toBeUndefined();
     expect(runtimeNotFoundMessage(resolution.attempts)).toContain("v18.20.4");
+  });
+});
+
+/**
+ * Finding Node is not the whole of it (P-W2-F2).
+ *
+ * The service the app spawns shells out too — `npx playwright --version` is how
+ * adapter readiness is probed — so a service handed launchd's PATH reports every
+ * probed adapter unavailable. The Session screen said Playwright was not
+ * installed, and told the person to install a browser, on a machine with
+ * Playwright 1.62.1 and its browsers both present.
+ */
+describe("what a child of the app is spawned with", () => {
+  const GUI_PATH = "/usr/bin:/bin:/usr/sbin:/sbin";
+
+  it("hands on the PATH that found the runtime, with that runtime first", () => {
+    const dir = withFiles("node");
+    const resolution = resolveNodeRuntime({
+      env: { PATH: GUI_PATH },
+      platform: "darwin",
+      probe: (path) => (path === join(dir, "node") ? "v22.23.2" : undefined),
+      loginPath: () => `${GUI_PATH}:${dir}`,
+      wellKnown: () => [],
+    });
+    const env = childEnvironment(resolution, { PATH: GUI_PATH, HOME: "/Users/x" });
+    expect(env["PATH"]?.split(":")[0]).toBe(dir);
+    expect(env["PATH"]).toContain("/usr/bin");
+    /* Everything else is the caller's, untouched. */
+    expect(env["HOME"]).toBe("/Users/x");
+  });
+
+  /* A resolution that found Node on PATH rewrites nothing. */
+  it("leaves PATH alone when PATH was already enough", () => {
+    const dir = withFiles("node");
+    const resolution = resolveNodeRuntime({
+      env: { PATH: dir },
+      platform: "darwin",
+      probe: () => "v22.23.2",
+      ...NOTHING_ELSE,
+    });
+    expect(resolution.childPath).toBeUndefined();
+    expect(childEnvironment(resolution, { PATH: dir })["PATH"]).toBe(dir);
+  });
+
+  it("names no runtime and rewrites nothing when none was found", () => {
+    const resolution = resolveNodeRuntime({ env: { PATH: "" }, platform: "darwin", ...NOTHING_ELSE });
+    expect(childEnvironment(resolution, { PATH: "x" })["PATH"]).toBe("x");
   });
 });

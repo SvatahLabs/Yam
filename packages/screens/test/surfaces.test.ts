@@ -191,11 +191,29 @@ describe("Surfaces actions run against the broker (SF-04, SF-05)", () => {
     });
     const outcome = await actionById("surface.connect")!.run(service, { url: "http://127.0.0.1:4173" });
     expect(outcome.ok).toBe(true);
-    expect(outcome.message).toBe("Connected with the bidi adapter.");
+    expect(outcome.message).toBe("Connected with the bidi adapter, and the window is visible.");
     expect(outcome.goTo).toBe("session");
     expect(outcome.params?.selected).toBe("s_new");
     const call = service.calls.find((one) => one.method === "postSessions");
-    expect(call?.args[0]).toEqual({ url: "http://127.0.0.1:4173" });
+    /*
+     * `headed` is sent, and sent true: the runtime has taken it since the
+     * adapter factory was written and neither renderer offered it, so connecting
+     * from the Session screen drove a browser nobody could see.
+     */
+    expect(call?.args[0]).toEqual({ url: "http://127.0.0.1:4173", headed: true });
+  });
+
+  it("connects hidden when asked to, and says so", async () => {
+    const service = fakeService({
+      surface: { connect: ok({ sessionId: "s_new", adapter: "playwright", kind: "web" }) },
+    });
+    const outcome = await actionById("surface.connect")!.run(service, {
+      url: "http://127.0.0.1:4173",
+      headed: false,
+    });
+    expect(outcome.message).toContain("no window");
+    const call = service.calls.find((one) => one.method === "postSessions");
+    expect((call?.args[0] as { headed?: boolean }).headed).toBe(false);
   });
 
   it("connect surfaces the service's refusal reason, not a generic one (SF-17)", async () => {

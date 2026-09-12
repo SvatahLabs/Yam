@@ -40,6 +40,7 @@ import { openDebugLog, type DebugLog } from "./debug.js";
 import { startOrAdopt, type RunningService, type ServiceConnection } from "./service.js";
 import {
   describeRuntime,
+  childEnvironment,
   resolveNodeRuntime,
   runtimeNotFoundMessage,
   type NodeRuntime,
@@ -101,13 +102,19 @@ function cliPath(): string {
  * Never `process.execPath`. Packaged, that is this application with the
  * `RunAsNode` fuse off, and spawning it produced a second APP_DIR that printed no
  * handshake — the defect the whole of T8.1 is about. The three places §13.6
- * names are tried in order and the failure names all three, because the person
+ * names are tried in order and the failure names all of them, because the person
  * who sees it is looking at an application and has no terminal to read.
+ *
+ * The `PATH` comes back with it (P-W2-F2). Finding a Node is not the whole
+ * problem: the service shells out too — `npx playwright --version` is how
+ * adapter readiness is probed — and on launchd's `PATH` there is no `npx`
+ * either. The Session screen reported Playwright unavailable, blaming a missing
+ * browser, on a machine that had Playwright and its browsers installed.
  */
-function nodeRuntime(cli: string): NodeRuntime {
+function nodeRuntime(cli: string): { runtime: NodeRuntime; env: Record<string, string | undefined> } {
   const resolution = resolveNodeRuntime({ cli });
   if (resolution.runtime === undefined) throw new Error(runtimeNotFoundMessage(resolution.attempts));
-  return resolution.runtime;
+  return { runtime: resolution.runtime, env: childEnvironment(resolution) };
 }
 
 /**
@@ -137,7 +144,7 @@ async function openProjectNow(directory: string, remember = true): Promise<Servi
   await closeProject();
 
   const cli = cliPath();
-  const runtime = nodeRuntime(cli);
+  const { runtime, env } = nodeRuntime(cli);
   runtime_ = runtime;
   window_?.webContents.send("service:log", describeRuntime({ runtime, attempts: [] }));
 
@@ -146,6 +153,7 @@ async function openProjectNow(directory: string, remember = true): Promise<Servi
     userDataDir: app.getPath("userData"),
     cli,
     runtime: runtime.path,
+    env,
     onLog: (line) => window_?.webContents.send("service:log", line),
   });
 

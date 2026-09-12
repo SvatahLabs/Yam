@@ -91,7 +91,12 @@ export async function negativeCases({ driver, connect, record, label }) {
     /* ── 1. A postcondition that holds, then one that does not ───────────── */
     const right = await driver.call("check", {
       session,
-      predicate: { kind: "textContains", value: "Surfaces" },
+      /*
+       * "Session", since Draft 2.27 merged Surfaces into it. This read
+       * "Surfaces" and failed as CHECK_FAILED — Yam reporting correctly that the
+       * text was not there, against an expectation that had gone stale.
+       */
+      predicate: { kind: "textContains", value: "Session" },
       subject: "page",
     });
     check(

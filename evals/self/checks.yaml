@@ -153,17 +153,18 @@ checks:
       source: "app-playwright"
       name: "Surfaces offers a connect form and no prose intent (T15, SF-12)"
   - id: "app.opens-into-the-new-flows-screen-not-the-eleven-tabs"
-    # Surface-first (T14): the app opens into Surfaces, not Flows. Both sides
+    # Surface-first (T14): the app opens into Session, not Flows — Draft 2.27
+    # merged Surfaces into it. Both sides
     # now drive the packaged application and ask the same question of it —
     # Yam's through `yam surface` and the MCP tools against the accessibility
     # tree and the renderer, Playwright's over CDP (T18, T20).
-    says: "opens into Surfaces by default, with the four-section rail (T14, SF-02, SF-16)"
+    says: "opens into Session by default, with the four-section rail (T14, SF-02, SF-16, REQ-ADE-14)"
     yam:
       source: "yam-on-yam"
-      name: "the packaged application opens into Surfaces"
+      name: "the packaged application opens into Session"
     external:
       source: "app-playwright"
-      name: "opens into Surfaces by default, with the four-section rail (T14, SF-02, SF-16)"
+      name: "opens into Session by default, with the four-section rail (T14, SF-02, SF-16, REQ-ADE-14)"
   - id: "app.yam-drives-the-packaged-yam-end-to-end"
     says: "Yam drives the packaged Yam through its own public interfaces: connect to the sample app, select a control, fill it, and disconnect (T18, SF-21)."
     # The mission's own acceptance scenario 8. Its `yam` side is the journey

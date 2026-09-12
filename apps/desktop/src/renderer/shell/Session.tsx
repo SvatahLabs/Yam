@@ -51,6 +51,14 @@ export function ModeStrip(props: {
       {(["record", "say", "do"] as const).map((one) => (
         <button
           key={one}
+          /*
+           * An id, because every interactive control has one (REQ-ADE-6, LLD
+           * §13.7) — a flow sentence has to be able to say "the Record tab" and
+           * mean something. These three had none: the merge that made this strip
+           * landed while the suite that checks the rule was skipping for want of
+           * a packaged build.
+           */
+          id={`session-mode-${one}`}
           type="button"
           role="tab"
           aria-selected={props.mode === one}
@@ -64,14 +72,41 @@ export function ModeStrip(props: {
   );
 }
 
+/**
+ * The screen, with its mode strip above whichever mode is showing.
+ *
+ * The strip was written, exported, and never rendered — so the app had a screen
+ * with three modes and nothing on it to change them, which is the same defect
+ * as the cockpit having a rail it never drew: the model knows and the view does
+ * not show. The mode is a screen parameter, so switching re-loads rather than
+ * remounting, and the broker session is never touched (REQ-ADE-14).
+ */
 export function SessionScreen(props: ScreenProps<SessionState>): React.JSX.Element {
   const { state } = props;
-  if (state.mode === "record") return <RecordScreen {...props} state={recordOf(state)} />;
-  if (state.mode === "do") return <SurfacesScreen {...props} state={surfaceOf(state)} />;
+  const strip = (
+    <ModeStrip mode={state.mode} onMode={(mode) => props.onParams({ ...props.params, mode })} />
+  );
+  if (state.mode === "record") {
+    return (
+      <>
+        {strip}
+        <RecordScreen {...props} state={recordOf(state)} />
+      </>
+    );
+  }
+  if (state.mode === "do") {
+    return (
+      <>
+        {strip}
+        <SurfacesScreen {...props} state={surfaceOf(state)} />
+      </>
+    );
+  }
 
   const say = state.say;
   return (
     <div className="sv-say">
+      {strip}
       {say.unbound === undefined ? null : (
         <Alert tone="abort" id="session-unbound">
           Nothing is bound to “{say.unbound.phrase}”. {say.unbound.reason}

@@ -838,3 +838,34 @@
   background: var(--accent);
   outline: none;
 }
+
+/*
+ * A checkbox and its label (TV-A09).
+ *
+ * `accent-color` rather than a rebuilt control: the native one is the one every
+ * assistive technology and every desktop adapter already knows, and the only
+ * thing wrong with it by default is that it is the system's blue.
+ */
+.sv-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sv-check-box {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+
+.sv-check-label {
+  color: var(--fg2);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sv-check-hint {
+  color: var(--dim);
+  font-size: 11px;
+}

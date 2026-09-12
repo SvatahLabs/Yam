@@ -249,7 +249,7 @@ try {
     await page.locator("#rail-surfaces").waitFor({ state: "visible", timeout: 30000 });
     await page.locator("#surfaces-discovery").waitFor({ state: "visible", timeout: 30000 });
     const title = (await page.locator("#toolbar-title").textContent())?.trim();
-    note(`[${label}] opens into Surfaces by default`, title === "Surfaces", `title=${title}`);
+    note(`[${label}] opens into Session by default`, title === "Session", `title=${title}`);
     const sectionActive = await page.locator("#section-surfaces").getAttribute("aria-current");
     note(`[${label}] the Surfaces section is current`, sectionActive === "page");
 
