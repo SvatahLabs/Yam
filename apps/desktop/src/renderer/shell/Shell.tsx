@@ -414,22 +414,10 @@ export function Shell(props: ShellProps): React.JSX.Element {
   }, [paletteOpen, runAction, screen, state]);
 
   /*
-   * The appearance to draw in (TV-18, TV-A06).
-   *
-   * The preference has been stored since the app had preferences and applied to
-   * nothing — `data-theme` appeared nowhere outside the component sheet. It is
-   * on the root now, and it follows the operating system while the app is open
-   * rather than sampling it at launch.
+   * The appearance is the document root's (TV-18, TV-A06), set by `useThemeRoot`
+   * in `App` — not this component's `<div>`, which is where it was and which
+   * left every screen rendered outside Shell unthemed.
    */
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
-  useEffect(() => {
-    /* In a browser harness there is no bridge, and dark is the default. */
-    try {
-      return bridge().onTheme((next: "light" | "dark") => setTheme(next));
-    } catch {
-      return undefined;
-    }
-  }, []);
 
   /* ── the palette's rows: the registry, filtered by this state ──────────── */
 
@@ -602,7 +590,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
   }
 
   return (
-    <div className="sv-app sv-root" data-theme={theme}>
+    <div className="sv-app">
       {/* ── top bar ───────────────────────────────────────────────────────── */}
       <header className="sv-topbar">
         <span className="sv-brand">

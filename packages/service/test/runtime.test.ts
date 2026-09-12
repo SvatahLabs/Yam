@@ -25,6 +25,16 @@ function withFiles(...names: readonly string[]): string {
   return dir;
 }
 
+/**
+ * The two steps that reach outside the test, switched off.
+ *
+ * The login shell and the platform's install locations both look at the machine
+ * running the suite. A test that says `PATH: ""` and expects nothing found would
+ * otherwise pass on a machine without Homebrew and fail on one with it — a test
+ * that measures the laptop. Every case that asserts *absence* names this.
+ */
+const NOTHING_ELSE = { loginPath: () => undefined, wellKnown: () => [] } as const;
+
 describe("the order LLD §13.6 states", () => {
   it("prefers YAM_NODE", () => {
     const path = join(withFiles("my-node"), "my-node");
@@ -69,6 +79,7 @@ describe("the order LLD §13.6 states", () => {
       env: { PATH: "" },
       platform: "darwin",
       probe: () => "v22.23.2",
+      ...NOTHING_ELSE,
     });
     expect(cli).toContain("yam");
     expect(resolution.runtime?.source).toBe("resources");
@@ -80,6 +91,7 @@ describe("the order LLD §13.6 states", () => {
       env: { PATH: "" },
       platform: "darwin",
       probe: () => "v22.23.2",
+      ...NOTHING_ELSE,
     });
     expect(resolution.runtime).toBeUndefined();
     expect(JSON.stringify(resolution)).not.toContain(process.execPath);
@@ -88,10 +100,11 @@ describe("the order LLD §13.6 states", () => {
 
 describe("what it says when there is nothing to run", () => {
   it("names the three places, which is what the Project screen shows", () => {
-    const resolution = resolveNodeRuntime({ env: { PATH: "" }, platform: "darwin" });
+    const resolution = resolveNodeRuntime({ env: { PATH: "" }, platform: "darwin", ...NOTHING_ELSE });
     const message = runtimeNotFoundMessage(resolution.attempts);
     expect(message).toContain("YAM_NODE");
     expect(message).toContain("PATH");
+    expect(message).toContain("login shell");
     expect(message).toContain("resources/");
     expect(message).toContain(`Node ${SUPPORTED_NODE_MAJOR}`);
   });
@@ -123,5 +136,82 @@ describe("this machine", () => {
     const resolution = resolveNodeRuntime();
     expect(resolution.runtime).toBeDefined();
     expect(majorOf(resolution.runtime!.version)!).toBeGreaterThanOrEqual(SUPPORTED_NODE_MAJOR);
+  });
+});
+
+/**
+ * The failure a person actually hits (P-W2-F1).
+ *
+ * A packaged app launched from Finder on macOS inherits `launchd`'s environment:
+ * `/usr/bin:/bin:/usr/sbin:/sbin`, and nothing a shell profile added. Homebrew
+ * puts Node at `/opt/homebrew/bin/node`, every version manager puts it under a
+ * home directory, and none of those are on that PATH — so a machine with a
+ * perfectly good Node 22 looked, from inside the window, like a machine with
+ * none. The first packaged launch showed exactly that.
+ *
+ * Two recoveries, in order: ask the login shell what its PATH is, and failing
+ * that look where installers put things.
+ */
+describe("a windowed app does not have the shell's PATH", () => {
+  const GUI_PATH = "/usr/bin:/bin:/usr/sbin:/sbin";
+
+  it("recovers the runtime from the login shell", () => {
+    const dir = withFiles("node");
+    const resolution = resolveNodeRuntime({
+      env: { PATH: GUI_PATH, SHELL: "/bin/zsh" },
+      platform: "darwin",
+      probe: (path) => (path === join(dir, "node") ? "v22.23.2" : undefined),
+      loginPath: () => `${GUI_PATH}:${dir}`,
+      wellKnown: () => [],
+    });
+    expect(resolution.runtime?.source).toBe("login-shell");
+    expect(resolution.runtime?.path).toBe(join(dir, "node"));
+  });
+
+  it("falls back to where an installer puts one when the shell says nothing", () => {
+    const dir = withFiles("node");
+    const resolution = resolveNodeRuntime({
+      env: { PATH: GUI_PATH },
+      platform: "darwin",
+      probe: (path) => (path === join(dir, "node") ? "v22.23.2" : undefined),
+      loginPath: () => undefined,
+      wellKnown: () => [join(dir, "node")],
+    });
+    expect(resolution.runtime?.source).toBe("well-known");
+  });
+
+  /*
+   * Order matters and is not incidental: `YAM_NODE` is the override a person
+   * set deliberately, and it must beat anything discovered.
+   */
+  it("still prefers YAM_NODE to anything it discovers", () => {
+    const chosen = withFiles("node");
+    const other = withFiles("node");
+    const resolution = resolveNodeRuntime({
+      env: { PATH: GUI_PATH, YAM_NODE: join(chosen, "node") },
+      platform: "darwin",
+      probe: () => "v22.23.2",
+      loginPath: () => other,
+      wellKnown: () => [join(other, "node")],
+    });
+    expect(resolution.runtime?.source).toBe("YAM_NODE");
+    expect(resolution.runtime?.path).toBe(join(chosen, "node"));
+  });
+
+  /*
+   * A Node too old is still refused wherever it was found. The login shell is
+   * exactly where a version manager's Node 18 lives.
+   */
+  it("refuses an old Node found in the shell, and says which it was", () => {
+    const dir = withFiles("node");
+    const resolution = resolveNodeRuntime({
+      env: { PATH: GUI_PATH },
+      platform: "darwin",
+      probe: () => "v18.20.4",
+      loginPath: () => dir,
+      wellKnown: () => [],
+    });
+    expect(resolution.runtime).toBeUndefined();
+    expect(runtimeNotFoundMessage(resolution.attempts)).toContain("v18.20.4");
   });
 });

@@ -10,7 +10,14 @@ import { defineConfig } from "vitest/config";
  */
 export default defineConfig({
   test: {
-    include: ["test/**/*.test.ts"],
+    /*
+     * `.tsx` as well as `.ts`.
+     *
+     * The pattern was `*.test.ts` alone, so a test file written in JSX was
+     * silently not collected — vitest reports "no test files found" only when
+     * *every* file is filtered out, and here there were nine others to hide it.
+     */
+    include: ["test/**/*.test.ts", "test/**/*.test.tsx"],
     testTimeout: 120_000,
   },
 });

@@ -26,6 +26,7 @@ import { bridge, type ServiceInfo } from "./bridge.js";
 import { ServiceClient } from "./client.js";
 import { Shell } from "./shell/Shell.js";
 import { Welcome } from "./shell/Welcome.js";
+import { useThemeRoot } from "./theme.js";
 
 /**
  * The window while the service is opening (SF-17's `loading`).
@@ -95,6 +96,14 @@ export function App(): React.JSX.Element {
       setError(cause instanceof Error ? cause.message : String(cause));
     }
   }, []);
+
+  /*
+   * The appearance, before any branch below returns (TV-18).
+   *
+   * It used to be `Shell`'s, which left `Starting` and `Welcome` — the first two
+   * screens anybody sees — with no theme, no font and no brand mark.
+   */
+  useThemeRoot();
 
   const client = info === null ? undefined : new ServiceClient(info);
 

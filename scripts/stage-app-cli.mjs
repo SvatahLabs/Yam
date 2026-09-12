@@ -17,11 +17,18 @@
  * — the CLI is a program the app *spawns*, and a program inside an asar cannot
  * be spawned.
  *
- * What is deliberately *not* staged is a Node binary. §13.6's third place is "a
+ * What is deliberately *not* staged is a Node binary. §13.6's last place is "a
  * Node binary shipped beside the CLI under `resources/` when the packager
  * includes one", and this packager does not: shipping one would make the
  * `PATH`-emptied case of T8.1 pass for the wrong reason, and an application that
  * carries its own interpreter carries its own security updates too.
+ *
+ * That decision was tested by the first packaged launch, which found no Node on
+ * a machine that had one — a windowed app does not get the shell's `PATH`. The
+ * answer was to recover the environment rather than to bundle an interpreter:
+ * `resolveNodeRuntime` asks the login shell, then looks where installers put
+ * things. See `packages/service/src/runtime.ts`. If that ever stops being
+ * enough, shipping a Node is the fallback and this is the file that would do it.
  */
 import { spawnSync } from "node:child_process";
 import { existsSync, rmSync } from "node:fs";
