@@ -1,4 +1,4 @@
- yam Bindings  yam-fixtures  http://127.0.0.1:55702                                  30 elements · 0 unverified  120×40
+ yam Bindings  yam-fixtures  http://127.0.0.1:55702                            30 elements · 0 unverified  live  120×40
 ┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
 │ 1 Elements · 0 unverified   │┃ 2 Bindings                                 ┃│ phrases       the Bookings link         │
 │ app.bookings-l… verified    │┃ ▌app.booki… /dashboa… testid #0 verified   ┃│ context       /dashboard · 691ed483     │

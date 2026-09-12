@@ -1,4 +1,4 @@
- yam API  yam-fixtures  http://127.0.0.1:55702                                                                                                                     1 named request · api/*.yaml  200×50
+ yam API  yam-fixtures  http://127.0.0.1:55702                                                                                                               1 named request · api/*.yaml  live  200×50
 ┌────────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────────────┐
 │ 1 Requests · 1                 │┃ 2 GET active count                                                                                                   ┃│ 3 Response                                 │
 │ GET     ▸ active count         │┃ ▌url           {data.baseUrl}/api/active-count                                                                       ┃│ press Enter to send it                     │

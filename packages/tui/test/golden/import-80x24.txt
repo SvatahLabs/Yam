@@ -1,4 +1,4 @@
- yam Import p… Reads a Yam prototype's electron-db into the open project  80×24
+ yam Im… Reads a Yam prototype's electron-db into the open project  live  80×24
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Import                     │┃ 2 Import prototype database                  ┃
 │ from          choose a fold… │┃ choose the prototype's electron-db directory ┃

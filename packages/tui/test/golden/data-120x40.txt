@@ -1,4 +1,4 @@
- yam Data  yam-fixtures  http://127.0.0.1:55702                      8 values · 3 secret(s), redacted · 3 unset  120×40
+ yam Data  yam-fixtures  http://127.0.0.1:55702                8 values · 3 secret(s), redacted · 3 unset  live  120×40
 ┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
 │ 1 Keys · 8                  │┃ 2 data.yaml                                ┃│ 3 user.email                            │
 │ ▸ user.email                │┃ ▌user.email               string           ┃│ kind          string                    │

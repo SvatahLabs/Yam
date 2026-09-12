@@ -1,4 +1,4 @@
- yam Run comp  yam-fixtures  http://127.0.0.1:55702               test behavior · invoker user via cli · 9.29 s  120×40
+ yam Run comp  yam-fixtures  http://127.0.0.1:55702         test behavior · invoker user via cli · 9.29 s  live  120×40
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Stories                    │┃ 2 Run comp · aborted                                                                 ┃
 │ I want to book a… failed     │┃ ▌✓  1 Click the Book a slot link                               testid #0    51 ms    ┃

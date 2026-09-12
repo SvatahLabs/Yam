@@ -1,4 +1,4 @@
- yam Agents and tools  yam-fixtur… 0 exposed · 0 refused · 0 invocations  80×24
+ yam Agents and tools  yam-… 0 exposed · 0 refused · 0 invocations  live  80×24
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Tools · 0                  │┃ 2 Invocations                                ┃
 │ no story is exposed as a to… │┃ no agent has called a tool yet               ┃

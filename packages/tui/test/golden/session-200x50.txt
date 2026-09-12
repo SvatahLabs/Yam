@@ -1,4 +1,4 @@
- yam Session  yam-fixtures  http://127.0.0.1:55702                                                                                                                       nothing connected · do  200×50
+ yam Session  yam-fixtures  http://127.0.0.1:55702                                                                                                                 nothing connected · do  live  200×50
 ┌────────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌──────────────────────────────────────┐
 │ 1 What you can connect to      │┃ 2 Sessions                                                                                                                 ┃│ 3 Selected                           │
 │ Nothing could be listed, beca… │┃ choose a browser, app, device or API to control                                                                            ┃│ no session                           │

@@ -474,7 +474,6 @@ function bindings(state: BindingsState): PaneModel {
       title: "Store",
       empty: "no bindings yet",
       nextActions: ["record.start", "bindings.verify"],
-      nextActions: ["record.start", "bindings.verify"],
       lines: state.rows
         /* The tone, not the word: which word means verified is the model's. */
         .filter((one) => one.verified.tone !== "pass")

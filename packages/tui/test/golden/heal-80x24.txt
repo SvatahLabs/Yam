@@ -1,4 +1,4 @@
- yam Heal review  yam-fixtures  http://127.0.0.1:5… 1 run with a failure  80×24
+ yam Heal review  yam-fixtures  http://127.0… 1 run with a failure  live  80×24
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Runs with a failure        │┃ 2 Heal comp                                  ┃
 │ ▸ comp 1 failed   24 h ago   │┃ press H to heal the selected run             ┃

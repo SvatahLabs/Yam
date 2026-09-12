@@ -1,4 +1,4 @@
- yam Flows  yam-fixtur… 7 files · 22 stories · 30 bindings, 1 unverified  80×24
+ yam Flows  yam-… 7 files · 22 stories · 30 bindings, 1 unverified  live  80×24
 ┌──────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Flows                  │┃ 2 flows/guards-and-compensation.flow             ┃
 │ booking-comp… not run    │┃ ▌  1   // Guards and compensation, end to end …▓ ┃

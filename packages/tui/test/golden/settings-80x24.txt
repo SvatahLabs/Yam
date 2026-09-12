@@ -1,4 +1,4 @@
- yam Settings  yam-fixtures  http://12… yam-fixtures · test · playwright  80×24
+ yam Settings  yam-fixtures  htt… yam-fixtures · test · playwright  live  80×24
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Settings                   │┃ 2 Settings                                   ┃
 │ Project                      │┃ ▌PROJECT▓                                    ┃

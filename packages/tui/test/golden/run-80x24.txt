@@ -1,4 +1,4 @@
- yam Run comp  yam-fixtur… test behavior · invoker user via cli · 9.29 s  80×24
+ yam Run comp  yam-… test behavior · invoker user via cli · 9.29 s  live  80×24
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ 2 Run comp · aborted                                                         ┃
 ┃ ▌✓  1 Click the Book a slot link                      testid #0    51 ms   ▓ ┃

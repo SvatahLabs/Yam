@@ -74,13 +74,48 @@ describe("no screen binds one key to two actions", () => {
     }
   });
 
-  it("does not bind `q`, which the cockpit quits on", () => {
+  it("takes no key the cockpit has already spent (TV-T12)", () => {
     /*
-     * The model bound `record.stop` to `q`, and `q` has always quit the
-     * cockpit — so that action was reachable in the app and unreachable here.
-     * Owning the table is what makes this checkable at all.
+     * `record.stop` was bound to `q`, and the cockpit has always quit on `q`, so
+     * that action was reachable in the app and unreachable here — a parity
+     * failure inside the file that claimed parity.
+     *
+     * The rule, rather than the instance: a screen may not bind a key the
+     * cockpit itself has spent, because the cockpit's key wins and the screen's
+     * is dead. The digits are `1-4` and `j k` is two keys, so the command table
+     * is expanded before it is compared.
      */
-    for (const one of ALL_KEYS) expect(one.key, `${one.screen} binds q to ${one.action}`).not.toBe("q");
+    const spent = new Set(
+      COMMAND_KEYS.flatMap((one) =>
+        one.key === "1-4"
+          ? ["1", "2", "3", "4"]
+          : one.key === "[ ]"
+            ? ["[", "]"]
+            : one.key.split(" ").filter((part) => part.length === 1),
+      ),
+    );
+    for (const one of ALL_KEYS) {
+      expect(
+        spent.has(one.key),
+        `${one.screen} binds ${one.key} to ${one.action}, which the cockpit has already spent`,
+      ).toBe(false);
+    }
+  });
+
+  it("reaches every action the registry offers (TV-02, TV-T12)", () => {
+    /*
+     * Reachability is the parity claim: an action the model offers and the
+     * cockpit cannot run is an action that exists in one renderer. Every action
+     * is in the palette, which `^K` opens from every screen; a key is the
+     * shortcut, never the only way.
+     */
+    const inPalette = new Set(ACTIONS.map((one) => one.id));
+    for (const screen of SCREEN_IDS) {
+      for (const action of actionsForScreen(screen)) {
+        expect(inPalette.has(action.id), `${screen}: ${action.id} is reachable from nowhere`).toBe(true);
+      }
+    }
+    expect(COMMAND_KEYS.some((one) => one.command === "palette.open")).toBe(true);
   });
 
   it("looks a key up by the screen it was pressed on", () => {

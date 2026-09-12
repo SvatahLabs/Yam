@@ -1,4 +1,4 @@
- yam Runs  yam-fixtures  http://127.0.0.1:55702                                                           1 run  120×40
+ yam Runs  yam-fixtures  http://127.0.0.1:55702                                                     1 run  live  120×40
 ┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
 │ 1 Filters · 1 of 1          │┃ 2 Runs                                     ┃│ 3 Run comp                              │
 │ BEHAVIOR                    │┃ ▌comp     test    aborted 6 · 1 … 24 h a…  ┃│ outcome       aborted                   │

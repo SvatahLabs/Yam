@@ -11,7 +11,19 @@
  * the model produces on its own. A cockpit that had massaged a number for the
  * terminal would fail that comparison, which is the point of making it.
  */
-import { screenById, type ScreenId, type ScreenParams, type ScreenStateBase } from "@svatah/yam-screens";
+import {
+  applyEvent,
+  applyHealEvent,
+  applyRecordEvent,
+  screenById,
+  type HealState,
+  type RunState,
+  type ScreenId,
+  type ScreenParams,
+  type ScreenStateBase,
+  type ServiceEventLike,
+  type SessionState,
+} from "@svatah/yam-screens";
 import type { ScreenService } from "@svatah/yam-screens";
 import { layoutFor, type Layout } from "./layout.js";
 
@@ -67,6 +79,26 @@ export async function loadUi(
 /** The terminal was resized: the panes follow it (T10.4). */
 export function resize(ui: UiState, columns: number, rows: number): UiState {
   return { ...ui, layout: layoutFor(columns, rows) };
+}
+
+/**
+ * Fold one event into the screen showing it (TV-09).
+ *
+ * The model's own reducers — `applyEvent` for a run, `applyRecordEvent` for a
+ * capture, `applyHealEvent` for a proposal — because a cockpit that folded an
+ * event its own way would be a cockpit showing a state the app cannot reach.
+ * An event for a screen that is not open is not an error: it is an event for a
+ * screen that is not open.
+ */
+export function applyToScreen(ui: UiState, event: ServiceEventLike): UiState {
+  if (ui.screen === "run") return { ...ui, state: applyEvent(ui.state as RunState, event) };
+  if (ui.screen === "heal") return { ...ui, state: applyHealEvent(ui.state as HealState, event) };
+  if (ui.screen === "session") {
+    const session = ui.state as SessionState;
+    const folded: SessionState = { ...session, record: applyRecordEvent(session.record, event) };
+    return { ...ui, state: folded as ScreenStateBase };
+  }
+  return ui;
 }
 
 /** `1`–`4` and `Tab`: which pane the keys go to (LLD §13.7). */

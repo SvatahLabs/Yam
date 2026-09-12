@@ -1,4 +1,4 @@
- yam Import prototype database  yam-fixtures  http:/… Reads a Yam prototype's electron-db into the open project  120×40
+ yam Import prototype database  yam-fixtures  … Reads a Yam prototype's electron-db into the open project  live  120×40
 ┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
 │ 1 Import                    │┃ 2 Import prototype database                ┃│ 3 Where it may write                    │
 │ from          choose a fol… │┃ choose the prototype's electron-db direct… ┃│ reads         —                         │

@@ -1,4 +1,4 @@
- yam Settings  yam-fixtures  http://127.0.0.1:55702                                                                                                            yam-fixtures · test · playwright  200×50
+ yam Settings  yam-fixtures  http://127.0.0.1:55702                                                                                                      yam-fixtures · test · playwright  live  200×50
 ┌────────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────────────┐
 │ 1 Settings                     │┃ 2 Settings                                                                                                           ┃│ 3 Sources                                  │
 │ Project                        │┃ ▌PROJECT                                                                                                             ┃│ GET /project                               │

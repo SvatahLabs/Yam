@@ -1,4 +1,4 @@
- yam Bindings  yam-fixtures  http://127.0.0.… 30 elements · 0 unverified  80×24
+ yam Bindings  yam-fixtures  http://12… 30 elements · 0 unverified  live  80×24
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Elements · 0 unverified    │┃ 2 Bindings                                   ┃
 │ app.bookings-l… verified   ▓ │┃ ▌app.booki… /dashboard testid #0 verified ▓  ┃

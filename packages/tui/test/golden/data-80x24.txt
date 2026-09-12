@@ -1,4 +1,4 @@
- yam Data  yam-fixtures  htt… 8 values · 3 secret(s), redacted · 3 unset  80×24
+ yam Data  yam-fixture… 8 values · 3 secret(s), redacted · 3 unset  live  80×24
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Keys · 8                   │┃ 2 data.yaml                                  ┃
 │ ▸ user.email                 │┃ ▌user.email               c… string          ┃

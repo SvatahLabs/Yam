@@ -166,6 +166,37 @@ const track = <T extends { unmount: () => void }>(one: T): T => {
   return one;
 };
 
+describe("the cockpit is live (TV-09, TV-T14)", () => {
+  it("says the stream is arriving, without anyone pressing a key", async () => {
+    const { lastFrame } = track(await cockpit("run", { runId: "comp" }));
+    expect(lastFrame() ?? "").toContain("live");
+  });
+
+  it("folds an event with the model's own reducer, and does not reload", async () => {
+    /*
+     * The cockpit re-read only when a key was pressed, in a product whose
+     * subject is runs — so a run finished and the screen did not know. What
+     * arrives is folded by `applyEvent`, so a run arriving here and the same run
+     * arriving in the app reach the same state.
+     */
+    const service = fakeService(FIXTURES);
+    const instance = track(
+      renderApp(
+        <App service={service} connection={CONNECTION} screen="run" params={{ runId: "comp" }} />,
+      ),
+    );
+    await settle();
+    const before = instance.lastFrame() ?? "";
+    expect(before).toContain("Run comp");
+
+    const calls = service.calls.length;
+    service.emit({ kind: "step.result", runId: "comp", story: "I want to book and then fail" });
+    await settle();
+    /* Folded, not re-fetched: the screen did not go back to the service. */
+    expect(service.calls.length, "an event caused a reload").toBe(calls);
+  });
+});
+
 describe("the four panes (the `TUI` artboard)", () => {
   it("draws all four, numbered, on a terminal with room for them", async () => {
     const { lastFrame } = track(await cockpit("run", { runId: "comp" }));

@@ -1,16 +1,19 @@
 /**
  * The `yam ui` cockpit (T9.4, REQ-TUI-1, LLD §13.7; the `TUI` artboard).
  *
- * > Full authoring cockpit: four numbered panes (tree, main, inspector, audit),
- * > `1–4` focus a pane, `Tab` cycles, `j/k` move, the same actions and keys as
- * > the app, the same palette. It opens or adopts a service exactly as the app
- * > does. `--json` prints screen state and audit lines as JSON and draws
- * > nothing. No tmux dependency; it runs in any terminal.
+ * > `yam ui` is a full authoring cockpit in the terminal, sharing the app's
+ * > screen model and action registry and owning its own view layer — its own
+ * > layout, key map, palette behaviour and colour (Draft 2.26, REQ-TUI-1).
  *
  * Everything a person reads here is a `ScreenState` from `@svatah/yam-screens`,
- * loaded by the same `load()` the app calls; every key runs an `Action` from
- * the same registry the app's palette shows. This file is the *terminal* half
- * and nothing else: panes, keys, and a palette drawn with Ink.
+ * loaded by the same `load()` the app calls, and every key runs an `Action` from
+ * the same registry. What this file decides is the terminal's: which regions
+ * there are (`views.tsx`), which key runs what (`keys.ts`), how tall a thing is
+ * drawn (`widgets.tsx`), and how much colour the terminal will take
+ * (`theme.ts`).
+ *
+ * It is live: `subscribe()` folds events through the model's own reducers, so a
+ * run arriving here and the same run arriving in the app reach one state.
  */
 import { Box, Text, useApp, useInput, useStdout } from "ink";
 import { spawn } from "node:child_process";
@@ -36,6 +39,7 @@ import {
 } from "./panes.js";
 import {
   PANES,
+  applyToScreen,
   focusPane,
   loadUi,
   moveCursor,
@@ -90,6 +94,14 @@ export function App(props: AppProps): React.JSX.Element {
   const [ui, setUi] = useState<UiState | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  /** Bumped by the retry key, which is what re-runs the subscription. */
+  const [retries, setRetries] = useState(0);
+  /*
+   * Whether the stream is arriving (TV-09). The renderer's, not the loaded
+   * state's: the subscription outlives any one screen, and `--json` prints the
+   * model rather than the cockpit's connection.
+   */
+  const [stream, setStream] = useState<"live" | "reconnecting" | "offline">("offline");
 
   /**
    * The terminal, as it is now (T10.4, P9-F4).
@@ -134,6 +146,37 @@ export function App(props: AppProps): React.JSX.Element {
   useEffect(() => {
     if (ui !== undefined) props.onState?.(ui);
   }, [ui, props]);
+
+  /*
+   * The event stream (TV-09, TV-T14).
+   *
+   * The cockpit re-read only when a key was pressed, in a product whose subject
+   * is runs — so a run finished and the screen did not know until somebody
+   * touched it. Every event is folded by the *model's* own reducer, so a run
+   * arriving here and the same run arriving in the app reach the same state.
+   *
+   * A stream that drops says so and offers the key that retries it. It does not
+   * reload behind a person's back: a screen that reloaded itself while a cursor
+   * was on a row is a screen that moved the row.
+   */
+  useEffect(() => {
+    let stopped = false;
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = props.service.subscribe((event) => {
+        if (stopped) return;
+        setStream("live");
+        setUi((before) => (before === undefined ? before : applyToScreen(before, event)));
+      });
+      setStream("live");
+    } catch {
+      setStream("offline");
+    }
+    return () => {
+      stopped = true;
+      unsubscribe?.();
+    };
+  }, [props.service, retries]);
 
   /** Re-load the current screen, keeping where the cursor is. */
   const reload = useCallback(
@@ -270,6 +313,13 @@ export function App(props: AppProps): React.JSX.Element {
       return;
     }
     /* The key map, drawn from the table the footer is drawn from (TV-07). */
+    /* `R` retries a dropped stream: a stated state with a way back (TV-09). */
+    if (input === "R") {
+      setRetries((was) => was + 1);
+      setStream("reconnecting");
+      setUi({ ...ui, message: "Reconnecting to the event stream…" });
+      return;
+    }
     if (input === "?") {
       setHelpOpen((was) => !was);
       return;
@@ -438,7 +488,11 @@ export function App(props: AppProps): React.JSX.Element {
          * capture of a screen nobody can identify.
          */
         left={["yam", ui.state.title, ui.connection.project, ui.connection.url]}
-        right={[ui.state.subtitle, sizeOf(ui.layout)]}
+        right={[
+          ui.state.subtitle,
+          stream === "live" ? "live" : stream === "reconnecting" ? "reconnecting…" : "offline · R",
+          sizeOf(ui.layout),
+        ]}
       />
 
       <Regions

@@ -1,4 +1,4 @@
- yam Flows  yam-fixtures  http://127.0.0.1:55702                                                                                               7 files · 22 stories · 30 bindings, 1 unverified  200×50
+ yam Flows  yam-fixtures  http://127.0.0.1:55702                                                                                         7 files · 22 stories · 30 bindings, 1 unverified  live  200×50
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────────┐
 │ 1 Flows                      │┃ 2 flows/guards-and-compensation.flow                                                                                       ┃│ 3 Inspect                              │
 │ booking-compensa… not run    │┃ ▌  1   // Guards and compensation, end to end (T5.4, REQ-LANG-14, REQ-AUTO-1, 4).                                        ▓ ┃│ no step selected                       │
