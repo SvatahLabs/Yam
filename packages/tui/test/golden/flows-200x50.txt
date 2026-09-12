@@ -47,4 +47,4 @@
 │ 0     W_SECRET_UNSET         user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Compiling does not need the value; running will.                                                          │
 │ 0     W_SECRET_UNSET         card.number reads ${YAM_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need the value; running will.                                                         │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r run the selected flow  r record a flow from what you do  b bind the selected flow's targets  h heal the last run  q quit
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r run the selected flow  R record a flow from what you do  b bind the selected flow's targets  h heal the last run  q quit

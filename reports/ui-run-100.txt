@@ -1,21 +1,30 @@
-yam ui 100×30  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-ui-capture-ttqDhr   http://127.…
-┌───────────────────────┐┌─────────────────────────────────────────────────────────────────────────┐
-│ 1 Stories             ││ 2 Run comp · aborted                                                    │
-│ I want to… failed     ││ ✓  1 Click the Book a slot link                   testid #0    105 ms   │
-│ cancel a … passed     ││ ✓  2 Type "Indiranagar" into the location field   testid #0    26 ms    │
-└───────────────────────┘│ ✓  3 Click the Book now button                    testid #0    27 ms    │
-                         │ ✓  4 Remember the text of the booking reference … = BK-10428   3 ms     │
-                         │ ✗  5 Click the pay button                                      8951 ms  │
-                         │ ✓  1 Click the cancel booking button              testid #0    29 ms    │
-                         │ ✓  2 The booking reference should say {I want to… testid #0    5 ms     │
-                         │ flow aborted · exit 11                                                  │
-                         └─────────────────────────────────────────────────────────────────────────┘
- inspector collapsed at 100 cols (120 to sit beside) · press 3 to open it below
+loading…
+ yam Run comp  /var/folders/x5/4649y5v… test behavior · invoker user via cli · 9.30 s  live  100×30 
+┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+│ 1 Stories                    │┃ 2 Run comp · aborted                                             ┃
+│ I want to book a… failed     │┃ ▌✓  1 Click the Book a slot link           testid #0    61 ms    ┃
+│ cancel a booking  passed     │┃ ✓  2 Type "Indiranagar" into the location… testid #0    27 ms    ┃
+│                              │┃ ✓  3 Click the Book now button             testid #0    26 ms    ┃
+│                              │┃ ✓  4 Remember the text of the booking ref… = BK-10428   4 ms     ┃
+│                              │┃ ✗  5 Click the pay button                               8958 ms  ┃
+│                              │┃ ✓  1 Click the cancel booking button       testid #0    37 ms    ┃
+│                              │┃ flow aborted · exit 11                                           ┃
+└──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ 4 Audit                                                                                          │
-│ 00.000 run        invoker kind user id local via cli · inputs                                    │
-│ 00.527 story      inputs                                                                         │
-│ 00.529 state      ok · 1 ms                                                                      │
+│ 00.000 run        invoker kind user id local via cli · inputs                                  ▓ │
+│ 00.169 story      inputs                                                                       ▓ │
+│ 00.174 state      ok · 5 ms                                                                    ▓ │
+│ 00.183 locate     nav.book-a-slot-link · testid "booking-link" · matched 1 · ok · 8 ms         ▓ │
+│ 00.230 act        click · h0 · ok · 47 ms                                                      ▓ │
+│ 00.241 state      ok · 10 ms                                                                   ░ │
+│ 00.250 locate     booking.location-field · testid "location" · matched 1 · ok · 10 ms          ░ │
+│ 00.258 act        type · h0 · value "Indiranagar" · ok · 8 ms                                  ░ │
+│ 00.259 state      ok · 0 ms                                                                    ░ │
+│ 00.261 locate     booking.book-now-button · testid "book-now" · matched 1 · ok · 2 ms          ░ │
+│ 00.284 act        click · h1 · ok · 23 ms                                                      ░ │
+│ 00.285 state      ok · 0 ms                                                                    ░ │
 │ yam ui --json streams these same lines to stdout for an agent                                    │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
-^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  s stop  h heal  q quit
+ inspector collapsed at 100 cols · press its number to open it below
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  h heal this run  q quit

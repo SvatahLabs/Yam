@@ -298,10 +298,16 @@ export function footerFor(
   const extra: FooterKey[] = [];
   for (const action of bound) {
     if (action.key.length !== 1) continue;
-    const one: FooterKey = {
-      key: action.key.toLowerCase(),
-      label: action.label.toLowerCase(),
-    };
+    /*
+     * As bound, not lowercased.
+     *
+     * The run screen binds `r` to run-again and `R` to resume-from-the-failing-
+     * step. Lowercasing printed both as `r`, so the footer advertised one key
+     * for two actions and the second was a lie — and React saw two children with
+     * the same key, which is how this was found: it printed a warning into the
+     * frame of a capture.
+     */
+    const one: FooterKey = { key: action.key, label: action.label.toLowerCase() };
     const cost = widthOf(one) + gap;
     if (cost > left) continue;
     left -= cost;

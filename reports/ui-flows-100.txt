@@ -1,27 +1,30 @@
-yam ui 100×30  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-ui-capture-ttqDhr   http://127.…
-┌───────────────────────┐┌─────────────────────────────────────────────────────────────────────────┐
-│ 1 Flows               ││ 2 flows/guards-and-compensation.flow                                    │
-│ booking-c… not run    ││   1   // Guards and compensation, end to end (T5.4, REQ-LANG-14, REQ-A… │
-│ booking-w… not run    ││   2   //                                                                │
-│ execution… not run    ││   3   // `booking-compensation.flow` beside this one is the *policy* s… │
-│ aborted    run 9 s …  ││   4   // faithful sibling of `execution.flow`. This file is the one th… │
-│ natural_l… not run    ││   5   // the two guarantees T5.4 is about, on the smallest thing that … │
-│ simple.fl… not run    ││   6   //                                                                │
-│ svatah.fl… not run    ││   7   //   * a guard whose predicate is false never performs its step,… │
-└───────────────────────┘│   8   //     log has no surface call for it (REQ-AUTO-1);               │
-                         │   9   //   * a failing story runs its compensating story with the fail… │
-                         │  10   //     scope, and the run ends `aborted` with the policy recorde… │
-                         │  11                                                                     │
-                         │  12   // ── guards ───────────────────────────────────────────────────… │
-                         │  13   //                                                                │
-                         │  14   // Three guards, one of each subject the IR has: the page, the s… │
-                         │ lint: 3 — W_SECRET_UNSET user.password reads ${YAM_SAMPLE_PASSWORD}, w… │
-                         └─────────────────────────────────────────────────────────────────────────┘
- inspector collapsed at 100 cols (120 to sit beside) · press 3 to open it below
+loading…
+ yam Flows  /var/folders/x5/4649y5v… 7 files · 22 stories · 30 bindings, 1 unverified  live  100×30 
+┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+│ 1 Flows                      │┃ 2 flows/guards-and-compensation.flow                             ┃
+│ booking-compensa… not run    │┃ ▌  1   // Guards and compensation, end to end (T5.4, REQ-LANG-…▓ ┃
+│ booking-workflow… not run    │┃   2   //                                                       ▓ ┃
+│ execution.flow    not run    │┃   3   // `booking-compensation.flow` beside this one is the *p…▓ ┃
+│ guar… aborted    run 8 s ago │┃   4   // faithful sibling of `execution.flow`. This file is th…▓ ┃
+│ natural_language… not run    │┃   5   // the two guarantees T5.4 is about, on the smallest thi…▓ ┃
+│ simple.flow       not run    │┃   6   //                                                       ▓ ┃
+│ svatah.flow       not run    │┃   7   //   * a guard whose predicate is false never performs i…░ ┃
+│                              │┃   8   //     log has no surface call for it (REQ-AUTO-1);      ░ ┃
+│                              │┃   9   //   * a failing story runs its compensating story with …░ ┃
+│                              │┃  10   //     scope, and the run ends `aborted` with the policy…░ ┃
+│                              │┃  11                                                            ░ ┃
+│                              │┃  12   // ── guards ───────────────────────────────────────────…░ ┃
+│                              │┃  13   //                                                       ░ ┃
+│                              │┃  14   // Three guards, one of each subject the IR has: the pag…░ ┃
+│                              │┃  15   // step's own element. The two that are false must leave…░ ┃
+│                              │┃  16   // application at all.                                   ░ ┃
+│                              │┃  17                                                            ░ ┃
+│                              │┃ lint: 3 — W_SECRET_UNSET user.password reads ${YAM_SAMPLE_PASSW… ┃
+└──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ 4 Lint                                                                                           │
 │ 0     W_SECRET_UNSET         user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Comp… │
 │ 0     W_SECRET_UNSET         card.number reads ${YAM_SAMPLE_CARD_NUMBER}, which is not set. Com… │
-│ 0     W_SECRET_UNSET         card.cvv reads ${YAM_SAMPLE_CARD_CVV}, which is not set. Compiling… │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
-^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r record  q quit
+ inspector collapsed at 100 cols · press its number to open it below
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r run the selected flow  q quit

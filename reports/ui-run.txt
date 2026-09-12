@@ -1,29 +1,40 @@
-yam ui 160×40  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-ui-capture-ttqDhr   http://127.0.0.1:52776   Run comp · test behavior · invoker user via cl…
-┌────────────────────────────────┐┌──────────────────────────────────────────────────────────────────────────────┐┌────────────────────────────────────────────┐
-│ 1 Stories                      ││ 2 Run comp · aborted                                                         ││ 3 Step 5 · Click the pay button            │
-│ I want to book and… failed     ││ ✓  1 Click the Book a slot link                        testid #0    105 ms   ││ failure       locator                      │
-│ cancel a booking    passed     ││ ✓  2 Type "Indiranagar" into the location field        testid #0    26 ms    ││ session       /booking · window 0          │
-└────────────────────────────────┘│ ✓  3 Click the Book now button                         testid #0    27 ms    ││ window        Booking · Yam Sample         │
-                                  │ ✓  4 Remember the text of the booking reference as re… = BK-10428   3 ms     ││ dialog        none                         │
-                                  │ ✗  5 Click the pay button                                           8951 ms  ││ policy        compensate: cancel a booking │
-                                  │ ✓  1 Click the cancel booking button                   testid #0    29 ms    ││ CANDIDATES TRIED                           │
-                                  │ ✓  2 The booking reference should say {I want to book… testid #0    5 ms     ││ testid   pay                           0   │
-                                  │ flow aborted · exit 11                                                       ││ role     button · "Pay"                0   │
-                                  └──────────────────────────────────────────────────────────────────────────────┘│ text     Pay                           0   │
-                                                                                                                  │ css      [data-testid="pay"]           0   │
-                                                                                                                  │ xpath    //*[@data-testid='pay']       0   │
-                                                                                                                  │ screenshot    I-want-to-book-and-then-fai… │
-                                                                                                                  │ WHAT TO DO                                 │
-                                                                                                                  │ Could not resolve "checkout.pay-button" (… │
-                                                                                                                  └────────────────────────────────────────────┘
+loading…
+ yam Run comp  /var/folders/x5/4649y5v52wq3tdvnv_dhn2hw0000gn/T/yam-ui-capture-kcHBe6  http://127.… test behavior · invoker user via cli · 9.30 s  live  160×40 
+┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────┐
+│ 1 Stories                    │┃ 2 Run comp · aborted                                                                   ┃│ 3 Step 5 · Click the pay button    │
+│ I want to book a… failed     │┃ ▌✓  1 Click the Book a slot link                                 testid #0    61 ms    ┃│ failure       locator            ▓ │
+│ cancel a booking  passed     │┃ ✓  2 Type "Indiranagar" into the location field                  testid #0    27 ms    ┃│ session       /booking · window 0▓ │
+│                              │┃ ✓  3 Click the Book now button                                   testid #0    26 ms    ┃│ window        Booking · Yam Samp…▓ │
+│                              │┃ ✓  4 Remember the text of the booking reference as reference     = BK-10428   4 ms     ┃│ dialog        none               ▓ │
+│                              │┃ ✗  5 Click the pay button                                                     8958 ms  ┃│ policy        compensate: cancel…▓ │
+│                              │┃ ✓  1 Click the cancel booking button                             testid #0    37 ms    ┃│ CANDIDATES TRIED▓                  │
+│                              │┃ ✓  2 The booking reference should say {I want to book and then … testid #0    5 ms     ┃│ testid   pay                  0  ▓ │
+│                              │┃                                                                                        ┃│ role     button · "Pay"       0  ▓ │
+│                              │┃                                                                                        ┃│ text     Pay                  0  ▓ │
+│                              │┃                                                                                        ┃│ css      [data-testid="pay"]  0  ▓ │
+│                              │┃                                                                                        ┃│ xpath    //*[@data-testid='p… 0  ▓ │
+│                              │┃ flow aborted · exit 11                                                                 ┃│ screenshot    I-want-to-book-and…▓ │
+└──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└────────────────────────────────────┘
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ 4 Audit                                                                                                                                                      │
-│ 00.000 run        invoker kind user id local via cli · inputs                                                                                                │
-│ 00.527 story      inputs                                                                                                                                     │
-│ 00.529 state      ok · 1 ms                                                                                                                                  │
-│ 00.545 locate     nav.book-a-slot-link · testid "booking-link" · matched 1 · ok · 16 ms                                                                      │
-│ 00.632 act        click · h0 · ok · 87 ms                                                                                                                    │
-│ 00.634 state      ok · 1 ms                                                                                                                                  │
+│ 00.000 run        invoker kind user id local via cli · inputs                                                                                              ▓ │
+│ 00.169 story      inputs                                                                                                                                   ▓ │
+│ 00.174 state      ok · 5 ms                                                                                                                                ▓ │
+│ 00.183 locate     nav.book-a-slot-link · testid "booking-link" · matched 1 · ok · 8 ms                                                                     ▓ │
+│ 00.230 act        click · h0 · ok · 47 ms                                                                                                                  ▓ │
+│ 00.241 state      ok · 10 ms                                                                                                                               ▓ │
+│ 00.250 locate     booking.location-field · testid "location" · matched 1 · ok · 10 ms                                                                      ▓ │
+│ 00.258 act        type · h0 · value "Indiranagar" · ok · 8 ms                                                                                              ▓ │
+│ 00.259 state      ok · 0 ms                                                                                                                                ▓ │
+│ 00.261 locate     booking.book-now-button · testid "book-now" · matched 1 · ok · 2 ms                                                                      ▓ │
+│ 00.284 act        click · h1 · ok · 23 ms                                                                                                                  ▓ │
+│ 00.285 state      ok · 0 ms                                                                                                                                ░ │
+│ 00.286 locate     booking.booking-reference · testid "booking-reference" · matched 1 · ok · 2 ms                                                           ░ │
+│ 00.288 read       h2 · ok · 1 ms                                                                                                                           ░ │
+│ 00.288 state      ok · 0 ms                                                                                                                                ░ │
+│ 02.060 locate     checkout.pay-button · testid "pay" · matched nothing · ok · 1772 ms                                                                      ░ │
+│ 03.850 locate     checkout.pay-button · role button "Pay" · matched nothing · ok · 1790 ms                                                                 ░ │
+│ 05.638 locate     checkout.pay-button · text "Pay" · matched nothing · ok · 1788 ms                                                                        ░ │
 │ yam ui --json streams these same lines to stdout for an agent                                                                                                │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  s stop  h heal  q quit
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r run the same thing again  R resume from the failing step  h heal this run  q quit

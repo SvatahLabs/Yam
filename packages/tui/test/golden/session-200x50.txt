@@ -47,4 +47,4 @@
 │                                                                                                                                                                                                      │
 │                                                                                                                                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  c connect a surface  s refresh the surface tree  r recheck available targets  t take control  t give up control  q quit
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  c connect a surface  s refresh the surface tree  r recheck available targets  t take control  T give up control  q quit

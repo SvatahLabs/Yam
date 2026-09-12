@@ -98,6 +98,27 @@ async function frameOf(screen: ScreenId, columns: number, rows: number): Promise
 
 const COLOUR = new RegExp(String.fromCharCode(27) + "\\[[0-9;]*m", "g");
 
+describe("no screen draws a warning into its own frame (TV-11)", () => {
+  it("renders every screen without React complaining", async () => {
+    /*
+     * A duplicate key warning is printed by React into whatever is listening,
+     * which for a cockpit is the frame — and that is how it was found: at the
+     * top of a capture, above the first row of the run screen. The cause was two
+     * footer entries with the same key, because the footer lowercased `r` and
+     * `R` into one.
+     */
+    const complaints: string[] = [];
+    const real = console.error;
+    console.error = (...args: unknown[]) => complaints.push(args.join(" "));
+    try {
+      for (const screen of SCREEN_IDS) await frameOf(screen, 120, 40);
+    } finally {
+      console.error = real;
+    }
+    expect(complaints, complaints.slice(0, 2).join(" · ")).toEqual([]);
+  });
+});
+
 describe("every screen, at every size, is the frame that was reviewed (TV-11)", () => {
   if (!existsSync(GOLDEN)) mkdirSync(GOLDEN, { recursive: true });
 

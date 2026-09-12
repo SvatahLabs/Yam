@@ -187,10 +187,31 @@ describe("the footer fits the terminal (P10-F9)", () => {
     expect(keys).toEqual(["^K", "1-4", "Tab", "j k", "Enter", "[ ]", "q"]);
   });
 
+  it("prints a key as it is bound, so `r` and `R` are two keys", () => {
+    /*
+     * The run screen binds `r` to run-again and `R` to resume. Lowercasing made
+     * the footer advertise one key for two actions, and React saw two children
+     * with the same key — which printed a warning into the frame of a capture,
+     * which is how it was found.
+     */
+    const both = footerFor(200, [
+      { key: "r", label: "Run the same thing again" },
+      { key: "R", label: "Resume from the failing step" },
+    ]).map((one) => one.key);
+    expect(both).toContain("r");
+    expect(both).toContain("R");
+    expect(new Set(both).size, both.join(" ")).toBe(both.length);
+  });
+
   it("takes the screen's accelerators when there is room for them", () => {
     const keys = footerFor(200, actions).map((one) => one.key);
-    expect(keys).toContain("r");
-    expect(keys).toContain("h");
+    /*
+     * As bound. This asserted lowercase before, which was true only because the
+     * footer lowercased everything — and that is what made `r` and `R` one key
+     * on the run screen.
+     */
+    expect(keys).toContain("R");
+    expect(keys).toContain("H");
     expect(keys.at(-1)).toBe("q");
   });
 

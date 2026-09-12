@@ -47,4 +47,4 @@
 │ 09.236 state      ok · 1 ms                                                                                                                                                                        ░ │
 │ yam ui --json streams these same lines to stdout for an agent                                                                                                                                        │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r run the same thing again  r resume from the failing step  s stop this run between steps  h heal this run  q quit
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r run the same thing again  R resume from the failing step  s stop this run between steps  h heal this run  q quit
