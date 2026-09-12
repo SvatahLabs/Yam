@@ -104,6 +104,41 @@ describe("Surfaces discovery, grouped by platform with honest states (SF-04, SF-
     // The base error is *not* set, so the shell still draws the connect form.
     expect(state.error).toBeUndefined();
   });
+
+  /*
+   * An empty list is either an answer or the absence of one (SF-17).
+   *
+   * Found in the running product: with no broker, Surfaces drew "Could not
+   * reach the surface broker" in its alert and "No adapter is installed" in the
+   * pane underneath — on a machine with eight adapters installed. The pane
+   * turned Yam's own failure to ask into a claim about the user's system, and
+   * contradicted the alert above it while doing so.
+   */
+  it("says nothing could be asked, rather than that nothing is installed", async () => {
+    const state = await load({
+      targets: {
+        schemaVersion: "1.0",
+        requestId: "r",
+        status: "refused",
+        error: { message: "broker down", retryable: true },
+      },
+      sessions: ok({ sessions: [] }),
+    });
+    expect(state.groups).toEqual([]);
+    expect(state.discoveryEmpty).toMatch(/could not ask/i);
+    expect(state.discoveryEmpty).toMatch(/not a statement about what you have installed/i);
+    expect(state.discoveryEmpty).not.toMatch(/no adapter is installed/i);
+  });
+
+  it("says nothing is installed only when the broker answered and listed nothing", async () => {
+    const state = await load({
+      targets: ok({ adapters: [], targets: [] }),
+      sessions: ok({ sessions: [] }),
+    });
+    expect(state.discovery).toBe("ready");
+    expect(state.groups).toEqual([]);
+    expect(state.discoveryEmpty).toMatch(/no adapter is installed/i);
+  });
 });
 
 describe("Surfaces sessions — an agent's as much as a person's (SF-05, SF-13)", () => {

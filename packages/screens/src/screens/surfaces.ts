@@ -239,6 +239,21 @@ export interface SurfacesState extends ScreenStateBase {
    * lazily — so this is drawn as an alert *within* Surfaces with a Recheck.
    */
   readonly discoveryMessage?: string;
+  /**
+   * What the discovery pane says when it has nothing to list (SF-17).
+   *
+   * There are two ways to have nothing, and they are not the same statement.
+   * *Nothing is installed* is a claim about the machine; *nothing could be
+   * asked* is a claim about Yam. The pane said the first in both cases, so a
+   * broker that was briefly unreachable produced "No adapter is installed" on a
+   * machine with eight — directly contradicting the alert above it, which was
+   * saying the broker could not be reached.
+   *
+   * A screen that reports its own inability as a fact about the user's system
+   * is the failure this project keeps finding in its own harnesses; it is no
+   * better in the product.
+   */
+  readonly discoveryEmpty: string;
   /** Whether anything can be connected to at all — false is the empty state. */
   readonly anyConnectable: boolean;
 
@@ -663,6 +678,15 @@ const surfacesScreen: Screen<SurfacesState> = {
           "Could not reach the surface broker. `yam surface targets` shows the same list from a terminal.")
         : undefined;
 
+    /*
+     * An empty list is either an answer or the absence of one, and the sentence
+     * has to say which (SF-17). Only the second is a claim about the machine.
+     */
+    const discoveryEmpty =
+      discovery === "error"
+        ? "Nothing could be listed, because Yam could not ask. This is not a statement about what you have installed. Press Recheck targets to ask again; the connect form works either way and starts the broker when you use it."
+        : "No adapter is installed. `yam surface targets` shows the same list from a terminal.";
+
     /* ── the connected surface (T15) ─────────────────────────────────────── */
 
     const chosen = rows.find((one) => one.selected);
@@ -803,6 +827,7 @@ const surfacesScreen: Screen<SurfacesState> = {
       ...(params.selected === undefined ? {} : { selected: params.selected }),
       discovery,
       ...(discoveryError === undefined ? {} : { discoveryMessage: discoveryError }),
+      discoveryEmpty,
       anyConnectable,
       agent: {
         /*

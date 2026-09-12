@@ -948,7 +948,10 @@ function surfaces(state: SurfacesState): PaneModel {
       title: session === undefined ? "What you can connect to" : "Current surface",
       empty:
         session === undefined
-          ? "no adapter is installed"
+          ? // The model's sentence, which says whether nothing is installed or
+            // nothing could be asked. The cockpit said the first in both cases,
+            // exactly as the desktop did (SF-17).
+            state.discoveryEmpty
           : state.httpSurface
             ? "an HTTP surface has no controls"
             : "press S to take a fresh snapshot",

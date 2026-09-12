@@ -226,9 +226,17 @@ export function SurfacesScreen(props: ScreenProps<SurfacesState>): React.JSX.Ele
           <SurfaceBody {...props} />
         ) : (
           <div className="sv-editor" id="surfaces-discovery" aria-label="What you can connect to">
+            {/*
+              The model's sentence, not one chosen here: an empty list means
+              either "nothing is installed" or "nothing could be asked", and
+              only the model knows which. Written out here, it claimed the first
+              in both cases — so a broker that was briefly unreachable reported
+              "No adapter is installed" on a machine with eight, contradicting
+              the alert directly above it (SF-17).
+            */}
             {state.groups.length === 0 ? (
-              <p className="sv-empty">
-                No adapter is installed. `yam surface targets` shows the same list from a terminal.
+              <p className="sv-empty" id="surfaces-discovery-empty">
+                {state.discoveryEmpty}
               </p>
             ) : (
               state.groups.map((group) => (
