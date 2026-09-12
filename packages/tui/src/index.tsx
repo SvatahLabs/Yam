@@ -17,6 +17,7 @@ import { own } from "./terminal.js";
 import { createElement } from "react";
 import { SCREEN_IDS, screenById, type ScreenId, type ScreenParams } from "@svatah/yam-screens";
 import type { ScreenService } from "@svatah/yam-screens";
+import { DEFAULT_SCREEN } from "./keys.js";
 import { App } from "./app.js";
 import { asJson, loadUi } from "./model.js";
 
@@ -88,7 +89,7 @@ export async function printJson(options: UiOptions): Promise<void> {
   const out = options.out ?? ((text: string) => process.stdout.write(`${text}\n`));
   const ui = await loadUi(
     options.service,
-    options.screen ?? "flows",
+    options.screen ?? DEFAULT_SCREEN,
     options.params ?? {},
     options.connection,
   );

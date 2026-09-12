@@ -50,7 +50,7 @@ import {
 import { INSPECTOR_MIN_COLUMNS, footerFor, sizeOf } from "./layout.js";
 import { Regions, viewFor } from "./views.js";
 import { StatusBar } from "./widgets.js";
-import { actionForKey, keysFor } from "./keys.js";
+import { DEFAULT_SCREEN, actionForKey, keysFor } from "./keys.js";
 
 export interface AppProps {
   readonly service: ScreenService;
@@ -113,7 +113,7 @@ export function App(props: AppProps): React.JSX.Element {
   useEffect(() => {
     void loadUi(
       props.service,
-      props.screen ?? "flows",
+      props.screen ?? DEFAULT_SCREEN,
       props.params ?? {},
       props.connection,
       measure(),

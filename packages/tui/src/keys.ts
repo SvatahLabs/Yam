@@ -13,6 +13,16 @@
  */
 import { SCREEN_IDS, actionById, type ScreenId, type SessionMode } from "@svatah/yam-screens";
 
+/**
+ * Where the cockpit opens (TV-14, `REQ-ADE-11`).
+ *
+ * The app opens on Session and the cockpit opened on Flows — a divergence that
+ * outlived Draft 2.25 because nothing checked it. One constant, read by both
+ * entry points, and `tools/repo-checks/test/palette-parity.test.ts` holds the
+ * two renderers to one default.
+ */
+export const DEFAULT_SCREEN: ScreenId = "session";
+
 /** One key, and the action it runs. */
 export interface KeyBinding {
   /** As a person presses it and as the footer prints it. */

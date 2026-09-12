@@ -91,6 +91,22 @@ describe("both palettes are the one registry (T9.4)", () => {
     }
   });
 
+  it("opens on the same screen in both renderers (TV-14)", () => {
+    /*
+     * Draft 2.25 made Session the default destination; the app honoured it and
+     * the cockpit did not, and nothing noticed because nothing compared them.
+     * The default is read out of each renderer's own source here, so the two
+     * cannot drift again without this failing.
+     */
+    const app = /useState<Showing>\("(\w+)"\)/.exec(APP_DIR)?.[1];
+    const cockpit = /DEFAULT_SCREEN: ScreenId = "(\w+)"/.exec(
+      readFileSync(fromRoot("packages/tui/src/keys.ts"), "utf8"),
+    )?.[1];
+    expect(app, "the app declares no default screen").toBeDefined();
+    expect(cockpit, "the cockpit declares no default screen").toBeDefined();
+    expect(cockpit, `the app opens on ${app ?? "?"} and the cockpit on ${cockpit ?? "?"}`).toBe(app);
+  });
+
   it("binds its keys from its own table, and names actions from the one registry", () => {
     /*
      * TV-M03 reversed this check's premise, deliberately. A key used to be
