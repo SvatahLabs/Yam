@@ -916,3 +916,35 @@
   color: var(--muted);
   font-size: 11.5px;
 }
+
+/*
+ * What is live, on the tab it belongs to (P-W2-F7).
+ *
+ * A dot and a word, never a dot alone: a coloured circle with no text beside it
+ * is a state a person has to have been told about (`REQ-ADE-12`).
+ */
+.sv-mode-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+  color: var(--pass);
+  font-size: 11px;
+}
+
+.sv-mode-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pass);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sv-mode-dot {
+    animation: sv-pulse 1.6s var(--motion-ease) infinite;
+  }
+}
+
+@keyframes sv-pulse {
+  50% { opacity: 0.35; }
+}

@@ -45,6 +45,19 @@ const recordOf = (state: SessionState): DrawnRecordLoad =>
 export function ModeStrip(props: {
   readonly mode: SessionMode;
   readonly onMode: (mode: SessionMode) => void;
+  /**
+   * What is live right now, drawn on the tab it belongs to (P-W2-F7).
+   *
+   * Nothing in the application said whether a recording was running. The Record
+   * pane says so once you are on it and a capture has started, and that is the
+   * one place — so a person who had started one, switched mode, and come back
+   * had no way to tell, and a person who had *not* started one could not tell
+   * that either. A live state that is visible on one screen only is a live state
+   * you have to go and check.
+   */
+  readonly capturing?: boolean;
+  readonly sentences?: number;
+  readonly connected?: boolean;
 }): React.JSX.Element {
   return (
     <div className="sv-modes" role="tablist" aria-label="Session mode">
@@ -66,6 +79,18 @@ export function ModeStrip(props: {
           onClick={() => props.onMode(one)}
         >
           {one === "record" ? "Record" : one === "say" ? "Say" : "Do"}
+          {one === "record" && props.capturing === true ? (
+            <span className="sv-mode-live" id="session-recording">
+              <span className="sv-mode-dot" aria-hidden="true" />
+              {`recording · ${props.sentences ?? 0}`}
+            </span>
+          ) : null}
+          {one === "do" && props.connected === true ? (
+            <span className="sv-mode-live" id="session-connected">
+              <span className="sv-mode-dot" aria-hidden="true" />
+              connected
+            </span>
+          ) : null}
         </button>
       ))}
     </div>
@@ -83,14 +108,41 @@ export function ModeStrip(props: {
  */
 export function SessionScreen(props: ScreenProps<SessionState>): React.JSX.Element {
   const { state } = props;
+  const record = recordOf(state);
+  const surface = surfaceOf(state);
   const strip = (
-    <ModeStrip mode={state.mode} onMode={(mode) => props.onParams({ ...props.params, mode })} />
+    <ModeStrip
+      mode={state.mode}
+      onMode={(mode) => props.onParams({ ...props.params, mode })}
+      capturing={record.capturing === true}
+      sentences={record.sentences?.length ?? 0}
+      connected={surface.session !== undefined}
+    />
   );
+  /*
+   * This mode's actions, not all seventeen (REQ-ADE-14, P-W2-F6).
+   *
+   * The merge put every Surfaces and Record action on one screen, and the
+   * toolbar offered all of them whatever the mode: nine shed into the palette at
+   * 1900px and fourteen at 1100px, with no window width at which they fit.
+   * `availableWhen` already refused the ones belonging to another mode, but a
+   * refused action is a *disabled button*, and a disabled button takes the room
+   * that hides a working one.
+   *
+   * Which mode an action belongs to is the action's own property now, so this
+   * reads the model rather than deciding anything.
+   */
+  const forMode = {
+    ...props,
+    actions: props.actions.filter(
+      (one) => one.modes === undefined || one.modes.includes(state.mode),
+    ),
+  };
   if (state.mode === "record") {
     return (
       <>
         {strip}
-        <RecordScreen {...props} state={recordOf(state)} />
+        <RecordScreen {...forMode} state={record} />
       </>
     );
   }
@@ -98,7 +150,7 @@ export function SessionScreen(props: ScreenProps<SessionState>): React.JSX.Eleme
     return (
       <>
         {strip}
-        <SurfacesScreen {...props} state={surfaceOf(state)} />
+        <SurfacesScreen {...forMode} state={surface} />
       </>
     );
   }

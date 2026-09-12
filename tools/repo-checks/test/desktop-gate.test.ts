@@ -267,14 +267,34 @@ describe("a locked display is the cause the gate names (P9-F7, Draft 2.12 §7.5)
  * silence.
  */
 describe("`surface doctor --adapter ax` reports the login session (P9-F7)", () => {
-  const doctor = (): { checks: Array<Record<string, unknown>> } =>
-    JSON.parse(
-      execFileSync(
+  /*
+   * The report is read whatever the exit code (P-W2-F8).
+   *
+   * `doctor` exits 1 when a check fails, and on a machine where macOS has not
+   * been granted Accessibility for the terminal, `ax/accessibility` fails — so
+   * `execFileSync` threw and this case failed for the host's permissions rather
+   * than for anything about the report. What is under test is that the report
+   * *carries* an `ax/session` check, which it does either way.
+   *
+   * `evals/self/yam-on-yam` already models this correctly: a host that cannot be
+   * asked is `blocked`, which is neither passed nor failed. This is the same
+   * distinction, kept by reading stdout rather than the status.
+   */
+  const doctor = (): { checks: Array<Record<string, unknown>> } => {
+    let printed: string;
+    try {
+      printed = execFileSync(
         process.execPath,
         [fromRoot("packages/cli/dist/bin.js"), "surface", "doctor", "--adapter", "ax", "--json"],
         { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 },
-      ),
-    ) as { checks: Array<Record<string, unknown>> };
+      );
+    } catch (cause) {
+      const said = (cause as { stdout?: string }).stdout;
+      if (typeof said !== "string" || said.trim() === "") throw cause;
+      printed = said;
+    }
+    return JSON.parse(printed) as { checks: Array<Record<string, unknown>> };
+  };
 
   it("carries an ax/session check on macOS, and says why not elsewhere", () => {
     const checks = doctor().checks;

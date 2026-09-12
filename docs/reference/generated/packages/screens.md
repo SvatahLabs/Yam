@@ -106,7 +106,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `SECTIONS` | variable | `SECTIONS: readonly Section[] = [` |  |
 | `ServiceConnectionInfo` | interface | `export interface ServiceConnectionInfo` | Where the connection is, for the renderers' chrome and for `--json`. |
 | `ServiceEventLike` | interface | `export interface ServiceEventLike` | One line of the event stream, as far as a screen cares. |
-| `SESSION_MODES` | variable | `SESSION_MODES = ["record", "say", "do"] as const` | The three ways of driving one session (REQ-ADE-14). |
+| `SESSION_MODES` | variable | `SESSION_MODES = ["record", "say", "do"] as const` | Session's three modes (REQ-ADE-14, Draft 2.27). |
 | `SessionMode` | typealias | `export type SessionMode = (typeof SESSION_MODES)[number];` |  |
 | `sessionScreen` | variable | `sessionScreen: Screen<SessionState> ` |  |
 | `SessionState` | interface | `export interface SessionState extends ScreenStateBase` |  |

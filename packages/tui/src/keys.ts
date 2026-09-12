@@ -111,7 +111,13 @@ const SCREEN_KEYS: Partial<Record<ScreenId, readonly KeyBinding[]>> = {
   session: [
     { key: "c", action: "surface.connect", label: "Connect a surface" },
     { key: "s", action: "surface.refresh", label: "Refresh the surface tree", modes: ["do", "say"] },
-    { key: "r", action: "surface.discover", label: "Recheck available targets" },
+    /*
+     * `do` only, as the model says. It was every mode, so `r` in Record ran an
+     * action `availableWhen` then refused — a key that could only ever report
+     * "not available here". `tools/repo-checks/test/action-modes.test.ts` found
+     * it the first time it ran.
+     */
+    { key: "r", action: "surface.discover", label: "Recheck available targets", modes: ["do"] },
     /*
      * One key takes the target back (TV-13, SF-13). Seeing that an agent is
      * driving is half of a handoff; the other half is being able to do something

@@ -33,6 +33,7 @@
     "@svatah/yam-service": "workspace:*",
     "@svatah/yam-spec": "workspace:*",
     "@svatah/yam-surface-control": "workspace:*",
+    "@svatah/yam-tui": "workspace:*",
     "@svatah/yam-ui-tokens": "workspace:*",
     "@types/node": "catalog:",
     "eslint": "catalog:",

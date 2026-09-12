@@ -152,6 +152,33 @@ checks:
     external:
       source: "app-playwright"
       name: "Surfaces offers a connect form and no prose intent (T15, SF-12)"
+  - id: "app.the-bar-keeps-what-you-can-do"
+    says: "A toolbar with no room keeps the controls you can press and sheds the ones you cannot."
+    yam:
+      # A layout rule measured in pixels at seven window widths. Yam can read a
+      # tree and press a control; it has no sentence for "resize to 1100 and tell
+      # me which buttons are hidden", and inventing one to cover a CSS rule would
+      # be a worse test than the measurement.
+      unreachable: "This is a measurement, not a journey: seven window widths, each button's hidden flag and disabled state read from the layout. What is missing is a sentence about geometry, not an adapter."
+    external:
+      source: "app-playwright"
+      name: "the bar keeps what you can do and sheds what you cannot (P-W2-F6)"
+  - id: "app.session-offers-only-this-mode"
+    says: "Session offers the actions of the mode showing, not all seventeen the merged screen has."
+    yam:
+      source: "yam-on-yam"
+      name: "the packaged application opens into Session"
+    external:
+      source: "app-playwright"
+      name: "Session offers only the mode's own actions (REQ-ADE-14)"
+  - id: "app.a-live-session-says-so"
+    says: "A recording or a connected surface is visible from every mode, not only from the pane that owns it."
+    yam:
+      source: "yam-on-yam"
+      name: "the packaged application opens into Session"
+    external:
+      source: "app-playwright"
+      name: "a live session says so where every mode can see it (P-W2-F7)"
   - id: "app.opens-into-the-new-flows-screen-not-the-eleven-tabs"
     # Surface-first (T14): the app opens into Session, not Flows — Draft 2.27
     # merged Surfaces into it. Both sides

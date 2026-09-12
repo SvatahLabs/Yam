@@ -37,8 +37,10 @@ import type { ScreenService } from "../service.js";
 import { actionsForScreen } from "../registry.js";
 
 /** The three ways of driving one session (REQ-ADE-14). */
-export const SESSION_MODES = ["record", "say", "do"] as const;
-export type SessionMode = (typeof SESSION_MODES)[number];
+/* The modes moved to `types.ts`, where `Action` can declare which it belongs to. */
+import { SESSION_MODES, type SessionMode } from "../types.js";
+export { SESSION_MODES };
+export type { SessionMode };
 
 /**
  * The field shapes are the loaders' own (TV-M04).

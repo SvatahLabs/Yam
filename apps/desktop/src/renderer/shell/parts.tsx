@@ -110,15 +110,33 @@ export function Toolbar(props: ToolbarProps): React.JSX.Element {
       for (const one of buttons) one.hidden = false;
 
       /*
-       * Secondary first, right to left; then, if the bar still does not fit,
-       * the primary and the dangerous one — because the title's twelve
-       * characters are the floor and a button is never worth breaking it. On a
-       * bar narrow enough for that to happen, every one of them is a `⌘K` away
-       * and the bar says how many.
+       * What you cannot do goes before what you can (P-W2-F6).
+       *
+       * The order was secondary-then-primary, and nothing in it looked at
+       * whether a button *worked*. So on a Session screen with a browser
+       * connected and no recording started, the bar kept a disabled **Accept**
+       * and a disabled **Reject** — the screen's declared primary and danger —
+       * and shed **Disconnect**, which was the one enabled thing on it and the
+       * only way to close the browser. The person could not stop, and killed the
+       * browser instead.
+       *
+       * A disabled button tells you something is possible later. An enabled one
+       * is something you can do now. When there is not room for both, the bar
+       * keeps the one you can do — and the disabled one is still a `⌘K` away,
+       * which is the same place it was always going.
+       *
+       * Within each group, right to left, and secondary before primary as
+       * before: the title's floor is still the thing no button outranks.
        */
+      const disabled = (one: HTMLElement): boolean =>
+        one.hasAttribute("disabled") || one.getAttribute("aria-disabled") === "true";
+      const secondary = (one: HTMLElement): boolean =>
+        one.dataset["toolbarSecondary"] === "true";
       const order = [
-        ...buttons.filter((one) => one.dataset["toolbarSecondary"] === "true").reverse(),
-        ...buttons.filter((one) => one.dataset["toolbarSecondary"] !== "true").reverse(),
+        ...buttons.filter((one) => disabled(one) && secondary(one)).reverse(),
+        ...buttons.filter((one) => disabled(one) && !secondary(one)).reverse(),
+        ...buttons.filter((one) => !disabled(one) && secondary(one)).reverse(),
+        ...buttons.filter((one) => !disabled(one) && !secondary(one)).reverse(),
       ];
       let dropped = 0;
       for (const one of order) {

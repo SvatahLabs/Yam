@@ -1386,6 +1386,13 @@ test("a toolbar that runs out of room sheds into the palette, and says so (P10-F
         secondary: buttons
           .filter((one) => one.dataset["toolbarSecondary"] === "true")
           .map((one) => one.id),
+        /* Disabled is now part of the shedding order, so it is measured. */
+        disabled: buttons
+          .filter(
+            (one) =>
+              one.hasAttribute("disabled") || one.getAttribute("aria-disabled") === "true",
+          )
+          .map((one) => one.id),
         shedText: (bar.querySelector(".sv-toolbar-shed")?.textContent ?? "").trim(),
         titleWidth: title.clientWidth,
         titleFloor: parseFloat(getComputedStyle(title).minWidth),
@@ -1452,11 +1459,25 @@ test("a toolbar that runs out of room sheds into the palette, and says so (P10-F
     expect(one.shedText, `${one.width}px: the hint does not count what went`).toBe(
       one.hidden.length === 0 ? "⌘K +0" : `⌘K +${one.hidden.length}`,
     );
-    // Secondary before primary, always.
-    const shedAPrimary = one.hidden.some((id) => !one.secondary.includes(id));
-    if (shedAPrimary) {
-      for (const id of one.secondary) {
-        expect(one.hidden, `${one.width}px: ${id} is on a bar that shed a primary`).toContain(id);
+    /*
+     * Secondary before primary — *among buttons in the same state* (P-W2-F6).
+     *
+     * This read "always", and always was wrong. It is the rule that kept a
+     * disabled Accept and a disabled Reject on the bar — the screen's declared
+     * primary and danger — while shedding an enabled Disconnect, leaving a
+     * person with a browser open and no way in the application to close it.
+     *
+     * Enabled-ness outranks primary-ness: a disabled button says something is
+     * possible later, an enabled one is something you can do now, and when there
+     * is not room for both the bar keeps what you can do. Within one state the
+     * old ordering stands, which is what this now asserts.
+     */
+    const shedAnEnabledPrimary = one.hidden.some(
+      (id) => !one.secondary.includes(id) && !one.disabled.includes(id),
+    );
+    if (shedAnEnabledPrimary) {
+      for (const id of one.secondary.filter((each: string) => !one.disabled.includes(each))) {
+        expect(one.hidden, `${one.width}px: ${id} is on a bar that shed an enabled primary`).toContain(id);
       }
     }
   }
@@ -1474,10 +1495,23 @@ test("a toolbar that runs out of room sheds into the palette, and says so (P10-F
    * out of room, sheds, and says how many went.
    */
   const oneRow = seen.filter((one) => one.width > 960);
-  const roomy = oneRow.find((one) => one.hidden.length === 0);
+  /*
+   * Roomy means "nothing you can do was shed", not "nothing was shed"
+   * (P-W2-F6).
+   *
+   * Session offers ten actions in Record mode, and several are pairs only one of
+   * which can ever be live at once — take control and give it up, stop the
+   * capture and stop the session. At the widest width measured, one *disabled*
+   * button is shed and every enabled one stays, which is the behaviour this file
+   * is about: the bar keeps what you can do. Requiring a literally empty shed
+   * list would be requiring room for buttons that cannot be pressed.
+   */
+  const roomy = oneRow.find((one) =>
+    one.hidden.every((id: string) => one.disabled.includes(id)),
+  );
   expect(
     roomy,
-    `every one-row width shed something: ${JSON.stringify(seen.map((o) => [o.width, o.barWidth, o.hidden.length]))}`,
+    `every one-row width shed something enabled: ${JSON.stringify(seen.map((o) => [o.width, o.barWidth, o.hidden.length, o.hidden.filter((id: string) => !o.disabled.includes(id)).length]))}`,
   ).toBeDefined();
   const tightest = oneRow.at(-1)!;
   expect(
@@ -1622,4 +1656,78 @@ test("a saved API request is edited and saved through the app (K7)", async () =>
       { timeout: 60_000 },
     )
     .toBe(1);
+});
+
+
+test("the bar keeps what you can do and sheds what you cannot (P-W2-F6)", async () => {
+  /*
+   * The failure this is about: a browser connected from Do mode, then Record
+   * mode, and the bar kept a disabled **Accept** and a disabled **Reject** —
+   * the screen's declared primary and danger — while shedding **Disconnect**,
+   * the one enabled control on it and the only way to close the browser. The
+   * person could not stop, and killed the browser.
+   */
+  await goToMode("record");
+  await expect(page.locator("#record-gateway")).toBeVisible({ timeout: 60_000 });
+
+  for (const width of [1900, 1500, 1100]) {
+    const measured = await atWidth(width, async () =>
+      page.evaluate(() => {
+        const bar = document.querySelector(".sv-toolbar") as HTMLElement;
+        const buttons = [...bar.querySelectorAll<HTMLElement>("[data-toolbar-action]")];
+        const off = (one: HTMLElement) =>
+          one.hasAttribute("disabled") || one.getAttribute("aria-disabled") === "true";
+        return {
+          shedEnabled: buttons.filter((one) => one.hidden && !off(one)).map((one) => one.id),
+          keptDisabled: buttons.filter((one) => !one.hidden && off(one)).map((one) => one.id),
+        };
+      }),
+    );
+    /*
+     * The rule, stated as an implication rather than as two counts: while any
+     * enabled control has been shed, no disabled one may still hold a place.
+     */
+    if (measured.shedEnabled.length > 0) {
+      expect(
+        measured.keptDisabled,
+        `${width}px: shed enabled ${measured.shedEnabled.join(", ")} while keeping disabled ` +
+          measured.keptDisabled.join(", "),
+      ).toEqual([]);
+    }
+  }
+});
+
+test("Session offers only the mode's own actions (REQ-ADE-14)", async () => {
+  /*
+   * Seventeen actions on one bar is what the merge produced, and there is no
+   * window width at which seventeen fit. Which mode an action belongs to is the
+   * action's own property, so the bar can ask.
+   */
+  const countFor = async (mode: "record" | "do") => {
+    await goToMode(mode);
+    return await page.evaluate(
+      () => document.querySelectorAll(".sv-toolbar [data-toolbar-action]").length,
+    );
+  };
+  const inRecord = await countFor("record");
+  const inDo = await countFor("do");
+  expect(inRecord, "Record offers no actions").toBeGreaterThan(0);
+  expect(inDo, "Do offers no actions").toBeGreaterThan(0);
+  /* Each mode shows fewer than the union: that is the whole point of scoping. */
+  expect(Math.max(inRecord, inDo), `record=${inRecord} do=${inDo}`).toBeLessThan(17);
+});
+
+test("a live session says so where every mode can see it (P-W2-F7)", async () => {
+  /*
+   * "Record functionality does not show anything that recording is in progress
+   * or whether it is working at all." The Record pane says it, once you are on
+   * that pane and a capture has started — which is no help to somebody deciding
+   * whether to go and look.
+   */
+  await goToMode("do");
+  const strip = page.locator(".sv-modes");
+  await expect(strip).toBeVisible();
+  /* Nothing is connected in this fixture, so neither badge is on. */
+  await expect(page.locator("#session-recording")).toHaveCount(0);
+  await expect(page.locator("#session-connected")).toHaveCount(0);
 });

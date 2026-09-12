@@ -1303,6 +1303,9 @@ importers:
       '@svatah/yam-surface-control':
         specifier: workspace:*
         version: link:../../packages/surface-control
+      '@svatah/yam-tui':
+        specifier: workspace:*
+        version: link:../../packages/tui
       '@svatah/yam-ui-tokens':
         specifier: workspace:*
         version: link:../../packages/ui-tokens

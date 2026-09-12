@@ -51,6 +51,16 @@ export const SCREEN_IDS = [
 export type ScreenId = (typeof SCREEN_IDS)[number];
 
 /**
+ * Session's three modes (REQ-ADE-14, Draft 2.27).
+ *
+ * Here rather than in `screens/session.ts`, because `Action` declares which mode
+ * it belongs to and `session.ts` imports this file — a type both the screen and
+ * the registry need cannot live inside one of them.
+ */
+export const SESSION_MODES = ["record", "say", "do"] as const;
+export type SessionMode = (typeof SESSION_MODES)[number];
+
+/**
  * What a screen was asked to show: which flow, which run, which binding.
  *
  * A screen is a function of the service and this, and of nothing else — which
@@ -219,6 +229,22 @@ export interface Action {
    * already has the flag.
    */
   readonly needs?: readonly ActionInput[];
+  /**
+   * The Session modes this action belongs to (REQ-ADE-14, TV-15).
+   *
+   * Absent means every mode. This fact existed only in the cockpit's key table,
+   * so the app had no way to read it — and rendered all seventeen of Session's
+   * actions on one toolbar whatever the mode. There is no window width at which
+   * seventeen fit: nine were shed into the palette at 1900px and fourteen at
+   * 1100px, and among the shed were **Stop recording** and **Stop the session**.
+   * A person recording could not stop, and had to kill the browser.
+   *
+   * `availableWhen` already refuses out of mode, but that only *disables* a
+   * button — it still takes the room that hides another. Which mode an action
+   * belongs to is a property of the action, so it is declared here and both
+   * renderers read it.
+   */
+  readonly modes?: readonly SessionMode[];
   /** Whether this action can run against this state. The palette greys the rest. */
   availableWhen(state: ScreenStateBase): boolean;
   run(service: ScreenService, args: ActionArgs): Promise<ActionOutcome>;

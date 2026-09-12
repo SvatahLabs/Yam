@@ -265,6 +265,8 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "session",
     cli: "yam surface targets",
+    /* listing what there is to connect to is part of connecting. */
+    modes: ["do"],
     availableWhen: loaded,
     async run(service): Promise<ActionOutcome> {
       // Reads discovery again; the reload the shell does after an action is
@@ -286,6 +288,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     cli: "yam surface act --session <id> --action <action> --ref <ref>",
     // Not on an HTTP surface: its `act` refuses everything, so offering it
     // would be the dead end T15 exists to remove. That surface has `request`.
+    modes: ["do"],
     availableWhen: both(inMode("do"), (state) => {
       const surface = half(state, "surface");
       return surface["session"] !== undefined && surface["httpSurface"] !== true;
@@ -353,6 +356,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "session",
     cli: "yam surface check --session <id> --input <file.json>",
+    modes: ["do"],
     availableWhen: both(inMode("do"), hasIn("surface", "session")),
     async run(service, args): Promise<ActionOutcome> {
       const session = typeof args.selected === "string" ? args.selected : undefined;
@@ -388,6 +392,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "session",
     cli: "yam surface read --session <id> --kind text --ref <ref>",
+    modes: ["do"],
     availableWhen: both(inMode("do"), hasIn("surface", "session")),
     async run(service, args): Promise<ActionOutcome> {
       const session = typeof args.selected === "string" ? args.selected : undefined;
@@ -408,6 +413,8 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "session",
     cli: "yam surface snapshot --session <id>",
+    /* a fresh snapshot is what those two modes act on. */
+    modes: ["do", "say"],
     availableWhen: hasIn("surface", "session"),
     async run(_service, args): Promise<ActionOutcome> {
       /*
@@ -488,6 +495,8 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "session",
     cli: "yam surface targets",
+    /* the agent's link to the surface is the Do mode's subject. */
+    modes: ["do"],
     availableWhen: loaded,
     async run(service): Promise<ActionOutcome> {
       /*
@@ -515,6 +524,8 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "session",
     cli: "yam trajectory compile <trajectory.jsonl>",
+    /* a trajectory becomes a flow, which is what recording makes. */
+    modes: ["record"],
     availableWhen: hasIn("surface", "session"),
     async run(service, args): Promise<ActionOutcome> {
       const session = typeof args.selected === "string" ? args.selected : undefined;
@@ -582,6 +593,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     screen: "session",
     cli: "yam surface request --session <id> --url <url>",
     // Only an HTTP surface has this form; the model says which is which.
+    modes: ["do"],
     availableWhen: both(inMode("do"), (state) => half(state, "surface")["httpSurface"] === true),
     async run(service, args): Promise<ActionOutcome> {
       const session = typeof args.selected === "string" ? args.selected : undefined;
@@ -751,6 +763,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "session",
     // No `cli`: at a terminal a capture ends with Enter, which is not a command.
+    modes: ["record"],
     availableWhen: both(inMode("record"), hasIn("record", "sessionId")),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No recording session is open.");
@@ -785,6 +798,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Accept",
     group: "Actions",
     screen: "session",
+    modes: ["record"],
     availableWhen: both(inMode("record"), hasIn("record", "decision")),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No recording session is open.");
@@ -800,6 +814,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Re-pick",
     group: "Actions",
     screen: "session",
+    modes: ["record"],
     availableWhen: both(inMode("record"), hasIn("record", "decision")),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No recording session is open.");
@@ -814,6 +829,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Reject",
     group: "Actions",
     screen: "session",
+    modes: ["record"],
     availableWhen: both(inMode("record"), hasIn("record", "decision")),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No recording session is open.");
@@ -829,6 +845,7 @@ const ACTIONS_ONLY: readonly Action[] = [
     label: "Stop recording",
     group: "Actions",
     screen: "session",
+    modes: ["record"],
     availableWhen: both(inMode("record"), hasIn("record", "sessionId")),
     async run(service, args): Promise<ActionOutcome> {
       if (typeof args.sessionId !== "string") return refused("No recording session is open.");
