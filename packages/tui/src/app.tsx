@@ -21,6 +21,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ACTIONS,
   RAIL,
+  SESSION_MODES,
   actionById,
   modeFrom,
   screenById,
@@ -50,7 +51,7 @@ import {
 import { INSPECTOR_MIN_COLUMNS, footerFor, sizeOf } from "./layout.js";
 import { Regions, viewFor } from "./views.js";
 import { StatusBar } from "./widgets.js";
-import { DEFAULT_SCREEN, actionForKey, keysFor } from "./keys.js";
+import { COMMAND_KEYS, DEFAULT_SCREEN, actionForKey, keysFor } from "./keys.js";
 
 export interface AppProps {
   readonly service: ScreenService;
@@ -92,6 +93,7 @@ export function App(props: AppProps): React.JSX.Element {
   const { stdout } = useStdout();
   const [ui, setUi] = useState<UiState | undefined>(undefined);
   const [busy, setBusy] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   /**
    * The terminal, as it is now (T10.4, P9-F4).
@@ -271,6 +273,26 @@ export function App(props: AppProps): React.JSX.Element {
       setUi({ ...ui, paletteOpen: true, paletteQuery: "" });
       return;
     }
+    /* The key map, drawn from the table the footer is drawn from (TV-07). */
+    if (input === "?") {
+      setHelpOpen((was) => !was);
+      return;
+    }
+    if (helpOpen) {
+      if (key.escape || input === "q") setHelpOpen(false);
+      return;
+    }
+    /*
+     * The mode, on one key (TV-15). Only where there are modes: `m` on a screen
+     * without them would be a key that does nothing, which the footer would
+     * have to advertise anyway.
+     */
+    if (input === "m" && SESSION_MODES.length > 0 && ui.screen === "session") {
+      const now = modeFrom(ui.params["mode"]);
+      const next = SESSION_MODES[(SESSION_MODES.indexOf(now) + 1) % SESSION_MODES.length]!;
+      void reload(ui.screen, { ...ui.params, mode: next });
+      return;
+    }
     if (input === "q") {
       exit();
       return;
@@ -400,13 +422,14 @@ export function App(props: AppProps): React.JSX.Element {
    * terminal: a frame that is exactly the terminal has no "beyond" (TV-04).
    */
   const paletteRowCount = ui.paletteOpen ? Math.min(12, Math.max(6, Math.floor(ui.layout.rows / 3))) : 0;
+  const helpRowCount = helpOpen ? Math.min(ui.layout.rows - 6, COMMAND_KEYS.length + keysFor(ui.screen).length + 3) : 0;
   /*
    * Inline, the last row belongs to the newline every frame ends with; on the
    * alternate screen there is no newline to make room for. The *size* is the
    * terminal's either way, because that is the fact a capture is read with.
    */
   const drawnRows = ui.layout.rows - (props.inline === true ? 1 : 0);
-  const bodyRows = Math.max(3, drawnRows - 2 - messageRows - paletteRowCount);
+  const bodyRows = Math.max(3, drawnRows - 2 - messageRows - paletteRowCount - helpRowCount);
 
   return (
     <Box flexDirection="column" width={ui.layout.columns} height={drawnRows}>
@@ -446,6 +469,23 @@ export function App(props: AppProps): React.JSX.Element {
           ))}
         </Text>
       </Box>
+
+      {helpOpen ? (
+        <Box flexDirection="column" borderStyle="single" borderColor="magenta" paddingX={1} width={ui.layout.columns}>
+          <Text color="magenta">Keys · generated from the key map · yam ui --keys --json</Text>
+          {COMMAND_KEYS.map((one) => (
+            <Text key={one.key} wrap="truncate-end">
+              <Text color="magenta">{one.key.padEnd(6)}</Text> {one.label}
+            </Text>
+          ))}
+          {keys.map((one) => (
+            <Text key={`s-${one.key}`} wrap="truncate-end">
+              <Text color="magenta">{one.key.padEnd(6)}</Text> {one.label}
+              {one.modes === undefined ? "" : <Text color="gray">{`  · ${one.modes.join(", ")}`}</Text>}
+            </Text>
+          ))}
+        </Box>
+      ) : null}
 
       {/* the palette: the same rows the app's ⌘K shows */}
       {ui.paletteOpen ? (

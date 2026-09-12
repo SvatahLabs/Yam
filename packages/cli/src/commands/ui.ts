@@ -110,6 +110,16 @@ export async function uiCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCo
   const project = resolve(args.command[1] ?? ".");
   const asJson = args.options["json"] !== undefined;
 
+  /*
+   * `--keys` needs no service and no terminal: it is the cockpit's key map, and
+   * an agent asking what it may press should not have to start one (TV-07).
+   */
+  if (args.options["keys"] !== undefined) {
+    const { printKeys } = await import("@svatah/yam-tui");
+    printKeys((text) => io.out(text));
+    return EXIT.ok;
+  }
+
   const given = {
     url: stringOption(args, "url") ?? process.env["YAM_SERVICE_URL"],
     token: stringOption(args, "token") ?? process.env["YAM_SERVICE_TOKEN"],

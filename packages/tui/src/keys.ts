@@ -47,6 +47,41 @@ export interface KeyBinding {
  * `Tab`, `j`/`k`, `q` — are the cockpit's own and live with the input layer that
  * owns them (TV-T11), because they run commands rather than actions.
  */
+/**
+ * The keys the cockpit itself has, which run commands rather than actions.
+ *
+ * They are here so that the `?` overlay and `yam ui --keys --json` are one table
+ * with the screens' keys, rather than a list somebody keeps in step by hand —
+ * which is what TV-07 means by "the key map is data".
+ */
+export interface CommandKey {
+  readonly key: string;
+  readonly command: string;
+  readonly label: string;
+}
+
+export const COMMAND_KEYS: readonly CommandKey[] = [
+  { key: "^K", command: "palette.open", label: "every action" },
+  { key: "?", command: "help.open", label: "this list" },
+  { key: "1-4", command: "region.focus", label: "focus a region" },
+  { key: "Tab", command: "region.next", label: "next region" },
+  { key: "j k", command: "cursor.move", label: "row down / up" },
+  { key: "Enter", command: "row.open", label: "open what the cursor is on" },
+  { key: "[ ]", command: "screen.walk", label: "previous / next screen" },
+  /*
+   * `m`, and not `1`/`2`/`3` — a deviation from the `TUI-Session` board, on
+   * purpose (TV-15).
+   *
+   * That board printed `1 record 2 say 3 do` in the mode strip while every other
+   * board printed `1-4 region` in the footer: the same digits, two meanings, on
+   * the one screen that has both. A person cannot be asked which they meant.
+   * Regions keep the digits because they are the navigation every screen has,
+   * and the mode cycles on a key that collides with nothing.
+   */
+  { key: "m", command: "mode.next", label: "record · say · do" },
+  { key: "q", command: "quit", label: "quit" },
+];
+
 const SCREEN_KEYS: Partial<Record<ScreenId, readonly KeyBinding[]>> = {
   session: [
     { key: "c", action: "surface.connect", label: "Connect a surface" },
@@ -120,8 +155,27 @@ export const actionForKey = (
 ): string | undefined => keysFor(screen, mode).find((one) => one.key === pressed)?.action;
 
 /**
- * Every binding, for `yam ui --keys --json` and for the check that no key names
- * an action the registry does not have (TV-T12).
+ * The whole key map, as `yam ui --keys --json` prints it and the `?` overlay
+ * draws it (TV-07).
+ *
+ * One table, three readers. A key advertised and unbound is not a mistake this
+ * can make.
+ */
+export function keyMap(): {
+  readonly commands: readonly CommandKey[];
+  readonly screens: Record<string, ReadonlyArray<KeyBinding>>;
+} {
+  const screens: Record<string, ReadonlyArray<KeyBinding>> = {};
+  for (const screen of SCREEN_IDS) {
+    const bound = keysFor(screen);
+    if (bound.length > 0) screens[screen] = bound;
+  }
+  return { commands: COMMAND_KEYS, screens };
+}
+
+/**
+ * Every binding, for the check that no key names an action the registry does
+ * not have (TV-T12).
  */
 export const ALL_KEYS: ReadonlyArray<KeyBinding & { readonly screen: ScreenId }> = SCREEN_IDS.flatMap(
   (screen) => keysFor(screen).map((one) => ({ ...one, screen })),

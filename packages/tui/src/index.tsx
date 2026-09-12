@@ -17,7 +17,7 @@ import { own } from "./terminal.js";
 import { createElement } from "react";
 import { SCREEN_IDS, screenById, type ScreenId, type ScreenParams } from "@svatah/yam-screens";
 import type { ScreenService } from "@svatah/yam-screens";
-import { DEFAULT_SCREEN } from "./keys.js";
+import { DEFAULT_SCREEN, keyMap } from "./keys.js";
 import { App } from "./app.js";
 import { asJson, loadUi } from "./model.js";
 
@@ -44,8 +44,8 @@ export { own, capabilitiesOf } from "./terminal.js";
 export { depthFor, foreground, hexOf, inkColour, tone, ansi256Of, rgbOf } from "./theme.js";
 export type { ColourDepth } from "./theme.js";
 export type { Capabilities, Owned } from "./terminal.js";
-export { keysFor, actionForKey, ALL_KEYS, unknownBindings } from "./keys.js";
-export type { KeyBinding } from "./keys.js";
+export { keysFor, actionForKey, keyMap, ALL_KEYS, COMMAND_KEYS, DEFAULT_SCREEN, unknownBindings } from "./keys.js";
+export type { KeyBinding, CommandKey } from "./keys.js";
 export type { Layout } from "./layout.js";
 
 export interface UiOptions {
@@ -94,6 +94,17 @@ export async function printJson(options: UiOptions): Promise<void> {
     options.connection,
   );
   out(JSON.stringify(asJson(ui), null, 2));
+}
+
+/**
+ * `--keys --json`: the key map, printed and drawn nothing (TV-07).
+ *
+ * The same table the footer takes its keys from and the `?` overlay lists, so a
+ * key cannot be advertised and unbound — and an agent driving the cockpit can
+ * read what it may press instead of guessing.
+ */
+export function printKeys(out: (text: string) => void = (text) => process.stdout.write(`${text}\n`)): void {
+  out(JSON.stringify(keyMap(), null, 2));
 }
 
 /** Draw the cockpit, and answer when it exits. */

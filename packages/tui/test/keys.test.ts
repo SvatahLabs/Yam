@@ -12,7 +12,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { ACTIONS, SCREEN_IDS, SESSION_MODES, actionsForScreen } from "@svatah/yam-screens";
-import { ALL_KEYS, actionForKey, keysFor, unknownBindings } from "../src/keys.js";
+import { ALL_KEYS, COMMAND_KEYS, actionForKey, keyMap, keysFor, unknownBindings } from "../src/keys.js";
 
 describe("every key names an action that exists", () => {
   it("binds nothing the registry does not have", () => {
@@ -92,6 +92,32 @@ describe("no screen binds one key to two actions", () => {
     /* The same letter, a different action, because the screen is different. */
     expect(actionForKey("flows", "h")).toBe("heal.run");
     expect(actionForKey("flows", "!")).toBeUndefined();
+  });
+});
+
+describe("the key map is one table, with three readers (TV-07)", () => {
+  it("prints the cockpit's own keys and the screens' together", () => {
+    const map = keyMap();
+    expect(map.commands.some((one) => one.key === "^K")).toBe(true);
+    expect(map.commands.some((one) => one.key === "?")).toBe(true);
+    expect(map.screens["session"]?.some((one) => one.action === "surface.connect")).toBe(true);
+  });
+
+  it("gives the mode a key that no region focus takes", () => {
+    /*
+     * The mock printed `1 record 2 say 3 do` on Session and `1-4 region` on
+     * every other board: the same digits, two meanings, on the screen that has
+     * both. The digits stayed with the regions.
+     */
+    const mode = COMMAND_KEYS.find((one) => one.command === "mode.next");
+    expect(mode, "no key cycles the mode").toBeDefined();
+    expect(mode!.key).not.toMatch(/^[0-9]$/);
+    expect(COMMAND_KEYS.filter((one) => one.key === mode!.key)).toHaveLength(1);
+  });
+
+  it("advertises no command key twice", () => {
+    const keys = COMMAND_KEYS.map((one) => one.key);
+    expect(new Set(keys).size, keys.join(" ")).toBe(keys.length);
   });
 });
 
