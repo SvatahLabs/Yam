@@ -190,6 +190,21 @@ const ACTIONS_ONLY: readonly Action[] = [
      * running. The old copy promised "a browser, app, device or API" for a field
      * that accepted the first only.
      */
+    /*
+     * Connecting is Do's subject (REQ-ADE-14, P-W2-F9).
+     *
+     * It was offered in every mode, and in Record it was a dead end: the session
+     * it makes is stored as `selected`, which is what the surface half reads,
+     * while the record half reads `sessionId`. So pressing Connect on the Record
+     * screen opened a browser and left the pane saying "No session" — the mode
+     * did not change, but the result was only visible in another one, which is
+     * indistinguishable from being sent there.
+     *
+     * And a surface session cannot become a recording one: `record.start` posts
+     * a flow and a gateway and gets its own session back. Joining the two is a
+     * runtime change, not a view one.
+     */
+    modes: ["do"],
     needs: [
       {
         name: "target",
@@ -237,7 +252,13 @@ const ACTIONS_ONLY: readonly Action[] = [
       return ok(`Connected with the ${used} adapter${headed ? ", and the window is visible" : " (no window)"}.`, {
         value: answer,
         goTo: "session",
-        ...(sessionId === undefined ? {} : { params: { selected: sessionId } }),
+        /*
+         * `mode: "do"` with it: the palette can run this from any mode, and a
+         * connected surface is only visible in one. Landing a person where the
+         * thing they just made is beats leaving them on a pane that says
+         * nothing happened.
+         */
+        params: { mode: "do", ...(sessionId === undefined ? {} : { selected: sessionId }) },
       });
     },
   },

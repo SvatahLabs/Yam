@@ -767,3 +767,43 @@ describe("a proposal needs a project (T14, T17)", () => {
     expect(service.calls.some((one) => one.method === "postTrajectoryCompile")).toBe(false);
   });
 });
+
+/**
+ * Connecting belongs to Do, and says where its result is (P-W2-F9).
+ *
+ * It was offered in every mode. In Record it was a dead end: the session it
+ * makes is stored as `selected`, which is what the surface half reads, while the
+ * record half reads `sessionId`. Pressing Connect on the Record screen therefore
+ * opened a browser and left the pane saying "No session" — the mode did not
+ * change, but the result was visible only in another one.
+ */
+describe("connect belongs to the mode that can show what it made", () => {
+  it("is a Do-mode action", () => {
+    expect(actionById("surface.connect")?.modes).toEqual(["do"]);
+  });
+
+  it("carries the mode its result is visible in", async () => {
+    const service = fakeService({
+      surface: { connect: ok({ sessionId: "s_new", adapter: "playwright", kind: "web" }) },
+    });
+    /* As if run from the palette while Record was showing. */
+    const outcome = await actionById("surface.connect")!.run(service, {
+      mode: "record",
+      target: "https://example.com",
+    });
+    expect(outcome.params?.["mode"]).toBe("do");
+    expect(outcome.params?.["selected"]).toBe("s_new");
+  });
+
+  /*
+   * The two halves read different keys, which is the whole of the defect. If
+   * they ever become one key this test should fail and be deleted deliberately.
+   */
+  it("stores the session where the surface half reads it, not the record half", async () => {
+    const service = fakeService({
+      surface: { connect: ok({ sessionId: "s_new", adapter: "playwright", kind: "web" }) },
+    });
+    const outcome = await actionById("surface.connect")!.run(service, { target: "https://x.test" });
+    expect(outcome.params?.["sessionId"]).toBeUndefined();
+  });
+});

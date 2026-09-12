@@ -107,7 +107,18 @@ test.describe("capabilities (LLD §2.4)", () => {
         const controller = new AbortController();
         const watching = surface.observe!((event) => { seen.push(event); }, { signal: controller.signal });
         await surface.act("click", await refByTestId(surface, "booking-link"));
-        for (let i = 0; i < 40 && !seen.some((one) => one.kind === "click"); i += 1) await new Promise((done) => setTimeout(done, 50));
+        /*
+         * Ten seconds, not two (P-W2-F10).
+         *
+         * This waited forty times fifty milliseconds for an event produced by a
+         * real browser in another process. Alone that is ample; under
+         * `pnpm -r test`, where several packages are driving browsers at once,
+         * it is not — and the failure read as "the adapter claims observe but
+         * the proof failed", which is an accusation about the adapter rather
+         * than about the clock. The assertion is unchanged; only the patience
+         * is, and it still stops the moment the event arrives.
+         */
+        for (let i = 0; i < 200 && !seen.some((one) => one.kind === "click"); i += 1) await new Promise((done) => setTimeout(done, 50));
         controller.abort();
         await watching;
         return seen.some((one) => one.kind === "click") && seen.some((one) => one.kind === "navigate");

@@ -109,7 +109,12 @@ export const COCKPIT_ONLY: readonly string[] = ["^k", "?", "1", "2", "3", "4", "
 
 const SCREEN_KEYS: Partial<Record<ScreenId, readonly KeyBinding[]>> = {
   session: [
-    { key: "c", action: "surface.connect", label: "Connect a surface" },
+    /*
+     * `do` only, as the model says (P-W2-F9). Connecting from Record opened a
+     * browser and left the pane saying "No session", because the session it
+     * makes is the surface half's and the record half reads a different key.
+     */
+    { key: "c", action: "surface.connect", label: "Connect a surface", modes: ["do"] },
     { key: "s", action: "surface.refresh", label: "Refresh the surface tree", modes: ["do", "say"] },
     /*
      * `do` only, as the model says. It was every mode, so `r` in Record ran an
