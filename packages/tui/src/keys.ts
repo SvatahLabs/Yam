@@ -87,6 +87,13 @@ const SCREEN_KEYS: Partial<Record<ScreenId, readonly KeyBinding[]>> = {
     { key: "c", action: "surface.connect", label: "Connect a surface" },
     { key: "s", action: "surface.refresh", label: "Refresh the surface tree", modes: ["do", "say"] },
     { key: "r", action: "surface.discover", label: "Recheck available targets" },
+    /*
+     * One key takes the target back (TV-13, SF-13). Seeing that an agent is
+     * driving is half of a handoff; the other half is being able to do something
+     * about it without opening a palette and reading.
+     */
+    { key: "t", action: "surface.take-control", label: "Take control" },
+    { key: "T", action: "surface.release-control", label: "Give up control" },
     { key: "a", action: "record.accept", label: "Accept the grounding", modes: ["record"] },
     { key: "p", action: "record.repick", label: "Re-pick in the session", modes: ["record"] },
     { key: "x", action: "record.reject", label: "Reject the grounding", modes: ["record"] },
