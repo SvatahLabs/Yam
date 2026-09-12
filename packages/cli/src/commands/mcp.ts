@@ -26,6 +26,7 @@ import { randomUUID } from "node:crypto";
 import { join, resolve } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { removeClient, writeClient } from "@svatah/yam-surface-control";
 import { z } from "zod";
 import { lintPlan, renderPlan } from "@svatah/yam-compiler";
 import { TrajectoryWriter } from "@svatah/yam-trajectory";
@@ -991,12 +992,37 @@ export async function mcpCommand(args: ParsedArgs, io: CommandIo): Promise<ExitC
   const transport = new StdioServerTransport();
   await built.server.connect(transport);
 
+  /*
+   * Say that somebody is connected (TV-M05, SF-13).
+   *
+   * This process is not the service, and the service is what the cockpit and the
+   * app ask — so the connection is recorded in the user's state directory and
+   * read from there. The heartbeat is what makes a record that outlived its
+   * process fall out of the list rather than showing an agent nobody can take a
+   * target back from.
+   */
+  const id = `stdio-${process.pid}`;
+  const record = (): void => {
+    writeClient({
+      id,
+      name: stringOption(args, "client") ?? "an MCP client",
+      transport: "stdio",
+      profile: stringOption(args, "profile") ?? "surface",
+      since: new Date().toISOString(),
+    });
+  };
+  record();
+  const heartbeat = setInterval(record, 10_000);
+  heartbeat.unref();
+
   await new Promise<void>((done) => {
     transport.onclose = () => done();
     process.once("SIGINT", () => done());
     process.once("SIGTERM", () => done());
   });
 
+  clearInterval(heartbeat);
+  removeClient(id);
   await built.close();
   return EXIT.ok;
 }

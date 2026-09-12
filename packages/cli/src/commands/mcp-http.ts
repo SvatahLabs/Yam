@@ -48,6 +48,7 @@
  */
 import { createServer, type Server, type ServerResponse } from "node:http";
 import { randomUUID, randomBytes } from "node:crypto";
+import { removeClient, writeClient } from "@svatah/yam-surface-control";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { EventStore } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { LATEST_PROTOCOL_VERSION, type JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
@@ -124,6 +125,10 @@ export function createEventStore(limitPerStream = 512): EventStore {
 export interface HttpMcpOptions extends McpServerOptions {
   /** The port to listen on. `0` asks the system for one. */
   readonly port?: number;
+  /** What to call a client that connects, for the list a person reads (TV-M05). */
+  readonly clientName?: string;
+  /** The tool profile these clients are given: what they may call. */
+  readonly profile?: string;
   /** The bearer token. Generated per process when not given. */
   readonly token?: string;
   /**
@@ -276,6 +281,14 @@ export async function startHttpMcp(options: HttpMcpOptions): Promise<RunningHttp
         allowedHosts: ["127.0.0.1", "localhost", `127.0.0.1:${addressPort(server)}`],
         allowedOrigins,
         onsessioninitialized: (id: string) => {
+          /* A connection the service can read, because it is another process. */
+          writeClient({
+            id: `http-${id}`,
+            name: options.clientName ?? "an MCP client",
+            transport: "http",
+            profile: options.profile ?? "surface",
+            since: new Date().toISOString(),
+          });
           sessions.set(id, {
             transport,
             close: async () => {
@@ -286,6 +299,7 @@ export async function startHttpMcp(options: HttpMcpOptions): Promise<RunningHttp
           });
         },
         onsessionclosed: (id: string) => {
+          removeClient(`http-${id}`);
           const held = sessions.get(id);
           sessions.delete(id);
           void held?.close();
