@@ -1,27 +1,252 @@
 {
   "pages": [
-    { "id": "page-app", "name": "app screens" },
-    { "id": "page-tui", "name": "TUI" },
-    { "id": "page-system", "name": "Design system" }
+    {
+      "id": "page-app",
+      "name": "app screens"
+    },
+    {
+      "id": "page-tui",
+      "name": "TUI"
+    },
+    {
+      "id": "page-system",
+      "name": "Design system"
+    }
   ],
   "artboards": [
-    { "file": "Main.dc.html", "title": "Flows · editor and plan", "x": 0, "y": 0, "w": 1440, "h": 900, "page": "page-app" },
-    { "file": "RecordReview.dc.html", "title": "Record review", "x": 1540, "y": 0, "w": 1440, "h": 900, "page": "page-app" },
-    { "file": "Run.dc.html", "title": "Run · live, with compensation", "x": 0, "y": 1040, "w": 1440, "h": 900, "page": "page-app" },
-    { "file": "Results.dc.html", "title": "Runs and evidence", "x": 1540, "y": 1040, "w": 1440, "h": 900, "page": "page-app" },
-    { "file": "HealReview.dc.html", "title": "Heal review", "x": 0, "y": 2080, "w": 1440, "h": 900, "page": "page-app" },
-    { "file": "Bindings.dc.html", "title": "Bindings", "x": 1540, "y": 2080, "w": 1440, "h": 900, "page": "page-app" },
-    { "file": "Agents.dc.html", "title": "Agents and tools", "x": 0, "y": 3120, "w": 1440, "h": 900, "page": "page-app" },
-    { "file": "Palette.dc.html", "title": "Command palette", "x": 1540, "y": 3120, "w": 1440, "h": 900, "page": "page-app" },
-    { "file": "Secondary.dc.html", "title": "Secondary screens · wireframe", "x": 0, "y": 4160, "w": 1440, "h": 900, "page": "page-app" },
-    { "file": "TUI.dc.html", "title": "yam ui · terminal cockpit", "x": 0, "y": 0, "w": 1180, "h": 720, "page": "page-tui" },
-    { "file": "Tokens.dc.html", "title": "Tokens, type, controls, rules", "x": 0, "y": 0, "w": 1440, "h": 1000, "page": "page-system" }
+    {
+      "file": "Main.dc.html",
+      "title": "Flows \u00b7 editor and plan",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "page": "page-app"
+    },
+    {
+      "file": "RecordReview.dc.html",
+      "title": "Record review",
+      "x": 1540,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "page": "page-app"
+    },
+    {
+      "file": "Run.dc.html",
+      "title": "Run \u00b7 live, with compensation",
+      "x": 0,
+      "y": 1040,
+      "w": 1440,
+      "h": 900,
+      "page": "page-app"
+    },
+    {
+      "file": "Results.dc.html",
+      "title": "Runs and evidence",
+      "x": 1540,
+      "y": 1040,
+      "w": 1440,
+      "h": 900,
+      "page": "page-app"
+    },
+    {
+      "file": "HealReview.dc.html",
+      "title": "Heal review",
+      "x": 0,
+      "y": 2080,
+      "w": 1440,
+      "h": 900,
+      "page": "page-app"
+    },
+    {
+      "file": "Bindings.dc.html",
+      "title": "Bindings",
+      "x": 1540,
+      "y": 2080,
+      "w": 1440,
+      "h": 900,
+      "page": "page-app"
+    },
+    {
+      "file": "Agents.dc.html",
+      "title": "Agents and tools",
+      "x": 0,
+      "y": 3120,
+      "w": 1440,
+      "h": 900,
+      "page": "page-app"
+    },
+    {
+      "file": "Palette.dc.html",
+      "title": "Command palette",
+      "x": 1540,
+      "y": 3120,
+      "w": 1440,
+      "h": 900,
+      "page": "page-app"
+    },
+    {
+      "file": "Secondary.dc.html",
+      "title": "Secondary screens \u00b7 wireframe",
+      "x": 0,
+      "y": 4160,
+      "w": 1440,
+      "h": 900,
+      "page": "page-app"
+    },
+    {
+      "file": "TUI.dc.html",
+      "title": "yam ui \u00b7 terminal cockpit",
+      "x": 0,
+      "y": 0,
+      "w": 1180,
+      "h": 720,
+      "page": "page-tui"
+    },
+    {
+      "file": "Tokens.dc.html",
+      "title": "Tokens, type, controls, rules",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1000,
+      "page": "page-system"
+    },
+    {
+      "file": "TUI-Regions.dc.html",
+      "title": "yam ui \u00b7 the region tree, filled",
+      "x": 1280,
+      "y": 0,
+      "w": 990,
+      "h": 860,
+      "page": "page-tui"
+    },
+    {
+      "file": "TUI-Run.dc.html",
+      "title": "yam ui \u00b7 a run, live",
+      "x": 2370,
+      "y": 0,
+      "w": 990,
+      "h": 830,
+      "page": "page-tui"
+    },
+    {
+      "file": "TUI-Palette.dc.html",
+      "title": "yam ui \u00b7 palette and keys (120 and 80)",
+      "x": 1280,
+      "y": 960,
+      "w": 990,
+      "h": 1375,
+      "page": "page-tui"
+    },
+    {
+      "file": "TUI-Empty.dc.html",
+      "title": "yam ui \u00b7 an empty project, before and after",
+      "x": 2370,
+      "y": 960,
+      "w": 990,
+      "h": 1695,
+      "page": "page-tui"
+    },
+    {
+      "file": "TUI-Surfaces.dc.html",
+      "title": "yam ui \u00b7 connect, inspect, act, verify",
+      "x": 3460,
+      "y": 0,
+      "w": 990,
+      "h": 860,
+      "page": "page-tui"
+    },
+    {
+      "file": "TUI-Mcp.dc.html",
+      "title": "yam ui \u00b7 serving MCP, and who holds the target",
+      "x": 3460,
+      "y": 960,
+      "w": 990,
+      "h": 860,
+      "page": "page-tui"
+    },
+    {
+      "file": "TUI-Surface-States.dc.html",
+      "title": "yam ui \u00b7 connect, and the six states",
+      "x": 3460,
+      "y": 1920,
+      "w": 990,
+      "h": 1400,
+      "page": "page-tui"
+    },
+    {
+      "file": "TUI-Session.dc.html",
+      "title": "yam ui \u00b7 one session, three modes",
+      "x": 4550,
+      "y": 0,
+      "w": 990,
+      "h": 1290,
+      "page": "page-tui"
+    },
+    {
+      "file": "App-Session.dc.html",
+      "title": "Session \u00b7 one session, three modes (Draft 2.27)",
+      "x": 0,
+      "y": 5200,
+      "w": 1440,
+      "h": 900,
+      "page": "page-app"
+    }
   ],
   "annotations": [
-    { "id": "note-ia", "x": 0, "y": -150, "w": 700, "text": "Structure: left rail (Flows, Runs, Bindings, Agents and tools, API, Data, Settings), centre workspace, right inspector. The eleven tabs are gone; every old screen has a home. Command palette on ⌘K lists the same actions the TUI, SDK and CLI have.", "page": "page-app" },
-    { "id": "note-content", "x": 760, "y": -150, "w": 640, "text": "All content is real: the fixtures project, the comp run that compensated, the fake-gateway record decision, the WebMCP binding, the heal of schedule-build-link, the agent invocations from the audit.", "page": "page-app" },
-    { "id": "note-tui", "x": 0, "y": -130, "w": 700, "text": "yam ui: full authoring cockpit, standalone Ink app over the same service. Four numbered panes, Tab to cycle, ^K palette with the same action list as the app. --json streams the audit pane for agents. Shown: run comp after compensation, palette open on 'heal'.", "page": "page-tui" },
-    { "id": "note-system", "x": 0, "y": -130, "w": 700, "text": "Dark-first, light theme beside it. Radix primitives, own tokens. One accent (amber), five status colours with words beside them. Every control named and id'd for the desktop adapters.", "page": "page-system" }
+    {
+      "id": "note-ia",
+      "x": 0,
+      "y": -150,
+      "w": 700,
+      "text": "Structure: left rail (Flows, Runs, Bindings, Agents and tools, API, Data, Settings), centre workspace, right inspector. The eleven tabs are gone; every old screen has a home. Command palette on \u2318K lists the same actions the TUI, SDK and CLI have.",
+      "page": "page-app"
+    },
+    {
+      "id": "note-content",
+      "x": 760,
+      "y": -150,
+      "w": 640,
+      "text": "All content is real: the fixtures project, the comp run that compensated, the fake-gateway record decision, the WebMCP binding, the heal of schedule-build-link, the agent invocations from the audit.",
+      "page": "page-app"
+    },
+    {
+      "id": "note-tui",
+      "x": 0,
+      "y": -130,
+      "w": 700,
+      "text": "yam ui: full authoring cockpit, standalone Ink app over the same service. Four numbered panes, Tab to cycle, ^K palette with the same action list as the app. --json streams the audit pane for agents. Shown: run comp after compensation, palette open on 'heal'.",
+      "page": "page-tui"
+    },
+    {
+      "id": "note-system",
+      "x": 0,
+      "y": -130,
+      "w": 700,
+      "text": "Dark-first, light theme beside it. Radix primitives, own tokens. One accent (amber), five status colours with words beside them. Every control named and id'd for the desktop adapters.",
+      "page": "page-system"
+    },
+    {
+      "id": "note-tui-view",
+      "x": 1280,
+      "y": -130,
+      "w": 900,
+      "text": "Draft 2.26 \u2014 the terminal owns its view layer. The eight boards to the right are the proposed cockpit, not the shipped one: the alternate screen filled by a solved region tree, a live run driven by the event stream, the palette as an overlay with reasons on unavailable actions, the empty project before and after, the default screen driving a live target with no project, and the cockpit while Yam serves MCP. Parity with the app is every action reachable and --json equal to the model, not the same panes and the same keys. See docs/spec/view-layers/.",
+      "page": "page-tui"
+    },
+    {
+      "id": "note-app-session",
+      "x": 0,
+      "y": 5050,
+      "w": 900,
+      "page": "page-app",
+      "text": "Draft 2.27 \u2014 Session replaces Surfaces and Record as a destination and becomes the rail's default. The rail drawn here is the one REQ-ADE-11 describes; macros.mjs still draws the pre-2.25 rail on every other board on this page, which is TV-A01. Motion, a tree, a following log and a picker overlay are what packages/ui still owes this design: TV-A03 and TV-A04."
+    }
   ],
-  "launch": { "view": "canvas", "page": "page-app" }
+  "launch": {
+    "view": "canvas",
+    "page": "page-app"
+  }
 }

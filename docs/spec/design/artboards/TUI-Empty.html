@@ -1,0 +1,96 @@
+<div class="tui-board">
+<style>
+.tui-board { width:960px; background:#0b0d10; padding:14px; font-family:var(--mono); }
+.term { width:120ch; height:720px; background:#0f1216; color:#e3e8ee; font-size:12.5px; line-height:18px; position:relative; border:1px solid #262e37; overflow:hidden; }
+.term + .lbl { margin-top:26px; }
+.lbl { width:120ch; color:#5f6a78; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; padding-bottom:6px; }
+.lbl b { color:#ee6a5f; font-weight:500; } .lbl i { color:#4fc48a; font-style:normal; font-weight:500; }
+.old { padding:0 1ch; }
+.old .hdr { color:#8b96a5; white-space:pre; }
+.old .hdr b { color:#b8a1ff; font-weight:500; }
+.old .row { display:flex; gap:1ch; margin-top:4px; padding:0; border:0; }
+.old .box { border:1px solid #5f6a78; padding:2px 1ch; }
+.old .box.f { border-color:#b8a1ff; }
+.old .box .t { color:#5f6a78; } .old .box .t b { color:#b8a1ff; font-weight:500; }
+.old .inv { background:#c8ccd0; color:#0f1216; white-space:pre; }
+.old .keys { color:#5f6a78; margin-top:6px; white-space:pre; }
+.old .keys b { color:#b4bdc8; font-weight:500; }
+.old .void { color:#3a4450; margin-top:8px; }
+.grid { display:grid; grid-template-rows:18px 1fr 18px; height:720px; }
+.sbar { align-items:center; height:18px; display:flex; gap:2ch; background:#1b2128; color:#8b96a5; padding:0 1ch; white-space:pre; }
+.sbar b { color:#b8a1ff; font-weight:500; }
+.body { display:grid; grid-template-columns:minmax(0,1fr) 46ch; }
+.reg { border:1px solid #262e37; margin:9px 1px 2px; position:relative; padding:3px 0; }
+.reg .ttl { position:absolute; top:-9px; left:2ch; background:#0f1216; padding:0 1ch; color:#5f6a78; font-size:11px; }
+.reg.f { border-color:#b8a1ff; } .reg.f .ttl { color:#b8a1ff; }
+.r { padding:0 2ch; white-space:pre; overflow:hidden; }
+.mid { display:flex; flex-direction:column; justify-content:center; height:100%; }
+.h1 { color:#e3e8ee; font-size:15px; line-height:24px; padding:0 2ch; overflow:hidden; white-space:pre; }
+.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#8b96a5} .d{color:#5f6a78} .a{color:#b8a1ff}
+.key { display:inline-block; min-width:3ch; color:#1c1533; background:#b8a1ff; font-weight:500; text-align:center; }
+.key.q { background:#262e37; color:#b4bdc8; }
+.foot { display:flex; gap:2ch; color:#5f6a78; padding:0 1ch; white-space:pre; }
+.foot b { color:#b4bdc8; font-weight:500; }
+.cap { width:120ch; color:#8b96a5; font-size:11.5px; line-height:17px; padding-top:8px; }
+.cap b { color:#b8a1ff; font-weight:500; }
+</style>
+
+<div class="lbl">Today · <b>an empty project, 120×40</b></div>
+<div class="term">
+  <div class="old">
+    <div class="hdr" style="margin-top:2px"><b>yam ui</b> 120×40  /Users/atul/Workspace/Svatah/automator  http://127.0.0.1:62245  Flows · 0 files · 0 stories · 0 bindings, …</div>
+    <div class="row">
+      <div class="box" style="width:26ch"><div class="t"><b>1</b> Flows</div><div class="d">no flow files</div></div>
+      <div class="box f" style="width:52ch"><div class="t"><b>2</b> Flows</div><div class="inv">  1                                            </div></div>
+      <div class="box" style="width:32ch"><div class="t"><b>3</b> Inspect</div><div class="d">no step selected</div></div>
+    </div>
+    <div class="row"><div class="box" style="width:114ch"><div class="t"><b>4</b> Lint</div><div class="d">nothing to report</div></div></div>
+    <div class="keys"><b>^K</b> commands  <b>1-4</b> pane  <b>Tab</b> next  <b>j k</b> move  <b>Enter</b> open  <b>[ ]</b> screen  <b>r</b> record  <b>b</b> bind targets  <b>q</b> quit</div>
+    <div class="void">─── thirty rows of nothing, because a pane is as tall as its content ───</div>
+    <div class="void" style="margin-top:2px">─── and line 1 is "".split("\n"), drawn under a full-width inverse bar ───</div>
+  </div>
+</div>
+<div class="cap"><b>The defect, drawn.</b> Four boxes that fit their contents rather than the terminal; a phantom row numbered <b>1</b> that is an empty string split on newlines; a cursor that is a solid inverse bar; and nothing anywhere that says what to do next. Nine keys are advertised, two of which do nothing in a project with no flows.</div>
+
+<div class="lbl" style="margin-top:26px">With a view layer of its own · <i>the same empty project, 120×40</i></div>
+<div class="term">
+  <div class="grid">
+    <div class="sbar"><b>yam</b><span>automator</span><span>127.0.0.1:62245</span><span>Welcome</span><span class="d">no project here</span><span style="flex:1"></span><span class="g">● service ready</span><span>120×40</span></div>
+    <div class="body">
+      <div class="reg f"><span class="ttl">1 Nothing here yet</span>
+        <div class="mid">
+          <div class="h1">There is no Yam project here.</div>
+          <div class="r m" style="margin-top:10px">~/Workspace/Svatah/automator</div>
+          <div class="r m" style="margin-top:10px">You do not need one. A surface can be driven directly —</div>
+          <div class="r m">connect, inspect, act, verify — and a project is what</div>
+          <div class="r m">you make when you want to keep what you did.</div>
+          <div class="r" style="margin-top:18px"><span class="key">c</span>  <span class="c">Connect to a target</span>     <span class="d">a browser, an endpoint, a window</span></div>
+          <div class="r d" style="margin-top:2px">    yam surface targets</div>
+          <div class="r" style="margin-top:12px"><span class="key">i</span>  <span class="c">Start a project here</span>    <span class="d">flows/, bindings/, yam.config</span></div>
+          <div class="r d" style="margin-top:2px">    yam init</div>
+          <div class="r" style="margin-top:12px"><span class="key">o</span>  <span class="c">Open a project</span>          <span class="d">3 recent</span></div>
+          <div class="r" style="margin-top:12px"><span class="key q">^K</span> <span class="m">Everything else</span>         <span class="d">48 actions, each with its command</span></div>
+          <div class="r d" style="margin-top:22px">The service is already running here; nothing starts a second.</div>
+        </div>
+      </div>
+      <div class="reg"><span class="ttl">2 Recent</span>
+        <div class="r m" style="margin-top:2px">PROJECTS</div>
+        <div class="r">  yam-fixtures        <span class="d">2m ago  9 flows</span></div>
+        <div class="r">  sample-web          <span class="d">yesterday</span></div>
+        <div class="r">  booking-demo        <span class="d">3 days ago</span></div>
+        <div class="r m" style="margin-top:10px">TARGETS ON THIS MACHINE</div>
+        <div class="r">  <span class="c">chromium</span> 3 tabs      <span class="g">ready</span></div>
+        <div class="r d">    localhost:5173 · github.com …</div>
+        <div class="r">  <span class="c">macOS AX</span> 12 windows  <span class="g">ready</span></div>
+        <div class="r">  <span class="c">http</span>     any URL     <span class="g">ready</span></div>
+        <div class="r">  <span class="c">AT-SPI</span>   <span class="d">linux only</span>  <span class="d">n/a</span></div>
+        <div class="r m" style="margin-top:10px">THIS TERMINAL</div>
+        <div class="r d">  120×40 · truecolor · mouse</div>
+        <div class="r d">  $EDITOR nvim</div>
+      </div>
+    </div>
+    <div class="foot"><span><b>c</b> connect</span><span><b>i</b> init</span><span><b>o</b> open</span><span><b>^K</b> commands</span><span><b>?</b> keys</span><span><b>q</b> quit</span></div>
+  </div>
+</div>
+<div class="cap"><b>TV-06, TV-04.</b> A zero state names its next action and binds a key to it, and the footer advertises only the keys that do something here. The frame is filled because a region is as tall as its box, not as tall as its rows. What is offered first is <b>connect</b>, not <b>init</b>: Draft 2.25 made connect → inspect → act → verify the primary journey, and a person who has just typed <b>yam ui</b> in an empty directory is exactly the person that decision was about. The right-hand region answers the question the old screen could not: what is on this machine that I could drive right now.</div>
+</div>

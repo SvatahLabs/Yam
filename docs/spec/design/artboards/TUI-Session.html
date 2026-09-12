@@ -1,0 +1,118 @@
+<div class="tui-board">
+<style>
+.tui-board { width:960px; background:#0b0d10; padding:14px; font-family:var(--mono); }
+.term { width:120ch; height:720px; background:#0f1216; color:#e3e8ee; font-size:12.5px; line-height:18px; position:relative; border:1px solid #262e37; overflow:hidden; }
+.grid { display:grid; grid-template-columns:44ch 40ch 36ch; grid-template-rows:18px 18px 1fr 162px 18px; height:720px; }
+.sbar { align-items:center; height:18px; grid-column:1/-1; display:flex; gap:2ch; background:#1b2128; color:#8b96a5; padding:0 1ch; white-space:pre; }
+.sbar b { color:#b8a1ff; font-weight:500; }
+.modes { grid-column:1/-1; display:flex; gap:0; color:#5f6a78; padding:0 1ch; white-space:pre; }
+.modes span { padding:0 2ch; }
+.modes .on { background:#b8a1ff; color:#1c1533; font-weight:500; }
+.modes .off { color:#8b96a5; }
+.reg { border:1px solid #262e37; margin:9px 1px 2px; padding:3px 0; position:relative; }
+.reg.f { border-color:#b8a1ff; }
+.reg .ttl { position:absolute; top:-9px; left:2ch; background:#0f1216; padding:0 1ch; color:#5f6a78; font-size:11px; }
+.reg.f .ttl { color:#b8a1ff; }
+.r { padding:0 1ch; white-space:pre; overflow:hidden; }
+.r.cur { background:#231d3a; box-shadow:inset 2px 0 0 #b8a1ff; color:#fff; }
+.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#8b96a5} .d{color:#5f6a78} .a{color:#b8a1ff}
+.foot { grid-column:1/-1; display:flex; gap:2ch; color:#5f6a78; padding:0 1ch; white-space:pre; }
+.foot b { color:#b4bdc8; font-weight:500; }
+.say { background:#151a20; border-top:1px solid #b8a1ff; }
+.fld { background:#1b2128; color:#e3e8ee; } .fld i { border-left:1px solid #e3e8ee; margin-left:1px; font-style:normal; }
+.cap { width:120ch; color:#8b96a5; font-size:11.5px; line-height:17px; padding-top:8px; }
+.cap b { color:#b8a1ff; font-weight:500; }
+.lbl { width:120ch; color:#5f6a78; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; padding:20px 0 8px; }
+.lbl i { color:#4fc48a; font-style:normal; font-weight:500; }
+</style>
+
+<div class="term">
+  <div class="grid">
+    <div class="sbar"><b>yam</b><span>yam-fixtures</span><span>Session</span><span class="c">chromium · localhost:5173</span><span class="c">sf-7a1c</span><span style="flex:1"></span><span class="g">you control</span><span class="g">● live</span><span>120×40</span></div>
+    <div class="modes"><span class="off">mode</span><span class="off">1 record</span><span class="on">2 say</span><span class="off">3 do</span><span class="d">   one session · switching never reconnects · p pick from the app</span></div>
+
+    <div class="reg f"><span class="ttl">1 Say · one sentence at a time</span>
+      <div class="r"><span class="g">✓</span> Click the Book a slot link   <span class="d">41 ms</span></div>
+      <div class="r d">    booking.book-a-slot-link</div>
+      <div class="r"><span class="g">✓</span> Type "Indiranagar" into the</div>
+      <div class="r"><span class="g"> </span> location field               <span class="d">63 ms</span></div>
+      <div class="r"><span class="g">✓</span> Click the Book now button    <span class="d">58 ms</span></div>
+      <div class="r"><span class="g">✓</span> Remember the booking</div>
+      <div class="r"><span class="g"> </span> reference as reference   <span class="d">= BK-4471</span></div>
+      <div class="r y" style="margin-top:4px">? Click the pay button</div>
+      <div class="r d">    nothing is bound to that phrase</div>
+      <div class="r d">    <span class="a">p</span> point at it in the browser</div>
+      <div class="r d">    <span class="a">m</span> ask the model   <span class="y">no credential</span></div>
+      <div class="r d">    <span class="a">esc</span> leave the line unbound</div>
+      <div class="r" style="margin-top:6px"><span class="a">›</span> <span class="fld">The receipt should say paid<i>&nbsp;</i></span></div>
+      <div class="r d">  ↵ ground, run, and append it</div>
+    </div>
+
+    <div class="reg"><span class="ttl">2 Flow being written</span>
+      <div class="r d">sessions/2026-09-09.flow</div>
+      <div class="r m" style="margin-top:4px">story: book a slot</div>
+      <div class="r">  Click the Book a slot</div>
+      <div class="r">  link</div>
+      <div class="r">  Type "Indiranagar" into</div>
+      <div class="r">  the location field</div>
+      <div class="r">  Click the Book now button</div>
+      <div class="r">  Remember the booking</div>
+      <div class="r">  reference as reference</div>
+      <div class="r y">  Click the pay button</div>
+      <div class="r d">  ▌the next line lands here</div>
+      <div class="r d" style="margin-top:6px">4 bindings, <span class="y">all unverified</span></div>
+      <div class="r d">nothing is on disk until</div>
+      <div class="r d"><span class="a">w</span> writes the session</div>
+    </div>
+
+    <div class="reg"><span class="ttl">3 What Yam sees</span>
+      <div class="r d">SNAPSHOT rev 14</div>
+      <div class="r">e17 button  Book now</div>
+      <div class="r">e19 status  "Booked"</div>
+      <div class="r a">e22 button  Pay          ◂ p</div>
+      <div class="r">e26 link    Terms</div>
+      <div class="r d" style="margin-top:6px">LAST LINE</div>
+      <div class="r d">resolved   e12</div>
+      <div class="r d">by         testid</div>
+      <div class="r"><span class="g">verified</span>  <span class="d">value matched</span></div>
+      <div class="r d" style="margin-top:6px">the do mode is this pane,</div>
+      <div class="r d">made the subject: pick a</div>
+      <div class="r d">control and act on it</div>
+      <div class="r d">without writing a line</div>
+    </div>
+
+    <div class="reg" style="grid-column:1/-1"><span class="ttl">4 This session</span>
+      <div class="r"><span class="d">44.101</span> <span class="m">say</span>    "Click the Book now button" → tier 1 · booking.book-now-button · <span class="g">ok</span></div>
+      <div class="r"><span class="d">44.140</span> <span class="m">act</span>    click e17 · <span class="g">succeeded</span> · 58 ms · appended as line 5</div>
+      <div class="r"><span class="d">44.180</span> <span class="m">say</span>    "Click the pay button" → <span class="y">unbound</span> · no candidate scored above 0.8</div>
+      <div class="r"><span class="d">44.181</span> <span class="m">ask</span>    <span class="y">waiting: point at it, ask the model, or leave it unbound</span></div>
+      <div class="r d">─── record and do write into this same session and this same flow ───</div>
+    </div>
+
+    <div class="foot"><span><b>1-3</b> mode</span><span><b>p</b> pick</span><span><b>↵</b> say it</span><span><b>e</b> edit the flow</span><span><b>w</b> write</span><span><b>v</b> verify all</span><span><b>t</b> take control</span><span><b>^K</b> commands</span><span><b>q</b> quit</span></div>
+  </div>
+</div>
+<div class="cap"><b>REQ-ADE-14, the <i>say</i> mode.</b> One sentence at a time against the session already open. A phrase Yam can ground deterministically is grounded and run; a phrase it cannot stops and asks, and the three answers are the three groundings the product already has — a person points at it (<b>REQ-REC-12</b>), a model is asked where one is configured, or the line stays unbound and the flow says so. The flow accumulates in the middle pane and reaches disk only when you write it. Nothing here calls a model to <i>execute</i>: the model, when used at all, resolves a phrase to a binding once, and the finished flow replays without it.</div>
+
+<div class="lbl">The other two modes · <i>same session, same flow, same bindings</i></div>
+<div class="term" style="height:288px">
+  <div class="grid" style="grid-template-rows:18px 18px 1fr 18px; height:288px">
+    <div class="sbar"><b>yam</b><span>yam-fixtures</span><span>Session</span><span class="c">chromium · localhost:5173</span><span class="c">sf-7a1c</span><span style="flex:1"></span><span class="y">◐ observing</span><span>120×40</span></div>
+    <div class="modes"><span class="off">mode</span><span class="on">1 record</span><span class="off">2 say</span><span class="off">3 do</span><span class="d">   drive the application; Yam writes down what you did</span></div>
+    <div class="reg f"><span class="ttl">1 Record · capturing</span>
+      <div class="r"><span class="g">✓</span> clicked <span class="c">Book a slot</span></div>
+      <div class="r d">   → Click the Book a slot link</div>
+      <div class="r"><span class="g">✓</span> typed into <span class="c">Location</span></div>
+      <div class="r d">   → Type "Indiranagar" into the…</div>
+      <div class="r"><span class="g">✓</span> chose <span class="c">18:30</span> in Slot</div>
+      <div class="r d">   → Choose "18:30" in the slot list</div>
+      <div class="r y">◐ waiting for what you do next</div>
+      <div class="r d">a password is never written down</div>
+    </div>
+    <div class="reg"><span class="ttl">2 Flow</span><div class="r d">3 lines · 3 bindings</div><div class="r d"><span class="y">unverified</span></div></div>
+    <div class="reg"><span class="ttl">3 Seen</span><div class="r d">rev 16 · 318 nodes</div></div>
+    <div class="foot"><span><b>1-3</b> mode</span><span><b>space</b> stop capturing</span><span><b>w</b> write</span><span><b>^K</b> commands</span></div>
+  </div>
+</div>
+<div class="cap"><b>Record is a mode, not a destination.</b> The same session and the same flow: stop capturing, press <b>2</b>, and the next sentence you write continues the flow the capture started — or press <b>3</b> and pick a control to check what Yam sees before you trust the line above it. That is the whole argument for one screen: the three ways of writing a flow disagree about who is driving, not about what is being made.</div>
+</div>

@@ -1,0 +1,47 @@
+$ yam
+yam 0.1.0 · yam-fixtures · test · playwright
+
+  9 flows · 22 stories · 41 bindings, 4 unverified · 12 runs
+  last run  comp  aborted  2 minutes ago  exit 11
+
+  Next
+    yam check              nothing has been verified since the bindings changed
+    yam run                the whole project, or  yam run --story "<name>"
+    yam heal --run comp    5 candidates failed to resolve on checkout.pay-button
+
+  Doing something else
+    yam surface targets    drive a live application, no project needed
+    yam ui                 the cockpit
+    yam help <command>     every command, or  yam help topics
+
+$ yam check
+  config          ok        yam.config.yaml, schema 1.0.0
+  flows           ok        9 files parse, 22 stories
+  bindings        4 unverified
+                            booking.book-now-button, checkout.pay-button, +2
+                            these have never been resolved against a live target
+  adapters        ok        playwright 1.49, chromium 131
+  surface broker  ok        127.0.0.1:55702
+  secrets         1 unset   CARD_TOKEN, used by guards-and-compensation.flow:4
+
+  2 things to fix, neither blocking:
+    yam bindings verify     resolves the 4 against a live target
+    export CARD_TOKEN=...   or declare it in .env for this project
+
+$ yam run --story "I want to book and then fail"
+  ✓  Click the Book a slot link                       testid       41 ms
+  ✓  Type "Indiranagar" into the location field       testid       63 ms
+  ✓  Click the Book now button                        testid       58 ms
+  ✓  Remember the booking reference as reference      = BK-4471    12 ms
+  ✗  Click the pay button                             locator      69 ms
+     Could not resolve checkout.pay-button (the pay button).
+     5 candidates tried, none matched exactly one element.
+     policy → compensate: cancel a booking
+  ✓  Click the cancel booking button                  testid       47 ms
+  ✓  The booking reference should say {…reference}    = BK-4471    15 ms
+
+  aborted · 6 passed · 1 failed · exit 11 · runs/comp
+
+  Next
+    yam heal --run comp        propose a binding from what the run saw
+    yam ui --screen run --run comp    read it with the evidence beside it

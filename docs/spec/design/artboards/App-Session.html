@@ -1,0 +1,75 @@
+<div class="app">
+<header class="topbar"><div class="brand"><span class="mark"></span>Yam</div><div class="crumb"><span class="sep">/</span><b>yam-fixtures</b><span class="sep">/</span><span>Session</span></div><div class="spacer"></div><div class="palette-hint" role="button" aria-label="Command palette"><svg viewBox="0 0 16 16" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span>Search or run a command</span><kbd>⌘K</kbd></div><span class="env"><span class="dot"></span>chromium · localhost:5173</span><span class="env">you control</span></header>
+
+<nav class="sidebar" aria-label="Sections">
+<div class="section">Work</div>
+<div class="nav active" role="link" aria-label="Session"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h6M5 9.5h4"/></svg><span>Session</span><span class="count">live</span></div>
+<div class="nav" role="link" aria-label="Automations"><svg viewBox="0 0 16 16"><path d="M3 2.5h7l3 3v8H3z"/><path d="M10 2.5v3h3"/><path d="M5.5 8h5M5.5 10.5h5"/></svg><span>Automations</span><span class="count">9</span></div>
+<div class="nav" role="link" aria-label="Activity"><svg viewBox="0 0 16 16"><path d="M5 3l8 5-8 5z"/></svg><span>Activity</span><span class="count">12</span></div>
+<div class="grow"></div>
+<div class="nav" role="link" aria-label="Settings"><svg viewBox="0 0 16 16"><path d="M2 4.5h12M2 8h12M2 11.5h12"/><circle cx="5" cy="4.5" r="1.3" fill="#151a20"/><circle cx="11" cy="8" r="1.3" fill="#151a20"/><circle cx="7" cy="11.5" r="1.3" fill="#151a20"/></svg><span>Settings</span></div>
+</nav>
+
+<section class="workspace">
+  <div class="toolbar"><h1>Session</h1><span class="sub">sf-7a1c · chromium · rev 14 · 4 lines, 4 unverified</span><div class="spacer"></div>
+    <span class="tabs" style="border:0;padding:0">
+      <span class="tab">Record</span><span class="tab active">Say</span><span class="tab">Do</span>
+    </span>
+    <button class="btn" aria-label="Pick"><svg viewBox="0 0 16 16"><path d="M3 2l5 12 2-5 5-2z"/></svg>Pick <kbd>P</kbd></button>
+    <button class="btn primary" aria-label="Write the flow"><svg viewBox="0 0 16 16"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 11v2.5h10V11"/></svg>Write <kbd>⌘S</kbd></button>
+  </div>
+  <div class="main">
+    <aside class="list" aria-label="Sentences said">
+      <div class="filter">One sentence at a time</div>
+      <div class="row"><span class="name">Click the Book a slot link</span><span class="pill pass">ok</span><span class="meta"><span>booking.book-a-slot-link</span><span>41 ms</span></span></div>
+      <div class="row"><span class="name">Type "Indiranagar" into the location field</span><span class="pill pass">ok</span><span class="meta"><span>booking.location-field</span><span>63 ms</span></span></div>
+      <div class="row"><span class="name">Click the Book now button</span><span class="pill pass">ok</span><span class="meta"><span>booking.book-now-button</span><span>58 ms</span></span></div>
+      <div class="row"><span class="name">Remember the booking reference as reference</span><span class="pill pass">ok</span><span class="meta"><span>= BK-4471</span><span>12 ms</span></span></div>
+      <div class="row active"><span class="name">Click the pay button</span><span class="pill abort">unbound</span><span class="meta"><span>no candidate above 0.8 — choose how to ground it</span></span></div>
+      <div class="row"><span class="name" style="color:var(--dim)">The receipt should say paid</span><span class="pill neutral">typing</span><span class="meta"><span>⏎ ground, run and append</span></span></div>
+    </aside>
+    <div class="editor">
+      <div class="tabs"><span class="tab active">sessions/2026-09-09.flow</span><span class="tab">Snapshot</span><span class="tab">Bindings</span></div>
+      <div class="code" aria-label="The flow being written">
+        <div class="ln"><span class="n">1</span><span class="g"></span><span><span class="head">story: book a slot</span></span><span></span></div>
+        <div class="ln"><span class="n">2</span><span class="g pass">✓</span><span>&nbsp;&nbsp;Click <span class="ref">the Book a slot link</span></span><span class="d" style="color:var(--dim);font-size:11px">tier 1 · human</span></div>
+        <div class="ln"><span class="n">3</span><span class="g pass">✓</span><span>&nbsp;&nbsp;Type <span class="str">"Indiranagar"</span> into <span class="ref">the location field</span></span><span class="d" style="color:var(--dim);font-size:11px">tier 1 · human</span></div>
+        <div class="ln"><span class="n">4</span><span class="g pass">✓</span><span>&nbsp;&nbsp;Click <span class="ref">the Book now button</span></span><span class="d" style="color:var(--dim);font-size:11px">tier 1 · human</span></div>
+        <div class="ln"><span class="n">5</span><span class="g pass">✓</span><span>&nbsp;&nbsp;Remember the text of <span class="ref">the booking reference</span> as reference</span><span></span></div>
+        <div class="ln cur"><span class="n">6</span><span class="g abort">!</span><span>&nbsp;&nbsp;Click <span class="ref">the pay button</span></span><span class="d" style="color:var(--dim);font-size:11px">unbound</span></div>
+        <div class="ln"><span class="n">7</span><span class="g"></span><span class="cmt">&nbsp;&nbsp;the next line lands here</span><span></span></div>
+      </div>
+      <div class="snap" aria-label="Grounding choices">nothing is bound to "the pay button"
+  Point at it in the browser      the control you click is the binding
+  Ask the model                   no credential; yam --gateway anthropic
+  Leave it unbound                the flow keeps the line and says so
+</div>
+    </div>
+  </div>
+</section>
+
+<aside class="inspector" aria-label="Inspector">
+  <div class="isec"><h2>This session</h2>
+    <div class="kv"><span>session</span><b>sf-7a1c</b></div>
+    <div class="kv"><span>adapter</span><b>playwright · chromium</b></div>
+    <div class="kv"><span>target</span><b>localhost:5173</b></div>
+    <div class="kv"><span>ownership</span><b>attached</b></div>
+    <div class="kv"><span>control</span><b>You control</b></div>
+    <div class="kv"><span>snapshot</span><b>rev 14 · 318 nodes</b></div>
+  </div>
+  <div class="isec"><h2>What Yam sees</h2>
+    <div class="kv"><span>e17</span><b>button · Book now</b></div>
+    <div class="kv"><span>e19</span><b>status · "Booked"</b></div>
+    <div class="kv"><span>e22</span><b>button · Pay</b></div>
+    <div class="kv"><span>e26</span><b>link · Terms</b></div>
+  </div>
+  <div class="isec"><h2>Will be written</h2>
+    <div class="kv"><span>flow</span><b>sessions/2026-09-09.flow</b></div>
+    <div class="kv"><span>bindings</span><b>4, all unverified</b></div>
+    <div class="kv"><span>provenance</span><b>human / capture</b></div>
+    <div class="kv"><span>on disk</span><b>nothing yet</b></div>
+  </div>
+</aside>
+
+<footer class="statusbar">Session · say · sf-7a1c · 4 lines<span class="spacer"></span><span><kbd>⌘K</kbd>commands</span><span><kbd>?</kbd>keys</span></footer>
+</div>

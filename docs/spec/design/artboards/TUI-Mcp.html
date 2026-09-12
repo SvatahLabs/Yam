@@ -1,0 +1,100 @@
+<div class="tui-board">
+<style>
+.tui-board { width:960px; background:#0b0d10; padding:14px; font-family:var(--mono); }
+.term { width:120ch; height:720px; background:#0f1216; color:#e3e8ee; font-size:12.5px; line-height:18px; position:relative; border:1px solid #262e37; overflow:hidden; }
+.grid { display:grid; grid-template-columns:34ch 50ch 36ch; grid-template-rows:18px 18px 1fr 216px 18px; height:720px; }
+.sbar { align-items:center; height:18px; grid-column:1/-1; display:flex; gap:2ch; background:#1b2128; color:#8b96a5; padding:0 1ch; white-space:pre; }
+.sbar b { color:#b8a1ff; font-weight:500; }
+.hand { grid-column:1/-1; background:#2a2312; color:#e5b04c; padding:0 1ch; white-space:pre; display:flex; gap:2ch; }
+.hand b { color:#e3e8ee; font-weight:500; }
+.reg { border:1px solid #262e37; margin:9px 1px 2px; padding:3px 0; position:relative; }
+.reg.f { border-color:#b8a1ff; }
+.reg .ttl { position:absolute; top:-9px; left:2ch; background:#0f1216; padding:0 1ch; color:#5f6a78; font-size:11px; }
+.reg.f .ttl { color:#b8a1ff; }
+.r { padding:0 1ch; white-space:pre; overflow:hidden; }
+.r.cur { background:#231d3a; box-shadow:inset 2px 0 0 #b8a1ff; color:#fff; }
+.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#8b96a5} .d{color:#5f6a78} .bl{color:#6ea8fe} .a{color:#b8a1ff}
+.foot { grid-column:1/-1; display:flex; gap:2ch; color:#5f6a78; padding:0 1ch; white-space:pre; }
+.foot b { color:#b4bdc8; font-weight:500; }
+.cap { width:120ch; color:#8b96a5; font-size:11.5px; line-height:17px; padding-top:8px; }
+.cap b { color:#b8a1ff; font-weight:500; }
+</style>
+
+<div class="term">
+  <div class="grid">
+    <div class="sbar"><b>yam</b><span>yam-fixtures</span><span>127.0.0.1:55702</span><span>Agents</span><span class="c">mcp</span><span>2 clients · 7 tools</span><span style="flex:1"></span><span class="y">agent controls sf-33b8</span><span class="g">● live</span><span>120×40</span></div>
+    <div class="hand"><span>⚑</span><span><b>claude-code</b> is driving <b>chromium · localhost:5173</b> — filling e12. You are watching.</span><span style="flex:1"></span><span><b>t</b> take control</span></div>
+
+    <div class="reg"><span class="ttl">1 Clients</span>
+      <div class="r a">▸ claude-code        <span class="y">busy</span></div>
+      <div class="r d">  stdio · 2026-11-05</div>
+      <div class="r d">  profile surface</div>
+      <div class="r d">  connected 14m ago</div>
+      <div class="r d">  holds sf-33b8</div>
+      <div class="r" style="margin-top:6px">▸ cursor             <span class="g">idle</span></div>
+      <div class="r d">  http · 2026-11-05</div>
+      <div class="r d">  profile automation</div>
+      <div class="r d">  connected 3m ago</div>
+      <div class="r m" style="margin-top:8px">SERVING</div>
+      <div class="r">  stdio   <span class="g">yam mcp</span></div>
+      <div class="r">  http    <span class="g">:55702/mcp</span></div>
+      <div class="r d">  origin-checked, token</div>
+      <div class="r m" style="margin-top:8px">CONFIG          <span class="d">y copy</span></div>
+      <div class="r d">  {"command":"yam",</div>
+      <div class="r d">   "args":["mcp"]}</div>
+    </div>
+
+    <div class="reg f"><span class="ttl">2 Tools exposed · 7</span>
+      <div class="r"><span class="c">surface.targets</span>    <span class="d">idempotent</span></div>
+      <div class="r"><span class="c">surface.connect</span>    <span class="d">adapter, target</span></div>
+      <div class="r"><span class="c">surface.snapshot</span>   <span class="d">session, maxNodes</span></div>
+      <div class="r cur"><span class="c">surface.act</span>        <span class="d">session, ref, action, text</span></div>
+      <div class="r"><span class="c">surface.check</span>      <span class="d">session, ref, kind</span></div>
+      <div class="r"><span class="c">surface.close</span>      <span class="d">session</span></div>
+      <div class="r"><span class="c">yam.run</span>            <span class="d">story · automation profile</span></div>
+      <div class="r m" style="margin-top:8px">REFUSED · 2 <span class="d">and why</span></div>
+      <div class="r"><span class="y">book a slot</span></div>
+      <div class="r d">  not idempotent; a tool that</div>
+      <div class="r d">  books twice is not a read</div>
+      <div class="r"><span class="y">pay for a booking</span></div>
+      <div class="r d">  destructive; enable with</div>
+      <div class="r d">  --allow-destructive</div>
+      <div class="r d" style="margin-top:6px">the refusals are the point: an</div>
+      <div class="r d">agent sees what it may not do</div>
+    </div>
+
+    <div class="reg"><span class="ttl">3 surface.act</span>
+      <div class="r d">session   <span class="c">sf-33b8</span></div>
+      <div class="r d">invoker   claude-code</div>
+      <div class="r d">at        18:41:09.220</div>
+      <div class="r m" style="margin-top:6px">ARGUMENTS</div>
+      <div class="r">  ref     e12</div>
+      <div class="r">  action  fill</div>
+      <div class="r">  text    "Indiranagar"</div>
+      <div class="r m" style="margin-top:6px">RESULT</div>
+      <div class="r"><span class="g">succeeded</span> <span class="d">· 41 ms</span></div>
+      <div class="r d">  verified false</div>
+      <div class="r d">  no postcondition given</div>
+      <div class="r m" style="margin-top:6px">SCHEMA <span class="d">· as published</span></div>
+      <div class="r d">  ref: string, required</div>
+      <div class="r d">  action: enum(12)</div>
+      <div class="r d">  text: string</div>
+      <div class="r d" style="margin-top:6px">↵ open the session</div>
+    </div>
+
+    <div class="reg" style="grid-column:1/-1"><span class="ttl">4 Calls · following</span>
+      <div class="r"><span class="d">09.118</span> <span class="m">claude-code</span> <span class="c">surface.targets</span>                              <span class="g">ok</span>      <span class="d">12 ms</span></div>
+      <div class="r"><span class="d">09.140</span> <span class="m">claude-code</span> <span class="c">surface.connect</span>  chromium localhost:5173      <span class="g">ok</span>      <span class="d">840 ms</span></div>
+      <div class="r"><span class="d">09.190</span> <span class="m">claude-code</span> <span class="c">surface.snapshot</span> sf-33b8 · 312 nodes          <span class="g">ok</span>      <span class="d">84 ms</span></div>
+      <div class="r"><span class="d">09.220</span> <span class="m">claude-code</span> <span class="c">surface.act</span>      e12 fill "Indiranagar"       <span class="g">ok</span>      <span class="d">41 ms</span></div>
+      <div class="r"><span class="d">09.244</span> <span class="m">cursor</span>      <span class="c">surface.act</span>      e12 fill "Koramangala"       <span class="y">refused</span> <span class="d">busy: claude-code holds it</span></div>
+      <div class="r"><span class="d">09.301</span> <span class="m">claude-code</span> <span class="c">surface.check</span>    value of e12                 <span class="g">passed</span>  <span class="d">2 ms</span></div>
+      <div class="r"><span class="d">09.355</span> <span class="m">cursor</span>      <span class="c">yam.run</span>          story "cancel a booking"     <span class="y">queued</span>  <span class="d">waiting for the target</span></div>
+      <div class="r d">─── the same lines yam mcp writes to its log, and the same envelope the SDK returns ───</div>
+    </div>
+
+    <div class="foot"><span><b>^K</b> commands</span><span><b>?</b> keys</span><span><b>1-4</b> region</span><span><b>j k</b> move</span><span><b>t</b> take control</span><span><b>y</b> copy config</span><span><b>d</b> disconnect client</span><span><b>x</b> stop serving</span><span><b>q</b> quit</span></div>
+  </div>
+</div>
+<div class="cap"><b>TV-13, TV-09.</b> The cockpit while Yam is an MCP server: who is connected, over which transport and profile, what they may call, what they may <i>not</i> and why, and every call as it arrives. Shared control is the banner, not a surprise — SF-13 says ownership and handoff must be visible, and a second client asking for a held target is refused in the open with the reason. Nothing here is a second implementation: the rows are the model's <b>invocations</b> and the session's holder, and the tool list is what <b>yam mcp</b> actually publishes.</div>
+</div>

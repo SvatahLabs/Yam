@@ -1,0 +1,98 @@
+<div class="tui-board">
+<style>
+.tui-board { width:960px; background:#0b0d10; padding:14px; font-family:var(--mono); }
+.term { width:120ch; height:720px; background:#0f1216; color:#e3e8ee; font-size:12.5px; line-height:18px; padding:0; position:relative; border:1px solid #262e37; overflow:hidden; }
+.term .grid { display:grid; grid-template-columns:30ch 56ch 34ch; grid-template-rows:18px 1fr 216px 18px; height:720px; }
+.sbar { align-items:center; height:18px; grid-column:1/-1; display:flex; gap:2ch; background:#1b2128; color:#8b96a5; padding:0 1ch; white-space:pre; }
+.sbar b { color:#b8a1ff; font-weight:500; }
+.sbar .live { color:#4fc48a; }
+.reg { border:1px solid #262e37; margin:9px 1px 2px; padding:3px 0; position:relative; }
+.reg.f { border-color:#b8a1ff; }
+.reg .ttl { position:absolute; top:-9px; left:2ch; background:#0f1216; padding:0 1ch; color:#5f6a78; font-size:11px; }
+.reg.f .ttl { color:#b8a1ff; }
+.reg .sb { position:absolute; right:0; top:6px; bottom:6px; width:1px; background:#262e37; }
+.reg .sb i { position:absolute; left:0; width:1px; background:#5f6a78; }
+.r { padding:0 1ch; white-space:pre; overflow:hidden; }
+.r.cur { background:#231d3a; box-shadow:inset 2px 0 0 #b8a1ff; color:#fff; }
+.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#8b96a5} .d{color:#5f6a78} .bl{color:#6ea8fe} .a{color:#b8a1ff}
+.foot { grid-column:1/-1; display:flex; gap:2ch; color:#5f6a78; padding:0 1ch; white-space:pre; }
+.foot b { color:#b4bdc8; font-weight:500; }
+.toast { position:absolute; right:2ch; bottom:26px; background:#1b2128; border:1px solid #4fc48a; border-left-width:3px; padding:2px 1ch; color:#e3e8ee; }
+.cap { width:120ch; color:#8b96a5; font-size:11.5px; line-height:17px; padding-top:8px; }
+.cap b { color:#b8a1ff; font-weight:500; }
+</style>
+
+<div class="term">
+  <div class="grid">
+    <div class="sbar"><b>yam</b><span>yam-fixtures</span><span>127.0.0.1:55702</span><span>Flows</span><span>9 flows · 41 bindings · <span class="y">4 unverified</span></span><span style="flex:1"></span><span class="live">● live</span><span>120×40</span></div>
+
+    <div class="reg"><span class="ttl">1 Project</span><span class="sb"><i style="top:0;height:40%"></i></span>
+      <div class="r m">▾ flows/</div>
+      <div class="r">  simple.flow        <span class="g">✓</span></div>
+      <div class="r">  booking-workflow   <span class="g">✓</span></div>
+      <div class="r a">  guards-and-comp…   <span class="y">!</span></div>
+      <div class="r">  booking-compens…   <span class="d">·</span></div>
+      <div class="r">  execution.flow     <span class="b">✗</span></div>
+      <div class="r">  natural_languag…   <span class="b">✗</span></div>
+      <div class="r">  svatah.flow        <span class="d">·</span></div>
+      <div class="r m" style="margin-top:6px">▾ bindings/       41</div>
+      <div class="r d">  4 unverified     <span class="a">b</span></div>
+      <div class="r m">▾ runs/           12</div>
+      <div class="r d">  comp <span class="y">aborted</span>   2m</div>
+      <div class="r m">▾ surfaces         1</div>
+      <div class="r d">  chromium /booking</div>
+    </div>
+
+    <div class="reg f"><span class="ttl">2 guards-and-compensation.flow</span><span class="sb"><i style="top:10%;height:55%"></i></span>
+      <div class="r"><span class="d">  8</span> <span class="g">✓</span> <span class="m">story:</span> I want to book and then fail</div>
+      <div class="r"><span class="d">  9</span> <span class="g">✓</span>   Click the Book a slot link</div>
+      <div class="r"><span class="d"> 10</span> <span class="g">✓</span>   Type "Indiranagar" into the location field</div>
+      <div class="r"><span class="d"> 11</span> <span class="g">✓</span>   Click the Book now button</div>
+      <div class="r"><span class="d"> 12</span> <span class="g">✓</span>   Remember the booking reference as reference</div>
+      <div class="r cur"><span class="d"> 13</span> <span class="b">✗</span>   Click the pay button          <span class="b">locator</span></div>
+      <div class="r"><span class="d"> 14</span> <span class="y">!</span>   compensate: cancel a booking</div>
+      <div class="r"><span class="d"> 15</span>  </div>
+      <div class="r"><span class="d"> 16</span> <span class="g">✓</span> <span class="m">story:</span> cancel a booking</div>
+      <div class="r"><span class="d"> 17</span> <span class="g">✓</span>   Click the cancel booking button</div>
+      <div class="r"><span class="d"> 18</span> <span class="g">✓</span>   The booking reference should say {…}</div>
+      <div class="r"><span class="d"> 19</span>  </div>
+      <div class="r"><span class="d"> 20</span> <span class="d">#</span> <span class="d">the guard below is why 13 aborts</span></div>
+      <div class="r"><span class="d"> 21</span> <span class="c">~</span> <span class="m">guard:</span> the slot is still held</div>
+      <div class="r y" style="margin-top:6px"> lint 1 · W_SECRET_UNSET line 4 · CARD_TOKEN is unset</div>
+    </div>
+
+    <div class="reg"><span class="ttl">3 Step 13</span>
+      <div class="r m">failure    <span class="b">locator</span></div>
+      <div class="r m">tier       2</div>
+      <div class="r m">target     checkout.pay-button</div>
+      <div class="r m">binding    <span class="y">unverified</span></div>
+      <div class="r m">guard      slot still held</div>
+      <div class="r m">last run   <span class="y">aborted</span> 2m ago</div>
+      <div class="r d" style="margin-top:6px">CANDIDATES</div>
+      <div class="r">  testid pay             <span class="b">0</span></div>
+      <div class="r">  role   button "Pay"    <span class="b">0</span></div>
+      <div class="r">  text   Pay             <span class="b">0</span></div>
+      <div class="r">  css    [data-testid=…]  <span class="b">0</span></div>
+      <div class="r d" style="margin-top:6px">NEXT</div>
+      <div class="r"><span class="a">h</span> heal this binding</div>
+      <div class="r"><span class="a">b</span> bind from a session</div>
+    </div>
+
+    <div class="reg" style="grid-column:1/-1"><span class="ttl">4 Events · following</span>
+      <div class="r"><span class="d">08.451</span> <span class="m">locate</span>  checkout.pay-button · testid "pay" · <span class="b">matched nothing</span>          1 ms</div>
+      <div class="r"><span class="d">08.455</span> <span class="m">locate</span>  role button "Pay" · <span class="b">matched nothing</span>                         3 ms</div>
+      <div class="r"><span class="d">08.520</span> <span class="m">step</span>    <span class="b">failed</span> · class locator · screenshot …-and-then-fail-5.png</div>
+      <div class="r"><span class="d">08.521</span> <span class="m">policy</span>  <span class="y">compensate "cancel a booking" with scope {reference: BK-4471}</span></div>
+      <div class="r"><span class="d">08.539</span> <span class="m">act</span>     click booking.cancel-booking-button · <span class="g">ok</span>                  17 ms</div>
+      <div class="r"><span class="d">08.571</span> <span class="m">check</span>   text "BK-4471" of booking.booking-reference · <span class="g">ok</span>            2 ms</div>
+      <div class="r"><span class="d">08.594</span> <span class="m">run</span>     <span class="y">aborted · exit 11</span></div>
+      <div class="r"><span class="d">08.601</span> <span class="m">bind</span>    41 bindings loaded · <span class="y">4 unverified</span></div>
+      <div class="r d">─── the stream continues; ^K → "Follow events" pins the tail ───</div>
+      <div class="toast"><span class="g">✓</span> Saved guards-and-compensation.flow · 21 lines</div>
+    </div>
+
+    <div class="foot"><span><b>^K</b> commands</span><span><b>?</b> keys</span><span><b>1-4</b> region</span><span><b>Tab</b> next</span><span><b>j k</b> move</span><span><b>/</b> filter</span><span><b>↵</b> open</span><span><b>e</b> edit</span><span><b>r</b> run</span><span><b>h</b> heal</span><span><b>q</b> quit</span></div>
+  </div>
+</div>
+<div class="cap"><b>TV-03, TV-04, TV-05, TV-07.</b> The alternate screen, filled: four regions solved from a tree rather than three fixed widths, every region as tall as its box. The status bar is one row and carries the connection state; the footer is generated from the key map, so a key cannot be advertised and unbound. Colour is the tokens at 24-bit — accent <b>#b8a1ff</b>, pass #4fc48a, abort #e5b04c — and every tone still carries its glyph. The cursor is an accent-tinted row with a gutter mark, not a full-width inverse bar. Scroll position is drawn; the last action is a toast over the frame, not a line that pushes the layout.</div>
+</div>

@@ -1,0 +1,93 @@
+<div class="tui-board">
+<style>
+.tui-board { width:960px; background:#0b0d10; padding:14px; font-family:var(--mono); }
+.term { width:120ch; height:720px; background:#0f1216; color:#e3e8ee; font-size:12.5px; line-height:18px; position:relative; border:1px solid #262e37; overflow:hidden; }
+.grid { display:grid; grid-template-columns:32ch 52ch 36ch; grid-template-rows:18px 1fr 180px 18px; height:720px; }
+.sbar { align-items:center; height:18px; grid-column:1/-1; display:flex; gap:2ch; background:#1b2128; color:#8b96a5; padding:0 1ch; white-space:pre; }
+.sbar b { color:#b8a1ff; font-weight:500; }
+.reg { border:1px solid #262e37; margin:9px 1px 2px; padding:3px 0; position:relative; }
+.reg.f { border-color:#b8a1ff; }
+.reg .ttl { position:absolute; top:-9px; left:2ch; background:#0f1216; padding:0 1ch; color:#5f6a78; font-size:11px; }
+.reg.f .ttl { color:#b8a1ff; }
+.r { padding:0 1ch; white-space:pre; overflow:hidden; }
+.r.cur { background:#231d3a; box-shadow:inset 2px 0 0 #b8a1ff; color:#fff; }
+.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#8b96a5} .d{color:#5f6a78} .bl{color:#6ea8fe} .a{color:#b8a1ff}
+.foot { grid-column:1/-1; display:flex; gap:2ch; color:#5f6a78; padding:0 1ch; white-space:pre; }
+.foot b { color:#b4bdc8; font-weight:500; }
+.fld { background:#1b2128; color:#e3e8ee; }
+.fld i { border-left:1px solid #e3e8ee; margin-left:1px; font-style:normal; }
+.cap { width:120ch; color:#8b96a5; font-size:11.5px; line-height:17px; padding-top:8px; }
+.cap b { color:#b8a1ff; font-weight:500; }
+</style>
+
+<div class="term">
+  <div class="grid">
+    <div class="sbar"><b>yam</b><span>no project</span><span>127.0.0.1:55702</span><span>Surfaces</span><span class="c">chromium · localhost:5173</span><span style="flex:1"></span><span class="g">you control</span><span class="g">● live</span><span>120×40</span></div>
+
+    <div class="reg"><span class="ttl">1 Targets</span>
+      <div class="r m">▾ chromium        <span class="g">ready</span></div>
+      <div class="r a">   localhost:5173  <span class="c">sf-7a1c</span></div>
+      <div class="r">   github.com/…</div>
+      <div class="r">   about:blank</div>
+      <div class="r m" style="margin-top:6px">▾ macOS AX       <span class="g">ready</span></div>
+      <div class="r">   Yam.app         <span class="d">2 win</span></div>
+      <div class="r">   Terminal</div>
+      <div class="r m" style="margin-top:6px">▾ http           <span class="g">ready</span></div>
+      <div class="r d">   any URL · u to open</div>
+      <div class="r m" style="margin-top:6px">▾ AT-SPI         <span class="d">n/a</span></div>
+      <div class="r d">   linux only</div>
+      <div class="r m" style="margin-top:10px">SESSIONS          2</div>
+      <div class="r"><span class="c">sf-7a1c</span> chromium  <span class="g">you</span></div>
+      <div class="r"><span class="c">sf-33b8</span> ax        <span class="y">agent</span></div>
+      <div class="r d">        claude-code holds it</div>
+    </div>
+
+    <div class="reg f"><span class="ttl">2 Snapshot · sf-7a1c · rev 12</span>
+      <div class="r"><span class="d">e1  </span> document  <span class="m">"Booking — sample-web"</span></div>
+      <div class="r"><span class="d">e4  </span>  banner</div>
+      <div class="r"><span class="d">e7  </span>   link     Book a slot</div>
+      <div class="r"><span class="d">e9  </span>  main</div>
+      <div class="r"><span class="d">e11 </span>   heading  Book a slot</div>
+      <div class="r cur"><span class="d">e12 </span>   textbox  Location            <span class="d">focusable</span></div>
+      <div class="r"><span class="d">e14 </span>   combobox Slot                <span class="d">expanded</span></div>
+      <div class="r"><span class="d">e17 </span>   button   Book now            <span class="d">enabled</span></div>
+      <div class="r"><span class="d">e21 </span>   status   <span class="m">"No booking yet"</span></div>
+      <div class="r"><span class="d">e24 </span>  contentinfo</div>
+      <div class="r"><span class="d">e26 </span>   link     Terms</div>
+      <div class="r d" style="margin-top:6px">312 nodes · cut at 200 · <span class="a">n</span> for the next page</div>
+      <div class="r d">refs belong to rev 12; a new snapshot renames</div>
+      <div class="r m" style="margin-top:8px">/ filter the tree      s screenshot</div>
+    </div>
+
+    <div class="reg"><span class="ttl">3 e12 · textbox</span>
+      <div class="r">Location</div>
+      <div class="r d">Text field · Enabled · Empty</div>
+      <div class="r m" style="margin-top:6px">ACTION            <span class="d">⇥ change</span></div>
+      <div class="r"><span class="a">▸</span> fill               <span class="d">needs ref</span></div>
+      <div class="r d">  click  press  read</div>
+      <div class="r d">  check  hover  drag</div>
+      <div class="r m" style="margin-top:6px">text <span class="d">· required</span></div>
+      <div class="r"><span class="fld"> Indiranagar          <i>&nbsp;</i></span></div>
+      <div class="r d" style="margin-top:4px">↵ act · then check it</div>
+      <div class="r m" style="margin-top:8px">LAST RESULT</div>
+      <div class="r"><span class="g">succeeded</span> <span class="d">· 41 ms</span></div>
+      <div class="r"><span class="g">verified</span>  <span class="d">value = "Indiranagar"</span></div>
+      <div class="r d">postcondition passed, so</div>
+      <div class="r d">verified is true — not because</div>
+      <div class="r d">the click returned ok</div>
+    </div>
+
+    <div class="reg" style="grid-column:1/-1"><span class="ttl">4 This session</span>
+      <div class="r"><span class="d">41.102</span> <span class="m">connect</span> chromium · attach · localhost:5173 · session <span class="c">sf-7a1c</span> · <span class="g">you control</span></div>
+      <div class="r"><span class="d">41.118</span> <span class="m">snapshot</span> rev 12 · 312 nodes · truncated at 200 · 84 ms</div>
+      <div class="r"><span class="d">41.140</span> <span class="m">act</span>      fill e12 "Indiranagar" · <span class="g">succeeded</span> · 41 ms</div>
+      <div class="r"><span class="d">41.143</span> <span class="m">check</span>    value of e12 = "Indiranagar" · <span class="g">passed</span> → <span class="g">verified</span></div>
+      <div class="r d">─── no project, no flow, no binding, no model: this is the whole journey ───</div>
+      <div class="r d" style="margin-top:2px">   c connect   ↵ act   k check   w save as automation   x close the session</div>
+    </div>
+
+    <div class="foot"><span><b>^K</b> commands</span><span><b>?</b> keys</span><span><b>1-4</b> region</span><span><b>j k</b> move</span><span><b>⇥</b> action</span><span><b>↵</b> act</span><span><b>k</b> check</span><span><b>n</b> more nodes</span><span><b>t</b> take control</span><span><b>q</b> quit</span></div>
+  </div>
+</div>
+<div class="cap"><b>TV-02, TV-06, TV-13.</b> Connect → inspect → act → verify, in a terminal, with no project open — the journey Draft 2.25 made primary and the screen the app opens on. The tree carries the refs the service issued and says which snapshot generation they belong to, so a stale ref is a visible fact rather than a silent retarget. The action form is typed from the catalogue's own fields; <b>verified</b> is green only because the postcondition passed. The second session is held by an agent, and the footer says which key takes it.</div>
+</div>

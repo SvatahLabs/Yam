@@ -1,0 +1,24 @@
+  yam   automator   127.0.0.1:62245   Welcome   no project here 80x24           
+┌─ 1 Nothing here yet ───────────────────────┐┌─ 2 On this machine ────────────┐
+│                                            ││ TARGETS                        │
+│                                            ││   chromium  3 tabs   ready     │
+│ There is no Yam project here.              ││   macOS AX  12 win    ready    │
+│                                            ││   http      any URL   ready    │
+│ ~/Workspace/Svatah/automator               ││   AT-SPI    linux     n/a      │
+│                                            ││                                │
+│ You do not need one. A surface can be      ││ RECENT PROJECTS                │
+│ driven directly — connect, inspect, act,   ││   yam-fixtures      2m ago     │
+│ verify — and a project is what you make    ││   sample-web     yesterday     │
+│ when you want to keep what you did.        ││   booking-demo   3 days ago    │
+│                                            ││                                │
+│  c   Connect to a target                   ││ THIS TERMINAL                  │
+│      yam surface targets                   ││   80x24 · truecolor · mouse    │
+│                                            ││   $EDITOR nvim                 │
+│  i   Start a project here                  ││                                │
+│      yam init                              ││                                │
+│                                            ││                                │
+│  o   Open a project        3 recent        ││                                │
+│                                            ││                                │
+│  ^K  Everything else       48 actions      ││                                │
+└────────────────────────────────────────────┘└────────────────────────────────┘
+ c connect  i init  o open  ^K commands  ? keys  q quit                         

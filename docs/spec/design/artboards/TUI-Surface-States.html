@@ -1,0 +1,112 @@
+<div class="tui-board">
+<style>
+.tui-board { width:960px; background:#0b0d10; padding:14px; font-family:var(--mono); }
+.term { width:120ch; height:720px; background:#0f1216; color:#e3e8ee; font-size:12.5px; line-height:18px; position:relative; border:1px solid #262e37; overflow:hidden; }
+.grid { display:grid; grid-template-columns:32ch 52ch 36ch; grid-template-rows:18px 1fr 180px 18px; height:720px; }
+.sbar { align-items:center; height:18px; grid-column:1/-1; display:flex; gap:2ch; background:#1b2128; color:#8b96a5; padding:0 1ch; white-space:pre; }
+.sbar b { color:#b8a1ff; font-weight:500; }
+.reg { border:1px solid #262e37; margin:9px 1px 2px; padding:3px 0; position:relative; }
+.reg.f { border-color:#b8a1ff; }
+.reg .ttl { position:absolute; top:-9px; left:2ch; background:#0f1216; padding:0 1ch; color:#5f6a78; font-size:11px; }
+.reg.f .ttl { color:#b8a1ff; }
+.r { padding:0 1ch; white-space:pre; overflow:hidden; }
+.r.cur { background:#231d3a; box-shadow:inset 2px 0 0 #b8a1ff; color:#fff; }
+.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#8b96a5} .d{color:#5f6a78} .a{color:#b8a1ff}
+.foot { grid-column:1/-1; display:flex; gap:2ch; color:#5f6a78; padding:0 1ch; white-space:pre; }
+.foot b { color:#b4bdc8; font-weight:500; }
+.scrim { position:absolute; inset:0; background:rgba(10,12,16,0.62); }
+.ov { position:absolute; left:50%; transform:translateX(-50%); top:70px; width:76ch; background:#151a20; border:1px solid #b8a1ff; box-shadow:0 18px 50px rgba(0,0,0,0.65); padding:4px 0; }
+.ov .hd { padding:2px 1ch 6px; border-bottom:1px solid #262e37; margin-bottom:4px; white-space:pre; color:#e3e8ee; }
+.ov .hint { padding:6px 1ch 2px; border-top:1px solid #262e37; margin-top:4px; color:#5f6a78; white-space:pre; }
+.fld { background:#1b2128; color:#e3e8ee; } .fld i { border-left:1px solid #e3e8ee; margin-left:1px; font-style:normal; }
+.cards { display:grid; grid-template-columns:58ch 58ch; gap:0 4ch; margin-top:22px; }
+.card { background:#0f1216; border:1px solid #262e37; font-size:12.5px; line-height:18px; color:#e3e8ee; padding:3px 0; margin-bottom:14px; position:relative; }
+.card .ttl { position:absolute; top:-9px; left:2ch; background:#0b0d10; padding:0 1ch; color:#5f6a78; font-size:11px; }
+.cap { width:120ch; color:#8b96a5; font-size:11.5px; line-height:17px; padding-top:8px; }
+.cap b { color:#b8a1ff; font-weight:500; }
+.off { color:#5f6a78; }
+.lbl { width:120ch; color:#5f6a78; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; padding:20px 0 8px; }
+</style>
+
+<div class="term">
+  <div class="grid">
+    <div class="sbar"><b>yam</b><span>no project</span><span>127.0.0.1:55702</span><span>Surfaces</span><span class="d">nothing connected</span><span style="flex:1"></span><span class="g">● service ready</span><span>120×40</span></div>
+    <div class="reg"><span class="ttl">1 Targets</span><div class="r m">▾ chromium        <span class="g">ready</span></div><div class="r d">   3 tabs</div><div class="r m">▾ macOS AX        <span class="g">ready</span></div><div class="r m">▾ http            <span class="g">ready</span></div></div>
+    <div class="reg"><span class="ttl">2 Snapshot</span><div class="r d">connect a surface first</div></div>
+    <div class="reg"><span class="ttl">3 Inspect</span><div class="r d">nothing selected</div></div>
+    <div class="reg" style="grid-column:1/-1"><span class="ttl">4 This session</span><div class="r d">no session yet</div></div>
+    <div class="foot"><span><b>c</b> connect</span><span><b>r</b> recheck</span><span><b>^K</b> commands</span><span><b>?</b> keys</span><span><b>q</b> quit</span></div>
+  </div>
+  <div class="scrim"></div>
+  <div class="ov">
+    <div class="hd">Connect a surface                                    <span class="d">esc cancel</span></div>
+    <div class="r d">DISCOVERED</div>
+    <div class="r cur">  chromium   localhost:5173            <span class="d">tab · attach</span></div>
+    <div class="r">  chromium   github.com/SvatahLabs/yam  <span class="d">tab · attach</span></div>
+    <div class="r">  macOS AX   Yam.app                   <span class="d">2 windows · attach</span></div>
+    <div class="r">  macOS AX   Terminal                  <span class="d">1 window · attach</span></div>
+    <div class="r off d">  AT-SPI     —                         <span class="y">linux only; nothing to ask</span></div>
+    <div class="r d" style="margin-top:6px">OR NAME ONE <span class="d">· discovery cannot enumerate every endpoint (SF-04)</span></div>
+    <div class="r">  http     <span class="fld"> https://api.example.com/v1/health        <i>&nbsp;</i></span></div>
+    <div class="r">  chromium <span class="d"> a url to launch a new tab</span></div>
+    <div class="r d" style="margin-top:6px">OWNERSHIP</div>
+    <div class="r">  <span class="a">(•)</span> attach   <span class="d">yours stays open when the session closes</span></div>
+    <div class="r">  <span class="d">( )</span> launch   <span class="d">Yam opened it, Yam closes it</span></div>
+    <div class="hint">↑↓ move  ⇥ field  space ownership  ↵ connect  ·  nothing is touched yet</div>
+  </div>
+</div>
+<div class="cap"><b>The connect form (SF-04, SF-05).</b> Discovery is a list, not the only way in: an endpoint discovery cannot enumerate is typed, which is what SF-04 requires of HTTP. Ownership is chosen <i>before</i> anything is touched and stated in the words that describe the consequence, because "attach" and "launch" differ only in what closing does. A platform that cannot be asked says so as a fact about the platform, not about the machine.</div>
+
+<div class="lbl">The six states a surface can be in · SF-17, each with the key that answers it</div>
+<div class="cards">
+  <div class="card"><span class="ttl">stale</span>
+    <div class="r"><span class="y">! e12 belongs to snapshot rev 12.</span></div>
+    <div class="r"><span class="y">  The page is at rev 14.</span></div>
+    <div class="r d">The control it named may not exist, and a</div>
+    <div class="r d">ref from an old generation is never</div>
+    <div class="r d">silently pointed at a new element.</div>
+    <div class="r" style="margin-top:6px"><span class="a">s</span> fresh snapshot, then choose again</div>
+    <div class="r d">Nothing was sent.</div>
+  </div>
+  <div class="card"><span class="ttl">busy</span>
+    <div class="r"><span class="y">! claude-code holds this target.</span></div>
+    <div class="r d">Your fill was refused, not queued: a</div>
+    <div class="r d">mutation that waits behind another</div>
+    <div class="r d">client's is a mutation you did not time.</div>
+    <div class="r" style="margin-top:6px"><span class="a">t</span> take control   <span class="a">w</span> watch instead</div>
+    <div class="r d">Taking control is announced to the agent.</div>
+  </div>
+  <div class="card"><span class="ttl">permission</span>
+    <div class="r"><span class="b">✗ macOS has not granted Yam control.</span></div>
+    <div class="r d">Accessibility permission, for the program</div>
+    <div class="r d">that actually asks — not for the terminal</div>
+    <div class="r d">it was started from.</div>
+    <div class="r" style="margin-top:6px"><span class="a">g</span> open the grant panel</div>
+    <div class="r d">yam surface grant · no target was touched.</div>
+  </div>
+  <div class="card"><span class="ttl">unsupported</span>
+    <div class="r"><span class="d">· drag is not available here.</span></div>
+    <div class="r d">The chromium adapter publishes 11 of 12</div>
+    <div class="r d">actions; drag needs a second ref this</div>
+    <div class="r d">adapter cannot resolve.</div>
+    <div class="r" style="margin-top:6px"><span class="a">⇥</span> choose another action</div>
+    <div class="r d">Capability said so before dispatch (SF-09).</div>
+  </div>
+  <div class="card"><span class="ttl">unknown</span>
+    <div class="r"><span class="y">! The click was sent. The answer was not</span></div>
+    <div class="r"><span class="y">  received.</span></div>
+    <div class="r d">Yam will not retry it: a repeat of a</div>
+    <div class="r d">mutation whose outcome is unknown is a</div>
+    <div class="r d">second booking (SF-14).</div>
+    <div class="r" style="margin-top:6px"><span class="a">v</span> check what the page says now</div>
+  </div>
+  <div class="card"><span class="ttl">disconnected</span>
+    <div class="r"><span class="b">✗ The browser closed at 18:44:02.</span></div>
+    <div class="r d">Session sf-7a1c is gone. What it did is</div>
+    <div class="r d">kept: four operations, in region 4 and in</div>
+    <div class="r d">the session's evidence.</div>
+    <div class="r" style="margin-top:6px"><span class="a">c</span> connect again   <span class="a">w</span> save what it did</div>
+  </div>
+</div>
+<div class="cap"><b>TV-06, SF-17.</b> Six states, six next actions, one key each. None of them says "an error occurred"; each says what happened, what it means for the thing you were about to do, and what to press. Three of them state explicitly that <i>nothing was touched</i> — which is the sentence a person needs before they decide whether to try again.</div>
+</div>

@@ -1,0 +1,76 @@
+<div class="tui-board">
+<style>
+.tui-board { width:960px; background:#0b0d10; padding:14px; font-family:var(--mono); }
+.term { width:120ch; height:720px; background:#0f1216; color:#e3e8ee; font-size:12.5px; line-height:18px; position:relative; border:1px solid #262e37; overflow:hidden; }
+.term .grid { display:grid; grid-template-columns:86ch 34ch; grid-template-rows:18px 1fr 270px 18px; height:720px; }
+.sbar { align-items:center; height:18px; grid-column:1/-1; display:flex; gap:2ch; background:#1b2128; color:#8b96a5; padding:0 1ch; white-space:pre; }
+.sbar b { color:#b8a1ff; font-weight:500; }
+.reg { border:1px solid #262e37; margin:9px 1px 2px; padding:3px 0; position:relative; }
+.reg.f { border-color:#b8a1ff; }
+.reg .ttl { position:absolute; top:-9px; left:2ch; background:#0f1216; padding:0 1ch; color:#5f6a78; font-size:11px; }
+.reg.f .ttl { color:#b8a1ff; }
+.r { padding:0 1ch; white-space:pre; overflow:hidden; }
+.r.cur { background:#231d3a; box-shadow:inset 2px 0 0 #b8a1ff; color:#fff; }
+.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#8b96a5} .d{color:#5f6a78} .bl{color:#6ea8fe} .a{color:#b8a1ff}
+.foot { grid-column:1/-1; display:flex; gap:2ch; color:#5f6a78; padding:0 1ch; white-space:pre; }
+.foot b { color:#b4bdc8; font-weight:500; }
+.pb { color:#4fc48a; } .pb i { color:#262e37; font-style:normal; }
+.cap { width:120ch; color:#8b96a5; font-size:11.5px; line-height:17px; padding-top:8px; }
+.cap b { color:#b8a1ff; font-weight:500; }
+.warn { margin:0 1ch 3px; background:#2a2312; border:1px solid #e5b04c; color:#e5b04c; padding:0 1ch; white-space:pre; }
+</style>
+
+<div class="term">
+  <div class="grid">
+    <div class="sbar"><b>yam</b><span>yam-fixtures</span><span>127.0.0.1:55702</span><span>Run <b>comp</b></span><span class="pb">████████████<i>████████</i></span><span>12/20</span><span style="flex:1"></span><span class="y">◐ running</span><span>120×40</span></div>
+
+    <div class="reg f"><span class="ttl">1 Steps · I want to book and then fail</span>
+      <div class="r"><span class="g">✓</span>  1 Click the Book a slot link                     <span class="d">testid#0        41 ms</span></div>
+      <div class="r"><span class="g">✓</span>  2 Type "Indiranagar" into the location field     <span class="d">testid#0        63 ms</span></div>
+      <div class="r"><span class="g">✓</span>  3 Click the Book now button                      <span class="d">testid#0        58 ms</span></div>
+      <div class="r"><span class="g">✓</span>  4 Remember the booking reference as reference    <span class="d">= BK-4471       12 ms</span></div>
+      <div class="r cur"><span class="y">◐</span>  5 Click the pay button                           <span class="y">locating…    2 of 5</span></div>
+      <div class="r d">      testid "pay" <span class="b">✗</span> · role button "Pay" <span class="b">✗</span> · text "Pay" <span class="y">◐</span></div>
+      <div class="r d">  6 The receipt should say paid                    <span class="d">queued</span></div>
+      <div class="r d">  7 Sign out                                       <span class="d">queued</span></div>
+      <div class="r m" style="margin-top:8px">cancel a booking <span class="d">· compensation, armed</span></div>
+      <div class="r d">  1 Click the cancel booking button                <span class="d">not started</span></div>
+      <div class="r d">  2 The booking reference should say {…reference}   <span class="d">not started</span></div>
+      <div class="r m" style="margin-top:8px">I want to see guards decide <span class="g">· 6 passed</span></div>
+      <div class="r m">cancel a booking <span class="g">· 3 passed</span></div>
+    </div>
+
+    <div class="reg"><span class="ttl">2 Step 5 · live</span>
+      <div class="r m">started    <span class="d">18:41:08.451</span></div>
+      <div class="r m">elapsed    <span class="y">1.9 s</span> <span class="d">of 10 s</span></div>
+      <div class="r m">tier       2</div>
+      <div class="r m">target     checkout.pay-button</div>
+      <div class="r m">binding    <span class="y">unverified</span></div>
+      <div class="r m">policy     <span class="y">compensate</span></div>
+      <div class="r d" style="margin-top:6px">ON FAILURE</div>
+      <div class="r">  cancel a booking</div>
+      <div class="r d">  scope {reference: BK-4471}</div>
+      <div class="r d" style="margin-top:6px">WHILE IT RUNS</div>
+      <div class="r"><span class="a">s</span> stop the run</div>
+      <div class="r"><span class="a">p</span> pause after this step</div>
+      <div class="r"><span class="a">o</span> open the surface</div>
+    </div>
+
+    <div class="reg" style="grid-column:1/-1"><span class="ttl">3 Events · following</span>
+      <div class="r"><span class="d">08.402</span> <span class="m">run</span>     started · comp · playwright · headless · workers 1</div>
+      <div class="r"><span class="d">08.409</span> <span class="m">act</span>     click booking.book-a-slot-link · <span class="g">ok</span>                             41 ms</div>
+      <div class="r"><span class="d">08.418</span> <span class="m">act</span>     fill booking.location-field "Indiranagar" · <span class="g">ok</span>                63 ms</div>
+      <div class="r"><span class="d">08.433</span> <span class="m">act</span>     click booking.book-now-button · <span class="g">ok</span>                            58 ms</div>
+      <div class="r"><span class="d">08.446</span> <span class="m">read</span>    text of booking.booking-reference → <span class="c">"BK-4471"</span>              12 ms</div>
+      <div class="r"><span class="d">08.451</span> <span class="m">locate</span>  checkout.pay-button · testid "pay" · <span class="b">matched nothing</span>       1 ms</div>
+      <div class="r"><span class="d">08.455</span> <span class="m">locate</span>  role button "Pay" · <span class="b">matched nothing</span>                          3 ms</div>
+      <div class="r"><span class="d">08.462</span> <span class="m">locate</span>  text "Pay" · <span class="y">◐ trying</span></div>
+      <div class="warn">⚠ the event stream dropped at 18:41:04 · reconnecting… · <span class="d">R retry now · the run is unaffected</span></div>
+      <div class="r d">▌</div>
+    </div>
+
+    <div class="foot"><span><b>^K</b> commands</span><span><b>?</b> keys</span><span><b>1-3</b> region</span><span><b>j k</b> move</span><span><b>↵</b> open</span><span><b>s</b> stop</span><span><b>p</b> pause</span><span><b>f</b> follow</span><span><b>[ ]</b> screen</span><span><b>q</b> quit</span></div>
+  </div>
+</div>
+<div class="cap"><b>TV-09, TV-04, TV-06.</b> The same cockpit, a different region tree: a run wants a wide step list over a live tail, not tree/main/inspector/audit. Nothing here was typed — the cockpit subscribes through the SDK and applies each event with the model's own <b>applyEvent</b>, so steps change state while a person watches. A dropped stream is a stated state with the key that retries, never a frozen screen; the run itself is unaffected and the banner says so.</div>
+</div>

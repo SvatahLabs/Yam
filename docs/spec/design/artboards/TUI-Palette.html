@@ -1,0 +1,108 @@
+<div class="tui-board">
+<style>
+.tui-board { width:960px; background:#0b0d10; padding:14px; font-family:var(--mono); }
+.term { background:#0f1216; color:#e3e8ee; font-size:12.5px; line-height:18px; position:relative; border:1px solid #262e37; overflow:hidden; }
+.term.wide { width:120ch; height:720px; }
+.term.narrow { width:80ch; height:432px; margin-top:22px; }
+.grid { display:grid; grid-template-columns:30ch 56ch 34ch; grid-template-rows:18px 1fr 216px 18px; height:720px; }
+.sbar { align-items:center; height:18px; grid-column:1/-1; display:flex; gap:2ch; background:#1b2128; color:#8b96a5; padding:0 1ch; white-space:pre; }
+.sbar b { color:#b8a1ff; font-weight:500; }
+.reg { border:1px solid #262e37; margin:9px 1px 2px; padding:3px 0; position:relative; }
+.reg .ttl { position:absolute; top:-9px; left:2ch; background:#0f1216; padding:0 1ch; color:#5f6a78; font-size:11px; }
+.r { padding:0 1ch; white-space:pre; overflow:hidden; }
+.r.cur { background:#231d3a; box-shadow:inset 2px 0 0 #b8a1ff; color:#fff; }
+.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#8b96a5} .d{color:#5f6a78} .a{color:#b8a1ff}
+.foot { grid-column:1/-1; display:flex; gap:2ch; color:#5f6a78; padding:0 1ch; white-space:pre; }
+.foot b { color:#b4bdc8; font-weight:500; }
+.scrim { position:absolute; inset:0; background:rgba(10,12,16,0.62); }
+.ov { position:absolute; left:50%; transform:translateX(-50%); top:96px; width:74ch; background:#151a20; border:1px solid #b8a1ff; box-shadow:0 18px 50px rgba(0,0,0,0.65); padding:4px 0; }
+.ov .q { padding:2px 1ch 6px; border-bottom:1px solid #262e37; margin-bottom:4px; white-space:pre; }
+.ov .q i { border-left:1px solid #e3e8ee; margin-left:1px; font-style:normal; }
+.ov .hint { padding:6px 1ch 2px; border-top:1px solid #262e37; margin-top:4px; color:#5f6a78; white-space:pre; }
+.hit { color:#b8a1ff; font-weight:500; text-decoration:underline; }
+.off { color:#5f6a78; }
+.cap { width:120ch; color:#8b96a5; font-size:11.5px; line-height:17px; padding-top:8px; }
+.cap b { color:#b8a1ff; font-weight:500; }
+.hgrid { display:grid; grid-template-columns:1fr; grid-template-rows:18px 1fr 18px; height:432px; }
+.hov { position:absolute; left:2ch; right:2ch; top:36px; background:#151a20; border:1px solid #b8a1ff; padding:4px 0; }
+.col2 { display:grid; grid-template-columns:1fr 1fr; }
+</style>
+
+<div class="term wide">
+  <div class="grid">
+    <div class="sbar"><b>yam</b><span>yam-fixtures</span><span>127.0.0.1:55702</span><span>Run comp</span><span style="flex:1"></span><span class="g">● live</span><span>120×40</span></div>
+    <div class="reg"><span class="ttl">1 Project</span>
+      <div class="r m">▾ flows/</div>
+      <div class="r">   simple.flow          <span class="g">✓</span></div>
+      <div class="r">   guards-and-comp…     <span class="y">!</span></div>
+      <div class="r">   execution.flow       <span class="b">✗</span></div>
+      <div class="r m" style="margin-top:6px">▾ bindings/          41</div>
+      <div class="r m">▾ runs/               12</div>
+    </div>
+    <div class="reg"><span class="ttl">2 Run comp</span>
+      <div class="r"><span class="g">✓</span> 4 Remember the booking reference</div>
+      <div class="r"><span class="b">✗</span> 5 Click the pay button</div>
+      <div class="r y">! flow aborted · exit 11</div>
+    </div>
+    <div class="reg"><span class="ttl">3 Step 5</span>
+      <div class="r m">failure  <span class="b">locator</span></div>
+      <div class="r m">binding  <span class="y">unverified</span></div>
+    </div>
+    <div class="reg" style="grid-column:1/-1"><span class="ttl">4 Events</span>
+      <div class="r d">08.594 run aborted · exit 11</div>
+    </div>
+    <div class="foot"><span><b>^K</b> commands</span><span><b>?</b> keys</span><span><b>1-4</b> region</span><span><b>q</b> quit</span></div>
+  </div>
+  <div class="scrim"></div>
+  <div class="ov">
+    <div class="q"><span class="a">›</span> <span class="hit">he</span>al<i>&nbsp;</i>                                        <span class="d">6 of 48 actions</span></div>
+    <div class="r d">RECENT</div>
+    <div class="r"><span class="m">heal    </span> <span class="hit">He</span>al run comp                       <span class="d">yam heal --run comp</span></div>
+    <div class="r d">ACTIONS</div>
+    <div class="r cur"><span class="m">heal    </span> <span class="hit">He</span>al from bind failures             <span class="d">--from-bind-failures</span></div>
+    <div class="r"><span class="m">heal    </span> Review proposals · <span class="hit">he</span>al-3           <span class="d">1 pending</span></div>
+    <div class="r"><span class="m">bindings</span> Verify all bindings                 <span class="d">yam bindings verify</span></div>
+    <div class="r off"><span class="">run     </span> <span class="hit">He</span>ad-to-head compare two runs       <span class="y">needs two runs</span></div>
+    <div class="r off"><span class="">surface </span> Attac<span class="hit">h</span> to a running targ<span class="hit">e</span>t          <span class="y">no broker; yam serve</span></div>
+    <div class="hint">↑↓ move  ↵ run  ⇥ copy the command  esc close  ·  greyed rows say why</div>
+  </div>
+</div>
+<div class="cap"><b>TV-08.</b> The palette is an overlay over a dimmed cockpit, not a box appended beneath the footer. Matches are fuzzy and the matched characters are marked; the selection moves, so a person can reach the fourth row instead of only ever running the first. Recents come first on an empty query. An action that <b>availableWhen</b> refuses is listed greyed <i>with its reason</i> — an action that silently vanishes teaches nothing. Every row carries the CLI command that does the same thing, which is the registry's own <b>cli</b> field and the reason the palette, the SDK and <b>yam --help</b> cannot drift.</div>
+
+<div class="term narrow">
+  <div class="hgrid">
+    <div class="sbar"><b>yam</b><span>yam-fixtures</span><span>Flows</span><span style="flex:1"></span><span>80×24</span></div>
+    <div class="reg"><span class="ttl">1 Project</span><div class="r d">flows/ · 9 files</div></div>
+    <div class="foot"><span><b>^K</b> commands</span><span><b>?</b> keys</span><span><b>q</b> quit</span></div>
+  </div>
+  <div class="scrim"></div>
+  <div class="hov">
+    <div class="r"><span class="a">Keys</span> <span class="d">· generated from the key map · yam ui --keys --json</span></div>
+    <div class="col2" style="margin-top:4px">
+      <div>
+        <div class="r d">MOVE</div>
+        <div class="r"><span class="a">j k</span>   row down / up</div>
+        <div class="r"><span class="a">1-4</span>   focus a region</div>
+        <div class="r"><span class="a">⇥</span>     next region</div>
+        <div class="r"><span class="a">[ ]</span>   previous / next screen</div>
+        <div class="r"><span class="a">/</span>     filter this region</div>
+        <div class="r d" style="margin-top:4px">DO</div>
+        <div class="r"><span class="a">↵</span>     open what the cursor is on</div>
+        <div class="r"><span class="a">^K</span>    every action</div>
+      </div>
+      <div>
+        <div class="r d">FLOWS</div>
+        <div class="r"><span class="a">e</span>     open in $EDITOR</div>
+        <div class="r"><span class="a">r</span>     run this flow</div>
+        <div class="r"><span class="a">h</span>     heal its bindings</div>
+        <div class="r"><span class="a">b</span>     bind targets</div>
+        <div class="r d" style="margin-top:4px">THE COCKPIT</div>
+        <div class="r"><span class="a">f</span>     follow the event stream</div>
+        <div class="r"><span class="a">?</span>     this list</div>
+        <div class="r"><span class="a">q</span>     quit</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>TV-07, TV-04.</b> Eighty columns by twenty-four rows: the same cockpit, whole. Regions collapse out of the row rather than being clipped, and every action stays reachable through the palette. The help overlay is not written by hand — it is the key map rendered, which is the same table the footer draws and <b>yam ui --keys --json</b> prints, so a key cannot be advertised and unbound.</div>
+</div>

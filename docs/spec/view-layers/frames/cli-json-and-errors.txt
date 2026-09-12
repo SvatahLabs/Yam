@@ -1,0 +1,39 @@
+$ yam surface act --session sf-7a1c --ref e12 --action fill --text "Indiranagar" --json
+{
+  "ok": true,
+  "operation": "surface.act",
+  "requestId": "op-4c91",
+  "session": "sf-7a1c",
+  "target": { "adapter": "playwright", "id": "localhost:5173", "revision": 12 },
+  "result": { "outcome": "succeeded", "verified": false, "durationMs": 41 },
+  "note": "verified is false because no postcondition was given"
+}
+                                        stdout is the result and nothing else;
+                                        progress went to stderr, so a pipe parses
+
+$ yam surface act --session sf-7a1c --ref e12 --action fil --text "x"
+  yam: no action "fil" on this surface.
+
+  This adapter publishes 11 actions; the nearest is "fill".
+    yam surface capabilities --session sf-7a1c    the full list, with arguments
+
+  exit 2 · E_UNKNOWN_ACTION · nothing was dispatched
+
+$ yam run --story "book a slot"
+  yam: no story called "book a slot".
+
+  The closest in this project:
+    "I want to book and then fail"      guards-and-compensation.flow
+    "cancel a booking"                  guards-and-compensation.flow
+    yam run --list                      every story, by file
+
+  exit 2 · E_NO_SUCH_STORY · nothing was run
+
+$ yam surface connect --adapter ax --target Yam.app
+  yam: macOS has not granted Yam accessibility control.
+
+  The permission belongs to the program that asks, which here is yam itself
+  and not the terminal it was started from.
+    yam surface grant                   opens the panel and names the program
+
+  exit 3 · E_PERMISSION · no target was touched

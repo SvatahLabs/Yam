@@ -1,0 +1,40 @@
+  yam   yam-fixtures   127.0.0.1:55702   Flows   9 flows · 41 bindings · 4 unverified             live   120x40         
+┌─ 1 Project ────────────────┐┏━ 2 guards-and-compensation.flow ━━━━━━━━━━━━━━━━━━━━━┓┌─ 3 Step 13 ────────────────────┐
+│ ~ flows/                   │┃   8 ✓ story: I want to book and then fail            ┃│ failure    locator             │
+│   simple.flow        ✓     │┃   9 ✓   Click the Book a slot link                   ┃│ tier       2                   │
+│   booking-workflow   ✓     │┃  10 ✓   Type "Indiranagar" into the location field   ┃│ target     checkout.pay-button │
+│   guards-and-comp…   !     │┃  11 ✓   Click the Book now button                    ┃│ binding    unverified          │
+│   booking-compens…   ·     │┃  12 ✓   Remember the booking reference as reference  ┃│ guard      slot still held     │
+│   execution.flow     ✗     │┃ ▌13 ✗   Click the pay button            locator      ┃│ last run   aborted 2m ago      │
+│   natural_languag…   ✗     │┃  14 !   compensate: cancel a booking                 ┃│                                │
+│   svatah.flow        ·     │┃  15                                                  ┃│ CANDIDATES                     │
+│                            │┃  16 ✓ story: cancel a booking                        ┃│   testid pay            0      │
+│ ~ bindings/       41       │┃  17 ✓   Click the cancel booking button              ┃│   role   button "Pay"   0      │
+│   4 unverified     b       │┃  18 ✓   The booking reference should say {…}         ┃│   text   Pay            0      │
+│ ~ runs/           12       │┃  19                                                  ┃│   css    [data-testid=…] 0     │
+│   comp aborted    2m       │┃  20 #   the guard below is why 13 aborts             ┃│                                │
+│ ~ surfaces         1       │┃  21 ~ guard: the slot is still held                  ┃│ NEXT                           │
+│   chromium /booking        │┃                                                      ┃│ h heal this binding            │
+│                            │┃  lint 1 · W_SECRET_UNSET line 4 · CARD_TOKEN unset   ┃│ b bind from a session          │
+│                            │┃                                                      ┃│                                │
+│                            │┃                                                      ┃│                                │
+│                            │┃                                                      ┃│                                │
+│                            │┃                                                      ┃│                                │
+│                            │┃                                                      ┃│                                │
+│                            │┃                                                      ┃│                                │
+│                            │┃                                                      ┃│                                │
+│                            │┃                                                      ┃│                                │
+│                            │┃                                                      ┃│                                │
+└────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└────────────────────────────────┘
+┌─ 4 Events · following ───────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 08.451 locate  checkout.pay-button · testid "pay" · matched nothing         1 ms                                     │
+│ 08.455 locate  role button "Pay" · matched nothing                          3 ms                                     │
+│ 08.520 step    failed · class locator · screenshot …-and-then-fail-5.png                                             │
+│ 08.521 policy  compensate "cancel a booking" with scope {reference: BK-4471}                                         │
+│ 08.539 act     click booking.cancel-booking-button · ok                     17 ms                                    │
+│ 08.571 check   text "BK-4471" of booking.booking-reference · ok              2 ms                                    │
+│ 08.594 run     aborted · exit 11                                                                                     │
+│ 08.601 bind    41 bindings loaded · 4 unverified                                                                     │
+│ ─── the stream continues; ^K → "Follow events" pins the tail ───                                                     │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ ^K commands  ? keys  1-4 region  Tab next  j k move  / filter  ↵ open  e edit  r run  h heal  q quit                   

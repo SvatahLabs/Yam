@@ -1,0 +1,40 @@
+  yam   no project   127.0.0.1:55702   Surfaces   chromium · localhost:5173               you control   live   120x40   
+┌─ 1 Targets ──────────────────┐┌─ 2 Snapshot · sf-7a1c · rev 12 ──────────────────┐┌─ 3 e12 · textbox ────────────────┐
+│ ~ chromium        ready      ││ e1    document  "Booking — sample-web"           ││ Location                         │
+│  ▌localhost:5173  sf-7a1c    ││ e4     banner                                    ││ Text field · Enabled · Empty     │
+│   github.com/…               ││ e7      link     Book a slot                     ││                                  │
+│   about:blank                ││ e9     main                                      ││ ACTION                  > change │
+│                              ││ e11     heading  Book a slot                     ││  > fill              needs ref   │
+│ ~ macOS AX        ready      ││ ▌e12    textbox  Location          focusable     ││    click  press  read            │
+│   Yam.app         2 win      ││ e14     combobox Slot              expanded      ││    check  hover  drag            │
+│   Terminal                   ││ e17     button   Book now          enabled       ││                                  │
+│                              ││ e21     status   "No booking yet"                ││ text · required                  │
+│ ~ http            ready      ││ e24    contentinfo                               ││ [ Indiranagar             ]      │
+│   any URL · u to open        ││ e26     link     Terms                           ││                                  │
+│                              ││                                                  ││ ↵ act · then check it            │
+│ ~ AT-SPI            n/a      ││ 312 nodes · cut at 200 · n for the next page     ││                                  │
+│   linux only                 ││ refs belong to rev 12; a new snapshot renames    ││ LAST RESULT                      │
+│                              ││                                                  ││ succeeded · 41 ms                │
+│ SESSIONS            2        ││ / filter the tree        s screenshot            ││ verified  value = "Indiranagar"  │
+│ sf-7a1c chromium    you      ││                                                  ││ postcondition passed, so         │
+│ sf-33b8 ax        agent      ││                                                  ││ verified is true — not because   │
+│         claude-code holds    ││                                                  ││ the call returned ok             │
+│                              ││                                                  ││                                  │
+│                              ││                                                  ││                                  │
+│                              ││                                                  ││                                  │
+│                              ││                                                  ││                                  │
+│                              ││                                                  ││                                  │
+│                              ││                                                  ││                                  │
+└──────────────────────────────┘└──────────────────────────────────────────────────┘└──────────────────────────────────┘
+┌─ 4 This session ─────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 41.102 connect  chromium · attach · localhost:5173 · session sf-7a1c · you control                                   │
+│ 41.118 snapshot rev 12 · 312 nodes · truncated at 200 · 84 ms                                                        │
+│ 41.140 act      fill e12 "Indiranagar" · succeeded · 41 ms                                                           │
+│ 41.143 check    value of e12 = "Indiranagar" · passed → verified                                                     │
+│                                                                                                                      │
+│ ─── no project, no flow, no binding, no model: this is the whole journey ───                                         │
+│     c connect   ↵ act   k check   w save as automation   x close the session                                         │
+│                                                                                                                      │
+│                                                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ ^K commands  ? keys  1-4 region  j k move  ⇥ action  ↵ act  k check  n more nodes  t take control  q quit              
