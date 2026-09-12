@@ -1,0 +1,40 @@
+ yam Flows  yam-fixtures  http://127.0.0.1:55702               7 files · 22 stories · 30 bindings, 1 unverified  120×40
+┌───────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌──────────────────────────────────┐
+│ 1 Flows                   │┃ 2 flows/guards-and-compensation.flow                ┃│ 3 Inspect                        │
+│ booking-compe… not run    │┃ ▌  1   // Guards and compensation, end to end (T5…▓ ┃│ no step selected                 │
+│ booking-workf… not run    │┃   2   //                                          ▓ ┃│                                  │
+│ execution.flow not run    │┃   3   // `booking-compensation.flow` beside this …▓ ┃│                                  │
+│ … aborted    run 24 h ago │┃   4   // faithful sibling of `execution.flow`. Th…▓ ┃│                                  │
+│ natural_langu… not run    │┃   5   // the two guarantees T5.4 is about, on the…▓ ┃│                                  │
+│ simple.flow    not run    │┃   6   //                                          ▓ ┃│                                  │
+│ svatah.flow    not run    │┃   7   //   * a guard whose predicate is false nev…▓ ┃│                                  │
+│                           │┃   8   //     log has no surface call for it (REQ-…▓ ┃│                                  │
+│                           │┃   9   //   * a failing story runs its compensatin…▓ ┃│                                  │
+│                           │┃  10   //     scope, and the run ends `aborted` wi…▓ ┃│                                  │
+│                           │┃  11                                               ▓ ┃│                                  │
+│                           │┃  12   // ── guards ──────────────────────────────…▓ ┃│                                  │
+│                           │┃  13   //                                          ▓ ┃│                                  │
+│                           │┃  14   // Three guards, one of each subject the IR…▓ ┃│                                  │
+│                           │┃  15   // step's own element. The two that are fal…▓ ┃│                                  │
+│                           │┃  16   // application at all.                      ▓ ┃│                                  │
+│                           │┃  17                                               ▓ ┃│                                  │
+│                           │┃  18   story: I want to see guards decide          ░ ┃│                                  │
+│                           │┃  19     Click the Book a slot li… tier 1 · bound  ░ ┃│                                  │
+│                           │┃  20     Remember the text of the… tier 1 · bound  ░ ┃│                                  │
+│                           │┃  21     // True: the page is the booking page.    ░ ┃│                                  │
+│                           │┃  22     Only if the URL contains… tier 1 · bound  ░ ┃│                                  │
+│                           │┃  23     // False: the status says "Confirmed", so…░ ┃│                                  │
+│                           │┃  24     Only if {status} is "Can… tier 1 · bound  ░ ┃│                                  │
+│                           │┃  25     // False the other way round: `Unless` ru…░ ┃│                                  │
+│                           │┃  26     Unless {status} is "Conf… tier 1 · bound  ░ ┃│                                  │
+│                           │┃  27     // True: the element the step acts on is …░ ┃│                                  │
+│                           │┃  28     Only if the Book now but… tier 1 · bound  ░ ┃│                                  │
+│                           │┃  29     The booking result shoul… tier 1 · bound  ░ ┃│                                  │
+│                           │┃ lint: 3 — W_SECRET_UNSET user.password reads ${YAM… ┃│                                  │
+└───────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└──────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4 Lint                                                                                                               │
+│ 0     W_SECRET_UNSET         user.password reads ${YAM_SAMPLE_PASSWORD}, which is not set. Compiling does not need … │
+│ 0     W_SECRET_UNSET         card.number reads ${YAM_SAMPLE_CARD_NUMBER}, which is not set. Compiling does not need… │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r run the selected flow  h heal the last run  q quit

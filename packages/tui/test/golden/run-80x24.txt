@@ -1,0 +1,24 @@
+ yam Run comp  yam-fixtur… test behavior · invoker user via cli · 9.29 s  80×24
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 2 Run comp · aborted                                                         ┃
+┃ ▌✓  1 Click the Book a slot link                      testid #0    51 ms   ▓ ┃
+┃ ✓  2 Type "Indiranagar" into the location field       testid #0    28 ms   ▓ ┃
+┃ ✓  3 Click the Book now button                        testid #0    27 ms   ░ ┃
+┃ flow aborted · exit 11                                                       ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 4 Audit                                                                      │
+│ 00.000 run        invoker kind user id local via cli · inputs              ▓ │
+│ 00.161 story      inputs                                                   ▓ │
+│ 00.163 state      ok · 2 ms                                                ▓ │
+│ 00.172 locate     nav.book-a-slot-link · testid "booking-link" · matched 1…▓ │
+│ 00.212 act        click · h0 · ok · 40 ms                                  ░ │
+│ 00.223 state      ok · 11 ms                                               ░ │
+│ 00.233 locate     booking.location-field · testid "location" · matched 1 ·…░ │
+│ 00.240 act        type · h0 · value "Indiranagar" · ok · 7 ms              ░ │
+│ 00.241 state      ok · 0 ms                                                ░ │
+│ 00.243 locate     booking.book-now-button · testid "book-now" · matched 1 …░ │
+│ yam ui --json streams these same lines to stdout for an agent                │
+└──────────────────────────────────────────────────────────────────────────────┘
+ tree, inspector collapsed at 80 cols · press its number to open it below
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  q quit

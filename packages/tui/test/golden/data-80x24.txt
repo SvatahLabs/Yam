@@ -1,0 +1,24 @@
+ yam Data  yam-fixtures  htt… 8 values · 3 secret(s), redacted · 3 unset  80×24
+┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+│ 1 Keys · 8                   │┃ 2 data.yaml                                  ┃
+│ ▸ user.email                 │┃ ▌user.email               c… string          ┃
+│   user.password              │┃ user.password            re… secret · unset  ┃
+│   card.number                │┃ card.number              re… secret · unset  ┃
+│   card.cvv                   │┃ card.cvv                 re… secret · unset  ┃
+│   env                        │┃ env                      te… string          ┃
+│   baseUrl                    │┃ baseUrl                  ht… string          ┃
+│   date                       │┃ date                     20… string          ┃
+│   reportPath                 │┃ reportPath               re… string          ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃ 3 secret(s), 3 unset                         ┃
+└──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 4 Secrets                                                                    │
+│ secret · unset  user.password            ${YAM_SAMPLE_PASSWORD}              │
+│ secret · unset  card.number              ${YAM_SAMPLE_CARD_NUMBER}           │
+│ secret · unset  card.cvv                 ${YAM_SAMPLE_CARD_CVV}              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ inspector collapsed at 80 cols · press its number to open it below
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  q quit

@@ -1,0 +1,24 @@
+ yam Runs  yam-fixtures  http://127.0.0.1:55702                    1 run  80×24
+┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+│ 1 Filters · 1 of 1           │┃ 2 Runs                                       ┃
+│ BEHAVIOR                     │┃ ▌comp     test     aborted  6 · 1 … 24 h a…  ┃
+│ ▸ all                        │┃                                              ┃
+│   test                       │┃                                              ┃
+│ INVOKER                      │┃                                              ┃
+│ ▸ all                        │┃                                              ┃
+│   user                       │┃                                              ┃
+│ STATUS                       │┃                                              ┃
+│ ▸ all                        │┃                                              ┃
+│   aborted                    │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+└──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 4 Runs · newest first                                                        │
+│ 24 h ago     comp           I want to book and then fail · cancel a booking  │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ inspector collapsed at 80 cols · press its number to open it below
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  q quit

@@ -1,0 +1,50 @@
+ yam Run comp  yam-fixtures  http://127.0.0.1:55702                                                                                               test behavior · invoker user via cli · 9.29 s  200×50
+┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────┐
+│ 1 Stories                    │┃ 2 Run comp · aborted                                                                                                           ┃│ 3 Step 5 · Click the pay button    │
+│ I want to book a… failed     │┃ ▌✓  1 Click the Book a slot link                                                                         testid #0    51 ms    ┃│ failure       locator              │
+│ cancel a booking  passed     │┃ ✓  2 Type "Indiranagar" into the location field                                                          testid #0    28 ms    ┃│ session       /booking · window 0  │
+│                              │┃ ✓  3 Click the Book now button                                                                           testid #0    27 ms    ┃│ window        Booking · Yam Sample │
+│                              │┃ ✓  4 Remember the text of the booking reference as reference                                             = BK-10428   3 ms     ┃│ dialog        none                 │
+│                              │┃ ✗  5 Click the pay button                                                                                             8965 ms  ┃│ policy        compensate: cancel … │
+│                              │┃ ✓  1 Click the cancel booking button                                                                     testid #0    31 ms    ┃│ CANDIDATES TRIED                   │
+│                              │┃ ✓  2 The booking reference should say {I want to book and then fail.reference}                           testid #0    6 ms     ┃│ testid   pay                   0   │
+│                              │┃                                                                                                                                ┃│ role     button · "Pay"        0   │
+│                              │┃                                                                                                                                ┃│ text     Pay                   0   │
+│                              │┃                                                                                                                                ┃│ css      [data-testid="pay"]   0   │
+│                              │┃                                                                                                                                ┃│ xpath    //*[@data-testid='pa… 0   │
+│                              │┃                                                                                                                                ┃│ screenshot    I-want-to-book-and-… │
+│                              │┃                                                                                                                                ┃│ WHAT TO DO                         │
+│                              │┃                                                                                                                                ┃│ Could not resolve "checkout.pay-b… │
+│                              │┃                                                                                                                                ┃│                                    │
+│                              │┃                                                                                                                                ┃│                                    │
+│                              │┃                                                                                                                                ┃│                                    │
+│                              │┃ flow aborted · exit 11                                                                                                         ┃│                                    │
+└──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4 Audit                                                                                                                                                                                              │
+│ 00.000 run        invoker kind user id local via cli · inputs                                                                                                                                      ▓ │
+│ 00.161 story      inputs                                                                                                                                                                           ▓ │
+│ 00.163 state      ok · 2 ms                                                                                                                                                                        ▓ │
+│ 00.172 locate     nav.book-a-slot-link · testid "booking-link" · matched 1 · ok · 9 ms                                                                                                             ▓ │
+│ 00.212 act        click · h0 · ok · 40 ms                                                                                                                                                          ▓ │
+│ 00.223 state      ok · 11 ms                                                                                                                                                                       ▓ │
+│ 00.233 locate     booking.location-field · testid "location" · matched 1 · ok · 10 ms                                                                                                              ▓ │
+│ 00.240 act        type · h0 · value "Indiranagar" · ok · 7 ms                                                                                                                                      ▓ │
+│ 00.241 state      ok · 0 ms                                                                                                                                                                        ▓ │
+│ 00.243 locate     booking.book-now-button · testid "book-now" · matched 1 · ok · 2 ms                                                                                                              ▓ │
+│ 00.267 act        click · h1 · ok · 24 ms                                                                                                                                                          ▓ │
+│ 00.267 state      ok · 0 ms                                                                                                                                                                        ▓ │
+│ 00.269 locate     booking.booking-reference · testid "booking-reference" · matched 1 · ok · 2 ms                                                                                                   ▓ │
+│ 00.270 read       h2 · ok · 1 ms                                                                                                                                                                   ▓ │
+│ 00.271 state      ok · 0 ms                                                                                                                                                                        ▓ │
+│ 02.052 locate     checkout.pay-button · testid "pay" · matched nothing · ok · 1781 ms                                                                                                              ▓ │
+│ 03.844 locate     checkout.pay-button · role button "Pay" · matched nothing · ok · 1792 ms                                                                                                         ▓ │
+│ 05.628 locate     checkout.pay-button · text "Pay" · matched nothing · ok · 1785 ms                                                                                                                ░ │
+│ 07.413 locate     checkout.pay-button · css "[data-testid="pay"]" · matched nothing · ok · 1784 ms                                                                                                 ░ │
+│ 09.187 locate     checkout.pay-button · xpath "//*[@data-testid='pay']" · matched nothing · ok · 1775 ms                                                                                           ░ │
+│ 09.190 state      ok · 2 ms                                                                                                                                                                        ░ │
+│ 09.235 screenshot ok · 44 ms                                                                                                                                                                       ░ │
+│ 09.236 state      ok · 1 ms                                                                                                                                                                        ░ │
+│ yam ui --json streams these same lines to stdout for an agent                                                                                                                                        │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  r run the same thing again  r resume from the failing step  s stop this run between steps  h heal this run  q quit

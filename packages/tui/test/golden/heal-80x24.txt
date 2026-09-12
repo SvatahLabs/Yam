@@ -1,0 +1,24 @@
+ yam Heal review  yam-fixtures  http://127.0.0.1:5… 1 run with a failure  80×24
+┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+│ 1 Runs with a failure        │┃ 2 Heal comp                                  ┃
+│ ▸ comp 1 failed   24 h ago   │┃ press H to heal the selected run             ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+└──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 4 Proposals                                                                  │
+│ no proposal yet                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ inspector collapsed at 80 cols · press its number to open it below
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  q quit

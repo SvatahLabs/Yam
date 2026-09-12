@@ -1,0 +1,40 @@
+ yam Import prototype database  yam-fixtures  http:/… Reads a Yam prototype's electron-db into the open project  120×40
+┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
+│ 1 Import                    │┃ 2 Import prototype database                ┃│ 3 Where it may write                    │
+│ from          choose a fol… │┃ choose the prototype's electron-db direct… ┃│ reads         —                         │
+│ into          <repo>/evals… │┃                                            ┃│ writes        <repo>/evals/fixtures     │
+│                             │┃                                            ┃│ refuses       anything outside it       │
+│                             │┃                                            ┃│ THE SAME THING FROM A TERMINAL          │
+│                             │┃                                            ┃│ yam migrate <repo>/evals/fixtures --fr… │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃ writes only into the project the service … ┃│                                         │
+└─────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4 migration-review.md                                                                                                │
+│ nothing imported yet                                                                                                 │
+│                                                                                                                      │
+│                                                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  q quit

@@ -1,0 +1,40 @@
+ yam Runs  yam-fixtures  http://127.0.0.1:55702                                                           1 run  120×40
+┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
+│ 1 Filters · 1 of 1          │┃ 2 Runs                                     ┃│ 3 Run comp                              │
+│ BEHAVIOR                    │┃ ▌comp     test    aborted 6 · 1 … 24 h a…  ┃│ outcome       aborted                   │
+│ ▸ all                       │┃                                            ┃│ behavior      test                      │
+│   test                      │┃                                            ┃│ invoker       user · local · cli        │
+│ INVOKER                     │┃                                            ┃│ duration      9.29 s                    │
+│ ▸ all                       │┃                                            ┃│ exit          11                        │
+│   user                      │┃                                            ┃│ plan          7a56729f                  │
+│ STATUS                      │┃                                            ┃│ bindings      551b0a87                  │
+│ ▸ all                       │┃                                            ┃│ FAILING STEP                            │
+│   aborted                   │┃                                            ┃│ Click the pay button                    │
+│                             │┃                                            ┃│ class         locator                   │
+│                             │┃                                            ┃│ Could not resolve "checkout.pay-button… │
+│                             │┃                                            ┃│ screenshot    I-want-to-book-and-then-… │
+│                             │┃                                            ┃│ ARTIFACTS                               │
+│                             │┃                                            ┃│ 7 results · results.jsonl               │
+│                             │┃                                            ┃│ audit.jsonl                             │
+│                             │┃                                            ┃│ 1 screenshot                            │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+└─────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4 Runs · newest first                                                                                                │
+│ 24 h ago     comp           I want to book and then fail · cancel a booking                                          │
+│                                                                                                                      │
+│                                                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen   open the selected run  q quit

@@ -1,0 +1,24 @@
+ yam Import p… Reads a Yam prototype's electron-db into the open project  80×24
+┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+│ 1 Import                     │┃ 2 Import prototype database                  ┃
+│ from          choose a fold… │┃ choose the prototype's electron-db directory ┃
+│ into          <repo>/evals/… │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃ writes only into the project the service wa… ┃
+└──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 4 migration-review.md                                                        │
+│ nothing imported yet                                                         │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ inspector collapsed at 80 cols · press its number to open it below
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  q quit

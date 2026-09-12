@@ -1,0 +1,40 @@
+ yam Bindings  yam-fixtures  http://127.0.0.1:55702                                  30 elements · 0 unverified  120×40
+┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
+│ 1 Elements · 0 unverified   │┃ 2 Bindings                                 ┃│ phrases       the Bookings link         │
+│ app.bookings-l… verified    │┃ ▌app.booki… /dashboa… testid #0 verified   ┃│ context       /dashboard · 691ed483     │
+│ app.checkout-l… verified    │┃ app.check… /dashboard testid #0 verified   ┃│ platform      web                       │
+│ app.logout-link verified    │┃ app.logou… /schedule… testid #0 verified   ┃│ state         verified                  │
+│ app.schedule-b… verified    │┃ app.sched… /dashboard testid #0 verified   ┃│ CANDIDATES · RESOLVER ORDER             │
+│ app.sidebar-to… verified    │┃ app.sideb… /dashboard testid #0 verified   ┃│ 0  testid   "nav-bookings"        0.98  │
+│ booking.09-00-… verified    │┃ booking.0… /booking   role #0   verified   ┃│ 1  role     link · "Bookings"     0.92  │
+│ booking.18-00-… verified    │┃ booking.1… /booking   role #0   verified   ┃│ 2  text     "Bookings"            0.75  │
+│ booking.book-n… verified    │┃ booking.b… /booking   testid #0 verified   ┃│ 3  css      "[data-testid="nav-b… 0.68  │
+│ booking.bookin… verified    │┃ booking.b… /booking   testid #0 verified   ┃│ 4  xpath    "//*[@data-testid='n… 0.6   │
+│ booking.bookin… verified    │┃ booking.b… /booking   testid #0 verified   ┃│ FINGERPRINT                             │
+│ booking.bookin… verified    │┃ booking.b… /booking   testid #0 verified   ┃│ tag           a                         │
+│ booking.cancel… verified    │┃ booking.c… /booking   testid #0 verified   ┃│ attrs         data-testid=nav-bookings… │
+│ booking.indira… verified    │┃ booking.i… /booking   css #0    verified   ┃│ text          Bookings                  │
+│ booking.locati… verified    │┃ booking.l… /booking   testid #0 verified   ┃│ neighbours    ☰ · Overview · Schedule  │
+│ booking.next-b… verified    │┃ booking.n… /booking   testid #0 verified   ┃│ …                                       │
+│ booking.slot-d… verified    │┃ booking.s… /booking   testid #0 verified   ┃│ role path     complementary › list › l… │
+│ checkout.card-… verified    │┃ checkout.… /checkout  testid #0 verified   ┃│ sibling index 0                         │
+│ checkout.cvv-f… verified    │┃ checkout.… /checkout  testid #0 verified   ┃│ PROVENANCE                              │
+│ checkout.expir… verified    │┃ checkout.… /checkout  testid #0 verified   ┃│ grounded by   human                     │
+│ checkout.expir… verified    │┃ checkout.… /checkout  testid #0 verified   ┃│ prompt        seed:hand-completed       │
+│ checkout.pay-b… verified    │┃ checkout.… /checkout  testid #0 verified   ┃│ recorded      2026-09-02T00:00:00.000Z  │
+│ home.home-head… verified    │┃ home.home… /          testid #0 verified   ┃│ cost          —                         │
+│ home.sign-in-b… verified    │┃ home.sign… /          testid #0 verified   ┃│                                         │
+│ login.login-bu… verified    │┃ login.log… /login     testid #0 verified   ┃│                                         │
+│ login.password… verified    │┃ login.pas… /login     testid #0 verified   ┃│                                         │
+│ login.username… verified    │┃ login.use… /login     testid #0 verified   ┃│                                         │
+│ nav.book-a-slo… verified    │┃ nav.book-… /          testid #0 verified   ┃│                                         │
+│ nav.dashboard-… verified    │┃ nav.dashb… /          testid #0 verified   ┃│                                         │
+│ nav.nav-toggle  verified    │┃ nav.nav-t… /          testid #0 verified   ┃│                                         │
+└─────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4 Store                                                                                                              │
+│ no bindings yet                                                                                                      │
+│                                                                                                                      │
+│ 30 element(s) · 0 unverified                                                                                         │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  v dry-resolve every binding  q quit

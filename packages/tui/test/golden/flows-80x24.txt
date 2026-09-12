@@ -1,0 +1,24 @@
+ yam Flows  yam-fixtur… 7 files · 22 stories · 30 bindings, 1 unverified  80×24
+┌──────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+│ 1 Flows                  │┃ 2 flows/guards-and-compensation.flow             ┃
+│ booking-comp… not run    │┃ ▌  1   // Guards and compensation, end to end …▓ ┃
+│ booking-work… not run    │┃   2   //                                       ▓ ┃
+│ execution.fl… not run    │┃   3   // `booking-compensation.flow` beside th…▓ ┃
+│ aborted    run 24 h ago  │┃   4   // faithful sibling of `execution.flow`.…░ ┃
+│ natural_lang… not run    │┃   5   // the two guarantees T5.4 is about, on …░ ┃
+│ simple.flow   not run    │┃   6   //                                       ░ ┃
+│ svatah.flow   not run    │┃   7   //   * a guard whose predicate is false …░ ┃
+│                          │┃   8   //     log has no surface call for it (R…░ ┃
+│                          │┃   9   //   * a failing story runs its compensa…░ ┃
+│                          │┃  10   //     scope, and the run ends `aborted`…░ ┃
+│                          │┃  11                                            ░ ┃
+│                          │┃  12   // ── guards ───────────────────────────…░ ┃
+│                          │┃ lint: 3 — W_SECRET_UNSET user.password reads ${… ┃
+└──────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 4 Lint                                                                       │
+│ 0     W_SECRET_UNSET         user.password reads ${YAM_SAMPLE_PASSWORD}, wh… │
+│ 0     W_SECRET_UNSET         card.number reads ${YAM_SAMPLE_CARD_NUMBER}, w… │
+└──────────────────────────────────────────────────────────────────────────────┘
+ inspector collapsed at 80 cols · press its number to open it below
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  q quit

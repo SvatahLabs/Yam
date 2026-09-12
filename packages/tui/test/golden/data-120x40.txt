@@ -1,0 +1,40 @@
+ yam Data  yam-fixtures  http://127.0.0.1:55702                      8 values · 3 secret(s), redacted · 3 unset  120×40
+┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
+│ 1 Keys · 8                  │┃ 2 data.yaml                                ┃│ 3 user.email                            │
+│ ▸ user.email                │┃ ▌user.email               string           ┃│ kind          string                    │
+│   user.password             │┃ user.password            … secret · unset  ┃│ value         connected2atul@gmail.com  │
+│   card.number               │┃ card.number              … secret · unset  ┃│                                         │
+│   card.cvv                  │┃ card.cvv                 … secret · unset  ┃│                                         │
+│   env                       │┃ env                      … string          ┃│                                         │
+│   baseUrl                   │┃ baseUrl                  … string          ┃│                                         │
+│   date                      │┃ date                     … string          ┃│                                         │
+│   reportPath                │┃ reportPath               … string          ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃                                            ┃│                                         │
+│                             │┃ 3 secret(s), 3 unset                       ┃│                                         │
+└─────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4 Secrets                                                                                                            │
+│ secret · unset  user.password            ${YAM_SAMPLE_PASSWORD}                                                      │
+│ secret · unset  card.number              ${YAM_SAMPLE_CARD_NUMBER}                                                   │
+│ secret · unset  card.cvv                 ${YAM_SAMPLE_CARD_CVV}                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  q quit

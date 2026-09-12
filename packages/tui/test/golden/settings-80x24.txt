@@ -1,0 +1,24 @@
+ yam Settings  yam-fixtures  http://12… yam-fixtures · test · playwright  80×24
+┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+│ 1 Settings                   │┃ 2 Settings                                   ┃
+│ Project                      │┃ ▌PROJECT▓                                    ┃
+│ Run                          │┃ name          yam-fixtures                 ▓ ┃
+│ Service                      │┃ directory     <repo>/evals/fixtures        ▓ ┃
+│                              │┃ environment   test                         ▓ ┃
+│                              │┃ flows         flows                        ▓ ┃
+│                              │┃ bindings      bindings                     ▓ ┃
+│                              │┃ RUN▓                                         ┃
+│                              │┃ adapter       playwright                   ▓ ┃
+│                              │┃ base url      http://127.0.0.1:PORT        ▓ ┃
+│                              │┃ workers       1                            ▓ ┃
+│                              │┃ headless      true                         ▓ ┃
+│                              │┃ output        runs                         ░ ┃
+└──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 4 Diagnostics · 3                                                            │
+│ warning  W_SECRET_UNSET         data.yaml · line 0 · user.password reads ${… │
+│ warning  W_SECRET_UNSET         data.yaml · line 0 · card.number reads ${YA… │
+│ warning  W_SECRET_UNSET         data.yaml · line 0 · card.cvv reads ${YAM_S… │
+└──────────────────────────────────────────────────────────────────────────────┘
+ inspector collapsed at 80 cols · press its number to open it below
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  q quit

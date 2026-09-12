@@ -283,8 +283,7 @@ export function place(tree: Region, columns: number, rows: number): Placed {
     let at = region.split === "columns" ? box.x : box.y;
     let along = 0;
     for (const child of region.children) {
-      const first = firstPane(child);
-      const found = first === undefined ? undefined : boxes.get(first);
+      const found = firstBox(child, boxes);
       if (found === undefined) continue;
       const size = region.split === "columns" ? found.width : found.height;
       const childBox: Box =
@@ -301,11 +300,18 @@ export function place(tree: Region, columns: number, rows: number): Placed {
   return walk(tree, { x: 0, y: 0, width: Math.max(1, Math.floor(columns)), height: Math.max(1, Math.floor(rows)) });
 }
 
-/** The first pane a region draws, which is where its box starts. */
-function firstPane(region: Region): string | undefined {
-  if (!isSplit(region)) return region.id;
+/**
+ * The first box a region actually got, which is where it starts.
+ *
+ * The first *declared* pane is not the answer: on the run screen at eighty
+ * columns the tree collapses, and looking its box up returned nothing — so the
+ * whole column split was skipped and the main pane, which had not collapsed,
+ * was never drawn. The golden frames caught it on the first run.
+ */
+function firstBox(region: Region, boxes: ReadonlyMap<string, Box>): Box | undefined {
+  if (!isSplit(region)) return boxes.get(region.id);
   for (const child of region.children) {
-    const found = firstPane(child);
+    const found = firstBox(child, boxes);
     if (found !== undefined) return found;
   }
   return undefined;
@@ -323,7 +329,7 @@ function sizeOfSplit(
     return box === undefined ? fallback : axis === "columns" ? box.width : box.height;
   }
   const along = region.children
-    .map((child) => (boxes.has(firstPane(child) ?? "") ? sizeOfSplit(child, boxes, axis, 0) : 0))
+    .map((child) => (firstBox(child, boxes) === undefined ? 0 : sizeOfSplit(child, boxes, axis, 0)))
     .filter((one) => one > 0);
   if (along.length === 0) return fallback;
   return region.split === axis ? along.reduce((sum, one) => sum + one, 0) : Math.max(...along);

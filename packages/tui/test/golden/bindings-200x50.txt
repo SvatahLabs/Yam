@@ -1,0 +1,50 @@
+ yam Bindings  yam-fixtures  http://127.0.0.1:55702                                                                                                                  30 elements · 0 unverified  200×50
+┌────────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌────────────────────────────────────────────┐
+│ 1 Elements · 0 unverified      │┃ 2 Bindings                                                                                                           ┃│ phrases       the Bookings link            │
+│ app.bookings-link  verified    │┃ ▌app.bookings-link                the Bookings link                          /dashboard     testid #0    verified    ┃│ context       /dashboard · 691ed483        │
+│ app.checkout-link  verified    │┃ app.checkout-link                the Checkout link                           /dashboard     testid #0    verified    ┃│ platform      web                          │
+│ app.logout-link    verified    │┃ app.logout-link                  the logout link                             /schedule-bui… testid #0    verified    ┃│ state         verified                     │
+│ app.schedule-buil… verified    │┃ app.schedule-build-link          the Schedule Build link                     /dashboard     testid #0    verified    ┃│ CANDIDATES · RESOLVER ORDER                │
+│ app.sidebar-toggle verified    │┃ app.sidebar-toggle               the sidebar toggle                          /dashboard     testid #0    verified    ┃│ 0  testid   "nav-bookings"           0.98  │
+│ booking.09-00-slo… verified    │┃ booking.09-00-slot-time          the 09:00 slot time                         /booking       role #0      verified    ┃│ 1  role     link · "Bookings"        0.92  │
+│ booking.18-00-slo… verified    │┃ booking.18-00-slot-time          the 18:00 slot time                         /booking       role #0      verified    ┃│ 2  text     "Bookings"               0.75  │
+│ booking.book-now-… verified    │┃ booking.book-now-button          the Book now button                         /booking       testid #0    verified    ┃│ 3  css      "[data-testid="nav-book… 0.68  │
+│ booking.booking-r… verified    │┃ booking.booking-reference        the booking reference                       /booking       testid #0    verified    ┃│ 4  xpath    "//*[@data-testid='nav-… 0.6   │
+│ booking.booking-r… verified    │┃ booking.booking-result           the booking result                          /booking       testid #0    verified    ┃│ FINGERPRINT                                │
+│ booking.booking-s… verified    │┃ booking.booking-status           the booking status                          /booking       testid #0    verified    ┃│ tag           a                            │
+│ booking.cancel-bo… verified    │┃ booking.cancel-booking-button    the cancel booking button                   /booking       testid #0    verified    ┃│ attrs         data-testid=nav-bookings · … │
+│ booking.indiranag… verified    │┃ booking.indiranagar-suggestion   the Indiranagar suggestion                  /booking       css #0       verified    ┃│ text          Bookings                     │
+│ booking.location-… verified    │┃ booking.location-field           the location field                          /booking       testid #0    verified    ┃│ neighbours    ☰ · Overview · Schedule     │
+│ booking.next-butt… verified    │┃ booking.next-button              the next button                             /booking       testid #0    verified    ┃│ Bui…                                       │
+│ booking.slot-date… verified    │┃ booking.slot-date-field          the slot date field                         /booking       testid #0    verified    ┃│ role path     complementary › list › list… │
+│ checkout.card-num… verified    │┃ checkout.card-number-field       the card number field                       /checkout      testid #0    verified    ┃│ sibling index 0                            │
+│ checkout.cvv-field verified    │┃ checkout.cvv-field               the CVV field                               /checkout      testid #0    verified    ┃│ PROVENANCE                                 │
+│ checkout.expiry-m… verified    │┃ checkout.expiry-month-select     the expiry month select                     /checkout      testid #0    verified    ┃│ grounded by   human                        │
+│ checkout.expiry-y… verified    │┃ checkout.expiry-year-select      the expiry year select                      /checkout      testid #0    verified    ┃│ prompt        seed:hand-completed          │
+│ checkout.pay-butt… verified    │┃ checkout.pay-button              the pay button                              /checkout      testid #0    verified    ┃│ recorded      2026-09-02T00:00:00.000Z     │
+│ home.home-heading  verified    │┃ home.home-heading                the home heading                            /              testid #0    verified    ┃│ cost          —                            │
+│ home.sign-in-butt… verified    │┃ home.sign-in-button              the sign in button                          /              testid #0    verified    ┃│                                            │
+│ login.login-button verified    │┃ login.login-button               the login button                            /login         testid #0    verified    ┃│                                            │
+│ login.password-fi… verified    │┃ login.password-field             the password field                          /login         testid #0    verified    ┃│                                            │
+│ login.username-fi… verified    │┃ login.username-field             the username field                          /login         testid #0    verified    ┃│                                            │
+│ nav.book-a-slot-l… verified    │┃ nav.book-a-slot-link             the Book a slot link                        /              testid #0    verified    ┃│                                            │
+│ nav.dashboard-link verified    │┃ nav.dashboard-link               the dashboard link                          /              testid #0    verified    ┃│                                            │
+│ nav.nav-toggle     verified    │┃ nav.nav-toggle                   the nav toggle                              /              testid #0    verified    ┃│                                            │
+│ schedule.schedule… verified    │┃ schedule.schedule-heading        the schedule heading                        /schedule-bui… testid #0    verified    ┃│                                            │
+│                                │┃                                                                                                                      ┃│                                            │
+│                                │┃                                                                                                                      ┃│                                            │
+│                                │┃                                                                                                                      ┃│                                            │
+│                                │┃                                                                                                                      ┃│                                            │
+│                                │┃                                                                                                                      ┃│                                            │
+│                                │┃                                                                                                                      ┃│                                            │
+│                                │┃                                                                                                                      ┃│                                            │
+│                                │┃                                                                                                                      ┃│                                            │
+│                                │┃                                                                                                                      ┃│                                            │
+└────────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛└────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4 Store                                                                                                                                                                                              │
+│ no bindings yet                                                                                                                                                                                      │
+│                                                                                                                                                                                                      │
+│ 30 element(s) · 0 unverified                                                                                                                                                                         │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  v dry-resolve every binding  q quit

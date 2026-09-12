@@ -1,0 +1,24 @@
+ yam API  yam-fixtures  http://127.0.0.1:5… 1 named request · api/*.yaml  80×24
+┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+│ 1 Requests · 1               │┃ 2 GET active count                           ┃
+│ GET     ▸ active count       │┃ ▌url           {data.baseUrl}/api/active-co… ┃
+│                              │┃ HEADERS                                      ┃
+│                              │┃ accept        application/json               ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+│                              │┃                                              ┃
+└──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 4 Body                                                                       │
+│ nothing has been sent from this screen                                       │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ inspector collapsed at 80 cols · press its number to open it below
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  q quit

@@ -1,0 +1,24 @@
+ yam Bindings  yam-fixtures  http://127.0.0.… 30 elements · 0 unverified  80×24
+┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+│ 1 Elements · 0 unverified    │┃ 2 Bindings                                   ┃
+│ app.bookings-l… verified   ▓ │┃ ▌app.booki… /dashboard testid #0 verified ▓  ┃
+│ app.checkout-l… verified   ▓ │┃ app.check… /dashboard testid #0  verified ▓  ┃
+│ app.logout-link verified   ▓ │┃ app.logou… /schedule… testid #0  verified ▓  ┃
+│ app.schedule-b… verified   ▓ │┃ app.sched… /dashboard testid #0  verified ▓  ┃
+│ app.sidebar-to… verified   ▓ │┃ app.sideb… /dashboard testid #0  verified ▓  ┃
+│ booking.09-00-… verified   ▓ │┃ booking.0… /booking   role #0    verified ▓  ┃
+│ booking.18-00-… verified   ░ │┃ booking.1… /booking   role #0    verified ░  ┃
+│ booking.book-n… verified   ░ │┃ booking.b… /booking   testid #0  verified ░  ┃
+│ booking.bookin… verified   ░ │┃ booking.b… /booking   testid #0  verified ░  ┃
+│ booking.bookin… verified   ░ │┃ booking.b… /booking   testid #0  verified ░  ┃
+│ booking.bookin… verified   ░ │┃ booking.b… /booking   testid #0  verified ░  ┃
+│ booking.cancel… verified   ░ │┃ booking.c… /booking   testid #0  verified ░  ┃
+└──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 4 Store                                                                      │
+│ no bindings yet                                                              │
+│                                                                              │
+│ 30 element(s) · 0 unverified                                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+ inspector collapsed at 80 cols · press its number to open it below
+^K commands  1-4 pane  Tab next  j k move  Enter open  [ ] screen  q quit
