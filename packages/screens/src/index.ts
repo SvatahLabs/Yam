@@ -52,6 +52,16 @@ export type {
   RunsState,
 } from "./screens/authoring.js";
 
+export { sessionScreen, modeFrom, SESSION_MODES } from "./screens/session.js";
+export type {
+  SessionState,
+  SessionMode,
+  SurfaceView,
+  RecordView,
+  SayView,
+  SaidSentence,
+} from "./screens/session.js";
+
 export { DESKTOP_HOLDER } from "./holder.js";
 
 export {
@@ -110,6 +120,7 @@ import { runScreen } from "./screens/run.js";
 import { AUTHORING_SCREENS } from "./screens/authoring.js";
 import { SECONDARY_SCREENS } from "./screens/secondary.js";
 import { SURFACES_SCREENS } from "./screens/surfaces.js";
+import { sessionScreen } from "./screens/session.js";
 import { SCREEN_IDS, type Screen, type ScreenId, type ScreenStateBase } from "./types.js";
 
 /**
@@ -122,6 +133,7 @@ import { SCREEN_IDS, type Screen, type ScreenId, type ScreenStateBase } from "./
  * tree use.
  */
 export const SCREENS: readonly Screen<ScreenStateBase>[] = [
+  sessionScreen as unknown as Screen<ScreenStateBase>,
   ...(SURFACES_SCREENS as readonly Screen<ScreenStateBase>[]),
   flowsScreen as Screen<ScreenStateBase>,
   runScreen as Screen<ScreenStateBase>,
@@ -191,6 +203,7 @@ export function defaultScreenOf(section: SectionId): ScreenId {
  * the sections rather than deleted, and stays in step with them by construction.
  */
 const RAIL_LABEL: Readonly<Record<ScreenId, string>> = {
+  session: "Session",
   surfaces: "Surfaces",
   flows: "Flows",
   runs: "Runs",

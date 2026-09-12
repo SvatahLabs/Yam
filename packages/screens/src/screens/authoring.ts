@@ -582,7 +582,7 @@ function rowsOf(value: unknown, keys: readonly string[]): Array<{ key: string; v
   }));
 }
 
-const recordScreen: Screen<RecordState> = {
+export const recordScreen: Screen<RecordState> = {
   id: "record",
   title: "Record review",
   actions: actionsForScreen("record"),

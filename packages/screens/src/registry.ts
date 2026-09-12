@@ -931,6 +931,7 @@ const ACTIONS_ONLY: readonly Action[] = [
  * labels are the rail's, which is what the mockups show.
  */
 const GO_TO_LABEL: Readonly<Record<ScreenId, string>> = {
+  session: "Session",
   surfaces: "Surfaces",
   flows: "Flows",
   record: "Record review",

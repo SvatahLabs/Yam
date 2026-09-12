@@ -638,7 +638,7 @@ export function platformGroups(
     .map(([family, { adapters: as, targets: ts }]) => ({ family, adapters: as, targets: ts }));
 }
 
-const surfacesScreen: Screen<SurfacesState> = {
+export const surfacesScreen: Screen<SurfacesState> = {
   id: "surfaces",
   title: "Surfaces",
   actions: actionsForScreen("surfaces"),

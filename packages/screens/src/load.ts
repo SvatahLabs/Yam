@@ -50,6 +50,23 @@ export class Sources {
     }
   }
 
+  /**
+   * Adopt what another `load()` already recorded (TV-M01).
+   *
+   * A screen composed of two loaders has one provenance, not two: `session`
+   * calls the surface loader and the record loader and joins them, and a person
+   * reading `--json` should see the endpoints in call order as though one
+   * function had made every call.
+   */
+  note(name: string): void {
+    this.names.push(name);
+  }
+
+  /** Adopt a failure a composed load already caught. The first one wins, as here. */
+  fail(message: string): void {
+    this.failure ??= message;
+  }
+
   base(
     screen: ScreenStateBase["screen"],
     title: string,

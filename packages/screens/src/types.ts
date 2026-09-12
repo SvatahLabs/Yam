@@ -26,6 +26,7 @@ import type { ScreenService } from "./service.js";
  * with different actions, which the mockups draw as two artboards.
  */
 export const SCREEN_IDS = [
+  "session",
   "surfaces",
   "flows",
   "record",
@@ -63,6 +64,15 @@ export interface ScreenParams {
   readonly sessionId?: string;
   /** `record`: whether that session is a capture rather than a binding run (Draft 2.23). */
   readonly capturing?: boolean;
+  /**
+   * `session`: which of the three modes is showing (REQ-ADE-14, Draft 2.27).
+   *
+   * A parameter rather than renderer state, so that `--screen session --mode
+   * say`, a deep link in the app and a restored cockpit all reach the same
+   * place — and so that switching mode is a re-load of one screen rather than a
+   * navigation between two.
+   */
+  readonly mode?: string;
   /** Which row the inspector is describing, when a screen has rows. */
   readonly selected?: string;
   /**
