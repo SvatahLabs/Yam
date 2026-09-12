@@ -31,7 +31,7 @@ function tree(next: () => number, depth = 3, id = { n: 0 }): Region {
     if (next() < 0.2) pane["max"] = Math.floor(next() * 40) + 4;
     if (next() < 0.15) pane["fixed"] = Math.floor(next() * 8) + 1;
     if (next() < 0.25) pane["collapseBelow"] = Math.floor(next() * 100) + 20;
-    return pane as Region;
+    return pane as unknown as Region;
   }
   const children = Array.from({ length: Math.floor(next() * 3) + 2 }, () => tree(next, depth - 1, id));
   return { split: next() < 0.5 ? "rows" : "columns", children };
