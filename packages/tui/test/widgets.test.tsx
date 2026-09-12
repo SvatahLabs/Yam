@@ -133,6 +133,45 @@ describe("a frame fills its box (TV-04)", () => {
   });
 });
 
+describe("a zero state names the key that changes it (TV-06)", () => {
+  it("draws the key and the registry's word beside what is not here", () => {
+    const lines = draw(
+      <Frame
+        box={{ x: 0, y: 0, width: 50, height: 8 }}
+        title="Elements"
+        focused={false}
+        content={content(0)}
+        cursor={0}
+        next={[{ key: "v", label: "Verify all bindings" }]}
+      />,
+      50,
+      8,
+    ).join("\n");
+    expect(lines).toContain("nothing here yet");
+    expect(lines).toContain("v");
+    expect(lines).toContain("Verify all bindings");
+  });
+
+  it("still fills the box exactly with the offer in it", () => {
+    const lines = draw(
+      <Frame
+        box={{ x: 0, y: 0, width: 50, height: 9 }}
+        title="Elements"
+        focused={false}
+        content={content(0)}
+        cursor={0}
+        next={[
+          { key: "r", label: "Bind targets" },
+          { key: "v", label: "Verify all bindings" },
+        ]}
+      />,
+      50,
+      9,
+    );
+    expect(lines.length).toBe(9);
+  });
+});
+
 describe("where the window is", () => {
   it("keeps the cursor on screen, and stops at the ends", () => {
     expect(slice(0, 100, 10)).toBe(0);

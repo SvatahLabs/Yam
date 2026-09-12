@@ -13,7 +13,8 @@ import { Box as InkBox, Text } from "ink";
 import { isSplit, place, solve, type Placed, type Region } from "./regions.js";
 import { paneModel, type PaneContent, type PaneModel } from "./rows.js";
 import { Frame } from "./widgets.js";
-import type { ScreenId, ScreenStateBase } from "@svatah/yam-screens";
+import { actionById, type ScreenId, type ScreenStateBase } from "@svatah/yam-screens";
+import { keysFor } from "./keys.js";
 
 /** A screen's regions: the tree, what is in each, and the order `Tab` walks. */
 export interface View {
@@ -131,6 +132,8 @@ export interface RegionsProps {
   readonly rows: number;
   readonly focus: string;
   readonly cursor: Readonly<Record<string, number>>;
+  /** Which screen this is, so a zero state can name the key that changes it. */
+  readonly screen: ScreenId;
   /** Told what left the row, so the footer can say so. */
   readonly onCollapsed?: (ids: readonly string[]) => void;
 }
@@ -181,10 +184,24 @@ export function Regions(props: RegionsProps): React.JSX.Element {
     const content = props.view.panes[region.id];
     if (content === undefined) return null;
     const number = props.view.focusOrder.indexOf(region.id);
+    /*
+     * The key is the cockpit's and the word is the registry's (TV-01). `rows.ts`
+     * names an action id and nothing else, so a zero state cannot spell either.
+     */
+    const next = (content.nextActions ?? [])
+      .map((id) => {
+        const bound = keysFor(props.screen).find((one) => one.action === id);
+        const action = actionById(id);
+        return bound === undefined || action === undefined
+          ? undefined
+          : { key: bound.key, label: action.label };
+      })
+      .filter((one): one is { key: string; label: string } => one !== undefined);
     return (
       <Frame
         key={region.id}
         box={box}
+        {...(next.length === 0 ? {} : { next })}
         {...(number >= 0 ? { number: number + 1 } : {})}
         title={content.title}
         focused={props.focus === region.id}

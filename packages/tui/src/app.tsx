@@ -443,6 +443,7 @@ export function App(props: AppProps): React.JSX.Element {
 
       <Regions
         view={view}
+        screen={ui.screen}
         columns={ui.layout.columns}
         rows={bodyRows}
         focus={ui.focus}

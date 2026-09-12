@@ -71,6 +71,8 @@ export function scrollbar(start: number, shown: number, total: number, height: n
 
 export interface FrameProps {
   readonly box: Box;
+  /** What a zero state offers, already resolved to a key and a word. */
+  readonly next?: ReadonlyArray<{ key: string; label: string }>;
   readonly number?: number;
   readonly title: string;
   readonly focused: boolean;
@@ -103,11 +105,24 @@ export function Frame(props: FrameProps): React.JSX.Element {
 
   const drawn: React.JSX.Element[] = [];
   if (total === 0) {
+    /*
+     * A zero state says what is not here *and what changes it* (TV-06). An empty
+     * box that says "no bindings yet" and stops is the dead end SF-17 removes
+     * from the app; the cockpit is held to the same rule.
+     */
     drawn.push(
       <Text key="empty" color="gray">
         {fit(content.empty, inner)}
       </Text>,
     );
+    for (const one of props.next ?? []) {
+      drawn.push(
+        <Text key={`next-${one.key}`}>
+          <Text backgroundColor="magenta" color="black">{` ${one.key} `}</Text>
+          <Text color="cyan">{fit(`  ${one.label}`, Math.max(0, inner - one.key.length - 2))}</Text>
+        </Text>,
+      );
+    }
   } else {
     shown.forEach((line: Line, at) => {
       const current = props.showCursor !== false && props.focused && start + at === props.cursor;

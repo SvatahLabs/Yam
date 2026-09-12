@@ -17,7 +17,7 @@
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ 4 Store                                                                      │
 │ no bindings yet                                                              │
-│                                                                              │
+│  v   Verify all bindings                                                     │
 │ 30 element(s) · 0 unverified                                                 │
 └──────────────────────────────────────────────────────────────────────────────┘
  inspector collapsed at 80 cols · press its number to open it below

@@ -60,6 +60,14 @@ export interface PaneContent {
   readonly footer?: Cell;
   /** When there is nothing: what the screen says instead of drawing a blank. */
   readonly empty: string;
+  /**
+   * And what to do about it, by action id (TV-06).
+   *
+   * Ids, not keys and not labels: the key is the cockpit's — `keys.ts` — and the
+   * label is the registry's. A zero state that spelled either would be inventing
+   * a word a person reads, which is the boundary TV-01 draws.
+   */
+  readonly nextActions?: readonly string[];
 }
 
 export interface PaneModel {
@@ -127,6 +135,7 @@ function flows(state: FlowsState, now: number): PaneModel {
     tree: {
       title: "Flows",
       empty: "no flow files",
+      nextActions: ["capture.start", "flows.compile"],
       lines: state.files.map((file) => ({
         key: file.file,
         cells: [
@@ -140,6 +149,7 @@ function flows(state: FlowsState, now: number): PaneModel {
     main: {
       title: state.file ?? "Flows",
       empty: "no file open",
+      nextActions: ["capture.start"],
       lines: state.lines.map((line) => ({
         key: String(line.line),
         cells: [
@@ -312,6 +322,7 @@ function runs(state: RunsState, now: number): PaneModel {
     tree: {
       title: `Filters · ${state.rows.length} of ${state.total}`,
       empty: "no runs yet",
+      nextActions: ["run.flow"],
       lines: [
         heading("behavior"),
         ...state.choices.behavior.map((one) => ({
@@ -391,6 +402,7 @@ function runs(state: RunsState, now: number): PaneModel {
     audit: {
       title: "Runs · newest first",
       empty: "no runs yet",
+      nextActions: ["run.flow"],
       lines: state.rows.slice(0, 12).map((row) => ({
         key: `tail-${row.runId}`,
         cells: [
@@ -409,6 +421,7 @@ function bindings(state: BindingsState): PaneModel {
     tree: {
       title: `Elements · ${state.unverified} unverified`,
       empty: "no bindings yet",
+      nextActions: ["record.start", "bindings.verify"],
       lines: state.rows.map((row) => ({
         key: row.elementId,
         cells: [text(row.elementId, { grow: true }), pill(row.verified, 11)],
@@ -460,6 +473,8 @@ function bindings(state: BindingsState): PaneModel {
     audit: {
       title: "Store",
       empty: "no bindings yet",
+      nextActions: ["record.start", "bindings.verify"],
+      nextActions: ["record.start", "bindings.verify"],
       lines: state.rows
         /* The tone, not the word: which word means verified is the model's. */
         .filter((one) => one.verified.tone !== "pass")
