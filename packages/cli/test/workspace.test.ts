@@ -3,7 +3,7 @@
  */
 import { afterAll, describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdtempSync, rmSync } from "node:fs";
+import { cpSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -139,5 +139,31 @@ describe("yam runs tail", () => {
     expect(tailLine({ kind: "step.result", result: { status: "failed", story: "Sign in", text: "Click", failure: { message: "No binding for `x` (a.b).\nmore" } } })).toBe("  ✗ Sign in · Click\n      No binding for `x` (a.b).");
     expect(tailLine({ kind: "run.summary", summary: { runId: "r1", totals: { passed: 2, failed: 0, skipped: 1 }, exitCode: 0 } })).toBe("run r1: 2 passed, 0 failed, 1 skipped (exit 0)");
     expect(tailLine({ kind: "record.started" })).toBeUndefined();
+  });
+});
+
+describe("the workspace is a convenience, not a trap (TV-12, TV-T16)", () => {
+  it("does not kill the session when the cockpit quits", () => {
+    /*
+     * It used to `kill-session`, which took the person's shell and their editor
+     * with it — everything they had typed in the pane beside it, because they
+     * pressed `q` in the pane above.
+     */
+    const source = readFileSync(new URL("../src/commands/workspace.ts", import.meta.url), "utf8");
+    const cockpit = source.slice(source.indexOf("const cockpit ="), source.indexOf("new-window"));
+    expect(cockpit).not.toContain("kill-session");
+  });
+
+  it("turns the mouse on in the session rather than in a person's own configuration", () => {
+    const source = readFileSync(new URL("../src/commands/workspace.ts", import.meta.url), "utf8");
+    expect(source).toContain('"mouse", "on"');
+  });
+
+  it("names its panes, so which is which does not depend on reading their output", () => {
+    const source = readFileSync(new URL("../src/commands/workspace.ts", import.meta.url), "utf8");
+    for (const name of ["cockpit", "shell", "events"]) {
+      expect(source, `no pane is called ${name}`).toContain(`"${name}"`);
+    }
+    expect(source).toContain("pane-border-status");
   });
 });

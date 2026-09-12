@@ -149,6 +149,50 @@ for (const file of artboards) {
      * `overflow: hidden` on `.app` is what hides the defect from a reader —
      * which is how the Explorer toolbar and the Data table got through review.
      */
+    /*
+     * The terminal boards (TV-T17).
+     *
+     * `.app` is the 1440 px application frame and the cockpit's boards have
+     * none, so every rule above passed them by saying nothing. A terminal board
+     * has its own frame — `.term`, a fixed number of columns wide — and the same
+     * question is worth asking of it: is anything drawn past the edge, and does
+     * the frame fill the rows it claims?
+     */
+    for (const term of document.querySelectorAll(".term")) {
+      const edge = box(term);
+      for (const element of term.querySelectorAll("*")) {
+        const one = box(element);
+        if (one.width === 0 && one.height === 0) continue;
+        if (one.right > edge.right + 1) {
+          problems.push(
+            `"${(element.textContent ?? "").trim().slice(0, 40)}" is ` +
+              `${Math.round(one.right - edge.right)}px past the right edge of its terminal`,
+          );
+        }
+        if (one.bottom > edge.bottom + 1) {
+          problems.push(
+            `"${(element.textContent ?? "").trim().slice(0, 40)}" is ` +
+              `${Math.round(one.bottom - edge.bottom)}px below its terminal`,
+          );
+        }
+      }
+      /*
+       * And the frame is filled. A terminal board drawn with rows to spare is
+       * drawing the defect this whole specification is about: a cockpit as tall
+       * as its content, with the rest of the screen black.
+       */
+      const rows = [...term.querySelectorAll(".r, .sbar, .foot, .modes, .hand")];
+      if (rows.length > 0) {
+        const lowest = Math.max(...rows.map((one) => box(one).bottom));
+        const spare = edge.bottom - lowest;
+        if (spare > edge.height * 0.5) {
+          problems.push(
+            `a terminal board leaves ${Math.round(spare)}px of its ${Math.round(edge.height)}px unused`,
+          );
+        }
+      }
+    }
+
     const frame = document.querySelector(".app");
     if (frame !== null) {
       const edge = box(frame);

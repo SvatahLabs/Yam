@@ -37,6 +37,29 @@ function audit(directory?: string): { status: number; output: string } {
   return { status: ran.status ?? 1, output: `${ran.stdout ?? ""}${ran.stderr ?? ""}` };
 }
 
+/** A terminal board written to break exactly one of the new rules (TV-T17). */
+const TERMINAL_BOARD = (broken: "past" | "short" | "none"): string => `
+<div class="tui-board">
+<style>
+.term { width: 60ch; height: 200px; background:#0f1216; color:#e3e8ee;
+        font-size:12.5px; line-height:18px; position:relative; overflow:visible; }
+.r { padding:0 1ch; white-space:pre; }
+</style>
+<div class="term">
+  <div class="sbar">yam 60x11</div>
+  ${
+    broken === "past"
+      ? '<div class="r" style="position:absolute;left:200ch;width:20ch">past the edge</div>'
+      : ""
+  }
+  ${
+    broken === "short"
+      ? '<div class="r">one row and then nothing</div>'
+      : Array.from({ length: 10 }, (_, at) => `<div class="r">row ${at}</div>`).join("")
+  }
+</div>
+</div>`;
+
 const made: string[] = [];
 const scratch = (): string => {
   const one = mkdtempSync(join(tmpdir(), "yam-artboards-"));
@@ -167,4 +190,38 @@ describe("every rule the audit has bites (P10-F4)", () => {
     expect(ran.status, ran.output).toBe(1);
     expect(ran.output).toContain("past the right edge of the artboard");
   }, 300_000);
+});
+
+
+describe("the terminal boards are measured too (TV-T17)", () => {
+  it("passes a terminal board that fills its frame", () => {
+    const dir = scratch();
+    writeFileSync(join(dir, "Terminal.html"), TERMINAL_BOARD("none"));
+    const ran = audit(dir);
+    expect(ran.status, ran.output).toBe(0);
+  });
+
+  it("catches something drawn past the right edge of a terminal", () => {
+    /*
+     * `.app` is the 1440 px application frame and the cockpit's boards have
+     * none, so every rule this file had passed them by saying nothing.
+     */
+    const dir = scratch();
+    writeFileSync(join(dir, "Terminal.html"), TERMINAL_BOARD("past"));
+    const ran = audit(dir);
+    expect(ran.status).toBe(1);
+    expect(ran.output).toContain("past the right edge of its terminal");
+  });
+
+  it("catches a terminal board that leaves half its rows black", () => {
+    /*
+     * Which is the defect this whole specification is about, drawn: a cockpit as
+     * tall as its content with the rest of the screen empty.
+     */
+    const dir = scratch();
+    writeFileSync(join(dir, "Terminal.html"), TERMINAL_BOARD("short"));
+    const ran = audit(dir);
+    expect(ran.status).toBe(1);
+    expect(ran.output).toContain("unused");
+  });
 });

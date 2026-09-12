@@ -133,8 +133,19 @@ export async function workspaceCommand(args: ParsedArgs, io: CommandIo, options:
    * The workspace window. The cockpit ends the session when it quits: that is
    * how "the service lives until the last pane" is kept simple enough to read.
    */
-  const cockpit = `${yam} ui ${q(project)}; tmux kill-session -t ${q("=" + session)}`;
+  /*
+   * Quitting the cockpit closes the cockpit (TV-12, TV-T16).
+   *
+   * It used to `kill-session`, which took the person's shell and their editor
+   * with it — everything they had typed in the pane beside it, because they
+   * pressed `q` in the pane above. The service window is what keeps the session
+   * alive; when the last pane a person wants is gone they close it themselves,
+   * the way they close every other tmux session they have.
+   */
+  const cockpit = `${yam} ui ${q(project)}`;
   tmux("new-window", "-t", `=${session}`, "-c", project, "-n", "yam", ...env, "sh", "-c", cockpit);
+  /* The mouse, in the session rather than in a person's own configuration. */
+  tmux("set-option", "-t", `=${session}`, "mouse", "on");
   /*
    * The cockpit takes the larger share (Draft 2.24).
    *
@@ -145,7 +156,12 @@ export async function workspaceCommand(args: ParsedArgs, io: CommandIo, options:
    * about 200 columns, and the shell keeps a usable width.
    */
   tmux("split-window", "-t", `=${session}:yam`, "-h", "-l", "40%", "-c", project, ...env);
+  /* Named panes, so a person can see which is which without reading its output. */
+  tmux("select-pane", "-t", `=${session}:yam.0`, "-T", "cockpit");
+  tmux("select-pane", "-t", `=${session}:yam.1`, "-T", "shell");
+  tmux("set-option", "-t", `=${session}:yam`, "pane-border-status", "top");
   tmux("split-window", "-t", `=${session}:yam.1`, "-v", "-c", project, ...env, "sh", "-c", `${yam} runs tail ${q(project)}`);
+  tmux("select-pane", "-t", `=${session}:yam.2`, "-T", "events");
   const editor = process.env["EDITOR"];
   if (editor !== undefined && editor !== "") {
     const flow = stringOption(args, "flow");
