@@ -90,7 +90,17 @@ on Flows while the app opened on Session, two drafts after the decision, and
 
 ## Evidence
 
-* `pnpm -r test` — green across every package.
+* `pnpm -r test` — 34 packages, 4,432 tests. Green on two runs of three.
+
+  **The third was not, and it is worth saying so rather than averaging it.**
+  `packages/cli`'s `surface-journey` and `surface-transport` failed once under
+  full-suite load and passed on their own immediately afterwards, as they did on
+  the run before and the run after. Both spawn processes and bind ports, so
+  contention is the obvious explanation and it is *not* established — wave 4 of
+  the surface-first work found a suite that passed without passing every time,
+  and the lesson there was that an intermittent failure with a plausible story is
+  still an intermittent failure. Nothing in this branch touches either path; the
+  honest statement is that it was seen once, in this shape, and not chased.
 * `pnpm artboards` — 24 boards fit their frames, now including the terminal ones,
   and every rule is shown to bite.
 * `node scripts/audit-sheet.mjs` — 0 axe violations, 34 interactive elements
