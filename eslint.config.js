@@ -311,6 +311,22 @@ export default tseslint.config(
       // diff, a model cache — and is git-ignored everywhere. It is generated
       // output, not source, and linting it says nothing about this repository.
       "**/.yam/**",
+      /*
+       * `.claude/` holds an editing agent's own state, and `.claude/worktrees/`
+       * holds *other checkouts of this repository* — a git worktree per branch,
+       * each with its own copy of every file.
+       *
+       * Linting them lints old revisions. Measured: `pnpm lint` in a checkout
+       * that had five merged wave worktrees under it reported eight errors, all
+       * of them in files at commits that had already been superseded, and none
+       * of them in anything a change here could fix. Worse, it is a failure
+       * that depends on who has been working in the checkout — CI and a fresh
+       * clone have no such directory and passed while a developer's tree did
+       * not.
+       *
+       * A worktree is a second checkout, and a checkout lints itself.
+       */
+      "**/.claude/**",
     ],
   },
   js.configs.recommended,
