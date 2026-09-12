@@ -222,6 +222,18 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
     }
     const page = topic(name);
     if (page === undefined) {
+      /*
+       * A person who typed `yam help run` meant `yam run --help` (TV-17).
+       *
+       * The diagnostic listed the topics and stopped, which is true and no use:
+       * `run` is a command and not a topic, and the thing they wanted is one
+       * word away. Every diagnostic names the next command.
+       */
+      const { COMMANDS: table } = await import("./help.js");
+      if (table.some((one) => one.name === name || one.name.startsWith(`${name} `))) {
+        io.err(`"${name}" is a command, not a help topic. Its help is: yam ${name} --help`);
+        return EXIT.usage;
+      }
       io.err(`No help topic "${name}". The topics: flows · bindings · exit-codes · session · adapters · agents`);
       return EXIT.usage;
     }
