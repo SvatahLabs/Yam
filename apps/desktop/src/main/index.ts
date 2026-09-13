@@ -216,16 +216,27 @@ async function closeProject(): Promise<void> {
  */
 function applyTheme(): void {
   nativeTheme.themeSource = preferences.theme;
+  announceTheme();
+}
+
+/**
+ * Tell the window what it is drawing in (TV-18, `EX-02`).
+ *
+ * Two things, because they are two mechanisms. The renderer is told the
+ * *resolved* appearance so the few components that need to branch can; the
+ * window's own background is set because it is what Chromium paints between
+ * frames, and a white flash into a dark window is a defect a stylesheet cannot
+ * reach.
+ */
+function announceTheme(): void {
   const dark = nativeTheme.shouldUseDarkColors;
+  window_?.setBackgroundColor(dark ? "#111613" : "#fafbf9");
   window_?.webContents.send("app:theme", dark ? "dark" : "light");
 }
 
 /* The OS changed its appearance while the app was open: follow it (TV-18). */
 nativeTheme.on("updated", () => {
-  window_?.webContents.send(
-    "app:theme",
-    nativeTheme.shouldUseDarkColors ? "dark" : "light",
-  );
+  announceTheme();
 });
 
 function createWindow(): void {
@@ -240,7 +251,16 @@ function createWindow(): void {
     width: preferences.window.width,
     height: preferences.window.height,
     title: "Yam",
-    backgroundColor: "#101418",
+    /*
+     * What is painted before the first frame (`EX-01`, `EX-02`).
+     *
+     * `#101418` was the old palette's page, near enough, and it was a literal
+     * in the main process — where `tokens.css` cannot reach, because this colour
+     * exists precisely for the moment before any stylesheet has loaded. So it is
+     * transcribed from `bg0`, and it follows the appearance: a white flash into
+     * a light window is the same defect as a black one into a dark window.
+     */
+    backgroundColor: nativeTheme.shouldUseDarkColors ? "#111613" : "#fafbf9",
     webPreferences: {
       // Beside the main bundle. A sandboxed preload has no ES module loader,
       // so both are CommonJS — see `vite.preload.config.ts`.

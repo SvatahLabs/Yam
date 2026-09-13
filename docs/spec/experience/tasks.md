@@ -8,18 +8,32 @@ changing it afterwards would rewrite all of them a second time.
 
 ## Wave E0 — one brand
 
-- [ ] **E0.1** Take the site's palette into `@svatah/yam-ui-tokens`: `--yam`
+- [x] **E0.1** Take the site's palette into `@svatah/yam-ui-tokens`: `--yam`
   `#357862`/`#7cc9ae`, `--accent` `#586ec2`/`#a3b1f0`, warm neutrals, both
   themes. Keep the token *names* the code already uses so the change is values,
   not a rename. `EX-01`
-- [ ] **E0.2** A check that fails when a token disagrees with the site's
+  — `yam`, `yam-ink` and `yam-soft` are added, because the site draws its mark
+  in one colour and its focus rings in another and collapsing them here would
+  have thrown away a distinction the brand already makes. `docs/spec/design/base.css`
+  reseeded and 39 artboards rewritten with it.
+- [x] **E0.2** A check that fails when a token disagrees with the site's
   stylesheet, reading the site rather than a copy of it. Records the site's
   values in the repository so the check runs without the site being up, and
   fails when the two drift. `EX-01`
-- [ ] **E0.3** `prefers-color-scheme` as the default and an explicit choice
+  — `packages/ui-tokens/test/brand.test.ts`, over `brand/site-palette.json`.
+  Every token is bound to a named site value or listed as derived with its
+  reason, so a new token cannot arrive from nowhere.
+- [x] **E0.3** `prefers-color-scheme` as the default and an explicit choice
   overriding it, in the app. `EX-02`
-- [ ] **E0.4** The cockpit's `chrome()` on the same tokens, at 24-bit, 256 and
+  — `tokens.css` gained the media query it never had; `system` is the *absence*
+  of `data-theme`, and the app has an Appearance chooser in the top bar.
+- [x] **E0.4** The cockpit's `chrome()` on the same tokens, at 24-bit, 256 and
   monochrome; golden frames regenerated and read. `CX-02`, `EX-02`
+  — the thirty-four existing goldens could not be regenerated into anything:
+  they are rendered by a test runner whose stdout is not a terminal, so they
+  contain no escape sequence at all and never could have caught the magenta.
+  `test/golden-colour.test.tsx` states a terminal instead of being run in one,
+  and `golden/chrome-truecolor.txt` is the frame with the colour left in.
 
 ## Wave E1 — the app's shape
 

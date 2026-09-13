@@ -2,9 +2,11 @@
  * GENERATED FILE — do not edit. `pnpm --filter @svatah/yam-ui-tokens build` writes it
  * from `src/index.ts`, which is the one place the values live (T9.2, REQ-ADE-12).
  *
- * Dark-first: `:root` is the dark theme and `[data-theme="light"]` overrides every
- * token and nothing else. A component that branched on the theme would break that
- * promise; `packages/ui/test/theme.test.ts` is what holds it.
+ * Dark-first: `:root` is the dark theme. `prefers-color-scheme: light` is what a
+ * machine that has chosen gets, and `[data-theme]` is what a person who has chosen
+ * gets — written last, so it wins the media query (EX-02). A component that branched
+ * on the theme would break the promise that the two differ only in tokens;
+ * `packages/ui/test/theme.test.ts` is what holds it.
  */
 @font-face {
   font-family: "IBM Plex Sans";
@@ -29,32 +31,36 @@
 }
 
 :root {
-  --bg0: #0f1216;
-  --bg1: #151a20;
-  --bg2: #1b2128;
-  --bg3: #222a33;
-  --line: #262e37;
-  --line2: #313a45;
-  --fg: #e3e8ee;
-  --fg2: #b4bdc8;
-  --muted: #8b96a5;
-  --dim: #5f6a78;
-  --accent: #b8a1ff;
-  --accent-ink: #1c1533;
-  --accent-soft: rgba(184,161,255,0.16);
+  color-scheme: dark light;
+  --bg0: #111613;
+  --bg1: #191f1b;
+  --bg2: #1e2821;
+  --bg3: #263029;
+  --line: #2d3830;
+  --line2: #3b483f;
+  --fg: #e3e9e2;
+  --fg2: #c2cdc4;
+  --muted: #a2aea4;
+  --dim: #7b8a80;
+  --accent: #a3b1f0;
+  --accent-ink: #131a2c;
+  --accent-soft: rgba(163,177,240,0.16);
+  --yam: #7cc9ae;
+  --yam-ink: #0c211a;
+  --yam-soft: rgba(124,201,174,0.14);
   --pass: #4fc48a;
   --fail: #ee6a5f;
-  --skip: #8b96a5;
+  --skip: #a2aea4;
   --healed: #56c5d0;
   --abort: #e5b04c;
   --info: #6ea8fe;
   --pass-soft: rgba(79,196,138,0.14);
   --fail-soft: rgba(238,106,95,0.14);
-  --skip-soft: rgba(139,150,165,0.14);
+  --skip-soft: rgba(162,174,164,0.14);
   --healed-soft: rgba(86,197,208,0.14);
   --abort-soft: rgba(229,176,76,0.14);
   --info-soft: rgba(110,168,254,0.14);
-  --scrim: rgba(10,12,16,0.62);
+  --scrim: rgba(9,13,11,0.62);
   --motion-quick: 120ms;
   --motion-settle: 220ms;
   --motion-ease: cubic-bezier(0.2, 0, 0, 1);
@@ -74,33 +80,112 @@
   --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
+/* The machine's preference, for anybody who has not stated one of their own. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg0: #fafbf9;
+    --bg1: #ffffff;
+    --bg2: #f0f3ef;
+    --bg3: #e7ebe5;
+    --line: #e0e5df;
+    --line2: #ccd4cb;
+    --fg: #253029;
+    --fg2: #41504a;
+    --muted: #626a65;
+    --dim: #828b85;
+    --accent: #586ec2;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(88,110,194,0.12);
+    --yam: #357862;
+    --yam-ink: #ffffff;
+    --yam-soft: rgba(53,120,98,0.10);
+    --pass: #1f7a45;
+    --fail: #b3261e;
+    --skip: #626a65;
+    --healed: #0f7f8a;
+    --abort: #8a5f10;
+    --info: #2f5bd7;
+    --pass-soft: rgba(31,122,69,0.12);
+    --fail-soft: rgba(179,38,30,0.12);
+    --skip-soft: rgba(98,106,101,0.12);
+    --healed-soft: rgba(15,127,138,0.12);
+    --abort-soft: rgba(138,95,16,0.12);
+    --info-soft: rgba(47,91,215,0.12);
+    --scrim: rgba(17,22,19,0.38);
+    --motion-quick: 120ms;
+    --motion-settle: 220ms;
+    --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+  }
+}
+
+/* A stated choice, after the media query so that it overrides it. */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg0: #111613;
+  --bg1: #191f1b;
+  --bg2: #1e2821;
+  --bg3: #263029;
+  --line: #2d3830;
+  --line2: #3b483f;
+  --fg: #e3e9e2;
+  --fg2: #c2cdc4;
+  --muted: #a2aea4;
+  --dim: #7b8a80;
+  --accent: #a3b1f0;
+  --accent-ink: #131a2c;
+  --accent-soft: rgba(163,177,240,0.16);
+  --yam: #7cc9ae;
+  --yam-ink: #0c211a;
+  --yam-soft: rgba(124,201,174,0.14);
+  --pass: #4fc48a;
+  --fail: #ee6a5f;
+  --skip: #a2aea4;
+  --healed: #56c5d0;
+  --abort: #e5b04c;
+  --info: #6ea8fe;
+  --pass-soft: rgba(79,196,138,0.14);
+  --fail-soft: rgba(238,106,95,0.14);
+  --skip-soft: rgba(162,174,164,0.14);
+  --healed-soft: rgba(86,197,208,0.14);
+  --abort-soft: rgba(229,176,76,0.14);
+  --info-soft: rgba(110,168,254,0.14);
+  --scrim: rgba(9,13,11,0.62);
+  --motion-quick: 120ms;
+  --motion-settle: 220ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
 [data-theme="light"] {
-  --bg0: #ffffff;
-  --bg1: #f7f8fa;
-  --bg2: #eef1f5;
-  --bg3: #e4e8ee;
-  --line: #d8dde5;
-  --line2: #c5ccd6;
-  --fg: #171b21;
-  --fg2: #3c4553;
-  --muted: #5b6472;
-  --dim: #868f9e;
-  --accent: #6b4fd8;
+  color-scheme: light;
+  --bg0: #fafbf9;
+  --bg1: #ffffff;
+  --bg2: #f0f3ef;
+  --bg3: #e7ebe5;
+  --line: #e0e5df;
+  --line2: #ccd4cb;
+  --fg: #253029;
+  --fg2: #41504a;
+  --muted: #626a65;
+  --dim: #828b85;
+  --accent: #586ec2;
   --accent-ink: #ffffff;
-  --accent-soft: rgba(107,79,216,0.12);
+  --accent-soft: rgba(88,110,194,0.12);
+  --yam: #357862;
+  --yam-ink: #ffffff;
+  --yam-soft: rgba(53,120,98,0.10);
   --pass: #1f7a45;
   --fail: #b3261e;
-  --skip: #5b6472;
+  --skip: #626a65;
   --healed: #0f7f8a;
   --abort: #8a5f10;
   --info: #2f5bd7;
   --pass-soft: rgba(31,122,69,0.12);
   --fail-soft: rgba(179,38,30,0.12);
-  --skip-soft: rgba(91,100,114,0.12);
+  --skip-soft: rgba(98,106,101,0.12);
   --healed-soft: rgba(15,127,138,0.12);
   --abort-soft: rgba(138,95,16,0.12);
   --info-soft: rgba(47,91,215,0.12);
-  --scrim: rgba(23,27,33,0.38);
+  --scrim: rgba(17,22,19,0.38);
   --motion-quick: 120ms;
   --motion-settle: 220ms;
   --motion-ease: cubic-bezier(0.2, 0, 0, 1);

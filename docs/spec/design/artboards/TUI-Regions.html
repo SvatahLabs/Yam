@@ -1,25 +1,25 @@
 <div class="tui-board">
 <style>
 .tui-board { width:960px; background:#0b0d10; padding:14px; font-family:var(--mono); }
-.term { width:120ch; height:720px; background:#0f1216; color:#e3e8ee; font-size:12.5px; line-height:18px; padding:0; position:relative; border:1px solid #262e37; overflow:hidden; }
+.term { width:120ch; height:720px; background:#111613; color:#e3e9e2; font-size:12.5px; line-height:18px; padding:0; position:relative; border:1px solid #2d3830; overflow:hidden; }
 .term .grid { display:grid; grid-template-columns:30ch 56ch 34ch; grid-template-rows:18px 1fr 216px 18px; height:720px; }
-.sbar { align-items:center; height:18px; grid-column:1/-1; display:flex; gap:2ch; background:#1b2128; color:#8b96a5; padding:0 1ch; white-space:pre; }
-.sbar b { color:#b8a1ff; font-weight:500; }
+.sbar { align-items:center; height:18px; grid-column:1/-1; display:flex; gap:2ch; background:#1e2821; color:#a2aea4; padding:0 1ch; white-space:pre; }
+.sbar b { color:#a3b1f0; font-weight:500; }
 .sbar .live { color:#4fc48a; }
-.reg { border:1px solid #262e37; margin:9px 1px 2px; padding:3px 0; position:relative; }
-.reg.f { border-color:#b8a1ff; }
-.reg .ttl { position:absolute; top:-9px; left:2ch; background:#0f1216; padding:0 1ch; color:#5f6a78; font-size:11px; }
-.reg.f .ttl { color:#b8a1ff; }
-.reg .sb { position:absolute; right:0; top:6px; bottom:6px; width:1px; background:#262e37; }
-.reg .sb i { position:absolute; left:0; width:1px; background:#5f6a78; }
+.reg { border:1px solid #2d3830; margin:9px 1px 2px; padding:3px 0; position:relative; }
+.reg.f { border-color:#a3b1f0; }
+.reg .ttl { position:absolute; top:-9px; left:2ch; background:#111613; padding:0 1ch; color:#7b8a80; font-size:11px; }
+.reg.f .ttl { color:#a3b1f0; }
+.reg .sb { position:absolute; right:0; top:6px; bottom:6px; width:1px; background:#2d3830; }
+.reg .sb i { position:absolute; left:0; width:1px; background:#7b8a80; }
 .r { padding:0 1ch; white-space:pre; overflow:hidden; }
-.r.cur { background:#231d3a; box-shadow:inset 2px 0 0 #b8a1ff; color:#fff; }
-.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#8b96a5} .d{color:#5f6a78} .bl{color:#6ea8fe} .a{color:#b8a1ff}
-.foot { grid-column:1/-1; display:flex; gap:2ch; color:#5f6a78; padding:0 1ch; white-space:pre; }
-.foot b { color:#b4bdc8; font-weight:500; }
-.toast { position:absolute; right:2ch; bottom:26px; background:#1b2128; border:1px solid #4fc48a; border-left-width:3px; padding:2px 1ch; color:#e3e8ee; }
-.cap { width:120ch; color:#8b96a5; font-size:11.5px; line-height:17px; padding-top:8px; }
-.cap b { color:#b8a1ff; font-weight:500; }
+.r.cur { background:#232d3f; box-shadow:inset 2px 0 0 #a3b1f0; color:#fff; }
+.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#a2aea4} .d{color:#7b8a80} .bl{color:#6ea8fe} .a{color:#a3b1f0}
+.foot { grid-column:1/-1; display:flex; gap:2ch; color:#7b8a80; padding:0 1ch; white-space:pre; }
+.foot b { color:#c2cdc4; font-weight:500; }
+.toast { position:absolute; right:2ch; bottom:26px; background:#1e2821; border:1px solid #4fc48a; border-left-width:3px; padding:2px 1ch; color:#e3e9e2; }
+.cap { width:120ch; color:#a2aea4; font-size:11.5px; line-height:17px; padding-top:8px; }
+.cap b { color:#a3b1f0; font-weight:500; }
 </style>
 
 <div class="term">
@@ -94,5 +94,5 @@
     <div class="foot"><span><b>^K</b> commands</span><span><b>?</b> keys</span><span><b>1-4</b> region</span><span><b>Tab</b> next</span><span><b>j k</b> move</span><span><b>/</b> filter</span><span><b>↵</b> open</span><span><b>e</b> edit</span><span><b>r</b> run</span><span><b>h</b> heal</span><span><b>q</b> quit</span></div>
   </div>
 </div>
-<div class="cap"><b>TV-03, TV-04, TV-05, TV-07.</b> The alternate screen, filled: four regions solved from a tree rather than three fixed widths, every region as tall as its box. The status bar is one row and carries the connection state; the footer is generated from the key map, so a key cannot be advertised and unbound. Colour is the tokens at 24-bit — accent <b>#b8a1ff</b>, pass #4fc48a, abort #e5b04c — and every tone still carries its glyph. The cursor is an accent-tinted row with a gutter mark, not a full-width inverse bar. Scroll position is drawn; the last action is a toast over the frame, not a line that pushes the layout.</div>
+<div class="cap"><b>TV-03, TV-04, TV-05, TV-07.</b> The alternate screen, filled: four regions solved from a tree rather than three fixed widths, every region as tall as its box. The status bar is one row and carries the connection state; the footer is generated from the key map, so a key cannot be advertised and unbound. Colour is the tokens at 24-bit — accent <b>#a3b1f0</b>, pass #4fc48a, abort #e5b04c — and every tone still carries its glyph. The cursor is an accent-tinted row with a gutter mark, not a full-width inverse bar. Scroll position is drawn; the last action is a toast over the frame, not a line that pushes the layout.</div>
 </div>

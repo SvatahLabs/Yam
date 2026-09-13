@@ -15,6 +15,7 @@ import { paneModel, type PaneContent, type PaneModel } from "./rows.js";
 import { Frame } from "./widgets.js";
 import { actionById, type ScreenId, type ScreenStateBase } from "@svatah/yam-screens";
 import { keysFor } from "./keys.js";
+import { CHROME, ink } from "./theme.js";
 
 /** A screen's regions: the tree, what is in each, and the order `Tab` walks. */
 export interface View {
@@ -228,7 +229,7 @@ export function Regions(props: RegionsProps): React.JSX.Element {
         and the screen off the end, which is the defect this is about one row up.
       */}
       {noticeRows === 1 ? (
-        <Text color="gray" wrap="truncate-end">
+        <Text {...ink(CHROME.dim)} wrap="truncate-end">
           {` ${collapsed.join(", ")} collapsed at ${props.columns} cols · press its number to open it below`}
         </Text>
       ) : null}

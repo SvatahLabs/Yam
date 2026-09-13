@@ -1,38 +1,38 @@
 <div class="tui-board">
 <style>
 .tui-board { width:960px; background:#0b0d10; padding:14px; font-family:var(--mono); }
-.term { width:120ch; height:720px; background:#0f1216; color:#e3e8ee; font-size:12.5px; line-height:18px; position:relative; border:1px solid #262e37; overflow:hidden; }
+.term { width:120ch; height:720px; background:#111613; color:#e3e9e2; font-size:12.5px; line-height:18px; position:relative; border:1px solid #2d3830; overflow:hidden; }
 .term + .lbl { margin-top:26px; }
-.lbl { width:120ch; color:#5f6a78; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; padding-bottom:6px; }
+.lbl { width:120ch; color:#7b8a80; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; padding-bottom:6px; }
 .lbl b { color:#ee6a5f; font-weight:500; } .lbl i { color:#4fc48a; font-style:normal; font-weight:500; }
 .old { padding:0 1ch; }
-.old .hdr { color:#8b96a5; white-space:pre; }
-.old .hdr b { color:#b8a1ff; font-weight:500; }
+.old .hdr { color:#a2aea4; white-space:pre; }
+.old .hdr b { color:#a3b1f0; font-weight:500; }
 .old .row { display:flex; gap:1ch; margin-top:4px; padding:0; border:0; }
-.old .box { border:1px solid #5f6a78; padding:2px 1ch; }
-.old .box.f { border-color:#b8a1ff; }
-.old .box .t { color:#5f6a78; } .old .box .t b { color:#b8a1ff; font-weight:500; }
-.old .inv { background:#c8ccd0; color:#0f1216; white-space:pre; }
-.old .keys { color:#5f6a78; margin-top:6px; white-space:pre; }
-.old .keys b { color:#b4bdc8; font-weight:500; }
+.old .box { border:1px solid #7b8a80; padding:2px 1ch; }
+.old .box.f { border-color:#a3b1f0; }
+.old .box .t { color:#7b8a80; } .old .box .t b { color:#a3b1f0; font-weight:500; }
+.old .inv { background:#c8ccd0; color:#111613; white-space:pre; }
+.old .keys { color:#7b8a80; margin-top:6px; white-space:pre; }
+.old .keys b { color:#c2cdc4; font-weight:500; }
 .old .void { color:#3a4450; margin-top:8px; }
 .grid { display:grid; grid-template-rows:18px 1fr 18px; height:720px; }
-.sbar { align-items:center; height:18px; display:flex; gap:2ch; background:#1b2128; color:#8b96a5; padding:0 1ch; white-space:pre; }
-.sbar b { color:#b8a1ff; font-weight:500; }
+.sbar { align-items:center; height:18px; display:flex; gap:2ch; background:#1e2821; color:#a2aea4; padding:0 1ch; white-space:pre; }
+.sbar b { color:#a3b1f0; font-weight:500; }
 .body { display:grid; grid-template-columns:minmax(0,1fr) 46ch; }
-.reg { border:1px solid #262e37; margin:9px 1px 2px; position:relative; padding:3px 0; }
-.reg .ttl { position:absolute; top:-9px; left:2ch; background:#0f1216; padding:0 1ch; color:#5f6a78; font-size:11px; }
-.reg.f { border-color:#b8a1ff; } .reg.f .ttl { color:#b8a1ff; }
+.reg { border:1px solid #2d3830; margin:9px 1px 2px; position:relative; padding:3px 0; }
+.reg .ttl { position:absolute; top:-9px; left:2ch; background:#111613; padding:0 1ch; color:#7b8a80; font-size:11px; }
+.reg.f { border-color:#a3b1f0; } .reg.f .ttl { color:#a3b1f0; }
 .r { padding:0 2ch; white-space:pre; overflow:hidden; }
 .mid { display:flex; flex-direction:column; justify-content:center; height:100%; }
-.h1 { color:#e3e8ee; font-size:15px; line-height:24px; padding:0 2ch; overflow:hidden; white-space:pre; }
-.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#8b96a5} .d{color:#5f6a78} .a{color:#b8a1ff}
-.key { display:inline-block; min-width:3ch; color:#1c1533; background:#b8a1ff; font-weight:500; text-align:center; }
-.key.q { background:#262e37; color:#b4bdc8; }
-.foot { display:flex; gap:2ch; color:#5f6a78; padding:0 1ch; white-space:pre; }
-.foot b { color:#b4bdc8; font-weight:500; }
-.cap { width:120ch; color:#8b96a5; font-size:11.5px; line-height:17px; padding-top:8px; }
-.cap b { color:#b8a1ff; font-weight:500; }
+.h1 { color:#e3e9e2; font-size:15px; line-height:24px; padding:0 2ch; overflow:hidden; white-space:pre; }
+.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#a2aea4} .d{color:#7b8a80} .a{color:#a3b1f0}
+.key { display:inline-block; min-width:3ch; color:#131a2c; background:#a3b1f0; font-weight:500; text-align:center; }
+.key.q { background:#2d3830; color:#c2cdc4; }
+.foot { display:flex; gap:2ch; color:#7b8a80; padding:0 1ch; white-space:pre; }
+.foot b { color:#c2cdc4; font-weight:500; }
+.cap { width:120ch; color:#a2aea4; font-size:11.5px; line-height:17px; padding-top:8px; }
+.cap b { color:#a3b1f0; font-weight:500; }
 </style>
 
 <div class="lbl">Today · <b>an empty project, 120×40</b></div>

@@ -35,9 +35,9 @@
 | `foreground` | function | `declare function foreground(hex: string, depth: ColourDepth): string;` | The escape that colours the foreground, for this depth. |
 | `Frame` | function | `export function Frame(props: FrameProps): React.JSX.Element` | A bordered region that fills its box exactly. |
 | `GLYPH` | variable | `GLYPH: Readonly<Record<StatusTone, string>> ` | The gutter glyph per tone. The word is always beside it (LLD §13.7). |
-| `hexOf` | variable | `hexOf: (what: StatusTone) => string` | The hexadecimal a tone is, for a renderer that colours its own way. |
+| `hexOf` | variable | `hexOf: (what: StatusTone, appearance?: Theme) => string` | The hexadecimal a tone is, for a renderer that colours its own way. |
 | `hitTest` | function | `export function hitTest(` | Which region was clicked, and which of its rows. |
-| `inkColour` | function | `export function inkColour(what: StatusTone, depth: ColourDepth): string \| undefined` | What Ink is told, which is a hexadecimal or a name. |
+| `inkColour` | function | `export function inkColour(` | What Ink is told, which is a hexadecimal or a name. |
 | `INSPECTOR_MIN_COLUMNS` | variable | `INSPECTOR_MIN_COLUMNS = 120` | The width at which the inspector still has room to be read (Draft 2.12 §13.7). |
 | `isMouse` | variable | `isMouse = (chunk: string): boolean => /\u001b\[</.test(chunk)` | Whether a chunk of input is mouse reporting rather than something typed. |
 | `KeyBinding` | interface | `export interface KeyBinding` | One key, and the action it runs. |
@@ -83,7 +83,7 @@
 | `solve` | function | `export function solve(tree: Region, columns: number, rows: number): Solved` | Fit a tree to a terminal. |
 | `Solved` | interface | `export interface Solved` |  |
 | `StatusBar` | function | `export function StatusBar(props:` | One line: what this is, where, and what it is doing. |
-| `tone` | function | `declare function tone(what: StatusTone, text: string, depth: ColourDepth): string;` | A tone, drawn. |
+| `tone` | function | `declare function tone(what: StatusTone, text: string, depth: ColourDepth, appearance?: Theme): string;` | A tone, drawn. |
 | `treeRows` | variable | `treeRows = (state: UiState["state"], now?: number): readonly Line[] =>` | The rows the tree pane lists, kept for the tests that read them directly. |
 | `UiOptions` | interface | `export interface UiOptions` |  |
 | `UiState` | interface | `export interface UiState` |  |

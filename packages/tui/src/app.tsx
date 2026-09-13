@@ -51,7 +51,7 @@ import {
 import { INSPECTOR_MIN_COLUMNS, footerFor, sizeOf } from "./layout.js";
 import { Regions, viewFor } from "./views.js";
 import { RailStrip, StatusBar } from "./widgets.js";
-import { CHROME, STATUS } from "./theme.js";
+import { CHROME, STATUS, ink } from "./theme.js";
 import type { StatusTone } from "@svatah/yam-screens";
 import { railRow, screenForJump, walk } from "./rail.js";
 import { COMMAND_KEYS, DEFAULT_SCREEN, actionForKey, keysFor } from "./keys.js";
@@ -620,7 +620,7 @@ export function App(props: AppProps): React.JSX.Element {
   if (ui === undefined) {
     return (
       <Box>
-        <Text color="gray">loading…</Text>
+        <Text {...ink(CHROME.dim)}>loading…</Text>
       </Box>
     );
   }
@@ -697,11 +697,11 @@ export function App(props: AppProps): React.JSX.Element {
 
       {ui.typing === undefined ? null : (
         <Text>
-          <Text color="gray">{`${ui.typing.label}  `}</Text>
-          <Text {...(CHROME.accent === undefined ? {} : { color: CHROME.accent })}>› </Text>
+          <Text {...ink(CHROME.dim)}>{`${ui.typing.label}  `}</Text>
+          <Text {...ink(CHROME.accent)}>› </Text>
           {ui.typing.text}
           <Text inverse> </Text>
-          <Text color="gray">{ui.typing.text === "" ? "  esc cancels" : ""}</Text>
+          <Text {...ink(CHROME.dim)}>{ui.typing.text === "" ? "  esc cancels" : ""}</Text>
         </Text>
       )}
 
@@ -713,7 +713,7 @@ export function App(props: AppProps): React.JSX.Element {
       )}
 
       <Box width={ui.layout.columns}>
-        <Text color="gray" wrap="truncate-end">
+        <Text {...ink(CHROME.dim)} wrap="truncate-end">
           {footerFor(ui.layout.columns, keys).map((one, at) => (
             <Text key={one.key}>
               {at === 0 ? "" : "  "}
@@ -731,18 +731,18 @@ export function App(props: AppProps): React.JSX.Element {
           paddingX={1}
           width={ui.layout.columns}
         >
-          <Text {...(CHROME.accent === undefined ? {} : { color: CHROME.accent })}>
+          <Text {...ink(CHROME.accent)}>
             Keys · generated from the key map · yam ui --keys --json
           </Text>
           {COMMAND_KEYS.map((one) => (
             <Text key={one.key} wrap="truncate-end">
-              <Text {...(CHROME.accent === undefined ? {} : { color: CHROME.accent })}>{one.key.padEnd(6)}</Text> {one.label}
+              <Text {...ink(CHROME.accent)}>{one.key.padEnd(6)}</Text> {one.label}
             </Text>
           ))}
           {keys.map((one) => (
             <Text key={`s-${one.key}`} wrap="truncate-end">
-              <Text {...(CHROME.accent === undefined ? {} : { color: CHROME.accent })}>{one.key.padEnd(6)}</Text> {one.label}
-              {one.modes === undefined ? "" : <Text color="gray">{`  · ${one.modes.join(", ")}`}</Text>}
+              <Text {...ink(CHROME.accent)}>{one.key.padEnd(6)}</Text> {one.label}
+              {one.modes === undefined ? "" : <Text {...ink(CHROME.dim)}>{`  · ${one.modes.join(", ")}`}</Text>}
             </Text>
           ))}
         </Box>
@@ -758,7 +758,7 @@ export function App(props: AppProps): React.JSX.Element {
           width={ui.layout.columns}
         >
           <Text>
-            <Text color="magenta">›</Text> {ui.paletteQuery}
+            <Text {...ink(CHROME.accent)}>›</Text> {ui.paletteQuery}
             <Text inverse> </Text>
           </Text>
           {paletteRows(ui)
@@ -777,7 +777,7 @@ export function App(props: AppProps): React.JSX.Element {
                 </Text>
               );
             })}
-          <Text color="gray">
+          <Text {...ink(CHROME.dim)}>
             ↑↓ move · ↵ run · esc close · greyed rows say why
           </Text>
         </Box>

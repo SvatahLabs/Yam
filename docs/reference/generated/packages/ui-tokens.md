@@ -13,17 +13,18 @@ The Yam design tokens: two themes, one type ramp, one status set (REQ-ADE-12)
 | Export | Kind | Signature | |
 |---|---|---|---|
 | `ansi256Of` | function | `export function ansi256Of(hex: string): number` | The nearest xterm-256 index, computed. |
+| `appearanceOf` | function | `export function appearanceOf(env: Record<string, string \| undefined>): Theme` | Which theme a terminal is on (`EX-02`). |
 | `Capabilities` | interface | `export interface Capabilities` | What a terminal can do, as far as it will admit. |
 | `capabilitiesOf` | function | `export function capabilitiesOf(` | What this terminal can do (TV-05). |
 | `ColourDepth` | typealias | `export type ColourDepth = "truecolor" \| "ansi256" \| "none";` | How much colour to send. |
 | `DARK` | variable | `DARK: Readonly<Record<TokenName, string>> ` | The dark theme (`docs/spec/design/base.css`, the `Tokens` artboard). |
-| `declarations` | function | `export function declarations(theme: Theme): string` | `--bg0: #0f1216; …` for one theme, in `TOKEN_NAMES` order. |
+| `declarations` | function | `export function declarations(theme: Theme): string` | `--bg0: #111613; …` for one theme, in `TOKEN_NAMES` order. |
 | `depthFor` | function | `export function depthFor(capabilities: Capabilities, asked?: string): ColourDepth` | `--color`, and what the terminal says when nobody passed it. |
 | `FONT_FILES` | variable | `FONT_FILES = [` | The packaged font files (REQ-PKG-3, and the phase's environment note: "ship |
 | `FONTS` | variable | `FONTS ` | The font stacks. Monospace is for what the runtime wrote; sans for what we |
 | `foreground` | function | `export function foreground(hex: string, depth: ColourDepth): string` | The escape that colours the foreground, for this depth. |
-| `hexOf` | variable | `hexOf = (what: StatusTone): string => STATUS[what].hex` | The hexadecimal a tone is, for a renderer that colours its own way. |
-| `LIGHT` | variable | `LIGHT: Readonly<Record<TokenName, string>> ` | The light theme (the `Tokens` artboard's "Light" block). |
+| `hexOf` | variable | `hexOf = (what: StatusTone, appearance: Theme = "dark"): string =>` | The hexadecimal a tone is, for a renderer that colours its own way. |
+| `LIGHT` | variable | `LIGHT: Readonly<Record<TokenName, string>> ` | The light theme (the site's `:root`). |
 | `METRICS` | variable | `METRICS ` | The measurements every control shares (LLD §13.7: 28 px controls, 4 px radii). |
 | `RESET` | variable | `RESET = "\u001b[39m"` | And the one that stops. |
 | `rgbOf` | function | `export function rgbOf(hex: string): readonly [number, number, number]` | `#4fc48a` → `[79, 196, 138]`. |
@@ -31,10 +32,11 @@ The Yam design tokens: two themes, one type ramp, one status set (REQ-ADE-12)
 | `STATUS_TONES` | variable | `STATUS_TONES = ["pass", "fail", "skip", "healed", "abort", "info", "neutral"] as const` | The five status colours, and the word each must appear with (LLD §13.7). |
 | `StatusStyle` | interface | `export interface StatusStyle` |  |
 | `StatusTone` | typealias | `export type StatusTone = (typeof STATUS_TONES)[number];` |  |
-| `stylesheet` | function | `export function stylesheet(): string` | The whole stylesheet: the faces, `:root` (dark), and the light override. |
+| `stylesheet` | function | `export function stylesheet(): string` | The whole stylesheet: the faces, the two themes, and how a machine chooses |
 | `Theme` | typealias | `export type Theme = "dark" \| "light";` |  |
 | `THEMES` | variable | `THEMES: Readonly<Record<Theme, Readonly<Record<TokenName, string>>>> ` |  |
 | `TOKEN_NAMES` | variable | `TOKEN_NAMES = [` | Every token name, in the order `docs/spec/design/base.css` declares them. |
+| `tokenHex` | variable | `tokenHex = (name: keyof (typeof THEMES)["dark"], appearance: Theme = "dark"): string =>` | A token's value, for the theme the terminal is on. |
 | `TokenName` | typealias | `export type TokenName = (typeof TOKEN_NAMES)[number];` |  |
-| `tone` | function | `export function tone(what: StatusTone, text: string, depth: ColourDepth): string` | A tone, drawn. |
+| `tone` | function | `export function tone(` | A tone, drawn. |
 | `TYPE` | variable | `TYPE ` | The type ramp (the `Tokens` artboard's "Type" block). |

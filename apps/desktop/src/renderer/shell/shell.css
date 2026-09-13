@@ -66,6 +66,23 @@
 }
 
 /*
+ * The appearance chooser, in a 44 px bar (`EX-02`).
+ *
+ * `.sv-field` stacks its label above its control, which is right in a form and
+ * two rows too tall here. The component is unchanged — this is the bar saying
+ * how it lays a field out, which is the layer that is allowed to.
+ */
+.sv-topbar .sv-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.sv-topbar .sv-select {
+  min-width: 104px;
+}
+
+/*
  * The mark (TV-A08, TV-20).
  *
  * An accent-coloured square stood in for a logo here and in every artboard. The
@@ -77,7 +94,12 @@
   width: 18px;
   height: 18px;
   display: inline-block;
-  background: var(--accent);
+  /*
+   * The brand, not the focus accent (`EX-01`). The site draws its own mark in
+   * `--yam` and everything that takes focus in `--accent`; these were one
+   * colour here only because the palette had one.
+   */
+  background: var(--yam);
   -webkit-mask: var(--brand-mark) center / contain no-repeat;
   mask: var(--brand-mark) center / contain no-repeat;
 }

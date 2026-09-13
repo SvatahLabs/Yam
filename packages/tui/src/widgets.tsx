@@ -17,7 +17,7 @@ import type { Box } from "./regions.js";
 import type { Cell, Line, PaneContent } from "./rows.js";
 import type { RailEntry } from "./rail.js";
 import { colourOf } from "./panes.js";
-import { CHROME } from "./theme.js";
+import { CHROME, ink, inkBg } from "./theme.js";
 
 /** `"a string"` cut to `width`, padded to it, so a line is exactly as wide as it claims. */
 export const fit = (text: string, width: number): string =>
@@ -113,15 +113,20 @@ export function Frame(props: FrameProps): React.JSX.Element {
      * from the app; the cockpit is held to the same rule.
      */
     drawn.push(
-      <Text key="empty" color="gray">
+      <Text key="empty" {...ink(CHROME.dim)}>
         {fit(content.empty, inner)}
       </Text>,
     );
     for (const one of props.next ?? []) {
       drawn.push(
         <Text key={`next-${one.key}`}>
-          <Text {...(CHROME.accent === undefined ? {} : { backgroundColor: CHROME.accent })} color="black">{` ${one.key} `}</Text>
-          <Text color="cyan">{fit(`  ${one.label}`, Math.max(0, inner - one.key.length - 2))}</Text>
+          <Text
+            {...inkBg(CHROME.accent)}
+            {...ink(CHROME.accentInk)}
+          >{` ${one.key} `}</Text>
+          <Text {...(CHROME.fg2 === undefined ? {} : { color: CHROME.fg2 })}>
+            {fit(`  ${one.label}`, Math.max(0, inner - one.key.length - 2))}
+          </Text>
         </Text>,
       );
     }
@@ -132,7 +137,7 @@ export function Frame(props: FrameProps): React.JSX.Element {
         <Text key={line.key} {...(current ? { backgroundColor: "#231d3a", bold: true } : {})}>
           {current ? "▌" : gutter ? "" : ""}
           {cells(line.cells, body - (current ? 1 : 0))}
-          {gutter ? <Text color="gray">{bar[at] ?? " "}</Text> : null}
+          {gutter ? <Text {...ink(CHROME.dim)}>{bar[at] ?? " "}</Text> : null}
         </Text>,
       );
     });
@@ -156,9 +161,9 @@ export function Frame(props: FrameProps): React.JSX.Element {
       flexShrink={0}
       overflow="hidden"
     >
-      <Text color="gray">
+      <Text {...ink(CHROME.dim)}>
         {props.number === undefined ? null : (
-          <Text {...(CHROME.accent === undefined ? {} : { color: CHROME.accent })}>{props.number} </Text>
+          <Text {...ink(CHROME.accent)}>{props.number} </Text>
         )}
         {fit(props.title, inner - (props.number === undefined ? 0 : 2)).trimEnd()}
       </Text>
@@ -199,11 +204,11 @@ export function StatusBar(props: {
   const gap = Math.max(1, props.width - name.length - shown.length - right.length - 3);
   return (
     <Text
-      {...(CHROME.barBg === undefined ? {} : { backgroundColor: CHROME.barBg })}
-      {...(CHROME.barFg === undefined ? {} : { color: CHROME.barFg })}
+      {...inkBg(CHROME.barBg)}
+      {...ink(CHROME.barFg)}
     >
       {" "}
-      <Text {...(CHROME.accent === undefined ? {} : { color: CHROME.accent })}>{name}</Text>
+      <Text {...ink(CHROME.accent)}>{name}</Text>
       {shown === "" ? "" : ` ${shown}`}
       {" ".repeat(gap)}
       {right}{" "}
@@ -231,18 +236,23 @@ export function Empty(props: {
     </Text>,
     <Text key="h-gap"> </Text>,
     ...props.sentences.map((one, at) => (
-      <Text key={`s${at}`} color="gray">
+      <Text key={`s${at}`} {...ink(CHROME.dim)}>
         {fit(one, inner)}
       </Text>
     )),
     <Text key="s-gap"> </Text>,
     ...props.actions.map((one) => (
       <Text key={one.key}>
-        <Text {...(CHROME.accent === undefined ? {} : { backgroundColor: CHROME.accent })} color="black">
+        <Text
+          {...inkBg(CHROME.accent)}
+          {...ink(CHROME.accentInk)}
+        >
           {` ${one.key} `}
         </Text>
-        <Text color="cyan">{`  ${one.label}`}</Text>
-        {one.hint === undefined ? null : <Text color="gray">{`  ${one.hint}`}</Text>}
+        <Text {...(CHROME.fg2 === undefined ? {} : { color: CHROME.fg2 })}>{`  ${one.label}`}</Text>
+        {one.hint === undefined ? null : (
+          <Text {...ink(CHROME.dim)}>{`  ${one.hint}`}</Text>
+        )}
       </Text>
     )),
   ];
@@ -267,28 +277,40 @@ export function RailStrip(props: {
 }): React.JSX.Element {
   return (
     <Text>
-      {props.more.left ? <Text color="gray">‹</Text> : " "}
+      {props.more.left ? (
+        <Text {...ink(CHROME.dim)}>‹</Text>
+      ) : (
+        " "
+      )}
       {props.entries.map((one) => (
         <Text key={one.screen}>
           <Text
             bold={one.current}
-            {...(one.current && CHROME.accent !== undefined ? { color: CHROME.accent } : { color: "gray" })}
+            {...(one.current
+              ? CHROME.brand === undefined
+                ? {}
+                : { color: CHROME.brand }
+              : CHROME.dim === undefined
+                ? {}
+                : { color: CHROME.dim })}
           >
             {one.key}
           </Text>
           <Text
             bold={one.current}
             {...(one.current
-              ? CHROME.accent === undefined
+              ? CHROME.brand === undefined
                 ? {}
-                : { color: CHROME.accent }
-              : { color: "gray" })}
+                : { color: CHROME.brand }
+              : CHROME.dim === undefined
+                ? {}
+                : { color: CHROME.dim })}
           >
             {` ${one.label}  `}
           </Text>
         </Text>
       ))}
-      {props.more.right ? <Text color="gray">›</Text> : ""}
+      {props.more.right ? <Text {...ink(CHROME.dim)}>›</Text> : ""}
     </Text>
   );
 }

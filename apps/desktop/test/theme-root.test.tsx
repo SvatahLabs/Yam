@@ -28,13 +28,16 @@ import type { AppBridge } from "../src/renderer/bridge.js";
  * the app is in for the first moment of every launch — and the moment `Starting`
  * is on screen. That is the frame this file is about.
  */
-function stubBridge(theme: "light" | "dark" = "dark"): void {
+function stubBridge(theme: "light" | "dark" = "dark", stored?: "system" | "light" | "dark"): void {
   const never = () => (): void => undefined;
   const bridge = {
     openProject: async () => ({ url: "", project: "", token: "" }),
     serviceInfo: async () => null,
     pickFile: async () => null,
-    preferences: async () => ({ recentProjects: [] }),
+    preferences: async () => ({
+      recentProjects: [],
+      ...(stored === undefined ? {} : { theme: stored }),
+    }),
     onServiceLog: never,
     onTheme: (listener: (next: "light" | "dark") => void) => {
       listener(theme);
@@ -43,6 +46,20 @@ function stubBridge(theme: "light" | "dark" = "dark"): void {
     onServiceOpened: never,
   } as unknown as AppBridge;
   Object.defineProperty(window, "yam", { value: bridge, configurable: true, writable: true });
+}
+
+/** jsdom answers no media query at all unless one is installed. */
+function stubMedia(dark: boolean): void {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: (query: string) => ({
+      matches: query.includes("dark") ? dark : !dark,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    }),
+  });
 }
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -65,9 +82,47 @@ describe("the appearance is on the document root", () => {
     stubBridge();
     render(<App />);
     await waitFor(() => {
+      expect(document.documentElement.classList.contains("sv-root")).toBe(true);
+    });
+  });
+
+  /*
+   * `EX-02`. This assertion used to read `toBe("dark")`, and that was the
+   * defect written down: with nothing stored, the app declared itself dark on
+   * every machine. `system` is the *absence* of the attribute, because
+   * `tokens.css` decides it with `prefers-color-scheme` and a stylesheet cannot
+   * ask the machine on an attribute's behalf.
+   */
+  it("leaves the root unmarked when nobody has chosen, so the machine decides", async () => {
+    stubBridge();
+    render(<App />);
+    await waitFor(() => {
+      expect(document.documentElement.classList.contains("sv-root")).toBe(true);
+    });
+    expect(document.documentElement.getAttribute("data-theme")).toBeNull();
+  });
+
+  it("writes a stated choice to the root, where it overrides the machine", async () => {
+    stubMedia(true);
+    stubBridge("dark", "light");
+    render(<App />);
+    await waitFor(() => {
+      expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+    });
+  });
+
+  it("goes back to unmarked when the choice returns to system", async () => {
+    stubBridge("dark", "dark");
+    const { unmount } = render(<App />);
+    await waitFor(() => {
       expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
     });
-    expect(document.documentElement.classList.contains("sv-root")).toBe(true);
+    unmount();
+    stubBridge("dark", "system");
+    render(<App />);
+    await waitFor(() => {
+      expect(document.documentElement.getAttribute("data-theme")).toBeNull();
+    });
   });
 
   it("puts the starting screen inside it", async () => {

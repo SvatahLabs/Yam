@@ -2,14 +2,24 @@
  * `@svatah/yam-ui-tokens` — the design tokens (T9.2, REQ-ADE-12, LLD §13.7).
  *
  * > Dark-first with a light theme, IBM Plex Sans and IBM Plex Mono (OFL), one
- * > lavender accent for chrome and focus, five status colours (pass, fail, skip,
+ * > accent for chrome and focus, five status colours (pass, fail, skip,
  * > healed, abort/warn/unverified, plus running/info) that never appear without
  * > a word or glyph beside them, 13 px text, 28 px controls, 4 px radii, 7 px
  * > row padding. Tokens are the seed in `docs/spec/design/base.css`.
  *
- * The values below are that file's, transcribed once. They are TypeScript
- * rather than CSS because three things need them and only one of them is a
- * stylesheet:
+ * ## The values are the product's own site (`EX-01`)
+ *
+ * They used to be lavender on blue-grey — `#b8a1ff` on `#0f1216` — while
+ * <https://yam.svatah.com> was green on warm paper. That is two opinions about
+ * what colour the product is, and a product's own site is its brand, so the
+ * site's values win. `packages/ui-tokens/test/brand.test.ts` reads the site's
+ * stylesheet and fails when the two drift.
+ *
+ * What is *not* the site's is derived and says so at the line: the site is a
+ * document and has three neutrals, an application is dense and needs six.
+ *
+ * They are TypeScript rather than CSS because three things need them and only
+ * one of them is a stylesheet:
  *
  *   * `tokens.css` — generated from here by `scripts/write-css.mjs`, so the two
  *     cannot drift and a test can assert that the themes differ only in tokens;
@@ -43,6 +53,17 @@ export const TOKEN_NAMES = [
   "accent",
   "accent-ink",
   "accent-soft",
+  /**
+   * The brand (`EX-01`).
+   *
+   * `accent` and `yam` are two roles, not two opinions: the site draws focus
+   * rings, marks and rules in `--accent` and the product's own mark, its active
+   * destination and its primary action in `--yam`. Splitting them here is what
+   * lets a renderer say which it means instead of picking a hex.
+   */
+  "yam",
+  "yam-ink",
+  "yam-soft",
   "pass",
   "fail",
   "skip",
@@ -87,32 +108,39 @@ export type Theme = "dark" | "light";
  * `[data-theme="light"]` overrides.
  */
 export const DARK: Readonly<Record<TokenName, string>> = {
-  bg0: "#0f1216",
-  bg1: "#151a20",
-  bg2: "#1b2128",
-  bg3: "#222a33",
-  line: "#262e37",
-  line2: "#313a45",
-  fg: "#e3e8ee",
-  fg2: "#b4bdc8",
-  muted: "#8b96a5",
-  dim: "#5f6a78",
-  accent: "#b8a1ff",
-  "accent-ink": "#1c1533",
-  "accent-soft": "rgba(184,161,255,0.16)",
+  bg0: "#111613",
+  bg1: "#191f1b",
+  bg2: "#1e2821",
+  /* A step the site has no name for: between its `--subtle` and its `--line`. */
+  bg3: "#263029",
+  line: "#2d3830",
+  line2: "#3b483f",
+  fg: "#e3e9e2",
+  /* Between the site's `--ink` and its `--muted`: secondary text, not a third opinion. */
+  fg2: "#c2cdc4",
+  muted: "#a2aea4",
+  /* 5.04:1 on `bg0` — the site has no fourth neutral and a 10.5 px label needs one. */
+  dim: "#7b8a80",
+  accent: "#a3b1f0",
+  "accent-ink": "#131a2c",
+  "accent-soft": "rgba(163,177,240,0.16)",
+  yam: "#7cc9ae",
+  "yam-ink": "#0c211a",
+  "yam-soft": "rgba(124,201,174,0.14)",
   pass: "#4fc48a",
   fail: "#ee6a5f",
-  skip: "#8b96a5",
+  /* `skip` is the neutral, so it follows `muted` rather than keeping a cool grey. */
+  skip: "#a2aea4",
   healed: "#56c5d0",
   abort: "#e5b04c",
   info: "#6ea8fe",
   "pass-soft": "rgba(79,196,138,0.14)",
   "fail-soft": "rgba(238,106,95,0.14)",
-  "skip-soft": "rgba(139,150,165,0.14)",
+  "skip-soft": "rgba(162,174,164,0.14)",
   "healed-soft": "rgba(86,197,208,0.14)",
   "abort-soft": "rgba(229,176,76,0.14)",
   "info-soft": "rgba(110,168,254,0.14)",
-  scrim: "rgba(10,12,16,0.62)",
+  scrim: "rgba(9,13,11,0.62)",
   /* A state change a person caused: fast enough to feel like the click. */
   "motion-quick": "120ms",
   /* One they did not: long enough to be seen arriving. */
@@ -121,49 +149,56 @@ export const DARK: Readonly<Record<TokenName, string>> = {
 };
 
 /**
- * The light theme (the `Tokens` artboard's "Light" block).
+ * The light theme (the site's `:root`).
  *
- * The accent darkens to `#6b4fd8` and every status colour with it: a lavender
- * that reads on `#0f1216` does not read on `#ffffff`, and "one accent" is a
- * statement about the *role* rather than about the hex.
+ * Every brand and status colour darkens: a value that reads on `#111613` does
+ * not read on `#fafbf9`, and "one accent" is a statement about the *role*
+ * rather than about the hex. The site holds the same position — its `--yam` is
+ * `#7cc9ae` in the dark and `#357862` in the light.
  */
 export const LIGHT: Readonly<Record<TokenName, string>> = {
-  bg0: "#ffffff",
-  bg1: "#f7f8fa",
-  bg2: "#eef1f5",
-  bg3: "#e4e8ee",
-  line: "#d8dde5",
-  line2: "#c5ccd6",
-  fg: "#171b21",
-  fg2: "#3c4553",
-  muted: "#5b6472",
   /*
-   * `#868f9e`, not the artboard's `#8b96a5` (a deviation, recorded in
-   * `docs/spec/progress/phase-9.md`).
-   *
-   * The mockup's light `dim` is 2.998:1 against `#ffffff` — three thousandths
-   * under WCAG AA's 3:1 for a large or bold glyph, and well under the 4.5:1 a
-   * 10.5 px section label would want. `scripts/audit-sheet.mjs` measures it and
-   * fails, which is what the audit is for. Darkened by five units of lightness
-   * to 3.26:1; on the dark theme `dim` is unchanged.
+   * `bg0` is the page and `bg1` is what is raised above it, in both themes. On
+   * the site that is warm paper with white cards, which is why the light ramp
+   * goes up at `bg1` and back down at `bg2` — the ramp is distance from the
+   * page, not a monotonic lightness.
    */
-  dim: "#868f9e",
-  accent: "#6b4fd8",
+  bg0: "#fafbf9",
+  bg1: "#ffffff",
+  bg2: "#f0f3ef",
+  bg3: "#e7ebe5",
+  line: "#e0e5df",
+  line2: "#ccd4cb",
+  fg: "#253029",
+  fg2: "#41504a",
+  muted: "#626a65",
+  /*
+   * `#828b85` — 3.38:1 on `bg0` and 3.51:1 on `bg1`.
+   *
+   * The same reasoning as the palette it replaces: a 10.5 px section label at
+   * 3:1 exactly is one rounding away from failing, and `scripts/audit-sheet.mjs`
+   * measures it. The site has no fourth neutral to copy, so this is derived.
+   */
+  dim: "#828b85",
+  accent: "#586ec2",
   "accent-ink": "#ffffff",
-  "accent-soft": "rgba(107,79,216,0.12)",
+  "accent-soft": "rgba(88,110,194,0.12)",
+  yam: "#357862",
+  "yam-ink": "#ffffff",
+  "yam-soft": "rgba(53,120,98,0.10)",
   pass: "#1f7a45",
   fail: "#b3261e",
-  skip: "#5b6472",
+  skip: "#626a65",
   healed: "#0f7f8a",
   abort: "#8a5f10",
   info: "#2f5bd7",
   "pass-soft": "rgba(31,122,69,0.12)",
   "fail-soft": "rgba(179,38,30,0.12)",
-  "skip-soft": "rgba(91,100,114,0.12)",
+  "skip-soft": "rgba(98,106,101,0.12)",
   "healed-soft": "rgba(15,127,138,0.12)",
   "abort-soft": "rgba(138,95,16,0.12)",
   "info-soft": "rgba(47,91,215,0.12)",
-  scrim: "rgba(23,27,33,0.38)",
+  scrim: "rgba(17,22,19,0.38)",
   /* A state change a person caused: fast enough to feel like the click. */
   "motion-quick": "120ms",
   /* One they did not: long enough to be seen arriving. */
@@ -275,17 +310,34 @@ export const FONT_FILES = [
   { family: "IBM Plex Mono", file: "IBMPlexMono-500-latin.woff2", weight: "500" },
 ] as const;
 
-/** `--bg0: #0f1216; …` for one theme, in `TOKEN_NAMES` order. */
+/** `--bg0: #111613; …` for one theme, in `TOKEN_NAMES` order. */
 export function declarations(theme: Theme): string {
   const table = THEMES[theme];
   return TOKEN_NAMES.map((name) => `  --${name}: ${table[name]};`).join("\n");
 }
 
 /**
- * The whole stylesheet: the faces, `:root` (dark), and the light override.
+ * The whole stylesheet: the faces, the two themes, and how a machine chooses
+ * between them (`EX-02`).
  *
- * Generated into `tokens.css` at build time and committed, so a renderer can
- * import a file and a test can read one.
+ * Four blocks, in this order, and the order is the requirement:
+ *
+ * 1. `:root` — the dark theme, and the metrics. The floor: a browser with no
+ *    media support and a document with no attribute still gets a whole palette.
+ * 2. `@media (prefers-color-scheme: light)` — the machine's preference. This is
+ *    what was missing: the sheet had the light theme only behind an attribute,
+ *    so somebody on a light Mac who had never opened the settings got the dark
+ *    application and no way to know there was another.
+ * 3. `[data-theme="dark"]` and `[data-theme="light"]` — a person's choice,
+ *    written after the media query so it wins it.
+ *
+ * "System" is therefore not a third palette: it is the *absence* of the
+ * attribute, which is why `theme.ts` in the renderer removes it rather than
+ * setting it to `system`.
+ *
+ * `color-scheme` rides along so that the scrollbars, the caret and any native
+ * control the application borrows follow the same decision. Without it a dark
+ * application scrolls with a white scrollbar.
  */
 export function stylesheet(): string {
   const faces = FONT_FILES.map(
@@ -329,18 +381,38 @@ export function stylesheet(): string {
     " * GENERATED FILE — do not edit. `pnpm --filter @svatah/yam-ui-tokens build` writes it",
     " * from `src/index.ts`, which is the one place the values live (T9.2, REQ-ADE-12).",
     " *",
-    " * Dark-first: `:root` is the dark theme and `[data-theme=\"light\"]` overrides every",
-    " * token and nothing else. A component that branched on the theme would break that",
-    " * promise; `packages/ui/test/theme.test.ts` is what holds it.",
+    " * Dark-first: `:root` is the dark theme. `prefers-color-scheme: light` is what a",
+    " * machine that has chosen gets, and `[data-theme]` is what a person who has chosen",
+    " * gets — written last, so it wins the media query (EX-02). A component that branched",
+    " * on the theme would break the promise that the two differ only in tokens;",
+    " * `packages/ui/test/theme.test.ts` is what holds it.",
     " */",
     faces,
     "",
     ":root {",
+    "  color-scheme: dark light;",
     declarations("dark"),
     metrics,
     "}",
     "",
+    "/* The machine's preference, for anybody who has not stated one of their own. */",
+    "@media (prefers-color-scheme: light) {",
+    "  :root {",
+    `${declarations("light")
+      .split("\n")
+      .map((line) => `  ${line}`)
+      .join("\n")}`,
+    "  }",
+    "}",
+    "",
+    "/* A stated choice, after the media query so that it overrides it. */",
+    '[data-theme="dark"] {',
+    "  color-scheme: dark;",
+    declarations("dark"),
+    "}",
+    "",
     '[data-theme="light"] {',
+    "  color-scheme: light;",
     declarations("light"),
     "}",
     "",
@@ -348,11 +420,13 @@ export function stylesheet(): string {
 }
 
 export {
+  appearanceOf,
   capabilitiesOf,
   depthFor,
   foreground,
   tone,
   hexOf,
+  tokenHex,
   ansi256Of,
   rgbOf,
   RESET,

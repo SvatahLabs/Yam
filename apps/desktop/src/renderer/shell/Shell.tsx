@@ -36,7 +36,16 @@ import {
   type ScreenParams,
   type ScreenStateBase,
 } from "@svatah/yam-screens";
-import { Alert, AskOverlay, Button, CommandPalette, Kbd, RailItem, type PaletteRow } from "@svatah/yam-ui";
+import {
+  Alert,
+  AskOverlay,
+  Button,
+  Chooser,
+  CommandPalette,
+  Kbd,
+  RailItem,
+  type PaletteRow,
+} from "@svatah/yam-ui";
 import {
   applyHealEvent,
   applyRecordEvent,
@@ -60,6 +69,7 @@ import { SurfacesScreen, SurfacesInspector } from "./Surfaces.js";
 import type { ServiceClient } from "../client.js";
 import { a11yVariant } from "../a11y-variant.js";
 import { bridge } from "../bridge.js";
+import type { ThemeControl } from "../theme.js";
 import { FlowsInspector, FlowsScreen } from "./Flows.js";
 import { RunInspector, RunScreen } from "./Run.js";
 import { RunsInspector, RunsScreen } from "./Runs.js";
@@ -104,6 +114,13 @@ export interface ShellProps {
    * here rather than being the frame the whole application lives in.
    */
   readonly onOpenProject?: (directory: string) => void | Promise<void>;
+  /**
+   * The appearance, and how to change it (`EX-02`).
+   *
+   * Held by `App` because it is set on `<html>` and every screen — including the
+   * two rendered outside this component — lives under it.
+   */
+  readonly theme?: ThemeControl;
 }
 
 type Showing = ScreenId;
@@ -668,6 +685,28 @@ export function Shell(props: ShellProps): React.JSX.Element {
           accelerator="⌘K"
           onPress={() => setPaletteOpen(true)}
         />
+        {/*
+          Light, dark or follow the machine (`EX-02`).
+
+          A preference the app has stored since it had preferences and never
+          offered: `preferences.theme` was written by nothing, so "system" was
+          not a default anybody had chosen, it was the only value there had ever
+          been. Three named options rather than a cycling button, because a
+          button that changes on every press cannot say what the other two are.
+        */}
+        {props.theme === undefined ? null : (
+          <Chooser
+            id="appearance"
+            label="Appearance"
+            value={props.theme.choice}
+            options={[
+              { value: "system", label: "System" },
+              { value: "light", label: "Light" },
+              { value: "dark", label: "Dark" },
+            ]}
+            onChange={(value) => props.theme?.choose(value as "system" | "light" | "dark")}
+          />
+        )}
         <span className="sv-chip" id="service-chip">
           <span className="sv-dot sv-tone-pass" aria-hidden="true" />
           service {props.serviceUrl.replace(/^https?:\/\//, "")}

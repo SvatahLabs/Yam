@@ -3,8 +3,8 @@
 .sw { display:grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap:8px; }
 .sw div { height:56px; border-radius:6px; border:1px solid var(--line); padding:6px 8px; font-size:10.5px; font-family:var(--mono); display:flex; flex-direction:column; justify-content:flex-end; }
 .h { font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--dim); margin:0 0 10px; }
-.light { background:#f7f8fa; color:#171b21; border:1px solid #d8dde5; border-radius:8px; padding:14px; }
-.light .sw div { border-color:#d8dde5; }
+.light { background:#fafbf9; color:#253029; border:1px solid #e0e5df; border-radius:8px; padding:14px; }
+.light .sw div { border-color:#e0e5df; }
 .type div { display:flex; align-items:baseline; gap:16px; padding:4px 0; border-bottom:1px solid var(--line); }
 .type span:last-child { color:var(--dim); font-family:var(--mono); font-size:11px; margin-left:auto; }
 .comp { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
@@ -17,20 +17,20 @@
 <div>
   <p class="h">Dark · surfaces and text</p>
   <div class="sw">
-    <div style="background:#0f1216">bg0<br>#0f1216</div><div style="background:#151a20">bg1<br>#151a20</div><div style="background:#1b2128">bg2<br>#1b2128</div><div style="background:#222a33">bg3<br>#222a33</div><div style="background:#262e37">line<br>#262e37</div><div style="background:#313a45">line2<br>#313a45</div>
-    <div style="background:#e3e8ee;color:#0f1216">fg<br>#e3e8ee</div><div style="background:#b4bdc8;color:#0f1216">fg2<br>#b4bdc8</div><div style="background:#8b96a5;color:#0f1216">muted<br>#8b96a5</div><div style="background:#5f6a78;color:#0f1216">dim<br>#5f6a78</div><div style="background:#b8a1ff;color:#1c1533">accent<br>#b8a1ff</div><div style="background:rgba(184,161,255,0.16);color:#b8a1ff">accent-soft</div>
+    <div style="background:#111613">bg0<br>#111613</div><div style="background:#191f1b">bg1<br>#191f1b</div><div style="background:#1e2821">bg2<br>#1e2821</div><div style="background:#263029">bg3<br>#263029</div><div style="background:#2d3830">line<br>#2d3830</div><div style="background:#3b483f">line2<br>#3b483f</div>
+    <div style="background:#e3e9e2;color:#111613">fg<br>#e3e9e2</div><div style="background:#c2cdc4;color:#111613">fg2<br>#c2cdc4</div><div style="background:#a2aea4;color:#111613">muted<br>#a2aea4</div><div style="background:#7b8a80;color:#111613">dim<br>#7b8a80</div><div style="background:#a3b1f0;color:#131a2c">accent<br>#a3b1f0</div><div style="background:rgba(184,161,255,0.16);color:#a3b1f0">accent-soft</div>
   </div>
   <p class="h" style="margin-top:18px">Status · the only colours that mean something</p>
   <div class="sw" style="grid-template-columns:repeat(6,minmax(0,1fr))">
-    <div style="background:#4fc48a;color:#0f1216">pass</div><div style="background:#ee6a5f;color:#0f1216">fail</div><div style="background:#8b96a5;color:#0f1216">skip</div><div style="background:#56c5d0;color:#0f1216">healed</div><div style="background:#e5b04c;color:#0f1216">abort · warn · unverified</div><div style="background:#6ea8fe;color:#0f1216">running · info</div>
+    <div style="background:#4fc48a;color:#111613">pass</div><div style="background:#ee6a5f;color:#111613">fail</div><div style="background:#a2aea4;color:#111613">skip</div><div style="background:#56c5d0;color:#111613">healed</div><div style="background:#e5b04c;color:#111613">abort · warn · unverified</div><div style="background:#6ea8fe;color:#111613">running · info</div>
   </div>
   <p class="h" style="margin-top:18px">Light</p>
   <div class="light">
     <div class="sw">
-      <div style="background:#ffffff">bg0<br>#ffffff</div><div style="background:#f7f8fa">bg1<br>#f7f8fa</div><div style="background:#eef1f5">bg2<br>#eef1f5</div><div style="background:#e4e8ee">bg3<br>#e4e8ee</div><div style="background:#d8dde5">line<br>#d8dde5</div><div style="background:#c5ccd6">line2<br>#c5ccd6</div>
-      <div style="background:#171b21;color:#fff">fg<br>#171b21</div><div style="background:#3c4553;color:#fff">fg2<br>#3c4553</div><div style="background:#5b6472;color:#fff">muted<br>#5b6472</div><div style="background:#8b96a5;color:#fff">dim<br>#8b96a5</div><div style="background:#6b4fd8;color:#fff">accent<br>#6b4fd8</div><div style="background:rgba(107,79,216,0.12);color:#4b34a8">accent-soft</div>
+      <div style="background:#ffffff">bg0<br>#ffffff</div><div style="background:#fafbf9">bg1<br>#fafbf9</div><div style="background:#f0f3ef">bg2<br>#f0f3ef</div><div style="background:#e7ebe5">bg3<br>#e7ebe5</div><div style="background:#e0e5df">line<br>#e0e5df</div><div style="background:#ccd4cb">line2<br>#ccd4cb</div>
+      <div style="background:#253029;color:#fff">fg<br>#253029</div><div style="background:#41504a;color:#fff">fg2<br>#41504a</div><div style="background:#626a65;color:#fff">muted<br>#626a65</div><div style="background:#a2aea4;color:#fff">dim<br>#a2aea4</div><div style="background:#586ec2;color:#fff">accent<br>#586ec2</div><div style="background:rgba(107,79,216,0.12);color:#3f4f9a">accent-soft</div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:10px;font-size:11px;font-family:var(--mono)"><span style="color:#1f7a45">● pass #1f7a45</span><span style="color:#b3261e">● fail #b3261e</span><span style="color:#5b6472">● skip</span><span style="color:#0f7f8a">● healed #0f7f8a</span><span style="color:#8a5f10">● abort #8a5f10</span><span style="color:#2f5bd7">● running #2f5bd7</span></div>
+    <div style="display:flex;gap:8px;margin-top:10px;font-size:11px;font-family:var(--mono)"><span style="color:#1f7a45">● pass #1f7a45</span><span style="color:#b3261e">● fail #b3261e</span><span style="color:#626a65">● skip</span><span style="color:#0f7f8a">● healed #0f7f8a</span><span style="color:#8a5f10">● abort #8a5f10</span><span style="color:#2f5bd7">● running #2f5bd7</span></div>
   </div>
 </div>
 <div>

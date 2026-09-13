@@ -1,0 +1,24 @@
+{
+  "readAt": "2026-09-12",
+  "source": "http://localhost:3102/styles.css",
+  "light": {
+    "yam": "#357862",
+    "accent": "#586ec2",
+    "ink": "#253029",
+    "muted": "#626a65",
+    "line": "#e0e5df",
+    "paper": "#ffffff",
+    "subtle": "#f0f3ef",
+    "bg": "#fafbf9"
+  },
+  "dark": {
+    "yam": "#7cc9ae",
+    "accent": "#a3b1f0",
+    "ink": "#e3e9e2",
+    "muted": "#a2aea4",
+    "line": "#2d3830",
+    "paper": "#191f1b",
+    "subtle": "#1e2821",
+    "bg": "#111613"
+  }
+}

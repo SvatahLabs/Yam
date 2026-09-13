@@ -1,18 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/*
+ * The palette is the product's own site (`EX-01`, E0.1).
+ *
+ * These values are `@svatah/yam-ui-tokens`' dark table, which is the site's own
+ * `:root` plus the neutrals an application needs and a document does not.
+ * `packages/ui-tokens/test/brand.test.ts` reads the site and fails when the two
+ * drift; this file is the seed the artboards are drawn from.
+ */
 :root {
-  --bg0: #0f1216; --bg1: #151a20; --bg2: #1b2128; --bg3: #222a33;
-  --line: #262e37; --line2: #313a45;
-  --fg: #e3e8ee; --fg2: #b4bdc8; --muted: #8b96a5; --dim: #5f6a78;
-  --accent: #b8a1ff; --accent-ink: #1c1533; --accent-soft: rgba(184,161,255,0.16);
-  --pass: #4fc48a; --fail: #ee6a5f; --skip: #8b96a5; --healed: #56c5d0; --abort: #e5b04c; --info: #6ea8fe;
-  --pass-soft: rgba(79,196,138,0.14); --fail-soft: rgba(238,106,95,0.14); --healed-soft: rgba(86,197,208,0.14); --abort-soft: rgba(229,176,76,0.14); --skip-soft: rgba(139,150,165,0.14); --info-soft: rgba(110,168,254,0.14);
+  --bg0: #111613; --bg1: #191f1b; --bg2: #1e2821; --bg3: #263029;
+  --line: #2d3830; --line2: #3b483f;
+  --fg: #e3e9e2; --fg2: #c2cdc4; --muted: #a2aea4; --dim: #7b8a80;
+  --accent: #a3b1f0; --accent-ink: #131a2c; --accent-soft: rgba(163,177,240,0.16);
+  --yam: #7cc9ae; --yam-ink: #0c211a; --yam-soft: rgba(124,201,174,0.14);
+  --pass: #4fc48a; --fail: #ee6a5f; --skip: #a2aea4; --healed: #56c5d0; --abort: #e5b04c; --info: #6ea8fe;
+  --pass-soft: rgba(79,196,138,0.14); --fail-soft: rgba(238,106,95,0.14); --healed-soft: rgba(86,197,208,0.14); --abort-soft: rgba(229,176,76,0.14); --skip-soft: rgba(162,174,164,0.14); --info-soft: rgba(110,168,254,0.14);
   --r: 4px; --r2: 6px;
   --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg0); color: var(--fg); font-family: var(--sans); font-size: 13px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
-a { color: var(--accent); text-decoration: none; } a:hover { color: #d2c3ff; text-decoration: underline; }
+a { color: var(--accent); text-decoration: none; } a:hover { color: #c3cdf6; text-decoration: underline; }
 .app { width: 1440px; height: 900px; display: grid; grid-template-columns: 220px minmax(0, 1fr) 360px; grid-template-rows: 44px minmax(0, 1fr) 28px; background: var(--bg0); overflow: hidden; }
 .app.no-inspector { grid-template-columns: 220px minmax(0, 1fr); }
 .topbar { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 16px; border-bottom: 1px solid var(--line); background: var(--bg1); }
@@ -23,7 +32,7 @@ a { color: var(--accent); text-decoration: none; } a:hover { color: #d2c3ff; tex
  * themes. `docs/spec/design` is rendered from this directory, so the path is
  * relative to it.
  */
-.brand .mark { width: 18px; height: 18px; background: var(--accent); display: inline-block;
+.brand .mark { width: 18px; height: 18px; background: var(--yam); display: inline-block;
   -webkit-mask: url("../../../packages/ui/brand/yam-white.svg") center / contain no-repeat;
   mask: url("../../../packages/ui/brand/yam-white.svg") center / contain no-repeat; }
 .crumb { color: var(--muted); display: flex; align-items: center; gap: 6px; }

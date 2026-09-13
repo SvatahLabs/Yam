@@ -1,30 +1,30 @@
 <div class="tui-board">
 <style>
 .tui-board { width:960px; background:#0b0d10; padding:14px; font-family:var(--mono); }
-.term { background:#0f1216; color:#e3e8ee; font-size:12.5px; line-height:18px; position:relative; border:1px solid #262e37; overflow:hidden; }
+.term { background:#111613; color:#e3e9e2; font-size:12.5px; line-height:18px; position:relative; border:1px solid #2d3830; overflow:hidden; }
 .term.wide { width:120ch; height:720px; }
 .term.narrow { width:80ch; height:432px; margin-top:22px; }
 .grid { display:grid; grid-template-columns:30ch 56ch 34ch; grid-template-rows:18px 1fr 216px 18px; height:720px; }
-.sbar { align-items:center; height:18px; grid-column:1/-1; display:flex; gap:2ch; background:#1b2128; color:#8b96a5; padding:0 1ch; white-space:pre; }
-.sbar b { color:#b8a1ff; font-weight:500; }
-.reg { border:1px solid #262e37; margin:9px 1px 2px; padding:3px 0; position:relative; }
-.reg .ttl { position:absolute; top:-9px; left:2ch; background:#0f1216; padding:0 1ch; color:#5f6a78; font-size:11px; }
+.sbar { align-items:center; height:18px; grid-column:1/-1; display:flex; gap:2ch; background:#1e2821; color:#a2aea4; padding:0 1ch; white-space:pre; }
+.sbar b { color:#a3b1f0; font-weight:500; }
+.reg { border:1px solid #2d3830; margin:9px 1px 2px; padding:3px 0; position:relative; }
+.reg .ttl { position:absolute; top:-9px; left:2ch; background:#111613; padding:0 1ch; color:#7b8a80; font-size:11px; }
 .r { padding:0 1ch; white-space:pre; overflow:hidden; }
-.r.cur { background:#231d3a; box-shadow:inset 2px 0 0 #b8a1ff; color:#fff; }
-.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#8b96a5} .d{color:#5f6a78} .a{color:#b8a1ff}
-.foot { grid-column:1/-1; display:flex; gap:2ch; color:#5f6a78; padding:0 1ch; white-space:pre; }
-.foot b { color:#b4bdc8; font-weight:500; }
+.r.cur { background:#232d3f; box-shadow:inset 2px 0 0 #a3b1f0; color:#fff; }
+.g{color:#4fc48a;font-family:inherit;font-size:inherit;text-align:left} .b{color:#ee6a5f} .y{color:#e5b04c} .c{color:#56c5d0} .m{color:#a2aea4} .d{color:#7b8a80} .a{color:#a3b1f0}
+.foot { grid-column:1/-1; display:flex; gap:2ch; color:#7b8a80; padding:0 1ch; white-space:pre; }
+.foot b { color:#c2cdc4; font-weight:500; }
 .scrim { position:absolute; inset:0; background:rgba(10,12,16,0.62); }
-.ov { position:absolute; left:50%; transform:translateX(-50%); top:96px; width:74ch; background:#151a20; border:1px solid #b8a1ff; box-shadow:0 18px 50px rgba(0,0,0,0.65); padding:4px 0; }
-.ov .q { padding:2px 1ch 6px; border-bottom:1px solid #262e37; margin-bottom:4px; white-space:pre; }
-.ov .q i { border-left:1px solid #e3e8ee; margin-left:1px; font-style:normal; }
-.ov .hint { padding:6px 1ch 2px; border-top:1px solid #262e37; margin-top:4px; color:#5f6a78; white-space:pre; }
-.hit { color:#b8a1ff; font-weight:500; text-decoration:underline; }
-.off { color:#5f6a78; }
-.cap { width:120ch; color:#8b96a5; font-size:11.5px; line-height:17px; padding-top:8px; }
-.cap b { color:#b8a1ff; font-weight:500; }
+.ov { position:absolute; left:50%; transform:translateX(-50%); top:96px; width:74ch; background:#191f1b; border:1px solid #a3b1f0; box-shadow:0 18px 50px rgba(0,0,0,0.65); padding:4px 0; }
+.ov .q { padding:2px 1ch 6px; border-bottom:1px solid #2d3830; margin-bottom:4px; white-space:pre; }
+.ov .q i { border-left:1px solid #e3e9e2; margin-left:1px; font-style:normal; }
+.ov .hint { padding:6px 1ch 2px; border-top:1px solid #2d3830; margin-top:4px; color:#7b8a80; white-space:pre; }
+.hit { color:#a3b1f0; font-weight:500; text-decoration:underline; }
+.off { color:#7b8a80; }
+.cap { width:120ch; color:#a2aea4; font-size:11.5px; line-height:17px; padding-top:8px; }
+.cap b { color:#a3b1f0; font-weight:500; }
 .hgrid { display:grid; grid-template-columns:1fr; grid-template-rows:18px 1fr 18px; height:432px; }
-.hov { position:absolute; left:2ch; right:2ch; top:36px; background:#151a20; border:1px solid #b8a1ff; padding:4px 0; }
+.hov { position:absolute; left:2ch; right:2ch; top:36px; background:#191f1b; border:1px solid #a3b1f0; padding:4px 0; }
 .col2 { display:grid; grid-template-columns:1fr 1fr; }
 </style>
 

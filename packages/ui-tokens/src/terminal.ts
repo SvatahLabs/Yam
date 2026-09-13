@@ -10,7 +10,7 @@
  * No `process` and no `ink`: capability detection takes what it is given, so a
  * test can state a terminal rather than being run in one.
  */
-import { STATUS, type StatusTone } from "./index.js";
+import { STATUS, THEMES, type StatusTone, type Theme } from "./index.js";
 
 /** What a terminal can do, as far as it will admit. */
 export interface Capabilities {
@@ -45,6 +45,42 @@ export function capabilitiesOf(
   };
 }
 
+
+/**
+ * Which theme a terminal is on (`EX-02`).
+ *
+ * A terminal has no `prefers-color-scheme`, and for a long time that was taken
+ * to mean it has no preference — so the cockpit drew the dark table on a light
+ * terminal and the status words came out pale on white.
+ *
+ * It does state one, in two ways, and both are read here:
+ *
+ *   * `YAM_THEME` — a person saying it outright, which is the cockpit's
+ *     equivalent of `[data-theme]` and beats everything;
+ *   * `COLORFGBG` — the terminal saying what its background is. Set by xterm,
+ *     rxvt, Konsole and iTerm2, as `fg;bg` or `fg;default;bg`. The convention is
+ *     the one vim reads: a background of 0–6 or 8 is dark, anything else light.
+ *
+ * Dark when neither says anything, because the tokens are dark-first and a
+ * guess that matches the default is the cheapest guess to be wrong about.
+ */
+export function appearanceOf(env: Record<string, string | undefined>): Theme {
+  const asked = (env["YAM_THEME"] ?? "").toLowerCase();
+  if (asked === "light" || asked === "dark") return asked;
+
+  const fgbg = env["COLORFGBG"];
+  if (fgbg !== undefined && fgbg !== "") {
+    const background = Number.parseInt(fgbg.split(";").pop() ?? "", 10);
+    if (Number.isFinite(background)) {
+      return (background >= 0 && background <= 6) || background === 8 ? "dark" : "light";
+    }
+  }
+  return "dark";
+}
+
+/** A token's value, for the theme the terminal is on. */
+export const tokenHex = (name: keyof (typeof THEMES)["dark"], appearance: Theme = "dark"): string =>
+  THEMES[appearance][name];
 
 /** How much colour to send. */
 export type ColourDepth = "truecolor" | "ansi256" | "none";
@@ -108,11 +144,23 @@ export const RESET = "\u001b[39m";
  * `REQ-ADE-12` forbids, and a function that took only a colour would make it
  * easy to write.
  */
-export function tone(what: StatusTone, text: string, depth: ColourDepth): string {
+export function tone(
+  what: StatusTone,
+  text: string,
+  depth: ColourDepth,
+  appearance: Theme = "dark",
+): string {
   if (depth === "none" || text === "") return text;
-  return `${foreground(STATUS[what].hex, depth)}${text}${RESET}`;
+  return `${foreground(hexOf(what, appearance), depth)}${text}${RESET}`;
 }
 
-/** The hexadecimal a tone is, for a renderer that colours its own way. */
-export const hexOf = (what: StatusTone): string => STATUS[what].hex;
+/**
+ * The hexadecimal a tone is, for a renderer that colours its own way.
+ *
+ * `STATUS` records the dark table's value, because a constant can only hold one.
+ * The theme is the argument, and it defaults to dark so that every caller
+ * written before there was a choice still means what it meant.
+ */
+export const hexOf = (what: StatusTone, appearance: Theme = "dark"): string =>
+  appearance === "dark" ? STATUS[what].hex : THEMES[appearance][STATUS[what].token];
 

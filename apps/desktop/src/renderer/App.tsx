@@ -103,7 +103,7 @@ export function App(): React.JSX.Element {
    * It used to be `Shell`'s, which left `Starting` and `Welcome` — the first two
    * screens anybody sees — with no theme, no font and no brand mark.
    */
-  useThemeRoot();
+  const theme = useThemeRoot();
 
   const client = info === null ? undefined : new ServiceClient(info);
 
@@ -136,6 +136,7 @@ export function App(): React.JSX.Element {
 
   return (
     <Shell
+      theme={theme}
       client={client}
       project={info.project}
       projectless={info.projectless === true}
