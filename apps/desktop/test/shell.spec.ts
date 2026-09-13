@@ -43,7 +43,15 @@
  */
 import { chromium, expect, test, type Browser, type Page } from "@playwright/test";
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import { cpSync, existsSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -171,6 +179,9 @@ function packagedApp(): string | undefined {
 let app: { origin: string; child: ChildProcess };
 let project: string;
 let desktopApp: ChildProcess;
+
+/** This suite's own broker, so it shares none with the packages beside it. */
+const BROKER_STATE_DIR = join(tmpdir(), `yam-broker-desktop-${String(process.pid)}`);
 let browser: Browser;
 let page: Page;
 
@@ -297,7 +308,7 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
        * copy of the CLI staged inside its bundle. One broker per machine makes
        * that a fixture three concurrent suites share and none declares.
        */
-      YAM_BROKER_STATE_DIR: join(tmpdir(), `yam-broker-desktop-${String(process.pid)}`),
+      YAM_BROKER_STATE_DIR: BROKER_STATE_DIR,
       YAM_A11Y: "1",
       // The packaged application carries its own CLI; this points at the
       // workspace's so a rebuild is picked up without repackaging.
@@ -352,6 +363,23 @@ test.afterAll(async () => {
   // signal, and the next run of this file is what pays for it.
   await stopLeftovers();
   app?.child.kill("SIGTERM");
+  /*
+   * The broker this suite's application started, which is its own
+   * (`YAM_BROKER_STATE_DIR`) and outlives it by fifteen idle minutes otherwise.
+   *
+   * By its descriptor, not by matching a command line: `pkill -f "surface
+   * broker"` would take the one somebody has open in another terminal with it.
+   */
+  try {
+    const descriptor = join(BROKER_STATE_DIR, "broker.json");
+    if (existsSync(descriptor)) {
+      const { pid } = JSON.parse(readFileSync(descriptor, "utf8")) as { pid?: number };
+      if (typeof pid === "number") process.kill(pid, "SIGTERM");
+    }
+  } catch {
+    /* Already gone, or never started. */
+  }
+  rmSync(BROKER_STATE_DIR, { recursive: true, force: true });
   if (project !== undefined) rmSync(project, { recursive: true, force: true });
 });
 

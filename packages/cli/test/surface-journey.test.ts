@@ -12,7 +12,7 @@
  * were green. So this drives the built binary, as a person would.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { mkdtempSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -29,8 +29,22 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await app?.close();
-  // The broker outlives its commands by design; it must not outlive the suite.
-  spawnSync("pkill", ["-f", "surface broker"]);
+  /*
+   * The broker outlives its commands by design, and it must not be killed here.
+   *
+   * This was `pkill -f "surface broker"`, which matches on the **command line**
+   * and so kills every broker on the machine — the one another file in this
+   * package is mid-journey on, and the one another package's suite is using,
+   * because `pnpm -r test` runs several at once and vitest runs files in
+   * parallel within each. That is the whole of the intermittent
+   * `SESSION_NOT_FOUND`: about one full-suite run in three, some file finished
+   * and took somebody else's broker with it.
+   *
+   * The suite's own broker is reaped once, after every file, by
+   * `scripts/vitest-broker.mjs` — by the pid in its descriptor, in the state
+   * directory this package's vitest configuration named. Per file is the wrong
+   * granularity for a process that exists to outlive commands.
+   */
 });
 
 interface Ran {
@@ -70,7 +84,15 @@ describe("connect, inspect, act, verify (SF-01, SF-06)", () => {
     const dir = mkdtempSync(join(tmpdir(), "yam-surface-"));
 
     const connect = await run(dir, ["surface", "connect", "--url", app.origin, "--json"]);
-    expect(connect.code, connect.stderr).toBe(EXIT.ok);
+    /*
+     * The envelope, not only stderr.
+     *
+     * This read `expect(connect.code, connect.stderr)`, and the command's
+     * *reason* is in the envelope on stdout — so an intermittent failure showed
+     * only whatever had been written to stderr, which for three investigations
+     * was a line about the broker. The reason was on stdout the whole time.
+     */
+    expect(connect.code, `${connect.stderr}\n${JSON.stringify(connect.envelope)}`).toBe(EXIT.ok);
     expect(connect.envelope["status"]).toBe("succeeded");
     const session = String(resultOf(connect)["sessionId"]);
     expect(session).toMatch(/^s_/);

@@ -320,7 +320,7 @@ export async function dispatchConnect(
     return maybeRedact(ctx, envelope);
   } catch (err) {
     const elapsed = Date.now() - start;
-    return handleError(requestId, undefined, err, elapsed);
+    return handleError(requestId, undefined, err, elapsed, true);
   }
 }
 
@@ -951,9 +951,27 @@ function handleError(
   sessionId: string | undefined,
   err: unknown,
   elapsedMs: number,
+  /**
+   * Whether this failure happened while *opening* a session (`SF-06`).
+   *
+   * A `SessionError` from an operation means the session it names has gone.
+   * The same class thrown by `connect` means the session was never made — a
+   * browser that would not launch, a permission that was not granted, an
+   * application that is not running — and calling that `SESSION_CLOSED` is a
+   * diagnosis that points at a session which has never existed.
+   *
+   * It cost three investigations. Under a loaded machine a browser launch fails
+   * about one full-suite run in three; `yam surface connect` exited **21**, the
+   * code for "the session is not here", and every reading of that number went
+   * looking at the broker. `CONNECT_FAILED` is 23 and is what the caller can
+   * act on.
+   */
+  opening = false,
 ): Record<string, unknown> {
   if (err instanceof SurfaceError) {
-    const code = surfaceErrorToCode(err);
+    const code = opening && surfaceErrorToCode(err) === "SESSION_CLOSED"
+      ? "CONNECT_FAILED"
+      : surfaceErrorToCode(err);
     return {
       ...failedEnvelope(requestId, sessionId, code, err.message),
       timing: { totalMs: elapsedMs },

@@ -199,68 +199,70 @@ opens it, with its options, and the Playwright case says so. What the same probe
 automatic selection carried the empty string, which is Radix's sentinel for
 "nothing chosen", so the first task's form invited a decision nobody has to make.
 
-## The intermittent failure, named and fixed
+## The intermittent failure: five `pkill`s
 
-It is not load, and it is not the stray broker the packaging wave guessed at.
-Capturing a full run's output instead of a filtered summary gave the actual
-failure:
+Three appearances, three wrong hypotheses — load, a stray broker, a shared state
+directory — before capturing a full run's output rather than a filtered summary
+gave the first real fact:
 
 ```
 surface-journey › runs across six separate processes …
-AssertionError: waiting for the surface broker another command is starting.
-: expected 21 to be +0
+AssertionError: … : expected 21 to be +0
 ```
 
-Exit **21** is `SESSION_NOT_FOUND`. `surface connect` had exited 0 a moment
-earlier and handed back a session id; the next process asked for it, found **no
-broker serving at all** — that is what the stderr line is — waited for one
-somebody else was starting, reached it, and was told the session does not exist.
-The broker holding the session went away between two consecutive commands.
+Exit **21** is `SESSION_NOT_FOUND` or `SESSION_CLOSED`, and the second reading
+put it on the **`connect`** line, not the snapshot. A connect cannot fail to find
+a session it is about to make.
 
-The cause is the test layout rather than the broker. `pnpm -r test` runs several
-packages at once and every one of them used **the machine's single broker**,
-because that is the product's property and there was no way to opt out. A
-session opened by `packages/cli`'s journey and a session closed by
-`packages/mcp`'s corpus were on the same process. A shared mutable fixture that
-nothing declares is a defect in the layout, not an unlucky interleaving.
+`handleError` was the first defect. A `SessionError` from an *operation* means
+the session it names has gone; the same class thrown while **opening** one means
+the session was never made — a browser that would not launch, a permission not
+granted. Calling that `SESSION_CLOSED` is a diagnosis pointing at a session that
+never existed, and it sent every reading of the number at the broker.
+`CONNECT_FAILED` is what a caller can act on.
 
-`YAM_BROKER_STATE_DIR` is the opt-out, and each suite's vitest configuration
-names a directory of its own with the runner's pid in it. Two things went wrong
-on the way, both worth keeping:
+The second is the cause. Five test files ended with:
 
-  * a **fixed** directory name per package was worse than the shared one: a
-    descriptor left by a previous run names a pid that may since have been
-    recycled, so the broker the next run spawns finds "a broker is already
-    running" and exits 0 — reported as "exited with 0 instead of starting";
-  * the MCP SDK's `StdioClientTransport` gives a spawned server a **minimal
-    environment** — `getDefaultEnvironment()`, which is PATH, HOME and a short
-    safe list. Nothing named `YAM_*` reaches it. That is right for an agent host
-    launching an untrusted command, and it meant half of `packages/mcp` was on
-    the isolated broker and half on the machine's: two populations inside one
-    package, which is worse than one shared between three.
+```
+spawnSync("pkill", ["-f", "surface broker"]);
+```
 
-Each run's broker also dies with it, through a `globalSetup` teardown that reads
-the descriptor and signals that pid. Without it, per-run isolation trades one
-problem for a smaller one: the idle timeout is fifteen minutes, so ten runs in an
-afternoon leave ten brokers holding ten ports. It reads the descriptor rather
-than matching a command line, because `pkill -f "surface broker"` would kill the
-one somebody has open in another terminal — the kind of cleanup that makes people
-stop running tests.
+`pkill -f` matches the **command line**, and every broker's command line is
+identical. `pnpm -r test` runs several packages at once and vitest runs files in
+parallel within each, so a file finishing its teardown killed the broker another
+file — or another package — was mid-journey on. About one run in three, and it
+moved between packages because it was a race between teardowns and journeys.
 
-Measuring it needed a clean machine, which took two attempts to realise. A run
-after this session's tenth manual suite failed again, with the new diagnostic
-reading *"the broker that answered is …, pid unknown, started by an unnamed build
-of Yam"* — a broker predating the change, still alive from an earlier run,
-because nothing had been reaping them. That is evidence for the teardown rather
-than against the isolation.
+That is also why the state-directory isolation did not fix it on its own: giving
+each suite `YAM_BROKER_STATE_DIR` separates their *descriptors* and does nothing
+about a signal sent by pattern to every matching process.
 
-The diagnosis stays in the product regardless. `SESSION_NOT_FOUND` now prints the
-broker that answered — its url, its pid and what started it — because "it was
-opened against a different session holder than the one answering now" is the
-right diagnosis and names neither party. `/health` has carried the pid since
-`PK-08` and nothing read it. The wait message was also ungrammatical —
-*"waiting for the surface broker another command is starting."* — which is how it
-came to be quoted as an error in three separate investigations.
+What is in place now:
+
+  * the five per-file kills are gone. A broker exists to outlive commands, so per
+    file is the wrong granularity;
+  * one reaper per package, in `scripts/vitest-broker.mjs`, run by `globalSetup`
+    after every file has finished, killing **by the pid in its own descriptor**;
+  * each suite's own state directory, with the runner's pid in the name, so two
+    packages cannot find each other's broker in the first place;
+  * `SESSION_NOT_FOUND` prints the broker that answered — url, pid, and what
+    started it. It earned its place immediately: the first failure after it
+    landed read *"pid unknown, started by an unnamed build of Yam"*, which is a
+    broker predating the change and still alive, and that is what pointed at the
+    reaping.
+
+Two attempts went wrong on the way and both are worth keeping. A **fixed**
+per-package directory name is worse than the shared one: a descriptor left by a
+previous run names a pid that may since have been recycled, so the next run's
+broker finds "a broker is already running" and exits 0. And the MCP SDK's
+`StdioClientTransport` gives a spawned server a **minimal environment** —
+`getDefaultEnvironment()`, PATH and HOME and a short list — so nothing named
+`YAM_*` reaches it unless passed, which had half of `packages/mcp` on one broker
+and half on another.
+
+The wait message was also ungrammatical — *"waiting for the surface broker
+another command is starting."* — which is how it came to be quoted as an error in
+three separate investigations.
 
 ## Left open
 

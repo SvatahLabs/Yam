@@ -53,7 +53,22 @@ beforeAll(async () => {
 afterAll(async () => {
   service?.kill("SIGTERM");
   await app?.close();
-  spawnSync("pkill", ["-f", "surface broker"]);
+  /*
+   * The broker outlives its commands by design, and it must not be killed here.
+   *
+   * This was `pkill -f "surface broker"`, which matches on the **command line**
+   * and so kills every broker on the machine — the one another file in this
+   * package is mid-journey on, and the one another package's suite is using,
+   * because `pnpm -r test` runs several at once and vitest runs files in
+   * parallel within each. That is the whole of the intermittent
+   * `SESSION_NOT_FOUND`: about one full-suite run in three, some file finished
+   * and took somebody else's broker with it.
+   *
+   * The suite's own broker is reaped once, after every file, by
+   * `scripts/vitest-broker.mjs` — by the pid in its descriptor, in the state
+   * directory this package's vitest configuration named. Per file is the wrong
+   * granularity for a process that exists to outlive commands.
+   */
 });
 
 async function call(
