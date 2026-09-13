@@ -107,6 +107,27 @@ const RULES = [
     },
   },
   {
+    id: "AX-16",
+    says: "the board says where its work goes next",
+    run: (ns) => {
+      /*
+       * There was a stepper across the top of every board, and it is gone: a
+       * diagram of the flow is what you print when the screens are not
+       * producing one. What it was carrying — where you are, what comes next —
+       * has to be in the screen now, so this is the rule that holds it there.
+       *
+       * A board passes by naming a place the product actually has, or by
+       * naming the artifact its work produces. A board that only describes
+       * what it is looking at is a cul-de-sac with no sign.
+       */
+      const text = ns.map((n) => `${n.name ?? ""} ${n.value ?? ""}`).join(" ");
+      const forward = /\b(Flows|Bindings|Reports|Runs|Settings|Agents|project|flow|report|repair|proposal|binding)s?\b/i;
+      const primary = ns.filter((n) => n.role === "button" && !isChrome(n)).length;
+      if (primary === 0) return { ok: false, why: "no action at all on this board" };
+      return { ok: forward.test(text), why: forward.test(text) ? "names a destination" : "describes itself and nothing beyond" };
+    },
+  },
+  {
     id: "AX-13",
     says: "no sentence twice, and no over-promising copy",
     run: (ns) => {

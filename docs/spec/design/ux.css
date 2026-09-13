@@ -96,17 +96,10 @@ h2 { font-size: 1rem; font-weight: 600; margin: 0 0 8px; }
 }
 .card.focus { border-color: var(--yam); box-shadow: 0 0 0 3px var(--soft); }
 
-/* The site's flow rail: what you can do, in the order you do it. */
-.flow-rail { display: flex; align-items: stretch; gap: 0; margin: 0 0 26px; }
-.flow-node {
-  flex: 1; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper);
-  padding: 13px 15px; text-align: left; color: var(--ink); text-decoration: none; display: block;
-}
-.flow-node[aria-current] { border-color: var(--yam); background: var(--soft); }
-.flow-node[aria-disabled="true"] { opacity: .45; }
-.flow-node strong { display: block; font-size: .86rem; font-weight: 600; }
-.flow-node span { font-size: .74rem; color: var(--muted); }
-.flow-connector { align-self: center; width: 26px; height: 1px; background: var(--line); flex: 0 0 26px; }
+/*
+ * The flow rail that was here is gone. A stepper tells a person where they are
+ * because the screen did not; the fix is the screen, not the diagram.
+ */
 
 .field { display: flex; gap: 8px; }
 input[type="text"] {

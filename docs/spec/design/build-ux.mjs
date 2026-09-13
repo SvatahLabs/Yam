@@ -39,24 +39,19 @@ const rail = (here, noProject) => {
 </nav>`;
 };
 
-/** The journey, drawn as the site draws one (the user's "visual flow"). */
-const flow = (at) => {
-  if (at === null) return "";
-  const nodes = [
-    ["connect", "Connect", "a browser, app, API or terminal"],
-    ["watch", "Watch or drive", "observe, say, or do it yourself"],
-    ["keep", "Keep it", "a flow and its bindings"],
-    ["run", "Run it again", "and heal what moved"],
-  ];
-  const done = nodes.findIndex((n) => n[0] === at);
-  return `<div class="flow-rail" role="list" aria-label="What you can do, in order">` +
-    nodes.map((n, i) => {
-      const state = i === done ? ' aria-current="step"' : i > done ? ' aria-disabled="true"' : "";
-      const why = i > done ? ", not yet" : i < done ? ", done" : "";
-      return `<a class="flow-node" role="listitem" href="#"${state} aria-label="${n[1]}${why}"><strong>${n[1]}</strong><span>${n[2]}</span></a>`;
-    }).join('<span class="flow-connector" aria-hidden="true"></span>') + `</div>`;
-};
-
+/*
+ * There is no journey rail.
+ *
+ * One was drawn here — Connect, Watch, Keep, Run, with connectors — and it is
+ * gone on the owner's call: a stepper is a *diagram* of the flow, printed
+ * because the screens were not producing it. It also lies on every screen that
+ * is a place rather than a step, which was already two of twelve and would have
+ * been more.
+ *
+ * What it was doing, the screens do now. Each says its state in the heading,
+ * names the next step on its primary control, and shows the result of the step
+ * before — which is what makes the next one obvious without a picture of it.
+ */
 const theme = "";
 
 const page = (title, body) =>
@@ -67,12 +62,11 @@ const boards = {
 "UX-1-Start": page("Start", rail("session", true) + `<main class="work">
   <div class="topline"><h1>Connect something to drive</h1>${theme}</div>
   <p class="lead">A browser at a URL, an application by name, a browser you already have open, an API, or a command in a terminal. Nothing here needs a project.</p>
-  ${flow("connect")}
   <div class="card focus">
-    <span class="eyebrow">Step one</span>
+    <span class="eyebrow">Start here</span>
     <label for="t" style="display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px">URL, application name, or endpoint</label>
     <div class="field"><input type="text" id="t" placeholder="https://example.com" aria-label="URL, application name, or endpoint"><button class="btn primary" aria-label="Connect">Connect</button></div>
-    <p class="hint"><span class="live-dot"></span>Ready here: Chromium, macOS apps, HTTP, and a terminal. <a href="#" style="color:var(--accent)">Three more ways</a></p>
+    <p class="hint"><span class="live-dot"></span>Ready here: Chromium, macOS apps, HTTP, and a terminal. <a href="#" style="color:var(--accent)">Three more ways</a><br>Connecting opens it and brings you back here to choose what to do with it.</p>
   </div>
   <div class="card">
     <span class="eyebrow">Or pick up where you left off</span>
@@ -85,13 +79,12 @@ const boards = {
 "UX-2-Watch": page("Watch or drive", rail("session") + `<main class="work">
   <div class="topline"><h1>example.com</h1><span class="pill">connected</span>${theme}</div>
   <p class="lead">Chromium, and you are holding it. Choose how the flow gets written.</p>
-  ${flow("watch")}
   <div class="card focus">
     <span class="eyebrow">Three ways, one session</span>
     <div class="row"><span><b>Watch me</b> — you drive, Yam writes it down</span><span class="meta">the observer, on this adapter</span><button class="btn primary" aria-label="Start watching">Start watching</button></div>
     <div class="row"><span><b>Say what to do</b> — one sentence at a time</span><span class="meta">grounded, run, appended</span><button class="btn" aria-label="Say what to do">Say</button></div>
     <div class="row"><span><b>Do it here</b> — pick a control and an action</span><span class="meta">from the adapter's catalogue</span><button class="btn" aria-label="Do it here">Do</button></div>
-    <p class="hint">Switching never reconnects. An agent over MCP can hold the same session — you will see who has it.</p>
+    <p class="hint">All three write the same thing: a flow and its bindings, kept in this project. Switching never reconnects, and an agent over MCP can hold the same session — you will see who has it.</p>
   </div>
   <div class="card">
     <span class="eyebrow">On the page</span>
@@ -103,8 +96,7 @@ const boards = {
 
 "UX-3-Observe": page("Watch me", rail("session") + `<main class="work">
   <div class="topline"><h1>Watching you</h1><span class="pill"><span class="live-dot"></span>4 steps</span>${theme}</div>
-  <p class="lead">Drive the browser that opened. Every click and every value becomes a step. Press Keep it when you are done.</p>
-  ${flow("watch")}
+  <p class="lead">Drive the browser that opened. Every click and every value becomes a step below. When you are done, <b>Keep it</b> writes a flow into this project and you can run it from Flows.</p>
   <div class="card">
     <span class="eyebrow">What Yam has seen</span>
     <div class="row"><span>Click <b>the Book a slot link</b></span><span class="meta">bound</span></div>
@@ -119,14 +111,13 @@ const boards = {
     <p class="hint">Or <a href="#" style="color:var(--accent)">point at it in the browser</a> — the control you click becomes the binding.</p>
   </div>
   <div class="card"><span class="eyebrow">Will be written</span>
-    <div class="row"><span class="mono">sessions/2026-09-11.flow</span><span class="meta">4 steps, one undecided</span><button class="btn primary" aria-label="Keep it">Keep it</button></div>
+    <div class="row"><span class="mono">flows/book-a-slot.flow</span><span class="meta">4 steps, one undecided · joins Flows</span><button class="btn primary" aria-label="Keep it">Keep it</button></div>
   </div>
 </main>`),
 
 "UX-4-Run": page("Run it again", rail("activity") + `<main class="work">
   <div class="topline"><h1>book a slot</h1><span class="pill">passed in 3.1 s</span>${theme}</div>
   <p class="lead">The flow you kept, run against the same application. Two bindings moved and Yam repaired them.</p>
-  ${flow("run")}
   <div class="card">
     <span class="eyebrow">Steps</span>
     <div class="row"><span>Click the Book a slot link</span><span class="meta">41 ms</span></div>
@@ -145,7 +136,6 @@ const boards = {
 "UX-5-Agents": page("Agents", rail("agents") + `<main class="work">
   <div class="topline"><h1>Agents</h1>${theme}</div>
   <p class="lead">An agent reaches the same sessions you do, through the same broker. You can see what it does and take the target back at any moment.</p>
-  ${flow("watch")}
   <div class="card focus">
     <span class="eyebrow">Who is holding what</span>
     <div class="row"><span><span class="live-dot"></span>example.com</span><span class="meta">claude-desktop has it · 2 min</span><button class="btn primary" aria-label="Take control">Take control</button></div>
@@ -165,7 +155,6 @@ const boards = {
 "UX-6-Flows": page("Flows", rail("flows") + `<main class="work">
   <div class="topline"><h1>Flows</h1><span class="pill">9 in booking-tests</span></div>
   <p class="lead">What Yam can run. Each one is a file you can read, written in sentences, with its bindings beside it.</p>
-  ${flow("keep")}
   <div class="card">
     <span class="eyebrow">In this project</span>
     <div class="row"><span><b>book a slot</b> — 6 steps</span><span class="meta">passed 2 min ago · all bound</span><button class="btn" aria-label="Run book a slot">Run</button></div>
@@ -178,14 +167,13 @@ const boards = {
     <div class="row"><span class="mono">Click the Book a slot link</span><span class="meta">tier 1 · human</span></div>
     <div class="row"><span class="mono">Type “Indiranagar” into the location field</span><span class="meta">tier 1 · human</span></div>
     <div class="row"><span class="mono">The receipt should say paid</span><span class="meta">a postcondition</span></div>
-    <p class="hint">Lint says nothing to report. <a href="#" style="color:var(--accent)">Open it in your editor</a> or run it above.</p>
+    <p class="hint">Lint says nothing to report. <a href="#" style="color:var(--accent)">Open it in your editor</a>, or run it — a run leaves a report, and anything that moved comes back here as a repair to review.</p>
   </div>
 </main>`),
 
 "UX-7-Bindings": page("Bindings", rail("bindings") + `<main class="work">
   <div class="topline"><h1>Bindings</h1><span class="pill">30 · 1 unverified</span></div>
   <p class="lead">How a sentence finds a control. Each binding says where it came from and when it last resolved, and an unverified one is never used without saying so.</p>
-  ${flow("keep")}
   <div class="card focus">
     <span class="eyebrow">Worth your attention</span>
     <div class="row"><span class="mono">booking.pay-button</span><span class="meta" style="color:var(--warn)">unverified · proposed by healing</span><button class="btn primary" aria-label="Verify booking.pay-button">Verify</button></div>
@@ -203,7 +191,6 @@ const boards = {
 "UX-8-Reports": page("Reports", rail("reports") + `<main class="work">
   <div class="topline"><h1>Reports</h1></div>
   <p class="lead">What happened, kept. A run's report is the evidence a person or a build system reads afterwards — steps, timings, screenshots, and every call an agent made.</p>
-  ${flow("run")}
   <div class="card">
     <span class="eyebrow">Runs</span>
     <div class="row"><span><b>book a slot</b></span><span class="meta">passed · 3.1 s · 2 healed · 2 min ago</span><button class="btn" aria-label="Open the report for book a slot">Open</button></div>
@@ -231,7 +218,6 @@ const boards = {
 "UX-9-Settings": page("Settings", rail("settings") + `<main class="work">
   <div class="topline"><h1>Settings</h1></div>
   <p class="lead">What this copy of Yam does, and what it is allowed to reach. Nothing here is a secret — secrets live in the project and are never shown.</p>
-  ${flow(null)}
   <div class="card">
     <span class="eyebrow">Appearance</span>
     <div class="row"><span>Theme</span><span class="meta">follows the system unless you choose</span>
@@ -258,7 +244,6 @@ const boards = {
 "UX-10-Data": page("Data and requests", rail("data") + `<main class="work">
   <div class="topline"><h1>Data</h1></div>
   <p class="lead">The values a flow uses, and the API requests it can send. A secret is named here and read from the environment when it runs — its value is never written to a file or shown on a screen.</p>
-  ${flow("keep")}
   <div class="card">
     <span class="eyebrow">data.yaml</span>
     <div class="row"><span class="mono">user.name</span><span class="meta">ada</span></div>
@@ -277,7 +262,6 @@ const boards = {
 "UX-11-Heal": page("Heal review", rail("runs") + `<main class="work">
   <div class="topline"><h1>Two controls moved</h1><span class="pill">proposed, not written</span></div>
   <p class="lead">The interface changed and the flow still ran, because Yam found the controls again. Here is what it would write to the store, and what it saw before and after.</p>
-  ${flow("run")}
   <div class="card focus">
     <span class="eyebrow">booking.location-field</span>
     <div class="row"><span>Was</span><span class="mono meta">testid=location</span></div>
@@ -305,9 +289,8 @@ const boards = {
 "UX-12-Import": page("Import", rail("import") + `<main class="work">
   <div class="topline"><h1>Import a prototype</h1></div>
   <p class="lead">Bring a prototype's screens and elements in as a starting point. Yam reads them, shows you what it would create, and writes nothing until you say so.</p>
-  ${flow(null)}
   <div class="card focus">
-    <span class="eyebrow">Step one</span>
+    <span class="eyebrow">Start here</span>
     <label for="imp" style="display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px">A prototype database file</label>
     <div class="field"><input type="text" id="imp" placeholder="~/Downloads/prototype.db" aria-label="A prototype database file"><button class="btn primary" aria-label="Read it">Read it</button></div>
     <p class="hint">Nothing is written while Yam reads. You will see the preview first.</p>
