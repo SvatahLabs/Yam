@@ -347,7 +347,7 @@ describe("the Record screen chooses the gateway (P5-F2, REQ-ADE-4, LLD §13.5, �
      * computes it now, so this drives the model — which is a better check,
      * because both renderers get the same answer from it.
      */
-    const { fakeService, screenById } = await import("@svatah/yam-screens");
+    const { fakeService } = await import("@svatah/yam-screens");
     const load = async (credential: boolean): Promise<RecordLoad> =>
       (await loadRecord(
         fakeService({ project: { gateway: { credential }, flows: [] } }),

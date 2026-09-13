@@ -11,7 +11,6 @@
  * loading the compiler, and `yam --help` should not load anything at all.
  */
 import {
-  boolOption,
   EXIT,
   inputOptions,
   parseArgs,

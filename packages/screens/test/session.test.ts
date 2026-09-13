@@ -75,8 +75,14 @@ describe("the halves are the states their loaders already produced (TV-M01)", ()
     const service = fakeService({ surface: SURFACE });
     const alone = await loadSurface(service, {});
     const merged = await load();
-    const { title, subtitle, status, sources, error, ...rest } = alone;
-    void title, subtitle, status, sources, error;
+    const {
+      title: _title,
+      subtitle: _subtitle,
+      status: _status,
+      sources: _sources,
+      error: _error,
+      ...rest
+    } = alone;
     expect(merged.surface).toEqual(rest);
   });
 

@@ -62,11 +62,9 @@ import {
   type RunsState,
   type SettingsState,
   type SessionState,
-  type SurfaceView,
 } from "@svatah/yam-screens";
 import { acceleratorFor, keysFor as appKeysFor } from "./keys.js";
 import { SessionInspector, SessionScreen } from "./Session.js";
-import { SurfacesScreen, SurfacesInspector } from "./Surfaces.js";
 import type { ServiceClient } from "../client.js";
 import { a11yVariant } from "../a11y-variant.js";
 import { bridge } from "../bridge.js";
@@ -76,7 +74,6 @@ import { RunInspector, RunScreen } from "./Run.js";
 import { RunsInspector, RunsScreen } from "./Runs.js";
 import { BindingsInspector, BindingsScreen } from "./Bindings.js";
 import { HealInspector, HealScreen } from "./Heal.js";
-import { RecordInspector, RecordScreen } from "./Record.js";
 import {
   AgentsInspector,
   AgentsScreen,

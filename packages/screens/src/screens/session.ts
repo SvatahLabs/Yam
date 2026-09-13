@@ -107,8 +107,23 @@ export function modeFrom(value: unknown): SessionMode {
 const strip = <T extends Omit<ScreenStateBase, "screen">>(
   load: T,
 ): Omit<T, keyof ScreenStateBase> => {
-  const { title, subtitle, status, sources, error, ...rest } = load;
-  void title, subtitle, status, sources, error;
+  /*
+   * Named with a leading underscore rather than `void`-ed.
+   *
+   * `void a, b, c` is the comma operator in an expression statement, which is a
+   * construct that does nothing and reads like a mistake — `no-unused-expressions`
+   * is right about it. The configuration already allows an unused binding whose
+   * name begins with an underscore, which is what "destructured out on purpose"
+   * has a spelling for.
+   */
+  const {
+    title: _title,
+    subtitle: _subtitle,
+    status: _status,
+    sources: _sources,
+    error: _error,
+    ...rest
+  } = load;
   return rest as Omit<T, keyof ScreenStateBase>;
 };
 

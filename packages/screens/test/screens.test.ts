@@ -35,7 +35,6 @@ import {
   type RunState,
   loadRecord,
   type RecordLoad,
-  type RecordView,
 } from "../src/index.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));

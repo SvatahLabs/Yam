@@ -20,7 +20,6 @@
 import { useState } from "react";
 import { Alert, Button, Field, Pill, Table } from "@svatah/yam-ui";
 import type { SessionMode, SessionState } from "@svatah/yam-screens";
-import type { RecordLoad, SurfaceLoad } from "@svatah/yam-screens";
 import { RecordInspector, RecordScreen, type DrawnRecordLoad } from "./Record.js";
 import { SurfacesInspector, SurfacesScreen, type DrawnSurfaceLoad } from "./Surfaces.js";
 import type { ScreenProps } from "./Secondary.js";

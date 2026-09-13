@@ -23,7 +23,6 @@ import { render } from "ink";
 import {
   ACTIONS,
   SCREEN_IDS,
-  actionsForScreen,
   fakeService,
   screenById,
   type FakeResponses,

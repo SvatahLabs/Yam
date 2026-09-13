@@ -13,22 +13,12 @@
  * checking a property rather than reading the code.
  */
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fromRoot, REPO_ROOT } from "../src/repo.js";
+import { fromRoot } from "../src/repo.js";
 
 /** The packages that are big enough to be worth not installing. */
 const DRIVERS = ["playwright", "webdriverio"] as const;
-
-const sources = (dir: string): string[] => {
-  const out: string[] = [];
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) out.push(...sources(full));
-    else if (/\.tsx?$/.test(entry)) out.push(full);
-  }
-  return out;
-};
 
 /** `import … from "x"` at the top level; `await import("x")` is the point. */
 const staticImports = (text: string): string[] =>

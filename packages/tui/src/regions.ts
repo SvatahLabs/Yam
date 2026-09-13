@@ -149,7 +149,7 @@ function share(asks: readonly Ask[], available: number): number[] {
     .map((one, at) => ({ at, weight: one.fixed === undefined ? one.weight : 0 }))
     .filter((one) => one.weight > 0);
   const total = growers.reduce((sum, one) => sum + one.weight, 0);
-  let left = available - spent;
+  const left = available - spent;
   if (total === 0 || left === 0) {
     /* Nothing wants to grow: the last ask takes the slack rather than a gap. */
     if (left > 0 && sizes.length > 0) sizes[sizes.length - 1] = sizes[sizes.length - 1]! + left;

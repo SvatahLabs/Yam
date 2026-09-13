@@ -33,8 +33,7 @@ import { offeredActions, defaultActionForRole, type ActionForm } from "@svatah/y
 import type { CapabilityFlag, SurfaceKind } from "@svatah/yam-schema";
 import { DESKTOP_HOLDER } from "../holder.js";
 import { Sources, dotted, plural } from "../load.js";
-import { actionsForScreen } from "../registry.js";
-import type { Pill, Screen, ScreenParams, ScreenStateBase } from "../types.js";
+import type { Pill, ScreenParams, ScreenStateBase } from "../types.js";
 import type { ScreenService } from "../service.js";
 
 /** How a person reads an adapter's home: "a browser, an app, a device or an API". */

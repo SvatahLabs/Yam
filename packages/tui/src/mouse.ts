@@ -25,6 +25,8 @@ export interface MouseEvent {
  * down. `M` is a press and `m` is a release, which is the whole of the SGR
  * extension over what came before.
  */
+/* An escape sequence is made of control characters: that is what it is. */
+// eslint-disable-next-line no-control-regex -- parsing ANSI, where ESC is the point
 const SGR = /\u001b\[<(\d+);(\d+);(\d+)([Mm])/g;
 
 /** Every mouse event in a chunk of input, in the order they happened. */
@@ -46,6 +48,7 @@ export function decodeMouse(chunk: string): MouseEvent[] {
 }
 
 /** Whether a chunk of input is mouse reporting rather than something typed. */
+// eslint-disable-next-line no-control-regex -- parsing ANSI, where ESC is the point
 export const isMouse = (chunk: string): boolean => /\u001b\[</.test(chunk);
 
 /** A box, as `regions.ts` solves them: zero-based, in cells. */

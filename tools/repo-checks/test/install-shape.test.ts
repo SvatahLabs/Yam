@@ -88,7 +88,15 @@ describe("the packed tarball is the size the specification claims", () => {
       maxBuffer: 32 * 1024 * 1024,
     });
     const [packed] = JSON.parse(printed) as Array<{ unpackedSize: number; entryCount: number }>;
-    expect(packed, "npm pack said nothing").toBeDefined();
+    /*
+     * A throw, not `expect(...).toBeDefined()`.
+     *
+     * The matcher asserts at run time and narrows nothing at compile time, so
+     * every use below was `possibly undefined` and `pnpm -r typecheck` said so.
+     * The check ran green the whole while, which is how a type error lives in a
+     * passing test.
+     */
+    if (packed === undefined) throw new Error("`npm pack --json` printed no package");
     /*
      * Eight, calibrated from six-point-one.
      *

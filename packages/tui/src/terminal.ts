@@ -125,7 +125,7 @@ export function own(options: OwnOptions = {}): Owned {
    */
   const onThrow = (error: unknown): void => {
     restore();
-    // eslint-disable-next-line no-console -- the frame is gone; this is stderr now.
+    /* The frame is gone; this is stderr now. */
     console.error(error);
     process.exit(1);
   };

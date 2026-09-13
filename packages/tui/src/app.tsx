@@ -23,7 +23,6 @@ import { dirname, join } from "node:path";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ACTIONS,
-  RAIL,
   SESSION_MODES,
   actionById,
   modeFrom,
