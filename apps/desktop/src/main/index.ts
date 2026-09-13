@@ -28,14 +28,7 @@
 import { app, nativeTheme, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import { existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
-import {
-  DEFAULT_PREFERENCES,
-  preferencesPath,
-  readPreferences,
-  withRecentProject,
-  writePreferences,
-  type Preferences,
-} from "./preferences.js";
+import { DEFAULT_PREFERENCES, personsProjects, preferencesPath, readPreferences, type Preferences, withRecentProject, writePreferences } from "./preferences.js";
 import { openDebugLog, type DebugLog } from "./debug.js";
 import { startOrAdopt, type RunningService, type ServiceConnection } from "./service.js";
 import {
@@ -390,7 +383,14 @@ ipcMain.handle("app:preferences", (_event, next: unknown) => {
     writePreferences(preferencesPath(app.getPath("userData")), preferences);
     applyTheme();
   }
-  return preferences;
+  /*
+   * What is handed to the window is the person's own (`AX-12`).
+   *
+   * Filtered on the way out rather than on the way in: a directory that exists
+   * today may be gone tomorrow, and rewriting the stored list would throw away
+   * a project that is merely on a volume nobody has mounted yet.
+   */
+  return personsProjects(preferences, app.getPath("userData"), existsSync);
 });
 
 /**

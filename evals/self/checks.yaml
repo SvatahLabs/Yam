@@ -163,6 +163,18 @@ checks:
     external:
       source: "app-playwright"
       name: "the bar keeps what you can do and sheds what you cannot (P-W2-F6)"
+  - id: "app.the-work-grows-with-the-window"
+    says: "The main region grows with the window, and the first task stays on screen and reachable at every width."
+    yam:
+      # Yam *can* resize a window — `proto-walk.mjs` does exactly this against
+      # the prototype through the web adapter, and that is where the same rule
+      # is read for the design. What it cannot do is the second half: comparing
+      # the widths of one element across five window sizes is arithmetic over a
+      # set of measurements, and there is no sentence for it.
+      unreachable: "Resizing is expressible and is done (`evals/self/yam-on-yam/proto-walk.mjs` drives the prototype through five widths). Asserting that a box *grew between* two of them is arithmetic across measurements, which no sentence says."
+    external:
+      source: "app-playwright"
+      name: "the work grows with the window and nothing is lost when it shrinks (AX-17)"
   - id: "app.session-offers-only-this-mode"
     says: "Session offers the actions of the mode showing, not all seventeen the merged screen has."
     yam:

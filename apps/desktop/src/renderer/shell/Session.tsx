@@ -17,7 +17,8 @@
  * ground, offering the three groundings the product already has rather than
  * failing the line.
  */
-import { Alert, Pill, Table } from "@svatah/yam-ui";
+import { useState } from "react";
+import { Alert, Button, Field, Pill, Table } from "@svatah/yam-ui";
 import type { SessionMode, SessionState } from "@svatah/yam-screens";
 import type { RecordLoad, SurfaceLoad } from "@svatah/yam-screens";
 import { RecordInspector, RecordScreen, type DrawnRecordLoad } from "./Record.js";
@@ -142,6 +143,7 @@ export function SessionScreen(props: ScreenProps<SessionState>): React.JSX.Eleme
     return (
       <>
         {strip}
+        <ConnectFirst {...props} mode="record" />
         <RecordScreen {...forMode} state={record} />
       </>
     );
@@ -155,10 +157,99 @@ export function SessionScreen(props: ScreenProps<SessionState>): React.JSX.Eleme
     );
   }
 
-  const say = state.say;
+  return <SayMode {...props} strip={strip} />;
+}
+
+/**
+ * The way in, from a mode that cannot start without one (`AX-02`, `AX-03`,
+ * `B6`).
+ *
+ * Record with nothing connected said: *"No recording session. Press Record on
+ * the Flows screen."* Flows is about a project, and for somebody without one
+ * that is a wall — connect, record, Flows, "needs a project", and the loop has
+ * no exit. Say had no way in at all.
+ *
+ * Every mode's first step is the same one, so every mode offers it: one
+ * sentence and one enabled control, which goes to the place that has the form
+ * rather than describing where the form is.
+ */
+function ConnectFirst(
+  props: ScreenProps<SessionState> & { readonly mode: "record" | "say" },
+): React.JSX.Element | null {
+  if (props.state.surface.session !== undefined) return null;
+  return (
+    <Alert tone="abort" id={`session-${props.mode}-needs-surface`}>
+      {props.mode === "record"
+        ? "Nothing is connected, so there is nothing to watch."
+        : "Nothing is connected, so a sentence has nothing to act on."}{" "}
+      <Button
+        id={`session-${props.mode}-connect`}
+        label="Connect a surface"
+        variant="ghost"
+        onPress={() => props.onParams({ ...props.params, mode: "do" })}
+      />
+    </Alert>
+  );
+}
+
+/**
+ * Say — a sentence, in the app, as `i` takes one in the cockpit (`AX-02`,
+ * `B5`).
+ *
+ * One of the three ways of working was a paragraph. It explained that "a
+ * sentence is grounded against the session already open and appended to the
+ * flow" and offered nowhere to type one: no textbox, no combobox, and no
+ * enabled control beyond the rail. A mode you cannot act in is a tab that leads
+ * to a description of itself.
+ *
+ * Grounding the line against the connected session needs the runtime to take a
+ * broker session, which `docs/spec/view-layers` puts out of scope and names as a
+ * runtime change (`TV-T07c`). So the sentence is *held* and said to be held —
+ * the cockpit does exactly this, in the same words — and nothing pretends to
+ * have executed. The field, the history and the zero state are the parts that
+ * were missing, and they are here.
+ */
+function SayMode(
+  props: ScreenProps<SessionState> & { readonly strip: React.ReactNode },
+): React.JSX.Element {
+  const say = props.state.say;
+  const [line, setLine] = useState("");
+  const [held, setHeld] = useState<string | undefined>(undefined);
+  const submit = (): void => {
+    const text = line.trim();
+    if (text === "") return;
+    setHeld(text);
+    setLine("");
+  };
+
   return (
     <div className="sv-say">
-      {strip}
+      {props.strip}
+      <ConnectFirst {...props} mode="say" />
+      <div className="sv-say-line" role="group" aria-label="Say what to do">
+        <Field
+          id="session-say"
+          label="Say what to do"
+          value={line}
+          placeholder="click the Sign in button"
+          onChange={setLine}
+          onSubmit={submit}
+        />
+        <Button
+          id="session-say-submit"
+          label="Say it"
+          variant="primary"
+          disabled={line.trim() === ""}
+          onPress={submit}
+        />
+      </div>
+      {held === undefined ? null : (
+        <Alert tone="abort" id="session-say-held">
+          “{held}” is held, not run: grounding a sentence against the open session is a runtime
+          change this view layer does not make. It is on the flow below, and <b>Record</b> writes
+          the same line by watching you do it.
+        </Alert>
+      )}
       {say.unbound === undefined ? null : (
         <Alert tone="abort" id="session-unbound">
           Nothing is bound to “{say.unbound.phrase}”. {say.unbound.reason}
@@ -178,11 +269,11 @@ export function SessionScreen(props: ScreenProps<SessionState>): React.JSX.Eleme
           },
           { key: "target", header: "Target", cell: (row) => row.target ?? "—" },
         ]}
-        empty="Nothing said yet."
+        empty="Nothing said yet. Type a sentence above and press Say it."
       />
       <p className="sv-hint">
-        A sentence is grounded against the session already open and appended to the flow; a phrase
-        Yam cannot ground asks rather than fails.
+        A sentence is appended to the flow this session is writing, and a phrase Yam cannot ground
+        asks rather than fails.
       </p>
     </div>
   );

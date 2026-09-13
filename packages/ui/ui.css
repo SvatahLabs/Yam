@@ -369,8 +369,30 @@
 }
 
 .sv-rail-active {
-  background: var(--bg3);
-  color: var(--fg);
+  /*
+   * Where you are is the brand (`EX-01`). The site marks its current
+   * destination in `--yam` and everything that takes focus in `--accent`; the
+   * app had one colour for both because the palette had one.
+   */
+  background: var(--yam-soft);
+  color: var(--yam);
+  font-weight: 500;
+}
+
+/*
+ * A destination whose precondition is not met (`AX-04`).
+ *
+ * Dimmed, with the condition beside it — not removed. Seven of nine rail items
+ * led to the same wall, and the only way to find out was to press one.
+ */
+.sv-rail-blocked {
+  color: var(--dim);
+}
+
+.sv-rail-needs {
+  margin-left: auto;
+  color: var(--dim);
+  font-size: 11px;
 }
 
 .sv-rail-count {

@@ -101,6 +101,33 @@ export function Toolbar(props: ToolbarProps): React.JSX.Element {
   const bar = useRef<HTMLDivElement>(null);
   const [shed, setShed] = useState(0);
 
+  /*
+   * What can be done, first — and when nothing can, no buttons at all
+   * (`AX-05`, `B8`).
+   *
+   * On a window with nothing connected the Session bar drew four buttons and
+   * three of them were disabled: Disconnect, Check the surface, Refresh and
+   * select again. They came before the only task a new person could perform,
+   * because the bar rendered `props.actions` in registry order and nothing in
+   * that order looked at whether a button *worked*.
+   *
+   * Two rules, and the second is the one that matters on arrival:
+   *
+   *   * an unavailable control is drawn after every available one — it still
+   *     exists, because "you will be able to do this" is worth saying;
+   *   * a bar with nothing available draws no buttons at all, because a row of
+   *     four dead controls is not information, it is furniture in front of the
+   *     door.
+   *
+   * Nothing becomes unreachable either way: every action here is in the command
+   * palette by construction, which is where the shedding already sends them.
+   */
+  const available = props.actions.filter((one) => one.availableWhen(props.state));
+  const drawn =
+    available.length === 0
+      ? []
+      : [...available, ...props.actions.filter((one) => !one.availableWhen(props.state))];
+
   useLayoutEffect(() => {
     const element = bar.current;
     if (element === null || typeof ResizeObserver === "undefined") return undefined;
@@ -153,6 +180,7 @@ export function Toolbar(props: ToolbarProps): React.JSX.Element {
     return () => observer.disconnect();
   }, [props.actions, props.state, props.children]);
 
+
   return (
     <div className="sv-toolbar" ref={bar}>
       {/*
@@ -171,7 +199,7 @@ export function Toolbar(props: ToolbarProps): React.JSX.Element {
       <span className="sv-toolbar-sub">{props.state.subtitle}</span>
       <span className="sv-spacer" />
       {props.children}
-      {props.actions.map((one) => (
+      {drawn.map((one) => (
         <Button
           key={one.id}
           id={actionId(one.id)}

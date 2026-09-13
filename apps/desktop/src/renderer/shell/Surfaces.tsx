@@ -33,7 +33,7 @@ import {
   type SurfaceAdapterRow,
   type SurfaceActionOffer,
 } from "@svatah/yam-screens";
-import { Toolbar, EmptyInspector } from "./parts.js";
+import { Toolbar, EmptyInspector, actionId } from "./parts.js";
 import type { ScreenProps } from "./Secondary.js";
 import { acceleratorFor } from "./keys.js";
 
@@ -112,6 +112,18 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
    */
   const PLACED_BY_THE_SCREEN = new Set([
     "surface.connect",
+    /*
+     * `surface.discover` refreshes the panel below, and it was the reason the
+     * toolbar drew at all on a window with nothing connected (`AX-01`,
+     * `AX-05`).
+     *
+     * One available action in the bar is enough to make the bar appear, and
+     * with it came three disabled ones — Disconnect, Check the surface, Refresh
+     * and select again — all of them above the only task a new person can
+     * perform. Rechecking targets is something you do *to the list of targets*,
+     * so it goes on the list.
+     */
+    "surface.discover",
     "surface.act",
     "surface.request",
     "surface.take-control",
@@ -252,76 +264,100 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
         {connected ? (
           <SurfaceBody {...props} />
         ) : (
-          <div className="sv-editor" id="surfaces-discovery" aria-label="What you can connect to">
-            {/*
-              The model's sentence, not one chosen here: an empty list means
-              either "nothing is installed" or "nothing could be asked", and
-              only the model knows which. Written out here, it claimed the first
-              in both cases — so a broker that was briefly unreachable reported
-              "No adapter is installed" on a machine with eight, contradicting
-              the alert directly above it (SF-17).
-            */}
-            {state.groups.length === 0 ? (
-              <p className="sv-empty" id="surfaces-discovery-empty">
-                {state.discoveryEmpty}
-              </p>
-            ) : (
-              state.groups.map((group) => (
-                <section
-                  key={group.family}
-                  className="sv-surface-group"
-                  id={`surfaces-group-${slug(group.family)}`}
-                  aria-labelledby={`surfaces-group-${slug(group.family)}-heading`}
-                >
-                  {/*
-                    * `h2`, not `h3` (SF-18).
-                    *
-                    * The toolbar title is the window's `h1`, so a group heading
-                    * at level three leaves a hole in the outline a screen
-                    * reader reads. Found by the accessibility oracle running
-                    * over the packaged application's own window in T18 — not by
-                    * reading this file, which is why it survived three waves.
-                    */}
-                  <h2
-                    className="sv-inspector-heading"
-                    id={`surfaces-group-${slug(group.family)}-heading`}
-                  >
-                    {group.family}
-                  </h2>
-                  <Table<SurfaceAdapterRow>
-                    id={`surfaces-adapters-${slug(group.family)}`}
-                    label={`${group.family} adapters`}
-                    rows={[...group.adapters]}
-                    rowKey={(row) => row.adapter}
-                    empty="No adapter here."
-                    columns={[
-                      { key: "adapter", header: "adapter", monospace: true, cell: (row) => row.adapter },
-                      {
-                        key: "status",
-                        header: "status",
-                        cell: (row) => <Pill tone={row.pill.tone} label={row.pill.label} />,
-                      },
-                      {
-                        key: "requires",
-                        header: "requires",
-                        cell: (row) =>
-                          row.available ? (
-                            <span className="sv-muted">ready</span>
-                          ) : (
-                            <span className="sv-tone-abort">
-                              {row.reason ?? row.prerequisites.join(", ") ?? "unavailable"}
-                            </span>
-                          ),
-                      },
-                    ]}
-                  />
-                </section>
-              ))
-            )}
-          </div>
+          <Discovery {...props} />
         )}
       </div>
     </>
+  );
+}
+
+
+/**
+ * What you can connect to: a status, not a catalogue (`AX-06`, `B19`, `B20`).
+ *
+ * The first screen used to list every adapter Yam knows about with a column
+ * explaining why four of them could not work — BiDi wants `YAM_BIDI_URL`, UIA
+ * says "this host is darwin", Appium wants a server on 4723, AT-SPI says "this
+ * host is darwin". A new person's first screen was mostly a list of things this
+ * machine cannot do.
+ *
+ * What is ready is a sentence. What is not is behind one disclosure, with the
+ * single command each needs — `install` comes from the adapter's own probe, so
+ * it is the command that would actually work rather than a description of the
+ * condition.
+ */
+function Discovery(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
+  const { state } = props;
+  const discover = props.actions.find((one) => one.id === "surface.discover");
+  const all = state.groups.flatMap((group) => group.adapters);
+  const ready = all.filter((one) => one.available);
+  const rest = all.filter((one) => !one.available);
+
+  return (
+    <div className="sv-editor" id="surfaces-discovery" aria-label="What you can connect to">
+      <div className="sv-panel-head">
+        <h2 id="surfaces-discovery-heading">Ready here</h2>
+        <span className="sv-spacer" />
+        {discover === undefined ? null : (
+          <Button
+            id={actionId(discover.id)}
+            label={discover.label}
+            variant="ghost"
+            disabled={!discover.availableWhen(state as never)}
+            onPress={() => props.onAction(discover.id)}
+          />
+        )}
+      </div>
+
+      {all.length === 0 ? (
+        <p className="sv-empty" id="surfaces-discovery-empty">
+          {state.discoveryEmpty}
+        </p>
+      ) : ready.length === 0 ? (
+        <p className="sv-empty" id="surfaces-ready-none">
+          Nothing on this machine is ready to drive yet. Open <b>Other ways to connect</b> below —
+          each one names the command that installs it.
+        </p>
+      ) : (
+        <p id="surfaces-ready">
+          {ready.map((one) => one.adapter).join(", ")} — enter a target above and press{" "}
+          <b>Connect surface</b>. Connecting opens it and brings you back here.
+        </p>
+      )}
+
+      {rest.length === 0 ? null : (
+        <details className="sv-disclosure" id="surfaces-other-ways">
+          <summary>Other ways to connect ({rest.length})</summary>
+          <Table<SurfaceAdapterRow>
+            id="surfaces-adapters-other"
+            label="Adapters that need something first"
+            rows={[...rest]}
+            rowKey={(row) => row.adapter}
+            empty="Nothing else to offer."
+            columns={[
+              { key: "adapter", header: "adapter", monospace: true, cell: (row) => row.adapter },
+              {
+                key: "status",
+                header: "status",
+                cell: (row) => <Pill tone={row.pill.tone} label={row.pill.label} />,
+              },
+              {
+                key: "needs",
+                header: "to use it",
+                cell: (row) =>
+                  row.install === undefined ? (
+                    <span className="sv-muted">
+                      {row.reason ?? row.prerequisites.join(", ") ?? "not available here"}
+                    </span>
+                  ) : (
+                    <code className="sv-mono">{row.install}</code>
+                  ),
+              },
+            ]}
+          />
+        </details>
+      )}
+    </div>
   );
 }
 
@@ -515,7 +551,7 @@ export function SurfacesInspector(props: ScreenProps<DrawnSurfaceLoad>): React.J
           Choose an open session to inspect it, or connect a new surface. Nothing here needs a
           project.
         </EmptyInspector>
-        <AgentPanel {...props} />
+        <AgentPanel {...props} collapsed />
       </>
     );
   }
@@ -704,11 +740,32 @@ export function SurfacesInspector(props: ScreenProps<DrawnSurfaceLoad>): React.J
  * connect an agent, and nothing here claims to have spoken MCP: the panel lists
  * exactly what was checked.
  */
-function AgentPanel(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
+function AgentPanel(
+  props: ScreenProps<DrawnSurfaceLoad> & { readonly collapsed?: boolean },
+): React.JSX.Element {
   const { agent } = props.state;
   const [copied, setCopied] = useState(false);
+  /*
+   * Shut, before there is anything to connect an agent *to* (`AX-06`, `B20`).
+   *
+   * A JSON snippet for agent authors was the first thing in the inspector on a
+   * window where nobody had done anything yet. It is still one keystroke away,
+   * and it opens itself once a session exists — which is the moment the
+   * configuration describes something real.
+   */
+  const Section = ({ children }: { children: React.ReactNode }): React.JSX.Element =>
+    props.collapsed === true ? (
+      <details className="sv-disclosure" id="inspector-agent">
+        <summary>Connect an agent</summary>
+        {children}
+      </details>
+    ) : (
+      <InspectorSection id="inspector-agent" title="Connect an agent">
+        {children}
+      </InspectorSection>
+    );
   return (
-    <InspectorSection id="inspector-agent" title="Connect an agent">
+    <Section>
       <p className="sv-card">
         Any compatible MCP client reaches these same sessions with this configuration. An agent and
         a person share one broker, so a session either opens is one both can see.
@@ -745,6 +802,6 @@ function AgentPanel(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
           ...agent.checks.map((one, at) => ({ key: at === 0 ? "Checked" : " ", value: one })),
         ]}
       />
-    </InspectorSection>
+    </Section>
   );
 }

@@ -14,7 +14,7 @@
  * hand or left by an older version cannot smuggle anything in.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 
 export interface Preferences {
   readonly theme: "system" | "light" | "dark";
@@ -63,6 +63,40 @@ export function withRecentProject(preferences: Preferences, project: string): Pr
     recentProjects: [project, ...preferences.recentProjects.filter((one) => one !== project)].slice(
       0,
       MAX_RECENT,
+    ),
+  };
+}
+
+/**
+ * The projects a person made, out of everything that has been opened
+ * (`AX-12`, `B1`).
+ *
+ * The top bar offered `yam-shell-ZSPbBQ`, `yam-shell-aTz9sp` and
+ * `yam-shell-v5WyAd` in the position where somebody expects their own work.
+ * Three of the five things in the bar were noise they did not make. Two
+ * separate causes, and both are filtered here:
+ *
+ *   * a directory **under the user-data directory** is the app's own — the
+ *     private surfaces workspace lives there, and `openProject(…, false)`
+ *     already declines to record it, but a list written before that rule
+ *     existed still carries one;
+ *   * a directory that is **no longer there** is not somewhere a person can go
+ *     back to. The three above were the desktop suite's temporary projects,
+ *     recorded when it drove the packaged app and deleted when it finished.
+ *
+ * `exists` is a parameter so this is a function of its inputs: the main process
+ * passes `existsSync` and a test passes a set.
+ */
+export function personsProjects(
+  preferences: Preferences,
+  userData: string,
+  exists: (path: string) => boolean,
+): Preferences {
+  const own = resolve(userData);
+  return {
+    ...preferences,
+    recentProjects: preferences.recentProjects.filter(
+      (one) => !resolve(one).startsWith(`${own}${sep}`) && resolve(one) !== own && exists(one),
     ),
   };
 }

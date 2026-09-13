@@ -237,9 +237,9 @@ export function RecordScreen(props: RecordProps): React.JSX.Element {
             {state.capturing || state.sentences.length > 0 ? null : decision === undefined ? (
               <p className="sv-empty">
                 {state.sessionId === undefined
-                  ? "No recording session. Press Record on the Flows screen to record a flow from " +
-                    "what you do, or choose a flow there and press Bind targets. Connecting a " +
-                    "surface in Do opens a browser to drive; it does not start a recording."
+                  ? "No recording session yet. Connect something in Do and press Start capture " +
+                    "to record a flow from what you do; with a project open, Flows can start one " +
+                    "against a flow you already have."
                   : "The session is running. A grounding appears here when the recorder needs a decision."}
               </p>
             ) : (

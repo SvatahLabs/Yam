@@ -70,6 +70,12 @@ const hasIn =
   (state: ScreenStateBase): boolean =>
     loaded(state) && half(state, name)[field] !== undefined;
 
+/** How many sessions the broker is holding, as the loaded state saw it. */
+const openSessions = (state: ScreenStateBase): number => {
+  const rows = half(state, "surface")["sessions"];
+  return Array.isArray(rows) ? rows.length : 0;
+};
+
 /**
  * An action that belongs to some of Session's three modes and not the others
  * (REQ-ADE-14, TV-15).
@@ -270,12 +276,46 @@ const ACTIONS_ONLY: readonly Action[] = [
     group: "Actions",
     screen: "session",
     cli: "yam surface close --session <id>",
-    // Only when a session is selected; `has("selected")` is the model saying so.
-    availableWhen: hasIn("surface", "selected"),
+    /*
+     * Wherever a session is open, in every mode (`AX-03`, `B7`).
+     *
+     * This read `hasIn("surface", "selected")`, and `selected` is a *screen
+     * parameter* set by picking a row in the Open sessions list — a list that
+     * only the **do** mode draws. So in record mode, with a browser open and
+     * nothing else able to close it, Disconnect was a disabled button. That is
+     * how the owner came to kill a browser by hand.
+     *
+     * A session being open is a fact about the broker, not about what a person
+     * has clicked. When exactly one is open the action does not need to be told
+     * which; when more than one is, it says so rather than guessing.
+     */
+    availableWhen: (state) =>
+      loaded(state) &&
+      (half(state, "surface")["selected"] !== undefined ||
+        half(state, "record")["sessionId"] !== undefined ||
+        openSessions(state) > 0),
     async run(service, args): Promise<ActionOutcome> {
-      const session = typeof args.selected === "string" ? args.selected : undefined;
-      if (session === undefined) return refused("Choose a session to disconnect.");
-      const answer = await service.deleteSessionsBySession(session);
+      let session =
+        typeof args.selected === "string"
+          ? args.selected
+          : typeof args["sessionId"] === "string"
+            ? args["sessionId"]
+            : undefined;
+      if (session === undefined) {
+        const open = await service.getSessions();
+        const rows = envelopeOf(open).result["sessions"];
+        const ids = (Array.isArray(rows) ? rows : [])
+          .map((one) => (one as { sessionId?: unknown }).sessionId)
+          .filter((one): one is string => typeof one === "string");
+        if (ids.length === 0) return refused("Nothing is connected.");
+        if (ids.length > 1) {
+          return refused(
+            `${String(ids.length)} sessions are open. Choose one under Open sessions in Do, then press Disconnect.`,
+          );
+        }
+        session = ids[0];
+      }
+      const answer = await service.deleteSessionsBySession(session!);
       const { ok: succeeded, message } = envelopeOf(answer);
       if (!succeeded) return refused(message ?? "Could not disconnect.");
       // Back to Surfaces with nothing selected: the session is gone.

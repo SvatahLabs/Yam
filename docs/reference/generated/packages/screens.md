@@ -64,6 +64,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 | `loadRecord` | function | `export async function loadRecord(` | Load the **record** mode's half of a Session (TV-M04). |
 | `loadSurface` | function | `export async function loadSurface(` | Load the **do** mode's half of a Session (TV-M04). |
 | `modeFrom` | function | `export function modeFrom(value: unknown): SessionMode` | `--mode`, validated against the model's own list; `do` when unsaid. |
+| `needsProject` | function | `export function needsProject(screen: ScreenId): boolean` |  |
 | `outcomeOf` | function | `export function outcomeOf(summary: SummaryResponse): Pill` | How a summary's outcome reads, in one place (T10.4 added `stopped`). |
 | `parseBinding` | function | `export function parseBinding(text: string): BindingFileResponse \| undefined` | One binding file's YAML → the shape a screen reads, or `undefined`. |
 | `Pill` | interface | `export interface Pill` | A pill: a word, and the tone that colours it. The word is never omitted. |

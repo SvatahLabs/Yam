@@ -132,6 +132,15 @@ const targetsOutputSchema = resultEnvelopeSchema.extend({
         platform: z.array(z.string()),
         reason: z.string().optional(),
         prerequisites: z.array(z.string()).optional(),
+        /*
+         * The one command that would make it available (`AX-06`, PK-03).
+         *
+         * Not part of the fingerprint: `catalogueFingerprint()` is derived from
+         * operation names, flags, tool names and paths, so an optional field on
+         * a response is a thing a client may read and never a thing that makes
+         * two Yams incompatible.
+         */
+        install: z.string().optional(),
       }),
     ),
   }),

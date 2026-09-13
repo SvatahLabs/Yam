@@ -211,6 +211,15 @@ export interface RailItemProps extends Named {
   readonly count?: number | string;
   readonly onPress?: () => void;
   readonly icon?: ReactNode;
+  /**
+   * Why this destination cannot be reached yet — "needs a project" (`AX-04`).
+   *
+   * A short phrase, drawn on the row and part of the accessible name, so a
+   * screen reader hears the condition *with* the destination rather than after
+   * pressing it. Seven of the nine rail items led to the same wall and none of
+   * them said so first.
+   */
+  readonly needs?: string;
 }
 
 /**
@@ -218,15 +227,34 @@ export interface RailItemProps extends Named {
  *
  * A real `<button>` with `aria-current`, not a link: nothing navigates, and a
  * link that goes nowhere is a promise a screen reader repeats.
+ *
+ * ## A closed door is drawn closed (`AX-04`)
+ *
+ * `needs` marks a destination whose precondition is not met. It is
+ * `aria-disabled` rather than `disabled`, because the row still does something
+ * — it offers the thing that would open it — and a `disabled` button is removed
+ * from the tab order, which would hide the row from the person most likely to
+ * be lost. The phrase is part of the accessible name, so it is heard with the
+ * destination and not discovered by arriving at a wall.
  */
 export function RailItem(props: RailItemProps): React.JSX.Element {
   const label = requireNamed("RailItem", props);
+  const blocked = props.needs !== undefined;
   return (
     <button
       id={props.id}
       type="button"
-      className={props.active === true ? "sv-rail-item sv-rail-active" : "sv-rail-item"}
+      className={
+        [
+          "sv-rail-item",
+          props.active === true ? "sv-rail-active" : "",
+          blocked ? "sv-rail-blocked" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")
+      }
       {...(props.active === true ? { "aria-current": "page" as const } : {})}
+      {...(blocked ? { "aria-disabled": true as const, "aria-label": `${label}, ${props.needs!}` } : {})}
       onClick={props.onPress}
     >
       {props.icon === undefined ? null : (
@@ -235,6 +263,11 @@ export function RailItem(props: RailItemProps): React.JSX.Element {
         </span>
       )}
       <span className="sv-rail-label">{label}</span>
+      {blocked ? (
+        <span className="sv-rail-needs" aria-hidden="true">
+          {props.needs}
+        </span>
+      ) : null}
       {props.count === undefined ? null : <span className="sv-rail-count">{props.count}</span>}
     </button>
   );

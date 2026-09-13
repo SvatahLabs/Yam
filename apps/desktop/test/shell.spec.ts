@@ -1275,6 +1275,74 @@ async function atWidth<T>(px: number, read: () => Promise<T>): Promise<T> {
   }
 }
 
+/**
+ * `AX-17` — the window is used, at every size.
+ *
+ * Responsive is two properties and only one of them was ever checked. "Nothing
+ * is cut off" passes at every width for a layout pinned to the left edge with a
+ * field of nothing beside it; and it passes at 420 for a layout whose main
+ * region is twenty pixels wide, because twenty pixels of a scrolling column
+ * cuts nothing off either.
+ *
+ * So both: the main region's width **grows** with the window, and the first
+ * task is **on screen and reachable** at every one of the five widths. The
+ * numbers come from the layout, not from the stylesheet: a media query that
+ * exists and does not apply is the defect this is looking for.
+ */
+test("the work grows with the window and nothing is lost when it shrinks (AX-17)", async () => {
+  await goTo("session", "Session");
+
+  const widths = [1920, 1440, 1100, 760, 420];
+  const measured: Array<{ width: number; main: number; task: boolean; rail: boolean }> = [];
+  for (const width of widths) {
+    measured.push(
+      await atWidth(width, async () =>
+        page.evaluate((at: number) => {
+          const main = document.querySelector("main.sv-workspace") as HTMLElement;
+          const rail = document.querySelector("nav.sv-rail") as HTMLElement | null;
+          const onScreen = (one: Element | null): boolean => {
+            if (one === null) return false;
+            const box = one.getBoundingClientRect();
+            return box.width > 0 && box.height > 0 && box.left >= 0 && box.right <= at + 1;
+          };
+          return {
+            width: at,
+            main: Math.round(main.getBoundingClientRect().width),
+            /* The connect field, which is the only task on a fresh window. */
+            task: onScreen(document.querySelector("#surfaces-url")),
+            rail: onScreen(rail),
+          };
+        }, width),
+      ),
+    );
+  }
+
+  const say = measured
+    .map((one) => `${String(one.width)}→main ${String(one.main)}px`)
+    .join("  ");
+
+  for (const one of measured) {
+    expect(one.task, `the first task is not on screen at ${String(one.width)}px — ${say}`).toBe(
+      true,
+    );
+    expect(one.rail, `the navigation is gone at ${String(one.width)}px — ${say}`).toBe(true);
+    /*
+     * A floor as well as a direction. At 420 the rail's minimum and the
+     * inspector's came to 400 of the 420 available, which left the work twenty
+     * pixels wide — a number that is monotonic with the window and useless.
+     */
+    expect(one.main, `the work is ${String(one.main)}px at ${String(one.width)}px — ${say}`)
+      .toBeGreaterThan(one.width * 0.35);
+  }
+
+  for (let at = 1; at < measured.length; at += 1) {
+    expect(
+      measured[at - 1]!.main,
+      `the work does not grow between ${String(measured[at]!.width)} and ${String(measured[at - 1]!.width)} — ${say}`,
+    ).toBeGreaterThan(measured[at]!.main);
+  }
+});
+
 test("the Record screen's toolbar keeps its title, its select and availableWhen (P10-F3)", async () => {
   await goToMode("record");
   await expect(page.locator("#record-gateway")).toBeVisible({ timeout: 60_000 });
@@ -1370,8 +1438,17 @@ test("the Record screen's toolbar keeps its title, its select and availableWhen 
 });
 
 test("a toolbar that runs out of room sheds into the palette, and says so (P10-F3)", async () => {
-  await goToMode("record");
-  await expect(page.locator("#record-gateway")).toBeVisible({ timeout: 60_000 });
+  /*
+   * Flows, not Session in record mode.
+   *
+   * Shedding is what a bar does when it has more controls than room, and
+   * `AX-05` means a bar with nothing available now has no controls at all — on
+   * a window with nothing connected, which is the state this suite's app is in,
+   * Record's bar is empty and there is nothing to shed. Flows has a project
+   * open and a full bar, which is the condition the rule is about.
+   */
+  await goTo("flows", "Flows");
+  await expect(page.locator("#toolbar-title")).toHaveText("Flows", { timeout: 60_000 });
 
   const read = async () =>
     await page.evaluate(() => {
@@ -1409,7 +1486,16 @@ test("a toolbar that runs out of room sheds into the palette, and says so (P10-F
    * title never goes under its floor, the hint counts what went, and a primary
    * is never shed while a secondary is still on the bar.
    */
-  const widths = [1900, 1700, 1500, 1300, 1100, 900, 760];
+  /*
+   * Down to 980, which is still one row (the wrap is at 960).
+   *
+   * The sweep stopped at 1100 because Session in record mode drew ten buttons
+   * and overflowed there. `AX-05` took the unavailable ones off the bar, so the
+   * fullest bar this suite can reach — Flows, with a project open — now fits at
+   * 1100 and the sweep stopped biting. The rule has not changed; the width at
+   * which it bites has.
+   */
+  const widths = [1900, 1700, 1500, 1300, 1100, 980, 900, 760];
   const seen: Array<Awaited<ReturnType<typeof read>> & { width: number }> = [];
   for (const width of widths) {
     seen.push({ width, ...(await atWidth(width, read)) });
@@ -1702,19 +1788,57 @@ test("Session offers only the mode's own actions (REQ-ADE-14)", async () => {
    * Seventeen actions on one bar is what the merge produced, and there is no
    * window width at which seventeen fit. Which mode an action belongs to is the
    * action's own property, so the bar can ask.
+   *
+   * This used to count the buttons in each mode and require more than nought.
+   * It cannot any more, and the reason is `AX-05`: a bar whose controls are all
+   * unavailable is not drawn, and on a window with nothing connected neither
+   * mode's are. Nought is the *right* answer there, so counting has stopped
+   * being a measurement of anything — a test that forbade nought would be a
+   * test holding the old design in place.
+   *
+   * So the claim is checked where it is made. The scoping is the **model's**:
+   * each mode's set is smaller than the union and differs from the others'. The
+   * bar's part is the negative one: nothing it draws belongs to another mode,
+   * which holds at any availability, including none.
    */
-  const countFor = async (mode: "record" | "do") => {
-    await goToMode(mode);
-    return await page.evaluate(
-      () => document.querySelectorAll(".sv-toolbar [data-toolbar-action]").length,
-    );
+  /*
+   * A dynamic import: `apps/desktop` is CommonJS here (see the note at the top
+   * of this file) and `@svatah/yam-screens` is ESM-only, so it cannot be
+   * required at the top.
+   */
+  const { ACTIONS } = (await import("@svatah/yam-screens")) as {
+    ACTIONS: ReadonlyArray<{ id: string; screen: string; modes?: readonly string[] }>;
   };
-  const inRecord = await countFor("record");
-  const inDo = await countFor("do");
-  expect(inRecord, "Record offers no actions").toBeGreaterThan(0);
-  expect(inDo, "Do offers no actions").toBeGreaterThan(0);
-  /* Each mode shows fewer than the union: that is the whole point of scoping. */
-  expect(Math.max(inRecord, inDo), `record=${inRecord} do=${inDo}`).toBeLessThan(17);
+  const onSession = ACTIONS.filter((one) => one.screen === "session");
+  const forMode = (mode: string): string[] =>
+    onSession
+      .filter((one) => one.modes === undefined || one.modes.includes(mode))
+      .map((one) => one.id);
+
+  const record = forMode("record");
+  const say = forMode("say");
+  const doing = forMode("do");
+  expect(onSession.length, "Session offers nothing at all").toBeGreaterThan(10);
+  for (const [name, set] of [["record", record], ["say", say], ["do", doing]] as const) {
+    expect(set.length, `${name} has no actions in the model`).toBeGreaterThan(0);
+    expect(set.length, `${name} has all of them, so the scoping does nothing`).toBeLessThan(
+      onSession.length,
+    );
+  }
+  expect(new Set([record.join(","), say.join(","), doing.join(",")]).size, "two modes are equal")
+    .toBeGreaterThan(1);
+
+  for (const mode of ["record", "do"] as const) {
+    await goToMode(mode);
+    const drawn = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>(".sv-toolbar [data-toolbar-action]")].map(
+        (one) => one.dataset["toolbarAction"] ?? "",
+      ),
+    );
+    for (const id of drawn) {
+      expect(forMode(mode), `${id} is drawn in ${mode} and does not belong to it`).toContain(id);
+    }
+  }
 });
 
 test("a live session says so where every mode can see it (P-W2-F7)", async () => {

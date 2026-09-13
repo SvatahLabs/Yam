@@ -189,6 +189,34 @@ const SECTION_OF_EXTRA: Readonly<Record<string, SectionId>> = {
   run: "activity",
 };
 
+/**
+ * The screens that are about a project, named one at a time (`AX-04`).
+ *
+ * The app decided this by *section* — everything under Automations and
+ * Activity — which shut seven destinations and was wrong about two of them.
+ * Agents and tools is about the sessions an agent holds and the tools this
+ * service exposes; a person with no project can connect an agent and watch it
+ * drive. Sending them to "open a project first" is a door drawn closed over a
+ * door that was open.
+ *
+ * Here rather than in either renderer, because "does this need a project" is a
+ * fact about the screen and both renderers have to agree about it.
+ */
+const PROJECT_SCREENS: ReadonlySet<string> = new Set([
+  "flows",
+  "bindings",
+  "api",
+  "data",
+  "import",
+  "runs",
+  "run",
+  "heal",
+]);
+
+export function needsProject(screen: ScreenId): boolean {
+  return PROJECT_SCREENS.has(screen);
+}
+
 export function sectionOf(screen: ScreenId): SectionId {
   for (const section of SECTIONS) if (section.rail.includes(screen)) return section.id;
   return SECTION_OF_EXTRA[screen] ?? "session";

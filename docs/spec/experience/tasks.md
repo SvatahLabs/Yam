@@ -37,24 +37,49 @@ changing it afterwards would rewrite all of them a second time.
 
 ## Wave E1 — the app's shape
 
-- [ ] **E1.1** The first task above everything on a window with nothing
+- [x] **E1.1** The first task above everything on a window with nothing
   connected; the toolbar drawn only when there is something to act on. `AX-01`,
   `AX-05`
-- [ ] **E1.2** Destinations that need a project say so on the navigation, and one
+  — the bar draws what works first and draws nothing when nothing works. The
+  last button keeping it alive was **Recheck targets**, which acts on the list
+  of targets, so it moved onto the list.
+- [x] **E1.2** Destinations that need a project say so on the navigation, and one
   invitation to open one replaces seven walls. `AX-04`
-- [ ] **E1.3** Say takes a sentence in the app. The grounding half is `TV-T07c`'s
+  — and two of the seven did not need one. Which screens are a project's is
+  `needsProject` in the model now, not "everything under Automations and
+  Activity": Agents and tools is about the sessions an agent holds.
+- [x] **E1.3** Say takes a sentence in the app. The grounding half is `TV-T07c`'s
   and stays out of scope; the field, the history and the zero state are not.
   `AX-02`
-- [ ] **E1.4** Disconnect is available wherever a session is open, in every mode.
+  — the line is held and said to be held, in the same words the cockpit uses.
+- [x] **E1.4** Disconnect is available wherever a session is open, in every mode.
   `AX-03`
-- [ ] **E1.5** Adapters become a status with one disclosure; the MCP
+  — it asked for `selected`, a parameter only Do's session list sets. A session
+  being open is a fact about the broker; when exactly one is, the action does
+  not need to be told which, and when more than one is it says so.
+- [x] **E1.5** Adapters become a status with one disclosure; the MCP
   configuration block leaves the first screen. `AX-06`
-- [ ] **E1.6** The window is used at every size: the main region grows, and a
+  — "Ready here" is a sentence; the rest are behind *Other ways to connect*
+  with the command each needs, which is the adapter's own probe `install` and
+  not a description of the condition. It had to be threaded through the
+  contract to get here.
+- [x] **E1.6** The window is used at every size: the main region grows, and a
   context column arrives where there is room. `AX-17`
-- [ ] **E1.7** Screens for observing, for handing a target to an agent and taking
+  — measured in the packaged window at 1920, 1440, 1100, 760 and 420. It found
+  the narrow end: at 420 the rail's minimum and the inspector's came to 400 of
+  the 420 there were, and the work was **four pixels wide**.
+- [x] **E1.7** Screens for observing, for handing a target to an agent and taking
   it back, for healing, and for a run's report. `AX-18`
-- [ ] **E1.8** Recents separate the person's projects from the app's scratch
+  — all four exist; what did not was anything checking they could be *got to*.
+  Reachability is a closure from the rail through the actions' own `goTo`, and
+  the first version of it reported Heal review unreachable because it only
+  looked one hop deep.
+- [x] **E1.8** Recents separate the person's projects from the app's scratch
   workspaces. `AX-12`
+  — two causes: a directory under the user-data directory is the app's own, and
+  a directory that is gone is nowhere to go back to. The three in the
+  walkthrough were this suite's temporary projects, recorded when it drove the
+  packaged app and deleted when it finished.
 
 ## Wave E2 — what a screen reader hears
 

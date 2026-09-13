@@ -29,7 +29,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-recorder`](recorder.md) | 51 | Grounding, record session and report |
 | [`@svatah/yam-runtime`](runtime.md) | 50 | Runner-agnostic executor core: scope, guards, checkpoints, policies, results, audit |
 | [`@svatah/yam-schema`](schema.md) | 185 | Zod definitions and generated JSON Schemas for the Yam artifact contracts |
-| [`@svatah/yam-screens`](screens.md) | 124 | The headless screen model: one set of screens, actions and keys behind the app, `yam ui`, the SDK and the CLI |
+| [`@svatah/yam-screens`](screens.md) | 125 | The headless screen model: one set of screens, actions and keys behind the app, `yam ui`, the SDK and the CLI |
 | [`@svatah/yam-sdk`](sdk.md) | 17 | The typed TypeScript client for the Yam local service, generated from its OpenAPI description (REQ-SDK-1) |
 | [`@svatah/yam-service`](service.md) | 17 | Local HTTP and event-stream service (yam serve) |
 | [`@svatah/yam-spec`](spec.md) | 54 | Flow reader, grammar, target dictionary, signatures |

@@ -29,6 +29,15 @@ export interface AdapterReadiness {
    * `version` is what it said its version was.
    */
   probe?: AdapterProbe;
+  /**
+   * The single command that would make this adapter available (`AX-06`, PK-03).
+   *
+   * Lifted out of `probe` so that a caller which only wants to *say* it does
+   * not have to know the probe's shape. `prerequisites` beside it is prose —
+   * "Appium server", "target device/emulator" — which describes the condition;
+   * this is the thing you type.
+   */
+  install?: string;
   /** The versions this repository has driven. Not a claim about others. */
   range?: string;
 }
@@ -126,6 +135,7 @@ export async function probeAdapters(registeredAdapters: string[]): Promise<Adapt
          */
         available: table.registered && probe.present,
         ...(probe.present ? {} : { reason: probe.reason ?? table.reason }),
+        ...(probe.install === undefined ? {} : { install: probe.install }),
         ...(DRIVEN_RANGES[name] === undefined ? {} : { range: DRIVEN_RANGES[name] }),
       } satisfies AdapterReadiness;
     }),

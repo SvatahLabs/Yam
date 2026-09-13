@@ -35,6 +35,7 @@ import {
   type ScreenId,
   type ScreenParams,
   type ScreenStateBase,
+  needsProject,
 } from "@svatah/yam-screens";
 import {
   Alert,
@@ -500,10 +501,28 @@ export function Shell(props: ShellProps): React.JSX.Element {
    * because a screen that needed a sixth would be a screen the shell knows
    * something about.
    */
-  /** Whether a screen is about a project rather than a surface (T17). */
-  const needsProject = (screen: string): boolean => {
-    const section = sectionOf(screen as Parameters<typeof sectionOf>[0]);
-    return section === "automations" || section === "activity";
+  /**
+   * Whether this destination is shut, right now (`AX-04`).
+   *
+   * Which screens are about a project is the model's — `needsProject` in
+   * `@svatah/yam-screens` — and not a section heuristic. Deciding it by section
+   * shut seven destinations and was wrong about Agents and tools, which is
+   * about the sessions an agent holds and needs no project at all.
+   */
+  const shut = (screen: string): boolean =>
+    props.projectless === true && needsProject(screen as Parameters<typeof needsProject>[0]);
+
+  /**
+   * The one invitation (`AX-04`).
+   *
+   * There were seven walls, one per destination, each a paragraph telling you
+   * to press a button somewhere else. The invitation is the button.
+   */
+  const inviteProject = (): void => {
+    void (async () => {
+      const chosen = await bridge().pickFile("directory");
+      if (chosen !== null) await props.onOpenProject?.(chosen);
+    })();
   };
 
   function screenBody(): React.ReactNode {
@@ -524,14 +543,33 @@ export function Shell(props: ShellProps): React.JSX.Element {
      * "New flow" writes into a directory nobody chose. Say what is needed
      * instead, and where to get it. Surfaces and Settings need no project.
      */
-    if (props.projectless === true && needsProject(state.screen)) {
+    if (shut(state.screen)) {
+      /*
+       * One invitation, and it is a button (`AX-04`, `AX-07`).
+       *
+       * This paragraph was reached from seven rail destinations, and it read
+       * "…is about a project — its flows, bindings, runs and proposals — and
+       * none is open", with the section's name in a node of its own: a screen
+       * reader began the sentence at "is about a project", which has no
+       * subject (`B3`). It then said "Surfaces needs no project", and Surfaces
+       * had been renamed Session two drafts earlier (`B4`).
+       *
+       * The rail now says which doors are shut before they are pressed, so
+       * arriving here at all means the palette or a link sent you. What is
+       * needed is the way in, not a description of the way in.
+       */
+      const section = SECTIONS.find((one) => one.id === sectionOf(state.screen))?.label ?? "This section";
       return (
         <div className="sv-editor" id="project-needed" aria-label="A project is needed">
-          <p className="sv-empty">
-            {SECTIONS.find((one) => one.id === sectionOf(state.screen))?.label ?? "This section"} is
-            about a project — its flows, bindings, runs and proposals — and none is open. Choose one
-            with <b>Open a project</b> in the top bar. Surfaces needs no project.
-          </p>
+          <div className="sv-invite">
+            <h2>Open a project to use {section}</h2>
+            <p>
+              {section} is about a project: its flows, its bindings, its runs and the proposals a
+              promotion writes. Session needs no project — it connects to a browser, an app, a
+              device or an API on its own.
+            </p>
+            <Button id="invite-open-project" label="Open a project" onPress={inviteProject} />
+          </div>
         </div>
       );
     }
@@ -568,7 +606,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
   function inspectorBody(): React.ReactNode {
     if (state === undefined) return null;
     // A project screen with no project has nothing to inspect (T17).
-    if (props.projectless === true && needsProject(state.screen)) return null;
+    if (shut(state.screen)) return null;
     const shared = {
       params,
       actions,
@@ -643,12 +681,7 @@ export function Shell(props: ShellProps): React.JSX.Element {
           label={projectLabel === undefined ? "Open a project" : `Project: ${projectLabel}`}
           variant="ghost"
           title="Choose the project whose flows, bindings and runs Automations and Activity show"
-          onPress={() => {
-            void (async () => {
-              const chosen = await bridge().pickFile("directory");
-              if (chosen !== null) await props.onOpenProject?.(chosen);
-            })();
-          }}
+          onPress={inviteProject}
         />
         {/*
           The projects you had open, while none is (T20).
@@ -748,8 +781,21 @@ export function Shell(props: ShellProps): React.JSX.Element {
                * only something reading the accessibility tree can see: the
                * suite that checks names here looks for *missing* ones.
                */
-              aria-label={`${section.label} section`}
+              aria-label={
+                shut(defaultScreenOf(section.id))
+                  ? `${section.label} section, needs a project`
+                  : `${section.label} section`
+              }
+              {...(shut(defaultScreenOf(section.id)) ? { "aria-disabled": true as const } : {})}
               onClick={() => {
+                /*
+                 * A shut section offers what would open it (`AX-04`). It used
+                 * to navigate to a wall that named a button in the top bar.
+                 */
+                if (shut(defaultScreenOf(section.id))) {
+                  inviteProject();
+                  return;
+                }
                 setParams({});
                 setLastOutcome(undefined);
                 setShowing(defaultScreenOf(section.id));
@@ -769,7 +815,12 @@ export function Shell(props: ShellProps): React.JSX.Element {
                  */
                 label={a11yVariant() === 1 && one === "flows" ? "Editor" : screenById(one).title}
                 active={showing === one}
+                {...(shut(one) ? { needs: "needs a project" } : {})}
                 onPress={() => {
+                  if (shut(one)) {
+                    inviteProject();
+                    return;
+                  }
                   // A rail click is a fresh screen, not the last one's selection.
                   setParams({});
                   setLastOutcome(undefined);

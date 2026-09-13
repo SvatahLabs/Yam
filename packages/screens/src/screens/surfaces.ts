@@ -65,6 +65,8 @@ export interface SurfaceAdapterRow {
   readonly reason?: string;
   /** What a person would have to install or grant to make it available. */
   readonly prerequisites: readonly string[];
+  /** The one command that would make it available, where there is one (`AX-06`). */
+  readonly install?: string;
   readonly pill: Pill;
 }
 
@@ -412,6 +414,7 @@ function adapterRows(result: Record<string, unknown> | undefined): SurfaceAdapte
       platform: Array.isArray(row["platform"]) ? (row["platform"] as string[]) : [],
       ...(typeof row["reason"] === "string" ? { reason: row["reason"] } : {}),
       prerequisites: Array.isArray(row["prerequisites"]) ? (row["prerequisites"] as string[]) : [],
+      ...(typeof row["install"] === "string" ? { install: row["install"] } : {}),
       pill: adapterPill(available, registered),
     };
   });
