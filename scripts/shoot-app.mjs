@@ -185,14 +185,16 @@ try {
    * row and screenshotted the wrong screen.
    */
   const goTo = async (screen) => {
-    const rail = page.locator(`#rail-${screen}`);
+    /* `session-record` is Session with its Record mode chosen, not a rail row. */
+    const target = screen === "session-record" ? "session" : screen;
+    const rail = page.locator(`#rail-${target}`);
     if ((await rail.count()) > 0) {
       await rail.click();
     } else {
       await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
       const palette = page.getByRole("dialog", { name: "Command palette" });
       await palette.waitFor({ timeout: 30_000 });
-      await page.locator(`#palette-go-${screen}`).click();
+      await page.locator(`#palette-go-${target}`).click();
     }
     await sleep(900);
   };
@@ -230,7 +232,15 @@ try {
         .click()
         .catch(() => undefined);
     }],
-    ["record", async () => undefined],
+    /*
+     * Record is a *mode* of Session, not a screen (Draft 2.27). This asked the
+     * palette for `go-record`, which has not existed since the merge, and the
+     * script waited thirty seconds and died.
+     */
+    ["session-record", async () => {
+      await page.locator("#session-mode-record").click().catch(() => undefined);
+      await sleep(400);
+    }],
     ["heal", async () => undefined],
     ["agents", async () => undefined],
     ["api", async () => {
@@ -244,7 +254,13 @@ try {
         .click()
         .catch(() => undefined);
     }],
-    ["explorer", async () => undefined],
+    /*
+     * `session`, not `explorer`. Explorer was renamed Flows in Draft 2.11 and
+     * Surfaces became Session in Draft 2.27; this list kept shooting a rail
+     * item that has not existed for two drafts, so `app-explorer.png` was a
+     * screenshot of whatever the app happened to be showing.
+     */
+    ["session", async () => undefined],
     ["import", async () => undefined],
     ["settings", async () => undefined],
   ];

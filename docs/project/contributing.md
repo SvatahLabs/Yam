@@ -1,5 +1,11 @@
 # Contributing
 
+**The contributing guide now lives at [CONTRIBUTING.md](../../CONTRIBUTING.md)**,
+where GitHub looks for it and where a new contributor will find it.
+
+This page keeps the parts that are about the repository's own rules rather than
+about sending a change.
+
 ## The contract
 
 Requires Node 22 LTS and pnpm. A clean checkout that runs these six, with no

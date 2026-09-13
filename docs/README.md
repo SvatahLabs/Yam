@@ -10,18 +10,28 @@ runs rather than written.
 
 The documentation is organised by what you are trying to do.
 
-| If you want to… | Read |
+| If you want to | Read |
 |---|---|
-| install Yam and control something | [Install and first control](getting-started/install-and-first-control.md) |
+| install it and run something | [Setup](setup.md) |
+| see everything Yam does | [Features](features.md) |
+| learn from working examples | [Examples](examples.md) |
+| look up a command, tool or endpoint | [API reference](api.md) |
 | get bindings into an existing Playwright suite | [Playwright quick start](getting-started/playwright-quick-start.md) |
 | do one specific task | [Guides](#guides) |
 | understand how and why it works | [Concepts](#concepts) |
-| look something up | [Reference](#reference) |
-| work on Yam itself | [Project](#project) |
+| work on Yam itself | [Developer guide](developer-guide.md) |
+| send a change | [Contributing](../CONTRIBUTING.md) |
 
-## Getting started
+## Start here
 
-1. [Install Yam and control something](getting-started/install-and-first-control.md), from `npm install` to a browser and a native application driven by hand — including which permissions macOS wants and, more importantly, *which program* it grants them to.
+1. [Setup](setup.md), from `npm install` to a working machine, including the
+   permissions macOS wants and which program it grants them to.
+2. [Features](features.md), what Yam does, one feature at a time, with pictures.
+3. [Examples](examples.md), working code for the things people do most.
+
+## Getting started, in detail
+
+1. [Install Yam and control something](getting-started/install-and-first-control.md), from `npm install` to a browser and a native application driven by hand.
 2. [Bindings in a plain Playwright project](getting-started/playwright-quick-start.md), the smaller thing to adopt if you already have a Playwright suite.
 3. [Your first flow](getting-started/first-flow.md), from `yam init` to a replayed plan.
 4. [One plan, three ways to run it](getting-started/one-plan-three-ways.md), as a test, a workflow and an agent tool.
@@ -52,6 +62,7 @@ The documentation is organised by what you are trying to do.
 
 Written by hand:
 
+- [API reference](api.md), the four ways in and which to pick
 - [The flow language](flow-language.md), every sentence pattern and IR action
 - [The agent surface contract](agent-surface.md), what an adapter implements
 - [MCP](mcp.md), the operation tools and the raw surface
@@ -60,7 +71,7 @@ Written by hand:
 
 Generated from the code by `pnpm docs`, and checked in CI so they cannot drift:
 
-- [Support matrix](reference/generated/support-matrix.md) — which adapters have been driven, and how far
+- [Support matrix](reference/generated/support-matrix.md), which adapters have been driven and how far
 - [The `yam` command line](reference/generated/cli.md)
 - [Packages and their exports](reference/generated/packages/README.md)
 - [JSON Schemas](reference/generated/schemas/README.md)
@@ -72,5 +83,5 @@ Generated from the code by `pnpm docs`, and checked in CI so they cannot drift:
 - [Changelog](../CHANGELOG.md) · [Versioning](project/versioning.md)
 - [Reports](project/reports.md), the published numbers and how to regenerate them
 - [Continuous integration](ci.md)
-- [Contributing](project/contributing.md) · [Security](project/security.md)
+- [Contributing](../CONTRIBUTING.md) · [Developer guide](developer-guide.md) · [Security](project/security.md)
 - [The specification](spec/), the source of truth: [requirements](spec/requirements.md), [HLD](spec/hld.md), [LLD](spec/lld.md), [tasks](spec/tasks.md), and every phase's [record and verification](spec/progress/)

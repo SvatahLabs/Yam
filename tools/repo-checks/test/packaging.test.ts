@@ -175,6 +175,24 @@ describe("module (a) resolves no module (b) package (REQ-PKG-1)", () => {
 describe("the README carries the quick start and the numbers (T1.9)", () => {
   const readme = readFileSync(fromRoot("README.md"), "utf8");
 
+  /*
+   * The front door is three files now, not one.
+   *
+   * T1.9 was written when `README.md` was the only documentation, so it asked
+   * that file for everything a newcomer needs. A newcomer and a contributor
+   * want different things, and one page answering both served neither: the
+   * quick start sat under a package table, and the build contract sat under the
+   * healing numbers.
+   *
+   * What each assertion below asks for has not changed. Where it looks has.
+   * `CONTRIBUTING.md` is where GitHub sends somebody about to send a change,
+   * and `docs/developer-guide.md` is where the module boundary is explained, so
+   * those are where the build contract and the module (a) list belong.
+   */
+  const contributing = readFileSync(fromRoot("CONTRIBUTING.md"), "utf8");
+  const developer = readFileSync(fromRoot("docs/developer-guide.md"), "utf8");
+  const frontDoor = `${readme}\n${contributing}\n${developer}`;
+
   it("shows the one dependency and the one import", () => {
     expect(readme).toContain("npm install --save-dev @svatah/yam-playwright-test");
     expect(readme).toContain('import { test, expect } from "@svatah/yam-playwright-test";');
@@ -190,7 +208,9 @@ describe("the README carries the quick start and the numbers (T1.9)", () => {
 
   it("lists the packages module (a) publishes", () => {
     for (const pkg of MODULE_A) {
-      expect(readme, `the README does not list @svatah/${pkg}`).toContain(`${specifierOf(pkg)}`);
+      expect(frontDoor, `nothing a newcomer reads lists @svatah/${pkg}`).toContain(
+        `${specifierOf(pkg)}`,
+      );
     }
   });
 
@@ -199,8 +219,8 @@ describe("the README carries the quick start and the numbers (T1.9)", () => {
     // `pnpm browsers` exists so it is a step rather than an incantation; the
     // longer form is documented beside it because that is what fails when the
     // step is missed.
-    expect(readme).toContain("pnpm browsers");
-    expect(readme).toContain("pnpm exec playwright install chromium");
+    expect(frontDoor).toContain("pnpm browsers");
+    expect(frontDoor).toContain("pnpm exec playwright install chromium");
   });
 
   it("provides `pnpm browsers` and a root Playwright to run it with", () => {
@@ -224,8 +244,11 @@ describe("the README carries the quick start and the numbers (T1.9)", () => {
     const contract = ["pnpm install", "pnpm browsers", "pnpm -r build", "pnpm -r test"];
     let at = -1;
     for (const command of contract) {
-      const next = readme.indexOf(command, at + 1);
-      expect(next, `the README does not document \`${command}\` after the previous step`).toBeGreaterThan(at);
+      const next = contributing.indexOf(command, at + 1);
+      expect(
+        next,
+        `CONTRIBUTING.md does not document \`${command}\` after the previous step`,
+      ).toBeGreaterThan(at);
       at = next;
     }
   });
