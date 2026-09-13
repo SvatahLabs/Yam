@@ -254,9 +254,18 @@ What is in place now:
     started it. It earned its place immediately: the first failure after it
     landed read *"pid unknown, started by an unnamed build of Yam"*, which is a
     broker predating the change and still alive, and that is what pointed at the
-    reaping.
+    reaping;
+  * and a fifth broker-using suite that nothing had noticed: `tools/repo-checks`
+    mentions the broker nowhere, and `self-gate-reports.test.ts` runs
+    `yam eval self`, which connects to a surface, which starts one. Found by
+    counting the processes left after a green run rather than by reading the
+    code — one survivor with every directory clean means the machine's own
+    directory, which is the fixture the other four had stopped using.
 
-Two attempts went wrong on the way and both are worth keeping. A **fixed**
+Three consecutive full runs since: 4,654 tests, exit 0, **no broker and no state
+directory left behind** by any of them. It failed about one run in three before.
+
+Two more attempts went wrong on the way and both are worth keeping. A **fixed**
 per-package directory name is worse than the shared one: a descriptor left by a
 previous run names a pid that may since have been recycled, so the next run's
 broker finds "a broker is already running" and exits 0. And the MCP SDK's
