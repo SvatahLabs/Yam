@@ -181,7 +181,9 @@ Module (b) is the command line and everything under it:
 
 | Package | What it is |
 |---|---|
-| [`@svatah/yam`](packages/cli) | The `yam` CLI and MCP server. **The one dependency for the whole runtime.** |
+| [`@svatah/yam`](packages/cli) | The `yam` CLI. **The one dependency for the whole runtime**, and what the app stages. |
+| [`@svatah/yam-mcp`](packages/mcp) | The MCP server, and the six megabytes of SDK it needs. `npx -y @svatah/yam-mcp` is what an agent's configuration says; it was `yam mcp` until the packaging wave moved it out of the base install. |
+| [`@svatah/yam-contract`](packages/contract) | The operation catalogue and the fingerprint two builds agree on. Never installed directly; all three depend on it. |
 | [`@svatah/yam-spec`](packages/spec), [`-steps`](packages/steps), [`-compiler`](packages/compiler) | The flow reader and grammar, Tier 0 typed steps, the tiered compiler and lint |
 | [`@svatah/yam-runtime`](packages/runtime), [`-host-playwright`](packages/host-playwright) | The executor, and the Playwright Test host |
 | [`@svatah/yam-workflow`](packages/workflow), [`-tool`](packages/tool), [`-trajectory`](packages/trajectory) | The workflow and tool behaviors, and trajectory capture |
