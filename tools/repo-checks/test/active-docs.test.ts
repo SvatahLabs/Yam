@@ -9,7 +9,7 @@
  * "Active" means what a *user* reads: `README.md`, `docs/**` and `examples/**`,
  * minus `docs/spec/**` (the specification, which is allowed to describe what is
  * proposed) and `docs/reference/generated/**` (which is derived and checked by
- * `pnpm docs --check`).
+ * `pnpm docs:check`).
  */
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";

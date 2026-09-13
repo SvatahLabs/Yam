@@ -10,7 +10,7 @@ captured (REQ-AGT-2, REQ-BEH-4, LLD §15, §13.4).
   "mcpServers": {
     "yam": {
       "command": "npx",
-      "args": ["@svatah/yam", "mcp"]
+      "args": ["-y", "@svatah/yam-mcp"]
     }
   }
 }
@@ -22,7 +22,7 @@ captured (REQ-AGT-2, REQ-BEH-4, LLD §15, §13.4).
   "mcpServers": {
     "yam": {
       "command": "npx",
-      "args": ["@svatah/yam", "mcp", "/path/to/the/project"]
+      "args": ["-y", "@svatah/yam-mcp", "/path/to/the/project"]
     }
   }
 }

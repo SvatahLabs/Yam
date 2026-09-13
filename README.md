@@ -1,39 +1,80 @@
 # Yam
 
-**Write a test once in plain English. Yam learns the real buttons. Then it replays without a model.**
+**Give an AI agent hands. It drives a browser, a desktop app, an API or a terminal, and you can watch it work.**
 
 Yam is an automation runtime from [Svatah Labs](https://github.com/SvatahLabs).
-You describe what you want in sentences. Yam drives the real app once and
-records which element each sentence means. After that, every run is a replay.
-No model runs during a replay, so runs are fast, cheap, and the same every time.
+It ships an MCP server, so any agent that speaks the Model Context Protocol can
+drive a real application through one set of tools. You and the agent share the
+same session, so you can watch what it does and take the controls back.
+
+Everything the agent does can be saved and replayed later with no model running
+at all.
 
 ![Yam driving a real website](docs/images/yam-drives-a-site.gif)
 
 Yam opening a site, going to the docs, filling a login form, and reading the
 error. Every step went through Yam's own tools.
 
-## Why people use it
+## Give an agent hands
 
-**Tests stop breaking when the page changes.** Yam saves five ways to find each
-element, plus a fingerprint of what the element looked like. When a button moves
-or gets renamed, Yam finds it again from that fingerprint. It marks the run
-`healed`, never `passed`, so you always know a repair happened.
+### What your agent gets
 
-**A run costs nothing to repeat.** A model is used once, when you record. The
-replay reads a file. There is no API bill and no waiting.
+Point your agent at Yam's MCP server and it gets 14 tools that work without a
+Yam project. Point it at a project and it gets 8 more.
 
-**One plan runs three ways.** The same file can be a test, a workflow you call
-from code, or a tool an AI agent calls. You do not rewrite it for each.
+| What it can do | Tool |
+|---|---|
+| See what there is to drive on this machine | `surface_targets` |
+| Open a browser, an app, an API or a terminal | `surface_connect` |
+| Read the screen as a list of elements | `surface_snapshot` |
+| Click, type, press a key, navigate | `surface_act` |
+| Read a title, a URL, an element's text | `surface_read` |
+| Test whether something is true, and see what it saw | `surface_check` |
+| Take a picture | `surface_screenshot` |
+| Ask about one element | `surface_describe` |
+| Ask what this kind of target can do | `surface_capabilities` |
+| Send an HTTP request | `surface_request` |
+| See every open session, including yours | `surface_sessions` |
+| See what has happened in this session | `surface_events` |
+| Take the controls, or hand them back | `surface_control` |
+| Close a session | `surface_close` |
 
-## Install
+Four things make this different from handing an agent a browser library.
 
-You need [Node 22 or newer](https://nodejs.org).
+**One set of tools for four kinds of target.** The same `snapshot` and `act`
+work on a web page, a macOS window, an HTTP API and a terminal program. Your
+agent does not learn a new interface for each one.
 
-```bash
-npm install -g @svatah/yam
+**Elements have references, not selectors and not screen positions.**
+`snapshot` hands back `r12`, and `act` takes `r12`. The agent never guesses a
+CSS selector and never clicks a coordinate, so nothing breaks when the window
+moves or the page is styled differently.
+
+**You and the agent share one session.** Yam keeps sessions in a single broker
+on your machine. If the agent opens a browser, you can see that same browser in
+the desktop app. `surface_control` decides who is driving, and you can take a
+target back at any time.
+
+**What the agent did can become a test.** Yam can record the whole session and
+compile it into a flow you replay later. That replay uses no model, so it is
+fast, free, and the same every time.
+
+### Set it up
+
+You need [Node 22 or newer](https://nodejs.org). Add this to your agent's MCP
+server list:
+
+```json
+{ "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp"] } } }
 ```
 
-To drive a browser, add Chromium once:
+For Claude Code, one line does it:
+
+```bash
+claude mcp add yam -- npx -y @svatah/yam-mcp
+```
+
+To drive a web browser, install Chromium once:
 
 ```bash
 npx playwright install chromium
@@ -41,21 +82,94 @@ npx playwright install chromium
 
 You do not need a browser to drive a desktop app, a terminal, or an HTTP API.
 
-Check it worked:
+If your agent cannot start a program, run the server over HTTP instead:
 
 ```bash
-yam --version
-yam surface doctor
+npx -y @svatah/yam-mcp --http
 ```
 
-`yam surface doctor` prints one line per adapter. It says what is ready, what
-this computer cannot do, and what is missing. It never guesses.
+### Use it
 
-## Your first test
+A session is five steps. Connect, look, act, read, close.
+
+```
+surface_connect    open https://example.com        -> session id
+surface_snapshot   the elements, each with a ref
+surface_act        click ref r12
+surface_read       the title, or an element's text
+surface_close      done
+```
+
+Every tool takes an optional `intent`, which is a short sentence saying why the
+agent is doing something. "Sign in as the test user" is an intent. "Click r14"
+is not. Intents are what let a session become a test later, so it is worth
+passing them.
+
+Give the server a project directory and it gets the project tools too:
+
+```json
+{ "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp", "/path/to/project"] } } }
+```
+
+| Tool | What it does |
+|---|---|
+| `yam_compile` | Turn the flows into a plan. |
+| `yam_lint` | Read the flows and report problems. |
+| `yam_run` | Run the plan and report every step. |
+| `yam_record` | Bind a flow to the real elements. |
+| `yam_heal` | Propose repairs after a failed run. |
+| `yam_bindings` | Read the bindings store. |
+| `yam_results` | Read a run's results. |
+| `surface_trajectory` | Where this session is being recorded, and how much of it there is. |
+
+These run the same code the `yam` command runs. An agent and a person working on
+the same project get the same answers.
+
+### Watch it, and take over
+
+Open the desktop app while the agent works. Its session shows up in the same
+list as yours.
+
+![The agents screen](docs/images/app-agents.png)
+
+The app says who holds each target. If the agent gets stuck, you take the target
+back and finish by hand. When you are done, you can hand it back.
+
+### Turn the session into a test
+
+This is the part that pays for itself. An agent figuring out a task is slow and
+costs money every time. Doing it once and replaying it costs nothing.
+
+```bash
+yam explore --name "Sign in"
+```
+
+Yam serves the tools, records what the agent does, and writes a proposal under
+`proposals/`. You read it, and nothing touches your flows until you accept it.
+After that, `yam run` replays the same steps with no model involved.
+
+You can also go the other way and expose a test you already have as a tool the
+agent calls by name:
+
+```bash
+yam tool serve --expose "Sign in"
+```
+
+The agent passes the inputs and gets the outputs back. The run is recorded as
+invoked by an agent, so your audit log says who asked.
+
+Full details: [Yam and MCP](docs/mcp.md).
+
+## Write a test in plain English
+
+The same engine works without an agent. You describe what you want in sentences,
+Yam drives the real app once to learn which element each sentence means, and
+every run after that is a replay.
 
 **1. Make a project.**
 
 ```bash
+npm install -g @svatah/yam
 yam init my-tests
 cd my-tests
 ```
@@ -97,6 +211,10 @@ by `yam help exit-codes`.
 ```bash
 yam heal
 ```
+
+Check your install with `yam --version` and `yam surface doctor`. Doctor prints
+one line per adapter and says what is ready, what this computer cannot do, and
+what is missing. It never guesses.
 
 Longer walkthrough: [Your first flow](docs/getting-started/first-flow.md).
 
@@ -141,6 +259,11 @@ matrix says which ones were driven in the last measured run.
 
 ## Healing, with numbers
 
+Tests stop breaking when the page changes. Yam saves five ways to find each
+element, plus a fingerprint of what the element looked like. When a button moves
+or gets renamed, Yam finds it again from that fingerprint. It marks the run
+`healed`, never `passed`, so you always know a repair happened.
+
 A healing claim without a number is a slogan. These numbers come from twenty
 deliberate interface changes in the sample app.
 
@@ -174,18 +297,6 @@ The same compiled plan runs as any of these. You do not rewrite it.
 
 Read [One plan, three ways](docs/getting-started/one-plan-three-ways.md).
 
-## Use Yam from an AI agent
-
-Yam ships an MCP server. Point your agent at it and the agent can drive a
-browser, an app, or an API through the same engine you use.
-
-```json
-{ "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp"] } } }
-```
-
-You and the agent share one session. If the agent opens a browser, you can see
-it in the app and take control back. Read [Yam and MCP](docs/mcp.md).
-
 ## Already have Playwright tests?
 
 You can take one piece on its own. Add bindings and healing to a Playwright
@@ -215,10 +326,11 @@ or the runnable version in
 
 | If you want to | Read |
 |---|---|
+| set up an agent | [Yam and MCP](docs/mcp.md) |
 | install it and run something | [Setup](docs/setup.md) |
 | see everything Yam does | [Features](docs/features.md) |
 | learn from working examples | [Examples](docs/examples.md) |
-| look up a command or an endpoint | [API reference](docs/api.md) |
+| look up a command, a tool or an endpoint | [API reference](docs/api.md) |
 | understand how it works | [Concepts](docs/concepts) |
 | work on Yam itself | [Developer guide](docs/developer-guide.md) |
 | send a change | [Contributing](CONTRIBUTING.md) |
@@ -227,12 +339,12 @@ Everything else is in [`docs/`](docs/README.md).
 
 ## What you install
 
-Three packages. Most people install the first one only.
+Three packages. Which one depends on what you are doing.
 
 | Package | What it is |
 |---|---|
-| [`@svatah/yam`](packages/cli) | The `yam` command. Everything above, without the browser driver. |
-| [`@svatah/yam-mcp`](packages/mcp) | The MCP server for agents. Adds the MCP SDK. |
+| [`@svatah/yam-mcp`](packages/mcp) | The MCP server, for an agent. Run it with `npx`. |
+| [`@svatah/yam`](packages/cli) | The `yam` command, for a person. |
 | [`@svatah/yam-contract`](packages/contract) | The shared operation list. You never install it directly. |
 
 There is also [`@svatah/yam-playwright-test`](packages/playwright-test) if you
@@ -240,7 +352,8 @@ only want bindings in an existing Playwright suite.
 
 ## Status
 
-Version 0.1.0 is a release candidate. Nothing is published yet.
+Version 0.1.0 is a release candidate. Nothing is published yet, so the `npx` and
+`npm install` commands above will not find anything until it is.
 
 Known gaps are written down rather than hidden. See
 [CHANGELOG.md](CHANGELOG.md). The specification is the source of truth and

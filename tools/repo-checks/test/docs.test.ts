@@ -57,7 +57,7 @@ describe("the documentation set (T13.5)", () => {
     }
   });
 
-  it("the generated pages are current (`pnpm docs --check`)", () => {
+  it("the generated pages are current (`pnpm docs:check`)", () => {
     // The script needs the built packages; the contract builds before it tests.
     const result = execFileSync(process.execPath, [fromRoot("scripts", "docs.mjs"), "--check"], {
       cwd: REPO_ROOT,
