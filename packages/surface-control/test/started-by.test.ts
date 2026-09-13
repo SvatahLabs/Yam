@@ -55,3 +55,20 @@ describe("a broker says who started it", () => {
     expect(verdict.startedBy).toBe("Yam.app 0.1.0");
   });
 });
+
+/*
+ * Which process answered, so a vanished session can be diagnosed.
+ *
+ * `/health` has carried the pid since PK-08 and nothing read it. It is the one
+ * fact that separates "your session was closed" from "the broker changed under
+ * you", and an intermittent `SESSION_NOT_FOUND` without it reads as a flake —
+ * which is how one read three times before anybody could name its cause.
+ */
+describe("the broker says which process it is", () => {
+  it("reports its own pid in its state", async () => {
+    const { descriptor } = await start("a test");
+    const state = await brokerState(descriptor);
+    expect(state.state).toBe("serving");
+    expect(state.pid, "the broker did not say which process it is").toBe(process.pid);
+  });
+});

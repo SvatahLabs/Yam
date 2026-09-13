@@ -909,26 +909,47 @@
 }
 
 /*
- * The third column arrives where there is room for it, and leaves where there
- * is not (`AX-17`).
+ * The third column arrives where there is room for it, and goes *below* where
+ * there is not (`AX-17`).
  *
  * Responsive is two properties. The wide half was answered by making the rail
  * and the inspector a share of the window; the narrow half was not. At 420 px
  * the two minima are 150 and 250, which is 400 of a 420-pixel window — the main
  * region, the one part of the application that is the work, was twenty pixels
- * wide. The inspector is context: below this width there is no room for
- * context, and what it says is reachable from the screen it is about.
+ * wide.
+ *
+ * The first fix was `display: none` on the inspector, and that broke the other
+ * half of the same rule: the inspector holds the act-and-verify form for a
+ * selected control and the agent's configuration, and hiding it makes them
+ * unreachable at exactly the width where a person has least room to work
+ * around it. "Nothing is unreachable when the window is small" is the half that
+ * cannot be traded for the other one.
+ *
+ * So it stacks. Two columns and a fourth row: the rail beside the work, the
+ * inspector under both, with the border moving from its left edge to its top.
  */
 @media (max-width: 820px) {
   .sv-app {
     grid-template-columns: clamp(var(--rail-min), var(--rail-w), var(--rail-max)) minmax(0, 1fr);
-  }
-  .sv-inspector {
-    display: none;
+    grid-template-rows:
+      var(--topbar-h)
+      minmax(0, 1fr)
+      minmax(0, 0.55fr)
+      var(--statusbar-h);
   }
   .sv-topbar,
   .sv-statusbar {
     grid-column: 1 / -1;
+  }
+  /* The rail runs beside the work and the inspector both. */
+  .sv-rail {
+    grid-row: 2 / 4;
+  }
+  .sv-inspector {
+    grid-column: 2;
+    grid-row: 3;
+    border-left: none;
+    border-top: 1px solid var(--line);
   }
 }
 

@@ -136,10 +136,23 @@ export function Table<Row>(props: TableProps<Row>): React.JSX.Element {
    * problem than the one being fixed.
    */
   if (props.rows.length === 0) {
+    /*
+     * `role="group"`, not a `<section>`.
+     *
+     * A `<section>` with an accessible name is a **region landmark**, and the
+     * first cut of this made one for every empty list — so the sessions list,
+     * which lives inside `<aside aria-label="Open sessions">`, published
+     * `complementary: Open sessions` *and* `region: Open sessions`: two
+     * landmarks, one name, which is the `landmark-unique` violation the sheet
+     * audit exists for. It did not catch it, because the sheet has no empty
+     * table inside an aside. Driving the packaged window did.
+     *
+     * A group is named and is not a landmark, which is what this is.
+     */
     return (
-      <section id={props.id} className="sv-table-empty" aria-label={label}>
+      <div id={props.id} role="group" className="sv-table-empty" aria-label={label}>
         <p className="sv-empty">{props.empty ?? "Nothing here yet."}</p>
-      </section>
+      </div>
     );
   }
 

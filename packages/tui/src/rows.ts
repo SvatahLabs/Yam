@@ -1198,7 +1198,7 @@ function settings(state: SettingsState): PaneModel {
     },
     main: {
       title: "Settings",
-      empty: "no project open",
+      empty: "no project here · run `yam init` to start one",
       lines: groups.flatMap((group) => [
         heading(group),
         ...state.rows

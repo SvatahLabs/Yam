@@ -293,7 +293,17 @@ const ACTIONS_ONLY: readonly Action[] = [
       loaded(state) &&
       (half(state, "surface")["selected"] !== undefined ||
         half(state, "record")["sessionId"] !== undefined ||
-        openSessions(state) > 0),
+        /*
+         * Exactly one, not "at least one".
+         *
+         * "At least one" made the button live whenever the broker held
+         * anything, and with two open and neither chosen it could only refuse —
+         * which is the *Reachable* property this specification opens with:
+         * "no enabled-looking control refuses". One session needs no choosing;
+         * more than one is chosen in Do's session list, and until it is, this
+         * has nothing to act on.
+         */
+        openSessions(state) === 1),
     async run(service, args): Promise<ActionOutcome> {
       let session =
         typeof args.selected === "string"

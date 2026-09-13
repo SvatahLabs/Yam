@@ -289,6 +289,15 @@ heal: { onFail: false, relocalizeThreshold: 0.72, margin: 0.1, useModel: false }
       ...process.env,
       // §13.6: the gate and this test open the project without a dialog.
       YAM_APP_PROJECT: project,
+      /*
+       * A broker of this suite's own (`YAM_BROKER_STATE_DIR`).
+       *
+       * This suite runs inside `pnpm -r test` beside `packages/cli` and
+       * `packages/mcp`, and the packaged application starts a broker from the
+       * copy of the CLI staged inside its bundle. One broker per machine makes
+       * that a fixture three concurrent suites share and none declares.
+       */
+      YAM_BROKER_STATE_DIR: join(tmpdir(), `yam-broker-desktop-${String(process.pid)}`),
       YAM_A11Y: "1",
       // The packaged application carries its own CLI; this points at the
       // workspace's so a rebuild is picked up without repackaging.
@@ -1289,11 +1298,57 @@ async function atWidth<T>(px: number, read: () => Promise<T>): Promise<T> {
  * numbers come from the layout, not from the stylesheet: a media query that
  * exists and does not apply is the defect this is looking for.
  */
+/**
+ * A chooser can be opened and chosen from, by keyboard (`AX-01`, SF-18).
+ *
+ * Driving the packaged window through the accessibility tree, a `click` on the
+ * Adapter chooser opened nothing that a snapshot could see — which is either a
+ * defect in the control or a limit of what an `AXPress` does to a Radix
+ * listbox, and those are very different things. The keyboard answers it: a
+ * listbox a person can open with the keyboard is operable, whatever a
+ * synthesised press does.
+ *
+ * It matters because Adapter is part of the **first task**. A control on the
+ * only thing a new person can do that cannot be operated is not a styling
+ * question.
+ */
+test("the adapter chooser opens and chooses, from the keyboard (SF-18)", async () => {
+  await goTo("session", "Session");
+  const chooser = page.locator("#surfaces-adapter");
+  await expect(chooser).toBeVisible({ timeout: 60_000 });
+
+  /*
+   * The default reads "Automatic", not "Choose…".
+   *
+   * The option for automatic selection carried the empty string, which is
+   * Radix's own sentinel for *nothing chosen*, so the control rendered its
+   * placeholder — and the first task's form invited a decision nobody has to
+   * make.
+   */
+  await expect(chooser).toContainText("Automatic");
+
+  await chooser.focus();
+  await page.keyboard.press("Enter");
+  const listbox = page.getByRole("listbox");
+  await expect(listbox, "the chooser did not open from the keyboard").toBeVisible();
+  const options = await listbox.getByRole("option").count();
+  expect(options, "the chooser opened with nothing in it").toBeGreaterThan(1);
+
+  await page.keyboard.press("Escape");
+  await expect(listbox).toBeHidden();
+});
+
 test("the work grows with the window and nothing is lost when it shrinks (AX-17)", async () => {
   await goTo("session", "Session");
 
   const widths = [1920, 1440, 1100, 760, 420];
-  const measured: Array<{ width: number; main: number; task: boolean; rail: boolean }> = [];
+  const measured: Array<{
+    width: number;
+    main: number;
+    task: boolean;
+    rail: boolean;
+    inspector: boolean;
+  }> = [];
   for (const width of widths) {
     measured.push(
       await atWidth(width, async () =>
@@ -1311,6 +1366,14 @@ test("the work grows with the window and nothing is lost when it shrinks (AX-17)
             /* The connect field, which is the only task on a fresh window. */
             task: onScreen(document.querySelector("#surfaces-url")),
             rail: onScreen(rail),
+            /*
+             * And the inspector, which the first attempt at this hid below
+             * 820 px — trading one half of the rule for the other. It holds the
+             * act-and-verify form and the agent's configuration; hiding it
+             * makes them unreachable at the width where a person has least room
+             * to work around it.
+             */
+            inspector: onScreen(document.querySelector("aside.sv-inspector")),
           };
         }, width),
       ),
@@ -1326,6 +1389,10 @@ test("the work grows with the window and nothing is lost when it shrinks (AX-17)
       true,
     );
     expect(one.rail, `the navigation is gone at ${String(one.width)}px — ${say}`).toBe(true);
+    expect(
+      one.inspector,
+      `the inspector is unreachable at ${String(one.width)}px — ${say}`,
+    ).toBe(true);
     /*
      * A floor as well as a direction. At 420 the rail's minimum and the
      * inspector's came to 400 of the 420 available, which left the work twenty

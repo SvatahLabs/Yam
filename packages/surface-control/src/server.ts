@@ -328,7 +328,7 @@ export type BrokerState = "serving" | "busy" | "mismatched" | "gone";
 export async function brokerState(
   descriptor: { url: string; token: string; pid?: number },
   { timeoutMs = 2000 }: { timeoutMs?: number } = {},
-): Promise<{ state: BrokerState; contract?: string; startedBy?: string }> {
+): Promise<{ state: BrokerState; contract?: string; startedBy?: string; pid?: number }> {
   let timedOut = false;
   try {
     const response = await fetch(`${descriptor.url}/health`, {
@@ -343,11 +343,28 @@ export async function brokerState(
      * for a broker that will never say yes.
      */
     if (!response.ok) return { state: "gone" };
-    const body = (await response.json()) as { contract?: unknown; startedBy?: unknown };
+    const body = (await response.json()) as {
+      contract?: unknown;
+      startedBy?: unknown;
+      /*
+       * Which process answered (`PK-08`, and diagnosing a vanished session).
+       *
+       * `/health` has sent it since the packaging wave and nothing read it. It
+       * is the one fact that distinguishes "your session was closed" from "the
+       * broker changed under you", and without it an intermittent
+       * `SESSION_NOT_FOUND` reads as an unexplained flake.
+       */
+      pid?: unknown;
+    };
     const contract = typeof body.contract === "string" ? body.contract : undefined;
     /* Who started it, so a mismatch can name the party to update (PK-08). */
     const startedBy = typeof body.startedBy === "string" ? body.startedBy : undefined;
-    const known = { ...(contract === undefined ? {} : { contract }), ...(startedBy === undefined ? {} : { startedBy }) };
+    const pid = typeof body.pid === "number" ? body.pid : undefined;
+    const known = {
+      ...(contract === undefined ? {} : { contract }),
+      ...(startedBy === undefined ? {} : { startedBy }),
+      ...(pid === undefined ? {} : { pid }),
+    };
     return contract === catalogueFingerprint()
       ? { state: "serving", ...known }
       : { state: "mismatched", ...known };

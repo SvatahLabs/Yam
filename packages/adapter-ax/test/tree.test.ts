@@ -144,8 +144,17 @@ describe("names, values and states (REQ-SURF-4)", () => {
    * no business reporting.
    */
   describe("collapsed is only for roles that can expand (EX-04)", () => {
-    const can = ["AXDisclosureTriangle", "AXOutline", "AXRow", "AXPopUpButton", "AXComboBox", "AXMenuButton"];
-    const cannot = ["AXButton", "AXGroup", "AXStaticText", "AXTextField", "AXImage", "AXCheckBox"];
+    const can = ["AXDisclosureTriangle", "AXOutline", "AXPopUpButton", "AXComboBox", "AXMenuButton"];
+    /*
+     * `AXRow` is in the second list, and that is a correction.
+     *
+     * It was in the first, on the reasoning that a tree item is a row. A row of
+     * a *table* is also an `AXRow` and cannot expand — so the loose form would
+     * have let "collapsed" back onto every row of every grid, which is the same
+     * defect one level down from the one this rule exists to fix. An outline's
+     * row says so in its subrole, and that is what is matched.
+     */
+    const cannot = ["AXButton", "AXGroup", "AXStaticText", "AXTextField", "AXImage", "AXCheckBox", "AXRow"];
 
     for (const role of can) {
       it(`keeps it on ${role}`, () => {

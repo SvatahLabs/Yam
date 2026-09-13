@@ -103,9 +103,14 @@ function zeroStates(): Array<{ where: string; text: string }> {
  * labelled with — or a key to press. "Press Connect surface" qualifies on both
  * counts; "an unverified binding is never used without saying so" qualifies on
  * neither, and is a guarantee rather than an instruction.
+ *
+ * `open` is **not** on the list, and that is a finding rather than an omission:
+ * it let "no project open" through, where the word is an adjective describing
+ * what is absent rather than a verb telling anybody to do anything. A word that
+ * reads both ways cannot carry this rule.
  */
 const instructs = (text: string): boolean =>
-  /\b(press|choose|enter|open|connect|run|record|select|pick|type|start|save|add|import|bind|use|watch)\b/i.test(
+  /\b(press|choose|enter|connect|run|record|select|pick|type|start|save|add|import|bind|use|watch)\b/i.test(
     text,
   );
 

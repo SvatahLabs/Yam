@@ -66,6 +66,14 @@ const VERIFY_KINDS: ReadonlyArray<{ kind: string; label: string; needsValue: boo
   { kind: "urlContains", label: "URL contains", needsValue: true },
 ];
 
+/**
+ * The value the adapter chooser carries for "let Yam decide".
+ *
+ * Not the empty string: Radix reads that as *no selection* and shows its
+ * placeholder, so the default state of the first task's form read "Choose…".
+ */
+const AUTOMATIC = "auto";
+
 export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
   const { state } = props;
 
@@ -77,7 +85,7 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
    * raced selection.
    */
   const [url, setUrl] = useState("");
-  const [adapter, setAdapter] = useState("");
+  const [adapter, setAdapter] = useState(AUTOMATIC);
   /*
    * Visible by default (TV-A09).
    *
@@ -87,8 +95,21 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
    */
   const [headed, setHeaded] = useState(true);
 
+  /*
+   * `"auto"`, not `""` (`AX-01`, and a defect found by driving the window).
+   *
+   * The default is automatic selection, and the option for it carried the empty
+   * string — which is Radix's own sentinel for *nothing chosen*. So the control
+   * rendered its placeholder: a person arriving at the only task on the screen
+   * read **"Choose…"** beside a field, and the honest state was "Yam will pick
+   * one". An invitation to make a decision nobody has to make, on the first
+   * screen, is exactly the furniture this wave has been removing.
+   *
+   * `AUTOMATIC` is mapped back to "say nothing" on the way to the action, which
+   * is what the runtime reads as "choose for me".
+   */
   const adapterOptions = [
-    { value: "", label: "Automatic" },
+    { value: AUTOMATIC, label: "Automatic" },
     ...state.groups.flatMap((group) =>
       group.adapters.map((one) => ({
         value: one.adapter,
@@ -110,7 +131,7 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
    * configuration — and a button drawn in both places is *two controls with one
    * id*, which is the ambiguity the desktop suite rightly fails.
    */
-  const PLACED_BY_THE_SCREEN = new Set([
+  const PLACED_BY_THE_SCREEN = new Set<string>([
     "surface.connect",
     /*
      * `surface.discover` refreshes the panel below, and it was the reason the
@@ -121,9 +142,12 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
      * with it came three disabled ones — Disconnect, Check the surface, Refresh
      * and select again — all of them above the only task a new person can
      * perform. Rechecking targets is something you do *to the list of targets*,
-     * so it goes on the list.
+     * so it goes on the list — and only while that list is on the screen. Once
+     * a surface is connected the discovery panel is replaced by the surface's
+     * own tree, and an action placed by a panel that is not drawn is an action
+     * reachable only through the palette.
      */
-    "surface.discover",
+    ...(state.session === undefined ? ["surface.discover"] : []),
     "surface.act",
     "surface.request",
     "surface.take-control",
@@ -133,7 +157,12 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
     "surface.save-automation",
   ]);
   const toolbarActions = props.actions.filter((one) => !PLACED_BY_THE_SCREEN.has(one.id));
-  const doConnect = (): void => props.onAction("surface.connect", { url, adapter, headed });
+  const doConnect = (): void =>
+    props.onAction("surface.connect", {
+      url,
+      adapter: adapter === AUTOMATIC ? "" : adapter,
+      headed,
+    });
 
   const connected = state.session !== undefined;
   /*
@@ -556,7 +585,16 @@ export function SurfacesInspector(props: ScreenProps<DrawnSurfaceLoad>): React.J
   if (session === undefined) {
     return (
       <>
-        <EmptyInspector id="inspector-empty" title="Inspector">
+        {/*
+          "Nothing selected", not "Inspector" (`AX-09`).
+
+          The inspector is `<aside aria-label="Inspector">`, and a section
+          inside it called "Inspector" published a second landmark with the same
+          name — `complementary: Inspector` and `region: Inspector`, which is
+          two answers to "where am I". The heading says what this section is
+          rather than repeating what it is inside.
+        */}
+        <EmptyInspector id="inspector-empty" title="Nothing selected">
           Choose an open session to inspect it, or connect a new surface. Nothing here needs a
           project.
         </EmptyInspector>

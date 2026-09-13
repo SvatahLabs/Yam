@@ -501,6 +501,57 @@ describe("the cockpit renders the model and adds nothing (LLD §13.7)", () => {
     expect(frame).toContain("127.0.0.1:55702");
   });
 
+  /*
+   * `CX-03`, and the wiring rather than the rule.
+   *
+   * `rail.test.ts` checks `railRow`'s answer. What it cannot check is that the
+   * cockpit asks it the right question — and the first version did not: it
+   * passed `connection.project !== ""`, which `yam ui` makes true on every run
+   * by resolving its argument to `.` whether or not there is a project there.
+   * The rule was correct and could never fire.
+   */
+  it("marks the project's destinations shut when the service reports no project", async () => {
+    const instance = track(
+      renderApp(
+        /*
+         * A project response with no configuration in it, which is what a
+         * directory without a `yam.config.yaml` produces. Not `fakeService({})`:
+         * that makes `GET /project` *throw*, and "the service would not say" is
+         * a third answer this deliberately does not treat as "no project".
+         */
+        <App
+          service={fakeService({ project: { root: "/tmp/nowhere" } })}
+          connection={CONNECTION}
+          screen="session"
+        />,
+      ),
+    );
+    await settle();
+    await settle();
+    const frame = instance.lastFrame() ?? "";
+    expect(frame, "the strip does not mark Flows shut").toContain("(Flows)");
+    /* And Session, which needs none, is not marked. */
+    expect(frame).not.toContain("(Session)");
+  });
+
+  it("claims nothing when the service will not say", async () => {
+    /* `getProject` throws here. Marking everything shut on a failed read would
+       be the same defect as never marking anything, pointed the other way. */
+    const instance = track(
+      renderApp(<App service={fakeService({})} connection={CONNECTION} screen="session" />),
+    );
+    await settle();
+    await settle();
+    expect(instance.lastFrame() ?? "").not.toContain("(Flows)");
+  });
+
+  it("leaves them unmarked when the service reports one", async () => {
+    const instance = track(await cockpit("session"));
+    const frame = instance.lastFrame() ?? "";
+    expect(frame).not.toContain("(Flows)");
+    expect(frame).toContain("Flows");
+  });
+
   it("draws a screen whose load failed as the model's error, not a crash", async () => {
     const instance = track(
       renderApp(<App service={fakeService({})} connection={CONNECTION} screen="flows" />),

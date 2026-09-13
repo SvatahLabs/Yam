@@ -9,7 +9,15 @@
  * the caller already wrote; there is no way to ask this file for a colour on its
  * own, which is what stops one being used instead of saying something.
  */
-import { capabilitiesOf, depthFor, tone, type ColourDepth, type StatusTone } from "@svatah/yam-ui-tokens";
+import {
+  appearanceOf,
+  capabilitiesOf,
+  depthFor,
+  tone,
+  type ColourDepth,
+  type StatusTone,
+  type Theme,
+} from "@svatah/yam-ui-tokens";
 
 /** How much colour this process should send. Measured once, per process. */
 export function depthOf(
@@ -21,14 +29,25 @@ export function depthOf(
 }
 
 let depth: ColourDepth | undefined;
+let appearance: Theme | undefined;
 
-/** A status word, in the colour the design system gives that tone. */
+/**
+ * A status word, in the colour the design system gives that tone — for the
+ * theme this terminal is on (`EX-02`).
+ *
+ * The cockpit learned to read `YAM_THEME` and `COLORFGBG`, and this did not: so
+ * `yam ui` drew the light palette on a light terminal and `yam run`, one command
+ * later, drew the dark one. Two products wearing one name is the thing this file
+ * exists to prevent, and it was doing it in the other direction.
+ */
 export function paint(what: StatusTone, text: string): string {
   depth ??= depthOf();
-  return tone(what, text, depth);
+  appearance ??= appearanceOf(process.env);
+  return tone(what, text, depth, appearance);
 }
 
 /** For a test that wants to state a terminal rather than be run in one. */
-export function withDepth(next: ColourDepth | undefined): void {
+export function withDepth(next: ColourDepth | undefined, theme?: Theme): void {
   depth = next;
+  appearance = theme;
 }

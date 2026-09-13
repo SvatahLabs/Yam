@@ -97,6 +97,22 @@ export function App(props: AppProps): React.JSX.Element {
    * model rather than the cockpit's connection.
    */
   const [stream, setStream] = useState<"live" | "reconnecting" | "offline">("offline");
+  /*
+   * Whether a project is configured here (`CX-03`).
+   *
+   * Not `connection.project !== ""`, which is what this was and which is always
+   * true: `yam ui` resolves its argument, defaulting to `.`, so the string is a
+   * path whether or not there is a project at the end of it. A rule that can
+   * never fire is a rule that was never checked, and this one marks the rail's
+   * shut destinations.
+   *
+   * The service's own answer instead: `GET /project` reports the configuration
+   * it loaded, and a directory with no `yam.config.yaml` has no `project` name
+   * in it. `undefined` until the answer arrives, and nothing is marked shut
+   * while it is — a strip that flickered from open to shut on the first frame
+   * would be worse than one that never marked anything.
+   */
+  const [configured, setConfigured] = useState<boolean | undefined>(undefined);
   /** The boxes the last frame drew, for the mouse to aim at. */
   const boxes = useRef<ReadonlyMap<string, RegionBox>>(new Map());
 
@@ -126,6 +142,36 @@ export function App(props: AppProps): React.JSX.Element {
       measure(),
     ).then(setUi);
   }, [props.service, props.screen, props.params, props.connection, measure]);
+
+  /*
+   * Whether this directory has a project in it (`CX-03`).
+   *
+   * Asked of the service, because nothing else knows. `connection.project` is
+   * always a path — `yam ui` resolves its argument and defaults to `.` — so it
+   * is true whether or not there is a `yam.config.yaml` at the end of it, and a
+   * rail marked from it would never mark anything.
+   *
+   * `GET /project` answers the project, not an envelope round one: `Sources.get`
+   * hands the value straight through, and so does this. `undefined` while the
+   * answer is in flight and when the service will not say, because a strip that
+   * flickered open-to-shut on the first frame would be worse than one that never
+   * marked anything, and "could not ask" is not "there is none".
+   */
+  useEffect(() => {
+    let alive = true;
+    void props.service
+      .getProject()
+      .then((answer) => {
+        const project = answer as { config?: { project?: unknown } } | undefined;
+        if (alive) setConfigured(typeof project?.config?.project === "string");
+      })
+      .catch(() => {
+        if (alive) setConfigured(undefined);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [props.service]);
 
   /* The panes follow the terminal when someone drags its corner. */
   useEffect(() => {
@@ -680,7 +726,10 @@ export function App(props: AppProps): React.JSX.Element {
         ]}
       />
 
-      <RailStrip width={ui.layout.columns} {...railRow(ui.screen, ui.layout.columns)} />
+      <RailStrip
+        width={ui.layout.columns}
+        {...railRow(ui.screen, ui.layout.columns, configured !== false)}
+      />
 
       <Regions
         view={view}

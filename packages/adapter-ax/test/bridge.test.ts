@@ -189,6 +189,24 @@ describe("an ambiguous process name (EX-07)", () => {
     expect(ambiguityAware("Yam", { error: "no-process" })).toContain("No application process");
   });
 
+  it("says the same thing when only the count is known", () => {
+    /*
+     * The action path goes through System Events, which answers a count where
+     * the read path's accessibility walk answers pids. Both must reach the same
+     * sentence, or half the adapter still blames the wrong thing.
+     */
+    const said = ambiguityAware("Yam", { error: "ambiguous", detail: "2 of them" });
+    expect(said).toContain("2 processes are named \"Yam\"");
+    /* The count is all this path has; inventing a pid list would be worse. */
+    expect(said).not.toContain("pids");
+    /*
+     * It does say "has gone" — in the clause that rules it out. What it must
+     * not do is *offer* it as the diagnosis, which is what `B21` was.
+     */
+    expect(said).toContain("This is an ambiguity, not an application that has gone");
+    expect(said).toMatch(/--attach|bundle identifier/);
+  });
+
   it("does not call one process an ambiguity", () => {
     /*
      * Shown to bite in the other direction. The script only writes `ambiguous`

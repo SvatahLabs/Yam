@@ -131,16 +131,124 @@ differs from their `was`. Three of the repository checks are new and have no
 exact text that was there, so the rule is exercised against the old design even
 though the old design is gone.
 
-## The intermittent failure, again
+## A second pass, after the lint was cleared
 
-Two full-suite runs during this wave failed in different packages —
-`packages/cli`'s `surface-journey` once and `packages/mcp`'s
-`trajectory-compile` once — and both passed alone immediately afterwards, and
-both passed in the runs either side. The packaging wave recorded the same shape
-and traced its last occurrence to a stray broker from a manual experiment; these
-two happened while a packaged application had been launched repeatedly for the
-walk, which starts a broker of its own. One process per machine means a stray
-broker is a shared fixture nobody declared. Still a hypothesis.
+`npx eslint .` was red with twenty-two errors when this wave began and is green
+now. Most were imports left by a rename. Three were not, and one of those —
+`drivers-optional.test.ts` carrying a recursive source lister it never called —
+was worth reading before deleting: the check is complete, the helper was left
+over from its first version. `pnpm -r typecheck` was red too, inside the
+packaging wave's own check, where `expect(packed).toBeDefined()` asserts at run
+time and narrows nothing at compile time. A type error can live inside a passing
+test.
+
+Then the implementation was re-read against what it claimed, and seven things
+came out of it.
+
+**A replacement that silently did not happen.** `CX-03`'s cockpit wiring was
+never applied: `railRow` was still being called with two arguments, so the strip
+could not have marked anything shut on any run. The unit tests passed because
+they call `railRow` directly. A test of the rule is not a test of the wiring,
+and a scripted edit that matches nothing says nothing.
+
+**A signal that could never fire.** The wiring, once applied, read
+`connection.project !== ""` — and `yam ui` resolves its argument, defaulting to
+`.`, so that is true whether or not there is a project at the end of it. It asks
+the service now. The first version of *that* read `answer.result.config.project`,
+an envelope `GET /project` does not send, which would have marked every
+destination shut on every run: the same defect pointed the other way.
+
+**Two landmarks with one name.** The empty-table zero state was a `<section>`
+with an accessible name, which is a **region landmark** — so the sessions list,
+inside `<aside aria-label="Open sessions">`, published `complementary: Open
+sessions` *and* `region: Open sessions`. The sheet audit has a rule for exactly
+this and could not see it, because the sheet has no empty table inside an aside.
+Driving the window did. The inspector had the same shape from the other
+direction: a section titled "Inspector" inside the Inspector landmark.
+
+**A control made unreachable by fixing something else.** Moving *Recheck
+targets* out of the toolbar was right while the discovery panel is on the
+screen — and once a surface connects, that panel is replaced and the action was
+nowhere. It is placed by the screen only while the screen draws it.
+
+**Half a rule traded for the other half.** `AX-17`'s narrow end was first
+answered with `display: none` on the inspector below 820 px, which makes the
+act-and-verify form and the agent's configuration unreachable at the width where
+a person has least room to work around it. "Nothing is unreachable when the
+window is small" is not tradeable for "the space is used when it is large". It
+stacks below the work now, and the measurement checks it at all five widths.
+
+**An enabled control that could only refuse.** `AX-03` was implemented as
+"Disconnect is live whenever the broker holds a session", and with two open and
+neither chosen it could do nothing but refuse — which is the *Reachable*
+property this specification opens with. Exactly one needs no choosing; more than
+one is chosen in Do's session list.
+
+**`yam mcp` still in the front door.** The packaging wave's check asserted
+`name: "mcp"` was absent from `help.ts`, and it was — while the first screen of
+`yam help` still ended "More, one level down: … tool · mcp · eval …". A check
+that reads a source marker rather than the sentence a person reads is a check of
+the shape of the fix. The help text is held verbatim against LLD §15.1, which
+still listed it too.
+
+And one non-defect, established rather than assumed: a synthesised `AXPress` on
+the Adapter chooser opens nothing a snapshot can see. That is a limit of what an
+accessibility press does to a Radix listbox, not a broken control — the keyboard
+opens it, with its options, and the Playwright case says so. What the same probe
+*did* find is that the chooser read **"Choose…"** on arrival: the option for
+automatic selection carried the empty string, which is Radix's sentinel for
+"nothing chosen", so the first task's form invited a decision nobody has to make.
+
+## The intermittent failure, named and fixed
+
+It is not load, and it is not the stray broker the packaging wave guessed at.
+Capturing a full run's output instead of a filtered summary gave the actual
+failure:
+
+```
+surface-journey › runs across six separate processes …
+AssertionError: waiting for the surface broker another command is starting.
+: expected 21 to be +0
+```
+
+Exit **21** is `SESSION_NOT_FOUND`. `surface connect` had exited 0 a moment
+earlier and handed back a session id; the next process asked for it, found **no
+broker serving at all** — that is what the stderr line is — waited for one
+somebody else was starting, reached it, and was told the session does not exist.
+The broker holding the session went away between two consecutive commands.
+
+The cause is the test layout rather than the broker. `pnpm -r test` runs several
+packages at once and every one of them used **the machine's single broker**,
+because that is the product's property and there was no way to opt out. A
+session opened by `packages/cli`'s journey and a session closed by
+`packages/mcp`'s corpus were on the same process. A shared mutable fixture that
+nothing declares is a defect in the layout, not an unlucky interleaving.
+
+`YAM_BROKER_STATE_DIR` is the opt-out, and each suite's vitest configuration
+names a directory of its own with the runner's pid in it. Two things went wrong
+on the way, both worth keeping:
+
+  * a **fixed** directory name per package was worse than the shared one: a
+    descriptor left by a previous run names a pid that may since have been
+    recycled, so the broker the next run spawns finds "a broker is already
+    running" and exits 0 — reported as "exited with 0 instead of starting";
+  * the MCP SDK's `StdioClientTransport` gives a spawned server a **minimal
+    environment** — `getDefaultEnvironment()`, which is PATH, HOME and a short
+    safe list. Nothing named `YAM_*` reaches it. That is right for an agent host
+    launching an untrusted command, and it meant half of `packages/mcp` was on
+    the isolated broker and half on the machine's: two populations inside one
+    package, which is worse than one shared between three.
+
+Three full runs since, all green: 4,654 tests, exit 0. The failure was about one
+run in three before.
+
+The diagnosis stays in the product regardless. `SESSION_NOT_FOUND` now prints the
+broker that answered — its url, its pid and what started it — because "it was
+opened against a different session holder than the one answering now" is the
+right diagnosis and names neither party. `/health` has carried the pid since
+`PK-08` and nothing read it. The wait message was also ungrammatical —
+*"waiting for the surface broker another command is starting."* — which is how it
+came to be quoted as an error in three separate investigations.
 
 ## Left open
 

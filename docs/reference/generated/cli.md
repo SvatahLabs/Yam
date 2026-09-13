@@ -21,7 +21,7 @@ yam — describe a behaviour once, bind it to the real application, replay it wi
   yam <command> --help   options and exit codes of one command
   yam help <topic>       flows · bindings · exit-codes · session · adapters · agents
 
-More, one level down: yam bindings · workflow · tool · mcp · eval · surface · migrate · repl · trajectory · host
+More, one level down: yam bindings · workflow · tool · eval · surface · migrate · repl · trajectory · host
 ```
 
 ## Commands
@@ -48,7 +48,7 @@ Exit codes: 0 ok · 64 usage
 ```text
 yam explore [dir] [--name <story>] [--trajectory <path.jsonl>]
 
-Let an agent write the first draft. Serves the MCP surface for one exploration and, when the agent disconnects, compiles what it did into a proposal under proposals/<date>/ for you to review. The agent opens its own target with `surface_connect`; this command records what it does, it does not choose what it drives. --trajectory compiles one yam mcp or the app's Explorer wrote.
+Let an agent write the first draft. Serves the MCP surface for one exploration and, when the agent disconnects, compiles what it did into a proposal under proposals/<date>/ for you to review. The agent opens its own target with `surface_connect`; this command records what it does, it does not choose what it drives. --trajectory compiles one that an MCP session or the app's Session screen wrote.
 
   --name <story>             the proposed story's name
   --trajectory <path.jsonl>  compile an existing trajectory instead of serving a session
@@ -169,6 +169,8 @@ Exit codes: 0 ok · 7 some unrepaired · 64 usage
 yam ui [dir] [--screen flows|run] [--flow <file>] [--run <id>] [--story <name>] [--url <url> --token <t>] [--tmux] [--json] [--capture <ms>]
 
 The terminal cockpit: four panes, the same screens and actions as Yam.app. --tmux opens the workspace: the cockpit, a shell, the audit tail and your editor in one tmux session.
+
+Appearance follows the terminal: YAM_THEME=light|dark states it outright, and COLORFGBG is read when it does not — so the cockpit and Yam.app are on the same theme as the machine. YAM_COLOR=24bit|256|none says how much colour to send, and NO_COLOR is honoured.
 
   --screen flows|run  open on a screen
   --flow <file>       open on a flow

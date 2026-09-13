@@ -2,7 +2,7 @@ import { tmpdir } from "node:os";
 import { defineConfig } from "vitest/config";
 
 /** This package's own broker, so concurrent suites cannot close each other's sessions. */
-const PACKAGE = "cli";
+const PACKAGE = "mcp";
 
 export default defineConfig({
   test: {
@@ -26,16 +26,5 @@ export default defineConfig({
      * which the caller reports as "exited with 0 instead of starting".
      */
     env: { YAM_BROKER_STATE_DIR: `${tmpdir()}/yam-broker-${PACKAGE}-${String(process.pid)}` },
-    /*
-     * Half the machine. Several files here start a browser, a sample
-     * application and a spawned `yam` at once — record, the human gateway,
-     * capture, the tmux workspace, the snapshot parity of two engines — and a
-     * laptop running eight of them together measures its own scheduler rather
-     * than the code: the BiDi session's `session.new` stopped answering inside
-     * its 15 s under that load (LLD §16's timing rule). Four workers keep the
-     * suite parallel without that.
-     */
-    minWorkers: 1,
-    maxWorkers: 4,
   },
 });

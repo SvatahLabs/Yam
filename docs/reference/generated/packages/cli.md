@@ -48,7 +48,7 @@ The yam CLI and MCP server
 | `newRunId` | function | `declare function newRunId(now?: Date, random?: () => number): string;` | A lexicographically sortable id, which is what a run directory wants. |
 | `NOUNS` | variable | `NOUNS: ReadonlyArray<readonly [string, string]> = [` | The nouns, and the verbs under each, for `yam <noun>` alone. |
 | `numberOption` | function | `declare function numberOption(args: ParsedArgs, name: string): number \| undefined;` | A numeric option, or `undefined` when absent or unparseable. |
-| `paint` | function | `export function paint(what: StatusTone, text: string): string` | A status word, in the colour the design system gives that tone. |
+| `paint` | function | `export function paint(what: StatusTone, text: string): string` | A status word, in the colour the design system gives that tone — for the |
 | `parseArgs` | function | `declare function parseArgs(argv: readonly string[]): ParsedArgs;` |  |
 | `ParsedArgs` | interface | `interface ParsedArgs` | A small argument reader for the CLI (LLD §15). |
 | `ProjectRunnerOptions` | interface | `export interface ProjectRunnerOptions` |  |
@@ -78,4 +78,4 @@ The yam CLI and MCP server
 | `uninstallModelGrounding` | function | `export function uninstallModelGrounding(): void` | Put module (a)'s picker-only default back. |
 | `userFacingHelpText` | function | `export function userFacingHelpText(): string` | Every string a person can read from the help, for the vocabulary check (REQ-CLI-9). |
 | `vitestCaseNames` | function | `export function vitestCaseNames(one:` | Every name a catalogue may call one vitest case by (P11-F2). |
-| `withDepth` | function | `export function withDepth(next: ColourDepth \| undefined): void` | For a test that wants to state a terminal rather than be run in one. |
+| `withDepth` | function | `export function withDepth(next: ColourDepth \| undefined, theme?: Theme): void` | For a test that wants to state a terminal rather than be run in one. |

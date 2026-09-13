@@ -45,6 +45,16 @@ const RENDERED = [
   fromRoot("packages/ui/src"),
   fromRoot("packages/screens/src"),
   fromRoot("packages/tui/src"),
+  /*
+   * The command line says things to people as well.
+   *
+   * It was left out of the first cut on the reasoning that `EX-06` is about
+   * screens — and `yam surface doctor`'s advice, `yam help`'s topics and every
+   * diagnostic are prose a person reads and acts on. A stale screen name is as
+   * wrong in a terminal as in a window.
+   */
+  fromRoot("packages/cli/src"),
+  fromRoot("packages/mcp/src"),
 ];
 
 /**

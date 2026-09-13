@@ -875,10 +875,16 @@ export function ambiguityAware(
 ): string {
   if (answer.error === "ambiguous") {
     const pids = answer.detail ?? "";
-    const count = pids === "" ? 0 : pids.split(",").length;
+    /*
+     * The read path knows the pids; the action path only knows how many, because
+     * System Events answers a count and the accessibility API answers elements.
+     * Both say the same thing, and neither says "the application has gone".
+     */
+    const counted = /^\d+ of them$/.test(pids);
+    const count = pids === "" ? 0 : counted ? Number.parseInt(pids, 10) : pids.split(",").length;
     return (
-      `${count === 0 ? "Several" : String(count)} processes are named "${process}" ` +
-      `(pids ${pids}), and none of them owns a window an accessibility client can read. ` +
+      `${count === 0 ? "Several" : String(count)} processes are named "${process}"` +
+      `${counted ? "" : ` (pids ${pids})`}, and none of them owns a window an accessibility client can read. ` +
       "This is an ambiguity, not an application that has gone: name the one you mean with " +
       "`--attach <pid>` or by its bundle identifier, or quit the others."
     );
@@ -1099,6 +1105,22 @@ function pause(seconds) {
   }
 }
 
+/**
+ * How many processes answered to the name (\`EX-07\`).
+ *
+ * The read path reports an ambiguous name as an ambiguity; this path did not,
+ * and said "either the application has gone, or nothing has a window on this
+ * display" — which is \`B21\`'s wrong blame word for word, from the other half
+ * of the adapter. Two processes called "Yam" is neither of those two things.
+ */
+function nameMatches(se, name) {
+  try {
+    return se.applicationProcesses.whose({ name: name })().length;
+  } catch (e) {
+    return 0;
+  }
+}
+
 function run(argv) {
   const command = JSON.parse(argv[0]);
   const se = Application("System Events");
@@ -1121,7 +1143,9 @@ function run(argv) {
   }
   if (command.kind === "setSize") {
     const window = processWithWindow(se, command.process).windows()[0];
-    if (window === undefined) return JSON.stringify({ ok: false, error: "no-window" });
+    if (window === undefined) {
+      return JSON.stringify({ ok: false, error: "no-window", matches: nameMatches(se, command.process) });
+    }
     try {
       window.attributes.byName("AXSize").value = command.size;
     } catch (e) {
@@ -1132,7 +1156,9 @@ function run(argv) {
 
   const proc = processWithWindow(se, command.process);
   let element = proc.windows()[0];
-  if (element === undefined) return JSON.stringify({ ok: false, error: "no-window" });
+  if (element === undefined) {
+    return JSON.stringify({ ok: false, error: "no-window", matches: nameMatches(se, command.process) });
+  }
   for (const step of command.path) {
     const children = element.uiElements();
     if (step >= children.length) return JSON.stringify({ ok: false, error: "stale-path" });
@@ -1543,10 +1569,12 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
     },
 
     async perform(command): Promise<void> {
-      const once = async (): Promise<{ ok: boolean; error?: string }> =>
+      const once = async (): Promise<{ ok: boolean; error?: string; matches?: number }> =>
         (await call(PERFORM_SCRIPT, { ...command, process: options.process }, timeoutMs)) as {
           ok: boolean;
           error?: string;
+          /** How many processes answered to the name (`EX-07`). */
+          matches?: number;
         };
 
       let answer = await once();
@@ -1580,6 +1608,22 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
       }
 
       if (!answer.ok) {
+        /*
+         * An ambiguous name is an ambiguity here too (`EX-07`, `B21`).
+         *
+         * The read path was taught this and the action path was not, which left
+         * half the adapter saying "either the application has gone, or nothing
+         * has a window on this display" — `B21`'s wrong blame, word for word,
+         * from the other side.
+         */
+        if (answer.error === "no-window" && (answer.matches ?? 0) > 1) {
+          throw new AxBridgeError(
+            ambiguityAware(options.process, {
+              error: "ambiguous",
+              detail: `${String(answer.matches)} of them`,
+            }),
+          );
+        }
         throw new AxBridgeError(
           answer.error === "no-window"
             ? `The action found no window for "${options.process}": System Events answered an ` +

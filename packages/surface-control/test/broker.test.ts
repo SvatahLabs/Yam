@@ -1,17 +1,19 @@
 /**
  * T05 — Broker discovery and session lifecycle (SF-04, SF-05, SF-13, SF-15).
  */
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { mkdtempSync, rmSync, existsSync, statSync } from "node:fs";
 import { tmpdir, platform } from "node:os";
 import { join } from "node:path";
 import {
+  acquireStartLock,
+  brokerStateDir,
+  discoverBroker,
   generateToken,
-  writeBrokerDescriptor,
   readBrokerDescriptor,
   removeBrokerDescriptor,
-  discoverBroker,
   type BrokerDescriptor,
+  writeBrokerDescriptor,
 } from "../src/broker.js";
 
 let tmpDir: string;
@@ -111,5 +113,46 @@ describe("discoverBroker", () => {
 
   it("returns undefined when no descriptor exists", () => {
     expect(discoverBroker(tmpDir)).toBeUndefined();
+  });
+});
+
+/*
+ * A broker that is not the machine's (`YAM_BROKER_STATE_DIR`).
+ *
+ * "One broker per machine" is the product's property and is the default. The
+ * escape hatch exists because this repository's own suites run several packages
+ * concurrently against the machine's single broker, and a session opened by one
+ * package's test could be closed by another's — `SESSION_NOT_FOUND` about one
+ * full-suite run in three, in whichever package drew the short straw. A shared
+ * mutable fixture that nothing declares is a defect in the layout.
+ */
+describe("the state directory can be stated (YAM_BROKER_STATE_DIR)", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("uses the stated directory when one is given", () => {
+    vi.stubEnv("YAM_BROKER_STATE_DIR", "/tmp/a-broker-of-my-own");
+    expect(brokerStateDir()).toBe("/tmp/a-broker-of-my-own");
+  });
+
+  it("falls back to the machine's when it is unset or empty", () => {
+    vi.stubEnv("YAM_BROKER_STATE_DIR", "");
+    const machine = brokerStateDir();
+    expect(machine).not.toBe("");
+    expect(machine).toContain("yam");
+    vi.stubEnv("YAM_BROKER_STATE_DIR", "   ");
+    expect(brokerStateDir()).toBe(machine);
+  });
+
+  it("puts the descriptor and the lock in the same place", () => {
+    vi.stubEnv("YAM_BROKER_STATE_DIR", tmpDir);
+    const lock = acquireStartLock();
+    try {
+      expect(lock, "the lock could not be taken in the stated directory").toBeDefined();
+      expect(existsSync(join(tmpDir, "broker.lock"))).toBe(true);
+    } finally {
+      lock?.release();
+    }
   });
 });

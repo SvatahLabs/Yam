@@ -273,16 +273,18 @@ function isExpandable(node: AxNode): boolean {
   return (
     node.role === "AXDisclosureTriangle" ||
     node.role === "AXOutline" ||
-    node.role === "AXRow" ||
     node.role === "AXPopUpButton" ||
     node.role === "AXComboBox" ||
     node.role === "AXMenuButton" ||
     node.subrole === "AXDisclosureTriangle" ||
     node.subrole === "AXCollapseButton" ||
     /*
-     * A row in an outline, which is how both platforms model a tree item. The
-     * role is `AXRow` above; this is the subrole macOS uses when the row is one
-     * of an outline rather than of a table.
+     * A row in an *outline*, which is how both platforms model a tree item.
+     *
+     * The role `AXRow` on its own is not enough and was here at first: a row of
+     * a table is an `AXRow` and cannot expand, so the loose form would have let
+     * "collapsed" back onto every row of every grid — the same defect one level
+     * down from the one this function exists to fix.
      */
     node.subrole === "AXOutlineRow"
   );

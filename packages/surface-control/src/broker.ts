@@ -24,6 +24,29 @@ export interface BrokerDescriptor {
 const APP_NAME = "yam";
 
 export function brokerStateDir(): string {
+  /*
+   * `YAM_BROKER_STATE_DIR`, for a broker that is not the machine's.
+   *
+   * "One broker per machine" is the product's property and stays the default.
+   * This is the escape hatch it has never had, and the reason for adding it is
+   * a defect rather than a preference: the repository's own suites run several
+   * packages **concurrently**, every one of them using the machine's single
+   * broker, and a session opened by one package's test can be closed by
+   * another's — which showed up as `surface snapshot` exiting 21
+   * (`SESSION_NOT_FOUND`) about one full-suite run in three, in whichever
+   * package drew the short straw.
+   *
+   * A shared mutable fixture that nothing declares is a defect in the layout,
+   * not an unlucky interleaving, and the fix is for each run to have its own.
+   * It is deliberately an environment variable and not a flag: the broker is
+   * reached by five separate processes and a flag would have to be threaded
+   * through all of them.
+   *
+   * A person who sets this is opting out of "the person and the agent share one
+   * broker", which is why nothing sets it in a shipped path.
+   */
+  const stated = process.env["YAM_BROKER_STATE_DIR"];
+  if (stated !== undefined && stated.trim() !== "") return stated;
   const p = platform();
   if (p === "darwin") return join(homedir(), "Library", "Application Support", APP_NAME);
   if (p === "win32") return join(process.env["APPDATA"] ?? join(homedir(), "AppData", "Roaming"), APP_NAME);

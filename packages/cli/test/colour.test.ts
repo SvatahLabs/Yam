@@ -6,7 +6,7 @@
  * asserted here is that the command line asks the same question of the terminal
  * and gets the same answer — and that a tone never arrives without its word.
  */
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { STATUS, tone as tokenTone } from "@svatah/yam-ui-tokens";
 import { depthOf, paint, withDepth } from "../src/colour.js";
 
@@ -53,5 +53,37 @@ describe("the same tone is the same colour as the cockpit's", () => {
     } finally {
       withDepth(undefined);
     }
+  });
+});
+
+/*
+ * `EX-02` — an ordinary command is on the same theme as the cockpit.
+ *
+ * `yam ui` learned to read `YAM_THEME` and `COLORFGBG` and this did not, so a
+ * person on a light terminal got the light palette from the cockpit and the
+ * dark one from `yam run` a command later. "The same tone, the same colour" is
+ * what this module's own header promises.
+ */
+describe("the theme the terminal is on (EX-02)", () => {
+  afterEach(() => {
+    withDepth(undefined);
+    vi.unstubAllEnvs();
+  });
+
+  it("paints a status in the light table on a light terminal", () => {
+    withDepth("truecolor", "light");
+    const light = paint("pass", "passed");
+    withDepth("truecolor", "dark");
+    const dark = paint("pass", "passed");
+    expect(light).toContain("passed");
+    expect(light).not.toBe(dark);
+  });
+
+  it("takes the theme from the environment when nobody stated one", () => {
+    vi.stubEnv("YAM_THEME", "light");
+    withDepth("truecolor");
+    const said = paint("pass", "passed");
+    withDepth("truecolor", "dark");
+    expect(said).not.toBe(paint("pass", "passed"));
   });
 });

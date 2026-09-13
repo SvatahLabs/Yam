@@ -129,6 +129,26 @@ export async function surfaceControlCommand(args: ParsedArgs, io: CommandIo): Pr
       unknown
     >;
     io.out(JSON.stringify(result, null, json ? 2 : 0));
+    /*
+     * When a session is not here, say *which broker* answered.
+     *
+     * "It was opened against a different session holder than the one answering
+     * now" is the right diagnosis and names neither party, so an intermittent
+     * failure in a suite reads as an unexplained flake. It has read as one three
+     * times: `surface snapshot` exiting 21 in a run where `surface connect`
+     * exited 0 a moment earlier, with no way afterwards to tell whether the
+     * broker had changed under the journey or the session had been closed.
+     *
+     * On stderr, never in the envelope: `--json` is one document on stdout.
+     */
+    const failure = (result as { error?: { code?: string } }).error?.code;
+    if (failure === "SESSION_NOT_FOUND" || failure === "SESSION_CLOSED") {
+      const who = await brokerState(broker);
+      io.err(
+        `the broker that answered is ${broker.url}, pid ${String(who.pid ?? "unknown")}, ` +
+          `started by ${who.startedBy ?? "an unnamed build of Yam"}.`,
+      );
+    }
     return exitFor(result);
   } catch (error) {
     io.err(error instanceof Error ? error.message : String(error));
@@ -285,7 +305,7 @@ export async function connectToBroker(io: CommandIo): Promise<BrokerDescriptor> 
        */
       waitingFor = "the broker another command on this machine is starting";
       if (!announcedWait) {
-        io.err("waiting for the surface broker another command is starting.");
+        io.err("another command on this machine is starting the surface broker; waiting for it.");
         announcedWait = true;
       }
       await new Promise((done) => setTimeout(done, 100));

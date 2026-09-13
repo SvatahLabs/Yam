@@ -61,6 +61,17 @@ describe("the MCP server is separate", () => {
   it("leaves no `mcp` subcommand behind", () => {
     const help = readFileSync(fromRoot("packages/cli/src/help.ts"), "utf8");
     expect(help).not.toContain('name: "mcp"');
+    /*
+     * And not in the *words* either.
+     *
+     * The structural half of this passed while `yam help`'s own first screen
+     * still ended "More, one level down: yam bindings · workflow · tool · mcp ·
+     * …" — so the front door advertised a command that answers "it has moved".
+     * A check that reads a source marker and not the sentence a person reads is
+     * a check of the shape of the fix rather than of the fix.
+     */
+    const front = /More, one level down:([^`\n]*)/.exec(help)?.[1] ?? "";
+    expect(front, "the top-level help still lists mcp").not.toMatch(/(^|·)\s*mcp\s*(·|$)/);
   });
 });
 

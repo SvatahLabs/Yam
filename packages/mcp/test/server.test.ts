@@ -571,6 +571,18 @@ describe("the conformance corpus over stdio (SF-07, SF-08)", () => {
         args: [join(ROOT, "packages", "mcp", "dist", "bin.js")],
         cwd: ROOT,
         stderr: "ignore",
+        /*
+         * The SDK gives a spawned server a *minimal* environment.
+         *
+         * `StdioClientTransport` defaults to `getDefaultEnvironment()` — PATH,
+         * HOME and a short safe list — so nothing named `YAM_*` reaches the
+         * server unless it is passed. That is right for an agent host launching
+         * an untrusted command, and it means this suite's own
+         * `YAM_BROKER_STATE_DIR` was being dropped: the in-process tests used
+         * the isolated broker and these used the machine's, which is two broker
+         * populations inside one package and worse than the one it replaced.
+         */
+        env: process.env as Record<string, string>,
       });
       const client = new Client({ name: "corpus-stdio", version: "0" });
       await client.connect(transport);
