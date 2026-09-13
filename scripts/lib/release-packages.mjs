@@ -14,10 +14,32 @@ import { fileURLToPath } from "node:url";
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-/** The three sets of T7.6, by the package each one starts from. */
+/**
+ * The sets of T7.6, by the package each one starts from.
+ *
+ * A set is a *root*, not a list: `closureOf` adds everything the root depends
+ * on inside this workspace. So a package earns its place here only when nothing
+ * else in the release reaches it.
+ *
+ * ## Why `mcp` is a root of its own
+ *
+ * `@svatah/yam-mcp` is the one a person installs that nothing depends on.
+ * `@svatah/yam` deliberately does *not* declare it — that is a cycle, and it
+ * would put the six-megabyte MCP SDK into every `yam` install (PK-01, PK-05) —
+ * so `yam explore` reaches it by a computed specifier and tells the user to
+ * install it when it is missing.
+ *
+ * The consequence nobody had drawn: a package no other package depends on is a
+ * package no closure reaches, so the release set did not contain it. Every
+ * `npx -y @svatah/yam-mcp` in the README and the guides would have been a 404,
+ * and `yam explore` would have named a package that does not exist. Being
+ * depended upon is how the other thirty-four get in; this one has to be asked
+ * for by name.
+ */
 export const SETS = {
   "module-a": ["@svatah/yam-bindings", "@svatah/yam-healer", "@svatah/yam-playwright-test", "@svatah/yam-bindings-cli"],
   cli: ["@svatah/yam"],
+  mcp: ["@svatah/yam-mcp"],
   schema: ["@svatah/yam-schema"],
 };
 

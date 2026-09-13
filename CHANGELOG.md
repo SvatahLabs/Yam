@@ -11,7 +11,7 @@ The first release, and the first under the name **Yam** (Draft 2.18): the
 product was renamed before anything was published, so no package has ever
 existed under another name. Svatah is the brand and the npm organisation; every
 package is `@svatah/yam` or `@svatah/yam-<name>`. **Nothing is published to a registry until the owner triggers
-the pipeline** (T8.5): `node scripts/publish.mjs` prints the 34 exact
+the pipeline** (T8.5): `node scripts/publish.mjs` prints the 35 exact
 `npm publish` commands, one per package of the release set in
 `scripts/lib/release-packages.mjs`, and stops unless `--publish`, a GitHub
 `workflow_dispatch` and a publish identity (trusted publishing, or `NPM_TOKEN`)
@@ -51,10 +51,12 @@ declarations and its README and nothing else.
 |---|---|
 | Module (a) — the adoption wedge (REQ-PKG-1) | `@svatah/yam-bindings`, `@svatah/yam-healer`, `@svatah/yam-playwright-test`, `@svatah/yam-bindings-cli`, and their dependencies `@svatah/yam-schema`, `@svatah/yam-surface`, `@svatah/yam-adapter-playwright`, `@svatah/yam-conformance` |
 | The command line — module (b) | `@svatah/yam`, whose bin is `yam`, and its workspace dependencies |
+| The MCP server (REQ-AGT-1) | `@svatah/yam-mcp`, whose bin is `yam-mcp`. Nothing depends on it, so it is asked for by name rather than reached through a closure |
 | The published contract (REQ-STD-1, 2) | `@svatah/yam-schema`, with the generated JSON Schemas under `json/` and the runtime conformance fixture under `conformance/` |
 
-`yam` and `@svatah/yam-desktop` are the two things a person runs; every other package
-is a library another package depends on.
+`yam` and `@svatah/yam-desktop` are the two things a person runs, and `yam-mcp`
+is the one an agent runs; every other package is a library another package
+depends on.
 
 ### Added
 

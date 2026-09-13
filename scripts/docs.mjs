@@ -15,6 +15,19 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import ts from "typescript";
+import { publishablePackages } from "./lib/release-packages.mjs";
+
+/*
+ * What a release actually puts on the registry, so a page cannot offer an
+ * install that would 404.
+ *
+ * `private` was the old test, and it is the wrong one: a package can be
+ * perfectly publishable and still be outside the release set, which is a
+ * closure over the packages a person installs. `@svatah/yam-ui` is exactly
+ * that — the design system the desktop app is built from, published to nobody —
+ * and its page offered `npm install @svatah/yam-ui` in earnest.
+ */
+const RELEASED = new Set(publishablePackages());
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "docs", "reference", "generated");
@@ -108,8 +121,10 @@ for (const [dir, file] of entries) {
   const body =
     `# \`${manifest.name}\`\n\n${manifest.description ?? ""}\n\n` +
     `- Source: [\`packages/${dir}\`](../../../../packages/${dir}) · README: [\`packages/${dir}/README.md\`](../../../../packages/${dir}/README.md)\n` +
-    `- Install: \`npm install ${manifest.name}\`${manifest.bin ? ` · bin: ${Object.keys(manifest.bin).map((b) => `\`${b}\``).join(", ")}` : ""}\n` +
-    `- Version ${manifest.version} · ${manifest.license}${manifest.private ? " · not published" : ""}\n\n` +
+    (RELEASED.has(manifest.name)
+      ? `- Install: \`npm install ${manifest.name}\`${manifest.bin ? ` · bin: ${Object.keys(manifest.bin).map((b) => `\`${b}\``).join(", ")}` : ""}\n`
+      : `- Not published: built and used inside this repository, and no release puts it on a registry.\n`) +
+    `- Version ${manifest.version} · ${manifest.license}${RELEASED.has(manifest.name) ? "" : " · not published"}\n\n` +
     `## Exports\n\n${table}\n`;
   page(`packages/${dir}.md`, body);
   packagePages.push([manifest.name, dir, manifest.description ?? "", rows.length]);

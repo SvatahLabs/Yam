@@ -33,7 +33,7 @@ on:
         required: false
       publish:
         description: >-
-          Publish the 34 packages of the release set to npm. Leave unchecked for a dry run that
+          Publish the 35 packages of the release set to npm. Leave unchecked for a dry run that
           prints the exact commands and contacts no registry (T8.5).
         type: boolean
         default: false
@@ -251,7 +251,7 @@ jobs:
       - name: The quick start, from the tarballs
         run: pnpm quick-start:packed --reuse
 
-      # Always. Prints the 30 exact `npm publish` commands and stops.
+      # Always. Prints the 35 exact `npm publish` commands and stops.
       - name: What publishing would run
         run: node scripts/publish.mjs
 
