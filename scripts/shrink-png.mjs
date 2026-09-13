@@ -14,6 +14,7 @@
  * both. What is here is the writing: IHDR, one zlib-deflated IDAT with no row
  * filtering, IEND, and the CRC each chunk carries.
  */
+import { Buffer } from "node:buffer";
 import { writeFileSync } from "node:fs";
 import { deflateSync } from "node:zlib";
 import { readPng, shrink } from "./make-gif.mjs";

@@ -24,6 +24,7 @@
  * It is deliberately small rather than general. It reads the PNG shapes
  * Playwright produces and nothing else, and says so when it is given another.
  */
+import { Buffer } from "node:buffer";
 import { readFileSync, writeFileSync } from "node:fs";
 import { inflateSync } from "node:zlib";
 
@@ -296,7 +297,7 @@ function gif(frames, palette, delay) {
   header.write("GIF89a", 0, "ascii");
   header.writeUInt16LE(width, 6);
   header.writeUInt16LE(height, 8);
-  header[10] = 0xf0 | (bits - 1); /* global table, `bits` per colour */
+  header[10] = 0xf0 | (bits - 1); /* a colour table follows, `bits` per colour */
   header[11] = 0;
   header[12] = 0;
   parts.push(header);
