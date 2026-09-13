@@ -35,6 +35,11 @@ import { awaitAxWindow, CLI, launchPackagedYam, PROCESS_NAME, quit, ROOT } from 
  * permission belongs to a **program**, so whichever binary starts the broker is
  * the one every native session asks on behalf of. Launch the application first
  * and that is `Yam.app`, which nobody granted.
+ *
+ * Machine-wide, and deliberately so — unlike the test suites, which each reap
+ * only their own by descriptor pid. This drives the packaged application, which
+ * uses the machine's broker and cannot be told otherwise. Do not run it beside
+ * `pnpm -r test`.
  */
 spawnSync("pkill", ["-f", "surface broker"], { encoding: "utf8" });
 spawnSync("pkill", ["-f", "bin.js serve"], { encoding: "utf8" });

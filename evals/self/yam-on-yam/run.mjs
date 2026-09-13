@@ -99,6 +99,12 @@ console.log("Yam controls the packaged Yam (T18)\n");
  * contract fingerprint is not this build's and replaces it, but a run that
  * begins by clearing the field is a run whose first measurement is not a
  * broker handover.
+ *
+ * Machine-wide, and deliberately so — unlike the test suites, which each reap
+ * only their own by descriptor pid. This drives the *packaged application*,
+ * which uses the machine's broker and cannot be told otherwise, so clearing the
+ * machine is the only clearing that means anything. Do not run it beside
+ * `pnpm -r test`: it will take those suites' brokers with it.
  */
 spawnSync("pkill", ["-f", "surface broker"], { encoding: "utf8" });
 
