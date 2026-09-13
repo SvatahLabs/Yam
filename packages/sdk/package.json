@@ -44,7 +44,6 @@
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
-    "@svatah/yam": "workspace:*",
     "@svatah/yam-service": "workspace:*",
     "sample-web": "workspace:*"
   },

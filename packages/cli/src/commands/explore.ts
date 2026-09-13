@@ -24,9 +24,22 @@ import { compileTrajectory, readTrajectory, writeProposal } from "@svatah/yam-tr
  *
  * `explore` *is* the MCP surface plus a trajectory compiled into a proposal, so
  * it needs the server — and the server is `@svatah/yam-mcp` now, because its SDK
- * is six megabytes against six for everything Yam wrote. An optional peer, like
- * the browser drivers: the one command that needs it says so, and nobody else
- * carries it.
+ * is six megabytes against six for everything Yam wrote. Resolved on use: the
+ * one command that needs it says so, and nobody else carries it.
+ *
+ * ## Why it is *not* declared as an optional peer
+ *
+ * It was, and that is a circle: `@svatah/yam-mcp` depends on this package, so
+ * declaring the reverse makes the two mutually dependent. pnpm answers a cycle
+ * by giving up on ordering and building both at once — and `@svatah/yam-mcp`'s
+ * declaration build then races this package's, finds no `index.d.ts`, and fails.
+ * `pnpm -r build` did not work from a clean checkout, which is the only checkout
+ * anybody installing has.
+ *
+ * The browser drivers are optional peers because they are *external*: `npm i
+ * playwright` is a thing a person does, and the declaration is how npm learns
+ * about it. A circular internal peer says nothing npm can act on, and the
+ * message below is what actually tells somebody what to install.
  */
 /*
  * Typed structurally, not by importing `@svatah/yam-mcp`'s types.

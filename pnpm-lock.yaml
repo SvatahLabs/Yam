@@ -86,6 +86,9 @@ importers:
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
+      '@svatah/yam':
+        specifier: workspace:*
+        version: link:packages/cli
       '@svatah/yam-adapter-playwright':
         specifier: workspace:*
         version: link:packages/adapter-playwright
@@ -98,6 +101,9 @@ importers:
       '@svatah/yam-compiler':
         specifier: workspace:*
         version: link:packages/compiler
+      '@svatah/yam-mcp':
+        specifier: workspace:*
+        version: link:packages/mcp
       '@svatah/yam-migrate':
         specifier: workspace:*
         version: link:packages/migrate
@@ -671,9 +677,6 @@ importers:
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
-      '@svatah/yam-mcp':
-        specifier: workspace:*
-        version: link:../mcp
       sample-web:
         specifier: workspace:*
         version: link:../../apps/sample-web
@@ -1057,9 +1060,6 @@ importers:
         specifier: workspace:*
         version: link:../screens
     devDependencies:
-      '@svatah/yam':
-        specifier: workspace:*
-        version: link:../cli
       '@svatah/yam-service':
         specifier: workspace:*
         version: link:../service

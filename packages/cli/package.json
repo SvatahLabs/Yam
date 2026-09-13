@@ -72,7 +72,6 @@
   "devDependencies": {
     "@modelcontextprotocol/sdk": "catalog:",
     "@playwright/test": "catalog:",
-    "@svatah/yam-mcp": "workspace:*",
     "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
@@ -88,8 +87,7 @@
   "peerDependencies": {
     "@playwright/test": "catalog:",
     "playwright": "catalog:",
-    "webdriverio": "catalog:",
-    "@svatah/yam-mcp": "workspace:*"
+    "webdriverio": "catalog:"
   },
   "peerDependenciesMeta": {
     "@playwright/test": {
@@ -99,9 +97,6 @@
       "optional": true
     },
     "webdriverio": {
-      "optional": true
-    },
-    "@svatah/yam-mcp": {
       "optional": true
     }
   }
