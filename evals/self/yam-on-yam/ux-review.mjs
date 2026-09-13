@@ -13,7 +13,7 @@ import { mcpDriver } from "./drivers.mjs";
 
 const BASE = process.env.UX_BASE ?? "http://127.0.0.1:8771";
 const OLD = [];
-const NEW = ["UX-1-Start", "UX-2-Watch", "UX-3-Observe", "UX-4-Run", "UX-5-Agents"];
+const NEW = ["UX-1-Start","UX-2-Watch","UX-3-Observe","UX-4-Run","UX-5-Agents","UX-6-Flows","UX-7-Bindings","UX-8-Reports","UX-9-Settings","UX-10-Data","UX-11-Heal","UX-12-Import"];
 const driver = await mcpDriver({ transcript: [], name: "ux-review" });
 
 /*

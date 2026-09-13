@@ -16,10 +16,17 @@ const rail = (here, noProject) => {
   <div class="brand"><span class="mark"></span>Yam</div>
   <span class="eyebrow">Work</span>
   ${item("session", "Session")}
-  ${item("automations", "Automations", noProject ? "needs a project" : undefined)}
-  ${item("activity", "Activity", noProject ? "needs a project" : undefined)}
   ${item("agents", "Agents")}
-  <span class="eyebrow" style="margin-top:18px">Yam</span>
+  <span class="eyebrow" style="margin-top:16px">Automations</span>
+  ${item("flows", "Flows", noProject ? "needs a project" : undefined)}
+  ${item("bindings", "Bindings", noProject ? "needs a project" : undefined)}
+  ${item("data", "Data", noProject ? "needs a project" : undefined)}
+  ${item("api", "API", noProject ? "needs a project" : undefined)}
+  <span class="eyebrow" style="margin-top:16px">Activity</span>
+  ${item("runs", "Runs", noProject ? "needs a project" : undefined)}
+  ${item("reports", "Reports", noProject ? "needs a project" : undefined)}
+  <span class="eyebrow" style="margin-top:16px">Yam</span>
+  ${item("import", "Import")}
   ${item("settings", "Settings")}
   <div class="theme" style="margin:16px 0 0;display:block">
     <span class="eyebrow" style="margin-bottom:6px">Appearance</span>
@@ -34,6 +41,7 @@ const rail = (here, noProject) => {
 
 /** The journey, drawn as the site draws one (the user's "visual flow"). */
 const flow = (at) => {
+  if (at === null) return "";
   const nodes = [
     ["connect", "Connect", "a browser, app, API or terminal"],
     ["watch", "Watch or drive", "observe, say, or do it yourself"],
@@ -151,6 +159,165 @@ const boards = {
   </div>
   <div class="card"><span class="eyebrow">Connect an agent</span>
     <div class="row"><span class="mono">npx -y @svatah/yam mcp</span><span class="meta">stdio</span><button class="btn" aria-label="Copy configuration">Copy</button></div>
+  </div>
+</main>`),
+
+"UX-6-Flows": page("Flows", rail("flows") + `<main class="work">
+  <div class="topline"><h1>Flows</h1><span class="pill">9 in booking-tests</span></div>
+  <p class="lead">What Yam can run. Each one is a file you can read, written in sentences, with its bindings beside it.</p>
+  ${flow("keep")}
+  <div class="card">
+    <span class="eyebrow">In this project</span>
+    <div class="row"><span><b>book a slot</b> — 6 steps</span><span class="meta">passed 2 min ago · all bound</span><button class="btn" aria-label="Run book a slot">Run</button></div>
+    <div class="row"><span><b>sign in and out</b> — 4 steps</span><span class="meta">passed yesterday · all bound</span><button class="btn" aria-label="Run sign in and out">Run</button></div>
+    <div class="row"><span><b>checkout with a card</b> — 11 steps</span><span class="meta" style="color:var(--warn)">2 unbound · never run</span><button class="btn" aria-label="Bind targets for checkout with a card">Bind targets</button></div>
+    <div class="row"><span><b>guards and compensation</b> — 9 steps</span><span class="meta" style="color:var(--fail)">failed at step 5</span><button class="btn" aria-label="Heal guards and compensation">Heal</button></div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">book a slot</span>
+    <div class="row"><span class="mono">Click the Book a slot link</span><span class="meta">tier 1 · human</span></div>
+    <div class="row"><span class="mono">Type “Indiranagar” into the location field</span><span class="meta">tier 1 · human</span></div>
+    <div class="row"><span class="mono">The receipt should say paid</span><span class="meta">a postcondition</span></div>
+    <p class="hint">Lint says nothing to report. <a href="#" style="color:var(--accent)">Open it in your editor</a> or run it above.</p>
+  </div>
+</main>`),
+
+"UX-7-Bindings": page("Bindings", rail("bindings") + `<main class="work">
+  <div class="topline"><h1>Bindings</h1><span class="pill">30 · 1 unverified</span></div>
+  <p class="lead">How a sentence finds a control. Each binding says where it came from and when it last resolved, and an unverified one is never used without saying so.</p>
+  ${flow("keep")}
+  <div class="card focus">
+    <span class="eyebrow">Worth your attention</span>
+    <div class="row"><span class="mono">booking.pay-button</span><span class="meta" style="color:var(--warn)">unverified · proposed by healing</span><button class="btn primary" aria-label="Verify booking.pay-button">Verify</button></div>
+    <p class="hint">Verifying resolves it against the live page and records what it found. Nothing is written until it does.</p>
+  </div>
+  <div class="card">
+    <span class="eyebrow">booking.location-field</span>
+    <div class="row"><span>1 · <span class="mono">testid=location</span></span><span class="meta">resolved 2 min ago</span></div>
+    <div class="row"><span>2 · <span class="mono">role=textbox name=“Location”</span></span><span class="meta">fallback</span></div>
+    <div class="row"><span>3 · <span class="mono">css=.search &gt; input</span></span><span class="meta">last resort</span></div>
+    <p class="hint">Tried in order. Yam records which one answered, so a brittle first choice shows up in a report.</p>
+  </div>
+</main>`),
+
+"UX-8-Reports": page("Reports", rail("reports") + `<main class="work">
+  <div class="topline"><h1>Reports</h1></div>
+  <p class="lead">What happened, kept. A run's report is the evidence a person or a build system reads afterwards — steps, timings, screenshots, and every call an agent made.</p>
+  ${flow("run")}
+  <div class="card">
+    <span class="eyebrow">Runs</span>
+    <div class="row"><span><b>book a slot</b></span><span class="meta">passed · 3.1 s · 2 healed · 2 min ago</span><button class="btn" aria-label="Open the report for book a slot">Open</button></div>
+    <div class="row"><span><b>guards and compensation</b></span><span class="meta" style="color:var(--fail)">failed at step 5 · 8.4 s · yesterday</span><button class="btn" aria-label="Open the report for guards and compensation">Open</button></div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">book a slot · passed</span>
+    <div class="row"><span>6 steps, 2 healed, 1 postcondition</span><span class="meta">3.1 s</span></div>
+    <div class="row"><span>Evidence</span><span class="meta">4 screenshots · a trace · the audit</span></div>
+    <div class="row"><span>Written to</span><span class="mono meta">runs/2026-09-12T09-14-02/</span></div>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button class="btn primary" aria-label="Open the folder">Open the folder</button>
+      <button class="btn" aria-label="Export as JUnit XML">Export as JUnit</button>
+      <button class="btn" aria-label="Copy the command that reproduces it">Copy the command</button>
+    </div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">Health over time</span>
+    <div class="row"><span>Healing</span><span class="meta">94% relocalized without a model · last 30 runs</span></div>
+    <div class="row"><span>Grounding</span><span class="meta">tier 1 on 78% of steps</span></div>
+    <p class="hint">These come from <span class="mono">yam eval healing</span> and <span class="mono">yam eval grounding</span>, which write the same numbers to a file for a release.</p>
+  </div>
+</main>`),
+
+"UX-9-Settings": page("Settings", rail("settings") + `<main class="work">
+  <div class="topline"><h1>Settings</h1></div>
+  <p class="lead">What this copy of Yam does, and what it is allowed to reach. Nothing here is a secret — secrets live in the project and are never shown.</p>
+  ${flow(null)}
+  <div class="card">
+    <span class="eyebrow">Appearance</span>
+    <div class="row"><span>Theme</span><span class="meta">follows the system unless you choose</span>
+      <button class="btn" aria-label="Light theme">Light</button><button class="btn" aria-label="Dark theme">Dark</button><button class="btn primary" aria-label="Match the system theme">System</button></div>
+    <div class="row"><span>Reduce motion</span><span class="meta">follows the system</span></div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">Project</span>
+    <div class="row"><span class="mono">~/work/booking-tests</span><span class="meta">9 flows · 30 bindings · 12 runs</span><button class="btn" aria-label="Open a different project">Change</button></div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">Ways to connect</span>
+    <div class="row"><span><span class="live-dot"></span>Chromium</span><span class="meta">Playwright 1.62.1 · ready</span></div>
+    <div class="row"><span><span class="live-dot"></span>macOS apps</span><span class="meta">Accessibility granted</span></div>
+    <div class="row"><span>Windows apps</span><span class="meta">not this machine</span></div>
+    <div class="row"><span>Phones</span><span class="meta">needs an Appium server · <span class="mono">appium</span></span></div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">Grounding</span>
+    <div class="row"><span>Model gateway</span><span class="meta">none configured — Yam grounds without one and says when it cannot</span><button class="btn" aria-label="Configure a gateway">Configure</button></div>
+  </div>
+</main>`),
+
+"UX-10-Data": page("Data and requests", rail("data") + `<main class="work">
+  <div class="topline"><h1>Data</h1></div>
+  <p class="lead">The values a flow uses, and the API requests it can send. A secret is named here and read from the environment when it runs — its value is never written to a file or shown on a screen.</p>
+  ${flow("keep")}
+  <div class="card">
+    <span class="eyebrow">data.yaml</span>
+    <div class="row"><span class="mono">user.name</span><span class="meta">ada</span></div>
+    <div class="row"><span class="mono">user.password</span><span class="meta">from <span class="mono">YAM_SAMPLE_PASSWORD</span> · not set</span></div>
+    <div class="row"><span class="mono">card.number</span><span class="meta">from <span class="mono">YAM_SAMPLE_CARD_NUMBER</span> · not set</span></div>
+    <p class="hint">Two are unset. Compiling does not need them; running will — Yam says which, and stops rather than sending a blank.</p>
+  </div>
+  <div class="card">
+    <span class="eyebrow">Saved requests</span>
+    <div class="row"><span class="mono">POST /bookings</span><span class="meta">api/create-booking.yaml</span><button class="btn" aria-label="Send POST bookings">Send</button></div>
+    <div class="row"><span class="mono">GET /bookings/{id}</span><span class="meta">api/read-booking.yaml</span><button class="btn" aria-label="Send GET booking">Send</button></div>
+    <p class="hint">A request is a surface like any other: a flow can send one and check what comes back.</p>
+  </div>
+</main>`),
+
+"UX-11-Heal": page("Heal review", rail("runs") + `<main class="work">
+  <div class="topline"><h1>Two controls moved</h1><span class="pill">proposed, not written</span></div>
+  <p class="lead">The interface changed and the flow still ran, because Yam found the controls again. Here is what it would write to the store, and what it saw before and after.</p>
+  ${flow("run")}
+  <div class="card focus">
+    <span class="eyebrow">booking.location-field</span>
+    <div class="row"><span>Was</span><span class="mono meta">testid=location</span></div>
+    <div class="row"><span>Now</span><span class="mono meta">testid=search-location</span></div>
+    <div class="row"><span>Why it is the same control</span><span class="meta">same role, same label, same place in the form · 0.93</span></div>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button class="btn primary" aria-label="Accept this repair">Accept</button>
+      <button class="btn" aria-label="Point at the control instead">Point at it instead</button>
+      <button class="btn" aria-label="Reject this repair">Reject</button>
+    </div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">booking.pay-button</span>
+    <div class="row"><span>Was</span><span class="mono meta">role=button name=“Pay”</span></div>
+    <div class="row"><span>Now</span><span class="mono meta">role=button name=“Pay now”</span></div>
+    <div class="row"><span>Why it is the same control</span><span class="meta">same position, label changed · 0.71</span></div>
+    <p class="hint">Below the threshold Yam accepts on its own, so it is asking. Accepting marks the binding unverified until it resolves once.</p>
+  </div>
+  <div class="card">
+    <span class="eyebrow">If you accept both</span>
+    <div class="row"><span>bindings/booking.yaml</span><span class="meta">2 changed, 0 added</span><button class="btn" aria-label="Accept both repairs">Accept both</button></div>
+  </div>
+</main>`),
+
+"UX-12-Import": page("Import", rail("import") + `<main class="work">
+  <div class="topline"><h1>Import a prototype</h1></div>
+  <p class="lead">Bring a prototype's screens and elements in as a starting point. Yam reads them, shows you what it would create, and writes nothing until you say so.</p>
+  ${flow(null)}
+  <div class="card focus">
+    <span class="eyebrow">Step one</span>
+    <label for="imp" style="display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px">A prototype database file</label>
+    <div class="field"><input type="text" id="imp" placeholder="~/Downloads/prototype.db" aria-label="A prototype database file"><button class="btn primary" aria-label="Read it">Read it</button></div>
+    <p class="hint">Nothing is written while Yam reads. You will see the preview first.</p>
+  </div>
+  <div class="card">
+    <span class="eyebrow">What is in it</span>
+    <div class="row"><span>14 screens</span><span class="meta">would become 14 stories</span></div>
+    <div class="row"><span>212 elements</span><span class="meta">would become 212 unverified bindings</span></div>
+    <div class="row"><span>3 flows already named</span><span class="meta">would be proposals under <span class="mono">proposals/</span></span></div>
+    <p class="hint">Everything lands as a proposal for you to read. Nothing joins the project until you accept it.</p>
   </div>
 </main>`),
 };
