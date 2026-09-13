@@ -26,7 +26,17 @@ const I = {
   import: '<svg viewBox="0 0 16 16"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 11v2.5h10V11"/></svg>',
   search: '<svg viewBox="0 0 16 16" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>',
 };
-const nav = (id, label, count, active) => `<div class="nav${active === id ? " active" : ""}" role="link" aria-label="${label}">${I[id]}<span>${label}</span>${count ? `<span class="count">${count}</span>` : ""}</div>`;
+/**
+ * One rail row. `state` is what the destination needs, drawn on the row (AX-04).
+ *
+ * A destination that needs a project used to look exactly like one that does
+ * not, so seven of nine rail items were walls discovered by clicking them. The
+ * state belongs in the accessible name as well as on the screen: a person using
+ * a screen reader hears "needs a project" before they choose it, which is the
+ * whole point of saying it early.
+ */
+const nav = (id, label, count, active, state) =>
+  `<div class="nav${active === id ? " active" : ""}" role="link" aria-label="${label}${state ? `, ${state}` : ""}"${state ? ' aria-disabled="true" style="opacity:.45"' : ""}>${I[id]}<span>${label}</span>${state ? `<span class="count">${state}</span>` : count ? `<span class="count">${count}</span>` : ""}</div>`;
 /*
  * The rail (`REQ-ADE-11`, `SF-16`, Draft 2.27).
  *
@@ -36,11 +46,11 @@ const nav = (id, label, count, active) => `<div class="nav${active === id ? " ac
  * what the product looks like; one that describes navigation nobody can reach is
  * a claim that has come untrue quietly.
  */
-const sidebar = (active) => `<nav class="sidebar" aria-label="Sections">
+const sidebar = (active, needProject) => `<nav class="sidebar" aria-label="Sections">
 <div class="section">Work</div>
 ${nav("session", "Session", "live", active)}
-${nav("flows", "Automations", "9", active)}
-${nav("runs", "Activity", "12", active)}
+${nav("flows", "Automations", "9", active, needProject ? "needs a project" : undefined)}
+${nav("runs", "Activity", "12", active, needProject ? "needs a project" : undefined)}
 <div class="grow"></div>
 ${nav("settings", "Settings", "", active)}
 </nav>`;
@@ -50,7 +60,7 @@ const statusbar = (text) => `<footer class="statusbar">${text}<span class="space
 /** One artboard fragment with `@@TOPBAR`, `@@SIDEBAR` and `@@STATUS` expanded. */
 export function expand(body) {
   return body
-    .replace(/@@SIDEBAR\((\w+)\)/g, (_, a) => sidebar(a))
+    .replace(/@@SIDEBAR\((\w+)(?:,(\w+))?\)/g, (_, a, need) => sidebar(a, need === "noproject"))
     .replace(/@@TOPBAR\(([^)]*)\)/g, (_, c) => topbar(c))
     .replace(/@@STATUS\(([^)]*)\)/g, (_, t) => statusbar(t));
 }

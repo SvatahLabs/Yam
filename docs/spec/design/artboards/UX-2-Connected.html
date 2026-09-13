@@ -1,0 +1,47 @@
+<div class="app">
+@@TOPBAR(Session)
+@@SIDEBAR(session)
+<section class="workspace">
+  <!-- AX-01/AX-10: the connected surface is the subject; the toolbar exists
+       now because there is something to act on. -->
+  <div class="tabs" style="padding:0 16px;border-bottom:1px solid var(--line)">
+    <span class="tab active" role="tab" aria-label="Explore">Explore</span>
+    <span class="tab" role="tab" aria-label="Say what to do">Say what to do</span>
+    <span class="tab" role="tab" aria-label="Record what I do">Record what I do</span>
+  </div>
+  <div class="toolbar">
+    <h1>example.com</h1>
+    <span class="sub">Chromium · you control · 10 controls</span>
+    <div class="spacer"></div>
+    <button class="btn" aria-label="Refresh">Refresh <kbd>R</kbd></button>
+    <button class="btn" aria-label="Disconnect">Disconnect</button>
+  </div>
+
+  <!-- AX-02/AX-03: three things to do with what is connected, each a door that
+       opens. The strip is under the subject it applies to, never above it. -->
+
+  <div class="main">
+    <aside class="list" aria-label="Controls on the page">
+      <div class="filter">Controls on the page</div>
+      <div class="row"><span class="name">link “Yam Sample”</span><span class="meta"><span>r0</span></span></div>
+      <div class="row"><span class="name">link “Book a slot”</span><span class="meta"><span>r3</span></span></div>
+      <div class="row active"><span class="name">textbox “Username”</span><span class="meta"><span>r6 · required</span></span></div>
+      <div class="row"><span class="name">textbox “Password”</span><span class="meta"><span>r7 · required</span></span></div>
+      <div class="row"><span class="name">button “Sign In”</span><span class="meta"><span>r9</span></span></div>
+    </aside>
+    <div class="editor">
+      <div class="card" style="margin:16px;padding:18px 20px">
+        <h2 style="margin:0 0 2px;font-size:15px">Username</h2>
+        <p class="empty" style="margin:0 0 16px;padding:0;text-align:left">A text field on example.com. Required, and empty.</p>
+        <label for="ux-fill" style="display:block;font-size:11px;color:var(--muted);margin-bottom:5px">Type into it</label>
+        <div style="display:flex;gap:8px">
+          <input id="ux-fill" style="flex:1;background:var(--bg0);border:1px solid var(--line2);border-radius:6px;color:var(--fg);padding:8px 10px;font:inherit" placeholder="a value" aria-label="Type into it">
+          <button class="btn primary" aria-label="Fill field">Fill field <kbd>⏎</kbd></button>
+        </div>
+        <p class="empty" style="padding:10px 0 0;text-align:left;font-size:11px">Nothing is written to a flow yet. Switch to <b>Record what I do</b> first if you want this kept.</p>
+      </div>
+    </div>
+  </div>
+  <footer class="statusbar">Connected to example.com<span class="spacer"></span><span><kbd>⌘K</kbd>commands</span><span><kbd>?</kbd>keys</span></footer>
+</section>
+</div>

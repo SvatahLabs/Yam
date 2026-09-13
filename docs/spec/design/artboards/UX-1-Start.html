@@ -1,0 +1,40 @@
+<div class="app">
+<header class="topbar"><div class="brand"><span class="mark"></span>Yam</div><div class="crumb"><span class="sep">/</span><span>No project open</span></div><div class="spacer"></div><div class="palette-hint" role="button" aria-label="Command palette"><svg viewBox="0 0 16 16" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span>Search or run a command</span><kbd>⌘K</kbd></div><span class="env"><span class="dot"></span>service 127.0.0.1:55702</span></header>
+
+@@SIDEBAR(session,noproject)
+
+<section class="workspace">
+  <!-- AX-01: the only task a new person can do, before anything else. No
+       toolbar: there is nothing yet to act on (AX-05). -->
+  <div class="main" style="grid-template-columns:1fr">
+    <div class="editor" style="padding:0">
+      <div class="card" style="margin:28px auto 0;max-width:620px;padding:22px 24px">
+        <h1 style="margin:0 0 4px;font-size:20px">Connect something to drive</h1>
+        <p class="empty" style="margin:0 0 18px;padding:0;text-align:left">A browser at a URL, an application by name, or a browser you already have open. Nothing here needs a project.</p>
+
+        <label for="ux-target" style="display:block;font-size:11px;color:var(--muted);margin-bottom:5px">URL, application name, or endpoint</label>
+        <div style="display:flex;gap:8px">
+          <input id="ux-target" style="flex:1;background:var(--bg0);border:1px solid var(--line2);border-radius:6px;color:var(--fg);padding:8px 10px;font:inherit" placeholder="https://example.com" aria-label="URL, application name, or endpoint">
+          <button class="btn primary" aria-label="Connect">Connect <kbd>⏎</kbd></button>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:14px;margin-top:14px;font-size:11px;color:var(--muted)">
+          <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" checked aria-label="Show the browser"> Show the browser</label>
+          <span>Ready: <b style="color:var(--pass)">Chromium</b> · <b style="color:var(--pass)">macOS apps</b> · <b style="color:var(--pass)">HTTP</b></span>
+          <span class="spacer"></span>
+          <span role="button" aria-label="Other ways to connect" style="text-decoration:underline;cursor:pointer">Other ways to connect (3)</span>
+        </div>
+      </div>
+
+      <!-- AX-12: the person's projects, and the app's own scratch space, apart. -->
+      <div class="card" style="margin:16px auto;max-width:620px;padding:16px 24px">
+        <h2 style="margin:0 0 10px;font-size:13px;color:var(--fg2)">Or open a project</h2>
+        <div class="row" role="button" aria-label="Open a project…"><span class="name">Open a project…</span><span class="meta"><span>a folder with flows, bindings and runs</span></span></div>
+        <div class="row" role="button" aria-label="booking-tests"><span class="name">booking-tests</span><span class="meta"><span>~/work · 9 flows · yesterday</span></span></div>
+        <p class="empty" style="padding:8px 0 0;text-align:left;font-size:11px">Yam also keeps three scratch workspaces for sessions started without a project. <span role="button" aria-label="Show scratch workspaces" style="text-decoration:underline;cursor:pointer">Show them</span></p>
+      </div>
+    </div>
+  </div>
+  <footer class="statusbar">Nothing connected<span class="spacer"></span><span><kbd>⌘K</kbd>commands</span><span><kbd>?</kbd>keys</span></footer>
+</section>
+</div>

@@ -1,0 +1,51 @@
+<div class="app">
+@@TOPBAR(Session)
+@@SIDEBAR(session)
+<section class="workspace">
+  <div class="tabs" style="padding:0 16px;border-bottom:1px solid var(--line)">
+    <span class="tab" role="tab" aria-label="Explore">Explore</span>
+    <span class="tab active" role="tab" aria-label="Say what to do">Say what to do</span>
+    <span class="tab" role="tab" aria-label="Record what I do">Record what I do</span>
+  </div>
+  <div class="toolbar">
+    <h1>example.com</h1>
+    <span class="sub">Chromium · you control · 3 sentences</span>
+    <div class="spacer"></div>
+    <button class="btn" aria-label="Disconnect">Disconnect</button>
+    <button class="btn primary" aria-label="Write the flow">Write the flow <kbd>⌘S</kbd></button>
+  </div>
+  <div class="main" style="grid-template-columns:1fr 320px">
+    <div class="editor">
+      <!-- AX-02: the field is the screen. The explanation is one line under it,
+           not a paragraph in place of it. -->
+      <div style="padding:16px 16px 0">
+        <label for="ux-say" style="display:block;font-size:11px;color:var(--muted);margin-bottom:5px">Say what to do next</label>
+        <div style="display:flex;gap:8px">
+          <input id="ux-say" style="flex:1;background:var(--bg0);border:1px solid var(--line2);border-radius:6px;color:var(--fg);padding:9px 11px;font:inherit" placeholder="Click the Book a slot link" aria-label="Say what to do next">
+          <button class="btn primary" aria-label="Run it">Run it <kbd>⏎</kbd></button>
+        </div>
+        <p class="empty" style="padding:6px 0 0;text-align:left;font-size:11px">Each sentence runs on the connected page and is appended to the flow.</p>
+      </div>
+      <div class="code" aria-label="Sentences said" style="margin:14px 16px">
+        <div class="ln"><span class="n">1</span><span class="g pass">✓</span><span>Click <span class="ref">the Book a slot link</span></span><span class="d" style="color:var(--dim);font-size:11px">41 ms</span></div>
+        <div class="ln"><span class="n">2</span><span class="g pass">✓</span><span>Type <span class="str">“Indiranagar”</span> into <span class="ref">the location field</span></span><span class="d" style="color:var(--dim);font-size:11px">63 ms</span></div>
+        <div class="ln cur"><span class="n">3</span><span class="g abort">!</span><span>Click <span class="ref">the pay button</span></span><span class="d" style="color:var(--dim);font-size:11px">nothing is bound to this</span></div>
+      </div>
+      <!-- AX-07: the dead end names the next keystroke, three ways. -->
+      <div class="card" style="margin:0 16px 16px;padding:14px 16px">
+        <h2 style="margin:0 0 8px;font-size:13px">Nothing is bound to “the pay button”</h2>
+        <div class="row" role="button" aria-label="Point at it in the browser"><span class="name">Point at it in the browser</span><span class="meta"><span>the control you click becomes the binding</span></span></div>
+        <div class="row" role="button" aria-label="Ask the model"><span class="name">Ask the model</span><span class="meta"><span>needs a gateway; none is configured</span></span></div>
+        <div class="row" role="button" aria-label="Leave it unbound"><span class="name">Leave it unbound</span><span class="meta"><span>the flow keeps the line and says so</span></span></div>
+      </div>
+    </div>
+    <aside class="inspector" aria-label="Inspector">
+      <h2 class="panel-h" style="text-transform:none">Will be written</h2>
+      <div class="kv"><span>File</span><span class="mono">sessions/2026-09-11.flow</span></div>
+      <div class="kv"><span>Lines</span><span>3, one unbound</span></div>
+      <p class="empty" style="text-align:left;font-size:11px">Nothing is on disk until you press <b>Write the flow</b>.</p>
+    </aside>
+  </div>
+  <footer class="statusbar">3 sentences said<span class="spacer"></span><span><kbd>⌘K</kbd>commands</span><span><kbd>?</kbd>keys</span></footer>
+</section>
+</div>

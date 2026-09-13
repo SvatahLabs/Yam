@@ -1,0 +1,47 @@
+<div class="app">
+@@TOPBAR(Session)
+@@SIDEBAR(session)
+<section class="workspace">
+  <div class="tabs" style="padding:0 16px;border-bottom:1px solid var(--line)">
+    <span class="tab" role="tab" aria-label="Explore">Explore</span>
+    <span class="tab" role="tab" aria-label="Say what to do">Say what to do</span>
+    <span class="tab active" role="tab" aria-label="Record what I do">Record what I do</span>
+  </div>
+  <div class="toolbar">
+    <h1>example.com</h1>
+    <span class="sub"><span class="pill pass">recording</span> 4 steps · you control</span>
+    <div class="spacer"></div>
+    <button class="btn" aria-label="Disconnect">Disconnect</button>
+    <button class="btn primary" aria-label="Stop and write the flow">Stop and write <kbd>⌘S</kbd></button>
+  </div>
+  <div class="main" style="grid-template-columns:1fr 320px">
+    <div class="editor">
+      <!-- AX-03: recording starts here, not on a screen behind a project wall. -->
+      <p class="empty" style="text-align:left;padding:14px 16px 0;font-size:12px">Drive the browser that opened. Every click and every value becomes a step here. Press <b>Stop and write</b> when you are done.</p>
+      <div class="code" aria-label="Steps recorded" style="margin:12px 16px">
+        <div class="ln"><span class="n">1</span><span class="g pass">✓</span><span>Click <span class="ref">the Book a slot link</span></span><span class="d" style="color:var(--dim);font-size:11px">bound</span></div>
+        <div class="ln"><span class="n">2</span><span class="g pass">✓</span><span>Type <span class="str">“ada”</span> into <span class="ref">the username field</span></span><span class="d" style="color:var(--dim);font-size:11px">bound</span></div>
+        <div class="ln"><span class="n">3</span><span class="g pass">✓</span><span>Click <span class="ref">the Sign In button</span></span><span class="d" style="color:var(--dim);font-size:11px">bound</span></div>
+        <div class="ln cur"><span class="n">4</span><span class="g abort">?</span><span>Click <span class="ref">the third card</span></span><span class="d" style="color:var(--dim);font-size:11px">needs a decision</span></div>
+      </div>
+      <div class="card" style="margin:0 16px 16px;padding:14px 16px">
+        <h2 style="margin:0 0 8px;font-size:13px">Which control did you mean?</h2>
+        <div class="row active" role="button" aria-label="Accept the offer card"><span class="name">the offer card</span><span class="score">0.81</span><span class="meta"><span>testid · offer-card-3</span></span></div>
+        <div class="row" role="button" aria-label="Accept the third list item"><span class="name">the third list item</span><span class="score">0.64</span><span class="meta"><span>role + position</span></span></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn primary" aria-label="Accept">Accept <kbd>A</kbd></button>
+          <button class="btn" aria-label="Point at it again">Point at it again <kbd>P</kbd></button>
+          <button class="btn" aria-label="Reject">Reject <kbd>X</kbd></button>
+        </div>
+      </div>
+    </div>
+    <aside class="inspector" aria-label="Inspector">
+      <h2 class="panel-h" style="text-transform:none">Will be written</h2>
+      <div class="kv"><span>File</span><span class="mono">sessions/2026-09-11.flow</span></div>
+      <div class="kv"><span>Steps</span><span>4, one undecided</span></div>
+      <p class="empty" style="text-align:left;font-size:11px">Nothing is on disk until you press <b>Stop and write</b>.</p>
+    </aside>
+  </div>
+  <footer class="statusbar">Recording · 4 steps<span class="spacer"></span><span><kbd>⌘K</kbd>commands</span><span><kbd>?</kbd>keys</span></footer>
+</section>
+</div>
