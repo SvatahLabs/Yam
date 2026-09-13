@@ -371,7 +371,14 @@ export async function httpMcpCommand(args: ParsedArgs, io: CommandIo): Promise<E
       : { allowedOrigins: origins.split(",").map((one) => one.trim()).filter((one) => one !== "") }),
   });
 
-  io.out(`yam mcp listening url=${running.url} token=${running.token}`);
+  /*
+   * The handshake names this package, not the subcommand it replaced (PK-05).
+   *
+   * Parsed by one thing — `test/http.test.ts` — and changed with it. A line a
+   * person reads in a log that names a command answering "it has moved" is the
+   * same defect as a screen name that no longer exists, one layer down.
+   */
+  io.out(`@svatah/yam-mcp listening url=${running.url} token=${running.token}`);
   io.err(
     `Streamable HTTP MCP on ${running.url}, protocol ${PINNED_PROTOCOL_VERSION}.\n` +
       "  Bound to 127.0.0.1 and behind the bearer token above.\n" +

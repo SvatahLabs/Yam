@@ -152,7 +152,13 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
   let loaded: LoadedProject | undefined;
 
   const project = async (): Promise<LoadedProject> => {
-    if (root === undefined) throw new Error("This tool requires a project. Start with: yam mcp <project-dir>");
+    if (root === undefined) {
+    /* The command that starts this server, which is no longer `yam mcp` (PK-05). */
+    throw new Error(
+      "This tool requires a project. Start the server with a directory: " +
+        "npx -y @svatah/yam-mcp <project-dir>",
+    );
+  }
     loaded ??= await loadProject(root);
     return loaded;
   };
@@ -982,10 +988,19 @@ export async function mcpCommand(args: ParsedArgs, io: CommandIo): Promise<ExitC
       : { sessionId: stringOption(args, "session")! }),
   });
 
+  /*
+   * The server names itself, and its name is not `yam mcp` (PK-05).
+   *
+   * That subcommand was removed when this package took the server over, and the
+   * banner it prints on every start still said it — so the first line an agent
+   * host's log shows names a command that answers "it has moved". The repository
+   * check for stale names covers screen names in the two renderers; a
+   * *command* name in a server's own greeting was outside it.
+   */
   if (built.trajectory) {
-    io.err(`yam mcp — trajectory at ${built.trajectory.path}`);
+    io.err(`@svatah/yam-mcp — trajectory at ${built.trajectory.path}`);
   } else {
-    io.err("yam mcp — surface tools ready (no project, no trajectory)");
+    io.err("@svatah/yam-mcp — surface tools ready (no project, no trajectory)");
   }
   if (boolOption(args, "json")) io.err("(--json has no meaning for a protocol server)");
 

@@ -20,7 +20,7 @@
  * name is not a sentence anybody reads on a screen.
  */
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { SCREEN_IDS, screenById, type ScreenId } from "@svatah/yam-screens";
 import { fromRoot, REPO_ROOT } from "../src/repo.js";
@@ -37,6 +37,14 @@ const RETIRED: Readonly<Record<string, string>> = {
   "Surfaces screen": "the Session screen (Draft 2.27)",
   Explorer: "Flows (Draft 2.11)",
   "Project screen": "Settings (Draft 2.11 removed the Project tabs)",
+  /*
+   * A command, not a screen — and the same defect one layer down.
+   *
+   * `yam mcp` was removed by PK-05 and the server it became still greeted every
+   * agent host with it, and printed it in the handshake an HTTP client parses.
+   * Both were rendered strings naming something that answers "it has moved".
+   */
+  "yam mcp": "`npx -y @svatah/yam-mcp` (PK-05 removed the subcommand)",
 };
 
 /** The directories whose strings reach a person. */
@@ -84,6 +92,20 @@ function sources(dir: string): string[] {
   return out;
 }
 
+/**
+ * The one place a retired name is the point.
+ *
+ * `yam mcp` prints where it went, and a message about a removed command has to
+ * name the command that was removed — otherwise a person who typed it cannot
+ * tell the message is for them. Enumerated by file, with the reason, rather
+ * than inferred: "a sentence that explains a rename" is not something a regular
+ * expression can be trusted to recognise, and an exemption nobody writes down
+ * is an exemption that grows.
+ */
+const EXPLAINS_THE_MOVE: Readonly<Record<string, string>> = {
+  "packages/cli/src/cli.ts": "`yam mcp` answers with where it moved to, and must say what you typed",
+};
+
 describe("no rendered sentence names a screen that is gone (EX-06)", () => {
   it("says nothing a person could go looking for and not find", () => {
     const found: string[] = [];
@@ -97,8 +119,9 @@ describe("no rendered sentence names a screen that is gone (EX-06)", () => {
            * What is being looked for is the name in a sentence.
            */
           const said = new RegExp(`(^|[^A-Za-z.])${name}([^A-Za-z]|$)`);
-          if (said.test(text)) {
-            found.push(`${file.replace(`${REPO_ROOT}/`, "")}: "${name}" — it is ${instead}`);
+          const where = file.replace(`${REPO_ROOT}/`, "");
+          if (said.test(text) && EXPLAINS_THE_MOVE[where] === undefined) {
+            found.push(`${where}: "${name}" — it is ${instead}`);
           }
         }
       }
@@ -119,6 +142,14 @@ describe("no rendered sentence names a screen that is gone (EX-06)", () => {
       new RegExp(`(^|[^A-Za-z.])${name}([^A-Za-z]|$)`).test(wall),
     );
     expect(caught).toEqual(["Surfaces"]);
+  });
+
+  it("exempts only what explains the move, and only what is written down", () => {
+    for (const [file, why] of Object.entries(EXPLAINS_THE_MOVE)) {
+      expect(why, `${file} is exempt with no reason`).not.toBe("");
+      expect(existsSync(join(REPO_ROOT, file)), `${file} is exempt and does not exist`).toBe(true);
+    }
+    expect(Object.keys(EXPLAINS_THE_MOVE).length, "the exemption list has grown").toBeLessThan(3);
   });
 
   it("does not flag a name the product still has", () => {

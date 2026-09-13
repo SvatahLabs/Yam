@@ -420,7 +420,7 @@ describe("`yam mcp --http`, as a person starts it (SF-07, SF-08)", () => {
         let said = "";
         child.stdout.on("data", (chunk: Buffer) => {
           said += chunk.toString("utf8");
-          const found = /yam mcp listening url=(\S+) token=(\S+)/u.exec(said);
+          const found = /@svatah\/yam-mcp listening url=(\S+) token=(\S+)/u.exec(said);
           if (found === null) return;
           clearTimeout(timer);
           done({ url: found[1]!, token: found[2]! });
