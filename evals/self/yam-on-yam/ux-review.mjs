@@ -11,12 +11,22 @@
  */
 import { mcpDriver } from "./drivers.mjs";
 
-const BASE = "http://127.0.0.1:8770";
-const OLD = ["App-Session", "Explorer", "RecordReview"];
-const NEW = ["UX-1-Start", "UX-2-Connected", "UX-3-Say", "UX-4-Record"];
+const BASE = process.env.UX_BASE ?? "http://127.0.0.1:8771";
+const OLD = [];
+const NEW = ["UX-1-Start", "UX-2-Watch", "UX-3-Observe", "UX-4-Run", "UX-5-Agents"];
 const driver = await mcpDriver({ transcript: [], name: "ux-review" });
 
-const CHROME = new Set(["Command palette", "Session", "Automations", "Activity", "Settings"]);
+/*
+ * The app's own furniture: navigation and appearance, which are on every screen
+ * and are nobody's task. Naming them here is a claim — that a person did not
+ * open the window to change the theme — and the rule below is only as honest as
+ * that claim is. Everything *else* competes with the task, including the
+ * controls a designer thinks of as trim.
+ */
+const CHROME = new Set([
+  "Command palette", "Session", "Automations", "Activity", "Agents", "Settings",
+  "Light", "Dark", "Match the system",
+]);
 const isChrome = (n) => CHROME.has((n.name ?? "").split(",")[0].trim());
 
 /** The rules a DOM snapshot can genuinely answer. */

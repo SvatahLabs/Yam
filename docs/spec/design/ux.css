@@ -1,0 +1,134 @@
+/*
+ * The app, in the brand the website already has.
+ *
+ * The artboards were drawn in `base.css`'s lavender-on-blue-grey, and the
+ * product's own site at `localhost:3102` is green-on-warm-paper. Two palettes,
+ * one product — which is most of what "not cohesive" and "outdated" were about.
+ * Every value below is read from that site's stylesheet, so there is one brand
+ * and the app is not a second opinion about it.
+ *
+ * Light, dark and system. `prefers-color-scheme` is the default and
+ * `[data-theme]` overrides it, which is what a three-way setting needs: a
+ * person who has chosen gets their choice, and one who has not follows the
+ * machine.
+ */
+:root {
+  --yam: #357862;          /* the brand: the product's own green */
+  --accent: #586ec2;       /* focus and selection: the site's periwinkle */
+  --ink: #253029;
+  --muted: #626a65;
+  --line: #e0e5df;
+  --paper: #fff;
+  --bg: #fafbf9;
+  --soft: rgba(53, 120, 98, 0.09);
+  --pass: #357862;
+  --fail: #b4392f;
+  --warn: #9a6b12;
+  --radius: 12px;
+  --radius-sm: 0.4rem;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --yam: #7cc9ae;
+    --accent: #a3b1f0;
+    --ink: #e3e9e2;
+    --muted: #a2aea4;
+    --line: #2d3830;
+    --paper: #191f1b;
+    --bg: #111613;
+    --soft: rgba(124, 201, 174, 0.12);
+    --pass: #7cc9ae;
+    --fail: #ee8a80;
+    --warn: #e0b155;
+  }
+}
+
+[data-theme="light"] {
+  --yam: #357862; --accent: #586ec2; --ink: #253029; --muted: #626a65;
+  --line: #e0e5df; --paper: #fff; --bg: #fafbf9; --soft: rgba(53,120,98,.09);
+  --pass: #357862; --fail: #b4392f; --warn: #9a6b12;
+}
+[data-theme="dark"] {
+  --yam: #7cc9ae; --accent: #a3b1f0; --ink: #e3e9e2; --muted: #a2aea4;
+  --line: #2d3830; --paper: #191f1b; --bg: #111613; --soft: rgba(124,201,174,.12);
+  --pass: #7cc9ae; --fail: #ee8a80; --warn: #e0b155;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.65 "IBM Plex Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+.mono { font-family: "IBM Plex Mono", SFMono-Regular, Consolas, monospace; }
+
+/* The site's label style: small, spaced, quiet. Capitals in CSS, not in the
+   accessible name (AX-08) — `text-transform` is what a screen reader ignores. */
+.eyebrow {
+  font-size: .72rem; font-weight: 650; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px;
+}
+
+.app { display: grid; grid-template-columns: 216px 1fr; min-height: 100vh; }
+.rail { border-right: 1px solid var(--line); padding: 18px 14px; background: var(--paper); }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 22px; }
+.mark { width: 16px; height: 16px; border-radius: 5px; background: var(--yam); display: inline-block; }
+.nav {
+  display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: var(--radius-sm);
+  color: var(--ink); text-decoration: none; font-size: .93rem; margin-bottom: 2px;
+}
+.nav:hover { background: var(--soft); }
+.nav[aria-current] { background: var(--soft); color: var(--yam); font-weight: 600; }
+.nav[aria-disabled="true"] { opacity: .5; }
+.nav .why { margin-left: auto; font-size: .68rem; color: var(--muted); }
+
+.work { padding: 26px 30px 40px; max-width: 980px; }
+h1 { font-size: 1.5rem; font-weight: 600; margin: 0 0 6px; letter-spacing: -.01em; }
+h2 { font-size: 1rem; font-weight: 600; margin: 0 0 8px; }
+.lead { color: var(--muted); margin: 0 0 22px; max-width: 560px; }
+
+.card {
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper);
+  padding: 20px 22px; margin-bottom: 14px;
+}
+.card.focus { border-color: var(--yam); box-shadow: 0 0 0 3px var(--soft); }
+
+/* The site's flow rail: what you can do, in the order you do it. */
+.flow-rail { display: flex; align-items: stretch; gap: 0; margin: 0 0 26px; }
+.flow-node {
+  flex: 1; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper);
+  padding: 13px 15px; text-align: left; color: var(--ink); text-decoration: none; display: block;
+}
+.flow-node[aria-current] { border-color: var(--yam); background: var(--soft); }
+.flow-node[aria-disabled="true"] { opacity: .45; }
+.flow-node strong { display: block; font-size: .86rem; font-weight: 600; }
+.flow-node span { font-size: .74rem; color: var(--muted); }
+.flow-connector { align-self: center; width: 26px; height: 1px; background: var(--line); flex: 0 0 26px; }
+
+.field { display: flex; gap: 8px; }
+input[type="text"] {
+  flex: 1; font: inherit; padding: 9px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+}
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.btn {
+  font: inherit; font-size: .9rem; padding: 9px 15px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer;
+}
+.btn.primary { background: var(--yam); border-color: var(--yam); color: var(--paper); font-weight: 600; }
+.btn:disabled { opacity: .45; cursor: default; }
+
+.row {
+  display: flex; align-items: baseline; gap: 10px; padding: 9px 0;
+  border-bottom: 1px solid var(--line); font-size: .92rem;
+}
+.row:last-child { border-bottom: 0; }
+.row .meta { margin-left: auto; color: var(--muted); font-size: .78rem; }
+.live-dot { display: inline-block; height: 6px; width: 6px; border-radius: 50%; background: var(--yam); margin-right: 7px; }
+.pill { font-size: .7rem; padding: 2px 8px; border-radius: 999px; background: var(--soft); color: var(--yam); font-weight: 600; }
+.hint { color: var(--muted); font-size: .8rem; margin: 10px 0 0; }
+.theme { margin-left: auto; display: flex; gap: 6px; align-items: center; font-size: .78rem; color: var(--muted); }
+.topline { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
