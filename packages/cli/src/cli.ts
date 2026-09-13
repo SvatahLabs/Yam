@@ -20,10 +20,10 @@ import {
   type ParsedArgs,
 } from "@svatah/yam-bindings-cli";
 import { ConfigError } from "./config-error.js";
+import { VERSION } from "./version.js";
 
 /** Commands LLD §15 lists that are not built yet, and what builds them. */
 const LATER: Record<string, string> = {};
-
 
 /**
  * Register the recorder as the healer's `Regrounder` (T3.3, LLD §10).
@@ -190,6 +190,28 @@ export async function main(argv: readonly string[], io: CommandIo): Promise<Exit
   if (args.options["help"] !== undefined) {
     const { TOP_LEVEL, helpFor } = await import("./help.js");
     io.out(helpFor(args.command) ?? TOP_LEVEL);
+    return EXIT.ok;
+  }
+  /*
+   * `yam --version`, which printed "No Yam project here" (PK-08).
+   *
+   * Nothing claimed the flag, so it fell through to the front door's project
+   * check — and the front door is what `yam` alone prints, so the answer looked
+   * deliberate. `version.ts` has recorded this in its own header since the
+   * packaging wave gave the CLI a version constant for a different reason; it
+   * was written down and not fixed.
+   *
+   * It matters more than the usual "every CLI has one": a machine can have
+   * three installables on it sharing one broker, and the first question when
+   * they disagree is which of them is old.
+   *
+   * `--version` only. `-v` would need the argument parser to learn single-dash
+   * short flags, which it does not have and which no other command uses; adding
+   * one spelling of one flag is not a reason to give the whole command line a
+   * new grammar.
+   */
+  if (args.options["version"] !== undefined) {
+    io.out(VERSION);
     return EXIT.ok;
   }
   if (command === undefined || command === "status") {

@@ -10,6 +10,7 @@ import { EXIT } from "@svatah/yam-bindings-cli";
 import { EXIT as RUNTIME_EXIT } from "@svatah/yam-runtime";
 import { main } from "../src/index.js";
 import { COMMANDS, EXIT_MEANINGS, NOUNS, TOP_LEVEL, TOPICS, exitCodesTopic, helpFor, topic, userFacingHelpText } from "../src/help.js";
+import { VERSION } from "../src/version.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
@@ -132,5 +133,33 @@ describe("no internal vocabulary reaches a person (REQ-CLI-9)", () => {
     } finally {
       process.chdir(cwd);
     }
+  });
+});
+
+/*
+ * `yam --version` printed "No Yam project here" (PK-08).
+ *
+ * Nothing claimed the flag, so it fell through to the front door's project
+ * check — and the front door is what `yam` alone prints, so the answer looked
+ * deliberate rather than missing. `version.ts` recorded this in its own header
+ * when the packaging wave added a version constant for a different reason: it
+ * was written down and not fixed.
+ *
+ * It matters more than "every command line has one". A machine can have three
+ * installables on it sharing a broker, and when they disagree the first
+ * question is which of them is old.
+ */
+describe("yam --version (PK-08)", () => {
+  it("says what this build is, and exits 0", async () => {
+    const { code, out } = await cli("--version");
+    expect(code).toBe(EXIT.ok);
+    expect(out.trim()).toBe(VERSION);
+    expect(out.trim()).toMatch(/^\d+\.\d+\.\d+/);
+  });
+
+  it("does not answer with the front door, which is what it used to do", async () => {
+    const { out } = await cli("--version");
+    expect(out).not.toContain("No Yam project here");
+    expect(out).not.toContain("describe a behaviour once");
   });
 });
