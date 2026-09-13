@@ -3,7 +3,7 @@
 The specification was written from a walkthrough of 2026-09-11 in which Yam drove
 the packaged Yam through the MCP tools and read every finding out of the
 application's own accessibility tree. This is the record of building what it
-asked for: 2026-09-12, waves E0 to E5, twenty-one tasks.
+asked for: 2026-09-12, waves E0 to E5, twenty-six tasks.
 
 `EX-N3` says a check that passes on the design it replaces measures nothing. So
 this is organised by *what the checking found*, not by what was built — and the
