@@ -105,6 +105,13 @@ const claim = (ok, message) => {
 for (const [name, listing] of contents) {
   claim(listing.includes("package.json"), `${name}: no package.json`);
   claim(listing.includes("README.md"), `${name}: no README.md — a published package explains itself`);
+  /*
+   * Apache-2.0 §4(a): "You must give any other recipients of the Work a copy of
+   * this License." The manifest saying `"license": "Apache-2.0"` is a label, not
+   * a copy. Every one of these packages carried the label and none carried the
+   * text, so every tarball was a licence breach the manifest check could not see.
+   */
+  claim(listing.includes("LICENSE"), `${name}: no LICENSE — the manifest claims Apache-2.0 and the tarball does not carry it`);
   claim(
     listing.some((file) => file.startsWith("dist/") && file.endsWith(".js")),
     `${name}: no built JavaScript`,
