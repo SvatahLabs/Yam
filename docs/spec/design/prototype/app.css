@@ -41,7 +41,22 @@ body {
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
 
 /* ── the shell ─────────────────────────────────────────────────────────── */
-.app { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); min-height: 100vh; }
+/*
+ * Three columns, and the third arrives when there is room for it.
+ *
+ * The work used to be `max-width: 900px` against the left edge, so a wide
+ * window was a column of content and a field of nothing — which is what
+ * "still not responsive" meant. Responsive is not only "nothing is cut off at
+ * 400px"; it is also "the space is used at 2000".
+ */
+.app {
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr);
+  min-height: 100vh;
+}
+@media (min-width: 1280px) {
+  .app { grid-template-columns: var(--rail) minmax(0, 1fr) 320px; }
+}
 .rail {
   border-right: 1px solid var(--line); background: var(--paper);
   padding: 16px 12px; display: flex; flex-direction: column; gap: 2px;
@@ -64,7 +79,18 @@ body {
 .nav .why { margin-left: auto; font-size: .66rem; color: var(--muted); font-weight: 400; }
 .grow { flex: 1; }
 
-.work { padding: 24px 30px 48px; max-width: 900px; }
+/* Prose stays readable; rows and lists take the width they are given. */
+.work { padding: 24px 34px 48px; width: 100%; max-width: 1120px; margin-inline: auto; }
+.lead, .hint { max-width: 62ch; }
+
+/* The context column: what this screen is about, when the window can hold it. */
+.aside {
+  display: none; border-left: 1px solid var(--line); background: var(--paper);
+  padding: 24px 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+@media (min-width: 1280px) { .aside { display: block; } }
+.aside h2 { font-size: .8rem; font-weight: 650; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.aside .row { font-size: .85rem; }
 h1 { font-size: 1.42rem; font-weight: 600; margin: 0; letter-spacing: -.01em; }
 h2 { font-size: .98rem; font-weight: 600; margin: 0 0 6px; }
 .head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
@@ -119,6 +145,7 @@ input[type="text"] {
  * unreachable — which is the only rule that matters here.
  */
 @media (max-width: 1000px) { :root { --rail: 176px; } .work { padding: 20px 22px 40px; } }
+@media (max-width: 1279px) { .aside { display: none; } }
 @media (max-width: 760px) {
   .app { grid-template-columns: 1fr; }
   .rail {

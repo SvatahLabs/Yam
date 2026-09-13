@@ -333,10 +333,38 @@ function setTheme(which) {
 }
 setTheme(localStorage.getItem("theme") ?? "system");
 
+/**
+ * The context column, drawn only where the window has room (CSS decides).
+ *
+ * It is the same facts the screen is about, not a second navigation: what is
+ * connected, what will be written, what is waiting. A wide window gets more of
+ * the answer, never more chrome.
+ */
+function aside() {
+  const bits = [];
+  if (S.surface) bits.push(["This session", [
+    ["Target", S.surface.url], ["Adapter", "playwright · web"],
+    ["Held by", S.surface.holder === "you" ? "you" : S.surface.holder],
+  ]]);
+  if (S.mode === "watch") bits.push(["Will be written", [
+    ["File", "flows/book-a-slot.flow"],
+    ["Steps", `${S.captured.length}${S.pending ? ", one undecided" : ""}`],
+  ]]);
+  if (S.project) bits.push(["Project", [
+    ["Folder", `~/work/${S.project.name}`], ["Flows", String(S.flows.length)],
+    ["Bindings", String(30 + S.repairs.length)],
+  ]]);
+  if (S.repairs.length) bits.push(["Waiting for you", [["Repairs", `${S.repairs.length} proposed`]]]);
+  if (bits.length === 0) bits.push(["Nothing connected", [["Next", "enter a target and press Connect"]]]);
+  return `<aside class="aside" aria-label="Context">${bits.map(([title, rows]) =>
+    `<h2>${esc(title)}</h2>${rows.map(([k, v]) => `<div class="row"><span>${esc(k)}</span><span class="meta">${esc(v)}</span></div>`).join("")}`
+  ).join("")}</aside>`;
+}
+
 /* ── render ─────────────────────────────────────────────────────────────── */
 function render() {
   const body = (screens[S.screen] ?? screens.session)();
-  document.body.innerHTML = `<div class="app">${rail()}<main class="work">${body}</main></div>` +
+  document.body.innerHTML = `<div class="app">${rail()}<main class="work">${body}</main>${aside()}</div>` +
     (S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : "");
 }
 document.addEventListener("click", (event) => {

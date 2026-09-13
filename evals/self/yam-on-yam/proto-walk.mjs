@@ -58,15 +58,39 @@ for (const where of ["Session", "Flows", "Bindings", "Agents", "API", "Data", "I
 console.log("\n=== it answers to the window ===");
 /* On the screen the check is about: the loop above left Settings showing. */
 await click("Session");
-for (const [w, h] of [[1440, 900], [1000, 800], [760, 900], [420, 800]]) {
-  await driver.call("act", { session: s, action: "resize", args: { width: w, height: h } });
-  await new Promise((r) => setTimeout(r, 200));
+/*
+ * Responsive is two properties, and the first version of this checked only one.
+ *
+ *   1. nothing is unreachable when the window is small;
+ *   2. the space is *used* when it is large.
+ *
+ * A layout pinned to 900px against the left edge passes (1) at every width and
+ * fails (2) at all of them — which is what a 2000px window actually looked
+ * like, and what the check could not see. So the main region's width is
+ * measured, and it has to grow with the window.
+ */
+const widths = [[1920, 1000], [1440, 900], [1100, 800], [760, 900], [420, 800]];
+/* Widest first, so the numbers read downwards; the growth check is below. */
+for (const [w, h] of widths) {
+  await driver.call("act", { session: s, action: "resizeWindow", args: { width: w, height: h } });
+  await new Promise((r) => setTimeout(r, 260));
   const ns = await nodes();
-  const reachable = ns.filter((n) => ["button", "link", "textbox"].includes(n.role) && !(n.states ?? []).includes("hidden")).length;
-  const overflow = await driver.call("check", { session: s, predicate: { kind: "textContains", value: "Session" }, subject: "page" });
-  console.log(`  ${String(w).padStart(4)}×${h}  ${reachable} control(s) reachable, the task ${overflow.envelope?.status === "succeeded" ? "still on screen" : "GONE"}`);
-  if (overflow.envelope?.status !== "succeeded") failed += 1;
+  const main = ns.find((n) => n.role === "main");
+  const width = main?.box ? Math.round(main.box[2]) : 0;
+  const reachable = ns.filter((n) => ["button", "link", "textbox"].includes(n.role)).length;
+  const onScreen = (await driver.call("check", { session: s, predicate: { kind: "textContains", value: "Session" }, subject: "page" })).envelope?.status === "succeeded";
+  console.log(`  ${String(w).padStart(4)}×${h}  main ${String(width).padStart(4)}px  ${String(reachable).padStart(2)} control(s)  ${onScreen ? "task on screen" : "TASK GONE"}`);
+  if (!onScreen) failed += 1;
 }
+const at = async (w) => {
+  await driver.call("act", { session: s, action: "resizeWindow", args: { width: w, height: 900 } });
+  await new Promise((r) => setTimeout(r, 240));
+  const m = (await nodes()).find((n) => n.role === "main");
+  return m?.box ? Math.round(m.box[2]) : 0;
+};
+const wide = await at(1920), narrow = await at(900);
+console.log(`  the work is ${wide}px wide at 1920 and ${narrow}px at 900`);
+if (wide <= narrow) { console.log("  \u2718 the layout does not use a wider window"); failed += 1; }
 await driver.call("close", { session: s });
 console.log(`\n${failed === 0 ? "the prototype walks" : `${failed} problem(s)`}`);
 process.exit(0);
