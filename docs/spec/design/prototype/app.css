@@ -1,0 +1,136 @@
+/*
+ * The prototype's stylesheet: the brand from the product's own site, and a
+ * layout that answers to the window.
+ *
+ * Light, dark and system. `prefers-color-scheme` is the default and
+ * `[data-theme]` on the root overrides it — a person who has chosen gets their
+ * choice, one who has not follows the machine.
+ */
+:root {
+  --yam: #357862; --accent: #586ec2; --ink: #253029; --muted: #626a65;
+  --line: #e0e5df; --paper: #fff; --bg: #fafbf9; --soft: rgba(53,120,98,.09);
+  --warn: #9a6b12; --fail: #b4392f;
+  --radius: 12px; --radius-sm: .4rem;
+  --rail: 212px;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --yam: #7cc9ae; --accent: #a3b1f0; --ink: #e3e9e2; --muted: #a2aea4;
+    --line: #2d3830; --paper: #191f1b; --bg: #111613; --soft: rgba(124,201,174,.12);
+    --warn: #e0b155; --fail: #ee8a80;
+  }
+}
+html[data-theme="light"] {
+  --yam: #357862; --accent: #586ec2; --ink: #253029; --muted: #626a65;
+  --line: #e0e5df; --paper: #fff; --bg: #fafbf9; --soft: rgba(53,120,98,.09);
+  --warn: #9a6b12; --fail: #b4392f; color-scheme: light;
+}
+html[data-theme="dark"] {
+  --yam: #7cc9ae; --accent: #a3b1f0; --ink: #e3e9e2; --muted: #a2aea4;
+  --line: #2d3830; --paper: #191f1b; --bg: #111613; --soft: rgba(124,201,174,.12);
+  --warn: #e0b155; --fail: #ee8a80; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.6 "IBM Plex Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+.mono { font-family: "IBM Plex Mono", SFMono-Regular, Consolas, monospace; font-size: .93em; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+/* ── the shell ─────────────────────────────────────────────────────────── */
+.app { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); min-height: 100vh; }
+.rail {
+  border-right: 1px solid var(--line); background: var(--paper);
+  padding: 16px 12px; display: flex; flex-direction: column; gap: 2px;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 600; padding: 4px 8px 14px; }
+.mark { width: 16px; height: 16px; border-radius: 5px; background: var(--yam); }
+.eyebrow {
+  font-size: .68rem; font-weight: 650; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--muted); padding: 14px 8px 5px;
+}
+.nav {
+  display: flex; align-items: center; gap: 8px; padding: 6px 9px; border-radius: var(--radius-sm);
+  color: inherit; font: inherit; font-size: .92rem; background: none; border: 0;
+  text-align: left; cursor: pointer; width: 100%;
+}
+.nav:hover:not([aria-disabled="true"]) { background: var(--soft); }
+.nav[aria-current] { background: var(--soft); color: var(--yam); font-weight: 600; }
+.nav[aria-disabled="true"] { opacity: .48; cursor: default; }
+.nav .why { margin-left: auto; font-size: .66rem; color: var(--muted); font-weight: 400; }
+.grow { flex: 1; }
+
+.work { padding: 24px 30px 48px; max-width: 900px; }
+h1 { font-size: 1.42rem; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+h2 { font-size: .98rem; font-weight: 600; margin: 0 0 6px; }
+.head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.lead { color: var(--muted); margin: 0 0 20px; max-width: 580px; }
+.hint { color: var(--muted); font-size: .82rem; margin: 12px 0 0; }
+
+.card {
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper);
+  padding: 18px 20px; margin-bottom: 14px;
+}
+.card.now { border-color: var(--yam); box-shadow: 0 0 0 3px var(--soft); }
+
+.row {
+  display: flex; align-items: center; gap: 12px; padding: 9px 0;
+  border-bottom: 1px solid var(--line); font-size: .93rem; flex-wrap: wrap;
+}
+.row:last-of-type { border-bottom: 0; }
+.row .meta { margin-left: auto; color: var(--muted); font-size: .79rem; }
+.row .meta.warn { color: var(--warn); }
+.row .meta.bad { color: var(--fail); }
+
+.field { display: flex; gap: 8px; flex-wrap: wrap; }
+input[type="text"] {
+  flex: 1 1 240px; font: inherit; padding: 9px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+}
+.btn {
+  font: inherit; font-size: .88rem; padding: 8px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer;
+}
+.btn:hover:not(:disabled) { border-color: var(--muted); }
+.btn.primary { background: var(--yam); border-color: var(--yam); color: var(--paper); font-weight: 600; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.small { padding: 4px 9px; font-size: .74rem; }
+
+.pill { font-size: .7rem; padding: 3px 9px; border-radius: 999px; background: var(--soft); color: var(--yam); font-weight: 600; }
+.pill.warn { background: rgba(154,107,18,.12); color: var(--warn); }
+.pill.bad { background: rgba(180,57,47,.12); color: var(--fail); }
+.dot { display: inline-block; height: 6px; width: 6px; border-radius: 50%; background: var(--yam); margin-right: 6px; }
+@media (prefers-reduced-motion: no-preference) { .live .dot { animation: pulse 1.6s ease-in-out infinite; } }
+@keyframes pulse { 50% { opacity: .3; } }
+
+.toast {
+  position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+  background: var(--paper); border: 1px solid var(--yam); border-radius: var(--radius);
+  padding: 10px 16px; box-shadow: 0 6px 30px rgba(0,0,0,.18); font-size: .88rem;
+}
+
+/* ── responsive ─────────────────────────────────────────────────────────
+ * Three states, because a window has three useful shapes: the rail beside the
+ * work, the rail as icons, and the rail as a row along the top. Nothing is ever
+ * unreachable — which is the only rule that matters here.
+ */
+@media (max-width: 1000px) { :root { --rail: 176px; } .work { padding: 20px 22px 40px; } }
+@media (max-width: 760px) {
+  .app { grid-template-columns: 1fr; }
+  .rail {
+    position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center;
+    border-right: 0; border-bottom: 1px solid var(--line); padding: 10px 12px; gap: 4px;
+  }
+  .brand { padding: 0 10px 0 4px; }
+  .eyebrow { display: none; }
+  .grow { display: none; }
+  .nav { width: auto; padding: 5px 10px; }
+  .nav .why { display: none; }
+  .nav[aria-disabled="true"] { display: none; }
+  .work { padding: 18px 16px 40px; }
+  .row .meta { margin-left: 0; flex-basis: 100%; }
+}

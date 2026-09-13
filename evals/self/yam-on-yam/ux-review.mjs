@@ -97,13 +97,36 @@ const RULES = [
   },
   {
     id: "AX-07",
-    says: "the prose names an action",
-    run: (ns) => {
-      const prose = ns.map((n) => String(n.value ?? "")).filter((t) => t.trim().length > 40);
-      if (prose.length === 0) return { ok: true, why: "no prose to judge" };
-      const verbs = /\b(press|enter|choose|click|type|open|switch|point|say|run|stop|drive)\b/i;
-      const idle = prose.filter((t) => !verbs.test(t));
-      return { ok: idle.length === 0, why: `${idle.length} of ${prose.length} sentence(s) name no action` };
+    says: "the screen tells you what to do, somewhere on it",
+    /*
+     * Third formulation, and the first two were both wrong.
+     *
+     * It read the snapshot's node values and found nothing, because the
+     * semantic snapshot is the *interactive* tree and a paragraph is not in it
+     * — so "no prose to judge" was the answer on every board and the rule
+     * passed without looking at a sentence.
+     *
+     * Reading the page's text instead, it then demanded an imperative in
+     * *every* sentence, and failed seven boards on copy that is correct:
+     * "an unverified binding is never used without saying so" is a guarantee,
+     * and rewriting it as an instruction would make it worse. It also counted
+     * the rail's own words as a sentence.
+     *
+     * What the walkthrough actually found was screens that describe themselves
+     * and never say what to do — Say mode's paragraph with no field. One
+     * sentence naming an action is the difference, and that is what this asks.
+     */
+    needsText: true,
+    run: (ns, text) => {
+      const rail = new Set(ns.filter((n) => n.role === "button" || n.role === "link").map((n) => (n.name ?? "").trim()));
+      const sentences = String(text ?? "")
+        .split(/(?<=[.!?])\s+/)
+        .map((t) => t.trim())
+        .filter((t) => t.length > 40 && !rail.has(t) && /\s[a-z]/.test(t));
+      if (sentences.length === 0) return { ok: false, why: "no prose on the page at all" };
+      const verbs = /\b(press|enter|choose|click|type|open|switch|point|say|run|stop|drive|connect|keep|accept|verify|review)\b/i;
+      const told = sentences.filter((t) => verbs.test(t));
+      return { ok: told.length > 0, why: `${told.length} of ${sentences.length} sentence(s) name an action` };
     },
   },
   {
@@ -152,8 +175,11 @@ async function judge(board) {
   const session = opened.envelope?.result?.sessionId;
   if (!session) return { board, rows: [], note: "could not open" };
   const nodes = (await driver.call("snapshot", { session, maxNodes: 400 })).envelope?.result?.nodes ?? [];
+  /* The page's text, for the rules that are about sentences rather than controls. */
+  const asked = await driver.call("check", { session, predicate: { kind: "textContains", value: "" }, subject: "page" });
+  const text = String(asked.envelope?.result?.actual ?? "");
   await driver.call("close", { session });
-  return { board, rows: RULES.map((r) => ({ id: r.id, ...r.run(nodes) })) };
+  return { board, rows: RULES.map((r) => ({ id: r.id, ...r.run(nodes, text) })) };
 }
 
 const results = [];

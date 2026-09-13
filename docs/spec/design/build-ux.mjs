@@ -173,7 +173,7 @@ const boards = {
 
 "UX-7-Bindings": page("Bindings", rail("bindings") + `<main class="work">
   <div class="topline"><h1>Bindings</h1><span class="pill">30 · 1 unverified</span></div>
-  <p class="lead">How a sentence finds a control. Each binding says where it came from and when it last resolved, and an unverified one is never used without saying so.</p>
+  <p class="lead">How a sentence finds a control. Press <b>Verify</b> on anything marked unverified to resolve it against the live page before a run depends on it.</p>
   <div class="card focus">
     <span class="eyebrow">Worth your attention</span>
     <div class="row"><span class="mono">booking.pay-button</span><span class="meta" style="color:var(--warn)">unverified · proposed by healing</span><button class="btn primary" aria-label="Verify booking.pay-button">Verify</button></div>
@@ -184,7 +184,7 @@ const boards = {
     <div class="row"><span>1 · <span class="mono">testid=location</span></span><span class="meta">resolved 2 min ago</span></div>
     <div class="row"><span>2 · <span class="mono">role=textbox name=“Location”</span></span><span class="meta">fallback</span></div>
     <div class="row"><span>3 · <span class="mono">css=.search &gt; input</span></span><span class="meta">last resort</span></div>
-    <p class="hint">Tried in order. Yam records which one answered, so a brittle first choice shows up in a report.</p>
+    <p class="hint">Tried in order, and Yam records which one answered — open a run\u2019s report to see whether a brittle first choice is being relied on.</p>
   </div>
 </main>`),
 
@@ -243,7 +243,7 @@ const boards = {
 
 "UX-10-Data": page("Data and requests", rail("data") + `<main class="work">
   <div class="topline"><h1>Data</h1></div>
-  <p class="lead">The values a flow uses, and the API requests it can send. A secret is named here and read from the environment when it runs — its value is never written to a file or shown on a screen.</p>
+  <p class="lead">The values a flow uses. Set the two unset secrets in your environment before you run, or the run stops and names them. A secret is read from the environment and never written to a file or shown here.</p>
   <div class="card">
     <span class="eyebrow">data.yaml</span>
     <div class="row"><span class="mono">user.name</span><span class="meta">ada</span></div>
