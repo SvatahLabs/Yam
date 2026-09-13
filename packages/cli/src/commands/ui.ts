@@ -27,6 +27,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import {
   EXIT,
   numberOption,
@@ -38,17 +39,54 @@ import {
 import { resolve, dirname, join } from "node:path";
 
 /**
- * The `yam` executable to spawn for a service. `process.argv[1]` when this is
- * the executable; otherwise the built `bin.js` beside this module (`dist/`) or
- * under the package (`src/` in a test), because a test runner's own entry is
- * not a command line anyone can serve from.
+ * The `yam` executable to spawn — **this package's**, not whatever is running.
+ *
+ * It used to prefer `process.argv[1]` whenever that ended in `bin.js` or `yam`,
+ * on the reasoning that a process already running as `yam` knows where `yam` is.
+ * That was true while there was one binary. `@svatah/yam-mcp`'s entry point is
+ * also called `bin.js`, so when an agent's MCP server needed a broker it spawned
+ * **itself** — `node …/yam-mcp/dist/bin.js surface broker` — which starts a
+ * second MCP server, finds its stdin closed because the spawn ignores stdio,
+ * and exits 0. The caller reports "The surface broker exited with 0 instead of
+ * starting", and an agent cannot connect to anything at all unless a broker
+ * happens to be running already.
+ *
+ * Nothing caught it because every suite starts a broker from the CLI first, on
+ * purpose: `evals/self/yam-on-yam/run.mjs` explains at its top why the broker
+ * must belong to the binary holding the macOS Accessibility grant. So the path
+ * where the *server* is the first to need one was never taken.
+ *
+ * This module lives in the CLI package, so the built `bin.js` beside it is this
+ * package's own — under `dist/` when bundled, and two levels up when this is
+ * `src/` under a test runner. `argv[1]` is the last resort rather than the
+ * first, for a tree that has not been built.
  */
 export function yamBin(): string {
+  /*
+   * Resolved, not guessed at.
+   *
+   * "The `bin.js` beside this module" is right when this module is the CLI's
+   * own bundle and wrong the moment a bundler copies this code somewhere else —
+   * which is what `@svatah/yam-mcp` was doing, leaving a second copy of the CLI
+   * whose neighbour was the MCP server's `bin.js`. Asking Node where the
+   * package *is* cannot be fooled that way: it answers `dist/index.js` of the
+   * one real `@svatah/yam`, and `bin.js` is its sibling.
+   */
+  try {
+    const index = createRequire(import.meta.url).resolve("@svatah/yam");
+    const sibling = join(dirname(index), "bin.js");
+    if (existsSync(sibling)) return sibling;
+  } catch {
+    /* Not installed under that name — a source tree, or a bundle without it. */
+  }
   const here = dirname(fileURLToPath(import.meta.url));
-  const candidates = [join(here, "bin.js"), join(here, "..", "..", "dist", "bin.js")];
+  const beside = [join(here, "bin.js"), join(here, "..", "..", "dist", "bin.js")].find((one) =>
+    existsSync(one),
+  );
+  if (beside !== undefined) return beside;
   const argv = process.argv[1];
   if (argv !== undefined && /(^|\/)(bin\.js|yam)$/.test(argv)) return argv;
-  return candidates.find((one) => existsSync(one)) ?? argv ?? "yam";
+  return argv ?? "yam";
 }
 
 /** The one line `yam serve` prints when it is listening (LLD §13.6). */
