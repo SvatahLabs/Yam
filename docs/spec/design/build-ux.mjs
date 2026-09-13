@@ -148,7 +148,7 @@ const boards = {
     <p class="hint">Every call an agent makes is on this list, with what it touched and whether a postcondition passed.</p>
   </div>
   <div class="card"><span class="eyebrow">Connect an agent</span>
-    <div class="row"><span class="mono">npx -y @svatah/yam mcp</span><span class="meta">stdio</span><button class="btn" aria-label="Copy configuration">Copy</button></div>
+    <div class="row"><span class="mono">npx -y @svatah/yam-mcp</span><span class="meta">stdio</span><button class="btn" aria-label="Copy configuration">Copy</button></div>
   </div>
 </main>`),
 

@@ -35,7 +35,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "catalog:",
     "@svatah/yam-adapter-appium": "workspace:*",
     "@svatah/yam-adapter-atspi": "workspace:*",
     "@svatah/yam-adapter-ax": "workspace:*",
@@ -71,7 +70,9 @@
     "yaml": "catalog:"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "catalog:",
     "@playwright/test": "catalog:",
+    "@svatah/yam-mcp": "workspace:*",
     "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
@@ -87,7 +88,8 @@
   "peerDependencies": {
     "@playwright/test": "catalog:",
     "playwright": "catalog:",
-    "webdriverio": "catalog:"
+    "webdriverio": "catalog:",
+    "@svatah/yam-mcp": "workspace:*"
   },
   "peerDependenciesMeta": {
     "@playwright/test": {
@@ -97,6 +99,9 @@
       "optional": true
     },
     "webdriverio": {
+      "optional": true
+    },
+    "@svatah/yam-mcp": {
       "optional": true
     }
   }

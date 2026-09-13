@@ -44,7 +44,7 @@ account of why the system changed.
 
 ## The raw surface
 
-`yam mcp` exposes the operations and the raw surface, `snapshot`, `act`,
+`@svatah/yam-mcp` exposes the operations and the raw surface, `snapshot`, `act`,
 `read` and `check`, to an agent that wants to explore rather than call a
 finished tool. Every call is recorded as a trajectory, and `yam trajectory
 compile` turns an exploration into a proposal under `proposals/` for a person

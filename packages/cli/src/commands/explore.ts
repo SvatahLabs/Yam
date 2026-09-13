@@ -18,7 +18,44 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { boolOption, EXIT, stringOption, type CommandIo, type ExitCode, type ParsedArgs } from "@svatah/yam-bindings-cli";
 import { compileTrajectory, readTrajectory, writeProposal } from "@svatah/yam-trajectory";
-import { buildMcpServer } from "./mcp.js";
+
+/**
+ * The MCP server, resolved on use (PK-05).
+ *
+ * `explore` *is* the MCP surface plus a trajectory compiled into a proposal, so
+ * it needs the server — and the server is `@svatah/yam-mcp` now, because its SDK
+ * is six megabytes against six for everything Yam wrote. An optional peer, like
+ * the browser drivers: the one command that needs it says so, and nobody else
+ * carries it.
+ */
+/*
+ * Typed structurally, not by importing `@svatah/yam-mcp`'s types.
+ *
+ * That package depends on this one, so naming its types here makes the two
+ * build in a circle — and an optional peer that cannot be installed is not
+ * optional. The shape is what this command uses and nothing more.
+ */
+async function buildMcpServer(
+  options: Record<string, unknown>,
+): Promise<{ server: { connect(transport: Transport): Promise<void> }; close(): Promise<void> }> {
+  let mcp: { buildMcpServer: (o: unknown) => Promise<unknown> };
+  try {
+    /* By a computed specifier, so the bundler leaves the optional peer alone. */
+    mcp = (await import(/* @vite-ignore */ "@svatah/yam" + "-mcp")) as {
+      buildMcpServer: (o: unknown) => Promise<unknown>;
+    };
+  } catch (cause) {
+    throw new Error(
+      "`yam explore` serves the MCP surface, which is `@svatah/yam-mcp`. Run " +
+        "`npm i @svatah/yam-mcp` — it is an optional peer so that a `yam` install does not " +
+        `carry the MCP SDK. (${cause instanceof Error ? cause.message : String(cause)})`,
+    );
+  }
+  return (await mcp.buildMcpServer(options)) as {
+    server: { connect(transport: Transport): Promise<void> };
+    close(): Promise<void>;
+  };
+}
 
 export interface ExploreOptions {
   readonly root: string;

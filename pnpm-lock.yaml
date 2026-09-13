@@ -559,9 +559,6 @@ importers:
 
   packages/cli:
     dependencies:
-      '@modelcontextprotocol/sdk':
-        specifier: 'catalog:'
-        version: 1.30.0(zod@3.25.76)
       '@svatah/yam-adapter-appium':
         specifier: workspace:*
         version: link:../adapter-appium
@@ -668,9 +665,15 @@ importers:
         specifier: 'catalog:'
         version: 2.9.0
     devDependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 'catalog:'
+        version: 1.30.0(zod@3.25.76)
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
+      '@svatah/yam-mcp':
+        specifier: workspace:*
+        version: link:../mcp
       sample-web:
         specifier: workspace:*
         version: link:../../apps/sample-web
@@ -845,6 +848,55 @@ importers:
       yaml:
         specifier: 'catalog:'
         version: 2.9.0
+
+  packages/mcp:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 'catalog:'
+        version: 1.30.0(zod@3.25.76)
+      '@svatah/yam':
+        specifier: workspace:*
+        version: link:../cli
+      '@svatah/yam-bindings-cli':
+        specifier: workspace:*
+        version: link:../bindings-cli
+      '@svatah/yam-compiler':
+        specifier: workspace:*
+        version: link:../compiler
+      '@svatah/yam-contract':
+        specifier: workspace:*
+        version: link:../contract
+      '@svatah/yam-gateway':
+        specifier: workspace:*
+        version: link:../gateway
+      '@svatah/yam-schema':
+        specifier: workspace:*
+        version: link:../schema
+      '@svatah/yam-spec':
+        specifier: workspace:*
+        version: link:../spec
+      '@svatah/yam-surface':
+        specifier: workspace:*
+        version: link:../surface
+      '@svatah/yam-surface-control':
+        specifier: workspace:*
+        version: link:../surface-control
+      '@svatah/yam-trajectory':
+        specifier: workspace:*
+        version: link:../trajectory
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 2.1.9(@types/node@26.4.1)(jsdom@30.0.1)(terser@5.51.2)
 
   packages/migrate:
     dependencies:

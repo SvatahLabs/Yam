@@ -83,7 +83,7 @@ yam surface grant
 
 macOS does not grant permissions to Yam. It grants them to **the program that
 starts Yam** — your terminal, your editor, or the MCP client that spawned
-`yam mcp`. Yam is a script inside that program and can never be granted anything
+`@svatah/yam-mcp`. Yam is a script inside that program and can never be granted anything
 of its own.
 
 So the answer changes depending on where you run it:
@@ -92,7 +92,7 @@ So the answer changes depending on where you run it:
 |---|---|---|
 | iTerm | iTerm | iTerm |
 | VS Code's terminal | VS Code | Visual Studio Code |
-| Claude Desktop, via `yam mcp` | Claude Desktop | Claude |
+| Claude Desktop, via `@svatah/yam-mcp` | Claude Desktop | Claude |
 | ssh or CI | nothing — no app owns the process | none exists |
 
 `yam surface grant` tells you which one you are in, by name:
@@ -200,7 +200,7 @@ On Windows use `--adapter uia`, on Linux `--adapter atspi`. A terminal is
 Everything above is also available over MCP, so an agent can do it:
 
 ```bash
-claude mcp add yam -- yam mcp
+claude mcp add yam -- npx -y @svatah/yam-mcp
 ```
 
 The agent gets `surface_connect`, `surface_snapshot`, `surface_act`,

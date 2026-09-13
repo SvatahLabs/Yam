@@ -590,8 +590,13 @@ describe("connecting an agent (T16, SF-07)", () => {
       mcpServers: { yam: { command: string; args: string[] } };
     };
     expect(config.mcpServers.yam.command).toBe("npx");
-    expect(config.mcpServers.yam.args).toContain("@svatah/yam");
-    expect(config.mcpServers.yam.args).toContain("mcp");
+    /*
+     * `@svatah/yam-mcp`, its own package since PK-05 — the server, not the CLI
+     * with a subcommand. The two assertions this replaces would both pass
+     * against `["-y", "@svatah/yam", "mcp"]`, which is the configuration that
+     * no longer starts anything.
+     */
+    expect(config.mcpServers.yam.args).toEqual(["-y", "@svatah/yam-mcp"]);
     expect(state.agent.brokerReady).toBe(true);
   });
 

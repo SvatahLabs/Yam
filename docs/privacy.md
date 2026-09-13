@@ -56,7 +56,7 @@ Two things are not in that file and matter as much:
 | **`yam compile --tier3`** | **a remote model** | That is what Tier 3 is |
 | `yam eval grounding` | **a remote model**, unless `--gateway fake` | |
 | `yam eval healing` | **nothing**, unless a model regrounder is registered | |
-| `yam mcp` | **nothing** | The tools it exposes are the ones above; whichever of them the agent calls is what reaches out |
+| `@svatah/yam-mcp` | **nothing** | The tools it exposes are the ones above; whichever of them the agent calls is what reaches out |
 
 **Local-only recording is P2** (REQ-NFR-3's own caveat). Today, recording either
 uses a remote model or uses the fake; there is no local-model grounding path.

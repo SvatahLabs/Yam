@@ -6,7 +6,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 
 | Package | Exports | What it is |
 |---|---|---|
-| [`@svatah/yam`](cli.md) | 66 | The yam CLI and MCP server |
+| [`@svatah/yam`](cli.md) | 67 | The yam CLI and MCP server |
 | [`@svatah/yam-adapter-appium`](adapter-appium.md) | 43 | Appium adapter: Android Chrome and native |
 | [`@svatah/yam-adapter-atspi`](adapter-atspi.md) | 28 | Linux AT-SPI accessibility adapter |
 | [`@svatah/yam-adapter-ax`](adapter-ax.md) | 54 | macOS Accessibility adapter: the Yam agent surface over AXUIElement |
@@ -23,6 +23,7 @@ One page per workspace package, generated from its entry point. `@svatah/yam` is
 | [`@svatah/yam-gateway`](gateway.md) | 44 | Model gateway: local and frontier backends, caching, redaction, provenance |
 | [`@svatah/yam-healer`](healer.md) | 44 | Failure selection, model-free repair, verification and diff |
 | [`@svatah/yam-host-playwright`](host-playwright.md) | 22 | Playwright Test host for Yam flows: the yam fixture, generated specs and the results reporter |
+| [`@svatah/yam-mcp`](mcp.md) | 10 | The Yam MCP server: surface and operation tools over stdio or Streamable HTTP |
 | [`@svatah/yam-migrate`](migrate.md) | 34 | v1/v2 to v3 migration and prototype database import |
 | [`@svatah/yam-playwright-test`](playwright-test.md) | 23 | The bind() fixture for an existing Playwright Test project |
 | [`@svatah/yam-recorder`](recorder.md) | 51 | Grounding, record session and report |

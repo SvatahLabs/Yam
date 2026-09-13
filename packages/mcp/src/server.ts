@@ -48,9 +48,9 @@ import {
   type BrokerDescriptor,
   type BrokerOperation,
 } from "@svatah/yam-surface-control";
-import { registerAllAdapters } from "../adapters.js";
-import { connectToBroker } from "./surface-control.js";
-import { compileProject, loadProject, type LoadedProject } from "../project.js";
+import { registerAllAdapters } from "@svatah/yam";
+import { connectToBroker } from "@svatah/yam";
+import { compileProject, loadProject, type LoadedProject } from "@svatah/yam";
 
 const OPTIONAL_INTENT = z
   .string()
@@ -360,7 +360,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ flows, stories, inputs }) => {
-      const { runProject } = await import("./run.js");
+      const { runProject } = await import("@svatah/yam");
       const outcome = await runProject(await project(), {
         ...(flows === undefined ? {} : { flows }),
         ...(stories === undefined ? {} : { stories }),
@@ -421,7 +421,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ flows, stories, rebind, gateway, inputs }) => {
-      const { serviceRecord } = await import("../service-api.js");
+      const { serviceRecord } = await import("@svatah/yam");
       const report = (await serviceRecord(await project(), {
         ...(flows === undefined ? {} : { flows }),
         ...(stories === undefined ? {} : { stories }),
@@ -501,7 +501,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
       },
     },
     async ({ runId, apply, useModel, inputs }) => {
-      const { serviceHeal } = await import("../service-api.js");
+      const { serviceHeal } = await import("@svatah/yam");
       const report = (await serviceHeal(await project(), {
         runId,
         ...(apply === undefined ? {} : { apply }),

@@ -76,8 +76,9 @@ describe("repository layout (HLD §12)", () => {
     // (T23, the Linux accessibility bus): 34. PK-07 adds `contract`, which is
     // the operation catalogue lifted out of `surface-control` so that three
     // installables can depend on the contract without depending on the broker
-    // that implements it: 35.
-    expect(fromHld.length).toBe(35);
+    // that implements it: 35. PK-05 moves the MCP server out of the CLI, so
+    // that a `yam` install does not carry the six-megabyte SDK: 36.
+    expect(fromHld.length).toBe(36);
   });
 
   it("names every Draft 2.11 package the LLD requires, with the section", () => {

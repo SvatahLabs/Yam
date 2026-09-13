@@ -308,6 +308,7 @@ yam/                      github.com/SvatahLabs/yam (Draft 2.18)
     workflow/             story-as-function runner, resume
     tool/                 MCP tool server over stories
     contract/             the operation catalogue and the fingerprint every client checks — schema and zod only, drives nothing (PK-07)
+    mcp/                  the MCP server over stdio and Streamable HTTP, its own installable so a CLI install does not carry the SDK (PK-05)
     surface-control/      shared operation dispatcher, session lifecycle, the broker — no compiler/recorder/gateway/service imports (Draft 2.25)
     screens/              headless screen model and action registry (Draft 2.11, LLD §13.7)
     ui-tokens/            design tokens for both themes, TS and generated CSS (Draft 2.11)

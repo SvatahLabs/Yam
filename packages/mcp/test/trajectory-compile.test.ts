@@ -30,7 +30,7 @@ import {
   type TrajectoryLine,
 } from "@svatah/yam-trajectory";
 import { proposalSchema } from "@svatah/yam-schema";
-import { buildMcpServer } from "../src/commands/mcp.js";
+import { buildMcpServer } from "../src/index.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");

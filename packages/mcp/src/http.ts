@@ -54,7 +54,7 @@ import type { EventStore } from "@modelcontextprotocol/sdk/server/streamableHttp
 import { LATEST_PROTOCOL_VERSION, type JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
 import { boolOption, numberOption, stringOption, EXIT } from "@svatah/yam-bindings-cli";
 import type { CommandIo, ExitCode, ParsedArgs } from "@svatah/yam-bindings-cli";
-import { buildMcpServer, type McpServerOptions } from "./mcp.js";
+import { buildMcpServer, type McpServerOptions } from "./server.js";
 
 /**
  * The protocol revision this transport was written and tested against.

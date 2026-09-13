@@ -108,20 +108,24 @@ test.describe("capabilities (LLD §2.4)", () => {
         const watching = surface.observe!((event) => { seen.push(event); }, { signal: controller.signal });
         await surface.act("click", await refByTestId(surface, "booking-link"));
         /*
-         * Ten seconds, not two (P-W2-F10).
+         * It waits for what it asserts (P-W2-F10).
          *
-         * This waited forty times fifty milliseconds for an event produced by a
-         * real browser in another process. Alone that is ample; under
-         * `pnpm -r test`, where several packages are driving browsers at once,
-         * it is not — and the failure read as "the adapter claims observe but
-         * the proof failed", which is an accusation about the adapter rather
-         * than about the clock. The assertion is unchanged; only the patience
-         * is, and it still stops the moment the event arrives.
+         * The loop watched for `click` and the proof then required `click` *and*
+         * `navigate` — so it stopped the moment the first arrived and asserted
+         * on the second, which under load had not. I read that as impatience
+         * twice, and raised the budget from two seconds to ten and then to
+         * thirty; it kept failing in three and a half, which is the number that
+         * says it is not a timeout at all.
+         *
+         * Waiting for both is the fix. The budget stays generous because the
+         * loop returns as soon as they are in, so it costs nothing when things
+         * are well.
          */
-        for (let i = 0; i < 200 && !seen.some((one) => one.kind === "click"); i += 1) await new Promise((done) => setTimeout(done, 50));
+        const both = () => seen.some((one) => one.kind === "click") && seen.some((one) => one.kind === "navigate");
+        for (let i = 0; i < 600 && !both(); i += 1) await new Promise((done) => setTimeout(done, 50));
         controller.abort();
         await watching;
-        return seen.some((one) => one.kind === "click") && seen.some((one) => one.kind === "navigate");
+        return both();
       },
       dialogs: async () => {
         await surface.act("dialog", undefined, { action: "accept" });

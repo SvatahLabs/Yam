@@ -18,6 +18,7 @@ The yam CLI and MCP server
 | `COMMANDS` | variable | `COMMANDS: readonly CommandHelp[] = [` | Every command, with its own help. Order is the order `yam help` lists them, then the nouns. |
 | `compileProject` | function | `export function compileProject(` | Compile a loaded project with the grammar alone. Offline, always. |
 | `CONFIG_FILES` | variable | `CONFIG_FILES: string[]` |  |
+| `connectToBroker` | function | `export async function connectToBroker(io: CommandIo): Promise<BrokerDescriptor>` | The broker this machine is using, started if there is not one — and exactly |
 | `defaultCasesPath` | function | `export function defaultCasesPath(): string` | Where the cases live, relative to the repository this package is built in. |
 | `depthOf` | function | `export function depthOf(` | How much colour this process should send. Measured once, per process. |
 | `diagnostic` | function | `export function diagnostic<C extends DiagnosticCode>(code: C, ...params: Parameters<(typeof CATALOGUE)[C]>): Diagnostic` | A row of the catalogue, with its parameters filled in. |

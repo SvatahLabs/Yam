@@ -417,13 +417,21 @@ async function runModuleB(command: string, args: ParsedArgs, io: CommandIo): Pro
       return await (await import("./commands/repl.js")).replCommand(args, io);
     case "mcp":
       /*
-       * One command, two transports (T21, SF-08). `--http` is the same tool
-       * surface over Streamable HTTP, for a client that cannot spawn a process;
-       * without it, stdio, which stays independently usable.
+       * Moved out, not deprecated (PK-05).
+       *
+       * The MCP SDK is six megabytes against six for everything Yam wrote, so
+       * every CLI install paid a hundred per cent overhead for a feature most
+       * never touch. It is `@svatah/yam-mcp` now, and there is one entry point
+       * to it: keeping this as an alias is how the app and the CLI ended up
+       * with two copies of everything else.
        */
-      return boolOption(args, "http")
-        ? await (await import("./commands/mcp-http.js")).httpMcpCommand(args, io)
-        : await (await import("./commands/mcp.js")).mcpCommand(args, io);
+      io.err(
+        "`yam mcp` has moved to its own package, so that a `yam` install does not carry the " +
+          "MCP SDK.\n\n  npx -y @svatah/yam-mcp            an agent that speaks stdio\n" +
+          "  npx -y @svatah/yam-mcp --http     one that cannot start a program\n\n" +
+          "The tools, the flags and the trajectory are unchanged.",
+      );
+      return EXIT.usage;
     case "workflow":
       return await (await import("./commands/workflow.js")).workflowCommand(args, io);
     case "tool":

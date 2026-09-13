@@ -1,4 +1,4 @@
-# `yam mcp`
+# `@svatah/yam-mcp`
 
 Yam's operations and its live surface, over the Model Context Protocol,
 so an external agent can drive an application and optionally have its exploration
@@ -140,7 +140,7 @@ surface an agent explores through, and the file that comes out.
 
 | | |
 |---|---|
-| `yam mcp [dir]` | the project; omit for surface-only mode |
+| `npx -y @svatah/yam-mcp [dir]` | the project; omit for surface-only mode |
 | `--trajectory <path.jsonl>` | where the trajectory goes; `runs/<session>/trajectory.jsonl` by default |
 | `--session <id>` | fix the session id, so the trajectory's path is predictable |
 

@@ -24,8 +24,8 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { startSampleApp, type SampleServer } from "sample-web";
 import { checkTrajectory, readTrajectory } from "@svatah/yam-trajectory";
-import { buildMcpServer } from "../src/commands/mcp.js";
-import { MCP_CORPUS } from "./mcp-corpus.js";
+import { buildMcpServer } from "../src/server.js";
+import { MCP_CORPUS } from "./corpus.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
@@ -191,7 +191,7 @@ describe("an agent compiles and runs the project (T4.6's Validate)", () => {
 
       // The same function the CLI calls, so the same hash. An agent and a person
       // compiling one project must not get two plans.
-      const { compileProject, loadProject } = await import("../src/project.js");
+      const { compileProject, loadProject } = await import("@svatah/yam");
       const direct = compileProject(await loadProject(project), { stable: true });
       expect(compiled.hash).toBe(direct.plan.hash);
     } finally {
@@ -568,7 +568,7 @@ describe("the conformance corpus over stdio (SF-07, SF-08)", () => {
     it(one.name, async () => {
       const transport = new StdioClientTransport({
         command: process.execPath,
-        args: [join(ROOT, "packages", "cli", "dist", "bin.js"), "mcp"],
+        args: [join(ROOT, "packages", "mcp", "dist", "bin.js")],
         cwd: ROOT,
         stderr: "ignore",
       });

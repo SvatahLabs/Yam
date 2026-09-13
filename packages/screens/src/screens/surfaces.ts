@@ -845,7 +845,12 @@ export async function loadSurface(
          * package rather than a path out of this checkout.
          */
         config: JSON.stringify(
-          { mcpServers: { yam: { command: "npx", args: ["-y", "@svatah/yam", "mcp"] } } },
+          /*
+           * `@svatah/yam-mcp`, its own package since PK-05: the MCP SDK is six
+           * megabytes against six for everything Yam wrote, so a CLI install no
+           * longer carries it. `npx -y` fetches on demand and installs nothing.
+           */
+          { mcpServers: { yam: { command: "npx", args: ["-y", "@svatah/yam-mcp"] } } },
           null,
           2,
         ),

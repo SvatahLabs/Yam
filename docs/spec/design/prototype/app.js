@@ -175,7 +175,7 @@ const screens = {
         <button class="btn primary" data-act="toggle-hold">${S.surface.holder === "you" ? "Give it up" : "Take control"}</button></div>
     </div>` : `<div class="card"><p class="hint" style="margin:0">No session is open, so nothing is held. Connect one in <b>Session</b>.</p></div>`}
     <div class="card"><span class="eyebrow" style="padding:0 0 8px">Connect an agent</span>
-      <div class="row"><span class="mono">npx -y @svatah/yam mcp</span><span class="meta">stdio</span><button class="btn" data-act="copy">Copy</button></div>
+      <div class="row"><span class="mono">npx -y @svatah/yam-mcp</span><span class="meta">stdio</span><button class="btn" data-act="copy">Copy</button></div>
       <p class="hint">Every call an agent makes is listed here with what it touched and whether a postcondition passed.</p></div>`,
 
   api: () => `

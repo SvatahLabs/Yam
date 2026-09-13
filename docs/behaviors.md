@@ -89,7 +89,7 @@ See [`examples/mcp-agent/`](../examples/mcp-agent/).
 ## Trajectory compile (REQ-BEH-4)
 
 Not a fourth behavior — the other direction. An agent explores through the raw
-surface (`yam mcp`, or the app's surface explorer), every call carrying what
+surface (`npx -y @svatah/yam-mcp`, or the app's surface explorer), every call carrying what
 it was trying to do, and `yam trajectory compile` turns the result into a
 **proposal**: a `.flow` draft, a plan fragment and `verified: false` bindings
 under `proposals/<date>/`, for a person to read.

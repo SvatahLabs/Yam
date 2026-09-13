@@ -31,6 +31,15 @@ export {
 } from "@svatah/yam-bindings-cli";
 
 export { registerAllAdapters } from "./adapters.js";
+/*
+ * The broker connection, for `@svatah/yam-mcp` (PK-05).
+ *
+ * The MCP server moved out of this package so that a CLI install does not carry
+ * the six-megabyte SDK, and it still needs to reach a broker the same way every
+ * other client does — through this, rather than through a second copy of the
+ * discovery, the start lock and the contract check.
+ */
+export { connectToBroker } from "./commands/surface-control.js";
 
 /**
  * The functions the local service calls (LLD §13.5: "every handler calls the

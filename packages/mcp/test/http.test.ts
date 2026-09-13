@@ -33,11 +33,12 @@ import {
   createEventStore,
   PINNED_PROTOCOL_VERSION,
   type RunningHttpMcp,
-} from "../src/commands/mcp-http.js";
-import { MCP_CORPUS, answer } from "./mcp-corpus.js";
+} from "../src/http.js";
+import { MCP_CORPUS, answer } from "./corpus.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
+/* The server is its own binary now (PK-05). */
+const MCP = join(ROOT, "packages", "mcp", "dist", "bin.js");
 
 let app: SampleServer;
 let served: RunningHttpMcp;
@@ -394,7 +395,7 @@ describe("`yam mcp --http`, as a person starts it (SF-07, SF-08)", () => {
    * person types, the handshake it prints, and an ordinary client against it.
    */
   it("prints a URL and a token, and an ordinary client connects to them", async () => {
-    const child = spawn(process.execPath, [CLI, "mcp", "--http"], {
+    const child = spawn(process.execPath, [MCP, "--http"], {
       cwd: ROOT,
       stdio: ["ignore", "pipe", "pipe"],
     });
