@@ -37,12 +37,12 @@
   },
   "dependencies": {
     "@svatah/yam-surface": "workspace:*",
-    "@svatah/yam-schema": "workspace:*",
-    "playwright": "catalog:"
+    "@svatah/yam-schema": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "catalog:",
     "@svatah/yam-conformance": "workspace:*",
+    "playwright": "catalog:",
     "sample-web": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
@@ -50,5 +50,13 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "peerDependencies": {
+    "playwright": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "playwright": {
+      "optional": true
+    }
   }
 }

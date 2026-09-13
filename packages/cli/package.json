@@ -85,10 +85,18 @@
     "yam": "./dist/bin.js"
   },
   "peerDependencies": {
-    "@playwright/test": "catalog:"
+    "@playwright/test": "catalog:",
+    "playwright": "catalog:",
+    "webdriverio": "catalog:"
   },
   "peerDependenciesMeta": {
     "@playwright/test": {
+      "optional": true
+    },
+    "playwright": {
+      "optional": true
+    },
+    "webdriverio": {
       "optional": true
     }
   }

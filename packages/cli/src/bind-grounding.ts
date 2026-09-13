@@ -31,7 +31,7 @@
  * credential, so a project with no `ANTHROPIC_API_KEY` records the way module (a)
  * does instead of failing at the first `bind()`.
  */
-import { registerBindGrounder, clearBindGrounder, hasBindGrounder } from "@svatah/yam-playwright-test";
+import { registerBindGrounder, clearBindGrounder, hasBindGrounder } from "@svatah/yam-playwright-test/grounder";
 import {
   anthropicGateway,
   credentialInEnvironment,

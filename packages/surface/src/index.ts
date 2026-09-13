@@ -32,6 +32,8 @@ export {
   clearAdapters,
   adapterFactory,
   createSurface,
+  adapterDriver,
+  type AdapterDriver,
   type AdapterFactory,
 } from "./registry.js";
 

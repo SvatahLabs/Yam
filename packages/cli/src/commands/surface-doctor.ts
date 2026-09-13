@@ -142,9 +142,20 @@ export async function surfaceDoctorCommand(
             probe.reason === undefined || DEEPER_CHECKS.has(adapter) ? "" : ` — ${probe.reason}`
           }`
         : (probe.reason ?? "not reachable on this host"),
-      ...(probe.present || probe.range === undefined
+      /*
+       * The command that fixes it comes before the range it is driven against
+       * (PK-03, PK-10). "Not installed" is a third answer — distinct from "not
+       * this host", which no command fixes, and from "not configured", which a
+       * different one does — and it is the only one where `doctor` can hand
+       * somebody the line to run.
+       */
+      ...(probe.present
         ? {}
-        : { fix: `Driven here against ${probe.range}.` }),
+        : probe.install !== undefined
+          ? { fix: `Not installed. Run \`${probe.install}\`.` }
+          : probe.range === undefined
+            ? {}
+            : { fix: `Driven here against ${probe.range}.` }),
     });
     if (adapter === "ax" && probe.present) checks.push(...(await axChecks()));
     if (adapter === "uia" && probe.present) checks.push(...(await uiaChecks()));

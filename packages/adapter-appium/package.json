@@ -36,15 +36,23 @@
   },
   "dependencies": {
     "@svatah/yam-schema": "workspace:*",
-    "@svatah/yam-surface": "workspace:*",
-    "webdriverio": "catalog:"
+    "@svatah/yam-surface": "workspace:*"
   },
   "devDependencies": {
     "tsup": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "webdriverio": "catalog:"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "peerDependencies": {
+    "webdriverio": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "webdriverio": {
+      "optional": true
+    }
   }
 }

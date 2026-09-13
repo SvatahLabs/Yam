@@ -324,9 +324,6 @@ importers:
       '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
-      webdriverio:
-        specifier: 'catalog:'
-        version: 9.31.5
     devDependencies:
       tsup:
         specifier: 'catalog:'
@@ -337,6 +334,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 2.1.9(@types/node@26.4.1)(jsdom@30.0.1)(terser@5.51.2)
+      webdriverio:
+        specifier: 'catalog:'
+        version: 9.31.5
 
   packages/adapter-atspi:
     dependencies:
@@ -431,9 +431,6 @@ importers:
       '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
-      playwright:
-        specifier: 'catalog:'
-        version: 1.62.1
     devDependencies:
       '@playwright/test':
         specifier: 'catalog:'
@@ -441,6 +438,9 @@ importers:
       '@svatah/yam-conformance':
         specifier: workspace:*
         version: link:../conformance
+      playwright:
+        specifier: 'catalog:'
+        version: 1.62.1
       sample-web:
         specifier: workspace:*
         version: link:../../apps/sample-web
@@ -658,6 +658,12 @@ importers:
       '@svatah/yam-workflow':
         specifier: workspace:*
         version: link:../workflow
+      playwright:
+        specifier: 'catalog:'
+        version: 1.62.1
+      webdriverio:
+        specifier: 'catalog:'
+        version: 9.31.5
       yaml:
         specifier: 'catalog:'
         version: 2.9.0
@@ -879,11 +885,11 @@ importers:
       '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
-      playwright:
-        specifier: 'catalog:'
-        version: 1.62.1
     devDependencies:
       '@playwright/test':
+        specifier: 'catalog:'
+        version: 1.62.1
+      playwright:
         specifier: 'catalog:'
         version: 1.62.1
       sample-web:

@@ -13,6 +13,34 @@ import type { AgentSurface } from "./surface.js";
 
 export type AdapterFactory = (config: Config) => AgentSurface | Promise<AgentSurface>;
 
+/**
+ * What an adapter needs installed before it can drive anything (PK-03).
+ *
+ * Only the adapter can answer this. A probe in another package resolves from
+ * *its* location, and under a strict node_modules layout that is a different
+ * question with a different answer — the first version of this asked
+ * `surface-control`, which depends on neither driver, and reported Appium
+ * missing on a machine that had it.
+ *
+ * Absent for the six adapters that need nothing: an adapter with no driver is
+ * not "installed", it simply is.
+ */
+export interface AdapterDriver {
+  /** The package, as npm names it. */
+  readonly name: string;
+  /** Whether the adapter can resolve it from its own location. */
+  readonly resolved: boolean;
+  /** The one command that fixes it. */
+  readonly install: string;
+}
+
+const drivers = new Map<string, AdapterDriver>();
+
+/** What `name` needs installed, when it needs anything. */
+export function adapterDriver(name: string): AdapterDriver | undefined {
+  return drivers.get(name);
+}
+
 const registry = new Map<string, AdapterFactory>();
 
 /**
@@ -20,7 +48,7 @@ const registry = new Map<string, AdapterFactory>();
  * silently replacing an adapter would make which implementation ran depend on
  * import order, and replay must not depend on that.
  */
-export function registerAdapter(name: string, factory: AdapterFactory): void {
+export function registerAdapter(name: string, factory: AdapterFactory, driver?: AdapterDriver): void {
   if (name.trim() === "") {
     throw new SessionError("An adapter name must not be empty.");
   }
@@ -30,10 +58,12 @@ export function registerAdapter(name: string, factory: AdapterFactory): void {
     );
   }
   registry.set(name, factory);
+  if (driver !== undefined) drivers.set(name, driver);
 }
 
 /** Remove a registration. Returns false when the name was not registered. */
 export function unregisterAdapter(name: string): boolean {
+  drivers.delete(name);
   return registry.delete(name);
 }
 

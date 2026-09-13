@@ -17,6 +17,8 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `ActionabilityError` | class | `export class ActionabilityError extends SurfaceError` | The element was found but was not in a state that permits the action. |
 | `ActResult` | typealias | `type ActResult = z.infer<typeof actResultSchema>;` |  |
 | `actResultSchema` | variable | `actResultSchema: z.ZodObject<` |  |
+| `adapterDriver` | function | `export function adapterDriver(name: string): AdapterDriver \| undefined` | What `name` needs installed, when it needs anything. |
+| `AdapterDriver` | interface | `export interface AdapterDriver` | What an adapter needs installed before it can drive anything (PK-03). |
 | `adapterFactory` | function | `export function adapterFactory(name: string): AdapterFactory \| undefined` | The factory registered under a name, or `undefined`. |
 | `AdapterFactory` | typealias | `export type AdapterFactory = (config: Config) => AgentSurface \| Promise<AgentSurface>;` | Adapter registration and selection (LLD §2.4, REQ-SURF-2). |
 | `AgentSurface` | interface | `export interface AgentSurface` | The agent surface (LLD §2.1, REQ-SURF-1). |
@@ -73,7 +75,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `QuitConfig` | interface | `export interface QuitConfig` | How to stop it (`config.app.quit`). |
 | `ReadKind` | typealias | `type ReadKind = z.infer<typeof readKindSchema>;` |  |
 | `Ref` | typealias | `type Ref = z.infer<typeof refSchema>;` |  |
-| `registerAdapter` | function | `export function registerAdapter(name: string, factory: AdapterFactory): void` | Register an adapter under a name. Registering the same name twice is an error: |
+| `registerAdapter` | function | `export function registerAdapter(name: string, factory: AdapterFactory, driver?: AdapterDriver): void` | Register an adapter under a name. Registering the same name twice is an error: |
 | `renderForHash` | function | `export function renderForHash(nodes: readonly SnapshotNode[]): string` | The canonical rendering the hash is taken over: one line per node, indented by |
 | `renderNode` | function | `export function renderNode(node: SnapshotNode, options: RenderOptions = {}): string` | Render one node, without its children. |
 | `RenderOptions` | interface | `export interface RenderOptions` |  |

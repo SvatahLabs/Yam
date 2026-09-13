@@ -35,10 +35,19 @@
  */
 import { spawnSync } from "node:child_process";
 import { createRequire } from "node:module";
+import { adapterDriver } from "@svatah/yam-surface";
 import { existsSync } from "node:fs";
 import { platform } from "node:os";
 
 export interface AdapterProbe {
+  /**
+   * The one command that makes this adapter work, when the answer is "not
+   * installed" (PK-03, PK-10).
+   *
+   * Absent when there is nothing to install — "UI Automation is Windows'; this
+   * host is darwin" is not fixed by a command, and offering one would be a lie.
+   */
+  readonly install?: string;
   /** Whether the thing this adapter drives is reachable on this host. */
   readonly present: boolean;
   /** What the host said its version is, when it could be asked. */
@@ -66,6 +75,24 @@ async function askHttp(url: string, timeoutMs = 1_500): Promise<unknown> {
   } catch {
     return undefined;
   }
+}
+
+/**
+ * "Not installed", from the adapter that would know (PK-03).
+ *
+ * Absent when the adapter needs no driver, or has not registered — a probe run
+ * in a process that never registered adapters cannot claim anything about them.
+ */
+function driverMissing(adapter: string): AdapterProbe | undefined {
+  const driver = adapterDriver(adapter);
+  if (driver === undefined || driver.resolved) return undefined;
+  return {
+    present: false,
+    install: driver.install,
+    reason:
+      `the ${adapter} adapter needs \`${driver.name}\`, which is not installed. It is an ` +
+      "optional peer, so that somebody who does not need it does not carry it.",
+  };
 }
 
 const cache = new Map<string, AdapterProbe>();
@@ -137,19 +164,21 @@ async function runProbe(adapter: string): Promise<AdapterProbe> {
        * reasons and send a person to different commands, so they are reported
        * apart.
        */
+      /*
+       * Not installed is a third answer (PK-03), and only the adapter can give
+       * it: resolution depends on where you ask from, and this package depends
+       * on neither driver. `adapterDriver` is what the adapter recorded when it
+       * registered, standing in the right place.
+       */
+      const missingPlaywright = driverMissing("playwright");
+      if (missingPlaywright !== undefined) return missingPlaywright;
       const require_ = createRequire(import.meta.url);
       let version: string;
       try {
         const manifest = require_("playwright/package.json") as { version?: unknown };
-        if (typeof manifest.version !== "string") throw new Error("no version");
-        version = manifest.version;
+        version = typeof manifest.version === "string" ? manifest.version : "installed";
       } catch {
-        return {
-          present: false,
-          reason:
-            "Playwright is not installed where Yam can load it. `npm i -D playwright` in the " +
-            "project, or use the ax adapter, which needs no browser package.",
-        };
+        version = "installed";
       }
       try {
         const { chromium } = (await import("playwright")) as {
@@ -206,6 +235,8 @@ async function runProbe(adapter: string): Promise<AdapterProbe> {
        * question and this does not claim to have asked it — which is the
        * distinction the old table could not make at all.
        */
+      const missingDriver = driverMissing("appium");
+      if (missingDriver !== undefined) return missingDriver;
       const endpoint = process.env["YAM_APPIUM_URL"] ?? "http://127.0.0.1:4723";
       const status = (await askHttp(`${endpoint.replace(/\/$/u, "")}/status`)) as
         | { value?: { build?: { version?: string } } }
