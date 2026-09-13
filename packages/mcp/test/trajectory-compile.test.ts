@@ -39,6 +39,8 @@ const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
 let app: SampleServer;
 const projects: string[] = [];
 
+const MCP_BIN = join(ROOT, "packages", "mcp", "dist", "bin.js");
+
 function scaffold(): string {
   const dir = mkdtempSync(join(tmpdir(), "yam-traj-"));
   projects.push(dir);
@@ -360,6 +362,52 @@ describe("yam trajectory compile (T5.5, REQ-AGT-1)", () => {
     const { files } = JSON.parse(result.out) as { files: string[] };
     expect(files.some((file) => file.includes("sign-in-as-the-enterprise-user.flow"))).toBe(true);
   }, 240_000);
+
+  /*
+   * The executable takes the project as its **first** argument (PK-05).
+   *
+   * `mcpCommand` read `args.command[1]`, which was right while the command was
+   * `yam mcp <project-dir>` and the first word was "mcp". As its own binary
+   * there is no such word, so `yam-mcp <project-dir>` put the directory in
+   * `command[0]`, the server read past it, and every project-scoped start
+   * silently became a projectless one — the operation tools absent, the
+   * trajectory unwritten, and the banner saying so in a line nobody reads
+   * twice.
+   *
+   * Nothing caught it because nothing drove this path: the in-process tests
+   * call `buildMcpServer` directly, and the stdio corpus spawns the binary with
+   * no project at all. Driving the executable is the only way to check what an
+   * agent host actually runs.
+   */
+  it("takes the project directory as its first argument", async () => {
+    const project = scaffold();
+    const said = await bannerOf([project]);
+    expect(said, `the server did not open the project: ${said}`).toContain("trajectory at");
+    expect(said).toContain(project);
+  });
+
+  it("starts without one, and says which it is", async () => {
+    const said = await bannerOf([]);
+    expect(said).toContain("no project, no trajectory");
+  });
+
+  /** Start the server, read its first line of stderr, and stop it. */
+  function bannerOf(args: readonly string[]): Promise<string> {
+    return new Promise((done) => {
+      const child = spawn(process.execPath, [MCP_BIN, ...args], { cwd: tmpdir(), env: process.env });
+      let said = "";
+      const finish = (): void => {
+        child.kill("SIGTERM");
+        done(said.trim());
+      };
+      child.stderr.on("data", (chunk) => {
+        said += String(chunk);
+        if (said.includes("\n")) finish();
+      });
+      /* A server that says nothing is a failure this reports rather than hangs on. */
+      setTimeout(finish, 20_000);
+    });
+  }
 
   it("says what it wants when it is given nothing to compile", async () => {
     const project = scaffold();

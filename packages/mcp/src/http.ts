@@ -359,7 +359,21 @@ function addressPort(server: Server): number {
  * needed it.
  */
 export async function httpMcpCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode> {
-  const root = args.command[1];
+  /*
+   * The first positional is the project, not the second (PK-05).
+   *
+   * This read `args.command[1]`, which was right while the command was
+   * `yam mcp <project-dir>`: `command[0]` was the word "mcp". As its own
+   * executable there is no such word, so `yam-mcp <project-dir>` put the
+   * directory in `command[0]` and this read past it — the server started with
+   * no project and said so, and the only way to get one was to pass a bogus
+   * first argument.
+   *
+   * Nothing caught it because nothing drove this path: the in-process tests
+   * call `buildMcpServer` directly and the stdio corpus spawns the binary with
+   * no project at all.
+   */
+  const root = args.command[0];
   const origins = stringOption(args, "allow-origin");
   const running = await startHttpMcp({
     ...(root === undefined ? {} : { root }),

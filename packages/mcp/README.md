@@ -8,6 +8,14 @@ that compile, lint, run, record and heal.
 { "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp"] } } }
 ```
 
+With no argument it offers the surface tools and opens no project — which is
+what an agent driving a browser or an application wants. Name a directory to add
+the operation tools and write a trajectory there:
+
+```json
+{ "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp", "/path/to/project"] } } }
+```
+
 `--http` serves the same tools over Streamable HTTP on loopback behind a bearer
 token, for a client that cannot start a program.
 
