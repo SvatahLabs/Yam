@@ -114,24 +114,49 @@ changing it afterwards would rewrite all of them a second time.
 
 ## Wave E3 — words
 
-- [ ] **E3.1** Every zero state names an action; the guarantees that are not
+- [x] **E3.1** Every zero state names an action; the guarantees that are not
   instructions stay as they are. `AX-07`, `CX-04`
-- [ ] **E3.2** Every screen names where its work goes. `AX-16`
-- [ ] **E3.3** No sentence twice on a screen; the "browser, app, device or API"
+  — thirty-odd of them, and the rule is scoped to zero states after two earlier
+  formulations measured nothing and then too much. "This project compiles clean"
+  is exempt, written down, with its reason.
+- [x] **E3.2** Every screen names where its work goes. `AX-16`
+  — Settings was the one that did not: its status was a directory path, which
+  says where you are. It names `yam.config.yaml` now.
+- [x] **E3.3** No sentence twice on a screen; the "browser, app, device or API"
   copy goes everywhere it survives. `EX-05`
-- [ ] **E3.4** A check for prose naming a screen the model does not have.
+  — it promised a device this machine has no driver for. What is ready is named
+  by the discovery panel, which asks the host rather than the copy.
+- [x] **E3.4** A check for prose naming a screen the model does not have.
   `EX-06`
+  — it found three beyond the one the walkthrough saw: two view titles still
+  reading "Surfaces" and "Record review", and a cockpit pane drawing the second
+  as its heading.
 
 ## Wave E4 — the cockpit
 
-- [ ] **E4.1** The four properties checked in a pseudo-terminal: a key that can
+- [x] **E4.1** The four properties checked in a pseudo-terminal: a key that can
   only refuse is not reachability. `CX-01`
-- [ ] **E4.2** The rail strip stays and is held to the same rule as the app's
+  — `packages/tui/test/zero-states.test.ts`, which found five instructions
+  naming a key bound on a different screen, all five written an hour earlier by
+  E3.1, plus one that predates the wave: "press H to heal", where the key is
+  `h`.
+- [x] **E4.2** The rail strip stays and is held to the same rule as the app's
   navigation. `CX-03`
-- [ ] **E4.3** Modes are the model's in both renderers. `CX-05`
+  — a bracket rather than a colour, because a monochrome terminal has to carry
+  it too, and from the same `needsProject` table the app reads.
+- [x] **E4.3** Modes are the model's in both renderers. `CX-05`
+  — `tools/repo-checks/test/action-modes.test.ts` already held the cockpit to
+  it; the app's half is now checked too, because the Playwright case that
+  claimed to was counting buttons and `AX-05` made that count nought.
 
 ## Wave E5 — the record
 
-- [ ] **E5.1** Re-run the walkthrough and diff it against 2026-09-11's. `EX-N2`
-- [ ] **E5.2** The wave record: what running it found, what each check would have
+- [~] **E5.1** Re-run the walkthrough and diff it against 2026-09-11's. `EX-N2`
+  — it is a command now (`evals/self/yam-on-yam/app-walk.mjs`) and it reports
+  ten measurements against what each read on 2026-09-11, all ten changed. The
+  reading was taken after E0–E2 were packaged; the machine's screen locked
+  before it could be retaken after E3 and E4, and macOS shows an accessibility
+  client no windows at all when it is.
+- [x] **E5.2** The wave record: what running it found, what each check would have
   caught, and which rules still cannot tell the new design from the old. `EX-N3`
+  — `progress/wave-1.md`.

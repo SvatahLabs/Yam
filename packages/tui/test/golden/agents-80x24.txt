@@ -2,7 +2,7 @@
 ‹a Agents and tools  p API  d Data  i Import prototype database  r Runs  ›
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Tools · 0                  │┃ 2 Invocations                                ┃
-│ no story is exposed as a to… │┃ no agent has called a tool yet               ┃
+│ no story is exposed as a to… │┃ no agent has called a tool yet · run `yam t… ┃
 │                              │┃                                              ┃
 │                              │┃                                              ┃
 │                              │┃                                              ┃

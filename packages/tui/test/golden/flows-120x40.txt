@@ -2,7 +2,7 @@
  s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌───────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌──────────────────────────────────┐
 │ 1 Flows                   │┃ 2 flows/guards-and-compensation.flow                ┃│ 3 Inspect                        │
-│ booking-compe… not run    │┃ ▌  1   // Guards and compensation, end to end (T5…▓ ┃│ no step selected                 │
+│ booking-compe… not run    │┃ ▌  1   // Guards and compensation, end to end (T5…▓ ┃│ no step selected · press ↑↓ to … │
 │ booking-workf… not run    │┃   2   //                                          ▓ ┃│                                  │
 │ execution.flow not run    │┃   3   // `booking-compensation.flow` beside this …▓ ┃│                                  │
 │ … aborted    run 12 h ago │┃   4   // faithful sibling of `execution.flow`. Th…▓ ┃│                                  │

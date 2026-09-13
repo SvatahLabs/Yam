@@ -225,7 +225,16 @@ export function SurfacesScreen(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.
             onSelect={(selected) =>
               props.onParams({ ...props.params, selected, ref: undefined, snapshot: undefined })
             }
-            empty="Choose a browser, app, device or API to control. Enter a URL above and press Connect surface."
+            /*
+             * What *this list* is, and what puts something in it (`EX-05`,
+             * `AX-07`, `B18`).
+             *
+             * It repeated the screen's own status line word for word — one
+             * sentence, twice on one screen, which tells a person their eyes
+             * have not moved. A zero state's job is to say what is missing from
+             * the thing it is inside, and which action changes that.
+             */
+            empty="No session is open. One appears here the moment you connect, and stays until you disconnect."
             columns={[
               {
                 key: "session",
@@ -333,7 +342,7 @@ function Discovery(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
             label="Adapters that need something first"
             rows={[...rest]}
             rowKey={(row) => row.adapter}
-            empty="Nothing else to offer."
+            empty="Nothing else to offer: every adapter this build has is ready. Enter a target above and press Connect surface."
             columns={[
               { key: "adapter", header: "adapter", monospace: true, cell: (row) => row.adapter },
               {

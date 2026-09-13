@@ -2,7 +2,7 @@
  s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  ›
 ┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 What you can connect to   │┃ 2 Sessions                                    ┃
-│ Nothing could be listed, b… │┃ choose a browser, app, device or API to cont… ┃
+│ Nothing could be listed, b… │┃ no session open · press c to connect somethi… ┃
 │                             │┃                                               ┃
 │                             │┃                                               ┃
 │                             │┃                                               ┃
@@ -16,7 +16,7 @@
 └─────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ 4 Adapters                                                                   │
-│ none reported                                                                │
+│ none reported · press s to refresh the surface                               │
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘

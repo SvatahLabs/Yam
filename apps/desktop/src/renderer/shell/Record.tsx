@@ -136,7 +136,7 @@ export function RecordScreen(props: RecordProps): React.JSX.Element {
             rowKey={(row) => row.file}
             selected={state.file ?? ""}
             onSelect={(file) => props.onParams({ ...props.params, file })}
-            empty="No flow files yet."
+            empty="No flow files yet. Connect something in Do and press Start capture to write one."
             columns={[
               { key: "file", header: "flow", cell: (row) => row.file.split("/").pop() ?? row.file },
             ]}
@@ -341,7 +341,7 @@ export function RecordInspector(props: RecordProps): React.JSX.Element {
           label="Resolver order"
           rows={[...decision.candidates]}
           rowKey={(row) => `${row.by}-${row.value}`}
-          empty="The model proposed no candidate."
+          empty="The model proposed no candidate. Press Pick again to choose the control yourself."
           columns={[
             { key: "by", header: "by", monospace: true, cell: (row) => row.by },
             { key: "value", header: "value", monospace: true, cell: (row) => row.value },

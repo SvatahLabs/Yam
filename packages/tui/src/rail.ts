@@ -11,7 +11,7 @@
  * truncating: the current screen stays on it, which is the one thing the strip
  * exists to say.
  */
-import { RAIL, type ScreenId } from "@svatah/yam-screens";
+import { RAIL, needsProject, type ScreenId } from "@svatah/yam-screens";
 
 /** One destination, as the strip prints it. */
 export interface RailEntry {
@@ -20,6 +20,17 @@ export interface RailEntry {
   readonly screen: ScreenId;
   readonly label: string;
   readonly current: boolean;
+  /**
+   * Whether this destination is shut, right now (`CX-03`, `AX-04`).
+   *
+   * The same rule the app's rail keeps, from the same table: a screen that is
+   * about a project cannot be opened without one, and saying so *on the strip*
+   * is what stops it being discovered by pressing `g f` and arriving at a wall.
+   * A terminal has no window chrome to carry the navigation, which is the
+   * argument for keeping the strip at all — and a strip that lies about where
+   * it goes is worse than no strip.
+   */
+  readonly shut: boolean;
 }
 
 /**
@@ -51,6 +62,9 @@ export const RAIL_ENTRIES: ReadonlyArray<{ key: string; screen: ScreenId; label:
   (one) => ({ key: JUMP[one.screen] ?? "", screen: one.screen, label: one.label }),
 );
 
+/** Which destinations are shut when no project is open (`CX-03`). */
+export const shutWithoutProject = (screen: ScreenId): boolean => needsProject(screen);
+
 /** The screen a jump key names, if it names one. */
 export const screenForJump = (key: string): ScreenId | undefined =>
   RAIL_ENTRIES.find((one) => one.key === key)?.screen;
@@ -76,8 +90,20 @@ const widthOf = (one: { key: string; label: string }): number => one.key.length 
 export function railRow(
   current: ScreenId,
   width: number,
+  /**
+   * Whether a project is open (`CX-03`).
+   *
+   * Optional and defaulting to "yes", because the strip is drawn in places that
+   * do not know — and a strip that marked everything shut on a screen with a
+   * project open would be a worse lie than the one it is fixing.
+   */
+  project = true,
 ): { readonly entries: readonly RailEntry[]; readonly more: { left: boolean; right: boolean } } {
-  const all = RAIL_ENTRIES.map((one) => ({ ...one, current: one.screen === current }));
+  const all = RAIL_ENTRIES.map((one) => ({
+    ...one,
+    current: one.screen === current,
+    shut: !project && shutWithoutProject(one.screen),
+  }));
   const total = all.reduce((sum, one) => sum + widthOf(one), 0);
   /* One space of leading padding, matching the status bar's. */
   if (total + 1 <= width) return { entries: all, more: { left: false, right: false } };

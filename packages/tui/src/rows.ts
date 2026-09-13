@@ -94,7 +94,7 @@ const kv = (key: string, value: string, tone?: StatusTone): Line => ({
 /** A heading inside a pane: the artboards' small upper-case section labels. */
 const heading = (one: string): Line => ({ key: `heading:${one}`, cells: [dim(one.toUpperCase())] });
 
-const none: PaneContent = { title: "—", lines: [], empty: "nothing here" };
+const none: PaneContent = { title: "—", lines: [], empty: "nothing here · press ? for the keys" };
 
 /* ────────────────────────────────────────────────────────────────────────────
  * The twelve
@@ -134,7 +134,7 @@ function flows(state: FlowsState, now: number): PaneModel {
   return {
     tree: {
       title: "Flows",
-      empty: "no flow files",
+      empty: "no flow files · run `yam init` to write one",
       nextActions: ["capture.start", "flows.compile"],
       lines: state.files.map((file) => ({
         key: file.file,
@@ -148,7 +148,7 @@ function flows(state: FlowsState, now: number): PaneModel {
     },
     main: {
       title: state.file ?? "Flows",
-      empty: "no file open",
+      empty: "no file open · press ↑↓ to choose one, e to edit it",
       nextActions: ["capture.start"],
       lines: state.lines.map((line) => ({
         key: String(line.line),
@@ -173,7 +173,7 @@ function flows(state: FlowsState, now: number): PaneModel {
     },
     inspector: {
       title: state.inspector === undefined ? "Inspect" : `Step ${state.inspector.line}`,
-      empty: "no step selected",
+      empty: "no step selected · press ↑↓ to choose one",
       lines:
         state.inspector === undefined
           ? []
@@ -205,7 +205,7 @@ function flows(state: FlowsState, now: number): PaneModel {
     },
     audit: {
       title: "Lint",
-      empty: "nothing to report",
+      empty: "nothing to report · press r to run a flow",
       lines: state.lint.map((one, at) => ({
         // Two diagnostics can share a code and a line (a project with two
         // unset secrets reports `W_SECRET_UNSET` twice at line 0), so the index
@@ -229,7 +229,7 @@ function runScreen(state: RunState): PaneModel {
   return {
     tree: {
       title: "Stories",
-      empty: "this run touched no story",
+      empty: "this run touched no story · press r to run one",
       lines: state.stories.map((story) => ({
         key: story.story,
         cells: [text(story.story, { grow: true }), pill(story.status)],
@@ -261,7 +261,7 @@ function runScreen(state: RunState): PaneModel {
     },
     inspector: {
       title: state.inspector?.title ?? "Inspect",
-      empty: "no step selected",
+      empty: "no step selected · press ↑↓ to choose one",
       lines:
         state.inspector === undefined
           ? []
@@ -298,7 +298,7 @@ function runScreen(state: RunState): PaneModel {
     },
     audit: {
       title: `Audit${state.live ? " · live" : ""}`,
-      empty: "this run wrote no audit lines",
+      empty: "this run wrote no audit lines · press r to run a flow",
       lines: state.audit.map((line) => ({
         key: String(line.seq),
         cells: [
@@ -321,7 +321,7 @@ function runs(state: RunsState, now: number): PaneModel {
   return {
     tree: {
       title: `Filters · ${state.rows.length} of ${state.total}`,
-      empty: "no runs yet",
+      empty: "no runs yet · run a flow and it lands here",
       nextActions: ["run.flow"],
       lines: [
         heading("behavior"),
@@ -364,7 +364,7 @@ function runs(state: RunsState, now: number): PaneModel {
     },
     inspector: {
       title: inspector === undefined ? "Inspect" : `Run ${inspector.runId}`,
-      empty: "no run selected",
+      empty: "no run selected · press ↑↓ to choose one",
       lines:
         inspector === undefined
           ? []
@@ -401,7 +401,7 @@ function runs(state: RunsState, now: number): PaneModel {
     },
     audit: {
       title: "Runs · newest first",
-      empty: "no runs yet",
+      empty: "no runs yet · run a flow and it lands here",
       nextActions: ["run.flow"],
       lines: state.rows.slice(0, 12).map((row) => ({
         key: `tail-${row.runId}`,
@@ -420,7 +420,7 @@ function bindings(state: BindingsState): PaneModel {
   return {
     tree: {
       title: `Elements · ${state.unverified} unverified`,
-      empty: "no bindings yet",
+      empty: "no bindings yet · record a flow and they are written for you",
       nextActions: ["record.start", "bindings.verify"],
       lines: state.rows.map((row) => ({
         key: row.elementId,
@@ -430,7 +430,7 @@ function bindings(state: BindingsState): PaneModel {
     },
     main: {
       title: "Bindings",
-      empty: "`yam record` writes them",
+      empty: "none yet · record a flow and they are written for you",
       lines: state.rows.map((row) => ({
         key: `main-${row.elementId}`,
         cells: [
@@ -445,7 +445,7 @@ function bindings(state: BindingsState): PaneModel {
     },
     inspector: {
       title: inspector?.elementId ?? "Inspect",
-      empty: "no binding selected",
+      empty: "no binding selected · press ↑↓ to choose one",
       lines:
         inspector === undefined
           ? []
@@ -472,7 +472,7 @@ function bindings(state: BindingsState): PaneModel {
     },
     audit: {
       title: "Store",
-      empty: "no bindings yet",
+      empty: "no bindings yet · record a flow and they are written for you",
       nextActions: ["record.start", "bindings.verify"],
       lines: state.rows
         /* The tone, not the word: which word means verified is the model's. */
@@ -495,7 +495,7 @@ function record(state: RecordView): PaneModel {
   return {
     tree: {
       title: "Gateway",
-      empty: "no gateway",
+      empty: "no gateway · press ↑↓ to choose one",
       lines: [
         ...state.gateways.map((one) => ({
           key: one.id,
@@ -518,13 +518,13 @@ function record(state: RecordView): PaneModel {
     main: {
       title:
         state.sessionId === undefined
-          ? "Record review · no session"
+          ? "Record · nothing connected"
           : state.capturing
             ? `Recording what you do · ${state.sessionId}`
             : `Session ${state.sessionId}`,
       empty:
         state.sessionId === undefined
-          ? "press R on the Flows screen to record what you do, B to bind a flow"
+          ? "press c to connect something to watch, then ^s to start capturing"
           : state.capturing
             ? "drive the application; each thing you do becomes a sentence"
             : "waiting for the first grounding",
@@ -611,7 +611,7 @@ function record(state: RecordView): PaneModel {
     },
     audit: {
       title: "Decisions",
-      empty: "no decision has been settled yet",
+      empty: "no decision has been settled yet · press a to accept one, x to reject it",
       lines: [
         ...state.decisions.map((one, at) => ({
           key: `decided-${at}`,
@@ -639,7 +639,7 @@ function heal(state: HealState, now: number): PaneModel {
   return {
     tree: {
       title: "Runs with a failure",
-      empty: "nothing to heal",
+      empty: "nothing to heal · press h to heal a run once one has failed",
       lines: state.candidates.map((one) => ({
         key: one.runId,
         cells: [
@@ -652,7 +652,7 @@ function heal(state: HealState, now: number): PaneModel {
     },
     main: {
       title: state.runId === undefined ? "Heal review" : `Heal ${state.runId}`,
-      empty: "press H to heal the selected run",
+      empty: "press h to heal the selected run",
       lines: state.proposals.map((one) => ({
         key: one.elementId,
         cells: [
@@ -679,7 +679,7 @@ function heal(state: HealState, now: number): PaneModel {
     },
     inspector: {
       title: proposal?.elementId ?? "Proposal",
-      empty: "no proposal yet",
+      empty: "no proposal yet · press h to heal the selected run",
       lines:
         proposal === undefined
           ? []
@@ -717,7 +717,7 @@ function heal(state: HealState, now: number): PaneModel {
     },
     audit: {
       title: "Proposals",
-      empty: "no proposal yet",
+      empty: "no proposal yet · press h to heal the selected run",
       lines: state.proposals.map((one) => ({
         key: `tail-${one.elementId}`,
         cells: [
@@ -744,7 +744,7 @@ function agents(state: AgentsState): PaneModel {
         state.clients.length === 0
           ? `Tools · ${state.tools.length}`
           : `${state.clients.length} connected · ${state.tools.length} tools`,
-      empty: "no story is exposed as a tool",
+      empty: "no story is exposed as a tool · run `yam tool serve --expose` to choose them",
       lines: [
         ...state.clients.map((one) => ({
           key: `client:${one.id}`,
@@ -774,7 +774,7 @@ function agents(state: AgentsState): PaneModel {
         driving.length === 0
           ? "Invocations"
           : `Invocations · ${driving[0]!.name} is driving ${driving[0]!.holds ?? ""}`,
-      empty: "no agent has called a tool yet",
+      empty: "no agent has called a tool yet · run `yam tool serve` to expose them",
       lines: state.invocations.map((one, at) => ({
         key: `invocation-${at}`,
         cells: [
@@ -789,7 +789,7 @@ function agents(state: AgentsState): PaneModel {
     },
     inspector: {
       title: chosen?.name ?? "Tool",
-      empty: "no tool selected",
+      empty: "no tool selected · press ↑↓ to choose one",
       lines:
         chosen === undefined
           ? []
@@ -823,7 +823,7 @@ function api(state: ApiState): PaneModel {
   return {
     tree: {
       title: `Requests · ${state.requests.length}`,
-      empty: "no request in api/",
+      empty: "no request in api/ · add a file to api/ to name one",
       lines: state.requests.map((one) => ({
         key: one.name,
         cells: [
@@ -835,7 +835,7 @@ function api(state: ApiState): PaneModel {
     },
     main: {
       title: request === undefined ? "API" : `${request.method} ${request.name}`,
-      empty: "no request selected",
+      empty: "no request selected · press ↑↓ to choose one",
       lines:
         request === undefined
           ? []
@@ -878,7 +878,7 @@ function api(state: ApiState): PaneModel {
     },
     audit: {
       title: "Body",
-      empty: "nothing has been sent from this screen",
+      empty: "nothing sent from this screen yet · press Enter to send the request",
       lines:
         response === undefined
           ? []
@@ -895,7 +895,7 @@ function data(state: DataState): PaneModel {
   return {
     tree: {
       title: `Keys · ${state.rows.length}`,
-      empty: "data.yaml is empty",
+      empty: "data.yaml is empty · add a value to it and press ^s to save",
       lines: state.rows.map((one) => ({
         key: one.path,
         cells: [text(one.selected ? `▸ ${one.path}` : `  ${one.path}`, { grow: true })],
@@ -904,7 +904,7 @@ function data(state: DataState): PaneModel {
     },
     main: {
       title: "data.yaml",
-      empty: "no run data",
+      empty: "no run data · run a flow and what it read lands here",
       lines: state.rows.map((one) => ({
         key: `row-${one.path}`,
         cells: [
@@ -925,7 +925,7 @@ function data(state: DataState): PaneModel {
     },
     inspector: {
       title: chosen?.path ?? "Value",
-      empty: "no key selected",
+      empty: "no key selected · press ↑↓ to choose one",
       lines:
         chosen === undefined
           ? []
@@ -950,7 +950,7 @@ function data(state: DataState): PaneModel {
     },
     audit: {
       title: "Secrets",
-      empty: "this project declares no secret",
+      empty: "this project declares no secret · add one to data.yaml to use it",
       lines: state.rows
         .filter((one) => one.secret)
         .map((one) => ({
@@ -989,7 +989,7 @@ function session(state: SessionState): PaneModel {
   return {
     tree: {
       title: "Session",
-      empty: "nothing connected",
+      empty: "nothing connected · press c to connect something",
       lines: state.surface.sessions.map((one) => ({
         key: one.sessionId,
         cells: [text(one.sessionId, { width: 10 }), dim(one.adapter, { grow: true }), pill(one.pill)],
@@ -998,7 +998,7 @@ function session(state: SessionState): PaneModel {
     },
     main: {
       title: "Say · one sentence at a time",
-      empty: "nothing said yet; a sentence is grounded against the open session and appended",
+      empty: "nothing said yet · press i to type a sentence",
       lines: say.sentences.map((one, at) => ({
         key: `${at}:${one.text}`,
         cells: [
@@ -1018,17 +1018,17 @@ function session(state: SessionState): PaneModel {
     },
     inspector: {
       title: "Will be written",
-      empty: "nothing yet",
+      empty: "nothing yet · press c to connect something",
       lines: [
         kv("flow", say.file ?? "not yet named"),
         kv("lines", String(say.flow.length)),
         kv("bindings", `${say.bindings}${say.unverified > 0 ? `, ${say.unverified} unverified` : ""}`),
-        kv("on disk", say.written ? "written" : "nothing yet", say.written ? "pass" : "neutral"),
+        kv("on disk", say.written ? "written" : "nothing yet · press c to connect something", say.written ? "pass" : "neutral"),
       ],
     },
     audit: {
       title: "The flow so far",
-      empty: "no lines yet",
+      empty: "no lines yet · press i to say what to do",
       lines: say.flow.map((line, at) => ({
         key: `line:${at}`,
         cells: [dim(String(at + 1).padStart(3), { width: 3 }), text(line, { grow: true })],
@@ -1079,7 +1079,8 @@ function surfaces(state: SurfaceView): PaneModel {
     },
     main: {
       title: session === undefined ? "Sessions" : `Session ${session.sessionId}`,
-      empty: "choose a browser, app, device or API to control",
+      /* What this list is, not what the status bar already said (`EX-05`). */
+      empty: "no session open · press c to connect something",
       lines: state.sessions.map((one) => ({
         key: `session-${one.sessionId}`,
         cells: [
@@ -1113,7 +1114,7 @@ function surfaces(state: SurfaceView): PaneModel {
     },
     audit: {
       title: "Adapters",
-      empty: "none reported",
+      empty: "none reported · press s to refresh the surface",
       lines: state.groups.flatMap((group) =>
         group.adapters.map((one) => ({
           key: `cap-${one.adapter}`,
@@ -1129,7 +1130,7 @@ function importing(state: ImportState): PaneModel {
   return {
     tree: {
       title: "Import",
-      empty: "nothing chosen",
+      empty: "nothing chosen · press ↑↓ to choose a control",
       lines: [
         kv("from", state.source ?? "choose a folder"),
         kv("into", state.root ?? "—"),
@@ -1171,7 +1172,7 @@ function importing(state: ImportState): PaneModel {
     },
     audit: {
       title: "migration-review.md",
-      empty: "nothing imported yet",
+      empty: "nothing imported yet · run `yam import prototype <file>` to bring one in",
       lines: (result?.notes ?? []).map((note, at) => ({
         key: `note-${at}`,
         cells: [

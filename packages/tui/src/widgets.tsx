@@ -306,7 +306,7 @@ export function RailStrip(props: {
                 ? {}
                 : { color: CHROME.dim })}
           >
-            {` ${one.label}  `}
+            {one.shut ? ` (${one.label})  ` : ` ${one.label}  `}
           </Text>
         </Text>
       ))}

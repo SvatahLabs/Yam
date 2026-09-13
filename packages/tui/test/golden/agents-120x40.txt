@@ -2,7 +2,7 @@
  s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  i Import prototype database  r Runs  t Settings
 ┌─────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓┌─────────────────────────────────────────┐
 │ 1 Tools · 0                 │┃ 2 Invocations                              ┃│ 3 Tool                                  │
-│ no story is exposed as a t… │┃ no agent has called a tool yet             ┃│ no tool selected                        │
+│ no story is exposed as a t… │┃ no agent has called a tool yet · run `yam… ┃│ no tool selected · press ↑↓ to choose … │
 │                             │┃                                            ┃│                                         │
 │                             │┃                                            ┃│                                         │
 │                             │┃                                            ┃│                                         │

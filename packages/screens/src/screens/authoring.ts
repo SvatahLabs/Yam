@@ -601,7 +601,14 @@ export async function loadRecord(
     const file = params.file ?? project.flows?.[0];
     return {
       ...sources.envelope(
-        "Record review",
+        /*
+         * "Session", not "Record review" (`EX-06`, `B4`).
+         *
+         * Draft 2.27 merged Surfaces and Record into one screen with modes, and
+         * this title stayed behind — so the cockpit drew a pane called "Record
+         * review" for a screen nobody could navigate to by that name.
+         */
+        "Session",
         params.sessionId === undefined
           ? dotted("No session", file === undefined ? undefined : `would bind ${file.split("/").pop()}`)
           : params.capturing === true

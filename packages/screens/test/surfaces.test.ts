@@ -93,7 +93,16 @@ describe("Surfaces discovery, grouped by platform with honest states (SF-04, SF-
   it("is the empty state when nothing is open, with the design's own words", async () => {
     const state = await load({ targets: ok({ adapters: ADAPTERS, targets: [] }), sessions: ok({ sessions: [] }) });
     expect(state.sessions).toEqual([]);
-    expect(state.status).toBe("Choose a browser, app, device or API to control.");
+    /*
+     * `EX-05`, `B18`. The old line was on the screen four times and promised a
+     * device this machine has no driver for. What is checked now is that the
+     * status names the three things the field takes and the control that acts
+     * on them — the claim, rather than one particular wording of it.
+     */
+    expect(state.status).toMatch(/URL/);
+    expect(state.status).toMatch(/application name/);
+    expect(state.status).toMatch(/endpoint/);
+    expect(state.status).toMatch(/Connect surface/);
   });
 
   it("carries a discovery failure inline, never blanks the screen (SF-17)", async () => {

@@ -109,7 +109,7 @@ export function FlowsScreen(props: FlowsProps): React.JSX.Element {
             rowKey={(row) => row.file}
             selected={state.file ?? ""}
             onSelect={(file) => props.onParams({ ...props.params, file, selected: undefined })}
-            empty="No flow files yet. `yam init` writes one."
+            empty="No flow files yet. Press New flow, or run `yam init` to write one."
             columns={[
               {
                 key: "name",
@@ -324,7 +324,7 @@ function Plan({ state }: { readonly state: FlowsState }): React.JSX.Element {
       label="Compiled steps"
       rows={steps}
       rowKey={(row) => String(row.line)}
-      empty="Nothing compiled for this file yet."
+      empty="Nothing compiled for this file yet. Press Compile to see the steps it makes."
       columns={[
         { key: "line", header: "line", align: "right", cell: (row) => row.line },
         { key: "text", header: "step", monospace: true, cell: (row) => row.text.trim() },

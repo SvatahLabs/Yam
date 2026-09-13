@@ -488,7 +488,17 @@ const settingsScreen: Screen<SettingsState> = {
         "settings",
         "Settings",
         dotted(config.project, config.environment, config.adapter),
-        project.root ?? "",
+        /*
+         * The file these values are in, not the directory (`AX-16`).
+         *
+         * This was the project root on its own — a path, which says where you
+         * are and not what this screen is about. Settings produces nothing; what
+         * it shows is `yam.config.yaml`, and naming the file is how a screen
+         * that is a *place* says where its work goes.
+         */
+        project.root === undefined
+          ? "this project's settings, from yam.config.yaml"
+          : `this project's settings, from ${project.root}/yam.config.yaml`,
       ),
       screen: "settings",
       rows: [

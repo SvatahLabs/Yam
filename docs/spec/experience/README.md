@@ -1,6 +1,9 @@
 # The experience: the app, the cockpit, and one brand
 
-Status: **specified, not started**. Written from a walkthrough of 2026-09-11 in
+Status: **implemented** — 25 of 26 tasks done and one partly, on 2026-09-12; the
+record of building it is [progress/wave-1.md](progress/wave-1.md) and the
+walkthrough is a command now (`evals/self/yam-on-yam/app-walk.mjs`). Written from
+a walkthrough of 2026-09-11 in
 which Yam drove the packaged Yam through the MCP tools with no project open —
 `surface_connect --app Yam --adapter ax`, then `surface_snapshot` and
 `surface_act` — and read every finding out of the application's own

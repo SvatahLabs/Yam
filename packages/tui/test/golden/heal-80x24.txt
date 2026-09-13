@@ -2,7 +2,7 @@
  s Session  f Flows  b Bindings  a Agents and tools  p API  d Data  ›
 ┌──────────────────────────────┐┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ 1 Runs with a failure        │┃ 2 Heal comp                                  ┃
-│ ▸ comp 1 failed   12 h ago   │┃ press H to heal the selected run             ┃
+│ ▸ comp 1 failed   12 h ago   │┃ press h to heal the selected run             ┃
 │                              │┃                                              ┃
 │                              │┃                                              ┃
 │                              │┃                                              ┃
@@ -16,7 +16,7 @@
 └──────────────────────────────┘┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ 4 Proposals                                                                  │
-│ no proposal yet                                                              │
+│ no proposal yet · press h to heal the selected run                           │
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘

@@ -826,11 +826,24 @@ export async function loadSurface(
 
     return {
       ...sources.envelope(
-        "Surfaces",
+        /* "Session", not "Surfaces": the screen was renamed in Draft 2.27 (`EX-06`). */
+        "Session",
         subtitle,
         session === undefined
           ? rows.length === 0
-            ? "Choose a browser, app, device or API to control."
+            ? /*
+               * What the field actually takes, and what to press (`EX-05`,
+               * `AX-07`, `B18`).
+               *
+               * "Choose a browser, app, device or API to control" was on the
+               * screen four times and over-promised twice over: the runtime
+               * takes exactly one of three — a URL launches a browser, a name
+               * drives an application already running, an endpoint joins one —
+               * and "device" is Appium, which is not installed on most
+               * machines. What is ready is named by the discovery panel, which
+               * asks the host rather than the copy.
+               */
+              "Nothing is connected. Enter a URL, an application name or an endpoint above, then press Connect surface."
             : `${plural(rows.length, "open session")}`
           : (element?.name ?? "Click a control, or search its name."),
       ),

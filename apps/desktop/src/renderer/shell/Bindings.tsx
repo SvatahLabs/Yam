@@ -111,7 +111,7 @@ export function BindingsInspector(props: BindingsProps): React.JSX.Element {
           label="Resolver order"
           rows={[...inspector.candidates]}
           rowKey={(row) => `${row.by}-${row.value}`}
-          empty="This entry has no candidate."
+          empty="This entry has no candidate. Press Verify to bind it again, or record the flow that uses it."
           columns={[
             { key: "by", header: "by", monospace: true, cell: (row) => row.by },
             { key: "value", header: "value", monospace: true, cell: (row) => row.value },

@@ -70,7 +70,7 @@ export function AgentsScreen(props: ScreenProps<AgentsState>): React.JSX.Element
             rowKey={(row) => row.name}
             selected={state.selected ?? ""}
             onSelect={(selected) => props.onParams({ ...props.params, selected })}
-            empty="No story is exposed as a tool. `yam tool serve --expose` chooses them."
+            empty="No story is exposed as a tool. Run `yam tool serve --expose` to choose which ones are."
             columns={[
               {
                 key: "name",
@@ -221,7 +221,7 @@ export function ApiScreen(props: ScreenProps<ApiState>): React.JSX.Element {
             rowKey={(row) => row.name}
             selected={state.selected ?? ""}
             onSelect={(selected) => props.onParams({ ...props.params, selected })}
-            empty="No named request in api/."
+            empty="No named request in api/. Save one from the form above to keep it."
             columns={[
               {
                 key: "name",
@@ -639,7 +639,7 @@ export function SettingsScreen(props: ScreenProps<SettingsState>): React.JSX.Ele
             label={group}
             rows={state.rows.filter((one) => one.group === group)}
             rowKey={(row) => row.label}
-            empty="Nothing here."
+            empty="Nothing here yet. Import a prototype database, or add a value to data.yaml."
             columns={[
               { key: "label", header: "setting", cell: (row) => row.label },
               { key: "value", header: "value", monospace: true, cell: (row) => row.value },

@@ -84,3 +84,51 @@ describe("every destination is reachable", () => {
     expect(SCREEN_IDS.filter((id) => !railed.has(id)).sort()).toEqual(["heal", "run"]);
   });
 });
+
+/*
+ * `CX-03`, E4.2 — the strip is held to the app's rule.
+ *
+ * `AX-04` made the app's rail say which destinations need a project *before*
+ * they are pressed, because seven of nine led to the same wall and the only way
+ * to find out was to press one. The cockpit has the same nine destinations and
+ * had no such mark: `g f` from a projectless session went to the same wall.
+ *
+ * A bracket rather than a colour, because a monochrome terminal has to carry it
+ * too — the same reason focus is never colour alone.
+ */
+describe("a destination that needs a project says so on the strip (CX-03)", () => {
+  it("marks the project's screens shut when none is open", () => {
+    const shut = railRow("session", 200, false).entries.filter((one) => one.shut);
+    /* The rail's five, which is `needsProject` minus `run` and `heal` — those
+       are reached *from* a run rather than from the strip. */
+    expect(shut.map((one) => one.screen).sort()).toEqual([
+      "api",
+      "bindings",
+      "data",
+      "flows",
+      "import",
+      "runs",
+    ]);
+  });
+
+  it("marks nothing shut when a project is open", () => {
+    expect(railRow("session", 200, true).entries.some((one) => one.shut)).toBe(false);
+  });
+
+  it("says nothing is shut when it has not been told, rather than guessing", () => {
+    /*
+     * The default is "a project is open". A strip that marked everything shut
+     * on a screen with a project open would be a worse lie than the one this
+     * fixes, and the places that draw a strip without knowing are the places
+     * that would produce it.
+     */
+    expect(railRow("session", 200).entries.some((one) => one.shut)).toBe(false);
+  });
+
+  it("keeps Session and Settings open, because neither is a project's", () => {
+    const entries = railRow("session", 200, false).entries;
+    for (const id of ["session", "settings", "agents"]) {
+      expect(entries.find((one) => one.screen === id)?.shut, `${id} is marked shut`).toBe(false);
+    }
+  });
+});
