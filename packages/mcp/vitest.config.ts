@@ -1,8 +1,18 @@
 import { tmpdir } from "node:os";
 import { defineConfig } from "vitest/config";
 
-/** This package's own broker, so concurrent suites cannot close each other's sessions. */
-const PACKAGE = "mcp";
+/**
+ * This package's own broker, so concurrent suites cannot close each other's
+ * sessions — and so the reaper can find it.
+ *
+ * Set on `process.env` here rather than only in `test.env`, because `test.env`
+ * reaches the **workers** and `globalSetup` runs in the main process. The first
+ * version set only `test.env`, and the reaper ran on every suite and read
+ * `undefined` every time: armed, fired, and cleaned nothing. Workers inherit
+ * this process's environment, so one assignment reaches both.
+ */
+const BROKER_STATE_DIR = `${tmpdir()}/yam-broker-mcp-${String(process.pid)}`;
+process.env["YAM_BROKER_STATE_DIR"] = BROKER_STATE_DIR;
 
 export default defineConfig({
   test: {
@@ -25,7 +35,7 @@ export default defineConfig({
      * broker a run then spawns finds "a broker is already running" and exits 0,
      * which the caller reports as "exited with 0 instead of starting".
      */
-    env: { YAM_BROKER_STATE_DIR: `${tmpdir()}/yam-broker-${PACKAGE}-${String(process.pid)}` },
+    env: { YAM_BROKER_STATE_DIR: BROKER_STATE_DIR },
     /* …and it dies with the run, so ten runs are not ten brokers. */
     globalSetup: ["../../scripts/vitest-broker.mjs"],
   },

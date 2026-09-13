@@ -8,8 +8,13 @@
  * ten runs in an afternoon is ten node processes, each holding a port.
  *
  * A `globalSetup` teardown is the right hook: it runs once per package's suite,
- * after every worker has finished, and it knows the directory because the
- * config that set it also names this file.
+ * after every worker has finished.
+ *
+ * It reads the directory from `process.env`, which the config sets **on the
+ * process** and not only in `test.env`. That distinction is the whole of a
+ * false start: `test.env` reaches the workers, `globalSetup` runs in the main
+ * process, and the first version of this armed on every suite and read
+ * `undefined` every time — cleaning nothing while appearing to work.
  *
  * It reads the descriptor rather than matching on a command line. `pkill -f
  * "surface broker"` would kill *every* broker on the machine, including the one

@@ -242,7 +242,12 @@ What is in place now:
   * the five per-file kills are gone. A broker exists to outlive commands, so per
     file is the wrong granularity;
   * one reaper per package, in `scripts/vitest-broker.mjs`, run by `globalSetup`
-    after every file has finished, killing **by the pid in its own descriptor**;
+    after every file has finished, killing **by the pid in its own descriptor**.
+    Its first version read `undefined` on every suite and cleaned nothing while
+    appearing to work: `test.env` reaches the *workers* and `globalSetup` runs in
+    the main process, so the directory has to be set on `process.env` in the
+    configuration itself. Found by counting the brokers left behind after three
+    green runs — three, then five, then five;
   * each suite's own state directory, with the runner's pid in the name, so two
     packages cannot find each other's broker in the first place;
   * `SESSION_NOT_FOUND` prints the broker that answered — url, pid, and what
