@@ -9,10 +9,9 @@ blockers are numbered `B1`–`B21` and every requirement cites the ones it close
 The [prototype](../design/prototype) is the shape being specified, and it is
 walkable.
 
-Requirement ids: `EX-` for what the app and the cockpit share, `AX-` for the app,
-`CX-` for the cockpit. §0 of [requirements.md](../requirements.md) says ids do not
-renumber; `AX-01`–`AX-16` keep the numbers they were written with when this
-document covered the app alone.
+Requirement ids: `EX-` for what is new and shared, `AX-` for the app, `CX-` for
+the cockpit. Nothing is renumbered: five requirements written as `AX-*` turned
+out to bind both renderers and are listed under *Shared* with their original ids.
 
 ## Why this exists
 
@@ -48,15 +47,22 @@ A general word is not checkable, so it is four properties:
 
 ## Shared: one brand, one appearance
 
+`EX-01` and `EX-02` are new. The five below them were written as `AX-*` when this
+document covered the app alone and **keep those ids** — they turned out to bind
+both renderers, which is a change of scope and not of identity. §0 of
+[requirements.md](../requirements.md) says ids do not renumber, and re-lettering
+them to `EX-*` was the first draft of this file doing exactly that while claiming
+it had not.
+
 | ID | Priority | Requirement and acceptance condition |
 |---|---|---|
 | EX-01 | P0 | **One palette across the product.** The app, the cockpit and the website are drawn from one set of values. Today they are two: `@svatah/yam-ui-tokens` is lavender on blue-grey (`#b8a1ff` on `#0f1216`) and the site is green on warm paper (`#7cc9ae`/`#357862` on `#111613`/`#fafbf9`). The site's values win, because a product's own site is its brand. A check fails when a token in `ui-tokens` disagrees with the site's stylesheet. |
 | EX-02 | P0 | **Light, dark and system, everywhere.** `prefers-color-scheme` is the default and an explicit choice overrides it, in the app and in the terminal — a person who has chosen gets their choice, one who has not follows the machine. The cockpit reads the same preference and renders it at the depth the terminal admits to (`TV-05`). |
-| EX-03 | P1 | **Visual styling is never an accessible name.** Capitals are `text-transform`; a name never begins mid-sentence because its subject is a sibling node. Closes `B3`, `B12`. |
-| EX-04 | P1 | **A state means something.** `collapsed` is reported only for roles that can expand. This is the adapter, not the view: `packages/adapter-ax/src/tree.ts` passes Chromium's `AXExpanded=0` through for every control, so a screen reader says "collapsed" on every button in the window. Closes `B11`. |
-| EX-05 | P2 | **One sentence, once.** No sentence appears twice on a screen, and none promises a capability the field beneath it does not take. Closes `B18`. |
-| EX-06 | P1 | **A name that no longer exists is a defect.** A repository check fails when a rendered string names a screen the model does not have. `tools/repo-checks/test/screen-ids.test.ts` does the locator half; the prose half does not exist. Closes `B4`. |
-| EX-07 | P2 | **An ambiguous target says so.** When more than one process answers to a name, the adapter reports the ambiguity rather than reporting that the application has gone. Closes `B21`. |
+| AX-08 | P1 | **Visual styling is never an accessible name.** Capitals are `text-transform`; a name never begins mid-sentence because its subject is a sibling node. Closes `B3`, `B12`. |
+| AX-11 | P1 | **A state means something.** `collapsed` is reported only for roles that can expand. This is the adapter, not the view: `packages/adapter-ax/src/tree.ts` passes Chromium's `AXExpanded=0` through for every control, so a screen reader says "collapsed" on every button in the window. Closes `B11`. |
+| AX-13 | P2 | **One sentence, once.** No sentence appears twice on a screen, and none promises a capability the field beneath it does not take. Closes `B18`. |
+| AX-14 | P1 | **A name that no longer exists is a defect.** A repository check fails when a rendered string names a screen the model does not have. `tools/repo-checks/test/screen-ids.test.ts` does the locator half; the prose half does not exist. Closes `B4`. |
+| AX-15 | P2 | **An ambiguous target says so.** When more than one process answers to a name, the adapter reports the ambiguity rather than reporting that the application has gone. Closes `B21`. |
 
 ## The app
 
