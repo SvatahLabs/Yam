@@ -26,6 +26,8 @@ export default defineConfig({
      * which the caller reports as "exited with 0 instead of starting".
      */
     env: { YAM_BROKER_STATE_DIR: `${tmpdir()}/yam-broker-${PACKAGE}-${String(process.pid)}` },
+    /* …and it dies with the run, so ten runs are not ten brokers. */
+    globalSetup: ["../../scripts/vitest-broker.mjs"],
     /*
      * Half the machine. Several files here start a browser, a sample
      * application and a spawned `yam` at once — record, the human gateway,

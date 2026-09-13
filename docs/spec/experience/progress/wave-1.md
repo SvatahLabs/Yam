@@ -239,8 +239,20 @@ on the way, both worth keeping:
     the isolated broker and half on the machine's: two populations inside one
     package, which is worse than one shared between three.
 
-Three full runs since, all green: 4,654 tests, exit 0. The failure was about one
-run in three before.
+Each run's broker also dies with it, through a `globalSetup` teardown that reads
+the descriptor and signals that pid. Without it, per-run isolation trades one
+problem for a smaller one: the idle timeout is fifteen minutes, so ten runs in an
+afternoon leave ten brokers holding ten ports. It reads the descriptor rather
+than matching a command line, because `pkill -f "surface broker"` would kill the
+one somebody has open in another terminal — the kind of cleanup that makes people
+stop running tests.
+
+Measuring it needed a clean machine, which took two attempts to realise. A run
+after this session's tenth manual suite failed again, with the new diagnostic
+reading *"the broker that answered is …, pid unknown, started by an unnamed build
+of Yam"* — a broker predating the change, still alive from an earlier run,
+because nothing had been reaping them. That is evidence for the teardown rather
+than against the isolation.
 
 The diagnosis stays in the product regardless. `SESSION_NOT_FOUND` now prints the
 broker that answered — its url, its pid and what started it — because "it was
