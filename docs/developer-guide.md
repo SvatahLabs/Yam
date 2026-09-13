@@ -184,7 +184,7 @@ Do not edit these. Run the command instead.
 
 | Files | Command |
 |---|---|
-| `docs/reference/generated/**` | `pnpm docs` |
+| `docs/reference/generated/**` | `pnpm docs:build` |
 | `packages/ui-tokens/tokens.css` | `pnpm --filter @svatah/yam-ui-tokens build` |
 | `clients/**` | `pnpm app:client` |
 | `packages/tui/test/golden/**` | `UPDATE_GOLDEN=1 pnpm --filter @svatah/yam-tui test` |
@@ -219,7 +219,7 @@ The app writes `app-debug.log` into its user data directory.
 
 ```bash
 pnpm -r build && pnpm -r typecheck && pnpm lint && pnpm -r test
-pnpm docs --check
+pnpm docs:check
 ```
 
 If you touched the app, package it and run its suite. If you touched an adapter,

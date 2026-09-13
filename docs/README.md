@@ -69,7 +69,7 @@ Written by hand:
 - [The REPL](repl.md)
 - [The local model, Tier 2](local-model.md) and [the fine-tune](finetune.md)
 
-Generated from the code by `pnpm docs`, and checked in CI so they cannot drift:
+Generated from the code by `pnpm docs:build`, and checked in CI so they cannot drift:
 
 - [Support matrix](reference/generated/support-matrix.md), which adapters have been driven and how far
 - [The `yam` command line](reference/generated/cli.md)

@@ -63,7 +63,7 @@ Three more checks run in CI and you can run them too:
 
 ```bash
 pnpm check:licenses   # every dependency is permissively licensed
-pnpm docs --check     # the generated reference matches the code
+pnpm docs:check       # the generated reference matches the code
 pnpm quick-start      # the ten minute quick start, timed
 ```
 
@@ -147,7 +147,7 @@ real runs. A new adapter appears there as unvalidated until something drives it.
 
 Docs live in [`docs/`](docs/README.md). Two rules:
 
-1. Do not edit anything under `docs/reference/generated/`. Run `pnpm docs`.
+1. Do not edit anything under `docs/reference/generated/`. Run `pnpm docs:build`.
 2. Do not claim what the product does not do. A check reads every doc a user
    might read and fails on a claim the support matrix does not back.
 

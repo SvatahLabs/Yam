@@ -117,4 +117,85 @@ describe("a publish puts on the registry what the documents promise", () => {
     }
     expect(wrong).toEqual([]);
   });
+
+  /*
+   * `pnpm docs` is why this exists.
+   *
+   * pnpm hands a fixed list of commands straight to npm before it ever looks at
+   * `package.json`, and `docs` is on it. So `pnpm docs` opened a home page,
+   * printed nothing and exited 0, and `scripts/docs.mjs` never ran — while the
+   * banner on all 73 generated pages, the contributing guide and the developer
+   * guide each told a contributor to run exactly that. CI never caught it,
+   * because CI calls `docs:check`, and pnpm forwards no name with a colon in it.
+   *
+   * The rule is only about that list. `test` and `publish` are npm commands too
+   * and are *not* forwarded: pnpm implements them, and `pnpm test` runs the
+   * script as anybody would expect. Checking "is it an npm command" would have
+   * failed the repository's own `test` script for no reason.
+   */
+  it("no root script has a name pnpm hands to npm", () => {
+    const scripts = Object.keys(
+      (JSON.parse(readFileSync(fromRoot("package.json"), "utf8")) as { scripts: Record<string, string> }).scripts,
+    );
+    const shadowed = scripts.filter((name) => PASSED_THROUGH_TO_NPM.has(name));
+    expect(shadowed, "pnpm forwards these to npm, so the script never runs").toEqual([]);
+  });
+
+  it("the shadowing check bites: `docs` is the name it was written for", () => {
+    // The exact name, and the exact shape of the mistake: a colon-free script
+    // whose name is on pnpm's list. If this stops holding, the rule above is
+    // guarding nothing and should be deleted rather than left to look busy.
+    expect(PASSED_THROUGH_TO_NPM.has("docs")).toBe(true);
+    expect(["docs:build", "docs:check"].some((name) => PASSED_THROUGH_TO_NPM.has(name))).toBe(false);
+    // The names pnpm implements itself, which the rule must not flag.
+    for (const own of ["test", "publish", "run", "build", "lint"]) {
+      expect(PASSED_THROUGH_TO_NPM.has(own), `${own} is pnpm's own`).toBe(false);
+    }
+  });
 });
+
+/**
+ * The commands pnpm passes straight to npm, from its own source: the `switch`
+ * at the top of `pnpm.cjs`, under the comment "commands that are passed through
+ * to npm". Copied rather than read at run time because pnpm is installed a
+ * dozen ways and none of them is a stable path, and because a list that only
+ * grows is safe here: a name pnpm adds later would be a false pass, and the
+ * bite case above holds the one that actually happened.
+ */
+const PASSED_THROUGH_TO_NPM = new Set([
+  "access",
+  "adduser",
+  "bugs",
+  "deprecate",
+  "dist-tag",
+  "docs",
+  "edit",
+  "find",
+  "home",
+  "info",
+  "issues",
+  "login",
+  "logout",
+  "owner",
+  "ping",
+  "prefix",
+  "profile",
+  "pkg",
+  "repo",
+  "s",
+  "se",
+  "search",
+  "set-script",
+  "show",
+  "star",
+  "stars",
+  "team",
+  "token",
+  "unpublish",
+  "unstar",
+  "v",
+  "version",
+  "view",
+  "whoami",
+  "xmas",
+]);

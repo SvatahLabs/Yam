@@ -21,7 +21,7 @@ pnpm lint
 ```
 
 Beside them: `pnpm check:licenses` (every dependency permissively licensed),
-`pnpm docs --check` (the generated reference is current), `pnpm quick-start`
+`pnpm docs:check` (the generated reference is current), `pnpm quick-start`
 (the ten-minute quick start, timed), and the evals in [Reports](reports.md).
 
 ## The specification is the source of truth
