@@ -151,12 +151,10 @@ changing it afterwards would rewrite all of them a second time.
 
 ## Wave E5 — the record
 
-- [~] **E5.1** Re-run the walkthrough and diff it against 2026-09-11's. `EX-N2`
+- [x] **E5.1** Re-run the walkthrough and diff it against 2026-09-11's. `EX-N2`
   — it is a command now (`evals/self/yam-on-yam/app-walk.mjs`) and it reports
-  ten measurements against what each read on 2026-09-11, all ten changed. The
-  reading was taken after E0–E2 were packaged; the machine's screen locked
-  before it could be retaken after E3 and E4, and macOS shows an accessibility
-  client no windows at all when it is.
+  ten measurements against what each read on 2026-09-11. All ten changed, on a
+  build packaged after every wave.
 - [x] **E5.2** The wave record: what running it found, what each check would have
   caught, and which rules still cannot tell the new design from the old. `EX-N3`
   — `progress/wave-1.md`.

@@ -38,10 +38,10 @@ landmark now.
 
 ## What the walk reads
 
-`evals/self/yam-on-yam/app-walk.mjs`, against a packaged build, after E0–E2:
+`evals/self/yam-on-yam/app-walk.mjs`, against a build packaged after every wave:
 
 ```
-  101 nodes     9 interactive controls    33 unnamed
+  101 nodes     6 interactive controls    33 unnamed
 
   ok   B11 / EX-04  2 collapsed, 0 on a role that cannot expand   (was: every one)
   ok   B12 / EX-03  none                                          (was: six shouted names)
@@ -57,12 +57,13 @@ landmark now.
   10 of 10 rules can tell this design from the one they were written against.
 ```
 
-**Not retaken after E3 and E4.** The machine's screen locked, and macOS shows an
-accessibility client no windows at all when it is — which the adapter reports
-correctly, and which is the whole reason `EX-N1` insists this be driven rather
-than asserted. E3 changed two zero-state strings the app draws and E4 changed the
-cockpit only; neither moves a number above. That is a reason to expect the same
-reading, not evidence of it.
+The first attempt to retake this after E3 and E4 failed, and instructively: the
+machine's screen had locked, and macOS shows an accessibility client no windows
+at all when it is. The adapter reported exactly that — *"the screen is locked
+(CGSSessionScreenIsLocked) … and the Finder, which is always running, reports 0
+windows to the same accessibility client, so this is the host and not the
+application under test"* — which is the sentence `SF-17` exists for, arriving
+unprompted in the one situation it was written for.
 
 ## The decision the measurement forced
 
@@ -143,5 +144,11 @@ broker is a shared fixture nobody declared. Still a hypothesis.
 
 ## Left open
 
-Nothing in `tasks.md` is `[ ]`. `E5.1`'s re-reading after E3 and E4 is the one
-measurement this record could not take, for the reason above.
+Nothing. All twenty-six tasks are `[x]`.
+
+The one thing that is a judgement rather than a measurement: `AX-01`'s "the
+navigation excepted" is read here as including the mode strip, for the reason
+under *The decision the measurement forced*. If that reading is wrong, `B9` is
+open and the strip belongs behind the first connection — which is what the
+prototype draws, and what six Playwright cases would have to be rewritten to
+allow.
