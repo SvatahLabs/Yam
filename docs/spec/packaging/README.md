@@ -1,8 +1,11 @@
 # What a person installs
 
-Status: **specified, not started**. Written from the owner's decisions of
-2026-09-12: `undici` stays in the base, and `yam mcp` stops being a subcommand so
-that a separate package can own it.
+Status: **implemented** — 12 of 14 tasks done and two marked partly, on
+2026-09-12; the record of building it is [progress/wave-1.md](progress/wave-1.md).
+The two partial ones both need something this repository cannot supply: a
+published tarball to install, and a machine that genuinely lacks a driver.
+Written from the owner's decisions of 2026-09-12: `undici` stays in the base, and
+`yam mcp` stops being a subcommand so that a separate package can own it.
 
 Requirement ids use the `PK-` prefix.
 
