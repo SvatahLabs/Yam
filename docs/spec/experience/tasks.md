@@ -83,15 +83,34 @@ changing it afterwards would rewrite all of them a second time.
 
 ## Wave E2 — what a screen reader hears
 
-- [ ] **E2.1** Capitals move to `text-transform`; no accessible name begins
+- [x] **E2.1** Capitals move to `text-transform`; no accessible name begins
   mid-sentence. `EX-03`
-- [ ] **E2.2** Headings carry levels; a heading that is not drawn is not
+  — they were already `text-transform`, and that is the finding: **Chromium
+  puts `text-transform` into the accessible name**, so the rule was satisfied
+  and the defect was there anyway. `font-variant-caps: all-small-caps` is a
+  font feature and changes no text. The walk now reads `none` where it read six
+  shouted names.
+- [x] **E2.2** Headings carry levels; a heading that is not drawn is not
   published. `AX-09`
-- [ ] **E2.3** No table is published before it has rows. `AX-10`
-- [ ] **E2.4** `collapsed` only for roles that can expand, in
+  — the inspector's sections were `h3` under an `h1`, which is a skipped level,
+  and the undrawn `OTHER` went with the adapter catalogue it belonged to. The
+  level was readable through Yam all along: `AXHeading` carries it in `AXValue`,
+  and the first version of the walk's rule read a field no adapter publishes and
+  therefore called every outline flat.
+- [x] **E2.3** No table is published before it has rows. `AX-10`
+  — 6 tables, 15 rows and 106 cells on a window with nothing connected are now
+  nought, nought and nought. The zero state keeps the list's id and name, so a
+  flow addresses the same thing whether or not it has anything in it.
+- [x] **E2.4** `collapsed` only for roles that can expand, in
   `adapter-ax/src/tree.ts`. `EX-04`
-- [ ] **E2.5** An ambiguous process name is reported as ambiguity, not as
+  — `expanded` is kept whatever the role: the negative is what Chromium
+  volunteers for everything, the positive is something a control said about
+  itself. Every control in the window announced collapsed; two do now.
+- [x] **E2.5** An ambiguous process name is reported as ambiguity, not as
   absence. `EX-07`
+  — a third answer beside `no-window` and `no-process`, carrying the pids, with
+  a way out. The script's own walk already visited every process of the name; it
+  just had nowhere to say that more than one had answered.
 
 ## Wave E3 — words
 

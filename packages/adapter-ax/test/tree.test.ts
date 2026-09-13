@@ -127,7 +127,53 @@ describe("names, values and states (REQ-SURF-4)", () => {
     expect(statesOf({ parent: 0, role: "AXButton", enabled: false })).toEqual(["disabled"]);
     expect(statesOf({ parent: 0, role: "AXButton", focused: true })).toEqual(["focused"]);
     expect(statesOf({ parent: 0, role: "AXRow", selected: true })).toEqual(["selected"]);
-    expect(statesOf({ parent: 0, role: "AXGroup", expanded: false })).toEqual(["collapsed"]);
+    expect(statesOf({ parent: 0, role: "AXPopUpButton", expanded: false })).toEqual(["collapsed"]);
+  });
+
+  /*
+   * `EX-04`, `AX-11`, `B11`.
+   *
+   * Yam drove the packaged Yam through this adapter and every one of the 34
+   * controls on the first screen came back "collapsed". Chromium publishes
+   * `AXExpanded=0` on very nearly everything it draws, and this turned all of
+   * it into a state — so a screen reader said "collapsed" about buttons,
+   * groups and static text, and there was no way to tell which one meant it.
+   *
+   * This test previously asserted the defect: `AXGroup` with `expanded: false`
+   * was expected to be `["collapsed"]`, which is exactly the case a group has
+   * no business reporting.
+   */
+  describe("collapsed is only for roles that can expand (EX-04)", () => {
+    const can = ["AXDisclosureTriangle", "AXOutline", "AXRow", "AXPopUpButton", "AXComboBox", "AXMenuButton"];
+    const cannot = ["AXButton", "AXGroup", "AXStaticText", "AXTextField", "AXImage", "AXCheckBox"];
+
+    for (const role of can) {
+      it(`keeps it on ${role}`, () => {
+        expect(statesOf({ parent: 0, role, expanded: false })).toContain("collapsed");
+      });
+    }
+
+    for (const role of cannot) {
+      it(`drops it on ${role}`, () => {
+        expect(statesOf({ parent: 0, role, expanded: false })).not.toContain("collapsed");
+      });
+    }
+
+    it("keeps `expanded` whatever the role, because that is a claim the control made", () => {
+      /*
+       * The negative is what Chromium volunteers for everything; the positive
+       * is something a control has said about itself, and the platforms
+       * disagree about which roles may say it. Dropping both would lose real
+       * information to fix noise.
+       */
+      expect(statesOf({ parent: 0, role: "AXGroup", expanded: true })).toContain("expanded");
+    });
+
+    it("reads a disclosure by its subrole as well as its role", () => {
+      expect(
+        statesOf({ parent: 0, role: "AXButton", subrole: "AXDisclosureTriangle", expanded: false }),
+      ).toContain("collapsed");
+    });
   });
 
   it("reads a zero-area box as hidden, because AX has no hidden attribute", () => {

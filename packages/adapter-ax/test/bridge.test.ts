@@ -23,6 +23,7 @@ import {
   PERFORM_SCRIPT,
   type runOsascript,
 } from "../src/index.js";
+import { ambiguityAware, parseWindow } from "../src/bridge.js";
 
 type Run = typeof runOsascript;
 
@@ -149,6 +150,54 @@ const answer = (
     ["OK", header.title ?? "", header.flags ?? "", String(header.calls ?? 0), String(nodes.length)].join(US),
     ...nodes,
   ].join(RS);
+
+/**
+ * An ambiguous name is reported as ambiguity (`EX-07`, `B21`).
+ *
+ * Yam drove the packaged Yam and `--app Yam` failed with *"the application has
+ * gone"*. It had not gone. Two processes were named "Yam" — the packaged
+ * application and a copy started from a checkout — and the one the walk reached
+ * first owned no window. An ambiguity reported as an absence sends a person
+ * looking for a crash that did not happen, while the thing to do is to name the
+ * target more precisely.
+ *
+ * The script's own walk cannot run here: it reads `NSWorkspace` through the
+ * ObjC bridge, which exists only inside `osascript`. What is checked is the
+ * contract between the two halves — the answer the script writes, and the
+ * sentence the bridge makes of it.
+ */
+describe("an ambiguous process name (EX-07)", () => {
+  it("carries the pids back out of the script's answer", () => {
+    const parsed = parseWindow(["ERR", "ambiguous", "4312,4477"].join(US));
+    expect(parsed.ok).toBe(false);
+    expect(parsed.error).toBe("ambiguous");
+    expect(parsed.detail).toBe("4312,4477");
+  });
+
+  it("says how many answered, and what to do about it", () => {
+    const said = ambiguityAware("Yam", { error: "ambiguous", detail: "4312,4477" });
+    expect(said).toContain("2 processes are named \"Yam\"");
+    expect(said).toContain("4312,4477");
+    /* The claim it must not make. */
+    expect(said).not.toContain("Is it running?");
+    /* And a way out, because a diagnosis with no next step is half of one. */
+    expect(said).toMatch(/--attach|bundle identifier/);
+  });
+
+  it("still says the two things that were true before", () => {
+    expect(ambiguityAware("Yam", { error: "no-window" })).toContain("has no window");
+    expect(ambiguityAware("Yam", { error: "no-process" })).toContain("No application process");
+  });
+
+  it("does not call one process an ambiguity", () => {
+    /*
+     * Shown to bite in the other direction. The script only writes `ambiguous`
+     * when more than one pid answered, and a rule that called every no-window a
+     * possible ambiguity would be as wrong as the sentence it replaces.
+     */
+    expect(ambiguityAware("Yam", { error: "no-window" })).not.toContain("ambiguity");
+  });
+});
 
 /*
  * P11 — two oracles for one question, and only a no from both is a cause.

@@ -42,6 +42,13 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 export const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
+/**
+ * The MCP server, which is its own installable now (PK-02).
+ *
+ * `yam mcp` was a subcommand until the packaging wave moved the 6 MB SDK out of
+ * the base install. Anything here that wants to speak MCP spawns this.
+ */
+export const MCP_SERVER = join(ROOT, "packages", "mcp", "dist", "bin.js");
 export const BUNDLE = join(ROOT, "apps", "desktop", "out", "Yam-darwin-arm64", "Yam.app");
 export const EXECUTABLE = join(BUNDLE, "Contents", "MacOS", "Yam");
 /** The name the accessibility API knows the application's process by. */

@@ -143,7 +143,23 @@
 .sv-rail-heading {
   font-size: 10.5px;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  /*
+   * Small caps, not `text-transform` (`EX-03`, `B12`).
+   *
+   * The rule already said "capitals are styling" and the styling was already
+   * CSS — and Chromium puts `text-transform` into the **accessible name**. It
+   * computes the name from rendered text, so `INSPECTOR`, `CONNECT AN AGENT`,
+   * `BROWSER`, `API`, `NATIVE APP` and `DEVICE` are what a screen reader was
+   * handed, and some of them spell capitals out letter by letter.
+   *
+   * `font-variant-caps` is a font feature. It changes which glyphs are drawn
+   * and nothing about the text, so the name stays the sentence that was
+   * written. Chromium synthesises small caps where the face has no `smcp`
+   * table, which IBM Plex Sans does not, so this renders everywhere the old
+   * rule did.
+   */
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
   color: var(--dim);
   padding: 10px 8px 4px;
   margin: 0;
@@ -469,7 +485,9 @@
   background: var(--bg1);
   font-size: 11px;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
+  /* Small caps, not `text-transform` — see the note above (`EX-03`). */
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
   color: var(--dim);
   flex: none;
 }

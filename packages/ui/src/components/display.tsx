@@ -119,6 +119,30 @@ export interface TableProps<Row> extends Named {
  */
 export function Table<Row>(props: TableProps<Row>): React.JSX.Element {
   const label = requireNamed("Table", props);
+
+  /*
+   * A table with no rows is not published as a table (`AX-10`, `B15`).
+   *
+   * The empty form was a `<table>` with a caption, a header row and one cell
+   * saying "Nothing here yet" — so a window with nothing connected published
+   * **6 tables, 15 rows and 106 cells** of scaffolding for content that did not
+   * exist. A screen reader announces "table, three columns, one row", walks
+   * into it, and finds a sentence. The grid is the app's way of arranging
+   * things, not a fact about what is there.
+   *
+   * The zero state keeps the table's `id` and its name, because the thing a
+   * flow sentence and a test address is *the list* — whether or not it has
+   * anything in it — and a region that appears and disappears by id is a worse
+   * problem than the one being fixed.
+   */
+  if (props.rows.length === 0) {
+    return (
+      <section id={props.id} className="sv-table-empty" aria-label={label}>
+        <p className="sv-empty">{props.empty ?? "Nothing here yet."}</p>
+      </section>
+    );
+  }
+
   return (
     <table id={props.id} className="sv-table">
       <caption className="sv-table-caption">{label}</caption>
@@ -136,14 +160,7 @@ export function Table<Row>(props: TableProps<Row>): React.JSX.Element {
         </tr>
       </thead>
       <tbody>
-        {props.rows.length === 0 ? (
-          <tr>
-            <td colSpan={props.columns.length} className="sv-empty">
-              {props.empty ?? "Nothing here yet."}
-            </td>
-          </tr>
-        ) : (
-          props.rows.map((row) => {
+        {props.rows.map((row) => {
             const key = props.rowKey(row);
             return (
               <tr
@@ -198,8 +215,7 @@ export function Table<Row>(props: TableProps<Row>): React.JSX.Element {
                 ))}
               </tr>
             );
-          })
-        )}
+        })}
       </tbody>
     </table>
   );
@@ -326,11 +342,18 @@ export function InspectorSection({
      * test addresses. Putting the id only on the heading made
      * `#inspector-step` a selector that matched nothing, which is the same
      * defect as an unnamed control from the other end.
+     *
+     * `h2`, not `h3` (`AX-09`, `B13`). The screen's title is the window's `h1`
+     * and the inspector is a landmark with a label and no heading of its own,
+     * so an `h3` here skipped a level: `Session > INSPECTOR > CONNECT AN AGENT`
+     * read as one flat list with a hole in it, and nothing said which section
+     * was inside which. A section of the window sits at two; anything inside
+     * one of these is a three.
      */
     <section id={id} className="sv-inspector-section" aria-labelledby={`${id}-heading`}>
-      <h3 id={`${id}-heading`} className="sv-inspector-heading">
+      <h2 id={`${id}-heading`} className="sv-inspector-heading">
         {title}
-      </h3>
+      </h2>
       {children}
     </section>
   );

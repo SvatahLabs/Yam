@@ -681,13 +681,23 @@ function children(element) {
  */
 function frontWindowOf(name) {
   var running = $.NSWorkspace.sharedWorkspace.runningApplications;
-  var seen = false;
+  /*
+   * Which processes answered to the name, not merely whether one did
+   * (\`EX-07\`).
+   *
+   * Two processes called "Yam" — the application and a copy of it started from
+   * a checkout — and the one this loop reached first had no window, so the
+   * caller was told the application has gone. It had not; the name was
+   * ambiguous, and that is a different thing a person does a different thing
+   * about. The pids come back so the message can say which.
+   */
+  var seenPids = [];
   for (var i = 0; i < running.count; i++) {
     var one = running.objectAtIndex(i);
     if (ObjC.unwrap(one.localizedName) !== name) continue;
     var pid = parseInt(String(one.processIdentifier), 10);
     if (!(pid > 0)) continue;
-    seen = true;
+    seenPids.push(pid);
     var application = $.AXUIElementCreateApplication(pid);
     // Focused, then main, then the first of the list: what a person is looking
     // at, what the application says it is, and what is left.
@@ -718,13 +728,23 @@ function frontWindowOf(name) {
       }
     }
   }
-  return { found: false, process: seen };
+  return { found: false, process: seenPids.length > 0, pids: seenPids };
 }
 
 function run(argv) {
   var request = JSON.parse(argv[0]);
   var found = frontWindowOf(request.process);
-  if (!found.found) return 'ERR' + US + (found.process ? 'no-window' : 'no-process');
+  if (!found.found) {
+    /*
+     * The third answer (\`EX-07\`). "No window" and "no process" were the only
+     * two, and an ambiguous name is neither: several processes answered and
+     * none of the ones reached owns a window.
+     */
+    if (found.pids && found.pids.length > 1) {
+      return 'ERR' + US + 'ambiguous' + US + found.pids.join(',');
+    }
+    return 'ERR' + US + (found.process ? 'no-window' : 'no-process');
+  }
 
   var window = found.window;
   var title = text(attr(window, 'AXTitle'));
@@ -840,9 +860,43 @@ const CHECKABLE = new Set(["AXCheckBox", "AXRadioButton", "AXMenuItem", "AXToggl
  * invented for, an AX string never contains one, and the script replaces them
  * with spaces if one ever does.
  */
+/**
+ * What to say when the window could not be found (`EX-07`, `B21`).
+ *
+ * Three answers, not two. "The application has gone" was said when two
+ * processes were named "Yam" and the one reached had no window — which sent a
+ * person looking for a crash that had not happened, while the thing to do was
+ * to name the target more precisely. An ambiguity reported as an absence is a
+ * diagnosis that points the wrong way.
+ */
+export function ambiguityAware(
+  process: string,
+  answer: { error?: string; detail?: string },
+): string {
+  if (answer.error === "ambiguous") {
+    const pids = answer.detail ?? "";
+    const count = pids === "" ? 0 : pids.split(",").length;
+    return (
+      `${count === 0 ? "Several" : String(count)} processes are named "${process}" ` +
+      `(pids ${pids}), and none of them owns a window an accessibility client can read. ` +
+      "This is an ambiguity, not an application that has gone: name the one you mean with " +
+      "`--attach <pid>` or by its bundle identifier, or quit the others."
+    );
+  }
+  if (answer.error === "no-window") {
+    return `The process "${process}" has no window. Is it running, and not minimised?`;
+  }
+  if (answer.error === "no-process") {
+    return `No application process is named "${process}". Is it running?`;
+  }
+  return `The accessibility call failed: ${answer.error ?? "unknown"}.`;
+}
+
 export function parseWindow(stdout: string): {
   ok: boolean;
   error?: string;
+  /** What the error is about: the pids, for an ambiguous name (`EX-07`). */
+  detail?: string;
   title: string;
   truncated: boolean;
   deadlineHit: boolean;
@@ -855,6 +909,7 @@ export function parseWindow(stdout: string): {
     return {
       ok: false,
       ...(header[1] === undefined ? {} : { error: header[1] }),
+      ...(header[2] === undefined ? {} : { detail: header[2] }),
       title: "",
       truncated: false,
       deadlineHit: false,
@@ -1455,13 +1510,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
 
       const answer = parseWindow(result.stdout);
       if (!answer.ok) {
-        throw new AxBridgeError(
-          answer.error === "no-window"
-            ? `The process "${request.process}" has no window. Is it running, and not minimised?`
-            : answer.error === "no-process"
-              ? `No application process is named "${request.process}". Is it running?`
-              : `The accessibility call failed: ${answer.error ?? "unknown"}.`,
-        );
+        throw new AxBridgeError(ambiguityAware(request.process, answer));
       }
 
       const cost: AxSnapshotCost = {

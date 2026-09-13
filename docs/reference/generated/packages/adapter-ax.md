@@ -52,7 +52,7 @@ macOS Accessibility adapter: the Yam agent surface over AXUIElement
 | `osascriptBridge` | function | `export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge` | The real bridge: `osascript`, System Events, and this machine. |
 | `OsascriptBridgeOptions` | interface | `export interface OsascriptBridgeOptions` |  |
 | `OsascriptLanguage` | typealias | `export type OsascriptLanguage = "JavaScript" \| "AppleScript";` | Which `osascript` dialect a script is written in. |
-| `parseWindow` | function | `export function parseWindow(stdout: string):` | Read `WINDOW_SCRIPT`'s answer. |
+| `parseWindow` | function | `export function parseWindow(stdout: string):` |  |
 | `PERFORM_SCRIPT` | variable | `PERFORM_SCRIPT = `function processWithWindow(se, name)` |  |
 | `registerAxAdapter` | function | `export function registerAxAdapter(): void` | Register the adapter. Idempotent, because the registry refuses a silent |
 | `requestAccessibility` | function | `export function requestAccessibility(options: { runner?: GrantRunner; platform?: string } = {}):` | Ask macOS to show the Accessibility prompt, and answer whether it is granted. |

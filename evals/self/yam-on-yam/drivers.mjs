@@ -8,7 +8,7 @@
  * these are its two implementations.
  *
  * Neither of them reaches inside the product. The CLI driver spawns the built
- * binary and reads its stdout; the MCP driver spawns `yam mcp` and speaks the
+ * binary and reads its stdout; the MCP driver spawns `@svatah/yam-mcp` and speaks the
  * protocol to it over stdio through the official SDK client, as an ordinary
  * agent would. There is no in-memory transport here on purpose: SF-07 asks for
  * "the actual subprocess transport", and wave 3's second defect was an MCP
@@ -21,7 +21,7 @@
 import { spawnSync } from "node:child_process";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { CLI, ROOT } from "./launch.mjs";
+import { CLI, MCP_SERVER, ROOT } from "./launch.mjs";
 
 /** The flag spelling a catalogue argument has on the command line. */
 const FLAG = {
@@ -155,7 +155,16 @@ export function cliDriver({ transcript, holder }) {
 export async function mcpDriver({ transcript, name = "yam-on-yam" }) {
   const transport = new StdioClientTransport({
     command: process.execPath,
-    args: [CLI, "mcp"],
+    /*
+     * `@svatah/yam-mcp`, not `yam mcp` (PK-02).
+     *
+     * The packaging wave made the MCP server its own installable and removed
+     * the subcommand, and this line kept spawning the subcommand — which now
+     * prints where it moved and exits 64. Nothing caught it because the eval
+     * suite is not part of `pnpm -r test`: it needs a packaged application and
+     * a machine with the Accessibility grant, so it runs by hand.
+     */
+    args: [MCP_SERVER],
     cwd: ROOT,
     stderr: "ignore",
   });

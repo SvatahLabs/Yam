@@ -227,8 +227,23 @@ export function statesOf(node: AxNode): NodeState[] {
   if (node.checked === true) states.push("checked");
   else if (node.checked === false && isCheckable(node)) states.push("unchecked");
   if (node.selected === true) states.push("selected");
+  /*
+   * Only for roles that can expand (`EX-04`, `AX-11`, `B11`).
+   *
+   * Chromium publishes `AXExpanded=0` on very nearly everything it draws, so
+   * this said "collapsed" about every button in the window — 34 controls on the
+   * app's first screen, every one of them announced as a closed thing that
+   * could be opened. A screen reader reads a state; noise in a state is worse
+   * than no state, because there is no way to tell which one was meant.
+   *
+   * `expanded` is the same attribute and is not filtered, deliberately: a
+   * control reporting `AXExpanded=1` has said something about itself, and the
+   * platforms disagree about which roles may. It is the *negative* that
+   * Chromium volunteers for everything, so it is the negative that is held to
+   * the role.
+   */
   if (node.expanded === true) states.push("expanded");
-  else if (node.expanded === false) states.push("collapsed");
+  else if (node.expanded === false && isExpandable(node)) states.push("collapsed");
   if (node.focused === true) states.push("focused");
   /*
    * `hidden` is a box, not an attribute. AX simply does not publish elements
@@ -245,6 +260,32 @@ export function statesOf(node: AxNode): NodeState[] {
    * being answered wrongly.
    */
   return states;
+}
+
+/**
+ * The roles for which "collapsed" is a fact rather than a default (`EX-04`).
+ *
+ * ARIA's own list of roles that take `aria-expanded` as a meaningful state,
+ * through the macOS roles Chromium and AppKit map them to. Not "anything with
+ * children": a group with children is not collapsed, it is a group.
+ */
+function isExpandable(node: AxNode): boolean {
+  return (
+    node.role === "AXDisclosureTriangle" ||
+    node.role === "AXOutline" ||
+    node.role === "AXRow" ||
+    node.role === "AXPopUpButton" ||
+    node.role === "AXComboBox" ||
+    node.role === "AXMenuButton" ||
+    node.subrole === "AXDisclosureTriangle" ||
+    node.subrole === "AXCollapseButton" ||
+    /*
+     * A row in an outline, which is how both platforms model a tree item. The
+     * role is `AXRow` above; this is the subrole macOS uses when the row is one
+     * of an outline rather than of a table.
+     */
+    node.subrole === "AXOutlineRow"
+  );
 }
 
 function isCheckable(node: AxNode): boolean {
