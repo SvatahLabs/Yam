@@ -73,8 +73,11 @@ describe("repository layout (HLD §12)", () => {
     // Draft 2.25 adds `surface-control` (the shared surface-control core), the
     // 32nd — HLD §12's layout block lists it (line "surface-control/ …").
     // Wave 5 adds `adapter-process` (T22, a terminal) and `adapter-atspi`
-    // (T23, the Linux accessibility bus): 34.
-    expect(fromHld.length).toBe(34);
+    // (T23, the Linux accessibility bus): 34. PK-07 adds `contract`, which is
+    // the operation catalogue lifted out of `surface-control` so that three
+    // installables can depend on the contract without depending on the broker
+    // that implements it: 35.
+    expect(fromHld.length).toBe(35);
   });
 
   it("names every Draft 2.11 package the LLD requires, with the section", () => {

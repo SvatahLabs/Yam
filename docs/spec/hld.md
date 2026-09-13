@@ -307,7 +307,8 @@ yam/                      github.com/SvatahLabs/yam (Draft 2.18)
     recorder/             grounding, session, report; bind() record mode
     workflow/             story-as-function runner, resume
     tool/                 MCP tool server over stories
-    surface-control/      shared operation dispatcher, session lifecycle, operation catalogue — no compiler/recorder/gateway/service imports (Draft 2.25)
+    contract/             the operation catalogue and the fingerprint every client checks — schema and zod only, drives nothing (PK-07)
+    surface-control/      shared operation dispatcher, session lifecycle, the broker — no compiler/recorder/gateway/service imports (Draft 2.25)
     screens/              headless screen model and action registry (Draft 2.11, LLD §13.7)
     ui-tokens/            design tokens for both themes, TS and generated CSS (Draft 2.11)
     ui/                   React components on Radix primitives, the component sheet (Draft 2.11)

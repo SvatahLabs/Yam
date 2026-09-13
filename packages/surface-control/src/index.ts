@@ -36,7 +36,7 @@ export {
   type CliFlag,
   type ResultEnvelope,
   type ErrorCode,
-} from "./catalogue.js";
+} from "@svatah/yam-contract";
 
 export {
   makeRequestId,

@@ -4,7 +4,7 @@ import { SurfaceError } from "@svatah/yam-surface";
 import { ACTION_FORMS } from "@svatah/yam-schema";
 import { makeRequestId, successEnvelope, failedEnvelope, refusedEnvelope } from "./envelope.js";
 import type { SessionStore } from "./sessions.js";
-import type { ErrorCode } from "./catalogue.js";
+import type { ErrorCode } from "@svatah/yam-contract";
 import {
   discoverTargets,
   probeAdapters,

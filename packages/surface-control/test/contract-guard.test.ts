@@ -9,7 +9,7 @@
  */
 import { describe, expect, it } from "vitest";
 import type { AgentSurface } from "@svatah/yam-surface";
-import { catalogueFingerprint, OPERATIONS } from "../src/catalogue.js";
+import { catalogueFingerprint, OPERATIONS } from "@svatah/yam-contract";
 import { dispatchAct, dispatchConnect, type DispatchContext } from "../src/dispatcher.js";
 import { createSessionStore } from "../src/sessions.js";
 import { createReferenceStore } from "../src/references.js";

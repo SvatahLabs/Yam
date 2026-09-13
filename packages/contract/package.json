@@ -1,13 +1,13 @@
 {
-  "name": "@svatah/yam-surface-control",
+  "name": "@svatah/yam-contract",
   "version": "0.1.0",
-  "description": "Shared surface operation dispatcher, session lifecycle and operation catalogue",
+  "description": "The surface operation catalogue and the contract fingerprint every client agrees on",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SvatahLabs/yam.git",
-    "directory": "packages/surface-control"
+    "directory": "packages/contract"
   },
   "bugs": {
     "url": "https://github.com/SvatahLabs/yam/issues"
@@ -34,6 +34,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
+  "dependencies": {
+    "@svatah/yam-schema": "workspace:*",
+    "zod": "catalog:"
+  },
   "devDependencies": {
     "tsup": "catalog:",
     "typescript": "catalog:",
@@ -41,12 +45,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
-    "@svatah/yam-contract": "workspace:*",
-    "@svatah/yam-schema": "workspace:*",
-    "@svatah/yam-surface": "workspace:*",
-    "zod": "catalog:",
-    "zod-to-json-schema": "catalog:"
   }
 }

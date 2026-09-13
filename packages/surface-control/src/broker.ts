@@ -17,6 +17,8 @@ export interface BrokerDescriptor {
   token: string;
   pid: number;
   startedAt: string;
+  /** Who started it: `@svatah/yam 0.1.0`, `Yam.app 0.1.0` (PK-08). */
+  startedBy?: string;
 }
 
 const APP_NAME = "yam";

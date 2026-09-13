@@ -9,7 +9,7 @@ import {
   SURFACE_CLI_SUBCOMMANDS,
   ERROR_CODES,
   CLI_EXIT_CODES,
-} from "../src/catalogue.js";
+} from "@svatah/yam-contract";
 
 describe("OPERATIONS catalogue", () => {
   it("has exactly 14 operations", () => {

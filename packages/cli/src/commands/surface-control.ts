@@ -21,6 +21,8 @@
  * Arguments that come from the caller's own machine — `--input` reading a file
  * or stdin — are read here, where that file and that stdin exist.
  */
+import { VERSION } from "../version.js";
+import { catalogueFingerprint } from "@svatah/yam-contract";
 import { readFileSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
@@ -52,6 +54,15 @@ import {
 import { createSurface, listAdapters } from "@svatah/yam-surface";
 import { registerAllAdapters } from "../adapters.js";
 import { yamBin } from "./ui.js";
+
+/**
+ * What this build calls itself when it starts a broker (PK-08).
+ *
+ * `YAM_STARTED_BY` so that the application can say `Yam.app 0.1.0` rather than
+ * the name of the CLI it stages — the whole point is telling three installables
+ * apart, and two of them are this same binary run from different places.
+ */
+const STARTED_BY = process.env["YAM_STARTED_BY"] ?? `@svatah/yam ${VERSION}`;
 
 const IDLE_MS = 15 * 60 * 1000;
 
@@ -225,10 +236,24 @@ export async function connectToBroker(io: CommandIo): Promise<BrokerDescriptor> 
         }
         try {
           const still = discoverBroker();
-          if (still === undefined || (await brokerState(still)).state !== "mismatched") continue;
+          const verdict = still === undefined ? undefined : await brokerState(still);
+          if (still === undefined || verdict?.state !== "mismatched") continue;
+          /*
+           * Name the parties (PK-08).
+           *
+           * This said "a different build of Yam", which is true, unactionable,
+           * and was the whole message. A machine can have three installables on
+           * it — the CLI, `@svatah/yam-mcp`, and the application staging its own
+           * copy of the CLI — and whichever needed a broker first started it. A
+           * person cannot tell which of the three is the old one from "a
+           * different build", and the next line closes its sessions.
+           */
           io.err(
-            "the surface broker on this machine was started from a different build of Yam; " +
-              "stopping it and starting one that matches. Sessions opened on it are closed.",
+            `the surface broker on this machine was started by ${verdict.startedBy ?? "an unnamed build of Yam"} ` +
+              `and speaks contract ${verdict.contract ?? "(none)"}; this is ${STARTED_BY} ` +
+              `and speaks ${catalogueFingerprint()}. Stopping it and starting one that matches: ` +
+              "sessions opened on it are closed. Update whichever of the two is older, or quit it " +
+              "before running this, and they will agree.",
           );
           try {
             process.kill(still.pid, "SIGTERM");
@@ -360,6 +385,7 @@ async function runBroker(io: CommandIo): Promise<ExitCode> {
     token,
     factory: adapterFactory,
     registeredAdapters,
+    startedBy: STARTED_BY,
     idleMs: IDLE_MS,
     onIdle: () => {
       /*

@@ -47,7 +47,7 @@ import { createPromotionStore } from "./promotion.js";
 import { isProcessAlive } from "./broker.js";
 import { createRedactionPolicy, type RedactionPolicy } from "./redaction.js";
 import { failedEnvelope, makeRequestId } from "./envelope.js";
-import { catalogueFingerprint } from "./catalogue.js";
+import { catalogueFingerprint } from "@svatah/yam-contract";
 
 /** One operation, by the name the catalogue gives it. */
 export type BrokerOperation =
@@ -74,6 +74,15 @@ export interface BrokerOptions {
   readonly idleMs?: number;
   /** Called when the idle timer fires, so the caller can clean its descriptor up. */
   readonly onIdle?: () => void;
+  /**
+   * Who started this broker, as a person would name it (PK-08).
+   *
+   * `@svatah/yam 0.1.0`, `@svatah/yam-mcp 0.1.0`, `Yam.app 0.1.0`. It is on
+   * `/health` so that a client finding a contract it does not recognise can say
+   * which of the three to update, rather than "a different build of Yam" — which
+   * is true, unactionable, and the only thing the message said.
+   */
+  readonly startedBy?: string;
 }
 
 export interface RunningBroker {
@@ -168,7 +177,23 @@ export async function startBroker(options: BrokerOptions): Promise<RunningBroker
          * recognise, because a dropped argument that answers `succeeded` is
          * worse than no broker at all. See `catalogueFingerprint`.
          */
-        send(200, { ok: true, sessions: sessions.list().length, contract: catalogueFingerprint() });
+        /*
+         * And *who* started it (PK-08).
+         *
+         * A machine can have three installables on it — the CLI, the MCP
+         * server, and the application that stages its own copy of the CLI — and
+         * whichever needs a broker first starts it. When a second one finds a
+         * contract it does not recognise, "a different build of Yam" is not
+         * enough to act on: a person cannot tell which of the three is the old
+         * one. This says so, and the mismatch message repeats it.
+         */
+        send(200, {
+          ok: true,
+          sessions: sessions.list().length,
+          contract: catalogueFingerprint(),
+          startedBy: options.startedBy ?? "an unnamed build of Yam",
+          pid: process.pid,
+        });
         return;
       }
       if (request.method !== "POST" || request.url !== "/op") {
@@ -303,7 +328,7 @@ export type BrokerState = "serving" | "busy" | "mismatched" | "gone";
 export async function brokerState(
   descriptor: { url: string; token: string; pid?: number },
   { timeoutMs = 2000 }: { timeoutMs?: number } = {},
-): Promise<{ state: BrokerState; contract?: string }> {
+): Promise<{ state: BrokerState; contract?: string; startedBy?: string }> {
   let timedOut = false;
   try {
     const response = await fetch(`${descriptor.url}/health`, {
@@ -318,11 +343,14 @@ export async function brokerState(
      * for a broker that will never say yes.
      */
     if (!response.ok) return { state: "gone" };
-    const body = (await response.json()) as { contract?: unknown };
+    const body = (await response.json()) as { contract?: unknown; startedBy?: unknown };
     const contract = typeof body.contract === "string" ? body.contract : undefined;
+    /* Who started it, so a mismatch can name the party to update (PK-08). */
+    const startedBy = typeof body.startedBy === "string" ? body.startedBy : undefined;
+    const known = { ...(contract === undefined ? {} : { contract }), ...(startedBy === undefined ? {} : { startedBy }) };
     return contract === catalogueFingerprint()
-      ? { state: "serving", ...(contract === undefined ? {} : { contract }) }
-      : { state: "mismatched", ...(contract === undefined ? {} : { contract }) };
+      ? { state: "serving", ...known }
+      : { state: "mismatched", ...known };
   } catch (error) {
     timedOut =
       error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");

@@ -13,13 +13,13 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | Export | Kind | Signature | |
 |---|---|---|---|
 | `acquireStartLock` | function | `export function acquireStartLock(stateDir?: string): StartLock \| undefined` | Take the exclusive right to start a broker, or answer that somebody else has |
-| `actInputSchema` | variable | `actInputSchema = z.object(` |  |
+| `actInputSchema` | variable | `actInputSchema: z.ZodObject<` |  |
 | `ACTION_FORMS` | variable | `ACTION_FORMS: readonly ActionForm[]` | The forms, in the order an inspector offers them: the common ones first. |
 | `ActionField` | interface | `interface ActionField` |  |
 | `ActionFieldType` | typealias | `type ActionFieldType = "string" \| "number" \| "boolean" \| "url" \| "key";` | How a field is collected, and how it is typed on the way to `args`. |
 | `ActionForm` | interface | `interface ActionForm` |  |
 | `actionFormFor` | function | `declare function actionFormFor(action: string): ActionForm \| undefined;` | One form by action name. |
-| `actOutputSchema` | variable | `actOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `actOutputSchema` | variable | `actOutputSchema: z.ZodObject<` |  |
 | `AdapterFactoryFn` | typealias | `export type AdapterFactoryFn ` |  |
 | `AdapterProbe` | interface | `export interface AdapterProbe` |  |
 | `AdapterReadiness` | interface | `export interface AdapterReadiness` |  |
@@ -36,20 +36,20 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `brokerStateDir` | function | `export function brokerStateDir(): string` |  |
 | `callBroker` | function | `export async function callBroker(` | Ask a running broker to perform one operation. |
 | `CAPABILITIES` | variable | `CAPABILITIES: readonly CapabilityFlag[]` | Every capability flag, so a client can render a readiness list. |
-| `capabilitiesInputSchema` | variable | `capabilitiesInputSchema = z.object(` |  |
-| `capabilitiesOutputSchema` | variable | `capabilitiesOutputSchema = resultEnvelopeSchema.extend(` |  |
-| `catalogueFingerprint` | function | `export function catalogueFingerprint(): string` | A fingerprint of the contract this build serves (T18, SF-03). |
+| `capabilitiesInputSchema` | variable | `capabilitiesInputSchema: z.ZodObject<` |  |
+| `capabilitiesOutputSchema` | variable | `capabilitiesOutputSchema: z.ZodObject<` |  |
+| `catalogueFingerprint` | function | `declare function catalogueFingerprint(): string;` | A fingerprint of the contract this build serves (T18, SF-03). |
 | `checkAdapterReadiness` | function | `export function checkAdapterReadiness(` |  |
-| `checkInputSchema` | variable | `checkInputSchema = z.object(` |  |
-| `checkOutputSchema` | variable | `checkOutputSchema = resultEnvelopeSchema.extend(` |  |
-| `CLI_EXIT_CODES` | variable | `CLI_EXIT_CODES ` |  |
+| `checkInputSchema` | variable | `checkInputSchema: z.ZodObject<` |  |
+| `checkOutputSchema` | variable | `checkOutputSchema: z.ZodObject<` |  |
+| `CLI_EXIT_CODES` | variable | `CLI_EXIT_CODES:` |  |
 | `CLIENT_STALE_MS` | variable | `CLIENT_STALE_MS = 30_000` | How long a record may go unrefreshed before a reader stops believing it. |
-| `CliFlag` | interface | `export interface CliFlag` |  |
-| `closeInputSchema` | variable | `closeInputSchema = z.object(` |  |
-| `closeOutputSchema` | variable | `closeOutputSchema = resultEnvelopeSchema.extend(` |  |
-| `connectInputSchema` | variable | `connectInputSchema = z` | What `connect` may be pointed at (SF-04, T18). |
+| `CliFlag` | interface | `interface CliFlag` |  |
+| `closeInputSchema` | variable | `closeInputSchema: z.ZodObject<` |  |
+| `closeOutputSchema` | variable | `closeOutputSchema: z.ZodObject<` |  |
+| `connectInputSchema` | variable | `connectInputSchema: z.ZodEffects<z.ZodObject<` | What `connect` may be pointed at (SF-04, T18). |
 | `ConnectOptions` | interface | `export interface ConnectOptions` |  |
-| `connectOutputSchema` | variable | `connectOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `connectOutputSchema` | variable | `connectOutputSchema: z.ZodObject<` |  |
 | `Control` | interface | `export interface Control` | Who holds a target, until they give it up (SF-13, T16). |
 | `CoordinationStore` | interface | `export interface CoordinationStore` |  |
 | `createAdapterFactory` | function | `export function createAdapterFactory(` |  |
@@ -61,8 +61,8 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `createSessionStore` | function | `export function createSessionStore(): SessionStore` |  |
 | `DEFAULT_HOLDER` | variable | `DEFAULT_HOLDER = "this client"` | Who a caller is when it does not say (SF-13). |
 | `defaultActionForRole` | function | `declare function defaultActionForRole(role: string \| undefined): string;` | The action an inspector opens on for an element of this role. |
-| `describeInputSchema` | variable | `describeInputSchema = z.object(` |  |
-| `describeOutputSchema` | variable | `describeOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `describeInputSchema` | variable | `describeInputSchema: z.ZodObject<` |  |
+| `describeOutputSchema` | variable | `describeOutputSchema: z.ZodObject<` |  |
 | `discoverAdapters` | function | `export function discoverAdapters(registeredAdapters: string[]): AdapterReadiness[]` |  |
 | `discoverBroker` | function | `export function discoverBroker(stateDir?: string): BrokerDescriptor \| undefined` |  |
 | `DiscoveredTarget` | interface | `export interface DiscoveredTarget` |  |
@@ -83,8 +83,8 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `dispatchSnapshot` | function | `export async function dispatchSnapshot(` |  |
 | `dispatchTargets` | function | `export async function dispatchTargets(` |  |
 | `DRIVEN_RANGES` | variable | `DRIVEN_RANGES: Readonly<Record<string, string>> ` | The version ranges this repository has driven. |
-| `ERROR_CODES` | variable | `ERROR_CODES = [` |  |
-| `ErrorCode` | typealias | `export type ErrorCode = (typeof ERROR_CODES)[number];` |  |
+| `ERROR_CODES` | variable | `ERROR_CODES: readonly ["TARGET_AMBIGUOUS", "SESSION_CLOSED", "SESSION_NOT_FOUND", "PERMISSION_REQUIRED", "UNSUPPORTED_OPERATION", "STALE_REFERENCE", "INVALID_AR` |  |
+| `ErrorCode` | typealias | `type ErrorCode = (typeof ERROR_CODES)[number];` |  |
 | `EventKind` | typealias | `export type EventKind ` |  |
 | `EventStore` | interface | `export interface EventStore` |  |
 | `failedEnvelope` | function | `export function failedEnvelope(` |  |
@@ -102,22 +102,22 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `Lease` | interface | `export interface Lease` |  |
 | `makeRequestId` | function | `export function makeRequestId(): string` |  |
 | `offeredActions` | function | `declare function offeredActions(kind: SurfaceKind, capabilities?: Partial<Record<CapabilityFlag, boolean>>): readonly ActionForm[];` | The actions this surface can actually perform, in offer order (SF-09). |
-| `operationByCliSubcommand` | function | `export function operationByCliSubcommand(sub: string): OperationDescriptor \| undefined` |  |
-| `operationByMcpTool` | function | `export function operationByMcpTool(toolName: string): OperationDescriptor \| undefined` |  |
-| `operationByName` | function | `export function operationByName(name: string): OperationDescriptor \| undefined` |  |
-| `operationByServicePath` | function | `export function operationByServicePath(method: string, path: string): OperationDescriptor \| undefined` |  |
-| `OperationDescriptor` | interface | `export interface OperationDescriptor` |  |
+| `operationByCliSubcommand` | function | `declare function operationByCliSubcommand(sub: string): OperationDescriptor \| undefined;` |  |
+| `operationByMcpTool` | function | `declare function operationByMcpTool(toolName: string): OperationDescriptor \| undefined;` |  |
+| `operationByName` | function | `declare function operationByName(name: string): OperationDescriptor \| undefined;` |  |
+| `operationByServicePath` | function | `declare function operationByServicePath(method: string, path: string): OperationDescriptor \| undefined;` |  |
+| `OperationDescriptor` | interface | `interface OperationDescriptor` |  |
 | `OperationOutcome` | typealias | `export type OperationOutcome = "succeeded" \| "failed" \| "refused" \| "cancelled" \| "unknown";` |  |
 | `OperationRecord` | interface | `export interface OperationRecord` |  |
-| `OPERATIONS` | variable | `OPERATIONS: readonly OperationDescriptor[] = [` |  |
+| `OPERATIONS` | variable | `OPERATIONS: readonly OperationDescriptor[]` |  |
 | `probeAdapter` | function | `export async function probeAdapter(adapter: string): Promise<AdapterProbe>` | Probe one adapter. Cached: `doctor` asks for all of them at once. |
 | `probeAdapters` | function | `export async function probeAdapters(registeredAdapters: string[]): Promise<AdapterReadiness[]>` | Readiness with the host actually asked (T23, SF-09, SF-23). |
 | `PromotionStep` | interface | `export interface PromotionStep` | One recorded step, shaped as `@svatah/yam-trajectory`'s `TrajectoryLine`. |
 | `PromotionStore` | interface | `export interface PromotionStore` |  |
 | `readBrokerDescriptor` | function | `export function readBrokerDescriptor(stateDir?: string): BrokerDescriptor \| undefined` |  |
 | `readClients` | function | `export function readClients(stateDir?: string, now: number = Date.now()): AgentClient[]` | Everyone connected, newest first, without the ones that have gone quiet. |
-| `readInputSchema` | variable | `readInputSchema = z.object(` |  |
-| `readOutputSchema` | variable | `readOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `readInputSchema` | variable | `readInputSchema: z.ZodObject<` |  |
+| `readOutputSchema` | variable | `readOutputSchema: z.ZodObject<` |  |
 | `RedactionPolicy` | interface | `export interface RedactionPolicy` |  |
 | `redactObject` | function | `export function redactObject(policy: RedactionPolicy, obj: unknown): unknown` |  |
 | `redactString` | function | `export function redactString(policy: RedactionPolicy, value: string): string` |  |
@@ -126,28 +126,28 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `refusedEnvelope` | function | `export function refusedEnvelope(` |  |
 | `removeBrokerDescriptor` | function | `export function removeBrokerDescriptor(stateDir?: string): void` |  |
 | `removeClient` | function | `export function removeClient(id: string, stateDir?: string): void` | Forget a client. Missing is not an error: a second disconnect is a disconnect. |
-| `ResultEnvelope` | typealias | `export type ResultEnvelope = z.infer<typeof resultEnvelopeSchema>;` |  |
-| `resultEnvelopeSchema` | variable | `resultEnvelopeSchema = z.object(` |  |
+| `ResultEnvelope` | typealias | `type ResultEnvelope = z.infer<typeof resultEnvelopeSchema>;` |  |
+| `resultEnvelopeSchema` | variable | `resultEnvelopeSchema: z.ZodObject<` |  |
 | `RunningBroker` | interface | `export interface RunningBroker` |  |
-| `screenshotInputSchema` | variable | `screenshotInputSchema = z.object(` |  |
-| `screenshotOutputSchema` | variable | `screenshotOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `screenshotInputSchema` | variable | `screenshotInputSchema: z.ZodObject<` |  |
+| `screenshotOutputSchema` | variable | `screenshotOutputSchema: z.ZodObject<` |  |
 | `SessionEntry` | interface | `export interface SessionEntry` |  |
 | `SessionEvent` | interface | `export interface SessionEvent` |  |
 | `SessionMode` | typealias | `export type SessionMode = "launch" \| "attach";` |  |
-| `sessionsInputSchema` | variable | `sessionsInputSchema = z.object({})` |  |
-| `sessionsOutputSchema` | variable | `sessionsOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `sessionsInputSchema` | variable | `sessionsInputSchema: z.ZodObject<{}, "strip", z.ZodTypeAny, {}, {}>` |  |
+| `sessionsOutputSchema` | variable | `sessionsOutputSchema: z.ZodObject<` |  |
 | `SessionStatus` | typealias | `export type SessionStatus = "connecting" \| "ready" \| "busy" \| "disconnected" \| "closed";` |  |
 | `SessionStore` | interface | `export interface SessionStore` |  |
-| `snapshotInputSchema` | variable | `snapshotInputSchema = z.object(` |  |
-| `snapshotOutputSchema` | variable | `snapshotOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `snapshotInputSchema` | variable | `snapshotInputSchema: z.ZodObject<` |  |
+| `snapshotOutputSchema` | variable | `snapshotOutputSchema: z.ZodObject<` |  |
 | `SnapshotRecord` | interface | `export interface SnapshotRecord` |  |
 | `startBroker` | function | `export async function startBroker(options: BrokerOptions): Promise<RunningBroker>` | Start the broker on loopback, on a port the OS picks. |
 | `StartLock` | interface | `export interface StartLock` | One broker to a machine, enforced rather than hoped for (T00, SF-05, SF-13). |
 | `startLockHeld` | function | `export function startLockHeld(stateDir?: string): boolean` | Whether a broker start is in progress in some other process. |
 | `successEnvelope` | function | `export function successEnvelope(` |  |
-| `SURFACE_CLI_SUBCOMMANDS` | variable | `SURFACE_CLI_SUBCOMMANDS = OPERATIONS.map((op) => op.cli.subcommand)` |  |
-| `SURFACE_TOOL_NAMES` | variable | `SURFACE_TOOL_NAMES = OPERATIONS.map((op) => op.mcp.toolName)` |  |
-| `targetsInputSchema` | variable | `targetsInputSchema = z.object(` |  |
-| `targetsOutputSchema` | variable | `targetsOutputSchema = resultEnvelopeSchema.extend(` |  |
+| `SURFACE_CLI_SUBCOMMANDS` | variable | `SURFACE_CLI_SUBCOMMANDS: string[]` |  |
+| `SURFACE_TOOL_NAMES` | variable | `SURFACE_TOOL_NAMES: string[]` |  |
+| `targetsInputSchema` | variable | `targetsInputSchema: z.ZodObject<` |  |
+| `targetsOutputSchema` | variable | `targetsOutputSchema: z.ZodObject<` |  |
 | `writeBrokerDescriptor` | function | `export function writeBrokerDescriptor(` |  |
 | `writeClient` | function | `export function writeClient(client: AgentClient, stateDir?: string): string` | Record a client, or refresh one. Returns the path, for the caller to remove. |

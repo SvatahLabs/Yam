@@ -154,6 +154,7 @@ async function openProjectNow(directory: string, remember = true): Promise<Servi
     cli,
     runtime: runtime.path,
     env,
+    startedBy: `Yam.app ${app.getVersion()}`,
     onLog: (line) => window_?.webContents.send("service:log", line),
   });
 

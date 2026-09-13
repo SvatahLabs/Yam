@@ -598,6 +598,9 @@ importers:
       '@svatah/yam-conformance':
         specifier: workspace:*
         version: link:../conformance
+      '@svatah/yam-contract':
+        specifier: workspace:*
+        version: link:../contract
       '@svatah/yam-gateway':
         specifier: workspace:*
         version: link:../gateway
@@ -717,6 +720,25 @@ importers:
       '@svatah/yam-surface':
         specifier: workspace:*
         version: link:../surface
+    devDependencies:
+      tsup:
+        specifier: 'catalog:'
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.26)(typescript@5.9.3)(yaml@2.9.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 2.1.9(@types/node@26.4.1)(jsdom@30.0.1)(terser@5.51.2)
+
+  packages/contract:
+    dependencies:
+      '@svatah/yam-schema':
+        specifier: workspace:*
+        version: link:../schema
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       tsup:
         specifier: 'catalog:'
@@ -1080,6 +1102,9 @@ importers:
 
   packages/surface-control:
     dependencies:
+      '@svatah/yam-contract':
+        specifier: workspace:*
+        version: link:../contract
       '@svatah/yam-schema':
         specifier: workspace:*
         version: link:../schema

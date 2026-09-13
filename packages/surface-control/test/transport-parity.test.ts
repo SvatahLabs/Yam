@@ -7,7 +7,7 @@ import {
   operationByCliSubcommand,
   operationByMcpTool,
   operationByServicePath,
-} from "../src/catalogue.js";
+} from "@svatah/yam-contract";
 import {
   generateOpenApiPaths,
   generateTypeScriptClient,

@@ -125,6 +125,8 @@ export interface StartOptions {
    * machine where the thing was installed.
    */
   readonly env?: Readonly<Record<string, string | undefined>>;
+  /** What the broker should call this starter: `Yam.app 0.1.0` (PK-08). */
+  readonly startedBy?: string;
   readonly onLog?: (line: string) => void;
   /** How long the handshake may take before the spawn is abandoned. */
   readonly timeoutMs?: number;
@@ -179,6 +181,15 @@ export async function startOrAdopt(options: StartOptions): Promise<RunningServic
        */
       YAM_APP_SMOKE: "",
       YAM_APP_PROJECT: "",
+      /*
+       * The application names itself to the broker (PK-08).
+       *
+       * It stages a copy of the CLI and spawns it, so without this a broker the
+       * app started is indistinguishable from one a person started in a
+       * terminal — and telling the two apart is the whole reason a mismatch
+       * message exists.
+       */
+      YAM_STARTED_BY: options.startedBy ?? "Yam.app",
     },
   });
 

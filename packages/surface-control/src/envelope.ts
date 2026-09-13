@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { ErrorCode, ResultEnvelope } from "./catalogue.js";
+import type { ErrorCode, ResultEnvelope } from "@svatah/yam-contract";
 
 export function makeRequestId(): string {
   return `req_${randomUUID().replace(/-/g, "").slice(0, 12)}`;

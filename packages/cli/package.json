@@ -48,6 +48,7 @@
     "@svatah/yam-bindings-cli": "workspace:*",
     "@svatah/yam-compiler": "workspace:*",
     "@svatah/yam-conformance": "workspace:*",
+    "@svatah/yam-contract": "workspace:*",
     "@svatah/yam-gateway": "workspace:*",
     "@svatah/yam-healer": "workspace:*",
     "@svatah/yam-host-playwright": "workspace:*",
@@ -65,9 +66,9 @@
     "@svatah/yam-tool": "workspace:*",
     "@svatah/yam-trajectory": "workspace:*",
     "@svatah/yam-tui": "workspace:*",
+    "@svatah/yam-ui-tokens": "workspace:*",
     "@svatah/yam-workflow": "workspace:*",
-    "yaml": "catalog:",
-    "@svatah/yam-ui-tokens": "workspace:*"
+    "yaml": "catalog:"
   },
   "devDependencies": {
     "@playwright/test": "catalog:",

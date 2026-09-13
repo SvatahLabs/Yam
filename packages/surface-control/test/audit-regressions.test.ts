@@ -28,7 +28,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
  */
 describe("G02: surface subcommands exist (SF-03, SF-06)", () => {
   it("catalogue defines snapshot, act, read, check, connect, close as CLI subcommands", async () => {
-    const { SURFACE_CLI_SUBCOMMANDS } = await import("../src/catalogue.js");
+    const { SURFACE_CLI_SUBCOMMANDS } = await import("@svatah/yam-contract");
     for (const sub of ["snapshot", "act", "read", "check", "connect", "close"]) {
       expect(
         SURFACE_CLI_SUBCOMMANDS,
@@ -111,7 +111,7 @@ describe("G03: an action is always offered, and always completable (SF-11, SF-17
  */
 describe("G04: adapter selection is real (SF-03, SF-04, SF-09)", () => {
   it("catalogue connect operation accepts adapter as a parameter", async () => {
-    const { operationByName } = await import("../src/catalogue.js");
+    const { operationByName } = await import("@svatah/yam-contract");
     const connect = operationByName("connect")!;
     expect(connect).toBeDefined();
     const parsed = connect.inputSchema.safeParse({ adapter: "does-not-exist" });
@@ -141,7 +141,7 @@ describe("G04: adapter selection is real (SF-03, SF-04, SF-09)", () => {
      * anything (the case above). Asserting on the removed route would be
      * asserting about code nothing serves.
      */
-    const { operationByName } = await import("../src/catalogue.js");
+    const { operationByName } = await import("@svatah/yam-contract");
     const connect = operationByName("connect")!;
     expect(connect.service).toEqual({ method: "POST", path: "/sessions" });
     const shape = connect.inputSchema.safeParse({ url: "http://127.0.0.1:1", adapter: "uia" });
@@ -159,7 +159,7 @@ describe("G04: adapter selection is real (SF-03, SF-04, SF-09)", () => {
  */
 describe("G05: intent is optional for direct control (SF-03, SF-12)", () => {
   it("catalogue input schemas do not require intent", async () => {
-    const { operationByName } = await import("../src/catalogue.js");
+    const { operationByName } = await import("@svatah/yam-contract");
 
     for (const name of ["snapshot", "act", "read", "check", "describe", "screenshot"]) {
       const op = operationByName(name)!;
@@ -205,7 +205,7 @@ describe("G05: intent is optional for direct control (SF-03, SF-12)", () => {
  */
 describe("G07: ref2, name, and snapshot options are not dropped (SF-03, SF-06, SF-11)", () => {
   it("act input schema accepts ref2", async () => {
-    const { operationByName } = await import("../src/catalogue.js");
+    const { operationByName } = await import("@svatah/yam-contract");
     const act = operationByName("act")!;
     const result = act.inputSchema.safeParse({
       session: "s_test123",
@@ -217,7 +217,7 @@ describe("G07: ref2, name, and snapshot options are not dropped (SF-03, SF-06, S
   });
 
   it("read input schema accepts name", async () => {
-    const { operationByName } = await import("../src/catalogue.js");
+    const { operationByName } = await import("@svatah/yam-contract");
     const read = operationByName("read")!;
     const result = read.inputSchema.safeParse({
       session: "s_test123",
@@ -229,7 +229,7 @@ describe("G07: ref2, name, and snapshot options are not dropped (SF-03, SF-06, S
   });
 
   it("snapshot input schema accepts root, maxNodes, interactiveOnly", async () => {
-    const { operationByName } = await import("../src/catalogue.js");
+    const { operationByName } = await import("@svatah/yam-contract");
     const snapshot = operationByName("snapshot")!;
     const result = snapshot.inputSchema.safeParse({
       session: "s_test123",
@@ -311,7 +311,7 @@ describe("G07: ref2, name, and snapshot options are not dropped (SF-03, SF-06, S
      * this asserts the *contract* every interface is generated from: if the
      * catalogue accepts them, CLI, MCP and HTTP all carry them.
      */
-    const { operationByName } = await import("../src/catalogue.js");
+    const { operationByName } = await import("@svatah/yam-contract");
     const act = operationByName("act")!;
     expect(act.inputSchema.safeParse({
       session: "s", action: "dragTo", ref: "r1", ref2: "r2", snapshot: "snap_1",

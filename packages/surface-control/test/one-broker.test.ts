@@ -29,7 +29,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { acquireStartLock, startLockHeld } from "../src/broker.js";
 import { brokerState } from "../src/server.js";
-import { catalogueFingerprint } from "../src/catalogue.js";
+import { catalogueFingerprint } from "@svatah/yam-contract";
 
 let dir: string;
 

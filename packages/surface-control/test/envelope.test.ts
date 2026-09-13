@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { makeRequestId, successEnvelope, failedEnvelope, refusedEnvelope } from "../src/envelope.js";
-import { resultEnvelopeSchema } from "../src/catalogue.js";
+import { resultEnvelopeSchema } from "@svatah/yam-contract";
 
 describe("makeRequestId", () => {
   it("returns req_ prefixed id", () => {

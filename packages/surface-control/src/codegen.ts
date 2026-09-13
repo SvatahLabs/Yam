@@ -1,4 +1,4 @@
-import { OPERATIONS, type OperationDescriptor } from "./catalogue.js";
+import { OPERATIONS, type OperationDescriptor } from "@svatah/yam-contract";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
 export interface OpenApiOperation {
