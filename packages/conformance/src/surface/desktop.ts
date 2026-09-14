@@ -91,6 +91,7 @@ const RAIL = [
 async function openScreen(
   context: Parameters<ConformanceCase["run"]>[0],
   railId: string,
+  content?: string,
 ): Promise<readonly Node[]> {
   const before = (await context.surface.snapshot()).nodes as readonly Node[];
   const item = before.find((node) => node.native?.["automationId"] === railId);
@@ -103,7 +104,37 @@ async function openScreen(
   });
   if (item === undefined) return before;
   await context.surface.act("click", item.ref);
+  if (content !== undefined) await until(context, content);
   return await settled(context, railId);
+}
+
+/**
+ * Wait for an id only the screen that was opened has (T11.1, LLD §16).
+ *
+ * `settled` alone was fooled on the Windows runner. Pressing the Bindings rail
+ * row switched the toolbar at once, but the workspace went on showing the API
+ * screen it had been on while Bindings loaded — about fourteen seconds there —
+ * and three reads of that mixture were identical, so the tree "stopped
+ * changing" on the wrong screen and `app.inspector` found no candidate table
+ * that arrived four seconds later. The trace is run 34814225072's.
+ *
+ * A screen's own content is what says it arrived, so the cases that read one
+ * name it. Polled, not slept, and bounded: a screen that never shows it is
+ * reported by the case's own check, which says what was missing.
+ */
+async function until(
+  context: Parameters<ConformanceCase["run"]>[0],
+  id: string,
+  timeoutMs = 60_000,
+): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const nodes = (await context.surface.snapshot()).nodes as readonly Node[];
+    if (nodes.some((node) => node.native?.["automationId"] === id)) return true;
+    if (Date.now() >= deadline) return false;
+    // A live read takes seconds; a recorded one takes none, and must not spin.
+    await new Promise((done) => setTimeout(done, 250));
+  }
 }
 
 /**
@@ -296,7 +327,7 @@ function subtreeText(nodes: readonly Node[], node: Node): string {
  * Runs screen exactly as a green one does.
  */
 async function startARun(context: Parameters<ConformanceCase["run"]>[0]): Promise<void> {
-  let flows = await openScreen(context, "rail-flows");
+  let flows = await openScreen(context, "rail-flows", "flows-list");
 
   /*
    * One flow, chosen first — the same thing the app's own Playwright case does,
@@ -586,7 +617,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
     description: "Flow 2: a flow file opens in the editor, with its plan and its lint beside it.",
     async run(context) {
       const { check } = context;
-      const nodes = await openScreen(context, "rail-flows");
+      const nodes = await openScreen(context, "rail-flows", "flows-list");
 
       check(
         "the flow list is addressable",
@@ -617,7 +648,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
     description: "Flow 3: the Flows toolbar offers Record and Run, and the Run screen renders.",
     async run(context) {
       const { check } = context;
-      const flows = await openScreen(context, "rail-flows");
+      const flows = await openScreen(context, "rail-flows", "flows-list");
 
       /*
        * Draft 2.12 §13.7: "the Flows toolbar shows Record and Run". Both by
@@ -687,7 +718,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
        */
       await startARun(context);
 
-      const nodes = await openScreen(context, "rail-runs");
+      const nodes = await openScreen(context, "rail-runs", "runs-table");
 
       check(
         "the runs table is addressable",
@@ -745,7 +776,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
     description: "Flow 5: the API screen's request list and its headers are addressable.",
     async run(context) {
       const { check } = context;
-      const nodes = await openScreen(context, "rail-api");
+      const nodes = await openScreen(context, "rail-api", "api-requests");
 
       check(
         "the named requests are addressable",
@@ -775,7 +806,7 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
       "T10.3: the right inspector is a list of landmarks, which is what makes controlPath short.",
     async run(context) {
       const { check } = context;
-      const nodes = await openScreen(context, "rail-bindings");
+      const nodes = await openScreen(context, "rail-bindings", "inspector-candidate-table");
 
       /*
        * LLD §13.6: "screen containers carry landmark roles so `controlPath`
