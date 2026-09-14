@@ -1,8 +1,8 @@
 # Runtime conformance — `java`
 
-Run at 2026-09-04T19:49:22.286Z · 13981 ms
+Run at 2026-09-14T02:49:15.737Z · 46205 ms
 
-Fixture: `evals/conformance/runtime` (plan `95ec8910a81b…`)
+Fixture: `evals/conformance/runtime` (plan `b1ffa3999e31…`)
 
 **Conformant.** Artifacts valid, and 40 step results with **zero mismatches** in status and matched candidate (REQ-STD-3, LLD §14).
 
