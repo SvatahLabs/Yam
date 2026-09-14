@@ -27,7 +27,7 @@ import { spawn } from "node:child_process";
 import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { startSampleApp, type SampleServer } from "sample-web";
@@ -37,7 +37,8 @@ import { buildToolServer } from "../src/commands/tool.js";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
 const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
-const BLOCKER = join(ROOT, "scripts", "block-external-network.mjs");
+// A `file:` URL: `--import` takes a module specifier, and a Windows path is not one.
+const BLOCKER = pathToFileURL(join(ROOT, "scripts", "block-external-network.mjs")).href;
 
 const CARD = "5123456789012346";
 

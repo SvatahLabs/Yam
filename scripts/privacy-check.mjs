@@ -18,12 +18,14 @@ import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { startSampleApp } from "sample-web";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
-const BLOCKER = join(ROOT, "scripts", "block-external-network.mjs");
+// A `file:` URL: `--import` takes a module specifier, and a Windows path is
+// read as a URL with the drive letter for its scheme.
+const BLOCKER = pathToFileURL(join(ROOT, "scripts", "block-external-network.mjs")).href;
 const OUT = mkdtempSync(join(tmpdir(), "yam-privacy-"));
 
 function offline(args, env = {}) {

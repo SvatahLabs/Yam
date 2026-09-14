@@ -22,7 +22,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { startSampleApp, type SampleServer } from "sample-web";
 import { EXIT } from "@svatah/yam-bindings-cli";
@@ -408,7 +408,8 @@ test: Sign in
       },
     });
 
-    const blocker = join(ROOT, "scripts", "block-external-network.mjs");
+    // A `file:` URL: `--import` takes a module specifier, and a Windows path is not one.
+    const blocker = pathToFileURL(join(ROOT, "scripts", "block-external-network.mjs")).href;
     const result = await cli(["run", ".", "--host", "none", "--run-id", "blocked"], project, {
       NODE_OPTIONS: `--import=${blocker}`,
       // A credential *is* present, and unusable: a run that reached for the model
@@ -425,7 +426,8 @@ test: Sign in
     const project = scaffold({
       flows: { "one.flow": "story: One\n  Click the sign in button\n\ntest: One\n" },
     });
-    const blocker = join(ROOT, "scripts", "block-external-network.mjs");
+    // A `file:` URL: `--import` takes a module specifier, and a Windows path is not one.
+    const blocker = pathToFileURL(join(ROOT, "scripts", "block-external-network.mjs")).href;
 
     // The negative control: `record --gateway anthropic` does reach for a model,
     // and with the blocker loaded it cannot. Without this, "the run passed with

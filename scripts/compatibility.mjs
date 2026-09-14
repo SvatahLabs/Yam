@@ -73,7 +73,9 @@ const SECRETS = {
  * passes, so it reached for nothing. Loopback stays open, because that is where
  * `apps/sample-web` is.
  */
-const BLOCK_NETWORK = `--import=${join(ROOT, "scripts", "block-external-network.mjs")}`;
+// A `file:` URL: `--import` takes a module specifier, and a Windows path is
+// read as a URL with the drive letter for its scheme.
+const BLOCK_NETWORK = `--import=${pathToFileURL(join(ROOT, "scripts", "block-external-network.mjs")).href}`;
 
 function runCli(args, env = {}) {
   return new Promise((resolve) => {

@@ -19,14 +19,19 @@ import { spawn } from "node:child_process";
 import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { startSampleApp, type SampleServer } from "sample-web";
 import { EXIT } from "@svatah/yam-bindings-cli";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const FIXTURES = join(ROOT, "evals", "fixtures");
 const YAM = join(ROOT, "packages", "cli", "dist", "bin.js");
-const BLOCKER = join(ROOT, "scripts", "block-external-network.mjs");
+/*
+ * A `file:` URL, not a path: `--import` takes a module specifier, and on Windows
+ * `D:\a\Yam\…` is read as a URL with the scheme `d:` and refused.
+ */
+const BLOCKER_PATH = join(ROOT, "scripts", "block-external-network.mjs");
+const BLOCKER = pathToFileURL(BLOCKER_PATH).href;
 
 let app: SampleServer;
 const projects: string[] = [];
@@ -260,7 +265,7 @@ describe("the blocker itself", () => {
   }, 120_000);
 
   it("names the requirement, so a failure reads as a policy and not a bug", async () => {
-    const source = readFileSync(BLOCKER, "utf8");
+    const source = readFileSync(BLOCKER_PATH, "utf8");
     expect(source).toContain("REQ-RUN-1");
     expect(source).toContain("REQ-NFR-1");
     // All four doors Node has; patching only the top would leave a socket open.
