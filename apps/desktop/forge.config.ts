@@ -89,8 +89,16 @@ const config: ForgeConfig = {
    */
   makers: [
     new MakerZIP({}, ["darwin", "linux", "win32"]),
-    // The installers carry the mark too; each maker's default is Electron's.
-    new MakerSquirrel({ name: testBuild ? "yam_test" : "yam", setupIcon: `${appIcon}.ico` }, ["win32"]),
+    /*
+     * The installers carry the mark too; each maker's default is Electron's.
+     * `authors` because Squirrel's package is a NuGet package, which will not
+     * build without one — "Authors is required." — and the default is the
+     * `author` in package.json, which no package here has.
+     */
+    new MakerSquirrel(
+      { name: testBuild ? "yam_test" : "yam", authors: "Svatah Labs", setupIcon: `${appIcon}.ico` },
+      ["win32"],
+    ),
     /*
      * `bin` is the executable's name inside the packaged app, and the packager
      * names it after `packagerConfig.name`. Unset, the Debian maker assumes the
