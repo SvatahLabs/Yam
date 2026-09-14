@@ -614,6 +614,12 @@ export interface PowershellBridgeOptions {
   readonly timeoutMs?: number;
   /** For tests: run a script without spawning anything. */
   readonly run?: typeof runPowershell;
+  /**
+   * For tests: the platform to answer for, `process.platform` unless given. The
+   * "not Windows" test asked the machine it ran on, and on the Windows runner
+   * the answer was Windows, so it reached a `run` that answers nothing.
+   */
+  readonly platform?: NodeJS.Platform;
 }
 
 const DEFAULT_TIMEOUT_MS = 30_000;
@@ -623,6 +629,7 @@ const AVAILABILITY_TIMEOUT_MS = 10_000;
 export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
   const run = options.run ?? runPowershell;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const platform = options.platform ?? process.platform;
 
   const call = async (script: string, argument: unknown, ms: number): Promise<unknown> => {
     const result = await run(script, argument, ms);
@@ -650,7 +657,7 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
 
   return {
     async availability(): Promise<UiaAvailability> {
-      if (process.platform !== "win32") {
+      if (platform !== "win32") {
         return {
           state: "unsupported",
           advice:

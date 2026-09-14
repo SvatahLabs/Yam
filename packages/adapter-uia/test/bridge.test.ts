@@ -30,51 +30,41 @@ const answering = (
 
 describe("availability (`yam surface doctor`)", () => {
   it("is available when UIAutomationClient loads", async () => {
-    const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
-    Object.defineProperty(process, "platform", { value: "win32", configurable: true });
-    try {
-      const { run, calls } = answering('{"ok":true,"root":"Desktop"}');
-      const availability = await powershellBridge({ process: "Yam", run }).availability();
-      expect(availability.state).toBe("available");
-      // The smallest call: load the assembly and read the root. It touches no
-      // application, so a failure is about the host rather than about the target.
-      expect(calls[0]!.script).toContain("UIAutomationClient");
-      expect(calls[0]!.script).not.toContain("Yam");
-    } finally {
-      Object.defineProperty(process, "platform", platform);
-    }
+    const { run, calls } = answering('{"ok":true,"root":"Desktop"}');
+    const availability = await powershellBridge({ process: "Yam", run, platform: "win32" }).availability();
+    expect(availability.state).toBe("available");
+    // The smallest call: load the assembly and read the root. It touches no
+    // application, so a failure is about the host rather than about the target.
+    expect(calls[0]!.script).toContain("UIAutomationClient");
+    expect(calls[0]!.script).not.toContain("Yam");
   });
 
   it("says a machine that is not Windows is unsupported, without spawning anything", async () => {
     const run = vi.fn<Run>();
-    const availability = await powershellBridge({ process: "x", run }).availability();
-    expect(availability.state).toBe("unsupported");
-    expect(availability.advice).toContain("--adapter ax");
+    for (const platform of ["darwin", "linux"] as const) {
+      const availability = await powershellBridge({ process: "x", run, platform }).availability();
+      expect(availability.state).toBe("unsupported");
+      expect(availability.advice).toContain("--adapter ax");
+    }
     expect(run).not.toHaveBeenCalled();
   });
 
   it("explains the two things that actually go wrong on Windows", async () => {
-    const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
-    Object.defineProperty(process, "platform", { value: "win32", configurable: true });
-    try {
-      const run: Run = async () => ({
-        code: 1,
-        stdout: "",
-        stderr: "Cannot load assembly",
-        timedOut: false,
-      });
-      const availability = await powershellBridge({ process: "x", run }).availability();
-      expect(availability.state).toBe("unavailable");
-      // Constrained Language Mode, and integrity level. Not "permission",
-      // because UI Automation has none — which is the thing someone coming from
-      // the macOS adapter will assume.
-      expect(availability.advice).toContain("Constrained Language Mode");
-      expect(availability.advice).toContain("integrity level");
-      expect(availability.advice).toContain("needs no permission grant");
-      expect(availability.detail).toContain("Cannot load assembly");
-    } finally {
-      Object.defineProperty(process, "platform", platform);
-    }
+    const run: Run = async () => ({
+      code: 1,
+      stdout: "",
+      stderr: "Cannot load assembly",
+      timedOut: false,
+    });
+    const availability = await powershellBridge({ process: "x", run, platform: "win32" }).availability();
+    expect(availability.state).toBe("unavailable");
+    // Constrained Language Mode, and integrity level. Not "permission",
+    // because UI Automation has none — which is the thing someone coming from
+    // the macOS adapter will assume.
+    expect(availability.advice).toContain("Constrained Language Mode");
+    expect(availability.advice).toContain("integrity level");
+    expect(availability.advice).toContain("needs no permission grant");
+    expect(availability.detail).toContain("Cannot load assembly");
   });
 });
 
