@@ -23,7 +23,7 @@
  * alternative was a compiler with no way to invoke it, and the app's "compile to
  * proposal" (T5.8) needs one function that both it and a person can call.
  */
-import { relative, resolve } from "node:path";
+import { relative, resolve, sep } from "node:path";
 import { compileTrajectory, readTrajectory, writeProposal } from "@svatah/yam-trajectory";
 import {
   boolOption,
@@ -34,6 +34,13 @@ import {
   type ParsedArgs,
 } from "@svatah/yam-bindings-cli";
 import { loadConfig } from "../project.js";
+
+/*
+ * A path relative to the project, with `/` on every platform, as `yam explore`
+ * says it: the proposal's directory and files are answered as JSON and compared
+ * against `proposals/`, and the source trajectory is written into the proposal.
+ */
+const portable = (root: string, path: string): string => relative(root, path).split(sep).join("/");
 
 const USAGE = `yam trajectory compile <trajectory.jsonl> [dir] [--name "Story name"]
                                      [--out proposals] [--app proposed] [--json]`;
@@ -64,7 +71,7 @@ export async function trajectoryCommand(args: ParsedArgs, io: CommandIo): Promis
       return EXIT.usage;
     }
     compiled = compileTrajectory(lines, {
-      sourceTrajectory: relative(root, resolve(path)),
+      sourceTrajectory: portable(root, resolve(path)),
       ...(stringOption(args, "name") === undefined ? {} : { storyName: stringOption(args, "name")! }),
       ...(stringOption(args, "app") === undefined ? {} : { app: stringOption(args, "app")! }),
     });
@@ -82,8 +89,8 @@ export async function trajectoryCommand(args: ParsedArgs, io: CommandIo): Promis
     io.out(
       JSON.stringify(
         {
-          dir: relative(root, dir),
-          files: files.map((file) => relative(root, file)),
+          dir: portable(root, dir),
+          files: files.map((file) => portable(root, file)),
           steps: compiled.steps,
           review: compiled.review,
         },
@@ -95,7 +102,7 @@ export async function trajectoryCommand(args: ParsedArgs, io: CommandIo): Promis
     for (const one of compiled.review) io.err(`  review: ${one.intent} — ${one.why}`);
     io.out(
       `${compiled.steps.compiled}/${compiled.steps.total} step(s) compile at Tier 1 ` +
-        `(${(compiled.steps.rate * 100).toFixed(0)}%) → ${relative(root, dir)}\n` +
+        `(${(compiled.steps.rate * 100).toFixed(0)}%) → ${portable(root, dir)}\n` +
         `  ${compiled.proposal.bindings.length} unverified binding(s). ` +
         "Review the draft, then move it into flows/ and record.",
     );

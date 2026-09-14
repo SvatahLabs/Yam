@@ -18,7 +18,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { spawn } from "node:child_process";
 import { cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, relative } from "node:path";
+import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
@@ -65,7 +65,8 @@ function tree(dir: string): string[] {
     for (const name of readdirSync(at)) {
       const path = join(at, name);
       if (statSync(path).isDirectory()) walk(path);
-      else out.push(relative(dir, path));
+      // With `/`, as the assertions below spell `proposals/`, on every platform.
+      else out.push(relative(dir, path).split(sep).join("/"));
     }
   };
   if (existsSync(dir)) walk(dir);
@@ -250,7 +251,7 @@ describe("the T4.6 exploration compiles to a proposal (T5.5's Validate)", () => 
     expect(added.length).toBeGreaterThan(0);
     expect(added.every((path) => path.startsWith("proposals/"))).toBe(true);
     // Nothing that existed before was rewritten either.
-    expect(files.every((path) => relative(project, path).startsWith("proposals/"))).toBe(true);
+    expect(files.every((path) => relative(project, path).split(sep).join("/").startsWith("proposals/"))).toBe(true);
     // And the flow store and the bindings store are byte-identical.
     expect(tree(join(project, "flows"))).toEqual(tree(join(FIXTURES, "flows")));
   }, 240_000);
