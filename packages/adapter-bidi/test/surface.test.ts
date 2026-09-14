@@ -12,7 +12,7 @@
  * is the independence proof; a test suite that needed Playwright to check it
  * would put Playwright back in its tree.
  */
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { startSampleApp, type SampleServer } from "sample-web";
 import { LocateError } from "@svatah/yam-surface";
 import { bidiAvailable } from "../src/launch.js";
@@ -51,8 +51,19 @@ beforeAll(async () => {
   app = await startSampleApp(0);
 }, 180_000);
 
+/*
+ * A test's browser is closed when the test ends, not when the file does.
+ *
+ * All of them were closed in `afterAll`, so the last test ran beside fourteen
+ * Firefoxes that had nothing left to do. On the four-CPU Windows runner the
+ * fifth test's `session.subscribe` missed its ten-second deadline beside four
+ * of them, and Node warned about the exit listeners they were holding.
+ */
+afterEach(async () => {
+  for (const surface of opened.splice(0)) await surface.close().catch(() => undefined);
+});
+
 afterAll(async () => {
-  for (const surface of opened) await surface.close().catch(() => undefined);
   await app?.close();
 });
 
