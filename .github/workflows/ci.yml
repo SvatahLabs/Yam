@@ -66,7 +66,17 @@ jobs:
         run: pnpm --filter @svatah/yam-adapter-playwright exec playwright install --with-deps chromium firefox
 
       - name: Test
+        if: runner.os != 'Linux'
         run: pnpm -r test
+
+      # The recorder's human gateway (REQ-REC-12) opens a headed browser for a
+      # person to click in, and the Linux runner has no display: Chromium refused
+      # with "Looks like you launched a headed browser without having a XServer
+      # running". xvfb is on the runner already, so Linux runs the suite on a
+      # virtual display, as the installer job's smoke check does.
+      - name: Test (Linux, on a virtual display)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum pnpm -r test
 
       # T2.10's milestone: the four migrated fixtures against apps/sample-web,
       # four times, checking determinism (REQ-RUN-2), that both hosts agree
