@@ -85,8 +85,14 @@ const config: ForgeConfig = {
   makers: [
     new MakerZIP({}, ["darwin", "linux", "win32"]),
     new MakerSquirrel({ name: testBuild ? "yam_test" : "yam" }, ["win32"]),
+    /*
+     * `bin` is the executable's name inside the packaged app, and the packager
+     * names it after `packagerConfig.name`. Unset, the Debian maker assumes the
+     * npm name, `@svatah/yam-desktop`, and `make` on Linux failed looking for
+     * `out/Yam-linux-x64/@svatah/yam-desktop`.
+     */
     new MakerDeb(
-      { options: { name: testBuild ? "yam-test" : "yam", productName } },
+      { options: { name: testBuild ? "yam-test" : "yam", productName, bin: productName } },
       ["linux"],
     ),
   ],
