@@ -303,6 +303,18 @@ jobs:
       # always launched the development Electron, which has the `RunAsNode` fuse
       # on and a CLI in the workspace, and so could not fail the way the product
       # failed. The line it prints says which target it used.
+      # Electron on Linux sandboxes the app with `chrome-sandbox`, a helper that
+      # has to be owned by root and setuid. The packager writes it as the
+      # runner's user, and on GitHub's Ubuntu image Chromium cannot fall back to
+      # unprivileged user namespaces, so the packaged app aborted with "The SUID
+      # sandbox helper binary was found, but is not configured correctly". This
+      # gives the helper the bits it needs rather than turning the sandbox off.
+      - name: The packaged app's sandbox helper (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo chown root:root apps/desktop/out/Yam-linux-x64/chrome-sandbox
+          sudo chmod 4755 apps/desktop/out/Yam-linux-x64/chrome-sandbox
+
       - name: Smoke against the packaged app (Linux)
         if: runner.os == 'Linux'
         run: xvfb-run --auto-servernum pnpm app:smoke
