@@ -1,7 +1,7 @@
 # Setup
 
 This page takes you from nothing to a working Yam. It covers the command line,
-the desktop app, the MCP server for agents, and the permissions each one needs.
+Yam MCP for agents, the desktop app, and the permissions each one needs.
 
 ## What you need first
 
@@ -30,6 +30,38 @@ yam --version
 This install gives you the flow language, the compiler, the runtime, the
 recorder, the healer, the terminal cockpit, and six adapters that need nothing
 extra. It does not include a browser.
+
+## Set up Yam MCP for agents
+
+Agents reach Yam through Yam MCP, a separate package, so a plain `yam` install
+does not carry the MCP SDK. For Claude Code, one line adds it:
+
+```bash
+claude mcp add yam -- npx -y @svatah/yam-mcp
+```
+
+For any other agent host, put this in its MCP server list:
+
+```json
+{ "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp"] } } }
+```
+
+`npx -y` fetches it when needed and installs nothing permanently.
+
+Add a project directory to give the agent the compile, run, record and heal
+tools as well:
+
+```json
+{ "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp", "/path/to/project"] } } }
+```
+
+With no directory the agent gets the surface tools only, which is what you want
+when the agent is driving a browser or an app rather than working on a project.
+
+To have an agent drive its first page, follow
+[Connect an agent with Yam MCP](getting-started/install-and-first-control.md#6-connect-an-agent-with-yam-mcp).
+[Yam MCP](concepts/yam-mcp.md) explains how an agent's session works, and the
+[MCP reference](mcp.md) lists every tool and option.
 
 ## Add a browser
 
@@ -111,30 +143,6 @@ pnpm --filter @svatah/yam-desktop package
 
 The app appears under `apps/desktop/out/`. On a Mac that is
 `Yam-darwin-arm64/Yam.app`.
-
-## Install the MCP server for agents
-
-Agents reach Yam through a separate package, so a plain `yam` install does not
-carry the MCP SDK.
-
-```json
-{ "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp"] } } }
-```
-
-Put that in your agent host's configuration. `npx -y` fetches it when needed and
-installs nothing permanently.
-
-Add a project directory to give the agent the compile, run, record and heal
-tools as well:
-
-```json
-{ "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp", "/path/to/project"] } } }
-```
-
-With no directory the agent gets the surface tools only, which is what you want
-when the agent is driving a browser or an app rather than working on a project.
-
-Read [Yam and MCP](mcp.md) for the tool list.
 
 ## Make a project
 

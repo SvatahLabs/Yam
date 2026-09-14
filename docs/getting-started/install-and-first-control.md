@@ -4,6 +4,10 @@ Fifteen minutes, from nothing to a browser and a native application driven from
 your terminal. No project, no flow file, no model — those come later and are
 optional.
 
+Connecting an AI agent? [Step 6](#6-connect-an-agent-with-yam-mcp) sets up
+Yam MCP and has the agent drive the same page you drive by hand in step 4; the
+steps before it show what the agent will be doing.
+
 If you only want bindings inside an existing Playwright suite, skip this and
 read [Bindings in a plain Playwright project](playwright-quick-start.md)
 instead; it is a smaller thing to adopt.
@@ -195,19 +199,81 @@ On Windows use `--adapter uia`, on Linux `--adapter atspi`. A terminal is
 `--adapter process`, and an HTTP API is `--adapter http` with
 `yam surface request`.
 
-## 6. Hand the same surface to an agent
+## 6. Connect an agent with Yam MCP
 
-Everything above is also available over MCP, so an agent can do it:
+Everything above is also available to an AI agent through Yam MCP, an MCP server
+that gives the agent the same sessions, references and verbs you just used by
+hand. [Yam MCP](../concepts/yam-mcp.md) explains how it works; this step sets it
+up and has an agent drive the page from step 4.
+
+### Set it up
+
+Yam MCP runs with `npx`, so there is nothing more to install. For Claude Code,
+one line adds it:
 
 ```bash
 claude mcp add yam -- npx -y @svatah/yam-mcp
 ```
 
-The agent gets `surface_connect`, `surface_snapshot`, `surface_act`,
-`surface_read`, `surface_check` and the rest — the same session model you just
-used by hand. **The MCP client is now the program macOS grants**, so if it has
-not been granted, run `yam surface doctor` *from that client* and follow what it
-says. [MCP reference](../mcp.md) has the full tool list and the HTTP transport.
+For any other MCP host, add this to its server list:
+
+```json
+{ "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp"] } } }
+```
+
+That is the surface-only server: 14 tools, and no project needed. To give the
+agent the project tools as well (compile, lint, run, record, heal, bindings and
+results), add a project directory:
+
+```json
+{ "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp", "/path/to/project"] } } }
+```
+
+If your host cannot start a program, serve over HTTP instead:
+
+```bash
+npx -y @svatah/yam-mcp --http
+```
+
+It prints one line with the address and a bearer token,
+`@svatah/yam-mcp listening url=http://127.0.0.1:<port>/mcp token=<token>`, and
+your host needs both. It listens on 127.0.0.1 only.
+
+**The MCP client is now the program macOS grants.** If the agent cannot read a
+Mac application, run `yam surface doctor` *from that client* and follow what it
+says; step 3 explains why.
+
+### Use it
+
+Ask for what you want in plain language. With the page from step 4:
+
+> Open file:///tmp/yamdemo/page.html, type Ada into the name field, read the
+> field back, and check that the Say hello button is visible.
+
+The agent makes the same calls you made by hand:
+
+| Step | Tool | Arguments |
+|---|---|---|
+| Open the page | `surface_connect` | `{"url": "file:///tmp/yamdemo/page.html", "adapter": "playwright"}`, which returns a `sessionId` |
+| Look | `surface_snapshot` | `{"session": "s_7ef55c603f6b", "interactiveOnly": true}` |
+| Type | `surface_act` | `{"session": "s_7ef55c603f6b", "action": "type", "ref": "r0", "args": {"value": "Ada"}}` |
+| Read it back | `surface_read` | `{"session": "s_7ef55c603f6b", "kind": "value", "ref": "r0"}` |
+| Check | `surface_check` | `{"session": "s_7ef55c603f6b", "predicate": {"kind": "visible"}, "subject": "ref", "ref": "r1"}` |
+| Finish | `surface_close` | `{"session": "s_7ef55c603f6b"}` |
+
+Two habits make an agent's session worth more:
+
+- **Pass an intent.** Every surface tool takes an optional `intent`, a short
+  sentence saying why: "enter the user's name", not "type into r0". With a
+  project, the calls that carry one are recorded, and `yam trajectory compile`
+  and `yam explore` turn that recording into a proposed flow which, once you
+  accept it, replays with no model.
+- **Watch, and take over.** The agent's session lives in the same broker as
+  yours, so it shows up in the desktop app next to your own, and
+  `surface_control` decides who is driving.
+
+The [MCP reference](../mcp.md) has the details: every surface tool, the project
+tools, the trajectory a session writes, and the server's options.
 
 ## Where to go next
 
@@ -219,6 +285,8 @@ You now have live control. The rest of Yam is about making a session
   in the loop.
 - [One plan, three ways to run it](one-plan-three-ways.md) — the same flow as a
   test, a workflow and an agent tool.
+- [Yam MCP](../concepts/yam-mcp.md) — how an agent's session works, and how it
+  becomes a test.
 - [The agent surface](../concepts/agent-surface.md) — what the four verbs
   guarantee, and what each adapter can and cannot do.
 - [Support matrix](../reference/generated/support-matrix.md) — how far each

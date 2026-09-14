@@ -12,6 +12,7 @@ The documentation is organised by what you are trying to do.
 
 | If you want to | Read |
 |---|---|
+| connect an AI agent to Yam | [Yam MCP](concepts/yam-mcp.md) |
 | install it and run something | [Setup](setup.md) |
 | see everything Yam does | [Features](features.md) |
 | learn from working examples | [Examples](examples.md) |
@@ -31,7 +32,7 @@ The documentation is organised by what you are trying to do.
 
 ## Getting started, in detail
 
-1. [Install Yam and control something](getting-started/install-and-first-control.md), from `npm install` to a browser and a native application driven by hand.
+1. [Install Yam and control something](getting-started/install-and-first-control.md), from `npm install` to a browser and a native application driven by hand, then by an agent through Yam MCP.
 2. [Bindings in a plain Playwright project](getting-started/playwright-quick-start.md), the smaller thing to adopt if you already have a Playwright suite.
 3. [Your first flow](getting-started/first-flow.md), from `yam init` to a replayed plan.
 4. [One plan, three ways to run it](getting-started/one-plan-three-ways.md), as a test, a workflow and an agent tool.
@@ -50,6 +51,7 @@ The documentation is organised by what you are trying to do.
 
 ## Concepts
 
+- [Yam MCP](concepts/yam-mcp.md), how an agent drives Yam, and how its session becomes a test
 - [The three layers](concepts/three-layers.md)
 - [The agent surface](concepts/agent-surface.md)
 - [Determinism and provenance](concepts/determinism-and-provenance.md)
