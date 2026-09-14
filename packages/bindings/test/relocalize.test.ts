@@ -17,6 +17,7 @@ import {
   decide,
   DEFAULT_MARGIN,
   DEFAULT_THRESHOLD,
+  fingerprintOf,
   neighbourSimilarity,
   rank,
   relocalize,
@@ -217,6 +218,57 @@ describe("the threshold and the margin (LLD §6.4)", () => {
 
   it("refuses an empty page rather than throwing", () => {
     expect(decide([]).outcome).toBe("not-found");
+  });
+
+  it("tells a renamed desktop rail row from its section header by class (app.heal.renamed-control)", () => {
+    /*
+     * The macOS gate's case, as a desktop adapter describes it: the Flows rail
+     * row is renamed "Editor", and directly above it is the Automations
+     * section header — another current button, in the same place, among the
+     * same neighbours. A desktop description carried no attribute on the
+     * fingerprint's list, so the two were one score apart only by position
+     * and the healer rightly refused (0.750 against 0.697 on the runner).
+     * The classes Chromium publishes are what the web fingerprint already had.
+     */
+    const rail = (renamed: boolean): string[] => [
+      "Surfaces section",
+      "Surfaces",
+      "Automations section",
+      renamed ? "Editor" : "Flows",
+      "Bindings",
+      "API",
+      "Data",
+    ];
+    const classes = ["sv-rail-heading sv-rail-section", "sv-rail-item", "sv-rail-heading sv-rail-section sv-rail-section-active", "sv-rail-item sv-rail-active", "sv-rail-item", "sv-rail-item", "sv-rail-item"];
+    const described = (names: string[], at: number, withClasses: boolean): ElementDescription => ({
+      ref: `r${at}`,
+      role: "button",
+      name: names[at]!,
+      tag: "AXButton",
+      attrs: { axRole: "AXButton" },
+      text: names[at]!,
+      neighbours: { before: names.slice(Math.max(0, at - 3), at), after: names.slice(at + 1, at + 4) },
+      rolePath: ["window", "navigation", "button"],
+      box: [8, 40 + at * 30, 184, 28],
+      index: at,
+      states: [],
+      native: withClasses ? { stableClasses: classes[at]! } : {},
+    });
+    const heal = (withClasses: boolean) => {
+      const recorded = fingerprintOf(described(rail(false), 3, withClasses));
+      const renamed = rail(true);
+      return decide(rank(recorded, renamed.map((_, at) => described(renamed, at, withClasses))));
+    };
+
+    // Right, and unable to say so: the best is the renamed row, and a
+    // neighbouring button is within the margin of it.
+    const without = heal(false);
+    expect(without.outcome).toBe("ambiguous");
+    if (without.outcome === "ambiguous") expect(without.best.description.name).toBe("Editor");
+
+    const withClasses = heal(true);
+    expect(withClasses.outcome).toBe("relocalized");
+    if (withClasses.outcome === "relocalized") expect(withClasses.match.description.name).toBe("Editor");
   });
 
   it("ranks best first", () => {

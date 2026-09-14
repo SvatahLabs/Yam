@@ -175,6 +175,41 @@ describe("locate and describe (LLD §6.3, §3.3)", () => {
     expect(described.states).toBeInstanceOf(Array);
   });
 
+  it("gives the fingerprint an element's classes, without the generated ones (LLD §6.4)", async () => {
+    /*
+     * The recorded trees predate the class list, so two of their nodes are
+     * given one here, the way Chromium publishes it.
+     */
+    const recorded = recordedBridge({ screen: "record" });
+    const bridge: RecordedBridge = {
+      ...recorded,
+      async window(request) {
+        const window = await recorded.window(request);
+        return {
+          ...window,
+          nodes: window.nodes.map((one) =>
+            one.domIdentifier === "rail-runs"
+              ? { ...one, domClassList: "sv-rail-item css-1x2y3z" }
+              : one.domIdentifier === "rail-bindings"
+                ? { ...one, domClassList: ":r3:" }
+                : one,
+          ),
+        };
+      },
+    };
+    const surface = new AxSurface({ processName: "Yam", bridge });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
+
+    const [runs] = await surface.locate({ by: "automationId", value: "rail-runs", score: 1 });
+    expect((await surface.describe(runs!)).native?.["stableClasses"]).toBe("sv-rail-item");
+    // Nothing left after the generated ones go is no class, not an empty one.
+    const [bindings] = await surface.locate({ by: "automationId", value: "rail-bindings", score: 1 });
+    expect((await surface.describe(bindings!)).native).not.toHaveProperty("stableClasses");
+    // And the snapshot's shape is what it was: the fingerprint is the only reader.
+    const snapshot = await surface.snapshot();
+    expect(JSON.stringify(snapshot.nodes)).not.toContain("sv-rail-item");
+  });
+
   it("refuses a reference the current snapshot does not have", async () => {
     const { surface } = await open();
     await surface.snapshot();

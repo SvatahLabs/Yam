@@ -38,7 +38,7 @@ Bindings store, context hash, resolver, synthesis, fingerprint, relocalization
 | `LANDMARK_ROLES` | variable | `LANDMARK_ROLES = [` | The roles that scope a context, in the order LLD §6.2 tries them: a landmark, |
 | `LocatorError` | class | `export class LocatorError extends LocateError` |  |
 | `LocatorErrorDetail` | interface | `export interface LocatorErrorDetail` |  |
-| `looksGenerated` | function | `export function looksGenerated(value: string): boolean` | Whether a value looks machine-generated and so is not worth binding to. |
+| `looksGenerated` | function | `declare function looksGenerated(value: string): boolean;` | Whether a value looks machine-generated and so is not worth binding to. |
 | `Lookup` | interface | `export interface Lookup` |  |
 | `Match` | interface | `export interface Match` |  |
 | `neighbourSimilarity` | function | `export function neighbourSimilarity(` | Neighbour text, before and after weighted equally. |

@@ -60,7 +60,12 @@ export interface UiaNode {
   readonly automationId?: string;
   /** `Name`: one name, wherever it came from. UIA has no title/description split. */
   readonly name?: string;
-  /** `ClassName`, which for web content is Chromium's window class. */
+  /**
+   * `ClassName`: a native control's window class, and for web content the DOM
+   * element's `class` attribute, which is what Chromium publishes there — the
+   * Windows runner's trace reads `sv-rail-item sv-rail-active` on a rail row.
+   * The recorded fixtures carry Chromium's window class instead.
+   */
   readonly className?: string;
   /** `HelpText`, which is a `title` attribute on the web. */
   readonly helpText?: string;

@@ -59,6 +59,7 @@ import {
   quitApplication,
   ScriptError,
   SessionError,
+  stableClassesOf,
   structuralHash,
   waitFor,
   type LaunchConfig,
@@ -544,7 +545,18 @@ export class AxSurface implements AgentSurface {
       box: node.box ?? [0, 0, 0, 0],
       index: Math.max(0, at),
       states: [...node.states],
-      native: { ...node.native, controlPath: node.controlPath },
+      native: {
+        ...node.native,
+        controlPath: node.controlPath,
+        /*
+         * The element's classes, for the fingerprint's `class` (LLD §6.4), by
+         * the web adapters' rule. In `describe` and not in the snapshot, because
+         * the fingerprint is the only reader and a snapshot's shape is recorded.
+         */
+        ...(stableClassesOf(node.source.domClassList) === undefined
+          ? {}
+          : { stableClasses: stableClassesOf(node.source.domClassList)! }),
+      },
     };
   }
 

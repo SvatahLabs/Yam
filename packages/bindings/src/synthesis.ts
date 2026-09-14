@@ -13,7 +13,7 @@
  * outright (REQ-REC-3) rather than guessed at.
  */
 import { DEFAULT_IGNORE_ATTRIBUTES, type Candidate, type ElementDescription, type Fingerprint, type Ref } from "@svatah/yam-schema";
-import type { AgentSurface } from "@svatah/yam-surface";
+import { looksGenerated, type AgentSurface } from "@svatah/yam-surface";
 
 export interface SynthesisOptions {
   /** Attributes treated as test ids, most preferred first. */
@@ -107,26 +107,15 @@ const FINGERPRINT_ATTRIBUTES = [
   "content-desc",
 ];
 
-/**
+/*
  * Whether a value looks machine-generated and so is not worth binding to.
  *
  * The adapter flags what it can see (`native.idIsGenerated`), but the heuristic
- * lives here too because it applies to any adapter's values, and because a
- * binding built on `:r3:` or `css-1x2y3z` breaks on the next build for no reason
- * a person would recognise.
+ * applies here too because it applies to any adapter's values. The rule is
+ * `@svatah/yam-surface`'s, where the desktop adapters can reach it as well, and
+ * it is exported from here as it always was.
  */
-export function looksGenerated(value: string): boolean {
-  return (
-    /^:r[0-9a-z]+:$/i.test(value) ||
-    /^ember\d+$/i.test(value) ||
-    /^(mui|radix|headlessui|reach|aria)[-_][:a-z0-9]+$/i.test(value) ||
-    /^sc-[a-zA-Z]{6,}$/.test(value) ||
-    /^(css|jsx|emotion)-[a-z0-9]{5,}$/i.test(value) ||
-    /^_[a-zA-Z0-9]{5,}$/.test(value) ||
-    /^[0-9a-f]{8,}$/i.test(value) ||
-    /\d{5,}$/.test(value)
-  );
-}
+export { looksGenerated };
 
 /**
  * The ranked candidates for one element, before uniqueness filtering.

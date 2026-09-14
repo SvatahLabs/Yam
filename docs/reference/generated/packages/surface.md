@@ -61,6 +61,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `LOCATE_RETURN_MARGIN_MS` | variable | `LOCATE_RETURN_MARGIN_MS = 250` | How long an adapter's `locate` may keep asking. |
 | `locateDeadline` | function | `export function locateDeadline(candidateTimeoutMs: number \| undefined, now = Date.now()): number` | The instant an adapter's retrying `locate` must answer by, given the |
 | `LocateError` | class | `export class LocateError extends SurfaceError` | A candidate matched no element, or matched more than one where exactly one was |
+| `looksGenerated` | function | `export function looksGenerated(value: string): boolean` | Whether a value looks machine-generated and so is not worth binding to. |
 | `missingCapabilities` | function | `export function missingCapabilities(` | The capabilities a set of actions needs but the adapter lacks. Empty means the |
 | `NavigationError` | class | `export class NavigationError extends SurfaceError` | Navigation failed, timed out, or landed somewhere unexpected. |
 | `NO_CAPABILITIES` | variable | `NO_CAPABILITIES: Capabilities ` | All capability flags default to false, so an adapter opts in to what it supports. |
@@ -94,6 +95,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `SnapshotNode` | typealias | `type SnapshotNode = z.infer<typeof snapshotNodeSchema>;` |  |
 | `snapshotNodeSchema` | variable | `snapshotNodeSchema: z.ZodObject<` |  |
 | `snapshotSchema` | variable | `snapshotSchema: z.ZodObject<` |  |
+| `stableClassesOf` | function | `export function stableClassesOf(list: string \| undefined): string \| undefined` | A class list without the classes a build generated, or nothing. |
 | `structuralHash` | function | `export function structuralHash(nodes: readonly SnapshotNode[]): string` | sha256 of `renderForHash`, hex encoded. |
 | `SURFACE_ACTIONS` | variable | `SURFACE_ACTIONS: readonly SurfaceAction[]` |  |
 | `SURFACE_ERRORS` | variable | `SURFACE_ERRORS = [` | Every surface error class, in the order LLD §2.3 lists them. |

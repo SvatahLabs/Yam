@@ -325,6 +325,25 @@ describe("reading a window", () => {
     expect(calls[0]!.language).toBe("JavaScript");
   });
 
+  it("reads the DOM classes Chromium publishes, for the fingerprint", async () => {
+    /*
+     * Without them a desktop fingerprint had no attributes at all, and the
+     * macOS gate could not tell the renamed Flows rail row from the section
+     * header above it: both buttons, both current, side by side.
+     */
+    const { run, calls } = answering(
+      answer({ title: "Yam" }, [
+        node({ 0: "-1", 1: "AXWindow", 3: "Yam" }),
+        node({ 0: "0", 1: "AXButton", 3: "Flows", 19: "sv-rail-item sv-rail-active" }),
+        node({ 0: "0", 1: "AXButton", 3: "Runs" }),
+      ]),
+    );
+    const window = await osascriptBridge({ process: "Yam", run }).window({ process: "Yam", maxNodes: 10 });
+    expect(window.nodes[1]!.domClassList).toBe("sv-rail-item sv-rail-active");
+    expect(window.nodes[2]!.domClassList).toBeUndefined();
+    expect(calls[0]!.script).toContain("words(attr(element, 'AXDOMClassList'))");
+  });
+
   it("honours the caller's deadline rather than its own (P7-F5, Draft 2.9 §7.5)", async () => {
     /*
      * `osascriptBridge({ timeoutMs: 180000 }).window(…)` stopped at ten seconds:

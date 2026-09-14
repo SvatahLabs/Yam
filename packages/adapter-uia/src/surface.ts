@@ -54,6 +54,7 @@ import {
   quitApplication,
   ScriptError,
   SessionError,
+  stableClassesOf,
   structuralHash,
   waitFor,
   type LaunchConfig,
@@ -384,7 +385,21 @@ export class UiaSurface implements AgentSurface {
       box: node.box ?? [0, 0, 0, 0],
       index: Math.max(0, at),
       states: [...node.states],
-      native: { ...node.native, controlPath: node.controlPath },
+      native: {
+        ...node.native,
+        controlPath: node.controlPath,
+        /*
+         * The element's classes, for the fingerprint's `class` (LLD §6.4).
+         * Chromium publishes a DOM element's `class` attribute as its UIA
+         * `ClassName` — the Windows runner's trace reads `sv-rail-item
+         * sv-rail-active` on the Flows rail row — and a native control's is its
+         * window class. By the web adapters' rule, and in `describe` only,
+         * because the fingerprint is the only reader.
+         */
+        ...(stableClassesOf(node.source.className) === undefined
+          ? {}
+          : { stableClasses: stableClassesOf(node.source.className)! }),
+      },
     };
   }
 

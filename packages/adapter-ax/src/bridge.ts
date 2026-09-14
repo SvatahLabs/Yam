@@ -102,6 +102,18 @@ export interface AxNode {
    * and puts this between them.
    */
   readonly domIdentifier?: string;
+  /**
+   * `AXDOMClassList` — the DOM `class` attribute's classes, space-joined, which
+   * Chromium publishes.
+   *
+   * Read for the fingerprint, which is what relocalization scores (LLD §6.4).
+   * Without it a desktop fingerprint carried no attributes at all: nothing an
+   * AX description holds is on the fingerprint's list, so every element scored
+   * the full 0.3 for attributes, and two buttons side by side in the app's
+   * rail could only be told apart by the names a rename takes away. The web
+   * adapters fingerprint the same classes from `classList`.
+   */
+  readonly domClassList?: string;
   /** `AXHelp`, which is a `title` attribute on the web. */
   readonly help?: string;
   /** `AXPlaceholderValue`. */
@@ -655,6 +667,18 @@ function actions(element) {
   }
 }
 
+/** A list-of-strings attribute, space-joined: AXDOMClassList. */
+function words(value) {
+  if (value === undefined) return '';
+  try {
+    var list = ObjC.deepUnwrap(ObjC.castRefToObject(value));
+    if (list === undefined || list === null || typeof list.join !== 'function') return '';
+    return clean(list.join(' '));
+  } catch (e) {
+    return '';
+  }
+}
+
 function children(element) {
   var value = attr(element, 'AXChildren');
   if (value === undefined) return [];
@@ -765,7 +789,7 @@ function run(argv) {
     var element = job.element;
     var index = records.length;
 
-    var fields = new Array(19);
+    var fields = new Array(20);
     fields[0] = String(job.parent);
     fields[1] = text(attr(element, 'AXRole')) || 'AXUnknown';
     fields[2] = text(attr(element, 'AXSubrole'));
@@ -785,6 +809,7 @@ function run(argv) {
     fields[16] = flag(attr(element, 'AXExpanded'));
     fields[17] = actions(element);
     fields[18] = frame(element, buffer);
+    fields[19] = words(attr(element, 'AXDOMClassList'));
     records.push(fields.join(US));
 
     /*
@@ -829,6 +854,8 @@ const enum Field {
   Actions = 17,
   /** `AXFrame` as base64 of four little-endian doubles: x, y, width, height. */
   Frame = 18,
+  /** `AXDOMClassList`, space-joined. */
+  DomClassList = 19,
 }
 
 /** Record and field separators: ASCII 30 and 31, which no AX string carries. */
@@ -976,6 +1003,9 @@ export function parseWindow(stdout: string): {
       ...(text(fields[Field.DomIdentifier]) === undefined
         ? {}
         : { domIdentifier: fields[Field.DomIdentifier]! }),
+      ...(text(fields[Field.DomClassList]?.trim()) === undefined
+        ? {}
+        : { domClassList: fields[Field.DomClassList]!.trim() }),
       ...(text(fields[Field.Help]) === undefined ? {} : { help: fields[Field.Help]! }),
       ...(text(fields[Field.Placeholder]) === undefined
         ? {}

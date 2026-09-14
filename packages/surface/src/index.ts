@@ -94,6 +94,8 @@ export {
 
 export { LOCATE_RETURN_MARGIN_MS, locateDeadline } from "./locate.js";
 
+export { looksGenerated, stableClassesOf } from "./generated.js";
+
 // The wire shapes, re-exported so an adapter implementer imports one package.
 export {
   CAPABILITY_FLAGS,

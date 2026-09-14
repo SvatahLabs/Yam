@@ -83,6 +83,33 @@ describe("snapshot, locate and describe", () => {
     expect(described.rolePath[0]).toBe("window");
   });
 
+  it("gives the fingerprint an element's classes, which Chromium publishes as ClassName (LLD §6.4)", async () => {
+    /*
+     * The recorded trees carry Chromium's window class on every node, which is
+     * not what a real Windows host answers: the runner's trace reads
+     * `sv-rail-item sv-rail-active` on the Flows rail row. One node is given
+     * that here.
+     */
+    const recorded = recordedBridge({ screen: "record" });
+    const bridge: RecordedBridge = {
+      ...recorded,
+      async window(request) {
+        const window = await recorded.window(request);
+        return {
+          ...window,
+          nodes: window.nodes.map((one) =>
+            one.automationId === "rail-runs" ? { ...one, className: "sv-rail-item sv-rail-active css-1x2y3z" } : one,
+          ),
+        };
+      },
+    };
+    const surface = new UiaSurface({ processName: "Yam", bridge });
+    await surface.open({ kind: "desktop", processName: "Yam" } as never);
+
+    const [runs] = await surface.locate({ by: "automationId", value: "rail-runs", score: 1 });
+    expect((await surface.describe(runs!)).native?.["stableClasses"]).toBe("sv-rail-item sv-rail-active");
+  });
+
   it("applies `nth`, which is the binding's decision and not the adapter's", async () => {
     const { surface } = await open();
     /*
