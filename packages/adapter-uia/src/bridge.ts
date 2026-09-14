@@ -434,7 +434,13 @@ while ($queue.Count -gt 0) {
   if ($focus) { $node.hasKeyboardFocus = $true }
   if ($box) { $node.box = $box }
 
-  $patterns = @(Get-PatternNames $element)
+  # No \`@()\` around the call: the function's \`,\` already keeps the list a
+  # list, and \`@()\` wrapped it again. Every node on the Windows runner
+  # answered \`[["Invoke","ScrollItem"]]\`, \`includes("Invoke")\` was false for
+  # all of them, and every action fell through to a mouse click at the box's
+  # centre — which, for a palette row scrolled out of its list, was a click on
+  # another application's window.
+  $patterns = Get-PatternNames $element
   if ($patterns.Count -gt 0) { $node.patterns = $patterns }
 
   try {
@@ -466,6 +472,7 @@ while ($queue.Count -gt 0) {
 }
 
 $title = Get-Prop $win $AE::NameProperty
+
 ConvertTo-Json -Compress -Depth 6 @{
   ok        = $true
   process   = $req.process
@@ -691,6 +698,24 @@ function untyped(command: UiaCommand): Readonly<Record<string, unknown>> {
   return command;
 }
 
+/**
+ * A node's pattern names as one flat list of strings.
+ *
+ * PowerShell unrolls a one-element array on return and wraps an array in
+ * another when asked to, and the script has been wrong both ways: a single
+ * pattern arrived as the string `"Invoke"` (T7.2), and on the Windows runner
+ * every list arrived as `[["Invoke","ScrollItem"]]`. Either way `includes`
+ * answered false and every action became a mouse click, so the list is made
+ * flat here whatever shape it came in.
+ */
+export function flatPatterns(value: unknown): readonly string[] | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value === "string") return [value];
+  if (!Array.isArray(value)) return undefined;
+  if (value.every((one) => typeof one === "string")) return value as readonly string[];
+  return (value as unknown[]).flat(Infinity).filter((one): one is string => typeof one === "string");
+}
+
 function unread(nodes: readonly UiaNode[] | undefined): readonly UiaNode[] | undefined {
   return nodes?.map((node) =>
     node.controlType === "Edit" && node.value !== undefined && node.value !== ""
@@ -793,7 +818,10 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
         );
       }
       const wallMs = Date.now() - startedAt;
-      const nodes = answer.nodes ?? [];
+      const nodes = (answer.nodes ?? []).map((node) => {
+        const patterns = flatPatterns(node.patterns);
+        return patterns === node.patterns ? node : { ...node, ...(patterns === undefined ? {} : { patterns }) };
+      });
       return {
         process: answer.process ?? request.process,
         title: answer.title ?? "",

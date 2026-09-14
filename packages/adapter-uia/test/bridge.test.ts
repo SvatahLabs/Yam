@@ -118,6 +118,34 @@ describe("reading a window", () => {
     expect(calls[0]!.script).toMatch(/try \{ return \$element\.GetCurrentPropertyValue/);
   });
 
+  it("hands the adapter a flat pattern list, whatever PowerShell wrapped it in", async () => {
+    /*
+     * On the Windows runner every node answered `[["Invoke","ScrollItem"]]`:
+     * the script wrapped a list its function had already kept a list. Nothing
+     * matched `includes("Invoke")`, and every click became a mouse click at a
+     * box's centre — off the screen, for a palette row scrolled out of view.
+     */
+    const { run, calls } = answering(
+      JSON.stringify({
+        ok: true,
+        nodes: [
+          { parent: -1, controlType: "Window", patterns: [["Window", "Transform"]] },
+          { parent: 0, controlType: "Button", patterns: "Invoke" },
+          { parent: 0, controlType: "ListItem", patterns: ["SelectionItem", "ScrollItem"] },
+          { parent: 0, controlType: "Text" },
+        ],
+      }),
+    );
+    const window = await powershellBridge({ process: "Yam", run }).window({ process: "Yam", maxNodes: 10 });
+    expect(window.nodes.map((node) => node.patterns)).toEqual([
+      ["Window", "Transform"],
+      ["Invoke"],
+      ["SelectionItem", "ScrollItem"],
+      undefined,
+    ]);
+    expect(calls[0]!.script).not.toContain("@(Get-PatternNames");
+  });
+
   it("reports something that is not JSON as such", async () => {
     const { run } = answering("At line:1 char:1 …");
     await expect(
@@ -322,13 +350,17 @@ describe("how the request reaches the script (T7.2)", () => {
      * `["Invoke"]` and `ConvertTo-Json` wrote a string. The adapter then calls
      * `patterns.includes("Value")` on it — which on a string is a *substring*
      * test.
+     *
+     * And only once. The call site used to wrap the result in `@()` as well,
+     * which made every list a list inside a list on a real Windows host (see
+     * "hands the adapter a flat pattern list").
      */
     const source = (await import("node:fs")).readFileSync(
       new URL("../src/bridge.ts", import.meta.url),
       "utf8",
     );
     expect(source).toContain("return ,@($names)");
-    expect(source).toContain("$patterns = @(Get-PatternNames $element)");
+    expect(source).toContain("$patterns = Get-PatternNames $element");
   });
 
   it("answers rather than dying on a host with no UI Automation", async () => {
