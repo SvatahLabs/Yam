@@ -50,12 +50,20 @@ rmSync(out, { recursive: true, force: true });
 /*
  * `--legacy` because this workspace does not inject workspace packages, and
  * `--prod` because the app spawns the CLI and never builds it.
+ *
+ * `node-linker=hoisted` because Squirrel cannot pack pnpm's isolated layout.
+ * Squirrel.Windows builds its installer with nuget.exe, which stops at 260
+ * characters, and the virtual store puts every file under
+ * `node_modules/.pnpm/<name>@<version>_<peers>/node_modules/<name>/` — 201
+ * characters inside the CLI at the deepest, before the temporary directory
+ * Squirrel packs from. The Windows installer job failed on exactly that. The
+ * flat layout is 157 at the deepest, has no virtual store to link through, and
+ * the CLI resolves its dependencies from it the same way.
  */
-const deploy = spawnPnpmSync(["deploy", "--filter", "@svatah/yam", "--prod", "--legacy", out], {
-  cwd: ROOT,
-  stdio: ["ignore", "pipe", "pipe"],
-  encoding: "utf8",
-});
+const deploy = spawnPnpmSync(
+  ["deploy", "--filter", "@svatah/yam", "--prod", "--legacy", "--config.node-linker=hoisted", out],
+  { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" },
+);
 
 if (deploy.status !== 0) {
   process.stderr.write(deploy.stdout ?? "");
