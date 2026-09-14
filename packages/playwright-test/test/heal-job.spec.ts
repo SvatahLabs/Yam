@@ -37,9 +37,23 @@ import { PlaywrightSurface } from "@svatah/yam-adapter-playwright";
 import { expect, test } from "./fixtures.js";
 
 /** A throwaway git repository holding a bindings store. */
+/**
+ * A repository whose line endings are what was written, whatever this machine's
+ * git is configured to do.
+ *
+ * Git for Windows installs with `core.autocrlf=true`, so on the Windows runner
+ * `git apply` wrote the patched file back with CRLF endings while `--apply` and
+ * the strings these tests expect use LF, and every line of an identical file
+ * compared unequal. What is under test is the patch, not the checkout.
+ */
+function gitInit(dir: string): void {
+  execFileSync("git", ["init", "--quiet"], { cwd: dir });
+  execFileSync("git", ["config", "core.autocrlf", "false"], { cwd: dir });
+}
+
 function makeRepository(): string {
   const dir = mkdtempSync(join(tmpdir(), "yam-heal-"));
-  execFileSync("git", ["init", "--quiet"], { cwd: dir });
+  gitInit(dir);
   execFileSync("git", ["config", "user.email", "test@example.invalid"], { cwd: dir });
   execFileSync("git", ["config", "user.name", "Yam tests"], { cwd: dir });
   mkdirSync(join(dir, "bindings", "login"), { recursive: true });
@@ -425,7 +439,7 @@ test.describe("the diff generator", () => {
   test("produces a unified diff git apply accepts", () => {
     const dir = mkdtempSync(join(tmpdir(), "yam-diff-"));
     try {
-      execFileSync("git", ["init", "--quiet"], { cwd: dir });
+      gitInit(dir);
       execFileSync("git", ["config", "user.email", "t@example.invalid"], { cwd: dir });
       execFileSync("git", ["config", "user.name", "t"], { cwd: dir });
 
