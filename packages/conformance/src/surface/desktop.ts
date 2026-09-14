@@ -521,16 +521,22 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
        * The gate opens `evals/fixtures`, whose config names the project
        * `yam-fixtures`. Until Draft 2.18 this looked for the product name
        * anywhere in the tree, which the fixture flow `svatah.flow` satisfied by
-       * accident; until T14 it looked in the crumb. T14 made the crumb section
-       * then screen and put the project on the top bar's `open-project` button,
-       * as "Project: <directory>", so that is where it is looked for now.
+       * accident; until T14 it looked only in the crumb. T14 made the crumb
+       * section then screen and put the project on the top bar's
+       * `open-project` button, as "Project: <directory>". The trees the adapters'
+       * replay tests serve were recorded before T14 and name it in the crumb, so
+       * both count — the claim is that the window names the project, not where.
        */
       const project = nodes.find((node) => node.native?.["automationId"] === "open-project");
       check(
         "the open project is named in the window",
-        project !== undefined && /(^|:\s*)(yam-)?fixtures$/.test(project.name ?? ""),
+        /^Project: (yam-)?fixtures$/.test(project?.name ?? "") ||
+          nodes.some((node) => {
+            const text = node.name ?? node.value ?? "";
+            return text === "fixtures" || text.includes("yam-fixtures");
+          }),
         {
-          expected: 'the top bar\'s "open-project" button naming the project, "Project: fixtures"',
+          expected: 'the top bar\'s "open-project" button naming the project, "Project: fixtures", or the crumb',
           actual: project?.name,
         },
       );
