@@ -214,8 +214,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: release
     # Trusted publishing (T13.1): the job's OIDC token is the publish identity,
-    # so no long-lived token has to exist. `NPM_TOKEN` below is the fallback for
-    # an organisation that has not configured it yet, and may be unset.
+    # so once it is set up no long-lived token has to exist. It cannot be set up
+    # before the first release, because npm registers a trusted publisher only on
+    # a package that already exists. The first publish therefore goes out on
+    # `NPM_TOKEN` below, which npm falls back to when the OIDC exchange fails, and
+    # the secret can be deleted once every package trusts this workflow.
     permissions:
       contents: write
       id-token: write

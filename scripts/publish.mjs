@@ -31,14 +31,17 @@
  *    is the only CI). A push to a branch must never publish, and
  *    the guard is here rather than only in the YAML so that a copied step cannot
  *    lose it.
- * 3. **A publish identity.** Either the workflow's OIDC identity — npm's trusted
+ * 3. **A publish identity.** The workflow's OIDC identity — npm's trusted
  *    publishing, which GitHub exposes as `ACTIONS_ID_TOKEN_REQUEST_URL` when the
- *    job has `id-token: write` (Draft 2.18, T13.1) — or, as the fallback, an
- *    `NPM_TOKEN` supplied as a secret. A token is read, used as an environment
- *    variable for the child process, and never written to a file, a log, or
- *    `.npmrc` — nothing in this repository has ever contained a credential and
- *    this is not where that changes (REQ-NFR-6). Provenance is attached when the
- *    identity is the workflow's, because then there is something to attest.
+ *    job has `id-token: write` (Draft 2.18, T13.1) — or an `NPM_TOKEN` supplied
+ *    as a secret, or both. npm tries the OIDC identity first and falls back to
+ *    the token, and the first release needs that fallback: npm registers a
+ *    trusted publisher only on a package that already exists. A token is read,
+ *    used as an environment variable for the child process, and never written to
+ *    a file, a log, or `.npmrc` — nothing in this repository has ever contained a
+ *    credential and this is not where that changes (REQ-NFR-6). Provenance is
+ *    attached whenever the job can mint an OIDC token, whichever identity
+ *    uploads, because the attestation is signed with that token.
  *
  * A missing guard is an exit code and a sentence about which one, not a warning
  * followed by a publish.
@@ -49,9 +52,18 @@
  * start installed and the licence check checked — never a fresh `npm publish
  * <dir>`. Publishing a directory would publish whatever is on disk now; a
  * tarball is the artefact that was tested.
+ *
+ * ## A publish that stops halfway
+ *
+ * The packages go out one at a time, and the registry can refuse any one of
+ * them. Running the publish again has to finish the release, but npm refuses a
+ * version it already has with the same non-zero exit as any other failure. So
+ * before each package the script asks the registry whether that exact version
+ * is there, and skips it when it is. The dry run still contacts nothing.
  */
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
+import { devNull } from "node:os";
 import { join, resolve } from "node:path";
 import { ROOT, publishablePackages, tarballName, workspacePackages } from "./lib/release-packages.mjs";
 const args = process.argv.slice(2);
@@ -169,32 +181,73 @@ if (refusals.length > 0) {
 
 /* ── the real thing ───────────────────────────────────────────────────────── */
 
+/*
+ * The token, when there is one, reaches npm beside the OIDC identity and not
+ * instead of it. npm tries the identity first and falls back to the token when
+ * the registry has no trusted publisher for the package, which is every package
+ * on its first publish. This used to drop the token whenever the job could mint
+ * an OIDC token, which the publish job always can, so the first release would
+ * have failed on its first package.
+ *
+ * The token is an environment variable on the child process and nothing else.
+ * No `.npmrc` is written, so nothing can be left behind on the runner.
+ */
+const publishEnv = {
+  ...process.env,
+  NPM_CONFIG_PROVENANCE: hasOidc ? "true" : "false",
+  npm_config__auth: undefined,
+  NODE_AUTH_TOKEN: hasToken ? process.env["NPM_TOKEN"] : undefined,
+};
+
+/**
+ * Whether this exact version is on the registry already.
+ *
+ * Asked with no user config and no token. Seeing a public version needs no
+ * credential, and an expired token must not be what makes the answer wrong. The
+ * registry is npm's default either way, which is the one the release job
+ * publishes to.
+ */
+function onTheRegistry(one) {
+  const asked = spawnSync(
+    "npm",
+    ["view", `${one.name}@${one.version}`, "version", "--userconfig", devNull],
+    {
+      cwd: ROOT,
+      encoding: "utf8",
+      env: { ...process.env, npm_config__auth: undefined, NODE_AUTH_TOKEN: undefined },
+    },
+  );
+  if (asked.status === 0) return asked.stdout.trim() === one.version;
+  // npm answers a package, or a version, that nobody has published with E404.
+  if (/\bE404\b/.test(asked.stderr ?? "")) return false;
+  return die(
+    `npm could not say whether ${one.name}@${one.version} is already published, so nothing ` +
+      `more was published:\n${asked.stderr || asked.error?.message || "(no output)"}`,
+  );
+}
+
 process.stderr.write(`publishing ${commands.length} package(s) at ${released}…\n`);
+let skipped = 0;
 for (const one of commands) {
+  if (onTheRegistry(one)) {
+    process.stderr.write(`${one.name}@${one.version} is already on the registry; skipped.\n`);
+    skipped += 1;
+    continue;
+  }
   const result = spawnSync(
     "npm",
     ["publish", tarballFor(one.name), "--access", "public", ...(hasOidc ? ["--provenance"] : [])],
-    {
-      cwd: ROOT,
-      stdio: "inherit",
-      env: {
-        ...process.env,
-        // A token, when that is the identity, reaches npm as an environment
-        // variable and nothing else. No `.npmrc` is written, so nothing can be
-        // left behind on the runner. Under trusted publishing npm mints its own
-        // short-lived credential from the job's OIDC token.
-        NPM_CONFIG_PROVENANCE: hasOidc ? "true" : "false",
-        npm_config__auth: undefined,
-        NODE_AUTH_TOKEN: hasOidc ? undefined : process.env["NPM_TOKEN"],
-      },
-    },
+    { cwd: ROOT, stdio: "inherit", env: publishEnv },
   );
   if (result.status !== 0) {
     die(
-      `npm publish failed for ${one.name}. ${commands.indexOf(one)} package(s) were published ` +
-        "before it; the rest are not. Fix the cause and re-run — npm refuses a version that " +
-        "is already there, so a re-run is safe.",
+      `npm publish failed for ${one.name}. The ${commands.indexOf(one)} package(s) before it are ` +
+        "on the registry and the rest are not. Fix the cause and run the publish again: it " +
+        "skips every version that is already there and carries on from this one.",
     );
   }
 }
-process.stderr.write(`published ${commands.length} package(s) at ${released}.\n`);
+process.stderr.write(
+  `published ${commands.length - skipped} package(s) at ${released}` +
+    (skipped > 0 ? `; ${skipped} were already on the registry.\n` : ".\n"),
+);

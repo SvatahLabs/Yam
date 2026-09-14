@@ -20,5 +20,9 @@ listed by hand.
 The publish itself is one guarded script, `scripts/publish.mjs`: a dry run
 unless `--publish`, a manual dispatch of the release workflow, and a publish
 identity (the workflow's trusted-publishing token, or `NPM_TOKEN` as a fallback)
-all hold. `pnpm quick-start:registry` verifies a publish afterwards by
-installing the module (a) packages by name into an empty project.
+all hold. The first release needs `NPM_TOKEN`: npm lets a package trust a
+workflow only once the package exists, and uses the token for any package that
+does not trust it yet. A publish that stops partway can be run again, because it
+skips every version already on the registry. `pnpm quick-start:registry`
+verifies a publish afterwards by installing the module (a) packages by name into
+an empty project.

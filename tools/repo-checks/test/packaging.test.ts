@@ -15,8 +15,20 @@
  * dependency tree contains no module (b) package.
  */
 import { describe, expect, it } from "vitest";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { delimiter, join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { fromRoot, specifierOf, dirOf } from "../src/repo.js";
 
 /**
@@ -409,6 +421,109 @@ describe("publishing 0.1.0 (T8.5, REQ-PKG-1, 2, 3, 4)", () => {
     // T13.1: the job can mint an OIDC token, which is what trusted publishing signs with.
     expect(release).toContain("id-token: write");
   });
+
+  /*
+   * The first publish, run rather than read.
+   *
+   * The job has `id-token: write`, so the script saw an OIDC identity on every
+   * run and took `NODE_AUTH_TOKEN` away from npm. But npm registers a trusted
+   * publisher only on a package that already exists, so on a first publish the
+   * OIDC exchange fails for every package and npm falls back to the token, and
+   * the token was not there. The first package would have failed, and so would
+   * the release. The assertions above read the script and could not see it.
+   *
+   * And "npm refuses a version that is already there, so a re-run is safe" was
+   * half true. npm does refuse it, with a non-zero exit, and the script stopped
+   * on that exit, so a publish that failed on the twentieth package could not be
+   * finished by running it again.
+   *
+   * Both are checked against an `npm` that records what it was handed. Not on
+   * Windows, where the stand-in would have to be a `.cmd`. The publish job runs
+   * on Linux.
+   */
+  it.skipIf(process.platform === "win32")(
+    "hands npm the token beside the OIDC identity, and a re-run skips what is already published",
+    async () => {
+      const { publishablePackages, tarballName } = (await import(
+        pathToFileURL(fromRoot("scripts/lib/release-packages.mjs")).href
+      )) as {
+        publishablePackages: () => string[];
+        tarballName: (name: string, version: string) => string;
+      };
+      const changelog = readFileSync(fromRoot("CHANGELOG.md"), "utf8");
+      const version = /^## \[(\d+\.\d+\.\d+)\]/m.exec(changelog)![1]!;
+      const names = publishablePackages();
+      const dir = mkdtempSync(join(tmpdir(), "yam-publish-"));
+      try {
+        const release = join(dir, "release");
+        const bin = join(dir, "bin");
+        const log = join(dir, "npm.log");
+        mkdirSync(release);
+        mkdirSync(bin);
+        for (const name of names) writeFileSync(join(release, tarballName(name, version)), "");
+
+        // The first two went out before whatever stopped the last run.
+        const published = names.slice(0, 2).map((name) => `${name}@${version}`);
+        writeFileSync(
+          join(bin, "npm"),
+          [
+            "#!/bin/sh",
+            'printf "%s token=%s\\n" "$*" "${NODE_AUTH_TOKEN:-}" >> "$NPM_LOG"',
+            'if [ "$1" = view ]; then',
+            '  case " $PUBLISHED " in *" $2 "*) echo "$VERSION"; exit 0 ;; esac',
+            '  echo "npm error code E404" >&2',
+            "  exit 1",
+            "fi",
+            "",
+          ].join("\n"),
+        );
+        chmodSync(join(bin, "npm"), 0o755);
+
+        const run = spawnSync(
+          process.execPath,
+          [fromRoot("scripts/publish.mjs"), "--publish", "--out", release],
+          {
+            encoding: "utf8",
+            env: {
+              ...process.env,
+              PATH: `${bin}${delimiter}${process.env["PATH"] ?? ""}`,
+              GITHUB_ACTIONS: "true",
+              GITHUB_EVENT_NAME: "workflow_dispatch",
+              ACTIONS_ID_TOKEN_REQUEST_URL: "https://actions.invalid/token",
+              ACTIONS_ID_TOKEN_REQUEST_TOKEN: "id-token",
+              NPM_TOKEN: "token-from-the-secret",
+              NPM_LOG: log,
+              PUBLISHED: published.join(" "),
+              VERSION: version,
+            },
+          },
+        );
+        expect(run.status, run.stderr).toBe(0);
+
+        const calls = readFileSync(log, "utf8").trim().split("\n");
+        const publishes = calls.filter((call) => call.startsWith("publish "));
+        expect(publishes).toHaveLength(names.length - published.length);
+        for (const call of publishes) {
+          expect(call).toContain("--provenance");
+          expect(call).toMatch(/ token=token-from-the-secret$/);
+        }
+        for (const name of names.slice(0, 2)) {
+          const tarball = join(release, tarballName(name, version));
+          expect(publishes.filter((call) => call.startsWith(`publish ${tarball} `))).toEqual([]);
+        }
+        expect(run.stderr).toContain(`${published[0]} is already on the registry`);
+
+        // The question is asked of every package, and anonymously: whether a
+        // public version exists needs no credential, and an expired one must
+        // not be what makes the answer wrong.
+        const views = calls.filter((call) => call.startsWith("view "));
+        expect(views).toHaveLength(names.length);
+        for (const call of views) expect(call).toMatch(/ token=$/);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    },
+  );
 
   it("has a changelog entry saying what is in, what is measured, and what is withdrawn", () => {
     const changelog = readFileSync(fromRoot("CHANGELOG.md"), "utf8");
