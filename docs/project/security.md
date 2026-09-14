@@ -19,7 +19,7 @@
 
 ## Reporting a vulnerability
 
-Email <security@svatah.com> rather than opening a public issue. Include the
+Email <info@svatah.com> rather than opening a public issue. Include the
 version, the command or endpoint, and what you observed. You will get an
 acknowledgement within three working days, and a fix or a mitigation before
 any public disclosure.
