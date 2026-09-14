@@ -30,8 +30,8 @@
  * things. See `packages/service/src/runtime.ts`. If that ever stops being
  * enough, shipping a Node is the fallback and this is the file that would do it.
  */
-import { existsSync, rmSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { existsSync, readdirSync, realpathSync, rmSync } from "node:fs";
+import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnPnpmSync } from "./lib/pnpm.mjs";
 
@@ -68,6 +68,42 @@ const entry = join(out, "dist", "bin.js");
 if (!existsSync(entry)) {
   process.stderr.write(`\`pnpm deploy\` wrote nothing at ${entry}.\n`);
   process.exit(1);
+}
+
+/*
+ * A staged CLI links to nothing outside itself.
+ *
+ * `pnpm deploy` leaves `node_modules/.pnpm/node_modules/@svatah/yam`, a
+ * relative link from the deployment's virtual store back to `packages/cli` —
+ * one link in some 2,800 that leaves the directory. It resolves only while
+ * `.stage/` is inside this checkout: copied into the app it points at nothing,
+ * and electron-installer-debian, which stats every file it packs, failed on it.
+ * Nothing in the deployment imports the package by its own name.
+ *
+ * The walk is its own and never enters a link: `readdirSync`'s recursive mode
+ * went through this one into `packages/cli`. A link is judged by where it
+ * really leads, which on Windows, where pnpm links directories with
+ * junctions, is also the only comparison that means anything.
+ */
+const root = realpathSync(out);
+const within = (path) => {
+  const [a, b] = process.platform === "win32" ? [path.toLowerCase(), root.toLowerCase()] : [path, root];
+  return a === b || a.startsWith(b + sep);
+};
+function* links(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isSymbolicLink()) yield join(dir, entry.name);
+    else if (entry.isDirectory()) yield* links(join(dir, entry.name));
+  }
+}
+for (const link of [...links(out)]) {
+  let target;
+  try {
+    target = realpathSync(link);
+  } catch {
+    // Already leads nowhere, which is the same defect.
+  }
+  if (target === undefined || !within(target)) rmSync(link);
 }
 
 process.stdout.write(`staged the yam CLI for packaging at ${out}\n`);
