@@ -64,10 +64,17 @@ export interface Pty {
   readonly running: boolean;
 }
 
-/** Is a program on this host at all? */
+/**
+ * Is a program on this host, and does it answer its probe?
+ *
+ * The exit status is the answer. This read only whether the program started,
+ * so `python3 -c "import pty"` counted as a Python with a `pty` module on
+ * Windows, where the import fails — `pty` needs `termios`, which is Unix's —
+ * and the Windows runner tried to drive a terminal it could not allocate.
+ */
 function present(program: string, probe: readonly string[]): boolean {
   const asked = spawnSync(program, [...probe], { encoding: "utf8", timeout: 10_000 });
-  return asked.error === undefined;
+  return asked.error === undefined && asked.status === 0;
 }
 
 export interface PtyReadiness {
@@ -91,6 +98,18 @@ export function ptyReadiness(prefer?: "expect" | "python3"): PtyReadiness {
    * dropdown is insufficient evidence of support). A named allocator that is
    * not there is a refusal that says so, not a silent fall back to the other.
    */
+  /*
+   * Windows first, named or not: neither allocator can give a terminal there,
+   * so naming one is not a reason to try.
+   */
+  if (process.platform === "win32") {
+    return {
+      ready: false,
+      reason:
+        "a pseudo-terminal on Windows is a ConPTY, which neither `expect` nor Python's `pty` " +
+        "module provides; no Windows terminal surface is implemented",
+    };
+  }
   const named = prefer ?? (process.env["YAM_PTY_ALLOCATOR"] as "expect" | "python3" | undefined);
   if (named !== undefined) {
     const probe = named === "expect" ? ["-v"] : ["-c", "import pty"];
@@ -100,14 +119,6 @@ export function ptyReadiness(prefer?: "expect" | "python3"): PtyReadiness {
           ready: false,
           reason: `\`${named}\` was asked for and is not on this host.`,
         };
-  }
-  if (process.platform === "win32") {
-    return {
-      ready: false,
-      reason:
-        "a pseudo-terminal on Windows is a ConPTY, which neither `expect` nor Python's `pty` " +
-        "module provides; no Windows terminal surface is implemented",
-    };
   }
   if (present("expect", ["-v"])) return { ready: true, allocator: "expect" };
   if (present("python3", ["-c", "import pty"])) return { ready: true, allocator: "python3" };
