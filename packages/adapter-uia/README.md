@@ -87,6 +87,12 @@ deterministic one: it either sets the value or reports that it cannot.
 
 `navigate`, `back`, `forward` and `refresh` throw `NavigationError`.
 
+A Chromium window's close, minimise and maximise buttons are not in its tree.
+Chromium's frame publishes them only as the window element's `Window` pattern:
+on a Windows runner neither the raw view nor hit-testing at the buttons found
+an element for them. The conformance suite counts that pattern as the window's
+own controls.
+
 ## Candidates
 
 | Kind | From | Survives |

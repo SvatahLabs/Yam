@@ -477,8 +477,28 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
        * still pass everything above.
        */
       const chrome = nodes.filter((node) => isWindowChrome(node));
-      check("the window's own controls are in the snapshot", chrome.length >= 3, {
-        expected: ">= 3 window-chrome controls (close, minimise, zoom)",
+      /*
+       * Or the window itself carries them, as UI Automation's Window pattern.
+       *
+       * UIA can publish a window's close, minimise and maximise two ways: as
+       * caption buttons under a title bar, or as the window element's own
+       * `WindowPattern`. Chromium's frame on Windows publishes only the second.
+       * The Windows runner's trace looked three ways and found no button: the
+       * walk from the window reaches `RootView` and no title bar, the raw
+       * view's children are `Intermediate D3D Window` and `RootView`, and
+       * hit-testing at each caption button's place answers the window. What a
+       * UIA client can use there is the pattern, so the pattern is what counts.
+       * An adapter that reports no patterns (AX) still needs the three buttons.
+       */
+      const root = nodes[0];
+      const windowPattern =
+        chrome.length >= 3 || root === undefined
+          ? false
+          : String((await surface.describe(root.ref)).attrs["patterns"] ?? "")
+              .split(",")
+              .includes("Window");
+      check("the window's own controls are in the snapshot", chrome.length >= 3 || windowPattern, {
+        expected: ">= 3 window-chrome controls (close, minimise, zoom), or a window that is their Window pattern",
         actual: chrome.map((node) => `${node.role} "${node.name ?? ""}"`).slice(0, 8),
       });
 

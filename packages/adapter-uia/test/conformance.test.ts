@@ -128,6 +128,51 @@ describe("the desktop conformance suite against the recorded APP_DIR (T6.1)", ()
     expect(report.conformant).toBe(true);
   }, 60_000);
 
+  it("counts a window that is its own Window pattern as having its controls", async () => {
+    /*
+     * On the Windows runner Chromium's frame published no caption button at all
+     * — not in the walk, not in the raw view, not to hit-testing — and the
+     * window element carried `WindowPattern`. The recorded trees have the three
+     * buttons, so here they are taken away (by id, so the tree keeps its shape)
+     * and the root is given the patterns the runner's root had, or not.
+     */
+    const snapshotCase = async (rootPatterns: readonly string[]) => {
+      const recorded = recordedBridge({ screen: "flows" });
+      const bridge: typeof recorded = {
+        ...recorded,
+        async window(request) {
+          const window = await recorded.window(request);
+          return {
+            ...window,
+            nodes: window.nodes.map((node, index) =>
+              index === 0
+                ? { ...node, patterns: rootPatterns }
+                : ["Close", "Minimize", "Maximize"].includes(node.automationId ?? "")
+                  ? { ...node, automationId: `not-chrome-${node.automationId}` }
+                  : node,
+            ),
+          };
+        },
+      };
+      const report = await runSurfaceConformance({
+        adapter: "uia",
+        baseUrl: "",
+        cases: DESKTOP_CASES,
+        only: ["app.snapshot"],
+        openSurface: async () => {
+          const one = new UiaSurface({ processName: "Yam", bridge });
+          await one.open({ kind: "desktop", processName: "Yam" } as never);
+          return one;
+        },
+      });
+      return report.cases[0]!.checks.find((check) => check.description === "the window's own controls are in the snapshot");
+    };
+
+    expect((await snapshotCase(["Window", "Transform", "ScrollItem", "ItemContainer"]))?.ok).toBe(true);
+    // And a window with neither the buttons nor the pattern still fails.
+    expect((await snapshotCase(["Transform"]))?.ok).toBe(false);
+  });
+
   it("covers the five flows LLD §16 names, and nothing else claims to be one", () => {
     expect(DESKTOP_CASES.map((one) => one.id)).toEqual([
       "app.snapshot",
