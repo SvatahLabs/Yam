@@ -39,7 +39,7 @@ publishing {
                 description.set(
                     "Typed client for the Yam local service, generated from its OpenAPI description",
                 )
-                url.set("https://github.com/SvatahLabs/yam")
+                url.set("https://github.com/SvatahLabs/Yam")
                 licenses {
                     license {
                         name.set("Apache License, Version 2.0")

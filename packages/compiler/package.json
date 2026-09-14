@@ -6,11 +6,11 @@
   "homepage": "https://yam.svatah.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SvatahLabs/yam.git",
+    "url": "git+https://github.com/SvatahLabs/Yam.git",
     "directory": "packages/compiler"
   },
   "bugs": {
-    "url": "https://github.com/SvatahLabs/yam/issues"
+    "url": "https://github.com/SvatahLabs/Yam/issues"
   },
   "type": "module",
   "main": "./dist/index.js",

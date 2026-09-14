@@ -88,8 +88,8 @@ describe("the product is Yam (Draft 2.18)", () => {
         bugs?: { url: string };
       };
       expect(m.homepage, file).toBe("https://yam.svatah.com");
-      expect(m.repository?.url, file).toBe("git+https://github.com/SvatahLabs/yam.git");
-      expect(m.bugs?.url, file).toBe("https://github.com/SvatahLabs/yam/issues");
+      expect(m.repository?.url, file).toBe("git+https://github.com/SvatahLabs/Yam.git");
+      expect(m.bugs?.url, file).toBe("https://github.com/SvatahLabs/Yam/issues");
       if (file !== "package.json") expect(m.repository?.directory, file).toBe(file.slice(0, -"/package.json".length));
     }
   });

@@ -20,8 +20,8 @@ missing test: send those straight in.
 You need Node 22 or newer and [pnpm](https://pnpm.io/installation).
 
 ```bash
-git clone https://github.com/SvatahLabs/yam
-cd yam
+git clone https://github.com/SvatahLabs/Yam
+cd Yam
 pnpm install
 pnpm -r build
 ```

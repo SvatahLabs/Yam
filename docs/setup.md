@@ -134,8 +134,8 @@ If it says denied, open **System Settings**, then **Privacy & Security**, then
 The app is not on npm. Build it from the repository:
 
 ```bash
-git clone https://github.com/SvatahLabs/yam
-cd yam
+git clone https://github.com/SvatahLabs/Yam
+cd Yam
 pnpm install
 pnpm -r build
 pnpm --filter @svatah/yam-desktop package

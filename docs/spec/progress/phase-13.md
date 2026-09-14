@@ -25,7 +25,7 @@ Node 22 was not re-run this phase; nothing here touched the runtime's Node-versi
 
 ## T13.1 The organisation and the accounts (owner)
 
-**Status: the owner's.** Nothing here can create an organisation. What the branch assumes, and the release workflow is written for: the GitHub organisation `SvatahLabs`, the repository `SvatahLabs/yam`, the npm organisation `svatah` with trusted publishing configured for `release.yml`'s `publish` job (`id-token: write` is set and the script accepts the OIDC identity; `NPM_TOKEN` is the fallback), `svatah-yam` on PyPI, and `yam.svatah.com`.
+**Status: the owner's.** Nothing here can create an organisation. What the branch assumes, and the release workflow is written for: the GitHub organisation `SvatahLabs`, the repository `SvatahLabs/Yam`, the npm organisation `svatah` with trusted publishing configured for `release.yml`'s `publish` job (`id-token: write` is set and the script accepts the OIDC identity; `NPM_TOKEN` is the fallback), `svatah-yam` on PyPI, and `yam.svatah.com`.
 
 ## T13.2 The clean repository
 
@@ -40,7 +40,7 @@ Node 22 was not re-run this phase; nothing here touched the runtime's Node-versi
 ```bash
 git clone --mirror <this repository> yam.git && cd yam.git
 git filter-repo --path legacy --invert-paths
-git push --mirror git@github.com:SvatahLabs/yam.git
+git push --mirror git@github.com:SvatahLabs/Yam.git
 ```
 
 That keeps every phase record and drops the binaries from history. The largest tracked file on this branch's head is 1.3 MB (`packages/recorder/test/fixtures/pages.json`).
@@ -49,7 +49,7 @@ That keeps every phase record and drops the binaries from history. The largest t
 
 **Status: done.** Commit `12f638a`, 880 files.
 
-One scripted pass with the brand's forms protected: `@svatah/cli` → `@svatah/yam`, every other `@svatah/<dir>` → `@svatah/yam-<dir>`; `dev.svatah` → `com.svatah.yam` and the Java trees moved; `svatah_sdk`/`svatah-sdk` → `svatah_yam`/`svatah-yam`; `https://svatah.dev` → `https://yam.svatah.com`; `github.com/a-t-u-l/svatah` → `github.com/SvatahLabs/yam`; then `svatah`/`Svatah`/`SVATAH` → `yam`/`Yam`/`YAM` everywhere else. Kept verbatim: the `@svatah` scope, `svatah.com`, `Svatah Labs`, the prototype repository `svatahADE`, and the legacy fixture names `svatah.flow`, `svatah.locator`, `svatah.data`. The progress records and prompts of Phases 0 to 12 keep their text as history. `pnpm-lock.yaml` was regenerated; the only lines that changed are the names.
+One scripted pass with the brand's forms protected: `@svatah/cli` → `@svatah/yam`, every other `@svatah/<dir>` → `@svatah/yam-<dir>`; `dev.svatah` → `com.svatah.yam` and the Java trees moved; `svatah_sdk`/`svatah-sdk` → `svatah_yam`/`svatah-yam`; `https://svatah.dev` → `https://yam.svatah.com`; `github.com/a-t-u-l/svatah` → `github.com/SvatahLabs/Yam`; then `svatah`/`Svatah`/`SVATAH` → `yam`/`Yam`/`YAM` everywhere else. Kept verbatim: the `@svatah` scope, `svatah.com`, `Svatah Labs`, the prototype repository `svatahADE`, and the legacy fixture names `svatah.flow`, `svatah.locator`, `svatah.data`. The progress records and prompts of Phases 0 to 12 keep their text as history. `pnpm-lock.yaml` was regenerated; the only lines that changed are the names.
 
 By hand afterwards: the ESLint boundary rules and the repo checks derive a package's specifier from its directory through `specifierOf` and `dirOf` (`tools/repo-checks/src/repo.ts`); the ADE's bundle id is `com.svatah.yam.ade`; the generated clients, the ADE client, the JSON Schemas (`$id` under `https://yam.svatah.com/schema/1.0.0/`), the migrate outputs and the screen fixtures were regenerated.
 
@@ -79,7 +79,7 @@ Two things the pass needed by hand. Code files were regenerated from their origi
 **Status: done.** Commit `cfdbdd6`.
 
 - The changelog and the release workflow say **30** packages, and the repo check reads the number from `scripts/lib/release-packages.mjs` and asserts both documents carry it. They said twenty-six, from before screens, sdk, ui-tokens and tui joined.
-- Every manifest (35: the root, 31 packages, 2 apps, repo-checks) carries `homepage`, `repository` with its `directory`, and `bugs`, pointing at `SvatahLabs/yam` and `yam.svatah.com`.
+- Every manifest (35: the root, 31 packages, 2 apps, repo-checks) carries `homepage`, `repository` with its `directory`, and `bugs`, pointing at `SvatahLabs/Yam` and `yam.svatah.com`.
 - **Trusted publishing.** `release.yml`'s `publish` job has `id-token: write` and installs an npm that can use it; `scripts/publish.mjs`'s third guard is now "a publish identity", the workflow's OIDC token or `NPM_TOKEN` as the fallback, and provenance is attached when the identity is the workflow's. `.npmrc` no longer forces provenance off. The manual-trigger guard is a GitHub `workflow_dispatch` and nothing else.
 - The README's status section described Phase 2; it now describes what ships, the known gaps, and every package by module.
 

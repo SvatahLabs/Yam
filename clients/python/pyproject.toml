@@ -29,7 +29,7 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/SvatahLabs/yam"
+Homepage = "https://github.com/SvatahLabs/Yam"
 
 [tool.setuptools]
 packages = ["svatah_yam"]

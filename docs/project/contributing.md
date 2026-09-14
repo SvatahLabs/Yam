@@ -49,6 +49,6 @@ every number with the report it comes from. Commit messages name the task
 
 ## Reporting a problem
 
-Open an issue at <https://github.com/SvatahLabs/yam/issues> with the command,
+Open an issue at <https://github.com/SvatahLabs/Yam/issues> with the command,
 the exit code, and the run directory or report if there is one. For anything
 security-related, read [Security](security.md) first.

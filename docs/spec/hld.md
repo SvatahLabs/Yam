@@ -282,7 +282,7 @@ Step IR (abridged; full in LLD §3):
 ## 12. Repository layout
 
 ```
-yam/                      github.com/SvatahLabs/yam (Draft 2.18)
+yam/                      github.com/SvatahLabs/Yam (Draft 2.18)
   packages/
     schema/               Zod + generated JSON Schemas: ir, plan, bindings, results, audit, checkpoint, config, surface
     surface/              AgentSurface interface, adapter registry, reference scheme, capabilities

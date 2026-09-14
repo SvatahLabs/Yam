@@ -2,7 +2,7 @@
 
 Status: T12.4, revised for Draft 2.18 · For the repository owner
 
-The repository lives at `github.com/SvatahLabs/yam` and GitHub Actions is the
+The repository lives at `github.com/SvatahLabs/Yam` and GitHub Actions is the
 only CI. `.github/workflows/ci.yml` runs on every push and pull request;
 `.github/workflows/release.yml` runs on a tag or a manual dispatch and is the
 only place a publish can happen (`scripts/publish.mjs`, T8.5).

@@ -527,11 +527,11 @@ Phase 12 total: 15 ideal days.
 
 ## Phase 13 — Yam: the name, the clean repository, the documentation (Draft 2.18)
 
-The owner's decisions of 2026-09-06: Svatah is the brand and the organisation, and this product is **Yam**. The npm scope stays `@svatah`; the product name goes into the umbrella package, the bin, the config file, the environment, the schema identifiers and the prose. The repository moves to `github.com/SvatahLabs/yam` without the frozen Java project. This phase runs before T12.5's publish, because package names and schema `$id`s are the public contract and a rename after 0.1.0 would deprecate thirty packages.
+The owner's decisions of 2026-09-06: Svatah is the brand and the organisation, and this product is **Yam**. The npm scope stays `@svatah`; the product name goes into the umbrella package, the bin, the config file, the environment, the schema identifiers and the prose. The repository moves to `github.com/SvatahLabs/Yam` without the frozen Java project. This phase runs before T12.5's publish, because package names and schema `$id`s are the public contract and a rename after 0.1.0 would deprecate thirty packages.
 
 ### T13.1 The organisation and the accounts (owner)
 **Refs:** REQ-PKG-1, REQ-NFR-6 · **Est:** 0.5 (the owner's action)
-**Do:** Create the GitHub organisation `SvatahLabs` and the empty repository `SvatahLabs/yam`; verify the `svatah.com` domain on the organisation and require two-factor authentication; create the npm organisation `yam` and configure trusted publishing (OIDC) for `release.yml` so no long-lived token exists; reserve `svatah-yam` on PyPI; point `yam.svatah.com` at the documentation.
+**Do:** Create the GitHub organisation `SvatahLabs` and the empty repository `SvatahLabs/Yam`; verify the `svatah.com` domain on the organisation and require two-factor authentication; create the npm organisation `yam` and configure trusted publishing (OIDC) for `release.yml` so no long-lived token exists; reserve `svatah-yam` on PyPI; point `yam.svatah.com` at the documentation.
 **Validate:** The repository exists; `npm org ls yam` lists the owner; the release workflow's publish step has an OIDC trust and no `NPM_TOKEN` secret is required; the domain badge is visible on the organisation.
 
 ### T13.2 The clean repository
@@ -541,7 +541,7 @@ The owner's decisions of 2026-09-06: Svatah is the brand and the organisation, a
 
 ### T13.3 The rename
 **Refs:** REQ-PKG-1, REQ-STD-1, LLD §1, §15, HLD §12 · **Est:** 2
-**Do:** `@svatah/yam` becomes `@svatah/yam` with the bin `yam`; every other package becomes `@svatah/yam-<name>`; `yam-bindings` becomes `yam-bindings`; `yam.config.yaml`, `.yam/`, `~/.yam-node`, `YAM_*`; the app is `Yam` with the bundle id `com.svatah.yam`; the Java packages are `com.svatah.yam`, the Python client `svatah_yam` (`svatah-yam` on PyPI); the schema `$id`s live under `https://yam.svatah.com/schema/`; every manifest gains `repository`, `homepage` and `bugs` pointing at `SvatahLabs/yam`; `Yam` stays wherever it names the brand, the organisation or the copyright; the progress records and prompts of Phases 0 to 12 keep their text as history.
+**Do:** `@svatah/yam` becomes `@svatah/yam` with the bin `yam`; every other package becomes `@svatah/yam-<name>`; `yam-bindings` becomes `yam-bindings`; `yam.config.yaml`, `.yam/`, `~/.yam-node`, `YAM_*`; the app is `Yam` with the bundle id `com.svatah.yam`; the Java packages are `com.svatah.yam`, the Python client `svatah_yam` (`svatah-yam` on PyPI); the schema `$id`s live under `https://yam.svatah.com/schema/`; every manifest gains `repository`, `homepage` and `bugs` pointing at `SvatahLabs/Yam`; `Yam` stays wherever it names the brand, the organisation or the copyright; the progress records and prompts of Phases 0 to 12 keep their text as history.
 **Validate:** A repo check enumerates every allowed form of the old name (the scope, the domain, the organisation, the copyright, the historical records) and fails on any other; the six-command contract green; the generated schemas regenerated and their drift test clean; the Java runtime and both generated clients build; the release dry run's thirty tarballs carry the new names and no `workspace:*`.
 
 ### T13.4 The readiness corrections

@@ -4,7 +4,7 @@
  * Until Draft 2.18 this file kept `.github/workflows/ci.yml` and a Bitbucket
  * pipeline in step, because the repository's only remote was Bitbucket and the
  * GitHub workflow had nowhere to run (Phase 0, K1; P0-F5). The repository now
- * lives at `github.com/SvatahLabs/yam` and GitHub Actions is the only CI, so
+ * lives at `github.com/SvatahLabs/Yam` and GitHub Actions is the only CI, so
  * the twin-file mirror is gone and what remains are the assertions about the
  * one workflow that runs.
  *
