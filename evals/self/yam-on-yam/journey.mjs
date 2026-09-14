@@ -406,10 +406,20 @@ export async function primaryJourney({ driver, connect, sampleUrl, record, label
      * last step; this is the safety net for the runs that never reach it.
      */
     if (session !== undefined) {
+      /*
+       * Connected means Disconnect is offered *and the connect form is not*.
+       *
+       * Disconnect is offered whenever the broker holds exactly one session,
+       * whoever opened it (AX-03, B7). Once the journey has disconnected the
+       * application's own surface, the one left is this pass's session on the
+       * application — so a Disconnect beside the connect form closes *us*, and
+       * the check below failed with SESSION_NOT_FOUND on the first GitHub run.
+       */
       const state = await driver.call("snapshot", { session, maxNodes: 900 });
-      const stillConnected = findNode(state.envelope, { role: "button", name: "Disconnect" });
-      if (stillConnected !== undefined) {
-        await driver.call("act", { session, action: "click", ref: stillConnected.ref });
+      const disconnect = findNode(state.envelope, { role: "button", name: "Disconnect" });
+      const connectForm = findNode(state.envelope, { role: "button", name: "Connect surface" });
+      if (disconnect !== undefined && connectForm === undefined) {
+        await driver.call("act", { session, action: "click", ref: disconnect.ref });
       }
       const closed = await driver.call("close", { session });
       check("the session closes", succeeded(closed),
