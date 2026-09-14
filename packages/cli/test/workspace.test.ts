@@ -71,7 +71,14 @@ describe("yam ui --tmux (REQ-TUI-2)", () => {
     expect(env).toMatch(/^YAM_SERVICE_URL=http:\/\/127\.0\.0\.1:\d+$/m);
     expect(env).toMatch(/^YAM_SERVICE_TOKEN=\S+$/m);
 
-    const serves = () => spawnSync("sh", ["-c", `pgrep -f "serve ${dir}" | wc -l`], { encoding: "utf8" }).stdout.trim();
+    /*
+     * `pgrep` itself, not through `sh -c`. The shell's own command line holds
+     * the pattern, and macOS's pgrep leaves out its ancestors while Linux's
+     * leaves out only itself — so on the Ubuntu runner the shell was the second
+     * "service" of a session that had one.
+     */
+    const serves = () =>
+      String(spawnSync("pgrep", ["-f", `serve ${dir}`], { encoding: "utf8" }).stdout.split("\n").filter(Boolean).length);
     expect(serves()).toBe("1");
 
     const second = await cli(["ui", dir, "--tmux", "--detach"]);
