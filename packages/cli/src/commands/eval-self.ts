@@ -35,6 +35,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { boolOption, stringOption, EXIT, type CommandIo, type ExitCode, type ParsedArgs } from "@svatah/yam-bindings-cli";
 
@@ -906,7 +907,8 @@ function sourcesFor(catalogue: Catalogue, reportsDir: string): Record<string, So
 
 /** The repository this build came from, found from the built file's own path. */
 function repositoryRoot(): string {
-  let at = dirname(new URL(import.meta.url).pathname);
+  // `fileURLToPath`: a URL's `pathname` is `/D:/…` on Windows and keeps `%20` for a space.
+  let at = dirname(fileURLToPath(import.meta.url));
   for (let up = 0; up < 8; up += 1) {
     if (existsSync(join(at, "pnpm-workspace.yaml"))) return at;
     at = dirname(at);

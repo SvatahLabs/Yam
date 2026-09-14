@@ -12,6 +12,7 @@
 import { mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { sessionStateSchema, CAPABILITY_FLAGS } from "@svatah/yam-schema";
 import {
   clearAdapters,
@@ -142,7 +143,7 @@ test.describe("capabilities (LLD §2.4)", () => {
       upload: async () =>
         (
           await surface.act("upload", await refByTestId(surface, "upload"), {
-            files: [new URL(import.meta.url).pathname],
+            files: [fileURLToPath(import.meta.url)],
           })
         ).ok,
       drag: async () =>

@@ -8,6 +8,7 @@
  *
  * Refs: REQ-ADP-1, REQ-RUN-10, LLD §7.1.
  */
+import { fileURLToPath } from "node:url";
 import { SURFACE_ACTIONS, type SurfaceAction } from "@svatah/yam-schema";
 import { LocateError, ScriptError, SessionError } from "@svatah/yam-surface";
 import { expect, MECHANISMS, refByTestId, test } from "./fixtures.js";
@@ -155,7 +156,9 @@ for (const mechanism of MECHANISMS) {
     test("[upload] upload sets an input's files", async ({ openSurface }) => {
       const surface = await openSurface(mechanism, "/widgets");
       const upload = await refByTestId(surface, "upload");
-      await surface.act("upload", upload, { files: [new URL(import.meta.url).pathname] });
+      // `fileURLToPath`, not the URL's `pathname`, which on Windows is `/D:/…`
+      // and resolved to `D:\D:\…`.
+      await surface.act("upload", upload, { files: [fileURLToPath(import.meta.url)] });
       const name = await surface.read("value", upload);
       expect(String(name)).toContain("actions.spec.ts");
     });
