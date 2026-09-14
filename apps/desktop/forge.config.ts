@@ -42,6 +42,8 @@ import type { ForgeConfig } from "@electron-forge/shared-types";
  */
 const testBuild = process.env["YAM_APP_TEST_BUILD"] === "1";
 const productName = testBuild ? "Yam Test" : "Yam";
+/** `app-icon.icns`, `.ico` and `.png` — see `packages/ui/brand/README.md`. */
+const appIcon = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "packages", "ui", "brand", "app-icon");
 
 const config: ForgeConfig = {
   outDir: testBuild ? "out-test" : "out",
@@ -57,9 +59,12 @@ const config: ForgeConfig = {
      * build here does not depend on a checkout of another one.
      *
      * No extension: the packager appends the one each platform wants, and
-     * naming `.icns` here would build on macOS and fail on Windows.
+     * naming `.icns` here would build on macOS and fail on Windows. Which means
+     * every one of them has to exist — with only `app-icon.png` vendored, the
+     * macOS and Windows builds found no icon, said nothing, and shipped
+     * Electron's after all.
      */
-    icon: resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "packages", "ui", "brand", "app-icon"),
+    icon: appIcon,
     // The project directory is the only source of truth (REQ-ADE-2), so there is
     // nothing to sign a manifest of and nothing to bundle but the app.
     asar: true,
@@ -84,7 +89,8 @@ const config: ForgeConfig = {
    */
   makers: [
     new MakerZIP({}, ["darwin", "linux", "win32"]),
-    new MakerSquirrel({ name: testBuild ? "yam_test" : "yam" }, ["win32"]),
+    // The installers carry the mark too; each maker's default is Electron's.
+    new MakerSquirrel({ name: testBuild ? "yam_test" : "yam", setupIcon: `${appIcon}.ico` }, ["win32"]),
     /*
      * `bin` is the executable's name inside the packaged app, and the packager
      * names it after `packagerConfig.name`. Unset, the Debian maker assumes the
@@ -92,7 +98,14 @@ const config: ForgeConfig = {
      * `out/Yam-linux-x64/@svatah/yam-desktop`.
      */
     new MakerDeb(
-      { options: { name: testBuild ? "yam-test" : "yam", productName, bin: productName } },
+      {
+        options: {
+          name: testBuild ? "yam-test" : "yam",
+          productName,
+          bin: productName,
+          icon: `${appIcon}.png`,
+        },
+      },
       ["linux"],
     ),
   ],

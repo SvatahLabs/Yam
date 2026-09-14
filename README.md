@@ -1,4 +1,9 @@
-# Yam
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="packages/ui/brand/yam-color-dark-horizontal.svg">
+    <img alt="Yam" src="packages/ui/brand/yam-color-light-horizontal.svg" height="64">
+  </picture>
+</h1>
 
 **Give an AI agent hands. It drives a browser, a desktop app, an API or a terminal, and you can watch it work.**
 

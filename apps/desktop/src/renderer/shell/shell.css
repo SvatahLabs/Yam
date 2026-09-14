@@ -15,9 +15,11 @@
    *
    * A mask rather than an image: the mono lockup is the shape, and colouring it
    * with the accent means the one file works on both themes and cannot drift
-   * from the palette the way a second copy of the artwork would.
+   * from the palette the way a second copy of the artwork would. The small
+   * drawing, because the mark is 18 px and the kit draws 16–32 px without the
+   * vein and tuber details.
    */
-  --brand-mark: url("@svatah/yam-ui/brand/yam-white.svg");
+  --brand-mark: url("@svatah/yam-ui/brand/yam-white-small.svg");
 }
 
 .sv-app {
