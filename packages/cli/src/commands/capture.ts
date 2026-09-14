@@ -13,7 +13,7 @@
  * asked for by naming the flow: `yam record --flow <file>` (or `--all`).
  */
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { join, relative, resolve, sep } from "node:path";
 import { createInterface } from "node:readline";
 import { EXIT, sessionTarget, stringOption, type CommandIo, type ExitCode, type ParsedArgs } from "@svatah/yam-bindings-cli";
 import type { BindingsStore } from "@svatah/yam-bindings";
@@ -91,8 +91,14 @@ export async function captureIntoProject(options: {
   const file = flowFileFor(flowsDir, outcome.story);
   writeFileSync(join(flowsDir, file), outcome.flow, "utf8");
   const saved = store.save();
+  /*
+   * Project-relative and with `/`, because both cross the service to a client
+   * as data. `join` and `relative` answered `flows\sign-in.flow` on Windows, which
+   * a client on another platform, or a `/flows/:file` route, reads as one name.
+   */
+  const portable = (one: string): string => one.split(sep).join("/");
   return {
-    file: join(loaded.config.flows.dir, file),
+    file: portable(join(loaded.config.flows.dir, file)),
     story: outcome.story,
     steps: outcome.steps,
     inputs: outcome.inputs,
@@ -100,7 +106,7 @@ export async function captureIntoProject(options: {
     unbound: outcome.unbound,
     // Relative: this crosses the service to a client, and an absolute path
     // says where somebody's machine keeps their work (REQ-NFR-6).
-    written: saved.written.map((one) => relative(loaded.root, one)),
+    written: saved.written.map((one) => portable(relative(loaded.root, one))),
   };
 }
 

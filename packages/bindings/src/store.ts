@@ -53,11 +53,18 @@ export class BindingsStore {
     const store = new BindingsStore(dir);
     if (!existsSync(dir)) return store;
 
-    for (const path of walk(dir)) {
-      const id = pathToId(relative(dir, path).split(sep).join("/"));
+    for (const found of walk(dir)) {
+      /*
+       * Said with `/` on every platform, as the id is. The message names the file
+       * a person has to open, and `bindings\home\sign-in-button.yaml` on Windows
+       * beside `bindings/home/sign-in-button.yaml` everywhere else made one
+       * diagnostic two strings.
+       */
+      const path = found.split(sep).join("/");
+      const id = pathToId(relative(dir, found).split(sep).join("/"));
       let raw: unknown;
       try {
-        raw = parseYaml(readFileSync(path, "utf8"));
+        raw = parseYaml(readFileSync(found, "utf8"));
       } catch (cause) {
         // The parser's own message says the line and column; without it the
         // diagnostic names a file and leaves the reader to find the typo.

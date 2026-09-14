@@ -13,7 +13,7 @@
  */
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { join, relative, resolve, sep } from "node:path";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { boolOption, EXIT, stringOption, type CommandIo, type ExitCode, type ParsedArgs } from "@svatah/yam-bindings-cli";
@@ -100,14 +100,20 @@ export function proposalFrom(
 ): Proposal | undefined {
   const lines = readTrajectory(trajectoryPath);
   if (lines.length === 0) return undefined;
+  /*
+   * Project-relative paths with `/` on every platform. They are printed, answered
+   * as JSON, written into the proposal and compared against `proposals/`; on
+   * Windows `relative` gave `proposals\2026-…` and every one of those disagreed.
+   */
+  const portable = (one: string): string => relative(root, one).split(sep).join("/");
   const compiled = compileTrajectory(lines, {
-    sourceTrajectory: relative(root, trajectoryPath),
+    sourceTrajectory: portable(trajectoryPath),
     ...(options.name === undefined ? {} : { storyName: options.name }),
   });
   const { dir, files } = writeProposal(resolve(root, options.out ?? "proposals"), compiled);
   return {
-    dir: relative(root, dir),
-    files: files.map((file) => relative(root, file)),
+    dir: portable(dir),
+    files: files.map((file) => portable(file)),
     steps: compiled.steps,
     review: compiled.review,
   };
