@@ -9,7 +9,6 @@
 import { describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
 import { fromRoot, REPO_ROOT } from "../src/repo.js";
 
 /** Forms of the old name that are allowed to remain, and why. */
@@ -78,7 +77,8 @@ describe("the product is Yam (Draft 2.18)", () => {
     const manifests = ["package.json"];
     for (const base of ["packages", "apps", "tools"]) {
       for (const dir of readdirSync(fromRoot(base))) {
-        if (existsSync(fromRoot(base, dir, "package.json"))) manifests.push(join(base, dir, "package.json"));
+        // `/`, as `repository.directory` says it: `join` gave `packages\adapter-appium` on Windows.
+        if (existsSync(fromRoot(base, dir, "package.json"))) manifests.push(`${base}/${dir}/package.json`);
       }
     }
     for (const file of manifests) {

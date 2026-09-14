@@ -13,8 +13,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
-import { fromRoot } from "../src/repo.js";
+import { join } from "node:path";
+import { fromRoot, repoPath } from "../src/repo.js";
 
 /** Every markdown file a user might read. */
 function activeDocs(): string[] {
@@ -36,7 +36,7 @@ function activeDocs(): string[] {
 }
 
 const docs = activeDocs().map((path) => ({
-  path: relative(fromRoot("."), path),
+  path: repoPath(path),
   text: readFileSync(path, "utf8"),
 }));
 

@@ -45,9 +45,14 @@ interface EslintResult {
 /** Run eslint over one path and return its JSON results (eslint exits 1 on errors). */
 function lint(targetPath: string): EslintResult[] {
   try {
+    /*
+     * ESLint's own entry point under this Node, rather than `pnpm exec`: `pnpm`
+     * is a `.cmd` shim on Windows, which `execFileSync` cannot start without a
+     * shell, and every test here failed with `spawnSync pnpm ENOENT`.
+     */
     const out = execFileSync(
-      "pnpm",
-      ["exec", "eslint", "--format", "json", "--no-warn-ignored", targetPath],
+      process.execPath,
+      [join(REPO_ROOT, "node_modules", "eslint", "bin", "eslint.js"), "--format", "json", "--no-warn-ignored", targetPath],
       { cwd: REPO_ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
     );
     return JSON.parse(out) as EslintResult[];

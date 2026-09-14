@@ -22,6 +22,7 @@
 import { describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fromRoot } from "../src/repo.js";
 
@@ -52,7 +53,9 @@ describe("the desktop gate's --report path (P6-F6, LLD §15)", () => {
   });
 
   it("leaves an absolute path alone", () => {
-    expect(printReportPath("/tmp/adapter-ax.md", fromRoot("."))).toBe("/tmp/adapter-ax.md");
+    // Absolute on this platform: `/tmp/…` is relative to the drive on Windows.
+    const absolute = join(tmpdir(), "adapter-ax.md");
+    expect(printReportPath(absolute, fromRoot("."))).toBe(absolute);
   });
 
   it("defaults to reports/, which is where run artifacts may be committed (LLD §16)", () => {

@@ -23,7 +23,7 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { SCREEN_IDS, screenById, type ScreenId } from "@svatah/yam-screens";
-import { fromRoot, REPO_ROOT } from "../src/repo.js";
+import { fromRoot, REPO_ROOT, repoPath } from "../src/repo.js";
 
 /**
  * The names that were retired, and what replaced each.
@@ -119,7 +119,7 @@ describe("no rendered sentence names a screen that is gone (EX-06)", () => {
            * What is being looked for is the name in a sentence.
            */
           const said = new RegExp(`(^|[^A-Za-z.])${name}([^A-Za-z]|$)`);
-          const where = file.replace(`${REPO_ROOT}/`, "");
+          const where = repoPath(file);
           if (said.test(text) && EXPLAINS_THE_MOVE[where] === undefined) {
             found.push(`${where}: "${name}" — it is ${instead}`);
           }

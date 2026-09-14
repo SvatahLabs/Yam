@@ -94,6 +94,8 @@ describe("the packed tarball is the size the specification claims", () => {
    */
   it("packs the CLI at about six megabytes, which is what the shape assumes", () => {
     const printed = execFileSync("npm", ["pack", "--dry-run", "--json"], {
+      // `npm` is a `.cmd` shim on Windows, which only a shell starts.
+      shell: process.platform === "win32",
       cwd: fromRoot("packages/cli"),
       encoding: "utf8",
       maxBuffer: 32 * 1024 * 1024,

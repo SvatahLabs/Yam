@@ -37,7 +37,7 @@
  * regenerated fails `pnpm -r test`.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, relative } from "node:path";
+import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { openApiDocument } from "@svatah/yam-service";
 
@@ -519,7 +519,7 @@ for (const one of outputs) {
     if (committed !== one.text) {
       drifted += 1;
       process.stderr.write(
-        `${relative(ROOT, one.path)} is not what the description generates.\n` +
+        `${relative(ROOT, one.path).split(sep).join("/")} is not what the description generates.\n` +
           `  ${committed === "" ? "It does not exist." : "It differs."} Run \`pnpm clients\` and read the diff.\n`,
       );
     }
@@ -527,7 +527,7 @@ for (const one of outputs) {
   }
   mkdirSync(dirname(one.path), { recursive: true });
   writeFileSync(one.path, one.text, "utf8");
-  process.stderr.write(`wrote ${relative(ROOT, one.path)}\n`);
+  process.stderr.write(`wrote ${relative(ROOT, one.path).split(sep).join("/")}\n`);
 }
 
 if (check) {
