@@ -1,0 +1,13 @@
+# Text is LF in the repository and in every checkout, Windows included.
+#
+# GitHub's Windows runners check out with `core.autocrlf=true`, so every text
+# file arrived with CRLF while the scripts that generate files write LF, and
+# `pnpm docs:check` called every generated page stale. The checks here that
+# compare what a script writes with what is committed — the reference pages,
+# the compiled plans, the conformance fixture — hold only when a checkout is
+# the committed bytes.
+* text=auto eol=lf
+
+# Committed with CRLF, and kept exactly as they are.
+runtimes/java/gradlew.bat -text
+packages/ui-tokens/fonts/OFL.txt -text
