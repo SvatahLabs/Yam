@@ -99,8 +99,8 @@ export function Welcome({
       )}
 
       {log.length === 0 ? null : (
-        <details className="sv-welcome-log">
-          <summary>Service log</summary>
+        <details className="sv-welcome-log" id="project-service-log">
+          <summary id="project-service-log-summary">Service log</summary>
           <pre className="sv-block">{log.join("\n")}</pre>
         </details>
       )}

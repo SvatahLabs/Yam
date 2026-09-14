@@ -365,7 +365,8 @@ function Discovery(props: ScreenProps<DrawnSurfaceLoad>): React.JSX.Element {
 
       {rest.length === 0 ? null : (
         <details className="sv-disclosure" id="surfaces-other-ways">
-          <summary>Other ways to connect ({rest.length})</summary>
+          {/* The summary is the control a person presses, so it is what carries an id (REQ-SURF-3). */}
+          <summary id="surfaces-other-ways-summary">Other ways to connect ({rest.length})</summary>
           <Table<SurfaceAdapterRow>
             id="surfaces-adapters-other"
             label="Adapters that need something first"
@@ -803,7 +804,7 @@ function AgentPanel(
   const Section = ({ children }: { children: React.ReactNode }): React.JSX.Element =>
     props.collapsed === true ? (
       <details className="sv-disclosure" id="inspector-agent">
-        <summary>Connect an agent</summary>
+        <summary id="inspector-agent-summary">Connect an agent</summary>
         {children}
       </details>
     ) : (
