@@ -65,9 +65,13 @@ jobs:
       - name: Install browsers
         run: pnpm --filter @svatah/yam-adapter-playwright exec playwright install --with-deps chromium firefox
 
+      # `--no-bail`: every package's tests run even after one fails, and the step
+      # still fails if any did. Without it pnpm stops at the first failing
+      # package, so a run showed one package's failures and hid the rest — on
+      # the Windows runner that turned six independent defects into six runs.
       - name: Test
         if: runner.os != 'Linux'
-        run: pnpm -r test
+        run: pnpm -r --no-bail test
 
       # The recorder's human gateway (REQ-REC-12) opens a headed browser for a
       # person to click in, and the Linux runner has no display: Chromium refused
@@ -76,7 +80,7 @@ jobs:
       # virtual display, as the installer job's smoke check does.
       - name: Test (Linux, on a virtual display)
         if: runner.os == 'Linux'
-        run: xvfb-run --auto-servernum pnpm -r test
+        run: xvfb-run --auto-servernum pnpm -r --no-bail test
 
       # T2.10's milestone: the four migrated fixtures against apps/sample-web,
       # four times, checking determinism (REQ-RUN-2), that both hosts agree

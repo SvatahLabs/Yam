@@ -83,7 +83,8 @@ describe("the CI workflow (T0.2, T13.2)", () => {
       "pnpm -r typecheck",
       "pnpm lint",
       "pnpm check:licenses",
-      "pnpm -r test",
+      // `--no-bail`, so one run reports every failing package rather than the first.
+      "pnpm -r --no-bail test",
       "node scripts/compatibility.mjs",
       "node scripts/privacy-check.mjs",
       "pnpm examples",
