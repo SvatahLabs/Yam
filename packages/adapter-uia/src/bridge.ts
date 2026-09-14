@@ -33,6 +33,7 @@
  * than being a convenience.
  */
 import { spawn } from "node:child_process";
+import { appendFileSync } from "node:fs";
 import { availableParallelism, loadavg } from "node:os";
 
 /**
@@ -523,9 +524,26 @@ if ($cmd.kind -eq "setSize") {
   ConvertTo-Json -Compress @{ ok = $true }
   exit 0
 }
+function Get-Said($element) {
+  $said = @{}
+  if ($null -eq $element) { return $said }
+  try {
+    $said.controlType = $element.Current.ControlType.ProgrammaticName -replace "ControlType.", ""
+    $said.name = [string]$element.Current.Name
+    $said.automationId = [string]$element.Current.AutomationId
+    $said.processId = $element.Current.ProcessId
+  } catch { }
+  return $said
+}
+
 if ($cmd.kind -eq "keys") {
+  # What had the keyboard (the trace): SendKeys types into whatever is focused,
+  # which is not necessarily a window of this process.
+  $focus = @{}
+  try { $focus = Get-Said ([System.Windows.Automation.AutomationElement]::FocusedElement) } catch { }
+  $focus.inTarget = ($focus.processId -eq @($procs)[0].Id)
   [System.Windows.Forms.SendKeys]::SendWait($cmd.text)
-  ConvertTo-Json -Compress @{ ok = $true }
+  ConvertTo-Json -Compress @{ ok = $true; focus = $focus }
   exit 0
 }
 if ($cmd.kind -eq "click") {
@@ -533,10 +551,18 @@ if ($cmd.kind -eq "click") {
 [DllImport("user32.dll")] public static extern bool SetCursorPos(int X, int Y);
 [DllImport("user32.dll")] public static extern void mouse_event(uint f, uint x, uint y, uint d, int e);
 "@ -Name Mouse -Namespace Yam
+  # What is under the point (the trace): a click at a box's centre lands on
+  # whatever is drawn there, which is not always the element the box came from.
+  $under = @{}
+  try {
+    Add-Type -AssemblyName WindowsBase -ErrorAction Stop
+    $point = New-Object System.Windows.Point($cmd.at[0], $cmd.at[1])
+    $under = Get-Said ([System.Windows.Automation.AutomationElement]::FromPoint($point))
+  } catch { }
   [void][Yam.Mouse]::SetCursorPos($cmd.at[0], $cmd.at[1])
   [Yam.Mouse]::mouse_event(0x0002, 0, 0, 0, 0)
   [Yam.Mouse]::mouse_event(0x0004, 0, 0, 0, 0)
-  ConvertTo-Json -Compress @{ ok = $true }
+  ConvertTo-Json -Compress @{ ok = $true; under = $under }
   exit 0
 }
 
@@ -548,6 +574,9 @@ foreach ($step in $cmd.path) {
   if ($null -eq $child) { ConvertTo-Json -Compress @{ ok = $false; error = "stale-path" }; exit 0 }
   $element = $child
 }
+# The element the path arrived at (the trace), which is the one acted on: a
+# path is a snapshot's address, and the tree may have moved since.
+$target = Get-Said $element
 
 try {
   if ($cmd.kind -eq "focus") { $element.SetFocus() }
@@ -576,10 +605,10 @@ try {
     }
   }
 } catch {
-  ConvertTo-Json -Compress @{ ok = $false; error = $_.Exception.Message }
+  ConvertTo-Json -Compress @{ ok = $false; error = $_.Exception.Message; target = $target }
   exit 0
 }
-ConvertTo-Json -Compress @{ ok = $true }
+ConvertTo-Json -Compress @{ ok = $true; target = $target }
 `;
 
 const SCREENSHOT_SCRIPT = `
@@ -620,16 +649,70 @@ export interface PowershellBridgeOptions {
    * the answer was Windows, so it reached a `run` that answers nothing.
    */
   readonly platform?: NodeJS.Platform;
+  /**
+   * A file to append every window read and every action to, one JSON object a
+   * line: `YAM_UIA_TRACE` unless given, and nothing when neither is.
+   *
+   * The trees in `test/fixtures` are Chromium's tree mapped into this shape on
+   * a Mac, so what `UIAutomationClient` really answers on Windows exists only
+   * on a Windows machine. The desktop gate runs on a CI runner nobody can open,
+   * and its report says which check failed but not what the tree was, which
+   * control an action reached, or what had the keyboard when keys were sent.
+   * The trace is those three, from the machine that saw them.
+   */
+  readonly trace?: string;
 }
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 const AVAILABILITY_TIMEOUT_MS = 10_000;
+
+/**
+ * A `SendKeys` sequence of named keys only: `{ESC}`, `+{F10}`, `{TAB}{ENTER}`.
+ *
+ * `escapeSendKeys` braces every syntax character a typed value contains, so
+ * no typed value can arrive in this shape; anything else may be one.
+ */
+const NAMED_KEYS = /^(?:[+^%]*\{[A-Za-z0-9]+\})+$/;
+
+/**
+ * What the trace keeps of a command and of a tree: never what was typed.
+ *
+ * The bridge cannot tell a password from a search term — both reach it as
+ * `keys` text or a `Value` argument — and REQ-NFR-6 redacts secrets from every
+ * artifact, so the trace keeps how many characters rather than which. The same
+ * goes for what an edit field holds in a window read.
+ */
+function untyped(command: UiaCommand): Readonly<Record<string, unknown>> {
+  const masked = (text: string): string => `<${text.length} characters>`;
+  if (command.kind === "keys" && !NAMED_KEYS.test(command.text)) return { ...command, text: masked(command.text) };
+  if (command.kind === "pattern" && command.argument !== undefined) {
+    return { ...command, argument: masked(command.argument) };
+  }
+  return command;
+}
+
+function unread(nodes: readonly UiaNode[] | undefined): readonly UiaNode[] | undefined {
+  return nodes?.map((node) =>
+    node.controlType === "Edit" && node.value !== undefined && node.value !== ""
+      ? { ...node, value: `<${node.value.length} characters>` }
+      : node,
+  );
+}
 
 /** The real bridge: PowerShell, `UIAutomationClient`, and this machine. */
 export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
   const run = options.run ?? runPowershell;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const platform = options.platform ?? process.platform;
+  const tracePath = options.trace ?? process.env["YAM_UIA_TRACE"] ?? "";
+  const trace = (entry: Readonly<Record<string, unknown>>): void => {
+    if (tracePath === "") return;
+    try {
+      appendFileSync(tracePath, `${JSON.stringify({ at: new Date().toISOString(), ...entry })}\n`, "utf8");
+    } catch {
+      // A trace that cannot be written must not fail the read it describes.
+    }
+  };
 
   const call = async (script: string, argument: unknown, ms: number): Promise<unknown> => {
     const result = await run(script, argument, ms);
@@ -685,7 +768,7 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
 
     async window(request): Promise<UiaWindow> {
       const startedAt = Date.now();
-      const answer = (await call(WINDOW_SCRIPT, request, timeoutMs)) as {
+      let answer: {
         ok: boolean;
         error?: string;
         process?: string;
@@ -693,6 +776,13 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
         nodes?: UiaNode[];
         truncated?: boolean;
       };
+      try {
+        answer = (await call(WINDOW_SCRIPT, request, timeoutMs)) as typeof answer;
+      } catch (error) {
+        trace({ kind: "window", request, ms: Date.now() - startedAt, thrown: String(error) });
+        throw error;
+      }
+      trace({ kind: "window", request, ms: Date.now() - startedAt, ...answer, nodes: unread(answer.nodes) });
       if (!answer.ok) {
         throw new UiaBridgeError(
           answer.error === "no-window"
@@ -720,11 +810,19 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
     },
 
     async perform(command): Promise<void> {
-      const answer = (await call(
-        PERFORM_SCRIPT,
-        { ...command, process: options.process },
-        timeoutMs,
-      )) as { ok: boolean; error?: string };
+      const startedAt = Date.now();
+      let answer: { ok: boolean; error?: string };
+      try {
+        answer = (await call(
+          PERFORM_SCRIPT,
+          { ...command, process: options.process },
+          timeoutMs,
+        )) as typeof answer;
+      } catch (error) {
+        trace({ kind: "perform", command: untyped(command), ms: Date.now() - startedAt, thrown: String(error) });
+        throw error;
+      }
+      trace({ kind: "perform", command: untyped(command), ms: Date.now() - startedAt, ...answer });
       if (!answer.ok) {
         throw new UiaBridgeError(`The UI Automation action failed: ${answer.error ?? "unknown"}.`);
       }

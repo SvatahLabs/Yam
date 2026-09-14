@@ -115,13 +115,25 @@ which here is Control.
 
 ```powershell
 pnpm -r build
-pnpm --filter @svatah/yam-desktop exec electron-forge package
+pnpm --filter @svatah/yam-desktop package
 node scripts/desktop-conformance.mjs --adapter uia --report reports/adapter-uia.md
 ```
 
 It checks the host first and refuses to write a report from a run that could not
 start. CI runs it on a `windows-latest` runner (`desktop-conformance` in
 `.github/workflows/ci.yml`).
+
+## Tracing the bridge
+
+Set `YAM_UIA_TRACE` to a file and the bridge appends one JSON object a line to
+it: every window read with the nodes UI Automation returned, and every action
+with the control its path reached, what had the keyboard when keys were sent,
+and what was under the point of a click. The conformance gate writes one per
+pass beside its report (`reports/uia-trace-variant-0.jsonl`), and CI uploads
+them with it.
+
+The trace holds whatever the window shows, so do not share one taken from a
+window with a secret on it.
 
 ## Testing without Windows
 

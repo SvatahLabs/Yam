@@ -570,8 +570,25 @@ process.on("exit", stop);
 /** The variants whose first read exceeded the deadline and were run again. */
 const retries = [];
 
+/*
+ * What the UIA bridge saw, beside the report (`YAM_UIA_TRACE`).
+ *
+ * The Windows gate runs on a runner nobody can open, and the report says which
+ * check failed without the tree it read or the control an action reached. The
+ * trace is both, one file per pass, and CI uploads it with the report. The AX
+ * bridge has no trace, so the macOS gate writes none.
+ */
+function traceFor(variant, attempt) {
+  if (adapter !== "uia") return undefined;
+  mkdirSync(dirname(report), { recursive: true });
+  const path = join(dirname(report), `uia-trace-variant-${variant}${attempt > 0 ? "-retry" : ""}.jsonl`);
+  rmSync(path, { force: true });
+  return path;
+}
+
 /** Run the conformance suite once against the app that is up, and parse it. */
-function runSuite(variant, statePath) {
+function runSuite(variant, statePath, attempt = 0) {
+  const trace = traceFor(variant, attempt);
   const conform = spawnSync(
     process.execPath,
     [
@@ -588,7 +605,12 @@ function runSuite(variant, statePath) {
       statePath,
       "--json",
     ],
-    { encoding: "utf8", cwd: project, maxBuffer: 64 * 1024 * 1024 },
+    {
+      encoding: "utf8",
+      cwd: project,
+      maxBuffer: 64 * 1024 * 1024,
+      env: { ...process.env, ...(trace === undefined ? {} : { YAM_UIA_TRACE: trace }) },
+    },
   );
   process.stderr.write(conform.stderr ?? "");
   try {
@@ -720,7 +742,7 @@ try {
       const relaunched = await launch(variant);
       running = relaunched.child;
       if (!relaunched.timedOut) {
-        const again = runSuite(variant, healState);
+        const again = runSuite(variant, healState, 1);
         stop();
         parsed = { ...again, ...(again.bridge === undefined ? {} : { bridge: { ...again.bridge, retried: true } }) };
         retries.push(variant);

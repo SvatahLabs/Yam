@@ -492,7 +492,10 @@ jobs:
         if: always()
         with:
           name: desktop-conformance-${{ matrix.adapter }}
-          path: reports/adapter-${{ matrix.adapter }}.md
+          # The report, and on Windows what the bridge saw (`YAM_UIA_TRACE`).
+          path: |
+            reports/adapter-${{ matrix.adapter }}.md
+            reports/${{ matrix.adapter }}-trace-*.jsonl
           if-no-files-found: ignore
 
   # T9.3: the generated clients, against a live service (REQ-SDK-1, REQ-SDK-2).

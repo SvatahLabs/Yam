@@ -6,6 +6,9 @@
  * what `yam surface doctor` is told.
  */
 import { describe, expect, it, vi } from "vitest";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   encodePowershell,
   powershellBridge,
@@ -162,6 +165,97 @@ describe("performing a command", () => {
     );
     expect(source).toContain('"-NoProfile"');
     expect(source).toContain('"-NonInteractive"');
+  });
+});
+
+describe("the trace (YAM_UIA_TRACE)", () => {
+  /*
+   * The recorded trees are Chromium's, mapped on a Mac; the Windows gate runs
+   * where nobody can look. The trace is what that machine saw: each tree, each
+   * action, and the control the action's path arrived at.
+   */
+  it("appends each window read and each action, with the control the action reached", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "yam-uia-trace-"));
+    const file = join(dir, "trace.jsonl");
+    try {
+      const run: Run = async (script) => ({
+        code: 0,
+        stdout: script.includes("$cmd = $Request")
+          ? JSON.stringify({ ok: true, target: { controlType: "ListItem", name: "Go to Run", automationId: "palette-go-run" } })
+          : JSON.stringify({ ok: true, title: "Yam", nodes: [{ parent: -1, controlType: "Window", name: "Yam" }], truncated: false }),
+        stderr: "",
+        timedOut: false,
+      });
+      const bridge = powershellBridge({ process: "Yam", run, platform: "win32", trace: file });
+      await bridge.window({ process: "Yam", maxNodes: 10 });
+      await bridge.perform({ kind: "pattern", path: [0, 2], pattern: "SelectionItem", method: "Select" });
+
+      const lines = readFileSync(file, "utf8").trim().split("\n").map((line) => JSON.parse(line) as Record<string, unknown>);
+      expect(lines.map((one) => one["kind"])).toEqual(["window", "perform"]);
+      expect(lines[0]!["nodes"]).toEqual([{ parent: -1, controlType: "Window", name: "Yam" }]);
+      expect(lines[1]!["command"]).toMatchObject({ path: [0, 2], pattern: "SelectionItem" });
+      expect(lines[1]!["target"]).toMatchObject({ automationId: "palette-go-run" });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps named keys and never what was typed (REQ-NFR-6)", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "yam-uia-trace-"));
+    const file = join(dir, "trace.jsonl");
+    try {
+      const run: Run = async (script) => ({
+        code: 0,
+        stdout: script.includes("$cmd = $Request")
+          ? '{"ok":true}'
+          : JSON.stringify({
+              ok: true,
+              nodes: [
+                { parent: -1, controlType: "Window", name: "Yam" },
+                { parent: 0, controlType: "Edit", name: "Password", value: "qwerty123" },
+              ],
+            }),
+        stderr: "",
+        timedOut: false,
+      });
+      const bridge = powershellBridge({ process: "Yam", run, platform: "win32", trace: file });
+      await bridge.perform({ kind: "keys", text: "{ESC}" });
+      await bridge.perform({ kind: "keys", text: "+{F10}" });
+      await bridge.perform({ kind: "keys", text: "qwerty123" });
+      await bridge.perform({ kind: "keys", text: "{{}ESC{}}" });
+      await bridge.perform({ kind: "pattern", path: [1], pattern: "Value", method: "SetValue", argument: "qwerty123" });
+      await bridge.window({ process: "Yam", maxNodes: 10 });
+
+      const text = readFileSync(file, "utf8");
+      expect(text).not.toContain("qwerty123");
+      const lines = text.trim().split("\n").map((line) => JSON.parse(line) as { command?: { text?: string; argument?: string } });
+      expect(lines.slice(0, 4).map((one) => one.command?.text)).toEqual([
+        "{ESC}",
+        "+{F10}",
+        "<9 characters>",
+        // A typed "{ESC}", escaped by `escapeSendKeys`, is text and not a key.
+        "<9 characters>",
+      ]);
+      expect(lines[4]!.command?.argument).toBe("<9 characters>");
+      expect(text).toContain('"value":"<9 characters>"');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not fail a read because its trace could not be written", async () => {
+    const { run } = answering(JSON.stringify({ ok: true, nodes: [] }));
+    const nowhere = join(tmpdir(), "yam-no-such-directory", "trace.jsonl");
+    const window = await powershellBridge({ process: "x", run, trace: nowhere }).window({ process: "x", maxNodes: 1 });
+    expect(window.nodes).toEqual([]);
+  });
+
+  it("says what had the keyboard when keys were sent, and what was under a click", () => {
+    // SendKeys types into whatever is focused, and a click lands on whatever is
+    // drawn at the point; the script reports both rather than assuming them.
+    const source = readFileSync(new URL("../src/bridge.ts", import.meta.url), "utf8");
+    expect(source).toContain("AutomationElement]::FocusedElement");
+    expect(source).toContain("AutomationElement]::FromPoint");
   });
 });
 
