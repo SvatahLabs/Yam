@@ -93,17 +93,26 @@ function stable(value, workspace) {
   const seen = JSON.stringify(value, (key, one) => {
     if (key === "stack") return undefined;
     if (typeof one === "string") {
-      return one
-        .replace(/127\.0\.0\.1:\d+/g, "127.0.0.1:PORT")
-        /*
-         * The working copy first, then the checkout. The copy lives under
-         * `/var/folders/…` (or `/tmp`) and is a different directory on every
-         * run; the fixture is about `evals/fixtures`, so that is what it says.
-         */
-        .split(workspace)
-        .join(AS_RECORDED)
-        .split(ROOT)
-        .join("<repo>");
+      /*
+       * The working copy first, then the checkout. The copy lives under
+       * `/var/folders/…` (or `/tmp`) and is a different directory on every
+       * run; the fixture is about `evals/fixtures`, so that is what it says.
+       *
+       * The rest of such a path is said with `/`, because the separator is as
+       * much a fact about the machine as the prefix: on Windows a failure's
+       * screenshot came back as `<repo>/evals/fixtures\runs\comp\…` and the
+       * check failed on a file that was the same.
+       */
+      const underneath = (text, prefix, as) =>
+        text
+          .split(prefix)
+          .map((part, index) => (index === 0 ? part : part.replace(/^[^\s"'`]*/, (path) => path.replaceAll("\\", "/"))))
+          .join(as);
+      return underneath(
+        underneath(one.replace(/127\.0\.0\.1:\d+/g, "127.0.0.1:PORT"), workspace, AS_RECORDED),
+        ROOT,
+        "<repo>",
+      );
     }
     return one;
   });
@@ -306,8 +315,22 @@ try {
     }
     const committed = readFileSync(path, "utf8");
     if (comparable(committed) !== comparable(text)) {
+      /*
+       * Where, and not only that. On a CI runner nobody can open, "differ" was
+       * the whole message, and the diff it pointed at is only on that machine.
+       */
+      const was = comparable(committed).split("\n");
+      const now = comparable(text).split("\n");
+      let at = 0;
+      while (at < was.length && at < now.length && was[at] === now[at]) at += 1;
+      const around = (lines) =>
+        lines
+          .slice(Math.max(0, at - 2), at + 3)
+          .map((line, index) => `  ${Math.max(0, at - 2) + index + 1}: ${line.slice(0, 200)}`)
+          .join("\n");
       process.stderr.write(
         "The committed screen fixtures differ from what the service answers now.\n" +
+          `The first difference is at line ${at + 1}.\ncommitted:\n${around(was)}\nnow:\n${around(now)}\n` +
           "Run `node scripts/record-screen-fixtures.mjs` and read the diff.\n",
       );
       process.exit(1);
