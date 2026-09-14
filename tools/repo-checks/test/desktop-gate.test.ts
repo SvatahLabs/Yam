@@ -301,7 +301,13 @@ describe("`surface doctor --adapter ax` reports the login session (P9-F7)", () =
     const session = checks.find((one) => one["adapter"] === "ax" && one["name"] === "session");
 
     if (process.platform !== "darwin") {
-      const platform = checks.find((one) => one["adapter"] === "ax" && one["name"] === "platform");
+      /*
+       * `reachable`, the name every desktop adapter's "not this platform" skip
+       * has (`uia/reachable` on macOS, `atspi/reachable` off Linux). This looked
+       * for an `ax/platform` check that `doctor` does not emit, which no host
+       * noticed until a Linux runner took this branch.
+       */
+      const platform = checks.find((one) => one["adapter"] === "ax" && one["name"] === "reachable");
       expect(platform?.["skipped"], "a non-macOS host should skip the ax checks").toBe(true);
       expect(session).toBeUndefined();
       return;
