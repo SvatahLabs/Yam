@@ -311,9 +311,14 @@ describe("attaching to the two endpoint shapes (P4-F3, LLD §7.3)", () => {
     expect(sent).toContain("session.subscribe:browsingContext.navigationAborted");
   });
 
+  /*
+   * "No browser" means none installed on this machine either (`systemPaths: []`).
+   * An empty `HOME` hides Playwright's caches and nothing else, and a CI runner
+   * has Firefox where a person would install it.
+   */
   it("says what to do when there is neither an endpoint nor a browser", async () => {
     await expect(
-      openEndpoint({ env: { HOME: join(tmpdir(), "definitely-not-a-home") } }),
+      openEndpoint({ env: { HOME: join(tmpdir(), "definitely-not-a-home") }, systemPaths: [] }),
     ).rejects.toThrow(/YAM_BIDI_URL|pnpm browsers/);
   });
 
@@ -327,15 +332,27 @@ describe("attaching to the two endpoint shapes (P4-F3, LLD §7.3)", () => {
   it("ignores a YAM_BIDI_BROWSER that names nothing", () => {
     // A stale path in an environment file should fall through to the search,
     // not make the adapter refuse to start.
-    const found = findGecko({
-      [BIDI_BROWSER_ENV]: join(tmpdir(), "no-such-firefox"),
-      HOME: join(tmpdir(), "definitely-not-a-home"),
-    });
+    const found = findGecko(
+      {
+        [BIDI_BROWSER_ENV]: join(tmpdir(), "no-such-firefox"),
+        HOME: join(tmpdir(), "definitely-not-a-home"),
+      },
+      [],
+    );
     expect(found).toBeUndefined();
+  });
+
+  it("searches the system install locations it is given", () => {
+    const dir = mkdtempSync(join(tmpdir(), "yam-gecko-"));
+    const binary = join(dir, "firefox");
+    writeFileSync(binary, "#!/bin/sh\n", "utf8");
+    const home = join(tmpdir(), "definitely-not-a-home");
+    expect(findGecko({ HOME: home }, [join(dir, "not-installed"), binary])).toBe(binary);
+    expect(bidiAvailable({ HOME: home }, [binary])).toBe(true);
   });
 
   it("reports availability from the two things that could provide it", () => {
     expect(bidiAvailable({ [BIDI_URL_ENV]: "ws://host/session" })).toBe(true);
-    expect(bidiAvailable({ HOME: join(tmpdir(), "definitely-not-a-home") })).toBe(false);
+    expect(bidiAvailable({ HOME: join(tmpdir(), "definitely-not-a-home") }, [])).toBe(false);
   });
 });

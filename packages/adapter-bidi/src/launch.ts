@@ -87,6 +87,11 @@ export interface LaunchOptions {
   /** How long to wait for the remote agent to announce itself. */
   readonly startupTimeoutMs?: number;
   readonly env?: NodeJS.ProcessEnv;
+  /**
+   * Where Firefox is installed outside a Playwright cache: the usual places on
+   * the three platforms unless given. A test that means "no browser" passes `[]`.
+   */
+  readonly systemPaths?: readonly string[];
   readonly onLog?: (line: string) => void;
 }
 
@@ -98,13 +103,34 @@ export const BIDI_BROWSER_ENV = "YAM_BIDI_BROWSER";
 const DEFAULT_STARTUP_TIMEOUT_MS = 60_000;
 
 /**
+ * Where Firefox installs itself outside a Playwright cache, on the three
+ * platforms.
+ *
+ * A default rather than a literal inside the search, because a caller asking
+ * what happens with no browser has to be able to say there is none. The caches
+ * follow the environment, so pointing `HOME` somewhere empty hides them; nothing
+ * hid these. GitHub's macOS and Linux runner images have Firefox at two of them,
+ * and the tests that assert "no browser" found it there and failed in the first
+ * CI run — while passing on every machine that had never installed Firefox.
+ */
+const SYSTEM_GECKO_PATHS: readonly string[] = [
+  "/Applications/Firefox.app/Contents/MacOS/firefox",
+  "/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox",
+  "/usr/bin/firefox",
+  "/usr/local/bin/firefox",
+  "/snap/bin/firefox",
+  "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+  "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe",
+];
+
+/**
  * Where a Gecko binary might be, most specific first.
  *
  * Playwright's cache comes before the system install because `pnpm browsers`
  * puts one there and a contributor's own Firefox is not necessarily the one CI
  * has. Both are Firefox and both serve the same remote agent.
  */
-function geckoCandidates(env: NodeJS.ProcessEnv): string[] {
+function geckoCandidates(env: NodeJS.ProcessEnv, systemPaths: readonly string[]): string[] {
   const out: string[] = [];
   const home = env["HOME"] ?? "";
 
@@ -136,23 +162,18 @@ function geckoCandidates(env: NodeJS.ProcessEnv): string[] {
     }
   }
 
-  out.push(
-    "/Applications/Firefox.app/Contents/MacOS/firefox",
-    "/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox",
-    "/usr/bin/firefox",
-    "/usr/local/bin/firefox",
-    "/snap/bin/firefox",
-    "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
-    "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe",
-  );
+  out.push(...systemPaths);
   return out;
 }
 
 /** The first Gecko binary that exists, or nothing. */
-export function findGecko(env: NodeJS.ProcessEnv = process.env): string | undefined {
+export function findGecko(
+  env: NodeJS.ProcessEnv = process.env,
+  systemPaths: readonly string[] = SYSTEM_GECKO_PATHS,
+): string | undefined {
   const named = env[BIDI_BROWSER_ENV];
   if (named !== undefined && named !== "" && existsSync(named)) return named;
-  return geckoCandidates(env).find((path) => existsSync(path));
+  return geckoCandidates(env, systemPaths).find((path) => existsSync(path));
 }
 
 /**
@@ -161,9 +182,12 @@ export function findGecko(env: NodeJS.ProcessEnv = process.env): string | undefi
  * Used by the tests and by `yam doctor`: a suite that silently passed because
  * no browser was there would be worse than one that says it was skipped.
  */
-export function bidiAvailable(env: NodeJS.ProcessEnv = process.env): boolean {
+export function bidiAvailable(
+  env: NodeJS.ProcessEnv = process.env,
+  systemPaths: readonly string[] = SYSTEM_GECKO_PATHS,
+): boolean {
   const url = env[BIDI_URL_ENV];
-  return (url !== undefined && url !== "") || findGecko(env) !== undefined;
+  return (url !== undefined && url !== "") || findGecko(env, systemPaths) !== undefined;
 }
 
 /**
@@ -186,7 +210,7 @@ export async function openEndpoint(options: LaunchOptions = {}): Promise<BidiEnd
     };
   }
 
-  const binary = options.binary ?? findGecko(env);
+  const binary = options.binary ?? findGecko(env, options.systemPaths);
   if (binary === undefined) {
     throw new SessionError(
       "No WebDriver BiDi endpoint and no Firefox to start one with.\n" +

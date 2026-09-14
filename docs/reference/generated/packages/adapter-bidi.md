@@ -19,7 +19,7 @@ WebDriver BiDi adapter (independence proof)
 | `BIDI_CAPABILITIES` | variable | `BIDI_CAPABILITIES: Capabilities ` | What this adapter can do (LLD §2.4, §7.3). |
 | `BIDI_URL_ENV` | variable | `BIDI_URL_ENV = "YAM_BIDI_URL"` | `YAM_BIDI_URL`: attach to a BiDi endpoint someone else is hosting. |
 | `BidiAdapterOptions` | interface | `export interface BidiAdapterOptions extends LaunchOptions` |  |
-| `bidiAvailable` | function | `export function bidiAvailable(env: NodeJS.ProcessEnv = process.env): boolean` | Whether this machine can run the BiDi adapter at all. |
+| `bidiAvailable` | function | `export function bidiAvailable(` | Whether this machine can run the BiDi adapter at all. |
 | `BidiClient` | class | `export class BidiClient` |  |
 | `BidiClientOptions` | interface | `export interface BidiClientOptions` |  |
 | `BidiEndpoint` | interface | `export interface BidiEndpoint` | Where a session is talking, and to what. |
@@ -32,7 +32,7 @@ WebDriver BiDi adapter (independence proof)
 | `createBidiSurface` | function | `export function createBidiSurface(` | Build a surface from a project config (LLD §2.4). |
 | `describeElement` | function | `export function describeElement(` |  |
 | `evaluateBidiPredicate` | function | `export async function evaluateBidiPredicate(` |  |
-| `findGecko` | function | `export function findGecko(env: NodeJS.ProcessEnv = process.env): string \| undefined` | The first Gecko binary that exists, or nothing. |
+| `findGecko` | function | `export function findGecko(` | The first Gecko binary that exists, or nothing. |
 | `fromRemoteValue` | function | `export function fromRemoteValue(remote: unknown): unknown` | Turn BiDi's tagged `RemoteValue` back into a plain JSON value. |
 | `HANDLES` | variable | `HANDLES = "__yamHandles__"` | The in-page array `locate()` fills, for refs minted from a stored candidate. |
 | `keyActions` | function | `export async function keyActions(` | `press`, `keyDown` and `keyUp`, including chords like `"Control+a"`. |
