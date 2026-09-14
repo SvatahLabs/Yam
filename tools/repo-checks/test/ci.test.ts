@@ -193,6 +193,36 @@ describe("the CI workflow (T0.2, T13.2)", () => {
     expect(steps).toContain("setup-python");
   });
 
+  /*
+   * A workflow can only call a root script that exists.
+   *
+   * `pnpm clients:check` and `pnpm clients:smoke` were in this workflow from
+   * T9.3 and in no root `package.json` until the first GitHub run answered
+   * "Command not found". The test above checks that the workflow *says* them,
+   * which is the half that cannot fail.
+   */
+  it("calls only root scripts that exist", () => {
+    const manifest = JSON.parse(readFileSync(fromRoot("package.json"), "utf8")) as {
+      scripts: Record<string, string>;
+    };
+    const builtins = new Set(["install", "add", "exec", "dlx", "deploy", "licenses", "pack", "publish", "store"]);
+    const called = new Set<string>();
+    for (const file of ["ci.yml", "release.yml"]) {
+      const workflow = parse(
+        readFileSync(fromRoot(".github", "workflows", file), "utf8"),
+      ) as GithubWorkflow;
+      for (const job of Object.values(workflow.jobs)) {
+        for (const step of job.steps) {
+          for (const match of (step.run ?? "").matchAll(/(?:^|[\s;&|(])pnpm\s+(?:run\s+)?([^\s-][^\s;&|)]*)/gm)) {
+            if (!builtins.has(match[1]!)) called.add(match[1]!);
+          }
+        }
+      }
+    }
+    expect(called.size, "no root script calls were found, so this checked nothing").toBeGreaterThan(5);
+    expect([...called].filter((name) => manifest.scripts[name] === undefined)).toEqual([]);
+  });
+
   it("the quick-start job runs the quick start and checks the recorded bindings (T1.6)", () => {
     const script = githubCommands("quick-start").join("\n");
     expect(script, "the quick start is not run").toContain("pnpm quick-start");

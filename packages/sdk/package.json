@@ -32,10 +32,7 @@
   "scripts": {
     "build": "node ../../scripts/generate-clients.mjs && tsup --config ../../tsup.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "clients": "node scripts/generate-clients.mjs",
-    "clients:check": "node scripts/generate-clients.mjs --check",
-    "clients:smoke": "node scripts/smoke-clients.mjs"
+    "test": "vitest run"
   },
   "dependencies": {
     "@svatah/yam-screens": "workspace:*"
