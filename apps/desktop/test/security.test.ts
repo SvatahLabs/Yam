@@ -158,4 +158,10 @@ describe("accessibility, because the app is the desktop conformance target", () 
     expect(main).toContain("setAccessibilitySupportEnabled(true)");
     expect(main).toContain('YAM_A11Y');
   });
+
+  it("gives the packaged window no menu bar on Windows and Linux", () => {
+    // Electron's default menu bar is drawn inside the window there, and its
+    // buttons are views no application can give an automationId to.
+    expect(main).toMatch(/if \(process\.platform !== "darwin" && app\.isPackaged\) window_\.removeMenu\(\);/);
+  });
 });

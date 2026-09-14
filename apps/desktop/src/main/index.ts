@@ -267,6 +267,23 @@ function createWindow(): void {
   });
 
   /*
+   * No menu bar in the window on Windows and Linux.
+   *
+   * The app sets no menu, so Electron gave the window its default: File, Edit,
+   * View and Window, drawn inside the window under the title bar. None of it is
+   * Yam's — every command is on a toolbar and in the palette — and its View
+   * menu reloads the renderer and opens the developer tools. Its buttons are
+   * also Chromium views an application cannot give an id to: the Windows gate
+   * read them as `button "File"` with no automationId beside `view_1`, `view_2`
+   * and `view_3`, and failed the rule that every control has one.
+   *
+   * On macOS the menu is the system's, outside the window, and it is where Quit
+   * and the editing shortcuts live, so it stays. So does a development build's,
+   * where the View menu's shortcuts are how a developer opens the tools.
+   */
+  if (process.platform !== "darwin" && app.isPackaged) window_.removeMenu();
+
+  /*
    * The renderer is not a browser tab.
    *
    * Refusing navigation and window opening means a screen cannot be turned into
