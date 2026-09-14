@@ -473,12 +473,51 @@ while ($queue.Count -gt 0) {
 
 $title = Get-Prop $win $AE::NameProperty
 
+# Where the window's own buttons are, when the bridge is tracing (\`probe\`). On
+# the Windows runner the walk found no title bar and no caption button in an
+# Electron window that has both, so this asks two other ways: the raw view's
+# children of the window, and hit-testing at each caption button's place.
+$probe = $null
+if ($req.probe) {
+  function Get-Brief($element) {
+    if ($null -eq $element) { return $null }
+    try {
+      return @{
+        controlType  = $element.Current.ControlType.ProgrammaticName -replace "ControlType.", ""
+        name         = [string]$element.Current.Name
+        automationId = [string]$element.Current.AutomationId
+        className    = [string]$element.Current.ClassName
+      }
+    } catch { return $null }
+  }
+  $probe = @{ raw = @(); points = @() }
+  try {
+    $rawWalker = [System.Windows.Automation.TreeWalker]::RawViewWalker
+    $child = $rawWalker.GetFirstChild($win)
+    for ($i = 0; $i -lt 12 -and $null -ne $child; $i++) {
+      $probe.raw += ,(Get-Brief $child)
+      $child = $rawWalker.GetNextSibling($child)
+    }
+  } catch { }
+  try {
+    Add-Type -AssemblyName WindowsBase -ErrorAction Stop
+    $rect = $win.Current.BoundingRectangle
+    foreach ($offset in @(31, 77, 123)) {
+      $x = [int]($rect.Right - $offset)
+      $y = [int]($rect.Top + 15)
+      $hit = [System.Windows.Automation.AutomationElement]::FromPoint((New-Object System.Windows.Point($x, $y)))
+      $probe.points += ,@{ at = @($x, $y); said = (Get-Brief $hit) }
+    }
+  } catch { }
+}
+
 ConvertTo-Json -Compress -Depth 6 @{
   ok        = $true
   process   = $req.process
   title     = if ($null -eq $title) { "" } else { [string]$title }
   nodes     = @($nodes)
   truncated = $truncated
+  probe     = $probe
 }
 `;
 
@@ -802,7 +841,9 @@ export function powershellBridge(options: PowershellBridgeOptions): UiaBridge {
         truncated?: boolean;
       };
       try {
-        answer = (await call(WINDOW_SCRIPT, request, timeoutMs)) as typeof answer;
+        // The frame probe costs a hit-test per caption button, so it is asked
+        // for only when there is a trace to put the answer in.
+        answer = (await call(WINDOW_SCRIPT, tracePath === "" ? request : { ...request, probe: true }, timeoutMs)) as typeof answer;
       } catch (error) {
         trace({ kind: "window", request, ms: Date.now() - startedAt, thrown: String(error) });
         throw error;
