@@ -181,6 +181,66 @@ async function openFromPalette(
 }
 
 /**
+ * The rows the command palette offers here, without choosing one.
+ *
+ * Every toolbar action is a palette row by construction (`actionsForScreen` is
+ * both lists), which is what makes a button the toolbar has shed still
+ * reachable. Opened, read, and closed with Escape, so the screen is left as it
+ * was found.
+ */
+async function paletteRows(
+  context: Parameters<ConformanceCase["run"]>[0],
+): Promise<ReadonlySet<string>> {
+  const before = (await context.surface.snapshot()).nodes as readonly Node[];
+  const opener = before.find(
+    (node) => node.native?.["automationId"] === "open-command-palette",
+  );
+  context.check("the top bar offers the command palette", opener !== undefined, {
+    expected: 'a control whose automationId is "open-command-palette"',
+  });
+  if (opener === undefined) return new Set();
+
+  await context.surface.act("click", opener.ref);
+  const open = (await context.surface.snapshot()).nodes as readonly Node[];
+  const rows = new Set(
+    open
+      .map((node) => node.native?.["automationId"])
+      .filter((one): one is string => one?.startsWith("palette-") === true),
+  );
+  await context.surface.act("press", undefined, { key: "Escape" });
+  await settled(context, "palette's");
+  return rows;
+}
+
+/**
+ * Open the Session screen in one of its modes (Draft 2.27).
+ *
+ * Record is not a screen any more. Draft 2.27 merged Surfaces and Record into
+ * Session, whose Record, Say and Do are modes on one screen, and the palette's
+ * `Go to` group lost its `record` row with them — which is how the healing case
+ * below went on asking for `palette-go-record` after it had gone. The route a
+ * person takes is the rail's Session row and then the mode's tab, both by id.
+ */
+async function openSessionMode(
+  context: Parameters<ConformanceCase["run"]>[0],
+  mode: "record" | "say" | "do",
+): Promise<readonly Node[]> {
+  const session = await openScreen(context, "rail-session");
+  const tabId = `session-mode-${mode}`;
+  const tab = session.find((node) => node.native?.["automationId"] === tabId);
+  context.check(`the Session screen has a "${tabId}" tab`, tab !== undefined, {
+    expected: `a control whose automationId is "${tabId}"`,
+    actual: session
+      .filter((node) => node.role === "tab")
+      .map((node) => node.native?.["automationId"] ?? node.name),
+  });
+  if (tab === undefined) return session;
+
+  await context.surface.act("click", tab.ref);
+  return await settled(context, `Session ${mode}`);
+}
+
+/**
  * Everything under `root`, by reference chain (T12.3).
  *
  * By `parent`, not by `depth` and position: a snapshot is a flat list with a
@@ -459,17 +519,20 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
       );
       /*
        * The gate opens `evals/fixtures`, whose config names the project
-       * `yam-fixtures`; the crumb carries the project's name or its directory.
-       * Until Draft 2.18 this looked for the product name anywhere in the tree,
-       * which the fixture flow `svatah.flow` satisfied by accident.
+       * `yam-fixtures`. Until Draft 2.18 this looked for the product name
+       * anywhere in the tree, which the fixture flow `svatah.flow` satisfied by
+       * accident; until T14 it looked in the crumb. T14 made the crumb section
+       * then screen and put the project on the top bar's `open-project` button,
+       * as "Project: <directory>", so that is where it is looked for now.
        */
+      const project = nodes.find((node) => node.native?.["automationId"] === "open-project");
       check(
         "the open project is named in the window",
-        nodes.some((node) => {
-          const text = node.name ?? node.value ?? "";
-          return text === "fixtures" || text.includes("yam-fixtures");
-        }),
-        { expected: "the project's name or directory in the crumb" },
+        project !== undefined && /(^|:\s*)(yam-)?fixtures$/.test(project.name ?? ""),
+        {
+          expected: 'the top bar\'s "open-project" button naming the project, "Project: fixtures"',
+          actual: project?.name,
+        },
       );
       check(
         "the eleven tabs are gone (T10.3)",
@@ -521,19 +584,28 @@ export const DESKTOP_CASES: readonly ConformanceCase[] = [
       /*
        * Draft 2.12 §13.7: "the Flows toolbar shows Record and Run". Both by
        * their `automationId`, which is what a binding survives a rewording on.
+       *
+       * On the bar, or in the palette. A toolbar that no longer fits sheds its
+       * secondary buttons right to left (T10, `Toolbar` in `parts.tsx`), and a
+       * shed button is hidden, so it is not in the tree at all; every toolbar
+       * action is a palette row by construction, and that is where the app
+       * sends it. On the macOS runner's window the bar shed "Bind targets"
+       * (`record.start`, its last action), and this reported Record missing.
        */
-      for (const id of ["action-record-start", "action-run-flow"]) {
-        check(
-          `the toolbar offers "${id}"`,
-          flows.some((node) => node.native?.["automationId"] === id),
-          {
-            expected: `a control whose automationId is "${id}"`,
-            actual: flows
-              .filter((node) => node.role === "button")
-              .map((node) => node.native?.["automationId"] ?? node.name)
-              .slice(0, 20),
-          },
-        );
+      const wanted = ["action-record-start", "action-run-flow"];
+      const onBar = new Set(
+        wanted.filter((id) => flows.some((node) => node.native?.["automationId"] === id)),
+      );
+      const rows = onBar.size === wanted.length ? new Set<string>() : await paletteRows(context);
+      for (const id of wanted) {
+        const row = `palette-${id.slice("action-".length)}`;
+        check(`the toolbar offers "${id}"`, onBar.has(id) || rows.has(row), {
+          expected: `a control whose automationId is "${id}", or, shed from a bar that is full, the palette row "${row}"`,
+          actual: flows
+            .filter((node) => node.role === "button")
+            .map((node) => node.native?.["automationId"] ?? node.name)
+            .slice(0, 20),
+        });
       }
 
       // And the Run screen itself, through the palette: it is not on the rail,
@@ -843,15 +915,18 @@ async function healingCase(
      * on exactly one screen and the pass has to go there to find it.
      */
     const viaPalette = subject.screen.startsWith("palette:");
-    const here = viaPalette
-      ? ((await context.surface.snapshot()).nodes as readonly Node[])
-      : undefined;
+    // A Session mode is a detour of the same kind: a rail row, then a tab.
+    const viaMode = subject.screen.startsWith("session:");
+    const here =
+      viaPalette || viaMode ? ((await context.surface.snapshot()).nodes as readonly Node[]) : undefined;
     const nodes =
       here !== undefined && byKey(here, subject.key) !== undefined
         ? here
         : viaPalette
           ? await openFromPalette(context, subject.screen.slice("palette:".length))
-          : await openScreen(context, subject.screen);
+          : viaMode
+            ? await openSessionMode(context, subject.screen.slice("session:".length) as "record" | "say" | "do")
+            : await openScreen(context, subject.screen);
     const live = byKey(nodes, subject.key);
 
     if (healing.variant === 0) {
@@ -981,14 +1056,14 @@ export const DESKTOP_HEALING_CASES: readonly ConformanceCase[] = [
     id: "app.heal.moved-panel",
     page: "Yam",
     description:
-      "LLD §16 variant 2: the Record screen's gateway control moves into another panel, and a " +
-      "binding recorded at variant 0 relocalizes onto it.",
+      "LLD §16 variant 2: the gateway control of Session's Record mode moves into another " +
+      "panel, and a binding recorded at variant 0 relocalizes onto it.",
     variants: [0, 2],
     async run(context) {
       await healingCase(
         context,
         "app.heal.moved-panel",
-        [{ key: "record-gateway", role: "combobox", screen: "palette:record", nameAtZero: "Gateway" }],
+        [{ key: "record-gateway", role: "combobox", screen: "session:record", nameAtZero: "Gateway" }],
         2,
       );
     },
