@@ -46,7 +46,9 @@ export function roleOf(
   context: { readonly insideRow?: boolean; readonly insideChooser?: boolean } = {},
 ): string {
   const localized = (node.localizedControlType ?? "").trim().toLowerCase();
-  if (localized !== "" && ARIA_ROLES.has(localized)) return localized;
+  if (localized !== "" && ARIA_ROLES.has(localized) && DEFAULT_LOCALIZED[node.controlType] !== localized) {
+    return localized;
+  }
   /*
    * A `DataItem` inside a `DataItem` is a cell (REQ-SURF-4).
    *
@@ -76,6 +78,23 @@ export function roleOf(
   if (context.insideChooser === true && node.controlType === "Text") return "option";
   return UIA_ROLE_MAP[node.controlType] ?? FALLBACK_ROLE;
 }
+
+/**
+ * A control type's own default `LocalizedControlType`, where it is spelt like
+ * an ARIA role the control is not (see `roleOf`).
+ *
+ * UI Automation's English default for `ControlType.Tab` — the strip, ARIA's
+ * `tablist` — is "tab", and for `TabItem`, the tab, "tab item". Reading the
+ * localised type first made every tab strip a `tab`: on the Windows runner the
+ * Session screen's "Session mode" strip failed the id rule as an interactive
+ * tab with no id, while its three tabs, which have ids, were fine. The default
+ * says nothing the control type does not, so it is not a refinement.
+ *
+ * One entry, because it is the one collision: the other defaults are "check
+ * box", "hyperlink", "list item" and the like, which `ARIA_ROLES` already
+ * refuses, and `Button`'s "button" names the role it maps to anyway.
+ */
+const DEFAULT_LOCALIZED: Readonly<Record<string, string>> = { Tab: "tab" };
 
 /**
  * The control types whose descendants are a chooser's items (see `roleOf`).

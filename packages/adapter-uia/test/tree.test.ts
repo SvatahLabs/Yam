@@ -65,6 +65,18 @@ describe("control types are normalised to the ARIA vocabulary (REQ-SURF-4)", () 
     expect(roleOf({ controlType: "Button", localizedControlType: "bouton" })).toBe("button");
   });
 
+  it("does not take a tab strip's default localised type for a role", () => {
+    /*
+     * UI Automation's own default for `ControlType.Tab` is "tab", which is also
+     * the ARIA role of what the strip holds. On the Windows runner the Session
+     * screen's `role="tablist"` strip came back as a `tab` with no id.
+     */
+    expect(roleOf({ controlType: "Tab", localizedControlType: "tab" })).toBe("tablist");
+    expect(roleOf({ controlType: "TabItem", localizedControlType: "tab item" })).toBe("tab");
+    // What Chromium's tree says, as the recorded fixtures carry it.
+    expect(roleOf({ controlType: "TabItem", localizedControlType: "tab" })).toBe("tab");
+  });
+
   it("falls back rather than dropping an element", () => {
     expect(roleOf({ controlType: "SomethingNew" })).toBe("generic");
   });
