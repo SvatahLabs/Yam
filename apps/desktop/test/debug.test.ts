@@ -42,7 +42,8 @@ describe("the log is off unless it is asked for", () => {
   });
 
   it("goes beside the preferences, in the user-data directory", () => {
-    expect(debugLogPath("/tmp/x")).toBe("/tmp/x/app-debug.log");
+    // `join`, not a literal: the path is the platform's own, `\tmp\x\…` on Windows.
+    expect(debugLogPath("/tmp/x")).toBe(join("/tmp/x", "app-debug.log"));
   });
 });
 

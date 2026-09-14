@@ -91,9 +91,12 @@ describe("the handshake (LLD §13.6)", () => {
 describe("the lock file (LLD §13.6)", () => {
   it("lives in the user-data directory, never in the project", () => {
     const path = lockPathFor("/home/someone/.config/yam", "/work/my-project");
-    expect(path.startsWith("/home/someone/.config/yam")).toBe(true);
+    // In the platform's own separators, which is what `lockPathFor` answers in:
+    // on the Windows runner the literal `/home/…` prefix matched nothing.
+    expect(path.startsWith(join("/home/someone/.config/yam"))).toBe(true);
     // A token in a repository is a token in a pull request (REQ-NFR-6).
-    expect(path).not.toContain("/work/my-project");
+    expect(path).not.toContain(join("/work/my-project"));
+    expect(path).not.toContain("my-project");
   });
 
   it("keys on the whole path, so two projects named the same do not collide", () => {
