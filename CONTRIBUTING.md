@@ -164,8 +164,10 @@ A failing test is the best bug report there is.
 
 ## Security
 
-Do not open a public issue for a security problem. See
-[docs/project/security.md](docs/project/security.md).
+Please do not open a public issue for a security problem. See
+[SECURITY.md](SECURITY.md) for how to report one, and
+[docs/project/security.md](docs/project/security.md) for how Yam is designed to
+handle credentials, secrets and the network.
 
 ## Licence
 

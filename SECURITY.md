@@ -2,24 +2,25 @@
 
 ## Reporting a vulnerability
 
-Do not open a public issue for a security problem. Email <info@svatah.com>
-instead, and include:
+Please do not open a public issue for a security problem. Email
+<info@svatah.com> instead, with as much of this as you have:
 
 - the Yam version, or the commit you built from,
 - the command, tool or endpoint involved,
 - what you observed, and how to reproduce it.
 
-You will get an acknowledgement within three working days, and a fix or a
-mitigation before any public disclosure.
+Yam is maintained on a best-effort basis. Reports are read and acted on as
+time allows; there is no guaranteed response time or fix schedule.
 
 ## Supported versions
 
-0.1.0 is the first release and has not been tagged yet. Until a later release
-exists, security fixes land on `main`, and only the latest `main` is supported.
+Yam has not had a release yet. Only the latest `main` is looked at, and any
+fix lands there.
 
-## What Yam promises
+## Security design
 
-No credentials in the repository, secrets redacted from every artifact, replay
-without network calls beyond the target application, and a local service bound
-to `127.0.0.1` are described in
-[docs/project/security.md](docs/project/security.md).
+How Yam keeps credentials out of the repository, redacts secrets, replays
+without calling a model, and binds its local service to `127.0.0.1` is
+described in [docs/project/security.md](docs/project/security.md). That page
+describes the design rather than guaranteeing it: Yam is provided as is, under
+the [Apache License 2.0](LICENSE).
