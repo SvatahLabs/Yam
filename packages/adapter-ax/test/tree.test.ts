@@ -51,6 +51,21 @@ describe("roles are normalised to the ARIA vocabulary (REQ-SURF-4, LLD §2.2)", 
     expect(roleOf({ role: "AXGroup", subrole: "AXLandmarkMain" })).toBe("main");
   });
 
+  it("reads the text a dropdown shows as its value, not as its options", () => {
+    /*
+     * The recorded Adapter and Gateway dropdowns show "playwright" and a
+     * gateway's name. That text sits inside the pop-up button, and the rule
+     * that makes a `<select>`'s menu items options made it options too — two
+     * named "playwright", and on a newer Chromium two with no name, which
+     * desktop conformance counted as interactive controls without names.
+     */
+    for (const screen of ["explorer", "record"] as const) {
+      const nodes = convert(screen);
+      expect(nodes.some((node) => node.role === "combobox"), screen).toBe(true);
+      expect(nodes.filter((node) => node.role === "option"), screen).toEqual([]);
+    }
+  });
+
   it("falls back rather than dropping an element", () => {
     // "An unmapped control still appears in the snapshot with its name and
     // states, so it can be grounded and acted on, rather than vanishing."

@@ -87,10 +87,23 @@ export function roleOf(
  */
 const CHOOSER_TYPES = new Set(["ComboBox"]);
 
-/** Whether this node is inside a chooser (see `roleOf`). */
+/** What a chooser's items sit in: the list or menu it opens. */
+const CHOOSER_LIST_TYPES = new Set(["List", "Menu"]);
+
+/**
+ * Whether this node is inside a chooser's list (see `roleOf`).
+ *
+ * *In its list*, not merely under the combo box: the combo box also holds the
+ * text of what it currently shows, which is its value and not an option. The
+ * AX adapter's pop-up rule draws the same line, so the two still agree
+ * (`test/parity.test.ts`).
+ */
 export function insideChooser(nodes: readonly UiaNode[], index: number): boolean {
+  let inList = false;
   for (let at = nodes[index]?.parent ?? -1; at >= 0; at = nodes[at]?.parent ?? -1) {
-    if (CHOOSER_TYPES.has(nodes[at]!.controlType)) return true;
+    const type = nodes[at]!.controlType;
+    if (CHOOSER_TYPES.has(type)) return inList;
+    if (CHOOSER_LIST_TYPES.has(type)) inList = true;
   }
   return false;
 }

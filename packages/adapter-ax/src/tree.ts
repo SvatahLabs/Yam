@@ -94,10 +94,26 @@ export function insideList(nodes: readonly AxNode[], index: number): boolean {
   return false;
 }
 
-/** Whether this node is inside a pop-up button's menu (see `roleOf`). */
+/** What a pop-up's items sit in: the menu Chromium publishes for a `<select>`, or a list. */
+const POP_UP_MENU_ROLES = new Set(["AXMenu", "AXList"]);
+
+/**
+ * Whether this node is inside a pop-up button's menu (see `roleOf`).
+ *
+ * *In its menu*, not merely under the button. A pop-up button also holds the
+ * text of what it currently shows — "System", "Automatic" — and that text is
+ * the control's value, not one of its options. Read as an option it was an
+ * `option` with no name beside every dropdown, which desktop conformance
+ * reported as interactive controls without names or ids. A `<select>`'s own
+ * options are under the `AXMenu` Chromium gives it, and a listbox's under its
+ * `AXList`, so both are still options.
+ */
 export function insidePopUp(nodes: readonly AxNode[], index: number): boolean {
+  let inMenu = false;
   for (let at = nodes[index]?.parent ?? -1; at >= 0; at = nodes[at]!.parent) {
-    if (POP_UP_ROLES.has(nodes[at]!.role)) return true;
+    const role = nodes[at]!.role;
+    if (POP_UP_ROLES.has(role)) return inMenu;
+    if (POP_UP_MENU_ROLES.has(role)) inMenu = true;
   }
   return false;
 }

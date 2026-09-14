@@ -21,7 +21,7 @@ Windows UI Automation adapter: the Yam agent surface over UIAutomationClient
 | `encodePowershell` | function | `export function encodePowershell(script: string, argument: unknown): string` | The request, and the console, put where the script can reach them (T7.2). |
 | `escapeSendKeys` | function | `export function escapeSendKeys(text: string): string` | Escape a literal for `SendKeys`. |
 | `evaluateUiaPredicate` | function | `export function evaluateUiaPredicate(` |  |
-| `insideChooser` | function | `export function insideChooser(nodes: readonly UiaNode[], index: number): boolean` | Whether this node is inside a chooser (see `roleOf`). |
+| `insideChooser` | function | `export function insideChooser(nodes: readonly UiaNode[], index: number): boolean` | Whether this node is inside a chooser's list (see `roleOf`). |
 | `insideRow` | function | `export function insideRow(nodes: readonly UiaNode[], index: number): boolean` | Whether this node is inside a table row (see `roleOf`). |
 | `isTextual` | function | `export function isTextual(node: UiaNode): boolean` | Whether the element takes text, for `type` and for `value`. |
 | `literalValue` | function | `export function literalValue(ref: ValueRef): string` | The literal a `ValueRef` names; an unresolved one is a caller mistake (LLD §8.2). |
