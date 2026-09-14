@@ -20,9 +20,9 @@
  * its own product name, bundle identifier and output directory, the suite's
  * build is invisible to the gate, to a person's own app, and to `pkill -f`.
  */
-import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { spawnPnpmSync } from "./lib/pnpm.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const APP_DIR = join(ROOT, "apps", "desktop");
@@ -31,11 +31,11 @@ const test = args.includes("--test");
 const command = args.includes("--make") ? "make" : "package";
 
 for (const step of [["ensure-electron"], ["stage-cli"]]) {
-  const ran = spawnSync("pnpm", ["run", ...step], { cwd: APP_DIR, stdio: "inherit" });
+  const ran = spawnPnpmSync(["run", ...step], { cwd: APP_DIR, stdio: "inherit" });
   if (ran.status !== 0) process.exit(ran.status ?? 1);
 }
 
-const forge = spawnSync("pnpm", ["exec", "electron-forge", command], {
+const forge = spawnPnpmSync(["exec", "electron-forge", command], {
   cwd: APP_DIR,
   stdio: "inherit",
   env: { ...process.env, ...(test ? { YAM_APP_TEST_BUILD: "1" } : {}) },

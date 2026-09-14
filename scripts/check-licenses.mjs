@@ -6,10 +6,10 @@
 // its own. Exits non-zero and prints the offending packages when anything outside
 // the allowlist appears.
 
-import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { execPnpmSync } from "./lib/pnpm.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -106,7 +106,7 @@ function isAllowed(expression) {
 }
 
 function pnpmLicenses() {
-  const raw = execFileSync("pnpm", ["licenses", "list", "--json"], {
+  const raw = execPnpmSync(["licenses", "list", "--json"], {
     cwd: ROOT,
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,

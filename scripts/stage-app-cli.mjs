@@ -30,10 +30,10 @@
  * things. See `packages/service/src/runtime.ts`. If that ever stops being
  * enough, shipping a Node is the fallback and this is the file that would do it.
  */
-import { spawnSync } from "node:child_process";
 import { existsSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { spawnPnpmSync } from "./lib/pnpm.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -51,11 +51,11 @@ rmSync(out, { recursive: true, force: true });
  * `--legacy` because this workspace does not inject workspace packages, and
  * `--prod` because the app spawns the CLI and never builds it.
  */
-const deploy = spawnSync(
-  "pnpm",
-  ["deploy", "--filter", "@svatah/yam", "--prod", "--legacy", out],
-  { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" },
-);
+const deploy = spawnPnpmSync(["deploy", "--filter", "@svatah/yam", "--prod", "--legacy", out], {
+  cwd: ROOT,
+  stdio: ["ignore", "pipe", "pipe"],
+  encoding: "utf8",
+});
 
 if (deploy.status !== 0) {
   process.stderr.write(deploy.stdout ?? "");
