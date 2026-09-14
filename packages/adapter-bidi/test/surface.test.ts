@@ -61,7 +61,9 @@ beforeAll(async () => {
  */
 afterEach(async () => {
   for (const surface of opened.splice(0)) await surface.close().catch(() => undefined);
-});
+  // Its own deadline: a close may take two seconds to end the session and five
+  // for the browser to exit, and a hook's default is ten.
+}, 60_000);
 
 afterAll(async () => {
   await app?.close();

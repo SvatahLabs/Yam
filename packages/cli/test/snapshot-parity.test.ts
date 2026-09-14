@@ -65,10 +65,17 @@ beforeAll(async () => {
   app = await startSampleApp(0);
 }, 180_000);
 
+/*
+ * With a deadline of its own, like `beforeAll`'s. Vitest's default for a hook
+ * is ten seconds, and this one closes two Playwright browsers, two Firefoxes —
+ * each allowed two seconds to end its session and five to exit — and the sample
+ * application, one after another. On the macOS runner beside the rest of the
+ * CLI's suites it ran out (run 34814225072) after every test had passed.
+ */
 afterAll(async () => {
   for (const surface of opened) await surface.close().catch(() => undefined);
   await app?.close();
-});
+}, 120_000);
 
 describeWithBidi("Playwright and BiDi report the same tree (REQ-SURF-4)", () => {
   it("agrees on every role, name and state, on every page the fixtures use", async () => {
