@@ -1189,6 +1189,12 @@ export interface OsascriptBridgeOptions {
   readonly windowDeadlineMs?: number;
   /** For tests: run a script without spawning anything. */
   readonly run?: typeof runOsascript;
+  /**
+   * For tests: the platform to answer for, `process.platform` unless given. A
+   * test that fakes `run` is describing macOS, and on a Linux runner the
+   * "not macOS" answer came first and it never reached the fake.
+   */
+  readonly platform?: NodeJS.Platform;
 }
 
 const DEFAULT_TIMEOUT_MS = 20_000;
@@ -1249,6 +1255,7 @@ export function machineLoad(): { loadAverage1m: number; cpus: number } {
 export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
   const run = options.run ?? runOsascript;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const platform = options.platform ?? process.platform;
 
   /*
    * What the last `permission()` answered, so a slow window read can say which
@@ -1320,7 +1327,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
 
   const bridge: AxBridge = {
     async permission(): Promise<AxPermission> {
-      if (process.platform !== "darwin") {
+      if (platform !== "darwin") {
         lastPermission = "unsupported";
         return {
           state: "unsupported",
@@ -1368,7 +1375,7 @@ export function osascriptBridge(options: OsascriptBridgeOptions): AxBridge {
      * reported as "could not tell", not as "locked".
      */
     async session(): Promise<AxSession> {
-      if (process.platform !== "darwin") {
+      if (platform !== "darwin") {
         return {
           usable: false,
           state: "no-session",

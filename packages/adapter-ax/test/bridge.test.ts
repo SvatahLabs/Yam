@@ -44,7 +44,7 @@ const answering = (
 describe("the permission check (REQ-ADP-7, `yam surface doctor`)", () => {
   it("is granted only when an assistive-access call answers", async () => {
     const { run, calls } = answering('{"ok":true,"processes":42,"elements":7}');
-    const permission = await osascriptBridge({ process: "Yam", run }).permission();
+    const permission = await osascriptBridge({ process: "Yam", run, platform: "darwin" }).permission();
     expect(permission.state).toBe("granted");
 
     /*
@@ -68,14 +68,14 @@ describe("the permission check (REQ-ADP-7, `yam surface doctor`)", () => {
       stderr: "execution error: Error: Error: osascript is not allowed assistive access. (-25211)",
       timedOut: false,
     });
-    const permission = await osascriptBridge({ process: "Yam", run: refused }).permission();
+    const permission = await osascriptBridge({ process: "Yam", run: refused, platform: "darwin" }).permission();
     expect(permission.state).toBe("denied");
     expect(permission.advice).toContain("restart it");
   });
 
   it("reads a timeout as the unanswered prompt, and says where to grant it", async () => {
     const run: Run = async () => ({ code: null, stdout: "", stderr: "", timedOut: true });
-    const permission = await osascriptBridge({ process: "Yam", run }).permission();
+    const permission = await osascriptBridge({ process: "Yam", run, platform: "darwin" }).permission();
     expect(permission.state).toBe("prompt-pending");
     expect(permission.advice).toContain("System Settings → Privacy & Security → Accessibility");
     // The part people get wrong: the grant is per application, so one granted
@@ -89,7 +89,7 @@ describe("the permission check (REQ-ADP-7, `yam surface doctor`)", () => {
 
   it("uses a short deadline, because a blocked prompt takes two minutes", async () => {
     const { run, calls } = answering('{"ok":true}');
-    await osascriptBridge({ process: "Yam", run, timeoutMs: 60_000 }).permission();
+    await osascriptBridge({ process: "Yam", run, timeoutMs: 60_000, platform: "darwin" }).permission();
     expect(calls[0]!.timeoutMs).toBe(5_000);
   });
 
@@ -100,7 +100,7 @@ describe("the permission check (REQ-ADP-7, `yam surface doctor`)", () => {
       stderr: "execution error: Not authorised to send Apple events (-1743)",
       timedOut: false,
     });
-    const permission = await osascriptBridge({ process: "Yam", run: denied }).permission();
+    const permission = await osascriptBridge({ process: "Yam", run: denied, platform: "darwin" }).permission();
     expect(permission.state).toBe("denied");
     // The other thing people get wrong: macOS does not re-read the setting for
     // a process that is already running.
@@ -110,16 +110,10 @@ describe("the permission check (REQ-ADP-7, `yam surface doctor`)", () => {
 
   it("says a machine that is not macOS is unsupported, without spawning anything", async () => {
     const run = vi.fn<Run>();
-    const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
-    Object.defineProperty(process, "platform", { value: "linux", configurable: true });
-    try {
-      const permission = await osascriptBridge({ process: "x", run }).permission();
-      expect(permission.state).toBe("unsupported");
-      expect(permission.advice).toContain("--adapter uia");
-      expect(run).not.toHaveBeenCalled();
-    } finally {
-      Object.defineProperty(process, "platform", platform);
-    }
+    const permission = await osascriptBridge({ process: "x", run, platform: "linux" }).permission();
+    expect(permission.state).toBe("unsupported");
+    expect(permission.advice).toContain("--adapter uia");
+    expect(run).not.toHaveBeenCalled();
   });
 });
 
@@ -446,7 +440,7 @@ describe("reading a window", () => {
         timedOut: false,
       };
     };
-    const bridge = osascriptBridge({ process: "Yam", run });
+    const bridge = osascriptBridge({ process: "Yam", run, platform: "darwin" });
     expect((await bridge.permission()).state).toBe("granted");
 
     await expect(
