@@ -22,7 +22,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -37,11 +37,11 @@ if (!existsSync(store)) {
   process.exit(2);
 }
 
-const { parse } = await import(join(ROOT, "node_modules", "yaml", "dist", "index.js"));
-const { relocalize } = await import(join(ROOT, "packages", "bindings", "dist", "index.js"));
-const { createSurface } = await import(join(ROOT, "packages", "surface", "dist", "index.js"));
-const ax = await import(join(ROOT, "packages", "adapter-ax", "dist", "index.js"));
-const { DEFAULT_CONFIG } = await import(join(ROOT, "packages", "schema", "dist", "index.js"));
+const { parse } = await import(pathToFileURL(join(ROOT, "node_modules", "yaml", "dist", "index.js")).href);
+const { relocalize } = await import(pathToFileURL(join(ROOT, "packages", "bindings", "dist", "index.js")).href);
+const { createSurface } = await import(pathToFileURL(join(ROOT, "packages", "surface", "dist", "index.js")).href);
+const ax = await import(pathToFileURL(join(ROOT, "packages", "adapter-ax", "dist", "index.js")).href);
+const { DEFAULT_CONFIG } = await import(pathToFileURL(join(ROOT, "packages", "schema", "dist", "index.js")).href);
 ax.registerAxAdapter();
 
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));

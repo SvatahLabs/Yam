@@ -32,7 +32,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse as parseYaml } from "yaml";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -165,7 +165,7 @@ mkdirSync(out, { recursive: true });
  * exactly the kind of thing nobody notices for a month.
  */
 const { TIER2_SYSTEM_PROMPT, TIER2_PROMPT_VERSION } = await import(
-  join(ROOT, "packages/cli/dist/index.js")
+  pathToFileURL(join(ROOT, "packages/cli/dist/index.js")).href
 );
 
 const jsonl = pairs

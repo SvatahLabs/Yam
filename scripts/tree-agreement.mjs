@@ -36,7 +36,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -224,9 +224,9 @@ await browser.close();
 
 /* ── 3. the accessibility snapshot of the same window ─────────────────────── */
 
-const { createSurface } = await import(join(ROOT, "packages", "surface", "dist", "index.js"));
-const ax = await import(join(ROOT, "packages", "adapter-ax", "dist", "index.js"));
-const { DEFAULT_CONFIG } = await import(join(ROOT, "packages", "schema", "dist", "index.js"));
+const { createSurface } = await import(pathToFileURL(join(ROOT, "packages", "surface", "dist", "index.js")).href);
+const ax = await import(pathToFileURL(join(ROOT, "packages", "adapter-ax", "dist", "index.js")).href);
+const { DEFAULT_CONFIG } = await import(pathToFileURL(join(ROOT, "packages", "schema", "dist", "index.js")).href);
 ax.registerAxAdapter();
 
 let snapshot;

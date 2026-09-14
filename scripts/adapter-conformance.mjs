@@ -14,7 +14,7 @@
 import { spawn } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { startSampleApp } from "sample-web";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -36,7 +36,7 @@ function run(args, env = {}) {
 const reportAt = process.argv.indexOf("--report");
 const reportPath = reportAt >= 0 ? process.argv[reportAt + 1] : undefined;
 
-const { bidiAvailable } = await import(join(ROOT, "packages", "adapter-bidi", "dist", "index.js"));
+const { bidiAvailable } = await import(pathToFileURL(join(ROOT, "packages", "adapter-bidi", "dist", "index.js")).href);
 
 const app = await startSampleApp(0);
 const rows = [];

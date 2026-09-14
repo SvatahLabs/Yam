@@ -24,7 +24,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "playwright";
 import { startSampleApp } from "sample-web";
 
@@ -290,7 +290,7 @@ try {
     });
     process.stderr.write(doctor.stdout ?? "");
     const { osascriptBridge } = await import(
-      join(ROOT, "packages", "adapter-ax", "dist", "index.js")
+      pathToFileURL(join(ROOT, "packages", "adapter-ax", "dist", "index.js")).href
     );
     const bridge = osascriptBridge({ process: "Yam" });
     const permission = await bridge.permission();

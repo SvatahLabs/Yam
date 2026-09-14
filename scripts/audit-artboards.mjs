@@ -30,7 +30,7 @@
  */
 import { readFileSync, readdirSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DESIGN = join(ROOT, "docs", "spec", "design");
@@ -54,7 +54,7 @@ try {
  * without them would be measuring a different picture from the one that was
  * approved.
  */
-const { expand, baseCss } = await import(join(DESIGN, "macros.mjs"));
+const { expand, baseCss } = await import(pathToFileURL(join(DESIGN, "macros.mjs")).href);
 
 /**
  * Which artboards to read. The committed set by default; `--artboards <dir>` for

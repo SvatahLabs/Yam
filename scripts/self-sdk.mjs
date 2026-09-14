@@ -41,7 +41,7 @@
  */
 import { spawn, spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const cli = join(ROOT, "packages", "cli", "dist", "bin.js");
@@ -103,8 +103,8 @@ try {
 }
 process.stderr.write(`the local service is on ${connection.url}\n`);
 
-const { SCREENS } = await import(join(ROOT, "packages", "screens", "dist", "index.js"));
-const { YamClient } = await import(join(ROOT, "packages", "sdk", "dist", "index.js"));
+const { SCREENS } = await import(pathToFileURL(join(ROOT, "packages", "screens", "dist", "index.js")).href);
+const { YamClient } = await import(pathToFileURL(join(ROOT, "packages", "sdk", "dist", "index.js")).href);
 const client = new YamClient({ url: connection.url, token: connection.token });
 
 /** `yam ui --json --screen <id>`, from another process entirely. */

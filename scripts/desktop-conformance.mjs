@@ -41,7 +41,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -740,7 +740,7 @@ try {
   /* ── 4. one report ──────────────────────────────────────────────────────── */
 
   const { renderMarkdown } = await import(
-    join(ROOT, "packages", "conformance", "dist", "index.js")
+    pathToFileURL(join(ROOT, "packages", "conformance", "dist", "index.js")).href
   );
 
   const failed = passes.flatMap((pass) =>
