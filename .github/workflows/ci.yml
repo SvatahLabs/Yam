@@ -442,9 +442,11 @@ jobs:
         run: node packages/cli/dist/bin.js surface doctor --adapter ${{ matrix.adapter }}
 
       # The conformance target is the app itself, packaged and launched with
-      # `YAM_A11Y=1` (LLD §16, REQ-ADE-6).
+      # `YAM_A11Y=1` (LLD §16, REQ-ADE-6). By the app's `package` script, which
+      # stages the CLI that Forge copies into the app: `electron-forge package`
+      # on its own fails on any checkout that has never staged one.
       - name: Package the app
-        run: pnpm --filter @svatah/yam-desktop exec electron-forge package
+        run: pnpm --filter @svatah/yam-desktop package
 
       # Exit 2 (host not ready) is tolerated and says so; exit 1 (not
       # conformant) fails the leg. Never the other way round.

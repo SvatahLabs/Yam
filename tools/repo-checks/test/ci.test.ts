@@ -146,8 +146,11 @@ describe("the CI workflow (T0.2, T13.2)", () => {
     // The host requirement first and on its own, so a failure reads as "the
     // runner cannot do this" rather than as a failed suite.
     expect(script).toContain("surface doctor --adapter");
-    // The conformance target is the app itself, packaged (LLD §16, REQ-ADE-6).
-    expect(script).toContain("electron-forge package");
+    // The conformance target is the app itself, packaged (LLD §16, REQ-ADE-6),
+    // by the app's own script: Forge alone does not stage the bundled CLI, and
+    // on a clean checkout it failed on the missing `.stage/yam`.
+    expect(script).toContain("pnpm --filter @svatah/yam-desktop package");
+    expect(script).not.toContain("electron-forge package");
     expect(script).toContain("scripts/desktop-conformance.mjs");
 
     /*
