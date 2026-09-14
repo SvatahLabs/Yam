@@ -309,7 +309,19 @@ export function App(props: AppProps): React.JSX.Element {
     setBusy(true);
     try {
       const code = await new Promise<number>((done) => {
-        const child = spawn(editor, [scratch], { stdio: "inherit", shell: false });
+        /*
+         * `$EDITOR` is a command line, not a path: `code --wait`, `subl -w`,
+         * `emacsclient -t`. Git runs it through the shell with the file as an
+         * argument, and so does this. Spawned as one executable it failed for
+         * every editor that takes an argument, and on Windows for every editor
+         * installed as a `.cmd` shim — `code` among them — which Node will not
+         * start without a shell. The file goes in as `$1` on a POSIX shell, so
+         * its path is never re-read as shell syntax.
+         */
+        const child =
+          process.platform === "win32"
+            ? spawn(`${editor} "${scratch}"`, { stdio: "inherit", shell: true })
+            : spawn("/bin/sh", ["-c", `${editor} "$1"`, "sh", scratch], { stdio: "inherit" });
         child.on("error", () => done(-1));
         child.on("exit", (status) => done(status ?? -1));
       });

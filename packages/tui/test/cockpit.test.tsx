@@ -795,9 +795,14 @@ describe("all thirteen screens draw in the cockpit (T10.1, T10.2, T14)", () => {
  * `flows.save` action against the same `PUT /flows/:file`, which is what makes
  * this one feature with two renderings rather than two features.
  *
- * `$EDITOR` here is a Node one-liner that appends a line, because what is being
- * checked is the round trip — the file's text out, the edited text in, the
+ * `$EDITOR` here is Node running a script that appends a line, because what is
+ * being checked is the round trip — the file's text out, the edited text in, the
  * action called with it — and not anybody's editor.
+ *
+ * It is a command line with arguments, `"<node>" "<editor.js>"`, the way
+ * `code --wait` is. It used to be a `#!/bin/sh` script, which Windows cannot
+ * run, and which hid that the cockpit spawned `$EDITOR` as one executable: an
+ * editor with an argument, or a `.cmd` shim, never opened at all.
  */
 describe("`e` edits the open flow through $EDITOR (K6)", () => {
   const withEditor = async (
@@ -806,14 +811,10 @@ describe("`e` edits the open flow through $EDITOR (K6)", () => {
   ): Promise<void> => {
     const before = process.env["EDITOR"];
     const visual = process.env["VISUAL"];
-    const directory = mkdtempSync(join(tmpdir(), "yam-editor-"));
-    const editor = join(directory, "editor.sh");
-    writeFileSync(
-      editor,
-      `#!/bin/sh\nexec "${process.execPath}" -e '${script}' "$1"\n`,
-      { mode: 0o755 },
-    );
-    process.env["EDITOR"] = editor;
+    const directory = mkdtempSync(join(tmpdir(), "yam editor "));
+    const editor = join(directory, "editor.js");
+    writeFileSync(editor, `${script}\n`, "utf8");
+    process.env["EDITOR"] = `"${process.execPath}" "${editor}"`;
     delete process.env["VISUAL"];
     try {
       await run();
@@ -852,7 +853,7 @@ describe("`e` edits the open flow through $EDITOR (K6)", () => {
     expect(text, "the Flows state carries no text for an editor to open").not.toBe("");
 
     await withEditor(
-      'require("fs").appendFileSync(process.argv[1], "\\n  Frobnicate the widget\\n")',
+      'require("fs").appendFileSync(process.argv[2], "\\n  Frobnicate the widget\\n")',
       async () => {
         instance.stdin.write("e");
         await until(() => (wrote.length > 0 ? "yes" : undefined), "the save");
@@ -888,7 +889,7 @@ describe("`e` edits the open flow through $EDITOR (K6)", () => {
     );
     await until(() => seen.at(-1), "the first load");
 
-    await withEditor('void process.argv[1]', async () => {
+    await withEditor('void process.argv[2]', async () => {
       instance.stdin.write("e");
       const said = await until(
         () => (seen.at(-1)?.message?.includes("unchanged") === true ? "yes" : undefined),
