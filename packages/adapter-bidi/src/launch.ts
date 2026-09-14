@@ -44,6 +44,12 @@ export interface BidiEndpoint {
    * `isDriverHostedSession`.
    */
   readonly hosted: boolean;
+  /**
+   * How long the session's opening commands may take, for a browser this
+   * adapter launched: the startup budget, because the browser is still
+   * starting when it says it is listening (see `BidiSession.open`).
+   */
+  readonly setupTimeoutMs?: number;
   /** Stop the browser this launched, if it launched one. */
   close(): Promise<void>;
 }
@@ -319,6 +325,7 @@ async function launchGecko(binary: string, options: LaunchOptions): Promise<Bidi
     launched: true,
     // A launched Gecko is a BiDi *server*: no session exists until we make one.
     hosted: false,
+    setupTimeoutMs: options.startupTimeoutMs ?? DEFAULT_STARTUP_TIMEOUT_MS,
     close: async () => {
       process.removeListener("exit", reap);
       reap();

@@ -163,6 +163,7 @@ export class BidiSurface implements AgentSurface {
       ignoreAttributes: this.options.ignoreAttributes ?? DEFAULT_IGNORE_ATTRIBUTES,
       timeoutMs: this.options.timeoutMs ?? 10_000,
       hosted: endpoint.hosted,
+      ...(endpoint.setupTimeoutMs === undefined ? {} : { setupTimeoutMs: endpoint.setupTimeoutMs }),
     });
 
     if (session.storageState !== undefined) {

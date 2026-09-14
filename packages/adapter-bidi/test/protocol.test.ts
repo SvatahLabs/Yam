@@ -297,6 +297,37 @@ describe("attaching to the two endpoint shapes (P4-F3, LLD §7.3)", () => {
     expect(session.windows).toEqual(["ea02a15e-b4d5-42fd-a38d-167ad444c9e5"]);
   });
 
+  it("spends a launched browser's startup budget on opening the session, and nothing after", async () => {
+    /*
+     * Firefox says it is listening before its first window is ready, and the
+     * first subscription waits for that window. On the Windows runner that
+     * wait once outlasted the thirty-second command timeout. The opening
+     * commands of a browser the adapter launched get the startup budget; an
+     * attached browser has finished starting, so it keeps the command timeout.
+     */
+    const recorded = exchange("firefox-server");
+    const asked: Array<{ method: string; timeoutMs: number | undefined }> = [];
+    const client = {
+      async call(method: string, params: Record<string, unknown> = {}, options: { timeoutMs?: number } = {}) {
+        asked.push({ method, timeoutMs: options.timeoutMs });
+        const key =
+          method === "session.subscribe" ? `session.subscribe:${(params["events"] as string[])[0]}` : method;
+        const answer = recorded[key];
+        if (answer?.error !== undefined) throw new Error(answer.error);
+        return answer?.result ?? {};
+      },
+      on(): void {},
+    } as unknown as Parameters<typeof BidiSession.open>[0];
+
+    await BidiSession.open(client, { ...options, hosted: false, setupTimeoutMs: 60_000 });
+    expect(asked.map((one) => one.method)).toContain("session.subscribe");
+    expect(asked.filter((one) => one.timeoutMs !== 60_000)).toEqual([]);
+
+    asked.length = 0;
+    await BidiSession.open(client, { ...options, hosted: false });
+    expect(asked.every((one) => one.timeoutMs === undefined)).toBe(true);
+  });
+
   it("loses only the event a browser does not have", async () => {
     // Gecko refuses `browsingContext.navigationAborted`, and the recording holds
     // that refusal. One subscription per call is what keeps the refusal from

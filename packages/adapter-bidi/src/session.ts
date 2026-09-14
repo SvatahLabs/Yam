@@ -233,8 +233,22 @@ export class BidiSession {
        * first message, so the README's own commands failed on contact.
        */
       readonly hosted?: boolean;
+      /**
+       * How long each opening command may take, when that is not the client's
+       * command timeout: a browser this adapter just launched is still starting.
+       *
+       * Firefox prints that it is listening before its first window's content
+       * process is up, and the first `session.subscribe` waits for it. Here that
+       * is a tenth of a second against a millisecond for each subscription
+       * after it; on the Windows runner it was more than the thirty-second
+       * command timeout, once in fifteen launches, and the next launch took
+       * twenty-three seconds and passed. That is the browser's startup, so it is
+       * spent from the startup budget.
+       */
+      readonly setupTimeoutMs?: number;
     },
   ): Promise<BidiSession> {
+    const setup = options.setupTimeoutMs === undefined ? {} : { timeoutMs: options.setupTimeoutMs };
     /*
      * Create a session, or attach to one (Draft 2.6, LLD §7.3).
      *
@@ -266,7 +280,7 @@ export class BidiSession {
              */
             alwaysMatch: { unhandledPromptBehavior: "ignore" },
           },
-        })) as {
+        }, setup)) as {
           capabilities?: { browserName?: string; browserVersion?: string };
         });
     const session = new BidiSession(
@@ -300,9 +314,9 @@ export class BidiSession {
     ];
     const OPTIONAL = ["browsingContext.navigationFailed", "browsingContext.navigationAborted"];
 
-    for (const event of REQUIRED) await client.call("session.subscribe", { events: [event] });
+    for (const event of REQUIRED) await client.call("session.subscribe", { events: [event] }, setup);
     for (const event of OPTIONAL) {
-      await client.call("session.subscribe", { events: [event] }).catch(() => undefined);
+      await client.call("session.subscribe", { events: [event] }, setup).catch(() => undefined);
     }
 
     client.on((event) => session.onEvent(event.method, event.params));
@@ -322,12 +336,12 @@ export class BidiSession {
       session.describedBrowser = `a WebDriver BiDi browser, build ${version}`;
     }
 
-    const tree = (await client.call("browsingContext.getTree", {})) as {
+    const tree = (await client.call("browsingContext.getTree", {}, setup)) as {
       contexts?: Array<{ context: string }>;
     };
     session.windows = (tree.contexts ?? []).map((c) => c.context);
     if (session.windows.length === 0) {
-      const created = (await client.call("browsingContext.create", { type: "tab" })) as {
+      const created = (await client.call("browsingContext.create", { type: "tab" }, setup)) as {
         context: string;
       };
       session.windows = [created.context];
