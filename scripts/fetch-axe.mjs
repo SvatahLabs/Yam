@@ -33,6 +33,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 /** The build this repository is tested against (the Phase 9 verification's). */
 export const AXE_VERSION = "4.10.3";
@@ -87,7 +88,7 @@ export async function ensureAxe() {
   return path;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     process.stdout.write(`${await ensureAxe()}\n`);
   } catch (error) {

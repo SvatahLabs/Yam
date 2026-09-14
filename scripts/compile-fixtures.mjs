@@ -16,7 +16,7 @@
  */
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { compile } from "@svatah/yam-compiler";
 import { readProjectFrom } from "@svatah/yam-spec";
 import { canonicalJson } from "@svatah/yam-schema";
@@ -74,7 +74,7 @@ export function planFor(fixture) {
   return `${canonicalJson(compiled.plan)}\n`;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const check = process.argv.includes("--check");
   let drifted = 0;
 

@@ -16,7 +16,7 @@
  */
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { canonicalYaml, SCHEMA_VERSION } from "@svatah/yam-schema";
 import { contextHash, contextPattern, fingerprint, synthesise } from "@svatah/yam-bindings";
 import { PlaywrightSurface } from "@svatah/yam-adapter-playwright";
@@ -177,7 +177,7 @@ export function storeSnapshot(dir) {
   return out;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const target = join(ROOT, BINDINGS_DIR);
   rmSync(target, { recursive: true, force: true });
   mkdirSync(target, { recursive: true });

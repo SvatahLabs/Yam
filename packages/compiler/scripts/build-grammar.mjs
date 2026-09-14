@@ -8,7 +8,7 @@
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import peggyDefault from "peggy";
 
 // peggy 5 ships CommonJS; under ESM the whole module object is the default.
@@ -30,7 +30,16 @@ export function generateParser() {
   return `/* eslint-disable */\n// @ts-nocheck\n// GENERATED from grammar/step.peggy by scripts/build-grammar.mjs — do not edit.\n${source}`;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+/*
+ * Only when run as a script, and on every platform.
+ *
+ * This compared `import.meta.url` with `file://` and `process.argv[1]` joined,
+ * which is the same string on macOS and Linux and never on Windows, where the
+ * path is `D:\a\…` and the URL `file:///D:/a/…`. On Windows the script exited 0
+ * without writing the parser, and the build failed a step later on a missing
+ * `./generated/step-parser.js`. `pathToFileURL` makes the URL the way Node does.
+ */
+if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const out = join(root, "src", "generated");
   mkdirSync(out, { recursive: true });
   const text = generateParser();
