@@ -1004,7 +1004,23 @@ async function healingCase(
     });
 
     const healed = await healing.relocalize(context.surface, recorded.fingerprint, subject.role);
-    equals(`"${subject.key}" relocalizes at variant ${variant}`, healed.outcome, "relocalized");
+    /*
+     * With the ranking when it fails. "ambiguous" alone says the healer refused
+     * and not what it could not tell apart — which is the whole of what a person
+     * reading the report needs to go and fix it.
+     */
+    check(`"${subject.key}" relocalizes at variant ${variant}`, healed.outcome === "relocalized", {
+      expected: "relocalized",
+      actual:
+        healed.outcome === "relocalized"
+          ? healed.outcome
+          : {
+              outcome: healed.outcome,
+              ...(healed.best === undefined ? {} : { best: healed.best }),
+              ...(healed.runnerUp === undefined ? {} : { runnerUp: healed.runnerUp }),
+              ...(healed.margin === undefined ? {} : { margin: healed.margin }),
+            },
+    });
     if (healed.outcome !== "relocalized" || healed.ref === undefined) continue;
 
     /*

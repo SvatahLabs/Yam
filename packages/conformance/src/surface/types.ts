@@ -60,6 +60,22 @@ export interface HealOutcome {
   readonly outcome: "relocalized" | "not-found" | "ambiguous";
   readonly ref?: Ref;
   readonly score?: number;
+  /**
+   * Why it was not relocalized: the best candidate, and for `ambiguous` the one
+   * too close behind it and by how much. A report that says "ambiguous" and
+   * nothing else names a problem without saying where it is.
+   */
+  readonly best?: HealCandidate;
+  readonly runnerUp?: HealCandidate;
+  readonly margin?: number;
+}
+
+/** A relocalization candidate as a report shows it: what it is, and its scores. */
+export interface HealCandidate {
+  readonly role: string;
+  readonly name?: string;
+  readonly total: number;
+  readonly scores: { readonly attrs: number; readonly text: number; readonly neighbours: number; readonly rolePath: number; readonly box: number };
 }
 
 export interface DesktopHealing {

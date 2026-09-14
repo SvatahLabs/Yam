@@ -21,6 +21,7 @@ Surface and runtime conformance suites
 | `DESKTOP_CASES` | variable | `DESKTOP_CASES: readonly ConformanceCase[] = [` |  |
 | `DESKTOP_HEALING_CASES` | variable | `DESKTOP_HEALING_CASES: readonly ConformanceCase[] = [` |  |
 | `DesktopHealing` | interface | `export interface DesktopHealing` |  |
+| `HealCandidate` | interface | `export interface HealCandidate` | A relocalization candidate as a report shows it: what it is, and its scores. |
 | `HealOutcome` | interface | `export interface HealOutcome` | What model-free relocalization answered (LLD §6.4). |
 | `RecordedElement` | interface | `export interface RecordedElement` | What the desktop healing cases need, and this package will not import |
 | `renderMarkdown` | function | `export function renderMarkdown(report: ConformanceReport): string` | A Markdown report, for the release notes (REQ-PKG-4). |

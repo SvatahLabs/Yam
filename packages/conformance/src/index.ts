@@ -18,6 +18,7 @@ export type {
   BridgeCost,
   CaseContext,
   DesktopHealing,
+  HealCandidate,
   HealOutcome,
   RecordedElement,
   CaseReport,

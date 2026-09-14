@@ -7,7 +7,7 @@
  */
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import { fingerprint, relocalize } from "@svatah/yam-bindings";
+import { fingerprint, relocalize, type RelocalizeResult } from "@svatah/yam-bindings";
 import {
   DESKTOP_CASES,
   DESKTOP_HEALING_CASES,
@@ -16,8 +16,11 @@ import {
   runSurfaceConformance,
   type ConformanceReport,
   type DesktopHealing,
+  type HealCandidate,
   type RecordedElement,
 } from "@svatah/yam-conformance";
+
+type Match = Extract<RelocalizeResult, { outcome: "ambiguous" }>["best"];
 import { createSurface, listAdapters } from "@svatah/yam-surface";
 import { DEFAULT_CONFIG, type Config } from "@svatah/yam-schema";
 import { registerAllAdapters } from "../adapters.js";
@@ -75,10 +78,30 @@ function desktopHealing(variant: number, statePath: string): DesktopHealing {
         preferRole,
         ignoreAttributes: [GROUND_TRUTH_ATTRIBUTE],
       });
-      return {
-        outcome: result.outcome,
-        ...(result.outcome === "relocalized" ? { ref: result.match.ref, score: result.match.score.total } : {}),
-      };
+      const candidate = (match: Match): HealCandidate => ({
+        role: match.description.role,
+        ...(match.description.name === undefined ? {} : { name: match.description.name }),
+        total: match.score.total,
+        scores: {
+          attrs: match.score.attrs,
+          text: match.score.text,
+          neighbours: match.score.neighbours,
+          rolePath: match.score.rolePath,
+          box: match.score.box,
+        },
+      });
+      if (result.outcome === "relocalized") {
+        return { outcome: "relocalized", ref: result.match.ref, score: result.match.score.total };
+      }
+      if (result.outcome === "ambiguous") {
+        return {
+          outcome: "ambiguous",
+          best: candidate(result.best),
+          runnerUp: candidate(result.runnerUp),
+          margin: result.margin,
+        };
+      }
+      return { outcome: "not-found", ...(result.best === undefined ? {} : { best: candidate(result.best) }) };
     },
     recall(id) {
       return state[id];
