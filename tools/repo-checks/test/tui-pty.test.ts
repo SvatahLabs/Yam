@@ -189,24 +189,31 @@ function inPty(
     .map((one) => `'${one.replace(/'/g, "'\\''")}'`)
     .join(" ");
 
+  /*
+   * `stty` first (T10.4, P9-F4).
+   *
+   * A `script` spawned with no controlling terminal allocates a pty of
+   * `0×0`, so `process.stdout.columns` inside it is 0 and `COLUMNS` in the
+   * environment is not what a terminal-aware program reads. Setting the
+   * pty's size is what makes "captured at 100 columns" a statement about
+   * the terminal rather than about an environment variable.
+   */
+  const inside = `stty cols ${size.columns} rows ${size.rows}; ${command}`;
+  /*
+   * And in the dialect this host's `script` speaks. macOS's is BSD's: the log
+   * file, then the command and its arguments. Linux's is util-linux's, which
+   * takes the command as one string with `-c` and the log file last, and
+   * refused the BSD form with "unexpected number of arguments" — every case in
+   * this file, on the Ubuntu runner.
+   */
+  const scriptArgs =
+    process.platform === "darwin"
+      ? ["-q", "/dev/null", "/bin/sh", "-c", inside]
+      : ["-q", "-e", "-c", inside, "/dev/null"];
+
   const result = spawnSync(
     "script",
-    [
-      "-q",
-      "/dev/null",
-      "/bin/sh",
-      "-c",
-      /*
-       * `stty` first (T10.4, P9-F4).
-       *
-       * A `script` spawned with no controlling terminal allocates a pty of
-       * `0×0`, so `process.stdout.columns` inside it is 0 and `COLUMNS` in the
-       * environment is not what a terminal-aware program reads. Setting the
-       * pty's size is what makes "captured at 100 columns" a statement about
-       * the terminal rather than about an environment variable.
-       */
-      `stty cols ${size.columns} rows ${size.rows}; ${command}`,
-    ],
+    scriptArgs,
     {
       encoding: "utf8",
       cwd: REPO_ROOT,
