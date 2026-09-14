@@ -43,10 +43,17 @@ intends and is not a Yam-specific arrangement:
 
 ```bash
 chromedriver --port=9515 &
-# start a session with { "alwaysMatch": { "webSocketUrl": true } } and read
-# `capabilities.webSocketUrl` from the response
+# start a session with
+#   { "alwaysMatch": { "webSocketUrl": true, "unhandledPromptBehavior": "ignore" } }
+# and read `capabilities.webSocketUrl` from the response
 YAM_BIDI_URL=ws://127.0.0.1:9515/session/<id> yam surface conform --adapter bidi
 ```
+
+`unhandledPromptBehavior: "ignore"` is not optional. Without it the driver
+answers every dialog itself the moment it opens — WebDriver's default is
+*dismiss and notify* — so a confirm a flow says to accept is already dismissed
+when the adapter tries to accept it. The adapter asks for `ignore` on the
+sessions it creates; on a session a driver hosts, whoever creates it has to.
 
 `node scripts/bidi-independence.mjs` runs exactly those commands for you whenever
 a chromedriver or msedgedriver is on `PATH` or named by `YAM_CHROMEDRIVER`,

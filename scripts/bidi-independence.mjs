@@ -150,6 +150,18 @@ async function attachThroughDriver(binary, baseUrl, say) {
         capabilities: {
           alwaysMatch: {
             webSocketUrl: true,
+            /*
+             * `ignore`, or the driver answers every prompt itself.
+             *
+             * WebDriver's default is dismiss-and-notify, so a confirm the flow
+             * said to accept was already dismissed when the adapter's
+             * `handleUserPrompt` arrived, and "an accepted confirm reports
+             * confirmed" failed wherever a chromedriver was on PATH — first on
+             * GitHub's runners. The adapter asks for `ignore` when it creates
+             * a session (`session.ts`); a session someone else creates has to
+             * be created with it.
+             */
+            unhandledPromptBehavior: "ignore",
             "goog:chromeOptions": { args: ["--headless=new", "--no-sandbox"] },
             "ms:edgeOptions": { args: ["--headless=new", "--no-sandbox"] },
           },
