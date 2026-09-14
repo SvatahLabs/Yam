@@ -156,7 +156,13 @@ describe("this machine", () => {
 describe("a windowed app does not have the shell's PATH", () => {
   const GUI_PATH = "/usr/bin:/bin:/usr/sbin:/sbin";
 
-  it("recovers the runtime from the login shell", () => {
+  /*
+   * Not on a Windows host. The case is macOS's launchd PATH, written with `:`,
+   * and the directory it adds is a real temporary one — which on Windows is
+   * `C:\Users\…`, a colon of its own. There is no PATH that is both, and no
+   * login shell to ask on Windows either (`resolveNodeRuntime` says so).
+   */
+  it.skipIf(process.platform === "win32")("recovers the runtime from the login shell", () => {
     const dir = withFiles("node");
     const resolution = resolveNodeRuntime({
       env: { PATH: GUI_PATH, SHELL: "/bin/zsh" },
@@ -229,7 +235,8 @@ describe("a windowed app does not have the shell's PATH", () => {
 describe("what a child of the app is spawned with", () => {
   const GUI_PATH = "/usr/bin:/bin:/usr/sbin:/sbin";
 
-  it("hands on the PATH that found the runtime, with that runtime first", () => {
+  // Not on a Windows host, for the reason the login-shell case above gives.
+  it.skipIf(process.platform === "win32")("hands on the PATH that found the runtime, with that runtime first", () => {
     const dir = withFiles("node");
     const resolution = resolveNodeRuntime({
       env: { PATH: GUI_PATH },
