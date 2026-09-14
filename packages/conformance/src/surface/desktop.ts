@@ -32,7 +32,19 @@
  * `AXButton` would be evidence against it.
  */
 import { isInteractiveRole, isWindowChrome } from "@svatah/yam-surface";
-import type { CaseContext, ConformanceCase, DesktopHealing } from "./types.js";
+import type { CaseContext, ConformanceCase, DesktopHealing, HealCandidate } from "./types.js";
+
+/**
+ * A relocalization candidate as few characters as it takes: role, name, total,
+ * and — when asked — the five scores as attrs, text, neighbours, rolePath and box.
+ * The report cuts an `actual` at 160 characters.
+ */
+const brief = (candidate: HealCandidate | undefined, scores = false): string => {
+  if (candidate === undefined) return "none";
+  const { attrs, text, neighbours, rolePath, box } = candidate.scores;
+  const parts = [attrs, text, neighbours, rolePath, box].map((one) => one.toFixed(2)).join(" ");
+  return `${candidate.role} "${candidate.name ?? ""}" ${candidate.total.toFixed(3)}${scores ? ` [a t n r b: ${parts}]` : ""}`;
+};
 
 interface Node {
   readonly ref: string;
@@ -1014,18 +1026,21 @@ async function healingCase(
      * With the ranking when it fails. "ambiguous" alone says the healer refused
      * and not what it could not tell apart — which is the whole of what a person
      * reading the report needs to go and fix it.
+     *
+     * As one short line: the report cuts an `actual` at 160 characters, and the
+     * ranking as JSON was cut off at the runner-up, the half that says why.
      */
     check(`"${subject.key}" relocalizes at variant ${variant}`, healed.outcome === "relocalized", {
       expected: "relocalized",
       actual:
         healed.outcome === "relocalized"
           ? healed.outcome
-          : {
-              outcome: healed.outcome,
-              ...(healed.best === undefined ? {} : { best: healed.best }),
-              ...(healed.runnerUp === undefined ? {} : { runnerUp: healed.runnerUp }),
-              ...(healed.margin === undefined ? {} : { margin: healed.margin }),
-            },
+          : [
+              `${healed.outcome}${healed.margin === undefined ? "" : ` by ${healed.margin.toFixed(3)}`}`,
+              healed.runnerUp === undefined
+                ? `best ${brief(healed.best, true)}`
+                : `runner-up ${brief(healed.runnerUp, true)} behind ${brief(healed.best)}`,
+            ].join("; "),
     });
     if (healed.outcome !== "relocalized" || healed.ref === undefined) continue;
 
