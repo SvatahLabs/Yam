@@ -15,6 +15,14 @@ onlyBuiltDependencies:
   # nothing to run.
   - electron
   - electron-winstaller
+  # The macOS disk image (`@electron-forge/maker-dmg`, through appdmg) writes
+  # Finder metadata with two native modules: `fs-xattr` for extended attributes
+  # and `macos-alias` for the alias record that places the Applications link.
+  # Both compile with node-gyp at install, which pnpm skips unless they are named
+  # here, and appdmg then fails at `make` rather than at install. Both are
+  # macOS-only optional dependencies, so Linux and Windows never build them.
+  - fs-xattr
+  - macos-alias
 
 # One version of every shared tool across the workspace (LLD §1).
 catalog:

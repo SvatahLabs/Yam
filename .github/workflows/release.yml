@@ -151,13 +151,45 @@ jobs:
   # T7.6: "a release workflow that builds the app installers on the three-OS
   # matrix". `ci.yml` builds them on every push to prove they *can* be built;
   # this one builds the ones a release ships and attaches them.
+  #
+  # ## Two Macs
+  #
+  # `macos-latest` is Apple silicon, so until this leg existed a release had
+  # no build a person on an Intel Mac could open at all. The Intel build runs on
+  # an Intel runner rather than being cross-built on the arm64 one: `make` stages
+  # the CLI with `pnpm deploy`, which installs the prebuilt native binaries for
+  # the machine it runs on, and a cross-build would ship arm64 ones inside an x64
+  # app. `macos-15-intel` because `macos-13`, the older Intel label, was retired
+  # in December 2025; GitHub has said this one is the last x86_64 image and
+  # lasts until August 2027, and when it goes the Intel build goes with it.
+  #
+  # ## Signing
+  #
+  # Every leg makes installers with or without the signing secrets, and says
+  # which it made. With none of them — a fork, or a repository that has not set
+  # them up — the result is exactly what it was before signing existed.
+  # `docs/project/signing.md` lists the secrets and what the owner creates.
+  #
+  # The secrets reach as few steps as they can: the certificate files only the
+  # step that installs them, and the rest only `Make`, which is the step that
+  # runs Forge. Each is further narrowed to the runner that uses it, so the Linux
+  # leg never holds an Apple password. A job-level `env:` would have handed all
+  # of them to `pnpm install`, and so to every install script in the tree.
   app-installers:
-    name: app installers (${{ matrix.os }})
+    name: app installers (${{ matrix.os }}, ${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            arch: x64
+          - os: macos-latest
+            arch: arm64
+          - os: macos-15-intel
+            arch: x64
+          - os: windows-latest
+            arch: x64
     steps:
       - uses: actions/checkout@v4
 
@@ -179,12 +211,128 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y fakeroot dpkg xvfb
 
+      # The Developer ID certificate, into a keychain that exists for this job.
+      #
+      # Not the runner's login keychain: a temporary one with a random password,
+      # added to the search list so `codesign` (and appdmg, which cannot be told
+      # a keychain) find the identity, and deleted at the end of the job. The
+      # partition list lets `codesign` use the private key without the dialog
+      # macOS would otherwise show to a machine nobody is sitting at.
+      # `APPLE_KEYCHAIN` tells Forge which keychain to sign from.
+      - name: Install the Developer ID certificate
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          APPLE_CERTIFICATE_P12: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          if [ -z "$APPLE_CERTIFICATE_P12" ]; then
+            echo "No APPLE_CERTIFICATE_P12 secret: nothing to install, and the macOS app will be unsigned."
+            exit 0
+          fi
+          keychain="$RUNNER_TEMP/yam-signing.keychain-db"
+          keychain_password="$(openssl rand -base64 32)"
+          certificate="$RUNNER_TEMP/developer-id.p12"
+          printf '%s' "$APPLE_CERTIFICATE_P12" | base64 --decode > "$certificate"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$certificate" -k "$keychain" -f pkcs12 -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          rm -f "$certificate"
+          echo "APPLE_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+          security find-identity -v -p codesigning "$keychain"
+
+      # The Authenticode certificate, as the PFX file @electron/windows-sign reads.
+      - name: Install the Windows code-signing certificate
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_P12: ${{ secrets.WINDOWS_CERTIFICATE_P12 }}
+        run: |
+          if (-not $env:WINDOWS_CERTIFICATE_P12) {
+            Write-Output "No WINDOWS_CERTIFICATE_P12 secret: nothing to install, and the Windows installer will be unsigned."
+            exit 0
+          }
+          $pfx = Join-Path $env:RUNNER_TEMP "windows-certificate.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_P12))
+          "WINDOWS_CERTIFICATE_FILE=$pfx" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      # `forge.config.ts` decides from these, prints one line saying what it
+      # decided, and treats an empty value as unset — which is what a secret the
+      # repository does not have expands to. The API key arrives as the `.p8`
+      # file's text and notarytool wants a path, so it is written out here.
       - name: Make
-        run: pnpm --filter @svatah/yam-desktop make
+        shell: bash
+        env:
+          APPLE_SIGNING_IDENTITY: ${{ runner.os == 'macOS' && secrets.APPLE_SIGNING_IDENTITY || '' }}
+          APPLE_ID: ${{ runner.os == 'macOS' && secrets.APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ runner.os == 'macOS' && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ runner.os == 'macOS' && secrets.APPLE_TEAM_ID || '' }}
+          APPLE_API_KEY_P8: ${{ runner.os == 'macOS' && secrets.APPLE_API_KEY_P8 || '' }}
+          APPLE_API_KEY_ID: ${{ runner.os == 'macOS' && secrets.APPLE_API_KEY_ID || '' }}
+          APPLE_API_ISSUER: ${{ runner.os == 'macOS' && secrets.APPLE_API_ISSUER || '' }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ runner.os == 'Windows' && secrets.WINDOWS_CERTIFICATE_PASSWORD || '' }}
+        run: |
+          if [ -n "$APPLE_API_KEY_P8" ]; then
+            export APPLE_API_KEY="$RUNNER_TEMP/AuthKey.p8"
+            printf '%s\n' "$APPLE_API_KEY_P8" > "$APPLE_API_KEY"
+          fi
+          unset APPLE_API_KEY_P8
+          pnpm --filter @svatah/yam-desktop make
+
+      # What was made, judged from the files rather than from which secrets were
+      # set: a signing step that failed quietly would otherwise be reported as a
+      # signed build. Written to the job summary as well as the log.
+      - name: Signed or unsigned
+        shell: bash
+        run: |
+          say() { echo "$1"; echo "$1" >> "$GITHUB_STEP_SUMMARY"; }
+          case "$RUNNER_OS" in
+            macOS)
+              app="$(ls -d apps/desktop/out/Yam-darwin-*/Yam.app | head -n 1)"
+              # Captured, not piped into `grep -q`: under the runner's `pipefail`
+              # a grep that exits at its first match can fail the pipeline.
+              details="$(codesign -dv --verbose=2 "$app" 2>&1 || true)"
+              if [[ "$details" == *"Authority=Developer ID Application"* ]]; then
+                codesign --verify --deep --strict "$app"
+                if xcrun stapler validate "$app" > /dev/null 2>&1; then
+                  say "macOS ${{ matrix.arch }}: SIGNED with Developer ID and NOTARIZED (ticket stapled)."
+                else
+                  say "macOS ${{ matrix.arch }}: SIGNED with Developer ID but NOT notarized. Gatekeeper will refuse it."
+                fi
+              else
+                say "macOS ${{ matrix.arch }}: UNSIGNED. Gatekeeper will refuse to open it until a person allows it in System Settings."
+              fi
+              ;;
+            Windows)
+              setup="$(ls apps/desktop/out/make/squirrel.windows/*/*Setup.exe | head -n 1)"
+              status="$(pwsh -NoProfile -Command "(Get-AuthenticodeSignature -FilePath '$setup').Status")"
+              if [ "$status" = "Valid" ]; then
+                say "Windows: SIGNED ($(basename "$setup") has a valid Authenticode signature)."
+              else
+                say "Windows: UNSIGNED ($(basename "$setup"): $status). SmartScreen will warn before it runs."
+              fi
+              ;;
+            *)
+              say "Linux: the .deb and .zip are not signed; nothing here signs them."
+              ;;
+          esac
+
+      # A hosted runner is discarded after the job, but a self-hosted one is not,
+      # and a keychain holding a Developer ID key must not outlive the job that
+      # needed it.
+      - name: Remove the signing material
+        if: always()
+        shell: bash
+        run: |
+          if [ -n "${APPLE_KEYCHAIN:-}" ]; then security delete-keychain "$APPLE_KEYCHAIN" || true; fi
+          rm -f "$RUNNER_TEMP/AuthKey.p8" "$RUNNER_TEMP/windows-certificate.pfx" "$RUNNER_TEMP/developer-id.p12"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: app-installers-${{ matrix.os }}
+          name: app-installers-${{ matrix.os }}-${{ matrix.arch }}
           path: apps/desktop/out/make/**
           if-no-files-found: error
 

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  What the signed Yam.app may do under the hardened runtime (docs/project/signing.md).
+
+  Notarization requires the hardened runtime, and the hardened runtime takes
+  away, by default, everything an entitlement here gives back. So this file is
+  the list of exceptions, and each one is here because something stops working
+  without it. `forge.config.ts` applies it to the application and its plain
+  helper; the GPU, renderer and plugin helpers keep @electron/osx-sign's own
+  defaults, which are Chromium's, and narrower.
+
+  Deliberately absent, because nothing here needs them:
+
+  * `com.apple.security.cs.allow-unsigned-executable-memory`. Electron before
+    12 needed it for V8. Electron 44 allocates JIT pages with MAP_JIT, which
+    `allow-jit` covers, and the unsigned-memory exception is the broader of the
+    two. If a signed build ever dies at launch with a code-signing crash in V8,
+    this is the key to try first, and the crash report is the evidence.
+  * `com.apple.security.cs.disable-library-validation`. Library validation
+    means the process loads only code signed by Apple or by the same team.
+    Yam.app loads its own frameworks, which the same identity signs. The bundled
+    CLI in `Resources/yam` has no native Node addon (no `.node` file), and it
+    never runs inside this process anyway: the app spawns it with a separate
+    `node` (`nodeRuntime` in `src/main/index.ts`), whose own signature and
+    entitlements govern what that process may load. Entitlements are not
+    inherited by a child that is its own signed executable.
+  * `com.apple.security.cs.allow-dyld-environment-variables`. The spawned
+    `node` gets its environment from the app; the app itself reads no DYLD_*.
+  * Camera, microphone, location, Bluetooth, USB, printing. @electron/osx-sign
+    grants all of these by default. Yam uses none, and an entitlement nobody
+    uses is permission a compromised renderer could use.
+  * The App Sandbox. Yam drives other applications and runs a person's project
+    code; a sandboxed Yam could do neither. It is distributed with Developer ID,
+    not through the Mac App Store, so the sandbox is not required.
+-->
+<plist version="1.0">
+  <dict>
+    <!--
+      V8 compiles JavaScript to machine code at run time, in the main process
+      (Node) and in every helper that runs JavaScript. The hardened runtime
+      refuses writable-and-executable memory unless this is present, and the
+      app aborts before its first window.
+    -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <!--
+      The macOS accessibility adapter acts through System Events, by running
+      `osascript` (packages/adapter-ax/src/bridge.ts). From the app, that
+      `osascript` is a grandchild: Yam.app spawns `node`, which spawns it. TCC
+      holds the *responsible* process to account, which is Yam.app, and under the
+      hardened runtime an app without this entitlement is refused Apple Events
+      with no prompt at all (errAEEventNotPermitted, -1743). The entitlement only
+      lets macOS ask; the person still decides, in the Automation prompt.
+    -->
+    <key>com.apple.security.automation.apple-events</key>
+    <true/>
+  </dict>
+</plist>

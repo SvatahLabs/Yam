@@ -11,6 +11,8 @@ playwright-report/
 # --- Gradle (runtimes/java) ---
 .gradle/
 build/
+# The desktop app's signing entitlements are source, not build output.
+!apps/desktop/build/
 gradle-app.setting
 .gradletasknamecache
 

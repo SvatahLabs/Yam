@@ -14,8 +14,11 @@ listed by hand.
 - **The tag** `v<version>` is created at the published commit and nowhere else.
   A tag is a claim that a version exists on a registry.
 - **What a release contains**: the tarballs, the app installers for three
-  operating systems, and every report under `reports/`, generated on the
-  release's commit.
+  operating systems (macOS for both Apple silicon and Intel), and every report
+  under `reports/`, generated on the release's commit. The installers are signed
+  and notarized when the repository has the signing secrets and unsigned when it
+  does not, and the release job says which; see
+  [Signing the app installers](signing.md).
 
 The publish itself is one guarded script, `scripts/publish.mjs`: a dry run
 unless `--publish`, a manual dispatch of the release workflow, and a publish
