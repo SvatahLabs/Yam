@@ -5,7 +5,7 @@
  * somebody else wrote used to run their code before anything had been asked.
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { loadProject } from "../src/project.js";
@@ -14,9 +14,21 @@ import { projectTrust, revokeProject, trustedProjects, trustProject } from "../s
 const saved = { CI: process.env["CI"], YAM_TRUST_PROJECT: process.env["YAM_TRUST_PROJECT"], YAM_TRUST_STORE: process.env["YAM_TRUST_STORE"] };
 let dir: string;
 
+/**
+ * A temporary directory by its real path.
+ *
+ * `mkdtempSync` answers the short form on the Windows runner —
+ * `C:\Users\RUNNER~1\…` — and a `~` in a path is percent-encoded by
+ * `pathToFileURL`, which the test runner's own loader then cannot find. The
+ * product imports the same file through Node and does not care; the test does.
+ */
+function temporaryDir(prefix: string): string {
+  return realpathSync(mkdtempSync(join(tmpdir(), prefix)));
+}
+
 /** A project whose one step file writes a marker when it is imported. */
 function projectWithCode(): { root: string; marker: string } {
-  const root = mkdtempSync(join(tmpdir(), "yam-trust-"));
+  const root = temporaryDir("yam-trust-");
   const marker = join(root, "ran.txt");
   mkdirSync(join(root, "steps"), { recursive: true });
   mkdirSync(join(root, "flows"), { recursive: true });
@@ -30,7 +42,7 @@ function projectWithCode(): { root: string; marker: string } {
 }
 
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "yam-trust-store-"));
+  dir = temporaryDir("yam-trust-store-");
   process.env["YAM_TRUST_STORE"] = join(dir, "trusted.json");
   delete process.env["CI"];
   delete process.env["YAM_TRUST_PROJECT"];
@@ -79,7 +91,7 @@ describe("a project's step code (SF-15)", () => {
   });
 
   it("needs no trust when there is no code, and can be revoked", () => {
-    const empty = mkdtempSync(join(tmpdir(), "yam-trust-empty-"));
+    const empty = temporaryDir("yam-trust-empty-");
     expect(projectTrust(empty)).toEqual({ runsCode: true, because: "no-code", code: [] });
     const { root } = projectWithCode();
     const stored = trustProject(root);
@@ -93,7 +105,7 @@ describe("a project's step code (SF-15)", () => {
 describe("what an untrusted project would start (SF-15)", () => {
   it("counts a launched program and a Playwright config as code, and refuses to run them", async () => {
     const { untrustedRun } = await import("../src/project.js");
-    const root = mkdtempSync(join(tmpdir(), "yam-trust-launch-"));
+    const root = temporaryDir("yam-trust-launch-");
     mkdirSync(join(root, "flows"), { recursive: true });
     writeFileSync(
       join(root, "yam.config.yaml"),
@@ -103,18 +115,21 @@ describe("what an untrusted project would start (SF-15)", () => {
     writeFileSync(join(root, "playwright.config.ts"), "export default {};\n", "utf8");
     const loaded = await loadProject(root);
     expect(loaded.trust.runsCode).toBe(false);
-    // The config's path as this platform resolves it: `/opt/evil/launcher` is
-    // `C:\opt\evil\launcher` on Windows, and the entry names what would run.
-    const launcher = `app.launch: ${resolve("/opt/evil/launcher")}`;
-    expect(loaded.trust.code).toEqual(expect.arrayContaining(["playwright.config.ts", launcher]));
-    expect(untrustedRun(loaded)).toContain(resolve("/opt/evil/launcher"));
+    /*
+     * The config's path as this platform resolves it, against the project
+     * rather than the process: `/opt/evil/launcher` is `C:\opt\evil\launcher`
+     * for a project on C:, and the Windows runner's own checkout is on D:.
+     */
+    const launcher = resolve(root, "/opt/evil/launcher");
+    expect(loaded.trust.code).toEqual(expect.arrayContaining(["playwright.config.ts", `app.launch: ${launcher}`]));
+    expect(untrustedRun(loaded)).toContain(launcher);
     expect(untrustedRun(loaded, "playwright")).toMatch(/playwright\.config\.ts/);
     trustProject(root);
     expect(untrustedRun(await loadProject(root))).toBeUndefined();
   });
 
   it("asks the status with the project's own steps directory", async () => {
-    const root = mkdtempSync(join(tmpdir(), "yam-trust-lib-"));
+    const root = temporaryDir("yam-trust-lib-");
     mkdirSync(join(root, "lib"), { recursive: true });
     mkdirSync(join(root, "flows"), { recursive: true });
     writeFileSync(join(root, "yam.config.yaml"), "project: lib\nsteps:\n  dir: lib\n", "utf8");

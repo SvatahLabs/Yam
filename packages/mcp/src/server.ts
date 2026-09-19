@@ -191,10 +191,25 @@ export function programAllowed(program: string, allowed: readonly string[]): boo
   if (allowed.includes("*")) return true;
   const onPath = (process.env["PATH"] ?? "").split(delimiter).filter((one) => one !== "");
   return allowed.some((entry) => {
-    if (entry.includes("/") || entry.includes("\\")) return resolve(entry) === resolve(program);
+    if (entry.includes("/") || entry.includes("\\")) return samePath(entry, program);
     if (program === entry) return true;
-    return basename(program) === entry && onPath.some((dir) => resolve(dir) === resolve(dirname(program)));
+    return basename(program) === entry && onPath.some((dir) => samePath(dir, dirname(program)));
   });
+}
+
+/**
+ * Whether two paths name the same place.
+ *
+ * Case matters on Linux and not on Windows, where `PATH` holds
+ * `C:\Windows\system32` and a caller writes `C:\Windows\System32\cmd.exe`.
+ * Compared exactly, those were two directories, so an allowed program on the
+ * `PATH` was refused — measured on the Windows runner, where every bare-name
+ * allowance failed.
+ */
+function samePath(left: string, right: string): boolean {
+  const a = resolve(left);
+  const b = resolve(right);
+  return process.platform === "win32" ? a.toLowerCase() === b.toLowerCase() : a === b;
 }
 
 /** Why an agent may not open this session, or `undefined` when it may. */
