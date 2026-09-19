@@ -45,7 +45,7 @@ const failedWith = (answer, code) =>
   (answer?.envelope?.status === "failed" || answer?.envelope?.status === "refused") &&
   answer?.envelope?.error?.code === code;
 
-export async function negativeCases({ driver, connect, record, label }) {
+export async function negativeCases({ driver, other, connect, record, label }) {
   const made = new Set();
   const check = (name, ok, detail) => {
     made.add(name);
@@ -178,7 +178,14 @@ export async function negativeCases({ driver, connect, record, label }) {
       anyControl !== undefined,
       anyControl === undefined ? "no button on screen" : `ref=${anyControl.ref}`,
     );
-    const otherClient = await driver.call("act", {
+    /*
+     * A second client, not a second name (SF-13).
+     *
+     * This pass used to be one driver claiming `holder: "somebody-else"`. An
+     * MCP client can no longer name its holder — that is what let an agent act
+     * as the desktop — so the other client is a real one: the terminal.
+     */
+    const otherClient = await (other ?? driver).call("act", {
       session,
       action: "click",
       ref: anyControl?.ref ?? "e1",

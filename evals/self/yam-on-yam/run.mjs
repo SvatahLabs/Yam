@@ -312,7 +312,13 @@ try {
           platform: "browser",
           make: async () => cliDriver({ transcript, holder: "yam cli" }),
           run: async (driver) =>
-            await negativeCases({ driver, connect: browserConnect, record, label: "negative-cli" }),
+            await negativeCases({
+              driver,
+              other: cliDriver({ transcript, holder: "somebody-else" }),
+              connect: browserConnect,
+              record,
+              label: "negative-cli",
+            }),
         },
         {
           label: "negative-mcp",
@@ -320,7 +326,13 @@ try {
           platform: "browser",
           make: async () => await mcpDriver({ transcript, name: "yam-on-yam-agent" }),
           run: async (driver) =>
-            await negativeCases({ driver, connect: browserConnect, record, label: "negative-mcp" }),
+            await negativeCases({
+              driver,
+              other: cliDriver({ transcript, holder: "somebody-else" }),
+              connect: browserConnect,
+              record,
+              label: "negative-mcp",
+            }),
         },
       ];
 
@@ -542,7 +554,8 @@ console.log(
  *   1  a check failed. The product, or the harness, is wrong.
  *   2  this host could not be asked: nothing was reached beyond the two
  *      run-level oracles, which need neither an application nor a terminal.
- *      A caller decides whether that is tolerable; CI tolerates it and says so.
+ *      A caller decides whether that is tolerable; CI does not, because its
+ *      hosted runners can reach everything this suite asks for.
  *   0  something was reached and nothing failed.
  *
  * The same three the desktop conformance gate uses, for the same reason.

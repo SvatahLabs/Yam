@@ -164,7 +164,13 @@ export async function mcpDriver({ transcript, name = "yam-on-yam" }) {
      * suite is not part of `pnpm -r test`: it needs a packaged application and
      * a machine with the Accessibility grant, so it runs by hand.
      */
-    args: [MCP_SERVER],
+    /*
+     * The terminal passes start `node` and `/bin/sh` through MCP, and the AX
+     * passes drive the running Yam — and an agent may start a program, or drive
+     * an application, only when the server allows it (SF-15). This suite is the
+     * person configuring its own server.
+     */
+    args: [MCP_SERVER, "--allow-program", "*", "--allow-app", "*"],
     cwd: ROOT,
     stderr: "ignore",
   });

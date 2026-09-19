@@ -15,6 +15,20 @@ import { chromium } from "@playwright/test";
 
 const APP_DIR = process.cwd();
 const ROOT = join(APP_DIR, "..", "..");
+
+/*
+ * A broker of this run's own, unless one is named (SF-05).
+ *
+ * The harness closes every session the broker holds, before and after, so that
+ * a leftover session does not pass for this run's empty state. On the
+ * machine's broker that closed a person's own sessions — a `yam serve` they had
+ * open, an agent mid-task. Every service and CLI this script starts inherits
+ * the variable, so they all reach the same private broker.
+ */
+const PRIVATE_BROKER = (process.env["YAM_BROKER_STATE_DIR"] ?? "").trim() === "";
+if (PRIVATE_BROKER) {
+  process.env["YAM_BROKER_STATE_DIR"] = mkdtempSync(join(tmpdir(), "yam-dogfood-broker-"));
+}
 const CLI = join(ROOT, "packages", "cli", "dist", "bin.js");
 // Where the evidence goes: a directory named by SURFACES_EVIDENCE_DIR, so a
 // verifier can keep it beside the spec, else a temporary one.
@@ -112,12 +126,24 @@ writeFileSync(
   "utf8",
 );
 
+/*
+ * The connection test starts an MCP server (T16). Pointed at this checkout's
+ * build rather than `npx -y @svatah/yam-mcp`, so the harness never reaches the
+ * registry — the route reads this from the service's environment and nothing
+ * else.
+ */
+const SERVE_ENV = {
+  ...process.env,
+  YAM_MCP_TEST_COMMAND: JSON.stringify([process.execPath, join(ROOT, "packages", "mcp", "dist", "bin.js")]),
+};
+
 let service, projectService, web, browser;
 try {
   // 1) A real, projectless service on an empty directory. It starts the broker
   //    lazily on the first catalogue call; nothing is written to the directory.
   service = spawn(process.execPath, [CLI, "serve", emptyProject, "--port", "0"], {
     stdio: ["ignore", "pipe", "pipe"],
+    env: SERVE_ENV,
   });
   const info = await new Promise((res, rej) => {
     let s = "";
@@ -134,6 +160,7 @@ try {
   // A second service, on the project, which "Open a project" connects to.
   projectService = spawn(process.execPath, [CLI, "serve", PROJECT, "--port", "0"], {
     stdio: ["ignore", "pipe", "pipe"],
+    env: SERVE_ENV,
   });
   const projectInfo = await new Promise((res, rej) => {
     let s = "";
@@ -146,10 +173,11 @@ try {
     projectService.on("exit", (c) => rej(new Error("project serve exited " + c)));
   });
 
-  // The broker is machine-global and persists sessions across processes (that is
-  // the design — every client sees the same sessions). For an isolated run,
-  // close whatever is open before and after, so a leftover session does not
-  // masquerade as this run's empty state.
+  // The broker persists sessions across processes (that is the design — every
+  // client sees the same sessions). This run has a broker of its own (above);
+  // close whatever is open before and after anyway, so a leftover session from
+  // an earlier run in the same directory does not masquerade as this run's
+  // empty state.
   const closeAllSessions = async () => {
     try {
       const listed = await (await fetch(`${serviceUrl}/sessions`, {
@@ -246,11 +274,13 @@ try {
     await page.goto(appOrigin);
 
     // Surfaces is the default (SF-02, SF-16).
-    await page.locator("#rail-surfaces").waitFor({ state: "visible", timeout: 30000 });
+    // `section-session`, not `rail-surfaces`: Draft 2.27 renamed the section and
+    // its rail row is `rail-session` now, drawn only when a section has several.
+    await page.locator("#section-session").waitFor({ state: "visible", timeout: 30000 });
     await page.locator("#surfaces-discovery").waitFor({ state: "visible", timeout: 30000 });
     const title = (await page.locator("#toolbar-title").textContent())?.trim();
     note(`[${label}] opens into Session by default`, title === "Session", `title=${title}`);
-    const sectionActive = await page.locator("#section-surfaces").getAttribute("aria-current");
+    const sectionActive = await page.locator("#section-session").getAttribute("aria-current");
     note(`[${label}] the Surfaces section is current`, sectionActive === "page");
 
     // Empty state, in the design's own words (SF-17).
@@ -358,6 +388,77 @@ try {
     note(`[${label}] Details discloses the request and its answer`,
       raw.includes("requestId") && raw.includes("status"));
 
+    /* ── T15: Copy command and Copy MCP call ─────────────────────────────── */
+
+    // The copies are what the form holds now, and the command is not only read:
+    // it is run, with `yam` standing for this checkout's CLI, against the same
+    // session the desktop has open.
+    await page.locator("#surfaces-field-value").fill("from-the-copied-command");
+    await page.locator("#surfaces-copy-summary").click();
+    const copiedCli = ((await page.locator("#surfaces-copy-cli").textContent()) ?? "").trim();
+    const copiedMcp = ((await page.locator("#surfaces-copy-mcp-call").textContent()) ?? "").trim();
+    note(`[${label}] Copy command holds the act with this session, control and snapshot`,
+      /^yam surface act --session \S+ --action type --ref \S+ --snapshot \S+ --input - <<'JSON'/.test(copiedCli) &&
+        copiedCli.includes('"value":"from-the-copied-command"'),
+      copiedCli.split("\n")[0]);
+    let mcpCall;
+    try { mcpCall = JSON.parse(copiedMcp); } catch { mcpCall = undefined; }
+    note(`[${label}] Copy MCP call is a surface_act tools/call with the same arguments`,
+      mcpCall?.method === "tools/call" && mcpCall?.params?.name === "surface_act" &&
+        mcpCall?.params?.arguments?.args?.value === "from-the-copied-command",
+      copiedMcp.replace(/\s+/g, " ").slice(0, 90));
+    const ranCopied = spawnSync("sh", ["-c", `yam() { "${process.execPath}" "${CLI}" "$@"; }\n${copiedCli}`], {
+      encoding: "utf8",
+      timeout: 60000,
+    });
+    let ranEnvelope;
+    try { ranEnvelope = JSON.parse(ranCopied.stdout); } catch { ranEnvelope = undefined; }
+    note(`[${label}] the copied command, run in a shell, performs the act`,
+      ranEnvelope?.status === "succeeded",
+      `${ranEnvelope?.status ?? "no envelope"} ${ranEnvelope?.error?.code ?? ""} ${ranCopied.stderr.trim().slice(0, 80)}`.trim());
+
+    /* ── T15: the preview ────────────────────────────────────────────────── */
+
+    await page.locator("#surfaces-preview-toggle").check();
+    await page.locator("#surfaces-preview-image, #surfaces-preview-unavailable").first().waitFor({ timeout: 45000 });
+    const pictured = await page.locator("#surfaces-preview-image").isVisible().catch(() => false);
+    const previewNote = ((await page.locator("#surfaces-preview-caption, #surfaces-preview-unavailable").first().textContent()) ?? "").trim();
+    note(`[${label}] the preview draws a picture of the surface beside its tree`,
+      pictured && (await page.locator("#surfaces-tree").isVisible()), previewNote.replace(/\s+/g, " ").slice(0, 110));
+    await page.screenshot({ path: join(OUT, `surfaces-preview-${label}.png`) });
+    if (pictured) {
+      /*
+       * Where the text field is, from the broker's own snapshot: the harness
+       * points at those pixels and expects the preview to name the control and
+       * select it — not to type into it or click it in the page.
+       */
+      const sessionNow = ((await row.locator(".sv-flow-name").textContent()) ?? "").trim();
+      const snapped = await asAgent(`/sessions/${sessionNow}/snapshot`, { interactiveOnly: true, maxNodes: 200 });
+      const field = (snapped?.result?.nodes ?? []).find((one) => one.role === "textbox" && Array.isArray(one.box));
+      if (field === undefined) {
+        note(`[${label}] with no element boxes, the preview says it cannot select and the tree still can`,
+          /no element boxes/.test(previewNote), previewNote.slice(0, 110));
+      } else {
+        const shown = await page.locator("#surfaces-preview-image").boundingBox();
+        const natural = await page.locator("#surfaces-preview-image").evaluate((one) => one.naturalWidth);
+        const onScreen = shown.width / natural;
+        const x = shown.x + (field.box[0] + field.box[2] / 2) * onScreen;
+        const y = shown.y + (field.box[1] + field.box[3] / 2) * onScreen;
+        await page.mouse.move(x, y);
+        const hovered = ((await page.locator("#surfaces-preview-hover").textContent()) ?? "").trim();
+        note(`[${label}] pointing at the text field on the picture names it`, hovered.startsWith("textbox"), hovered);
+        const before = await page.locator("#surfaces-field-value").inputValue().catch(() => "");
+        await page.mouse.click(x, y);
+        await page.waitForTimeout(900);
+        const pressed = ((await page.locator('#surfaces-tree button[aria-pressed="true"]').textContent().catch(() => "")) ?? "");
+        note(`[${label}] clicking the picture selects that control in the tree, and clicks nothing in the page`,
+          /textbox/.test(pressed) && before === (await page.locator("#surfaces-field-value").inputValue().catch(() => before)),
+          pressed.replace(/\s+/g, " ").trim().slice(0, 60));
+      }
+    }
+    await page.locator("#surfaces-preview-toggle").uncheck();
+    await page.locator("#surfaces-preview").waitFor({ state: "detached", timeout: 30000 }).catch(() => {});
+
     /* ── T16: shared control ─────────────────────────────────────────────── */
 
     // Who is driving is on the session row, in words.
@@ -460,10 +561,15 @@ try {
     note(`[${label}] a generic MCP configuration is offered, ready to copy`,
       config.includes("@svatah/yam") && config.includes("mcp"), config.replace(/\s+/g, " ").slice(0, 70));
     await page.locator("#action-surface-test-agent").click();
-    await page.waitForTimeout(600);
-    const tested = (await page.locator("#status-context").textContent()) ?? "";
-    note(`[${label}] the connection test reports what it actually checked`,
-      /broker answered|reaches the same sessions/i.test(tested), tested.trim().slice(0, 80));
+    // A real handshake with this checkout's MCP server (T16): the panel says
+    // what it verified, and the broker beside it.
+    // Not /MCP handshake/: before a test the panel says "No MCP handshake has
+    // been tried", which would end the wait before the answer arrived.
+    await page.locator("#inspector-agent", { hasText: /MCP handshake(:| failed)/ }).waitFor({ timeout: 90000 }).catch(() => {});
+    const tested = (await page.locator("#inspector-agent").textContent()) ?? "";
+    note(`[${label}] the connection test completes an MCP handshake and says what it verified`,
+      /MCP handshake: yam \S+, \d+ tools in [\d.]+ s/.test(tested) && /reaches the same sessions/.test(tested),
+      (/MCP handshake:.*? s\b/.exec(tested)?.[0] ?? tested.trim()).slice(0, 110));
 
     /* ── T17: automations regrouped, and Save as automation ──────────────── */
 
@@ -503,7 +609,7 @@ try {
     await page.locator("#project-needed").waitFor({ timeout: 15000 }).catch(() => {});
     note(`[${label}] Automations without a project says so and points at Open a project`,
       await page.locator("#project-needed").isVisible().catch(() => false));
-    await page.locator("#section-surfaces").click();
+    await page.locator("#section-session").click();
     await page.locator("#surfaces-discovery").waitFor({ timeout: 15000 });
 
     // Then with a project open: the same session, promoted into that project.
@@ -700,6 +806,12 @@ try {
   slow.close();
   service?.kill("SIGTERM");
   projectService?.kill("SIGTERM");
+  // The private broker this run started, by the pid in its own descriptor.
+  if (PRIVATE_BROKER) {
+    try {
+      process.kill(JSON.parse(readFileSync(join(process.env["YAM_BROKER_STATE_DIR"], "broker.json"), "utf8")).pid);
+    } catch { /* never started, or already gone */ }
+  }
   writeFileSync(join(OUT, "surfaces-dogfood.json"), JSON.stringify(results, null, 2) + "\n");
   // The transcript, however far the keyboard journey got.
   if (transcript.length > 2) writeFileSync(join(OUT, "keyboard-transcript.txt"), transcript.join("\n") + "\n");
