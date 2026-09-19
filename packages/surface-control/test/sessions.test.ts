@@ -159,3 +159,18 @@ describe("SessionStore", () => {
     expect(store.get(id)).toBeDefined();
   });
 });
+
+describe("what a session is attached to (SF-13)", () => {
+  it("names a running browser or application, and nothing that starts a new one", async () => {
+    const { targetIdFor } = await import("../src/sessions.js");
+    expect(targetIdFor({ attach: "http://127.0.0.1:9222" })).toBe("attach:loopback:9222");
+    // One browser, however its endpoint is spelled; one application, whatever the case.
+    expect(targetIdFor({ attach: "http://localhost:9222/" })).toBe("attach:loopback:9222");
+    expect(targetIdFor({ attach: "ws://[::1]:9222/devtools/browser/x" })).toBe("attach:loopback:9222");
+    expect(targetIdFor({ adapter: "ax", app: "Yam" })).toBe("app:yam");
+    expect(targetIdFor({ adapter: "ax", app: " YAM " })).toBe("app:yam");
+    // A terminal's `app` is the program it starts: a new target every time.
+    expect(targetIdFor({ adapter: "process", app: "/bin/sh" })).toBeUndefined();
+    expect(targetIdFor({})).toBeUndefined();
+  });
+});

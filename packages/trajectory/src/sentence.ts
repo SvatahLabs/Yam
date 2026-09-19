@@ -29,7 +29,7 @@
  * the index. The first is what a person would write, and the rest are the
  * honest fallbacks for an element that has nothing to be called.
  */
-import type { ElementDescription } from "@svatah/yam-schema";
+import { REDACTED_VALUE, type ElementDescription } from "@svatah/yam-schema";
 import type { TrajectoryLine } from "./capture.js";
 
 /** A step drafted from one or more calls. */
@@ -48,6 +48,8 @@ export interface DraftStep {
   readonly url?: string;
   /** The page's structural hash at the time, for the binding's context. */
   readonly snapshotHash?: string;
+  /** The `secret` input a withheld value became, which the story must declare. */
+  readonly secretInput?: string;
 }
 
 /**
@@ -117,6 +119,17 @@ export function captureNameFor(phrase: string, kind: string): string {
   return camel === "" ? `captured${suffix}` : `${camel}${suffix}`;
 }
 
+/**
+ * The input a withheld secret becomes: `the Password field` → `passwordField`.
+ *
+ * From the phrase, so the same field typed into twice is one input, and a
+ * reviewer reads which value the run will ask for.
+ */
+export function secretInputNameFor(phrase: string): string {
+  const name = captureNameFor(phrase, "text").replace(/Text$/, "");
+  return name === "captured" || !/^[A-Za-z]/.test(name) ? "secret" : name;
+}
+
 /** The literal, quoted and escaped, as the grammar wants it. */
 function quoted(value: unknown): string {
   return `"${String(value ?? "").replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
@@ -151,7 +164,14 @@ export function sentenceForAct(
     case "hover":
       return phrase === undefined ? undefined : `Hover over ${at}`;
     case "type":
-      return phrase === undefined ? undefined : `Type ${quoted(args["value"])} into ${at}`;
+      if (phrase === undefined) return undefined;
+      /*
+       * A withheld value is not typed as the placeholder (SF-15): the story asks
+       * for it as a `secret` input, and the proposal never held it.
+       */
+      return args["value"] === REDACTED_VALUE
+        ? `Type {input.${secretInputNameFor(phrase)}} into ${at}`
+        : `Type ${quoted(args["value"])} into ${at}`;
     case "clear":
       return phrase === undefined ? undefined : `Clear ${at}`;
     case "submit":
@@ -286,12 +306,33 @@ export function draftFor(line: TrajectoryLine): DraftStep | undefined {
   const args = (line.args ?? {}) as Record<string, unknown>;
   const phrase = base.element?.phrase;
 
+  /*
+   * A withheld value the step cannot ask for as an input (SF-15).
+   *
+   * The whole typed value becomes `{input.<name>}` below. Anything else that
+   * carries the placeholder — a secret inside a longer value, a URL with a token
+   * in it, the value a check compared a password field against — would compile
+   * to a step that types or expects the placeholder itself, so it is left for a
+   * person to write.
+   */
+  const secretTyped =
+    line.call === "act" &&
+    args["action"] === "type" &&
+    ((args["args"] ?? {}) as Record<string, unknown>)["value"] === REDACTED_VALUE;
+  if (!secretTyped && JSON.stringify(args).includes(REDACTED_VALUE)) {
+    return {
+      ...base,
+      why: "part of this step was withheld as a secret; write it with a `secret` input",
+    };
+  }
+
   if (line.call === "act") {
     const action = String(args["action"] ?? "");
     const actArgs = (args["args"] ?? {}) as Record<string, unknown>;
     const sentence = sentenceForAct(action, actArgs, phrase);
-    return sentence === undefined
-      ? { ...base, why: `no sentence pattern for act("${action}")` }
+    if (sentence === undefined) return { ...base, why: `no sentence pattern for act("${action}")` };
+    return action === "type" && actArgs["value"] === REDACTED_VALUE && phrase !== undefined
+      ? { ...base, sentence, secretInput: secretInputNameFor(phrase) }
       : { ...base, sentence };
   }
 

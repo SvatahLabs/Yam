@@ -23,7 +23,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `AdapterFactoryFn` | typealias | `export type AdapterFactoryFn ` |  |
 | `AdapterProbe` | interface | `export interface AdapterProbe` |  |
 | `AdapterReadiness` | interface | `export interface AdapterReadiness` |  |
-| `addSecretLiteral` | function | `export function addSecretLiteral(policy: RedactionPolicy, literal: string): void` |  |
+| `addSecretLiteral` | function | `export function addSecretLiteral(policy: RedactionPolicy, literal: string, session?: string): void` | A secret for every session, or — given `session` — for that session alone. |
 | `addSecretPattern` | function | `export function addSecretPattern(policy: RedactionPolicy, pattern: RegExp): void` |  |
 | `AgentClient` | interface | `export interface AgentClient` | One connected MCP client, as a person reads it. |
 | `brokerAlive` | function | `export async function brokerAlive(descriptor: { url: string; token: string }): Promise<boolean>` | Whether a broker is answering at this descriptor *and* speaks this contract. |
@@ -89,6 +89,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `EventStore` | interface | `export interface EventStore` |  |
 | `failedEnvelope` | function | `export function failedEnvelope(` |  |
 | `forgetProbes` | function | `export function forgetProbes(): void` | For a test that wants a fresh answer. |
+| `forgetSecrets` | function | `export function forgetSecrets(policy: RedactionPolicy, session: string): void` | Forget what a session declared, when it closes. |
 | `generateJavaClient` | function | `export function generateJavaClient(): string` |  |
 | `generateOpenApiDocument` | function | `export function generateOpenApiDocument(version: string): Record<string, unknown>` |  |
 | `generateOpenApiPaths` | function | `export function generateOpenApiPaths(): Record<string, Record<string, unknown>>` |  |
@@ -96,7 +97,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `generateToken` | function | `export function generateToken(): string` |  |
 | `generateTypeScriptClient` | function | `export function generateTypeScriptClient(): string` |  |
 | `hashInput` | function | `function hashInput(input: unknown): string` |  |
-| `hasSecret` | function | `export function hasSecret(policy: RedactionPolicy, value: string): boolean` |  |
+| `hasSecret` | function | `export function hasSecret(policy: RedactionPolicy, value: string, session?: string): boolean` |  |
 | `IdempotencyRecord` | interface | `export interface IdempotencyRecord` |  |
 | `isProcessAlive` | function | `export function isProcessAlive(pid: number): boolean` |  |
 | `Lease` | interface | `export interface Lease` |  |
@@ -119,8 +120,8 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `readInputSchema` | variable | `readInputSchema: z.ZodObject<` |  |
 | `readOutputSchema` | variable | `readOutputSchema: z.ZodObject<` |  |
 | `RedactionPolicy` | interface | `export interface RedactionPolicy` |  |
-| `redactObject` | function | `export function redactObject(policy: RedactionPolicy, obj: unknown): unknown` |  |
-| `redactString` | function | `export function redactString(policy: RedactionPolicy, value: string): string` |  |
+| `redactObject` | function | `export function redactObject(policy: RedactionPolicy, obj: unknown, session?: string): unknown` |  |
+| `redactString` | function | `export function redactString(policy: RedactionPolicy, value: string, session?: string): string` |  |
 | `ReferenceStore` | interface | `export interface ReferenceStore` |  |
 | `RefScope` | interface | `export interface RefScope` |  |
 | `refusedEnvelope` | function | `export function refusedEnvelope(` |  |
@@ -147,7 +148,10 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 | `successEnvelope` | function | `export function successEnvelope(` |  |
 | `SURFACE_CLI_SUBCOMMANDS` | variable | `SURFACE_CLI_SUBCOMMANDS: string[]` |  |
 | `SURFACE_TOOL_NAMES` | variable | `SURFACE_TOOL_NAMES: string[]` |  |
+| `targetIdFor` | function | `export function targetIdFor(input: { adapter?: string; app?: string; attach?: string }): string \| undefined` | What a session is attached to, when two sessions can be on the same thing |
 | `targetsInputSchema` | variable | `targetsInputSchema: z.ZodObject<` |  |
 | `targetsOutputSchema` | variable | `targetsOutputSchema: z.ZodObject<` |  |
+| `withholdFieldValues` | function | `export function withholdFieldValues<T>(answer: T, describe: unknown): T` | What a call about a secret field may keep of the field's own value (SF-15). |
+| `withholdSecrets` | function | `export function withholdSecrets(` | An action's arguments as they may be kept: in a trajectory, in the promotion |
 | `writeBrokerDescriptor` | function | `export function writeBrokerDescriptor(` |  |
 | `writeClient` | function | `export function writeClient(client: AgentClient, stateDir?: string): string` | Record a client, or refresh one. Returns the path, for the caller to remove. |

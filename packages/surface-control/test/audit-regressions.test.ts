@@ -248,7 +248,9 @@ describe("G07: ref2, name, and snapshot options are not dropped (SF-03, SF-06, S
     let receivedRef2: string | undefined;
     const mockSurface = {
       kind: "web",
-      capabilities: () => ({}),
+      // A surface that is asked to drag says it can: `dragTo` is refused before
+      // dispatch when the `drag` capability is false (SF-11).
+      capabilities: () => ({ drag: true }),
       open: async () => {},
       close: async () => {},
       snapshot: async () => ({}),

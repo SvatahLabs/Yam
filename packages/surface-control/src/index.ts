@@ -47,6 +47,7 @@ export {
 
 export {
   createSessionStore,
+  targetIdFor,
   type SessionStore,
   type SessionEntry,
   type SessionStatus,
@@ -127,6 +128,9 @@ export {
   redactString,
   redactObject,
   hasSecret,
+  forgetSecrets,
+  withholdFieldValues,
+  withholdSecrets,
   type RedactionPolicy,
 } from "./redaction.js";
 

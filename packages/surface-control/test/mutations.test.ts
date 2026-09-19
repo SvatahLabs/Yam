@@ -13,15 +13,19 @@
  */
 import { describe, expect, it, vi } from "vitest";
 import type { AgentSurface } from "@svatah/yam-surface";
+import { PermissionError, TimeoutError, UnsupportedError } from "@svatah/yam-surface";
 import {
   DEFAULT_HOLDER,
   createAdapterFactory,
   createCoordinationStore,
   createEventStore,
+  createPromotionStore,
+  createRedactionPolicy,
   createSessionStore,
   dispatchAct,
   dispatchConnect,
   dispatchControl,
+  dispatchEvents,
   dispatchRequest,
   type DispatchContext,
 } from "../src/index.js";
@@ -148,5 +152,107 @@ describe("a request is a mutation like any other", () => {
       request: { name: "r", method: "GET", url: "/things" },
     });
     expect(code(again)).not.toBe("CONTROL_BUSY");
+  });
+});
+
+describe("what a session is promoted from keeps no secret (SF-15)", () => {
+  const passwordField = {
+    ref: "r1",
+    role: "textbox",
+    name: "Password",
+    tag: "input",
+    attrs: { type: "password" },
+    text: "",
+    neighbours: { before: [], after: [] },
+    rolePath: [],
+    box: [0, 0, 1, 1],
+    index: 0,
+    states: [],
+  };
+
+  async function promoting(surface: AgentSurface) {
+    const { ctx, session } = await open(surface);
+    ctx.promotion = createPromotionStore();
+    ctx.redaction = createRedactionPolicy();
+    return { ctx, session };
+  }
+
+  const typed = (ctx: DispatchContext, session: string): unknown =>
+    (ctx.promotion!.list(session)[0]!.args as { args?: { value?: unknown } }).args?.value;
+
+  it("withholds a value typed into a password field, though nobody declared it", async () => {
+    const { ctx, session } = await promoting(
+      surfaceWith({ describe: vi.fn().mockResolvedValue(passwordField) }),
+    );
+    await dispatchAct(ctx, { session, action: "type", ref: "r1", args: { value: "hunter2" } });
+    expect(typed(ctx, session)).toBe("[REDACTED]");
+    expect(JSON.stringify(await dispatchEvents(ctx, { session }))).not.toContain("hunter2");
+  });
+
+  it("withholds a declared secret, and keeps an ordinary value", async () => {
+    const { ctx, session } = await promoting(surfaceWith());
+    await dispatchAct(ctx, { session, action: "type", ref: "r1", args: { value: "code-4711" }, secrets: ["code-4711"] });
+    await dispatchAct(ctx, { session, action: "type", ref: "r1", args: { value: "ada@example.test" } });
+    const values = ctx.promotion!.list(session).map(
+      (one) => (one.args as { args?: { value?: unknown } }).args?.value,
+    );
+    expect(values).toEqual(["[REDACTED]", "ada@example.test"]);
+    expect(typed(ctx, session)).toBe("[REDACTED]");
+  });
+});
+
+describe("what cannot be done is refused as unsupported, not told as a timeout (SF-11, SF-14)", () => {
+  it("refuses an action whose capability the adapter lacks, before dispatch", async () => {
+    const act = vi.fn().mockResolvedValue({ ok: true });
+    const { ctx, session } = await open(
+      surfaceWith({ act, kind: "desktop", capabilities: () => ({ drag: false }) as never } as never),
+    );
+    const refused = await dispatchAct(ctx, { session, action: "dragTo", ref: "r1", ref2: "r2" });
+    expect(refused["status"]).toBe("refused");
+    expect(code(refused)).toBe("UNSUPPORTED_OPERATION");
+    expect(act).not.toHaveBeenCalled();
+  });
+
+  it("leaves an action to the adapter on a kind of surface its form was not written for", async () => {
+    // Appium: `frames` is false, and `switchFrame` is how it enters a web view.
+    const act = vi.fn().mockResolvedValue({ ok: true });
+    const { ctx, session } = await open(
+      surfaceWith({ act, kind: "mobile", capabilities: () => ({ frames: false }) as never } as never),
+    );
+    const switched = await dispatchAct(ctx, { session, action: "switchFrame", args: { frame: "WEBVIEW_1" } });
+    expect(switched["status"]).toBe("succeeded");
+    expect(act).toHaveBeenCalled();
+  });
+
+  it("answers an adapter's own refusal as UNSUPPORTED_OPERATION, refused", async () => {
+    const { ctx, session } = await open(
+      surfaceWith({ act: vi.fn().mockRejectedValue(new UnsupportedError("A browser has no application to quit.")) }),
+    );
+    const refused = await dispatchAct(ctx, { session, action: "quit" });
+    expect(refused["status"]).toBe("refused");
+    expect(code(refused)).toBe("UNSUPPORTED_OPERATION");
+  });
+
+  it("still answers a real timeout as TIMEOUT", async () => {
+    const { ctx, session } = await open(surfaceWith({ act: vi.fn().mockRejectedValue(new TimeoutError("slow")) }));
+    const failed = await dispatchAct(ctx, { session, action: "click", ref: "r1" });
+    expect(failed["status"]).toBe("failed");
+    expect(code(failed)).toBe("TIMEOUT");
+  });
+
+  it("answers a permission nobody granted as PERMISSION_REQUIRED, even while connecting", async () => {
+    const surface = surfaceWith({
+      open: vi.fn().mockRejectedValue(new PermissionError("The macOS Accessibility permission is not granted.")),
+    });
+    const connected = await dispatchConnect(
+      { sessions: createSessionStore() },
+      {
+        app: "Yam",
+        adapter: "http",
+        adapterFactory: createAdapterFactory(async () => surface, () => ["http"]),
+      },
+    );
+    expect(connected["status"]).toBe("refused");
+    expect(code(connected)).toBe("PERMISSION_REQUIRED");
   });
 });

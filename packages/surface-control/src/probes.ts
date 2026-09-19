@@ -95,7 +95,20 @@ function driverMissing(adapter: string): AdapterProbe | undefined {
   };
 }
 
-const cache = new Map<string, AdapterProbe>();
+/**
+ * The command that installs a browser for the Playwright that was asked (PK-03).
+ *
+ * Pinned, because a bare `npx playwright install` resolves whichever Playwright
+ * npx finds, and a different version wants a different browser build: the
+ * person installs one, and the probe says the same thing again.
+ */
+function installChromium(version: string): string {
+  return /^\d+\.\d+\.\d+/.test(version)
+    ? `npx playwright@${version} install chromium`
+    : "npx playwright install chromium";
+}
+
+const cache = new Map<string, { probe: AdapterProbe; at: number }>();
 
 /**
  * The version ranges this repository has driven.
@@ -104,7 +117,7 @@ const cache = new Map<string, AdapterProbe>();
  * are told the same thing, and so a range that moves moves once.
  */
 export const DRIVEN_RANGES: Readonly<Record<string, string>> = {
-  playwright: "Playwright 1.5x, Chromium and Firefox as it bundles them",
+  playwright: "Playwright 1.62, Chromium and Firefox as it bundles them",
   bidi: "WebDriver BiDi as Chrome 130+ and Firefox 130+ speak it",
   appium: "Appium 2.x, over the W3C WebDriver protocol",
   ax: "macOS 13+ (the AXUIElement API and System Events)",
@@ -114,16 +127,30 @@ export const DRIVEN_RANGES: Readonly<Record<string, string>> = {
   atspi: "AT-SPI2 over D-Bus, as GNOME 40+ and GTK 3.24+ publish it",
 };
 
+/**
+ * How long a probe that found nothing is believed.
+ *
+ * A present driver stays present for the life of the process; an absent one is
+ * exactly what a person fixes next — `npx playwright install`, starting Appium —
+ * and the broker lives for fifteen minutes between uses. Cached forever,
+ * `surface_targets` kept answering `ready: false` after the fix until the broker
+ * happened to restart. Long enough that `doctor` asking for everything at once
+ * still costs one round of spawns.
+ */
+const ABSENT_PROBE_MS = 10_000;
+
 /** Probe one adapter. Cached: `doctor` asks for all of them at once. */
 export async function probeAdapter(adapter: string): Promise<AdapterProbe> {
   const already = cache.get(adapter);
-  if (already !== undefined) return already;
+  if (already !== undefined && (already.probe.present || Date.now() - already.at < ABSENT_PROBE_MS)) {
+    return already.probe;
+  }
   const answer = await runProbe(adapter);
   const withRange: AdapterProbe = {
     ...answer,
     ...(DRIVEN_RANGES[adapter] === undefined ? {} : { range: DRIVEN_RANGES[adapter] }),
   };
-  cache.set(adapter, withRange);
+  cache.set(adapter, { probe: withRange, at: Date.now() });
   return withRange;
 }
 
@@ -191,7 +218,7 @@ async function runProbe(adapter: string): Promise<AdapterProbe> {
             version,
             reason:
               `Playwright ${version} is installed but has no browser to drive. Run ` +
-              "`npx playwright install chromium`.",
+              `\`${installChromium(version)}\`.`,
           };
         }
       } catch {
@@ -200,7 +227,7 @@ async function runProbe(adapter: string): Promise<AdapterProbe> {
           version,
           reason:
             `Playwright ${version} is installed but could not say where its browser is. Run ` +
-            "`npx playwright install chromium`.",
+            `\`${installChromium(version)}\`.`,
         };
       }
       return { present: true, version };
@@ -313,7 +340,13 @@ async function runProbe(adapter: string): Promise<AdapterProbe> {
           reason: `AT-SPI is Linux's accessibility bus; this host is ${platform()}.`,
         };
       }
-      const gdbus = ask("gdbus", ["--version"]);
+      /*
+       * Present, asked with `help`: `gdbus` has no `--version` — it answers
+       * "Unknown command" and exits 1 — so the probe said GLib was missing on
+       * every Linux host, and the doctor refused the adapter before anything
+       * could be asked of the bus.
+       */
+      const gdbus = ask("gdbus", ["help"]) === undefined ? undefined : "gdbus (GLib)";
       if (gdbus === undefined) {
         return {
           present: false,

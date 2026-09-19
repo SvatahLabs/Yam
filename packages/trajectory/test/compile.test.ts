@@ -212,3 +212,56 @@ describe("grouping and the proposal (LLD §13.4)", () => {
     expect(compiled.proposal.bindings).toEqual([]);
   });
 });
+
+describe("a withheld secret becomes an input, never text (SF-15)", () => {
+  const signIn: TrajectoryLine[] = [
+    line({
+      seq: 1,
+      call: "act",
+      intent: "enter the email",
+      url: "http://app.test/login",
+      args: { action: "type", args: { value: "ada@example.test" } },
+      describe: describeOf({ role: "textbox", name: "Email", attrs: { type: "email" } }),
+    }),
+    line({
+      seq: 2,
+      call: "act",
+      intent: "enter the password",
+      url: "http://app.test/login",
+      args: { action: "type", args: { value: "[REDACTED]" } },
+      describe: describeOf({ role: "textbox", name: "Password", attrs: { type: "password" } }),
+    }),
+  ];
+
+  it("types the input rather than the placeholder", () => {
+    expect(sentenceForAct("type", { value: "[REDACTED]" }, "the Password field")).toBe(
+      "Type {input.passwordField} into the Password field",
+    );
+    expect(draftFor(signIn[1]!)?.secretInput).toBe("passwordField");
+  });
+
+  it("leaves a step that carries only part of a secret for a person to write", () => {
+    const partial = draftFor(
+      line({ seq: 3, call: "act", args: { action: "type", args: { value: "user:[REDACTED]" } }, describe: describeOf({ role: "textbox", name: "Token" }) }),
+    );
+    expect(partial?.sentence).toBeUndefined();
+    expect(partial?.why).toContain("withheld as a secret");
+    const checked = draftFor(
+      line({ seq: 4, call: "check", args: { subject: "ref", predicate: { kind: "value", value: "[REDACTED]" } }, describe: describeOf({ role: "textbox", name: "Password" }) }),
+    );
+    expect(checked?.sentence).toBeUndefined();
+  });
+
+  it("declares the input on the story, and the step compiles", () => {
+    const compiled = compileTrajectory(signIn, {
+      now: "2026-09-04T00:00:00.000Z",
+      storyName: "Sign in",
+    });
+    expect(compiled.review).toEqual([]);
+    expect(compiled.steps.compiled).toBe(2);
+    expect(compiled.proposal.flow).toContain("story: Sign in\ninputs: passwordField: secret\n");
+    expect(compiled.proposal.flow).toContain("Type {input.passwordField} into the Password field");
+    expect(compiled.proposal.flow).not.toContain("[REDACTED]");
+    expect(compiled.proposal.story).toBeDefined();
+  });
+});

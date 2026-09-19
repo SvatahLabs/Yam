@@ -3,7 +3,7 @@ import type { ReadKind, CheckSubject, Ref, ActArgs } from "@svatah/yam-schema";
 import { SurfaceError } from "@svatah/yam-surface";
 import { ACTION_FORMS } from "@svatah/yam-schema";
 import { makeRequestId, successEnvelope, failedEnvelope, refusedEnvelope } from "./envelope.js";
-import type { SessionStore } from "./sessions.js";
+import { targetIdFor, type SessionStore } from "./sessions.js";
 import type { ErrorCode } from "@svatah/yam-contract";
 import {
   discoverTargets,
@@ -16,7 +16,13 @@ import { hashInput } from "./coordination.js";
 import type { EventStore } from "./events.js";
 import type { RedactionPolicy } from "./redaction.js";
 import type { PromotionStore } from "./promotion.js";
-import { addSecretLiteral, redactObject } from "./redaction.js";
+import {
+  addSecretLiteral,
+  forgetSecrets,
+  redactObject,
+  withholdFieldValues,
+  withholdSecrets,
+} from "./redaction.js";
 
 
 /**
@@ -54,9 +60,17 @@ export interface DispatchContext {
   promotion?: PromotionStore;
 }
 
-function maybeRedact(ctx: DispatchContext, result: Record<string, unknown>): Record<string, unknown> {
+/**
+ * An answer with every secret withheld: the ones declared for everybody, and
+ * the ones this session's own caller declared (SF-15).
+ */
+function maybeRedact(
+  ctx: DispatchContext,
+  result: Record<string, unknown>,
+  session: string | undefined,
+): Record<string, unknown> {
   if (!ctx.redaction) return result;
-  return redactObject(ctx.redaction, result) as Record<string, unknown>;
+  return redactObject(ctx.redaction, result, session) as Record<string, unknown>;
 }
 
 /**
@@ -172,10 +186,6 @@ export async function dispatchTargets(
 ): Promise<Record<string, unknown>> {
   const requestId = makeRequestId();
   const start = Date.now();
-  const targets = discoverTargets(input.registeredAdapters, {
-    url: input.url,
-    adapter: input.adapter,
-  });
   /*
    * Asked, not looked up (T23, SF-09).
    *
@@ -183,9 +193,15 @@ export async function dispatchTargets(
    * `Record<string, string[]>` — `appium: available` on a machine with no
    * Appium server. `targets` is the operation a caller asks *before* it
    * connects, so it is the one that should cost a probe and answer with the
-   * version the host said and the reason it could not be asked.
+   * version the host said and the reason it could not be asked — and its
+   * targets are ready by the same probe, not by the table beside it.
    */
   const adapters = await probeAdapters(input.registeredAdapters ?? []);
+  const targets = discoverTargets(input.registeredAdapters, {
+    url: input.url,
+    adapter: input.adapter,
+    readiness: adapters,
+  });
   const elapsed = Date.now() - start;
   return successEnvelope(requestId, undefined, { targets, adapters }, elapsed);
 }
@@ -202,6 +218,7 @@ export async function dispatchConnect(
       path?: string;
       args?: string[];
       env?: Record<string, string>;
+      inheritEnv?: boolean;
       timeoutMs?: number;
       size?: [number, number];
     };
@@ -269,7 +286,15 @@ export async function dispatchConnect(
      * application that already exists; `launch` is when Yam started the target.
      */
     const mode = input.attach !== undefined || input.app !== undefined ? "attach" : "launch";
-    const sessionId = ctx.sessions.create(surface, adapterName, { mode });
+    const targetId = targetIdFor({
+      adapter: adapterName,
+      ...(input.app === undefined ? {} : { app: input.app }),
+      ...(input.attach === undefined ? {} : { attach: input.attach }),
+    });
+    const sessionId = ctx.sessions.create(surface, adapterName, {
+      mode,
+      ...(targetId === undefined ? {} : { targetId }),
+    });
 
     /*
      * `SessionInit` already carried all three of these; nothing but the
@@ -317,7 +342,7 @@ export async function dispatchConnect(
       kind: surface.kind,
       capabilities: caps,
     }, elapsed);
-    return maybeRedact(ctx, envelope);
+    return maybeRedact(ctx, envelope, sessionId);
   } catch (err) {
     const elapsed = Date.now() - start;
     return handleError(requestId, undefined, err, elapsed, true);
@@ -373,7 +398,7 @@ export async function dispatchSnapshot(
       ...(generation !== undefined ? { generation } : {}),
       truncated,
     }, elapsed);
-    return maybeRedact(ctx, envelope);
+    return maybeRedact(ctx, envelope, input.session);
   } catch (err) {
     return handleError(requestId, input.session, err, Date.now() - start);
   }
@@ -406,7 +431,9 @@ export async function dispatchAct(
 ): Promise<Record<string, unknown>> {
   const requestId = makeRequestId();
   const start = Date.now();
-  if (ctx.redaction) for (const secret of input.secrets ?? []) addSecretLiteral(ctx.redaction, secret);
+  if (ctx.redaction) {
+    for (const secret of input.secrets ?? []) addSecretLiteral(ctx.redaction, secret, input.session);
+  }
   const entry = ctx.sessions.get(input.session);
   if (!entry) {
     return sessionNotFound(requestId, input.session);
@@ -469,6 +496,41 @@ export async function dispatchAct(
         { action: input.action, missing },
       );
     }
+  }
+
+  /*
+   * The adapter's capability, asked before dispatch too (SF-11).
+   *
+   * `ACTION_FORMS` names the capability an action needs, and the adapter says
+   * whether it has it; the desktop already used both to decide what to *offer*.
+   * Nothing used them to refuse, so a `dragTo` on the AX adapter reached it,
+   * which refused with an error the broker told as `TIMEOUT` — "try again",
+   * about an action the adapter will never perform.
+   */
+  /*
+   * Only where the form describes this kind of surface. `switchFrame` is a web
+   * form gated on `frames`, and the Appium adapter — `frames: false`, a phone
+   * has no iframes — implements it as the switch between its native view and a
+   * web view; the gate refused the one call its own errors tell an agent to
+   * make. On a kind the form was not written for, the adapter answers.
+   */
+  const capability = form?.capability;
+  const describes = form?.kinds === undefined || form.kinds.includes(entry.surface.kind);
+  if (capability !== undefined && describes && entry.surface.capabilities()[capability] !== true) {
+    ctx.events?.emit({
+      sessionId: input.session,
+      kind: "operation.refused",
+      operationName: input.action,
+      data: { code: "UNSUPPORTED_OPERATION", capability },
+    });
+    return refusedEnvelope(
+      requestId,
+      input.session,
+      "UNSUPPORTED_OPERATION",
+      `The ${entry.adapter} adapter cannot ${form!.label.toLowerCase()}: its \`${capability}\` capability ` +
+        "is false. Nothing was dispatched.",
+      { action: input.action, capability },
+    );
   }
 
   if (ctx.coordination && input.idempotencyKey) {
@@ -544,18 +606,29 @@ export async function dispatchAct(
      * a promoted "type" step compiled to `Type "" into the Username field`,
      * which is a proposal that would type nothing. The MCP path records the
      * same shape, so one trajectory reads the same whoever wrote it.
+     *
+     * The typed value is kept unless it is a secret (SF-15): declared by the
+     * caller, or typed into a field that says it is a password. A withheld one
+     * compiles to a `secret` input rather than into the proposal's text.
      */
+    const kept = withholdSecrets(input.args as Record<string, unknown> | undefined, {
+      ...(input.secrets === undefined ? {} : { secrets: input.secrets }),
+      describe: evidence.describe,
+      failClosed: input.action === "type",
+    });
     ctx.promotion?.record(input.session, {
       call: "act",
       ...(input.intent === undefined ? {} : { intent: input.intent }),
       args: {
         action: input.action,
-        ...(input.args === undefined ? {} : { args: input.args }),
+        ...(kept === undefined ? {} : { args: kept }),
         ...(input.ref2 === undefined ? {} : { ref2: input.ref2 }),
       },
       ...(input.ref === undefined ? {} : { ref: input.ref }),
-      ...evidence,
-      result,
+      // A password field's own value rides along in `describe`, whatever the
+      // arguments were (SF-15).
+      ...withholdFieldValues(evidence, evidence.describe),
+      result: withholdFieldValues(result, evidence.describe),
     });
 
     const envelope = successEnvelope(requestId, input.session, result, elapsed);
@@ -574,16 +647,18 @@ export async function dispatchAct(
       operationName: input.action,
       data: { ref: input.ref },
     });
-    return maybeRedact(ctx, envelope);
+    return maybeRedact(ctx, envelope, input.session);
   } catch (err) {
     mutation.end("failed");
+    const answer = handleError(requestId, input.session, err, Date.now() - start);
+    // An adapter's own refusal is a refusal in the record too, not a failure.
     ctx.events?.emit({
       sessionId: input.session,
-      kind: "operation.failed",
+      kind: answer["status"] === "refused" ? "operation.refused" : "operation.failed",
       operationName: input.action,
       data: { ref: input.ref, error: err instanceof Error ? err.message : String(err) },
     });
-    return handleError(requestId, input.session, err, Date.now() - start);
+    return maybeRedact(ctx, answer, input.session);
   }
 }
 
@@ -609,7 +684,9 @@ export async function dispatchRead(
       input.name,
     );
     const elapsed = Date.now() - start;
-    return successEnvelope(requestId, input.session, { value }, elapsed);
+    // Redacted like an action's answer: reading back a field is how a typed
+    // secret would otherwise come straight back out (SF-15).
+    return maybeRedact(ctx, successEnvelope(requestId, input.session, { value }, elapsed), input.session);
   } catch (err) {
     return handleError(requestId, input.session, err, Date.now() - start);
   }
@@ -656,13 +733,13 @@ export async function dispatchCheck(
     );
     const elapsed = Date.now() - start;
     if (!result.ok) {
-      return {
+      return maybeRedact(ctx, {
         ...failedEnvelope(requestId, input.session, "CHECK_FAILED", result.message ?? "Check failed"),
         result,
         timing: { totalMs: elapsed },
-      };
+      }, input.session);
     }
-    return successEnvelope(requestId, input.session, result, elapsed);
+    return maybeRedact(ctx, successEnvelope(requestId, input.session, result, elapsed), input.session);
   } catch (err) {
     return handleError(requestId, input.session, err, Date.now() - start);
   }
@@ -682,6 +759,7 @@ export async function dispatchClose(
     await entry.surface.close();
     ctx.sessions.remove(input.session);
     ctx.references?.invalidateSession(input.session);
+    if (ctx.redaction) forgetSecrets(ctx.redaction, input.session);
     const elapsed = Date.now() - start;
     ctx.promotion?.clear(input.session);
     return successEnvelope(requestId, input.session, { closed: true }, elapsed);
@@ -740,7 +818,7 @@ export async function dispatchEvents(
   const events = ctx.events?.list(input.session) ?? [];
   const steps = ctx.promotion?.list(input.session) ?? [];
   const envelope = successEnvelope(requestId, input.session, { events, steps }, 0);
-  return maybeRedact(ctx, envelope);
+  return maybeRedact(ctx, envelope, input.session);
 }
 
 export async function dispatchControl(
@@ -913,7 +991,7 @@ export async function dispatchRequest(
     // Redacted like every other result: a response body is page text, and a
     // declared secret must not come back in one (SF-15).
     const envelope = successEnvelope(requestId, input.session, { response }, elapsed);
-    return maybeRedact(ctx, envelope);
+    return maybeRedact(ctx, envelope, input.session);
   } catch (err) {
     mutation.end("failed");
     ctx.events?.emit({
@@ -972,8 +1050,16 @@ function handleError(
     const code = opening && surfaceErrorToCode(err) === "SESSION_CLOSED"
       ? "CONNECT_FAILED"
       : surfaceErrorToCode(err);
+    /*
+     * An action the adapter will never perform, and a permission nobody has
+     * granted, are refusals: nothing happened to the target, and retrying
+     * changes nothing until somebody does something else first (SF-11, SF-14).
+     */
+    const refused = code === "UNSUPPORTED_OPERATION" || code === "PERMISSION_REQUIRED";
     return {
-      ...failedEnvelope(requestId, sessionId, code, err.message),
+      ...(refused
+        ? refusedEnvelope(requestId, sessionId, code, err.message)
+        : failedEnvelope(requestId, sessionId, code, err.message)),
       timing: { totalMs: elapsedMs },
     };
   }
@@ -986,6 +1072,10 @@ function handleError(
 
 function surfaceErrorToCode(err: SurfaceError): ErrorCode {
   switch (err.constructor.name) {
+    case "UnsupportedError":
+      return "UNSUPPORTED_OPERATION";
+    case "PermissionError":
+      return "PERMISSION_REQUIRED";
     case "LocateError":
       return "STALE_REFERENCE";
     case "ActionabilityError":

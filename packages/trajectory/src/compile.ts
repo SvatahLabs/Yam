@@ -107,7 +107,7 @@ export function compileTrajectory(
       review.push({ intent: draft.intent, why: draft.why ?? "no sentence could be drafted" });
       continue;
     }
-    const problem = tier1Refusal(draft.sentence, storyName);
+    const problem = tier1Refusal(draft.sentence, storyName, draft.secretInput);
     if (problem !== undefined) {
       review.push({ intent: draft.intent, why: problem });
       continue;
@@ -255,16 +255,27 @@ function slug(name: string): string {
 /* ── the draft, and the Tier 1 compile of it ──────────────────────────────── */
 
 /** Why Tier 1 refused a sentence, or `undefined` when it did not. */
-function tier1Refusal(sentence: string, storyName: string): string | undefined {
-  const { diagnostics } = compileDraftResult(oneStepFlow(storyName, sentence), storyName);
+function tier1Refusal(
+  sentence: string,
+  storyName: string,
+  secretInput: string | undefined,
+): string | undefined {
+  const { diagnostics } = compileDraftResult(oneStepFlow(storyName, sentence, secretInput), storyName);
   const errors = diagnostics.filter((d) => d.severity === "error");
   return errors.length === 0
     ? undefined
     : errors.map((d) => `${d.code}: ${d.message.split("\n")[0]}`).join("; ");
 }
 
-function oneStepFlow(storyName: string, sentence: string): string {
-  return `story: ${storyName}\n  ${sentence}\n\ntest: ${storyName}\n`;
+function oneStepFlow(storyName: string, sentence: string, secretInput: string | undefined): string {
+  const inputs = secretInput === undefined ? "" : `inputs: ${secretInput}: secret\n`;
+  return `story: ${storyName}\n${inputs}  ${sentence}\n\ntest: ${storyName}\n`;
+}
+
+/** `inputs: passwordField: secret`, for every withheld value a step asks for. */
+function secretInputsLine(accepted: readonly DraftStep[]): string[] {
+  const names = [...new Set(accepted.flatMap((one) => (one.secretInput === undefined ? [] : [one.secretInput])))];
+  return names.length === 0 ? [] : [`inputs: ${names.map((name) => `${name}: secret`).join(", ")}`];
 }
 
 function compileDraftResult(
@@ -337,6 +348,7 @@ function renderFlow(
     `// file are \`verified: false\` — no run has confirmed any of them.`,
     ``,
     `story: ${storyName}`,
+    ...secretInputsLine(accepted),
   ];
 
   for (const draft of drafts) {

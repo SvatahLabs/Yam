@@ -180,10 +180,22 @@ export function selectAdapter(
 
 export function discoverTargets(
   registeredAdapters: string[],
-  options?: { url?: string; adapter?: string },
+  options?: {
+    url?: string;
+    adapter?: string;
+    /**
+     * Readiness a probe already established (T23, SF-09).
+     *
+     * Without it a target's `ready` comes from the platform table, and
+     * `targets` answered `appium ready: true` beside an `adapters` entry, in the
+     * same envelope, saying no Appium server answered. An agent picks from
+     * `targets`; it should be picking from what the host said.
+     */
+    readiness?: readonly AdapterReadiness[];
+  },
 ): DiscoveredTarget[] {
   const targets: DiscoveredTarget[] = [];
-  const adapters = discoverAdapters(registeredAdapters);
+  const adapters = options?.readiness ?? discoverAdapters(registeredAdapters);
 
   for (const readiness of adapters) {
     if (options?.adapter && readiness.adapter !== options.adapter) continue;

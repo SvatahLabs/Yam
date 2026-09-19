@@ -17,7 +17,11 @@ export interface SessionEntry {
 }
 
 export interface SessionStore {
-  create(surface: AgentSurface, adapter: string, options?: { mode?: SessionMode; ttlMs?: number }): string;
+  create(
+    surface: AgentSurface,
+    adapter: string,
+    options?: { mode?: SessionMode; ttlMs?: number; targetId?: string },
+  ): string;
   get(sessionId: string): SessionEntry | undefined;
   touch(sessionId: string): void;
   list(): Array<{
@@ -41,7 +45,11 @@ export function createSessionStore(): SessionStore {
   const sessions = new Map<string, SessionEntry>();
 
   return {
-    create(surface: AgentSurface, adapter: string, options?: { mode?: SessionMode; ttlMs?: number }): string {
+    create(
+      surface: AgentSurface,
+      adapter: string,
+      options?: { mode?: SessionMode; ttlMs?: number; targetId?: string },
+    ): string {
       const sessionId = `s_${randomUUID().replace(/-/g, "").slice(0, 12)}`;
       const now = new Date().toISOString();
       sessions.set(sessionId, {
@@ -50,6 +58,7 @@ export function createSessionStore(): SessionStore {
         adapter,
         status: "ready",
         mode: options?.mode ?? "launch",
+        ...(options?.targetId === undefined ? {} : { targetId: options.targetId }),
         createdAt: now,
         lastActivity: now,
         ttlMs: options?.ttlMs ?? DEFAULT_TTL_MS,
@@ -119,4 +128,37 @@ export function createSessionStore(): SessionStore {
       return expired;
     },
   };
+}
+
+/**
+ * What a session is attached to, when two sessions can be on the same thing
+ * (SF-13).
+ *
+ * A running browser joined by its endpoint, or a running application driven by
+ * its name, is one target however many sessions are opened on it; a URL, and a
+ * terminal's program, start a new one each time. `undefined` for those.
+ */
+export function targetIdFor(input: { adapter?: string; app?: string; attach?: string }): string | undefined {
+  /*
+   * Normalised, so one target has one id: `http://localhost:9222`,
+   * `http://127.0.0.1:9222/` and `ws://[::1]:9222/devtools/browser/x` are the
+   * same browser, and `Safari` and `safari` the same application — process
+   * names are looked up without regard to case. Compared raw, each spelling was
+   * a way to open an unheld session on a target somebody held.
+   */
+  if (input.attach !== undefined) return `attach:${endpointOf(input.attach)}`;
+  if (input.app !== undefined && input.adapter !== "process") return `app:${input.app.trim().toLowerCase()}`;
+  return undefined;
+}
+
+function endpointOf(attach: string): string {
+  try {
+    const url = new URL(attach);
+    const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+    const loopback = host === "localhost" || host === "::1" || /^127\.\d+\.\d+\.\d+$/.test(host);
+    const port = url.port !== "" ? url.port : url.protocol === "https:" || url.protocol === "wss:" ? "443" : "80";
+    return `${loopback ? "loopback" : host}:${port}`;
+  } catch {
+    return attach.trim().toLowerCase();
+  }
 }

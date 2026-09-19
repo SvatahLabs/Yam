@@ -59,6 +59,27 @@ describe("target discovery (T06, SF-04)", () => {
     expect(targets[0]!.adapter).toBe("http");
   });
 
+  it("takes a target's readiness from a probe when one was run, not from the platform table", () => {
+    /*
+     * `targets` answered `appium ready: true` beside a probe, in the same
+     * envelope, that said no Appium server answered. The table's claim is
+     * about the platform; the probe's is about this host.
+     */
+    const table = discoverAdapters(["appium", "http"]);
+    const probed = table.map((one) =>
+      one.adapter === "appium"
+        ? { ...one, available: false, reason: "no Appium server answered" }
+        : one,
+    );
+    const targets = discoverTargets(["appium", "http"], { readiness: probed });
+    const appium = targets.find((one) => one.adapter === "appium")!;
+    expect(appium.ready).toBe(false);
+    expect(appium.reason).toBe("no Appium server answered");
+    expect(targets.find((one) => one.adapter === "http")!.ready).toBe(
+      table.find((one) => one.adapter === "http")!.available,
+    );
+  });
+
   it("returns all known adapters when no URL is given", () => {
     const targets = discoverTargets(registered);
     expect(targets.length).toBeGreaterThanOrEqual(registered.length);

@@ -17,7 +17,7 @@
  * on a machine where somebody had started one — which would be the table
  * mistake all over again, with the sides swapped.
  */
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import { probeAdapter, forgetProbes, DRIVEN_RANGES } from "../src/probes.js";
 import { probeAdapters, checkAdapterReadiness } from "../src/discovery.js";
 
@@ -57,6 +57,21 @@ describe("a probe answers with what the host said", () => {
     const first = await probeAdapter("http");
     const second = await probeAdapter("http");
     expect(second).toBe(first);
+  });
+
+  it("asks again about a driver it did not find, once the person has had time to install it", async () => {
+    // `ready: false` was cached for the broker's whole life, so installing the
+    // browser the probe named changed nothing until the broker restarted.
+    const now = Date.now();
+    const clock = vi.spyOn(Date, "now").mockReturnValue(now);
+    try {
+      const first = await probeAdapter("nothing-like-this");
+      expect(await probeAdapter("nothing-like-this")).toBe(first);
+      clock.mockReturnValue(now + 11_000);
+      expect(await probeAdapter("nothing-like-this")).not.toBe(first);
+    } finally {
+      clock.mockRestore();
+    }
   });
 });
 
