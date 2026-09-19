@@ -77,6 +77,15 @@ const METADATA_GAPS = [
     // copyright TJ Holowaychuk.
     evidence: "node_modules/.pnpm/css-value@0.0.1/node_modules/css-value/Readme.md",
   },
+  {
+    name: "color-convert",
+    version: "0.5.3",
+    licence: "MIT",
+    // A transitive dependency of `@electron-forge/maker-dmg` (through appdmg and
+    // parse-color), for the macOS DMG. Its package.json has no `license` field;
+    // `LICENSE` is the MIT text, copyright Heather Arthur.
+    evidence: "node_modules/.pnpm/color-convert@0.5.3/node_modules/color-convert/LICENSE",
+  },
 ];
 
 /** Whether a package is one of the documented metadata gaps above. */
