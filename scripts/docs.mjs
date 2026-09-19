@@ -241,6 +241,8 @@ if (existsSync(coveragePath)) {
     blocked: "not available on this host",
   };
   const bar = (text) => String(text ?? "—").replace(/\|/g, "\\|");
+  /** The adapters CI's desktop legs drive, which this page's one host may not reach. */
+  const CI_DRIVEN = new Set(["ax", "uia"]);
   const lines = [
     "# Support matrix",
     "",
@@ -266,8 +268,28 @@ if (existsSync(coveragePath)) {
     ...coverage.adapters.map(
       (one) =>
         `| \`${one.adapter}\` | ${bar(one.platforms)} | ${STATUS[one.status] ?? one.status} | ` +
-        `${bar(one.version)} | ${bar(one.range)} | ${bar(one.reason)} |`,
+        `${bar(one.version)} | ${bar(one.range)} | ${bar(
+          one.status !== "validated" && CI_DRIVEN.has(one.adapter)
+            ? `${one.reason} — CI drives it on a hosted runner; see the note below the table`
+            : one.reason,
+        )} |`,
     ),
+    "",
+    /*
+     * What this page's one machine could not ask, CI asks on every run.
+     *
+     * The table above is one host's, and read alone it said `uia` was "not
+     * available" for months after a hosted Windows runner started driving it
+     * conformant. Stated here rather than folded in: CI's reports are
+     * artifacts of their runs, not evidence committed beside this page, and a
+     * number with no committed evidence is the thing this page exists not to
+     * print. `tools/repo-checks/test/ci.test.ts` keeps both legs in the workflow.
+     */
+    "CI drives two of these on every run, on hosted runners, against the packaged",
+    "app: `ax` on macOS and `uia` on Windows, each failing its leg unless conformant.",
+    "Their reports are the `desktop-conformance-ax` and `desktop-conformance-uia`",
+    "artifacts of that run. *Not available on this host* above means this page's",
+    "host.",
     "",
     "## Interfaces",
     "",

@@ -267,6 +267,30 @@ jobs:
           name: model-eval-reports
           path: reports/
 
+  # The front door as a person uses it: the published MCP server, from npm, in an
+  # empty directory (SF-07, REQ-PKG-2).
+  #
+  # Everything else here runs this checkout. The README's first command is
+  # `npx -y @svatah/yam-mcp`, and the first time it was run from an empty
+  # directory it could not open a browser: npx resolved a newer Playwright than
+  # the browser `npx playwright install` had fetched. Nightly rather than per
+  # push, because what it tests is the registry, which a commit does not change;
+  # a failure here is a release that is broken for the people installing it.
+  registry-mcp:
+    name: the published MCP server, from npm
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: npx @svatah/yam-mcp, doctor and one connect
+        run: node scripts/registry-mcp-smoke.mjs --with-deps
+
   # T3.6: "installers build on three OSes."
   #
   # The app is an Electron application developed in this repository until its
@@ -356,11 +380,13 @@ jobs:
   # It runs behind the packaged build, because the whole point is that it drives
   # the thing a person installs rather than a renderer in a browser.
   #
-  # **Exit 2 is tolerated and says so.** A hosted macOS runner cannot grant the
-  # Accessibility permission, so the two AX passes are `blocked` with the
-  # doctor's own sentence — and if the runner can reach nothing at all, the
-  # suite says so with 2 rather than reporting a green nothing. Exit 1 is a
-  # check that failed, and fails the leg. Never the other way round.
+  # **Exit 2 fails the leg.** It means the runner could reach nothing and the
+  # suite did not run. That was tolerated while hosted macOS runners were
+  # believed unable to grant Accessibility; they grant it (`ax/accessibility
+  # granted` in this job's doctor step), and the suite reaches 118 of 119
+  # checks here, so a 2 now is a regression in what Yam can reach — and a green
+  # leg over a suite that never ran would hide exactly that. Exit 1 is a check
+  # that failed, and fails the leg too.
   yam-on-yam:
     name: Yam drives the packaged Yam
     runs-on: macos-latest
@@ -402,8 +428,7 @@ jobs:
           code=$?
           set -e
           if [ "$code" = "2" ]; then
-            echo "::warning::This runner could reach nothing (exit 2); the suite did not run."
-            exit 0
+            echo "::error::This runner could reach nothing (exit 2); the suite did not run."
           fi
           exit "$code"
 
@@ -414,6 +439,102 @@ jobs:
           path: reports/yam-on-yam/**
           if-no-files-found: warn
 
+  # T11.5: Yam verifies Yam, the two-sided parity gate (REQ-SELF-2, REQ-SELF-3,
+  # LLD §13.9).
+  #
+  # `yam eval self` runs every check in `evals/self/checks.yaml` two ways — once
+  # through Yam, once through an oracle that is not Yam (the app's Playwright
+  # cases, vitest, a script's exit code) — and passes only when every check both
+  # sides reached was answered the same way. Until now it had only ever been run
+  # by hand, as `pnpm self`, on a developer's Mac.
+  #
+  # Nightly and on dispatch, never per push: it runs the Yam-on-Yam suite, the
+  # live AX gate, the app's Playwright suite and the healing eval among its
+  # sources, which is most of an hour on a hosted runner, and it has never run
+  # here, so it must not block a push before it has been green.
+  #
+  # macOS, behind the packaged build, for the reasons `yam-on-yam` gives: the Yam
+  # side drives the packaged app through the AX adapter.
+  #
+  # **It does not touch the committed reports.** `pnpm self` is `yam eval self
+  # --update`, which rewrites `reports/self-parity.md` and the reports its
+  # sources write; that is for a person refreshing the committed set. Here the
+  # parity report goes to the runner's temporary directory and is uploaded, the
+  # sources' reports go to a temporary directory of the command's own (P11-F3),
+  # and a last step checks that `reports/` is exactly what was checked out.
+  self-parity:
+    name: Yam verifies Yam (self parity)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: macos-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Browsers
+        run: pnpm browsers
+
+      - name: Build the workspace
+        run: pnpm -r build
+
+      # The Yam side and the app's Playwright side both drive the packaged app,
+      # with the CLI staged inside it by the app's own `package` script.
+      - name: Package the app
+        run: pnpm --filter @svatah/yam-desktop package
+
+      - name: What this host can be asked
+        run: node packages/cli/dist/bin.js surface doctor || true
+
+      # `evals/self`'s flows open the fixtures project through the app's Recent
+      # list, which is empty on a runner nobody has opened a project on. This is
+      # the first half of `pnpm self`; the second half is below, without
+      # `--update`.
+      - name: Put the fixtures project in the app's Recent list
+        run: node scripts/seed-app-recents.mjs
+
+      # Exit 1 is a disagreement: one oracle is wrong, and the report names both
+      # pieces of evidence. Exit 0 with no check reached by both sides is not a
+      # pass either — "100 percent agreement over 0 checks" is a gate that
+      # compared nothing, which is what a runner that can reach neither side
+      # would print — so that fails the leg too, saying so.
+      - name: Self parity
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/self-parity"
+          set +e
+          node packages/cli/dist/bin.js eval self \
+            --report "$RUNNER_TEMP/self-parity/self-parity.md" \
+            | tee "$RUNNER_TEMP/self-parity/summary.txt"
+          code=${PIPESTATUS[0]}
+          set -e
+          if [ "$code" = "1" ]; then
+            echo "::error::Yam and an external oracle disagreed; the uploaded self-parity report names the checks and both answers."
+          fi
+          if [ "$code" = "0" ] && grep -q "agreement over 0 check(s)" "$RUNNER_TEMP/self-parity/summary.txt"; then
+            echo "::error::No check was reached by both sides, so the parity gate compared nothing."
+            code=1
+          fi
+          exit "$code"
+
+      - name: The committed reports are untouched
+        run: git diff --exit-code -- reports
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: self-parity
+          path: ${{ runner.temp }}/self-parity/**
+          if-no-files-found: warn
+
   # T6.1, T6.2: the desktop adapters against the app (REQ-ADP-6, 7, REQ-ADE-6).
   #
   # The only place either adapter can be *run*: the AX one needs macOS with the
@@ -421,20 +542,18 @@ jobs:
   # the bridge is a pure function of a recorded tree and is covered by the
   # `workspace` job on every platform; this is the part that is not.
   #
-  # What the macOS leg is allowed to do, and what it is not (T7.2).
+  # Neither leg tolerates anything (T7.2).
   #
-  # GitHub's hosted macOS runners cannot grant the Accessibility permission to a
-  # process — there is nobody to answer the prompt and no supported way to write
-  # the TCC database — so on one the gate stops before it runs anything.
-  # `scripts/desktop-conformance.mjs` says which of the two happened in its exit
-  # code: **2** is "the host is not ready", **1** is "this adapter is not
-  # conformant". Only the first is tolerated.
+  # `scripts/desktop-conformance.mjs` says what happened in its exit code: **2**
+  # is "the host is not ready", **1** is "this adapter is not conformant". Exit
+  # 2 used to pass the leg with a warning, because GitHub's hosted macOS runners
+  # were believed unable to grant the Accessibility permission. They grant it,
+  # and both hosted legs report "conformant — 10 cases" — so a 2 now means the
+  # gate silently stopped running, and it fails.
   #
-  # It used to be `continue-on-error: macos-latest`, which tolerated both — so a
-  # macOS run that genuinely failed 0 of 7 would have been green, which is
-  # exactly what Phase 6's live gate did (F1). The distinction is now in the
-  # step, and a self-hosted macOS runner with the permission granted turns the
-  # leg green for real.
+  # Before that it was `continue-on-error: macos-latest`, which tolerated both —
+  # so a macOS run that genuinely failed 0 of 7 would have been green, which is
+  # exactly what Phase 6's live gate did (F1).
   desktop-conformance:
     name: desktop conformance (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -474,8 +593,8 @@ jobs:
       - name: Package the app
         run: pnpm --filter @svatah/yam-desktop package
 
-      # Exit 2 (host not ready) is tolerated and says so; exit 1 (not
-      # conformant) fails the leg. Never the other way round.
+      # Exit 2 (host not ready) and exit 1 (not conformant) both fail the leg;
+      # the first says which it was.
       - name: Conformance
         shell: bash
         run: |
@@ -486,9 +605,7 @@ jobs:
           code=$?
           set -e
           if [ "$code" = "2" ]; then
-            echo "::warning::This runner cannot host the ${{ matrix.adapter }} gate (exit 2)."
-            echo "The suite did not run. A self-hosted runner with the permission granted does."
-            exit 0
+            echo "::error::This runner could not host the ${{ matrix.adapter }} gate (exit 2); the suite did not run."
           fi
           exit "$code"
 
@@ -500,6 +617,280 @@ jobs:
           path: |
             reports/adapter-${{ matrix.adapter }}.md
             reports/${{ matrix.adapter }}-trace-*.jsonl
+          if-no-files-found: ignore
+
+  # T23, SF-23: the Linux AT-SPI adapter against the app (REQ-ADP-7's Linux half).
+  #
+  # **Its first run is the first live run of the AT-SPI bridge anywhere.** The
+  # adapter's role table, reference scope and refusals are pure functions of a
+  # recorded tree and run in `workspace` on every push; the bridge — a `python3`
+  # program over `pyatspi`, and `gdbus` for the bus — has never talked to a real
+  # accessibility registry, and nor has the Linux half of
+  # `scripts/desktop-conformance.mjs`. So this is nightly and on dispatch only,
+  # its own job rather than a third leg of `desktop-conformance`, and it does
+  # not block a push until it has been green. When it has, it belongs in that
+  # matrix beside the other two.
+  #
+  # Exit 2 fails it all the same, as on the other two hosts: a leg that is green
+  # because the host could not run the gate says nothing about the adapter.
+  #
+  # A hosted Ubuntu runner has no desktop session, so this builds the pieces one
+  # would have given it: a virtual X display, a session D-Bus, toolkit
+  # accessibility switched on, the accessibility bus that `org.a11y.Bus` hands
+  # out, and `at-spi2-registryd` on it. Every step prints what answered, because
+  # nobody has yet seen what a working one prints here.
+  desktop-conformance-linux:
+    name: desktop conformance (ubuntu, atspi)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # What the adapter needs, as its README and `surface doctor` name it:
+      # `xvfb` for a display; `dbus-x11` for `dbus-launch`, a session bus that
+      # outlives one step; `at-spi2-core` for the accessibility bus launcher and
+      # the registry; `python3-pyatspi` and `gir1.2-atspi-2.0` for the walker the
+      # bridge runs; `libglib2.0-bin` for `gdbus` and `gsettings`, with the GNOME
+      # schema and the dconf backend so the accessibility setting is stored
+      # somewhere a later process can read it. `libgtk-3-0` and
+      # `libatk-bridge2.0-0` are what Electron's AT-SPI connection loads; apt
+      # resolves both to their `t64` packages on Ubuntu 24.04.
+      - name: The Linux accessibility stack
+        timeout-minutes: 10
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            xvfb dbus-x11 at-spi2-core python3-pyatspi gir1.2-atspi-2.0 python3-gi \
+            libglib2.0-bin gsettings-desktop-schemas dconf-gsettings-backend \
+            libgtk-3-0 libatk-bridge2.0-0
+
+      - name: Build the workspace
+        run: pnpm -r build
+
+      # The conformance target is the packaged app, launched with `YAM_A11Y=1`
+      # (LLD §16, REQ-ADE-6), by the app's own script, which stages the CLI.
+      - name: Package the app
+        run: pnpm --filter @svatah/yam-desktop package
+
+      # As in `app-installers`: on GitHub's Ubuntu image Chromium cannot fall back
+      # to unprivileged user namespaces, so the sandbox helper has to be
+      # root-owned and setuid or the packaged app aborts at once.
+      - name: The packaged app's sandbox helper
+        run: |
+          sudo chown root:root apps/desktop/out/Yam-linux-x64/chrome-sandbox
+          sudo chmod 4755 apps/desktop/out/Yam-linux-x64/chrome-sandbox
+
+      # One display and one session bus for every step after this one, exported
+      # through `GITHUB_ENV`. `xvfb-run` and `dbus-run-session` would each end
+      # with the command they wrap, and the host check and the gate are separate
+      # steps so that a failure reads as one or the other.
+      #
+      # Accessibility is switched on twice, because which one Chromium and the bus
+      # launcher consult has not been seen here: GNOME's `toolkit-accessibility`
+      # setting, and `org.a11y.Status.IsEnabled` on the bus itself. The gate adds
+      # `ACCESSIBILITY_ENABLED=1` to the app's own environment as a third.
+      # Setting `IsEnabled` also starts `at-spi-bus-launcher` through D-Bus
+      # activation. The registry is started explicitly, and the step ends only
+      # when `pyatspi` gets an answer from it.
+      - name: A display, a session bus and the accessibility bus
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp > "$RUNNER_TEMP/xvfb.log" 2>&1 &
+          for attempt in $(seq 1 30); do
+            [ -S /tmp/.X11-unix/X99 ] && break
+            sleep 1
+          done
+          [ -S /tmp/.X11-unix/X99 ] || { echo "::error::Xvfb did not start"; cat "$RUNNER_TEMP/xvfb.log"; exit 1; }
+          export DISPLAY=:99
+          echo "DISPLAY=:99" >> "$GITHUB_ENV"
+
+          eval "$(dbus-launch --sh-syntax)"
+          echo "DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS" >> "$GITHUB_ENV"
+          echo "DBUS_SESSION_BUS_PID=$DBUS_SESSION_BUS_PID" >> "$GITHUB_ENV"
+          echo "session bus: $DBUS_SESSION_BUS_ADDRESS"
+
+          gsettings set org.gnome.desktop.interface toolkit-accessibility true \
+            || echo "::warning::gsettings could not turn toolkit-accessibility on; relying on org.a11y.Status"
+          echo "toolkit-accessibility: $(gsettings get org.gnome.desktop.interface toolkit-accessibility || echo unreadable)"
+          gdbus call --session --dest org.a11y.Bus --object-path /org/a11y/bus \
+            --method org.freedesktop.DBus.Properties.Set org.a11y.Status IsEnabled '<true>'
+          echo "accessibility bus: $(gdbus call --session --dest org.a11y.Bus --object-path /org/a11y/bus --method org.a11y.Bus.GetAddress)"
+
+          registryd=""
+          for candidate in /usr/libexec/at-spi2-registryd /usr/lib/at-spi2-core/at-spi2-registryd; do
+            if [ -x "$candidate" ]; then registryd="$candidate"; break; fi
+          done
+          [ -n "$registryd" ] || { echo "::error::at-spi2-registryd is not installed where at-spi2-core puts it"; exit 1; }
+          "$registryd" > "$RUNNER_TEMP/at-spi2-registryd.log" 2>&1 &
+
+          echo "python3: $(command -v python3)"
+          ready=no
+          for attempt in $(seq 1 30); do
+            if python3 -c 'import pyatspi; d = pyatspi.Registry.getDesktop(0); print("registry answered:", d.name, d.childCount, "application(s)")'; then
+              ready=yes
+              break
+            fi
+            sleep 1
+          done
+          [ "$ready" = "yes" ] || { echo "::error::The AT-SPI registry never answered pyatspi"; cat "$RUNNER_TEMP/at-spi2-registryd.log"; exit 1; }
+
+      # The host requirement, first and on its own, as on the other two hosts.
+      - name: Host check
+        run: node packages/cli/dist/bin.js surface doctor --adapter atspi
+
+      # Exit 2 (host not ready) and exit 1 (not conformant) both fail the leg;
+      # the first says which it was.
+      - name: Conformance
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          set +e
+          node scripts/desktop-conformance.mjs \
+            --adapter atspi \
+            --report reports/adapter-atspi.md
+          code=$?
+          set -e
+          if [ "$code" = "2" ]; then
+            echo "::error::This runner could not host the atspi gate (exit 2); the suite did not run."
+          fi
+          exit "$code"
+
+      # The report; what the app printed at each launch; the app's own
+      # window-lifecycle log (`YAM_APP_DEBUG=1`, under its Linux user data
+      # directory); and what Xvfb and the registry said. Everything a reader of
+      # the first run will need and cannot ask the runner for afterwards.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-conformance-atspi
+          path: |
+            reports/adapter-atspi.md
+            reports/atspi-app-*.log
+            ~/.config/Yam/app-debug.log
+            ${{ runner.temp }}/xvfb.log
+            ${{ runner.temp }}/at-spi2-registryd.log
+          if-no-files-found: ignore
+
+  # T4.2, REQ-ADP-5: the Appium adapter against a real Android emulator, with
+  # Android Chrome replaying the conformance subset `packages/adapter-appium`'s
+  # README names ("The emulator gate").
+  #
+  # **It has never run live, here or anywhere.** Every unit test of the adapter
+  # drives a fake device; what only a real driver can say is whether it accepts
+  # these selectors and whether a real screen looks like the fixtures. Nightly
+  # and on dispatch only, and not blocking a push, until it has been green.
+  #
+  # The pieces and why each is pinned or chosen:
+  #
+  #   * KVM, through the udev rule every emulator job on a hosted Ubuntu runner
+  #     uses; without it the emulator falls back to software and does not boot
+  #     inside the action's timeout.
+  #   * `reactivecircus/android-emulator-runner`, API 34, x86_64, target
+  #     `google_apis`. The AOSP `default` and the ATD images ship no Chrome; the
+  #     Google APIs image ships it and is a debuggable build, which matters
+  #     because ChromeDriver turns Chrome's first-run screens off through a
+  #     command-line file that Chrome reads only on a debuggable build. The Play
+  #     Store image also ships Chrome but is a production build.
+  #     `scripts/appium-conformance.mjs` checks that Chrome is on the device
+  #     before it runs anything, and names the target to change if it is not.
+  #   * Appium 2 and the UiAutomator2 driver from npm, pinned: Appium 2.19.0 is
+  #     the last 2.x, and UiAutomator2 driver 4.2.9 the last release whose peer
+  #     range admits Appium 2 (5.x requires Appium 3). The adapter's probe says
+  #     "Appium 2.x".
+  #   * `--allow-insecure chromedriver_autodownload`, so Appium fetches the
+  #     ChromeDriver that matches whatever Chrome the system image ships rather
+  #     than this file pinning one to an image nobody here chose the Chrome of.
+  #   * The sample application is served by the script on this runner's port
+  #     4173, and the emulator reaches the runner's loopback as `10.0.2.2`.
+  #   * `webdriverio` is a devDependency of `@svatah/yam-adapter-appium` in this
+  #     workspace, so `pnpm install` is what provides it; the script checks it
+  #     resolves from the adapter before it starts.
+  appium-emulator:
+    name: Android Chrome through Appium (emulator)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      APPIUM_VERSION: "2.19.0"
+      UIAUTOMATOR2_DRIVER_VERSION: "4.2.9"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the workspace
+        run: pnpm -r build
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Appium and the UiAutomator2 driver
+        timeout-minutes: 10
+        run: |
+          npm install -g "appium@${APPIUM_VERSION}"
+          appium driver install --source=npm "appium-uiautomator2-driver@${UIAUTOMATOR2_DRIVER_VERSION}"
+          appium --version
+          appium driver list --installed
+
+      # In the background for the rest of the job, before the emulator exists:
+      # Appium does not need a device to start, and the script waits for its
+      # `/status` rather than for a fixed time. Its log is uploaded below.
+      - name: Start Appium
+        run: |
+          nohup appium --address 127.0.0.1 --port 4723 \
+            --allow-insecure chromedriver_autodownload \
+            --log-no-colors > "$RUNNER_TEMP/appium.log" 2>&1 &
+
+      # The action boots the emulator, runs `script` while it is up, and shuts
+      # it down. Each line of `script` is its own `sh -c`, so the exit-code
+      # handling the other gates do over several lines is one line here: exit 2
+      # (the device, Chrome, Appium or the sample application was not ready)
+      # and exit 1 (not conformant) both fail the leg, and the first says which.
+      - name: Emulator, and the conformance subset against it
+        timeout-minutes: 60
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          ram-size: 4096M
+          disk-size: 6000M
+          emulator-boot-timeout: 900
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            node scripts/appium-conformance.mjs --report reports/adapter-appium.md || { code=$?; if [ "$code" = "2" ]; then echo "::error::This runner could not host the Appium gate (exit 2); the suite did not run."; fi; exit "$code"; }
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: appium-emulator
+          path: |
+            reports/adapter-appium.md
+            ${{ runner.temp }}/appium.log
           if-no-files-found: ignore
 
   # T9.3: the generated clients, against a live service (REQ-SDK-1, REQ-SDK-2).

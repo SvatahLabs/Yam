@@ -28,7 +28,13 @@ Last measured 2026-09-09T06:02:20.386Z on **darwin arm64, Node v25.6.1**.
 | `http` | darwin, linux, win32 | implemented, unvalidated here | v25.6.1 | any HTTP/1.1 or HTTP/2 endpoint | driven by `packages/cli/test/surface-transport.test.ts` in the gate rather than by this suite, which drives the packaged desktop |
 | `playwright` | darwin, linux, win32 | **validated** | Version 1.62.1 | Playwright 1.5x, Chromium and Firefox as it bundles them | a session of kind `web` opened through it in this run |
 | `process` | darwin, linux | **validated** | expect version 5.45 | a pseudo-terminal from expect(1) or python3's pty module | a session of kind `process` opened through it in this run |
-| `uia` | win32 | not available on this host | — | Windows 10 1809+ (UI Automation) | UI Automation is Windows'; this host is darwin. — needs Windows; no Windows runner is available — Windows UI Automation runtime |
+| `uia` | win32 | not available on this host | — | Windows 10 1809+ (UI Automation) | UI Automation is Windows'; this host is darwin. — needs Windows; no Windows runner is available — Windows UI Automation runtime — CI drives it on a hosted runner; see the note below the table |
+
+CI drives two of these on every run, on hosted runners, against the packaged
+app: `ax` on macOS and `uia` on Windows, each failing its leg unless conformant.
+Their reports are the `desktop-conformance-ax` and `desktop-conformance-uia`
+artifacts of that run. *Not available on this host* above means this page's
+host.
 
 ## Interfaces
 

@@ -3,8 +3,9 @@
  * The desktop conformance run: launch the app, drive it, write the report
  * (T6.1, T6.2, T7.1, LLD §7.5, §14, §16, REQ-ADE-6).
  *
- *   node scripts/desktop-conformance.mjs --adapter ax   [--report reports/adapter-ax.md]
- *   node scripts/desktop-conformance.mjs --adapter uia  [--report reports/adapter-uia.md]
+ *   node scripts/desktop-conformance.mjs --adapter ax    [--report reports/adapter-ax.md]
+ *   node scripts/desktop-conformance.mjs --adapter uia   [--report reports/adapter-uia.md]
+ *   node scripts/desktop-conformance.mjs --adapter atspi [--report reports/adapter-atspi.md]
  *
  * One command, because the gate has three parts that are easy to get wrong
  * separately: the app has to be *packaged*, it has to be launched with
@@ -36,9 +37,38 @@
  * shorter than the fifteen seconds this machine has taken twice. It is a poll
  * for an actual window now, up to sixty seconds (§15), and a launch that never
  * shows one is reported as that rather than as seven failing cases.
+ *
+ * ## Linux, which has never been run
+ *
+ * `--adapter atspi` (T23, SF-23) was added before any Linux host had run it, so
+ * every Linux branch below is written from the documentation of the pieces it
+ * talks to and none of it from an answer one of them gave. It needs what the
+ * adapter needs — a display, a session D-Bus, the accessibility bus with
+ * `at-spi2-registryd` on it, `python3` with `pyatspi` — and asks for each before
+ * it launches anything, so a host that lacks one exits 2 naming it.
+ *
+ * Two things differ from the other hosts. Chromium on Linux connects its
+ * accessibility tree to AT-SPI only when it is told at startup that assistive
+ * technology is wanted, and `app.setAccessibilitySupportEnabled(true)` — which
+ * is what `YAM_A11Y=1` does on every platform — is not that signal; the launch
+ * sets `ACCESSIBILITY_ENABLED=1`, the environment variable Chromium's ATK
+ * bridge reads, beside it. And the name AT-SPI publishes for an Electron
+ * application is not necessarily the process name, so the probes find the
+ * application by the process id this script launched and hand the suite the
+ * name the bus actually uses, saying what it was.
  */
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  closeSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  openSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -50,7 +80,8 @@ const option = (name, fallback) => {
   return at < 0 ? fallback : args[at + 1];
 };
 
-const adapter = option("adapter", process.platform === "darwin" ? "ax" : "uia");
+const DEFAULT_ADAPTER = { darwin: "ax", win32: "uia", linux: "atspi" };
+const adapter = option("adapter", DEFAULT_ADAPTER[process.platform] ?? "uia");
 /*
  * Against the current directory (F6, LLD §15). `resolve` with one argument is
  * exactly that, and it leaves an absolute path alone.
@@ -95,14 +126,20 @@ if (!existsSync(cli)) die(2, "Run `pnpm -r build` first.");
  * "the app would not start" are different answers and sent a reader to
  * different places.
  */
-const HOST_FOR = { ax: "darwin", uia: "win32" };
+const HOST_FOR = { ax: "darwin", uia: "win32", atspi: "linux" };
+/** The CI job that runs each adapter's gate, for the message below. */
+const JOB_FOR = {
+  ax: "`desktop-conformance`",
+  uia: "`desktop-conformance`",
+  atspi: "`desktop-conformance-linux` (nightly)",
+};
 if (HOST_FOR[adapter] !== undefined && HOST_FOR[adapter] !== process.platform) {
   die(
     2,
     `The "${adapter}" adapter runs on ${HOST_FOR[adapter]} and this host is ${process.platform}, ` +
       "so the conformance suite was not run and nothing was written to " +
-      `${report}.\nRun this on a ${HOST_FOR[adapter]} host, or attach one as a runner ` +
-      "(`.github/workflows/ci.yml`, the `desktop-conformance` job on a self-hosted runner).",
+      `${report}.\nRun this on a ${HOST_FOR[adapter]} host: CI's ${JOB_FOR[adapter]} job ` +
+      "(`.github/workflows/ci.yml`) runs it on a hosted one.",
   );
 }
 
@@ -176,18 +213,49 @@ function lockedDisplay() {
 
 /** The macOS application bundle, which is what LaunchServices opens. */
 const bundle = join(ROOT, "apps", "desktop", "out", "Yam-darwin-arm64", "Yam.app");
+/*
+ * On Linux the packager writes `out/Yam-linux-<arch>/Yam`: the directory is
+ * `packagerConfig.name` with the platform and architecture, and the executable
+ * is named after `packagerConfig.name` too — which is why the Debian maker in
+ * `forge.config.ts` has to be told `bin: "Yam"`.
+ */
 const app =
   process.platform === "darwin"
     ? join(bundle, "Contents", "MacOS", "Yam")
-    : join(ROOT, "apps", "desktop", "out", `Yam-win32-x64`, "Yam.exe");
+    : process.platform === "linux"
+      ? join(ROOT, "apps", "desktop", "out", `Yam-linux-${process.arch}`, "Yam")
+      : join(ROOT, "apps", "desktop", "out", `Yam-win32-x64`, "Yam.exe");
 
 if (!existsSync(app)) {
   die(
     2,
     `The app is not packaged (${app}).\n` +
-      "Run: pnpm --filter @svatah/yam-desktop exec electron-forge package\n" +
+      // The app's own script, which stages the CLI Forge copies in; `electron-forge
+      // package` alone fails on a checkout that has never staged one.
+      "Run: pnpm --filter @svatah/yam-desktop package\n" +
       `Nothing was written to ${report}.`,
   );
+}
+
+/**
+ * Where a Linux launch writes what the app printed (T23).
+ *
+ * The other two hosts launch with nothing captured, and have a history of runs
+ * to say what a silent failure looks like. Linux has none: the first launch
+ * that aborts on its sandbox helper, a missing X server or a library the runner
+ * lacks would otherwise be reported as "no window within 60000 ms" and nothing
+ * else. One file per launch, beside the report, which CI uploads.
+ */
+function appLogFor(variant, attempt = 0) {
+  if (process.platform !== "linux") return undefined;
+  mkdirSync(dirname(report), { recursive: true });
+  return join(dirname(report), `atspi-app-variant-${variant}${attempt > 0 ? "-retry" : ""}.log`);
+}
+
+/** The last lines of a launch's log, for a message that has to say why. */
+function tailOf(path, lines = 20) {
+  if (path === undefined || !existsSync(path)) return "";
+  return readFileSync(path, "utf8").trim().split("\n").slice(-lines).join("\n");
 }
 
 /**
@@ -218,6 +286,161 @@ const REAL_WINDOW_SCRIPT = [
 ].join("");
 
 /**
+ * "Which application on the accessibility bus is ours, does it have a window,
+ * and is a project open on it?" — asked of AT-SPI directly (T23).
+ *
+ * One `python3` program with `pyatspi`, the binding the adapter's own bridge
+ * uses, so a host this can ask is a host the bridge can ask. It does not go
+ * through the adapter, for the reason `hasWindow` gives.
+ *
+ * The application is chosen by **process id** first — the ids of the process
+ * this script launched, from `pgrep` — and by the name `Yam`, ignoring case,
+ * only when no process id matches. What Chromium publishes as an Electron
+ * application's accessible name has not been seen on a live bus here, and a
+ * probe that matched by name alone would wait sixty seconds for a name the bus
+ * never uses and report a launch failure. Every application on the desktop is
+ * listed in the answer, so a failure says what *was* there.
+ *
+ * `rail-flows` is found through the element's object attributes, where
+ * Chromium publishes the DOM `id` as `id:<value>` — the same attribute the
+ * bridge's walker reads as the automation id. The walk stops at 4000 nodes,
+ * as the macOS probe's does.
+ */
+const ATSPI_PROBE_SCRIPT = [
+  "import json, sys",
+  "try:",
+  "    import pyatspi",
+  "except Exception as error:",
+  "    json.dump({'error': 'pyatspi could not be imported by %s: %s' % (sys.executable, error)}, sys.stdout)",
+  "    sys.exit(0)",
+  "pids = set(int(one) for one in sys.argv[1].split(',') if one.strip().isdigit())",
+  "wanted = sys.argv[2].lower()",
+  "walk = sys.argv[3] == '1'",
+  "limit = int(sys.argv[4])",
+  "answer = {'applications': [], 'window': False, 'project': False}",
+  "by_pid = None",
+  "by_name = None",
+  "desktop = pyatspi.Registry.getDesktop(0)",
+  "for application in desktop:",
+  "    if application is None:",
+  "        continue",
+  "    try:",
+  "        name = application.name or ''",
+  "    except Exception:",
+  "        name = ''",
+  "    try:",
+  "        pid = int(application.get_process_id())",
+  "    except Exception:",
+  "        pid = -1",
+  "    try:",
+  "        windows = int(application.childCount)",
+  "    except Exception:",
+  "        windows = 0",
+  "    answer['applications'].append({'name': name, 'pid': pid, 'windows': windows})",
+  "    if by_pid is None and pid in pids:",
+  "        by_pid = (application, name, pid, windows)",
+  "    if by_name is None and name.lower() == wanted:",
+  "        by_name = (application, name, pid, windows)",
+  "chosen = by_pid if by_pid is not None else by_name",
+  "if chosen is not None:",
+  "    application, name, pid, windows = chosen",
+  "    answer['name'] = name",
+  "    answer['pid'] = pid",
+  "    answer['matchedBy'] = 'pid' if by_pid is not None else 'name'",
+  "    answer['window'] = windows > 0",
+  "    if walk and windows > 0:",
+  "        ids = []",
+  "        stack = []",
+  "        for index in range(windows):",
+  "            try:",
+  "                stack.append(application.getChildAtIndex(index))",
+  "            except Exception:",
+  "                pass",
+  "        seen = 0",
+  "        while stack and seen < limit and not answer['project']:",
+  "            element = stack.pop()",
+  "            if element is None:",
+  "                continue",
+  "            seen += 1",
+  "            try:",
+  "                attributes = element.getAttributes()",
+  "            except Exception:",
+  "                attributes = []",
+  "            for one in attributes:",
+  "                if one.startswith('id:'):",
+  "                    if len(ids) < 12:",
+  "                        ids.append(one[3:])",
+  "                    if one[3:] == 'rail-flows':",
+  "                        answer['project'] = True",
+  "            try:",
+  "                count = int(element.childCount)",
+  "            except Exception:",
+  "                count = 0",
+  "            for index in range(count):",
+  "                try:",
+  "                    stack.append(element.getChildAtIndex(index))",
+  "                except Exception:",
+  "                    pass",
+  "        answer['walked'] = seen",
+  "        answer['ids'] = ids",
+  "json.dump(answer, sys.stdout)",
+].join("\n");
+
+/** What the last AT-SPI probe answered, for a message that has to say why. */
+let lastAtspi;
+/** The name the accessibility bus publishes for the launched app, once seen. */
+let atspiName;
+
+/** Ask the accessibility bus about the launched app; see `ATSPI_PROBE_SCRIPT`. */
+function atspiProbe(walk) {
+  const pids = processIds();
+  const probe = spawnSync(
+    "python3",
+    ["-c", ATSPI_PROBE_SCRIPT, pids.join(","), PROCESS_NAME, walk ? "1" : "0", "4000"],
+    { encoding: "utf8", timeout: 30_000 },
+  );
+  let answer;
+  if (probe.error !== undefined || probe.status !== 0) {
+    answer = {
+      error:
+        `python3 ${probe.error !== undefined ? `could not be run (${probe.error.message})` : `exited ${probe.status ?? "on a signal"}`}` +
+        `${(probe.stderr ?? "").trim() === "" ? "" : `: ${(probe.stderr ?? "").trim().slice(-400)}`}`,
+    };
+  } else {
+    try {
+      answer = JSON.parse(probe.stdout ?? "");
+    } catch {
+      answer = { error: `python3 answered something that is not JSON: ${(probe.stdout ?? "").slice(0, 200)}` };
+    }
+  }
+  lastAtspi = { ...answer, pids };
+  if (typeof answer.name === "string" && answer.name !== "" && answer.name !== atspiName) {
+    atspiName = answer.name;
+    process.stderr.write(
+      `atspi: the app is "${atspiName}" on the accessibility bus (matched by ${answer.matchedBy}, pid ${answer.pid})\n`,
+    );
+  }
+  return answer;
+}
+
+/** The last probe's answer, in one paragraph. */
+function describeAtspi() {
+  if (lastAtspi === undefined) return "The accessibility bus was never asked.";
+  if (lastAtspi.error !== undefined) return `The accessibility bus could not be asked: ${lastAtspi.error}`;
+  const listed = (lastAtspi.applications ?? [])
+    .map((one) => `"${one.name}" (pid ${one.pid}, ${one.windows} window(s))`)
+    .join(", ");
+  return (
+    `The accessibility bus listed ${listed === "" ? "no applications" : listed}; ` +
+    `this app's process ids were ${lastAtspi.pids.join(", ") || "none"} when it was asked.` +
+    (lastAtspi.name === undefined
+      ? ""
+      : ` The app was "${lastAtspi.name}"; the walk read ${lastAtspi.walked ?? 0} node(s) and ` +
+        `saw the ids ${(lastAtspi.ids ?? []).join(", ") || "(none)"}.`)
+  );
+}
+
+/**
  * Does the application have a window yet?
  *
  * Asked of the OS rather than of Yam, and deliberately not through the
@@ -226,6 +449,7 @@ const REAL_WINDOW_SCRIPT = [
  * apart. The call is the cheapest one each platform has.
  */
 function hasWindow() {
+  if (process.platform === "linux") return atspiProbe(false).window === true;
   if (process.platform === "darwin") {
     /*
      * The accessibility API directly, not System Events (P10-F1).
@@ -273,6 +497,7 @@ const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
  * the eleven tabs this phase deleted.
  */
 function hasProject() {
+  if (process.platform === "linux") return atspiProbe(true).project === true;
   if (process.platform !== "darwin") {
     const probe = spawnSync(
       "powershell.exe",
@@ -350,6 +575,19 @@ function launchEnvironment(variant) {
      * every probe the gate has is outside the application.
      */
     YAM_APP_DEBUG: "1",
+    /*
+     * Chromium's ATK bridge, on Linux (T23).
+     *
+     * `YAM_A11Y=1` makes the app call `app.setAccessibilitySupportEnabled(true)`,
+     * which turns on the renderer's accessibility tree on every platform. On
+     * Linux that tree reaches AT-SPI only if Chromium also registered with the
+     * accessibility bus at startup, which it does when it is told assistive
+     * technology is wanted: `ACCESSIBILITY_ENABLED=1`, or GNOME's
+     * `toolkit-accessibility` setting, which CI turns on as well. Set here so a
+     * person running this by hand on a desktop with the setting off gets the
+     * same launch CI does. Not yet seen to work on a live bus.
+     */
+    ...(process.platform === "linux" ? { ACCESSIBILITY_ENABLED: "1" } : {}),
   };
 }
 
@@ -366,6 +604,30 @@ function launchEnvironment(variant) {
  * a new way for teardown to hang.
  */
 function requestQuit() {
+  /*
+   * On Linux a `SIGTERM` to the main process, which the app turns into its
+   * own quit route (`process.on("SIGTERM")` in `src/main/index.ts`). Only the
+   * main process: Chromium's helpers share the executable path and carry a
+   * `--type=` argument, and a signal to them first would take the renderer away
+   * from under a quit that is still writing preferences.
+   */
+  if (process.platform === "linux") {
+    for (const pid of processIds()) {
+      let commandLine = "";
+      try {
+        commandLine = readFileSync(`/proc/${pid}/cmdline`, "utf8");
+      } catch {
+        continue;
+      }
+      if (commandLine.includes("--type=")) continue;
+      try {
+        process.kill(pid, "SIGTERM");
+      } catch {
+        // Already gone.
+      }
+    }
+    return undefined;
+  }
   if (process.platform === "darwin") {
     return spawnSync(
       "osascript",
@@ -399,8 +661,28 @@ function requestQuit() {
  *
  * `-F` so a restored window from a previous run cannot stand in for this one.
  */
-function start(variant) {
+function start(variant, attempt = 0) {
   const environment = launchEnvironment(variant);
+  if (process.platform === "linux") {
+    /*
+     * Directly, under the display and the session bus this process was given
+     * (`DISPLAY`, `DBUS_SESSION_BUS_ADDRESS`): Linux has no LaunchServices to
+     * place the app in a session, and the session this script runs in is the
+     * one the accessibility bus belongs to. What the app prints goes to
+     * `appLogFor`, because nobody has yet seen what it prints here.
+     */
+    const log = appLogFor(variant, attempt);
+    const fd = openSync(log, "w");
+    try {
+      return spawn(app, [], {
+        stdio: ["ignore", fd, fd],
+        detached: false,
+        env: { ...process.env, ...environment },
+      });
+    } finally {
+      closeSync(fd);
+    }
+  }
   if (process.platform !== "darwin") {
     return spawn(app, [], { stdio: "ignore", detached: false, env: { ...process.env, ...environment } });
   }
@@ -417,8 +699,8 @@ function start(variant) {
 }
 
 /** Launch the app at one variant and wait for its project screen. */
-async function launch(variant) {
-  const child = start(variant);
+async function launch(variant, attempt = 0) {
+  const child = start(variant, attempt);
   const startedAt = Date.now();
   let windowAt;
   while (Date.now() - startedAt < WINDOW_TIMEOUT_MS) {
@@ -441,6 +723,60 @@ async function launch(variant) {
   return { child, waitedMs: Date.now() - startedAt, windowAt, timedOut: true };
 }
 
+/*
+ * The Linux host, before anything is launched (T23).
+ *
+ * `surface doctor` has said the accessibility bus answers. What it does not ask
+ * is whether this process has a display to launch onto and whether `pyatspi`
+ * can reach the registry through that bus — the two things every probe above
+ * and the adapter's own walker depend on. Either missing is a host that is not
+ * ready, and saying so now is better than a sixty-second wait for a window that
+ * no probe could have seen.
+ */
+if (process.platform === "linux") {
+  if ((process.env["DISPLAY"] ?? "") === "" && (process.env["WAYLAND_DISPLAY"] ?? "") === "") {
+    die(
+      2,
+      "There is no display (`DISPLAY` is not set), so the app would have nowhere to open a window.\n" +
+        "Run this in a desktop session, or under Xvfb with the session bus exported, as CI's " +
+        `\`desktop-conformance-linux\` job does.\nNothing was written to ${report}.`,
+    );
+  }
+  const registry = atspiProbe(false);
+  if (registry.error !== undefined) {
+    die(
+      2,
+      `The accessibility registry could not be asked through pyatspi: ${registry.error}\n` +
+        "The adapter reads the tree through the same binding. Install `python3-pyatspi` " +
+        "(and `gir1.2-atspi-2.0`), and make sure `at-spi2-registryd` is running on the " +
+        `accessibility bus.\nNothing was written to ${report}.`,
+    );
+  }
+  process.stderr.write(
+    `atspi: the registry answered through pyatspi; ${(registry.applications ?? []).length} ` +
+      "application(s) on the desktop before the launch\n",
+  );
+
+  /*
+   * The sandbox helper, as a warning rather than a refusal. On a host where
+   * Chromium cannot use unprivileged user namespaces — GitHub's Ubuntu image is
+   * one — a helper that is not root-owned and setuid aborts the app at once,
+   * and CI fixes the bits before this runs. Where namespaces work the helper is
+   * not used at all, so refusing here would refuse a host that is fine.
+   */
+  const helper = join(dirname(app), "chrome-sandbox");
+  if (existsSync(helper)) {
+    const bits = statSync(helper);
+    if (bits.uid !== 0 || (bits.mode & 0o4000) === 0) {
+      process.stderr.write(
+        `warning: ${helper} is not root-owned and setuid. If the app's log says "The SUID sandbox ` +
+          "helper binary was found, but is not configured correctly\", run:\n" +
+          `  sudo chown root:root ${helper} && sudo chmod 4755 ${helper}\n`,
+      );
+    }
+  }
+}
+
 /* ── 3. the three passes ──────────────────────────────────────────────────── */
 
 const workspace = mkdtempSync(join(tmpdir(), "yam-desktop-"));
@@ -456,7 +792,7 @@ let running;
  * counted and not killed.
  */
 function processIds() {
-  if (process.platform === "darwin") {
+  if (process.platform !== "win32") {
     const found = spawnSync("pgrep", ["-f", app], { encoding: "utf8" });
     return (found.stdout ?? "")
       .split("\n")
@@ -533,9 +869,10 @@ const stop = () => {
     return;
   }
 
-  if (process.platform === "darwin") {
-    // Started by LaunchServices, so there is no child to signal. The executable
-    // path is unique to this checkout's packaged build.
+  if (process.platform !== "win32") {
+    // Started by LaunchServices on macOS, so there is no child to signal; on
+    // Linux the helpers Chromium forked are not our child either. The
+    // executable path is unique to this checkout's packaged build.
     spawnSync("pkill", ["-f", app], { encoding: "utf8" });
   }
 
@@ -551,7 +888,7 @@ const stop = () => {
     remaining = processIds();
     if (!escalated && remaining.length > 0 && Date.now() - signalledAt > TEARDOWN_TIMEOUT_MS / 2) {
       escalated = true;
-      if (process.platform === "darwin") spawnSync("pkill", ["-9", "-f", app], { encoding: "utf8" });
+      if (process.platform !== "win32") spawnSync("pkill", ["-9", "-f", app], { encoding: "utf8" });
       else for (const pid of remaining) spawnSync("taskkill", ["/PID", String(pid), "/F"]);
     }
   }
@@ -587,6 +924,25 @@ function traceFor(variant, attempt) {
 }
 
 /** Run the conformance suite once against the app that is up, and parse it. */
+/**
+ * The name the suite addresses the app by.
+ *
+ * `Yam` on macOS and Windows. On Linux, the name the accessibility bus
+ * published for the process this script launched, because that is what the
+ * adapter's walker compares — and when the bus published none, `Yam` with a
+ * warning: the adapter addresses an application only by its name, so an app
+ * with no name cannot be driven, and the report will say so case by case.
+ */
+function suiteProcessName() {
+  if (adapter !== "atspi") return PROCESS_NAME;
+  if (atspiName !== undefined) return atspiName;
+  process.stderr.write(
+    `warning: the accessibility bus published no name for the app; addressing it as "${PROCESS_NAME}". ` +
+      `${describeAtspi()}\n`,
+  );
+  return PROCESS_NAME;
+}
+
 function runSuite(variant, statePath, attempt = 0) {
   const trace = traceFor(variant, attempt);
   const conform = spawnSync(
@@ -598,7 +954,7 @@ function runSuite(variant, statePath, attempt = 0) {
       "--adapter",
       adapter,
       "--process",
-      PROCESS_NAME,
+      suiteProcessName(),
       "--variant",
       String(variant),
       "--heal-state",
@@ -638,7 +994,9 @@ function exceededDeadline(report) {
   return (
     text.includes("did not finish reading the window") ||
     text.includes("did not answer within") ||
-    text.includes("has no window. Is it running")
+    text.includes("has no window. Is it running") ||
+    // The AT-SPI bridge's own sentence for the same thing (T23).
+    text.includes("from the accessibility bus took longer than")
   );
 }
 
@@ -706,7 +1064,10 @@ try {
               ". That is a launch failure, not an adapter failure, and it is " +
               "reported as one so the report is not a list of cases that never had anything to " +
               `read.\nNothing was written to ${report}.\n` +
-              `\`yam surface doctor --adapter ${adapter}\` said:\n${doctorOutput}`
+              `\`yam surface doctor --adapter ${adapter}\` said:\n${doctorOutput}` +
+              (process.platform === "linux"
+                ? `\n${describeAtspi()}\nThe app printed (${appLogFor(variant)}):\n${tailOf(appLogFor(variant)) || "(nothing)"}`
+                : "")
           : `The app showed no window at variant ${variant} because this login session cannot ` +
               `show one: ${locked.detail}.\n` +
               "That is the cause, not a launch failure and not an adapter failure — nothing " +
@@ -739,7 +1100,7 @@ try {
         `variant ${variant}: a window read exceeded the bridge's deadline; ` +
           "retrying this variant once (LLD §7.5, P8-F2)\n",
       );
-      const relaunched = await launch(variant);
+      const relaunched = await launch(variant, 1);
       running = relaunched.child;
       if (!relaunched.timedOut) {
         const again = runSuite(variant, healState, 1);
