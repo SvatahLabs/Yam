@@ -195,6 +195,8 @@ const connectInputSchema = z
         path: z.string().min(1).optional(),
         args: z.array(z.string()).optional(),
         env: z.record(z.string().min(1), z.string()).optional(),
+        /** `false` starts the program with only a shell's environment plus `env` (SF-15). */
+        inheritEnv: z.boolean().optional(),
         timeoutMs: z.number().int().positive().optional(),
         size: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
       })
@@ -241,6 +243,13 @@ const actInputSchema = z.object({
   ref2: refSchema.optional(),
   snapshot: z.string().optional(),
   intent: z.string().optional(),
+  /**
+   * Values that must never come back in a result, an event or a trajectory
+   * (SF-15). The command line has had `--secret` and the broker `secrets`; the
+   * schema every other client is generated from did not, so an SDK caller could
+   * not say that the password it typed was one.
+   */
+  secrets: z.array(z.string().min(1)).optional(),
 });
 
 const actOutputSchema = resultEnvelopeSchema.extend({
@@ -469,14 +478,14 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
       ],
       exitCodes: [
         { code: CLI_EXIT_CODES.OK, meaning: "Connected" },
-        { code: CLI_EXIT_CODES.ADAPTER_ERROR, meaning: "Adapter unavailable or not registered" },
+        { code: CLI_EXIT_CODES.ADAPTER_ERROR, meaning: "Adapter unavailable or not registered, or a permission it needs is not granted" },
         { code: CLI_EXIT_CODES.CONNECT_FAILED, meaning: "Connection failed" },
         { code: CLI_EXIT_CODES.INVALID_INPUT, meaning: "Invalid arguments" },
       ],
     },
     mcp: {
       toolName: "surface_connect",
-      annotations: { title: "Connect to a surface", readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+      annotations: { title: "Connect to a surface", readOnlyHint: false, destructiveHint: true, openWorldHint: true },
     },
     service: { method: "POST", path: "/sessions" },
     inputSchema: connectInputSchema,
@@ -537,12 +546,13 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
         { code: CLI_EXIT_CODES.OK, meaning: "Action performed" },
         { code: CLI_EXIT_CODES.FAILED, meaning: "Action failed" },
         { code: CLI_EXIT_CODES.SESSION_ERROR, meaning: "Session not found or closed" },
+        { code: CLI_EXIT_CODES.ADAPTER_ERROR, meaning: "The adapter cannot perform this action, or needs a permission not granted" },
         { code: CLI_EXIT_CODES.INVALID_INPUT, meaning: "Invalid action or arguments" },
       ],
     },
     mcp: {
       toolName: "surface_act",
-      annotations: { title: "Perform a surface action", readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+      annotations: { title: "Perform a surface action", readOnlyHint: false, destructiveHint: true, openWorldHint: true },
     },
     service: { method: "POST", path: "/sessions/:session/act" },
     inputSchema: actInputSchema,
@@ -754,7 +764,7 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
         { name: "url", type: "string", required: false, description: "URL or path, joined to the session's base URL" },
         { name: "input", type: "file", required: false, description: "The full ApiRequest as a JSON file or stdin" },
         { name: "holder", type: "string", required: false, description: "Who you are; defaults to a name for this client" },
-        { name: "with-session-cookies", type: "boolean", required: false, description: "Send the browser session's cookies with the request" },
+        { name: "with-session-cookies", type: "boolean", required: false, description: "Send session cookies the caller supplies; a session opened here has no browser of its own to take them from, so in a flow it is the run's browser that supplies them" },
       ],
       exitCodes: [
         { code: CLI_EXIT_CODES.OK, meaning: "Request sent" },
@@ -765,7 +775,7 @@ export const OPERATIONS: readonly OperationDescriptor[] = [
     },
     mcp: {
       toolName: "surface_request",
-      annotations: { title: "Send an HTTP request", readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+      annotations: { title: "Send an HTTP request", readOnlyHint: false, destructiveHint: true, openWorldHint: true },
     },
     service: { method: "POST", path: "/sessions/:session/request" },
     inputSchema: requestInputSchema,

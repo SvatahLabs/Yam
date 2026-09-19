@@ -132,6 +132,15 @@ export const sessionInitSchema = z
         path: z.string().min(1).optional(),
         args: z.array(z.string()).optional(),
         env: z.record(z.string(), z.string()).optional(),
+        /**
+         * Whether the program starts with the environment of whoever started it
+         * (the default), or with only what a shell needs — `PATH`, `HOME`,
+         * `USER`, `SHELL`, `TERM`, `LANG` and the locale — plus `env` (SF-15).
+         * The broker is started by whichever client needed it first, so its
+         * environment can hold a model credential or a service token; a program
+         * an agent started has no business reading them.
+         */
+        inheritEnv: z.boolean().optional(),
         timeoutMs: z.number().int().positive().optional(),
         /** The window's size once it exists, `[width, height]` (pattern 33, T12.7). */
         size: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
@@ -243,6 +252,47 @@ export const elementDescriptionSchema = z
   })
   .strict();
 export type ElementDescription = z.infer<typeof elementDescriptionSchema>;
+
+/**
+ * What a withheld secret is recorded as (SF-15, REQ-NFR-6).
+ *
+ * The broker's redaction already wrote this in place of a declared secret in
+ * the events a person reads, and nothing downstream knew what it meant: a
+ * promoted session compiled to `Type "[REDACTED]" into the password field`, a
+ * step that would type the placeholder. One spelling, here, so the recorder of
+ * a session and the compiler of a proposal agree that it stands for a value
+ * the story must be given as a `secret` input.
+ */
+export const REDACTED_VALUE = "[REDACTED]";
+
+/**
+ * Whether what a person types into this element is a secret, whatever the
+ * caller declared (SF-15).
+ *
+ * An agent that signs in rarely says which of its values is a password, and the
+ * application usually does. How each adapter says so:
+ *
+ * - the web: `type="password"`;
+ * - macOS: an `NSSecureTextField` is role `AXTextField` with subrole
+ *   `AXSecureTextField`, which the AX adapter puts in `attrs.AXSubrole` (the
+ *   `tag` is the role, so a check of the tag alone missed every real one);
+ * - iOS through Appium: the class `XCUIElementTypeSecureTextField`, which is
+ *   the `tag`;
+ * - Android through Appium: the `password` attribute.
+ *
+ * A caller's declaration adds to this; it is never needed for the field that
+ * already says so.
+ */
+export function isSecretField(describe: ElementDescription | undefined): boolean {
+  if (describe === undefined) return false;
+  return (
+    describe.attrs["type"]?.toLowerCase() === "password" ||
+    describe.attrs["password"] === "true" ||
+    describe.attrs["AXSubrole"] === "AXSecureTextField" ||
+    describe.tag === "AXSecureTextField" ||
+    describe.tag.endsWith("SecureTextField")
+  );
+}
 
 /* ── HTTP adapter messages (REQ-ADP-2, LLD §7.2) ──────────────────────────── */
 

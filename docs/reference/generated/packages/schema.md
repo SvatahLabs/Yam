@@ -105,6 +105,7 @@ Zod definitions and generated JSON Schemas for the Yam artifact contracts
 | `Invoker` | typealias | `export type Invoker = z.infer<typeof invokerSchema>;` |  |
 | `invokerSchema` | variable | `invokerSchema = z` |  |
 | `isHumanProvenance` | function | `export function isHumanProvenance(p: Provenance): boolean` | True when the provenance records a human decision rather than a model call. |
+| `isSecretField` | function | `export function isSecretField(describe: ElementDescription \| undefined): boolean` | Whether what a person types into this element is a secret, whatever the |
 | `MOBILE_CANDIDATE_KINDS` | variable | `MOBILE_CANDIDATE_KINDS = ["accessibilityId", "resourceId"] as const` | Mobile candidate kinds (Appium). |
 | `MODEL_TIERS` | variable | `MODEL_TIERS: readonly Tier[] = [2, 3]` | Tiers whose output came from a model and therefore requires provenance (REQ-STD-4). |
 | `NAMED_VALUE_PREDICATE_KINDS` | variable | `NAMED_VALUE_PREDICATE_KINDS = ["attribute", "css"] as const` |  |
@@ -134,6 +135,7 @@ Zod definitions and generated JSON Schemas for the Yam artifact contracts
 | `PublishedSchema` | interface | `export interface PublishedSchema` | Every schema that is published as a JSON Schema file under |
 | `ReadKind` | typealias | `export type ReadKind = z.infer<typeof readKindSchema>;` |  |
 | `readKindSchema` | variable | `readKindSchema = z.enum(["text", "value", "attribute", "title", "url", "result"])` |  |
+| `REDACTED_VALUE` | variable | `REDACTED_VALUE = "[REDACTED]"` | What a withheld secret is recorded as (SF-15, REQ-NFR-6). |
 | `Ref` | typealias | `export type Ref = z.infer<typeof refSchema>;` |  |
 | `referencesSecret` | function | `export function referencesSecret(ref: ValueRef): boolean` | True when a `ValueRef` reads a value marked secret; used by redaction (REQ-NFR-6). |
 | `refSchema` | variable | `refSchema = z.string().min(1)` | Opaque above the surface: `"r12"` style, stable within one snapshot (LLD §2.2). |

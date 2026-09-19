@@ -159,6 +159,8 @@ export {
   checkSubjectSchema,
   checkResultSchema,
   elementDescriptionSchema,
+  REDACTED_VALUE,
+  isSecretField,
   apiRequestSchema,
   apiResponseSchema,
   surfaceSnapshotMessageSchema,
