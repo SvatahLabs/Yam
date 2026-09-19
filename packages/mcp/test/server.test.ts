@@ -17,7 +17,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, delimiter, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
@@ -898,12 +898,26 @@ describe("a screenshot is a picture the agent can see (SF-11)", () => {
   }, 300_000);
 });
 
+/*
+ * A program this machine's shell would find, and one it would not.
+ *
+ * Written as `/bin/sh` at first, which is a name on POSIX and a file on no
+ * Windows runner: the bare-name rule looks for the program in a `PATH`
+ * directory, so the whole set refused there and three tests failed on Windows
+ * alone.
+ */
+const SHELL = process.platform === "win32" ? join(process.env["SystemRoot"] ?? "C:\\Windows", "System32", "cmd.exe") : "/bin/sh";
+const SHELL_NAME = basename(SHELL);
+const OTHER_SHELL = process.platform === "win32" ? join(dirname(SHELL), "wscript.exe") : "/bin/zsh";
+
 describe("what an agent may start and open is the person's to say (SF-15)", () => {
   it("starts no program unless the server was told it may", () => {
-    expect(launchRefusal({ adapter: "process", app: "/bin/sh" }, {})).toMatch(/--allow-program/);
-    expect(launchRefusal({ adapter: "process", app: "/bin/sh" }, { allowPrograms: ["sh"] })).toBeUndefined();
-    expect(launchRefusal({ adapter: "process", app: "/bin/sh" }, { allowPrograms: ["/bin/sh"] })).toBeUndefined();
-    expect(launchRefusal({ adapter: "process", app: "/bin/zsh" }, { allowPrograms: ["sh"] })).toMatch(/zsh/);
+    expect(launchRefusal({ adapter: "process", app: SHELL }, {})).toMatch(/--allow-program/);
+    expect(launchRefusal({ adapter: "process", app: SHELL }, { allowPrograms: [SHELL_NAME] })).toBeUndefined();
+    expect(launchRefusal({ adapter: "process", app: SHELL }, { allowPrograms: [SHELL] })).toBeUndefined();
+    expect(launchRefusal({ adapter: "process", app: OTHER_SHELL }, { allowPrograms: [SHELL_NAME] })).toMatch(
+      new RegExp(basename(OTHER_SHELL).replace(".", "\\.")),
+    );
     expect(launchRefusal({ adapter: "process", app: "anything" }, { allowPrograms: ["*"] })).toBeUndefined();
     // An application launched by bundle or path is a program started too.
     expect(launchRefusal({ adapter: "ax", app: "Notes", launch: { bundle: "com.apple.Notes" } }, { allowApps: ["Notes"] })).toMatch(
@@ -917,7 +931,7 @@ describe("what an agent may start and open is the person's to say (SF-15)", () =
       ),
     ).toMatch(/cmd\.exe/);
     // A terminal named only by its launch path is still a program started.
-    expect(launchRefusal({ adapter: "process", launch: { path: "/bin/sh" } }, {})).toMatch(/--allow-program/);
+    expect(launchRefusal({ adapter: "process", launch: { path: SHELL } }, {})).toMatch(/--allow-program/);
   });
 
   it("drives a running application only when the server was told it may", () => {
@@ -928,11 +942,12 @@ describe("what an agent may start and open is the person's to say (SF-15)", () =
   });
 
   it("matches a bare program name only where a shell would find it", () => {
-    const dir = (process.env["PATH"] ?? "").split(":").find((one) => one !== "") ?? "/usr/bin";
-    expect(programAllowed("sh", ["sh"])).toBe(true);
-    expect(programAllowed(`${dir}/sh`, ["sh"])).toBe(true);
-    expect(programAllowed("/tmp/not-on-path/sh", ["sh"])).toBe(false);
-    expect(programAllowed("/tmp/x/sh", ["/tmp/x/sh"])).toBe(true);
+    const dir = (process.env["PATH"] ?? "").split(delimiter).find((one) => one !== "") ?? dirname(SHELL);
+    const elsewhere = join(tmpdir(), "not-on-path", SHELL_NAME);
+    expect(programAllowed(SHELL_NAME, [SHELL_NAME])).toBe(true);
+    expect(programAllowed(join(dir, SHELL_NAME), [SHELL_NAME])).toBe(true);
+    expect(programAllowed(elsewhere, [SHELL_NAME])).toBe(false);
+    expect(programAllowed(elsewhere, [elsewhere])).toBe(true);
   });
 
   it("opens http, https and about: pages, and file: only when allowed", () => {
@@ -1009,7 +1024,8 @@ describe("what an agent may start and open is the person's to say (SF-15)", () =
     }
   }, 180_000);
 
-  it("starts an allowed program", async () => {
+  // The process adapter opens a terminal through a pty, which it has on POSIX.
+  it.skipIf(process.platform === "win32")("starts an allowed program", async () => {
     const session = await connect(undefined, undefined, "test-agent", { allowPrograms: ["sh"] });
     let sid: string | undefined;
     try {

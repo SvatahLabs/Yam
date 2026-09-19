@@ -7,7 +7,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { loadProject } from "../src/project.js";
 import { projectTrust, revokeProject, trustedProjects, trustProject } from "../src/trust.js";
 
@@ -58,8 +58,10 @@ describe("a project's step code (SF-15)", () => {
 
     trustProject(root);
     expect(projectTrust(root).because).toBe("store");
-    await loadProject(root);
-    expect(existsSync(marker)).toBe(true);
+    const trusted = await loadProject(root);
+    // The diagnostics, so a load that did not import says why rather than
+    // failing as a bare "expected false to be true".
+    expect(existsSync(marker), JSON.stringify(trusted.diagnostics)).toBe(true);
   });
 
   it("is trusted by CI and by YAM_TRUST_PROJECT, and YAM_TRUST_PROJECT=0 wins over CI", () => {
@@ -101,8 +103,11 @@ describe("what an untrusted project would start (SF-15)", () => {
     writeFileSync(join(root, "playwright.config.ts"), "export default {};\n", "utf8");
     const loaded = await loadProject(root);
     expect(loaded.trust.runsCode).toBe(false);
-    expect(loaded.trust.code).toEqual(expect.arrayContaining(["playwright.config.ts", "app.launch: /opt/evil/launcher"]));
-    expect(untrustedRun(loaded)).toMatch(/\/opt\/evil\/launcher/);
+    // The config's path as this platform resolves it: `/opt/evil/launcher` is
+    // `C:\opt\evil\launcher` on Windows, and the entry names what would run.
+    const launcher = `app.launch: ${resolve("/opt/evil/launcher")}`;
+    expect(loaded.trust.code).toEqual(expect.arrayContaining(["playwright.config.ts", launcher]));
+    expect(untrustedRun(loaded)).toContain(resolve("/opt/evil/launcher"));
     expect(untrustedRun(loaded, "playwright")).toMatch(/playwright\.config\.ts/);
     trustProject(root);
     expect(untrustedRun(await loadProject(root))).toBeUndefined();
