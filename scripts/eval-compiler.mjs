@@ -28,7 +28,9 @@ const status = await new Promise((done) => {
       join(ROOT, "evals", "compiler", "project"),
       ...process.argv.slice(2),
     ],
-    { cwd: ROOT, stdio: "inherit", env: process.env },
+    // The golden project's steps are this repository's own code, imported only
+    // in a trusted project (SF-15); running this script is asking for that.
+    { cwd: ROOT, stdio: "inherit", env: { ...process.env, YAM_TRUST_PROJECT: "1" } },
   );
   child.on("close", (code) => done(code ?? 1));
 });

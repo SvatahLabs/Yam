@@ -228,9 +228,17 @@ function yamSource(project: string, options: { attach?: boolean } = {}): SourceS
       const before = existsSync(runs) ? new Set(readdirSync(runs)) : new Set<string>();
 
       io.err(`  running ${project}…`);
+      /*
+       * The self project launches the app, which a run starts only in a
+       * trusted project (SF-15). This command already runs the repository's
+       * own tests, so its own project is started on purpose too.
+       */
       const ran = shell(process.execPath, [cli, "run", directory, "--host", "none"], {
         cwd: root,
-        ...(desktopApp?.url === undefined ? {} : { env: { YAM_CDP_URL: desktopApp.url } }),
+        env: {
+          YAM_TRUST_PROJECT: "1",
+          ...(desktopApp?.url === undefined ? {} : { YAM_CDP_URL: desktopApp.url }),
+        },
       });
       desktopApp?.stop();
 

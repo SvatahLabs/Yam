@@ -88,6 +88,9 @@ const run = (what, extra) => {
     encoding: "utf8",
     cwd: ROOT,
     maxBuffer: 64 * 1024 * 1024,
+    // A copy of this repository's self project, which launches the app: a run
+    // starts it only in a trusted project (SF-15), and this one is on purpose.
+    env: { ...process.env, YAM_TRUST_PROJECT: "1" },
   });
   process.stderr.write(`${ran.stdout ?? ""}${ran.stderr ?? ""}`);
   return ran.status ?? 1;

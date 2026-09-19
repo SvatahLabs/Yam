@@ -115,7 +115,9 @@ function measure(model, label) {
       out,
       "--json",
     ],
-    { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
+    // A copy of this repository's golden project, whose steps are imported
+    // only in a trusted project (SF-15); this script is asking for that.
+    { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, env: { ...process.env, YAM_TRUST_PROJECT: "1" } },
   );
   if (result.status !== 0 && result.stdout.trim() === "") {
     die(1, `The eval failed for ${label} (${model}):\n${result.stdout}${result.stderr}`);

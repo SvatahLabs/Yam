@@ -13,7 +13,7 @@
  * * **A report can never be mistaken for a measurement**: the gateway is named
  *   and `real` is false whenever a fake produced it (Phase 3's D1).
  */
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -32,6 +32,20 @@ import {
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const GOLDEN = join(ROOT, "evals", "compiler", "golden.jsonl");
 const PROJECT = join(ROOT, "evals", "compiler", "project");
+
+/*
+ * The golden project's steps are code, imported only in a trusted project
+ * (SF-15). It is this repository's own, so the suite trusts it the way CI's
+ * `CI=true` does, and a local run without `CI` scores the same.
+ */
+const savedTrust = process.env["YAM_TRUST_PROJECT"];
+beforeAll(() => {
+  process.env["YAM_TRUST_PROJECT"] = "1";
+});
+afterAll(() => {
+  if (savedTrust === undefined) delete process.env["YAM_TRUST_PROJECT"];
+  else process.env["YAM_TRUST_PROJECT"] = savedTrust;
+});
 
 interface Report {
   gateway: string;

@@ -86,6 +86,9 @@ function runCli(args, env = {}) {
         ...process.env,
         ...SECRETS,
         NODE_OPTIONS: [process.env.NODE_OPTIONS, BLOCK_NETWORK].filter(Boolean).join(" "),
+        // The fixture is this repository's own, and `--host playwright` runs
+        // its playwright.config: started on purpose, so trusted (SF-15).
+        YAM_TRUST_PROJECT: "1",
         ...env,
       },
     });
