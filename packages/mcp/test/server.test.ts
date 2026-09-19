@@ -24,7 +24,17 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { startSampleApp, type SampleServer } from "sample-web";
 import { checkTrajectory, readTrajectory } from "@svatah/yam-trajectory";
-import { buildMcpServer } from "../src/server.js";
+import { parseArgs } from "@svatah/yam-bindings-cli";
+import {
+  AGENT_HOLDER_SUFFIX,
+  agentHolder,
+  buildMcpServer,
+  launchRefusal,
+  policyFrom,
+  programAllowed,
+  urlRefusal,
+  urlsIn,
+} from "../src/server.js";
 import { MCP_CORPUS } from "./corpus.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -54,14 +64,20 @@ function scaffold(): string {
 }
 
 /** A client connected to a server over the SDK's in-memory transport pair. */
-async function connect(root: string, trajectoryPath: string) {
+async function connect(
+  root: string | undefined,
+  trajectoryPath?: string,
+  clientName = "test-agent",
+  policy: { allowPrograms?: string[]; allowFileUrls?: boolean } = {},
+) {
   const built = await buildMcpServer({
-    root,
-    trajectoryPath,
+    ...policy,
+    ...(root === undefined ? {} : { root }),
+    ...(trajectoryPath === undefined ? {} : { trajectoryPath }),
     sessionId: "test",
     io: { out: () => undefined, err: () => undefined },
   });
-  const client = new Client({ name: "test-agent", version: "0" });
+  const client = new Client({ name: clientName, version: "0" });
   const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
   await Promise.all([built.server.connect(serverSide), client.connect(clientSide)]);
   return {
@@ -144,6 +160,20 @@ describe("the tools an agent is offered (REQ-AGT-2, LLD §15)", () => {
     try {
       const { tools } = await session.client.listTools();
       expect(tools.map((one) => one.name).sort()).toEqual(PUBLISHED);
+    } finally {
+      await session.close();
+    }
+  }, 180_000);
+
+  it("offers only the surface tools when it has no project (REQ-AGT-2)", async () => {
+    // Seven project tools that could only answer "requires a project" were
+    // listed on the server `npx -y @svatah/yam-mcp` starts by default.
+    const session = await connect(undefined);
+    try {
+      const { tools } = await session.client.listTools();
+      expect(tools.map((one) => one.name).sort()).toEqual(
+        PUBLISHED.filter((one) => one.startsWith("surface_") && one !== "surface_trajectory"),
+      );
     } finally {
       await session.close();
     }
@@ -643,7 +673,7 @@ describe("an agent and the command line share one broker (T11, T16, SF-05, SF-13
         await session.client.callTool({ name: "surface_control", arguments: { session: sid, action: "take" } }),
       ) as { status: string; result: { holder: string } };
       expect(taken.status).toBe("succeeded");
-      expect(taken.result.holder).toBe("test-agent");
+      expect(taken.result.holder).toBe("test-agent (MCP)");
 
       // The terminal is refused, and told who has it; the agent is not.
       const input = join(tmpdir(), `yam-mcp-nav-${process.pid}.json`);
@@ -684,4 +714,318 @@ describe("an agent and the command line share one broker (T11, T16, SF-05, SF-13
       await session.close();
     }
   }, 240_000);
+});
+
+describe("an agent acts as itself, and only a person forces a handoff (SF-13)", () => {
+  it("offers no argument that names a holder or forces control", async () => {
+    const session = await connect(undefined);
+    try {
+      const { tools } = await session.client.listTools();
+      for (const tool of tools) {
+        const properties = Object.keys((tool.inputSchema as { properties?: object }).properties ?? {});
+        expect(properties, tool.name).not.toContain("holder");
+        expect(properties, tool.name).not.toContain("force");
+      }
+    } finally {
+      await session.close();
+    }
+  }, 180_000);
+
+  it("never lets a client pass for a person's client, however it spells its name", () => {
+    expect(agentHolder("claude-code")).toBe("claude-code (MCP)");
+    expect(agentHolder("Yam desktop")).toBe("Yam desktop (MCP)");
+    // A zero-width space and a stray control character are not a different name.
+    expect(agentHolder("Yam\u200B desktop\u0007")).toBe("Yam desktop (MCP)");
+    expect(agentHolder(undefined)).toBe("an agent (MCP)");
+  });
+
+  it("marks agents with a suffix no person's client name has", () => {
+    const desktop = /DESKTOP_HOLDER = "([^"]+)"/.exec(
+      readFileSync(join(ROOT, "packages", "screens", "src", "holder.ts"), "utf8"),
+    )?.[1];
+    const terminal = /CLI_HOLDER = "([^"]+)"/.exec(
+      readFileSync(join(ROOT, "packages", "cli", "src", "commands", "surface-control.ts"), "utf8"),
+    )?.[1];
+    expect(desktop).toBeDefined();
+    expect(terminal).toBeDefined();
+    expect(desktop!.endsWith(AGENT_HOLDER_SUFFIX)).toBe(false);
+    expect(terminal!.endsWith(AGENT_HOLDER_SUFFIX)).toBe(false);
+  });
+
+  it("refuses to close a session a person holds, and to write a screenshot through act", async () => {
+    const session = await connect(undefined);
+    let sid: string | undefined;
+    try {
+      const opened = answer(
+        await session.client.callTool({ name: "surface_connect", arguments: { url: app.origin, adapter: "playwright" } }),
+      ) as { result: { sessionId: string } };
+      sid = opened.result.sessionId;
+
+      const shot = answer(
+        await session.client.callTool({
+          name: "surface_act",
+          arguments: { session: sid, action: "screenshot", args: { path: join(tmpdir(), "yam-mcp-act-shot.png") } },
+        }),
+      ) as { status: string; error: { code: string } };
+      expect(shot.status).toBe("refused");
+      expect(existsSync(join(tmpdir(), "yam-mcp-act-shot.png"))).toBe(false);
+
+      const cli = (...args: string[]) =>
+        spawnSync(process.execPath, [join(ROOT, "packages", "cli", "dist", "bin.js"), "surface", ...args, "--json"], {
+          encoding: "utf8",
+          env: { ...process.env, CI: "true" },
+        });
+      expect(JSON.parse(cli("control", "--session", sid, "--take").stdout).status).toBe("succeeded");
+      const closed = answer(
+        await session.client.callTool({ name: "surface_close", arguments: { session: sid } }),
+      ) as { status: string; error: { code: string; message: string } };
+      expect(closed.status).toBe("refused");
+      expect(closed.error.message).toContain("yam cli");
+      cli("control", "--session", sid, "--release");
+    } finally {
+      if (sid !== undefined) {
+        await session.client.callTool({ name: "surface_close", arguments: { session: sid } }).catch(() => undefined);
+      }
+      await session.close();
+    }
+  }, 240_000);
+});
+
+describe("what an agent types in secret stays out of the record (SF-15)", () => {
+  it("withholds a password from the trajectory, declared or not", async () => {
+    const project = scaffold();
+    const path = join(project, "runs", "secret", "trajectory.jsonl");
+    const session = await connect(project, path);
+    let sid: string | undefined;
+    try {
+      const connected = answer(
+        await session.client.callTool({
+          name: "surface_connect",
+          arguments: { url: `${app.origin}/login`, adapter: "playwright" },
+        }),
+      ) as { result: { sessionId: string } };
+      sid = connected.result.sessionId;
+      const login = answer(
+        await session.client.callTool({
+          name: "surface_snapshot",
+          arguments: { session: sid, interactiveOnly: true },
+        }),
+      ) as { result: { text: string } };
+      const username = /textbox "Username"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(login.result.text)?.[1];
+      const password = /textbox "Password"(?: \[[^\]]*\])* \[ref=(\w+)\]/.exec(login.result.text)?.[1];
+      expect(password, login.result.text.slice(0, 400)).toBeDefined();
+
+      // Undeclared, into a field that says it is a password.
+      await session.client.callTool({
+        name: "surface_act",
+        arguments: { session: sid, intent: "enter the password", action: "type", ref: password, args: { value: "hunter2-undeclared" } },
+      });
+      // Declared, into a field that does not.
+      await session.client.callTool({
+        name: "surface_act",
+        arguments: {
+          session: sid,
+          intent: "enter the account code",
+          action: "type",
+          ref: username,
+          args: { value: "code-4711-declared" },
+          secrets: ["code-4711-declared"],
+        },
+      });
+
+      // The next look, with an intent, after the password is in the field.
+      await session.client.callTool({
+        name: "surface_snapshot",
+        arguments: { session: sid, intent: "find the sign in button" },
+      });
+      await session.client.callTool({
+        name: "surface_act",
+        arguments: { session: sid, intent: "submit with Enter", action: "press", ref: password, args: { key: "Tab" } },
+      });
+
+      const written = readFileSync(path, "utf8");
+      expect(written).not.toContain("hunter2-undeclared");
+      expect(written).not.toContain("code-4711-declared");
+      const typed = readTrajectory(path)
+        .filter((one) => (one.args as { action?: string } | undefined)?.action === "type")
+        .map((one) => ((one.args as { args?: { value?: string } }).args ?? {}).value);
+      expect(typed).toEqual(["[REDACTED]", "[REDACTED]"]);
+    } finally {
+      if (sid !== undefined) {
+        await session.client.callTool({ name: "surface_close", arguments: { session: sid } }).catch(() => undefined);
+      }
+      await session.close();
+    }
+  }, 300_000);
+});
+
+describe("a screenshot is a picture the agent can see (SF-11)", () => {
+  it("returns the image, and keeps the file beside the trajectory rather than where it is told", async () => {
+    const project = scaffold();
+    const path = join(project, "runs", "shot", "trajectory.jsonl");
+    const session = await connect(project, path);
+    let sid: string | undefined;
+    try {
+      const { tools } = await session.client.listTools();
+      const shot = tools.find((one) => one.name === "surface_screenshot")!;
+      expect(Object.keys((shot.inputSchema as { properties?: object }).properties ?? {})).not.toContain("path");
+
+      const connected = answer(
+        await session.client.callTool({
+          name: "surface_connect",
+          arguments: { url: `${app.origin}/login`, adapter: "playwright" },
+        }),
+      ) as { result: { sessionId: string } };
+      sid = connected.result.sessionId;
+      const result = (await session.client.callTool({
+        name: "surface_screenshot",
+        arguments: { session: sid, path: join(project, "elsewhere.png") },
+      })) as { content: Array<{ type: string; data?: string; mimeType?: string }> };
+      const envelope = answer(result) as { status: string; result: { path: string } };
+      expect(envelope.status).toBe("succeeded");
+      expect(envelope.result.path.startsWith(join(project, "runs", "shot", "screenshots"))).toBe(true);
+      expect(existsSync(envelope.result.path)).toBe(true);
+      expect(existsSync(join(project, "elsewhere.png"))).toBe(false);
+      const image = result.content.find((one) => one.type === "image");
+      expect(image?.mimeType).toBe("image/png");
+      expect(Buffer.from(image!.data!, "base64").subarray(1, 4).toString("latin1")).toBe("PNG");
+    } finally {
+      if (sid !== undefined) {
+        await session.client.callTool({ name: "surface_close", arguments: { session: sid } }).catch(() => undefined);
+      }
+      await session.close();
+    }
+  }, 300_000);
+});
+
+describe("what an agent may start and open is the person's to say (SF-15)", () => {
+  it("starts no program unless the server was told it may", () => {
+    expect(launchRefusal({ adapter: "process", app: "/bin/sh" }, {})).toMatch(/--allow-program/);
+    expect(launchRefusal({ adapter: "process", app: "/bin/sh" }, { allowPrograms: ["sh"] })).toBeUndefined();
+    expect(launchRefusal({ adapter: "process", app: "/bin/sh" }, { allowPrograms: ["/bin/sh"] })).toBeUndefined();
+    expect(launchRefusal({ adapter: "process", app: "/bin/zsh" }, { allowPrograms: ["sh"] })).toMatch(/zsh/);
+    expect(launchRefusal({ adapter: "process", app: "anything" }, { allowPrograms: ["*"] })).toBeUndefined();
+    // An application launched by bundle or path is a program started too.
+    expect(launchRefusal({ adapter: "ax", app: "Notes", launch: { bundle: "com.apple.Notes" } }, { allowApps: ["Notes"] })).toMatch(
+      /com.apple.Notes/,
+    );
+    // Both are checked: an allowed bundle does not carry a path that is not.
+    expect(
+      launchRefusal(
+        { adapter: "uia", app: "notepad", launch: { bundle: "notepad", path: "C:\\Windows\\System32\\cmd.exe" } },
+        { allowPrograms: ["notepad"], allowApps: ["notepad"] },
+      ),
+    ).toMatch(/cmd\.exe/);
+    // A terminal named only by its launch path is still a program started.
+    expect(launchRefusal({ adapter: "process", launch: { path: "/bin/sh" } }, {})).toMatch(/--allow-program/);
+  });
+
+  it("drives a running application only when the server was told it may", () => {
+    // Typing into a running Terminal starts anything, whatever --allow-program says.
+    expect(launchRefusal({ adapter: "ax", app: "Terminal" }, {})).toMatch(/--allow-app/);
+    expect(launchRefusal({ adapter: "ax", app: "terminal" }, { allowApps: ["Terminal"] })).toBeUndefined();
+    expect(launchRefusal({ adapter: "ax", app: "Yam" }, { allowApps: ["*"] })).toBeUndefined();
+  });
+
+  it("matches a bare program name only where a shell would find it", () => {
+    const dir = (process.env["PATH"] ?? "").split(":").find((one) => one !== "") ?? "/usr/bin";
+    expect(programAllowed("sh", ["sh"])).toBe(true);
+    expect(programAllowed(`${dir}/sh`, ["sh"])).toBe(true);
+    expect(programAllowed("/tmp/not-on-path/sh", ["sh"])).toBe(false);
+    expect(programAllowed("/tmp/x/sh", ["/tmp/x/sh"])).toBe(true);
+  });
+
+  it("opens http, https and about: pages, and file: only when allowed", () => {
+    expect(urlRefusal("https://example.com", {})).toBeUndefined();
+    expect(urlRefusal("about:blank", {})).toBeUndefined();
+    expect(urlRefusal("/login", {})).toBeUndefined();
+    expect(urlRefusal("file:///etc/passwd", {})).toMatch(/--allow-file-urls/);
+    expect(urlRefusal("file:///etc/passwd", { allowFileUrls: true })).toBeUndefined();
+    expect(urlRefusal("chrome://settings", {})).toMatch(/refused/);
+    // A list is joined into one URL by the web adapters; every spelling is checked.
+    expect(urlsIn(["file:///etc/passwd"])).toContain("file:///etc/passwd");
+    expect(urlsIn(["a", "b"])).toEqual(["a", "b", "a,b"]);
+  });
+
+  it("joins a running browser on loopback only", () => {
+    expect(launchRefusal({ attach: "http://127.0.0.1:9222" }, {})).toBeUndefined();
+    expect(launchRefusal({ attach: "ws://localhost:9222/devtools/browser/x" }, {})).toBeUndefined();
+    expect(launchRefusal({ attach: "http://10.0.0.5:9222" }, {})).toMatch(/loopback/);
+    // A name that only starts like a loopback address is not one; a mapped one is.
+    expect(launchRefusal({ attach: "http://127.evil.example:9222" }, {})).toMatch(/loopback/);
+    expect(launchRefusal({ attach: "http://[::ffff:127.0.0.1]:9222" }, {})).toBeUndefined();
+  });
+
+  it("reads the policy from the flags a person puts in the server's configuration", () => {
+    expect(policyFrom(parseArgs(["/p", "--allow-program", "sh", "--allow-program", "node,python3"]))).toEqual({
+      allowPrograms: ["sh", "node", "python3"],
+    });
+    expect(policyFrom(parseArgs(["--allow-file-urls"]))).toEqual({ allowFileUrls: true });
+    expect(policyFrom(parseArgs(["--allow-app", "Yam", "--allow-upload"]))).toEqual({ allowApps: ["Yam"], allowUpload: true });
+    expect(policyFrom(parseArgs([]))).toEqual({});
+  });
+
+  it("refuses over the protocol before anything is started, and marks what it cannot undo", async () => {
+    const session = await connect(undefined);
+    try {
+      const { tools } = await session.client.listTools();
+      for (const name of ["surface_connect", "surface_act", "surface_request"]) {
+        expect(tools.find((one) => one.name === name)?.annotations?.destructiveHint, name).toBe(true);
+      }
+      const terminal = answer(
+        await session.client.callTool({ name: "surface_connect", arguments: { adapter: "process", app: "/bin/sh" } }),
+      ) as { status: string; error: { code: string } };
+      expect(terminal.status).toBe("refused");
+      expect(terminal.error.code).toBe("PERMISSION_REQUIRED");
+      const page = answer(
+        await session.client.callTool({ name: "surface_connect", arguments: { url: "file:///etc/hosts" } }),
+      ) as { status: string; error: { code: string } };
+      expect(page.error.code).toBe("PERMISSION_REQUIRED");
+
+      const web = answer(
+        await session.client.callTool({ name: "surface_connect", arguments: { url: app.origin, adapter: "playwright" } }),
+      ) as { result: { sessionId: string } };
+      const sid = web.result.sessionId;
+      try {
+        const listed = answer(
+          await session.client.callTool({
+            name: "surface_act",
+            arguments: { session: sid, action: "navigate", args: { url: ["file:///etc/hosts"] } },
+          }),
+        ) as { status: string; error: { code: string } };
+        expect(listed.error.code).toBe("PERMISSION_REQUIRED");
+        const upload = answer(
+          await session.client.callTool({
+            name: "surface_act",
+            arguments: { session: sid, action: "upload", ref: "r1", args: { files: "/etc/hosts" } },
+          }),
+        ) as { status: string; error: { code: string } };
+        expect(upload.error.code).toBe("PERMISSION_REQUIRED");
+      } finally {
+        await session.client.callTool({ name: "surface_close", arguments: { session: sid } }).catch(() => undefined);
+      }
+    } finally {
+      await session.close();
+    }
+  }, 180_000);
+
+  it("starts an allowed program", async () => {
+    const session = await connect(undefined, undefined, "test-agent", { allowPrograms: ["sh"] });
+    let sid: string | undefined;
+    try {
+      const opened = answer(
+        await session.client.callTool({
+          name: "surface_connect",
+          arguments: { adapter: "process", app: "/bin/sh", launch: { args: ["-c", "echo started; sleep 5"] } },
+        }),
+      ) as { status: string; result?: { sessionId: string }; error?: unknown };
+      expect(opened.status, JSON.stringify(opened.error)).toBe("succeeded");
+      sid = opened.result!.sessionId;
+    } finally {
+      if (sid !== undefined) {
+        await session.client.callTool({ name: "surface_close", arguments: { session: sid } }).catch(() => undefined);
+      }
+      await session.close();
+    }
+  }, 180_000);
 });

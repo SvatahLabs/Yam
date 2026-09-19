@@ -17,7 +17,7 @@ The Yam MCP server: surface and operation tools over stdio or Streamable HTTP
 | `httpMcpCommand` | function | `export async function httpMcpCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode>` | `yam mcp --http` — serve over Streamable HTTP. |
 | `HttpMcpOptions` | interface | `export interface HttpMcpOptions extends McpServerOptions` |  |
 | `mcpCommand` | function | `export async function mcpCommand(args: ParsedArgs, io: CommandIo): Promise<ExitCode>` | `yam mcp` — serve over stdio. |
-| `McpServerOptions` | interface | `export interface McpServerOptions` |  |
+| `McpServerOptions` | interface | `export interface McpServerOptions extends LaunchPolicy` |  |
 | `PINNED_PROTOCOL_VERSION` | variable | `PINNED_PROTOCOL_VERSION = "2025-11-25"` | The protocol revision this transport was written and tested against. |
 | `RunningHttpMcp` | interface | `export interface RunningHttpMcp` |  |
 | `SDK_LATEST_PROTOCOL_VERSION` | variable | `SDK_LATEST_PROTOCOL_VERSION: string = LATEST_PROTOCOL_VERSION` | What the SDK in this workspace speaks, so a test can compare the two. |

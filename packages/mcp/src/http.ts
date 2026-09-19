@@ -54,7 +54,7 @@ import type { EventStore } from "@modelcontextprotocol/sdk/server/streamableHttp
 import { LATEST_PROTOCOL_VERSION, type JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
 import { boolOption, numberOption, stringOption, EXIT } from "@svatah/yam-bindings-cli";
 import type { CommandIo, ExitCode, ParsedArgs } from "@svatah/yam-bindings-cli";
-import { buildMcpServer, type McpServerOptions } from "./server.js";
+import { buildMcpServer, policyFrom, type McpServerOptions } from "./server.js";
 
 /**
  * The protocol revision this transport was written and tested against.
@@ -378,6 +378,7 @@ export async function httpMcpCommand(args: ParsedArgs, io: CommandIo): Promise<E
   const running = await startHttpMcp({
     ...(root === undefined ? {} : { root }),
     io,
+    ...policyFrom(args),
     ...(numberOption(args, "port") === undefined ? {} : { port: numberOption(args, "port")! }),
     ...(stringOption(args, "token") === undefined ? {} : { token: stringOption(args, "token")! }),
     ...(origins === undefined
