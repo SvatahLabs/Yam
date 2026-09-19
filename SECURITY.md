@@ -14,8 +14,8 @@ time allows; there is no guaranteed response time or fix schedule.
 
 ## Supported versions
 
-Yam has not had a release yet. Only the latest `main` is looked at, and any
-fix lands there.
+Only the latest release, 0.1.0, and the latest `main` are looked at. A fix lands
+on `main` and ships in the next release; there are no backports.
 
 ## Security design
 

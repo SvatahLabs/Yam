@@ -87,6 +87,18 @@ npx playwright install chromium
 
 You do not need a browser to drive a desktop app, a terminal, or an HTTP API.
 
+An agent starts no program and drives no desktop application you have not
+named. To let it drive a terminal, list the program; to let it drive an
+application that is running, list the application:
+
+```json
+{ "mcpServers": { "yam": { "command": "npx", "args": ["-y", "@svatah/yam-mcp", "--allow-program", "bash", "--allow-app", "Notes"] } } }
+```
+
+A program you allow runs as you, and an application you allow is driven as you,
+so allow what you would let the agent type into yourself. Web pages need no
+list.
+
 If your agent cannot start a program, run the server over HTTP instead:
 
 ```bash
@@ -109,6 +121,10 @@ Every tool takes an optional `intent`, which is a short sentence saying why the
 agent is doing something. "Sign in as the test user" is an intent. "Click r14"
 is not. Intents are what let a session become a test later, so it is worth
 passing them.
+
+Anything typed into a password field is kept out of that record. So is any value
+the agent names in `secrets`, and the test asks for it as a `secret` input
+instead.
 
 Give the server a project directory and it gets the project tools too:
 
@@ -357,8 +373,12 @@ only want bindings in an existing Playwright suite.
 
 ## Status
 
-Version 0.1.0 is a release candidate. Nothing is published yet, so the `npx` and
-`npm install` commands above will not find anything until it is.
+Version 0.1.0 is on npm: every command above installs it. The desktop app's
+installers are attached to the
+[GitHub release](https://github.com/SvatahLabs/Yam/releases/tag/v0.1.0) and are
+not signed yet, so macOS and Windows will warn before opening them. The Python
+and Java clients are not published to PyPI or Maven Central; build them from
+[`clients/`](clients/README.md).
 
 Known gaps are written down rather than hidden. See
 [CHANGELOG.md](CHANGELOG.md). The specification is the source of truth and

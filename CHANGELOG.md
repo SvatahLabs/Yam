@@ -5,31 +5,190 @@ whole workspace's changelog and every package version below is the same number.
 It follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] — 2026-09-06 (ready to publish; the tag is the owner's)
+## [Unreleased]
+
+### Security
+
+- **An agent over MCP acts under its own name, and cannot force a handoff.**
+  `surface_act`, `surface_request` and `surface_control` took a `holder`, and
+  `surface_control` a `force`, so an agent could act as `Yam desktop` through a
+  hold the person had taken, or take the target from them. Both arguments are
+  gone from the MCP tools; the holder is the name the client gave with ` (MCP)`
+  after it, so no spelling of a name passes for a person's client, and an agent
+  cannot close a session somebody else holds. The desktop and the terminal still
+  take a target back.
+- **Secrets stay out of what a session is promoted from.** A value typed into a
+  password field (web, macOS, iOS, Android), or named in `surface_act`'s new
+  `secrets`, is withheld from the trajectory and from the steps "Save as
+  automation" compiles; so is the field's own value in a description, a read or
+  a check, and a web password field's value in a snapshot. The trajectory
+  compiler turns a withheld typed value into a `secret` input and leaves any
+  step carrying part of one for a person to write. Before, a password typed with
+  an intent reached `trajectory.jsonl`, and the next snapshot read it back.
+- **A declared secret is redacted from its own session's answers only**, and a
+  secret shorter than three characters only where it is the whole value. The
+  broker's redaction replaced until nothing matched, so a secret such as `E`,
+  which the placeholder `[REDACTED]` itself contains, never returned and stopped
+  the broker every client shares; and one client's secrets blanked words out of
+  every other session.
+- **Screenshots no longer write where they are told.** `surface_screenshot` took
+  any `path` while annotated read-only, and `surface_act` with the `screenshot`
+  action did the same; a terminal's screenshot is text, so either could
+  overwrite a file. The tool writes into the server's own directory, and the
+  action is refused over MCP.
+
+- **An agent starts and drives only what the person configuring the server
+  allowed.** Over MCP, `surface_connect` started any program with any arguments,
+  drove any running application and opened any URL. It now starts no program
+  unless `--allow-program` names it (a terminal's program, or an application
+  launched by bundle or path — each one named is checked), drives no running
+  application unless `--allow-app` names it, opens `http`, `https` and `about:`
+  pages however the URL is passed (and `file:` with `--allow-file-urls`),
+  uploads no local file without `--allow-upload`, joins only a browser on
+  loopback, and refuses a second session on an application or browser somebody
+  else holds (`CONTROL_BUSY`; the rest are `PERMISSION_REQUIRED`). A terminal an
+  agent starts gets a shell's environment rather than the broker's, and
+  `surface_connect`, `surface_act` and `surface_request` are annotated
+  destructive.
+- **The HTTP adapter sends a cookie where a browser would.** One jar was sent
+  with every request, so a cookie an application set went to any absolute URL a
+  caller named. Cookies now keep their `Domain`, `Path`, `Secure` and expiry and
+  are matched by one rule shared with the browser adapters — whose own
+  Playwright filter had sent host-only cookies to every subdomain. A request to
+  a link-local or cloud metadata address — `169.254.0.0/16`, `fe80::/10`,
+  `fd00:ec2::/64`, `100.100.100.200`, `168.63.129.16`,
+  `metadata.google.internal`, NAT64 forms of them, directly, by a name that
+  resolves to one, or by a redirect — is refused unless
+  `YAM_HTTP_ALLOW_LINK_LOCAL=1`. Loopback and private networks are unaffected.
+- **A project's own code runs only where it is trusted.** Loading a project
+  imports the files under `steps/`, so opening a repository somebody else wrote
+  — `yam` in it, the desktop, `yam serve`, an MCP server — ran their code; and a
+  run started the program its config launches and the Playwright config it
+  carries. An untrusted project now loads without its custom steps and warns
+  (`W_STEP_UNTRUSTED`), and a run that would start its other code is refused.
+  `yam trust` trusts a directory, `yam init` trusts the project it makes, the
+  desktop asks when a person opens one, and `CI=true` (or `1`) or
+  `YAM_TRUST_PROJECT=1` trust without asking — `CI` not for the MCP server.
+
+### Added
+
+- **Signed, notarized installers, when the owner provides certificates.** The
+  desktop build signs and notarizes for macOS and signs for Windows when the
+  signing secrets are present (`docs/project/signing.md` names them), and says
+  it is unsigned when they are not. macOS gets a DMG beside the ZIP, and the
+  release builds an Intel Mac leg as well as Apple silicon.
+- **The Surfaces inspector copies what it would do.** "Copy command" and "Copy
+  MCP call" copy a `yam surface act` line and an MCP `surface_act` call for the
+  action in the form, with the value of a password field read from
+  `YAM_SECRET` rather than written into either.
+- **A screenshot preview you can click to select.** The session pane can show a
+  picture of the target beside its tree; clicking selects the element under the
+  pointer, and never clicks the application. The box-to-pixel scale is inferred
+  and the preview says how. The service serves the picture at
+  `GET /sessions/:session/screenshot.png`.
+- **The agent connection test speaks MCP.** "Test the connection" starts the
+  server command the panel tells people to configure, performs the MCP handshake
+  and lists the tools, and says what it checked (`POST /agents/test`). It used to
+  check the broker only.
+- **Three nightly CI legs that have never run before:** the Linux AT-SPI desktop
+  conformance gate on a virtual display, the Appium adapter's conformance subset
+  in Android Chrome on an emulator, and the self-parity gate ("Yam verifies
+  Yam"). They run on the schedule and on dispatch, and fail rather than pass when
+  their host cannot run them.
+- `yam trust [dir]`, with `--revoke`, `--status` and `--list`.
+- `waitFor` with no reference waits for the page: `text`, `url` or `title`.
+- `launch.inheritEnv` on a session, for a program started with a shell's
+  environment only.
+- `AgentSurface.cookies(url)`, optional: the cookies a session would send.
+
+### Changed
+
+- An action an adapter can never perform is refused as `UNSUPPORTED_OPERATION`,
+  before dispatch when its capability flag is false, and a platform permission
+  nobody granted is `PERMISSION_REQUIRED`; `yam surface` exits 22 for both. They
+  were `TIMEOUT`, `CONNECT_FAILED` or `OUTCOME_UNKNOWN`, which tell a caller to
+  retry or to check whether something happened. Adapters throw the new
+  `UnsupportedError` and `PermissionError`. The conformance suite's `throws`
+  accepts a list of error names, and `app.no-navigation` accepts
+  `UnsupportedError` or `NavigationError`; a runner that implements the suite's
+  context itself receives that list.
+
+### Fixed
+
+- `Call the "x" API with the session cookies` sends the run's browser cookies
+  for the request's URL. It sent the HTTP adapter's own cookies whether or not
+  the phrase was there, and never the browser's, so an API call after a sign-in
+  in the browser was not signed in.
+- `waitFor` on an element waits for `attached` and `detached` for real; the
+  Playwright adapter waited for the element to stop moving, and BiDi's
+  `attached` held only for a visible element. And a flow's `Wait for X to be
+  hidden` (or present, absent, enabled, disabled) passes that state to the
+  adapter at all: every such step waited for visible.
+- `Call the "x" API without cookies` sends no cookies, not even the ones an
+  earlier API response set.
+- The Playwright adapter's snapshot reads a control's value wherever Playwright
+  prints it, so a filled field shows its value, and a password field — in a
+  shadow root or a child frame too — shows `[REDACTED]`.
+- `deselectOption` on macOS and Windows selected the option it was asked to
+  deselect; it is refused. On Appium, `hover` and `release` tapped the element,
+  and are refused; a web view's `scrollIntoView` scrolled nothing, and a native
+  one swiped once whatever the element, and now swipes until it is on screen.
+- AT-SPI's `check` answers from the window as it is now rather than the last
+  snapshot, and `absent` holds for an element that has gone.
+- The AT-SPI readiness probe asked `gdbus --version`, which `gdbus` does not
+  have, so every Linux host was told GLib was missing; and the AT-SPI adapter
+  acted on the first window of the first application on the bus, whichever it
+  was. It acts on the application it read.
+- The Appium adapter asks for WebDriver Classic, which WebdriverIO 9 otherwise
+  replaces with a BiDi session that UiAutomator2 and Android ChromeDriver can
+  refuse.
+- `surface_screenshot` returns the image, or a terminal's text, and not only a
+  file name an agent over HTTP cannot open; an adapter that reports a screenshot
+  and writes none is an error.
+- `surface_targets` marks a target ready by the adapter's probe rather than the
+  platform table: `appium` and `bidi` said `ready: true` beside a probe, in the
+  same answer, that said neither was reachable. A probe that found nothing is
+  asked again after ten seconds, so installing what it named is noticed.
+- The seven `yam_*` tools are offered only when the MCP server has a project.
+  Without one they were listed and could only answer that they needed one.
+- A browser that will not launch says `npx playwright@<version> install
+  chromium`, pinned to the Playwright that failed, instead of `pnpm exec
+  playwright install`, and `yam run` suggests the same command.
+- `act`'s `secrets` is in the operation catalogue, so the HTTP API's description
+  names it.
+- CI fails a desktop conformance or Yam-on-Yam leg that exits 2, "the suite did
+  not run". It passed with a warning, from when hosted macOS runners were
+  believed unable to grant Accessibility; they grant it.
+- CI runs the published `@svatah/yam-mcp` from npm nightly, in an empty
+  directory: the README's browser install, `surface doctor`, and one page
+  connected and read over the protocol (`scripts/registry-mcp-smoke.mjs`).
+
+## [0.1.0] — 2026-09-15
 
 The first release, and the first under the name **Yam** (Draft 2.18): the
 product was renamed before anything was published, so no package has ever
 existed under another name. Svatah is the brand and the npm organisation; every
-package is `@svatah/yam` or `@svatah/yam-<name>`. **Nothing is published to a registry until the owner triggers
-the pipeline** (T8.5): `node scripts/publish.mjs` prints the 35 exact
-`npm publish` commands, one per package of the release set in
-`scripts/lib/release-packages.mjs`, and stops unless `--publish`, a GitHub
-`workflow_dispatch` and a publish identity (trusted publishing, or `NPM_TOKEN`)
-all hold. Everything it would publish exists and has been driven:
-`pnpm release:dry-run` packs the tarballs, and `pnpm quick-start:packed`
-installs the module (a) four into an empty Playwright project outside this
-workspace and records, runs and heals there.
+package is `@svatah/yam` or `@svatah/yam-<name>`. **Published to npm on
+2026-09-15**, with provenance, by the release workflow's publish job (T8.5):
+`node scripts/publish.mjs` prints the 35 exact `npm publish` commands, one per
+package of the release set in `scripts/lib/release-packages.mjs`, and stops
+unless `--publish`, a GitHub `workflow_dispatch` and a publish identity (trusted
+publishing, or `NPM_TOKEN`) all hold. Before that, `pnpm release:dry-run` packed
+the tarballs, and `pnpm quick-start:packed` installed the module (a) four into an
+empty Playwright project outside this workspace and recorded, ran and healed
+there. npm accepts about 25 new packages a day from one organisation, so the
+last ten went out a day after the first 25, from the same commit.
 
 **Verifying the publish is one command** (T12.5). `pnpm quick-start:registry`
 asks the registry whether the four module (a) packages are there at this
 version; when they are, it installs them **by name, with no overrides** into an
 empty project and runs the same quick start — which is the last thing nobody can
 test beforehand, because a `workspace:*` that escaped into what was uploaded
-fails there and nowhere else. Until then it says the packages are not published,
-runs the tarball quick start instead, and says which mode it took.
+fails there and nowhere else. Run after the publish, it installed them from the
+registry and recorded three bindings in 4.0 s.
 
-The **git tag `v0.1.0` is not created here**. A tag is a claim that a version
-exists somewhere, and until the owner dispatches the release workflow with `publish` it does not.
+The git tag `v0.1.0` marks the published commit, and the GitHub release carries
+the installers, the tarballs and the reports.
 
 **What is measured**, and where the number is:
 
@@ -153,11 +312,16 @@ before it was fixed:
 Recorded rather than closed, with the command that closes each in
 `docs/spec/progress/phase-8.md`:
 
-- The Windows UI Automation gate has no Windows host.
-  `reports/adapter-uia.md` has the defects found without one.
 - No screenshot was taken through the macOS adapter on this host: `screencapture`
   needs the Screen Recording grant, which is separate from Accessibility.
   `yam surface doctor` reports it as an advisory check.
-- Nothing is published to a registry until the owner triggers the pipeline.
+- The desktop installers are not signed or notarized, so macOS and Windows warn
+  before opening them.
+- The Python and Java clients are not on PyPI or Maven Central.
+
+Closed since this entry was written: the Windows UI Automation gate runs on a
+hosted Windows runner in CI and is conformant, 10 cases across variants 0, 1
+and 2, and so is the macOS one on a hosted macOS runner. The reports attached to
+the release, and `reports/adapter-uia.md`, predate those runs.
 
 [0.1.0]: https://github.com/SvatahLabs/Yam/releases/tag/v0.1.0

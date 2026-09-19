@@ -311,11 +311,13 @@ describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
     expect(rootManifest.version).toBe("0.1.0");
   });
 
-  it("has a changelog that names the version and what it does not do", () => {
+  it("has a changelog that names the version and says when it was published", () => {
     const changelog = readFileSync(fromRoot("CHANGELOG.md"), "utf8");
     expect(changelog).toContain("## [0.1.0]");
-    // The decision, written down where a reader of the release finds it.
-    expect(changelog).toContain("Nothing is published to a registry");
+    // Where a reader of the release finds it. This asserted "Nothing is
+    // published to a registry" and outlived the publish by a day.
+    expect(changelog).toContain("Published to npm on");
+    expect(changelog).not.toContain("Nothing is published to a registry");
   });
 
   it("offers the two scripts the release candidate is made of", () => {

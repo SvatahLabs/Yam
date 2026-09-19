@@ -48,7 +48,8 @@ GET /runs/00mto7o3c8a3h79n/results  8 step(s), matching the stream
 python 3.14.3: 3 of 3 — the client is conformant
 ```
 
-Published as `svatah-yam` on PyPI, versioned with the npm tarballs.
+To be published as `svatah-yam` on PyPI, versioned with the npm tarballs. It is
+not on PyPI yet; use it from this directory.
 
 ## `java`
 
@@ -58,5 +59,6 @@ $ javac -d /tmp/yam clients/java/src/main/java/com/svatah/yam/sdk/GeneratedClien
 $ java -cp /tmp/yam Smoke
 ```
 
-Published as `com.svatah.yam:svatah-yam`, versioned with the npm tarballs. The
-Gradle build is for publishing; nothing in the smoke path needs it.
+To be published as `com.svatah.yam:svatah-yam`, versioned with the npm tarballs.
+It is not on Maven Central yet; build it from this directory. The Gradle build is
+for publishing; nothing in the smoke path needs it.

@@ -84,6 +84,7 @@ Generated from the code by `pnpm docs:build`, and checked in CI so they cannot d
 - [Surface-first mission proposal](spec/surface-first/README.md), with Yam-on-Yam gap analysis, requirements, design and implementation tasks
 - [Changelog](../CHANGELOG.md) · [Versioning](project/versioning.md)
 - [Reports](project/reports.md), the published numbers and how to regenerate them
+- [Signing the app installers](project/signing.md), the certificates and secrets a signed release needs, and how to check one
 - [Continuous integration](ci.md)
 - [Contributing](../CONTRIBUTING.md) · [Developer guide](developer-guide.md) · [Security](project/security.md)
 - [The specification](spec/), the source of truth: [requirements](spec/requirements.md), [HLD](spec/hld.md), [LLD](spec/lld.md), [tasks](spec/tasks.md), and every phase's [record and verification](spec/progress/)
