@@ -6,7 +6,7 @@ Default web adapter: AgentSurface on Playwright
 
 - Source: [`packages/adapter-playwright`](../../../../packages/adapter-playwright) · README: [`packages/adapter-playwright/README.md`](../../../../packages/adapter-playwright/README.md)
 - Install: `npm install @svatah/yam-adapter-playwright`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

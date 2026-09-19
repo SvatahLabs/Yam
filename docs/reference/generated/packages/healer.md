@@ -6,7 +6,7 @@ Failure selection, model-free repair, verification and diff
 
 - Source: [`packages/healer`](../../../../packages/healer) · README: [`packages/healer/README.md`](../../../../packages/healer/README.md)
 - Install: `npm install @svatah/yam-healer`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

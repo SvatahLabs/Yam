@@ -587,7 +587,7 @@ export function openApiDocument(version: string): Record<string, unknown> {
        *
        * They are written out here rather than derived from the catalogue because
        * the service may not import `@svatah/yam-surface-control` (LLD §1) and
-       * `contract.test.ts` pins the served document to `openApiDocument("0.1.0")`
+       * `contract.test.ts` pins the served document to `openApiDocument("0.2.0")`
        * exactly. `tools/repo-checks/test/surface-catalogue-openapi.test.ts` reads
        * the catalogue and this document together and fails when a served
        * operation is missing or its method or path drifts — so the duplication is

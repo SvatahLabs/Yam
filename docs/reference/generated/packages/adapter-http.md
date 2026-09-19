@@ -6,7 +6,7 @@ HTTP/API adapter
 
 - Source: [`packages/adapter-http`](../../../../packages/adapter-http) · README: [`packages/adapter-http/README.md`](../../../../packages/adapter-http/README.md)
 - Install: `npm install @svatah/yam-adapter-http`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

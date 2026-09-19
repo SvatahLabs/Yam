@@ -6,7 +6,7 @@ WebDriver BiDi adapter (independence proof)
 
 - Source: [`packages/adapter-bidi`](../../../../packages/adapter-bidi) · README: [`packages/adapter-bidi/README.md`](../../../../packages/adapter-bidi/README.md)
 - Install: `npm install @svatah/yam-adapter-bidi`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

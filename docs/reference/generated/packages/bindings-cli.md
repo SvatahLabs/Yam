@@ -6,7 +6,7 @@ The yam-bindings command line: bindings, heal, surface conform and the healing e
 
 - Source: [`packages/bindings-cli`](../../../../packages/bindings-cli) · README: [`packages/bindings-cli/README.md`](../../../../packages/bindings-cli/README.md)
 - Install: `npm install @svatah/yam-bindings-cli` · bin: `yam-bindings`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

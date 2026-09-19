@@ -6,7 +6,7 @@ Surface and runtime conformance suites
 
 - Source: [`packages/conformance`](../../../../packages/conformance) · README: [`packages/conformance/README.md`](../../../../packages/conformance/README.md)
 - Install: `npm install @svatah/yam-conformance`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

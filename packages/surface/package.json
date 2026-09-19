@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-surface",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The published AgentSurface interface, adapter registry and wire schemas",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

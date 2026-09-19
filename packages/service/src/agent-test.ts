@@ -293,7 +293,7 @@ export async function testMcpServer(options: {
         params: {
           protocolVersion: MCP_TEST_PROTOCOL,
           capabilities: {},
-          clientInfo: { name: "yam-connection-test", version: "0.1.0" },
+          clientInfo: { name: "yam-connection-test", version: "0.2.0" },
         },
       });
     });

@@ -6,7 +6,7 @@ Flow reader, grammar, target dictionary, signatures
 
 - Source: [`packages/spec`](../../../../packages/spec) · README: [`packages/spec/README.md`](../../../../packages/spec/README.md)
 - Install: `npm install @svatah/yam-spec`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

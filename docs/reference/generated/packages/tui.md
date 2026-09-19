@@ -6,7 +6,7 @@
 
 - Source: [`packages/tui`](../../../../packages/tui) · README: [`packages/tui/README.md`](../../../../packages/tui/README.md)
 - Install: `npm install @svatah/yam-tui`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

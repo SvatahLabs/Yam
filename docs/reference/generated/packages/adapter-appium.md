@@ -6,7 +6,7 @@ Appium adapter: Android Chrome and native
 
 - Source: [`packages/adapter-appium`](../../../../packages/adapter-appium) · README: [`packages/adapter-appium/README.md`](../../../../packages/adapter-appium/README.md)
 - Install: `npm install @svatah/yam-adapter-appium`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

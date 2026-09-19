@@ -6,7 +6,7 @@ Linux AT-SPI accessibility adapter
 
 - Source: [`packages/adapter-atspi`](../../../../packages/adapter-atspi) · README: [`packages/adapter-atspi/README.md`](../../../../packages/adapter-atspi/README.md)
 - Install: `npm install @svatah/yam-adapter-atspi`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

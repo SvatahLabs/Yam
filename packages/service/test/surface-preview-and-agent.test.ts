@@ -157,7 +157,7 @@ describe("GET /sessions/:session/screenshot.png (T15)", () => {
   });
 
   it("is described, with its image answer, in the OpenAPI document", () => {
-    const paths = openApiDocument("0.1.0")["paths"] as Record<string, Record<string, { responses: Record<string, { content?: object }> }>>;
+    const paths = openApiDocument("0.2.0")["paths"] as Record<string, Record<string, { responses: Record<string, { content?: object }> }>>;
     const route = paths["/sessions/{session}/screenshot.png"]?.["get"];
     expect(route).toBeDefined();
     expect(Object.keys(route!.responses["200"]!.content ?? {})).toEqual(["image/png"]);
@@ -345,7 +345,7 @@ describe("the MCP connection test (T16, SF-07, SF-15)", () => {
     });
 
     it("is described in the OpenAPI document, with no request body to take a command from", () => {
-      const paths = openApiDocument("0.1.0")["paths"] as Record<string, Record<string, { requestBody?: unknown; description?: string }>>;
+      const paths = openApiDocument("0.2.0")["paths"] as Record<string, Record<string, { requestBody?: unknown; description?: string }>>;
       const route = paths["/agents/test"]?.["post"];
       expect(route).toBeDefined();
       expect(route!.requestBody).toBeUndefined();

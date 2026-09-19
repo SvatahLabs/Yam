@@ -179,7 +179,7 @@ describe("GET /openapi.json (REQ-ADE-1)", () => {
 
   it("is what the committed document says", async () => {
     const served = await json(await get("/openapi.json"));
-    expect(served).toEqual(openApiDocument("0.1.0"));
+    expect(served).toEqual(openApiDocument("0.2.0"));
   });
 
   it("says how to authenticate", async () => {
@@ -683,7 +683,7 @@ describe("the config's decision deadline (P5-F4, LLD §13.5)", () => {
   });
 
   it("is documented on POST /record, along with the 409", () => {
-    const document = openApiDocument("0.1.0") as unknown as {
+    const document = openApiDocument("0.2.0") as unknown as {
       paths: Record<string, { post?: { description?: string; responses: Record<string, { description: string }> } }>;
     };
     const record = document.paths["/record"]!.post!;

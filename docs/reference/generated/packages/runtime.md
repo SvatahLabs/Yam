@@ -6,7 +6,7 @@ Runner-agnostic executor core: scope, guards, checkpoints, policies, results, au
 
 - Source: [`packages/runtime`](../../../../packages/runtime) · README: [`packages/runtime/README.md`](../../../../packages/runtime/README.md)
 - Install: `npm install @svatah/yam-runtime`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

@@ -6,7 +6,7 @@ The Yam design system: React components on Radix primitives, every one of them n
 
 - Source: [`packages/ui`](../../../../packages/ui) · README: [`packages/ui/README.md`](../../../../packages/ui/README.md)
 - Not published: built and used inside this repository, and no release puts it on a registry.
-- Version 0.1.0 · Apache-2.0 · not published
+- Version 0.2.0 · Apache-2.0 · not published
 
 ## Exports
 

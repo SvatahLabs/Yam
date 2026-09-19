@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-healer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Failure selection, model-free repair, verification and diff",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

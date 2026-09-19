@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-service",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Local HTTP and event-stream service (yam serve)",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

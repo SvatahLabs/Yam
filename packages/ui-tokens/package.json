@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-ui-tokens",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The Yam design tokens: two themes, one type ramp, one status set (REQ-ADE-12)",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

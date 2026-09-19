@@ -6,7 +6,7 @@ Local HTTP and event-stream service (yam serve)
 
 - Source: [`packages/service`](../../../../packages/service) · README: [`packages/service/README.md`](../../../../packages/service/README.md)
 - Install: `npm install @svatah/yam-service`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

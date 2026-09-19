@@ -1,6 +1,6 @@
 {
   "name": "yam-fixtures",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "The migrated sample flows, run against apps/sample-web as the compatibility milestone (T2.10, REQ-NFR-8)",
   "license": "Apache-2.0",

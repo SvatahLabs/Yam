@@ -217,11 +217,11 @@ timestamp.
 
 ```powershell
 # From a Windows SDK command prompt. /pa uses the Authenticode policy.
-signtool verify /pa /v "apps\desktop\out\make\squirrel.windows\x64\Yam-0.1.0 Setup.exe"
+signtool verify /pa /v "apps\desktop\out\make\squirrel.windows\x64\Yam-0.2.0 Setup.exe"
 signtool verify /pa /v "apps\desktop\out\Yam-win32-x64\Yam.exe"
 
 # Or, without the SDK:
-Get-AuthenticodeSignature "apps\desktop\out\make\squirrel.windows\x64\Yam-0.1.0 Setup.exe"
+Get-AuthenticodeSignature "apps\desktop\out\make\squirrel.windows\x64\Yam-0.2.0 Setup.exe"
 ```
 
 A good result names the certificate's subject and a timestamp. Without the

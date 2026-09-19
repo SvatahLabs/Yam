@@ -6,7 +6,7 @@ Shared surface operation dispatcher, session lifecycle and operation catalogue
 
 - Source: [`packages/surface-control`](../../../../packages/surface-control) · README: [`packages/surface-control/README.md`](../../../../packages/surface-control/README.md)
 - Install: `npm install @svatah/yam-surface-control`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

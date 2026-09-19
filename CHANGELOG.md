@@ -5,7 +5,7 @@ whole workspace's changelog and every package version below is the same number.
 It follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] — 2026-09-19
 
 ### Security
 
@@ -324,4 +324,5 @@ hosted Windows runner in CI and is conformant, 10 cases across variants 0, 1
 and 2, and so is the macOS one on a hosted macOS runner. The reports attached to
 the release, and `reports/adapter-uia.md`, predate those runs.
 
+[0.2.0]: https://github.com/SvatahLabs/Yam/releases/tag/v0.2.0
 [0.1.0]: https://github.com/SvatahLabs/Yam/releases/tag/v0.1.0

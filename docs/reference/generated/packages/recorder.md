@@ -6,7 +6,7 @@ Grounding, record session and report
 
 - Source: [`packages/recorder`](../../../../packages/recorder) · README: [`packages/recorder/README.md`](../../../../packages/recorder/README.md)
 - Install: `npm install @svatah/yam-recorder`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

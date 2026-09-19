@@ -304,7 +304,7 @@ export async function buildMcpServer(options: McpServerOptions): Promise<{
   registerAllAdapters();
 
   const server = new McpServer(
-    { name: "yam", version: "0.1.0" },
+    { name: "yam", version: "0.2.0" },
     {
       instructions:
         (root === undefined

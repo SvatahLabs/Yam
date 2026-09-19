@@ -6,7 +6,7 @@ Compiler tiers, validation, lint and plan writer
 
 - Source: [`packages/compiler`](../../../../packages/compiler) · README: [`packages/compiler/README.md`](../../../../packages/compiler/README.md)
 - Install: `npm install @svatah/yam-compiler`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

@@ -6,7 +6,7 @@ The Yam MCP server: surface and operation tools over stdio or Streamable HTTP
 
 - Source: [`packages/mcp`](../../../../packages/mcp) · README: [`packages/mcp/README.md`](../../../../packages/mcp/README.md)
 - Install: `npm install @svatah/yam-mcp` · bin: `yam-mcp`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

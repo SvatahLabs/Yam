@@ -6,7 +6,7 @@ The typed TypeScript client for the Yam local service, generated from its OpenAP
 
 - Source: [`packages/sdk`](../../../../packages/sdk) · README: [`packages/sdk/README.md`](../../../../packages/sdk/README.md)
 - Install: `npm install @svatah/yam-sdk`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

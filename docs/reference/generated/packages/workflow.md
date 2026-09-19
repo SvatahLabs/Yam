@@ -6,7 +6,7 @@ Story-as-function runner and resume
 
 - Source: [`packages/workflow`](../../../../packages/workflow) · README: [`packages/workflow/README.md`](../../../../packages/workflow/README.md)
 - Install: `npm install @svatah/yam-workflow`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

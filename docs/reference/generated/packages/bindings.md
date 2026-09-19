@@ -6,7 +6,7 @@ Bindings store, context hash, resolver, synthesis, fingerprint, relocalization
 
 - Source: [`packages/bindings`](../../../../packages/bindings) · README: [`packages/bindings/README.md`](../../../../packages/bindings/README.md)
 - Install: `npm install @svatah/yam-bindings`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

@@ -6,7 +6,7 @@ Model gateway: local and frontier backends, caching, redaction, provenance
 
 - Source: [`packages/gateway`](../../../../packages/gateway) · README: [`packages/gateway/README.md`](../../../../packages/gateway/README.md)
 - Install: `npm install @svatah/yam-gateway`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

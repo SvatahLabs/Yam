@@ -6,7 +6,7 @@ MCP tool server exposing stories as deterministic tools
 
 - Source: [`packages/tool`](../../../../packages/tool) · README: [`packages/tool/README.md`](../../../../packages/tool/README.md)
 - Install: `npm install @svatah/yam-tool`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

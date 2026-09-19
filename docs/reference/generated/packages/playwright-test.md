@@ -6,7 +6,7 @@ The bind() fixture for an existing Playwright Test project
 
 - Source: [`packages/playwright-test`](../../../../packages/playwright-test) · README: [`packages/playwright-test/README.md`](../../../../packages/playwright-test/README.md)
 - Install: `npm install @svatah/yam-playwright-test`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

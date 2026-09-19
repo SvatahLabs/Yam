@@ -87,11 +87,20 @@ interface Manifest {
 const manifest = (pkg: string): Manifest =>
   JSON.parse(readFileSync(fromRoot("packages", pkg, "package.json"), "utf8")) as Manifest;
 
-describe("module (a) is publishable at 0.1.0 (T1.9)", () => {
+/**
+ * The version every package carries, read rather than written down.
+ *
+ * These checks named `0.1.0`, so the first bump failed nine of them about the
+ * release they were meant to describe. What they are for is that one version is
+ * everywhere and the changelog names it, which is true of any version.
+ */
+const WORKSPACE_VERSION = (JSON.parse(readFileSync(fromRoot("package.json"), "utf8")) as { version: string }).version;
+
+describe("module (a) is publishable at the workspace version (T1.9)", () => {
   it.each(MODULE_A)("@svatah/%s declares what npm needs to publish it", (pkg) => {
     const m = manifest(pkg);
     expect(m.name).toBe(specifierOf(pkg));
-    expect(m.version).toBe("0.1.0");
+    expect(m.version).toBe(WORKSPACE_VERSION);
     expect(m.license, "REQ-PKG-3: the project itself is Apache-2.0").toBe("Apache-2.0");
     expect(m.type, "the workspace is ESM (LLD §1)").toBe("module");
     expect(m.publishConfig?.["access"], "a scoped package needs public access").toBe("public");
@@ -286,13 +295,13 @@ describe("every published package explains itself", () => {
  * publish in it. `pnpm release:dry-run` and `pnpm quick-start:packed` check the
  * rest by doing it.
  */
-describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
+describe("the release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
   const rootManifest = JSON.parse(readFileSync(fromRoot("package.json"), "utf8")) as {
     version: string;
     scripts: Record<string, string>;
   };
 
-  it("versions every publishable package at 0.1.0", () => {
+  it("versions every publishable package at the workspace version", () => {
     const wrong: string[] = [];
     for (const dir of readdirSync(fromRoot("packages"))) {
       const manifestPath = fromRoot("packages", dir, "package.json");
@@ -304,15 +313,16 @@ describe("the 0.1.0 release candidate (T7.6, REQ-PKG-1, 2, 3, 4)", () => {
         license?: string;
       };
       if (manifest.private === true) continue;
-      if (manifest.version !== "0.1.0") wrong.push(`${manifest.name}@${manifest.version}`);
+      if (manifest.version !== WORKSPACE_VERSION) wrong.push(`${manifest.name}@${manifest.version}`);
       if (manifest.license !== "Apache-2.0") wrong.push(`${manifest.name}: ${manifest.license}`);
     }
-    expect(wrong, "every published package is 0.1.0 and Apache-2.0").toEqual([]);
-    expect(rootManifest.version).toBe("0.1.0");
+    expect(wrong, `every published package is ${WORKSPACE_VERSION} and Apache-2.0`).toEqual([]);
+    expect(rootManifest.version).toBe(WORKSPACE_VERSION);
   });
 
   it("has a changelog that names the version and says when it was published", () => {
     const changelog = readFileSync(fromRoot("CHANGELOG.md"), "utf8");
+    expect(changelog).toContain(`## [${WORKSPACE_VERSION}]`);
     expect(changelog).toContain("## [0.1.0]");
     // Where a reader of the release finds it. This asserted "Nothing is
     // published to a registry" and outlived the publish by a day.

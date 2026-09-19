@@ -18,7 +18,7 @@ plugins {
 }
 
 group = "com.svatah.yam"
-version = "0.1.0"
+version = "0.2.0"
 
 java {
     // JDK 17, the version REQ-NFR-7 and this phase's environment note name.

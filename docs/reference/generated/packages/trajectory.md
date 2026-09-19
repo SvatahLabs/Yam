@@ -6,7 +6,7 @@ Trajectory capture and compile to proposals
 
 - Source: [`packages/trajectory`](../../../../packages/trajectory) · README: [`packages/trajectory/README.md`](../../../../packages/trajectory/README.md)
 - Install: `npm install @svatah/yam-trajectory`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

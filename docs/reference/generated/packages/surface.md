@@ -6,7 +6,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 
 - Source: [`packages/surface`](../../../../packages/surface) · README: [`packages/surface/README.md`](../../../../packages/surface/README.md)
 - Install: `npm install @svatah/yam-surface`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

@@ -6,7 +6,7 @@ Zod definitions and generated JSON Schemas for the Yam artifact contracts
 
 - Source: [`packages/schema`](../../../../packages/schema) · README: [`packages/schema/README.md`](../../../../packages/schema/README.md)
 - Install: `npm install @svatah/yam-schema`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

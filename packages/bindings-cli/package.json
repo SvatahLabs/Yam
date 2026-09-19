@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-bindings-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The yam-bindings command line: bindings, heal, surface conform and the healing eval for module (a)",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

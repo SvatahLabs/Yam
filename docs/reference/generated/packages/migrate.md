@@ -6,7 +6,7 @@ v1/v2 to v3 migration and prototype database import
 
 - Source: [`packages/migrate`](../../../../packages/migrate) · README: [`packages/migrate/README.md`](../../../../packages/migrate/README.md)
 - Install: `npm install @svatah/yam-migrate`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

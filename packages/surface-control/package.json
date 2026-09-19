@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-surface-control",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shared surface operation dispatcher, session lifecycle and operation catalogue",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

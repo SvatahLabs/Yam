@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-steps",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "defineStep API and the Tier 0 matcher",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

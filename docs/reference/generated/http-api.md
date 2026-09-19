@@ -4,7 +4,7 @@
 
 The local integration point for the Yam app and any other client (REQ-ADE-1, LLD §13.5). Bound to 127.0.0.1, behind a bearer token printed on stdout. Every handler calls the same function the CLI calls; no logic lives here.
 
-OpenAPI 3.1.0, service version 0.1.0. The document itself is `openApiDocument()` in `@svatah/yam-service`; the Python and Java clients under `clients/` and `@svatah/yam-sdk` are generated from it.
+OpenAPI 3.1.0, service version 0.2.0. The document itself is `openApiDocument()` in `@svatah/yam-service`; the Python and Java clients under `clients/` and `@svatah/yam-sdk` are generated from it.
 
 | Method | Path | Summary |
 |---|---|---|

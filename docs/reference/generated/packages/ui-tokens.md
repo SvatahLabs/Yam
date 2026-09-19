@@ -6,7 +6,7 @@ The Yam design tokens: two themes, one type ramp, one status set (REQ-ADE-12)
 
 - Source: [`packages/ui-tokens`](../../../../packages/ui-tokens) · README: [`packages/ui-tokens/README.md`](../../../../packages/ui-tokens/README.md)
 - Install: `npm install @svatah/yam-ui-tokens`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

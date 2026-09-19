@@ -6,7 +6,7 @@ Windows UI Automation adapter: the Yam agent surface over UIAutomationClient
 
 - Source: [`packages/adapter-uia`](../../../../packages/adapter-uia) · README: [`packages/adapter-uia/README.md`](../../../../packages/adapter-uia/README.md)
 - Install: `npm install @svatah/yam-adapter-uia`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

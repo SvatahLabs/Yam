@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-adapter-uia",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Windows UI Automation adapter: the Yam agent surface over UIAutomationClient",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

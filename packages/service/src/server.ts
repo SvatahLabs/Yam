@@ -119,7 +119,7 @@ export async function createService(options: ServeOptions): Promise<RunningServi
   const load = async (): Promise<ProjectHandle> => await api.loadProject(root);
 
   fastify.get("/health", async () => ({ ok: true, project: root }));
-  fastify.get("/openapi.json", async () => openApiDocument(options.version ?? "0.1.0"));
+  fastify.get("/openapi.json", async () => openApiDocument(options.version ?? "0.2.0"));
 
   fastify.get("/project", async () => {
     const loaded = await load();

@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-host-playwright",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Playwright Test host for Yam flows: the yam fixture, generated specs and the results reporter",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

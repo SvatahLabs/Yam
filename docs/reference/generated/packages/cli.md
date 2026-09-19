@@ -6,7 +6,7 @@ The yam CLI and MCP server
 
 - Source: [`packages/cli`](../../../../packages/cli) · README: [`packages/cli/README.md`](../../../../packages/cli/README.md)
 - Install: `npm install @svatah/yam` · bin: `yam`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

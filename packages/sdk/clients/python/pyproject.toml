@@ -14,7 +14,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "svatah-yam"
-version = "0.1.0"
+version = "0.2.0"
 description = "Typed client for the Yam local service, generated from its OpenAPI description"
 readme = "README.md"
 requires-python = ">=3.9"

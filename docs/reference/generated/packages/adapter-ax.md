@@ -6,7 +6,7 @@ macOS Accessibility adapter: the Yam agent surface over AXUIElement
 
 - Source: [`packages/adapter-ax`](../../../../packages/adapter-ax) · README: [`packages/adapter-ax/README.md`](../../../../packages/adapter-ax/README.md)
 - Install: `npm install @svatah/yam-adapter-ax`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

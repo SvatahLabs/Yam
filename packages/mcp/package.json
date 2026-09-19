@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The Yam MCP server: surface and operation tools over stdio or Streamable HTTP",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

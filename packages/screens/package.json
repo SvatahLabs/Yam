@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-screens",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The headless screen model: one set of screens, actions and keys behind the app, `yam ui`, the SDK and the CLI",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

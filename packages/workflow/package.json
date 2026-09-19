@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-workflow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Story-as-function runner and resume",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

@@ -123,7 +123,7 @@ export async function buildToolServer(
   const invocations: Invocation[] = [];
 
   const server = new McpServer(
-    { name: "yam-tools", version: "0.1.0" },
+    { name: "yam-tools", version: "0.2.0" },
     {
       instructions:
         "Each tool runs one Yam story as a deterministic function: the same plan and the " +

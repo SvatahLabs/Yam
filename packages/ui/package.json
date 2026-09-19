@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-ui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The Yam design system: React components on Radix primitives, every one of them named and id'd (REQ-ADE-12)",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

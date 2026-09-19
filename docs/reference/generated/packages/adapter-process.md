@@ -6,7 +6,7 @@ Process and pseudo-terminal adapter
 
 - Source: [`packages/adapter-process`](../../../../packages/adapter-process) · README: [`packages/adapter-process/README.md`](../../../../packages/adapter-process/README.md)
 - Install: `npm install @svatah/yam-adapter-process`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

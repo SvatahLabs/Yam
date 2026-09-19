@@ -6,7 +6,7 @@ Playwright Test host for Yam flows: the yam fixture, generated specs and the res
 
 - Source: [`packages/host-playwright`](../../../../packages/host-playwright) · README: [`packages/host-playwright/README.md`](../../../../packages/host-playwright/README.md)
 - Install: `npm install @svatah/yam-host-playwright`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

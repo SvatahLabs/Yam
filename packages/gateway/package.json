@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-gateway",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Model gateway: local and frontier backends, caching, redaction, provenance",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

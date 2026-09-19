@@ -1,6 +1,6 @@
 {
   "name": "example-mcp-agent",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "An MCP client calling a Yam story as a tool (T5.6, REQ-BEH-3, REQ-AGT-4)",
   "license": "Apache-2.0",

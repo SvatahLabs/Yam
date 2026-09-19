@@ -6,7 +6,7 @@ defineStep API and the Tier 0 matcher
 
 - Source: [`packages/steps`](../../../../packages/steps) · README: [`packages/steps/README.md`](../../../../packages/steps/README.md)
 - Install: `npm install @svatah/yam-steps`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 

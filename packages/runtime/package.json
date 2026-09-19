@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-runtime",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Runner-agnostic executor core: scope, guards, checkpoints, policies, results, audit",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

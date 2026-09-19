@@ -38,7 +38,7 @@ describe("the committed client is what the generator writes (T3.6)", () => {
   it("has one method per route the service publishes, and no others", () => {
     const published = new Set<string>();
     for (const [path, operations] of Object.entries(
-      openApiDocument("0.1.0")["paths"] as Record<string, Record<string, unknown>>,
+      openApiDocument("0.2.0")["paths"] as Record<string, Record<string, unknown>>,
     )) {
       for (const verb of ["get", "post", "put", "delete", "patch"]) {
         if (operations[verb] !== undefined) published.add(`${verb} ${path}`);

@@ -12,6 +12,6 @@ import { fileURLToPath } from "node:url";
 import { openApiDocument } from "../dist/index.js";
 
 const out = join(dirname(fileURLToPath(import.meta.url)), "..", "openapi.json");
-const text = `${JSON.stringify(openApiDocument("0.1.0"), null, 2)}\n`;
+const text = `${JSON.stringify(openApiDocument("0.2.0"), null, 2)}\n`;
 writeFileSync(out, text);
-console.log(`wrote packages/service/openapi.json (${Object.keys(openApiDocument("0.1.0").paths).length} paths)`);
+console.log(`wrote packages/service/openapi.json (${Object.keys(openApiDocument("0.2.0").paths).length} paths)`);

@@ -1,6 +1,6 @@
 {
   "name": "@svatah/yam-adapter-playwright",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Default web adapter: AgentSurface on Playwright",
   "license": "Apache-2.0",
   "homepage": "https://yam.svatah.com",

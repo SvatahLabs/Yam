@@ -6,7 +6,7 @@ The headless screen model: one set of screens, actions and keys behind the app, 
 
 - Source: [`packages/screens`](../../../../packages/screens) · README: [`packages/screens/README.md`](../../../../packages/screens/README.md)
 - Install: `npm install @svatah/yam-screens`
-- Version 0.1.0 · Apache-2.0
+- Version 0.2.0 · Apache-2.0
 
 ## Exports
 
