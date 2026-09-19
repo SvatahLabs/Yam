@@ -438,7 +438,10 @@ export function reasonFor(failure: { readonly class: string; readonly message: s
     case "infrastructure":
       if (/executable doesn't exist|browser.*not (found|installed)|playwright install/i.test(message)) {
         const which = /firefox/i.test(message) ? "Firefox" : /webkit/i.test(message) ? "WebKit" : "Chromium";
-        return { message, next: diagnostic("no-browser", which).next };
+        // The adapter names the install for the Playwright that failed; a bare
+        // `npx playwright install` can fetch a browser for another version.
+        const pinned = /`(npx playwright@\S+ install \w+)`/.exec(message)?.[1];
+        return { message, next: pinned ?? diagnostic("no-browser", which).next };
       }
       if (/accessibility|screen-recording|ax\/|uia\/|is locked|no window|not granted/i.test(message)) {
         return { message, next: diagnostic("host-not-ready", message, /uia/i.test(message) ? "uia" : "ax").next };

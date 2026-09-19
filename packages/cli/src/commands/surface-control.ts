@@ -171,7 +171,19 @@ function exitFor(result: Record<string, unknown>): ExitCode {
   const code = (result as { error?: { code?: string } }).error?.code;
   if (code === "CHECK_FAILED") return 20 as ExitCode;
   if (code === "SESSION_NOT_FOUND" || code === "SESSION_CLOSED") return 21 as ExitCode;
-  if (code === "ADAPTER_UNAVAILABLE" || code === "ADAPTER_NOT_REGISTERED") return 22 as ExitCode;
+  /*
+   * The adapter cannot, and waiting will not change it: an action it never
+   * performs, a permission nobody granted (SF-11, SF-14). They fell through to
+   * 1, "failed", which a script cannot tell from an action that ran and missed.
+   */
+  if (
+    code === "ADAPTER_UNAVAILABLE" ||
+    code === "ADAPTER_NOT_REGISTERED" ||
+    code === "UNSUPPORTED_OPERATION" ||
+    code === "PERMISSION_REQUIRED"
+  ) {
+    return 22 as ExitCode;
+  }
   if (code === "CONNECT_FAILED") return 23 as ExitCode;
   if (code === "INVALID_ARGUMENT") return EXIT.usage;
   if (code === "TIMEOUT") return 75 as ExitCode;
