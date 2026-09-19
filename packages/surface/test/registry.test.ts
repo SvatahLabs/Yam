@@ -262,15 +262,17 @@ describe("the surface interface is stable", () => {
       "request",
       "pick",
       "observe",
+      "cookies",
     ]);
   });
 
-  it("marks only trace, request, pick and observe optional", () => {
+  it("marks only trace, request, pick, observe and cookies optional", () => {
     expect(SURFACE_METHODS.filter((m) => !REQUIRED_SURFACE_METHODS.includes(m as never))).toEqual([
       "trace",
       "request",
       "pick",
       "observe",
+      "cookies",
     ]);
   });
 });

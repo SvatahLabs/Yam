@@ -83,6 +83,14 @@ export interface AgentSurface {
    * signal aborts. Only adapters with the `observe` capability.
    */
   observe?(handler: (event: ObservedEvent) => void | Promise<void>, opts?: { signal?: AbortSignal }): Promise<void>;
+  /**
+   * Optional: the cookies this session would send to `url`, by name (REQ-ADP-3).
+   *
+   * What `Call the "x" API with the session cookies` means: an API call made
+   * as the person the browser signed in. Browsers have it; a surface with no
+   * cookie jar leaves it out.
+   */
+  cookies?(url: string): Promise<Record<string, string>>;
 }
 
 /** One thing a person did in the driven session (Draft 2.23, REQ-REC-13). */
@@ -114,13 +122,14 @@ export const SURFACE_METHODS = [
   "request",
   "pick",
   "observe",
+  "cookies",
 ] as const;
 export type SurfaceMethod = (typeof SURFACE_METHODS)[number];
 
-/** The methods every adapter must implement; `trace`, `request`, `pick` and `observe` are optional. */
+/** The methods every adapter must implement; `trace`, `request`, `pick`, `observe` and `cookies` are optional. */
 export const REQUIRED_SURFACE_METHODS = SURFACE_METHODS.filter(
-  (m): m is Exclude<SurfaceMethod, "trace" | "request" | "pick" | "observe"> =>
-    m !== "trace" && m !== "request" && m !== "pick" && m !== "observe",
+  (m): m is Exclude<SurfaceMethod, "trace" | "request" | "pick" | "observe" | "cookies"> =>
+    m !== "trace" && m !== "request" && m !== "pick" && m !== "observe" && m !== "cookies",
 );
 
 /** All capability flags default to false, so an adapter opts in to what it supports. */

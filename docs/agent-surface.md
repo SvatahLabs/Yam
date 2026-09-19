@@ -44,6 +44,7 @@ interface AgentSurface {
   request?(req: ApiRequest, opts: { withSessionCookies: boolean }): Promise<ApiResponse>;
   pick?(phrase: string, opts?: { id?: string; timeoutMs?: number; signal?: AbortSignal }): Promise<Ref | undefined>;
   observe?(handler: (event: ObservedEvent) => void | Promise<void>, opts?: { signal?: AbortSignal }): Promise<void>;
+  cookies?(url: string): Promise<Record<string, string>>;
 }
 ```
 
@@ -67,8 +68,9 @@ interface AgentSurface {
 | `request` | optional | Execute a named HTTP request, optionally sharing the web session's cookies (REQ-ADP-3). | `surface.api-request.schema.json`, `surface.api-response.schema.json` |
 | `pick` | optional | Put an overlay over the application naming `phrase`, wait for a person's click, and return the element clicked as a reference; `undefined` when the person cancelled. `opts.id` is the element id, so a scripted pick can answer it. Present only when `capabilities().pick` (Draft 2.21, REQ-REC-12). | — |
 | `observe` | optional | Report what a person does in the session — each click, value typed, choice, key and navigation — as an `ObservedEvent` with the element acted on as a reference, as it happens; resolve when the session closes or `opts.signal` aborts. Present only when `capabilities().observe` (Draft 2.23, REQ-REC-13). | — |
+| `cookies` | optional | The cookies the session would send to `url`, by name: what an API step `with the session cookies` sends as the signed-in person (REQ-ADP-3). A surface with no cookie jar omits it. | — |
 
-An adapter that does not implement `trace`, `request`, `pick` or `observe` must omit them, not
+An adapter that does not implement `trace`, `request`, `pick`, `observe` or `cookies` must omit them, not
 implement them as throwing stubs — callers check for presence.
 
 ### Every capability flag
@@ -101,9 +103,9 @@ waiting — every adapter must support.
 
 `snapshot()` is the primary input to grounding (REQ-REC-2) and the source of the
 context hash (LLD §6.2). Its shape is identical whether the tree came from ARIA,
-UIA, AX or an Appium page source (REQ-SURF-4) — and would be identical for
-AT-SPI, which the contract admits and no adapter implements yet (see the
-[support matrix](reference/generated/support-matrix.md)).
+UIA, AX, AT-SPI or an Appium page source (REQ-SURF-4). The AT-SPI adapter is
+implemented and has not yet been driven against a live accessibility bus (see
+the [support matrix](reference/generated/support-matrix.md)).
 
 ```ts
 interface Snapshot { ref: Ref; nodes: SnapshotNode[]; text: string; tokensEstimate: number; hash: string; }
@@ -399,7 +401,7 @@ actions such as `dragTo`.
 | Keyboard and input | `type`, `clear`, `press`, `keyDown`, `keyUp`, `submit`, `upload` |
 | Selection | `selectOption`, `deselectOption`, `deselectAll`, `setChecked` |
 | Scrolling | `scrollIntoView`, `scrollToTop`, `scrollToBottom` |
-| Waiting | `sleep`, `waitFor` |
+| Waiting | `sleep`, `waitFor` — on an element with a reference, or on the page with `text`, `url` or `title` and none |
 | Windows and frames | `switchWindow`, `closeOtherWindows`, `switchFrame`, `resizeWindow` |
 | Application lifecycle | `quit` |
 | Dialogs | `dialog` |
@@ -480,6 +482,8 @@ so LLD §8.4's mapping is data on the error rather than a switch above the surfa
 | `ScriptError` | `script` | An injected or evaluated script threw. |
 | `SessionError` | `infrastructure` | The session could not be opened, was lost, or the driven process crashed. |
 | `DataError` | `data` | A value was missing or of the wrong type. |
+| `UnsupportedError` | `infrastructure` | This adapter cannot perform the action at all. The broker answers `UNSUPPORTED_OPERATION`, refused, because nothing was dispatched. |
+| `PermissionError` | `infrastructure` | A platform permission, such as macOS Accessibility, is not granted to the program that is driving. A `SessionError`; the broker answers `PERMISSION_REQUIRED`. |
 
 Anything that is not a `SurfaceError` is classified `unknown`, so a leaked native
 error shows up in the results rather than being silently miscategorised.

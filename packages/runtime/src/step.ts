@@ -29,7 +29,7 @@ import type {
   TargetRef,
 } from "@svatah/yam-schema";
 import type { AgentSurface, SnapshotNode } from "@svatah/yam-surface";
-import { CheckError, isWindowChrome } from "@svatah/yam-surface";
+import { CheckError, isWindowChrome, TimeoutError } from "@svatah/yam-surface";
 import { GuardError, candidatesTried, classify, messageOf, stackOf } from "./failure.js";
 import { DataError, type Scope } from "./scope.js";
 
@@ -58,10 +58,19 @@ export type CustomStepRunner = (
   },
 ) => Promise<void>;
 
-/** Runs an `api` step. Injected for the same reason. */
+/**
+ * Runs an `api` step. Injected for the same reason.
+ *
+ * `surface` is the session the step runs in, when there is one (REQ-ADP-3).
+ * `Call the "x" API with the session cookies` means "as the person the browser
+ * signed in", and the runner is the only thing that sends the request — but it
+ * was never shown the browser, so the phrase compiled, ran, and sent no
+ * browser cookie. The runner asks `surface.cookies(url)` for them; a surface
+ * without that method has none to give.
+ */
 export type ApiRunner = (
   step: Step,
-  context: { scope: Scope; args: Record<string, unknown> },
+  context: { scope: Scope; args: Record<string, unknown>; surface?: AgentSurface },
 ) => Promise<unknown>;
 
 /** Runs another story as a function (`invoke`, REQ-AUTO-5). */
@@ -284,7 +293,7 @@ async function perform(
             "`yam run` registers one; a foreign runtime has to supply its own.",
         );
       }
-      const value = await context.api(step, { scope, args });
+      const value = await context.api(step, { scope, args, surface });
       return capture(step, value, scope);
     }
 
@@ -337,7 +346,18 @@ async function perform(
      */
     case "waitFor": {
       if (step.expect?.subject !== "api") {
-        await surface.act(step.action as never, ref, args as never, ref2);
+        /*
+         * An element wait takes its state from the step's predicate (see
+         * `elementWait`). A target with no reference is an `absent` or
+         * `hidden` wait whose element did not resolve (`meansAbsence`), and
+         * is asked rather than sent to the adapter as a page wait.
+         */
+        const asked = elementWait(step, args);
+        if (asked.poll || (step.target !== undefined && ref === undefined)) {
+          await waitUntilHolds(step, context);
+          return undefined;
+        }
+        await surface.act(step.action as never, ref, asked.args as never, ref2);
         return undefined;
       }
       if (context.api === undefined) {
@@ -352,7 +372,7 @@ async function perform(
       let why = "";
       for (;;) {
         try {
-          last = await context.api(step, { scope, args });
+          last = await context.api(step, { scope, args, surface });
           if (matchesValue(wanted, last)) return undefined;
           why = `it answered ${JSON.stringify(last) ?? "nothing"}`;
         } catch (error) {
@@ -396,6 +416,80 @@ function capture(
   return { [step.capture.name]: value };
 }
 
+/*
+ * The state a `Wait for "<element>" to be <state>` waits for (pattern 19).
+ *
+ * The sentence compiles to a target and `expect: {subject: "target",
+ * predicate}`, and nothing else; every adapter reads the state from
+ * `args.state` and waits for `visible` when there is none. So the executor
+ * handed the adapter `{}`, and `Wait for "toast" to be hidden` waited for the
+ * toast to be *visible* — returning at once while it was on the screen, which
+ * is exactly when the flow meant to wait — and `to be enabled` returned as
+ * soon as a still-disabled button was drawn. The predicate is the state, so it
+ * becomes `args.state` here. A state already in `args` is the caller's and is
+ * left alone, and a step with no predicate still reads `until`, the argument
+ * migrated steps carry (`present` or `visible`).
+ */
+const WAIT_STATES: Readonly<Record<string, string>> = {
+  present: "attached",
+  absent: "detached",
+  visible: "visible",
+  hidden: "hidden",
+  enabled: "enabled",
+  disabled: "disabled",
+};
+const LEGACY_UNTIL: Readonly<Record<string, string>> = { present: "attached", visible: "visible" };
+
+/**
+ * The arguments an element wait goes to the adapter with — or `poll`, for a
+ * predicate no adapter's `waitFor` knows (`checked`, `unchecked`, `selected`,
+ * a negated one), which the executor asks `check` about itself rather than
+ * sending a wait the adapter would read as "visible", or refuse.
+ */
+function elementWait(
+  step: Step,
+  args: Record<string, unknown>,
+): { poll: false; args: Record<string, unknown> } | { poll: true } {
+  if (args["state"] !== undefined || step.target === undefined) return { poll: false, args };
+  const predicate = step.expect?.subject === "target" ? step.expect.predicate : undefined;
+  if (predicate !== undefined) {
+    const one = predicate as { kind: string; negate?: boolean };
+    const state = one.negate === true ? undefined : WAIT_STATES[one.kind];
+    return state === undefined ? { poll: true } : { poll: false, args: { ...args, state } };
+  }
+  const until = typeof args["until"] === "string" ? LEGACY_UNTIL[args["until"]] : undefined;
+  return until === undefined ? { poll: false, args } : { poll: false, args: { ...args, state: until } };
+}
+
+/**
+ * Ask the step's own predicate until it holds, for the step's timeout.
+ *
+ * `evaluate` resolves the element afresh each time, so an element that is
+ * replaced while it is waited on is asked about as it now is, and an `absent`
+ * or `hidden` one that no longer resolves holds (T12.7). Running out is a
+ * `timeout`, as an adapter's own wait running out is.
+ */
+async function waitUntilHolds(step: Step, context: StepContext): Promise<void> {
+  const expectation = step.expect;
+  if (expectation === undefined) {
+    throw new DataError(`"${step.text}" waits for an element with no state to wait for.`);
+  }
+  const deadline = Date.now() + step.timeoutMs;
+  for (;;) {
+    const held = await evaluate(expectation.subject, expectation.predicate, step, context);
+    if (held.ok) return;
+    if (Date.now() >= deadline) {
+      throw new TimeoutError(
+        `Waited ${step.timeoutMs} ms for ${
+          step.target === undefined ? "the element" : `"${step.target.phrase}"`
+        } to be ${describePredicate(expectation.predicate)}, and it was not so${observed(held.actual)}.`,
+        { timeoutMs: step.timeoutMs },
+      );
+    }
+    await new Promise((done) => setTimeout(done, 100));
+  }
+}
+
 /**
  * Does this predicate *mean* "not there"? (T12.7)
  *
@@ -408,10 +502,17 @@ function predicateMeansAbsence(predicate: Predicate): boolean {
   return one.negate !== true && (one.kind === "absent" || one.kind === "hidden");
 }
 
-/** Is this step an expectation that its own target is not there? */
+/**
+ * Is this step an expectation, or a wait, that its own target is not there?
+ *
+ * A wait too: `Wait for "toast" to be absent` once the toast has already gone
+ * failed at resolution with "matched nothing", which is the state it was
+ * waiting for. Such a wait reaches `waitFor` with no reference, and is asked
+ * through `evaluate`, which takes a locator failure as the answer.
+ */
 function meansAbsence(step: Step): boolean {
   return (
-    step.action === "expect" &&
+    (step.action === "expect" || step.action === "waitFor") &&
     step.expect?.subject === "target" &&
     step.guard === undefined &&
     predicateMeansAbsence(step.expect.predicate)

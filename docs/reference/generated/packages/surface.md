@@ -40,8 +40,10 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `checkResultSchema` | variable | `checkResultSchema: z.ZodObject<` |  |
 | `CheckSubject` | typealias | `type CheckSubject = z.infer<typeof checkSubjectSchema>;` |  |
 | `clearAdapters` | function | `export function clearAdapters(): void` | Drop every registration. For tests and for the REPL's session teardown. |
+| `cookiesFor` | function | `export function cookiesFor(url: string, cookies: readonly StoredCookie[]): Record<string, string>` |  |
 | `createSurface` | function | `export async function createSurface(config: Config): Promise<AgentSurface>` | Build the surface the configuration selects (LLD §2.4). |
 | `DataError` | class | `export class DataError extends SurfaceError` | A value was missing or of the wrong type (type validation, `{data.*}` lookups). |
+| `DEFAULT_PAGE_WAIT_MS` | variable | `DEFAULT_PAGE_WAIT_MS = 10_000` | How long a page wait waits when the caller does not say. |
 | `DialogError` | class | `export class DialogError extends SurfaceError` | A dialog was expected and absent, unexpected and present, or could not be handled. |
 | `ElementDescription` | typealias | `type ElementDescription = z.infer<typeof elementDescriptionSchema>;` |  |
 | `elementDescriptionSchema` | variable | `elementDescriptionSchema: z.ZodObject<` | What `describe(ref)` returns: everything candidate synthesis and fingerprinting |
@@ -52,6 +54,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `hasAdapter` | function | `export function hasAdapter(name: string): boolean` |  |
 | `INTERACTIVE_ROLES` | variable | `INTERACTIVE_ROLES: ReadonlySet<string> = new Set([` | The roles that are worth acting on (LLD §2.2, §11). |
 | `isInteractiveRole` | function | `export function isInteractiveRole(role: string): boolean` |  |
+| `isPageWait` | function | `export function isPageWait(args: ActArgs \| undefined): boolean` | Whether `args` ask for a page wait at all. |
 | `isWindowChrome` | function | `export function isWindowChrome(node:` | Is this snapshot node one of the window manager's own controls? |
 | `launchApplication` | function | `export function launchApplication(` | Start the application. |
 | `LaunchConfig` | interface | `export interface LaunchConfig` | Where the application is and how to start it (`config.app.launch`). |
@@ -70,6 +73,8 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `normalisedRoles` | function | `export function normalisedRoles(): string[]` | Every ARIA role any table maps onto, sorted. Useful for conformance assertions. |
 | `normaliseRole` | function | `export function normaliseRole(map: RoleMapName, sourceRole: string): string` | Map one source role onto the ARIA vocabulary, falling back to `generic`. |
 | `ObservedEvent` | typealias | `export type ObservedEvent ` | One thing a person did in the driven session (Draft 2.23, REQ-REC-13). |
+| `PageWaitOptions` | interface | `export interface PageWaitOptions` |  |
+| `PermissionError` | class | `export class PermissionError extends SessionError {}` | A permission this platform grants per program has not been granted to the |
 | `Predicate` | typealias | `type Predicate = z.infer<typeof predicateSchema>;` |  |
 | `processIdsOf` | function | `export function processIdsOf(` | The process ids of this executable, right now. |
 | `quitApplication` | function | `export async function quitApplication(` | Stop it: the graceful route, then a signal, then a harder one. |
@@ -81,7 +86,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `renderNode` | function | `export function renderNode(node: SnapshotNode, options: RenderOptions = {}): string` | Render one node, without its children. |
 | `RenderOptions` | interface | `export interface RenderOptions` |  |
 | `renderSnapshot` | function | `export function renderSnapshot(` | Render a whole snapshot. Nodes are emitted in the order the adapter produced |
-| `REQUIRED_SURFACE_METHODS` | variable | `REQUIRED_SURFACE_METHODS = SURFACE_METHODS.filter(` | The methods every adapter must implement; `trace`, `request`, `pick` and `observe` are optional. |
+| `REQUIRED_SURFACE_METHODS` | variable | `REQUIRED_SURFACE_METHODS = SURFACE_METHODS.filter(` | The methods every adapter must implement; `trace`, `request`, `pick`, `observe` and `cookies` are optional. |
 | `ROLE_MAPS` | variable | `ROLE_MAPS ` | The published mapping tables, keyed by the adapter family they belong to. |
 | `RoleMapName` | typealias | `export type RoleMapName = keyof typeof ROLE_MAPS;` |  |
 | `Runner` | interface | `export interface Runner` | The commands this module runs. Injected, so every path above is testable. |
@@ -96,6 +101,7 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `snapshotNodeSchema` | variable | `snapshotNodeSchema: z.ZodObject<` |  |
 | `snapshotSchema` | variable | `snapshotSchema: z.ZodObject<` |  |
 | `stableClassesOf` | function | `export function stableClassesOf(list: string \| undefined): string \| undefined` | A class list without the classes a build generated, or nothing. |
+| `StoredCookie` | interface | `export interface StoredCookie` | A cookie as a jar keeps it. `domain` has a leading dot for a domain cookie. |
 | `structuralHash` | function | `export function structuralHash(nodes: readonly SnapshotNode[]): string` | sha256 of `renderForHash`, hex encoded. |
 | `SURFACE_ACTIONS` | variable | `SURFACE_ACTIONS: readonly SurfaceAction[]` |  |
 | `SURFACE_ERRORS` | variable | `SURFACE_ERRORS = [` | Every surface error class, in the order LLD §2.3 lists them. |
@@ -116,4 +122,6 @@ The published AgentSurface interface, adapter registry and wire schemas
 | `UIA_ROLE_MAP` | variable | `UIA_ROLE_MAP: Readonly<Record<string, string>> ` | Windows UI Automation `ControlType` → ARIA role (REQ-ADP-6). |
 | `UIA_WINDOW_CHROME_IDS` | variable | `UIA_WINDOW_CHROME_IDS: ReadonlySet<string> = new Set([` | What Windows calls the same three, as `AutomationId`s. |
 | `unregisterAdapter` | function | `export function unregisterAdapter(name: string): boolean` | Remove a registration. Returns false when the name was not registered. |
+| `UnsupportedError` | class | `export class UnsupportedError extends SurfaceError` | This adapter cannot do this at all — not now, not after a wait (SF-11). |
 | `waitFor` | function | `export async function waitFor(` | Wait for a condition, and say how long it took. |
+| `waitForPage` | function | `export async function waitForPage(` |  |

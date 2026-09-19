@@ -48,6 +48,8 @@ export {
   ScriptError,
   SessionError,
   DataError,
+  UnsupportedError,
+  PermissionError,
   SURFACE_ERRORS,
   failureClassOf,
 } from "./errors.js";
@@ -93,6 +95,10 @@ export {
 } from "./roles.js";
 
 export { LOCATE_RETURN_MARGIN_MS, locateDeadline } from "./locate.js";
+
+export { DEFAULT_PAGE_WAIT_MS, isPageWait, waitForPage, type PageWaitOptions } from "./wait.js";
+
+export { cookiesFor, type StoredCookie } from "./cookies.js";
 
 export { looksGenerated, stableClassesOf } from "./generated.js";
 

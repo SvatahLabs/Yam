@@ -17,6 +17,7 @@ import {
   ScriptError,
   SessionError,
   TimeoutError,
+  UnsupportedError,
 } from "@svatah/yam-surface";
 import type { FailureClass } from "@svatah/yam-schema";
 import { DataError } from "./scope.js";
@@ -43,6 +44,8 @@ export function classify(error: unknown): FailureClass {
   if (error instanceof DialogError) return "dialog";
   if (error instanceof ScriptError) return "script";
   if (error instanceof SessionError) return "infrastructure";
+  // The adapter cannot do this at all; see `UnsupportedError`.
+  if (error instanceof UnsupportedError) return "infrastructure";
   // An element that is present but not actionable — covered by a mask, disabled,
   // still moving — is a timing problem, which is what `timeout` means to a
   // person reading a report.

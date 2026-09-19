@@ -97,6 +97,37 @@ export class DataError extends SurfaceError {
   override readonly failureClass = "data" as const;
 }
 
+/**
+ * This adapter cannot do this at all — not now, not after a wait (SF-11).
+ *
+ * The refusals adapters already made were thrown as whichever error was near
+ * to hand: the AX adapter's "cannot drag" was an `ActionabilityError`, which a
+ * caller is told is `TIMEOUT`; a browser's "no application to quit" was a
+ * `NavigationError`, told as `CONNECT_FAILED`; Appium's was a `ScriptError`,
+ * told as `OUTCOME_UNKNOWN`. An agent reads the first as "try again" and the
+ * last as "check whether it happened", and neither is true of an action the
+ * adapter will never perform. Nothing was dispatched, so the broker answers
+ * `UNSUPPORTED_OPERATION`, refused.
+ *
+ * `infrastructure` because the step is not wrong and the application is not
+ * wrong: the platform under this adapter cannot do it, which is the same kind
+ * of answer as a session that could not be opened.
+ */
+export class UnsupportedError extends SurfaceError {
+  override readonly failureClass = "infrastructure" as const;
+}
+
+/**
+ * A permission this platform grants per program has not been granted to the
+ * program that is driving (SF-14) — macOS Accessibility, Screen Recording.
+ *
+ * A `SessionError`, because the session cannot be had, and its own class so the
+ * broker can say `PERMISSION_REQUIRED` rather than `CONNECT_FAILED`: the second
+ * sends a person to the application, the first to System Settings, and only the
+ * first is where the fix is.
+ */
+export class PermissionError extends SessionError {}
+
 /** Every surface error class, in the order LLD §2.3 lists them. */
 export const SURFACE_ERRORS = [
   LocateError,
@@ -108,6 +139,8 @@ export const SURFACE_ERRORS = [
   ScriptError,
   SessionError,
   DataError,
+  UnsupportedError,
+  PermissionError,
 ] as const;
 
 /**
